@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>DoseTest.RecipientId</name>
+    <baseClass>Safir.Dob.Item</baseClass>
+    <members>
+        <member>
+            <name>NodeId</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>SubId</name>
+            <type>Int32</type>
+        </member>
+    </members>
+</class>

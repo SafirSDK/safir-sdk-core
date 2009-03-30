@@ -1,0 +1,8 @@
+build:
+	gmcs -define:FUNC_PTR_WORKAROUND -r:Safir.Dob.Typesystem.dll,dots_generated-dotnet.dll,System.Windows.Forms.dll *.cs -out:Safir.Dob.dll -target:library
+
+install: build
+	cp Safir.Dob.dll $(SAFIR_RUNTIME)/lib
+
+clean:
+	/bin/rm -f *.dll *~ *.mdb

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>The baseclass for all error responses.</summary>
+    <name>Safir.Dob.ErrorResponse</name>
+    <baseClass>Safir.Dob.Response</baseClass>
+    <members>
+        <member>
+            <summary>The error code. Should be a mnemonic defined by a parameter, eg Safir.Dob.ResponseGeneralErrorCodes.SafirNullMember</summary>
+            <name>Code</name>
+            <type>String</type>
+            <maxLength>50</maxLength>
+        </member>
+        <member>
+            <summary>Extra information when applicable.</summary>
+            <name>AdditionalInfo</name>
+            <type>String</type>
+            <maxLength>200</maxLength>
+        </member>
+    </members>
+    <createRoutines>
+        <createRoutine>
+            <summary>Create an ErrorListResponse with one ResponseErrorInfo.</summary>
+            <name>ErrorResponse</name>
+            <parameters>
+                <member>Code</member>
+                <member>AdditionalInfo</member>
+            </parameters>
+        </createRoutine>
+    </createRoutines>
+</class>

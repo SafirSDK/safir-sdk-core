@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<property xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Defines the priority used for transmission of this class. This value overrides the
+             inherited value, and it is not inherited by child classes.</summary>
+    <name>Safir.Dob.PriorityOverrideProperty</name>
+    <members>
+        <member>
+            <summary>The name or alias of a priority.</summary>
+            <name>Priority</name>
+            <type>String</type>
+        </member>
+    </members>
+</property>

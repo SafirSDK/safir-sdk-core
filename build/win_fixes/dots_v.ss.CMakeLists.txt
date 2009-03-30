@@ -1,0 +1,34 @@
+PROJECT (dots_v)
+
+cmake_minimum_required(VERSION 2.4)
+
+SET(gprmake_arguments -q -XBUILD=release -XWarning_Level=Default -XUSE_XMLADA3=true)
+
+SET(build_directories program/lib-obj/release 
+		      program/lib-obj/debug 
+                      lib-obj/release 
+		      lib-obj/debug)
+
+FILE(MAKE_DIRECTORY ${build_directories})
+
+ADD_CUSTOM_TARGET(dots_v.exe ALL
+                  COMMAND gnatmake ${gprmake_arguments} -P dots_v-program.gpr 
+                  WORKING_DIRECTORY program
+                  COMMENT "Building dots_v using gprmake"
+                  VERBATIM)
+
+
+INSTALL(PROGRAMS program/dots_v.exe
+        DESTINATION $ENV{SAFIR_RUNTIME}/bin)
+
+FILE(GLOB dod_files data/*.dod)
+INSTALL(FILES ${dod_files}
+              data/dots_unit.xsd
+        DESTINATION $ENV{SAFIR_RUNTIME}/data/text/dots/config/)
+
+INSTALL(FILES data/AssemblyInfo.cs
+              data/dots_generated-dotnet.snk
+              data/Makefile
+              data/Makefile_cpp
+              data/precompiled_header_for_cpp.h
+        DESTINATION $ENV{SAFIR_SDK}/dots/dots_generated)

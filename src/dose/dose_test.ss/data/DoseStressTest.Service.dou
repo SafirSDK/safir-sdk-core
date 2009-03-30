@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>DoseStressTest.Service</name>
+    <baseClass>Safir.Dob.Service</baseClass>
+    <members>
+        <member>
+            <name>SequenceNumber</name>
+            <type>Int32</type>
+        </member>
+    </members>  
+</class>

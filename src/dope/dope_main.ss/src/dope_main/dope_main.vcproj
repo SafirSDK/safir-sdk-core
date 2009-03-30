@@ -1,0 +1,91 @@
+<?xml version="1.0" ?><VisualStudioProject Keyword="Win32Proj" Name="dope_main" ProjectGUID="{2343181B-5124-4593-B877-4E1EE8D480ED}" ProjectType="Visual C++" RootNamespace="dope_main" Version="8,00">
+	<Platforms>
+		<Platform Name="Win32"/>
+	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
+	<Configurations>
+		<Configuration CharacterSet="1" ConfigurationType="1" IntermediateDirectory="$(ConfigurationName)" Name="Debug|Win32" OutputDirectory="$(SolutionDir)$(ConfigurationName)">
+			<Tool CommandLine="" Name="VCPreBuildEventTool"/>
+			<Tool CommandLine="" Name="VCCustomBuildTool"/>
+			<Tool Name="VCXMLDataGeneratorTool"/>
+			<Tool Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool Name="VCMIDLTool"/>
+			<Tool AdditionalIncludeDirectories="&quot;$(SAFIR_SDK)\include&quot;" BasicRuntimeChecks="3" DebugInformationFormat="1" Detect64BitPortabilityProblems="true" ForcedIncludeFiles="" MinimalRebuild="false" Name="VCCLCompilerTool" Optimization="0" PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE" RuntimeLibrary="3" SmallerTypeCheck="true" UsePrecompiledHeader="0" WarnAsError="true" WarningLevel="4"/>
+			<Tool Name="VCManagedResourceCompilerTool"/>
+			<Tool Name="VCResourceCompilerTool"/>
+			<Tool Name="VCPreLinkEventTool"/>
+			<Tool AdditionalDependencies="ACEd.lib" AdditionalLibraryDirectories="&quot;$(SAFIR_SDK)\lib&quot;" GenerateDebugInformation="true" LinkIncremental="1" Name="VCLinkerTool" OutputFile="$(OutDir)\$(ProjectName).exe" ProgramDatabaseFile="" SubSystem="1" TargetMachine="1"/>
+			<Tool Name="VCALinkTool"/>
+			<Tool Name="VCManifestTool"/>
+			<Tool Name="VCXDCMakeTool"/>
+			<Tool Name="VCBscMakeTool"/>
+			<Tool Name="VCFxCopTool"/>
+			<Tool Name="VCAppVerifierTool"/>
+			<Tool Name="VCWebDeploymentTool"/>
+			<Tool CommandLine="copy &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;$(SAFIR_RUNTIME)\bin&quot;&#x0D;&#x0A;copy &quot;$(TargetDir)$(TargetFileName)&quot; &quot;$(SAFIR_RUNTIME)\bin&quot;" Name="VCPostBuildEventTool"/>
+		</Configuration>
+		<Configuration CharacterSet="1" ConfigurationType="1" IntermediateDirectory="$(ConfigurationName)" Name="Release|Win32" OutputDirectory="$(SolutionDir)$(ConfigurationName)" WholeProgramOptimization="1">
+			<Tool CommandLine="" Name="VCPreBuildEventTool"/>
+			<Tool CommandLine="" Name="VCCustomBuildTool"/>
+			<Tool Name="VCXMLDataGeneratorTool"/>
+			<Tool Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool Name="VCMIDLTool"/>
+			<Tool AdditionalIncludeDirectories="&quot;$(SAFIR_SDK)\include&quot;" DebugInformationFormat="0" Detect64BitPortabilityProblems="true" ForcedIncludeFiles="" Name="VCCLCompilerTool" PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE" RuntimeLibrary="2" UsePrecompiledHeader="0" WarnAsError="true" WarningLevel="4"/>
+			<Tool Name="VCManagedResourceCompilerTool"/>
+			<Tool Name="VCResourceCompilerTool"/>
+			<Tool Name="VCPreLinkEventTool"/>
+			<Tool AdditionalDependencies="ACE.lib" AdditionalLibraryDirectories="&quot;$(SAFIR_SDK)\lib&quot;" EnableCOMDATFolding="2" GenerateDebugInformation="false" LinkIncremental="1" Name="VCLinkerTool" OptimizeReferences="2" SubSystem="1" TargetMachine="1"/>
+			<Tool Name="VCALinkTool"/>
+			<Tool Name="VCManifestTool"/>
+			<Tool Name="VCXDCMakeTool"/>
+			<Tool Name="VCBscMakeTool"/>
+			<Tool Name="VCFxCopTool"/>
+			<Tool Name="VCAppVerifierTool"/>
+			<Tool Name="VCWebDeploymentTool"/>
+			<Tool CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; &quot;$(SAFIR_RUNTIME)\bin&quot;" Name="VCPostBuildEventTool"/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<Filter Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx" Name="Source Files" UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			<File RelativePath=".\dope_main.cpp">
+			</File>
+			<File RelativePath=".\DopeApp.cpp">
+			</File>
+			<File RelativePath=".\FilePersistor.cpp">
+			</File>
+			<File RelativePath=".\OdbcPersistor.cpp">
+			</File>
+			<File RelativePath=".\PersistenceHandler.cpp">
+			</File>
+		</Filter>
+		<Filter Filter="h;hpp;hxx;hm;inl;inc;xsd" Name="Header Files" UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File RelativePath=".\Defs.h">
+			</File>
+			<File RelativePath=".\DopeApp.h">
+			</File>
+			<File RelativePath=".\FilePersistor.h">
+			</File>
+			<File RelativePath=".\OdbcPersistor.h">
+			</File>
+			<File RelativePath=".\PersistenceHandler.h">
+			</File>
+		</Filter>
+		<Filter Name="sql">
+			<File RelativePath="..\sql\install_dope.sql">
+			</File>
+			<File RelativePath="..\sql\install_dope_on_mimer.bat">
+			</File>
+		</Filter>
+		<Filter Name="Data">
+			<File RelativePath="..\data\Safir.Dob.PersistenceBackend.dou">
+			</File>
+			<File RelativePath="..\data\Safir.Dob.PersistenceParameters.dou">
+			</File>
+		</Filter>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>

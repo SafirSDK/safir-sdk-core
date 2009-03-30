@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Definition of updating multiple objects using ForEach service request</summary>
+  <name>Safir.Utilities.ForEach.UpdateRequest</name>
+  <baseClass>Safir.Dob.Service</baseClass>
+  <members>
+    <member>
+      <summary>The entity that is used as template for updating the OperateOn array</summary>
+      <name>TemplateEntityRequest</name>
+      <type>Safir.Dob.Entity</type>
+    </member>
+    <member>
+      <summary>The type of response wanted</summary>
+      <name>ResponseType</name>
+      <type>Safir.Utilities.ForEach.ResponseType</type>
+    </member>
+    <member>
+      <summary>Array of entities to operate on</summary>
+      <name>OperateOn</name>
+      <!-- Note: The size in Safir.Utilities.ForEach.FullResponse.dou must be set to max of this value
+      and corresponding value in Safir.Utilities.ForEach.DeleteRequest.dou -->
+      <arraySize>1000</arraySize>
+      <type>EntityId</type>
+    </member>
+  </members>
+</class>

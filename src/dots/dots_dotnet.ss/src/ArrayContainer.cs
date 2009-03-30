@@ -1,0 +1,276 @@
+/******************************************************************************
+*
+* Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+* 
+* Created by: Lars Hagström / stlrha
+*
+*******************************************************************************
+*
+* This file is part of Safir SDK Core.
+*
+* Safir SDK Core is free software: you can redistribute it and/or modify
+* it under the terms of version 3 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* Safir SDK Core is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+*
+******************************************************************************/
+
+using System;
+using System.Collections.Generic;
+
+namespace Safir.Dob.Typesystem
+{
+    /// <summary>
+    /// STL container for arrays of DOB-containers.
+    ///
+    /// <para/>
+    /// This template class is used for arrays of containers in objects.
+    /// The arrays cannot change size once they have been created.
+    /// Apart from that they behave like a normal STL container.
+    ///
+    /// <para/>
+    /// This class exports the following from std::vector:
+    ///
+    ///   Types: iterator, const_iterator, reference const_reference;
+    ///
+    ///    Methods: begin(), end().
+    ///
+    /// See your STL documentation for information on them
+    ///
+    /// <para/>
+    /// Note: This container is currently a random access container (based on std::vector).
+    ///       At some point in the future it may change to become a reversible container (based on a std::map).
+    ///       Do not assume that the [] operator is constant time.
+    /// </summary>
+    public class ArrayContainer<T> : IList<T>, ICloneable where T : ContainerBase, new()
+    {
+        #region Constructors
+        /// <summary>
+        /// Constructor with size.
+        ///
+        /// Creates an array of the given size. Remember that once it has been created the size cannot be changed.
+        /// </summary>
+        /// <param name="size">The desired size of the array. Must be > 0.</param>
+        public ArrayContainer(System.Int32 size)
+        {
+            m_Array = new List<T>(size);
+            for (System.Int32 i = 0; i < size; ++i)
+            {
+                m_Array.Add(new T());
+            }
+        }
+
+        #endregion
+
+        #region Change flags>
+        /// <summary>
+        /// Check if any element has a change flag set on it.
+        /// 
+        /// <para/>
+        /// Note that if this array contains objects this call will be recursive.
+        /// </summary>
+        /// <returns>true if any element has changed.</returns>
+        virtual public bool IsChanged()
+        {
+            foreach (ContainerBase cont in m_Array)
+            {
+                if (cont.IsChanged())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Set the change flag on all elements in the array.
+        /// 
+        /// <para/>
+        /// Note that if this array contains objects this call will be recursive.
+        /// </summary>
+        /// <param name="changed">The value to set the change flags to</param>
+        virtual public void SetChanged(bool changed) 
+        {
+            for (System.Int32 i = 0; i < m_Array.Count; ++i)
+            {
+                m_Array[i].SetChanged(changed);
+            }
+        }
+
+        #endregion
+
+        #region IList<T> Members
+
+        /// <summary>
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public int IndexOf(T item)
+        {
+            return m_Array.IndexOf(item);
+        }
+
+        void IList<T>.Insert(int index, T item)
+        {
+            throw new SoftwareViolationException("Array containers cannot change size!");
+            //TODO: maybe this should drop one off the end instead?
+        }
+
+        void IList<T>.RemoveAt(int index)
+        {
+            throw new SoftwareViolationException("Array containers cannot change size!");
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public T this[int index]
+        {
+            get
+            {
+                return m_Array[index];
+            }
+            set
+            {
+                m_Array[index] = value;
+            }
+        }
+
+        #endregion
+
+        #region ICollection<T> Members
+
+        void ICollection<T>.Add(T item)
+        {
+            throw new SoftwareViolationException("Array containers cannot change size!");
+        }
+
+        void ICollection<T>.Clear()
+        {
+            throw new SoftwareViolationException("Array containers cannot change size!");
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool Contains(T item)
+        {
+            return m_Array.Contains(item);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="arrayIndex"></param>
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            if (array.Length != m_Array.Count)
+            {
+                throw new SoftwareViolationException("Array sizes must be the same!");
+            }
+            m_Array.CopyTo(array, arrayIndex);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int Count
+        {
+            get { return m_Array.Count; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsReadOnly
+        {
+            get { return false; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool Remove(T item)
+        {
+            throw new SoftwareViolationException("Array containers cannot change size!");
+        }
+
+        #endregion
+
+        #region IEnumerable<T> Members
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator<T> GetEnumerator()
+        {
+            return m_Array.GetEnumerator();
+        }
+
+        #endregion
+
+        #region IEnumerable Members
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return m_Array.GetEnumerator();
+        }
+
+        #endregion
+
+        #region Cloning
+
+        object ICloneable.Clone()
+        {
+            return new ArrayContainer<T>(this);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public ArrayContainer<T> Clone()
+        {
+            return (ArrayContainer<T>)(((ICloneable)this).Clone());
+        }
+
+        /// <summary>
+        /// Copy constructor for use by Clone 
+        /// </summary>
+        /// <param name="other"></param>
+        protected ArrayContainer(ArrayContainer<T> other)
+            : this(other.m_Array.Count)
+        {
+            for (System.Int32 i = 0; i < other.m_Array.Count; ++i)
+            {
+                m_Array[i] = (T)(other.m_Array[i].Clone());
+            }
+        }
+
+        #endregion
+
+        #region Private data
+
+        private System.Collections.Generic.List<T> m_Array;
+        
+        #endregion
+
+    }
+
+    
+}

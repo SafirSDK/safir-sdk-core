@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary> Definition of vehicle entities</summary>   
+  <name>Capabilities.Vehicles.Vehicle</name>
+  <baseClass>Safir.Dob.Entity</baseClass>
+  <members>
+    <member>
+      <summary>Callsign name</summary>
+      <name>Callsign</name>
+      <type>String</type>
+      <maxLength>10</maxLength>
+    </member>
+    <member>
+      <summary>Identity (hostile, friend etc)</summary>
+      <name>Identity</name>
+      <type>Capabilities.Vehicles.Enum.Identity</type>
+    </member>
+    <member>
+      <summary>Unique vehicle identifier for database use</summary>
+      <name>VehicleKey</name>
+      <type>String</type>
+      <maxLength>25</maxLength>
+    </member>
+    <member>
+      <summary>Speed</summary>
+      <name>Speed</name>
+      <type>MeterPerSecond32</type>
+    </member>
+  </members>
+</class>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>This enumeration represents the internal dob queues that it is possible to get status info about from a connection. More values may be added to this enumeration at some stage, so do not rely on the exact size of the enumeration (e.g. no looping without being able to handle unknown values.).</summary>
+    <name>Safir.Dob.ConnectionQueueId</name>
+    <values>
+        <value>MessageInQueue</value>
+        <value>MessageOutQueue</value>
+        <value>RequestInQueue</value>
+        <value>RequestOutQueue</value>
+    </values>
+</enumeration>

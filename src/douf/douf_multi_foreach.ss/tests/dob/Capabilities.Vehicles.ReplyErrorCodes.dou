@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Declares error codes that are of general interest</summary>
+  <name>Capabilities.Vehicles.ReplyErrorCodes</name>
+  <baseClass>Safir.Dob.ResponseGeneralErrorCodes</baseClass>
+  <parameters>
+    <parameter>
+      <summary>The vehicle is already created</summary>
+      <name>VehicleReqErr</name>
+      <type>String</type>
+      <value>VehicleReqErr</value>
+    </parameter>
+    <parameter>
+      <summary>Max number of vehicles reached</summary>
+      <name>VehicleMaxReached</name>
+      <type>String</type>
+      <value>VehicleMaxReached</value>
+    </parameter>    
+  </parameters>
+</class>

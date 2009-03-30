@@ -1,0 +1,174 @@
+Release: swre 1.7 			   2009-02-04 STSYLI
+---------------------------------------------------------------------
+
+Common fixes for all subsystems
+-------------------------------
+Removed SUG. See Safir SDK Core SUG.
+
+
+swre_backdoor.ss
+----------------
+Changed the project file.
+The d-suffix is removed when building the debug executable.
+Fix #615: swre backdoor has wrong name in linux build
+
+  
+swre_interface.ss
+-----------------
+
+
+swre_library.ss
+---------------
+
+
+swre_logger.ss
+--------------
+
+Changed the project file.
+The d-suffix is removed when building the debug executable.
+
+
+swre_test.ss
+------------
+
+
+
+Release: swre 1.6 			   2008-11-27 STSYLI
+---------------------------------------------------------------------
+
+
+Common fixes for all subsystems
+-------------------------------
+
+Updated file headers to contain license information (GPL)
+
+
+swre_backdoor.ss
+----------------
+
+  
+swre_interface.ss
+-----------------
+
+
+swre_library.ss
+---------------
+
+
+swre_logger.ss
+--------------
+
+
+swre_test.ss
+------------
+
+
+
+
+Release: swre 1.5 			   2008-11-07 STSYLI
+---------------------------------------------------------------------
+
+
+Common fixes for all subsystems
+-------------------------------
+
+  Migration to dob v4 for C++ and C#.
+  Added #ifdef GetMessage to make linux compilation go smoothly.
+  Updates to new interface changes.
+  Fix for OnMessage that had wrong signature.
+  Removed #include IllegalObjectIdException.h
+  Added a Stop method to SwReports, that gracefully stops the background thread.
+  Made some modifications to the background thread to make it behave better.
+  Some minor debug output changes.
+  Expanded a warning to make it clearer.
+  Removed cyclic stop timer (which caused exception).
+  Removed debug output.
+  Fix #31
+  Fix #134: Truncate long strings in Swre reports
+  an update to the test program that is completely untested...
+
+
+swre_backdoor.ss
+----------------
+
+  
+swre_interface.ss
+-----------------
+updates for cmake 2.6
+added missing include
+disabled building ada with cmake
+Fix #355 for Java and Ada.
+Fixed ticket #355 "An application can be locked in a trace flush call."
+
+
+swre_library.ss
+---------------
+
+Fix for #178 Add signal handler to swre_library
+Postponed creating the swre connection.
+Fix for #505
+Second part of #419 (listening to udp socket in swre_logger) implemented.
+Tracer uses PanicLogging and ProcessInfo.
+Protect against spurious flushes.
+While solving ticket #355 code was added to swre_library to start the library thread even for flush calls. 
+  This seems to cause a deadlock so a revert to the earlier version has been made. The check of the on/off switch 
+  for flush call in the swre_interface would be sufficent to solve the orginal problem.
+Fixed ticket #355 "An application can be locked in a trace flush call."
+
+
+swre_logger.ss
+--------------
+
+Fix for #165 swre_logger with -file argument spins
+ACE timer handling was wrong.
+removed windows debugging statements and added some casts necessary for linux building
+Second part of #419 (listening to udp socket in swre_logger) implemented.
+Tracer uses PanicLogging and ProcessInfo.
+Fixed ticket #281 Swre logger doesn't show backdoor info by default.
+  The console output hanged when special characters from Smap wrote an report. 
+  The solution is to filter output. 
+  This fix filters all ASCII values >127 and a warning message is appended to the output that this has happend.
+
+
+swre_test.ss
+------------
+
+Added new testcase for PanicLogging / UDP.
+Replaced scenario files with one scenario containing the previous ones + one more.
+Updates test program with -noTrace switch for C++ test.
+  Include ACE library in project file for C++.
+  SATE scenarios added in tests/ directory.
+
+
+
+Release: swre 1.4 			   2008-04-29 STMRWE
+---------------------------------------------------------------------
+
+swre_backdoor.ss
+----------------
+
+First component release.
+
+
+swre_interface.ss
+-----------------
+
+First component release.
+
+
+swre_library.ss
+---------------
+
+First component release.
+
+
+swre_logger.ss
+--------------
+
+First component release.
+
+
+swre_test.ss
+------------
+
+First component release.

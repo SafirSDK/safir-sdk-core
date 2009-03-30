@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>Safir.SwReports.Internal.Error</name>
+  <baseClass>Safir.SwReports.Internal.Report</baseClass>
+  <members>
+    <member>
+      <summary>Application error code</summary>
+      <name>ErrorCode</name>
+      <type>String</type>
+      <maxLength>50</maxLength>
+    </member>
+    <member>
+      <summary>Source code location</summary>
+      <name>Location</name>
+      <type>String</type>
+      <maxLength>1000</maxLength>     
+    </member>
+  </members>
+</class>

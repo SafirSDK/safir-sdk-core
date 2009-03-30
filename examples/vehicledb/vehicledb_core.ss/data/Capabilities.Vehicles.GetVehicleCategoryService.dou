@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>
+    Reads vehicle category information from the database. The response is given in
+    GetVehicleCategoryResponse. If the given vehicle category is not found or if a
+    database error occurs an ErrorResponse is returned.
+  </summary>
+  <name>Capabilities.Vehicles.GetVehicleCategoryService</name>
+  <baseClass>Safir.Dob.Service</baseClass>
+  <members>
+
+    <member>
+      <summary>The vehicle category.</summary>
+      <name>VehicleCategory</name>
+      <type>Capabilities.Vehicles.VehicleCategoryCode</type>
+    </member>
+
+  </members>
+</class>

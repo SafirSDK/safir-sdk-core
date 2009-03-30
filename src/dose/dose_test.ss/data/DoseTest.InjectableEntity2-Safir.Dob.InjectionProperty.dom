@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <property>Safir.Dob.InjectionProperty</property>
+    <class>DoseTest.InjectableEntity2</class>
+    <memberMapping>
+        <member>
+            <propertyMember>Injection</propertyMember>
+            <value>Injectable</value>
+        </member>
+    </memberMapping>
+</propertyMapping>

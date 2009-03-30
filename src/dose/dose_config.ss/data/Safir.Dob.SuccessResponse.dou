@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>The baseclass for all success responses.</summary>
+    <name>Safir.Dob.SuccessResponse</name>
+    <baseClass>Safir.Dob.Response</baseClass>
+</class>

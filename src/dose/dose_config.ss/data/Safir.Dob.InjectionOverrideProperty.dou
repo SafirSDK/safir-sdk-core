@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<property xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Defines the Injection used for entities of this class. This value overrides the
+             inherited value, and it is not inherited by child classes.</summary>
+    <name>Safir.Dob.InjectionOverrideProperty</name>
+    <members>
+        <member>
+            <summary>The kind of Injection used for this entity.</summary>
+            <name>Injection</name>
+            <type>Safir.Dob.InjectionKind</type>
+        </member>
+    </members>
+</property>

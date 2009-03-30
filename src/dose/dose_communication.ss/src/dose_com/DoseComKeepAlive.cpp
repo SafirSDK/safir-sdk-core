@@ -1,0 +1,680 @@
+/******************************************************************************
+*
+* Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+*
+* Created by: Lars Engdahl / stlsen
+*
+*******************************************************************************
+*
+* This file is part of Safir SDK Core.
+*
+* Safir SDK Core is free software: you can redistribute it and/or modify
+* it under the terms of version 3 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* Safir SDK Core is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+*
+******************************************************************************/
+
+/*************************************************************************
+* DoseComKeepAlive.cpp - a part of DoseComDll - For LINUX and WIN32
+*
+* Function:
+* 1) Sends IpMulticast alive messages every time intervall.
+* 2) Receives IpMulticast alive messages and stores in internal 'DataBase'.
+*    This DataBase is accessable by other functions.
+*************************************************************************/
+#ifndef _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE
+#endif
+
+#define IS_USING_SOCKETS
+#include "DosePlatform.h"
+
+#include "DoseOsInterface.h"
+#include "DoseComTransmit.h"
+#include "DoseComReceive.h"
+#include "DoseComConfig.h"
+#include "../defs/DoseUdpMsg.h"
+#include "PrintError.h"
+#include "../defs/DoseNodeStatus.h"
+#include "IpmSocket.h"
+#include "DoseComStatistics.h"
+
+
+extern volatile int * volatile pDbg;
+
+//-----------------------------------------------------------
+// Node_Status[] holds the status of all nodes in the system.
+// It is updated by reception of KeepAlive messages (UP).
+// or the absence of KeepAlive messages (DOWN).
+//-----------------------------------------------------------
+
+static  ushort  g_MyDoseId = 123;
+static  bool    g_bStartUpIsCompleted = FALSE;
+
+static bool     g_bAutoConfigure;
+
+static  Statistics::TX_STATISTICS_S *g_pTxStatistics;
+static  Statistics::RX_STATISTICS_S *g_pRxStatistics;
+
+
+/*******************************************************************
+* For Monitoring and Debugging
+* Build a response and send it.
+*
+* Use pRxMsg->ReqCode_1, _2 to define the contents.
+*
+* This goes to DoseWebMon
+********************************************************************/
+static void Handle_GetInfoRequest(CIpmSocket *pTxRxSock,
+                                  DOSE_UDP_GETINFO_MSG *pRxMsg)
+{
+    int     jj;
+    int     pos = 0;
+    int     result;
+    unsigned long IpMulticastAddr_nw;
+    unsigned long IpAddr_nw;
+    char    buff[3000];
+
+    //PrintDbg("--- Handle_GetInfoRequest().\n");
+
+    //-------------------------
+    // [S0] Statistic Counters
+    //-------------------------
+    if(pRxMsg->ReqCode_1 == 'S')
+    {
+        sprintf(buff,
+            "Counters DoseId %d\n"
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            "TxNoAckOk   =%lu/%lu/%lu/%lu/%lu/%lu\n"
+            "TxWithAckOk =%lu/%lu/%lu/%lu/%lu/%lu\n"
+            "TxRetransm  =%lu/%lu/%lu/%lu/%lu/%lu\n",
+#else
+            "TxNoAckOk   =%lu/%lu/%lu/%lu\n"
+            "TxWithAckOk =%lu/%lu/%lu/%lu\n"
+            "TxRetransm  =%lu/%lu/%lu/%lu\n",
+#endif
+            CConfig::m_MyDoseId,
+            g_pTxStatistics[0].CountTxNoAckOk,
+            g_pTxStatistics[1].CountTxNoAckOk,
+            g_pTxStatistics[2].CountTxNoAckOk,
+            g_pTxStatistics[3].CountTxNoAckOk,
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            g_pTxStatistics[4].CountTxNoAckOk,
+            g_pTxStatistics[5].CountTxNoAckOk,
+#endif
+            g_pTxStatistics[0].CountTxWithAckOk,
+            g_pTxStatistics[1].CountTxWithAckOk,
+            g_pTxStatistics[2].CountTxWithAckOk,
+            g_pTxStatistics[3].CountTxWithAckOk,
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            g_pTxStatistics[4].CountTxWithAckOk,
+            g_pTxStatistics[5].CountTxWithAckOk,
+#endif
+            g_pTxStatistics[0].CountTxRetransmit,
+            g_pTxStatistics[1].CountTxRetransmit,
+            g_pTxStatistics[2].CountTxRetransmit,
+            g_pTxStatistics[3].CountTxRetransmit
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            ,
+            g_pTxStatistics[4].CountTxRetransmit,
+            g_pTxStatistics[5].CountTxRetransmit
+#endif
+            );
+        pos = strlen(buff);
+        sprintf(&buff[pos],
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            "TxOverflow  =%lu/%lu/%lu/%lu/%lu/%lu\n"
+            "TxNoTargets =%lu/%lu/%lu/%lu/%lu/%lu\n"
+            "TxGiveup    =%lu/%lu/%lu/%lu/%lu/%lu\n",
+#else
+            "TxOverflow  =%lu/%lu/%lu/%lu\n"
+            "TxNoTargets =%lu/%lu/%lu/%lu\n"
+            "TxGiveup    =%lu/%lu/%lu/%lu\n",
+#endif
+            g_pTxStatistics[0].CountTxOverflow,
+            g_pTxStatistics[1].CountTxOverflow,
+            g_pTxStatistics[2].CountTxOverflow,
+            g_pTxStatistics[3].CountTxOverflow,
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            g_pTxStatistics[4].CountTxOverflow,
+            g_pTxStatistics[5].CountTxOverflow,
+#endif
+            g_pTxStatistics[0].CountTxNoTargets,
+            g_pTxStatistics[1].CountTxNoTargets,
+            g_pTxStatistics[2].CountTxNoTargets,
+            g_pTxStatistics[3].CountTxNoTargets,
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            g_pTxStatistics[4].CountTxNoTargets,
+            g_pTxStatistics[5].CountTxNoTargets,
+#endif
+            g_pTxStatistics[0].CountTxGiveUp,
+            g_pTxStatistics[1].CountTxGiveUp,
+            g_pTxStatistics[2].CountTxGiveUp,
+            g_pTxStatistics[3].CountTxGiveUp
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            ,
+            g_pTxStatistics[2].CountTxGiveUp,
+            g_pTxStatistics[3].CountTxGiveUp
+#endif
+            );
+        pos = strlen(buff);
+        sprintf(&buff[pos],
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            "RxOverflow  =%lu/%lu/%lu/%lu/%lu/%lu\n"
+            "RxNoAckOk   =%lu/%lu/%lu/%lu/%lu/%lu\n"
+            "RxWithAckOk =%lu/%lu/%lu/%lu/%lu/%lu\n"
+            "RxDuplicate =%lu/%lu/%lu/%lu/%lu/%lu\n",
+#else
+            "RxOverflow  =%lu/%lu/%lu/%lu\n"
+            "RxNoAckOk   =%lu/%lu/%lu/%lu\n"
+            "RxWithAckOk =%lu/%lu/%lu/%lu\n"
+            "RxDuplicate =%lu/%lu/%lu/%lu\n",
+#endif
+            g_pRxStatistics[0].CountRxOverflow,
+            g_pRxStatistics[1].CountRxOverflow,
+            g_pRxStatistics[2].CountRxOverflow,
+            g_pRxStatistics[3].CountRxOverflow,
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            g_pRxStatistics[4].CountRxOverflow,
+            g_pRxStatistics[5].CountRxOverflow,
+#endif
+            g_pRxStatistics[0].CountRxNoAckOk,
+            g_pRxStatistics[1].CountRxNoAckOk,
+            g_pRxStatistics[2].CountRxNoAckOk,
+            g_pRxStatistics[3].CountRxNoAckOk,
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            g_pRxStatistics[4].CountRxNoAckOk,
+            g_pRxStatistics[5].CountRxNoAckOk,
+#endif
+            g_pRxStatistics[0].CountRxWithAckOk,
+            g_pRxStatistics[1].CountRxWithAckOk,
+            g_pRxStatistics[2].CountRxWithAckOk,
+            g_pRxStatistics[3].CountRxWithAckOk,
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            g_pRxStatistics[4].CountRxWithAckOk,
+            g_pRxStatistics[5].CountRxWithAckOk,
+#endif
+            g_pRxStatistics[0].CountRxDuplicate,
+            g_pRxStatistics[1].CountRxDuplicate,
+            g_pRxStatistics[2].CountRxDuplicate,
+            g_pRxStatistics[3].CountRxDuplicate
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            ,
+            g_pRxStatistics[2].CountRxDuplicate,
+            g_pRxStatistics[3].CountRxDuplicate
+#endif
+            );
+
+        pos = strlen(buff);
+        sprintf(&buff[pos],
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            "RxInvalidMsg=%lu/%lu/%lu/%lu/%lu/%lu\n"
+            "RxRxMustWait=%lu/%lu/%lu/%lu/%lu/%lu\n"
+            "RxInvSeqNum =%lu/%lu/%lu/%lu/%lu/%lu\n",
+#else
+            "RxInvalidMsg=%lu/%lu/%lu/%lu\n"
+            "RxRxMustWait=%lu/%lu/%lu/%lu\n"
+            "RxInvSeqNum =%lu/%lu/%lu/%lu\n",
+#endif
+            g_pRxStatistics[0].CountRxInvalidMsg,
+            g_pRxStatistics[1].CountRxInvalidMsg,
+            g_pRxStatistics[2].CountRxInvalidMsg,
+            g_pRxStatistics[3].CountRxInvalidMsg,
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            g_pRxStatistics[4].CountRxInvalidMsg,
+            g_pRxStatistics[5].CountRxInvalidMsg,
+#endif
+            g_pRxStatistics[0].CountRxMustWait,
+            g_pRxStatistics[1].CountRxMustWait,
+            g_pRxStatistics[2].CountRxMustWait,
+            g_pRxStatistics[3].CountRxMustWait,
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            g_pRxStatistics[4].CountRxMustWait,
+            g_pRxStatistics[5].CountRxMustWait,
+#endif
+            g_pRxStatistics[0].CountRxInvSeqNum,
+            g_pRxStatistics[1].CountRxInvSeqNum,
+            g_pRxStatistics[2].CountRxInvSeqNum,
+            g_pRxStatistics[3].CountRxInvSeqNum
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            ,
+            g_pRxStatistics[2].CountRxInvSeqNum,
+            g_pRxStatistics[3].CountRxInvSeqNum
+#endif
+            );
+
+        pos = strlen(buff);
+        sprintf(&buff[pos],
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            "RxInvFragNum=%lu/%lu/%lu/%lu/%lu/%lu\n"
+            "RxOtherErr  =%lu/%lu/%lu/%lu/%lu/%lu\n",
+#else
+            "RxInvFragNum=%lu/%lu/%lu/%lu\n"
+            "RxOtherErr  =%lu/%lu/%lu/%lu\n",
+#endif
+            g_pRxStatistics[0].CountRxInvFragmentNum,
+            g_pRxStatistics[1].CountRxInvFragmentNum,
+            g_pRxStatistics[2].CountRxInvFragmentNum,
+            g_pRxStatistics[3].CountRxInvFragmentNum,
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            g_pRxStatistics[4].CountRxInvFragmentNum,
+            g_pRxStatistics[5].CountRxInvFragmentNum,
+#endif
+            g_pRxStatistics[0].CountRxOtherErr,
+            g_pRxStatistics[1].CountRxOtherErr,
+            g_pRxStatistics[2].CountRxOtherErr,
+            g_pRxStatistics[3].CountRxOtherErr
+#if (MAX_NUM_PRIO_CHANNELS == 6)
+            ,
+            g_pRxStatistics[2].CountRxOtherErr,
+            g_pRxStatistics[3].CountRxOtherErr
+#endif
+            );
+    }
+    //-------------------------------
+    // [I1] Destination Address Table
+    //-------------------------------
+    else
+    if((pRxMsg->ReqCode_1 == 'I') && (pRxMsg->ReqCode_2 == '1'))
+    {
+        char    IsUsedForReception;
+
+        sprintf(buff,"Dest Table for DoseId %d\n", g_MyDoseId);
+
+        for(jj=0 ; jj<MAX_NUM_DEST_CHANNELS ; jj++)
+        {
+
+            result = CConfig::GetDestinationItem(jj,
+                                &IpMulticastAddr_nw,
+                                &IsUsedForReception);
+            if(result == -1) break;
+
+            pos = strlen(buff);
+            sprintf(&buff[pos], "%2d (%2d) %s %s\n", 64+jj, jj,
+                    DoseOs::Inet_Ntoa(IpMulticastAddr_nw),
+                    IsUsedForReception ? "(Rx)" : " ");
+
+            //PrintDbg("%2d %08X (R=%d)\n",jj,
+            //      IpMulticastAddr_nw,IsUsedForReception);
+            //??? merge to buffer and send it
+        }
+    }
+    //---------------------------------
+    // [I2] Up/Down Nodes
+    //---------------------------------
+    else
+    if((pRxMsg->ReqCode_1 == 'I') && (pRxMsg->ReqCode_2 == '2'))
+    {
+        DOSE_SHARED_DATA_S *pS;
+
+        ulong NodeStatus;
+
+        sprintf(buff,"Up/Down Nodes for DoseId %d\n", g_MyDoseId);
+
+        for(jj=0 ; jj<NODESTATUS_TABLE_SIZE ; jj++)
+        {
+            result = CNodeStatus::GetNodeInfo((ushort)jj, &IpAddr_nw, &NodeStatus);
+            if(result == -1) break;
+
+            if(NodeStatus == 0) continue; // never up
+            if(IpAddr_nw == CConfig::m_MyIpAddr_nw) NodeStatus = '*';
+
+            pos = strlen(buff);
+
+            sprintf(&buff[pos], "%2d %c %s\n", jj,
+                    (char)NodeStatus, // 'U' or 'D' or 'N'
+                    DoseOs::Inet_Ntoa(IpAddr_nw));
+        }
+        pos = strlen(buff);
+
+        pS = CNodeStatus::GetNodeSharedDataPointer();
+
+        sprintf(&buff[pos],
+            "\nNewMap= %08lX %08lX\nUpMap=  %08lX %08lX\nDownMap=%08lX %08lX\n",
+             (ulong)(pS->BitMapNodesNew64>>32),
+             (ulong)(pS->BitMapNodesNew64 & 0xFFFFFFFF),
+             (ulong)(pS->BitMapNodesUp64>>32),
+             (ulong)(pS->BitMapNodesUp64 & 0xFFFFFFFF),
+             (ulong)(pS->BitMapNodesDown64>>32),
+             (ulong)(pS->BitMapNodesDown64 & 0xFFFFFFFF));
+    }
+    //---------------------------------
+    // [I3] Tx/Rx Queue Info
+    //---------------------------------
+    else
+    if((pRxMsg->ReqCode_1 == 'I') && (pRxMsg->ReqCode_2 == '3'))
+    {
+        sprintf(buff,"TxQueueInfo DoseId %d\n", CConfig::m_MyDoseId);
+        pos = strlen(buff);
+        CDoseComTransmit::Get_Info(&buff[pos]);
+
+        strcat(buff,"\nRxQueueInfo\n");
+        pos = strlen(buff);
+        CDoseComReceive::Get_Info(&buff[pos]);
+    }
+    //---------------------------------
+    // [I4] NodeStatus
+    //---------------------------------
+    else
+    if((pRxMsg->ReqCode_1 == 'I') && (pRxMsg->ReqCode_2 == '4'))
+    {
+         CNodeStatus::Get_Info(buff);
+    }
+
+    //---------------------------------
+    // [C?] Configuration
+    //---------------------------------
+    else
+    if(pRxMsg->ReqCode_1 == 'C')
+    {
+         CConfig::Get_Info(pRxMsg->ReqCode_2, buff);
+    }
+    //---------------------------------
+    // Default
+    //---------------------------------
+    else
+    {
+        sprintf(buff,"DoseComDll got Invalid request: %c%c\n",
+                pRxMsg->ReqCode_1,pRxMsg->ReqCode_2);
+    }
+    //-------------------
+    // Send the message
+    //-------------------
+
+    result = pTxRxSock->SendTo2(pRxMsg->IpAddrFrom_nw,
+                                htons(pRxMsg->RespPort_nw),
+                                buff, strlen(buff), NULL, 0);
+}
+/*------------- end Handle_GetInfoRequest() -----------------*/
+
+/******************************************************************
+* This thread that receives alive messages and sends alive messages
+*
+*
+*******************************************************************/
+
+static THREAD_API KeepAlive_Thread(void *)
+{
+    int     result;
+    ulong   dwPreviosSendTime = 0;
+    ulong   dwPreviosCheckTime = 0;  //NYTT 08-09-18
+    ulong   dwCurrentTime;
+    ulong   ErrCode;
+    DOSE_UDP_KEEPALIVE_MSG TxMsg;
+    ulong   FromIpAddr_nw;
+    char    RxBuff[32];  // Must be at least sizeof(DOSE_UDP_GETINFO_MSG)
+    DOSE_UDP_KEEPALIVE_MSG *pRxMsg;
+    CIpmSocket TxRxSock;
+
+
+    DoseOs::Sleep(1000); // MUST sleep to be sure to get a new TimeStamp
+
+    pRxMsg = (DOSE_UDP_KEEPALIVE_MSG *) RxBuff;
+
+    if(*pDbg>=1)
+        PrintDbg("=== KeepAlive_Thread() starts. IP=%s Port=%d\n",
+                DoseOs::Inet_Ntoa(CConfig::m_MyIpAddr_nw),
+                    CConfig::m_Dose_KeepAlivePort);
+    //--------------------------------------------------
+    // Initializations
+    //--------------------------------------------------
+
+    TxMsg.Magic         = DOSE_MSG_MAGIC;
+    TxMsg.MsgType       = MSG_TYPE_KEEPALIVE;
+    TxMsg.IpAddrFrom_nw = CConfig::m_MyIpAddr_nw;
+    TxMsg.DoseIdFrom    = (uchar) g_MyDoseId;
+    TxMsg.TimeStamp     = (ulong) time(NULL); // the time the prog is started
+    //---------------------------------------------
+    // Create socket for Receive and Send
+    //---------------------------------------------
+
+    result = TxRxSock.CreateIpMulticastSocket(
+                        1,1,    //Rx, and Tx
+                        CConfig::m_BaseIpMultiCastAddr_nw,
+                        CConfig::m_Dose_KeepAlivePort,
+                        0,      // Opt_so_rcvbuf_size,
+                        800);   //  Opt_So_Rcvbuf_Timeout,
+
+    if(result == -1)
+    {
+        PrintErr(0, "ERROR: KeepAlive() Can not create Rx/Tx socket\n");
+
+        return(NULL);
+    }
+
+    dwPreviosSendTime = DoseOs::Get_TickCount() - 1500;
+
+    g_bStartUpIsCompleted = TRUE;
+
+    TxMsg.MsgType = MSG_TYPE_KEEPALIVE;
+
+    //=========================================================
+    // Loop here for ever - receive and send KeepAlive messages
+    //=========================================================
+
+    // Let RxThread start before we tell other nodes we are here
+
+    DoseOs::Sleep(1000);
+
+    dwPreviosSendTime = DoseOs::Get_TickCount();
+
+    for(;;)
+    {
+        //------------------------------------------------
+        // Wait for a msg or timeout
+        //------------------------------------------------
+
+        // note a 800 ms timeout on recvfrom
+
+        result = TxRxSock.RecvFrom2(RxBuff,sizeof(RxBuff),NULL,0);
+
+        // When timeout. RecvFrom2() returns:
+        // Linux: result=0. Win32: result=-1 with GetLastError() = DOSE_ETIMEDOUT
+
+        if(result == 0) // Linux Receive Timeout
+            goto Check_Timeout;
+
+        if(result < 0) // Rx error
+        {
+            ErrCode = DoseOs::Get_LastError();
+
+            // On a UPD-datagram socket this error would indicate that a previous
+            // send operation resulted in an ICMP "Port Unreachable" message.
+
+            if(ErrCode == DOSE_ECONNRESET)
+            {
+                if(*pDbg>=5)
+                PrintDbg("=   KeepAliveThread got a DOSE_ECONNRESET\n");
+
+                DoseOs::Sleep(500);
+                goto Check_Timeout;
+            }
+            if (ErrCode == DOSE_ETIMEDOUT)  // fall through
+            {
+                ; //PrintDbg("=   KeepAlive recvfrom() timed out\n");
+                goto Check_Timeout;
+            }
+            else
+            {
+                PrintErr(ErrCode,"=   KeepAlive got an unexpected error.\n");
+
+                DoseOs::Sleep(1000); // to prevent wild loop
+                goto Check_Timeout;
+            }
+        }
+        //PrintDbg("=   KeepAlive got a msg. 2\n");
+
+        //--------------------------------------------------------
+        // Got a KeepAlive msg from a node
+        // Update Node_Status[]
+        //
+        // If a change (ret 'U' or 'D') we must notify subscribers)
+        // Tghat is Appl and
+        //--------------------------------------------------------
+        if( pRxMsg->Magic != DOSE_MSG_MAGIC) goto Check_Timeout; //got junk
+
+        if( pRxMsg->MsgType == MSG_TYPE_KEEPALIVE)
+        {
+            //if(*pDbg>3) PrintDbg("=   KeepAlive got a msg. 3\n");
+
+            FromIpAddr_nw = pRxMsg->IpAddrFrom_nw;
+
+            // if(FromIpAddr_nw != CConfig::m_MyIpAddr_nw)
+            {
+                //PrintDbg("=   KeepAlive call UpdateNode_Up(%X,%X)\n",
+                //          pRxMsg->DoseIdFrom, pRxMsg->IpAddrFrom_nw);
+
+                result = CNodeStatus::UpdateNode_Up(pRxMsg->DoseIdFrom,
+                                    pRxMsg->IpAddrFrom_nw, pRxMsg->TimeStamp);
+                                        //pRxMsg->BitMapDestChannelMemberShip);
+
+                if (result != 0) // If a change (a new node)
+                {
+                    if(*pDbg>=2)
+                        PrintDbg("=   KeepAlive Adding a node IP=%s\n",
+                            DoseOs::Inet_Ntoa(pRxMsg->IpAddrFrom_nw));
+                }
+            }
+        }
+        else
+        // Is this used any more ???
+        if( pRxMsg->MsgType == MSG_TYPE_KEEPALIVE_START)
+        {
+            //if(*pDbg) PrintDbg("=   Got an MSG_TYPE_KEEPALIVE_START msg\n");
+            FromIpAddr_nw = pRxMsg->IpAddrFrom_nw;
+
+            if((pRxMsg->DoseIdFrom == g_MyDoseId)
+                && (FromIpAddr_nw != CConfig::m_MyIpAddr_nw))
+            {
+                if(*pDbg)
+                    PrintDbg("=   KeepAliveThread DoseId conflict with %s\n",
+                            DoseOs::Inet_Ntoa(FromIpAddr_nw));
+
+                // Normally the node that is sending MSG_TYPE_KEEPALIVE_START
+                // will detect me and select another DoseId so we are
+                // not doing anything here.
+                // What we could do is to implement a counter to check if
+                // the messages continues to come.
+            }
+        }
+        else
+        if( pRxMsg->MsgType == MSG_TYPE_GETINFO_1)
+        {
+            Handle_GetInfoRequest(&TxRxSock, (DOSE_UDP_GETINFO_MSG *) pRxMsg);
+        }
+
+        //---------------------------------------------------------
+        // Check if any missing nodes ( nodes that have timed out)
+        //---------------------------------------------------------
+Check_Timeout:
+
+        //-----------------------------------
+        // Time to send a KeepAlive msg
+        //-----------------------------------
+        dwCurrentTime = DoseOs::Get_TickCount();
+
+        /*----------- OLD Style - Now removed //NYTT 08-09-18,
+
+        if((dwCurrentTime - dwPreviosSendTime) > 1000)
+        {
+            // Check if any missing nodes (nodes that have timed out)
+
+            CNodeStatus::CheckTimedOutNodes();
+
+            //if(*pDbg>3) PrintDbg("=   KeepAlive Send KeepAlive\n");
+
+            dwPreviosSendTime = dwCurrentTime;
+
+            result = TxRxSock.SendTo2(CConfig::m_BaseIpMultiCastAddr_nw,
+                                CConfig::m_Dose_KeepAlivePort,
+                                (char *) &TxMsg, sizeof(DOSE_UDP_KEEPALIVE_MSG),
+                                NULL, 0);
+
+            //PrintDbg("KeepAlive Has sent 2 alive msg. result=%d\n", result);
+        }---------------------- end old style ------*/
+
+        // --- Start NYTT 08-09-18 ---
+
+        if((dwCurrentTime - dwPreviosSendTime) > 900) // I changed this time
+        {
+            dwPreviosSendTime = dwCurrentTime;
+
+            TxRxSock.SendTo2(CConfig::m_BaseIpMultiCastAddr_nw,
+                             CConfig::m_Dose_KeepAlivePort,
+                             (char *) &TxMsg, sizeof(DOSE_UDP_KEEPALIVE_MSG),
+                             NULL, 0);
+        }
+
+        if((dwCurrentTime - dwPreviosCheckTime) > 1000)
+        {
+            // Check if any missing nodes (nodes that have timed out)
+            // First check if there are any pending messages on the
+            // socket RxQueue. We must consume every messages before
+            // checking timeout. This is to handle the case when
+            // high CPU load so this thread can not run and messages
+            // are queued on the socket.
+            // (We do not want to report a node as down when there
+            // are pending messages from the node on the socket RxQueue).
+
+            if(TxRxSock.AreThereAnyPendingRxMessages())
+                continue; // Get all msg before check timeout
+
+            CNodeStatus::CheckTimedOutNodes();
+
+            dwPreviosCheckTime = dwCurrentTime;
+        }
+        // --- End NYTT 08-09-18 ---
+
+    } // end for(;;)
+}
+/*--------------------- end KeepAlive_Thread() --------------*/
+
+/**********************************************************
+*
+* Returns: DoseUd which could be auto configured here
+***********************************************************/
+int DOSE_KeepAlive_Init(uchar DoseId)
+{
+    if(*pDbg >= 1) PrintDbg("/// KeepAlive_Init().\n");
+
+    // Add myself as the first node  ( ??? no effect)
+
+    CNodeStatus::UpdateNode_Up((uchar) g_MyDoseId,
+                                CConfig::m_MyIpAddr_nw, (ulong) time(NULL));
+
+    g_pRxStatistics = Statistics::GetPtrToRxStatistics(0);
+    g_pTxStatistics = Statistics::GetPtrToTxStatistics(0);
+
+    //--------------------------------------------
+    // A valid DoseId (0-63) means use this DoseId
+    // An invalid means autoconfigure.
+    //--------------------------------------------
+
+    g_MyDoseId = DoseId;
+    g_bAutoConfigure = FALSE;
+
+    //--------------------------------------------
+    // Start Keep Alive
+    //--------------------------------------------
+
+    // returns 0 if OK
+    unsigned long tid;
+    DoseOs::CreateThread(tid, &KeepAlive_Thread, NULL);
+
+    CNodeStatus::UpdateNode_Up((uchar) g_MyDoseId,
+                                CConfig::m_MyIpAddr_nw, (ulong) time(NULL));
+
+    if(*pDbg>=1)
+    PrintDbg("/   DOSE_KeepAlive_Init() done DoseId=%d\n", g_MyDoseId);
+
+    return(g_MyDoseId);
+}
+/*-------------------------- end DoseComKeepAlive.cpp ------------------*/

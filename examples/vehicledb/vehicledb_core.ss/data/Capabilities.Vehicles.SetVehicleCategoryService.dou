@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>
+    Creates or updates the given vehicle category information in the database. On success,
+    a SuccussResponse is returned. If any kind of error occurs, an ErrorResponse is returned.
+  </summary>
+  <name>Capabilities.Vehicles.SetVehicleCategoryService</name>
+  <baseClass>Safir.Dob.Service</baseClass>
+  <members>
+
+    <member>
+      <summary>The vehicle category information. The contained member "VehicleCategory" is mandatory and identifies the database entry to be updated.</summary>
+      <name>VehicleCategoryInfo</name>
+      <type>Capabilities.Vehicles.VehicleCategoryInfo</type>
+    </member>
+
+  </members>
+</class>

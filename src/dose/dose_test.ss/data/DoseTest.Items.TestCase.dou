@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>DoseTest.Items.TestCase</name>
+    <baseClass>Safir.Dob.Item</baseClass>
+    <members>
+        <member>
+            <name>Description</name>
+            <type>String</type>
+            <maxLength>500</maxLength>
+        </member>
+
+        <member>
+            <name>Expectation</name>
+            <type>String</type>
+            <maxLength>500</maxLength>
+        </member>
+
+        <member>
+            <name>TestCaseSetupActions</name>
+            <arraySize>100</arraySize>
+            <type>DoseTest.Action</type>
+        </member>
+
+        <member>
+            <name>TestActions</name>
+            <arraySize>100</arraySize>
+            <type>DoseTest.Action</type>
+        </member>
+
+
+        <member>
+            <name>AlwaysMarkAsFailed</name>
+            <type>Boolean</type>
+        </member>
+    </members>
+</class>

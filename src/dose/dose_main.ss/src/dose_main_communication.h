@@ -1,0 +1,120 @@
+/******************************************************************************
+*
+* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+*
+* Created by: Lars Hagström / stlrha
+*
+*******************************************************************************
+*
+* This file is part of Safir SDK Core.
+*
+* Safir SDK Core is free software: you can redistribute it and/or modify
+* it under the terms of version 3 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* Safir SDK Core is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+*
+******************************************************************************/
+
+#ifndef _dose_main_communication_h
+#define _dose_main_communication_h
+
+#include "dose_main_quality_of_service_data.h"
+#include <Safir/Dob/Internal/DistributionData.h>
+#include <Safir/Dob/Internal/DoseCom_Interface_Classes.h>
+#include <boost/scoped_array.hpp>
+#include <deque>
+#include <queue>
+#include <ace/Thread_Mutex.h>
+#include <ace/Event_Handler.h>
+namespace Safir
+{
+namespace Dob
+{
+namespace Internal
+{
+
+    class ExternNodeCommunication:
+        public ACE_Event_Handler,
+        public DoseComNotificationHandler,
+        private boost::noncopyable
+    {
+    public:
+        typedef boost::function<void(const DistributionData & data, const bool isAckedData)> IncomingDataCallback;
+        typedef boost::function<void(void)> QueueNotFullCallback;
+        typedef boost::function<void(void)> NodeStatusChangedNotifierCallback;
+        typedef boost::function<void(void)> StartPoolDistributionCallback;
+
+        ExternNodeCommunication();
+
+        bool Init (const IncomingDataCallback & dataCb,
+                   const QueueNotFullCallback & queueNotFullCb,
+                   const NodeStatusChangedNotifierCallback & nodeStatusChangedNotifierCb,
+                   const StartPoolDistributionCallback & startPoolDistributionCb);
+
+        bool Send(const DistributionData & msg);
+
+        //this will block if there is overflow
+        void SendPoolDistributionData(const DistributionData & msg);
+        //this will block if necessary.
+        void PoolDistributionCompleted();
+
+        //Check if type shall be distributed (returns true if system is standalone too)
+        bool IsLocal(Dob::Typesystem::TypeId tid) const;
+
+        const QualityOfServiceData & GetQualityOfServiceData() const {return m_QualityOfServiceData;}
+
+        std::wstring GetOwnIpAddress() const;
+        std::wstring IpAddressToString(const unsigned long ipAddr) const;
+
+        void SetOkToSignalPDComplete() {m_okToSignalPDComplete = true;}
+
+        static const Identifier DoseComVirtualConnectionId;
+
+    private:
+        const Dob::Typesystem::Int32 m_thisNode;
+
+        bool ShouldBeDiscarded(const DistributionData & msg);
+
+        virtual int handle_exception(ACE_HANDLE);
+        void HandleIncomingData(const int startFromPriority);
+
+        virtual void NotifyIncomingData(const int priorityChannel);
+        virtual void NotifyQueueNotFull(const int priorityChannel);
+        virtual void NotifyNodeStatusChanged();
+        virtual void NotifyStartPoolDistribution();
+
+        IncomingDataCallback m_handleDataCb;
+        QueueNotFullCallback m_queueNotFullCb;
+        NodeStatusChangedNotifierCallback m_nodeStatusChangedNotifierCb;
+        StartPoolDistributionCallback m_startPoolDistributionCb;
+
+
+        QualityOfServiceData m_QualityOfServiceData;
+
+        boost::scoped_array<volatile bool> m_queueIsFull;
+        ACE_Thread_Mutex m_queueIsFullLock;
+
+        volatile bool m_okToSignalPDComplete;
+        volatile int m_isNotified;
+
+        int m_pdChannel;
+        int m_pdPriority;
+        bool m_pdIsAcked;
+
+        boost::scoped_array<volatile bool> m_incomingDataEvents;
+        volatile bool m_queueNotFullEvent;
+        volatile bool m_startPoolDistributionEvent;
+    };
+}
+}
+}
+
+#endif
+

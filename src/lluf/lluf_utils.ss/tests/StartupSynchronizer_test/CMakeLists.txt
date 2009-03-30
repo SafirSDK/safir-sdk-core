@@ -1,0 +1,7 @@
+PROJECT (ss_test)
+INCLUDE_DIRECTORIES($ENV{SAFIR_SDK}/include)
+LINK_DIRECTORIES($ENV{SAFIR_RUNTIME}/lib)
+FILE(GLOB sources *.cpp)
+
+ADD_EXECUTABLE(ss_test ${sources})
+TARGET_LINK_LIBRARIES(ss_test lluf_utils)

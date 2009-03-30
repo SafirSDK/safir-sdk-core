@@ -1,0 +1,712 @@
+@@-------------------------------------------------------------------------------
+@@--
+@@--  Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+@@--
+@@--  Created by: Henrik Sundberg / sthesu
+@@--
+@@-------------------------------------------------------------------------------
+@@IF@@ @_SECTION_@ = "Parameters"
+File_Extension:"h"
+Filename_Separator:"/"
+Output_Directory:"cpp/include/"
+Namespace_Separator:"::"
+Lowercase_Namespace:"False"
+Lowercase_Filenames:"False"
+Object_Type:"Object"
+Index_Type:"Int32"
+@@--
+@@-- Exceptions are defined like this:
+@@--   Exception:<dou>:"<generated>":"<dependency>"
+@@-- E.g.:
+@@--   Exception:illegalValue:"Safir::Dob::Typesystem::IllegalValue":"Safir/Dob/Typesystem/Defs"
+@@-- defines "illegalValue" as an exceptionname in the xml-syntax (dou-file).
+@@-- And "Safir::Dob::Typesystem::IllegalValue" to be used where the actual type is needed in the code.
+@@-- And that "Safir/Dob/Typesystem/Defs" (with file extension added below) is to be included due to this.
+@@--
+Exception:exception:"Safir::Dob::Typesystem::Exception":"Safir/Dob/Typesystem/Exceptions"
+Exception:fundamentalException:"Safir::Dob::Typesystem::FundamentalException":"Safir/Dob/Typesystem/Exceptions"
+Exception:configurationError:"Safir::Dob::Typesystem::ConfigurationError":"Safir/Dob/Typesystem/Exceptions"
+Exception:incompatibleTypes:"Safir::Dob::Typesystem::IncompatibleTypes":"Safir/Dob/Typesystem/Exceptions"
+Exception:illegalValue:"Safir::Dob::Typesystem::IllegalValue":"Safir/Dob/Typesystem/Exceptions"
+Exception:nullValue:"Safir::Dob::Typesystem::NullValue":"Safir/Dob/Typesystem/Exceptions"
+Exception:softwareViolation:"Safir::Dob::Typesystem::SoftwareViolation":"Safir/Dob/Typesystem/Exceptions"
+@@--
+@@-- Types are defined like this:
+@@--   Type:<dou>:<set/get>:"<generated>":"<dependency>"
+@@-- E.g.:
+@@--   Type:String:String:"Safir::Dob::Typesystem::String":"Safir/Dob/Typesystem/Defs"
+@@-- defines "String" as a typename in the xml-syntax (dou-file).
+@@-- And "String" to be the @_UNIFORM_MEMBERTYPE_@, used in the name of Set/Get routines.
+@@-- And "Safir::Dob::Typesystem::String" to be used where the actual type is needed in the code.
+@@-- And that "Safir/Dob/Typesystem/Defs" (with file extension added below) is to be included due to this.
+@@--
+Type:Int32:Int32:"Safir::Dob::Typesystem::Int32":"Safir/Dob/Typesystem/ValueContainers"
+Type:Int64:Int64:"Safir::Dob::Typesystem::Int64":"Safir/Dob/Typesystem/ValueContainers"
+Type:Float32:Float32:"Safir::Dob::Typesystem::Float32":"Safir/Dob/Typesystem/ValueContainers"
+Type:Float64:Float64:"Safir::Dob::Typesystem::Float64":"Safir/Dob/Typesystem/ValueContainers"
+Type:Boolean:Boolean:"bool":""
+Type:String:String:"std::wstring":""
+Type:EntityId:EntityId:"Safir::Dob::Typesystem::EntityId":"Safir/Dob/Typesystem/ValueContainers"
+Type:TypeId:TypeId:"Safir::Dob::Typesystem::TypeId":"Safir/Dob/Typesystem/ValueContainers"
+Type:InstanceId:InstanceId:"Safir::Dob::Typesystem::InstanceId":"Safir/Dob/Typesystem/ValueContainers"
+Type:ChannelId:ChannelId:"Safir::Dob::Typesystem::ChannelId":"Safir/Dob/Typesystem/ValueContainers"
+Type:HandlerId:HandlerId:"Safir::Dob::Typesystem::HandlerId":"Safir/Dob/Typesystem/ValueContainers"
+Type:Binary:Binary:"Safir::Dob::Typesystem::Binary":""
+Type:Object:Object:"Safir::Dob::Typesystem::Object":""
+Type:Ampere32:Float32:"Safir::Dob::Typesystem::Si32::Ampere":"Safir/Dob/Typesystem/ValueContainers"
+Type:CubicMeter32:Float32:"Safir::Dob::Typesystem::Si32::CubicMeter":"Safir/Dob/Typesystem/ValueContainers"
+Type:Hertz32:Float32:"Safir::Dob::Typesystem::Si32::Hertz":"Safir/Dob/Typesystem/ValueContainers"
+Type:Joule32:Float32:"Safir::Dob::Typesystem::Si32::Joule":"Safir/Dob/Typesystem/ValueContainers"
+Type:Kelvin32:Float32:"Safir::Dob::Typesystem::Si32::Kelvin":"Safir/Dob/Typesystem/ValueContainers"
+Type:Kilogram32:Float32:"Safir::Dob::Typesystem::Si32::Kilogram":"Safir/Dob/Typesystem/ValueContainers"
+Type:Meter32:Float32:"Safir::Dob::Typesystem::Si32::Meter":"Safir/Dob/Typesystem/ValueContainers"
+Type:MeterPerSecond32:Float32:"Safir::Dob::Typesystem::Si32::MeterPerSecond":"Safir/Dob/Typesystem/ValueContainers"
+Type:MeterPerSecondSquared32:Float32:"Safir::Dob::Typesystem::Si32::MeterPerSecondSquared":"Safir/Dob/Typesystem/ValueContainers"
+Type:Newton32:Float32:"Safir::Dob::Typesystem::Si32::Newton":"Safir/Dob/Typesystem/ValueContainers"
+Type:Pascal32:Float32:"Safir::Dob::Typesystem::Si32::Pascal":"Safir/Dob/Typesystem/ValueContainers"
+Type:Radian32:Float32:"Safir::Dob::Typesystem::Si32::Radian":"Safir/Dob/Typesystem/ValueContainers"
+Type:RadianPerSecond32:Float32:"Safir::Dob::Typesystem::Si32::RadianPerSecond":"Safir/Dob/Typesystem/ValueContainers"
+Type:RadianPerSecondSquared32:Float32:"Safir::Dob::Typesystem::Si32::RadianPerSecondSquared":"Safir/Dob/Typesystem/ValueContainers"
+Type:Second32:Float32:"Safir::Dob::Typesystem::Si32::Second":"Safir/Dob/Typesystem/ValueContainers"
+Type:SquareMeter32:Float32:"Safir::Dob::Typesystem::Si32::SquareMeter":"Safir/Dob/Typesystem/ValueContainers"
+Type:Steradian32:Float32:"Safir::Dob::Typesystem::Si32::Steradian":"Safir/Dob/Typesystem/ValueContainers"
+Type:Volt32:Float32:"Safir::Dob::Typesystem::Si32::Volt":"Safir/Dob/Typesystem/ValueContainers"
+Type:Watt32:Float32:"Safir::Dob::Typesystem::Si32::Watt":"Safir/Dob/Typesystem/ValueContainers"
+Type:Ampere64:Float64:"Safir::Dob::Typesystem::Si64::Ampere":"Safir/Dob/Typesystem/ValueContainers"
+Type:CubicMeter64:Float64:"Safir::Dob::Typesystem::Si64::CubicMeter":"Safir/Dob/Typesystem/ValueContainers"
+Type:Hertz64:Float64:"Safir::Dob::Typesystem::Si64::Hertz":"Safir/Dob/Typesystem/ValueContainers"
+Type:Joule64:Float64:"Safir::Dob::Typesystem::Si64::Joule":"Safir/Dob/Typesystem/ValueContainers"
+Type:Kelvin64:Float64:"Safir::Dob::Typesystem::Si64::Kelvin":"Safir/Dob/Typesystem/ValueContainers"
+Type:Kilogram64:Float64:"Safir::Dob::Typesystem::Si64::Kilogram":"Safir/Dob/Typesystem/ValueContainers"
+Type:Meter64:Float64:"Safir::Dob::Typesystem::Si64::Meter":"Safir/Dob/Typesystem/ValueContainers"
+Type:MeterPerSecond64:Float64:"Safir::Dob::Typesystem::Si64::MeterPerSecond":"Safir/Dob/Typesystem/ValueContainers"
+Type:MeterPerSecondSquared64:Float64:"Safir::Dob::Typesystem::Si64::MeterPerSecondSquared":"Safir/Dob/Typesystem/ValueContainers"
+Type:Newton64:Float64:"Safir::Dob::Typesystem::Si64::Newton":"Safir/Dob/Typesystem/ValueContainers"
+Type:Pascal64:Float64:"Safir::Dob::Typesystem::Si64::Pascal":"Safir/Dob/Typesystem/ValueContainers"
+Type:Radian64:Float64:"Safir::Dob::Typesystem::Si64::Radian":"Safir/Dob/Typesystem/ValueContainers"
+Type:RadianPerSecond64:Float64:"Safir::Dob::Typesystem::Si64::RadianPerSecond":"Safir/Dob/Typesystem/ValueContainers"
+Type:RadianPerSecondSquared64:Float64:"Safir::Dob::Typesystem::Si64::RadianPerSecondSquared":"Safir/Dob/Typesystem/ValueContainers"
+Type:Second64:Float64:"Safir::Dob::Typesystem::Si64::Second":"Safir/Dob/Typesystem/ValueContainers"
+Type:SquareMeter64:Float64:"Safir::Dob::Typesystem::Si64::SquareMeter":"Safir/Dob/Typesystem/ValueContainers"
+Type:Steradian64:Float64:"Safir::Dob::Typesystem::Si64::Steradian":"Safir/Dob/Typesystem/ValueContainers"
+Type:Volt64:Float64:"Safir::Dob::Typesystem::Si64::Volt":"Safir/Dob/Typesystem/ValueContainers"
+Type:Watt64:Float64:"Safir::Dob::Typesystem::Si64::Watt":"Safir/Dob/Typesystem/ValueContainers"
+@@--
+@@--
+@@--
+@@--
+@@--
+@@--
+@@ELSIF@@ @_SECTION_@ = "Code"
+@@--
+@@-- HEADER
+@@--
+#ifndef @_UPPER:REPLACE_ALL(\./_):UNIT_@_H_INCLUDED
+#define @_UPPER:REPLACE_ALL(\./_):UNIT_@_H_INCLUDED
+
+@@IF@@ @_UNITTYPE_@=property
+@@--
+@@-- PROPERTY
+@@--
+#ifdef _MSC_VER
+#ifdef DOTS_GENERATED_CPP_EXPORTS
+#define GENERATED_API __declspec(dllexport)
+#else
+#define GENERATED_API __declspec(dllimport)
+#ifdef _DEBUG
+#pragma comment( lib, "dots_generated-cppd.lib" )
+#else
+#pragma comment( lib, "dots_generated-cpp.lib" )
+#endif
+#endif
+#endif
+#ifdef __GNUC__
+#define GENERATED_API
+#endif
+
+#include <Safir/Dob/Typesystem/Object.h>
+
+@@TABLE@@
+@@IF@@ @_EXIST:DEPENDENCY_@
+#include <@_REPLACE_ALL(\./\/):DEPENDENCY_@.h>
+@@END_IF@@
+@@END_TABLE@@
+
+@@TABLE@@
+/**
+ * @_NAMESPACEV_@
+ */
+namespace @_NAMESPACEV_@
+{
+@@END_TABLE@@
+
+@@IF@@ @_EXIST:CLASSSUMMARY_@
+    /**
+     * @_REPLACE_ALL(\n/\n     * ):CLASSSUMMARY_@
+     */
+@@ELSE@@
+    /**
+      * This class has no summary.
+      */
+@@END_IF@@
+    class GENERATED_API @_CLASS_@
+    {
+    public:
+        //HasProperty
+        static bool HasProperty(const Safir::Dob::Typesystem::ObjectPtr object);
+
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+        //@_MEMBER_@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+        static Safir::Dob::Typesystem::ArrayIndex @_MEMBER_@ArraySize(const Safir::Dob::Typesystem::ObjectPtr object);
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+/**
+ * @_REPLACE_ALL(\n/\n * ):MEMBERSUMMARY_@
+ */
+@@END_IF@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        static void Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index, const @_MEMBERTYPE_@::Enumeration value, const Safir::Dob::Typesystem::TypeId checksum = @_MEMBERTYPE_@::Checksum);
+        static void SetOrdinal@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index, const Safir::Dob::Typesystem::EnumerationValue value);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        static void Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index, const @_MEMBERTYPE_@Ptr ptr);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+        static void Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index, const @_MEMBERTYPE_@ & value);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
+        static void Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index, const @_MEMBERTYPE_@ & value);
+@@ELSE@@
+        static void Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index, const @_MEMBERTYPE_@ value);
+@@END_IF@@
+        static void SetNull@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index);
+        static bool IsNull@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index);
+        static bool IsChanged@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index);
+        static bool IsReadOnly@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index);
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+/**
+ * @_REPLACE_ALL(\n/\n * ):MEMBERSUMMARY_@
+ */
+@@END_IF@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        static @_MEMBERTYPE_@::Enumeration Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index, const Safir::Dob::Typesystem::TypeId checksum = @_MEMBERTYPE_@::Checksum);
+        static Safir::Dob::Typesystem::EnumerationValue GetOrdinal@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        static @_MEMBERTYPE_@Ptr Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index);
+        //If readonly it points to a new object, otherwise to the real one.
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=EntityId
+        static const @_MEMBERTYPE_@ Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+        static const @_MEMBERTYPE_@ Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index);
+@@ELSE@@
+        static @_MEMBERTYPE_@ Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index);
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+/**
+ * @_REPLACE_ALL(\n/\n * ):MEMBERSUMMARY_@
+ */
+@@END_IF@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        static void Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const @_MEMBERTYPE_@::Enumeration value, const Safir::Dob::Typesystem::TypeId checksum = @_MEMBERTYPE_@::Checksum);
+        static void SetOrdinal@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::EnumerationValue value);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        static void Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const @_MEMBERTYPE_@Ptr ptr);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+        static void Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const @_MEMBERTYPE_@ & value);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
+        static void Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const @_MEMBERTYPE_@ & value);
+@@ELSE@@
+        static void Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const @_MEMBERTYPE_@ value);
+@@END_IF@@
+        static void SetNull@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object);
+        static bool IsNull@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object);
+        static bool IsChanged@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object);
+        static bool IsReadOnly@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object);
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+/**
+ * @_REPLACE_ALL(\n/\n * ):MEMBERSUMMARY_@
+ */
+@@END_IF@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        static @_MEMBERTYPE_@::Enumeration Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::TypeId checksum = @_MEMBERTYPE_@::Checksum);
+        static Safir::Dob::Typesystem::EnumerationValue GetOrdinal@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        static @_MEMBERTYPE_@Ptr Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object);
+        //If readonly it points to a new object, otherwise to the real one.
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=EntityId
+        static const @_MEMBERTYPE_@ Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+        static const @_MEMBERTYPE_@ Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object);
+@@ELSE@@
+        static @_MEMBERTYPE_@ Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object);
+@@END_IF@@
+@@END_IF@@
+@@END_IF@@
+
+@@END_TABLE@@
+        /** Type id for @_CLASS_@. */
+        static const Safir::Dob::Typesystem::TypeId ClassTypeId = @_TYPEID_@LL;
+
+    };
+@@ELSIF@@ @_UNITTYPE_@=class
+@@--
+@@-- CLASS
+@@--
+#include <Safir/Dob/Typesystem/Object.h>
+#include <Safir/Dob/Typesystem/ObjectContainer.h>
+#include <Safir/Dob/Typesystem/ArrayContainer.h>
+#include <Safir/Dob/Typesystem/ContainerProxies.h>
+
+@@TABLE@@
+#include <@_REPLACE_ALL(\./\/):DEPENDENCY_@.h>
+@@END_TABLE@@
+
+#ifdef _MSC_VER
+#ifdef DOTS_GENERATED_CPP_EXPORTS
+#define GENERATED_API __declspec(dllexport)
+#else
+#define GENERATED_API __declspec(dllimport)
+#ifdef _DEBUG
+#pragma comment( lib, "dots_generated-cppd.lib" )
+#else
+#pragma comment( lib, "dots_generated-cpp.lib" )
+#endif
+#endif
+#endif
+#ifdef __GNUC__
+#define GENERATED_API
+#endif
+
+@@TABLE@@
+/**
+ * @_NAMESPACEV_@
+ */
+namespace @_NAMESPACEV_@
+{
+@@END_TABLE@@
+
+    class @_CLASS_@; //forward declaration
+    typedef boost::shared_ptr<@_CLASS_@> @_CLASS_@Ptr;
+    typedef boost::shared_ptr<const @_CLASS_@> @_CLASS_@ConstPtr;
+
+    typedef Safir::Dob::Typesystem::ObjectContainerImpl<@_CLASS_@> @_CLASS_@Container;
+    typedef Safir::Dob::Typesystem::ArrayContainer<@_CLASS_@Container> @_CLASS_@ContainerArray;
+
+@@IF@@ @_EXIST:CLASSSUMMARY_@
+    /**
+     * @_REPLACE_ALL(\n/\n     * ):CLASSSUMMARY_@
+     */
+@@ELSE@@
+    /**
+     * This class has no summary.
+     */
+@@END_IF@@
+
+    class GENERATED_API @_CLASS_@ : public @_BASECLASS_@
+    {
+    public:
+        //Constructors and Create routines
+        @_CLASS_@();
+        virtual Safir::Dob::Typesystem::ObjectPtr Clone() const;
+        static @_CLASS_@Ptr Create();
+
+@@TABLE@@
+@@IF@@ @_EXIST:CREATEROUTINESUMMARY_@
+        /**
+         * @_REPLACE_ALL(\n/\n         * ):CREATEROUTINESUMMARY_@
+         */
+@@END_IF@@
+@@IF@@ @_EXIST:CREATEPARAMETER_@
+        static @_CLASS_@Ptr Create@_CREATEROUTINE_@(
+@@ELSE@@
+        static @_CLASS_@Ptr Create@_CREATEROUTINE_@();
+@@END_IF@@
+@@TABLE@@
+@@IF@@ @_EXIST:CREATEPARAMETER_@
+@@IF@@ @_EXIST:CREATEPARAMETERISLAST_@
+@@IF@@ @_UNIFORM_CREATEPARAMETERTYPE_@=Enumeration
+            const @_CREATEPARAMETERTYPE_@::Enumeration @_CREATEPARAMETER_@);
+@@ELSIF@@ @_UNIFORM_CREATEPARAMETERTYPE_@=Object
+            const @_CREATEPARAMETERTYPE_@Ptr @_CREATEPARAMETER_@);
+@@ELSIF@@ @_UNIFORM_CREATEPARAMETERTYPE_@=String
+            const @_CREATEPARAMETERTYPE_@ & @_CREATEPARAMETER_@);
+@@ELSE@@
+            const @_CREATEPARAMETERTYPE_@ @_CREATEPARAMETER_@);
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_CREATEPARAMETERTYPE_@=Enumeration
+            const @_CREATEPARAMETERTYPE_@::Enumeration @_CREATEPARAMETER_@,
+@@ELSIF@@ @_UNIFORM_CREATEPARAMETERTYPE_@=Object
+            const @_CREATEPARAMETERTYPE_@Ptr @_CREATEPARAMETER_@,
+@@ELSIF@@ @_UNIFORM_CREATEPARAMETERTYPE_@=String
+            const @_CREATEPARAMETERTYPE_@ & @_CREATEPARAMETER_@,
+@@ELSE@@
+            const @_CREATEPARAMETERTYPE_@ @_CREATEPARAMETER_@,
+@@END_IF@@
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+
+
+@@END_TABLE@@
+@@TABLE@@
+@@IF@@ @_EXIST:PARAMETER_@
+        //@_PARAMETER_@
+@@IF@@ @_EXIST:PARAMETERISARRAY_@
+        static Safir::Dob::Typesystem::ArrayIndex @_PARAMETER_@ArraySize();
+@@IF@@ @_EXIST:PARAMETERSUMMARY_@
+        /**
+         * @_REPLACE_ALL(\n/\n         * ):PARAMETERSUMMARY_@
+         */
+@@END_IF@@
+@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+        static @_PARAMETERTYPE_@::Enumeration @_PARAMETER_@(const Safir::Dob::Typesystem::ArrayIndex index, const Safir::Dob::Typesystem::TypeId enumId = @_PARAMETERTYPE_@::Checksum);
+@@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
+        static @_PARAMETERTYPE_@Ptr @_PARAMETER_@(const Safir::Dob::Typesystem::ArrayIndex index);
+@@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = EntityId)
+        static const @_PARAMETERTYPE_@ @_PARAMETER_@(const Safir::Dob::Typesystem::ArrayIndex index);
+@@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = String)
+        static const @_PARAMETERTYPE_@ @_PARAMETER_@(const Safir::Dob::Typesystem::ArrayIndex index);
+@@ELSE@@
+        static @_PARAMETERTYPE_@ @_PARAMETER_@(const Safir::Dob::Typesystem::ArrayIndex index);
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_EXIST:PARAMETERSUMMARY_@
+        /**
+         * @_REPLACE_ALL(\n/\n         * ):PARAMETERSUMMARY_@
+         */
+@@END_IF@@
+@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+        static @_PARAMETERTYPE_@::Enumeration @_PARAMETER_@(const Safir::Dob::Typesystem::TypeId enumId = @_PARAMETERTYPE_@::Checksum);
+@@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
+        static @_PARAMETERTYPE_@Ptr @_PARAMETER_@();
+@@ELSE@@
+        static @_PARAMETERTYPE_@ @_PARAMETER_@();
+@@END_IF@@
+@@END_IF@@
+
+@@END_IF@@
+@@END_TABLE@@
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+        //@_MEMBER_@
+        static Safir::Dob::Typesystem::MemberIndex @_MEMBER_@MemberIndex();
+@@IF@@ @_EXIST:MEMBERISSTRING_@
+        static Safir::Dob::Typesystem::Int32 @_MEMBER_@MaxStringLength();
+@@END_IF@@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+        static Safir::Dob::Typesystem::ArrayIndex @_MEMBER_@ArraySize();
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /**
+         * @_REPLACE_ALL(\n/\n         * ):MEMBERSUMMARY_@
+         */
+@@END_IF@@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        const Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@ContainerArray & @_MEMBER_@() const;
+        Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@ContainerArray & @_MEMBER_@();
+@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+        const @_MEMBERTYPE_@::EnumerationContainerArray & @_MEMBER_@() const;
+        @_MEMBERTYPE_@::EnumerationContainerArray & @_MEMBER_@();
+@@ELSE@@
+        const @_MEMBERTYPE_@ContainerArray & @_MEMBER_@() const;
+        @_MEMBERTYPE_@ContainerArray & @_MEMBER_@();
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /**
+         * @_REPLACE_ALL(\n/\n         * ):MEMBERSUMMARY_@
+         */
+@@END_IF@@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        const Safir::Dob::Typesystem::ContainerProxy<Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container> @_MEMBER_@() const;
+        Safir::Dob::Typesystem::ContainerProxy<Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container> @_MEMBER_@();
+@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+        const Safir::Dob::Typesystem::ContainerProxy<@_MEMBERTYPE_@::EnumerationContainer> @_MEMBER_@() const;
+        Safir::Dob::Typesystem::ContainerProxy<@_MEMBERTYPE_@::EnumerationContainer> @_MEMBER_@();
+@@ELSE@@
+        const Safir::Dob::Typesystem::ContainerProxy<@_MEMBERTYPE_@Container> @_MEMBER_@() const;
+        Safir::Dob::Typesystem::ContainerProxy<@_MEMBERTYPE_@Container> @_MEMBER_@();
+@@END_IF@@
+@@END_IF@@
+
+
+@@END_IF@@
+@@END_TABLE@@
+        /** Type id for @_CLASS_@. */
+        static const Safir::Dob::Typesystem::TypeId ClassTypeId = @_TYPEID_@LL;
+
+        //Type id for @_CLASS_@
+        virtual Safir::Dob::Typesystem::TypeId GetTypeId() const {return ClassTypeId;}
+
+        //Check if anything in the object has change flags set
+        virtual bool IsChanged();
+
+        //Recursively set all change flags in the object
+        virtual void SetChanged(const bool changed);
+
+
+        //Reflection part (Don't use unless you really know what you're doing!!)
+        virtual       Safir::Dob::Typesystem::ContainerBase & GetMember(const Safir::Dob::Typesystem::MemberIndex member,
+                                                                        const Safir::Dob::Typesystem::ArrayIndex index);
+        virtual const Safir::Dob::Typesystem::ContainerBase & GetMember(const Safir::Dob::Typesystem::MemberIndex member,
+                                                                        const Safir::Dob::Typesystem::ArrayIndex index) const;
+
+        virtual Safir::Dob::Typesystem::Int32 CalculateBlobSize() const;
+        virtual void WriteToBlob(char * blob, char * & beginningOfUnused) const;
+        explicit @_CLASS_@(char const * const blob);
+
+    private:
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable : 4251)
+#endif
+
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@ContainerArray m_@_MEMBER_@Member;
+@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+        @_MEMBERTYPE_@::EnumerationContainerArray m_@_MEMBER_@Member;
+@@ELSE@@
+        @_MEMBERTYPE_@ContainerArray m_@_MEMBER_@Member;
+@@END_IF@@
+@@ELSE@@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container m_@_MEMBER_@Member;
+@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+        @_MEMBERTYPE_@::EnumerationContainer m_@_MEMBER_@Member;
+@@ELSE@@
+        @_MEMBERTYPE_@Container m_@_MEMBER_@Member;
+@@END_IF@@
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+    };
+
+@@ELSIF@@ @_UNITTYPE_@=enumeration
+@@--
+@@-- ENUMERATION
+@@--
+#include <Safir/Dob/Typesystem/Defs.h>
+#include <Safir/Dob/Typesystem/Operations.h>
+#include <Safir/Dob/Typesystem/EnumerationContainerBase.h>
+#include <Safir/Dob/Typesystem/ArrayContainer.h>
+
+#ifdef _MSC_VER
+#ifdef DOTS_GENERATED_CPP_EXPORTS
+#define GENERATED_API __declspec(dllexport)
+#else
+#define GENERATED_API __declspec(dllimport)
+#ifdef _DEBUG
+#pragma comment( lib, "dots_generated-cppd.lib" )
+#else
+#pragma comment( lib, "dots_generated-cpp.lib" )
+#endif
+#endif
+#endif
+#ifdef __GNUC__
+#define GENERATED_API
+#endif
+
+@@TABLE@@
+/**
+* @_NAMESPACEV_@
+*/
+namespace @_NAMESPACEV_@
+{
+@@END_TABLE@@
+
+@@IF@@ @_EXIST:CLASSSUMMARY_@
+/**
+ * @_REPLACE_ALL(\n/\n * ):CLASSSUMMARY_@
+ */
+@@ELSE@@
+/**
+ * This enumeration has no summary.
+ */
+@@END_IF@@
+
+    struct GENERATED_API @_CLASS_@
+    {
+        enum Enumeration
+        {
+@@IF@@ @_ENUMVALUE'length_@=1
+            @_ENUMVALUE_@ = 0
+@@ELSE@@
+@@TABLE@@
+@@IF@@ @_TABLE_LINE_@=1
+            @_ENUMVALUE_@ = 0,
+@@ELSIF@@ @_TABLE_LINE_@=@_ENUMVALUE'length_@
+            @_ENUMVALUE_@
+@@ELSE@@
+            @_ENUMVALUE_@,
+@@END_IF@@
+@@END_TABLE@@
+@@END_IF@@
+        };
+
+
+        static Safir::Dob::Typesystem::Int32 Size();
+        static Enumeration First();
+        static Enumeration Last();
+
+        static Safir::Dob::Typesystem::EnumerationValue FirstOrdinal();
+        static Safir::Dob::Typesystem::EnumerationValue LastOrdinal();
+
+        static std::wstring ToString(const Enumeration enumVal);
+        static Enumeration ToValue(const std::wstring & valueString);
+
+        static const Safir::Dob::Typesystem::TypeId EnumerationTypeId = @_TYPEID_@LL;
+        static const Safir::Dob::Typesystem::TypeId Checksum = @_CHECKSUM_@LL;
+
+        //Check that there is no enumeration mismatch
+        //throws an exception if there is - ConfigurationErrorException
+        static void CheckForMismatch(const Safir::Dob::Typesystem::TypeId checksum = Checksum);
+
+        class EnumerationContainer : public Safir::Dob::Typesystem::EnumerationContainerBase
+        {
+        public:
+            typedef Enumeration ContainedType;
+        
+            //Will throw IllegalValueException if value is not in first .. last
+            virtual void SetOrdinal(const Safir::Dob::Typesystem::EnumerationValue value)
+            {
+                if (value < FirstOrdinal() || value > LastOrdinal())
+                {
+                    throw Safir::Dob::Typesystem::IllegalValueException(L"The enumerated type @_UNIT_@ does not have such a value",__WFILE__,__LINE__);
+                }
+                m_bIsNull = false;
+                m_bIsChanged = true;
+                m_Value = value;
+            }
+
+            virtual Safir::Dob::Typesystem::EnumerationValue GetOrdinal() const
+            {
+                if (IsNull())
+                {
+                    throw Safir::Dob::Typesystem::NullException(L"Value is null",__WFILE__,__LINE__);
+                }
+                return m_Value;
+            }
+
+            //Will throw ConfigurationErrorException if there is an enumeration mismatch
+            void SetVal(const Enumeration value)
+            {
+                CheckForMismatch();
+                SetOrdinal(value);
+            }
+
+            //Will throw ConfigurationErrorException if there is an enumeration mismatch
+            Enumeration GetVal() const
+            {
+                CheckForMismatch();
+                return static_cast<Enumeration>(GetOrdinal());
+            }
+
+            //compare an enumerationcontainer with a value, will return false if the container is null or the values are not equal
+            bool operator==(const Enumeration other) const
+            {CheckForMismatch(); return !IsNull() && m_Value == other;}
+
+            bool operator != (const Enumeration other) const
+            {return !(*this == other);}
+        };
+
+        typedef Safir::Dob::Typesystem::ArrayContainer<EnumerationContainer> EnumerationContainerArray;
+
+    };
+    static inline bool operator==(const @_CLASS_@::Enumeration first, const @_CLASS_@::EnumerationContainer second)
+    {return second == first;}
+
+    static inline bool operator!=(const @_CLASS_@::Enumeration first, const @_CLASS_@::EnumerationContainer second)
+    {return !(first == second);}
+
+@@ELSIF@@ @_UNITTYPE_@=exception
+@@--
+@@-- EXCEPTION
+@@--
+#ifdef _MSC_VER
+#ifdef DOTS_GENERATED_CPP_EXPORTS
+#define GENERATED_API __declspec(dllexport)
+#else
+#define GENERATED_API __declspec(dllimport)
+#ifdef _DEBUG
+#pragma comment( lib, "dots_generated-cppd.lib" )
+#else
+#pragma comment( lib, "dots_generated-cpp.lib" )
+#endif
+#endif
+#endif
+#ifdef __GNUC__
+#define GENERATED_API
+#endif
+
+@@TABLE@@
+#include <@_REPLACE_ALL(\./\/):DEPENDENCY_@.h>
+@@END_TABLE@@
+
+@@TABLE@@
+/**
+ *  @_NAMESPACEV_@
+ */
+namespace @_NAMESPACEV_@
+{
+@@END_TABLE@@
+
+@@IF@@ @_EXIST:CLASSSUMMARY_@
+/**
+ * @_REPLACE_ALL(\n/\n * ):CLASSSUMMARY_@
+ */
+@@ELSE@@
+/**
+ * This class has no summary.
+ */
+@@END_IF@@
+
+    class GENERATED_API @_CLASS_@ :
+        public @_BASECLASS_@
+    {
+    public:
+        /**
+         * Constructor with exception information.
+         *
+         * Creates an exception that contains information about why and where the exception
+         * occurred.
+         *
+         * @param message [in] - A message describing why the exception occurred.
+         * @param fileName [in] - The name of the file where the exception occurred.
+         *                        Always use __WFILE__ as the argument for this parameter.
+         * @param lineNumber [in] - The line number that the exception occurred on.
+         *                          Always use __LINE__ as the argument for this parameter.
+         */
+        @_CLASS_@
+            (const std::wstring & message,
+             const std::wstring & fileName,       //Use the __WFILE__ macro
+             const Safir::Dob::Typesystem::Int64 lineNumber);//Use the __LINE__ macro
+
+        //override of pure virtual
+        virtual const std::wstring GetName() const;
+
+        /** Type id for @_CLASS_@. */
+        static const Safir::Dob::Typesystem::TypeId ExceptionTypeId = @_TYPEID_@LL;
+
+        //override of pure virtual
+        virtual Safir::Dob::Typesystem::TypeId GetTypeId() const {return ExceptionTypeId;}
+
+    };
+
+
+@@END_IF@@
+@@--
+@@-- FOOTER
+@@--
+@@TABLE@@
+} // @_REVNAMESPACE_@
+@@END_TABLE@@
+
+#endif
+@@END_IF@@

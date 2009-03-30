@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Full response for a ForEach service request</summary>   
+  <name>Safir.Utilities.ForEach.FullResponse</name>
+  <baseClass>Safir.Utilities.ForEach.BriefResponse</baseClass>
+  <members>
+    <member>
+      <summary>Array of responses for each operated object</summary>
+      <name>Response</name>
+      <!-- Note: The size must be set to max of this Safir.Utilities.ForEach.UpdateRequest.dou and DeleteRequest.dou-->
+      <arraySize>1000</arraySize>
+      <type>Safir.Dob.Response</type>
+    </member>
+  </members>
+</class>

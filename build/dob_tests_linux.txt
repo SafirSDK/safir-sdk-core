@@ -1,0 +1,9 @@
+#COPY DOB FILES
+copy_dob_files   src/dots/dots_test.ss/data
+copy_dob_files   src/dose/dose_test.ss/data
+
+build_dots_generated
+
+build_dir        src/dots/dots_test.ss/cpp/DotsTestCpp
+build_dir        src/dots/dots_test.ss/dotnet/DotsTestDotnet
+build_dir        src/dose/dose_test.ss

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>Safir.Test.TimeConversion</name>
+  <baseClass>Safir.Dob.Entity</baseClass>
+    <members>
+      <member>
+        <name>TimeStamp</name>
+        <type>Float64</type>
+      </member>
+    </members>
+</class>

@@ -1,0 +1,73 @@
+###################################################################################################
+#
+# Makefile
+#
+# Used to build and run .Net test programs.
+#
+# 050909/HESU: Created
+# 051006/HESU: Restructured according to the makefile in the directory above.
+# 070113/LAHA: Rewrite
+#
+###################################################################################################
+.PHONY: default build clean install 
+
+.SILENT:
+
+include $(SAFIR_SDK)/data/build/make_vs_setup
+
+default: build
+
+build : 
+	$(NET_SETUP) & devenv.com /build release dose_test_dotnet.csproj
+
+install: build
+	copy bin\Release\dose_test_dotnet.exe $(SAFIR_RUNTIME)\bin
+
+clean: 
+	-rm -rf bin obj
+	-rm -f $(SAFIR_RUNTIME)\bin\dose_test_dotnet.exe
+
+# ASSEMBLY_DIR := $(SAFIR_RUNTIME)\bin
+# SOURCES := DoseTestDotnet\*.cs
+# SOURCES_EXPANDED := $(wildcard $(SOURCES))
+
+# # All the needed assemblies from the SAFIR_RUNTIME
+# NEEDED_ASSEMBLIES := Safir.Dob.Typesystem.dll dots_generated-dotnet.dll Safir.Dob.dll
+# REFERENCES := $(foreach assembly,$(NEEDED_ASSEMBLIES),/reference:$(assembly))
+
+# #this is used to get a rebuild when something has changed in dots
+# DOTS_INSTALLED := $(SAFIR_SDK)\dots\dots_generated\install_flag
+
+# TARGET_EXECUTABLE_NAME := DoseTestDotnet.exe
+
+# goal = ..\new_output\cs.txt
+
+# default : build
+
+# test: dirs build
+# 	$(TARGET_EXECUTABLE_NAME) >$(goal)
+
+# %.dll: $(SAFIR_RUNTIME)\bin\%.dll
+# 	copy $(SAFIR_RUNTIME)\bin\$@ .
+
+# dirs:
+# 	-mkdir ..\new_output >\nul 2>\nul
+
+# build : $(TARGET_EXECUTABLE_NAME)
+
+# $(TARGET_EXECUTABLE_NAME): $(SOURCES_EXPANDED) $(NEEDED_ASSEMBLIES) $(DOTS_INSTALLED)
+# 	echo Building
+# 	$(NET_SETUP) >\nul & csc /debug:pdbonly /warnaserror /nologo /out:$(TARGET_EXECUTABLE_NAME) /lib:$(ASSEMBLY_DIR) $(REFERENCES) $(SOURCES)
+
+# run: build
+# 	$(TARGET_EXECUTABLE_NAME)
+
+# print: test
+# 	echo Testing
+# 	type $(goal)
+# 	echo Test complete.
+
+# clean:
+# 	-del $(goal) *.dll *.exe *.pdb >\nul 2>\nul
+
+

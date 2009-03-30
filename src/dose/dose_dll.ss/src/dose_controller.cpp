@@ -1,0 +1,2674 @@
+/******************************************************************************
+*
+* Copyright Saab AB, 2008 (http://www.safirsdk.com)
+*
+* Created by: Joel Ottosson / stjoot
+*
+*******************************************************************************
+*
+* This file is part of Safir SDK Core.
+*
+* Safir SDK Core is free software: you can redistribute it and/or modify
+* it under the terms of version 3 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* Safir SDK Core is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+*
+******************************************************************************/
+
+#include "dose_controller.h"
+
+#include <boost/bind.hpp>
+#include <Safir/Dob/AccessDeniedException.h>
+#include <Safir/Dob/Entity.h>
+#include <Safir/Dob/Internal/Connection.h>
+#include <Safir/Dob/Internal/Connections.h>
+#include <Safir/Dob/Internal/InternalDefs.h>
+#include <Safir/Dob/Internal/MessageTypes.h>
+#include <Safir/Dob/Internal/ServiceTypes.h>
+#include <Safir/Dob/Internal/EntityTypes.h>
+#include <Safir/Dob/Internal/EndStates.h>
+#include <Safir/Dob/Internal/InjectionKindTable.h>
+#include <Safir/Dob/Internal/State.h>
+#include <Safir/Dob/Internal/SubscriptionId.h>
+#include <Safir/Dob/Internal/TimestampOperations.h>
+#include <Safir/Dob/Message.h>
+#include <Safir/Dob/NodeParameters.h>
+#include <Safir/Dob/QueueParameters.h>
+#include <Safir/Dob/NotFoundException.h>
+#include <Safir/Dob/NotOpenException.h>
+#include <Safir/Dob/OverflowException.h>
+#include <Safir/Dob/Typesystem/Exceptions.h>
+#include <Safir/Dob/Service.h>
+#include <Safir/Dob/Response.h>
+#include <Safir/Dob/EntityIdResponse.h>
+#include <Safir/Dob/CallbackId.h>
+#include <Safir/Dob/ThisNodeParameters.h>
+#include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
+#include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
+#include <Safir/Dob/Typesystem/Operations.h>
+#include <Safir/Dob/Typesystem/Utilities.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Dob/ErrorResponse.h>
+#include <Safir/Dob/ResponseGeneralErrorCodes.h>
+#include <Safir/Dob/Typesystem/Serialization.h>
+
+#include <assert.h>
+#include <boost/shared_ptr.hpp>
+#include <iostream>
+
+#include <ace/OS_NS_unistd.h>
+
+#ifdef DispatchMessage
+#undef DispatchMessage
+#endif
+
+using namespace std;
+
+namespace Safir
+{
+namespace Dob
+{
+namespace Internal
+{
+    Controller::Controller(bool persistController)
+        : m_persistController(persistController),
+          m_considerGhost(persistController),  // A persist controller considers ghosts
+          m_isConnected(false),
+          m_connection(NULL),
+          m_requestQueueInOverflowState(false),
+          m_messageQueueInOverflowState(false),
+          m_ctrlId(0),
+          m_context(0),
+          m_exitDispatch(false),
+          m_dispatchedInjection(no_state_tag),
+          m_originalInjectionState(no_state_tag)
+    {
+
+    }
+
+    void Controller::SetInstanceId(long id)
+    {
+        m_ctrlId=id;
+    }
+
+    //---------------------------------------------------------------------------------------
+    // DOB Startup and Initialization
+    //---------------------------------------------------------------------------------------
+    bool Controller::IsConnected()
+    {
+        return m_isConnected;
+    }
+
+    void Controller::Connect(const char* connectionNameCommonPart,
+                             const char* connectionNameInstancePart,
+                             long context,
+                             long lang,
+                             const ConsumerId & connectionOwner,
+                             const ConsumerId & dispatcher,
+                             OnDispatchCb* onDispatchCb, //callback instead of event
+                             OnStopOrderCb* onStopOrderCb,
+                             OnNewEntityCb* onNewEntityCb,
+                             OnUpdatedEntityCb* onUpdatedEntityCb,
+                             OnDeletedEntityCb* onDeletedEntityCb,
+                             OnCreateRequestCb* onCreateRequestCb,
+                             OnUpdateRequestCb* onUpdateRequestCb,
+                             OnDeleteRequestCb* onDeleteRequestCb,
+                             OnServiceRequestCb* onServiceRequestCb,
+                             OnResponseCb* onResponseCb,
+                             OnMessageCb* onMessageCb,
+                             OnRegisteredCb* onRegisteredCb,
+                             OnUnregisteredCb* onUnregisteredCb,
+                             OnRevokedRegistrationCb* onRevokedRegistrationCb,
+                             OnCompletedRegistrationCb* onCompletedRegistrationCb,
+                             OnInjectedNewEntityCb* onInjectedNewEntityCb,
+                             OnInjectedUpdatedEntityCb* onInjectedUpdatedEntityCb,
+                             OnInjectedDeletedEntityCb* onInjectedDeletedEntityCb,
+                             OnInitialInjectionsDoneCb* onInitialInjectionsDoneCb,
+                             OnNotRequestOverflowCb* onNotRequestOverflowCb,
+                             OnNotMessageOverflowCb* onNotMessageOverflowCb)
+    {
+
+        if (m_isConnected)
+        {
+            return;
+        }
+
+        m_context = context;
+
+        lllout << "Starting  with (" << connectionNameCommonPart << ", " << connectionNameInstancePart << ")" << std::endl;
+
+        m_dispatcher.SetConnectionOwner(connectionOwner, onStopOrderCb);
+
+        m_dispatcher.SetCallbacks(  lang,
+                                    onNewEntityCb,
+                                    onUpdatedEntityCb,
+                                    onDeletedEntityCb,
+                                    onCreateRequestCb,
+                                    onUpdateRequestCb,
+                                    onDeleteRequestCb,
+                                    onServiceRequestCb,
+                                    onResponseCb,
+                                    onMessageCb,
+                                    onRegisteredCb,
+                                    onUnregisteredCb,
+                                    onRevokedRegistrationCb,
+                                    onCompletedRegistrationCb,
+                                    onInjectedNewEntityCb,
+                                    onInjectedUpdatedEntityCb,
+                                    onInjectedDeletedEntityCb,
+                                    onInitialInjectionsDoneCb,
+                                    onNotRequestOverflowCb,
+                                    onNotMessageOverflowCb);
+        // Save the original name parts
+        m_connectionNameCommonPart = connectionNameCommonPart;
+        m_connectionNameInstancePart = connectionNameInstancePart;
+
+        m_connectionName = ComposeName(m_connectionNameCommonPart, m_connectionNameInstancePart);
+
+        ConnectResult result;
+        ConnectionPtr connection;
+
+        Connections::Instance().Connect(m_connectionName, context, result, connection);
+
+        switch (result)
+        {
+        case Success:
+            {
+                m_isConnected = true;
+                m_connection = connection;
+
+                MessageTypes::Initialize();
+                EndStates::Initialize();
+                ServiceTypes::Initialize();
+                InjectionKindTable::Initialize();
+                EntityTypes::Initialize();
+            }
+            break;
+        case TooManyProcesses:
+            {
+                m_isConnected = false;
+                std::wostringstream ostr;
+                ostr << "Failed to open connection! There are too many processes connected to the Dob, please increase "
+                     << "the parameter Safir.Dob.ProcessInfo.MaxNumberOfInstances. " << std::endl
+                     << "While opening connection with name " << m_connectionName.c_str();
+                throw Safir::Dob::NotOpenException(ostr.str(), __WFILE__,__LINE__);
+            }
+            break;
+        case TooManyConnectionsInProcess:
+            {
+                m_isConnected = false;
+                std::wostringstream ostr;
+                ostr << "Failed to open connection! This process has too many connections, "
+                     << "please increase the size of the ConnectionNames array in class Safir.Dob.ProcessInfo. " << std::endl
+                     << "While opening Process pid = " << ACE_OS::getpid() << ", ConnectionName = " << m_connectionName.c_str();
+                throw Safir::Dob::NotOpenException(ostr.str(), __WFILE__,__LINE__);
+            }
+            break;
+
+        case ConnectionNameAlreadyExists:
+            {
+                m_isConnected = false;
+                std::wostringstream ostr;
+                ostr << "Failed to open connection! The connection name '" << m_connectionName.c_str()
+                     << "' is already in use. While opening connection from process with pid = " << ACE_OS::getpid();
+                throw Safir::Dob::NotOpenException(ostr.str(), __WFILE__,__LINE__);
+            }
+            break;
+
+        case Undefined:
+            ENSURE(result != Undefined, << "Got Undefined from Connetions::Instance().Connect().");
+            break;
+        }
+
+
+        ENSURE(m_dispatchThread == NULL, << "DispatchThread was non-NULL when  was called!");
+        m_dispatchThread.reset(new DispatchThread(m_connection->Id(), dispatcher, onDispatchCb));
+
+        if (lang!=3/*DOSE_LANGUAGE_JAVA*/)
+        {
+            m_dispatchThread->StartNewThread();
+        }
+
+        lllout << " complete for " << m_connectionName.c_str() << std::endl;
+    }
+
+    void Controller::ConnectSecondary(  long lang,
+                                        OnNewEntityCb* onNewEntityCb,
+                                        OnUpdatedEntityCb* onUpdatedEntityCb,
+                                        OnDeletedEntityCb* onDeletedEntityCb,
+                                        OnCreateRequestCb* onCreateRequestCb,
+                                        OnUpdateRequestCb* onUpdateRequestCb,
+                                        OnDeleteRequestCb* onDeleteRequestCb,
+                                        OnServiceRequestCb* onServiceRequestCb,
+                                        OnResponseCb* onResponseCb,
+                                        OnMessageCb* onMessageCb,
+                                        OnRegisteredCb* onRegisteredCb,
+                                        OnUnregisteredCb* onUnregisteredCb,
+                                        OnRevokedRegistrationCb* onRevokedRegistrationCb,
+                                        OnCompletedRegistrationCb* onCompletedRegistrationCb,
+                                        OnInjectedNewEntityCb* onInjectedNewEntityCb,
+                                        OnInjectedUpdatedEntityCb* onInjectedUpdatedEntityCb,
+                                        OnInjectedDeletedEntityCb* onInjectedDeletedEntityCb,
+                                        OnInitialInjectionsDoneCb* onInitialInjectionsDoneCb,
+                                        OnNotRequestOverflowCb* onNotRequestOverflowCb,
+                                        OnNotMessageOverflowCb* onNotMessageOverflowCb)
+    {
+        if (!m_isConnected) //Must already be attached to dose_main, to be able to attach secondary
+        {
+            throw Safir::Dob::NotOpenException(L"Attach: The connection that SecondaryConnection is trying to attach to is not open",__WFILE__,__LINE__);
+        }
+
+        m_dispatcher.SetCallbacks(lang,
+                                  onNewEntityCb,
+                                  onUpdatedEntityCb,
+                                  onDeletedEntityCb,
+                                  onCreateRequestCb,
+                                  onUpdateRequestCb,
+                                  onDeleteRequestCb,
+                                  onServiceRequestCb,
+                                  onResponseCb,
+                                  onMessageCb,
+                                  onRegisteredCb,
+                                  onUnregisteredCb,
+                                  onRevokedRegistrationCb,
+                                  onCompletedRegistrationCb,
+                                  onInjectedNewEntityCb,
+                                  onInjectedUpdatedEntityCb,
+                                  onInjectedDeletedEntityCb,
+                                  onInitialInjectionsDoneCb,
+                                  onNotRequestOverflowCb,
+                                  onNotMessageOverflowCb);
+        lllout << "ConnectSecondary complete for " << m_connectionName.c_str() << std::endl;
+    }
+
+
+    void Controller::Disconnect()
+    {
+        //stop m_dispatchThread first of all
+        if (m_dispatchThread != NULL)
+        {
+            const bool stopped = m_dispatchThread->Stop(true);
+
+            //if it couldnt be stopped it - assuming that the user didn't do anything stupid - is
+            //in user code waiting to tell the main thread about a dispatch. But the main thread is
+            //in here (we're it...), trying to stop the dispatch thread. So we put the dispatch thread in
+            //the "attic" so that we can stop and remove it when we're dispatched again.
+            if (!stopped)
+            {
+                lllout << "Failed to stop the DispatchThread (addr = "
+                       << (void *)m_dispatchThread.get()
+                       << ") in connection "
+                       << m_connectionName.c_str()
+                       << ", sticking it in the attic for later removal" << std::endl;
+
+                m_dispatchThreadAttic.insert(std::make_pair(m_dispatchThread,1));
+            }
+
+            m_dispatchThread.reset();
+        }
+
+        lllout << "Controller::Disconnect() - m_isConnected: " << std::boolalpha << m_isConnected << std::endl;
+
+        if (m_isConnected)
+        {
+            lllout << "Controller::Disconnect() - Disconnecting " << m_connectionName.c_str() << std::endl;
+            Connections::Instance().Disconnect(m_connection);
+        }
+        m_isConnected = false;
+
+        //-----------------------------
+        //clean up local resources
+        //-----------------------------
+        m_requestQueueInOverflowState = false;
+        m_messageQueueInOverflowState = false;
+
+        //delete m_dispatcher's resources
+        m_dispatcher.Clear();
+
+        //shared queues are deleted by dose_main.
+        m_context = 0;
+        m_connection = NULL;
+    }
+
+    const char * const
+    Controller::GetConnectionName() const
+    {
+        if (!m_isConnected)
+        {
+            throw Safir::Dob::NotOpenException(L"This connection to the DOB is not open. (While calling GetConnectionName)",__WFILE__,__LINE__);
+        }
+        return m_connection->NameWithCounter();
+    }
+
+    const char * const
+    Controller::GetConnectionNameCommonPart() const
+    {
+        if (!m_isConnected)
+        {
+            throw Safir::Dob::NotOpenException(L"This connection to the DOB is not open. (While calling GetConnectionNameCommonPart)",__WFILE__,__LINE__);
+        }
+        return m_connectionNameCommonPart.c_str();
+    }
+
+    const char * const
+    Controller::GetConnectionNameInstancePart() const
+    {
+        if (!m_isConnected)
+        {
+            throw Safir::Dob::NotOpenException(L"This connection to the DOB is not open. (While calling GetConnectionNameInstancePart)",__WFILE__,__LINE__);
+        }
+        return m_connectionNameInstancePart.c_str();
+    }
+
+
+    bool Controller::NameIsEqual (const std::string & connectionNameCommonPart,
+                                  const std::string & connectionNameInstancePart) const
+    {
+        if (!m_isConnected)
+        {
+            return false;
+        }
+
+        return m_connectionNameCommonPart   == connectionNameCommonPart &&
+            m_connectionNameInstancePart == connectionNameInstancePart;
+    }
+
+    void Controller::RegisterServiceHandler(const Dob::Typesystem::TypeId       typeId,
+                                            const Dob::Typesystem::HandlerId&   handlerId,
+                                            const bool                          overrideRegistration,
+                                            const ConsumerId&                   consumer)
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling RegisterServiceHandler for type "
+                 << Typesystem::Operations::GetName(typeId)
+                 << " with handlerId " << handlerId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Dob::Typesystem::Operations::IsOfType(typeId, Dob::Service::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Type used in RegisterServiceHandler is not a Service type. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (overrideRegistration)
+        {
+            ServiceTypes::Instance().Register(m_connection,
+                                              typeId,
+                                              handlerId,
+                                              overrideRegistration,
+                                              consumer);
+        }
+        else
+        {
+            m_connection->AddPendingRegistration(PendingRegistration(typeId, handlerId, consumer));
+            m_connection->SignalOut();
+        }
+    }
+
+    void Controller::RegisterEntityHandler(const Dob::Typesystem::TypeId            typeId,
+                                           const Dob::Typesystem::HandlerId&        handlerId,
+                                           const Dob::InstanceIdPolicy::Enumeration instanceIdPolicy,
+                                           const bool                               overrideRegistration,
+                                           const bool                               isInjectionHandler,
+                                           const ConsumerId&                        consumer)
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling RegisterEntityHandler for type "
+                 << Typesystem::Operations::GetName(typeId)
+                 << " with handlerId " << handlerId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Type used in RegisterEntityHandler is not an Entity type. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        //if the type has any kind of injection the handler must be able to handle injections.
+        if (!InjectionKindTable::Instance().IsNone(typeId) && !isInjectionHandler)
+        {
+            std::wostringstream ostr;
+            ostr << "Handler used in RegisterEntityHandler is not of a kind that can handle injections, "
+                << "but the type has InjectionKind = "
+                << InjectionKind::ToString(InjectionKindTable::Instance().GetInjectionKind(typeId));
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (overrideRegistration)
+        {
+            EntityTypes::Instance().Register(m_connection,
+                                             typeId,
+                                             handlerId,
+                                             instanceIdPolicy,
+                                             isInjectionHandler,
+                                             overrideRegistration,
+                                             consumer);
+        }
+        else
+        {
+            m_connection->AddPendingRegistration(PendingRegistration(typeId, handlerId, instanceIdPolicy, isInjectionHandler, consumer));
+            m_connection->SignalOut();
+        }
+    }
+
+    void Controller::UnregisterHandler(const Dob::Typesystem::TypeId typeId,
+                                       const Dob::Typesystem::HandlerId& handlerId)
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling UnregisterHandler for type "
+                 << Typesystem::Operations::GetName(typeId)
+                 << " with handlerId " << handlerId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (m_connection->RemovePendingRegistrations(typeId,handlerId))
+        {
+            m_connection->SignalOut();
+        }
+
+        if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
+        {
+            EntityTypes::Instance().Unregister(m_connection,
+                                               typeId,
+                                               handlerId);
+        }
+        else if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Service::ClassTypeId))
+        {
+            ServiceTypes::Instance().Unregister(m_connection,
+                                                typeId,
+                                                handlerId);
+        }
+        else
+        {
+            std::wostringstream ostr;
+            ostr << "Type used in UnregisterHandler is not an Entity type or Service type. typeId = "
+                 << Typesystem::Operations::GetName(typeId) << ")";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+    }
+
+    //----------------------------
+    // Subscription methods
+    //----------------------------
+    void Controller::SubscribeMessage(const Dob::Typesystem::TypeId typeId,
+                                      const Dob::Typesystem::ChannelId & channelId,
+                                      const bool includeSubclasses,
+                                      const ConsumerId & messageSubscriber)
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling SubscribeMessage for type "
+                 << Typesystem::Operations::GetName(typeId)
+                 << " with channelId " << channelId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Dob::Typesystem::Operations::IsOfType(typeId, Dob::Message::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Type used in SubscribeMessage is not a Message type. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        MessageTypes::Instance().Subscribe(m_connection,
+                                           typeId,
+                                           channelId,
+                                           includeSubclasses,
+                                           messageSubscriber);
+    }
+
+    void Controller::UnsubscribeMessage(const Dob::Typesystem::TypeId typeId,
+                                        const Dob::Typesystem::ChannelId & channelId,
+                                        const bool includeSubclasses,
+                                        const ConsumerId & messageSubscriber)
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling UnsubscribeMessage for type "
+                 << Typesystem::Operations::GetName(typeId)
+                 << " with channelId " << channelId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Dob::Typesystem::Operations::IsOfType(typeId, Dob::Message::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Type used in SubscribeMessage is not a Message type. typeId = " << Typesystem::Operations::GetName(typeId) << ")";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        MessageTypes::Instance().Unsubscribe(m_connection,
+                                             typeId,
+                                             channelId,
+                                             includeSubclasses,
+                                             messageSubscriber);
+    }
+
+    void Controller::SubscribeEntity(const Typesystem::EntityId& entityId,
+                                     const bool allInstances,
+                                     const bool includeSubclasses,
+                                     const bool restartSubscription,
+                                     const SubscriptionOptionsPtr& subscriptionOptions,
+                                     const ConsumerId& consumer)
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling SubscribeEntity for ";
+            if (allInstances)
+            {
+                ostr << "all instances of type " << Typesystem::Operations::GetName(entityId.GetTypeId())
+                    << ").";
+            }
+            else
+            {
+                ostr << entityId << ").";
+            }
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Dob::Typesystem::Operations::IsOfType(entityId.GetTypeId(), Dob::Entity::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Type used in SubscribeEntity is not an Entity type. type = "
+                << Typesystem::Operations::GetName(entityId.GetTypeId());
+            throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        // All subscriptions/unsubscriptions made by the user is marked as a NormalSubscription.
+        // This makes it possible for dose to set up an internal subscription for the same connection/consumer
+        // that doesn't interfere with the normal subscription.
+        SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), NormalSubscription, 0);
+
+        EntityTypes::Instance().Subscribe(subscriptionId,
+                                          entityId,
+                                          allInstances,
+                                          includeSubclasses,
+                                          restartSubscription,
+                                          subscriptionOptions);
+    }
+
+
+
+
+    void Controller::UnsubscribeEntity(const Typesystem::EntityId& entityId,
+                                       const bool allInstances,
+                                       const bool includeSubclasses,
+                                       const ConsumerId& consumer)
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling UnsubscribeEntity for ";
+            if (allInstances)
+            {
+                ostr << "all instances of type " << Typesystem::Operations::GetName(entityId.GetTypeId())
+                    << ").";
+            }
+            else
+            {
+                ostr << entityId << ").";
+            }
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        // See comment for the SubscribeEntity method above.
+        SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), NormalSubscription, 0);
+
+        EntityTypes::Instance().Unsubscribe(subscriptionId,
+                                            entityId,
+                                            allInstances,
+                                            includeSubclasses);
+    }
+
+    void Controller::SubscribeRegistration(const Safir::Dob::Typesystem::TypeId typeId,
+                                           const Dob::Typesystem::HandlerId& handlerId,
+                                           const bool includeSubclasses,
+                                           const bool restartSubscription,
+                                           const SubscriptionOptionsPtr& subscriptionOptions,
+                                           const ConsumerId& consumer)
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling SubscribeRegistration for type "
+                 << Typesystem::Operations::GetName(typeId)
+                 << " with handlerId " << handlerId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        // See comment for the SubscribeEntity method above.
+        SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), NormalSubscription, 0);
+
+        if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
+        {
+            EntityTypes::Instance().SubscribeRegistration(subscriptionId,
+                                                          typeId,
+                                                          handlerId,
+                                                          includeSubclasses,
+                                                          restartSubscription,
+                                                          subscriptionOptions);
+        }
+        else if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Service::ClassTypeId))
+        {
+            ServiceTypes::Instance().SubscribeRegistration(subscriptionId,
+                                                           typeId,
+                                                           handlerId,
+                                                           includeSubclasses,
+                                                           restartSubscription,
+                                                           subscriptionOptions);
+        }
+        else
+        {
+            std::wostringstream ostr;
+            ostr << "Type " << Typesystem::Operations::GetName(typeId)
+                 << " used in SubscribeRegistration is not an Entity or Service type.";
+            throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+    }
+
+    void Controller::UnsubscribeRegistration(const Safir::Dob::Typesystem::TypeId typeId,
+                                             const Dob::Typesystem::HandlerId& handlerId,
+                                             const bool includeSubclasses,
+                                             const ConsumerId& consumer)
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling UnsubscribeRegistration for type "
+                 << Typesystem::Operations::GetName(typeId)
+                 << " with handlerId " << handlerId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        // See comment for the SubscribeEntity method above.
+        SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), NormalSubscription, 0);
+
+        if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
+        {
+            EntityTypes::Instance().UnsubscribeRegistration(subscriptionId,
+                                                            typeId,
+                                                            handlerId,
+                                                            includeSubclasses);
+        }
+        else if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Service::ClassTypeId))
+        {
+            ServiceTypes::Instance().UnsubscribeRegistration(subscriptionId,
+                                                             typeId,
+                                                             handlerId,
+                                                             includeSubclasses);
+        }
+        else
+        {
+            std::wostringstream ostr;
+            ostr << "Type " << Typesystem::Operations::GetName(typeId)
+                 << " used in UnsubscribeRegistration is not an Entity or Service type.";
+            throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+    }
+
+    //------------------------------------
+    // Entity methods
+    //------------------------------------
+    void Controller::SetEntity(const char* const                blob,
+                               const Typesystem::InstanceId&    instanceId,
+                               const Typesystem::HandlerId&     handlerId,
+                               const bool                       considerChangeFlags,
+                               const bool                       initialInjection)
+    {
+        Dob::Typesystem::TypeId typeId = Dob::Typesystem::BlobOperations::GetTypeId(blob);
+
+        Dob::Typesystem::EntityId entityId(typeId, instanceId);
+
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling SetEntity with type = "
+                 << Typesystem::Operations::GetName(typeId) << " and instance = " << instanceId
+                 << " and handler = " << handlerId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Object passed to SetEntity is not an entity! (Type = "
+                << Typesystem::Operations::GetName(typeId) << " and instance = " << instanceId
+                << " and handler = " << handlerId << ")";
+            throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        bool onInjNewCb = m_dispatcher.InCallback(CallbackId::OnInjectedNewEntity);
+        bool onInjUpdCb = m_dispatcher.InCallback(CallbackId::OnInjectedUpdatedEntity);
+        bool onInjDelCb = m_dispatcher.InCallback(CallbackId::OnInjectedDeletedEntity);
+
+        if (onInjNewCb || onInjUpdCb || onInjDelCb)
+        {
+            if (typeId == m_dispatchedInjection.GetTypeId() &&
+                instanceId == m_dispatchedInjection.GetInstanceId())
+            {
+                if (onInjNewCb || onInjUpdCb)
+                {
+                    if (!Dob::Typesystem::BlobOperations::IsChanged(blob))
+                    {
+                        // The app is calling Set in an OnInjectedNew or OnInjectedUpdate callback.
+                        // In this case we check that the app really has changed some member and isn't
+                        // just setting the same entity as received in the callback.
+                        std::wostringstream ostr;
+                        ostr << "Calling SetAll or SetChanges in an";
+                        if (onInjNewCb)
+                        {
+                            ostr << " OnInjectedNewEntity";
+                        }
+                        else
+                        {
+                            ostr << " OnInjectedUpdatedEntity";
+                        }
+                        ostr << " callback with hasn't been changed!"
+                             << " The app has probably not been modified to the new way of accepting"
+                             << " an injected entity (the new way is to do nothing). (Type = "
+                             << Typesystem::Operations::GetName(typeId) << " and instance = " << instanceId
+                             << " and handler = " << handlerId << ")";
+                        throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+                    }
+                }
+                // The app is calling set in an OnInject callback.
+                m_setInjectedEntity = true;
+
+                EntityTypes::Instance().SetInjection(m_connection,
+                                                     handlerId,
+                                                     entityId,
+                                                     considerChangeFlags,
+                                                     blob,
+                                                     m_originalInjectionState);
+                return;
+            }
+        }
+
+        EntityTypes::Instance().SetEntity(m_connection,
+                                          handlerId,
+                                          entityId,
+                                          blob,
+                                          considerChangeFlags,
+                                          initialInjection);
+    }
+
+    void Controller::DeleteEntity(const Dob::Typesystem::EntityId& entityId,
+                                  const bool                       allInstances,
+                                  const Typesystem::HandlerId&     handlerId)
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling DeleteEntity with entityId = "
+                 << entityId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Dob::Typesystem::Operations::IsOfType(entityId.GetTypeId(), Dob::Entity::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Entity id passed to DeleteEntity is not an entity! (entityId = "
+                 << entityId << ")";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!allInstances &&
+            (m_dispatcher.InCallback(CallbackId::OnInjectedNewEntity) ||
+            m_dispatcher.InCallback(CallbackId::OnInjectedUpdatedEntity) ||
+            m_dispatcher.InCallback(CallbackId::OnInjectedDeletedEntity)))
+        {
+            if (entityId.GetTypeId() == m_dispatchedInjection.GetTypeId() &&
+                entityId.GetInstanceId() == m_dispatchedInjection.GetInstanceId())
+            {
+                // The app is deleting the injected entity in an OnInject callback.
+                m_deleteInjectedEntity = true;
+
+                EntityTypes::Instance().DeleteInjection(m_connection, handlerId, entityId, m_originalInjectionState);
+                return;
+            }
+        }
+
+        EntityTypes::Instance().DeleteEntity(m_connection,
+                                             handlerId,
+                                             entityId,
+                                             allInstances);
+    }
+
+    void Controller::InjectEntity(const char* const                blob,
+                                  const Typesystem::InstanceId&    instanceId,
+                                  const Typesystem::HandlerId&     handlerId,
+                                  const Dob::Typesystem::Int64     timestamp)
+    {
+
+        Dob::Typesystem::TypeId typeId = Dob::Typesystem::BlobOperations::GetTypeId(blob);
+
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling InjectEntity with type = "
+                 << Typesystem::Operations::GetName(typeId) << " and instance = " << instanceId
+                 << " and handler = " << handlerId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Object passed to InjectEntity is not an entity! (Type = "
+                << Typesystem::Operations::GetName(typeId) << " and instance = " << instanceId
+                << " and handler = " << handlerId << ")";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+    EntityTypes::Instance().InjectEntity(m_connection,
+                                         handlerId,
+                                         Dob::Typesystem::EntityId(typeId, instanceId),
+                                         blob,
+                                         timestamp);
+    }
+
+    void Controller::InjectDeletedEntity(const Dob::Typesystem::EntityId& entityId,
+                                         const Typesystem::HandlerId&     handlerId,
+                                         const Dob::Typesystem::Int64     timestamp)
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling InjectDeletedEntity with entityId = "
+                 << entityId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Dob::Typesystem::Operations::IsOfType(entityId.GetTypeId(), Dob::Entity::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Entity id passed to DeleteEntity is not an entity! (entityId = "
+                 << entityId << ")";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        EntityTypes::Instance().InjectDeletedEntity(m_connection,
+                                                    handlerId,
+                                                    entityId,
+                                                    timestamp);
+    }
+
+    void
+    Controller::ReadEntity(const Typesystem::EntityId& entityId,
+                           const char*& currentBlob,
+                           const char*& currentState)
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling ReadEntity for " << entityId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        const DistributionData state = EntityTypes::Instance().ReadEntity(entityId);
+        currentBlob = state.GetBlob();
+        currentState = state.GetReference();
+        //Note that we count up the refcount by one here, which the proxy *has* to drop
+        //on destruction!
+    }
+
+    bool Controller::IsCreated(const Dob::Typesystem::EntityId& entityId)
+    {
+        return EntityTypes::Instance().IsCreated(entityId);
+    }
+
+    Typesystem::Int32
+    Controller::GetQueueCapacity(const ConnectionQueueId::Enumeration queue)
+    {
+        switch (queue)
+        {
+        case ConnectionQueueId::MessageInQueue:
+            return Dob::QueueParameters::DefaultMessageInQueueLength();
+
+        case ConnectionQueueId::MessageOutQueue:
+            return Dob::QueueParameters::DefaultMessageOutQueueLength();
+
+        case ConnectionQueueId::RequestInQueue:
+            return Dob::QueueParameters::DefaultRequestInQueueLength();
+
+        case ConnectionQueueId::RequestOutQueue:
+            return Dob::QueueParameters::DefaultRequestOutQueueLength();
+
+        default:
+            std::wostringstream ostr;
+            ostr << "Getting queue capacity for queue " << queue << "is not implemented (or that is not a queue!";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+
+        }
+    }
+
+    Typesystem::Int32
+    Controller::GetQueueSize(const ConnectionQueueId::Enumeration queue)
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling GetQueueSize for "
+                << ConnectionQueueId::ToString(queue) << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+        switch (queue)
+        {
+        case ConnectionQueueId::MessageOutQueue:
+            return static_cast<Typesystem::Int32>(m_connection->GetMessageOutQueue().size());
+
+        case ConnectionQueueId::RequestOutQueue:
+            return static_cast<Typesystem::Int32>(m_connection->GetRequestOutQueue().size());
+
+        default:
+            std::wostringstream ostr;
+            ostr << "Getting queue size for queue " << queue << "is not implemented (or that is not a queue!";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+    }
+
+    //----------------------------------------
+    //Send message
+    //----------------------------------------
+    void Controller::SendMessage(const char * const blob,
+                                 const Typesystem::ChannelId & channel,
+                                 const ConsumerId & consumer)
+    {
+        const Dob::Typesystem::TypeId typeId = Dob::Typesystem::BlobOperations::GetTypeId(blob);
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling Send(Message) with "
+                 << Typesystem::Operations::GetName(typeId) << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Dob::Typesystem::Operations::IsOfType(typeId, Dob::Message::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Object passed to Send(Message) is not a Message. TypeId = "
+                 << Typesystem::Operations::GetName(typeId);
+             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (channel == Dob::Typesystem::ChannelId::ALL_CHANNELS)
+        {
+            std::wostringstream ostr;
+            ostr << "Not allowed to send a message on ALL_CHANNELS. TypeId = "
+                 << Typesystem::Operations::GetName(typeId);
+             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        const bool success = m_connection->GetMessageOutQueue().push
+            (DistributionData(message_tag, m_connection->Id(), channel, blob));
+
+        if (success)
+        {
+            m_connection->SignalOut();
+        }
+        else
+        {
+            m_messageQueueInOverflowState = true;
+            m_dispatcher.AddOverflowedMessageConsumer(consumer);
+            throw Safir::Dob::OverflowException(L"Overflow when sending message.",__WFILE__,__LINE__);
+        }
+    }
+
+    //-------------------------------------------
+    // Request methods
+    //-------------------------------------------
+    void Controller::ServiceRequest(const char * const blob,
+                                    const Typesystem::HandlerId& handlerId,
+                                    const ConsumerId& consumer,
+                                    RequestId & requestId)
+    {
+        const Typesystem::TypeId typeId=Dob::Typesystem::BlobOperations::GetTypeId(blob);
+
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling Send(ServiceRequest) with type = "
+                << Typesystem::Operations::GetName(typeId) << " and handler = " << handlerId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Dob::Typesystem::Operations::IsOfType(typeId, Dob::Service::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Object passed to Send(ServiceRequest) is not a Service! (Type = "
+                << Typesystem::Operations::GetName(typeId) << " and handler = " << handlerId << ")";
+            throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        const InternalRequestId reqIdCounter = m_requestIds.GetNextRequestId();
+        requestId = reqIdCounter.GetCounter();
+
+        DistributionData request(service_request_tag,
+                                 m_connection->Id(),
+                                 handlerId,
+                                 reqIdCounter,
+                                 blob);
+
+        SendRequest(request, consumer);
+    }
+
+    void Controller::CreateRequest(const char * const blob,
+                                   bool hasInstanceId,
+                                   Typesystem::InstanceId instanceId,
+                                   const Typesystem::HandlerId& handlerId,
+                                   const ConsumerId& consumer,
+                                   RequestId& requestId)
+    {
+
+        const Typesystem::TypeId typeId = Dob::Typesystem::BlobOperations::GetTypeId(blob);
+
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling CreateRequest with type = "
+                 << Typesystem::Operations::GetName(typeId) << " and handler = " << handlerId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Object passed to CreateRequest is not an entity! (Type = "
+                << Typesystem::Operations::GetName(typeId) << " and handler = " << handlerId << ")";
+            throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        ConnectionConsumerPair regOwner;
+        InstanceIdPolicy::Enumeration policy;
+        EntityTypes::Instance().GetRegisterer(typeId,handlerId,regOwner,policy);
+        //Only check the policy if the handler is registered. Otherwise we let dose_main
+        //send an unregistered-response.
+        if (regOwner.connection != NULL)
+        {
+            switch(policy)
+            {
+            case InstanceIdPolicy::HandlerDecidesInstanceId:
+                {
+                    if (hasInstanceId)
+                    {
+                        std::wostringstream ostr;
+                        ostr << "This handler is registered as HandlerDecidesInstanceId, so you "
+                            << "cannot specify an instance in your CreateRequest. (Type = "
+                            << Typesystem::Operations::GetName(typeId) << " and handler = " << handlerId << ")";
+                        throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+                    }
+                }
+                break;
+
+            case InstanceIdPolicy::RequestorDecidesInstanceId:
+                {
+                    if (!hasInstanceId)
+                    {
+                        instanceId = Typesystem::InstanceId::GenerateRandom();
+                        hasInstanceId = true;
+                    }
+                }
+                break;
+            }
+        }
+
+        const InternalRequestId reqIdCounter = m_requestIds.GetNextRequestId();
+        requestId = reqIdCounter.GetCounter();
+
+        DistributionData request(entity_create_request_tag,
+                                 m_connection->Id(),
+                                 handlerId,
+                                 reqIdCounter,
+                                 hasInstanceId,
+                                 instanceId,
+                                 blob);
+
+        SendRequest(request, consumer);
+    }
+
+    void Controller::UpdateRequest(const char * const blob,
+                                   const Typesystem::InstanceId& instanceId,
+                                   const ConsumerId& consumer,
+                                   RequestId& requestId)
+    {
+        const Typesystem::TypeId typeId=Dob::Typesystem::BlobOperations::GetTypeId(blob);
+
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling UpdateRequest with type = "
+                 << Typesystem::Operations::GetName(typeId) << " and instance = " << instanceId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Object passed to UpdateRequest is not an entity! (Type = "
+                << Typesystem::Operations::GetName(typeId) << " and instance = " << instanceId << ")";
+            throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+
+        const InternalRequestId reqIdCounter = m_requestIds.GetNextRequestId();
+        requestId = reqIdCounter.GetCounter();
+
+        DistributionData request(entity_update_request_tag,
+                                 m_connection->Id(),
+                                 reqIdCounter,
+                                 instanceId,
+                                 blob);
+
+        SendRequest(request, consumer);
+    }
+
+    void Controller::DeleteRequest(const Typesystem::EntityId& entityId,
+                                   const ConsumerId& consumer,
+                                   RequestId & requestId)
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling DeleteRequest with entityId = "
+                << entityId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Dob::Typesystem::Operations::IsOfType(entityId.GetTypeId(), Dob::Entity::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Object passed to DeleteRequest is not an entity! entityId = "
+                << entityId;
+            throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        const InternalRequestId reqIdCounter = m_requestIds.GetNextRequestId();
+        requestId = reqIdCounter.GetCounter();
+
+        DistributionData request(entity_delete_request_tag,
+                                 m_connection->Id(),
+                                 reqIdCounter,
+                                 entityId);
+
+        SendRequest(request, consumer);
+    }
+
+    void CheckResponseType(const DistributionData& request, const DistributionData& response)
+    {
+        if (Typesystem::Operations::IsOfType(response.GetTypeId(),Safir::Dob::EntityIdResponse::ClassTypeId))
+        {
+            ConnectionConsumerPair regOwner;
+            InstanceIdPolicy::Enumeration policy;
+            EntityTypes::Instance().GetRegisterer(request.GetTypeId(),request.GetHandlerId(),regOwner,policy);
+
+            if (policy == InstanceIdPolicy::RequestorDecidesInstanceId)
+            {
+                std::wostringstream ostr;
+                ostr << "This handler is registered as RequestorDecidesInstanceId, so you "
+                     << "cannot send a response that derives from EntityIdResponse. (ResponseType = "
+                     << Typesystem::Operations::GetName(response.GetTypeId()) << " and handler = " << request.GetHandlerId() << ")";
+                throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+            }
+        }
+    }
+
+    //-----------------------------------------
+    // Response method
+    //-----------------------------------------
+    void Controller::SendResponse(const char * const blob,
+                                  const ConsumerId & consumer,
+                                  const ResponseId responseId)
+    {
+        const Dob::Typesystem::TypeId typeId = Dob::Typesystem::BlobOperations::GetTypeId(blob);
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling SendResponse with "
+                << Safir::Dob::Typesystem::Operations::GetName(typeId) << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        if (!Dob::Typesystem::Operations::IsOfType(typeId, Dob::Response::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "Object passed to Send(Response) is not a response! TypeId = "
+                << Safir::Dob::Typesystem::Operations::GetName(typeId);
+            throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        m_connection->ForSpecificRequestInQueue(consumer,
+            boost::bind(&RequestInQueue::AttachResponse,_2,responseId,m_connection->Id(),blob, CheckResponseType));
+
+        m_connection->SignalOut();
+    }
+
+    //--------------------------------------------
+    // Compose name of the form <node name>:<common part>:<instance part>
+    //--------------------------------------------
+    const std::string Controller::ComposeName(const std::string& commonPart,
+                                              const std::string& instancePart)
+    {
+        std::string name(Dob::Typesystem::Utilities::ToUtf8(NodeParameters::Nodes(Dob::ThisNodeParameters::NodeNumber())->NodeName().GetVal()));
+        name.append(";");
+        name.append(commonPart);
+        name.append(";");
+        name.append(instancePart);
+        return name;
+    }
+
+    //---------------------------------------
+    // Dispatch the queues
+    //---------------------------------------
+    void Controller::Dispatch()
+    {
+        if (!m_isConnected)
+            return;
+
+        //get rid of any old dispatch threads.
+        if (!m_dispatchThreadAttic.empty())
+        {
+            DispatchThreadPtrStopCountMap::iterator it = m_dispatchThreadAttic.begin();
+
+            while (it != m_dispatchThreadAttic.end()) // it is increased in loop
+            {
+                lllout << "Found an old DispatchThread (addr = " << (void *)it->first.get()
+                       << ") in the attic, will try to stop and delete it (have tried "
+                       << it->second << " time(s) before)" <<std::endl;
+
+                if (it->first->Stop(false))
+                {
+                    lllout << "Stop of DispatchThread was successful! Deleting it." << std::endl;
+
+                    DispatchThreadPtrStopCountMap::iterator eraseIt = it;
+                    ++it;
+
+                    m_dispatchThreadAttic.erase(eraseIt);
+                }
+                else
+                {
+                    lllout << "Stop failed!" << std::endl;
+                    ++(it->second); //increase the stopcount
+                    if (it->second > 10)
+                    {
+                        lllout << "We have tried to stop this DispatchThread " << it->second
+                               << " times, but it hasn't worked. Someone must have screwed up, most likely the user" << std::endl;
+                        throw Typesystem::SoftwareViolationException(L"This connection has an old dispatch thread which it has tried to get rid of 10 times now, but the thread is still blocked!"
+                                                                     L" You must not block the dispatch thread after you have closed your connection, or the Dob is unable to clean up its resources!",
+                                                                     __WFILE__,__LINE__);
+                    }
+                    ++it;
+                }
+            }
+        }
+
+        m_exitDispatch=false;
+
+        // First dispatch response in queue
+        DispatchResponseInQueue();
+
+        // The dispatching of the response in queue might have released space in the request out queue, tell
+        // a user with waiting requests that it is worth trying to send them.
+        if (m_requestQueueInOverflowState)
+        {
+            if(!m_connection->GetRequestOutQueue().full())
+            {
+                m_requestQueueInOverflowState = false;
+                m_dispatcher.DispatchNotRequestOverflows();
+                m_postponedTypes.Clear();
+                //no need to signal, since we're already in dispatch, and
+                //requests will be dispatched below
+            }
+        }
+
+        // The message out queue isn't "related" to a corresponding in queue (as the request out queue) but
+        // this could be a good place to notify the user anyway.
+        if (m_messageQueueInOverflowState)
+        {
+            if(!m_connection->GetMessageOutQueue().full())
+            {
+                m_messageQueueInOverflowState = false;
+                m_dispatcher.DispatchNotMessageOverflows();
+                m_postponedTypes.Clear();
+                //no need to signal, since we're already in dispatch, and
+                //messages will be dispatched below
+            }
+        }
+
+        DispatchRequestInQueues();
+        DispatchMessageInQueues();
+
+        // Check subscriptions
+        if (!m_exitDispatch)
+        {
+            DispatchSubscriptions();
+        }
+
+        // Dispatch OnInitialInjectionsDone for injection handlers where the registration didn't
+        // created any injection subscriptions (because there where no instances)
+        if (!m_exitDispatch)
+        {
+            DispatchEmptyInitialInjections();
+        }
+
+        //Check pending ownerships
+        if (!m_exitDispatch)
+        {
+            //Note that exitDispatch is not checked inside this call, so all prs will be dispatched.
+            HandlePendingRegistrations();
+        }
+
+        // Check revoked registrations
+        if (!m_exitDispatch)
+        {
+            HandleRevokedRegistrations();
+        }
+
+        //Stop order
+        if (m_connection->StopOrderPending() && !m_exitDispatch)
+        {
+            m_dispatcher.DispatchStopOrder();
+            m_connection->SetStopOrderHandled();
+        }
+    }
+
+    void Controller::ExitDispatch()
+    {
+        m_exitDispatch=true;
+        m_connection->SignalIn();
+    }
+
+    void Controller::Postpone(const bool redispatchCurrent)
+    {
+        m_postpone = true;
+        m_postponeCurrent = redispatchCurrent;
+    }
+
+    void Controller::ResumePostponed()
+    {
+        m_postponedTypes.Clear();
+        m_connection->SignalIn();
+    }
+
+    void Controller::IncompleteInjectionState()
+    {
+        m_incompleteInjection = true;
+    }
+
+
+    void Controller::DispatchRequest(const ConsumerId& consumer,
+                                     const DistributionData& request,
+                                     bool& exitDispatch,
+                                     bool& dontRemove)
+    {
+        dontRemove = false;
+        m_postponeCurrent = false;
+        m_postpone = false;
+
+        switch (request.GetType())
+        {
+        case DistributionData::Request_Service:
+            {
+                if (m_postponedTypes.IsPostponed(consumer, request.GetTypeId(), CallbackId::OnServiceRequest))
+                {
+                    dontRemove = true;
+                }
+                else
+                {
+                    m_dispatcher.InvokeOnServiceRequestCb(consumer,
+                                                          request,
+                                                          m_ctrlId);
+
+                    if (m_postpone)
+                    {
+                        m_postponedTypes.Postpone(consumer,request.GetTypeId(), CallbackId::OnServiceRequest);
+                    }
+                }
+            }
+            break;
+        case DistributionData::Request_EntityCreate:
+            {
+                if (m_postponedTypes.IsPostponed(consumer, request.GetTypeId(), CallbackId::OnCreateRequest))
+                {
+                    dontRemove = true;
+                }
+                else
+                {
+                    m_dispatcher.InvokeOnCreateRequestCb(consumer,
+                                                         request,
+                                                         m_ctrlId);
+
+                    if (m_postpone)
+                    {
+                        m_postponedTypes.Postpone(consumer,request.GetTypeId(), CallbackId::OnCreateRequest);
+                    }
+                }
+            }
+            break;
+        case DistributionData::Request_EntityUpdate:
+            {
+                const bool isOwner = EntityTypes::Instance().IsOwner(request.GetEntityId(),
+                                                                     request.GetHandlerId(),
+                                                                     ConnectionConsumerPair(m_connection,consumer));
+
+                if (isOwner)
+                {
+                    if (m_postponedTypes.IsPostponed(consumer, request.GetTypeId(), CallbackId::OnUpdateRequest))
+                    {
+                        dontRemove = true;
+                    }
+                    else
+                    {
+                        m_dispatcher.InvokeOnUpdateRequestCb(consumer,
+                                                             request,
+                                                             m_ctrlId);
+
+                        if (m_postpone)
+                        {
+                            m_postponedTypes.Postpone(consumer,request.GetTypeId(), CallbackId::OnUpdateRequest);
+                        }
+                    }
+                }
+                else
+                {
+                    // No such instance, or the instance is owned by other handler/connection/consumer.
+                    std::wostringstream ostr;
+                    ostr << "The instance " << request.GetEntityId() << " does not exist, or isn't owned by handler "
+                         << request.GetHandlerId() << " and/or connection " << m_connection->NameWithoutCounter();
+
+                    Dob::ErrorResponsePtr errorResponse = Dob::ErrorResponse::CreateErrorResponse
+                        (Dob::ResponseGeneralErrorCodes::SafirNotRegistered(),
+                        ostr.str());
+
+                    //TODO: write directly to shared memory
+                    Typesystem::BinarySerialization bin;
+                    Typesystem::Serialization::ToBinary(errorResponse,bin);
+
+                    SendResponse(&bin[0],
+                                 consumer,
+                                 request.GetResponseId());
+                }
+            }
+            break;
+        case DistributionData::Request_EntityDelete:
+            {
+                const bool isOwner = EntityTypes::Instance().IsOwner(request.GetEntityId(),
+                                                                     request.GetHandlerId(),
+                                                                     ConnectionConsumerPair(m_connection,consumer));
+
+                if (isOwner)
+                {
+                    if (m_postponedTypes.IsPostponed(consumer, request.GetTypeId(), CallbackId::OnDeleteRequest))
+                    {
+                        dontRemove = true;
+                    }
+                    else
+                    {
+                        m_dispatcher.InvokeOnDeleteRequestCb(consumer,
+                                                             request,
+                                                             m_ctrlId);
+
+                        if (m_postpone)
+                        {
+                            m_postponedTypes.Postpone(consumer,request.GetTypeId(), CallbackId::OnDeleteRequest);
+                        }
+                    }
+                }
+                else
+                {
+                    // No such instance, or the instance is owned by other handler/connection/consumer.
+                    std::wostringstream ostr;
+                    ostr << "The instance " << request.GetEntityId() << " does not exist, or isn't owned by handler "
+                         << request.GetHandlerId() << " and/or connection " << m_connection->NameWithoutCounter();
+
+                    Dob::ErrorResponsePtr errorResponse = Dob::ErrorResponse::CreateErrorResponse
+                        (Dob::ResponseGeneralErrorCodes::SafirNotRegistered(),
+                        ostr.str());
+
+                    //TODO: write directly to shared memory
+                    Typesystem::BinarySerialization bin;
+                    Typesystem::Serialization::ToBinary(errorResponse,bin);
+
+                    SendResponse(&bin[0],
+                                 consumer,
+                                 request.GetResponseId());
+                }
+            }
+            break;
+        default:
+            ENSURE(false, << "Unexpected DistributionData type in DispatchRequestInQueue: " << request.GetType());
+        }
+
+        if (m_postponeCurrent)
+        {
+            dontRemove = true;
+        }
+        exitDispatch = m_exitDispatch;
+    }
+
+    void Controller::DispatchRequestInQueue(const ConsumerId& consumer, RequestInQueue & queue)
+    {
+        queue.DispatchRequests(boost::bind(&Controller::DispatchRequest,this,boost::cref(consumer),_1,_2,_3),
+                               boost::bind(&Connection::SignalOut,m_connection));
+    }
+
+
+    void Controller::DispatchRequestInQueues()
+    {
+        lllout << "Dispatching all RequestInQueues" << std::endl;
+        m_connection->ForEachRequestInQueue(boost::bind(&Controller::DispatchRequestInQueue,this,_1,_2));
+    }
+
+    void Controller::DispatchResponse(const DistributionData & response,
+                                      const DistributionData & request,
+                                      bool & exitDispatch)
+    {
+        m_dispatcher.InvokeOnResponseCb(response,request);
+        exitDispatch = m_exitDispatch;
+    }
+
+    void Controller::DispatchResponseInQueue()
+    {
+        lllout << "Dispatching ResponseInQueue" << std::endl;
+        m_connection->GetRequestOutQueue().DispatchResponses(boost::bind(&Controller::DispatchResponse,this,_1,_2,_3));
+    }
+
+    void Controller::DispatchMessage(const ConsumerId& consumer, const DistributionData& msg, bool& exitDispatch, bool& dontRemove)
+    {
+        dontRemove = false;
+        if (m_postponedTypes.IsPostponed(consumer, msg.GetTypeId(), CallbackId::OnMessage))
+        {
+            dontRemove = true;
+        }
+        else
+        {
+            m_postponeCurrent = false;
+            m_postpone = false;
+            m_dispatcher.InvokeOnMessageCb(consumer, msg);
+
+            if (m_postpone)
+            {
+                m_postponedTypes.Postpone(consumer,msg.GetTypeId(), CallbackId::OnMessage);
+            }
+            if (m_postponeCurrent)
+            {
+                dontRemove = true;
+            }
+        }
+        exitDispatch = m_exitDispatch;
+    }
+
+    void Controller::DispatchMessageInQueue(const ConsumerId& consumer, MessageQueue& queue)
+    {
+        queue.Dispatch(boost::bind(&Controller::DispatchMessage,this,boost::cref(consumer),_1,_2,_3),NULL);
+    }
+
+    void Controller::DispatchMessageInQueues()
+    {
+        m_connection->ForEachMessageInQueue(boost::bind(&Controller::DispatchMessageInQueue,this,_1,_2));
+    }
+
+    bool ProcessHasBeenDeleted(bool & unreg, bool & reg)
+    {
+        unreg = true;
+        reg = true;
+        return true;
+    }
+
+    void CalculateRegistrationSubscriptionChanges(const SubscriptionPtr&  subscription,
+                                                  const DistributionData& lastState,
+                                                  const DistributionData& currState,
+                                                  bool&                   unreg,
+                                                  bool&                   reg)
+    {
+        unreg = false;
+        reg = false;
+
+        bool lastIsReg = !lastState.IsNoState() && lastState.IsRegistered();
+        bool currIsReg = !currState.IsNoState() && currState.IsRegistered();
+
+        if (!lastIsReg && currIsReg)
+        {
+            reg =true;
+        }
+        else if (lastIsReg && !currIsReg)
+        {
+            unreg = true;
+        }
+        else if (lastIsReg && currIsReg)
+        {
+            // Both last and current state is 'registered', but can it be that there has
+            // been a unregister->register?
+            subscription->HasBeenDeletedFlag().Process(boost::bind(ProcessHasBeenDeleted,boost::ref(unreg), boost::ref(reg)));
+        }
+    }
+
+    bool Controller::ProcessRegistrationSubscription(const SubscriptionPtr& subscription, bool& exitDispatch)
+    {
+        const DistributionData currDistState = subscription->GetCurrentRealState();
+        const DistributionData lastDistState = subscription->GetLastRealState();
+
+        bool unreg = false;
+        bool reg = false;
+
+        // Get state changes by comparing the state that was last dispatched with current state
+        CalculateRegistrationSubscriptionChanges(subscription, lastDistState, currDistState, unreg, reg);
+
+        const ConsumerId consumer = subscription->GetSubscriptionId().connectionConsumer.consumer;
+
+        if (unreg)
+        {
+            m_dispatcher.InvokeOnUnregisteredCb(consumer, currDistState.GetTypeId(), currDistState.GetHandlerId());
+        }
+
+        if (reg)
+        {
+            m_dispatcher.InvokeOnRegisteredCb(consumer, currDistState.GetTypeId(), currDistState.GetHandlerId());
+        }
+
+        subscription->SetLastRealState(currDistState);
+
+        lllout << "Controller::ProcessRegistrationSubscription unreg:" << unreg << "reg:" << reg << std::endl;
+
+        exitDispatch = m_exitDispatch;
+        return true;
+    }
+
+    void Controller::DispatchRegistrationSubscription(const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
+    {
+        exitDispatch = false;
+        dontRemove = false;  // not possible to postpone registration subscription callbacks
+
+        if (!subscription->IsSubscribed())
+        {
+            // An unsubscribe has been invoked, drop this subscription.
+            return;
+        }
+
+        subscription->DirtyFlag().Process(boost::bind(&Controller::ProcessRegistrationSubscription,
+                                                      this,
+                                                      boost::cref(subscription),
+                                                      boost::ref(exitDispatch)));
+    }
+
+    namespace //anonymous namespace to avoid possible name collisions
+    {
+        enum StateKind {None, Real, Ghost};
+        static const wchar_t * const StateKindNames [] = {L"None", L"Real", L"Ghost"};
+
+        StateKind GetStateKind(const DistributionData& state)
+        {
+            if (state.IsNoState())
+            {
+                return None;
+            }
+
+            if (state.GetEntityStateKind() == DistributionData::Ghost)
+            {
+                //It is not possible for a ghost to not have a blob!
+                ENSURE (state.HasBlob(), << "A Ghost state must always have a blob! entity = " << state.GetEntityId());
+                return Ghost;
+            }
+
+            if (!state.HasBlob())
+            {
+                return None;
+            }
+
+            return Real;
+        }
+    }
+
+    void CalculateEntitySubscriptionChanges(const SubscriptionPtr&  subscription,
+                                            const DistributionData& lastState,
+                                            const DistributionData& currState,
+                                            bool& created,
+                                            bool& updated,
+                                            bool& deleted,
+                                            bool& deleteIsExplicit)
+    {
+        created = false;
+        updated = false;
+        deleted = false;
+        deleteIsExplicit = false;
+
+        const StateKind lastKind = GetStateKind(lastState);
+        const StateKind currKind = GetStateKind(currState);
+
+        if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LoggingEnabled())
+        {
+            Safir::Dob::Typesystem::EntityId eid;
+            if (!lastState.IsNoState())
+            {
+                eid = lastState.GetEntityId();
+            }
+            else if (!currState.IsNoState())
+            {
+                eid = currState.GetEntityId();
+            }
+            lllout << "Got state change " << StateKindNames[lastKind]
+                   << " --> " << StateKindNames[currKind]
+                   << " for entity " << eid << std::endl;
+        }
+
+        const EntitySubscriptionOptions & subscriptionOptions =
+            *boost::interprocess::static_pointer_cast<const EntitySubscriptionOptions>(subscription->GetSubscriptionOptions());
+
+        ENSURE(!subscriptionOptions.wantsAllStateChanges,
+            << "CalculateEntitySubscriptionChanges is not intended to dispatch subscriptions "
+            << "that has WantsAllStateChanges flag");
+
+        //Filter out persistence handlers own sets (and the accepts from app).
+        if (currKind != None && currState.SourceIsPermanentStore() && subscriptionOptions.doesntWantSourceIsPermanentStore)
+        {
+            return;
+        }
+
+        //Real --> Real
+        if (lastKind == Real && currKind == Real && subscriptionOptions.includeUpdates)
+        {
+            if (lastState.GetCreationTime() < currState.GetCreationTime())
+            {
+                updated = true;
+            }
+            else if (currState.GetCreationTime() < lastState.GetCreationTime())
+            {
+                ENSURE(false, << "Got unexpected CreationTimes (in Real --> Real) for entity "
+                    << lastState.GetEntityId() << ". last = "
+                    << lastState.GetCreationTime() << ", curr = "
+                    << currState.GetCreationTime());
+            }
+            else
+            { //equal creation time
+                if (lastState.GetVersion() < currState.GetVersion())
+                {
+                    updated = true;
+                }
+            }
+
+            return;
+        }
+
+        //None --> Real
+        if (lastKind == None && currKind == Real)
+        {
+            created = true;
+            return;
+        }
+
+        //Real --> None
+        if (lastKind == Real && currKind == None)
+        {
+            deleted = true;
+            deleteIsExplicit = currState.IsExplicitlyDeleted();
+            return;
+        }
+
+        //Ghost --> Real
+        if (lastKind == Ghost && currKind == Real)
+        {
+            created = true;
+            return;
+        }
+
+        //None --> Ghost
+        if (lastKind == None && currKind == Ghost)
+        {
+            if (subscriptionOptions.wantsLastState)
+            {
+                created = true;
+                deleted = true;
+                deleteIsExplicit = false;
+            }
+            return;
+        }
+
+        //Real --> Ghost
+        if (lastKind == Real && currKind == Ghost)
+        {
+            if (subscriptionOptions.wantsLastState && subscriptionOptions.includeUpdates)
+            {
+                if (lastState.GetCreationTime() < currState.GetCreationTime())
+                {
+                    updated = true;
+                }
+                else if (currState.GetCreationTime() < lastState.GetCreationTime())
+                {
+                    ENSURE(false, << "Got unexpected CreationTimes (in Real --> Ghost) for entity "
+                        << lastState.GetEntityId() << ". last = "
+                        << lastState.GetCreationTime() << ", curr = "
+                        << currState.GetCreationTime());
+                }
+                else
+                { //equal creation time
+                    if (lastState.GetVersion().IsDiffGreaterThanOne(currState.GetVersion()))
+                    {
+                        updated = true;
+                    }
+                }
+            }
+
+            deleted = true;
+            deleteIsExplicit = false;
+            return;
+        }
+
+        //Ghost --> Ghost
+        if (lastKind == Ghost && currKind == Ghost)
+        {
+            if (subscriptionOptions.wantsLastState)
+            {
+                if (lastState.GetCreationTime() < currState.GetCreationTime())
+                {
+                    created = true;
+                    deleted = true;
+                    deleteIsExplicit = false;
+                }
+                else if (currState.GetCreationTime() < lastState.GetCreationTime())
+                {
+                    ENSURE(false, << "Got unexpected CreationTimes (in Ghost --> Ghost) for entity "
+                        << lastState.GetEntityId() << ". last = "
+                        << lastState.GetCreationTime() << ", curr = "
+                        << currState.GetCreationTime());
+                }
+                else
+                {
+                    //equal creation time
+
+                    if (currState.GetVersion() < lastState.GetVersion() ||
+                        lastState.GetVersion() < currState.GetVersion())
+                    {
+                        ENSURE(false, << "Got unexpected VersionNumbers and CreationTimes (in Ghost --> Ghost) for entity "
+                                      << lastState.GetEntityId()
+                                      << ". CreationTime = " << lastState.GetCreationTime()
+                                      << ", lastV = " << lastState.GetVersion()
+                                      << ", currV = " << currState.GetVersion());
+                    }
+                    else
+                    { //equal times!
+                        //ignore it
+                    }
+
+                }
+            }
+
+            return;
+        }
+
+        //Ghost --> None
+        if (lastKind == Ghost && currKind == None)
+        {
+            if (subscriptionOptions.wantsGhostDelete)
+            {
+                deleted = true;
+                deleteIsExplicit = true;
+            }
+
+            return;
+        }
+    }
+
+    bool Controller::ProcessEntitySubscription(const SubscriptionPtr& subscription,
+                                               bool& exitDispatch,
+                                               bool& dontRemove)
+    {
+        //TODO: this routine currently ignores the problem of getting postpones on an OnDeletedEntity
+        //when it is a WantsLastState case that gets dispatched.
+        //In this case the last state will be dispatched twice if the OnDeletedEntity gets postponed.
+        //This must be fixed, somehow...
+
+        const DistributionData currState = subscription->GetCurrentRealState();
+        const DistributionData lastState = subscription->GetLastRealState();
+
+        bool created;
+        bool updated;
+        bool deleted;
+        bool deleteIsExplicit;
+
+        // Get state changes by comparing the state that was last dispatched with current state
+        CalculateEntitySubscriptionChanges(subscription, lastState, currState, created, updated, deleted, deleteIsExplicit);
+
+        dontRemove = false;
+        exitDispatch = false;
+        m_postponeCurrent = false;
+        m_postpone = false;
+
+        const bool timestampChangeInfo =
+            boost::interprocess::static_pointer_cast<const EntitySubscriptionOptions>
+            (subscription->GetSubscriptionOptions())->timestampChangeInfo;
+
+        const ConsumerId consumer = subscription->GetSubscriptionId().connectionConsumer.consumer;
+
+        if(created)
+        {
+            if (m_postponedTypes.IsPostponed(consumer,
+                                             currState.GetTypeId(),
+                                             CallbackId::OnNewEntity))
+            {
+                dontRemove = true;
+            }
+            else
+            {
+                m_dispatcher.InvokeOnNewEntityCb(consumer, currState, timestampChangeInfo);
+
+                if (m_postpone)
+                {
+                    m_postponedTypes.Postpone(consumer,
+                                              currState.GetTypeId(),
+                                              CallbackId::OnNewEntity);
+                }
+                if (m_postponeCurrent)
+                {
+                    dontRemove = true;
+                }
+            }
+        }
+
+        if (updated)
+        {
+            if (m_postponedTypes.IsPostponed(consumer,
+                                             currState.GetTypeId(),
+                                             CallbackId::OnUpdatedEntity))
+            {
+                dontRemove = true;
+            }
+            else
+            {
+                m_dispatcher.InvokeOnUpdatedEntityCb(consumer, currState, lastState, timestampChangeInfo);
+
+                if (m_postpone)
+                {
+                    m_postponedTypes.Postpone(consumer,
+                                              currState.GetTypeId(),
+                                              CallbackId::OnUpdatedEntity);
+                }
+                if (m_postponeCurrent)
+                {
+                    dontRemove = true;
+                }
+            }
+        }
+
+        if (deleted)
+        {
+            if (m_postponedTypes.IsPostponed(consumer,
+                                             currState.GetTypeId(),
+                                             CallbackId::OnDeletedEntity))
+            {
+                dontRemove = true;
+            }
+            else
+            {
+                //if we're a WantsLastState subscription we may have just dispatched a create, so we need
+                //to "fudge" this delete to have the correct states.
+                if (created || updated)
+                {
+                    m_dispatcher.InvokeOnDeletedEntityCb(consumer, currState, currState, deleteIsExplicit, timestampChangeInfo);
+                }
+                else
+                {
+                    m_dispatcher.InvokeOnDeletedEntityCb(consumer, currState, lastState, deleteIsExplicit, timestampChangeInfo);
+                }
+
+                if (m_postpone)
+                {
+                    m_postponedTypes.Postpone(consumer,
+                                              currState.GetTypeId(),
+                                              CallbackId::OnDeletedEntity);
+                }
+                if (m_postponeCurrent)
+                {
+                    dontRemove = true;
+                }
+            }
+        }
+
+        exitDispatch = m_exitDispatch;
+        if (!dontRemove)
+        {
+            subscription->SetLastRealState(currState);
+        }
+
+        return !dontRemove; //subscription is only clean if we're removing.
+    }
+
+    void Controller::DispatchEntitySubscription(const SubscriptionPtr& subscription,
+                                                bool& exitDispatch,
+                                                bool& dontRemove)
+    {
+        if (!subscription->IsSubscribed())
+        {
+            // An unsubscribe has been invoked, drop this subscription.
+            return;
+        }
+
+        switch (subscription->GetSubscriptionId().subscriptionType)
+        {
+            case InjectionSubscription:
+            {
+                subscription->DirtyFlag().Process(boost::bind(&Controller::ProcessInjectionSubscription,
+                                                              this,
+                                                              boost::cref(subscription),
+                                                              boost::ref(exitDispatch),
+                                                              boost::ref(dontRemove)));
+            }
+            break;
+
+            case NormalSubscription:
+            {
+                subscription->DirtyFlag().Process(boost::bind(&Controller::ProcessEntitySubscription,
+                                                              this,
+                                                              boost::cref(subscription),
+                                                              boost::ref(exitDispatch),
+                                                              boost::ref(dontRemove)));
+            }
+            break;
+
+            default:
+                ENSURE(false, << "Unexpectd subscription type!");
+        }
+    }
+
+    void Controller::DispatchSubscription(const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
+    {
+        exitDispatch = false;
+        dontRemove = false;
+        lllout << "Controller::DispatchSubscription() called " << std::endl;
+
+        DistributionData realState = subscription->GetState()->GetRealState();
+
+        if (!realState.IsNoState() && realState.GetType() == DistributionData::RegistrationState)
+        {
+            // Registration state
+             DispatchRegistrationSubscription(subscription, exitDispatch, dontRemove);
+        }
+        else
+        {
+            // Entity state
+            DispatchEntitySubscription(subscription, exitDispatch, dontRemove);
+        }
+    }
+
+    void Controller::DispatchSubscriptions()
+    {
+        m_connection->GetDirtySubscriptionQueue().Dispatch
+                            (boost::bind(&Controller::DispatchSubscription, this, _1, _2, _3));
+    }
+
+    bool Controller::ProcessInjectionSubscription(const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
+    {
+        exitDispatch = false;
+        dontRemove = false;
+
+        DistributionData realState = subscription->GetCurrentRealState();
+        DistributionData injectionState = subscription->GetCurrentInjectionState();
+
+        // Check if this is an injection that is meant for the handler that has setup this subscription
+        Dob::Typesystem::HandlerId stateHandlerId;
+        if (realState.IsNoState() && injectionState.IsNoState())
+        {
+            // No real state and no injection state
+            return true; // Remove from queue and reset dirty flag
+        }
+        else if (!realState.IsNoState())
+        {
+            stateHandlerId = realState.GetHandlerId();
+        }
+        else
+        {
+            stateHandlerId = injectionState.GetHandlerId();
+        }
+
+        if (stateHandlerId != Dob::Typesystem::HandlerId(subscription->GetSubscriptionId().id))
+        {
+            // The state is not for this handler
+            return true;    // Remove from queue and reset dirty flag
+        }
+
+        bool injectionStateChanged = injectionState != subscription->GetLastInjectionState();
+
+        const bool isGhost = !realState.IsNoState() && realState.GetEntityStateKind() == DistributionData::Ghost;
+
+        if (!injectionStateChanged && !isGhost)
+        {
+            // We are only interested if there is a change of the injection state or if the real state is a ghost.
+            return true; // Remove from queue and reset dirty flag
+        }
+
+        DistributionData dispatchedInjection = DistributionData(no_state_tag);
+
+
+        if (!realState.IsNoState() && !injectionState.IsNoState())
+        {
+            // Both a real state and an injection state
+
+            if (realState.GetHandlerId() != injectionState.GetHandlerId())
+            {
+                std::wostringstream ostr;
+                ostr << "Handler Id of the injection doesn't match the Handler Id used in this system. typeId = "
+                     << Typesystem::Operations::GetName(realState.GetTypeId())
+                     << " handlerId = " << realState.GetHandlerId() << " injection handlerId = " << injectionState.GetHandlerId()
+                     << " instanceId = " << realState.GetInstanceId() << ")";
+                throw Safir::Dob::Typesystem::ConfigurationErrorException(ostr.str(),__WFILE__,__LINE__);
+            }
+
+            const TimestampOperations::MergeResult mergeResult = TimestampOperations::Merge(realState,
+                                                                                            injectionState);
+
+            // If a merge was not performed, then we are interested only if the real state is a ghost
+            if (!mergeResult.second && !isGhost)
+            {
+                subscription->SetLastInjectionState(injectionState);
+                return true; // Remove from queue and reset dirty flag
+            }
+            dispatchedInjection = mergeResult.first;
+
+        }
+        else if (!injectionState.IsNoState())
+        {
+            // There is an injection state but no real state
+            dispatchedInjection = injectionState.GetEntityStateCopy(true); // true means that the blob will be included.
+        }
+        else
+        {
+            // There is a real state but no injection state
+            dispatchedInjection = realState.GetEntityStateCopy(true); // true means that the blob will be included.
+
+            if (!isGhost)
+            {
+                // Then we are interested only if the real state is a ghost
+                subscription->SetLastInjectionState(injectionState);
+                return true; // Remove from queue and reset dirty flag
+            }
+        }
+
+        // At this point a merge has been performed and/or we are handling a ghost.
+
+
+
+        // Find out what callback to dispatch to application.
+        enum DispatchAction
+        {
+            NoAction,
+            NewCallback,
+            UpdateCallback,
+            DeleteCallback
+        };
+
+        DispatchAction dispatchAction = NoAction;
+
+        if (realState.IsNoState() || !realState.HasBlob() || isGhost)
+        {
+            // There is no created entity ...
+
+            if (dispatchedInjection.HasBlob())
+            {
+                // ... and the entity that we are about to dispatch has a blob.
+                dispatchAction = NewCallback;
+            }
+        }
+        else
+        {
+            // There is a created entity ...
+
+            if (dispatchedInjection.HasBlob())
+            {
+                // ... and the entity that we are about to dispatch has a blob.
+                dispatchAction = UpdateCallback;
+            }
+            else
+            {
+                // ... and the entity that we are about to dispatch has a no blob.
+                dispatchAction = DeleteCallback;
+            }
+        }
+
+        const ConnectionPtr connection = subscription->GetSubscriptionId().connectionConsumer.connection;
+
+        // Update the header
+        dispatchedInjection.SetEntityStateKind(DistributionData::Real);
+        if (dispatchedInjection.HasBlob())
+        {
+            dispatchedInjection.SetSenderId(connection->Id());
+            dispatchedInjection.SetExplicitlyDeleted(false);
+        }
+        else
+        {
+            dispatchedInjection.SetSenderId(ConnectionId(ThisNodeParameters::NodeNumber(),-1));  // Correct node number but no connection id for delete states
+            dispatchedInjection.SetExplicitlyDeleted(true);
+        }
+
+        const ConsumerId consumer = subscription->GetSubscriptionId().connectionConsumer.consumer;
+        const Typesystem::TypeId typeId = dispatchedInjection.GetTypeId();
+        const Typesystem::InstanceId instanceId = dispatchedInjection.GetInstanceId();
+        const Typesystem::EntityId entityId(typeId, instanceId);
+
+        if (dispatchAction == NoAction)
+        {
+            // Nothing to dispatch to app, but the state must be updated anyway.
+            // This is the case when we have a "newer" delete-inject for a non existing instance.
+            EntityTypes::Instance().AcceptInjection(connection,
+                                                    dispatchedInjection,
+                                                    injectionState);
+
+            subscription->SetLastInjectionState(injectionState);
+            return true; // Remove from queue and reset dirty flag
+        }
+
+        // Ok, it's time to make a callback to the app
+
+        // Initialize some member variables that can be altered by the application in the callback (we will check them
+        // when the callback returns).
+        m_postpone = false;
+        m_postponeCurrent = false;
+        m_incompleteInjection = false;
+        m_setInjectedEntity = false;
+        m_deleteInjectedEntity = false;
+        m_dispatchedInjection = dispatchedInjection;
+        m_originalInjectionState = injectionState;
+
+        bool confirmInjection = true;
+
+        switch (dispatchAction)
+        {
+        case NewCallback:
+            {
+                // We are going to dispatch an OnInjectedNewEntity
+
+                if (m_postponedTypes.IsPostponed(consumer,
+                                                 typeId,
+                                                 CallbackId::OnInjectedNewEntity))
+                {
+                    dontRemove = true;
+                    confirmInjection = false;
+                }
+                else
+                {
+                    // Make the callback to the app
+                    m_dispatcher.InvokeOnInjectedNewEntityCb(consumer, dispatchedInjection);
+
+                    // Check that the app hasn't invoked multiple actions
+                    CheckAppInjectionAction(m_postpone, m_incompleteInjection, m_setInjectedEntity, m_deleteInjectedEntity);
+
+                    if (m_postpone)
+                    {
+                        m_postponedTypes.Postpone(consumer,
+                                                  typeId,
+                                                  CallbackId::OnInjectedNewEntity);
+                        if (m_postponeCurrent)
+                        {
+                            dontRemove = true;
+                            confirmInjection = false;
+                        }
+                    }
+                }
+            }
+            break;
+
+        case UpdateCallback:
+            {
+                // We are going to dispatch an OnInjectedUpdatedEntity
+
+                if (m_postponedTypes.IsPostponed(consumer,
+                                                 typeId,
+                                                 CallbackId::OnInjectedUpdatedEntity))
+                {
+                    dontRemove = true;
+                    confirmInjection = false;
+                }
+                else
+                {
+                    // Make the callback to the app
+                    m_dispatcher.InvokeOnInjectedUpdatedEntityCb(consumer, dispatchedInjection, realState);
+
+                    // Check that the app hasn't invoked multiple actions
+                    CheckAppInjectionAction(m_postpone, m_incompleteInjection, m_setInjectedEntity, m_deleteInjectedEntity);
+
+                    if (m_postpone)
+                    {
+                        m_postponedTypes.Postpone(consumer,
+                                                  typeId,
+                                                  CallbackId::OnInjectedUpdatedEntity);
+                        if (m_postponeCurrent)
+                        {
+                            dontRemove = true;
+                            confirmInjection = false;
+                        }
+                    }
+                }
+            }
+            break;
+
+        case DeleteCallback:
+            {
+                // We are going to dispatch an OnInjectedDeletedEntity
+
+                if (m_postponedTypes.IsPostponed(consumer,
+                                                 typeId,
+                                                 CallbackId::OnInjectedDeletedEntity))
+                {
+                    dontRemove = true;
+                    confirmInjection = false;
+                }
+                else
+                {
+                    // Make the callback to the app
+                    m_dispatcher.InvokeOnInjectedDeletedEntityCb(consumer, dispatchedInjection, realState);
+
+                    // Check that the app hasn't invoked multiple actions
+                    CheckAppInjectionAction(m_postpone, m_incompleteInjection, m_setInjectedEntity, m_deleteInjectedEntity);
+
+                     if (m_postpone)
+                     {
+                         m_postponedTypes.Postpone(consumer,
+                                                   typeId,
+                                                   CallbackId::OnInjectedDeletedEntity);
+                         if (m_postponeCurrent)
+                         {
+                             dontRemove = true;
+                             confirmInjection = false;
+                         }
+                     }
+                }
+            }
+            break;
+
+        default:
+            ENSURE(false, << "Unexpected dispatchAction!");
+        }
+
+        if (m_incompleteInjection)
+        {
+            confirmInjection = false;
+        }
+        else if (m_deleteInjectedEntity || m_setInjectedEntity)
+        {
+            // The app has called set and/or delete so we don't have to make a confirmation call.
+            confirmInjection = false;
+        }
+
+        if (confirmInjection)
+        {
+            EntityTypes::Instance().AcceptInjection(connection, dispatchedInjection, injectionState);
+        }
+
+
+        if (dispatchAction == NewCallback && (confirmInjection || m_setInjectedEntity || m_deleteInjectedEntity))
+        {
+            // A new instance has been accepted or rejected by the app, check if an OninitialInjectionDone
+            // should be sent for this type
+            InitialInjectionHandled(Dob::Typesystem::HandlerId(subscription->GetSubscriptionId().id),
+                                    consumer,
+                                    typeId,
+                                    instanceId);
+        }
+
+        exitDispatch = m_exitDispatch;
+
+        // Release references
+        m_dispatchedInjection = DistributionData(no_state_tag);
+        m_originalInjectionState = DistributionData(no_state_tag);
+
+        if (!dontRemove && !m_incompleteInjection)
+        {
+            // Only set last == current if subscription isn't saved for a redispatch.
+            subscription->SetLastInjectionState(injectionState);
+        }
+        return !dontRemove;  // Reset dirty flag if removed from queue
+    }
+
+    void Controller::InitialInjectionHandled(const Dob::Typesystem::HandlerId&     handlerId,
+                                             const ConsumerId&                     consumer,
+                                             const Typesystem::TypeId              typeId,
+                                             const Dob::Typesystem::InstanceId&    instanceId)
+    {
+        bool removedLastInstance = m_connection->RemoveInitialInjectionInstance(typeId,
+                                                                                handlerId,
+                                                                                instanceId,
+                                                                                false); // false => not all instances
+        if (removedLastInstance)
+        {
+             m_dispatcher.InvokeOnInitialInjectionsDoneCb(consumer, typeId, handlerId);
+        }
+    }
+
+    void Controller::DispatchEmptyInitialInjections()
+    {
+        std::vector<TypeHandlerPair> emptyInitialInjections = m_connection->GetAndClearEmptyInitialInjections();
+
+        if (emptyInitialInjections.empty())
+        {
+            return;
+        }
+
+        // We are looping from front to back, so there will be a copy of the remaining items for each
+        // erase() call. Since this vector will be empty in the majority of calls we don't bother using
+        // a more sophisticated algorithm.
+        for (std::vector<TypeHandlerPair>::iterator it = emptyInitialInjections.begin();
+             it != emptyInitialInjections.end();) // iterator incrementation is done below
+        {
+            const Typesystem::TypeId& typeId = it->first;
+            const Typesystem::HandlerId& handlerId = it->second;
+
+            const ConsumerId consumer = m_connection->GetInjectionHandlerConsumer(typeId, handlerId);
+
+            m_dispatcher.InvokeOnInitialInjectionsDoneCb(consumer, typeId, handlerId);
+
+            it = emptyInitialInjections.erase(it);
+
+            if (m_exitDispatch)
+            {
+                break;
+            }
+        }
+
+        // Put back any non-dispatched injection
+        for (std::vector<TypeHandlerPair>::iterator it = emptyInitialInjections.begin();
+             it != emptyInitialInjections.end();
+             ++it)
+        {
+            const Typesystem::TypeId& typeId = it->first;
+            const Typesystem::HandlerId& handlerId = it->second;
+
+            m_connection->AddEmptyInitialInjection(typeId,
+                                                   handlerId);
+        }
+    }
+
+    void Controller::CheckAppInjectionAction(const bool postpone,
+                                             const bool incompleteInjectionState,
+                                             const bool setInjectedEntity,
+                                             const bool deleteInjectedEntity) const
+    {
+        int nbrOfActions = 0;
+        if (postpone) ++nbrOfActions;
+        if (incompleteInjectionState) ++nbrOfActions;
+        if (setInjectedEntity || deleteInjectedEntity) ++nbrOfActions;
+
+        if (nbrOfActions > 1)
+        {
+            std::wostringstream ostr;
+
+            ostr << "The application is not allowed to call ";
+            if (postpone)
+            {
+                ostr << " Postpone";
+            }
+            if (incompleteInjectionState)
+            {
+                ostr << " IncompleteInjectionState";
+            }
+            if (setInjectedEntity)
+            {
+                ostr << " SetEntity";
+            }
+            if (deleteInjectedEntity)
+            {
+                ostr << " DeleteEntity";
+            }
+            ostr << " in a single injection callback.";
+            throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+    }
+
+    void Controller::SendRequest(const DistributionData & request,
+                                 const ConsumerId & consumer)
+    {
+        const bool success = m_connection->GetRequestOutQueue().PushRequest(request);
+
+        if (success)
+        {
+            m_connection->SignalOut();
+            m_dispatcher.AddResponseConsumer(request.GetRequestId().GetCounter(), consumer);
+        }
+        else
+        {
+            m_requestQueueInOverflowState = true;
+            m_dispatcher.AddOverflowedRequestConsumer(consumer);
+
+            lllout << "Throwing overflow exception due to request overflow" << std::endl;
+            throw Safir::Dob::OverflowException(L"Overflow when sending request",__WFILE__,__LINE__);
+        }
+    }
+
+    void Controller::HandleRevokedRegistrations()
+    {
+        RegistrationVector revoked;
+
+        m_connection->GetAndClearRevokedRegistrations(revoked);
+
+        for (RegistrationVector::iterator it = revoked.begin(); it != revoked.end(); ++it)
+        {
+            m_dispatcher.InvokeOnRevokedRegistrationCb(it->consumer,
+                                                       it->typeId,
+                                                       it->handlerId);
+        }
+    }
+
+    void Controller::HandlePendingRegistrations()
+    {
+        PendingRegistrationVector prv;
+        bool needKick = false;
+
+        ServiceTypes::Instance().RegisterAcceptedPendingRegistrations(m_connection, prv, needKick);
+        EntityTypes::Instance().RegisterAcceptedPendingRegistrations(m_connection, prv, needKick);
+
+        for (PendingRegistrationVector::iterator it = prv.begin();
+             it != prv.end(); ++it)
+        {
+            lllout << "Got an accept for pending registration "<< it->id << std::endl;
+            m_dispatcher.InvokeOnCompletedRegistrationCb(it->consumer,it->typeId,it->handlerId.GetHandlerId());
+        }
+        if (needKick)
+        {
+            m_connection->SignalOut();
+        }
+    }
+
+    Typesystem::Int32 Controller::EntityIteratorCreate(const Typesystem::TypeId typeId,
+                                                       const bool includeSubclasses,
+                                                       bool& end)
+    {
+        //Generate a unique iterator id
+        Typesystem::Int32 newIteratorId = rand();
+        while (m_entityIterators.find(newIteratorId) != m_entityIterators.end())
+        {
+            newIteratorId = rand();
+        }
+
+        m_entityIterators.insert(std::make_pair(newIteratorId, EntityTypes::Instance().
+            CreateEntityIterator(typeId,includeSubclasses,end)));
+        return newIteratorId;
+    }
+
+    void Controller::EntityIteratorDestroy(const Typesystem::Int32 iteratorId)
+    {
+        m_entityIterators.erase(iteratorId);
+    }
+
+    Typesystem::Int32 Controller::EntityIteratorCopy(const Safir::Dob::Typesystem::Int32 iteratorId)
+    {
+        //Generate a unique iterator id
+        Typesystem::Int32 newIteratorId = rand();
+        while (m_entityIterators.find(newIteratorId) != m_entityIterators.end())
+        {
+            newIteratorId = rand();
+        }
+
+        EntityIteratorTable::iterator otherIterator = m_entityIterators.find(iteratorId);
+        if (otherIterator == m_entityIterators.end())
+        {
+            throw Typesystem::SoftwareViolationException(L"Cannot copy that iterator!",__WFILE__,__LINE__);
+        }
+
+        m_entityIterators.insert(std::make_pair(newIteratorId,otherIterator->second));
+        return newIteratorId;
+    }
+
+    void Controller::EntityIteratorIncrement(const Safir::Dob::Typesystem::Int32 iteratorId,
+                                             bool& end)
+    {
+        EntityIteratorTable::iterator findIt = m_entityIterators.find(iteratorId);
+        ENSURE(findIt != m_entityIterators.end(), << "Failed to find iterator with id " << iteratorId);
+        end = !EntityTypes::Instance().IncrementIterator(findIt->second);
+    }
+
+    void Controller::EntityIteratorDereference(const Safir::Dob::Typesystem::Int32 iteratorId,
+                                               const char *& entityBlob,
+                                               const char *& entityState)
+    {
+        EntityIteratorTable::iterator findIt = m_entityIterators.find(iteratorId);
+        ENSURE(findIt != m_entityIterators.end(), << "Failed to find iterator with id " << iteratorId);
+        findIt->second.Dereference(entityBlob,entityState);
+    }
+
+    bool Controller::EntityIteratorEqual(const Safir::Dob::Typesystem::Int32 first,
+                                         const Safir::Dob::Typesystem::Int32 second)
+    {
+        EntityIteratorTable::iterator firstIt = m_entityIterators.find(first);
+        ENSURE(firstIt != m_entityIterators.end(), << "Failed to find iterator with id " << first);
+        EntityIteratorTable::iterator secondIt = m_entityIterators.find(second);
+        ENSURE(secondIt != m_entityIterators.end(), << "Failed to find iterator with id " << second);
+        return firstIt->second == secondIt->second;
+    }
+
+
+    void Controller::SimulateOverflows(const bool inQueues, const bool outQueues)
+    {
+        m_connection->ForEachMessageInQueue(boost::bind(&MessageQueue::SimulateFull,_2,inQueues));
+        m_connection->ForEachRequestInQueue(boost::bind(&RequestInQueue::SimulateFull,_2,inQueues));
+
+        m_connection->GetMessageOutQueue().SimulateFull(outQueues);
+        m_connection->GetRequestOutQueue().SimulateFull(outQueues);
+
+        //Kick ourselves so that we dispatch the correct Overflow calls, if needed.
+        m_connection->SignalIn();
+
+        //Kick dose_main so that we stop blocking if we had an overflow-in.
+        m_connection->SignalOut();
+    }
+
+}
+}
+}

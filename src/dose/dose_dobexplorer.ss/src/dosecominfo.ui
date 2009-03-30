@@ -1,0 +1,51 @@
+<ui version="4.0" >
+ <class>DoseComInfo</class>
+ <widget class="QWidget" name="DoseComInfo" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>488</width>
+    <height>436</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>DoseCom Info</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <widget class="QTextEdit" name="doseInfo" >
+     <property name="readOnly" >
+      <bool>true</bool>
+     </property>
+     <property name="acceptRichText" >
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <widget class="QLabel" name="debugLevelLabel" >
+       <property name="text" >
+        <string>Debug Level</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="debugLevel" >
+       <property name="decimals" >
+        <number>0</number>
+       </property>
+       <property name="maximum" >
+        <double>10.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

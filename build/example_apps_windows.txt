@@ -1,0 +1,12 @@
+#COPY DOB FILES
+copy_dob_files   examples/vehicleapp/vehicleapp_core.ss/data/
+copy_dob_files   examples/vehicleapp/vehicleapp_core.ss/extra/
+copy_dob_files   examples/vehicledb/vehicledb_core.ss/data/
+
+build_dots_generated
+
+build_dir        examples/vehicleapp/vehicleapp_core.ss/src/VehicleAppCpp         release
+build_dir        examples/vehicleapp/vehicleapp_core.ss/src/VehicleAppCs
+build_dir        examples/vehicledb/vehicledb_core.ss/src/VehicleDatabaseCpp      release
+build_dir        examples/vehiclemmi/vehiclemmi_core.ss/src/VehicleMmiCppQt       debug
+build_dir        examples/vehiclemmi/vehiclemmi_core.ss/src/VehicleMmiCsWinForms

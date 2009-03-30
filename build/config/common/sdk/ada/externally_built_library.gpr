@@ -1,0 +1,19 @@
+project externally_built_library is
+
+   type Build_Type is
+      ("release", "debug", "gcov", "gperf", "normal");
+   Build : Build_Type := external ("BUILD");
+
+   type OS_Type is ("Windows_NT", "Linux");
+   OS : OS_Type := external ("OS", "Linux");
+
+   for Source_Dirs use ();
+
+   case OS is
+      when "Linux" =>
+          for Library_dir use external ("SAFIR_RUNTIME") & "/lib";
+      when "Windows_NT" =>
+          for Library_dir use external ("SAFIR_RUNTIME") & "/bin";
+    end case;
+
+end externally_built_library;

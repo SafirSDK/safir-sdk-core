@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<name>DoseTest.CallbackEnum</name>
+  <values>
+    <value>OnRegistrationStatus</value>
+
+    <value>OnMessage</value>
+    <value>OnNotMessageOverflow</value>
+
+    <value>OnRegistered</value>
+    <value>OnUnregistered</value>
+
+    <value>OnNewEntity</value>
+    <value>OnUpdatedEntity</value>
+    <value>OnRemovedEntity</value>
+
+    <value>OnPersistentData</value>
+    <value>OnCreateRequest</value>
+    <value>OnUpdateRequest</value>
+    <value>OnDeleteRequest</value>
+
+    <value>OnServiceRequest</value>
+
+    <value>OnResponse</value>
+    <value>OnNotRequestOverflow</value>
+
+    <value>OnReadEntity</value>
+  </values>
+</enumeration>

@@ -1,0 +1,148 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE MOVEABLE PURE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE MOVEABLE PURE 
+BEGIN
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE MOVEABLE PURE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Swedish resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_SVE)
+#ifdef _WIN32
+LANGUAGE LANG_SWEDISH, SUBLANG_DEFAULT
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG_MAIN DIALOG DISCARDABLE  0, 0, 163, 108
+STYLE WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "DoseCom Monitor"
+FONT 10, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "Info",IDC_BUTT_INFO,94,6,18,9
+    LTEXT           "IpAddr",IDC_STATIC,36,19,25,8
+    LTEXT           "Status",IDC_STATIC,90,19,24,8
+    LTEXT           "DoseId",IDC_STATIC,9,19,26,8
+    LTEXT           "RxCount",IDC_STATIC,115,19,26,8
+    EDITTEXT        IDC_EDIT_MODE,3,6,51,12,ES_READONLY | NOT WS_BORDER
+    PUSHBUTTON      "Help",IDC_BUTT_HELP,115,6,26,9
+    GROUPBOX        "",IDC_STATIC,0,0,144,18
+END
+
+IDD_DIALOG_INFO DIALOG DISCARDABLE  0, 0, 186, 199
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Dose Info"
+FONT 8, "Courier New"
+BEGIN
+    PUSHBUTTON      "Cancel",IDCANCEL,149,4,33,14
+    PUSHBUTTON      "Get Info",IDC_BUTTON_GETINFO,3,4,42,14
+    EDITTEXT        IDC_EDIT_INFO,0,23,184,169,ES_MULTILINE | ES_AUTOHSCROLL | 
+                    WS_VSCROLL
+    PUSHBUTTON      "Dbg--",IDC_BUTTON_DEBUG_MINUS,80,4,31,14
+    PUSHBUTTON      "Dbg++",IDC_BUTTON_DEBUG_PLUS,114,4,31,14
+    PUSHBUTTON      "Help",IDC_BUTTON_HELP,49,4,26,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO MOVEABLE PURE 
+BEGIN
+    IDD_DIALOG_MAIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 1
+        RIGHTMARGIN, 161
+        BOTTOMMARGIN, 104
+    END
+
+    IDD_DIALOG_INFO, DIALOG
+    BEGIN
+        RIGHTMARGIN, 184
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 192
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+107                     ICON    DISCARDABLE     "DoseMonitor.ico"
+#endif    // Swedish resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

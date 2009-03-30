@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Response to the service GetVehicleCategoryService.</summary>
+  <name>Capabilities.Vehicles.GetVehicleCategoryResponse</name>
+  <baseClass>Safir.Dob.SuccessResponse</baseClass>
+  <members>
+
+    <member>
+      <summary>The vehicle category information.</summary>
+      <name>VehicleCategoryInfo</name>
+      <type>Capabilities.Vehicles.VehicleCategoryInfo</type>
+    </member>
+
+  </members>
+</class>

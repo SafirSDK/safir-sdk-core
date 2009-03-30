@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Used to report program information, usually for test, verification or debug purposes</summary>
+  <name>Safir.SwReports.Internal.ProgramInfoReport</name>
+  <baseClass>Safir.SwReports.Internal.Report</baseClass>
+</class>

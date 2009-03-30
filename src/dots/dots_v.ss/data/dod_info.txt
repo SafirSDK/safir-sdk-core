@@ -1,0 +1,55 @@
+SECTION: One of "Parameters", "Parent" and "Code"
+
+Parameters
+==========
+The parameter section contains information for Dots_V. There are some fix parameters:
+	File_Extension:"cs"
+	Filename_Separator:"."
+	Output_Directory:"dotnet\"
+	Namespace_Separator:"."
+	Object_Type:"object"
+	Index_Type:"int32"
+
+Types are defined like this:
+    Type:<dou>:<set/get>:"<generated>"
+E.g.:
+    Type:string:String:"Safir::Dots::String":"dots/dots_defs"
+    defines "string" as a typename in the xml-syntax (dou-file).
+    And "String" to be the @_UNIFORM_ELEMENTTYPE_@, used in the name of Set/Get routines.
+    And "Safir::Dots::String" to be used where the actual type is needed in the code.
+    And that "dots/dots_defs" (without file extension) is to be included due to this.
+
+Parent
+======
+Declared if there is a need to create parental files.
+Tags:
+NAMESPACE - The namespace (as in the current language)
+
+Code
+====
+
+NAMESPACEV - The namespace (as a vector, one level per index)
+REVNAMESPACE - NAMESPACEV in reverse order (obsoleted by the REVERSE functionality)
+NAMESPACE - The namespace (as in the current language)
+UNIT - The unit name as in the file system (no extension)
+DEPENDENCY - A vector containing all classes/files to include (no extension included)
+CLASS - The name of the defined Class/Property/Enumeration (no namespace included)
+UNITTYPE - One of "class", "enumeration" and "property"
+BASECLASS - The baseclass (as writtin in the current language)
+
+CONSTANT - A vector of the names of the defined constants
+UNIFORM_CONSTANTTYPE - A vector of the types of the defined constants, as named in Dots API routines.
+CONSTANTTYPE - A vector of the types of the defined constants, as named in the current language.
+CONSTANTCLASS - A vector with all elements set to the name of the class (obsoleted by UP_LEVEL)
+CONSTANTISARRAY - Set if True, otherwise non-existent.
+
+ELEMENT - A vector of the names of the defined elements
+UNIFORM_ELEMENTTYPE - A vector of the types of the defined elements, as named in Dots API routines.
+ELEMENTTYPE - A vector of the types of the defined elements, as named in the current language.
+ELEMENTCLASS - A vector with all elements set to the name of the class (obsoleted by UP_LEVEL)
+ELEMENTISARRAY - Set if True, otherwise non-existent.
+ELEMENTISSTRING - Set if True, otherwise non-existent.
+
+TYPEID - The 64-bit integer value of the TypeId
+
+ENUMVALUE - A vector of all enumeration values (iff UNITTYPE = enumeration)

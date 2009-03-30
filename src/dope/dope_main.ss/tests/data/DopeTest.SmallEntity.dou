@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>DopeTest.SmallEntity</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <members>
+        <member>
+            <summary>The name of the sensor</summary>
+            <name>Name</name>
+            <type>String</type>
+            <maxLength>16</maxLength>
+        </member>
+        <member>
+            <summary>The position of the sensor</summary>
+            <name>Position</name>
+            <type>Safir.Geodesy.Position</type>
+        </member>
+        <member>
+            <summary>The kind of the sensor</summary>
+            <name>Kind</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>The altitude of the sensor</summary>
+            <name>Altitude</name>
+            <type>Meter32</type>
+        </member>
+        <member>
+            <summary>The name used for the sensor as an external counterpart</summary>
+            <name>ExternalName</name>
+            <type>String</type>
+            <maxLength>20</maxLength>
+        </member>
+        <member>
+            <summary>The rotation time of the sensor</summary>
+            <name>Period</name>
+            <type>Second32</type>
+        </member>
+        <member>
+            <summary>Indicates if bearings reported from the sensor is in reference system RT90</summary>
+            <name>UseRT</name>
+            <type>Boolean</type>
+        </member>
+    </members>
+</class>

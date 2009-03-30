@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<name>DoseTest.ActionEnum</name>
+  <values>
+    <!-- **** Sequencer Actions **** -->
+    <value>Sleep</value>
+
+    <!-- **** Executor Actions **** -->
+    <value>Activate</value>
+    <value>Deactivate</value>
+    <value>Reset</value>
+    <value>Open</value>
+    <value>Close</value>
+    <value>InhibitDispatch</value>
+    <value>Print</value>
+
+    <!-- **** Executor and Consumer Actions **** -->
+    <value>ResetCallbackActions</value>
+
+    <!-- **** Consumer Actions **** -->
+    <!-- Responses -->
+    <value>SendResponse</value>
+    <value>DiscardResponseSender</value>
+
+    <!-- ConnectionBase Interface -->
+    <value>RegisterEntityHandler</value>
+    <value>RegisterEntityHandlerInjection</value>
+    <value>RegisterEntityHandlerPending</value>
+    <value>RegisterServiceHandler</value>
+    <value>RegisterServiceHandlerPending</value>
+    <value>UnregisterHandler</value>
+
+    <value>SubscribeRegistration</value>
+    <value>UnsubscribeRegistration</value>
+    <value>SubscribeMessage</value>
+    <value>UnsubscribeMessage</value>
+    <value>SubscribeEntity</value>
+    <value>UnsubscribeEntity</value>
+
+    <value>SendMessage</value>
+    <value>ServiceRequest</value>
+    <value>CreateRequest</value>
+    <value>UpdateRequest</value>
+    <value>DeleteRequest</value>
+
+    <value>SetAll</value>
+    <value>SetChanges</value>
+    <value>Delete</value>
+    <value>DeleteAllInstances</value>
+    <value>IsCreated</value>
+    <value>GetNumberOfInstances</value>
+    <value>Read</value>
+
+    <value>GetEntityIterator</value>
+
+    <!-- ConnectionAspectInjector Interface -->
+    <value>InjectorSubscribeEntity</value>
+    <value>InitialSet</value>
+    <value>InjectChanges</value>
+    <value>InjectDelete</value>
+
+    <!-- ConnectionAspectPostpone Interface -->
+    <value>Postpone</value>
+    <value>ResumePostponed</value>
+    <value>IncompleteInjectionState</value>
+
+    <!-- ConnectionAspectMisc Interface -->
+    <value>GetQueueCapacity</value>
+    <value>GetQueueSize</value>
+    <value>SimulateOverflows</value>
+
+
+    <!-- dob-v4 -->
+<!--
+    <value>InhibitPoolScanFlag</value>
+-->
+  </values>
+</enumeration>

@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<exception xmlns="urn:safir-dots-unit">
+        <summary>The operation took longer then the specified timeout time to execute.</summary>
+  <name>Safir.Databases.Odbc.TimeoutException</name>
+  <baseClass>Safir.Databases.Odbc.RetryException</baseClass>
+</exception>

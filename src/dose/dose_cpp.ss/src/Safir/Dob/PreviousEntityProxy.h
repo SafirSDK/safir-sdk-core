@@ -1,0 +1,222 @@
+/******************************************************************************
+*
+* Copyright Saab AB, 2008 (http://www.safirsdk.com)
+*
+* Created by: Anders Widén / stawi
+*
+*******************************************************************************
+*
+* This file is part of Safir SDK Core.
+*
+* Safir SDK Core is free software: you can redistribute it and/or modify
+* it under the terms of version 3 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* Safir SDK Core is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+*
+******************************************************************************/
+
+#ifndef _SAFIR_DOB_PREVIOUS_ENTITY_PROXY_H
+#define _SAFIR_DOB_PREVIOUS_ENTITY_PROXY_H
+
+#include <Safir/Dob/Internal/ProxyImplPtr.h>
+#include <Safir/Dob/DoseCppExportDefs.h>
+#include <Safir/Dob/ConnectionInfo.h>
+#include <Safir/Dob/Typesystem/EntityId.h>
+#include <Safir/Dob/Typesystem/HandlerId.h>
+#include <Safir/Dob/Typesystem/Defs.h>
+#include <Safir/Dob/Entity.h>
+#include <Safir/Dob/Defs.h>
+
+#include <string>
+
+namespace Safir
+{
+namespace Dob
+{
+    // Forward declaration
+    namespace Internal
+    {
+        class PreviousEntityProxyImpl;
+    }
+
+    /**
+     * Proxy class for a "previous" entity.
+     */
+    class DOSE_CPP_API PreviousEntityProxy
+    {
+    public:
+
+        /**
+         * Get type id.
+         *
+         * Retrieves type id of the Entity.
+         *
+         * @return Type id.
+         */
+        const Dob::Typesystem::TypeId GetTypeId() const;
+
+        /**
+         * Get instance id.
+         *
+         * Retrieves instance id of the Entity.
+         *
+         * @return Instance id.
+         */
+        const Dob::Typesystem::InstanceId GetInstanceId() const;
+
+        /**
+         * Get entity id.
+         *
+         * Aggregation of type id and instance id.
+         *
+         * @return Entity id.
+         */
+        const Dob::Typesystem::EntityId GetEntityId() const;
+
+        /**
+         * Get entity.
+         *
+         * Retrieves a smart pointer to the entity.
+         *
+         * No change flags will be set in the returned entity.
+         *
+         * @return entity.
+         */
+        const Dob::EntityPtr GetEntity() const;
+
+        /**
+         * Get entity with change information.
+         *
+         * Retrieves the entity with change flags set to indicate which members have
+         * changed since the last subscription response.
+         *
+         * @return entity.
+         */
+        const Dob::EntityPtr GetEntityWithChangeInfo() const;
+
+        /**
+         * Get owner handler id.
+         *
+         * Retrieves the handler id of the handler that owns (has created) this entity instance.
+         *
+         * @return Handler id.
+         */
+        const Dob::Typesystem::HandlerId GetOwner() const;
+
+        /**
+         * Get info about the connection to which the owner handler is related.
+         *
+         * @return Connection info.
+         */
+        const Dob::ConnectionInfoPtr GetOwnerConnectionInfo() const;
+
+        /**
+         * @name Retrieve binary blob
+         */
+        /** @{ */
+
+        /**
+         * Get binary blob of the received entity without changeflags set.
+         *
+         * This method will give you a pointer to the underlying representation of the object.
+         * Note that this pointer is only valid while the PreviousEntityProxy is in scope.
+         * If you want to keep the blob you must copy it using methods in Safir::Dob::Typesystem.
+         *
+         * This method is mainly useful if all you want to do with a received object is to write it
+         * to a database or pass it over a C-interface to a library or plugin.
+         *
+         * As an example, if you want to copy the bytes into a std::vector<char> you could do it
+         * like this "v = std::vector<char>(blob,blob+Safir::Dob::Typesystem::BlobOperations.GetSize())"
+         *
+         * @return Binary blob of the received entity.
+         */
+        const char * GetBlob() const;
+
+        /**
+         * Get binary blob with change information.
+         *
+         * Retrieves the entity with change flags set to indicate which members have
+         * changed since the last subscription response.
+         *
+         * @see GetBlob
+         *
+         * @return Binary blob.
+         */
+        const char * GetBlobWithChangeInfo() const;
+
+        /** @} */
+
+        /**
+         * @name Trace and Debug stuff
+         */
+        /** @{ */
+
+        /**
+         * Get owner handler id that also contains the string representation.
+         *
+         * Mainly for trace and debug purposes.
+         * @see GetOwner()
+         *
+         * @return Handler id.
+         */
+        const Dob::Typesystem::HandlerId GetOwnerWithStringRepresentation() const;
+
+        /** @} */
+
+        /**
+         * @name Retrieve timestamps. (Extended info for applications with special need)
+         *       Note that timestamps is only available for types configured with this option.
+         */
+        /** @{ */
+
+        /**
+         * Retrieves the timestamp for the latest create, update or delete.
+         *
+         * @return Timestamp.
+         *
+         * @throws Dob::NotFoundException No timestamp available for this entity type.
+         */
+        const Dob::Typesystem::Int64 GetTimestamp() const;
+
+        /**
+         * Retrieves the timestamp for the given top member.
+         *
+         * @param [in] member Top level member index.
+         * @return Timestamp.
+         *
+         * @throws Dob::NotFoundException No timestamp available for this entity type.
+         */
+        const Dob::Typesystem::Int64 GetTimestamp(const Dob::Typesystem::MemberIndex member) const;
+
+        /** @} */
+
+
+        // The constructor is for internal usage only!
+        explicit PreviousEntityProxy(Internal::PreviousEntityProxyImpl* pImpl);
+
+    private:
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4251) // To get rid of warning that says that the template needs to have a DLL-interface
+#endif
+
+        Internal::ProxyImplPtr<Internal::PreviousEntityProxyImpl> m_pImpl;
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
+    };
+
+}
+}
+
+#endif

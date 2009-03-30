@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--//StartRemoveInExercise-->
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <property>Capabilities.SpeedObjectProperty</property>
+    <class>Capabilities.Vehicles.Vehicle</class>
+    <memberMapping>
+
+        <member>
+            <propertyMember>SpeedMember</propertyMember>
+            <classMemberReference>
+                <classMember>Speed</classMember>
+            </classMemberReference>
+        </member>
+
+    </memberMapping>
+</propertyMapping>
+<!--//StopRemoveInExercise-->

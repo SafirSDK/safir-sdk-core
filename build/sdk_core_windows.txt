@@ -1,0 +1,76 @@
+build_dir        build/config
+build_dir        src/lluf/lluf_utils.ss/src                debug release
+build_dir        src/lluf/lluf_logger_control.ss/src       release
+build_dir        src/dots/dots_id.ss/src                   debug release
+
+#hackish way of getting around the fact that dots_id doesnt copy its gpr file correctly.
+copy_file         src/dots/dots_id.ss/data/dots_id.gpr      SAFIR_SDK ada/
+
+build_dir        src/dots/dots_kernel.ss/src               debug release
+build_dir        src/dots/dots_configuration_check.ss      release
+build_dir        src/dots/dots_cpp.ss/src                  debug release
+build_dir        src/dots/dots_dotnet.ss/src
+
+#put a CMakeLists.txt file that works for windows in the right spot.
+copy_file        src/dots/dots_v.ss/CMakeLists.txt          None src/dots/dots_v.ss/CMakeLists.txt.bak
+copy_file        build/win_fixes/dots_v.ss.CMakeLists.txt   None src/dots/dots_v.ss/CMakeLists.txt
+build_dir        src/dots/dots_v.ss
+copy_file        src/dots/dots_v.ss/CMakeLists.txt.bak      None src/dots/dots_v.ss/CMakeLists.txt
+copy_file         C:\MinGW\bin\mingw32-make.exe               SAFIR_SDK dots/dots_generated/make.exe
+copy_file        C:\msys\bin\touch.exe                       SAFIR_SDK dots/dots_generated/
+copy_file        C:\msys\bin\rm.exe                          SAFIR_SDK dots/dots_generated/
+copy_file        C:\msys\bin\msys-1.0.dll                    SAFIR_SDK dots/dots_generated/
+copy_file        build/win_fixes/Makefile_cpp                SAFIR_SDK dots/dots_generated
+
+
+build_dir        src/dots/dots_cpp_build_helper.ss
+build_dir        src/dots/dots_schema_validator.ss
+
+#COPY DOB FILES
+copy_dob_files   src/dose/dose_config.ss/data
+copy_dob_files   src/swre/swre_library.ss/data
+copy_dob_files   src/douf/douf_multi_foreach.ss/src/dob
+copy_dob_files   src/douf/douf_time_library.ss/src/dob
+copy_dob_files   src/olib/olib_code.ss/data
+copy_dob_files   src/dope/dope_main.ss/data
+
+build_dots_generated
+
+build_dir        src/dose/dose_internal.ss/src                    debug release
+build_dir        src/dose/dose_dll.ss/src                         debug release
+build_dir        src/dose/dose_cpp.ss/src                         debug release
+build_dir        src/dose/dose_communication.ss/src/dose_com       debug release
+build_dir        src/dose/dose_main.ss/src                         release
+
+copy_file        src/dose/dose_dotnet.ss/src/dose_dotnet.csproj   None src/dose/dose_dotnet.ss/src/dose_dotnet.csproj.bak
+copy_file        build/win_fixes/dose_dotnet.csproj   None src/dose/dose_dotnet.ss/src/
+build_dir        src/dose/dose_dotnet.ss/src
+copy_file        src/dose/dose_dotnet.ss/src/dose_dotnet.csproj.bak   None src/dose/dose_dotnet.ss/src/dose_dotnet.csproj
+
+build_dir        src/dose/dose_sate.ss/src
+build_dir        src/dose/dose_dobexplorer.ss/src
+build_dir        src/douf/douf_time_library.ss/src/douf_time_library   debug release
+build_dir        src/douf/douf_time_mix.ss/cpp                         debug release
+build_dir        src/douf/douf_time_mix.ss/dotnet
+
+copy_file        src/douf/douf_utilities_mix.ss/src/Ace_dispatcher/cpp/CMakeLists.txt None src/douf/douf_utilities_mix.ss/src/Ace_dispatcher/cpp/CMakeLists.txt.bak
+copy_file        build/win_fixes/douf_ace_dispatcher.CMakeLists.txt   None src/douf/douf_utilities_mix.ss/src/Ace_dispatcher/cpp/CMakeLists.txt
+build_dir        src/douf/douf_utilities_mix.ss/src
+copy_file        src/douf/douf_utilities_mix.ss/src/Ace_dispatcher/cpp/CMakeLists.txt.bak None src/douf/douf_utilities_mix.ss/src/Ace_dispatcher/cpp/CMakeLists.txt
+
+build_dir        src/swre/swre_library.ss/src                            debug release
+build_dir        src/swre/swre_interface.ss/cpp/swre_interface_cpp       debug release
+build_dir        src/swre/swre_interface.ss/dotnet/swre_interface_dotnet
+build_dir        src/swre/swre_logger.ss/src                             release
+build_dir        src/swre/swre_backdoor.ss/src                           release
+build_dir        src/douf/douf_multi_foreach.ss/src/cpp                  release
+build_dir        src/olib/olib_code.ss/olib                              debug release
+build_dir        src/dope/dope_main.ss/src/dope_main                     release
+build_dir        src/dope/dope_main.ss/src/dope_bin2xml                  release
+
+sign_assembly    Safir.Dob.dll
+sign_assembly    Safir.Dob.Typesystem.dll
+sign_assembly    Safir.SwReports.dll
+sign_assembly    Safir.Time.dll
+
+build_dir        docs/doxygen

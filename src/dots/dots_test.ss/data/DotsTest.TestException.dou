@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<exception xmlns="urn:safir-dots-unit">
+    <name>DotsTest.TestException</name>
+    <baseClass>fundamentalException</baseClass>
+</exception>

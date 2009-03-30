@@ -1,0 +1,63 @@
+--=============================================================================
+-- Copyright (C)  2002 SAAB TECH SYSTEMS AB
+--=============================================================================
+--    Creation Information:
+--          This file was automaticly generated
+--          Creation Date : 2005-06-13
+--
+--
+--
+--=============================================================================
+
+with "dose_ada.gpr";
+with "dots_ada.gpr";
+with "syst_default.gpr";
+with "../../ada/program/douf_time_ada_library.gpr";
+with "dots_generated_ada.gpr";
+with "win32ada.gpr";
+
+project douf_time_ada_test is
+
+  for Source_Dirs use (".");
+  for Object_Dir use syst_default'Object_Dir;
+  for Exec_Dir use syst_default'Exec_Dir;
+
+  for Main use ("douf_time_test_program_receive.adb",
+                "douf_time_test_program_send.adb",
+                "douf_time_test_program.adb");
+
+  type OS_Type is ("Windows_NT", "Linux");
+  OS : OS_Type := external ("OS", "Windows_NT");
+
+  case OS is
+      when "Linux" =>
+         for library_dir use  project'Object_dir & "-lib";
+      when "Windows_NT" =>
+         for Library_Dir use external ("SAFIR_RUNTIME") & "\bin";
+      when others =>
+  end case;
+
+  package Builder is
+     for Default_Switches ("Ada") use
+       syst_default.Builder'Default_Switches ("Ada");
+  end Builder;
+
+  package Compiler is
+     for Default_Switches ("Ada") use
+       syst_default.Compiler'Default_Switches ("Ada");
+  end Compiler;
+
+  package Linker is
+     for Default_Switches ("Ada") use
+       syst_default.Linker'Default_Switches ("Ada");
+  end Linker;
+
+   package Pretty_Printer is
+      for Default_Switches ("ada") use ("-nM");
+   end Pretty_Printer;
+
+   package Ide is
+      for Default_Switches ("gnade") use ("-DDBSOURCE=GNADE", "-DDBUSER=GNADE", "-DDBPASSWD=GNADE");
+   end Ide;
+
+end douf_time_ada_test;

@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Vehicle categories.</summary>
+    <name>Capabilities.Vehicles.VehicleCategoryCode</name>
+    <values>
+
+        <value>Submarine</value>
+        <value>MotorShip</value>
+        <value>SteamShip</value>
+        <value>SailShip</value>
+        <value>Punt</value>
+        <value>Car</value>
+        <value>Bus</value>
+        <value>Truck</value>
+        <value>Tractor</value>
+        <value>Motorcycle</value>
+        <value>Bicycle</value>
+        <value>TerrainVehicle</value>
+        <value>Train</value>
+        <value>Aeroplane</value>
+        <value>Helicopter</value>
+        <value>Baloon</value>
+        <value>Rocket</value>
+        <value>UFO</value>
+
+    </values>
+</enumeration>

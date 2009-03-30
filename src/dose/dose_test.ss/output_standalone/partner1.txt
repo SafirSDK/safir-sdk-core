@@ -1,0 +1,1204 @@
+==========================================================================
+TESTCASE 0
+Description: Test of sending and subscribing of local messages
+Expectation: Consumer 0 recieves a local message
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 1
+Description: Test of sending and subscribing of global messages
+Expectation: Consumer 0 recieves a global message
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 2
+Description: Test of sending and subscribing of local messages
+Expectation: Consumer 0 does NOT recieve a local message
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 4
+Description: Test of unsubscription of local messages
+Expectation: Consumer 0 recieves ONE local message
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 5
+Description: Test of unsubscription of global messages
+Expectation: Parter 0/Consumer 0 recieves ONE global message
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 6
+Description: Test of simulate overflows in message out queues.
+Expectation: Overflow exception followed by a not overflow notification
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 7
+Description: Test of simulate overflows on message in queues.
+Expectation: No messages received in partner 0
+--------- Setup -----------
+--------- Test  -----------
+Caught Overflow exception
+Consumer 0: OnNotMessageOverflow
+
+==========================================================================
+TESTCASE 100
+Description: Test of registering/unregistering a service handler while a subscription for registrations exists (local)
+Expectation: Consumer 0 receives two OnRegistered and two OnUnregistered callbacks
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 101
+Description: Test of setting up a susbcription while there is an existing registration (local)
+Expectation: Consumer 0 receives one OnRegistered and one OnUnregistered callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 102
+Description: Test of unsubscription of a service registration (local)
+Expectation: Consumer 0 receives one OnRegistered but no OnUnregistered callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 103
+Description: Test the registration subscription blacklist
+Expectation: Consumer 0 receives one OnRegistered callback for handler HANDLER_1
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 104
+Description: Test the registration subscription whitelist
+Expectation: Consumer 0 receives one OnRegistered callback for handler HANDLER_1
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 105
+Description: Test of registration subscription including subclasses (local)
+Expectation: Consumer 0 receives OnRegistered for ROOT_HANDLER_0, LOCAL_HANDLER_0 and LOCAL_HANDLER_1
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 106
+Description: Test of registration susbcription restart (local)
+Expectation: Consumer 0 receives two OnRegistered callbacks
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 107
+Description: Test of registering/unregistering a service handler while a subscription for registrations exists (Global)
+Expectation: Consumer 0 receives two OnRegistered and two OnUnregistered callbacks
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 108
+Description: Test of registration subscription including subclasses (global)
+Expectation: Partner 2/Consumer 2 receives OnRegistered for ROOT_HANDLER_0, GLOBAL_HANDLER_0 and GLOBAL_HANDLER_1
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 109
+Description: Test of registration subscription including superclass (local)
+Expectation: Partner 0/Consumer 0 receives OnRegistered for ROOT_HANDLER_0 and ROOT_HANDLER_1
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 110
+Description: Test of unsubscription of a service registration (global)
+Expectation: Partner 2/Consumer 2 receives one OnRegistered but no OnUnregistered callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 111
+Description: Test of registering of a service handler with the same name for a local entity handler on two nodes
+Expectation: Partner 2 registration is completed. Partner 0 doesn't get a revoke (if running on different nodes).
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 112
+Description: Test that different consumers don't interfere (local)
+Expectation: Partner 0/Consumer 1 and 2 receives OnRegistered and Partner 0/Consumer 2 receives OnUnregistered for DoseTest.LocalService
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 113
+Description: Test of registering a service handler while there is an unregister state remaining (local)
+Expectation: Consumer 0 receives one OnRegistered
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 114
+Description: Test of registering a service handler while there is an unregister state remaining (global)
+Expectation: Consumer 0 receives one OnRegistered
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 150
+Description: Testing of pending registration of global service handler
+Expectation: Global Service should be Completed (cons 1) and Registered (cons 0)
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 151
+Description: Testing of pending registration of global service handler on one node
+Expectation: Global Service should be Registered (cons 1), Unregistered (cons 1), Completed (cons 0) and Registered (cons 1)
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 152
+Description: Testing of removing pending registrations within one application
+Expectation: Global Service: Consumer 0 gets a Completed, Service is registered, Consumer 0 then unregisters, and Consumer 1 does NOT get a Completed
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 153
+Description: Testing of Pending registrations between nodes
+Expectation: Global Service 0 gets registered (by someone else). The service gets unregistered (by someone else) which leads to Consumer 1 getting a Completed.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 154
+Description: Test of overregistering of global service handler (revoke)
+Expectation: Partner 0/Consumer 0 receives one OnRevokedRegistration for GLOBAL_HANDLER_0
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 155
+Description: Testing of Pending registrations between apps in same node
+Expectation: Partner 0 gets OnRegistered, OnUnregistered, OnCompletedRegistration and OnRegistered
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.GlobalService
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 200
+Description: Test of using local service (within one partner)
+Expectation: Partner0/Consumer 0 should get a service request and Partner0/consumer 1 should get a service response
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 201
+Description: Test of using local service (between two partners)
+Expectation: Consumer 0 should get a service request
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnResponse:
+  Type       = DoseTest.SuccessfulService
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulService</name><members><member><name>Info</name><value>AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalService</name></object>
+
+==========================================================================
+TESTCASE 202
+Description: Test of using global service
+Expectation: Partner2/Consumer 0 should get a service request and Partner0/consumer 1 should get a successful response
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 203
+Description: Test of sending a service request to a non-existing handler
+Expectation: Partner0/consumer 1 should get an error response saying "not registered handler" 
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 204
+Description: Test of service request timeout (local request)
+Expectation: Partner0/Consumer 1 should get a time out response on a service request
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnServiceRequest: 
+  Type       = DoseTest.GlobalService
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
+
+==========================================================================
+TESTCASE 205
+Description: Test of service request timeout (global request)
+Expectation: Partner0/Consumer 1 should get a time out response on a service request
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 206
+Description: Test of simulate overflow in request out queue
+Expectation: Partner0/Consumer 1 should get an overflow exception and then a OnNotRequestOverflow
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 207
+Description: Test simulate overflow on service request in queue locally.
+Expectation: Partner0/Consumer 0 should get an overflow exception and then one response followed by OnNotRequestOverflow and then 9 more responses
+--------- Setup -----------
+Consumer 0: SimulateOverflows(true, false)
+--------- Test  -----------
+Consumer 0: SimulateOverflows(false, false)
+Consumer 0: OnServiceRequest: 
+  Type       = DoseTest.GlobalService
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
+
+Consumer 0: OnServiceRequest: 
+  Type       = DoseTest.GlobalService
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
+
+Consumer 0: OnServiceRequest: 
+  Type       = DoseTest.GlobalService
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
+
+Consumer 0: OnServiceRequest: 
+  Type       = DoseTest.GlobalService
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
+
+Consumer 0: OnServiceRequest: 
+  Type       = DoseTest.GlobalService
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
+
+Consumer 0: OnServiceRequest: 
+  Type       = DoseTest.GlobalService
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
+
+Consumer 0: OnServiceRequest: 
+  Type       = DoseTest.GlobalService
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
+
+Consumer 0: OnServiceRequest: 
+  Type       = DoseTest.GlobalService
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
+
+Consumer 0: OnServiceRequest: 
+  Type       = DoseTest.GlobalService
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
+
+Consumer 0: OnServiceRequest: 
+  Type       = DoseTest.GlobalService
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
+
+==========================================================================
+TESTCASE 208
+Description: Test simulate overflow on service request in queue globally
+Expectation: Partner0/Consumer 0 should get an overflow exception and then one response followed by OnNotRequestOverflow and then 9 more responses
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 300
+Description: Test of registering/unregistering a entity handler while a subscription for registrations exists (local)
+Expectation: Partner 0/Consumer 0 receives two OnRegistered and two OnUnregistered callbacks
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 301
+Description: Test of setting up a susbcription while there is an existing registration (local)
+Expectation: Parter 0/Consumer 0 receives one OnRegistered and one OnUnregistered callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 302
+Description: Test of unsubscription of a entity registration (local)
+Expectation: Partner 0/Consumer 0 receives one OnRegistered but no OnUnregistered callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 303
+Description: Test the registration subscription blacklist
+Expectation: Partner 0/Consumer 0 receives one OnRegistered callback for handler HANDLER_1
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 304
+Description: Test the registration subscription whitelist
+Expectation: Partner 0/Consumer 0 receives one OnRegistered callback for handler HANDLER_1
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 305
+Description: Test of registration entity handler subscription including subclasses (local)
+Expectation: Partner 0/Consumer 0 receives OnRegistered for ROOT_HANDLER_0, LOCAL_HANDLER_0 and LOCAL_HANDLER_1
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 306
+Description: Test of registration entity handler subscription restart (local)
+Expectation: Partner 0/Consumer 0 receives two OnRegistered callbacks
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 307
+Description: Test of registering/unregistering a entity handler while a subscription for registrations exists (Global)
+Expectation: Partner 0/Consumer 0 receives two OnRegistered and two OnUnregistered callbacks
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 308
+Description: Test of entity handler registration subscription including subclasses (global)
+Expectation: Partner 2/Consumer 2 receives OnRegistered for ROOT_HANDLER_0, GLOBAL_HANDLER_0 and GLOBAL_HANDLER_1
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 309
+Description: Test of registration subscription including superclass (local)
+Expectation: Partner 0/Consumer 0 receives OnRegistered for ROOT_HANDLER_0 and ROOT_HANDLER_1
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 310
+Description: Test of unsubscription of a entity handler registration (global)
+Expectation: Partner 2/Consumer 2 receives one OnRegistered but no OnUnregistered callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 311
+Description: Test of registering of an entity handler with the same name for a local entity handler on two nodes
+Expectation: Partner 2 registration is completed. Partner 0 doesn't get a revoke (if running on different nodes).
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 312
+Description: Test that different consumers don't interfere (local)
+Expectation: Partner 0/Consumer 1 and 2 receives OnRegistered and Partner 0/Consumer 2 receives OnUnregistered for DoseTest.LocalEntity
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 313
+Description: Test of registering a entity handler while there is an unregister state remaining (local)
+Expectation: Consumer 0 receives one OnRegistered
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 314
+Description: Test of registering a entity handler while there is an unregister state remaining (global)
+Expectation: Consumer 0 receives one OnRegistered
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 350
+Description: Testing of pending registration of global entity handler
+Expectation: Global Entity should be Completed (part 0/cons 1) and Registered (part 0/cons 0)
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 351
+Description: Testing of pending registration of global entity handler on one node
+Expectation: Global Entity should be Registered (cons 1), Unregistered (cons 1), Completed (cons 0) and Registered (cons 1)
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 352
+Description: Testing of removing pending entity registrations within one application
+Expectation: Global Entity: Consumer 0 gets a Completed, Entity is registered, Consumer 0 then unregisters, and Consumer 1 does NOT get a Completed
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 353
+Description: Testing of Pending entity handler registrations between nodes
+Expectation: Global Entity 0 gets registered (by someone else). The entity gets unregistered (by someone else) which leads to Consumer 1 getting a Completed.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 354
+Description: Test of double registration of global entity handler (revoke)
+Expectation: Partner 0/Consumer 0 receives one OnRevokedRegistration for GLOBAL_HANDLER_0
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 355
+Description: Testing of registration of global entity injection handler
+Expectation: partner 0/consumer 1 receives an OnInitialInjectionsDone and an OnInjectedUpdatedEntity. Consumer 0 receives OnRegistered for InjectableEntity
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 356
+Description: Testing that iex injections are transfered to application when registering a corresponding handler
+Expectation: partner 0/consumer 1 receives OnInjectedNewEntity for InjectableEntity instance 888888 (Info is "Some new info" and Int32Member is 123) and instance 999999 (Int64Member is 123456). The read values correspond to the injected ones.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 357
+Description: Testing of injection for a non-existing entity
+Expectation: partner 0/consumer 0 receives one OnInjectedNewEntity
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 358
+Description: Testing of inject delete for an existing entity
+Expectation: partner 0/consumer 0 receives one OnInjectedNewEntity and one OnInjectedDeletedEntity. P1 and P2 reads the entity before and after the injectDelete
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: Read entity (DoseTest.InjectableEntity, 654321):
+  EntityId  = (DoseTest.InjectableEntity, 654321):
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value>Some new info</value></member></members></object>
+
+Consumer 0: Read entity (DoseTest.InjectableEntity, 654321):
+Caught Exception in ExecuteAction: Safir.Dob.NotFoundException
+==========================================================================
+TESTCASE 359
+Description: Test that registering an injection handler for a type that has no injection property is ok.
+Expectation: partner 0/consumer 0 receives OnInitialInjectionsDone.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 360
+Description: Testing of inject delete for an existing entity
+Expectation: partner 0/consumer 0 receives one OnInjectedNewEntity and one OnInjectedDeletedEntity. P1 and P2 gets new and delete subscription
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.InjectableEntity, 987654)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value>Some new info</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+    Int32Member
+    Int64Member
+    Float32Member
+    Float64Member
+    Ampere32Member
+    ArrayMember
+    ObjectMember
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.InjectableEntity, 987654)
+  deletedByOwner = true
+  Owner          = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value>Some new info</value></member></members></object>
+
+==========================================================================
+TESTCASE 361
+Description: Inject update and inject delete for an existing entity
+Expectation: partner 0/consumer 0 receives one OnInitialInjectionsDone, one OnInjectedNewEntity, one OnInjectedUpdatedEntity and one OnInjectedDeletedEntity. P1 and P2 reads the entity before and after each injection.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: Read entity (DoseTest.InjectableEntity, 654321):
+  EntityId  = (DoseTest.InjectableEntity, 654321):
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value>First inject</value></member></members></object>
+
+Consumer 0: Read entity (DoseTest.InjectableEntity, 654321):
+  EntityId  = (DoseTest.InjectableEntity, 654321):
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value>Second inject</value></member></members></object>
+
+Consumer 0: Read entity (DoseTest.InjectableEntity, 654321):
+Caught Exception in ExecuteAction: Safir.Dob.NotFoundException
+==========================================================================
+TESTCASE 362
+Description: Postpone OnInjectedNewEntity, redispatch is True.
+Expectation: partner 0/consumer 0 receives one OnInitialInjectionsDone and two OnInjectedNewEntity. The first P2 read gives a "not found" exception, second read gives an entity.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 363
+Description: Postpone OnInjectedNewEntity, redispatch is False.
+Expectation: partner 0/consumer 0 receives one OnInitialInjectionsDone, one OnInjectedNewEntity (instance 654321) and one OnInjectedNewEntity(instance 123456).
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 364
+Description: Test incomplete injection state.
+Expectation: The first read gives a not found exception. The second read gives an existing instance
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 365
+Description: Reject of injected entity
+Expectation: partner 0/consumer 0 receives one OnInitialInjectionsDone and OnInjectedNewEntity. P0 read gives 'not found'.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 366
+Description: Test a SetChanges call in an OnInjectedNew callback.
+Expectation: partner 0/consumer 0 receives an OnInitialInjectionsDone and an OnInjectedNewEntity. The Partner 2 read value 434343 for member Int64Member.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 367
+Description: Test a SetAll call in an OnInjectedUpdated callback.
+Expectation: partner 0/consumer 0 receives an OnInitialInjectionsDone, an OnInjectedNewEntity, and an OnInjectedUpdatedEntity. The Partner 2 read value 434343 for member Int64Member.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 368
+Description: Test a SetChanges call, with an enity that isn't changed, in an OnInjectedNew callback.
+Expectation: partner 0/consumer 0 receives an OnInitialInjectionsDone and an OnInjectedNewEntity. The SetChanges call gives a software violation exception.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 370
+Description: Test that unregistration of the owner makes created instances (of injectable type) become ghosts
+Expectation: Partner 0 receives OnNewEntity and OnDeletedEntity twice, P2 takes over ownership from P1
+--------- Setup -----------
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.InjectableEntity
+  HandlerId = DEFAULT_HANDLER
+
+--------- Test  -----------
+==========================================================================
+TESTCASE 375
+Description: Testing of injection for existing entity. Injector and handler reside on different nodes.
+Expectation: partner 0/consumer 0 receives an OnInitialInjectionsDone and an OnInjectedUpdatedEntity.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 400
+Description: Test of owner setting entity and read (local)
+Expectation: The Info field should be "Updated information"
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 401
+Description: Test of non-owner setting entity owned by another connection
+Expectation: Exception (access denied) should be raised
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 402
+Description: Test of setting an entity using an unregistered handler
+Expectation: This is considered a programming error and a SoftwareViolation exception should be thrown
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 403
+Description: Test of owner deleting instance (global)
+Expectation: The created instance shall be found and after deletion exception Safir.Dob.NotFoundException shall be thrown
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 404
+Description: Test of non-owner deleting entity within the same connection as owner
+Expectation: Exception Safir.Dob.NotFoundException shall be thrown
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 405
+Description: Test of non-owner deleting entity
+Expectation: Exception (access denied) should be raised
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 406
+Description: Test of handler deleting non-existing instance.
+Expectation: This should be a NOP
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 407
+Description: Test of deleting all owned instances (global)
+Expectation: 2 created instances shall be found and after deletion no instances should be found (exception Safir.Dob.NotFoundException shall be thrown)
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 408
+Description: Test of delete of a non-existant entity
+Expectation: No exception should be thrown!
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 450
+Description: Testing subscription and unsubscription of local entity using typeid
+Expectation: Partner 0/Consumer 2 receives OnNewEntity callbacks for 2 instances
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 451
+Description: Testing subscription of local entity using typeid with includeUpdates, without includeSubclasses, without restartSubscription
+Expectation: Partner 0/Consumer 2 receives OnNewEntity, OnUpdatedEntity and OnDeleteEntity callbacks
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 452
+Description: Testing subscription of local entity using typeid without includeUpdates and with restartSubscription
+Expectation: Partner 0/Consumer receives two OnNewEntity and one OnDeleteEntity callbacks (no OnUpdatedEntity)
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 453
+Description: Testing subscription of local entity using typeid with includeUpdates and without restartSubscription
+Expectation: Partner 0/Consumer 2 receives one OnNewEntity, one OnUpdatedEntity and one OnDeleteEntity callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 454
+Description: Testing subscription of local entity using typeid with includeSubclasses
+Expectation: Partner 0/Consumer 0 receives OnNewEntity callback for RootEntity and LocalEntity and OnUpdatedEntity callback for LocalEntity
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 455
+Description: Testing subscription and unsubscription of local entity using entity id
+Expectation: Partner 0/Consumer 2 receives one OnNewEntity callback (no OnUpdatedEntity)
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 456
+Description: Testing subscription of local entity using entity id with includeUpdates, without restartSubscription
+Expectation: Partner 0/Consumer 2 receives OnNewEntity, OnUpdatedEntity and OnDeleteEntity callbacks for instance 12345
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 457
+Description: Testing subscription of local entity using entity id without includeUpdates and with restartSubscription
+Expectation: Partner 0/Consumer 2 receives two OnNewEntity and one OnDeletedEntity callbacks (no OnUpdatedEntity)
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 458
+Description: Testing subscription of local entity using entity id with includeUpdates and without restartSubscription
+Expectation: Partner 0/Consumer 2 receives one OnNewEntity, one OnUpdatedEntity and one OnDeleteEntity callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 459
+Description: Testing subscription and unsubscription of global entity using typeid
+Expectation: Partner 0/Consumer 2 receives OnNewEntity callbacks
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 460
+Description: Testing subscription of global entity using typeid with includeUpdates, without includeSubclasses, without restartSubscription
+Expectation: Partner 0/Consumer 2 receives OnNewEntity, OnUpdatedEntity and OnDeleteEntity callbacks
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 461
+Description: Testing subscription of global entity using typeid without includeUpdates and with restartSubscription
+Expectation: Partner 0/Consumer 2 receives two OnNewEntity and one OnDeleteEntity callback (no OnUpdatedEntity)
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 462
+Description: Testing subscription of global entity using typeid with includeUpdates and without restartSubscription
+Expectation: Partner 0/Consumer 2 receives one OnNewEntity, one OnUpdatedEntity and one OnDeleteEntity callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 463
+Description: Testing subscription of global entity using typeid with includeSubclasses
+Expectation: Partner 0/Consumer 0 receives OnNewEntity callback for RootEntity and GlobalEntity and OnUpdatedEntity callback for GlobalEntity
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 464
+Description: Testing subscription and unsubscription of global entity using entity id
+Expectation: Partner 0/Consumer 2 receives one OnNewEntity callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 465
+Description: Testing subscription of global entity using entity id with includeUpdates, without restartSubscription
+Expectation: Partner 0/Consumer 2 receives OnNewEntity, OnUpdatedEntity and OnDeleteEntity callbacks
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 466
+Description: Testing subscription of global entity using entity id without includeUpdates and with restartSubscription
+Expectation: Partner 0/Consumer 2 receives two OnNewEntity and one OnDeleteEntity callback (no OnUpdatedEntity callbac)
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 467
+Description: Testing subscription of global entity using entity id with includeUpdates and without restartSubscription
+Expectation: Partner 0/Consumer 2 receives one OnNewEntity, one OnUpdatedEntity and one OnDeleteEntity callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 468
+Description: Test the entity subscription whitelist
+Expectation: Partner 0/Consumer 0 receives one OnNewEntity callback for LocalEntity instance 0
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 469
+Description: Test the entity subscription blacklist
+Expectation: Partner 0/Consumer 0 receives one OnNewEntity callback for LocalEntity instance 1
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 471
+Description: Testing subscription of local parent entity using typeid without includeSubclasses
+Expectation: Partner 0/Consumer 0 receives 1 OnNewEntity and 1 OnUpdatedEntity callbacks for RootEntity
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 475
+Description: Testing subscription and unsubscription
+Expectation: Partner 0/Consumer 2 receives one OnNewEntity and one OnUpdatedEntity callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 476
+Description: Testing that setting up the same subscription twice is a null operation
+Expectation: Partner 0/Consumer 2 receives one OnNewEntity and one OnUpdatedEntity callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 480
+Description: Test of special subscription WantsGhostDelete
+Expectation: Partner 0/Consumer 0 receives one OnDeletedEntity. Partner 2/Consumer 0 receives no subscription responses.
+--------- Setup -----------
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.InjectableEntity
+  HandlerId = DEFAULT_HANDLER
+
+--------- Test  -----------
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.InjectableEntity, 12345)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value>Blabla</value></member><member><name>MoreInfo</name></member><member><name>Int32Member</name></member><member><name>Int64Member</name></member><member><name>Float32Member</name></member><member><name>Float64Member</name></member><member><name>Ampere32Member</name></member><member><name>ArrayMember</name><arrayElements><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement></arrayElements></member><member><name>ObjectMember</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+    Int32Member
+    Int64Member
+    Float32Member
+    Float64Member
+    Ampere32Member
+    ArrayMember
+    ObjectMember
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.InjectableEntity
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 481
+Description: Test of special subscription WantsLastState
+Expectation: Partner 0/Consumer 0 receives one OneNewEntity with info set to BlaBla, one OnUpdatedEntity with info set to MoreBlaBla, and one OnDeletedEntity. Partner 2/Consumer 0 receives one OneNewEntity with info set to BlaBla and one OnDeletedEntity.
+--------- Setup -----------
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.InjectableEntity
+  HandlerId = DEFAULT_HANDLER
+
+--------- Test  -----------
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.InjectableEntity, 54321)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value>MoreBlabla</value></member><member><name>MoreInfo</name></member><member><name>Int32Member</name></member><member><name>Int64Member</name></member><member><name>Float32Member</name></member><member><name>Float64Member</name></member><member><name>Ampere32Member</name></member><member><name>ArrayMember</name><arrayElements><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement></arrayElements></member><member><name>ObjectMember</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+    Int32Member
+    Int64Member
+    Float32Member
+    Float64Member
+    Ampere32Member
+    ArrayMember
+    ObjectMember
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.InjectableEntity
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 482
+Description: Test of special subscription WantsLastState when last state is 'created'
+Expectation: Partner 0/Consumer 0 receives one OneNewEntity with info set to BlaBla and one OnDeletedEntity. Partner 2/Consumer 0 receives no subscription callbacks.
+--------- Setup -----------
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = DEFAULT_HANDLER
+
+--------- Test  -----------
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 54321)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value>Blabla</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 483
+Description: Test of special subscription DoesntWantSourceIsPermanentStore
+Expectation: Partner 0/Consumer 0 receives only an OnDeletedEntity (no OnNewEntity). Partner 2/Consumer 0 receives one OneNewEntity and one OnDeletedEntity.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousPermanentEntity, 56789)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousPermanentEntity</name><members><member><name>Info</name><value>Blabla</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousPermanentEntity
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 484
+Description: Test of special subscription timestampChangeInfo
+Expectation: Partner 0/consumer 0 receives an OnNewEntity with change flags set for all top members, an OnUpdatedEntity with changed top-member 'Info', another OnUpdatedEntity with changed top-member 'MoreInfo' (and an OnDeleteEntity). Partner 2/consumer 0 receives an OnNewEntity with change flags set for all top members, an OnUpdatedEntity with no changed top-members, another OnUpdatedEntity with changed top-member 'MoreInfo' (and an OnDeleteEntity)
+--------- Setup -----------
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.InjectableEntity
+  HandlerId = DEFAULT_HANDLER
+
+--------- Test  -----------
+Consumer 0: OnInjectedUpdatedEntity:
+  EntityId  = (DoseTest.InjectableEntity, 565656)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value>Some info</value></member><member><name>MoreInfo</name><value>Some more info</value></member></members></object>
+  Current   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value>Some info</value></member><member><name>MoreInfo</name><value>Some more info</value></member></members></object>
+  Changed top-level members: 
+    Info
+
+Consumer 0: OnInjectedUpdatedEntity:
+  EntityId  = (DoseTest.InjectableEntity, 565656)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value>Some info</value></member><member><name>MoreInfo</name><value>Some more changed info</value></member></members></object>
+  Current   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value>Some info</value></member><member><name>MoreInfo</name><value>Some more info</value></member></members></object>
+  Changed top-level members: 
+    MoreInfo
+
+==========================================================================
+TESTCASE 500
+Description: Test of sending create request (owner on this node)
+Expectation: Partner 0/Consumer 0 receives a success response and the entity info field should be "Created" (part 0/cons 1)
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnCreateRequest (Requestor decides instance id): 
+  Entity     = (DoseTest.LocalEntity, 345678)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalEntity</name><members><member><name>Info</name><value>Created</value></member></members></object>
+
+==========================================================================
+TESTCASE 501
+Description: Test of sending create request (owner on other node)
+Expectation: Partner 0/Consumer 0 receives a success response and the entity info field should be "Created" (part 0/cons 1)
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 502
+Description: Test of sending update request of created instance (owner on this node)
+Expectation: Partner 0/Consumer 1 receives a success response and the entity info field is "Updated" (part 0/cons 1)
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnUpdateRequest: 
+  Entity     = (DoseTest.LocalEntity, 565656)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalEntity</name><members><member><name>Info</name><value>Updated</value></member></members></object>
+
+==========================================================================
+TESTCASE 503
+Description: Test of sending update request of created instance (owner on other node)
+Expectation: Partner 0/Consumer 1 receives a success response and the entity info field is "Updated" (part 0/cons 1)
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 504
+Description: Test of sending update request of non-created instance
+Expectation: Partner 0/Consumer 1 receives an error response SafirNotRegistered, with info that the instance does not exist
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 505
+Description: Test of sending delete request of created instance (owner on this node)
+Expectation: Partner 0/Consumer 1 receives a success response and exception Safir::Dob::NotFoundException is thrown
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnDeleteRequest: 
+  Entity     = (DoseTest.LocalEntity, 0)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 506
+Description: Test of sending delete request of created instance (owner on other node)
+Expectation: Partner 0/Consumer 1 receives a success response and exception Safir::Dob::NotFoundException is thrown
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 507
+Description: Test of sending delete request of non-created instance
+Expectation: Part 0/Cons 1 receives an error response SafirNotRegistered, with info that the instance does not exist
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 508
+Description: Test of entity request timeout (local request)
+Expectation: Partner 0/Consumer 1 should get a time out response
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnCreateRequest (Requestor decides instance id): 
+  Entity     = (DoseTest.LocalEntity, 0)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalEntity</name><members><member><name>Info</name><value>Created</value></member></members></object>
+
+==========================================================================
+TESTCASE 509
+Description: Test of entity request timeout (global request)
+Expectation: Partner 0/Consumer 1 should get a time out response
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 510
+Description: Test of overflow notification while sending entity requests
+Expectation: Partner 0/Consumer 1 gets an overflow exception and then a response, a OnNotRequestOverflow notification, followed by 9 responses
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 511
+Description: Test of sending update request of non-created global instance
+Expectation: Partner 0/Consumer 1 receives an error response SafirNotRegistered, with info that the instance does not exist
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 512
+Description: Test of sending delete request of non-created global instance
+Expectation: Part 0/Cons 1 receives an error response SafirNotRegistered
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 513
+Description: Test of sending update request of non-created instance
+Expectation: Partner 0/Consumer 1 receives an error response SafirNotRegistered, with info that the instance does not exist
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 514
+Description: Test of sending global update request of non-created instance
+Expectation: Partner 0/Consumer 1 receives an error response SafirNotRegistered, with info that the instance does not exist
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 515
+Description: Test of sending local delete request of non-created instance
+Expectation: Partner 0/Consumer 1 receives an error response SafirNotRegistered, with info that the instance does not exist
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 516
+Description: Test of sending global delete request of non-created instance
+Expectation: Partner 0/Consumer 1 receives an error response SafirNotRegistered, with info that the instance does not exist
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 520
+Description: A handler receives an update request for a non-existing entity.
+Expectation: Partner 0 receives a SafirNotRegistered response.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 550
+Description: Test of IsCreated
+Expectation: IsCreated returns false when entity is not created and true when it is.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 551
+Description: Test of IsCreated when other connection is owner
+Expectation: IsCreated returns false when entity is not created and true when it is.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 560
+Description: Test of reception of an EntityHandlerResponse when the handler decides instance id
+Expectation: Partner 0/Consumer 0 receives an EntityIdResponse with member Assigned set to -6778878277529052275
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 561
+Description: Test of reception of an OnCreateRequest where the handler decides instance id
+Expectation: Partner 0 receives an OnCreateRequest (Handler decides instance id) without instance id
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 562
+Description: Test of reception of an OnCreateRequest where the requestor decides instance id
+Expectation: Partner 0 receives an OnCreateRequest (Requestor decides instance id) with instance id 789789789
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 600
+Description: Test of GetQueueSize
+Expectation: Queue size should be 0 for all queues
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 601
+Description: Test of GetQueueSize
+Expectation: Queue capacity should be 10 for all queues
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 700
+Description: Test of iterating a single entity type
+Expectation: There should be two entities (Info set to "One" and "Two")
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 701
+Description: Test of iterating an entity class tree
+Expectation: There should be six entities, two each of Root, Global and Local
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 702
+Description: Test of iterating a single entity type that has no registerer
+Expectation: There should be no entities
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 703
+Description: Test of iterating an entity class tree without registerers
+Expectation: There should be no entities
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 704
+Description: Test of iterating an entity class tree where there are ghosts
+Expectation: There should be two Local entities (One and Two), twice (the iteration is done twice).
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 710
+Description: Test GetNumberOfInstances with entities of a single type
+Expectation: There should be two local entities set by default handler.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 711
+Description: Test of GetNumberOfInstances on an entity class tree
+Expectation: There should be six entities, two each of Root, Global and Local, all set by default handler
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 712
+Description: Test of GetNumberOfInstances on a single entity type that has no registerer
+Expectation: There should be no entities
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 713
+Description: Test of GetNumberOfInstances on an entity class tree without registerers
+Expectation: There should be no entities
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 714
+Description: Test of GetNumberOfInstances on an entity class tree where there are ghosts
+Expectation: There should be two Local entities twice, then the ghosts are removed and the checks are done again.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 800
+Description: Test of synchronous volatile persistence
+Expectation: Partner 0 receives OnNewInjectedEntity. Partner 1 receives OnNewEntity and OnDeletedEntity
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 12345)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value>StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value>Blabla</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.SynchronousVolatileEntity, 12345)
+  deletedByOwner = false
+  Owner          = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value>Blabla</value></member></members></object>
+
+==========================================================================
+TESTCASE 830
+Description: Test of volatile persistence with two different handlers for the same type
+Expectation: Partner 0 receives OnNewInjectedEntity for instance 678678. Partner 1 receives OnNewInjectedEntity for instance 353535
+--------- Setup -----------
+Consumer 1: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = P1_HANDLER
+
+--------- Test  -----------
+Consumer 1: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 353535)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value>Partner1SnickSnack</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 1: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = 1962097528835644014
+
+==========================================================================
+TESTCASE 850
+Description: Check that ghost instances get dispatched to correct handler when there are sevaral handlers for a type.
+Expectation: Partner 0 receives no OnNewInjectedEntity. Partner 0 receives one OnNewInjectedEntity for instance 353535.
+--------- Setup -----------
+Consumer 1: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = P1_HANDLER
+
+--------- Test  -----------
+Consumer 1: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 353535)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value>Partner1SnickSnack</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 1: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = 1962097528835644014
+
+==========================================================================
+TESTCASE 999
+Description: Empty Test case
+Expectation: Nothing
+--------- Setup -----------
+--------- Test  -----------

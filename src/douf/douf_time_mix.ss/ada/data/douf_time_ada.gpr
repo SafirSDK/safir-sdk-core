@@ -1,0 +1,21 @@
+with "externally_built_library";
+project douf_time_ada is
+
+    for Source_Dirs use (external ("SAFIR_SDK") & "/ada/douf_time_ada");
+
+    for library_dir use Externally_Built_Library'library_dir;
+
+    case Externally_Built_Library.Build is
+        when "debug" =>
+            for library_name use "douf_time_adad";
+        when others =>
+            for library_name use "douf_time_ada";
+    end case;
+
+ 
+    for Library_ALI_Dir use external ("SAFIR_SDK") & "/ada/douf_time_ada/lib-obj/" & Externally_Built_Library.Build;
+
+    for Library_Kind use "dynamic";
+
+    for Externally_Built use "true";
+end douf_time_ada;

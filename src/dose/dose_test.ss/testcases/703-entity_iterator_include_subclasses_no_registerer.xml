@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<object xmlns="urn:safir-dots-unit">
+  <name>DoseTest.Items.TestCase</name>
+  <members>
+    <member>
+      <name>Description</name>
+      <value>Test of iterating an entity class tree without registerers</value>
+    </member>
+    <member>
+      <name>Expectation</name>
+      <value>There should be no entities</value>
+    </member>
+    <member>
+      <name>TestActions</name>
+      <arrayElements>
+        <arrayElement>
+          <object>
+            <name>DoseTest.Action</name>
+            <members>
+              <member>
+                <name>Partner</name>
+                <value>0</value>
+              </member>
+              <member>
+                <name>ActionType</name>
+                <value>DoseTest.ActionEnum.GetEntityIterator</value>
+              </member>
+              <member>
+                <name>TypeId</name>
+                <value>DoseTest.RootEntity</value>
+              </member>
+              <member>
+                <name>IncludeSubclasses</name>
+                <value>true</value>
+              </member>
+              <member>
+                <name>Consumer</name>
+                <value>0</value>
+              </member>
+            </members>
+          </object>
+        </arrayElement>
+      </arrayElements>
+    </member>
+  </members>
+</object>
+

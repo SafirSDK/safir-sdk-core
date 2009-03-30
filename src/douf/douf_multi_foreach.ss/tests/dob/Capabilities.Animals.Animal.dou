@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary></summary>   
+  <name>Capabilities.Animals.Animal</name>
+  <baseClass>Safir.Dob.Entity</baseClass>
+  <members>
+    <member>
+      <summary>name</summary>
+      <name>Namen</name>
+      <type>String</type>
+      <maxLength>10</maxLength>
+    </member>
+    <member>
+      <summary>Color</summary>
+      <name>Color</name>
+      <type>String</type>
+      <maxLength>10</maxLength>
+    </member>
+  </members>
+</class>

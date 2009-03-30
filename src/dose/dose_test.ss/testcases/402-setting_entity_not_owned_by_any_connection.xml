@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<object xmlns="urn:safir-dots-unit">
+  <name>DoseTest.Items.TestCase</name>
+  <members>
+    <member>
+      <name>Description</name>
+      <value>Test of setting an entity using an unregistered handler</value>
+    </member>
+    <member>
+      <name>Expectation</name>
+      <value>This is considered a programming error and a SoftwareViolation exception should be thrown</value>
+    </member>
+    <member>
+      <name>TestCaseSetupActions</name>
+    </member>
+    <member>
+      <name>TestActions</name>
+      <arrayElements>
+        <arrayElement>
+          <object>
+            <name>DoseTest.Action</name>
+            <members>
+              <member>
+                <name>Partner</name>
+                <value>0</value>
+              </member>
+              <member>
+                <name>ActionType</name>
+                <value>DoseTest.ActionEnum.SetAll</value>
+              </member>
+              <member>
+                <name>Instance</name>
+                <value>0</value>
+              </member>
+              <member>
+                <name>Object</name>
+                <object>
+                  <name>DoseTest.LocalEntity</name>
+                  <members>
+                    <member>
+                      <name>Info</name>
+                      <value>Updated information</value>
+                    </member>
+                  </members>
+                </object>
+              </member>
+              <member>
+                <name>Handler</name>
+                <value>DEFAULT_HANDLER</value>
+              </member>
+              <member>
+                <name>Consumer</name>
+                <value>2</value>
+              </member>
+            </members>
+          </object>
+        </arrayElement>
+      </arrayElements>
+    </member>
+  </members>
+</object>
+

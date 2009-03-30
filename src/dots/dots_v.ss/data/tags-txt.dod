@@ -1,0 +1,180 @@
+@@-------------------------------------------------------------------------------
+@@--
+@@--  Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+@@--
+@@--  Created by: Henrik Sundberg / sthesu
+@@--
+@@-------------------------------------------------------------------------------
+@@IF@@ @_SECTION_@ = "Parameters"
+File_Extension:"txt"
+Filename_Separator:"-"
+Output_Directory:"tags/"
+Namespace_Separator:"&"
+Lowercase_Namespace:"False"
+Lowercase_Filenames:"False"
+Object_Type:"Object"
+Index_Type:"Int32"
+@@--
+@@-- Exceptions are defined like this:
+@@--   Exception:<dou>:"<generated>":"<dependency>"
+@@-- E.g.:
+@@--   Exception:illegalValue:"Safir::Dots::IllegalValue":"dots/dots_defs"
+@@-- defines "illegalValue" as an exceptionname in the xml-syntax (dou-file).
+@@-- And "Safir::Dots::IllegalValue" to be used where the actual type is needed in the code.
+@@-- And that "dots/dots_defs" (with file extension added below) is to be included due to this.
+@@--
+Exception:exception:"Safir&Dots&Exception":"dots/dots_exception"
+Exception:fundamentalException:"Safir&Dots&FundamentalException":"dots/dots_exception"
+Exception:configurationError:"Safir&Dots&ConfigurationError":"dots/dots_exception"
+Exception:incompatibleTypes:"Safir&Dots&IncompatibleTypes":"dots/dots_exception"
+Exception:illegalValue:"Safir&Dots&IllegalValue":"dots/dots_exception"
+Exception:nullValue:"Safir&Dots&NullValue":"dots/dots_exception"
+Exception:softwareViolation:"Safir&Dots&SoftwareViolation":"dots/dots_exception"
+@@--
+@@-- Types are defined like this:
+@@--   Type:<dou>:<set/get>:"<generated>":"<dependency>"
+@@-- E.g.:
+@@--   Type:String:String:"Safir::Dots::String":"dots/dots_defs"
+@@-- defines "String" as a typename in the xml-syntax (dou-file).
+@@-- And "String" to be the @_UNIFORM_MEMBERTYPE_@, used in the name of Set/Get routines.
+@@-- And "Safir::Dots::String" to be used where the actual type is needed in the code.
+@@-- And that "dots/dots_defs" (with file extension added below) is to be included due to this.
+@@--
+Type:Int32:Int32:"Dots&Int32":""
+Type:Int64:Int64:"Dots&Int64":""
+Type:Float32:Float32:"Dots&Float32":""
+Type:Float64:Float64:"Dots&Float64":""
+Type:Boolean:Boolean:"Boolean":""
+Type:String:String:"Dots&String":""
+Type:EntityId:EntityId:"Dots&EntityId":""
+Type:TypeId:TypeId:"Dots&TypeId":""
+Type:InstanceId:InstanceId:"Dots&InstanceId":""
+Type:ChannelId:ChannelId:"Dots&ChannelId":""
+Type:HandlerId:HandlerId:"Dots&HandlerId":""
+Type:Binary:Binary:"Dots&Binary":"Dots&Binary"
+Type:Object:Object:"Dots&Object":"Dots&Object"
+Type:Ampere32:Float32:"Dots&SI32&Ampere":"Dots&SI32"
+Type:CubicMeter32:Float32:"Dots&SI32&Cubic_Meter":"Dots&SI32"
+Type:Hertz32:Float32:"Dots&SI32&Hertz":"Dots&SI32"
+Type:Joule32:Float32:"Dots&SI32&Joule":"Dots&SI32"
+Type:Kelvin32:Float32:"Dots&SI32&Kelvin":"Dots&SI32"
+Type:Kilogram32:Float32:"Dots&SI32&Kilogram":"Dots&SI32"
+Type:Meter32:Float32:"Dots&SI32&Meter":"Dots&SI32"
+Type:MeterPerSecond32:Float32:"Dots&SI32&Meter_Per_Second":"Dots&SI32"
+Type:MeterPerSecondSquared32:Float32:"Dots&SI32&Meter_Per_Second_Squared":"Dots&SI32"
+Type:Newton32:Float32:"Dots&SI32&Newton":"Dots&SI32"
+Type:Pascal32:Float32:"Dots&SI32&Pascal":"Dots&SI32"
+Type:Radian32:Float32:"Dots&SI32&Radian":"Dots&SI32"
+Type:RadianPerSecond32:Float32:"Dots&SI32&Radian_Per_Second":"Dots&SI32"
+Type:RadianPerSecondSquared32:Float32:"Dots&SI32&Radian_Per_Second_Squared":"Dots&SI32"
+Type:Second32:Float32:"Dots&SI32&Second":"Dots&SI32"
+Type:SquareMeter32:Float32:"Dots&SI32&Square_Meter":"Dots&SI32"
+Type:Steradian32:Float32:"Dots&SI32&Steradian":"Dots&SI32"
+Type:Volt32:Float32:"Dots&SI32&Volt":"Dots&SI32"
+Type:Watt32:Float32:"Dots&SI32&Watt":"Dots&SI32"
+Type:Ampere64:Float64:"Dots&SI64&Ampere":"Dots&SI64"
+Type:CubicMeter64:Float64:"Dots&SI64&Cubic_Meter":"Dots&SI64"
+Type:Hertz64:Float64:"Dots&SI64&Hertz":"Dots&SI64"
+Type:Joule64:Float64:"Dots&SI64&Joule":"Dots&SI64"
+Type:Kelvin64:Float64:"Dots&SI64&Kelvin":"Dots&SI64"
+Type:Kilogram64:Float64:"Dots&SI64&Kilogram":"Dots&SI64"
+Type:Meter64:Float64:"Dots&SI64&Meter":"Dots&SI64"
+Type:MeterPerSecond64:Float64:"Dots&SI64&Meter_Per_Second":"Dots&SI64"
+Type:MeterPerSecondSquared64:Float64:"Dots&SI64&Meter_Per_Second_Squared":"Dots&SI64"
+Type:Newton64:Float64:"Dots&SI64&Newton":"Dots&SI64"
+Type:Pascal64:Float64:"Dots&SI64&Pascal":"Dots&SI64"
+Type:Radian64:Float64:"Dots&SI64&Radian":"Dots&SI64"
+Type:RadianPerSecond64:Float64:"Dots&SI64&Radian_Per_Second":"Dots&SI64"
+Type:RadianPerSecondSquared64:Float64:"Dots&SI64&Radian_Per_Second_Squared":"Dots&SI64"
+Type:Second64:Float64:"Dots&SI64&Second":"Dots&SI64"
+Type:SquareMeter64:Float64:"Dots&SI64&Square_Meter":"Dots&SI64"
+Type:Steradian64:Float64:"Dots&SI64&Steradian":"Dots&SI64"
+Type:Volt64:Float64:"Dots&SI64&Volt":"Dots&SI64"
+Type:Watt64:Float64:"Dots&SI64&Watt":"Dots&SI64"
+@@--
+@@--
+@@--
+@@--
+@@--
+@@--
+@@ELSE@@
+SECTION     : @_SECTION_@
+UNITTYPE    : @_UNITTYPE_@
+NAMESPACE   : @_NAMESPACE_@
+UNIT        : @_UNIT_@
+NAMESPACEV  :
+@@TABLE@@
+   @_NAMESPACEV_@
+@@END_TABLE@@
+REVNAMESPACE:
+@@TABLE@@
+   @_REVNAMESPACE_@
+@@END_TABLE@@
+DEPENDENCY  :
+@@TABLE@@
+   @_DEPENDENCY_@
+@@END_TABLE@@
+CLASS       : @_CLASS_@
+CLASSSUMMARY: @_CLASSSUMMARY_@
+BASECLASS   : @_BASECLASS_@
+TYPEID      : @_TYPEID_@
+CHECKSUM    : @_CHECKSUM_@
+ENUMVALUE   :
+@@TABLE@@
+   @_ENUMVALUE_@
+@@END_TABLE@@
+
+--- Parameter Info:
+@@TABLE@@
+   PARAMETER            : @_PARAMETER_@
+   PARAMETERSUMMARY     : @_PARAMETERSUMMARY_@
+   UNIFORM_PARAMETERTYPE: @_UNIFORM_PARAMETERTYPE_@
+   PARAMETERTYPE        : @_PARAMETERTYPE_@
+   PARAMETERCLASS       : @_PARAMETERCLASS_@
+   PARAMETERISARRAY     : @_PARAMETERISARRAY_@
++++
+@@END_TABLE@@
+
+--- Member Info:
+@@TABLE@@
+   MEMBER               : @_MEMBER_@
+   MEMBERSUMMARY        : @_MEMBERSUMMARY_@
+   UNIFORM_MEMBERTYPE   : @_UNIFORM_MEMBERTYPE_@
+   MEMBERTYPE           : @_MEMBERTYPE_@
+   MEMBERCLASS          : @_MEMBERCLASS_@
+   MEMBERISARRAY        : @_MEMBERISARRAY_@
+   MEMBERISSTRING       : @_MEMBERISSTRING_@
++++
+@@END_TABLE@@
+
+--- Create Routine Info:
+@@TABLE@@
+CREATEROUTINE       : @_CREATEROUTINE_@
+CREATEROUTINESUMMARY: @_CREATEROUTINESUMMARY_@
+   --- Create Routine Parameter Info:
+@@TABLE@@
+@@IF@@ @_EXIST:CREATEPARAMETER_@
+   CREATEPARAMETER            : @_CREATEPARAMETER_@
+   UNIFORM_CREATEPARAMETERTYPE: @_UNIFORM_CREATEPARAMETERTYPE_@
+   CREATEPARAMETERTYPE        : @_CREATEPARAMETERTYPE_@
+   CREATEPARAMETERISARRAY     : @_CREATEPARAMETERISARRAY_@
+   CREATEPARAMETERISLAST      : @_CREATEPARAMETERISLAST_@
+   +++
+@@END_IF@@
+@@END_TABLE@@
+   --- Create Routine Value Info:
+@@TABLE@@
+@@IF@@ @_EXIST:CREATEVALUE_@
+   CREATEVALUE                : @_CREATEVALUE_@
+   UNIFORM_CREATEVALUETYPE    : @_UNIFORM_CREATEVALUETYPE_@
+   CREATEVALUETYPE            : @_CREATEVALUETYPE_@
+   CREATEVALUEISARRAY         : @_CREATEVALUEISARRAY_@
+   CREATEVALUEPARAMETER       : @_CREATEVALUEPARAMETER_@
+   CREATEVALUEPARAMETERINDEX  : @_CREATEVALUEPARAMETERINDEX_@
+   CREATEVALUEPARAMETERCLASS  : @_CREATEVALUEPARAMETERCLASS_@
+   +++
+@@END_IF@@
+@@END_TABLE@@
++++
+@@END_TABLE@@
+@@END_IF@@

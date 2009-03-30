@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Ids for all callback routines for all Dob consumers.</summary>
+    <name>Safir.Dob.CallbackId</name>
+    <values>
+        <value>OnRevokedRegistration</value>
+        <value>OnCompletedRegistration</value>
+        <value>OnCreateRequest</value>
+        <value>OnUpdateRequest</value>
+        <value>OnDeleteRequest</value>
+        <value>OnInjectedNewEntity</value>
+        <value>OnInjectedUpdatedEntity</value>
+        <value>OnInjectedDeletedEntity</value>
+        <value>OnInitialInjectionsDone</value>
+        <value>OnServiceRequest</value>
+        <value>OnStopOrder</value>
+        <value>OnDoDispatch</value>
+        <value>OnResponse</value>
+        <value>OnNotRequestOverflow</value>
+        <value>OnNotMessageOverflow</value>
+        <value>OnRegistered</value>
+        <value>OnUnregistered</value>
+        <value>OnMessage</value>
+        <value>OnNewEntity</value>
+        <value>OnUpdatedEntity</value>
+        <value>OnDeletedEntity</value>
+        <value>None</value>
+    </values>
+</enumeration>

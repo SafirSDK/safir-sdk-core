@@ -1,0 +1,179 @@
+<ui version="4.0" >
+ <class>EntityDialogClass</class>
+ <widget class="QDialog" name="EntityDialogClass" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>269</width>
+    <height>240</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Create Vehicle</string>
+  </property>
+  <property name="windowIcon" >
+   <iconset resource="entitymw.qrc" >:/EntityMw/Resources/safir.png</iconset>
+  </property>
+  <layout class="QGridLayout" >
+   <item row="0" column="0" >
+    <layout class="QVBoxLayout" >
+     <item>
+      <widget class="QLabel" name="labelIdentification" >
+       <property name="minimumSize" >
+        <size>
+         <width>50</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text" >
+        <string>Identification</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelCategory" >
+       <property name="text" >
+        <string>Category</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelSpeed" >
+       <property name="text" >
+        <string>Speed</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelPositionLat" >
+       <property name="text" >
+        <string>Position (lat)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelPositionLong" >
+       <property name="text" >
+        <string>Position (long)</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="0" column="1" >
+    <layout class="QVBoxLayout" >
+     <item>
+      <widget class="QLineEdit" name="lineEditIdentification" />
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBoxCategory" />
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lineEditSpeed" />
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lineEditPositionLat" />
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lineEditPositionLong" />
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="1" >
+    <spacer>
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" >
+      <size>
+       <width>20</width>
+       <height>21</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="0" colspan="2" >
+    <layout class="QHBoxLayout" >
+     <property name="rightMargin" >
+      <number>11</number>
+     </property>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>5</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonOK" >
+       <property name="text" >
+        <string>OK</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonCancel" >
+       <property name="text" >
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonApply" >
+       <property name="text" >
+        <string>Apply</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="3" column="0" colspan="2" >
+    <widget class="QLineEdit" name="lineEditStatusBar" >
+     <property name="enabled" >
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11" />
+ <tabstops>
+  <tabstop>lineEditIdentification</tabstop>
+  <tabstop>comboBoxCategory</tabstop>
+  <tabstop>lineEditSpeed</tabstop>
+  <tabstop>lineEditPositionLat</tabstop>
+  <tabstop>lineEditPositionLong</tabstop>
+  <tabstop>pushButtonOK</tabstop>
+  <tabstop>pushButtonCancel</tabstop>
+  <tabstop>pushButtonApply</tabstop>
+  <tabstop>lineEditStatusBar</tabstop>
+ </tabstops>
+ <resources>
+  <include location="entitymw.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>pushButtonCancel</sender>
+   <signal>clicked()</signal>
+   <receiver>EntityDialogClass</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>153</x>
+     <y>137</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>220</x>
+     <y>84</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

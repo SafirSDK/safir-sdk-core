@@ -1,0 +1,22 @@
+PROJECT (lluf_utils)
+
+INCLUDE_DIRECTORIES(.)
+
+INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+
+#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DINOTIFY_THREAD_SAFE")
+
+FILE(GLOB sources *.cpp)
+
+ADD_LIBRARY(lluf_utils SHARED ${sources})
+
+TARGET_LINK_LIBRARIES(lluf_utils rt ACE boost_filesystem boost_date_time)
+
+INSTALL(DIRECTORY Safir DESTINATION $ENV{SAFIR_SDK}/include
+        PATTERN ".svn" EXCLUDE
+        PATTERN "*~" EXCLUDE)
+
+INSTALL(TARGETS lluf_utils 
+        RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin
+        LIBRARY DESTINATION $ENV{SAFIR_RUNTIME}/lib
+        ARCHIVE DESTINATION $ENV{SAFIR_SDK}/lib)

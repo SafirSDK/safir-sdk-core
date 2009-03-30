@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <name>Capabilities.Vehicles.Enum.Identity</name>
+  <values>
+    <value>Unknown</value>		
+    <value>Own</value>
+    <value>Friend</value>
+    <value>Hostile</value>
+  </values>
+
+</enumeration>

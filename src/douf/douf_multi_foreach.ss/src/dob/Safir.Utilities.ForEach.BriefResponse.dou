@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Brief response for a ForEach service request</summary>   
+  <name>Safir.Utilities.ForEach.BriefResponse</name>
+ 	<baseClass>Safir.Dob.SuccessResponse</baseClass>
+  <members>
+    <member>
+      <summary>Number of successful responses</summary>
+      <name>NumberOfSuccessResponses</name>
+      <type>Int32</type>
+    </member>
+    <member>
+      <summary>Number of unsuccessful responses</summary>
+      <name>NumberOfErrorResponses</name>
+      <type>Int32</type>
+    </member>
+    <member>
+      <summary>Number of total responses</summary>
+      <name>NumberOfResponses</name>
+      <type>Int32</type>
+    </member>
+  </members>
+  </class>

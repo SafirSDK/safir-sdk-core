@@ -1,0 +1,27 @@
+with "externally_built_library";
+
+project douf_time_library is
+
+   for Source_Dirs use ();
+
+   for library_dir use Externally_Built_Library'library_dir;
+
+   case Externally_Built_Library.OS is
+      when "Linux" =>
+          for Library_name use "douf_time_library";
+      when "Windows_NT" =>
+          case Externally_Built_Library.Build is
+             when "debug" =>
+               for Library_name use "douf_time_libraryd";
+
+             when others =>
+               for Library_name use "douf_time_library";
+          end case;
+   end case;
+
+   for Library_kind  use "dynamic";
+
+   for Externally_Built use "true";
+
+
+end douf_time_library;

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Used to report the allocation status of a dynamic resource</summary>
+  <name>Safir.SwReports.Internal.ResourceReport</name>
+  <baseClass>Safir.SwReports.Internal.Report</baseClass>
+  <members>
+    <member>
+      <summary>Application unique identification of the resource</summary>
+      <name>Id</name>
+      <type>String</type>
+      <maxLength>50</maxLength>
+    </member>
+    <member>
+      <summary>Indicates if the resource is allocated or not</summary>
+      <name>Allocated</name>
+      <type>Boolean</type>
+    </member>
+  </members>
+</class>

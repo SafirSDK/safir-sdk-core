@@ -1,0 +1,193 @@
+-- Default project setings for SS2000 systems.
+--
+-- 2002-07-10 Added support for different release and debug configurations.
+-- 2004-11-29 Removed -fstack-check since it is not mandatory under windows.
+-- 2005-12-12 Removed frontend inlining after recomendatios from AdaCore
+--              the backend is is doing a better job when left alone.
+-- 2005-02-17 Remove acceptance of Ada05 reserver words.
+--             The code must now be both Ada95 and Ada05 Compliant.
+-- 2005-02-17 Enable Full Ada05
+-- 2008-01-15 STLRHA Removed apex dependency and source file.
+--
+-- Some useful Compile switches valid as of GNAT 3.16w
+-- ===================================================
+-- -gnatq         - Don't quit, try semantics, even if parse errors
+-- -gnatE         - Dynamic elaboration checking mode enabled
+-- -gnatc         - Turn on constant conditional Warnings
+-- -gnatf         - Turn on unreferenced formal warnings
+-- -gnatf         - Turn on warnings for hiding variables
+-- -gnatl         - Turn on elaboration warnings
+-- -gnatp         - Turn on warnings for ineffective pragma inline
+-- -gnatr         - Turn on redundant construct warnings
+-- -gnate         - Treat all warnings as errors
+-- -gnatQ         - Don't quit, write ali/tree file even if compile errors
+-- -fstack-check  - Generate code to verify that you do not go
+--                  beyond the boundary of the stack.
+--                  See GCC manual for further info.
+-- -gnatwaL       - Generate optional warnings (Most of them above).
+--                  But suppress elaboration warnings. See GNAT UG.
+-- -gnato         - Numeric overflow checks.
+-- -gnatR[1..3]   - Level of rep spec info. 1 - least, 3 - most
+-- -pg            - Generate profiling information usable with the
+--                  gprof tool. Must link with -gmon and
+--                  use the gcrt2.o runtime.
+-- -O0            - No optimization (the default)
+-- -O1            - Medium level optimization
+-- -O2            - Full optimization
+-- -Os            - Full opimisation but dont trade size for speed.
+-- -O3            - Full optimization, and also attempt automatic
+--                  inlining of small subprograms within a unit
+--
+-- Some useful gnatmake swithces.
+-- ==============================
+-- -g             - Generate debugging information.
+-- -C             - Cache source mappings: invoke the compiler
+--                  with a mapping file.
+-- -s             - Recompile if compiler switches have changed.
+-- -k             - Keep going after compilation errors.
+-- -j n           - Use n number of processors processes to compile.
+--
+-- Some useful gnatlink switches.
+-- ==============================
+-- -f             - "On some targets, the command line length is limited,
+--                  and gnatlink will generate a separate file for the linker
+--                  if the list of object files is too long.
+--                  The -f flag forces this file to be generated even if
+--                  the limit is not exceeded. This is useful in some cases
+--                  to deal with special situations where the command line
+--                  length is exceeded." -- GNAT User Guide, 3.16w1
+--                  THIS PARAMETER SHOULD ALWAYS BE SPECIFIED.
+--
+-- ========================================================================
+--with "apex.gpr";
+project syst_Default is
+
+   type Build_Type is ("release", "debug","gcov","gperf","normal");
+   Build : Build_Type := external ("BUILD", "debug");
+
+   type Warning_Levels is ("Default","Elaboration","Full");
+   Warning_Level : Warning_Levels := external ("Warning_Level", "Default");
+
+   type boolean is ("False","True");
+
+   for source_files use ();
+   for Object_Dir use "lib-obj/" & Build;
+   for Exec_Dir use ".";-- & Build;
+
+   -- ========================================================================
+   -- BUILDER
+   -- ========================================================================
+   package Builder is
+      for Default_Switches("Ada") use
+        (-- "-C", -- Cache source mappings
+         "-k", -- Keep going after compilation errors
+         "-s", -- Recompile if compiler switches have changed
+         "-j" &  external ("NUMBER_OF_PROCESSORS", "1"));
+
+      case Build is
+         when "release" =>
+            for Default_Switches("Ada") use
+              Builder'Default_Switches("Ada");
+         when "debug" =>
+            for Default_Switches("Ada") use
+              Builder'Default_Switches("Ada") &
+              ("-g"); -- debug.
+         when "gcov" | "gperf" |"normal" =>
+            for Default_Switches("Ada") use
+              Builder'Default_Switches("Ada");
+      end case;
+   end Builder;
+
+   -- ========================================================================
+   -- COMPILER
+   -- ========================================================================
+   package Compiler is
+      for Default_Switches("Ada") use
+        ("-gnatf", -- Full source path in brief error messages
+         "-gnatwa",-- Turn on all optional warnings (except d,h,l)
+         "-gnatq", -- Don't quit, try semantics, even if parse errors
+         "-gnatQ",  -- Don't quit, write ali/tree file even if compile errors
+         --  "-fstack-check",  -- Since we are running multiple threads.
+         "-gnat05");
+
+
+      case Build is
+         when "release" =>
+            for Default_Switches("Ada") use
+              Compiler'Default_Switches("Ada") &
+              ("-Os",    -- Full optimisation dont trade size for speed.
+               -- "-gnatN", -- Full (frontend) inlining of subprograms
+               "-Wuninitialized", -- Use backend to find uninitialized
+              "-gnatn");-- Inlining of subprograms.
+
+         when "debug" =>
+            for Default_Switches("Ada") use
+              Compiler'Default_Switches("Ada") &
+              ("-g",
+               "-gnatVa", -- Turn on all validity checking options
+               "-O0",     -- Optimisation level 0 (-Wuninitialized inefective)
+               "-gnato",  -- Enable overflow checking (off by default)
+               "-gnata"); -- Enable assertions.
+
+         when "normal" =>
+            for Default_Switches("Ada") use
+              Compiler'Default_Switches("Ada") &
+              ("-gnatVa", --turn on all validity checking options
+               "-Wuninitialized", -- Use backend to find uninitialized
+               "-O1");     --Optimisation level 1
+           when "gcov" | "gperf" =>
+            for Default_Switches("Ada") use
+              Compiler'Default_Switches("Ada");
+      end case;
+
+      case Warning_Level is
+         when "Elaboration" =>
+            for Default_Switches("Ada") use
+              Compiler'Default_Switches("Ada") & ("-gnatwl");
+            -- Warn for possible elaboration problem.
+         when "Full" =>
+            for Default_Switches("Ada") use
+              Compiler'Default_Switches("Ada") & ("-gnatwbdhl");
+            -- Warn for every thing.
+         when  "Default" =>
+            for Default_Switches("Ada") use
+              Compiler'Default_Switches("Ada");
+      end case;
+   end Compiler;
+
+   -- ========================================================================
+   -- LINKER
+   -- ========================================================================
+   package Linker is
+      for Default_Switches("Ada") use();
+   end Linker;
+
+   -- ========================================================================
+   -- GNATLS
+   -- ========================================================================
+
+   package Gnatls is
+      for Switches use ("-v");
+   end Gnatls;
+
+   package Binder is
+      for Default_Switches("Ada") use
+        ("-E");-- Include Stack traceback in Exception message.
+   end Binder;
+
+   -- ========================================================================
+   -- XXXXX
+   -- ========================================================================
+
+-- Is this really needed: What does it mean?!?!
+--   for Externally_Built use "true";
+
+
+   -- ========================================================================
+   -- OS Detection
+   -- ========================================================================
+    
+   type OS_Type is ("Windows_NT", "Linux");
+   OS : OS_Type := external("OS", "Linux");
+end syst_Default;
+

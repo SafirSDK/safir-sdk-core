@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<property xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Defines the timeout time for requests. This value is inherited by child classes.</summary>
+    <name>Safir.Dob.RequestTimeoutProperty</name>
+    <members>
+        <member>
+            <summary>Timeout time for a request (seconds)</summary>
+            <name>Timeout</name>
+            <type>Second32</type>
+        </member>
+    </members>
+</property>

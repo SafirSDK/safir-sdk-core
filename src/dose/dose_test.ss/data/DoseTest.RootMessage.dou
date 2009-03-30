@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>DoseTest.RootMessage</name>
+    <baseClass>Safir.Dob.Message</baseClass>
+    <members>
+        <member>
+            <name>Info</name>
+            <type>String</type>
+            <maxLength>500</maxLength>
+        </member>
+    </members>
+</class>

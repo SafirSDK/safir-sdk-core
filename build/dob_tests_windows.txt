@@ -1,0 +1,19 @@
+#COPY DOB FILES
+copy_dob_files   src/dots/dots_test.ss/data
+copy_dob_files   src/dose/dose_test.ss/data
+
+build_dots_generated
+
+build_dir        src/dots/dots_test.ss/cpp/DotsTestCpp                   release
+build_dir        src/dots/dots_test.ss/dotnet/DotsTestDotnet
+build_dir        src/dose/dose_test.ss/cpp                           release
+build_dir        src/dose/dose_test.ss/dotnet
+build_dir        src/dose/dose_test.ss/Sequencer                     release
+build_dir        src/dose/dose_test.ss/StressTests/EntityIntegrityChecker        release
+#build_dir        src/dose/dose_test.ss/StressTests/EntityReceptionVerifier       release
+#build_dir        src/dose/dose_test.ss/StressTests/EntityStresser                release
+#build_dir        src/dose/dose_test.ss/StressTests/MessageLatencies              release
+#build_dir        src/dose/dose_test.ss/StressTests/MessageStresser               release
+#build_dir        src/dose/dose_test.ss/StressTests/MultiPingPong                 release
+#build_dir        src/dose/dose_test.ss/StressTests/RequestLatencies              release
+#build_dir        src/dose/dose_test.ss/StressTests/RequestStresser               release

@@ -1,0 +1,145 @@
+///////
+This file is included into the main SUG document, and is located under header level "==="
+///////
+
+The Tracer is intended to be used for developer/integration logging inside applications. It should never be used as the sole target for logging errors, since the output can only be viewed by developers or integration. A common way to use trace logging is to log "significant events" or other points of interest, so that the developer can find out what his component is doing when running in a reference site or when running in a situation when it is not desirable or possible to halt execution with a debugger.
+
+The functionality is supported in C\+\+, C#, Ada and Java. The interface to the trace logging functionality is a class named _Tracer_ (which is how it will be referred to in the rest of this chapter).
+
+==== How to use
+
+The main goal of the Tracer class is for it to be as easy to use as possible, and that its usage should be as close to the languages own text input/output-syntax as possible. 
+
+1. Instantiate the Tracer class in each of the classes/packages where you want to use trace logging. Each instantiation requires a "prefix" which is used to enable and disable the logging from each tracer instantiation (described below). Several Tracer instances can use the same prefix, and will then all be enabled/disabled by the same command.
+2. Log to the tracer-instance (in this example the instance is called "debug"):
+ - *C\+\+*
++
+[cpp]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+debug << "Testing logging " << myFloat << ", " << myInt << std::endl;
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ - *C#*
++
+[cs]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+debug.WriteLine("Testing logging {0}, {1}",myFloat,myInt);
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ - *Ada*
++
+[pascal]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+debug.Put_Line("Testing logging " & Float'Wide_Image(myFloat) &
+               ", " & Float'Wide_Image(myInt));
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ - *Java*
++
+[java]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+debug.println("Testing logging " + myFloat + ", " + myInt);
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+3. Enable and disable the logging by using the "backdoor" command. Send "<prefix> on" to turn on the logging of a prefix (also try "help" to see what prefixes are registered and what their current states are). To do this, type "backdoor -c myconnection myprefix on" in a command line window (if you skip the "-c myconnection" bit you will send the command to all applications in the system, which may have undesired consequences).
+ - It is possible to turn on/off all prefixes by sending "all on" to your application.
+ - It is possible to turn on/off prefixes immediately from the start of an application by setting the environment variable FORCE_LOG to one or several "<prefix>" or "all". This is useful to be able to have logging on by default or for logging the startup behaviour of an application. See <<force_log>> for a few hints on how this feature can be used.
+ - Log output will be sent to the swre_logger application. Remember that it is possible to filter output in the swre_logger. Do a swre_logger -? to find out how to do it.
+ - Log output is also sent to the applications standard output (its console).
+
+
+==== Notes
+Some notes on how the Tracer works and is implemented.
+
+*Buffering:* Logging is buffered. The buffer is flushed every 0.5 seconds into one ProgramInformationReport. This means that a lot of output will be sent as one report.
+
+*Prefixes:* The prefix is not "registered" in the internal data structures until it is actually used (the reason for this is rather complicated). This means that if you send a backdoor help command to your application before all Tracers (with unique prefixes, of course) have been used, you will not see all your prefixes in the help text.
+
+*Extra threads and connections:* When logging is on an extra thread will be started in the application. This thread has its own Dob connection from which the output will be sent. The Connection name is set to the name of the process and the PID of the process. One upshot from this is that if all applications logs are turned on at the same time the number of connections in the system may double. The easiest way to avoid this is to only turn on logging in the application(s) that you are interested in (Use the -c <connectionName> syntax when using "backdoor").
+
+*When to start logging:* A rule for using the Tracer is to not send any output to it before you have opened your own connection (instantiation is ok though). Since the connection is usually opened in the constructor of the application this means that all that should be avoided is logging in constructors that are called by the application constructor.
+
+===== Expression expansion
+
+The checking of whether a prefix is enabled happens in slightly different ways in the different languages, which means that depending on how you use the logger you may pay for string expansion or you may not.
+
+- In C\+\+ the check is made once for every "<<", but since the check is inlined it can be considered cheap. Floats and suchlike are not expanded into strings until after the check has "been successful", so it is ok to log most stuff using lines like 
++
+[cpp]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+debug << "Testing logging " << myFloat << ", " << myInt << std::endl;
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- In C# the check is made for every +Write+ or +WriteLine+ call, which means that if you log using the form
++
+[cs]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+debug.WriteLine("Hello " + 123.098);
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++
+the whole string expansion will be performed before the check is made. It is better to use the form
++
+[cs]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+debug.WriteLine("Hello {0}", 123.098);
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++
+since the string expansion will not be performed until the check has passed.
+- In Ada the check is made for every call to Put or Put_Line. As far as the author is aware there is no equivalent of the C# functionality in Ada, so it is not possible to avoid the check without encapsulating the debugging inside if-statements.
+- In Java the check is made for every +print+ or +println+ call that is made. The tracer supports the +printf(...)+ functions that will give the similar functionality as C# described above. Check out the documentation for javas +PrintWriter+ to find out how to use this syntax.
+
+Sometimes you might have something that is expensive to calculate in your logs, for example something like 
+
+[cpp]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+debug << "Average: " << ExpensiveAverageCalculation() << std::endl;
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+where the expensive function will be called every time the statement executed whether or not the prefix is enabled. In this situation it is better to check whether logging is enabled using +debug.IsEnabled()+ before doing the logging, like this:
+
+[cpp]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if (debug.IsEnabled()) 
+{
+    debug << "Average: " << ExpensiveAverageCalculation() << std::endl;
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This applies to all languages, even if this example was in C\+\+.
+
+
+[[force_log]]
+==== The FORCE_LOG environment variable
+There are a few different ways that the FORCE_LOG environment variable can be used.
+
+The first is, naturally, to set the environment variable in the System Properties --> Environment Variables dialog (in Windows), or in your .bashrc file (for Unix bash shell users). This has the sometimes unfortunate side effect of turning on the selected prefixes for all applications, which can be a problem if several applications use the same prefix, or if you set FORCE_LOG to "all" which will mean that all applications will log everything.
+
+The second way is to start your program from the command line: First run +set FORCE_LOG="something somethingelse"+ (Windows again, unix bash shell users do +export FORCE_LOG=...+), and then run your application from the command line. Now only your application will be run with those settings. This same way can of course be used in a script.
+
+Lastly, if you want to run your program from the Visual Studio debugger with trace logging on by default, there is support for that too. Under Project Settings --> Debugging --> Environment it is possible to set environment variables. So set FORCE_LOG="all" there to get your program to start with all logging enabled. Also make sure that "Merge Environment" is set to Yes, or your program (and the libraries it depends on) will not be able to read other environment variables.
+
+==== Troubleshooting the tracer
+
+Some solutions to common problems.
+
+Why do I have to call +flush()+ to get the logging to work?::
+  You don't. You need to send a +std::endl+ directly to the tracer to end lines. Do not use "\n" in your strings to generate newlines, and don't expect +std::endl+'s that you've put into a +std::wostringstream+ to generate a flush in the tracer.
++
+The reason is that +std::endl+ is in fact a function object that, when passed into an output stream (such as +std::ofstream+, +std::wcout+ and the swre tracer), generate one newline and one flush call. The flush call is interpreted by the swre tracer as a request to flush the buffers "soon", so the tracer starts a timer which will flush the buffers in half a second, hoping to collect more trace statements that can be sent along as well.
++
+An explicit call to flush() will generate an immediate flushing of the buffers (as opposed to the timed kind), and should only be used when you explicitly need to get the buffers completely flushed immediately. One use I can think of is to add a call to flush() when debugging, to get all trace statements flushed just before entering some code that crashes.
++
+In short: If you have to add flush() statements to your code to get the logging to work, you're not using the tracer right.
+
+Can I get timestamps on every trace line?::
+  No, sorry. That is not implemented (yet).
+
+Can I get logging to only go to <my favourite logging output>?::
+  Nope, but I've toyed with the idea of making it possible to explicitly control the logging output to
++
+- a UDP port (with or without broadcast)
+- Program Information
+- stdout/stderr
+- etc.
++
+But this is not implemented yet...
+

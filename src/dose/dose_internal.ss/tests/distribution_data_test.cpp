@@ -1,0 +1,98 @@
+/******************************************************************************
+*
+* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+*
+* Created by: Lars Hagström / stlrha
+*
+*******************************************************************************
+*
+* This file is part of Safir SDK Core.
+*
+* Safir SDK Core is free software: you can redistribute it and/or modify
+* it under the terms of version 3 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* Safir SDK Core is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+*
+******************************************************************************/
+
+#include <Safir/Dob/Internal/DistributionData.h>
+#include <Safir/Dob/Internal/SharedMemoryObject.h>
+#include <Safir/Dob/Message.h>
+#include <Safir/Dob/Typesystem/Serialization.h>
+
+using namespace Safir::Dob::Internal;
+using namespace Safir::Dob::Typesystem;
+
+class ShmStatistics:
+    public SharedMemoryObject
+{
+public:
+    ShmStatistics():m_lastFree(0) {}
+
+    void DumpMemoryUsage()
+    {
+        Int64 free = GetSharedMemory().get_free_memory();
+        std::wcout << "Size / Free = " << GetSharedMemory().get_size() << " / " << free << std::endl;
+        std::wcout << "Allocated delta = " << free - m_lastFree << std::endl;
+        m_lastFree = free;
+    }
+private:
+    Int64 m_lastFree;
+};
+
+int main()
+{
+    ShmStatistics stats;
+    stats.DumpMemoryUsage();
+    {
+        Safir::Dob::MessagePtr m = Safir::Dob::Message::Create();
+        Safir::Dob::Typesystem::BinarySerialization ser;
+        Safir::Dob::Typesystem::Serialization::ToBinary(m,ser);
+
+        DistributionData d(message_tag,ConnectionId(100,100),Safir::Dob::Typesystem::ChannelId(),&ser[0]);
+
+        std::wcout << d.Image() << std::endl;
+        {
+            DistributionData d2 (d);
+            std::wcout << d.Image() << std::endl;
+            std::wcout << d2.Image() << std::endl;
+        }
+        std::wcout << d.Image() << std::endl;
+
+
+        DistributionData d3(message_tag,ConnectionId(666,666),Safir::Dob::Typesystem::ChannelId(),&ser[0]);
+        d3 = d;
+        std::wcout << d.Image() << std::endl;
+        std::wcout << d3.Image() << std::endl;
+
+        const char * extRef = d.GetReference();
+        std::wcout << d.Image() << std::endl;
+        DistributionData::DropReference(extRef);
+        std::wcout << d.Image() << std::endl;
+
+        char * extAlloc = DistributionData::NewData(d.Size());
+        memcpy(extAlloc,extRef,d.Size());
+        d3 = DistributionData(new_data_tag, extAlloc);
+        std::wcout << d.Image() << std::endl;
+        std::wcout << d3.Image() << std::endl;
+
+        {
+            DistributionData d4(message_tag,ConnectionId(3445,34455),Safir::Dob::Typesystem::ChannelId(),&ser[0]);
+            DistributionData d5 = d4;
+            extRef = d4.GetReference();
+            DistributionData d6 = d5;
+        }
+
+        DistributionData::DropReference(extRef);
+    }
+    stats.DumpMemoryUsage();
+    return 0;
+}
+

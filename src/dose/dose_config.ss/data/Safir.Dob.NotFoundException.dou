@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<exception xmlns="urn:safir-dots-unit">
+    <summary>Thrown when eg GetFreeInstance can not find a free instance.</summary>
+    <name>Safir.Dob.NotFoundException</name>
+    <baseClass>exception</baseClass>
+</exception>

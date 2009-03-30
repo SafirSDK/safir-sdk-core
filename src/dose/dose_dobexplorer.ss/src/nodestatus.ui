@@ -1,0 +1,54 @@
+<ui version="4.0" >
+ <class>NodeStatus</class>
+ <widget class="QWidget" name="NodeStatus" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Node Statuses</string>
+  </property>
+  <layout class="QHBoxLayout" >
+   <item>
+    <widget class="QTableWidget" name="nodeTable" >
+     <column>
+      <property name="text" >
+       <string>ID</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>x</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>IP Address</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>State</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Packets</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

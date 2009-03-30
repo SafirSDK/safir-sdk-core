@@ -1,0 +1,14 @@
+PROJECT (container_test)
+INCLUDE_DIRECTORIES($ENV{SAFIR_SDK}/include)
+LINK_DIRECTORIES($ENV{SAFIR_RUNTIME}/lib)
+FILE(GLOB sources *.cpp)
+
+SET(CMAKE_CXX_FLAGS "-Wall")
+
+ADD_EXECUTABLE(container_test ${sources})
+TARGET_LINK_LIBRARIES(container_test dots_cpp dots_generated-cpp)
+
+INSTALL(TARGETS container_test
+        RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin
+        LIBRARY DESTINATION $ENV{SAFIR_RUNTIME}/lib
+        ARCHIVE DESTINATION $ENV{SAFIR_SDK}/lib)

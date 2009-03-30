@@ -1,0 +1,89 @@
+Release: douf 1.5			   2009-02-04 STSYLI
+---------------------------------------------------------------------
+
+
+douf_multi_foreach.ss
+---------------------
+New scenarios for sate_robot
+Updated testprograms for SDK 3.2
+Removed old testprogram that didn't compile against SDK 3.2.
+Changed the project file.
+The d-suffix is removed when building the debug executable.
+Inserted correct GPL headers.
+Clean up of code.
+
+douf_time_library.ss
+---------------------
+-
+
+
+douf_time_mix.ss
+---------------------
+Updated testprograms for SDK 3.2.
+
+
+douf_utilities_mix.ss:
+---------------------
+Updated testprograms for SDK 3.2.
+
+
+
+
+Release: douf 1.4 			   2008-11-27 STSYLI
+---------------------------------------------------------------------
+
+
+Updated file headers to contain license information (GPL).
+Port to DOB v4.
+
+
+douf_multi_foreach.ss
+---------------------
+
+Added new service DeleteAllRequest to delete all instances of a typeId.
+
+
+douf_time_library.ss
+---------------------
+-
+
+
+douf_time_mix.ss
+---------------------
+-
+
+
+douf_utilities_mix.ss:
+---------------------
+
+Update for CMake 2.6.
+
+
+
+Release: douf 1.3 			   2008-04-29 STMRWE
+---------------------------------------------------------------------
+
+
+douf_multi_foreach.ss
+---------------------
+
+First component release.
+
+
+douf_time_library.ss
+---------------------
+
+First component release.
+
+
+douf_time_mix.ss
+---------------------
+
+First component release.
+
+
+douf_utilities_mix.ss:
+---------------------
+
+First component release.
+

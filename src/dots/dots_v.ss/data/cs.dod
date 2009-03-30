@@ -1,0 +1,1190 @@
+@@-------------------------------------------------------------------------------
+@@--
+@@--  Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+@@--
+@@--  Created by: Henrik Sundberg / sthesu
+@@--
+@@-------------------------------------------------------------------------------
+@@IF@@ @_SECTION_@ = "Parameters"
+File_Extension:"cs"
+Filename_Separator:"."
+Output_Directory:"dotnet/"
+Namespace_Separator:"."
+Lowercase_Namespace:"False"
+Lowercase_Filenames:"False"
+Object_Type:"Object"
+Index_Type:"Int32"
+@@--
+@@-- Exceptions are defined like this:
+@@--   Exception:<dou>:"<generated>":"<dependency>"
+@@-- E.g.:
+@@--   Exception:illegalValue:"Safir::Dots::IllegalValue":"dots/dots_defs"
+@@-- defines "illegalValue" as an exceptionname in the xml-syntax (dou-file).
+@@-- And "Safir::Dots::IllegalValue" to be used where the actual type is needed in the code.
+@@-- And that "dots/dots_defs" (with file extension added below) is to be included due to this.
+@@--
+Exception:exception:"Safir.Dob.Typesystem.Exception":""
+Exception:fundamentalException:"Safir.Dob.Typesystem.FundamentalException":""
+Exception:configurationError:"Safir.Dob.Typesystem.ConfigurationErrorException":""
+Exception:incompatibleTypes:"Safir.Dob.Typesystem.IncompatibleTypesException":""
+Exception:illegalValue:"Safir.Dob.Typesystem.IllegalValueException":""
+Exception:nullValue:"Safir.Dob.Typesystem.NullValueException":""
+Exception:softwareViolation:"Safir.Dob.Typesystem.SoftwareViolationException":""
+@@--
+@@-- Types are defined like this:
+@@--   Type:<dou>:<set/get>:"<generated>":"<dependency>"
+@@-- E.g.:
+@@--   Type:String:String:"Safir::Dots::String":"dots/dots_defs"
+@@-- defines "String" as a typename in the xml-syntax (dou-file).
+@@-- And "String" to be the @_UNIFORM_MEMBERTYPE_@, used in the name of Set/Get routines.
+@@-- And "Safir::Dots::String" to be used where the actual type is needed in the code.
+@@-- And that "dots/dots_defs" (with file extension added below) is to be included due to this.
+@@--
+Type:Int32:Int32:"System.Int32":""
+Type:Int64:Int64:"System.Int64":""
+Type:Float32:Float32:"System.Single":""
+Type:Float64:Float64:"System.Double":""
+Type:Boolean:Boolean:"bool":""
+Type:String:String:"string":""
+Type:EntityId:EntityId:"Safir.Dob.Typesystem.EntityId":""
+Type:TypeId:TypeId:"System.Int64":""
+Type:InstanceId:InstanceId:"Safir.Dob.Typesystem.InstanceId":""
+Type:ChannelId:ChannelId:"Safir.Dob.Typesystem.ChannelId":""
+Type:HandlerId:HandlerId:"Safir.Dob.Typesystem.HandlerId":""
+Type:Binary:Binary:"byte[]":""
+Type:Object:Object:"Safir.Dob.Typesystem.Object":""
+Type:Ampere32:Si32.Ampere:"System.Single":""
+Type:CubicMeter32:Si32.CubicMeter:"System.Single":""
+Type:Hertz32:Si32.Hertz:"System.Single":""
+Type:Joule32:Si32.Joule:"System.Single":""
+Type:Kelvin32:Si32.Kelvin:"System.Single":""
+Type:Kilogram32:Si32.Kilogram:"System.Single":""
+Type:Meter32:Si32.Meter:"System.Single":""
+Type:MeterPerSecond32:Si32.MeterPerSecond:"System.Single":""
+Type:MeterPerSecondSquared32:Si32.MeterPerSecondSquared:"System.Single":""
+Type:Newton32:Si32.Newton:"System.Single":""
+Type:Pascal32:Si32.Pascal:"System.Single":""
+Type:Radian32:Si32.Radian:"System.Single":""
+Type:RadianPerSecond32:Si32.RadianPerSecond:"System.Single":""
+Type:RadianPerSecondSquared32:Si32.RadianPerSecondSquared:"System.Single":""
+Type:Second32:Si32.Second:"System.Single":""
+Type:SquareMeter32:Si32.SquareMeter:"System.Single":""
+Type:Steradian32:Si32.Steradian:"System.Single":""
+Type:Volt32:Si32.Volt:"System.Single":""
+Type:Watt32:Si32.Watt:"System.Single":""
+Type:Ampere64:Si64.Ampere:"System.Double":""
+Type:CubicMeter64:Si64.CubicMeter:"System.Double":""
+Type:Hertz64:Si64.Hertz:"System.Double":""
+Type:Joule64:Si64.Joule:"System.Double":""
+Type:Kelvin64:Si64.Kelvin:"System.Double":""
+Type:Kilogram64:Si64.Kilogram:"System.Double":""
+Type:Meter64:Si64.Meter:"System.Double":""
+Type:MeterPerSecond64:Si64.MeterPerSecond:"System.Double":""
+Type:MeterPerSecondSquared64:Si64.MeterPerSecondSquared:"System.Double":""
+Type:Newton64:Si64.Newton:"System.Double":""
+Type:Pascal64:Si64.Pascal:"System.Double":""
+Type:Radian64:Si64.Radian:"System.Double":""
+Type:RadianPerSecond64:Si64.RadianPerSecond:"System.Double":""
+Type:RadianPerSecondSquared64:Si64.RadianPerSecondSquared:"System.Double":""
+Type:Second64:Si64.Second:"System.Double":""
+Type:SquareMeter64:Si64.SquareMeter:"System.Double":""
+Type:Steradian64:Si64.Steradian:"System.Double":""
+Type:Volt64:Si64.Volt:"System.Double":""
+Type:Watt64:Si64.Watt:"System.Double":""
+@@--
+@@--
+@@--
+@@--
+@@--
+@@--
+@@ELSIF@@ @_SECTION_@ = "Code"
+@@--
+@@-- HEADER
+@@--
+using System;
+
+namespace @_NAMESPACE_@
+{
+@@IF@@ @_UNITTYPE_@=property
+@@--
+@@-- PROPERTY
+@@--
+
+@@IF@@ @_EXIST:CLASSSUMMARY_@
+    /// <summary>
+    /// @_REPLACE_ALL(\n/\n    /// ):CLASSSUMMARY_@
+    /// </summary>
+@@END_IF@@
+    public class @_CLASS_@
+    {
+
+        public static bool HasProperty(Safir.Dob.Typesystem.Object obj)
+        {
+            return Safir.Dob.Typesystem.Operations.HasProperty(obj.GetTypeId(), ClassTypeId);
+        }
+
+        #region Property members
+
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+        //@_MEMBER_@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+        public static System.Int32 @_MEMBER_@ArraySize(Safir.Dob.Typesystem.Object obj)
+        {
+            Init();
+            return Safir.Dob.Typesystem.Properties.GetArraySize(obj.GetTypeId(), ClassTypeId, @_LOWER:MEMBER_@MemberIndex);
+        }
+
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <summary>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+        /// </summary>
+@@END_IF@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index, @_MEMBERTYPE_@.Enumeration val)
+        {
+            Init();
+            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, (System.Int32) val, @_LOWER:MEMBER_@MemberIndex, index);
+@@ELSE@@
+        public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index, @_MEMBERTYPE_@ val)
+        {
+            Init();
+            Safir.Dob.Typesystem.Properties.Set(obj, ClassTypeId, val, @_LOWER:MEMBER_@MemberIndex, index);
+@@END_IF@@
+        }
+
+        public static void SetNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        {
+            Init();
+            Safir.Dob.Typesystem.Properties.SetNull(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, index);
+        }
+
+        public static bool IsNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        {
+            Init();
+            return Safir.Dob.Typesystem.Properties.IsNull(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, index);
+        }
+
+        public static bool IsChanged@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        {
+            Init();
+            return Safir.Dob.Typesystem.Properties.IsChanged(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, index);
+        }
+
+        public static bool IsReadOnly@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        {
+            Init();
+            return Safir.Dob.Typesystem.Properties.IsReadOnly(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, index);
+        }
+
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <summary>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+        /// </summary>
+@@END_IF@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        public static @_MEMBERTYPE_@ Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        {
+            Safir.Dob.Typesystem.Object val;
+            Init();
+            Safir.Dob.Typesystem.Properties.Get(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, index);
+@@IF@@ @_MEMBERTYPE_@="Safir.Dob.Typesystem.Object"
+            return val;
+@@ELSE@@
+            return (@_MEMBERTYPE_@)val;
+@@END_IF@@
+        }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        public static @_MEMBERTYPE_@.Enumeration Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        {
+            System.Int32 val;
+            Init();
+            Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, index);
+            return (@_MEMBERTYPE_@.Enumeration) val;
+        }
+@@ELSE@@
+        public static @_MEMBERTYPE_@ Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        {
+            @_MEMBERTYPE_@ val;
+            Init();
+            Safir.Dob.Typesystem.Properties.Get(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, index);
+            return val;
+        }
+@@END_IF@@
+@@ELSE@@
+        /// <summary>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+        /// </summary>
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, @_MEMBERTYPE_@.Enumeration val)
+        {
+            Init();
+            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, (System.Int32) val, @_LOWER:MEMBER_@MemberIndex, 0);
+        }
+@@ELSE@@
+        public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, @_MEMBERTYPE_@ val)
+        {
+            Init();
+            Safir.Dob.Typesystem.Properties.Set(obj, ClassTypeId, val, @_LOWER:MEMBER_@MemberIndex, 0);
+        }
+@@END_IF@@
+
+        public static void SetNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
+        {
+            Init();
+            Safir.Dob.Typesystem.Properties.SetNull(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, 0);
+        }
+
+        public static bool IsNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
+        {
+            Init();
+            return Safir.Dob.Typesystem.Properties.IsNull(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, 0);
+        }
+
+        public static bool IsChanged@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
+        {
+            Init();
+            return Safir.Dob.Typesystem.Properties.IsChanged(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, 0);
+        }
+
+        public static bool IsReadOnly@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
+        {
+            Init();
+            return Safir.Dob.Typesystem.Properties.IsReadOnly(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, 0);
+        }
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <summary>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+        /// </summary>
+@@END_IF@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        public static @_MEMBERTYPE_@ Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
+        {
+            Safir.Dob.Typesystem.Object val;
+            Init();
+            Safir.Dob.Typesystem.Properties.Get(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, 0);
+@@IF@@ @_MEMBERTYPE_@="Safir.Dob.Typesystem.Object"
+            return val;
+@@ELSE@@
+            return (@_MEMBERTYPE_@)val;
+@@END_IF@@
+        }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        public static @_MEMBERTYPE_@.Enumeration Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
+        {
+            System.Int32 val;
+            Init();
+            Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, 0);
+            return (@_MEMBERTYPE_@.Enumeration) val;
+        }
+@@ELSE@@
+        public static @_MEMBERTYPE_@ Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
+        {
+            @_MEMBERTYPE_@ val;
+            Init();
+            Safir.Dob.Typesystem.Properties.Get(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, 0);
+            return val;
+        }
+@@END_IF@@
+@@END_IF@@
+
+@@END_IF@@
+@@END_TABLE@@
+        #endregion
+
+        //Type id for @_CLASS_@
+        public static System.Int64 ClassTypeId = @_TYPEID_@;
+
+        #region Indices
+
+        private static void Init()
+        {
+            if (!isInit)
+            {
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+                @_LOWER:MEMBER_@MemberIndex=Safir.Dob.Typesystem.Members.GetIndex(ClassTypeId, "@_MEMBER_@");
+@@END_IF@@
+@@END_TABLE@@
+                isInit=true;
+            }
+        }
+
+
+        private static bool isInit = false;
+
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+        private static System.Int32 @_LOWER:MEMBER_@MemberIndex = -1;
+@@END_IF@@
+@@END_TABLE@@
+        #endregion
+    }
+@@ELSIF@@ @_UNITTYPE_@=class
+@@--
+@@-- CLASS
+@@--
+
+@@IF@@ @_EXIST:CLASSSUMMARY_@
+    /// <summary>
+    /// @_REPLACE_ALL(\n/\n    /// ):CLASSSUMMARY_@
+    /// </summary>
+@@END_IF@@
+    public class @_CLASS_@ : @_BASECLASS_@, ICloneable
+    {
+        #region Constructors
+
+        public @_CLASS_@()
+            : base()
+        {
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+            m_@_MEMBER_@Member = new @_MEMBERTYPE_@.EnumerationContainerArray(@_MEMBER_@ArraySize);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+            m_@_MEMBER_@Member = new @_MEMBERTYPE_@ContainerArray(@_MEMBER_@ArraySize);
+@@ELSE@@
+            m_@_MEMBER_@Member = new Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray(@_MEMBER_@ArraySize);
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+            m_@_MEMBER_@Member = new @_MEMBERTYPE_@.EnumerationContainer();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+            m_@_MEMBER_@Member = new @_MEMBERTYPE_@Container();
+@@ELSE@@
+            m_@_MEMBER_@Member = new Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container();
+@@END_IF@@
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+        }
+
+        #endregion
+
+        #region Create Routines
+
+@@TABLE@@
+@@IF@@ @_EXIST:CREATEROUTINESUMMARY_@
+        /// <summary>
+        /// @_REPLACE_ALL(\n/\n        /// ):CREATEROUTINESUMMARY_@
+        /// </summary>
+@@END_IF@@
+@@IF@@ @_EXIST:CREATEPARAMETER_@
+        public static @_NAMESPACE_@.@_CLASS_@ Create@_CREATEROUTINE_@ (
+@@ELSE@@
+        public static @_NAMESPACE_@.@_CLASS_@ Create@_CREATEROUTINE_@ ()
+@@END_IF@@
+@@TABLE@@
+@@IF@@ @_EXIST:CREATEPARAMETER_@
+@@IF@@ @_EXIST:CREATEPARAMETERISLAST_@
+@@IF@@ @_UNIFORM_CREATEPARAMETERTYPE_@=Enumeration
+            @_CREATEPARAMETERTYPE_@.Enumeration @_CREATEPARAMETER_@)
+@@ELSE@@
+            @_CREATEPARAMETERTYPE_@ @_CREATEPARAMETER_@)
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_CREATEPARAMETERTYPE_@=Enumeration
+            @_CREATEPARAMETERTYPE_@.Enumeration @_CREATEPARAMETER_@,
+@@ELSE@@
+            @_CREATEPARAMETERTYPE_@ @_CREATEPARAMETER_@,
+@@END_IF@@
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+        {
+            Init();
+            @_NAMESPACE_@.@_CLASS_@ val = new @_NAMESPACE_@.@_CLASS_@();
+@@TABLE@@
+@@IF@@ @_EXIST:CREATEPARAMETER_@
+@@IF@@ @_EXIST:CREATEPARAMETERISARRAY_@
+@@IF@@ @_UNIFORM_CREATEPARAMETERTYPE_@=Object
+            val.@_CREATEPARAMETER_@[0].Obj = @_CREATEPARAMETER_@;
+@@ELSE@@
+            val.@_CREATEPARAMETER_@[0].Val = @_CREATEPARAMETER_@;
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_CREATEPARAMETERTYPE_@=Object
+            val.@_CREATEPARAMETER_@.Obj = @_CREATEPARAMETER_@;
+@@ELSE@@
+            val.@_CREATEPARAMETER_@.Val = @_CREATEPARAMETER_@;
+@@END_IF@@
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+@@TABLE@@
+@@IF@@ @_EXIST:CREATEVALUE_@
+@@IF@@ @_EXIST:CREATEVALUEISARRAY_@
+@@IF@@ @_EXIST:CREATEVALUEPARAMETERINDEX_@
+@@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
+            val.@_CREATEVALUE_@[0].Obj = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@(@_CREATEVALUEPARAMETERINDEX_@);
+@@ELSE@@
+            val.@_CREATEVALUE_@[0].Val = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@(@_CREATEVALUEPARAMETERINDEX_@);
+@@END_IF@@
+@@ELSE@@
+            for (System.Int32 i=0;i<@_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@ArraySize;i++)
+            {
+@@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
+                val.@_CREATEVALUE_@[i].Obj = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@(i);
+@@ELSE@@
+                val.@_CREATEVALUE_@[i].Val = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@(i);
+@@END_IF@@
+            }
+@@END_IF@@
+@@ELSIF@@ @_EXIST:CREATEVALUEPARAMETERINDEX_@
+@@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
+            val.@_CREATEVALUE_@.Obj = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@(@_CREATEVALUEPARAMETERINDEX_@);
+@@ELSE@@
+            val.@_CREATEVALUE_@.Val = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@(@_CREATEVALUEPARAMETERINDEX_@);
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
+            val.@_CREATEVALUE_@.Obj = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@;
+@@ELSE@@
+            val.@_CREATEVALUE_@.Val = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@;
+@@END_IF@@
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+            return val;
+        }
+
+@@END_TABLE@@
+        #endregion
+
+        #region Cloning
+
+        object ICloneable.Clone()
+        {
+            return new @_CLASS_@(this);
+        }
+
+        public new @_CLASS_@ Clone()
+        {
+            return (@_CLASS_@)(((ICloneable)this).Clone());
+        }
+
+        protected @_CLASS_@(@_CLASS_@ other)
+            : base(other)
+        {
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+            m_@_MEMBER_@Member = (@_MEMBERTYPE_@.EnumerationContainerArray)other.m_@_MEMBER_@Member.Clone();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+            m_@_MEMBER_@Member = (@_MEMBERTYPE_@ContainerArray)other.m_@_MEMBER_@Member.Clone();
+@@ELSE@@
+            m_@_MEMBER_@Member = (Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray)other.m_@_MEMBER_@Member.Clone();
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+            m_@_MEMBER_@Member = (@_MEMBERTYPE_@.EnumerationContainer)other.m_@_MEMBER_@Member.Clone();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+            m_@_MEMBER_@Member = (@_MEMBERTYPE_@Container)other.m_@_MEMBER_@Member.Clone();
+@@ELSE@@
+            m_@_MEMBER_@Member = (Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container)other.m_@_MEMBER_@Member.Clone();
+@@END_IF@@
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+        }
+
+        #endregion
+
+        #region Members
+
+@@TABLE@@
+@@IF@@ @_EXIST:PARAMETER_@
+        //@_PARAMETER_@
+@@IF@@ @_EXIST:PARAMETERISARRAY_@
+        public static System.Int32 @_PARAMETER_@ArraySize
+        {
+            get
+            {
+                Init();
+                return Safir.Dob.Typesystem.Parameters.GetArraySize(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex);
+            }
+        }
+
+@@IF@@ @_EXIST:PARAMETERSUMMARY_@
+        /// <summary>
+        /// @_REPLACE_ALL(\n/\n        /// ):PARAMETERSUMMARY_@
+        /// </summary>
+@@END_IF@@
+@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Object
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
+        {
+            Init();
+            return (@_PARAMETERTYPE_@)Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+        public static @_PARAMETERTYPE_@.Enumeration @_PARAMETER_@ (System.Int32 index)
+        {
+            Init();
+            return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(@_PARAMETERTYPE_@.EnumerationId, ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSIF@@ @_PARAMETERTYPE_@=System.Single
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
+        {
+            Init();
+            return Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSIF@@ @_PARAMETERTYPE_@=System.Double
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
+        {
+            Init();
+            return Safir.Dob.Typesystem.Parameters.GetFloat64(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSE@@
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
+        {
+            Init();
+            return Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Object
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@
+        {
+            get
+            {
+                Init();
+                return (@_PARAMETERTYPE_@)Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, 0);
+            }
+        }
+@@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+        public static @_PARAMETERTYPE_@.Enumeration @_PARAMETER_@
+        {
+            get
+            {
+                Init();
+                return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(@_PARAMETERTYPE_@.EnumerationId, ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, 0);
+            }
+        }
+@@ELSIF@@ @_PARAMETERTYPE_@=System.Single
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@
+        {
+            get
+            {
+                Init();
+                return Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, 0);
+            }
+        }
+@@ELSIF@@ @_PARAMETERTYPE_@=System.Double
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@
+        {
+            get
+            {
+                Init();
+                return Safir.Dob.Typesystem.Parameters.GetFloat64(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, 0);
+            }
+        }
+@@ELSE@@
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@
+        {
+            get
+            {
+                Init();
+                return Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, 0);
+            }
+        }
+@@END_IF@@
+@@END_IF@@
+
+@@END_IF@@
+@@END_TABLE@@
+
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+        //@_MEMBER_@
+        public static System.Int32 @_MEMBER_@MemberIndex
+        {
+            get
+            {
+                Init();
+                return @_LOWER:MEMBER_@MemberIndex;
+            }
+        }
+
+@@IF@@ @_EXIST:MEMBERISSTRING_@
+        public static System.Int32 @_MEMBER_@MaxStringLength
+        {
+            get
+            {
+                Init();
+                return @_LOWER:MEMBER_@Length;
+            }
+        }
+
+@@END_IF@@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+        public static System.Int32 @_MEMBER_@ArraySize
+        {
+            get
+            {
+                Init();
+                return @_LOWER:MEMBER_@Size;
+            }
+        }
+
+@@END_IF@@
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <summary>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+        /// </summary>
+@@END_IF@@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        public @_MEMBERTYPE_@.EnumerationContainerArray @_MEMBER_@
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        public @_MEMBERTYPE_@ContainerArray @_MEMBER_@
+@@ELSE@@
+        public Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray @_MEMBER_@
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        public @_MEMBERTYPE_@.EnumerationContainer @_MEMBER_@
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        public @_MEMBERTYPE_@Container @_MEMBER_@
+@@ELSE@@
+        public Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container @_MEMBER_@
+@@END_IF@@
+@@END_IF@@
+        {
+            get { return m_@_MEMBER_@Member; }
+        }
+
+
+@@END_IF@@
+@@END_TABLE@@
+        #endregion
+
+        #region TypeId, Instance and EntityId
+
+        //Type id for @_CLASS_@
+        public new const System.Int64 ClassTypeId = @_TYPEID_@;
+
+        public override System.Int64 GetTypeId()
+        {
+            return ClassTypeId;
+        }
+
+        #endregion
+
+        #region Change flags
+
+        override public bool IsChanged()
+        {
+            return
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+                m_@_MEMBER_@Member.IsChanged() ||
+@@END_IF@@
+@@END_TABLE@@
+                base.IsChanged();
+        }
+
+        override public void SetChanged(bool changed)
+        {
+            base.SetChanged(changed);
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+            m_@_MEMBER_@Member.SetChanged(changed);
+@@END_IF@@
+@@END_TABLE@@
+        }
+
+        #endregion
+
+        #region Blob serialization and deserialization
+
+        public @_CLASS_@(System.IntPtr blob)
+            : base(blob)
+        {
+            Init();
+
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+            m_@_MEMBER_@Member = new @_MEMBERTYPE_@.EnumerationContainerArray(@_MEMBER_@ArraySize);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+            m_@_MEMBER_@Member = new @_MEMBERTYPE_@ContainerArray(@_MEMBER_@ArraySize);
+@@ELSE@@
+            m_@_MEMBER_@Member = new Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray(@_MEMBER_@ArraySize);
+@@END_IF@@
+            for (System.Int32 i = 0; i < @_MEMBER_@ArraySize; ++i)
+            {
+                Safir.Dob.Typesystem.BlobOperations.Get(m_@_MEMBER_@Member[i], blob, @_LOWER:MEMBER_@MemberIndex, i);
+            }
+
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+            m_@_MEMBER_@Member = new @_MEMBERTYPE_@.EnumerationContainer();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+            m_@_MEMBER_@Member = new @_MEMBERTYPE_@Container();
+@@ELSE@@
+            m_@_MEMBER_@Member = new Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container();
+@@END_IF@@
+            Safir.Dob.Typesystem.BlobOperations.Get(m_@_MEMBER_@Member, blob, @_LOWER:MEMBER_@MemberIndex, 0);
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+        }
+
+        override public System.Int32 CalculateBlobSize()
+        {
+            Init();
+
+            System.Int32 size = base.CalculateBlobSize() + initialSize;
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+            //@_MEMBER_@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=String
+            for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
+            {
+                size += m_@_MEMBER_@Member[i].Utf8StringLength();
+            }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+            for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
+            {
+                size += m_@_MEMBER_@Member[i].CalculateBlobSize();
+            }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
+            for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
+            {
+                if (!m_@_MEMBER_@Member[i].IsNull())
+                   size += (m_@_MEMBER_@Member[i].Val.Length+4);
+            }
+@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
+            for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
+            {
+                if (!m_@_MEMBER_@Member[i].IsNull())
+                   size += 8 + 4 + m_@_MEMBER_@Member[i].Val.Utf8StringLength();
+            }
+@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
+            for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
+            {
+                if (!m_@_MEMBER_@Member[i].IsNull())
+                   size += 16 + 4 + m_@_MEMBER_@Member[i].Val.InstanceId.Utf8StringLength();
+            }
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=String
+            size += m_@_MEMBER_@Member.Utf8StringLength();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+            size += m_@_MEMBER_@Member.CalculateBlobSize();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
+            if (!m_@_MEMBER_@Member.IsNull())
+               size += (m_@_MEMBER_@Member.Val.Length+4);
+@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
+            if (!m_@_MEMBER_@Member.IsNull())
+               size += 8 + 4 + m_@_MEMBER_@Member.Val.Utf8StringLength();
+@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
+            if (!m_@_MEMBER_@Member.IsNull())
+               size += 16 + 4 + m_@_MEMBER_@Member.Val.InstanceId.Utf8StringLength();
+@@END_IF@@
+@@END_IF@@
+@@END_IF@@
+
+@@END_TABLE@@
+            return size;
+        }
+
+        override public void WriteToBlob(System.IntPtr blob, ref System.IntPtr beginningOfUnused)
+        {
+            Init();
+
+            base.WriteToBlob(blob,ref beginningOfUnused);
+
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+            //@_MEMBER_@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=String
+            for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
+            {
+                if (!m_@_MEMBER_@Member[i].IsNull() && m_@_MEMBER_@Member[i].Val.Length > @_MEMBER_@MaxStringLength)
+                {
+                    throw new Safir.Dob.Typesystem.IllegalValueException("The string member is longer than what is specified in the dou file");
+                }
+                Safir.Dob.Typesystem.BlobOperations.Set(m_@_MEMBER_@Member[i],blob, ref beginningOfUnused, @_LOWER:MEMBER_@MemberIndex,i);
+            }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object or @_UNIFORM_MEMBERTYPE_@=Binary or @_UNIFORM_MEMBERTYPE_@=InstanceId or @_UNIFORM_MEMBERTYPE_@=EntityId or @_UNIFORM_MEMBERTYPE_@=ChannelId or @_UNIFORM_MEMBERTYPE_@=HandlerId
+            for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
+            {
+                Safir.Dob.Typesystem.BlobOperations.Set(m_@_MEMBER_@Member[i],blob, ref beginningOfUnused, @_LOWER:MEMBER_@MemberIndex,i);
+            }
+@@ELSE@@
+            for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
+            {
+                Safir.Dob.Typesystem.BlobOperations.Set(m_@_MEMBER_@Member[i],blob,@_LOWER:MEMBER_@MemberIndex,i);
+            }
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=String
+            if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.Val.Length > @_MEMBER_@MaxStringLength)
+            {
+                throw new Safir.Dob.Typesystem.IllegalValueException("The string member is longer than what is specified in the dou file");
+            }
+            Safir.Dob.Typesystem.BlobOperations.Set(m_@_MEMBER_@Member,blob, ref beginningOfUnused,@_LOWER:MEMBER_@MemberIndex,0);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object or @_UNIFORM_MEMBERTYPE_@=Binary or @_UNIFORM_MEMBERTYPE_@=InstanceId or @_UNIFORM_MEMBERTYPE_@=EntityId or @_UNIFORM_MEMBERTYPE_@=ChannelId or @_UNIFORM_MEMBERTYPE_@=HandlerId
+            Safir.Dob.Typesystem.BlobOperations.Set(m_@_MEMBER_@Member,blob,ref beginningOfUnused,@_LOWER:MEMBER_@MemberIndex,0);
+@@ELSE@@
+            Safir.Dob.Typesystem.BlobOperations.Set(m_@_MEMBER_@Member,blob,@_LOWER:MEMBER_@MemberIndex,0);
+@@END_IF@@
+@@END_IF@@
+@@END_IF@@
+
+@@END_TABLE@@
+        }
+
+        #endregion
+
+        #region Reflection part
+
+        public override Safir.Dob.Typesystem.ContainerBase GetMember(System.Int32 member,
+                                                                     System.Int32 index)
+        {
+            Init();
+
+@@IF@@ @_MEMBER'length_@=0
+            return base.GetMember(member,index);
+@@ELSE@@
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+@@IF@@ @_TABLE_LINE_@=1
+            if (member == @_LOWER:MEMBER_@MemberIndex)
+@@ELSE@@
+
+            else if (member == @_LOWER:MEMBER_@MemberIndex)
+@@END_IF@@
+            {
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+                if (index < 0 || index >= @_LOWER:MEMBER_@Size)
+                {
+                    throw new Safir.Dob.Typesystem.IllegalValueException("Invalid index");
+                }
+                return m_@_MEMBER_@Member[index];
+            }
+@@ELSE@@
+                if (index != 0)
+                {
+                    throw new Safir.Dob.Typesystem.SoftwareViolationException("Member is not an array");
+                }
+                return m_@_MEMBER_@Member;
+            }
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+
+            else
+            {
+                return base.GetMember(member,index);
+            }
+@@END_IF@@
+        }
+
+        #endregion
+
+        #region Private Data
+
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        private @_MEMBERTYPE_@.EnumerationContainerArray m_@_MEMBER_@Member;
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        private @_MEMBERTYPE_@ContainerArray m_@_MEMBER_@Member;
+@@ELSE@@
+        private Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray m_@_MEMBER_@Member;
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        private @_MEMBERTYPE_@.EnumerationContainer m_@_MEMBER_@Member;
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        private @_MEMBERTYPE_@Container m_@_MEMBER_@Member;
+@@ELSE@@
+        private Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container m_@_MEMBER_@Member;
+@@END_IF@@
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+        #endregion
+
+        #region Indices and Sizes
+
+        private static void Init()
+        {
+            if (!isInit)
+            {
+@@TABLE@@
+@@IF@@ @_EXIST:PARAMETER_@
+                @_LOWER:PARAMETER_@ParameterIndex=Safir.Dob.Typesystem.Parameters.GetIndex(ClassTypeId, "@_PARAMETER_@");
+@@END_IF@@
+@@END_TABLE@@
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+                @_LOWER:MEMBER_@MemberIndex = Safir.Dob.Typesystem.Members.GetIndex(ClassTypeId, "@_MEMBER_@");
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+                @_LOWER:MEMBER_@Size = Safir.Dob.Typesystem.Members.GetArraySize(ClassTypeId, @_LOWER:MEMBER_@MemberIndex);
+@@END_IF@@
+@@IF@@ @_EXIST:MEMBERISSTRING_@
+                @_LOWER:MEMBER_@Length=Safir.Dob.Typesystem.Members.GetMaxStringLength(ClassTypeId, @_LOWER:MEMBER_@MemberIndex);
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+                initialSize = Safir.Dob.Typesystem.BlobOperations.GetInitialSize(ClassTypeId);
+                isInit=true;
+            }
+        }
+
+
+        private static bool isInit = false;
+
+@@TABLE@@
+@@IF@@ @_EXIST:PARAMETER_@
+        private static System.Int32 @_LOWER:PARAMETER_@ParameterIndex = -1;
+@@END_IF@@
+@@END_TABLE@@
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+        private static System.Int32 @_LOWER:MEMBER_@MemberIndex = -1;
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+        private static System.Int32 @_LOWER:MEMBER_@Size = -1;
+@@END_IF@@
+@@IF@@ @_EXIST:MEMBERISSTRING_@
+        private static System.Int32 @_LOWER:MEMBER_@Length = -1;
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+
+        private static System.Int32 initialSize = -1;
+
+        #endregion
+    }
+
+    //
+    // @_CLASS_@Container
+    //
+    public class @_CLASS_@Container : Safir.Dob.Typesystem.ObjectContainerImpl<@_CLASS_@>, ICloneable
+    {
+        public @_CLASS_@Container() : base() { }
+
+        #region Cloning
+
+        object ICloneable.Clone()
+        {
+            return new @_CLASS_@Container(this);
+        }
+
+        public new @_CLASS_@Container Clone()
+        {
+            return (@_CLASS_@Container)((ICloneable)this).Clone();
+        }
+
+        //Copy constructor for use by Clone
+        protected @_CLASS_@Container(@_CLASS_@Container other) : base(other) { }
+
+        #endregion
+    }
+
+    //
+    // @_CLASS_@ContainerArray
+    //
+    public class @_CLASS_@ContainerArray : Safir.Dob.Typesystem.ArrayContainer<@_CLASS_@Container>, ICloneable
+    {
+        public @_CLASS_@ContainerArray(System.Int32 size) : base(size) { }
+
+        #region Cloning
+
+        object ICloneable.Clone()
+        {
+            return new @_CLASS_@ContainerArray(this);
+        }
+
+        public new @_CLASS_@ContainerArray Clone()
+        {
+            return (@_CLASS_@ContainerArray)(((ICloneable)this).Clone());
+        }
+
+        //Copy constructor for use by Clone
+        protected @_CLASS_@ContainerArray(@_CLASS_@ContainerArray other) : base(other) { }
+
+        #endregion
+    }
+@@ELSIF@@ @_UNITTYPE_@=enumeration
+@@--
+@@-- ENUMERATION
+@@--
+
+@@IF@@ @_EXIST:CLASSSUMMARY_@
+    /// <summary>
+    /// @_REPLACE_ALL(\n/\n    /// ):CLASSSUMMARY_@
+    /// </summary>
+@@END_IF@@
+    public struct @_CLASS_@
+    {
+        public enum Enumeration
+        {
+@@IF@@ @_ENUMVALUE'length_@=1
+            @_ENUMVALUE_@ = 0
+@@ELSE@@
+@@TABLE@@
+@@IF@@ @_TABLE_LINE_@=1
+            @_ENUMVALUE_@ = 0,
+@@ELSIF@@ @_TABLE_LINE_@=@_ENUMVALUE'length_@
+            @_ENUMVALUE_@
+@@ELSE@@
+            @_ENUMVALUE_@,
+@@END_IF@@
+@@END_TABLE@@
+@@END_IF@@
+        }
+
+        public static System.Int64 EnumerationId = @_TYPEID_@;
+
+        public const System.Int64 Checksum = @_CHECKSUM_@;
+
+        //Check that there is no enumeration mismatch
+        //throws an exception if there is - ConfigurationErrorException
+        //call this like this from your application (somewhere in the startup code):
+        //  @_UNIT_@.CheckForMismatch(@_UNIT_@.Checksum);
+        //The checksum that you are passing to this function is compiled into your application
+        //so that if the enum changes the checksum in your application will be different than that
+        //in dots_generated, which will mean that an exception is thrown.
+        static public void CheckForMismatch(System.Int64 checksum)
+        {
+            if (checksum != Checksum)
+            {
+                throw new Safir.Dob.Typesystem.ConfigurationErrorException("Type mismatch in type @_UNIT_@. Recompile your application!");
+            }
+        }
+
+
+        public class EnumerationContainer : Safir.Dob.Typesystem.EnumerationContainerBase, ICloneable
+        {
+            public EnumerationContainer() : base() { }
+
+            #region Cloning
+
+            object ICloneable.Clone()
+            {
+                return new EnumerationContainer(this);
+            }
+
+            public new EnumerationContainer Clone()
+            {
+                return (EnumerationContainer)((ICloneable)this).Clone();
+            }
+
+            //Copy constructor for use by Clone
+            protected EnumerationContainer(EnumerationContainer other) : base(other) { }
+
+            #endregion
+
+            public override int Ordinal
+            {
+                get
+                {
+                    if (IsNull())
+                    {
+                        throw new Safir.Dob.Typesystem.NullException("Value is null");
+                    }
+                    return m_Value;
+                }
+                set
+                {
+                    if (!System.Enum.IsDefined(typeof(Enumeration), value))
+                    {
+                        throw new Safir.Dob.Typesystem.IllegalValueException("Value is not in the enumeration range");
+                    }
+                    m_bIsNull = false;
+                    m_bIsChanged = true;
+                    m_Value = value;
+                }
+            }
+
+            public Enumeration Val
+            {
+                get { return (Enumeration)Ordinal; }
+                set { Ordinal = (int)value; }
+            }
+
+            public static bool operator ==(EnumerationContainer first, Enumeration second)
+            { return !first.IsNull() && first.m_Value.Equals((int)second); }
+
+            public static bool operator !=(EnumerationContainer first, Enumeration second)
+            { return !(first == second); }
+
+            public static bool operator ==(Enumeration first, EnumerationContainer second)
+            { return second == first; }
+
+            public static bool operator !=(Enumeration first, EnumerationContainer second)
+            { return !(second == first); }
+
+            public override int GetHashCode()
+            {
+                throw new System.Exception("The method or operation is not implemented.");
+            }
+
+            public override bool Equals(object obj)
+            {
+                throw new System.Exception("The method or operation is not implemented.");
+            }
+        }
+
+        public class EnumerationContainerArray : Safir.Dob.Typesystem.ArrayContainer<EnumerationContainer>, ICloneable
+        {
+             public EnumerationContainerArray(System.Int32 size) : base(size) { }
+
+            #region Cloning
+
+            object ICloneable.Clone()
+            {
+                return new EnumerationContainerArray(this);
+            }
+
+            public new EnumerationContainerArray Clone()
+            {
+                return (EnumerationContainerArray)(((ICloneable)this).Clone());
+            }
+
+            //Copy constructor for use by Clone
+            protected EnumerationContainerArray(EnumerationContainerArray other) : base(other) { }
+
+            #endregion
+        }
+    }
+
+@@ELSIF@@ @_UNITTYPE_@=exception
+@@--
+@@-- EXCEPTION
+@@--
+@@IF@@ @_EXIST:CLASSSUMMARY_@
+    /// <summary>
+    /// @_REPLACE_ALL(\n/\n    /// ):CLASSSUMMARY_@
+    /// </summary>
+@@END_IF@@
+    public class @_CLASS_@ : @_BASECLASS_@
+    {
+        public @_CLASS_@(string message) : base(message)
+        {
+        }
+
+        //Type id for @_CLASS_@
+        public new const System.Int64 ExceptionTypeId = @_TYPEID_@;
+
+        public override System.Int64 GetTypeId()
+        {
+            return ExceptionTypeId;
+        }
+    }
+@@END_IF@@
+@@--
+@@-- FOOTER
+@@--
+}
+@@END_IF@@

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Contains the parametrization of queue lengths used by a connection. Currently, only the default queue lengths can be set.</summary>
+    <name>Safir.Dob.QueueParameters</name>
+    <baseClass>Safir.Dob.Parametrization</baseClass>
+    <parameters>
+        <parameter>
+            <summary>Specifies the default length of message in queues.</summary>
+            <name>DefaultMessageInQueueLength</name>
+            <type>Int32</type>
+            <value>10</value>
+        </parameter>
+        <parameter>
+            <summary>Specifies the default length of message out queues.</summary>
+            <name>DefaultMessageOutQueueLength</name>
+            <type>Int32</type>
+            <value>10</value>
+        </parameter>
+        <parameter>
+            <summary>Specifies the default length of request in queues.</summary>
+            <name>DefaultRequestInQueueLength</name>
+            <type>Int32</type>
+            <value>10</value>
+        </parameter>
+        <parameter>
+            <summary>Specifies the default length of request out queues.</summary>
+            <name>DefaultRequestOutQueueLength</name>
+            <type>Int32</type>
+            <value>10</value>
+        </parameter>
+    </parameters>
+</class>

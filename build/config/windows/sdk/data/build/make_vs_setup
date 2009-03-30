@@ -1,0 +1,14 @@
+#
+#
+#
+ifeq ($(strip $(VC_SETUP)),)  #if VC_SETUP does not have a value
+VC_SETUP = "C:\Program Files\Microsoft Visual Studio 8\VC\vcvarsall.bat" x86 >/nul
+endif
+
+ifeq ($(strip $(NET_SETUP)),) #if NET_SETUP does not have a value
+NET_SETUP = "C:\Program Files\Microsoft Visual Studio 8\VC\vcvarsall.bat" x86 >/nul
+endif
+
+#VS_SETUP = "%VS80COMNTOOLS%vsvars32.bat"
+#NET_SETUP = "%VS80COMNTOOLS%vsvars32.bat"
+

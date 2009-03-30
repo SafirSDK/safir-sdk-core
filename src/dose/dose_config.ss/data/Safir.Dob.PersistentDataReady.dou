@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>This service is called by the persistency handler when the persistent data has been fed to the Dob. This is the signal to allow connections on other contexts than -1.</summary>
+    <name>Safir.Dob.PersistentDataReady</name>
+    <baseClass>Safir.Dob.Service</baseClass>
+</class>

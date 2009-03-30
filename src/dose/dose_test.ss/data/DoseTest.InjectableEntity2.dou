@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>DoseTest.InjectableEntity2</name>
+    <baseClass>DoseTest.RootEntity</baseClass>
+    <members>
+        <member>
+            <name>Int32Member</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>Int64Member</name>
+            <type>Int64</type>
+        </member>
+        <member>
+            <name>Float32Member</name>
+            <type>Float32</type>
+        </member>
+        <member>
+            <name>Float64Member</name>
+            <type>Float64</type>
+        </member>
+        <member>
+            <name>Ampere32Member</name>
+            <type>Ampere32</type>
+        </member>
+        <member>
+            <name>ArrayMember</name>
+            <arraySize>10</arraySize>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>ObjectMember</name>
+            <type>Object</type>
+        </member>
+    </members>
+</class>

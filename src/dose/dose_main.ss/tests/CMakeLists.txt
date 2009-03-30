@@ -1,0 +1,22 @@
+PROJECT (dose_main_test)
+
+INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+
+ADD_EXECUTABLE(dose_connector_test dose_connector_test.cpp)
+ADD_EXECUTABLE(dose_message_sender_test dose_message_sender_test.cpp)
+ADD_EXECUTABLE(dose_message_subscriber_test dose_message_subscriber_test.cpp)
+ADD_EXECUTABLE(dose_entity_owner_test dose_entity_owner_test.cpp)
+ADD_EXECUTABLE(dose_entity_subscriber_test dose_entity_subscriber_test.cpp)
+ADD_EXECUTABLE(dose_process_info_subscriber_test dose_process_info_subscriber_test.cpp)
+
+TARGET_LINK_LIBRARIES(dose_connector_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
+TARGET_LINK_LIBRARIES(dose_message_sender_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
+TARGET_LINK_LIBRARIES(dose_message_subscriber_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
+TARGET_LINK_LIBRARIES(dose_entity_owner_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
+TARGET_LINK_LIBRARIES(dose_entity_subscriber_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
+TARGET_LINK_LIBRARIES(dose_process_info_subscriber_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
+
+INSTALL(TARGETS dose_connector_test dose_message_sender_test dose_message_subscriber_test dose_entity_owner_test dose_entity_subscriber_test dose_process_info_subscriber_test
+        RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin
+        LIBRARY DESTINATION $ENV{SAFIR_RUNTIME}/lib
+        ARCHIVE DESTINATION $ENV{SAFIR_SDK}/lib)

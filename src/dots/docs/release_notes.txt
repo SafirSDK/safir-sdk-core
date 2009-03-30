@@ -1,0 +1,21 @@
+Release: dots 4.2			   2009-02-04 STLRHA
+---------------------------------------------------------------------
+Fixed a bug in dots_dotnet. A too long array with trailing garbage was returned from Operations.GetClassTree.
+
+Removed "d" from dots_configuration_check exe in VS project file
+
+Fix ticket #507: Remove the NotAType construction
+Partial fix for ticket #83: Comment the C# interfaces as well as those in C++.
+Fix ticket #624: Add possibility to use environment variables in all kinds of parameters.
+Fix ticket #616: Remove deleted do[um] files from runtime/data/text/dots/classes on make install in Linux.
+
+Release: dots 4.1			   2008-12-08 STLRHA
+---------------------------------------------------------------------
+Fix ticket #608: Dots gives bad InstanceId values when converting from xml to blob
+
+Release: dots 4.0			   2008-11-27 STLRHA
+---------------------------------------------------------------------
+First subversion release.
+Updated syntax and types for global object id.
+Removed support for java and Ada (will be resurrected in some future release).
+dots_v has a subfolder for code ported to xmlada3, but the build scripts do not take that into account.

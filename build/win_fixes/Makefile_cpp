@@ -1,0 +1,79 @@
+####################################################################################################
+#
+# Makefile_cpp
+#
+# This makefile is used by the main makefile to build the C++ code. 
+#  It is not meant to be called directly. 
+#
+# 2005-11-23 STLRHA : Created.
+# 2006-03-23 ASEK   : Adapted to Visual Studio 2005
+# 2006-05-12 STLRHA : Changed to use make_vs_setup include file
+# 2006-06-02 HESU   : Adapted to hierarchical include structure.
+# 2006-09-05 STLRHA&HESU : Added reset of CL to make the compilation independent of its value.
+####################################################################################################
+
+.SILENT:
+
+# Makefile.conf is only used to override the defaults.
+# It is only here for the convenience of the developers.
+-include Makefile.conf
+
+include $(SAFIR_SDK)\\data\\build\\make_vs_setup
+
+
+SDK_DIR := %SAFIR_SDK%
+CPP_DIR := cpp
+
+CXXLINK := $(VC_SETUP) && link
+CXXLINK_FLAGS = /NOLOGO /DLL /LIBPATH:$(SAFIR_SDK)\lib 
+CXXLINK_FLAGS_DEBUG := /DEBUG
+CXXLINK_FLAGS_RELEASE :=
+CL :=
+
+CXX := $(VC_SETUP) && cl
+CXXFLAGS := /nologo /EHsc /I ..\include /I $(SDK_DIR)\include /D DOTS_GENERATED_CPP_EXPORTS /TP /MP
+CXXFLAGS_DEBUG :=   /D _DEBUG /D _UNICODE /D UNICODE /MDd /LDd /Od /W3 /WX /Zi /Gm
+CXXFLAGS_RELEASE := /D NDEBUG /D _UNICODE /D UNICODE /MD  /LD  /O2  /Zi /Gm
+
+#If BOOST_DIR is defined we add that to the include path
+ifneq ($(BOOST_DIR),)
+   CXXFLAGS := $(CXXFLAGS) /I "$(BOOST_DIR)"
+endif
+
+#CXX_PRECOMP = $(CPP_DIR)\$(TARGET)\precompiled_header_for_cpp.pch
+SOURCES := $(wildcard *.dou)
+SOURCES := $(SOURCES:%.dou=%.cpp)
+
+
+vpath %.cpp $(CPP_DIR)
+vpath %.h $(CPP_DIR)
+vpath %.obj $(CPP_DIR)\$(TARGET)
+vpath %.pch $(CPP_DIR)\$(TARGET)
+vpath %.dll $(CPP_DIR)\$(TARGET)
+vpath %.txt $(CPP_DIR)
+
+%.pch: %.h 
+	@echo CPP: Building precompiled header from $<
+	cd $(CPP_DIR)\$(TARGET) && $(CXX) /c $(CXXFLAGS) /Fo /Fp$(@F) /Yc ..\..\$<
+
+dots_generated-cppd.dll: CXXFLAGS += $(CXXFLAGS_DEBUG) 
+dots_generated-cppd.dll: CXXLINK_FLAGS += $(CXXLINK_FLAGS_DEBUG)
+dots_generated-cppd.dll: precompiled_header_for_cpp.pch $(SOURCES) cpp_build.txt
+	echo CPP: Building $@
+	cd $(CPP_DIR)\$(TARGET) && $(CXX) $(CXXFLAGS) /Yuprecompiled_header_for_cpp.h @..\cpp_build.txt /link $(CXXLINK_FLAGS) /OUT:$@ /IMPLIB:$(patsubst %.dll,%.lib,$@) precompiled_header_for_cpp.obj
+
+dots_generated-cpp.dll: CXXFLAGS += $(CXXFLAGS_RELEASE) 
+dots_generated-cpp.dll: CXXLINK_FLAGS += $(CXXLINK_FLAGS_RELEASE)
+dots_generated-cpp.dll: precompiled_header_for_cpp.pch $(SOURCES) cpp_build.txt
+	echo CPP: Building $@
+	cd $(CPP_DIR)\$(TARGET) && $(CXX) $(CXXFLAGS) /Yuprecompiled_header_for_cpp.h @..\cpp_build.txt /link $(CXXLINK_FLAGS) /OUT:$@ /IMPLIB:$(patsubst %.dll,%.lib,$@) precompiled_header_for_cpp.obj
+
+#%.obj: %.cpp precompiled_header_for_cpp.pch
+#	echo CPP: Building $@ from $<
+#	cd $(CPP_DIR)\$(TARGET) && $(CXX) /c $(CXXFLAGS) /Fo$@ /Yuprecompiled_header_for_cpp.h ..\$(<F) 
+
+
+cpp_build.txt: $(SOURCES)
+	echo Creating cpp build help file
+	cd $(CPP_DIR) & dots_cpp_build_helper .
+

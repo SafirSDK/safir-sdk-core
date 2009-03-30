@@ -1,0 +1,109 @@
+with "syst_default";
+with "dots_ada";
+with "dose_ada";
+with "dots_generated_ada";
+with "swre_library";
+
+project Swre_Interface_Ada_Library is
+
+   for Source_Dirs use ("../shared");
+   for Object_Dir use Syst_Default'Object_Dir;
+   for Exec_Dir use Syst_Default'Exec_Dir;
+   type Warning_Levels is
+      ("Default", "Elaboration", "Full");
+   Warning_Level : Warning_Levels := external ("Warning_Level");
+   type Build_Type is
+      ("release", "debug", "gcov", "gperf", "normal");
+   Build : Build_Type := external ("BUILD");
+
+   case Build is 
+      when "debug" =>
+         for library_name use "swre_interface_adad";
+      when others =>
+         for library_name use "swre_interface_ada";
+   end case;
+
+   for library_kind use "dynamic";
+   case Syst_Default.OS is
+      when "Linux" =>
+         for library_dir use  project'Object_dir & "-lib";
+      when "Windows_NT" =>
+         for Library_Dir use external ("SAFIR_RUNTIME") & "/bin";
+         for Library_Interface use ("safir.application.backdoor","safir.application.backdoorkeeper",
+                                    "safir.application.tracers","safir.swreports.swreport");
+         for Library_Src_Dir use external ("SAFIR_SDK") & "/ada/swre_interface_ada/";
+         for Library_Ali_Dir use external ("SAFIR_SDK") & "/ada/swre_interface_ada/lib-obj/" & Build;
+      when others =>
+   end case;
+
+
+   package Builder is
+
+      case Warning_Level is
+
+         when "Full" =>
+            for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
+
+         when "Elaboration" =>
+            for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
+
+         when "Default" =>
+
+            case Build is
+
+               when "normal" =>
+                  for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
+
+               when "gperf" =>
+                  for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
+
+               when "gcov" =>
+                  for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
+
+               when "debug" =>
+                  for Default_Switches ("ada") use ("-s", "-k", "-g", "-C");
+
+               when "release" =>
+                  for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
+            end case;
+      end case;
+   end Builder;
+
+   package Compiler is
+
+      case Warning_Level is
+
+         when "Full" =>
+            for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada") & "-gnat05";
+
+         when "Elaboration" =>
+            for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada") & "-gnat05";
+
+         when "Default" =>
+
+            case Build is
+
+               when "normal" =>
+                  for Default_Switches ("ada") use     ("-gnatwcefijmpruv", "-gnatwe", "-gnatyabefhiklnprst", "-gnat05");
+
+               when "gperf" =>
+                  for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada") & "-gnat05";
+
+               when "gcov" =>
+                  for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada") & "-gnat05";
+
+               when "debug" =>
+                  for Default_Switches ("ada") use     ("-gnatwcefijmpruv", "-gnatwe", "-gnatyabefhiklnprst", "-gnat05");
+
+               when "release" =>
+                  for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada") & "-gnat05";
+            end case;
+      end case;
+   end Compiler;
+
+   package Linker is
+      for Default_Switches ("ada") use Syst_Default.Linker'Default_Switches ("Ada");
+   end Linker;
+
+end Swre_Interface_Ada_Library;
+

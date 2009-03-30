@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Defines an array of errors, typically used to report errors for individual members in the request.</summary>
+    <name>Safir.Dob.ErrorListResponse</name>
+    <baseClass>Safir.Dob.ErrorResponse</baseClass>
+    <members>
+        <member>
+            <summary>The number of indecies used in the Error array.</summary>
+            <name>NumberOfErrors</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>The generated errors.</summary>
+            <name>Error</name>
+            <arraySize>10</arraySize>
+            <type>Safir.Dob.ResponseErrorInfo</type>
+        </member>
+    </members>
+    <createRoutines>
+        <createRoutine>
+            <summary>Create an ErrorListResponse with one ResponseErrorInfo.</summary>
+            <name>ErrorListResponse</name>
+            <parameters>
+                <member>Error</member>
+            </parameters>
+            <values>
+                <value>
+                    <member>NumberOfErrors</member>
+                    <parameter>Safir.Dob.CreateRoutineParameters.One</parameter>
+                </value>
+            </values>
+        </createRoutine>
+    </createRoutines>
+</class>

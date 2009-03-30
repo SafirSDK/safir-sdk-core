@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Response for Capabilities.CalculateSpeedDifference.</summary>
+    <name>Capabilities.CalculateSpeedDifferenceResponse</name>
+    <baseClass>Safir.Dob.SuccessResponse</baseClass>
+    <members>
+
+        <member>
+            <summary>The speed difference.</summary>
+            <name>SpeedDifference</name>
+            <type>MeterPerSecond32</type>
+        </member>
+
+    </members>
+</class>

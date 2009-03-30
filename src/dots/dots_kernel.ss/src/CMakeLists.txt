@@ -1,0 +1,22 @@
+PROJECT (dots_kernel)
+
+INCLUDE_DIRECTORIES(.)
+
+INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+
+FILE(GLOB sources *.cpp)
+
+ADD_LIBRARY(dots_kernel SHARED ${sources})
+TARGET_LINK_LIBRARIES(dots_kernel ACE boost_regex boost_filesystem boost_date_time expat dots_id lluf_utils)
+
+INSTALL(DIRECTORY Safir DESTINATION $ENV{SAFIR_SDK}/include
+        PATTERN ".svn" EXCLUDE
+        PATTERN "*~" EXCLUDE)
+
+INSTALL(TARGETS dots_kernel
+        RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin
+        LIBRARY DESTINATION $ENV{SAFIR_RUNTIME}/lib
+        ARCHIVE DESTINATION $ENV{SAFIR_SDK}/lib)
+
+INSTALL(FILES ../data/dots_kernel.gpr
+        DESTINATION $ENV{SAFIR_SDK}/ada/)

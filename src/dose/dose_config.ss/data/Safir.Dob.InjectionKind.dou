@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>TODO</summary>
+  <name>Safir.Dob.InjectionKind</name>
+  <values>
+    <value>None</value>
+    <value>SynchronousVolatile</value>
+    <value>SynchronousPermanent</value>
+    <value>Injectable</value>
+  </values>
+</enumeration>

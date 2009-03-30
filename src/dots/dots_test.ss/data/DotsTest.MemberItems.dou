@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit">
+    <name>DotsTest.MemberItems</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <member>
+            <name>TypesItem</name>
+            <type>DotsTest.TypesItem</type>
+        </member>
+        <member>
+            <name>ArraysItem</name>
+            <type>DotsTest.ArraysItem</type>
+        </member>
+    </members>
+</class>
