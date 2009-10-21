@@ -22,7 +22,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SendResponse</value>
               </member>
               <member>
@@ -57,7 +57,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.RegisterEntityHandler</value>
               </member>
               <member>
@@ -93,7 +93,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.UpdateRequest</value>
               </member>
               <member>

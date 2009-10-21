@@ -191,8 +191,8 @@ namespace Safir.Dob
         
         private bool disposed = false;
 
-        System.IntPtr m_messageBlob;
-        System.IntPtr m_state;
+        private System.IntPtr m_messageBlob;
+        private System.IntPtr m_state;
         #endregion
     }
 }

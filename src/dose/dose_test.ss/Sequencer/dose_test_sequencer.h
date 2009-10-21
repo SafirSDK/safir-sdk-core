@@ -29,6 +29,7 @@
 #include <string>
 #include <Safir/Dob/Connection.h>
 #include <DoseTest/Items/TestCase.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <iostream>
 #include <fstream>
 #include <list>
@@ -97,6 +98,7 @@ private:
     const int m_stopTc;
 
     State m_state;
+    boost::posix_time::ptime m_lastCleanupTime;
 
     const Languages m_languages;
 

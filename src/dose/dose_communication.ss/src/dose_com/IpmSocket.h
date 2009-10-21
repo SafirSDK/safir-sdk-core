@@ -23,7 +23,7 @@
 ******************************************************************************/
 
 #ifdef _LINUX
-#define INVALID_SOCKET   -1
+#define INVALID_SOCKET (unsigned long)-1
 #define SOCKET_ERROR    -1
 typedef  unsigned long SOCKET;
 typedef unsigned long IPADDR;

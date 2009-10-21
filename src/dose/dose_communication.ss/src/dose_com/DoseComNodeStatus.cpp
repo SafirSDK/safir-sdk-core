@@ -152,8 +152,8 @@ CNodeStatus::CNodeStatus()
 *    DoseCommunicationC_GetNodeUp, DoseCommunicationC_GetNodeDown
 *
 ******************************************************************/
-int CNodeStatus::GetNodeInfo(ushort DoseId, ulong *pIpAddr,
-                             ulong *pNodeStatus)
+int CNodeStatus::GetNodeInfo(dcom_ushort16 DoseId, dcom_ulong32 *pIpAddr,
+                             dcom_ulong32 *pNodeStatus)
 {
     if(DoseId >= NODESTATUS_TABLE_SIZE) return(-1);
 
@@ -176,24 +176,24 @@ int CNodeStatus::GetNodeInfo(ushort DoseId, ulong *pIpAddr,
 void CNodeStatus::UpdateNodeStatusBitMap(void)
 {
     int jj;
-    ulong64 BitMapUp64   = (ulong64) 0;
-    ulong64 BitMapDown64 = (ulong64) 0;
-    ulong64 BitMapNew64  = (ulong64) 0;
-    ulong64 BitMapToBePd64  = (ulong64) 0;
+    dcom_ulong64 BitMapUp64   = (dcom_ulong64) 0;
+    dcom_ulong64 BitMapDown64 = (dcom_ulong64) 0;
+    dcom_ulong64 BitMapNew64  = (dcom_ulong64) 0;
+    dcom_ulong64 BitMapToBePd64  = (dcom_ulong64) 0;
 
     for (jj=0 ; jj< 64 ; jj++)
     {
         if(g_pNodeStatusTable[jj].Status == NODESTATUS_UP)
-            BitMapUp64 |= ((ulong64)1<<jj);
+            BitMapUp64 |= ((dcom_ulong64)1<<jj);
         else
         if(g_pNodeStatusTable[jj].Status == NODESTATUS_DOWN)
-            BitMapDown64 |= ((ulong64)1<<jj);
+            BitMapDown64 |= ((dcom_ulong64)1<<jj);
         else
         if(g_pNodeStatusTable[jj].Status == NODESTATUS_NEW)
-            BitMapNew64 |= ((ulong64)1<<jj);
+            BitMapNew64 |= ((dcom_ulong64)1<<jj);
 
         if(g_pNodeStatusTable[jj].ToBePoolDistributed)
-            BitMapToBePd64 |= ((ulong64)1<<jj);
+            BitMapToBePd64 |= ((dcom_ulong64)1<<jj);
     }
 
     // New are Up or New but not Up or New before
@@ -204,13 +204,13 @@ void CNodeStatus::UpdateNodeStatusBitMap(void)
     // which checks if it is time to start a PoolDistribution.
     // So here we 'or' new nodes.
 
-    if(BitMapToBePd64 != (ulong64)0)
+    if(BitMapToBePd64 != (dcom_ulong64)0)
     {
         g_pShm->BitMapToBePoolDistributed64 |= BitMapToBePd64;
 
         // Clear my own bit
         g_pShm->BitMapToBePoolDistributed64
-                     &= ~((ulong64)1<< (g_pShm->MyDoseId & 0x3F));
+                     &= ~((dcom_ulong64)1<< (g_pShm->MyDoseId & 0x3F));
     }
 
     g_pShm->BitMapNodesUp64   = BitMapUp64;
@@ -220,10 +220,10 @@ void CNodeStatus::UpdateNodeStatusBitMap(void)
     if(*pDbg>1)
         PrintDbg("    UpdateNodeStatusBitMap()."
                  " Setting BitMapToBePd=%X.%08X  N=%X.%08X U=%X.%08X\n",
-                 (ulong) (g_pShm->BitMapToBePoolDistributed64>>32),
-                 (ulong) (g_pShm->BitMapToBePoolDistributed64  & 0xFFFFFFFF),
-                 (ulong) (BitMapNew64>>32), (ulong) (BitMapNew64 & 0xFFFFFFFF),
-                 (ulong) (BitMapUp64>>32), (ulong) (BitMapNew64 & 0xFFFFFFFF));
+                 (dcom_ulong32) (g_pShm->BitMapToBePoolDistributed64>>32),
+                 (dcom_ulong32) (g_pShm->BitMapToBePoolDistributed64  & 0xFFFFFFFF),
+                 (dcom_ulong32) (BitMapNew64>>32), (dcom_ulong32) (BitMapNew64 & 0xFFFFFFFF),
+                 (dcom_ulong32) (BitMapUp64>>32), (dcom_ulong32) (BitMapNew64 & 0xFFFFFFFF));
 }
 /*----------------- end UpdateNodeStatusBitMap() -----------*/
 
@@ -234,13 +234,13 @@ void CNodeStatus::UpdateNodeStatusBitMap(void)
 * registered as down. Compare with code in CNodeStatus::CheckTimedOutNodes().
 * It will be _NEW when next msg arrives.
 ******************************************************************************/
-void CNodeStatus::SetNodeDownWhenInvalidTimeStamp(uchar DoseId)
+void CNodeStatus::SetNodeDownWhenInvalidTimeStamp(dcom_uchar8 DoseId)
 {
     if(*pDbg)
         PrintDbg("*** A node with invalid TimeStamp. DoseId=%d\n", DoseId);
 
     g_pNodeStatusTable[DoseId].Status = NODESTATUS_DOWN;
-    CDoseComReceive::UpdateNodeUp((uchar) DoseId);
+    CDoseComReceive::UpdateNodeUp((dcom_uchar8) DoseId);
     g_pNodeStatusTable[DoseId].ToBeGivenToAppl       = 2;
     g_pNodeStatusTable[DoseId].ToBePoolDistributed   = 0;
     g_pNodeStatusTable[DoseId].HasReceivedPdComplete = 0;
@@ -261,7 +261,7 @@ void CNodeStatus::SetNodeDownWhenInvalidTimeStamp(uchar DoseId)
 *  0 - if no change
 *****************************************************************/
 int CNodeStatus::UpdateNode_Up(unsigned char DoseId,
-                               ulong IpAddr_nw, ulong TimeStamp)
+                               dcom_ulong32 IpAddr_nw, dcom_ulong32 TimeStamp)
 {
     unsigned long TickNow;
 
@@ -388,8 +388,8 @@ int CNodeStatus::CheckTimedOutNodes(void)
 {
     int     jj;
     int     ChangeCount = 0;
-    ulong   dwCurrentTime;
-    ulong   TickNow;
+    dcom_ulong32   dwCurrentTime;
+    dcom_ulong32   TickNow;
 
 
     //if(*pDbg>3) PrintDbg("CheckTimedOutNodes()\n");
@@ -427,7 +427,7 @@ int CNodeStatus::CheckTimedOutNodes(void)
                 g_TickPrev = TickNow;
 
                 g_pNodeStatusTable[jj].Status = NODESTATUS_DOWN;
-                CDoseComReceive::UpdateNodeUp((uchar) jj);
+                CDoseComReceive::UpdateNodeUp((dcom_uchar8) jj);
                 g_pNodeStatusTable[jj].ToBeGivenToAppl       = 2;
                 g_pNodeStatusTable[jj].ToBePoolDistributed   = 0;
                 g_pNodeStatusTable[jj].HasReceivedPdComplete = 0;
@@ -458,7 +458,7 @@ int CNodeStatus::CheckTimedOutNodes(void)
             g_pShm->BitMapLatestPoolDistributed64 =
                                 g_pShm->BitMapToBePoolDistributed64;
 
-            g_pShm->BitMapToBePoolDistributed64 = (ulong64)0;
+            g_pShm->BitMapToBePoolDistributed64 = (dcom_ulong64)0;
 
             for (jj=0 ; jj<NODESTATUS_TABLE_SIZE ; jj++)
             {
@@ -470,8 +470,8 @@ int CNodeStatus::CheckTimedOutNodes(void)
             if(*pDbg>1)
                 PrintDbg("CheckTimedOutNodes()."
                     " Setting BitMapBeingPd=%X.%08X (clear ToBePd)\n",
-                    (ulong)(g_pShm->BitMapBeingPoolDistributed64>>32),
-                    (ulong)(g_pShm->BitMapBeingPoolDistributed64 & 0xFFFFFFFF));
+                    (dcom_ulong32)(g_pShm->BitMapBeingPoolDistributed64>>32),
+                    (dcom_ulong32)(g_pShm->BitMapBeingPoolDistributed64 & 0xFFFFFFFF));
 
             g_pShm->PoolDistributionWillStartSoon = 0;
             g_pShm->PoolDistributionIsInProgress = 1;
@@ -491,8 +491,8 @@ int CNodeStatus::CheckTimedOutNodes(void)
 *          to be used as next start search index
 *
 *****************************************************************/
-ulong CNodeStatus::GetNextChangedNode(unsigned char *pNodeStatus,
-                                      unsigned long *pIpAddr_nw)
+dcom_ulong32 CNodeStatus::GetNextChangedNode(unsigned char *pNodeStatus,
+                                             dcom_ulong32 *pIpAddr_nw)
 {
     int jj;
 

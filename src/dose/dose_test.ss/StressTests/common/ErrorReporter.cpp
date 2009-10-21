@@ -22,11 +22,7 @@
 *
 ******************************************************************************/
 #include "ErrorReporter.h"
-#include <ace/Thread.h>
-#include <ace/Process.h>
-#include <ace/SOCK_Dgram_Bcast.h>
-#include <ace/OS_NS_sys_socket.h>
-#include <ace/OS_NS_unistd.h>
+#include "../common/CommonIncludes.h"
 #include <Safir/Utilities/ProcessInfo.h>
 #include <sstream>
 void ErrorReporter::Log(const std::string& text)

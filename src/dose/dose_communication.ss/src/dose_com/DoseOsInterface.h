@@ -40,21 +40,21 @@
 
 //#include <stdio.h>
 
-#ifndef ulong
-typedef  unsigned long  ulong;
-typedef  unsigned short ushort;
-typedef  unsigned char  uchar;
+#ifndef dcom_ulong32
+typedef  unsigned int  dcom_ulong32;
+typedef  unsigned short dcom_ushort16;
+typedef  unsigned char  dcom_uchar8;
 #endif
 
 #ifdef _WIN32
-#ifndef ulong64
-typedef unsigned _int64  ulong64;
+#ifndef dcom_ulong64
+typedef unsigned _int64  dcom_ulong64;
 typedef _int64  long64;
 #endif
 #endif
 
 #ifdef _LINUX
-typedef unsigned long long  ulong64;
+typedef unsigned long long  dcom_ulong64;
 typedef long long  long64;
 #endif
 

@@ -73,7 +73,7 @@ namespace Internal
         std::wstring GetOwnIpAddress() const;
         std::wstring IpAddressToString(const unsigned long ipAddr) const;
 
-        void SetOkToSignalPDComplete() {m_okToSignalPDComplete = true;}
+        void SetOkToSignalPDComplete() {m_okToSignalPDComplete = 1;}
 
         static const Identifier DoseComVirtualConnectionId;
 
@@ -98,19 +98,19 @@ namespace Internal
 
         QualityOfServiceData m_QualityOfServiceData;
 
-        boost::scoped_array<volatile bool> m_queueIsFull;
+        boost::scoped_array<AtomicUint32> m_queueIsFull;
         ACE_Thread_Mutex m_queueIsFullLock;
 
-        volatile bool m_okToSignalPDComplete;
-        volatile int m_isNotified;
+        AtomicUint32 m_okToSignalPDComplete;
+        AtomicUint32 m_isNotified;
 
         int m_pdChannel;
         int m_pdPriority;
         bool m_pdIsAcked;
 
-        boost::scoped_array<volatile bool> m_incomingDataEvents;
-        volatile bool m_queueNotFullEvent;
-        volatile bool m_startPoolDistributionEvent;
+        boost::scoped_array<AtomicUint32> m_incomingDataEvents;
+        AtomicUint32 m_queueNotFullEvent;
+        AtomicUint32 m_startPoolDistributionEvent;
     };
 }
 }

@@ -51,7 +51,7 @@ namespace Typesystem
          * Creates an EntityId with the given typeid and instance number.
          *
          * @param typeId [in] - The type id of the entity that the EntityId is to refer to.
-         * @param instance [in] - The instance of the entity that the EntityId is to refer to.
+         * @param instanceId [in] - The instance of the entity that the EntityId is to refer to.
         */
         EntityId(const Dob::Typesystem::TypeId typeId,
                  const Dob::Typesystem::InstanceId instanceId)
@@ -79,7 +79,7 @@ namespace Typesystem
         /**
          * Set the instance number of the EntityId.
          *
-         * @param instance [in] - The new instance number.
+         * @param instanceId [in] - The new instance number.
          */
         void SetInstanceId(const Dob::Typesystem::InstanceId & instanceId) {m_instanceId = instanceId;}
 

@@ -6,17 +6,7 @@ project swre_library is
 
    for library_dir use Externally_Built_Library'library_dir;
 
-   case Externally_Built_Library.OS is
-      when "Linux" =>
-          for library_name use "swre_library";
-      when "Windows_NT" =>
-          case Externally_Built_Library.Build is
-              when "debug" =>
-                  for library_name use "swre_libraryd";
-              when others =>
-                  for library_name use "swre_library";
-          end case;
-   end case;
+   for library_name use "swre_library";
 
    for Library_kind  use "dynamic";
 

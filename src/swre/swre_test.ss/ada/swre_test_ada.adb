@@ -23,10 +23,10 @@
 -------------------------------------------------------------------------------
 with Ada.Exceptions;
 with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
-with Safir.Dob.Consumer;
-with Safir.Dob.Connection;
+with Safir.Dob.Consumers;
+with Safir.Dob.Connections;
 with Safir.Application.Tracers;
-with Safir.SwReports.SwReport; use Safir.SwReports;
+with Safir.Sw_Reports.Sw_Report; use Safir.Sw_Reports;
 with Ada.Text_IO;
 
 procedure Swre_Test_Ada is
@@ -38,52 +38,52 @@ procedure Swre_Test_Ada is
 
 
    type Dispatcher is limited new
-     Safir.Dob.Consumer.Dispatcher with null record;
+     Safir.Dob.Consumers.Dispatcher with null record;
 
-   procedure OnDoDispatch
+   procedure On_Do_Dispatch
       (Self : in out Dispatcher) is
       pragma Unreferenced (Self);
    begin
       MainLoop.Dispatch;
-   end OnDoDispatch;
+   end On_Do_Dispatch;
 
    type StopHandler is limited new
-      Safir.Dob.Consumer.StopHandler with
+      Safir.Dob.Consumers.Stop_Handler with
    record
       Stop : Boolean := False;
    end record;
 
-   procedure OnStopOrder
+   procedure On_Stop_Order
       (Self : in out StopHandler);
 
 
-   procedure OnStopOrder
+   procedure On_Stop_Order
       (Self : in out StopHandler) is
    begin
       Self.Stop := True;
-   end OnStopOrder;
+   end On_Stop_Order;
 
    Debug : Safir.Application.Tracers.Tracer;
 
    procedure Timeout is
    begin
-      SwReport.Send_Fatal_Error_Report ("FatalErrorCode99", "AdaTestApp", "Fatal Error text99");
-      SwReport.Send_Fatal_Error_Report ("FatalErrorCode100", "AdaTestApp", "Fatal Error text100");
+      Sw_Report.Send_Fatal_Error_Report ("FatalErrorCode99", "AdaTestApp", "Fatal Error text99");
+      Sw_Report.Send_Fatal_Error_Report ("FatalErrorCode100", "AdaTestApp", "Fatal Error text100");
 
-      SwReport.Send_Error_Report ("ErrorCode44", "AdaTestApp", "Error text44");
-      SwReport.Send_Error_Report ("ErrorCode55", "AdaTestApp", "Error text55");
+      Sw_Report.Send_Error_Report ("ErrorCode44", "AdaTestApp", "Error text44");
+      Sw_Report.Send_Error_Report ("ErrorCode55", "AdaTestApp", "Error text55");
 
-      SwReport.Send_Resource_Report ("Resource77", true, "Resource text77");
-      SwReport.Send_Resource_Report ("Resource88", true, "Resource text88");
+      Sw_Report.Send_Resource_Report ("Resource77", True, "Resource text77");
+      Sw_Report.Send_Resource_Report ("Resource88", True, "Resource text88");
 
-      SwReport.Send_Program_Info_Report ("Important information from the Ada application");
-      SwReport.Send_Program_Info_Report ("More Important information from the Ada application");
+      Sw_Report.Send_Program_Info_Report ("Important information from the Ada application");
+      Sw_Report.Send_Program_Info_Report ("More Important information from the Ada application");
 
-      SwReport.Send_Programming_Error_Report ("ProgrammingErrorCode33", "AdaTestApp", "Ada programming error33");
-      SwReport.Send_Programming_Error_Report ("ProgrammingErrorCode34", "AdaTestApp", "Ada programming error34");
+      Sw_Report.Send_Programming_Error_Report ("ProgrammingErrorCode33", "AdaTestApp", "Ada programming error33");
+      Sw_Report.Send_Programming_Error_Report ("ProgrammingErrorCode34", "AdaTestApp", "Ada programming error34");
 
-      SwReport.Send_Programming_Error_Report ("ProgrammingErrorCode35", "AdaTestApp", "Ada programming error35");
-      SwReport.Send_Programming_Error_Report ("ProgrammingErrorCode36", "AdaTestApp", "Ada programming error36");
+      Sw_Report.Send_Programming_Error_Report ("ProgrammingErrorCode35", "AdaTestApp", "Ada programming error35");
+      Sw_Report.Send_Programming_Error_Report ("ProgrammingErrorCode36", "AdaTestApp", "Ada programming error36");
 
       for Index in 0 .. 100 loop
          Debug.Put_Line ("Testing logging to tracer " & Integer'Wide_Image (Index));
@@ -91,7 +91,7 @@ procedure Swre_Test_Ada is
    end Timeout;
 
    task body MainLoop is
-      Connection      : Safir.Dob.Connection.Class;
+      Connection      : Safir.Dob.Connections.Connection;
       Disp : aliased Dispatcher;
       Stop : aliased StopHandler;
    begin

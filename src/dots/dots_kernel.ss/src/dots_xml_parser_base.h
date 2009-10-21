@@ -48,9 +48,9 @@ namespace Internal
         virtual ~XmlParserBase() {};
 
         virtual void Reset() = 0;
-        virtual bool StartElement(std::string s) = 0;
-        virtual bool EndElement(std::string s) = 0;
-        virtual bool Content(std::string s) = 0;
+        virtual bool StartElement(const std::string& s) = 0;
+        virtual bool EndElement(const std::string& s) = 0;
+        virtual bool Content(const std::string& s) = 0;
 
 
     protected:

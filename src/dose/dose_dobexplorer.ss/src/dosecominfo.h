@@ -23,8 +23,8 @@
 ******************************************************************************/
 #ifndef DOSECOMINFO_H
 #define DOSECOMINFO_H
+#include "common_header.h"
 #include "ui_dosecominfo.h"
-#include <QtGui>
 
 class DoseComInfo :
   public QWidget,

@@ -31,7 +31,18 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/integer_traits.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4702)
+#endif
+
 #include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <fstream>
 #include <string>
 #include <Safir/Dob/ConnectionAspectInjector.h>

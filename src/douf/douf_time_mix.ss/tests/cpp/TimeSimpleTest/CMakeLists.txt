@@ -6,7 +6,7 @@ FILE(GLOB sources douf_time_test2.cpp)
 
 ADD_EXECUTABLE(douf_time_test_simple ${sources})
 
-TARGET_LINK_LIBRARIES(douf_time_test_simple dots_cpp douf_time_library douf_time boost_date_time)
+TARGET_LINK_LIBRARIES(douf_time_test_simple dots_cpp douf_time_library douf_time_cpp boost_date_time)
 
 INSTALL(TARGETS douf_time_test_simple
         RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin

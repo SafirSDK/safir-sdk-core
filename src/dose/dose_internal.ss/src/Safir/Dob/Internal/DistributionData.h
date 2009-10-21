@@ -241,7 +241,7 @@ namespace Internal
         DistributionData(have_persistence_data_request_tag_t,
                          const ConnectionId& sender);
 
-        
+
         //Create an Action_HavePersistenceDataResponse
         DistributionData(have_persistence_data_response_tag_t,
                          const ConnectionId& sender,
@@ -450,6 +450,9 @@ namespace Internal
         const VersionNumber GetVersion() const {return GetEntityStateHeader().m_version;}
         void IncrementVersion() {++GetEntityStateHeader().m_version;}
         void ResetVersion() {GetEntityStateHeader().m_version = VersionNumber();}
+        void DecrementVersion();
+        void ResetDecrementedFlag() {GetEntityStateHeader().m_versionIsDecremented = false;}
+        const VersionNumber GetUndecrementedVersion() const;
 
         EntityStateKind GetEntityStateKind() const {return GetEntityStateHeader().m_kind;}
         void SetEntityStateKind(const EntityStateKind& kind) {GetEntityStateHeader().m_kind = kind;}
@@ -521,7 +524,7 @@ namespace Internal
         /** @{ */
 
         bool GetIHavePersistenceData() const {return GetHavePersistenceDataResponseMsg().m_iHavePersistenceData;}
-        
+
         /** @} */
 
         /**
@@ -605,7 +608,7 @@ namespace Internal
             bool                        m_explicitlyDeleted;
             bool                        m_sourceIsPermanentStore;
             bool                        m_hasBlob;
-            bool                        m_padding2;
+            bool                        m_versionIsDecremented;
             Typesystem::Int32           m_numTimestamps;
         };
 
@@ -738,26 +741,26 @@ namespace Internal
         public:
             static inline char * Allocate(const size_t size)
             {
-                char * data = static_cast<char*>(GetSharedMemory().allocate(size + sizeof(boost::uint32_t))) + sizeof(boost::uint32_t);
-                *GetCount(data) = 0;
+                char * data = static_cast<char*>(GetSharedMemory().allocate(size + sizeof(AtomicUint32))) + sizeof(AtomicUint32);
+                GetCount(data) = 0;
                 return data;
             }
 
-            static inline volatile boost::uint32_t * GetCount(const char * p)
+            static inline AtomicUint32& GetCount(const char * p)
             {
-                return static_cast<volatile boost::uint32_t *>(static_cast<void *>(const_cast<char*>(p - sizeof(boost::uint32_t))));
+                return *static_cast<AtomicUint32*>(static_cast<void *>(const_cast<char*>(p - sizeof(AtomicUint32))));
             }
 
             static inline void AddRef(const char * p)
             {
-                atomic_inc32(GetCount(p));
+                GetCount(p)++;
             }
             static inline void ReleaseRef(const char * p)
             {
-                //if the old value was 1 the new value is 0 and we can deallocate.
-                if(1 == atomic_dec32(GetCount(p)))
+                //if the old value is 0 the new value is 0 and we can deallocate.
+                if(1 == GetCount(p)--)
                 {
-                    GetSharedMemory().deallocate(const_cast<char*>(p) - sizeof(boost::uint32_t));
+                    GetSharedMemory().deallocate(const_cast<char*>(p) - sizeof(AtomicUint32));
                 }
             }
 

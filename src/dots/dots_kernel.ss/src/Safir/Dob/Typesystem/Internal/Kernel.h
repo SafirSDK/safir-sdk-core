@@ -34,11 +34,7 @@
         #define DOTS_KERNEL_API __declspec(dllexport)
     #else
         #define DOTS_KERNEL_API __declspec(dllimport)
-        #ifndef NDEBUG
-            #pragma comment( lib, "dots_kerneld.lib" )
-        #else
-            #pragma comment( lib, "dots_kernel.lib" )
-        #endif
+        #pragma comment( lib, "dots_kernel.lib" )
     #endif
     #define CALLING_CONVENTION __cdecl
 #elif defined __GNUC__
@@ -74,6 +70,8 @@
 
 extern "C"
 {
+    typedef void (CALLING_CONVENTION *DotsC_BytePointerDeleter)(char * &);
+
     //********************************************************
     //* Base operations on blobs
     //*
@@ -197,6 +195,12 @@ extern "C"
     // Comments:    Get the number of enum types defined in the system.
     DOTS_KERNEL_API DotsC_Int32 CALLING_CONVENTION DotsC_NumberOfEnumerations();
 
+    // Function:    DotsC_NumberOfExceptions
+    // Parameters:  -
+    // Returns:     number of existing exception types
+    // Comments:    Get the number of exception types defined in the system.
+    DOTS_KERNEL_API DotsC_Int32 CALLING_CONVENTION DotsC_NumberOfExceptions();
+
     // Function:    DotsC_GetAllTypeIds
     // Parameters:  buf - pointer to an array of size 'bufSize'
     //              bufSize - size of buf
@@ -232,6 +236,12 @@ extern "C"
     // Returns:     true if the type exists as an enumeration type
     // Comments:    Check if type id belongs to a existing enumeration type
     DOTS_KERNEL_API bool CALLING_CONVENTION DotsC_IsEnumeration(const DotsC_TypeId typeId);
+
+    // Function:    DotsC_IsException
+    // Parameters:  typeId - id of exception type
+    // Returns:     true if the type exists as an exception type
+    // Comments:    Check if type id belongs to a existing enumeration type
+    DOTS_KERNEL_API bool CALLING_CONVENTION DotsC_IsException(const DotsC_TypeId typeId);
 
     // Function:    DotsC_TypeIdFromName
     // Parameters:  typeName -  The name shall contain namespaces and class name
@@ -352,7 +362,16 @@ extern "C"
     DOTS_KERNEL_API DotsC_Int32 CALLING_CONVENTION DotsC_GetMemberArraySizeProperty(const DotsC_TypeId classId,
                                                                                     const DotsC_TypeId propertyId,
                                                                                     const DotsC_MemberIndex propertyMember);
-
+    // Function:    DotsC_GetStringMemberMaxLengthProperty
+    // Parameters:  classId         -   id of the class with a property
+    //              propertyId      -   id of a property supported by the class
+    //              propertyMember  -   the property member
+    // Returns:     The max string length of the property member.
+    //              -1 if there is no such type or mapping defined
+    // Comments:    Returns the max string length of a property member.
+    DOTS_KERNEL_API DotsC_Int32 CALLING_CONVENTION DotsC_GetStringMemberMaxLengthProperty(const DotsC_TypeId classId,
+                                                                                          const DotsC_TypeId propertyId,
+                                                                                          const DotsC_MemberIndex propertyMember);
 
     // Function:    DotsC_GetMemberTypeName
     // Parameters:  typeId  -   id of class or property
@@ -500,6 +519,7 @@ extern "C"
     // Returns:     -
     // Comments:    Serializes a xml string to a blob.
     DOTS_KERNEL_API void CALLING_CONVENTION DotsC_XmlToBlob(char * & blobDest,
+                                                            DotsC_BytePointerDeleter & deleter,
                                                             const char * const xmlSource);
 
     // Function:    DotsC_BinaryToBase64
@@ -1904,7 +1924,6 @@ extern "C"
 
     DOTS_KERNEL_API void CALLING_CONVENTION DotsC_AppendExceptionDescription(const char * const moreDescription);
 
-    typedef void (CALLING_CONVENTION *DotsC_BytePointerDeleter)(char * &);
 
     DOTS_KERNEL_API void CALLING_CONVENTION DotsC_GetAndClearException(DotsC_TypeId & exceptionId,
                                                                        char * & description,

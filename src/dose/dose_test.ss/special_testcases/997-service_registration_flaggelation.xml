@@ -22,7 +22,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.RegisterServiceHandler</value>
               </member>
               <member>
@@ -53,7 +53,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.UnregisterHandler</value>
               </member>
               <member>
@@ -85,7 +85,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SubscribeRegistration</value>
               </member>
               <member>
@@ -103,7 +103,7 @@
               <member>
                 <name>RestartSubscription</name>
                 <value>false</value>
-              </member>              
+              </member>
               <member>
                 <name>Consumer</name>
                 <value>0</value>
@@ -125,7 +125,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.RegisterServiceHandler</value>
               </member>
               <member>
@@ -149,7 +149,7 @@
             <name>DoseTest.Action</name>
             <members>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.Sleep</value>
               </member>
               <member>

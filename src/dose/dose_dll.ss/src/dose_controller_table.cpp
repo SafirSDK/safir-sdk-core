@@ -29,11 +29,18 @@
 #include <iostream>
 #include <string>
 #include "dose_controller.h"
+#include <ace/Guard_T.h>
+
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4702)
+#endif
 
 #include <boost/lexical_cast.hpp>
 
-#include <ace/Guard_T.h>
-#include <ace/Thread.h>
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
 
 namespace Safir
 {

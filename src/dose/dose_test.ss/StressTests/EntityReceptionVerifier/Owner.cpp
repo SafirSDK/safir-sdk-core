@@ -29,7 +29,7 @@
 #include <DoseStressTest/EntityWithoutAck.h>
 #include <DoseStressTest/EntityWithAckLarge.h>
 #include <DoseStressTest/EntityWithoutAckLarge.h>
-#include <ace/OS_NS_unistd.h>
+
 Owner::Owner():
     m_setStat(StatisticsCollection::Instance().AddHzCollector(L"Set Entity")),
     m_currentInstance(0)

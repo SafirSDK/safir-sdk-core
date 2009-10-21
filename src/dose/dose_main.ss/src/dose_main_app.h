@@ -79,9 +79,11 @@ namespace Internal
 
         //Handler for all other events in dose_main
         virtual int handle_exception(ACE_HANDLE);
-        volatile bool m_connectEvent;
-        volatile bool m_connectionOutEvent;
-        volatile bool m_nodeStatusChangedEvent;
+        AtomicUint32 m_connectEvent;
+        AtomicUint32 m_connectionOutEvent;
+        AtomicUint32 m_nodeStatusChangedEvent;
+
+        
         static ACE_THR_FUNC_RETURN ConnectionThread(void *);
 
         void OnDoDispatch();
@@ -89,8 +91,8 @@ namespace Internal
         //implementation of Connections::ConnectionHandler
         virtual ConnectResult CanAddConnection(const std::string & connectionName, const pid_t pid, const long context);
         virtual void HandleConnect(const ConnectionPtr & connection);
-        virtual void HandleDisconnect(const ConnectionPtr & connection);
-        virtual void DisconnectComplete();
+        
+        void HandleDisconnect(const ConnectionPtr & connection);
 
         bool AllocateStatic();
 
@@ -148,8 +150,8 @@ namespace Internal
         // For monitoring processes
         Safir::Utilities::ProcessMonitor m_processMonitor;
 
-        volatile int m_handle_exception_notified;
-        volatile int m_handle_input_notified;
+        AtomicUint32 m_handle_exception_notified;
+        AtomicUint32 m_handle_input_notified;
 
     };
 

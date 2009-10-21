@@ -22,7 +22,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.RegisterEntityHandler</value>
               </member>
               <member>
@@ -53,7 +53,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.RegisterEntityHandlerInjection</value>
               </member>
               <member>
@@ -84,7 +84,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SetAll</value>
               </member>
               <member>
@@ -123,7 +123,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SetAll</value>
               </member>
               <member>
@@ -162,7 +162,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SetAll</value>
               </member>
               <member>
@@ -201,7 +201,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SetAll</value>
               </member>
               <member>
@@ -240,7 +240,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.UnregisterHandler</value>
               </member>
               <member>
@@ -254,6 +254,21 @@
               <member>
                 <name>Consumer</name>
                 <value>0</value>
+              </member>
+            </members>
+          </object>
+        </arrayElement>
+        <arrayElement> <!--Sleep a short while to let the unreg propagate correctly -->
+          <object>
+            <name>DoseTest.Action</name>
+            <members>
+              <member>
+                <name>ActionKind</name>
+                <value>DoseTest.ActionEnum.Sleep</value>
+              </member>
+              <member>
+                <name>SleepDuration</name>
+                <value>1</value>
               </member>
             </members>
           </object>
@@ -272,7 +287,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.GetEntityIterator</value>
               </member>
               <member>
@@ -291,6 +306,22 @@
           </object>
         </arrayElement>
 
+        <arrayElement> <!--Sleep a short while to let the iteration complete -->
+          <object>
+            <name>DoseTest.Action</name>
+            <members>
+              <member>
+                <name>ActionKind</name>
+                <value>DoseTest.ActionEnum.Sleep</value>
+              </member>
+              <member>
+                <name>SleepDuration</name>
+                <value>1</value>
+              </member>
+            </members>
+          </object>
+        </arrayElement>
+
 <!-- Cleanup of ghosts -->
 
         <arrayElement>
@@ -302,7 +333,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.RegisterEntityHandlerInjection</value>
               </member>
               <member>
@@ -333,7 +364,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.DeleteAllInstances</value>
               </member>
               <member>
@@ -357,7 +388,7 @@
             <name>DoseTest.Action</name>
             <members>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.Sleep</value>
               </member>
               <member>
@@ -378,7 +409,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.GetEntityIterator</value>
               </member>
               <member>

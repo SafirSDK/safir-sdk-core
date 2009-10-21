@@ -110,6 +110,10 @@ namespace Internal
                                                             reg.typeId,
                                                             reg.handlerId.GetHandlerId())));
 
+                lllout << "Inserted a new pending RegistrationRequest for type: "
+                       << Dob::Typesystem::Operations::GetName(reg.typeId) << ", connection: " << connection->NameWithCounter()
+                       << ", handler: " << reg.handlerId.GetHandlerId() << std::endl;
+
                 ENSURE(result.second, << "Inserting new pending registration request failed!");
 
                 //count up nextId until we find a free spot (most likely after just one try)
@@ -257,9 +261,13 @@ namespace Internal
     PendingRegistrationHandler::CheckForPending()
     {
         for (PendingRegistrations::iterator it = m_pendingRegistrations.begin();
-             it != m_pendingRegistrations.end(); ++it)
+             it != m_pendingRegistrations.end();)  // iterator incrementation done below
         {
-            TryPendingRegistration(it->first);
+            // Important to increment iterator before we call TryPendingRegistration since
+            // the pointed to object might get erased in that routine.
+            PendingRegistrations::iterator tmpIt = it;
+            ++it;
+            TryPendingRegistration(tmpIt->first);
         }
     }
 

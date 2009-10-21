@@ -24,7 +24,6 @@
 
 #include "dots_error_handler.h"
 
-#include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <string>
 

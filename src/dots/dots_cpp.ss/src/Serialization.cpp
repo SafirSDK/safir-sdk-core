@@ -102,9 +102,10 @@ namespace Typesystem
         std::vector<char> xml8v(xml8.size() +1);
         xml8v.assign(xml8.begin(),xml8.end());
         xml8v.push_back(0); //null termination
-        DotsC_XmlToBlob(blob, &xml8v[0]);
+        DotsC_BytePointerDeleter deleter;
+        DotsC_XmlToBlob(blob, deleter, &xml8v[0]);
         ObjectPtr p = ObjectFactory::Instance().CreateObject(blob);
-        DotsC_DeleteBlob(blob);
+        deleter(blob);
         return p;
     }
 
@@ -114,7 +115,7 @@ namespace Typesystem
     {
         if (object == NULL)
         {
-            throw SoftwareViolationException(L"Attempt to serialize a null pointer to binay!", __WFILE__,__LINE__);
+            throw SoftwareViolationException(L"Attempt to serialize a null pointer to binary!", __WFILE__,__LINE__);
         }
 
         const Safir::Dob::Typesystem::Int32 blobSize = object->CalculateBlobSize();

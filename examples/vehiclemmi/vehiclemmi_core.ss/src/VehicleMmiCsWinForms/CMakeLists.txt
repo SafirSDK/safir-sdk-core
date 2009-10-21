@@ -1,41 +1,24 @@
+cmake_minimum_required(VERSION 2.6)
 PROJECT(VehicleMmiCsWinForms)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+find_package(CSharp REQUIRED)
+INCLUDE(CSharpMacros)
 
-FILE(GLOB cs_files *.cs)
+FILE(GLOB sources *.cs Properties/*.cs)
 FILE(GLOB resx_files *.resx)
-
-FILE(GLOB property_files Properties/*.cs)
 FILE(GLOB property_resx_files Properties/*.resx)
 
-FOREACH(resx_file ${resx_files})
-  STRING(REGEX REPLACE "/([a-zA-Z.0-9]+).resx" "/VehicleMmiCsWinForms.\\1.resources" resource_file ${resx_file})
-  SET(resource_files ${resource_files} ${resource_file})
-  SET(resource_command_line ${resource_command_line} -res:${resource_file})
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${resource_file}
-                     COMMAND resgen2 ARGS ${resx_file} ${resource_file}
-                     DEPENDS ${resx_file})
-ENDFOREACH(resx_file)
+SET(CS_FLAGS ${COMMON_CS_FLAGS} "-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dll,${SAFIR_RUNTIME}/bin/Safir.Dob.dll,${SAFIR_RUNTIME}/bin/dots_generated-dotnet.dll,${SAFIR_RUNTIME}/bin/swre_interface_dotnet.dll,System.Windows.Forms.dll,System.Drawing.dll" )
 
-FOREACH(resx_file ${property_resx_files})
-  STRING(REGEX REPLACE "/([a-zA-Z.0-9]+).resx" "/VehicleMmiCsWinForms.Properties.\\1.resources" resource_file ${resx_file})
-  SET(property_resource_files ${property_resource_files} ${resource_file})
-  SET(resource_command_line ${resource_command_line} -res:${resource_file})
+ADD_CS_RESOURCES("${resx_files}" VehicleMmiCsWinForms .)
+ADD_CS_RESOURCES("${property_resx_files}" VehicleMmiCsWinForms.Properties ${CMAKE_CURRENT_SOURCE_DIR}/Properties)
+ADD_CS_EXECUTABLE(VehicleMmiCsWinForms "${sources}" ALL)
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${resource_file}
-                     COMMAND resgen2 ARGS ${resx_file} ${resource_file}
-                     WORKING_DIRECTORY Properties
-                     DEPENDS ${resx_file})
-ENDFOREACH(resx_file)
+#The csharp build renames the exe to XXXX.csexe, so we rename it back when we install
+INSTALL(PROGRAMS ${target_EXE} 
+ DESTINATION ${SAFIR_RUNTIME}/bin
+  RENAME VehicleMmiCsWinForms.exe)
 
-
-ADD_CUSTOM_TARGET(
-  VehicleMmiCsWinForms.exe ALL 
-  COMMAND gmcs -target:exe -r:Safir.Dob.Typesystem.dll,Safir.Dob.dll,dots_generated-dotnet.dll,swre_interface_dotnet.dll,System.Windows.Forms.dll,System.Drawing.dll -out:VehicleMmiCsWinForms.exe ${cs_files} ${property_files} ${resource_command_line}
-  DEPENDS ${cs_files} ${property_files} ${resource_files} ${property_resource_files}
-  )
-
-INSTALL(FILES VehicleMmiCsWinForms.exe
-        DESTINATION ${SAFIR_RUNTIME}/bin)
-
+INSTALL_CS_DEBUG_INFO()

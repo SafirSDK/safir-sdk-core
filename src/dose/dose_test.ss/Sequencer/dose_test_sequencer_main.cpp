@@ -28,12 +28,24 @@
 #include <Safir/Dob/Consumer.h>
 #include "TestCaseReader.h"
 #include "dose_test_sequencer.h"
-#include <boost/lexical_cast.hpp>
+
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4512 4702 4267)
+#endif
+
 #include <boost/program_options.hpp>
+#include <boost/lexical_cast.hpp>
+#include <ace/Thread.h>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
+
 #include <boost/random.hpp>
 #include <ace/Reactor.h>
 #include <ace/OS_NS_unistd.h>
-#include <ace/Thread.h>
 
 namespace po = boost::program_options;
 
@@ -70,8 +82,8 @@ std::string GetRandomLanguage()
     static const char * languages[] = {"cpp", "ada", "java", "dotnet"};
     return languages[rand()%4];
 #else
-    static const char * languages[] = {"cpp", "dotnet"};
-    return languages[rand()%2];
+    static const char * languages[] = {"cpp", "dotnet", "java"};
+    return languages[rand()%3];
 #endif
 }
 

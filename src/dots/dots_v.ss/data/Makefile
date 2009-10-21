@@ -47,6 +47,7 @@
 # 2006-06-02 HESU   : Adapted to hierarchical include structure.
 # 2006-06-02 HESU/STLRHA: Improved. But install runs for every make anyway.
 # 2008-09-02 HESU: Removed creation of Ada/Java.
+# 2009-06-02 AWI: Added creation of Ada.
 #
 ###################################################################################################
 
@@ -61,13 +62,16 @@ dod_dir = $(SAFIR_RUNTIME)\data\text\dots\config
 endif
 
 ifeq ($(strip $(dots_v)),)
-dots_v  = $(SAFIR_RUNTIME)\bin\dots_v
+dots_v  = "$(SAFIR_RUNTIME)\bin\dots_v"
 endif
 
-include $(SAFIR_SDK)\\data\\build\\make_vs_setup
+space :=
+space +=
+
+include $(subst $(space),\$(space),$(SAFIR_SDK)\\data\\build\\make_vs_setup)
 
 GNATMAKE=gnatmake.exe
-#JAR_DIR := $(SAFIR_RUNTIME)\bin
+JAR_DIR := $(SAFIR_RUNTIME)\bin
 ASSEMBLY_DIR := %SAFIR_RUNTIME%\bin
 SDK_DIR := %SAFIR_SDK%
 
@@ -80,12 +84,12 @@ CPP_RELEASE_DIR := $(CPP_DIR)\release
 
 DOTNET_DIR := dotnet
 
-#ADA_DOTS_GENERATED_DIR := $(SAFIR_SDK)\ada\dots_generated-ada $(SAFIR_SDK)\ada\dots_generated-ada\lib-obj $(SAFIR_SDK)\ada\dots_generated-ada\lib-obj\debug $(SAFIR_SDK)\ada\dots_generated-ada\lib-obj\release
+ADA_DOTS_GENERATED_DIR := "$(SAFIR_SDK)\ada\dots_generated_ada" "$(SAFIR_SDK)\ada\dots_generated_ada\interface" "$(SAFIR_SDK)\ada\dots_generated_ada\ali"
 ADA_DIR := ada
-#ADA_DIRS := $(ADA_DIR) $(ADA_DIR)\lib-obj $(ADA_DIR)\lib-obj\debug $(ADA_DIR)\lib-obj\release $(ADA_DIR)\lib-obj\release-lib $(ADA_DIR)\lib-obj\debug-lib  
+ADA_DIRS := "$(ADA_DIR)" "$(ADA_DIR)\lib" "$(ADA_DIR)\obj" "$(ADA_DIR)\ali"  "$(ADA_DIR)\interface"
 JAVA_DIR := java
-#JAVA_SRC_DIR := $(JAVA_DIR)\src
-#JAVA_BIN_DIR := $(JAVA_DIR)\bin
+JAVA_SRC_DIR := $(JAVA_DIR)\src
+JAVA_BIN_DIR := $(JAVA_DIR)\bin
 
 UNUSED_STUFF_TO_DELETE := dep
 
@@ -96,17 +100,15 @@ DOD_FILES := $(wildcard $(dod_dir)/*.dod)
 
 
 vpath %.cpp $(CPP_DIR)
-#vpath %.ada $(ADA_DIR)
+vpath %.ada $(ADA_DIR)
 vpath %.cs $(DOTNET_DIR)
-#vpath %.jar $(JAVA_DIR)
-##vpath %.java $(JAVA_SRC_DIR)
-vpath %.dll $(DOTNET_DIR) $(CPP_DIR)\\debug $(CPP_DIR)\\release
+vpath %.jar $(JAVA_DIR)
+vpath %.dll $(DOTNET_DIR) $(CPP_DIR)\\debug $(CPP_DIR)\\release $(ADA_DIR)\lib
 
 default: dirs build install_flag check
 
-#%.cpp %.adb %.ads %.cs : %.dou $(DOD_FILES)
-%.cpp %.cs : %.dou $(DOD_FILES)
-	$(dots_v) -dod=$(dod_dir) $< 
+%.cpp %.adb %.ads %.cs : %.dou $(DOD_FILES)
+	$(dots_v) -dod="$(dod_dir)" $< 
 
 #relies on the fact that dots_v always generates .cpp files
 .PHONY: generate
@@ -121,76 +123,69 @@ dots_generated-cppd.dll: $(SOURCES:%.dou=%.cpp)
 dots_generated-cpp.dll: $(SOURCES:%.dou=%.cpp)
 	@$(MAKE) -f Makefile_cpp TARGET="release" $@
 
-##.PHONY: dots_generated-adad.dll
-#dots_generated-adad.dll: $(SOURCES:%.dou=%.adb)
-#	${GNATMAKE} -Pdots_generated_library.gpr -XBUILD=debug -XWarning_Level=Default
-
-##.PHONY: dots_generated-ada.dll
-#dots_generated-ada.dll: $(SOURCES:%.dou=%.adb)
-#	${GNATMAKE} -Pdots_generated_library.gpr -XBUILD=release -XWarning_Level=Default
-
+libdots_generated-ada.dll: $(SOURCES:%.dou=%.cpp)
+	${GNATMAKE} -Pdots_generated_ada_library.gpr -XBUILD=Release
 
 .PHONY: build
 build: dots_generated-cppd.dll dots_generated-cpp.dll dots_generated-dotnet.dll
-#ifneq ($(strip $(JAVA_HOME)),)  #This bit adds the jar file as a prerequisite to build if JAVA_HOME is defined. Otherwise a message is printed
-#build: dots_generated-java.jar
-#else
-#	echo *** JAVA_HOME is not defined. NO JAR-file was produced.
-#endif
-#ifneq ($(strip $(ADA_PROJECT_PATH)),)  #Build the ada code if ADA_PROJECT_PATH is defined. Otherwise a message is printed
-#build: dots_generated-ada.dll dots_generated-adad.dll
-#else
-#	echo *** ADA_PROJECT_PATH is not defined. NO ADA code was built.
-#endif
+ifneq ($(strip $(JAVA_HOME)),)  #This bit adds the jar file as a prerequisite to build if JAVA_HOME is defined. Otherwise a message is printed
+build: dots_generated-java.jar
+else
+	echo *** JAVA_HOME is not defined. NO JAR-file was produced.
+endif
+ifneq ($(strip $(ADA_PROJECT_PATH)),)  #Build the ada code if ADA_PROJECT_PATH is defined. Otherwise a message is printed
+build: libdots_generated-ada.dll
+else
+	echo *** ADA_PROJECT_PATH is not defined. NO ADA code was built.
+endif
 
 
 .PHONY: dirs
 dirs:
 	echo Creating directories
-#	-mkdir $(TAG_DIR) $(ADA_DIRS) $(ADA_DOTS_GENERATED_DIR) $(DOTNET_DIR) $(CPP_DIR) $(CPP_INCLUDE_DIR) $(CPP_RELEASE_DIR) $(CPP_DEBUG_DIR) $(JAVA_DIR) $(JAVA_SRC_DIR) $(JAVA_BIN_DIR) >\nul 2>\nul
-	-mkdir $(TAG_DIR) $(DOTNET_DIR) $(CPP_DIR) $(CPP_INCLUDE_DIR) $(CPP_RELEASE_DIR) $(CPP_DEBUG_DIR) >\nul 2>\nul
+	-mkdir "$(TAG_DIR)" $(ADA_DIRS) $(ADA_DOTS_GENERATED_DIR) "$(DOTNET_DIR)" "$(CPP_DIR)" "$(CPP_INCLUDE_DIR)" "$(CPP_RELEASE_DIR)" "$(CPP_DEBUG_DIR)" "$(JAVA_DIR)" "$(JAVA_SRC_DIR)" "$(JAVA_BIN_DIR)" >\nul 2>\nul
 
 dots_generated-dotnet.dll : $(SOURCES:%.dou=%.cs)
 	echo Building (.Net): $@
 	copy dots_generated-dotnet.snk $(DOTNET_DIR) >\nul
 	$(NET_SETUP) >\nul && cd $(DOTNET_DIR) && \
-		csc /warnaserror /nologo /target:library /out:$@ /lib:$(ASSEMBLY_DIR) /reference:Safir.Dob.TypeSystem.dll /keyfile:dots_generated-dotnet.snk *.cs ..\AssemblyInfo.cs 
+		csc /warnaserror /nologo /target:library /out:$@ /lib:"$(ASSEMBLY_DIR)" /reference:Safir.Dob.TypeSystem.dll /keyfile:dots_generated-dotnet.snk *.cs ..\AssemblyInfo.cs 
 
-##relies on the fact that dots_v always generates .cpp files
-#java_build.txt: $(SOURCES:%.dou=%.cpp)
-#	echo Creating java build help file
-#	dots_java_build_helper .
+#relies on the fact that dots_v always generates .cpp files
+java_build.txt: $(SOURCES:%.dou=%.cpp)
+	echo Creating java build help file
+	dots_java_build_helper .
 
-##relies on the fact that dots_v always generates .cpp files
-#dots_generated-java.jar: $(SOURCES:%.dou=%.cpp) java_build.txt
-#	echo Building $@
-#	javac -cp "$(JAVA_SRC_DIR);$(JAR_DIR)\safir.dob.typesystem.jar" -d $(JAVA_BIN_DIR) @java_build.txt
-#	jar cvf $(JAVA_DIR)\$@ -C $(JAVA_BIN_DIR) . >\nul
+#relies on the fact that dots_v always generates .cpp files
+dots_generated-java.jar: $(SOURCES:%.dou=%.cpp) java_build.txt
+	echo Building $@
+	javac -cp "$(JAVA_SRC_DIR);$(JAR_DIR)\dots_java.jar" -d $(JAVA_BIN_DIR) @java_build.txt
+	jar cmf Manifest.java.txt $(JAVA_DIR)\$@ -C $(JAVA_BIN_DIR) . >\nul
 
 .PHONY: install
 install: build install_flag
 
 install_flag : build
 	echo Installing
-	-del /Q $(SAFIR_RUNTIME)\data\text\dots\classes\*.*
-#ifneq ($(strip $(ADA_PROJECT_PATH)),)
-#	-copy $(SAFIR_SDK)\dots\dots_generated\ada\*.ads $(SAFIR_SDK)\ada\dots_generated-ada >\nul
-#	-copy $(SAFIR_SDK)\dots\dots_generated\ada\lib-obj\release-lib\libdots_generated-ada.dll $(SAFIR_RUNTIME)\bin >\nul
-#	-copy $(SAFIR_SDK)\dots\dots_generated\ada\lib-obj\debug-lib\libdots_generated-adad.dll $(SAFIR_RUNTIME)\bin >\nul
-#	-copy $(SAFIR_SDK)\dots\dots_generated\ada\lib-obj\release-lib\*.ali $(SAFIR_SDK)\ada\dots_generated-ada\lib-obj\release >\nul
-#	-copy $(SAFIR_SDK)\dots\dots_generated\ada\lib-obj\debug-lib\*.ali $(SAFIR_SDK)\ada\dots_generated-ada\lib-obj\debug >\nul
-#endif
-	-copy $(CPP_DEBUG_DIR)\*.dll %SAFIR_RUNTIME%\bin >\nul
-	-copy $(CPP_RELEASE_DIR)\*.dll %SAFIR_RUNTIME%\bin >\nul
-	-copy $(CPP_DEBUG_DIR)\*.lib %SAFIR_SDK%\lib >\nul
-	-copy $(CPP_RELEASE_DIR)\*.lib %SAFIR_SDK%\lib >\nul
-	-copy $(DOTNET_DIR)\*.dll $(ASSEMBLY_DIR) >\nul
-	-xcopy $(CPP_INCLUDE_DIR) $(SAFIR_SDK)\include /E /Y >\nul
-	-copy *.dou $(SAFIR_RUNTIME)\data\text\dots\classes >\nul
-	-copy *.dom  $(SAFIR_RUNTIME)\data\text\dots\classes >\nul 2>\nul
-#ifneq ($(strip $(JAVA_HOME)),)  #This bit adds the jar file as a prerequisite to build if JAVA_HOME is defined. Otherwise a message is printed
-#	-copy $(JAVA_DIR)\*.jar $(SAFIR_RUNTIME)\bin >\nul 2>\nul
-#endif
+	-del /Q "$(SAFIR_RUNTIME)\data\text\dots\classes\*.*"
+ifneq ($(strip $(ADA_PROJECT_PATH)),)
+	-copy "$(SAFIR_SDK)\dots\dots_generated\ada\interface\*.ads" "$(SAFIR_SDK)\ada\dots_generated_ada\interface" >\nul
+	-copy "$(SAFIR_SDK)\dots\dots_generated\dots_generated_ada.gpr" "$(SAFIR_SDK)\ada" >\nul
+	-copy "$(SAFIR_SDK)\dots\dots_generated\ada\lib\libdots_generated_ada.dll" "$(SAFIR_RUNTIME)\bin" >\nul
+	-copy "$(SAFIR_SDK)\dots\dots_generated\ada\ali\*.ali" "$(SAFIR_SDK)\ada\dots_generated_ada\ali" >\nul
+endif
+	-copy "$(CPP_DEBUG_DIR)\*.dll" "%SAFIR_RUNTIME%\bin" >\nul
+	-copy "$(CPP_RELEASE_DIR)\*.dll" "%SAFIR_RUNTIME%\bin" >\nul
+	-copy "$(CPP_DEBUG_DIR)\*.lib" "%SAFIR_SDK%\lib" >\nul
+	-copy "$(CPP_RELEASE_DIR)\*.lib" "%SAFIR_SDK%\lib" >\nul
+	-copy "$(DOTNET_DIR)\*.dll" "$(ASSEMBLY_DIR)" >\nul
+	-xcopy "$(CPP_INCLUDE_DIR)" "$(SAFIR_SDK)\include" /E /Y >\nul
+	-copy *.dou "$(SAFIR_RUNTIME)\data\text\dots\classes" >\nul
+	-copy *.dom  "$(SAFIR_RUNTIME)\data\text\dots\classes" >\nul 2>\nul
+	-copy *.namespace.txt  "$(SAFIR_RUNTIME)\data\text\dots\classes" >\nul 2>\nul
+ifneq ($(strip $(JAVA_HOME)),)  #This bit adds the jar file as a prerequisite to build if JAVA_HOME is defined. Otherwise a message is printed
+	-copy "$(JAVA_DIR)\*.jar" "$(SAFIR_RUNTIME)\bin" >\nul 2>\nul
+endif
 	touch install_flag
 
 check:
@@ -213,7 +208,7 @@ love:
 	@echo You make sweet tender love to the DOB, and the DOB loves you back!
 
 generate_rebuild: validation_flag dirs
-	$(dots_v) -dod=$(dod_dir) *.dou 
+	$(dots_v) -dod="$(dod_dir)" *.dou 
 
 
 rebuild: clean generate_rebuild build

@@ -27,11 +27,22 @@
 
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Connection.h>
+#include <Safir/Dob/Internal/Atomic.h>
 #include <DoseTest/Action.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include "Consumer.h"
-#include <ace/Reactor.h>
 #include <boost/function.hpp>
+
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4267)
+#endif
+
+#include <ace/Reactor.h>
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
 
 class Dispatcher:
     public ACE_Event_Handler,
@@ -60,7 +71,7 @@ private:
     }
 
     const boost::function<void(void)> m_dispatchCallback;
-    volatile int m_isNotified;
+    Safir::Dob::Internal::AtomicUint32 m_isNotified;
 };
 
 

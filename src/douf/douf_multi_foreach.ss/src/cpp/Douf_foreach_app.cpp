@@ -24,7 +24,17 @@
 
 #include "Douf_foreach_app.h"
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4702)
+#endif
+
 #include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <Safir/Dob/NotOpenException.h>
 #include <Safir/SwReports/SwReport.h>
 

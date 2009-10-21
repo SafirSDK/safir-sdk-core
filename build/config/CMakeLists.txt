@@ -11,6 +11,12 @@ SET(sdk_dirs "common/sdk")
 IF (WIN32)
   SET(runtime_dirs ${runtime_dirs} windows/runtime)
   SET(sdk_dirs ${sdk_dirs} windows/sdk)
+  
+  #todo: remove this when we dont use make_vs_setup any longer
+  if (SAFIR_BUILD_SYSTEM_VERSION)
+    SET(additional_exclude PATTERN "make_vs_setup" EXCLUDE
+                           PATTERN "etc" EXCLUDE)
+  endif()
 ENDIF(WIN32)
 
 IF (LINUX)
@@ -24,4 +30,5 @@ INSTALL(DIRECTORY ${runtime_dirs}
 
 INSTALL(DIRECTORY ${sdk_dirs}
         DESTINATION ${SAFIR_SDK}/..
-        PATTERN ".svn" EXCLUDE)
+        PATTERN ".svn" EXCLUDE
+        ${additional_exclude})

@@ -87,6 +87,7 @@ namespace Dob
          *
          * @param [in] entity Entity to create.
          * @param [in] instanceId Instance id.
+         * @param [in] handlerId The handler id to which the state belongs.
          */
         void InitialSet(const Dob::EntityPtr&              entity,
                         const Dob::Typesystem::InstanceId& instanceId,

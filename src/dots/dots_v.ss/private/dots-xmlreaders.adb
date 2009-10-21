@@ -57,7 +57,7 @@ package body Dots.Xmlreaders is
          Put (Indent_Str (1 .. Indentation + 4));
          Put_Line ("Sax.Characters (" & Ch & ','
                    & Integer'Image (Ch'Length) & ") at "
-                   & To_String (Handler.Locator.all));
+                   & To_String (Handler.Locator));
       end if;
       Dots.Parser.Characters (Ch);
    end Characters;
@@ -101,14 +101,14 @@ package body Dots.Xmlreaders is
       if not Handler.Silent then
          Put (Indent_Str (1 .. Indentation));
          Put_Line ("Sax.End_Element (" & Local_Name & ") at "
-                   & To_String (Handler.Locator.all));
+                   & To_String (Handler.Locator));
          Indentation := Indentation - 4;
       end if;
 
    exception
       when Error_Found =>
          Dots.Parser.Error :=
-           To_String (Handler.Locator.all) & ": " & Dots.Parser.Error;
+           To_String (Handler.Locator) & ": " & Dots.Parser.Error;
          raise;
 
       when Error_Completed =>
@@ -116,7 +116,7 @@ package body Dots.Xmlreaders is
 
       when E : others =>
          Dots.Parser.Error := To_Unbounded_String
-           (To_String (Handler.Locator.all) & ": " &
+           (To_String (Handler.Locator) & ": " &
          Ada.Exceptions.Exception_Message (E));
          raise Error_Found;
    end End_Element;
@@ -154,9 +154,9 @@ package body Dots.Xmlreaders is
 
    procedure Set_Document_Locator
      (Handler : in out Reader;
-      Loc     : access Sax.Locators.Locator'Class) is
+      Loc     : in out Sax.Locators.Locator) is
    begin
-      Handler.Locator := Locator_Access (Loc);
+      Handler.Locator := Loc;
    end Set_Document_Locator;
 
    ---------------------
@@ -227,7 +227,7 @@ package body Dots.Xmlreaders is
    exception
       when Error_Found =>
          Dots.Parser.Error :=
-           To_String (Handler.Locator.all) & ": " & Dots.Parser.Error;
+           To_String (Handler.Locator) & ": " & Dots.Parser.Error;
          raise;
 
       when Error_Completed =>
@@ -235,7 +235,7 @@ package body Dots.Xmlreaders is
 
       when E : others =>
          Dots.Parser.Error := To_Unbounded_String (
-           To_String (Handler.Locator.all) & ": " &
+           To_String (Handler.Locator) & ": " &
          Ada.Exceptions.Exception_Message (E));
          raise Error_Found;
    end Start_Element;

@@ -33,12 +33,68 @@ namespace Dob
 {
 namespace Internal
 {
+    namespace Atomics 
+    {
+        using boost::interprocess::detail::atomic_inc32;
+        using boost::interprocess::detail::atomic_dec32;
+        using boost::interprocess::detail::atomic_read32;
+        using boost::interprocess::detail::atomic_write32;
+        using boost::interprocess::detail::atomic_cas32;
+    }
 
-    using boost::interprocess::detail::atomic_inc32;
-    using boost::interprocess::detail::atomic_dec32;
-    using boost::interprocess::detail::atomic_read32;
-    using boost::interprocess::detail::atomic_write32;
-    using boost::interprocess::detail::atomic_cas32;
+    class AtomicUint32:
+        private boost::noncopyable
+    {
+    public:
+        AtomicUint32():
+            m_value(0) {}
+
+        explicit AtomicUint32(const boost::uint32_t initialValue):
+            m_value(initialValue) {}
+
+           
+        //atomic write
+        inline void operator=(const boost::uint32_t value)
+        {
+            Atomics::atomic_write32(&m_value,value);
+        }
+        
+        //atomic post increment
+        inline boost::uint32_t operator++(int)
+        {
+            return Atomics::atomic_inc32(&m_value);
+        }
+
+        //atomic post decrement
+        inline boost::uint32_t operator--(int)
+        {
+            return Atomics::atomic_dec32(&m_value);
+        }
+
+        inline boost::uint32_t value() const
+        {
+            return Atomics::atomic_read32(const_cast<boost::uint32_t*>(&m_value));
+        }
+
+        inline boost::uint32_t compare_exchange(const boost::uint32_t with, const boost::uint32_t cmp)
+        {
+            return Atomics::atomic_cas32(&m_value,with,cmp);
+        }
+
+        inline bool operator ==(const boost::uint32_t other) const
+        {
+            return value() == other;
+        }
+
+        inline bool operator !=(const boost::uint32_t other) const
+        {
+            return value() != other;
+        }
+
+    private:
+        volatile boost::uint32_t m_value;
+    };
+
 
 }
 }

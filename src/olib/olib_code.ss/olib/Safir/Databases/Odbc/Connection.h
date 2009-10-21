@@ -157,7 +157,7 @@ public:
     * See SQLSetConnectAttr in ODBC documentation for more info.
     *
     * @param [in] lAttribute - An integer representing the attribute
-    * @param [in] szValue - The value of the attribute to be set
+    * @param [in] wszValue - The value of the attribute to be set
     * @exception ReconnectException - SQLSetConnectAttr failed. Check GetDiagRec for info.
     */
     void SetConnectAttr(long lAttribute, const std::wstring & wszValue);
@@ -177,7 +177,7 @@ public:
     * See SQLSetConnectAttr in ODBC documentation for more info.
     *
     * @param [in] lAttribute - An integer representing the attribute
-    * @param [out] szValue - The value of the attribute
+    * @param [out] wszValue - The value of the attribute
     * @param [in] ulLength - Size in bytes of the szValue buffer.
     * @exception ReconnectException - SQLGetConnectAttr failed. Check GetDiagRec for info.
     */

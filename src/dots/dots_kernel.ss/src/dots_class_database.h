@@ -26,9 +26,23 @@
 #define _dots_class_database_h
 
 #include "dots_class_description.h"
+
 #include "dots_fwd.h"
 #include "dots_temporary_descriptions.h"
+
+//disable warnings in boost and ace
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4127)
+  #pragma warning (disable : 4512)
+#endif
+
 #include <ace/Synch.h>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 namespace Safir
 {

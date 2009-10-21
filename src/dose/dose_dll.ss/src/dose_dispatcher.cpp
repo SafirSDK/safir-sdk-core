@@ -73,7 +73,8 @@ namespace Internal
                                   OnInjectedDeletedEntityCb* onInjectedDeletedEntityCb,
                                   OnInitialInjectionsDoneCb* onInitialInjectionsDoneCb,
                                   OnNotRequestOverflowCb* onNotRequestOverflowCb,
-                                  OnNotMessageOverflowCb* onNotMessageOverflowCb)
+                                  OnNotMessageOverflowCb* onNotMessageOverflowCb,
+                                  OnDropReferenceCb* onDropReferenceCb)
     {
         if (!m_callbacks[lang].m_initiated)
         {
@@ -96,6 +97,7 @@ namespace Internal
             m_callbacks[lang].m_onInitialInjectionsDoneCb=onInitialInjectionsDoneCb;
             m_callbacks[lang].m_onNotRequestOverflowCb=onNotRequestOverflowCb;
             m_callbacks[lang].m_onNotMessageOverflowCb=onNotMessageOverflowCb;
+            m_callbacks[lang].m_onDropReferenceCb=onDropReferenceCb;
         }
     }
 
@@ -595,6 +597,25 @@ namespace Internal
             moreDesc << "Exception while in Dob callback "
                 << CallbackId::ToString(m_callbackStack.top().m_callbackId)
                 << ". typeId:" << Typesystem::Operations::GetName(typeId) << " handlerId:" << handlerId << std::endl;
+            Typesystem::LibraryExceptions::Instance().AppendDescription(moreDesc.str());
+            Typesystem::LibraryExceptions::Instance().Throw();
+        }
+    }
+
+    void Dispatcher::InvokeDropReferenceCb(const ConsumerId&    consumer,
+                                           const long           refCounter)
+    {
+        ENSURE(g_garbageCollected[consumer.lang], << "Dispatcher::InvokeDropReferenceCb called for a non GC language");
+
+        bool success;
+        m_callbacks[consumer.lang].m_onDropReferenceCb(consumer.consumer,
+                                                       refCounter,
+                                                       success);
+        if (!success)
+        {
+            std::wostringstream moreDesc;
+            moreDesc << "Exception while in Dob callback OnDropReference. Consumer:" << consumer.consumer
+                << " Lang:" << consumer.lang << std::endl;
             Typesystem::LibraryExceptions::Instance().AppendDescription(moreDesc.str());
             Typesystem::LibraryExceptions::Instance().Throw();
         }

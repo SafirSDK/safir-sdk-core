@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
@@ -21,9 +22,9 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-import safir.dob.*;
-import safir.swreports.*;
-public class SwreTest 
+import com.saabgroup.safir.dob.*;
+import com.saabgroup.safir.swreports.*;
+public class SwreTest
 {
 
     public SwreTest()
@@ -34,7 +35,7 @@ public class SwreTest
 
     private enum SynchReason {None, Dispatch, StopOrder, Timeout}
 
-    private class Synchronizer 
+    private class Synchronizer
     {
         public Synchronizer() {reason = SynchReason.None;}
         public SynchReason reason;
@@ -42,7 +43,7 @@ public class SwreTest
 
     private Synchronizer m_synchronizer = new Synchronizer();
 
-    private class Dispatcher implements safir.dob.Dispatcher
+    private class Dispatcher implements com.saabgroup.safir.dob.Dispatcher
     {
         public Dispatcher(Synchronizer synchronizer)
         {
@@ -102,15 +103,15 @@ public class SwreTest
         private Synchronizer m_synchronizer;
     }
 
-    private class Backdoor 
-        implements safir.application.Backdoor
+    private class Backdoor
+        implements com.saabgroup.safir.application.Backdoor
     {
         public String getHelpText()
         {
             System.out.println("getHelpText()");
             return "There is no help to get!";
         }
-        
+
         public void handleCommand(String [] cmdTokens)
         {
             System.out.println("handleCommand");
@@ -129,30 +130,30 @@ public class SwreTest
         System.out.println("HandleTimeout");
         SwReport.SendFatalErrorReport("FatalErrorCode99", "JavaTestApp", "Fatal Error text99");
         SwReport.SendFatalErrorReport("FatalErrorCode100", "JavaTestApp", "Fatal Error text100");
-        
+
         SwReport.SendErrorReport("ErrorCode44", "JavaTestApp", "Error text44");
         SwReport.SendErrorReport("ErrorCode55", "JavaTestApp", "Error text55");
-        
+
         SwReport.SendResourceReport("Resource77", true, "Resource text77");
         SwReport.SendResourceReport("Resource88", true, "Resource text88");
-        
+
         SwReport.SendProgramInfoReport("Important information from the Java application");
         SwReport.SendProgramInfoReport("More Important information from the Java application");
-        
+
         SwReport.SendProgrammingErrorReport("ProgrammingErrorCode33", "JavaTestApp", "Java programming error33");
         SwReport.SendProgrammingErrorReport("ProgrammingErrorCode34", "JavaTestApp", "Java programming error34");
-        
+
         SwReport.SendProgrammingErrorReport("ProgrammingErrorCode35", "JavaTestApp", "Java programming error35");
         SwReport.SendProgrammingErrorReport("ProgrammingErrorCode36", "JavaTestApp", "Java programming error36");
-        
-        
+
+
         for (int i = 0; i < 100; ++i)
         {
             m_tracer.println("Testing logging to tracer " + i);
         }
     }
 
-    
+
 
     private void run()
     {
@@ -174,7 +175,7 @@ public class SwreTest
                         {
                             m_synchronizer.wait();
                             //System.out.println ("Got out of wait: " + m_synchronizer.reason.toString());
-                            
+
                         }
                         //System.out.println ("Got notified of a " + m_synchronizer.reason.toString());
                     }
@@ -182,7 +183,7 @@ public class SwreTest
                     {
                         //System.out.println ("Something happened while we were handling something else "+ m_synchronizer.reason.toString());
                     }
-          
+
                     reason = m_synchronizer.reason;
                     m_synchronizer.reason = SynchReason.None;
                 }
@@ -207,13 +208,13 @@ public class SwreTest
                         HandleTimeout();
                     }
                     break;
-                    
+
                 default:
                     {
                         System.out.println ("Spurious notification!!!!");
                     }
                 }
-        
+
             }
             catch(InterruptedException e)
             {
@@ -228,12 +229,12 @@ public class SwreTest
         SwreTest app = new SwreTest();
         app.run();
     }
-    private safir.application.BackdoorKeeper m_keeper = new safir.application.BackdoorKeeper();
+    private com.saabgroup.safir.application.BackdoorKeeper m_keeper = new com.saabgroup.safir.application.BackdoorKeeper();
     private Backdoor m_backdoor = new Backdoor();
     private boolean m_isDone = false;
-    private safir.dob.Connection m_connection = new safir.dob.Connection();
+    private com.saabgroup.safir.dob.Connection m_connection = new com.saabgroup.safir.dob.Connection();
     private Dispatcher m_dispatcher = new Dispatcher(m_synchronizer);
-    
+
     private Stopper m_stopper = new Stopper(m_synchronizer);
-    private safir.application.Tracer m_tracer = new safir.application.Tracer("javaTracer");
+    private com.saabgroup.safir.application.Tracer m_tracer = new com.saabgroup.safir.application.Tracer("javaTracer");
 }

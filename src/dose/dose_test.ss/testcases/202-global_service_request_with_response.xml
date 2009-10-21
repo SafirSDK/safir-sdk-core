@@ -22,7 +22,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SendResponse</value>
               </member>
               <member>
@@ -57,7 +57,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.RegisterServiceHandler</value>
               </member>
               <member>
@@ -89,7 +89,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.ServiceRequest</value>
               </member>
               <member>

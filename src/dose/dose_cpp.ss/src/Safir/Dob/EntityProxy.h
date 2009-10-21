@@ -202,19 +202,19 @@ namespace Dob
         /**
          * Retrieves the timestamp for the latest create, update or delete.
          *
-         * @return Timestamp.
+         * Note that this operation is only valid for Injectable types.
          *
-         * @throws Dob::NotFoundException No timestamp available for this entity type.
+         * @return Timestamp.
          */
         const Dob::Typesystem::Int64 GetTimestamp() const;
 
         /**
          * Retrieves the timestamp for the given top member.
          *
+         * Note that this operation is only valid for Injectable types.
+         *
          * @param [in] member Top level member index.
          * @return Timestamp.
-         *
-         * @throws Dob::NotFoundException No timestamp available for this entity type.
          */
         const Dob::Typesystem::Int64 GetTimestamp(const Dob::Typesystem::MemberIndex member) const;
 

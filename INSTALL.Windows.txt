@@ -7,7 +7,7 @@ Installing Prerequisites
 First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core. 
 Here is a summary of what you need, and below are instructions on where to get them and how to install them.
 
-Visual Studio 2005 SP1 and GNAT (support for MinGW/GCC and Mono will be added in 3.2.2)
+Visual Studio 2005 SP1 or 2008 SP1 and GNAT 
 MinGW and MSYS
 Boost (1.38 or later)
 ACE (>5.x)
@@ -20,20 +20,20 @@ Python (>= 2.4)
 doxygen
 graphviz
 
-Visual Studio 2005 SP1 and utils
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-You are assumed to already have Visual Studio 2005 SP1 installed, so we proceed immediately to the more interesting bits.
+Visual Studio and utils
+~~~~~~~~~~~~~~~~~~~~~~~
+You are assumed to already have Visual Studio 2005 SP1 (aka 8.0) or 2008 SP1 (aka 9.0) installed, so we proceed immediately to the more interesting bits.
 You are also assumed to have some unpacking tool installed that can handle .gz files, like winzip, 7-zip or winrar.
 
 Boost
 ~~~~~
-Safir SDK Core needs Boost version 1.38 or later (it is possible to use 1.35 or later as well, but then you need to patch some of the header files that contain bugs).
+The easiest way to install boost is to use the installer provided by BoostPro Computing: http://www.boostpro.com/products/free. Download the newest installer and run it.
+ - In the "Select Default Variants" step, select "Visual C++ 8.0" (or "Visual C++ 9.0"), "Multithread Debug, DLL" and "Multithread, DLL". If you need more variants or compilers, check those as well.
+ - In the "Choose Components" step you need to check the "Multithread Debug" and "Multithread" under the "VC8.0" or "VC9.0" item under each of "Boost DateTime", "Boost Filesystem", "Boost ProgramOptions", "Boost Regex" and "Boost System" (again, if you need other things as well, select them too).
 
-The easiest way to install boost is to use the installer provided by BoostPro Computing: http://www.boostpro.com/products/free. Download the 1.38 installer and run it.
- - In the "Select Default Variants" step, select "Visual C++ 8.0", "Multithread Debug" and "Multithread". If you need more variants or compilers, check those as well.
- - In the "Choose Components" step you need to check the "Multithread Debug" and "Multithread" under the "VC8.0" item under each of "Boost DateTime", "Boost Filesystem", "Boost ProgramOptions", "Boost Regex" and "Boost System" (again, if you need other things as well, select them too).
+Add the lib directory of the boost installation (e.g. C:\Program Files\boost\boost_1_39\lib or similar) to your PATH.
 
-Create an environment variable BOOST_DIR that points to the boost installation directory.
+There are a bugs in all current versions of the Boost libraries that need to be patched for Safir SDK to work correctly. In the build/patches/boost directory there are a set of patches for some recent boost versions. Find the appropriate files and copy them over the corresponding files in your boost installation. (You can also use run "cmake . -G 'NMake Makefiles'", "nmake install" once you have installed cmake, which will install the correct patches automatically).
 
 ACE
 ~~~
@@ -46,7 +46,6 @@ Create the file C:\ACE_wrappers\ace\config.h and put the following lines into it
   #define _WIN32_WINNT 0x0501
 #endif
 #include "ace/config-win32.h"
-#define ACE_USE_SELECT_REACTOR_FOR_REACTOR_IMPL
 
 //Both Boost and ACE define some errno constants. This fixes the problem that will occur
 //if both those files are included in the same compilation.
@@ -54,7 +53,7 @@ Create the file C:\ACE_wrappers\ace\config.h and put the following lines into it
 #define ACE_OS_INCLUDE_OS_ERRNO_H
 #endif
 
-For Visual Studio builds I tend to only build the ACE project in the C:\ACE_wrappers\ace\ACE_vc8.sln solution in Debug and Release, but you may want to build more stuff if you need it.
+For Visual Studio builds I tend to only build the ACE project in the C:\ACE_wrappers\ace\ACE_vc8.sln (or ACE_vc9.sln) solution in Debug and Release, but you may want to build more stuff if you need it.
 
 Copy the files ACE.dll and ACEd.dll to somewhere on your path, or add C:\ACE_wrappers\lib to your PATH
 
@@ -65,17 +64,17 @@ Installing Qt is sort of optional. If you don't install it you won't be able to 
 Download the Qt source code from http://www.qtsoftware.com/downloads (direct link to 4.5.0: http://get.qtsoftware.com/qt/source/qt-win-opensource-src-4.5.0.zip), and unzip it to a directory of your choice (must not contain spaces). These instructions assume that you use "C:\Qt".
 Create the environment variable QTDIR set it to C:\Qt
 Add %QTDIR%\bin and %QTDIR%\lib to your PATH.
-Open a Visual Studio 2005 command prompt and go to c:\qt. 
+Open a Visual Studio command prompt and go to c:\qt. 
  - Run "configure" (I've had some trouble with the qmake.exe that is built by configure, so I had to copy that to C:\Qt\bin and re-run "configure")
- - Run "nmake" (this step takes a very long time to complete... A couple of hours last time I did it...)
+ - Run "nmake" (this step takes a very long time to complete, we're building the whole Qt framework from source!)
 
 MinGW and MSYS
 ~~~~~~~~~~~~~~
-Safir SDK Core only needs a couple of things from MinGW and MSYS (rm.exe, touch.exe and make.exe), but some of the installations of the other prerequisites need more stuff from MinGW and MSYS, so I'm afraid you'll have to install the whole things. 
+MinGW and MSYS are not requirements of Safir SDK Core, but some of the installations of the other prerequisites need more stuff from MinGW and MSYS, so we have to install them.
 
 Download the Automated Installer from http://www.mingw.org (direct link: http://downloads.sourceforge.net/mingw/MinGW-5.1.4.exe) and run it. In the "Choose Components" step, add "MinGW Make" to the stuff to be installed. Install to C:\MinGW, or you'll get into trouble later.
 
-Go to http://www.mingw.org and download the MSYS installer (direct link: http://downloads.sourceforge.net/mingw/MSYS-1.0.10.exe)
+Go to http://www.mingw.org and download the MSYS installer (direct link: http://downloads.sourceforge.net/mingw/MSYS-1.0.11.exe)
 Run the installer (install it to C:\msys, or you will get into trouble later).
 
 Please avoid adding MSYS to your PATH, since that appears to cause trouble for us.
@@ -90,27 +89,15 @@ Expat
 Go to http://expat.sourceforge.net/ and download and install the binary installer for windows.
 Add C:\Program Files\Expat 2.0.1\Bin to your PATH (or put the DLLs in some dir that is in your PATH).
 
-Setting up library and include paths in Visual Studio
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Open Visual Studio and go to Tools --> Options --> Projects and Solutions --> VC++ Directories:
-Add the following under "Include files" (top right combo-box)
-    $(ACE_ROOT)
-    $(BOOST_DIR)
-    C:\Program Files\Expat 2.0.1\Source\lib
-Add the following under "Library files"
-    $(ACE_ROOT)/lib
-    $(BOOST_DIR)/lib
-    C:\Program Files\Expat 2.0.1\Bin
-
 GNAT and Ada libraries
 ~~~~~~~~~~~~~~~~~~~~~~
-Go to http://libre.adacore.com/ and download the GPL version of GNAT. Also download xmlada-gpl-3.1.tgz (or a similar version).
+Go to http://libre.adacore.com/ and download the GPL version of GNAT. Also download xmlada-gpl-3.2.tgz (or a similar version).
 Install GNAT. (and reboot, as the installer says)
 Install xmlada:
         unzip xmlada to C:\xmlada
         open a MSYS command prompt (Start --> All Programs --> MinGW --> MSYS --> msys) and do "cd /c/xmlada"
-        run ./configure --prefix=C:/GNAT/2008 (note the direction of the slashes!)
-        run make install
+        run ./configure --prefix=C:/GNAT/2009 (note the direction of the slashes!)
+        run "make" and then "make install"
         (delete c:\xmlada, it is no longer needed)
 
 Go to http://pagesperso-orange.fr/pascal.obry/contrib.html and download the "Templates Parser" (direct link http://pagesperso-orange.fr/pascal.obry/archive/templates_parser-11.1.tar.gz)
@@ -119,9 +106,13 @@ Install templates_parser:
         open a MSYS command prompt (Start --> All Programs --> MinGW --> MSYS --> msys) and do "cd /c/templates_parser"
         run make build
         run make install
-        Copy the file build/win_fixes/aws.gpr (in the Safir SDK Core directory) to c:\GNAT\2008\lib\gnat
+        (delete c:\templates_parser, it is no longer needed)
 
-Add c:\GNAT\2008\lib to your PATH.
+Add c:\GNAT\2009\lib to your PATH.
+
+Java
+~~~~
+Go to http://java.sun.com/javase/downloads/index.jsp and download and install a JDK kit. (Last time I used "JDK 6 Update 16", since I needed only the jdk itself, but any of the JDK kits should work)
 
 Python
 ~~~~~~
@@ -133,8 +124,8 @@ Add C:\Python26 to your PATH.
 Doxygen and Graphviz
 ~~~~~~~~~~~~~~~~~~~~
 These tools are used to build the interface documentation from the C++ source code. 
-Go to http://www.doxygen.org/ and download and install the windows installer (direct link: http://ftp.stack.nl/pub/users/dimitri/doxygen-1.5.8-setup.exe).
-Go to http://www.graphviz.org/ and download and install the windows installer (direct link: http://www.graphviz.org/pub/graphviz/stable/windows/graphviz-2.22.2.msi).
+Go to http://www.doxygen.org/ and download and install the windows installer (direct link: http://ftp.stack.nl/pub/users/dimitri/doxygen-1.6.1-setup.exe).
+Go to http://www.graphviz.org/ and download and install the windows installer (direct link: http://www.graphviz.org/pub/graphviz/stable/windows/graphviz-2.24.msi).
 
 It appears that Graphviz installs its own version of libexpat.dll which conflicts with the one we installed above (part of Expat). You have to make sure that the libexpat.dll that we installed above is before the graphviz one in your PATH. 
 (If you don't do this you will get an error message about "The ordinal 63 could not be located in the dynamic link library libexpat.dll" when you build Safir SDK Core.)
@@ -149,8 +140,7 @@ First of all you should decide where you want the SDK installed. You have to spe
 Add %SAFIR_RUNTIME%\bin to your PATH.
 Add an environment variable ADA_PROJECT_PATH containing %SAFIR_SDK%\ada
 
-The building of C# applications require one more thing, the creation of a K: drive that points to %SAFIR_RUNTIME%\bin. The reason for this is that Visual Studio does not support the use of environment variables for locating dependent assemblies, and since we don't add the assemblies to the GAC we have to provide some other way of locating them. So create the folder "C:\safir\runtime\bin" (assuming that is where you put your tower), and open a command prompt and run "subst k: %SAFIR_RUNTIME%\bin". (This creates a K: drive that is mapped to C:\safir\runtime\bin. The mapping will disappear when you restart your computer, so if you want it to be persistent put that command in a .bat file and place it in your Startup folder.)
-
+#The building of C# applications require one more thing, the creation of a K: drive that points to %SAFIR_RUNTIME%\bin. The reason for this is that Visual Studio does not support the use of environment variables for locating dependent assemblies, and since we don't add the assemblies to the GAC we have to provide some other way of locating them. So create the folder "C:\safir\runtime\bin" (assuming that is where you put your tower), and open a command prompt and run "subst k: %SAFIR_RUNTIME%\bin". (This creates a K: drive that is mapped to C:\safir\runtime\bin. The mapping will disappear when you restart your computer, so if you want it to be persistent put that command in a .bat file and place it in your Startup folder.)
 
 Now open a Visual Studio 2005 command prompt and go to the directory that contains the build and src directories, and run 
     build\build_windows.py -f build\sdk_core_windows.txt
@@ -161,16 +151,36 @@ With a bit of luck you should now have a working Safir SDK Core installed on you
 
 Try running start_core.bat (in C:\safir\runtime\bin) to see if everything is working. You should get a dose_main, dope_main and a swre_logger started for you. Try starting sate.exe, and you can start playing around with Safir SDK Core.
 
+
 Building example applications
 -----------------------------
-
 The directory named "examples" contains some test applications. The simplest way to build these is to use the build script with a different configuration file (run after the build of the SDK as described above):
     build/build_windows.py -f build/example_apps_windows.txt
 When this is complete you should have a few new applications installed under %SAFIR_RUNTIME%/bin: VehicleAppCpp, VehicleAppCs, VehicleMmiCppQt, VehicleMmiCsWinForms and VehicleAppDb. 
 Note: There is also a build script configuration file dob_tests_windows.txt, which builds the Dob test suite.
+
+Setting up library and include paths in Visual Studio
+-----------------------------------------------------
+To be able to build your own applications using Visual Studio projects/solutions you will have to set up Visual Studio to find the third party stuff.
+The instructions below will set up these things for all projects. If you want it for just one project you need to do similar things just to your project settings.
+
+If you do the below step, "Recreating the downloadable binary", you can skip all the things except $(SAFIR_SDK)/include and $(SAFIR_SDK)/lib, since the script described there copies the relevant stuff into the SAFIR_SDK directories.
+
+Open Visual Studio and go to Tools --> Options --> Projects and Solutions --> VC++ Directories:
+Add the following under "Include files" (top right combo-box)
+    $(ACE_ROOT)
+    $(BOOST_DIR)
+    C:\Program Files\Expat 2.0.1\Source\lib
+    $(SAFIR_SDK)/include
+Add the following under "Library files"
+    $(ACE_ROOT)/lib
+    $(BOOST_DIR)/lib
+    C:\Program Files\Expat 2.0.1\Bin
+    $(SAFIR_SDK)/lib
 
 
 Recreating the downloadable binary
 ----------------------------------
 The Windows binary that is available for download at www.safirsdk.com is created by following the above instructions and then running the create_windows_distributable.py script. The script copies necessary dlls, libs and header files into appropriate parts of SAFIR_RUNTIME and SAFIR_SDK, so that those folders can be moved to another computer where it will not be necessary to install/build all of the above prerequisites to be able to develop against the Safir SDK Core.
 If you want to do that, open a command prompt and cd to the directory where you ran the build script from and run "create_windows_distributable.py".
+

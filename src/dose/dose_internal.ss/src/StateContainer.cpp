@@ -74,7 +74,7 @@ namespace Internal
 
             subIt = status.first;
 
-            subscriptionId.connectionConsumer.connection->AddSubscription(m_typeId);
+            subscriptionId.connectionConsumer.connection->AddSubscription(m_typeId, subscriptionId.subscriptionType);
         }
 
         // Set meta subscription state
@@ -98,7 +98,11 @@ namespace Internal
                                      boost::cref(subscriptionId),
                                      restartSubscription,
                                      boost::cref(subIt->second.GetSubscriptionOptions())),
-                          false); // false => don't include released states
+                         subscriptionId.subscriptionType == EntityRegistrationSubscription ||
+                         subscriptionId.subscriptionType == ServiceRegistrationSubscription);
+            //include released states for registration subscriptions, since dose_main needs them (see #726),
+            //but dont include them for any other type of subscription, since they are not needed, and
+            //the injectionsubscriptions get upset by them...
         }
         else
         {
@@ -110,7 +114,11 @@ namespace Internal
                                          boost::cref(subscriptionId),
                                          restartSubscription,
                                          boost::cref(subIt->second.GetSubscriptionOptions())),
-                             false); // false => don't include released states
+                             subscriptionId.subscriptionType == EntityRegistrationSubscription ||
+                             subscriptionId.subscriptionType == ServiceRegistrationSubscription);
+            //include released states for registration subscriptions, since dose_main needs them (see #726),
+            //but dont include them for any other type of subscription, since they are not needed, and
+            //the injectionsubscriptions get upset by them...
         }
     }
 
@@ -150,6 +158,14 @@ namespace Internal
                 ++subIt;
             }
         }
+    }
+
+    bool StateContainer::HasSubscription(const SubscriptionId&   subscriptionId) const
+    {
+        // Lock the meta subscriptions
+        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_metaSubLock);
+
+        return m_metaSubscriptions.find(subscriptionId) != m_metaSubscriptions.end();
     }
 
     void StateContainer::ForEachState(const ActionFunc& actionFunc, const bool includeReleasedStates)

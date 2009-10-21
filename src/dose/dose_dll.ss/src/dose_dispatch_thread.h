@@ -93,7 +93,7 @@ namespace Internal
         ACE_Auto_Event m_startEvent;
         ACE_Auto_Event m_stopEvent;
 
-        volatile bool m_stop;
+        AtomicUint32 m_stop;
 
         enum ThreadState
         {
@@ -104,6 +104,9 @@ namespace Internal
         };
 
         ThreadState m_threadState;
+
+        bool m_stopSignalled;
+
     };
 }
 }

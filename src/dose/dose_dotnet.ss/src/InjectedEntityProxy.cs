@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -106,8 +106,8 @@ namespace Safir.Dob
                 {
                     throw new Typesystem.SoftwareViolationException("Not possible to use call Injection on InjectDeletes proxy!");
                 }
-                return (Entity)Typesystem.ObjectFactory.Instance.CreateObject(m_injectionBlob);            
-            
+                return (Entity)Typesystem.ObjectFactory.Instance.CreateObject(m_injectionBlob);
+
             }
         }
 
@@ -172,7 +172,7 @@ namespace Safir.Dob
         /// </summary>
         internal InjectedEntityProxy(System.IntPtr injectionBlob,
                                      System.IntPtr injectionState,
-                                     System.IntPtr currentBlob,  
+                                     System.IntPtr currentBlob,
                                      System.IntPtr currentState)
         {
             m_injectionBlob = injectionBlob;
@@ -210,17 +210,16 @@ namespace Safir.Dob
         {
             if (disposed)
             {
-                throw new Typesystem.SoftwareViolationException("Attempt to use a MessageProxy that is disposed! Please do not use a MessageProxy outside the OnMessage callback!");
+                throw new Typesystem.SoftwareViolationException("Attempt to use an InjectedEntityProxy that is disposed! Please do not use an InjectedEntityProxy outside the OnInjected*Entity callbacks!");
             }
         }
 
-        
         private bool disposed = false;
 
-        System.IntPtr m_injectionBlob;
-        System.IntPtr m_injectionState;
-        System.IntPtr m_currentBlob;
-        System.IntPtr m_currentState;
+        private System.IntPtr m_injectionBlob;
+        private System.IntPtr m_injectionState;
+        private System.IntPtr m_currentBlob;
+        private System.IntPtr m_currentState;
 
         #endregion
     }

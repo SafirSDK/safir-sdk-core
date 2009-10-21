@@ -145,9 +145,9 @@ namespace Internal
 
     void NodeHandler::HandleNodeStatusChanges()
     {
-        unsigned long id;        //out range 0-63
-        unsigned long ns = 0;        //out = NODESTATUS_UP/DOWN
-        unsigned long addr;
+        dcom_ulong32 id;        //out range 0-63
+        dcom_ulong32 ns = 0;        //out = NODESTATUS_UP/DOWN
+        dcom_ulong32 addr;
 
         Dob::NodeInfoPtr ni = Dob::NodeInfo::Create();
 
@@ -199,14 +199,19 @@ namespace Internal
         }
     }
 
-    void NodeHandler::HandleDisconnect(const ConnectionPtr & connection)
+    void NodeHandler::HandleDisconnect(const ConnectionPtr & connection, const NodeNumber node)
     {
+        if (!connection->IsLocal() && m_nodeStatuses[node] == Dob::NodeStatus::Failed)
+        {
+            connection->SetNodeDown();
+        }
+
         m_requestHandler->HandleDisconnect(connection);
     }
 
     void NodeHandler::DeleteConnections(const NodeNumber node)
     {
-        Connections::Instance().RemoveConnectionFromNode(node, boost::bind(&NodeHandler::HandleDisconnect,this,_1));
+        Connections::Instance().RemoveConnectionFromNode(node, boost::bind(&NodeHandler::HandleDisconnect,this,_1,node));
     }
 
 

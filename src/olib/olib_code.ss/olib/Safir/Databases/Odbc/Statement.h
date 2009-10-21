@@ -125,14 +125,14 @@ public:
     *
     * See SQLFetch in ODBC documentation for more info.
     *
-    * @return True if data was returned. False if at end of the recordset..
+    * @return True if data was returned. False if at end of the recordset.
     * @exception ReconnectException - SQLFetch failed. Check GetDiagRec for info.
     * @exception RetryException - Retry the operation.
     * @exception TimeoutException - Timeout has occurred. Retry the operation.
     */
     bool Fetch();
 
-    /** @brief Retrieves more results (resultsets or parameters) from the database..
+    /** @brief Retrieves more results (resultsets or parameters) from the database.
     *
     * See SQLMoreResults in ODBC documentation for more info.
     *

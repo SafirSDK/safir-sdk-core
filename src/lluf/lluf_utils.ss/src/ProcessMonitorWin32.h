@@ -27,12 +27,25 @@
 #ifdef _MSC_VER
 
 #include "ProcessMonitorImpl.h"
-#include "Safir/Utilities/ProcessMonitor.h"
+#include <Safir/Utilities/ProcessMonitor.h>
+
+//disable warnings in ace
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4512)
+  #pragma warning (disable : 4127)
+  #pragma warning (disable : 4267)
+#endif
 
 #include <ace/Auto_Event.h>
 #include <ace/Thread.h>
 #include <ace/Synch.h>
 #include <ace/OS.h>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 #include <boost/shared_ptr.hpp>
 

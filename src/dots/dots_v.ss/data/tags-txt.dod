@@ -1,17 +1,39 @@
 @@-------------------------------------------------------------------------------
 @@--
-@@--  Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+@@--  Copyright Saab AB, 2005-2009 (http://www.safirsdk.com)
 @@--
 @@--  Created by: Henrik Sundberg / sthesu
 @@--
 @@-------------------------------------------------------------------------------
 @@IF@@ @_SECTION_@ = "Parameters"
-File_Extension:"txt"
+File_Suffix:".txt"
 Filename_Separator:"-"
 Output_Directory:"tags/"
 Namespace_Separator:"&"
-Lowercase_Namespace:"False"
-Lowercase_Filenames:"False"
+@@-- Namspace prefixes are defined separately, since they are supposed to differ between projects.
+@@-- Files matching <Namespace><Namespace_Prefix_File_Suffix> are searched for a line containing the namespace prefix
+@@-- to use for <Namespace>. E.g. Namespace_Prefix_File_Prefix:"-java.namespace.txt" will match the file
+@@-- "Safir-java.namespace.txt". The first non comment line in the file is used as namespace prefix.
+@@-- Empty value is used when no namespace prefixes are to be added.
+Namespace_Prefix_File_Suffix:""
+@@-- Parent filename "" defaults to the namespace with added file suffix.
+Parent_Filename:""
+@@
+@@ *_Underscore_Style is one of: "Add", "Remove", "Keep"
+@@
+Namespace_Underscore_Style:"Keep"
+Filename_Underscore_Style:"Keep"
+Classname_Underscore_Style:"Keep"
+Membername_Underscore_Style:"Keep"
+Enum_Value_Underscore_Style:"Add"
+@@
+@@ *_Case_Style is one of: "Upper", "Lower", "Camel", "Keep"
+@@
+Namespace_Case_Style:"Keep"
+Filename_Case_Style:"Keep"
+Classname_Case_Style:"Upper"
+Membername_Case_Style:"Upper"
+Enum_Value_Case_Style:"Upper"
 Object_Type:"Object"
 Index_Type:"Int32"
 @@--
@@ -23,13 +45,13 @@ Index_Type:"Int32"
 @@-- And "Safir::Dots::IllegalValue" to be used where the actual type is needed in the code.
 @@-- And that "dots/dots_defs" (with file extension added below) is to be included due to this.
 @@--
-Exception:exception:"Safir&Dots&Exception":"dots/dots_exception"
-Exception:fundamentalException:"Safir&Dots&FundamentalException":"dots/dots_exception"
-Exception:configurationError:"Safir&Dots&ConfigurationError":"dots/dots_exception"
-Exception:incompatibleTypes:"Safir&Dots&IncompatibleTypes":"dots/dots_exception"
-Exception:illegalValue:"Safir&Dots&IllegalValue":"dots/dots_exception"
-Exception:nullValue:"Safir&Dots&NullValue":"dots/dots_exception"
-Exception:softwareViolation:"Safir&Dots&SoftwareViolation":"dots/dots_exception"
+Exception:Exception:"Safir&Dots&Exception":"dots/dots_exception"
+Exception:FundamentalException:"Safir&Dots&FundamentalException":"dots/dots_exception"
+Exception:Safir.Dob.Typesystem.ConfigurationError:"Safir&Dots&ConfigurationError":"dots/dots_exception"
+Exception:Safir.Dob.Typesystem.IncompatibleTypes:"Safir&Dots&IncompatibleTypes":"dots/dots_exception"
+Exception:Safir.Dob.Typesystem.IllegalValue:"Safir&Dots&IllegalValue":"dots/dots_exception"
+Exception:Safir.Dob.Typesystem.NullValue:"Safir&Dots&NullValue":"dots/dots_exception"
+Exception:Safir.Dob.Typesystem.SoftwareViolation:"Safir&Dots&SoftwareViolation":"dots/dots_exception"
 @@--
 @@-- Types are defined like this:
 @@--   Type:<dou>:<set/get>:"<generated>":"<dependency>"
@@ -114,6 +136,10 @@ DEPENDENCY  :
 @@TABLE@@
    @_DEPENDENCY_@
 @@END_TABLE@@
+DEPENDENCYBASE:
+@@TABLE@@
+   @_DEPENDENCYBASE_@
+@@END_TABLE@@
 CLASS       : @_CLASS_@
 CLASSSUMMARY: @_CLASSSUMMARY_@
 BASECLASS   : @_BASECLASS_@
@@ -127,6 +153,7 @@ ENUMVALUE   :
 --- Parameter Info:
 @@TABLE@@
    PARAMETER            : @_PARAMETER_@
+   XMLPARAMETER         : @_XMLPARAMETER_@
    PARAMETERSUMMARY     : @_PARAMETERSUMMARY_@
    UNIFORM_PARAMETERTYPE: @_UNIFORM_PARAMETERTYPE_@
    PARAMETERTYPE        : @_PARAMETERTYPE_@
@@ -138,6 +165,7 @@ ENUMVALUE   :
 --- Member Info:
 @@TABLE@@
    MEMBER               : @_MEMBER_@
+   XMLMEMBER            : @_XMLMEMBER_@
    MEMBERSUMMARY        : @_MEMBERSUMMARY_@
    UNIFORM_MEMBERTYPE   : @_UNIFORM_MEMBERTYPE_@
    MEMBERTYPE           : @_MEMBERTYPE_@

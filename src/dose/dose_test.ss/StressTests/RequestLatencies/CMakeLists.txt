@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 2.6)
 PROJECT (RequestLatencies)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
@@ -6,9 +7,17 @@ FILE(GLOB sources *.cpp ../common/*.cpp)
 
 ADD_EXECUTABLE(RequestLatencies ${sources})
 
-TARGET_LINK_LIBRARIES(RequestLatencies dose_cpp boost_program_options)
+TARGET_LINK_LIBRARIES(RequestLatencies ${COMMON_LIBRARIES} ${ACE_LIBRARY})
+
+if (NOT MSVC)
+    FIND_PACKAGE(Boost COMPONENTS program_options)
+    TARGET_LINK_LIBRARIES(RequestLatencies dose_cpp ${Boost_LIBRARIES})
+endif()
 
 INSTALL(TARGETS RequestLatencies
-        RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION $ENV{SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION $ENV{SAFIR_SDK}/lib)
+        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+
+
+INSTALL_DEBUG_INFO(RequestLatencies)

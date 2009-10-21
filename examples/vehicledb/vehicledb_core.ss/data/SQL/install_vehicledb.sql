@@ -1,4 +1,4 @@
---==============================================================================
+﻿--==============================================================================
 --
 -- Copyright Saab AB, 2008 (http://www.safirsdk.com)
 -- 
@@ -73,7 +73,7 @@ vehicledbuser
 -- Create databanks to hold the tables.
 --==============================================================================
 
-CREATE DATABANK vehicledb_db OF 1000 PAGES IN 'vehicledb_db.dbf' WITH LOG OPTION;
+CREATE DATABANK vehicledb_db OF 1000 PAGES IN 'vehicledb_db.dbf' WITH TRANS OPTION;
 
 
 --==============================================================================

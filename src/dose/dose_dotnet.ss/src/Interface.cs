@@ -33,11 +33,8 @@ namespace Safir.Dob
     {
         internal const System.Int32 DOSE_LANGUAGE_DOTNET = 2;
 
-#if DEBUG
-        internal const string DOSE_DLL_NAME = "dose_dlld.dll";
-#else
         internal const string DOSE_DLL_NAME = "dose_dll.dll";
-#endif
+
         //---------------------------------------------------------------------
         // Delegates - using callingconvetion Cdecl instead of default stdcall
         //---------------------------------------------------------------------
@@ -188,6 +185,11 @@ namespace Safir.Dob
         internal delegate void OnNotMessageOverflowCb(System.IntPtr consumer,
                                                       out byte success);
 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal delegate void OnDropReferenceCb(System.IntPtr consumer,
+                                                 System.Int32 refCounter,
+                                                 out byte success);
+
         #endregion
 
         //--------------------------------------------------------------------
@@ -242,6 +244,7 @@ namespace Safir.Dob
              OnInitialInjectionsDoneCb onInitialInjectionsDoneCb,
              OnNotRequestOverflowCb onNotRequestOverflowCb,
              OnNotMessageOverflowCb onNotMessageOverflowCb,
+             OnDropReferenceCb onDropReferenceCb,
              out byte success);
 
         //DoseC_ConnectSecondary
@@ -269,6 +272,7 @@ namespace Safir.Dob
              OnInitialInjectionsDoneCb onInitialInjectionsDoneCb,
              OnNotRequestOverflowCb onNotRequestOverflowCb,
              OnNotMessageOverflowCb onNotMessageOverflowCb,
+             OnDropReferenceCb onDropReferenceCb,
              out System.Int32 newCtrlId,
              out byte success);
 
@@ -424,6 +428,12 @@ namespace Safir.Dob
         [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DoseC_ExitDispatch(System.Int32 ctrl,
                                                        out byte success);
+
+        //DoseC_GetCurrentCallbackId
+        [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DoseC_GetCurrentCallbackId(System.Int32 ctrl,
+                                                               out System.Int32 callbackId,
+                                                               out byte success);
 
 
         //DoseC_SendMessage
@@ -604,7 +614,7 @@ namespace Safir.Dob
         internal static extern void DoseC_GetHandlerId(System.IntPtr state,
                                                        out System.Int64 handlerId,
                                                        out byte success);
-                //TODO: re-add this when MONO has fixed their bug. See 
+                //TODO: re-add this when MONO has fixed their bug. See
 #if FUNC_PTR_WORKAROUND
         //DoseC_GetConnectionInfo
         [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
@@ -649,7 +659,7 @@ namespace Safir.Dob
                                                        System.Int32 queue,
                                                        out System.Int32 queueSize,
                                                        out byte success);
-        
+
 #if FUNC_PTR_WORKAROUND
         //DoseC_Diff
         [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]

@@ -30,6 +30,8 @@
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
+#include <Safir/Dob/Entity.h>
+#include <Safir/Dob/Service.h>
 
 namespace Safir
 {
@@ -42,6 +44,7 @@ namespace Internal
           m_registrations(typeId),
           m_entityContainerPtr(NULL)
     {
+        SetSubscriptionType();
     }
 
     HandlerRegistrations::HandlerRegistrations(const Typesystem::TypeId typeId,
@@ -50,8 +53,27 @@ namespace Internal
           m_registrations(typeId),
           m_entityContainerPtr(entityContainerPtr)
     {
+        SetSubscriptionType();
     }
 
+    void HandlerRegistrations::SetSubscriptionType()
+    {
+        if (Dob::Typesystem::Operations::IsOfType(m_typeId, Dob::Entity::ClassTypeId))
+        {
+            m_subscriptionType = EntityRegistrationSubscription;
+        }
+        else if (Dob::Typesystem::Operations::IsOfType(m_typeId, Dob::Service::ClassTypeId))
+        {
+            m_subscriptionType = ServiceRegistrationSubscription;
+        }
+        else
+        {
+            std::wostringstream ostr;
+            ostr << "Type " << Typesystem::Operations::GetName(m_typeId)
+                 << " is not an entity or service type";
+            throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+    }
 
     bool HandlerRegistrations::Register(const ConnectionPtr&                connection,
                                         const Dob::Typesystem::HandlerId&   handlerId,
@@ -116,6 +138,29 @@ namespace Internal
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
 
         registrationDone = false;
+
+        // If this registration is on the revoked list we must act as if the application
+        // has an existing registration.
+        RegistrationVector revoked = registerer.connection->GetRevokedRegistrations();
+        for (RegistrationVector::iterator it = revoked.begin(); it != revoked.end(); ++it)
+        {
+            if (m_typeId == it->typeId && handlerId == it->handlerId)
+            {
+                if (registerer.consumer == it->consumer)
+                {
+                    // The connection and consumer is revoked. This is a NOP.
+                    return;
+                }
+                else
+                {
+                    // The connection is registering using a different consumer. This is not allowed!
+                    ENSURE(false,
+                           << "Not allowed for a connection to register a handler that is already registered by the same connection! (revoked)");
+                }
+            }
+
+        }
+
 
         DistributionData currentRegState = statePtr->GetRealState();
 
@@ -185,7 +230,7 @@ namespace Internal
                     if (currentRegisterer->IsLocal())
                     {
                         ENSURE(registerer.connection->Id() != currentRegisterer->Id(),
-                            << "Not allowed for a connection to overregister a handler that is already registered by the same connection!!!");
+                            << "Not allowed for a connection to register a handler that is already registered by the same connection!!!");
 
                         // If the current handler is an injection handler some additional work must be done
                         UnregisterInjectionHandler(currentRegisterer, handlerId);
@@ -322,8 +367,14 @@ namespace Internal
         statePtr->SetRealState(newRegState);
 
         // This is an end state so it must be saved "a while".
-        EndStates::Instance().Add(statePtr);
-
+        // In the case that the unregistration is caused by a node down (and not a real unregistration)
+        // we don't put it in EndStates. This simplifies the split/join mechanism since we don't have to
+        // "decrement" a registration state.
+        if (connection == NULL || !connection->NodeIsDown())
+        {
+            EndStates::Instance().Add(statePtr);
+        }
+        
         // Drop the reference from the state container to this state.
         dontRelease = false;
     }
@@ -497,6 +548,14 @@ namespace Internal
          m_registrations.UnsubscribeAll(connection);
     }
 
+    bool HandlerRegistrations::HasSubscription(const ConnectionPtr&    connection,
+                                               const ConsumerId&       consumer) const
+    {
+        SubscriptionId subscriptionId(ConnectionConsumerPair(connection, consumer), m_subscriptionType, 0);
+
+        return m_registrations.HasSubscription(subscriptionId);     
+    }
+
     void HandlerRegistrations::IsRegisteredInternal(const UpgradeableStateResult&  upgradeableStateResult,
                                                     bool&                          isRegistered) const
     {
@@ -596,8 +655,21 @@ namespace Internal
         }
 
         newRealState.ResetSenderIdConnectionPart();
-        newRealState.IncrementVersion();
         newRealState.SetExplicitlyDeleted(false);
+
+        // Normally the entity version gets incremented for every new state, but, there is an
+        // exception to this rule and this is when the deletion (or ghosting) of an entity is
+        // caused by a remote node being marked as down. In this case we actually *decrements*
+        // the version number so if the node joins again the version from the remote node will
+        // override our version.
+        if (!connection->IsLocal() && connection->NodeIsDown())
+        {
+            newRealState.DecrementVersion();
+        }
+        else
+        {
+            newRealState.IncrementVersion();
+        }
 
         // Release pointer to request in queue. We must not have any shared pointers to request queues
         // when the connection (and therefore the queue container) is destructed.

@@ -23,7 +23,6 @@
 ******************************************************************************/
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/ProcessInfo.h>
-
 #include <time.h>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -31,8 +30,20 @@
 #include <iostream>
 #include <ace/Guard_T.h>
 #include <ace/OS_NS_unistd.h>
+
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4702)
+#endif
+
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 namespace Safir
 {

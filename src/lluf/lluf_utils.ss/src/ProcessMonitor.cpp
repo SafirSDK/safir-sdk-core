@@ -22,18 +22,12 @@
 *
 ******************************************************************************/
 #include "ProcessMonitorImpl.h"
-#include "Safir/Utilities/ProcessMonitor.h"
-
+#include <Safir/Utilities/ProcessMonitor.h>
 #if defined _MSC_VER
 #include "ProcessMonitorWin32.h"
 #elif defined __GNUC__
 #include "ProcessMonitorLinux.h"
 #endif
-
-
-//#include <Safir/Utilities/Internal/LowLevelLogger.h>
-
-
 
 namespace Safir
 {

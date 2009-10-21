@@ -30,12 +30,12 @@ with Ada.Strings.Unbounded.Hash;
 
 with GNAT.Directory_Operations;
 with GNAT.OS_Lib;
-with GNAT.Spitbol; use GNAT.Spitbol;
 
 with Input_Sources.File;
 with Sax.Readers;
+-- with Templates_Parser.Query;
+with Templates_Parser.Utils;
 
-with Templates_Parser;
 with Dots.Member_Reader;
 
 package body Dots.Utilities is
@@ -74,12 +74,212 @@ package body Dots.Utilities is
       Conf : Dots.State.Output_Config renames
         Dots.State.Outputs (Dots.State.Current_Output);
    begin
-      if Conf.Lowercase_Filenames then
-         return Ada.Characters.Handling.To_Lower (Name);
-      else
-         return Name;
-      end if;
+      return Apply_Style (Conf.Filename_Style, Name);
    end Adjust_Filecase;
+
+
+   --------------------------------
+   -- Apply_Prefixed_Class_Style --
+   --------------------------------
+
+   function Apply_Prefixed_Class_Style
+     (To    : String) return String is
+      Conf : Dots.State.Output_Config renames
+        Dots.State.Outputs (Dots.State.Current_Output);
+      Seps : constant String := S (Conf.Namespace_Separator);
+      Sep  : constant Character := Seps (Seps'First);
+      Tmp : constant String := Mangle_Namespace (To);
+   begin
+      for J in reverse Tmp'Range loop
+         if Tmp (J) = '.' or Tmp (J) = Sep then
+            return Apply_Style (Conf.Namespace_Style, Tmp (Tmp'First .. J)) &
+            Apply_Style (conf.Classname_Style, Tmp (J + 1 .. Tmp'Last));
+         end if;
+      end loop;
+
+      return Apply_Style (conf.Classname_Style, Tmp);
+   end Apply_Prefixed_Class_Style;
+
+   -----------------
+   -- Get_Base_Of --
+   -----------------
+
+   function Get_Base_Of
+     (Class    : String) return String is
+      Conf : Dots.State.Output_Config renames
+        Dots.State.Outputs (Dots.State.Current_Output);
+      Seps : constant String := S (Conf.Namespace_Separator);
+      Sep : constant Character := Seps (Seps'Last);
+   begin
+      for J in reverse Class'Range loop
+         if Class (J) = Sep then
+            return Class (Class'First .. J - Seps'Length);
+         elsif Class (J) = '.' then
+            return Class (Class'First .. J - 1);
+         end if;
+      end loop;
+      return "";
+   end Get_Base_Of;
+
+   -----------------
+   -- Apply_Style --
+   -----------------
+
+   function Apply_Style
+     (Style : Dots.State.Style;
+      To    : String) return String is
+      Tmp : String (1 .. To'Length * 2);
+      Tok_Start : Integer := Tmp'First;
+      Tok_End   : Integer := Tmp'Last;
+      Pending_Separator : Boolean := False;
+      Cur       : Integer := Tmp'First - 1;
+      Ix        : Integer := To'First;
+      type Mode_Type is (Search,  Token);
+      type Tok_Type is (First_Upper, Upper, Lower, Digit);
+      Mode      : Mode_Type := Search;
+      Tok       : Tok_Type := Tok_Type'First;
+
+      use type Dots.State.Case_Style;
+      use type Dots.State.Underscore_Style;
+
+      procedure Adjust_Token is
+         Token : String := To (Tok_Start .. Tok_End);
+      begin
+         case Style.Choose_Case is
+            when Dots.State.Upper =>
+               Token := Ada.Characters.Handling.To_Upper (Token);
+            when Dots.State.Lower =>
+               Token := Ada.Characters.Handling.To_Lower (Token);
+            when Dots.State.Camel =>
+               Token := Ada.Characters.Handling.To_Lower (Token);
+               Token (Token'First) :=
+                 Ada.Characters.Handling.To_Upper (Token (Token'First));
+            when Dots.State.Keep =>
+               null;
+         end case;
+         Tmp (Cur + 1 .. Cur + Token'Length) := Token (Token'First .. Token'Last);
+         Cur := Cur + Token'Length;
+         Mode := Search;
+         Pending_Separator := True;
+      end Adjust_Token;
+
+      procedure Adjust_Separator is
+      begin
+         if Pending_Separator and Style.Underscore = Dots.State.Add then
+            Cur := Cur + 1;
+            Tmp (Cur) := '_';
+         end if;
+         Pending_Separator := False;
+      end Adjust_Separator;
+
+   begin
+      -- Ada.Text_IO.Put_Line ("Styling: " & To);
+
+      while Ix <= To'Last loop
+         case Mode is
+            when Search =>
+               if To (Ix) in 'A' .. 'Z' then
+                  Adjust_Separator;
+                  Tok := First_Upper;
+                  Mode := Token;
+                  Tok_Start := Ix;
+                  Tok_End := To'Last;
+               elsif To (Ix) in 'a' .. 'z' then
+                  Adjust_Separator;
+                  Tok := Lower;
+                  Mode := Token;
+                  Tok_Start := Ix;
+                  Tok_End := To'Last;
+               elsif To (Ix) in '0' .. '9' then
+                  Adjust_Separator;
+                  Tok := Digit;
+                  Mode := Token;
+                  Tok_Start := Ix;
+                  Tok_End := To'Last;
+               elsif To (Ix) = '_' then
+                  if Style.Underscore = Dots.State.Keep then
+                     Cur := Cur + 1;
+                     Tmp (Cur) := To (Ix);
+                     Pending_Separator := False;
+                  else
+                     Adjust_Separator;
+                  end if;
+               else
+                  Cur := Cur + 1;
+                  Tmp (Cur) := To (Ix);
+                  Pending_Separator := False;
+               end if;
+            when Token =>
+               case Tok is
+                  when First_Upper =>
+                     if To (Ix) in 'A' .. 'Z' then
+                        Tok := Upper;
+                     elsif To (Ix) in 'a' .. 'z' then
+                        Tok := Lower;
+                     else
+                        Ix := Ix - 1;
+                        Tok_End := Ix;
+                        Adjust_Token;
+                     end if;
+                  when Upper =>
+                     if To (Ix) in 'A' .. 'Z' then
+                        null;
+                     elsif To (Ix) in 'a' .. 'z' then
+                        Ix := Ix - 2;
+                        Tok_End := Ix;
+                        Adjust_Token;
+                     else
+                        Ix := Ix - 1;
+                        Tok_End := Ix;
+                        Adjust_Token;
+                     end if;
+                  when Lower =>
+                     if not (To (Ix) in 'a' .. 'z') then
+                        Ix := Ix - 1;
+                        Tok_End := Ix;
+                        Adjust_Token;
+                     end if;
+                  when Digit =>
+                     if not (To (Ix) in '0' .. '9') then
+                        Ix := Ix - 1;
+                        Tok_End := Ix;
+                        Adjust_Token;
+                     end if;
+               end case;
+         end case;
+
+         Ix := Ix + 1;
+      end loop;
+      if Mode = Token then
+         Adjust_Token;
+      end if;
+
+      -- Ada.Text_IO.Put_Line (" Result: " & Tmp (Tmp'First .. Cur));
+      return Tmp (Tmp'First .. Cur);
+   end Apply_Style;
+
+   -----------------
+   -- Apply_Style --
+   -----------------
+
+   function Apply_Style
+     (Style : Dots.State.Style;
+      To    : VString) return VString is
+   begin
+      return V (Apply_Style( Style, S (To)));
+   end Apply_Style;
+
+   -----------------
+   -- Apply_Style --
+   -----------------
+
+   function Apply_Style
+     (Style : Dots.State.Style;
+      To    : Templates_Parser.Tag) return Templates_Parser.Tag is
+   begin
+      return Templates_Parser.Utils.Value
+        (Apply_Style (Style, Templates_Parser.Utils.Image (To)));
+   end Apply_Style;
 
    ------------------------------
    -- Create_Namespace_Parents --
@@ -94,6 +294,15 @@ package body Dots.Utilities is
       Sep_String : constant String := S (Conf.Filename_Separator);
       Separator : constant Character := Sep_String (Sep_String'First);
 
+      function Get_Filename (Namespace : in String) return String is
+      begin
+         if Conf.Parent_Filename /= "" then
+            return Namespace & Separator & S (Conf.Parent_Filename);
+         else
+            return Namespace & S (Conf.File_Suffix);
+            end if;
+      end Get_Filename;
+
       procedure Create_Parent
         (Namespace : in String;
          Continue  : out Boolean);
@@ -101,23 +310,27 @@ package body Dots.Utilities is
       procedure Create_Parent
         (Namespace : in String;
          Continue  : out Boolean) is
-         File_Name : String := Namespace;
+         File_Name : String := Get_Filename (Namespace);
+         Dot_Found : Boolean := False;
       begin
          Continue := False;
          if Namespace = "" then
             return;
          end if;
 
-         for K in File_Name'Range loop
+         for K in reverse File_Name'Range loop
             if File_Name (K) = '.' then
-               File_Name (K) := Separator;
+               if Dot_Found then
+                  File_Name (K) := Separator;
+               else
+                  Dot_Found := True;
+               end if;
             end if;
          end loop;
 
          declare
             Full_Name : constant String := Adjust_Filecase (
-              S (Conf.Output_Directory) & File_Name &
-              '.' & S (Conf.File_Extension));
+              S (Conf.Output_Directory) & File_Name);
             Translations : constant Templates_Parser.Translate_Table :=
               (1  => Templates_Parser.Assoc ("SECTION", "Parent"),
                2  => Templates_Parser.Assoc ("NAMESPACE", Namespace));
@@ -375,6 +588,22 @@ package body Dots.Utilities is
                   Key       => V (Unit & '-' & Member))).Xml_Type));
    end Get_Uniform_Member_Type;
 
+   -------------------------
+   -- Get_Xml_Member_Type --
+   -------------------------
+
+   function Get_Xml_Member_Type
+     (Unit   : String;
+      Member : String) return String
+   is
+   begin
+      Setup_Unit (Unit);
+      return S (Handled_Member.Element
+              (Handled_Member.Find
+                 (Container => Member_Map,
+                  Key       => V (Unit & '-' & Member))).Xml_Type);
+   end Get_Xml_Member_Type;
+
    -------------------
    -- Get_Unit_Type --
    -------------------
@@ -433,23 +662,10 @@ package body Dots.Utilities is
         Dots.State.Outputs (Dots.State.Current_Output);
       Asso : constant Templates_Parser.Association
         := Templates_Parser.Get (Conf.Type_Set, Xml_Type);
-      Tmp : String := Xml_Type;
-      Dot_Found : Boolean := False;
    begin
       if Asso = Templates_Parser.Null_Association then
-
-         if Conf.Lowercase_Namespace then
-            for J in reverse Tmp'Range loop
-               if Dot_Found then
-                  Tmp (J) := Ada.Characters.Handling.To_Lower (Tmp (J));
-               elsif Tmp (J) = '.' then
-                  Dot_Found := True;
-               end if;
-            end loop;
-         end if;
-
          return Replace_Dots
-           (S         => Tmp,
+           (S         => Dots.Utilities.Apply_Prefixed_Class_Style (Xml_Type),
             Separator => S (Conf.Namespace_Separator));
       else
          return Templates_Parser.Item
@@ -602,6 +818,61 @@ package body Dots.Utilities is
             2);
       end if;
    end Uniform_Type_Tag_Of;
+
+   ----------------------
+   -- Mangle_Namespace --
+   ----------------------
+
+   function Mangle_Namespace
+     (Value : in String) return String is
+
+      Conf : Dots.State.Output_Config renames
+        Dots.State.Outputs (Dots.State.Current_Output);
+      use type Templates_Parser.Translate_Set;
+      use type Templates_Parser.Vector_Tag;
+      use type Templates_Parser.Association;
+
+   begin
+      if not Conf.Namspace_Prefix_Used then
+         return Value;
+--        else
+--           declare
+--              procedure Action
+--                (Item : in     Templates_Parser.Association;
+--                 Quit : in out Boolean) is
+--              begin
+--                 Ada.Text_IO.Put_Line ("   " & Templates_Parser.Query.Variable(Item) & " -> " & Templates_Parser.Get (Item));
+--                 Quit := False;
+--              end Action;
+--              procedure Put_Assos is new
+--                Templates_Parser.For_Every_Association (Action);
+--           begin
+--              Ada.Text_IO.Put_Line ("Namspace_Prefix_Set:");
+--              Put_Assos (Conf.Namspace_Prefix_Set);
+--           end;
+        end if;
+
+      for Ix in reverse Value'Range loop
+         if Value (Ix) = '.' or Ix = Value'Last then
+            declare
+               Asso : constant Templates_Parser.Association
+                 := Templates_Parser.Get
+                   (Conf.Namspace_Prefix_Set,
+                    Value (Value'First .. Ix));
+            begin
+               if Asso /= Templates_Parser.Null_Association then
+                  -- Ada.Text_IO.Put_Line ("Hit: " & Value (Value'First .. Ix - 1));
+                  return Templates_Parser.Get (Asso) & Value;
+               end if;
+               -- Ada.Text_IO.Put_Line ("Miss: " & Value (Value'First .. Ix - 1));
+            end;
+         end if;
+      end loop;
+      -- Ada.Text_IO.Put_Line ("No hit for: " & Value);
+
+      return Value;
+
+   end Mangle_Namespace;
 
 
 begin

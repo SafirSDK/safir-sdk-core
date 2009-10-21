@@ -52,7 +52,7 @@
 
 #ifdef _LINUX
 typedef unsigned long SOCKET;
-#define INVALID_SOCKET -1
+#define INVALID_SOCKET (unsigned long)-1
 #define _vsnprintf vsnprintf
 #endif
 
@@ -73,7 +73,7 @@ static char g_IpAddr[20] = SERVER_IPADDR;  // might be modified by PrintSetMode(
 
 static char * Get_IpAddr() { return(g_IpAddr); }
 
-static char g_ProgName[PROGRAM_NAME_LENGTH] = {0};  //Note: this aso offset in msg to server
+//static char g_ProgName[PROGRAM_NAME_LENGTH] = {0};  //Note: this aso offset in msg to server
 
 /***************************************************************
 * Convert error number to a text
@@ -82,16 +82,16 @@ static char g_ProgName[PROGRAM_NAME_LENGTH] = {0};  //Note: this aso offset in m
 
 static char *Get_Err_Text(int err_code, char *pBuff, int maxSize)
 {
-    int     result;
-    char    *pTxt = NULL;
-
     //------------------------
     // Is it an OS error
     //------------------------
     sprintf(pBuff,"E=%d - ", err_code);
-    int len = strlen(pBuff);
 
 #ifdef _WIN32
+    int     result;
+    char    *pTxt = NULL;
+    int len = strlen(pBuff);
+
     result = FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM, NULL, err_code,
                             MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                             (LPTSTR) &pBuff[len], maxSize-len, NULL );

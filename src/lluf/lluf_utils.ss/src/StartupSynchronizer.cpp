@@ -27,7 +27,8 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/interprocess/sync/named_semaphore.hpp>
 #include <ace/Guard_T.h>
-
+#include <stdio.h>
+#include <iostream>
 namespace Safir
 {
 namespace Utilities
@@ -54,7 +55,7 @@ namespace Utilities
             const bool gotLock = m_fileLock->try_lock();
             if (gotLock)
             {
-                //                std::wcout << "Got exclusive lock, noone else has it open, so I can remove everything!" << std::endl;
+                //                std::wcerr << "Got exclusive lock, noone else has it open, so I can remove everything!" << std::endl;
                 m_synchronized->Destroy();
 
                 boost::interprocess::named_semaphore::remove(m_name.c_str());
@@ -137,7 +138,7 @@ namespace Utilities
         }
 
         const boost::filesystem::path lockfile = GetLockFile(m_name);
-        //        std::wcout << "Using '" << lockfile.string().c_str() << "' as lockfile" << std::endl;
+        //        std::wcerr << "Using '" << lockfile.string().c_str() << "' as lockfile" << std::endl;
 
         m_fileLock.reset(new boost::interprocess::file_lock(lockfile.string().c_str()));
 
@@ -146,38 +147,45 @@ namespace Utilities
         {
             boost::interprocess::named_semaphore::remove(m_name.c_str());
 
-            //            std::wcout << "Got exclusive lock, calling Create" << std::endl;
+            //            std::wcerr << "Got exclusive lock, calling Create" << std::endl;
             m_synchronized->Create();
 
-            //            std::wcout << "Creating semaphore." << std::endl;
+            //            std::wcerr << "Creating semaphore." << std::endl;
             boost::interprocess::named_semaphore sem(boost::interprocess::create_only,m_name.c_str(),1);
-            //            std::wcout << "Initialize complete" << std::endl;
+            //            std::wcerr << "Initialize complete" << std::endl;
             m_fileLock->unlock();
         }
         else
         {
-            //            std::wcout << "Failed to get exclusive lock, someone else is initializing" << std::endl;
+            //            std::wcerr << "Failed to get exclusive lock, someone else is initializing" << std::endl;
         }
 
-        //        std::wcout << "Waiting for sharable lock" << std::endl;
+        //        std::wcerr << "Waiting for sharable lock" << std::endl;
         m_fileLock->lock_sharable();
-        //        std::wcout << "Got sharable lock" << std::endl;
+        //        std::wcerr << "Got sharable lock" << std::endl;
 
         try
         {
+            //            std::wcerr << "Opening semaphore" << std::endl;
             boost::interprocess::named_semaphore sem(boost::interprocess::open_only,m_name.c_str());
+            //            std::wcerr << "Waiting on semaphore" << std::endl;
             sem.wait();
+
+            //            std::wcerr << "Posting semaphore" << std::endl;
             sem.post();
         }
-        catch (const boost::interprocess::interprocess_exception&)
+        catch (const boost::interprocess::interprocess_exception& exc)
         {
+            perror("open_semaphore");
             std::ostringstream ostr;
             ostr << "It appears that Create failed in some other process for '" << m_name << "'." << std::endl;
+            ostr << "The exception I got was " << exc.what() << std::endl;
             throw StartupSynchronizerException(ostr.str());
         }
 
-        //        std::wcout << "Initialization seems to have been successful!" << std::endl;
+        //        std::wcerr << "Initialization seems to have been successful! Calling Use" << std::endl;
         m_synchronized->Use();
+        //        std::wcerr << "StartupSynchronizer::Start is complete" << std::endl;
 
         m_started = true;
     }

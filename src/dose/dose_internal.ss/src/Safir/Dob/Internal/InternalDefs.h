@@ -67,8 +67,12 @@ namespace Internal
 
     enum SubscriptionType
     {
-        NormalSubscription,
-        InjectionSubscription
+        EntityRegistrationSubscription,
+        ServiceRegistrationSubscription,
+        MessageSubscription,
+        EntitySubscription,
+        InjectionSubscription,
+        NumberOfSubscriptionTypes
     };
 
     enum RemoteSetResult {RemoteSetAccepted,

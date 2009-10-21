@@ -26,8 +26,21 @@
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
+
+//disable warnings in ace
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4267)
+#endif
+
 #include <ace/Guard_T.h>
 #include <ace/Recursive_Thread_Mutex.h>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
 #include <sstream>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 

@@ -56,8 +56,8 @@ namespace Internal
         /** Get the description of one type id */
         const EnumDescription * FindEnum(const TypeId typeId) const;
 
-        /** Get the number of enumerations in the database */
-        Int32 NumberOfEnums() const {return static_cast<Int32>(m_enums->size());}
+        /** Get the number of enumerations in the database (remember both checksum and id is in table)*/
+        Int32 NumberOfEnums() const {return static_cast<Int32>(m_enums->size() / 2);}
 
         /**
          * Get all the type ids in the database.

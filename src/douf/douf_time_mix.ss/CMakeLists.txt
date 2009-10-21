@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 2.6)
+
 ADD_SUBDIRECTORY(cpp)
 ADD_SUBDIRECTORY(dotnet)
-ADD_SUBDIRECTORY(ada)
+#ADD_SUBDIRECTORY(ada)

@@ -42,8 +42,19 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/bind.hpp>
 #include <boost/lambda/algorithm.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
+#include <boost/static_assert.hpp>
+
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4702)
+#endif
+
+#include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
 
 namespace Safir
 {
@@ -51,6 +62,9 @@ namespace Dob
 {
 namespace Internal
 {
+    
+    
+
     Identifier Connection::CalculateIdentifier(const std::string & name)
     {
         return DotsId_Generate64(name.c_str());
@@ -65,12 +79,14 @@ namespace Internal
         m_counter(counter),
         m_id(),
         m_pid(pid),
+        m_subscribedTypes(NumberOfSubscriptionTypes),
         m_messageInQueues(GetSharedMemory().construct<MessageQueueContainer>(boost::interprocess::anonymous_instance)()),
         m_messageOutQueue(Dob::QueueParameters::DefaultMessageOutQueueLength()),
         m_requestInQueues(GetSharedMemory().construct<RequestInQueueContainer>(boost::interprocess::anonymous_instance)()),
         m_requestOutQueue(Dob::QueueParameters::DefaultRequestOutQueueLength()),
-        m_stopOrderPending(false),
-        m_died(false),
+        m_stopOrderPending(0),
+        m_died(0),
+        m_nodeDown(0),
         m_isLocal(node == Dob::ThisNodeParameters::NodeNumber())
     {
         const std::wstring wNameWithCounter = Typesystem::Utilities::ToWstring(name) + L"#" + boost::lexical_cast<std::wstring>(counter);
@@ -97,12 +113,16 @@ namespace Internal
                       boost::bind(&Connection::Unregister, this, _1));
 
         // Remove all subscriptions
-        //(making copy of the set allows Unsubscribe to call back into connection without upsetting the iteration)
-        TypesSet subscribedTypes;
-        subscribedTypes.swap(m_subscribedTypes);
-        std::for_each(subscribedTypes.begin(),
-                      subscribedTypes.end(),
-                      boost::bind(&Connection::Unsubscribe, this, _1));
+        for (TypesSetVector::iterator it = m_subscribedTypes.begin(); it < m_subscribedTypes.end(); ++it)
+        {
+            TypesSet subscribedTypes;
+
+            // Making copy of the set allows Unsubscribe to call back into connection without upsetting the iteration.
+            subscribedTypes.swap(*it);
+            std::for_each(subscribedTypes.begin(),
+                          subscribedTypes.end(),
+                          boost::bind(&Connection::Unsubscribe, this, _1));
+        }
 
         //We do nothing about the message in queue, we don't care if the app hasn't emptied its in-queue before exiting.
         //We do nothing about the pending ownerships, since dose_main clears up the "master lists"
@@ -151,11 +171,18 @@ namespace Internal
         m_messageInQueues->ForEach(queueFunc);
     }
 
-    void Connection::AddSubscription(const Typesystem::TypeId typeId)
+    void Connection::AddSubscription(const Typesystem::TypeId   typeId,
+                                     SubscriptionType           subscriptionType)
     {
         if (!IsLocal()) return;
 
-        m_subscribedTypes.insert(typeId);
+        m_subscribedTypes[subscriptionType].insert(typeId);
+    }
+
+    Connection::TypesSet
+    Connection::GetSubscriptions(SubscriptionType subscriptionType) const
+    {
+        return m_subscribedTypes[subscriptionType];
     }
 
     void Connection::AddEmptyInitialInjection(const Typesystem::TypeId              typeId,
@@ -324,11 +351,13 @@ namespace Internal
         return GetRegistrations(m_revokedRegistrations);
     }
 
-    void Connection::GetAndClearRevokedRegistrations(RegistrationVector& revokedRegistrations)
+    const RegistrationVector Connection::GetAndClearRevokedRegistrations()
     {
         boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
-        revokedRegistrations = GetRegistrations(m_revokedRegistrations);
+
+        RegistrationVector tmp = GetRegistrations(m_revokedRegistrations);
         m_revokedRegistrations.clear();
+        return tmp;
     }
 
     void Connection::SignalOut() const

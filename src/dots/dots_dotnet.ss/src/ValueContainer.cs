@@ -37,11 +37,7 @@ namespace Safir.Dob.Typesystem
     /// (which is inherited from ContainerBase).
     /// 
     /// <para/>
-    /// This container is intendedddddd for the simple types of the DOB typesystem.
-    /// There should be no need to use this type in a definition, since all the
-    /// relevant instances of this template are defined with typedefs
-    /// (e.g. Int32Container, BooleanContainer, EntityIdContainer, etc).
-    /// 
+    /// This container is intended for the simple types of the DOB typesystem.
     /// </summary>
     /// <typeparam name="T">The type to contain.</typeparam>
     public class ValueContainer<T> : ContainerBase, ICloneable

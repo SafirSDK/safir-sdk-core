@@ -56,7 +56,7 @@ namespace Internal
     DOTS_API void Delete(char * & blob);
 
     /**
-     * Set all changed flags in the blob to false.
+     * Set all changed flags in the blob.
      *
      * @param blob [in] - The blob to modify.
      * @param changed [in] - The value to set the change flags to.
@@ -89,16 +89,6 @@ namespace Internal
      */
     DOTS_API void Diff(char const * const base,
                        char * const mine);
-
-    /**
-     * Dump all class descriptions to stdout.
-     */
-    DOTS_API void DumpClassDescriptions();
-
-    /**
-     * Dump memory block information to stdout.
-     */
-    DOTS_API void DumpMemoryBlockInfo();
 
     /**
      * Generate a 64 bit hash from a string.

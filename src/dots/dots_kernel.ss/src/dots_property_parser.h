@@ -48,9 +48,9 @@ namespace Internal
 
         //Inherited methods
         void Reset();
-        bool StartElement(std::string s);
-        bool EndElement(std::string s);
-        bool Content(std::string str);
+        bool StartElement(const std::string& s);
+        bool EndElement(const std::string& s);
+        bool Content(const std::string& str);
 
         //special PropertyParser methods
         int GetIndex(TypeId t);

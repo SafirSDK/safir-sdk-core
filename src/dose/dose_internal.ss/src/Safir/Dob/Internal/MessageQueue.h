@@ -62,14 +62,14 @@ namespace Internal
         bool empty() const
         {
             boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
-            return (m_size == 0) && !m_simulateFull;
+            return (m_size == 0) && (m_simulateFull == 0);
         }
 
         /**Checks if the queue is full. Will also return true if queue is set to simulate overflows. */
         bool full() const
         {
             boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
-            return m_size == m_capacity || m_simulateFull;
+            return m_size == m_capacity || m_simulateFull != 0;
         }
 
         /** Returns the number of elements currently in the queue
@@ -78,7 +78,7 @@ namespace Internal
         size_t size() const
         {
             boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
-            return m_simulateFull ? m_capacity : m_size;
+            return m_simulateFull != 0 ? m_capacity : m_size;
         }
 
         /** Get the capacity of the queue. */
@@ -101,8 +101,8 @@ namespace Internal
         Typesystem::Int32 NumberOfPushes() const {return m_noPushed;}
         Typesystem::Int32 NumberOfOverflows() const {return m_noOverflows;}
 
-        bool SimulateFull() const {return m_simulateFull;}
-        void SimulateFull(const bool simulateFull) {m_simulateFull = simulateFull;}
+        bool SimulateFull() const {return m_simulateFull != 0;}
+        void SimulateFull(const bool simulateFull) {m_simulateFull = simulateFull?1:0;}
 
     private:
         //Locking Policy:
@@ -124,7 +124,7 @@ namespace Internal
 
         Typesystem::Int32 m_noPushed;
         Typesystem::Int32 m_noOverflows;
-        volatile bool m_simulateFull;
+        AtomicUint32 m_simulateFull;
 
         friend void StatisticsCollector(MessageQueue&, void*);
     };

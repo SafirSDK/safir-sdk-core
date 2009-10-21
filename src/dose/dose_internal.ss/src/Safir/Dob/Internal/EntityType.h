@@ -96,6 +96,11 @@ namespace Internal
         void UnsubscribeRegistration(const SubscriptionId&              subscriptionId,
                                      const Dob::Typesystem::HandlerId&  handlerId);
 
+        // Returns true if the given connection/consumer has any entity handler registration
+        // subscription for this type.
+        bool HasRegistrationSubscription(const ConnectionPtr&    connection,
+                                         const ConsumerId&       consumer) const;
+
         /** @} */
 
         /**
@@ -193,6 +198,10 @@ namespace Internal
         void Unsubscribe(const SubscriptionId&              subscriptionId,
                          const Dob::Typesystem::InstanceId& instanceId,
                          const bool                         allInstances);
+
+        // Returns true if the given connection/consumer has any entity subscription for this type.
+        bool HasEntitySubscription(const ConnectionPtr&    connection,
+                                   const ConsumerId&       consumer) const;
 
         /** @} */
 

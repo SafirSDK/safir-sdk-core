@@ -22,11 +22,13 @@
 *
 ******************************************************************************/
 
-#include <ace/OS_NS_unistd.h>
 
 #include "StatisticsCollection.h"
 #include <assert.h>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <iostream>
+
+
+
 
 static const double fraction_multiplicator = pow(10.0,-boost::posix_time::time_duration::num_fractional_digits());
 double GetUtcTime()
@@ -96,15 +98,22 @@ StatisticsCollection::~StatisticsCollection()
 
 }
 
+//we need to convince vc80 that the return 0 is harmless, and vc90 and gcc require it.
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4702)
+  #pragma warning(disable: 4716)
+#endif
 
 ACE_THR_FUNC_RETURN StatisticsCollection::PrinterThreadFun(void* param)
 {
     static_cast<StatisticsCollection*>(param)->PrintThread();
-    //this is just to get rid of warnings, apparently the only way...
-#if (defined _MSC_VER && !defined NDEBUG) || (defined __GNUC__)
     return 0;
-#endif
 }
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
 
 void StatisticsCollection::PrintThread()
 {

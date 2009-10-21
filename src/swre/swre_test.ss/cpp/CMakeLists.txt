@@ -6,7 +6,7 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(swre_test ${sources})
 
-TARGET_LINK_LIBRARIES(swre_test dose_cpp swre_interface_cpp douf_time)
+TARGET_LINK_LIBRARIES(swre_test dose_cpp swre_interface_cpp douf_time_cpp)
 
 INSTALL(TARGETS swre_test
         RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin

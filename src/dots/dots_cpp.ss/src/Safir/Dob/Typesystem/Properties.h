@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -46,7 +46,6 @@ namespace Typesystem
      * If you need member information (names, typeids etc) from a property, use the
      * functions in Members. (For array sizes, use the method in this class though...).
     */
-
     class DOTS_API Properties
     {
     public:
@@ -573,7 +572,7 @@ namespace Typesystem
                         const Dob::Typesystem::ArrayIndex index);
 
 
-        
+
 
 
     private:

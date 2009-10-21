@@ -22,7 +22,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.RegisterEntityHandler</value>
               </member>
               <member>
@@ -53,7 +53,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <!-- Must discard response sender since we are making a Postpone-->
                 <value>DoseTest.ActionEnum.DiscardResponseSender</value>
               </member>
@@ -77,7 +77,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.Postpone</value>
               </member>
               <member>
@@ -104,7 +104,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SetAll</value>
               </member>
               <member>
@@ -148,7 +148,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.UpdateRequest</value>
               </member>
               <member>
@@ -188,7 +188,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.Delete</value>
               </member>
               <member>
@@ -219,7 +219,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.ResetCallbackActions</value>
               </member>
               <member>
@@ -238,7 +238,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.ResumePostponed</value>
               </member>
               <member>

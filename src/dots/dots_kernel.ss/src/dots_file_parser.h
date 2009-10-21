@@ -48,6 +48,7 @@ namespace Internal
         const DobClasses & ResultClasses() const;
         const DobProperties & ResultProperties() const;
         const DobEnumerations & ResultEnums() const;
+        const DobExceptions& ResultExceptions() const;
         size_t ParameterSize();
 
         //DEBUG

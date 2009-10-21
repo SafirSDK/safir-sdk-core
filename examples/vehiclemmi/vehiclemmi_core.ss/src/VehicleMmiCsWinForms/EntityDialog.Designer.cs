@@ -33,24 +33,18 @@ namespace VehicleMmiCsWinForms
             this.labelIdentification = new System.Windows.Forms.Label();
             this.textBoxIdentification = new System.Windows.Forms.TextBox();
             this.comboBoxCategory = new System.Windows.Forms.ComboBox();
-            //StartRemoveInExercise
             this.labelSpeed = new System.Windows.Forms.Label();
-            //StopRemoveInExercise
             this.labelCategory = new System.Windows.Forms.Label();
-            //StartRemoveInExercise
             this.textBoxSpeed = new System.Windows.Forms.TextBox();
-            //StopRemoveInExercise
             this.buttonApply = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonOk = new System.Windows.Forms.Button();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            //StartRemoveInExercise
             this.labelPosLong = new System.Windows.Forms.Label();
             this.labelPosLat = new System.Windows.Forms.Label();
             this.textBoxPosLong = new System.Windows.Forms.TextBox();
             this.textBoxPosLat = new System.Windows.Forms.TextBox();
-            //StopRemoveInExercise
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -72,22 +66,21 @@ namespace VehicleMmiCsWinForms
             // 
             // comboBoxCategory
             // 
+            this.comboBoxCategory.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxCategory.FormattingEnabled = true;
             this.comboBoxCategory.Location = new System.Drawing.Point(88, 39);
             this.comboBoxCategory.Name = "comboBoxCategory";
             this.comboBoxCategory.Size = new System.Drawing.Size(121, 21);
             this.comboBoxCategory.TabIndex = 3;
-            //StartRemoveInExercise
             // 
             // labelSpeed
-            //
+            // 
             this.labelSpeed.AutoSize = true;
             this.labelSpeed.Location = new System.Drawing.Point(12, 73);
             this.labelSpeed.Name = "labelSpeed";
             this.labelSpeed.Size = new System.Drawing.Size(38, 13);
             this.labelSpeed.TabIndex = 4;
             this.labelSpeed.Text = "Speed";
-            //StopRemoveInExercise
             // 
             // labelCategory
             // 
@@ -97,15 +90,13 @@ namespace VehicleMmiCsWinForms
             this.labelCategory.Size = new System.Drawing.Size(49, 13);
             this.labelCategory.TabIndex = 2;
             this.labelCategory.Text = "Category";
-            //StartRemoveInExercise
             // 
             // textBoxSpeed
-            //
+            // 
             this.textBoxSpeed.Location = new System.Drawing.Point(88, 66);
             this.textBoxSpeed.Name = "textBoxSpeed";
             this.textBoxSpeed.Size = new System.Drawing.Size(121, 20);
             this.textBoxSpeed.TabIndex = 5;
-            //StopRemoveInExercise
             // 
             // buttonApply
             // 
@@ -156,7 +147,6 @@ namespace VehicleMmiCsWinForms
             this.toolStripStatus.Name = "toolStripStatus";
             this.toolStripStatus.Size = new System.Drawing.Size(21, 17);
             this.toolStripStatus.Text = "OK";
-            //StartRemoveInExercise
             // 
             // labelPosLong
             // 
@@ -189,7 +179,6 @@ namespace VehicleMmiCsWinForms
             this.textBoxPosLat.Name = "textBoxPosLat";
             this.textBoxPosLat.Size = new System.Drawing.Size(121, 20);
             this.textBoxPosLat.TabIndex = 7;
-            //StopRemoveInExercise
             // 
             // EntityDialog
             // 
@@ -198,23 +187,17 @@ namespace VehicleMmiCsWinForms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonCancel;
             this.ClientSize = new System.Drawing.Size(274, 228);
-            //StartRemoveInExercise
             this.Controls.Add(this.labelPosLong);
             this.Controls.Add(this.labelPosLat);
             this.Controls.Add(this.textBoxPosLong);
             this.Controls.Add(this.textBoxPosLat);
-            //StopRemoveInExercise
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.buttonOk);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonApply);
-            //StartRemoveInExercise
             this.Controls.Add(this.textBoxSpeed);
-            //StopRemoveInExercise
             this.Controls.Add(this.labelCategory);
-            //StartRemoveInExercise
             this.Controls.Add(this.labelSpeed);
-            //StopRemoveInExercise
             this.Controls.Add(this.comboBoxCategory);
             this.Controls.Add(this.textBoxIdentification);
             this.Controls.Add(this.labelIdentification);

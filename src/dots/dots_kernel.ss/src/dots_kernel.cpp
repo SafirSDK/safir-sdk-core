@@ -59,12 +59,21 @@ namespace //check size of type definitions
     BOOST_STATIC_ASSERT(sizeof(DotsC_EntityId) == 16);
 }
 
+void CALLING_CONVENTION DeleteBytePointer(char * & ptr)
+{
+    if (ptr != NULL)
+    {
+        delete [] ptr;
+        ptr = NULL;
+    }
+}
+
 //********************************************************
 //* Type information operations
 //********************************************************
 Int32 DotsC_NumberOfTypeIds()
 {
-    return DotsC_NumberOfClasses()+DotsC_NumberOfProperties()+DotsC_NumberOfEnumerations();
+    return DotsC_NumberOfClasses()+DotsC_NumberOfProperties()+DotsC_NumberOfEnumerations()+DotsC_NumberOfExceptions();
 }
 
 //Get the number of classes defined in the system
@@ -83,6 +92,11 @@ Int32 DotsC_NumberOfEnumerations()
     return Repository::Enums().NumberOfEnums();
 }
 
+Int32 DotsC_NumberOfExceptions()
+{
+    return Repository::Exceptions().NumberOfExceptions();
+}
+
 //Get a list of all type id's that exists in the system. Buf is a pointer to an array of size bufSize. The
 //out parameter size defines how many type id's that were inserted into buf.
 void DotsC_GetAllTypeIds(TypeId* buf, Int32 bufSize, Int32& size)
@@ -90,15 +104,17 @@ void DotsC_GetAllTypeIds(TypeId* buf, Int32 bufSize, Int32& size)
     Int32 noClasses = 0;
     Int32 noProps = 0;
     Int32 noEnums = 0;
+    Int32 noExceptions = 0;
     Repository::Classes().GetTypeIds(buf, bufSize, noClasses);
     Repository::Properties().GetTypeIds(buf+noClasses, bufSize-noClasses, noProps);
     Repository::Enums().GetTypeIds(buf+noClasses+noProps, bufSize-noClasses-noProps, noEnums);
-    size=noClasses+noProps+noEnums;
+    Repository::Exceptions().GetTypeIds(buf+noClasses+noProps+noEnums,bufSize-noClasses-noProps-noEnums,noExceptions);
+    size=noClasses+noProps+noEnums+noExceptions;
 }
 
 bool DotsC_TypeExists(const TypeId typeId)
 {
-    return (DotsC_IsClass(typeId) || DotsC_IsProperty(typeId) || DotsC_IsEnumeration(typeId));
+    return (DotsC_IsClass(typeId) || DotsC_IsProperty(typeId) || DotsC_IsEnumeration(typeId) || DotsC_IsException(typeId));
 }
 
 bool DotsC_IsClass(const TypeId typeId)
@@ -114,6 +130,11 @@ bool DotsC_IsProperty(const TypeId typeId)
 bool DotsC_IsEnumeration(const TypeId typeId)
 {
     return Repository::Enums().FindEnum(typeId) != NULL;
+}
+
+bool DotsC_IsException(const TypeId typeId)
+{
+    return Repository::Exceptions().FindException(typeId) != NULL;
 }
 
 TypeId DotsC_TypeIdFromName(const char* typeName)
@@ -139,6 +160,12 @@ const char* DotsC_GetTypeName(const TypeId typeId)
     if (ed!=NULL)
     {
         return ed->Name();
+    }
+
+    const ExceptionDescription * const excD = Repository::Exceptions().FindException(typeId);
+    if (excD != NULL)
+    {
+        return excD->Name();
     }
 
     return NULL; //not found
@@ -371,6 +398,14 @@ void DotsC_GetMemberInfo(const TypeId typeId,  //in
     if (cd!=NULL)
     {
         memberDesc = cd->GetMember(member);
+        if (memberDesc == NULL)
+        {
+            // there is no error code, so set all out fields to invalid (-1 or null)
+            memberName = NULL;
+            complexType = -1;
+            arrayLength = -1;
+            return;
+        }
     }
     else
     {
@@ -482,6 +517,52 @@ Int32 DotsC_GetMemberArraySizeProperty(const TypeId classId, const TypeId proper
     return -1;
 }
 
+Int32 DotsC_GetStringMemberMaxLengthProperty(const TypeId classId, const TypeId propertyId, const MemberIndex propertyMember)
+{
+    bool isInherited;
+    const PropertyMappingDescription * const pmd = Repository::Classes().FindClass(classId)->FindPropertyMapping(propertyId, isInherited);
+    if (pmd == NULL)
+    {
+        return -1;
+    }
+
+    const MemberMapping * const mm = pmd->GetMemberMapping(propertyMember);
+    if (mm == NULL)
+    {
+        return -1;
+    }
+
+    switch (mm->GetMappingKind())
+    {
+    case MappedToNull:
+        return 1; //it is one long (just the null...)
+
+    case MappedToMember:
+        {
+            const ClassMemberReference * cmr = mm->GetMemberReference();
+
+            TypeId parent = classId;
+
+            //Follow the refe6rence into objects (the last one is skipped since that goes into a member, not an object)
+            for (Size ii = 0; ii < cmr->size() - 1; ++ii)
+            {
+                MemberReferenceElement ref = cmr->at(ii);//*cmr->Get(&Repository::m_pool,ii);
+                parent = DotsC_GetComplexMemberTypeId(parent,ref.m_classMember);
+            }
+            MemberReferenceElement ref = cmr->back();
+
+            return DotsC_GetStringMemberMaxLength(parent, ref.m_classMember);
+        }
+        break;
+    case MappedToParameter:
+        // AWI: Vad göra här? I daxläget finns inte informationen för parameterar
+        //return mm->GetParameter()->ArrayLength();
+        break;
+    }
+
+    //will never get here!
+    return -1;
+}
 
 const char* DotsC_GetMemberTypeName(const TypeId typeId, const MemberIndex member)
 {
@@ -552,25 +633,7 @@ Int32 DotsC_GetParameterArraySize(const TypeId typeId, const ParameterIndex para
 {
     return Repository::Classes().FindClass(typeId)->GetParameter(parameter)->ArrayLength();
 }
-/*
-  Int32 DotsC_GetParameterTypeSize(const TypeId typeId, const ParameterIndex parameter)
-  {
-  const ParameterDescription * const cde=Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-  if (cde->GetMemberType()==StringMemberType)
-  {
-  return static_cast<Int32>(strlen(cde->Value<char>()));
-  }
-  else if (cde->GetMemberType()==ObjectMemberType)
-  {
-  const Blob blob=(Blob)cde->Value<char>();
-  return DotsC_GetSize(blob);
-  }
-  else
-  {
-  return BasicTypes::SizeOfType(cde->GetMemberType());
-  }
-  }
-*/
+
 //************************************************************************************
 //* Functions for retrieving member values
 //************************************************************************************
@@ -892,10 +955,13 @@ void DotsC_BetterBlobToXml(char * const xmlDest, const char * const blobSource, 
     }
 }
 
-void DotsC_XmlToBlob(char * & blobDest, const char* xmlSource)
+void DotsC_XmlToBlob(char * & blobDest, 
+                     DotsC_BytePointerDeleter & deleter,
+                     const char* xmlSource)
 {
     XmlToBlobSerializer ser;
     blobDest = ser.Serialize(xmlSource);
+    deleter = DeleteBytePointer;
 }
 
 DotsC_Int32 DotsC_CalculateBase64BufferSize(DotsC_Int32 binarySourceSize)
@@ -1391,23 +1457,6 @@ void DotsC_SetBinaryProperty(const char* val,
     SetDynamicPropertyValue(val, size, blob, property, member, index, errorCode);
 }
 
-
-//*********************************
-//* For debug
-//*********************************
-/*
-  void DotsC_DumpClassDescriptions()
-  {
-  Repository::Classes().Dump();
-  Repository::Properties().Dump();
-  Repository::Enums().Dump();
-  }*/
-/*
-  void DotsC_DumpMemoryBlockInfo()
-  {
-  Repository::m_pool.Dump();
-  }
-*/
 //*********************************
 //* For "real classes"
 //*********************************
@@ -1971,14 +2020,7 @@ void DotsC_AppendExceptionDescription(const char * const moreDescription)
     ExceptionKeeper::Instance().AppendDescription(moreDescription);
 }
 
-void CALLING_CONVENTION DeleteBytePointer(char * & ptr)
-{
-    if (ptr != NULL)
-    {
-        delete [] ptr;
-        ptr = NULL;
-    }
-}
+
 
 void DotsC_GetAndClearException(DotsC_TypeId & exceptionId, char * & description, DotsC_BytePointerDeleter & deleter, bool & wasSet)
 {

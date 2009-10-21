@@ -70,7 +70,7 @@ package body Dots.Member_Reader is
       use type Dots.State.Unit_Type;
       Stack : constant String := To_String (Handler.Stack);
       File_Name : constant Unbounded_String :=
-                    To_Unbounded_String (Get_Public_Id (Handler.Locator.all));
+                    To_Unbounded_String (Get_Public_Id (Handler.Locator));
    begin
       if Handler.Depth = 2 then
          if Local_Name = "name" then
@@ -122,12 +122,12 @@ package body Dots.Member_Reader is
    exception
       when Error_Found =>
          Dots.Parser.Error :=
-           To_String (Handler.Locator.all) & ": " & Dots.Parser.Error;
+           To_String (Handler.Locator) & ": " & Dots.Parser.Error;
          raise Error_Completed;
 
       when E : others =>
          Dots.Parser.Error := File_Name
-           & To_String (Handler.Locator.all) & ": " &
+           & To_String (Handler.Locator) & ": " &
          Ada.Exceptions.Exception_Message (E);
          raise Error_Completed;
    end End_Element;
@@ -165,9 +165,9 @@ package body Dots.Member_Reader is
 
    procedure Set_Document_Locator
      (Handler : in out Reader;
-      Loc     : access Sax.Locators.Locator'Class) is
+      Loc     : in out Sax.Locators.Locator) is
    begin
-      Handler.Locator := Locator_Access (Loc);
+      Handler.Locator := Loc;
    end Set_Document_Locator;
 
    ----------------
@@ -234,12 +234,12 @@ package body Dots.Member_Reader is
    exception
       when Error_Found =>
          Dots.Parser.Error :=
-           To_String (Handler.Locator.all) & ": " & Dots.Parser.Error;
+           To_String (Handler.Locator) & ": " & Dots.Parser.Error;
          raise Error_Completed;
 
       when E : others =>
          Dots.Parser.Error := To_Unbounded_String
-           (To_String (Handler.Locator.all) & ": " &
+           (To_String (Handler.Locator) & ": " &
          Ada.Exceptions.Exception_Message (E));
          raise Error_Completed;
    end Start_Element;

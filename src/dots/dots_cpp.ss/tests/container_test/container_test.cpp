@@ -141,10 +141,17 @@ int main()
 
     }
 
+#define CheckNullExc(expr) \
+    try{bool b = expr;b;Check(false);}catch(Safir::Dob::Typesystem::NullException &){Check(true);}
+
     {
         MemberTypes t;
         Check(t.Int32Member().IsNull());
         Check(!t.Int32Member().IsChanged());
+        CheckNullExc(t.Int32Member() == 10);
+        CheckNullExc(10 == t.Int32Member());
+        CheckNullExc(t.Int32Member() != 10);
+        CheckNullExc(10 != t.Int32Member());
         t.Int32Member().SetVal(10);
         Check(!t.Int32Member().IsNull());
         Check(t.Int32Member().IsChanged());
@@ -153,8 +160,35 @@ int main()
         const Int32 i = t.Int32Member();
         Check(i == 10);
 
+        
+
+        CheckNullExc(t.BooleanMember() == true);
+        CheckNullExc(true == t.BooleanMember());
+        CheckNullExc(t.BooleanMember());
+        CheckNullExc(t.BooleanMember() != true);
+        CheckNullExc(true != t.BooleanMember());
+        CheckNullExc(t.BooleanMember());
+        t.BooleanMember() = true;
+        Check(!t.BooleanMember().IsNull());
+        Check(t.BooleanMember().IsChanged());
+        Check(t.BooleanMember() == true);
+        Check(t.BooleanMember());
+        t.BooleanMember().SetNull();
+        t.BooleanMember().SetChanged(false);
+        Check(t.BooleanMember().IsNull());
+        Check(!t.BooleanMember().IsChanged());
+        t.BooleanMember().SetVal(false);
+        Check(!t.BooleanMember().IsNull());
+        Check(t.BooleanMember().IsChanged());
+        Check(t.BooleanMember() == false);
+        Check(!t.BooleanMember());
+
         Check(t.Float32Member().IsNull());
         Check(!t.Float32Member().IsChanged());
+        CheckNullExc(t.Float32Member() == 10);
+        CheckNullExc(10 == t.Float32Member());
+        CheckNullExc(t.Float32Member() != 10);
+        CheckNullExc(10 != t.Float32Member());
         t.Float32Member().SetVal(10);
         Check(!t.Float32Member().IsNull());
         Check(t.Float32Member().IsChanged());
@@ -171,24 +205,62 @@ int main()
 
         Check(t.InstanceIdMember().IsNull());
         Check(!t.InstanceIdMember().IsChanged());
+        CheckNullExc(t.InstanceIdMember() == InstanceId(10));
+        CheckNullExc(InstanceId(10) == t.InstanceIdMember());
+        CheckNullExc(t.InstanceIdMember() != InstanceId(10));
+        CheckNullExc(InstanceId(10) != t.InstanceIdMember());
         t.InstanceIdMember().SetVal(InstanceId(10));
         Check(!t.InstanceIdMember().IsNull());
         Check(t.InstanceIdMember().IsChanged());
         Check(t.InstanceIdMember().GetVal() == InstanceId(10));
         Check(InstanceId(10) == t.InstanceIdMember());
-        //        Check(t.InstanceIdMember() == InstanceId(10));//Unexpectedly does not work
+        Check(t.InstanceIdMember() == InstanceId(10));
+        Check(InstanceId(11) != t.InstanceIdMember());
+        Check(t.InstanceIdMember() != InstanceId(11));
         t.InstanceIdMember().SetVal(InstanceId(L"Kalle"));
         Check(InstanceId(L"Kalle") == t.InstanceIdMember());
-        //        Check(t.InstanceIdMember() == L"Kalle"); //Unexpectedly does not work
+        Check(t.InstanceIdMember() == InstanceId(L"Kalle")); 
+        Check(InstanceId(L"Pelle") != t.InstanceIdMember());
+        Check(t.InstanceIdMember() != InstanceId(L"Pelle")); 
 
         Check(t.StringMember().IsNull());
         Check(!t.StringMember().IsChanged());
+        CheckNullExc(t.StringMember() == L"Kalle");
+        CheckNullExc(L"Kalle" == t.StringMember());
+        CheckNullExc(t.StringMember() != L"Kalle");
+        CheckNullExc(L"Kalle" != t.StringMember());
+        const std::wstring kalleS(L"Kalle");
+        CheckNullExc(t.StringMember() == kalleS);
+        CheckNullExc(kalleS == t.StringMember());
+        CheckNullExc(t.StringMember() != kalleS);
+        CheckNullExc(kalleS != t.StringMember());
         t.StringMember().SetVal(L"Kalle");
         Check(!t.StringMember().IsNull());
         Check(t.StringMember().IsChanged());
         Check(t.StringMember().GetVal() == L"Kalle");
         Check(t.StringMember() == L"Kalle");
+        Check(L"Kalle" == t.StringMember());
+        Check(t.StringMember() != L"Pelle");
+        Check(L"Pelle" != t.StringMember());
 
+        Check(t.BinaryMember().IsNull());
+        Check(!t.BinaryMember().IsChanged());
+        const char kalleC [] = "Kalle";
+        const Safir::Dob::Typesystem::Binary kalle(kalleC,kalleC + sizeof(kalleC));
+        CheckNullExc(t.BinaryMember() == kalle);
+        CheckNullExc(kalle == t.BinaryMember());
+        CheckNullExc(t.BinaryMember() != kalle);
+        CheckNullExc(kalle != t.BinaryMember());
+        t.BinaryMember().SetVal(kalle);
+        Check(!t.BinaryMember().IsNull());
+        Check(t.BinaryMember().IsChanged());
+        Check(t.BinaryMember().GetVal() == kalle);
+        Check(t.BinaryMember() == kalle);
+        Check(kalle == t.BinaryMember());
+        const char pelleC [] = "PellePlutt";
+        const Safir::Dob::Typesystem::Binary pelle(pelleC,pelleC + sizeof(pelleC));
+        Check(t.BinaryMember() != pelle);
+        Check(pelle != t.BinaryMember());
     }
 
     {
@@ -316,17 +388,7 @@ int main()
         Check(t2.BooleanMember().IsChanged());
         Check(!t1.BooleanMember().IsChanged());
 
-        //Operators
-        ++t2.BooleanMember();
-        Check(t2.BooleanMember() == true);
-        t2.BooleanMember()++;
-        Check(t2.BooleanMember() == true);
-        t2.BooleanMember() += 10;
-        Check(t2.BooleanMember() == true);
-        t2.BooleanMember() *= 2;
-        Check(t2.BooleanMember() == true);
-        t2.BooleanMember() /= 4;
-        Check(t2.BooleanMember() == true);
+        //Operators N/A
 
         //proxied container assign.
         t1.EnumerationMember() = TestEnum::MyFirst;
@@ -407,6 +469,7 @@ int main()
     //objects
     {
         MemberTypes t;
+        t.ObjectMember() = Safir::Dob::Typesystem::Object::Create();
         t.ObjectMember().GetPtr()->GetTypeId();
         t.ObjectMember()->GetTypeId();
     }

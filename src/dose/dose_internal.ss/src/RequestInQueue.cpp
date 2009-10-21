@@ -213,7 +213,7 @@ namespace Internal
     bool RequestInQueue::PushRequest(DistributionData request)
     {
         boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
-        if ((m_size < m_capacity) && !m_simulateFull) //not full
+        if ((m_size < m_capacity) && m_simulateFull == 0) //not full
         {
             request.SetResponseId(m_responseIdGenerator.GetNextResponseId());
             m_unhandledRequests.push_back(request);

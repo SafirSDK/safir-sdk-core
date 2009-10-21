@@ -1,0 +1,60 @@
+with "safir_defaults.gpr";
+with "dots_ada";
+with "dots_generated_ada";
+with "dose_dll.gpr";
+
+project Dose_Ada_Library is
+
+   for Source_Dirs use (".");
+   for Object_Dir use "obj";
+   for Library_Dir use "lib";
+   for Library_Src_Dir use "interface";
+   for Library_ALI_Dir use "ali";
+   for Library_Name use "dose_ada";
+   for Library_Kind use "dynamic";
+   for Library_Interface use ("Safir.Dob.Blob_References",
+                              "Safir.Dob.Callbacks",
+                              "Safir.Dob.Connection_Aspect_Miscs",
+                              "Safir.Dob.Connection_Aspect_Injectors",
+                              "Safir.Dob.Connection_Aspect_Postpones",
+                              "Safir.Dob.Connection_Bases",
+                              "Safir.Dob.Connections",
+                              "Safir.Dob.Consumer_Bases",
+                              "Safir.Dob.Consumers",
+                              "Safir.Dob.Defs",
+                              "Safir.Dob.Entity_Iterators",
+                              "Safir.Dob.Entity_Proxies",
+                              "Safir.Dob.Entity_Proxy_Impl_Pointers",
+                              "Safir.Dob.Entity_Proxy_Impls",
+                              "Safir.Dob.Previous_Entity_Proxies",
+                              "Safir.Dob.Previous_Entity_Proxy_Impl_Pointers",
+                              "Safir.Dob.Previous_Entity_Proxy_Impls",
+                              "Safir.Dob.Entity_Request_Proxies",
+                              "Safir.Dob.Entity_Request_Proxy_Impl_Pointers",
+                              "Safir.Dob.Entity_Request_Proxy_Impls",
+                              "Safir.Dob.Injected_Entity_Proxies",
+                              "Safir.Dob.Injected_Entity_Proxy_Impl_Pointers",
+                              "Safir.Dob.Injected_Entity_Proxy_Impls",
+                              "Safir.Dob.Message_Proxies",
+                              "Safir.Dob.Message_Proxy_Impl_Pointers",
+                              "Safir.Dob.Message_Proxy_Impls",
+                              "Safir.Dob.Smart_Pointers",
+                              "Safir.Dob.Response_Proxies",
+                              "Safir.Dob.Response_Proxy_Impl_Pointers",
+                              "Safir.Dob.Response_Proxy_Impls",
+                              "Safir.Dob.Response_Senders",
+                              "Safir.Dob.Response_Sender_Impl_Pointers",
+                              "Safir.Dob.Response_Sender_Impls",
+                              "Safir.Dob.Secondary_Connections",
+                              "Safir.Dob.Service_Request_Proxies",
+                              "Safir.Dob.Service_Request_Proxy_Impl_Pointers",
+                              "Safir.Dob.Service_Request_Proxy_Impls",
+                              "Safir.Dob.Shm_References");
+
+
+   package Compiler is
+      for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
+   end Compiler;
+
+end Dose_Ada_Library;
+

@@ -26,10 +26,10 @@
 * DoseNodeStatus.h - a part of DoseComDll - For LINUX and WIN32
 **************************************************************************/
 
-#ifndef ushort
-typedef unsigned short ushort;
-typedef unsigned char  uchar;
-typedef unsigned long  ulong;
+#ifndef dcom_ushort16
+typedef unsigned short dcom_ushort16;
+typedef unsigned char  dcom_uchar8;
+typedef unsigned int  dcom_ulong32;
 #endif
 
 #define NODESTATUS_FREE      0   // not used
@@ -51,30 +51,30 @@ typedef unsigned long  ulong;
 
 typedef volatile struct
 {
-    volatile uchar  Status;          // NODESTATUS_xxxx (Up/Down)
-    volatile uchar  ToBeGivenToAppl; // Set by KeepAlive when Status change
+    volatile dcom_uchar8  Status;          // NODESTATUS_xxxx (Up/Down)
+    volatile dcom_uchar8  ToBeGivenToAppl; // Set by KeepAlive when Status change
                                      // cleared when Appl has fetched it
-    volatile uchar  ToBePoolDistributed; // ??? needed Set by KeepAlive when a new up
-    volatile uchar  HasReceivedPdComplete;
+    volatile dcom_uchar8  ToBePoolDistributed; // ??? needed Set by KeepAlive when a new up
+    volatile dcom_uchar8  HasReceivedPdComplete;
 
-    volatile ushort RetryCount;     // # retry send to this node
-    volatile ushort spare2;
+    volatile dcom_ushort16 RetryCount;     // # retry send to this node
+    volatile dcom_ushort16 spare2;
 
-    volatile ulong  RxCount;        // received from this node
-    volatile ulong  IpAddr_nw;
-    volatile ulong  LatestTime;     // Time when latest a msg arrived (keep alive)
-    volatile ulong  TimeStamp;      // from KeepAlive msg. Time when node started.
+    volatile dcom_ulong32  RxCount;        // received from this node
+    volatile dcom_ulong32  IpAddr_nw;
+    volatile dcom_ulong32  LatestTime;     // Time when latest a msg arrived (keep alive)
+    volatile dcom_ulong32  TimeStamp;      // from KeepAlive msg. Time when node started.
 } NODESTATUS_TABLE;
 
 typedef volatile struct
 {
-    volatile ulong TotRxCount;    // Incremented by Rececive_Thread when new msg
-    volatile ulong TotTxCount;    // Incremented by Xmit_Thread when new msg
-    volatile ulong LostAckCount;  // Incremented by Xmit_Thread when lost Ack
-    volatile ulong ReTxCount;     // Incremented by Xmit_Thread when rexmit msg
-    volatile ulong zBufferOverFlowCount;   // Incremented when GetBuffer fails
-    volatile ulong ReceiveQueueFullCount;  // Incremented when overflow in RxQueue
-    volatile ulong TransmitQueueFullCount; // Incremented when overflow in TxQueue
+    volatile dcom_ulong32 TotRxCount;    // Incremented by Rececive_Thread when new msg
+    volatile dcom_ulong32 TotTxCount;    // Incremented by Xmit_Thread when new msg
+    volatile dcom_ulong32 LostAckCount;  // Incremented by Xmit_Thread when lost Ack
+    volatile dcom_ulong32 ReTxCount;     // Incremented by Xmit_Thread when rexmit msg
+    volatile dcom_ulong32 zBufferOverFlowCount;   // Incremented when GetBuffer fails
+    volatile dcom_ulong32 ReceiveQueueFullCount;  // Incremented when overflow in RxQueue
+    volatile dcom_ulong32 TransmitQueueFullCount; // Incremented when overflow in TxQueue
 } DOSE_STATISTICS;
 
 
@@ -84,35 +84,35 @@ typedef struct
     volatile DOSE_STATISTICS        Statistics;
 
     //These are updated by KeepAliveThread
-    volatile ulong64    BitMapNodesNew64;             // defines DOWN nodes
-    volatile ulong64    BitMapNodesUp64;              // defines UP nodes
-    volatile ulong64    BitMapNodesDown64;            // defines DOWN nodes
-    volatile ulong64    BitMapToBePoolDistributed64;  // marked here when new
-    volatile ulong64    BitMapBeingPoolDistributed64; // marked here when PD
-    volatile ulong64    BitMapLatestPoolDistributed64;// marked here when PD
+    volatile dcom_ulong64    BitMapNodesNew64;             // defines DOWN nodes
+    volatile dcom_ulong64    BitMapNodesUp64;              // defines UP nodes
+    volatile dcom_ulong64    BitMapNodesDown64;            // defines DOWN nodes
+    volatile dcom_ulong64    BitMapToBePoolDistributed64;  // marked here when new
+    volatile dcom_ulong64    BitMapBeingPoolDistributed64; // marked here when PD
+    volatile dcom_ulong64    BitMapLatestPoolDistributed64;// marked here when PD
 
-    volatile ulong  MyIpAddr_nw;
-    volatile ulong  NetAddr_nw;
-    volatile ulong  IpMulticastAddr_nw;
-    volatile ushort DosePort;
-    volatile uchar  MyDoseId;
-    volatile uchar  MaxUsedDoseId;
+    volatile dcom_ulong32  MyIpAddr_nw;
+    volatile dcom_ulong32  NetAddr_nw;
+    volatile dcom_ulong32  IpMulticastAddr_nw;
+    volatile dcom_ushort16 DosePort;
+    volatile dcom_uchar8  MyDoseId;
+    volatile dcom_uchar8  MaxUsedDoseId;
 
     //These are updated by KeepAliveThread
-    volatile ulong  PoolDistributionWillStartSoon; // a flag and a timer
-    volatile ulong  PoolDistributionIsInProgress;
-    volatile ulong  PoolDistributionWillEndSoon;
-    //volatile ulong    zzzzzzz_LastTxQueuePosForPoolDistribution; //??????
+    volatile dcom_ulong32  PoolDistributionWillStartSoon; // a flag and a timer
+    volatile dcom_ulong32  PoolDistributionIsInProgress;
+    volatile dcom_ulong32  PoolDistributionWillEndSoon;
+    //volatile dcom_ulong32    zzzzzzz_LastTxQueuePosForPoolDistribution; //??????
 
     // Each node is member in a set of DestinationChannels
     // BitMapDestChannelMembers[][0] is for channel 0.
     // BitMapDestChannelMembers[][31] is for channel 31.
     // Bit 'NN' defines if DoseId 'NN' is a member
-    // Since DoseId is requires 64 bit, two ulong are used.
+    // Since DoseId is requires 64 bit, two dcom_ulong32 are used.
     // Built by KeepAliveThread.
     // Used by TxThread which must make a quick lookup to
     // find out which nodes are  expected to send an Ack.
-    //ulong BitMapDestChannelMembers[2][MAX_NUM_DEST_CHANNELS];
+    //dcom_ulong32 BitMapDestChannelMembers[2][MAX_NUM_DEST_CHANNELS];
 
     // Debug levels
     //    0 - no debug
@@ -135,24 +135,24 @@ public:
 public:
     static DOSE_SHARED_DATA_S *GetNodeSharedDataPointer(void);
 
-    static int  UpdateNode_Up(uchar NodeId,
-                            ulong IpAddr_nw, ulong TimeStamp);
+    static int  UpdateNode_Up(dcom_uchar8 NodeId,
+                            dcom_ulong32 IpAddr_nw, dcom_ulong32 TimeStamp);
 
     static int  CheckTimedOutNodes(void);
 
-    static int  GetNodeInfo(ushort NodeId, ulong *pIpAddr,
-                            ulong *pNodeStatus);
+    static int  GetNodeInfo(dcom_ushort16 NodeId, dcom_ulong32 *pIpAddr,
+                            dcom_ulong32 *pNodeStatus);
 
     static int InitNodeStatus(int mode);
 
-    static ulong GetNextChangedNode(uchar *pNodeStatus,ulong *pIpAddr_nw);
+    static dcom_ulong32 GetNextChangedNode(dcom_uchar8 *pNodeStatus,dcom_ulong32 *pIpAddr_nw);
 
     static void Get_Info(char *pBuff);
 
     static void Set_HasReceivedPdComplete(int DoseId);
 
 private:
-    static void SetNodeDownWhenInvalidTimeStamp(uchar DoseId);
+    static void SetNodeDownWhenInvalidTimeStamp(dcom_uchar8 DoseId);
 
     static void UpdateNodeStatusBitMap(void);
 };

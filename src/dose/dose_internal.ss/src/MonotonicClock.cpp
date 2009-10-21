@@ -23,8 +23,17 @@
 ******************************************************************************/
 #include <Safir/Dob/Internal/MonotonicClock.h>
 
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable: 4244)
+#endif
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
 
 namespace Safir
 {

@@ -41,6 +41,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <ace/Thread.h>
 #include <boost/bind.hpp>
+#include <ace/OS_NS_unistd.h>
 
 namespace Safir
 {
@@ -48,7 +49,7 @@ namespace Dob
 {
 namespace Internal
 {
-     const Dob::Typesystem::Int32 g_thisNode = Safir::Dob::ThisNodeParameters::NodeNumber();
+    const Dob::Typesystem::Int32 g_thisNode = Safir::Dob::ThisNodeParameters::NodeNumber();
 
     PoolHandler::PoolHandler():
         m_ecom(NULL),
@@ -626,6 +627,7 @@ namespace Internal
     void PoolHandler::RemoveStatesWaitingForNode(const Typesystem::Int32 node)
     {
         m_waitingStates.NodeDown(node);
+        m_endStates->ClearDisconnectsFromNode(node);
     }
 }
 }

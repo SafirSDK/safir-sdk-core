@@ -23,14 +23,25 @@
 ******************************************************************************/
 #include <string>
 #include <ace/DLL.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4244)
+#endif
+
 #include <boost/date_time/gregorian/greg_date.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/time_duration.hpp>
 #include <boost/date_time/time_zone_base.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 #include <Safir/Dob/Typesystem/Utilities.h>
 
 #include <Safir/Time/LibraryParameters.h>
-#include "Safir/Time/Internal/Interface.h"
+#include <Safir/Time/Internal/Interface.h>
 
 const boost::posix_time::ptime _1_JAN_1970 (boost::gregorian::date(1970,boost::date_time::Jan,1));
 

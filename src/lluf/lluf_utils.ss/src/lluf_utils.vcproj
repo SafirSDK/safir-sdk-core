@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="lluf_utils"
 	ProjectGUID="{90173B50-45F8-4E16-8E20-A9D06CD17921}"
 	RootNamespace="lluf"
@@ -226,6 +226,10 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			>
+			<File
+				RelativePath=".\Safir\Utilities\Internal\AutoLink.h"
+				>
+			</File>
 			<File
 				RelativePath=".\Safir\Utilities\Internal\LowLevelLogger.h"
 				>

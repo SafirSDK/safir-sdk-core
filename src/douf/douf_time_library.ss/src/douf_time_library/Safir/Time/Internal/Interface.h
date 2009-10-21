@@ -24,18 +24,14 @@
 #ifndef __DOUF_TIME_LIBRARY_H
 #define __DOUF_TIME_LIBRARY_H
 
-#include <Safir/Dob/Typesystem/Defs.h>
+#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 
 #if defined _MSC_VER
 #  ifdef DOUF_TIME_EXPORTS
 #    define DOUF_TIME_API __declspec(dllexport)
 #  else
 #    define DOUF_TIME_API __declspec(dllimport)
-#    ifdef _DEBUG
-#      pragma comment( lib, "douf_time_libraryd.lib" )
-#    else
-#      pragma comment( lib, "douf_time_library.lib" )
-#    endif
+#    pragma comment( lib, "douf_time_library.lib" )
 #  endif
 #  define CALLING_CONVENTION __cdecl
 #elif defined __GNUC__
@@ -51,12 +47,12 @@ extern "C"
     //----------------------------------------------
     // Get current UTC time
     //----------------------------------------------
-    DOUF_TIME_API void CALLING_CONVENTION DoufTimeC_GetUtcTime(Safir::Dob::Typesystem::Si64::Second & utcTime);
+    DOUF_TIME_API void CALLING_CONVENTION DoufTimeC_GetUtcTime(DotsC_Float64& utcTime);
 
     //----------------------------------------------
     // Get local time offset according to GMT
     //----------------------------------------------
-    DOUF_TIME_API void CALLING_CONVENTION DoufTimeC_GetLocalTimeOffset(Safir::Dob::Typesystem::Int32& offset);
+    DOUF_TIME_API void CALLING_CONVENTION DoufTimeC_GetLocalTimeOffset(DotsC_Int32& offset);
 
 #ifdef __cplusplus
 }

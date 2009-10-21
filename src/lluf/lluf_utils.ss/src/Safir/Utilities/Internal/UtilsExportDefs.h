@@ -29,11 +29,9 @@
         #define LLUF_UTILS_API __declspec(dllexport)
     #else
         #define LLUF_UTILS_API __declspec(dllimport)
-        #ifdef _DEBUG
-            #pragma comment( lib, "lluf_utilsd.lib" )
-        #else
-            #pragma comment( lib, "lluf_utils.lib" )
-       #endif
+
+        #define SAFIR_LIBRARY_NAME "lluf_utils"
+        #include <Safir/Utilities/Internal/AutoLink.h>
     #endif
 #elif defined __GNUC__
     #define LLUF_UTILS_API

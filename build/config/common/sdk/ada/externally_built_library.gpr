@@ -1,9 +1,5 @@
 project externally_built_library is
 
-   type Build_Type is
-      ("release", "debug", "gcov", "gperf", "normal");
-   Build : Build_Type := external ("BUILD");
-
    type OS_Type is ("Windows_NT", "Linux");
    OS : OS_Type := external ("OS", "Linux");
 

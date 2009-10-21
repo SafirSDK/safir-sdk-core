@@ -1,7 +1,8 @@
+// -*- coding: utf-8 -*-
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Engdahl / stlsen
 *
 *******************************************************************************
@@ -71,7 +72,7 @@ class DoseMon
                                 "ERROR: DoseMon can not load file.\n"
                                 + "Filename LINUX:  libdose_com_jni.so\n"
                                 + "Filename WIN32:  dose_com_jni.dll\n");
-        
+
                 rc = doseJni.GetInfo('N',4, buff);
         //System.out.println("*** ret Dose " + rc );
 

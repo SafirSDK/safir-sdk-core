@@ -22,7 +22,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SubscribeMessage</value>
               </member>
               <member>
@@ -58,7 +58,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SendMessage</value>
               </member>
               <member>

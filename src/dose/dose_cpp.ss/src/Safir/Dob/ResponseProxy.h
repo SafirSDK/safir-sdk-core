@@ -142,6 +142,27 @@ namespace Dob
         const Dob::Typesystem::ObjectPtr GetRequest() const;
 
         /**
+         * Get the original request blob.
+         *
+         * Retrieves the blob of the original request.
+         * If the request was a delete request NULL will be returned.
+         *
+         * This method will give you a pointer to the underlying representation of the object.
+         * Note that this pointer is only valid while the ResponseProxy is in scope.
+         * If you want to keep the blob you must copy it using methods in Safir::Dob::Typesystem.
+         *
+         * This method is mainly useful if all you want to do with a received object is to write it
+         * to a database or pass it over a C-interface to a library or plugin.
+         *
+         * As an example, if you want to copy the bytes into a std::vector<char> you could do it
+         * like this "v = std::vector<char>(blob,blob+Safir::Dob::Typesystem::BlobOperations.GetSize())"
+
+         * @return Original request blob.
+         */
+        const char * GetRequestBlob() const;
+
+
+        /**
          * Get the handler id to which the original request was sent.
          *
          * @return Handler id.

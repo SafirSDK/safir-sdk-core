@@ -21,12 +21,10 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <QtGui>
 #include "connectionstats.h"
 //#include <iostream>
 #include <sstream>
 #include <math.h>
-// if we include <QtGui> there is no need to include every class used: <QString>, <QFileDialog>,...
 
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/RequestOutQueue.h>
@@ -167,14 +165,14 @@ ConnectionStats::ConnectionStats(QWidget* /*parent*/,  const QString& connection
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(UpdateStatistics()));
     m_timer.start(3000);
 
-    UpdateStatistics();
+    UpdateStatistics(true);
 }
 
 
 
-void ConnectionStats::UpdateStatistics()
+void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
 {
-    if (!isVisible())
+    if (!ignoreVisible && !isVisible())
     {
         return;
     }
@@ -182,11 +180,12 @@ void ConnectionStats::UpdateStatistics()
     bool connectionExists = false;
     Stat stat;
 
-    Safir::Dob::Internal::Connections::Instance().ForSpecificConnection(m_connectionId,
-                                                                        boost::bind(&ProcessConnection,
-                                                                                    _1,
-                                                                                    boost::ref(stat),
-                                                                                    boost::ref(connectionExists)));
+    Safir::Dob::Internal::Connections::Instance().ForSpecificConnection
+        (m_connectionId,
+         boost::bind(&ProcessConnection,
+                     _1,
+                     boost::ref(stat),
+                     boost::ref(connectionExists)));
 
     if (connectionExists)
     {
@@ -200,6 +199,12 @@ void ConnectionStats::UpdateStatistics()
         reqOutQTableWidget->item(0,4)->setText(boost::lexical_cast<std::string>(stat.reqOutQStat.noDispatchedResponses).c_str());
         reqOutQTableWidget->item(0,5)->setText(boost::lexical_cast<std::string>(stat.reqOutQStat.noTimeouts).c_str());
 
+        //empty the table
+        reqInQTableWidget->clear();
+        for(int row = 0; row < reqInQTableWidget->rowCount(); ++row)
+        {
+            reqInQTableWidget->removeRow(row);
+        }
         // Request in queues
         for (unsigned int row = 0; row < stat.reqInQStat.size(); ++row)
         {
@@ -253,6 +258,13 @@ void ConnectionStats::UpdateStatistics()
         // Message out queue
         msgOutQTableWidget->item(0,0)->setText(boost::lexical_cast<std::string>(stat.msgOutQStat.noPushedMsg).c_str());
         msgOutQTableWidget->item(0,1)->setText(boost::lexical_cast<std::string>(stat.msgOutQStat.noOverflows).c_str());
+
+        //empty the table
+        msgInQTableWidget->clearContents();
+        for(int row = 0; row < msgInQTableWidget->rowCount(); ++row)
+        {
+            msgInQTableWidget->removeRow(row);
+        }
 
         // Message in queues
         for (unsigned int row = 0; row < stat.msgInQStat.size(); ++row)

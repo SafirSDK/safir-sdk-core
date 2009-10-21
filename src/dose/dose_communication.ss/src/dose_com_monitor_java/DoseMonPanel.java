@@ -1,7 +1,8 @@
+// -*- coding: utf-8 -*-
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Engdahl / stlsen
 *
 *******************************************************************************
@@ -30,11 +31,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-import javax.swing.BorderFactory; 
+import javax.swing.BorderFactory;
 import javax.swing.border.Border;
- 
+
 /*******************************************
-* 
+*
 ********************************************/
 
 public class DoseMonPanel  extends JPanel
@@ -42,14 +43,14 @@ public class DoseMonPanel  extends JPanel
         OneDoseNode[] m_allNodes;
         JButton m_buttHelp;
         JButton m_buttInfo;
-        
+
         /******************************************************
-        *  
+        *
         *******************************************************/
         private class ButtonListener implements ActionListener
         {
                 public void actionPerformed(ActionEvent event)
-                {       
+                {
                         if(event.getSource() == m_buttHelp)
                         {
                                 JOptionPane.showMessageDialog(null,
@@ -111,8 +112,8 @@ public class DoseMonPanel  extends JPanel
                 m_allNodes = new OneDoseNode[64];
 
         //setLayout(new GridLayout(11,1));      - blir ej bra
-                setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));       
-                
+                setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
                 //---------- Buttons -------
 
                 JPanel p1 = new JPanel(); add(p1);
@@ -126,7 +127,7 @@ public class DoseMonPanel  extends JPanel
                 m_buttInfo.addActionListener(buttonListener);
 
                 //---------- header -------
-                
+
                 addRow((byte) 99, 'H', "ID");
         }
         //=======================
@@ -137,7 +138,7 @@ public class DoseMonPanel  extends JPanel
         {
                 JPanel pan = new JPanel(); add(pan);
                 pan.setLayout(new GridBagLayout());
-        
+
                 JTextField  t11 = new JTextField(strDoseId,2);  pan.add(t11);
                 JTextField  t22 = new JTextField(" ",1);                pan.add(t22);
                 JTextField  t33 = new JTextField("xx",10);      pan.add(t33);
@@ -147,7 +148,7 @@ public class DoseMonPanel  extends JPanel
             t22.setForeground(Color.black);
             t33.setForeground(Color.black);
             t44.setForeground(Color.black);
-                
+
                 if(mode == 'H') // Header
                 {
                         t11.setBackground(null);
@@ -161,9 +162,9 @@ public class DoseMonPanel  extends JPanel
                 }
 
                 if(doseId >= 64) return;
-                
+
                 // Save so they can be updated
-        
+
                 m_allNodes[doseId].m_txt_nid            = t11;
                 m_allNodes[doseId].m_txt_xtra           = t22;
                 m_allNodes[doseId].m_txt_ip             = t33;
@@ -173,50 +174,50 @@ public class DoseMonPanel  extends JPanel
         //
         //=======================
 
-        public void updateNode(char nodeStatus, char xtraStatus, 
+        public void updateNode(char nodeStatus, char xtraStatus,
                             byte doseId, byte[] ipAddr)
         {
                 String ipStr = "";
                 int ip_Addr;
-                
+
                 // must do this since 'byte' is unsigned
                 for(int jj=0 ; jj<4 ; jj++)
                 {
-                        ip_Addr = ipAddr[jj]; 
+                        ip_Addr = ipAddr[jj];
                         if(ip_Addr<0) ip_Addr += 256;
                         ipStr += ip_Addr;
                         if(jj<3) ipStr += ".";
                 }
-                
+
                 if(m_allNodes[doseId] == null)
                 {
-                        m_allNodes[doseId] 
+                        m_allNodes[doseId]
                                 = new OneDoseNode(doseId, nodeStatus, ipAddr);
 
                         addRow(doseId, nodeStatus, " " + doseId);
                 }
-        
+
                 // What to do here is to set/change text in a TextField
 
                 String nsStr = " ";
-                
+
         // Color in ID field depends on NodeStatus
                 switch(nodeStatus)
                 {
-                        case 'U': 
-                m_allNodes[doseId].m_txt_nid.setBackground(Color.green); 
+                        case 'U':
+                m_allNodes[doseId].m_txt_nid.setBackground(Color.green);
                             nsStr = " Up";
                 break;
-                        case 'D': 
+                        case 'D':
                 m_allNodes[doseId].m_txt_nid.setBackground(Color.red);
                             nsStr = " Down";
                 break;
-                        case 'N': 
+                        case 'N':
                 m_allNodes[doseId].m_txt_nid.setBackground(Color.blue);
                 nsStr = " New";
                 break;
-                        case 'M': 
-                                m_allNodes[doseId].m_txt_nid.setBackground(Color.yellow); 
+                        case 'M':
+                                m_allNodes[doseId].m_txt_nid.setBackground(Color.yellow);
                             nsStr = " Me";
                                 break;
                 }
@@ -224,15 +225,15 @@ public class DoseMonPanel  extends JPanel
                 m_allNodes[doseId].m_txt_ip.setText(ipStr);
                 m_allNodes[doseId].m_txt_status.setText(nsStr);
 
-                // The xtra field has a color that this node thinks the remote 
+                // The xtra field has a color that this node thinks the remote
         // thinks of this node.
                 switch(xtraStatus)
                 {
-                        case 'U': 
+                        case 'U':
                 m_allNodes[doseId].m_txt_xtra.setBackground(Color.green); break;
-                        case 'N': 
+                        case 'N':
                 m_allNodes[doseId].m_txt_xtra.setBackground(Color.blue);  break;
-                        case 'M': 
+                        case 'M':
                                 m_allNodes[doseId].m_txt_xtra.setBackground(Color.yellow); break;
                 }
         }

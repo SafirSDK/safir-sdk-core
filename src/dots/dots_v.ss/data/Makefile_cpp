@@ -18,22 +18,30 @@
 # It is only here for the convenience of the developers.
 -include Makefile.conf
 
-include $(SAFIR_SDK)\\data\\build\\make_vs_setup
 
+space :=
+space +=
+
+include $(subst $(space),\$(space),$(SAFIR_SDK)\\data\\build\\make_vs_setup)
 
 SDK_DIR := %SAFIR_SDK%
 CPP_DIR := cpp
 
 CXXLINK := $(VC_SETUP) && link
-CXXLINK_FLAGS = /NOLOGO /DLL /LIBPATH:$(SAFIR_SDK)\lib 
+CXXLINK_FLAGS = /NOLOGO /DLL /LIBPATH:"$(SAFIR_SDK)\lib"
 CXXLINK_FLAGS_DEBUG := /DEBUG
 CXXLINK_FLAGS_RELEASE :=
 CL :=
 
 CXX := $(VC_SETUP) && cl
-CXXFLAGS := /nologo /EHsc /I ..\include /I $(SDK_DIR)\include /D DOTS_GENERATED_CPP_EXPORTS /TP
+CXXFLAGS := /nologo /EHsc /I ..\include /I "$(SDK_DIR)\include" /D DOTS_GENERATED_CPP_EXPORTS /TP
 CXXFLAGS_DEBUG :=   /D _DEBUG /D _UNICODE /D UNICODE /MDd /LDd /Od /W3 /WX /Zi /Gm
 CXXFLAGS_RELEASE := /D NDEBUG /D _UNICODE /D UNICODE /MD  /LD  /O2  /Zi /Gm
+
+#If BOOST_DIR is defined we add that to the include path
+ifneq ($(BOOST_DIR),)
+   CXXFLAGS := $(CXXFLAGS) /I "$(BOOST_DIR)"
+endif
 
 #CXX_PRECOMP = $(CPP_DIR)\$(TARGET)\precompiled_header_for_cpp.pch
 SOURCES := $(wildcard *.dou)

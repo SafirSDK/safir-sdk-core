@@ -53,6 +53,7 @@ namespace Safir.Dob
         internal static Interface.OnInitialInjectionsDoneCb onInitialInjectionsDoneCb = new Interface.OnInitialInjectionsDoneCb(Callbacks.OnInitialInjectionsDone);
         internal static Interface.OnNotRequestOverflowCb onNotRequestOverflowCb = new Interface.OnNotRequestOverflowCb(Callbacks.OnNotRequestOverflow);
         internal static Interface.OnNotMessageOverflowCb onNotMessageOverflowCb = new Interface.OnNotMessageOverflowCb(Callbacks.OnNotMessageOverflow);
+        internal static Interface.OnDropReferenceCb onDropReferenceCb = new Interface.OnDropReferenceCb(Callbacks.OnDropReference);
 
 
         //-------------------------------------------------------------------------------------
@@ -114,7 +115,7 @@ namespace Safir.Dob
             catch (System.Exception exc)
             {
                 Typesystem.LibraryExceptions.Instance.Set(exc);
-            }
+            }            
         }
 
         private static void OnUpdatedEntity(System.IntPtr currentBlob,
@@ -515,6 +516,27 @@ namespace Safir.Dob
                 MessageSender cons = (MessageSender)ConsumerHandler.ToConsumer(messageSender);
                 ConsumerHandler.Instance.DropReference(cons);
                 cons.OnNotMessageOverflow();
+                success = Interface.ByteOf(true);
+            }
+            catch (System.Exception exc)
+            {
+                Typesystem.LibraryExceptions.Instance.Set(exc);
+            }
+        }
+
+        private static void OnDropReference(System.IntPtr   consumer,
+                                            System.Int32    refCounter,
+                                            out byte        success)
+        {
+            success = Interface.ByteOf(false);
+            try
+            {
+                Internal.ConsumerBase consumerBase = ConsumerHandler.ToConsumer(consumer);
+
+                for (System.Int32 i = 0; i < refCounter; ++i)
+                {
+                    ConsumerHandler.Instance.DropReference(consumerBase);
+                }
                 success = Interface.ByteOf(true);
             }
             catch (System.Exception exc)

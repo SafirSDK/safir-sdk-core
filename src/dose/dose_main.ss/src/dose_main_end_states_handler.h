@@ -55,6 +55,8 @@ namespace Internal
 
         bool IsDisconnected(const ConnectionId & connection) const
         {return m_connections.find(connection) != m_connections.end();}
+
+        void ClearDisconnectsFromNode(const NodeNumber node);
     private:
         virtual void HandleTimeout(const TimerInfoPtr & timer);
 

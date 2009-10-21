@@ -65,8 +65,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libexpatd.lib aced.lib"
-				OutputFile="$(OutDir)\$(ProjectName)d.dll"
+				AdditionalDependencies="libexpat.lib aced.lib"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(SAFIR_SDK)/lib&quot;"
 				IgnoreDefaultLibraryNames=""
@@ -250,7 +250,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\dots_exception_database.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dots_exception_description.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\dots_exception_keeper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dots_exception_parser.cpp"
 				>
 			</File>
 			<File
@@ -363,7 +375,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\dots_exception_database.h"
+				>
+			</File>
+			<File
+				RelativePath=".\dots_exception_description.h"
+				>
+			</File>
+			<File
 				RelativePath=".\dots_exception_keeper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\dots_exception_parser.h"
 				>
 			</File>
 			<File

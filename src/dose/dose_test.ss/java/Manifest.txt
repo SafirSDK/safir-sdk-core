@@ -1,0 +1,6 @@
+Class-Path: 
+   dots_java.jar
+   dose_java.jar
+   dots_generated-java.jar
+Main-Class: Program
+

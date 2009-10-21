@@ -29,6 +29,7 @@
 #include "dots_temporary_descriptions.h"
 #include "dots_class_database.h"
 #include "dots_parameter_database.h"
+#include "dots_exception_database.h"
 #include "dots_property_database.h"
 #include "dots_enum_database.h"
 #include <boost/scoped_ptr.hpp>
@@ -57,6 +58,7 @@ namespace Internal
         static const EnumDatabase &       Enums()       {return *Instance().m_enumDb;}
         static const PropertyDatabase &   Properties()  {return *Instance().m_propertyDb;}
         static const ClassDatabase &      Classes()     {return *Instance().m_classDb;}
+        static const ExceptionDatabase &  Exceptions()  {return *Instance().m_exceptionDb;}
 
     private:
         //initilisation of the databases
@@ -80,6 +82,7 @@ namespace Internal
         boost::scoped_ptr<ParameterDatabase> m_parameterDb;
         boost::scoped_ptr<ClassDatabase> m_classDb;
         boost::scoped_ptr<PropertyDatabase> m_propertyDb;
+        boost::scoped_ptr<ExceptionDatabase> m_exceptionDb;
 
 
         static Repository * volatile m_instance;

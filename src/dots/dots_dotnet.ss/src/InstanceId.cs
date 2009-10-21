@@ -28,31 +28,57 @@ using System.Text;
 
 namespace Safir.Dob.Typesystem
 {
+    /// <summary>
+    /// Class containing the identity of an instance.
+    /// </summary>
     public class InstanceId : IComparable
     {
+        /// <summary>
+        /// Returns a random instance id.
+        /// </summary>
+        /// <returns>Random instance id.</returns>
         public static InstanceId GenerateRandom()
         {
             return new InstanceId(Internal.Id.DotsId_GenerateRandom64());
         }
 
+        /// <summary>
+        /// Default constructor.
+        /// <para>
+        /// Creates an unspecified instance id.
+        /// </para>
+        /// </summary>
         public InstanceId()
         {
             m_instanceId = -1;
             m_instanceIdStr = "";
         }
 
+        /// <summary>
+        /// Creates an instance id from the given string.
+        /// </summary>
+        /// <param name="id">String identifying the instance.</param>
         public InstanceId(string id)
         {
             m_instanceId = Internal.Id.Generate64BitHash(id);
             m_instanceIdStr = id;
         }
 
+        /// <summary>
+        /// Creates an instance id using a 64 bit integer.
+        /// </summary>
+        /// <param name="id">The 64bit integer id of the instance.</param>
         public InstanceId(Int64 id)
         {
             m_instanceId = id;
             m_instanceIdStr = "";
         }
 
+        /// <summary>
+        /// Creates an instance id from the given data.
+        /// </summary>
+        /// <param name="id">Identifier identifying the instance.</param>
+        /// <param name="idStr">String identifying the instance.</param>
         public InstanceId(Int64 id, string idStr)
         {
             m_instanceId = id;
@@ -71,12 +97,26 @@ namespace Safir.Dob.Typesystem
 #endif
         }
 
+        /// <summary>
+        /// Remove the included string from the instance id.
+        /// <para>
+        /// This is meant to be used when this type is used as a member of a Dob object.
+        /// Using this call before the object gets serialized to binary or xml (i.e.
+        /// also before sending it anywhere) means that the string will not be included
+        /// when the object is sent.
+        /// </para>
+        /// </summary>
         public void RemoveString()
         {
             m_instanceIdStr = "";
             m_CachedUtf8String = null;
         }
 
+        /// <summary>
+        /// Equals method
+        /// </summary>
+        /// <param name="obj">The instance id to compare with.</param>
+        /// <returns>True if the instance ids are equal.</returns>
         public override bool Equals(object obj)
         {
             InstanceId other = obj as InstanceId;
@@ -90,6 +130,10 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Return a string representation of the instance id.
+        /// </summary>
+        /// <returns>String representation of the instance id.</returns>
         public override string ToString()
         {
             if (m_instanceIdStr.Length != 0)
@@ -102,11 +146,21 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Overridden base class method.
+        /// </summary>
+        /// <returns>Hash code.</returns>
         public override int GetHashCode()
         {
             return (int)m_instanceId;
         }
 
+        /// <summary>
+        /// Static == operator.
+        /// </summary>
+        /// <param name="first">First instance id.</param>
+        /// <param name="second">Second instance id.</param>
+        /// <returns>True if the instance ids are equal.</returns>
         public static bool operator ==(InstanceId first, object second)
         {
             // If both are null, or both are same instance, return true.
@@ -125,6 +179,12 @@ namespace Safir.Dob.Typesystem
             return first.Equals(second);
         }
 
+        /// <summary>
+        /// Static != operator
+        /// </summary>
+        /// <param name="first">First instance id.</param>
+        /// <param name="second">Second instance id.</param>
+        /// <returns>True if the instance ids not are equal.</returns>
         public static bool operator !=(InstanceId first, object second)
         {
             return !(first == second);
@@ -132,6 +192,11 @@ namespace Safir.Dob.Typesystem
 
         #region IComparable Members
 
+        /// <summary>
+        /// Compare to specified object.
+        /// </summary>
+        /// <param name="obj">Object to compare to.</param>
+        /// <returns>Relative order</returns>
         public int CompareTo(object obj)
         {
             if (obj is InstanceId)
@@ -146,16 +211,30 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
+        /// <summary>
+        /// Get the raw 64 bit integer identifier.
+        /// </summary>
         public Int64 RawValue
         {
             get { return m_instanceId; }
         }
 
+        /// <summary>
+        /// Get the string that was used to create this id.
+        /// <para/>
+        /// If no string was used this method returns an empty string.
+        /// </summary>
         public string RawString
         {
             get { return m_instanceIdStr; }
         }
 
+        /// <summary>
+        /// Get the length of the string when converted to UTF-8 encoding.
+        /// <para/>
+        /// Includes one byte for a null termination.
+        /// </summary>
+        /// <returns>The length of the string of the id when converted to UTF-8.</returns>
         public System.Int32 Utf8StringLength()
         {
             if (m_instanceIdStr.Length == 0)
@@ -171,6 +250,12 @@ namespace Safir.Dob.Typesystem
             return m_CachedUtf8String.Length + 1;
         }
 
+        /// <summary>
+        /// Convert the string to UTF-8.
+        /// <para/>
+        /// Returns an empty string if there is no string.
+        /// </summary>
+        /// <returns>UTF-8 representation of the string.</returns>
         public byte[] Utf8String()
         {
             if (m_CachedUtf8String == null)

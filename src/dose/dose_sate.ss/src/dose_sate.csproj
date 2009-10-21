@@ -380,9 +380,7 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>xcopy /Y /C "$(TargetDir)$(TargetName).pdb*" "%25SAFIR_RUNTIME%25\bin\$(ConfigurationName)\"
-xcopy /Y /C "$(TargetDir)$(TargetName).pdb*" "%25SAFIR_RUNTIME%25\bin"
-copy "$(TargetPath)" "%25SAFIR_RUNTIME%25\bin\$(ConfigurationName)\"
+    <PostBuildEvent>xcopy /Y /C "$(TargetDir)$(TargetName).pdb*" "%25SAFIR_RUNTIME%25\bin"
 copy "$(TargetPath)" "%25SAFIR_RUNTIME%25\bin"</PostBuildEvent>
   </PropertyGroup>
 </Project>

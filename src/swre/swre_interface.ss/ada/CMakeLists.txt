@@ -1,37 +1,36 @@
+cmake_minimum_required(VERSION 2.6)
+
 PROJECT (swre_interface_ada)
 
-SET(build_directories program/lib-obj/release program/lib-obj/release-lib program/lib-obj/debug program/lib-obj/debug-lib)
+INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+
+SET(build_directories
+  src/lib
+  src/obj
+  src/ali)
 
 FILE(MAKE_DIRECTORY ${build_directories})
 
-SET(gnatmake_arguments -q -XBUILD=release -XWarning_Level=Default)
+SET(gnatmake_arguments -q -XBUILD=${CUSTOM_BUILD_TYPE})
 ADD_CUSTOM_TARGET(swre_interface_ada ALL
-                  COMMAND gnatmake ${gnatmake_arguments} -P program/swre_interface_ada_library.gpr 
+                  COMMAND gnatmake ${gnatmake_arguments} -P swre_interface_ada_library.gpr 
+                  WORKING_DIRECTORY src
                   COMMENT "Building swre_interface_ada using gnatmake"
                   VERBATIM)
 
-SET(gnatmake_arguments_dbg -q -XBUILD=debug -XWarning_Level=Default)
-ADD_CUSTOM_TARGET(swre_interface_adad ALL
-                  COMMAND gnatmake ${gnatmake_arguments_dbg} -P program/swre_interface_ada_library.gpr 
-                  COMMENT "Building swre_interface_adad using gnatmake"
-                  VERBATIM)
+FILE(GLOB ads_files src/*.ads)
+INSTALL(FILES ${ads_files}
+        DESTINATION ${SAFIR_SDK}/ada/swre_interface_ada/interface)
 
-INSTALL(DIRECTORY shared/
-        DESTINATION $ENV{SAFIR_SDK}/ada/swre_interface_ada/
-        PATTERN ".svn" EXCLUDE
-        PATTERN "*.adb" EXCLUDE)
-
-INSTALL(DIRECTORY program/lib-obj/release-lib/
-        DESTINATION $ENV{SAFIR_SDK}/ada/swre_interface_ada/lib-obj/release/
-        PATTERN "*.so" EXCLUDE)
-
-INSTALL(DIRECTORY program/lib-obj/debug-lib/
-        DESTINATION $ENV{SAFIR_SDK}/ada/swre_interface_ada/lib-obj/debug/
-        PATTERN "*.so" EXCLUDE)
-
-INSTALL(FILES program/lib-obj/release-lib/libswre_interface_ada.so
-              program/lib-obj/debug-lib/libswre_interface_adad.so
-        DESTINATION $ENV{SAFIR_RUNTIME}/lib/)
+INSTALL(DIRECTORY src/ali/
+        DESTINATION ${SAFIR_SDK}/ada/swre_interface_ada/ali)
+if (WIN32)
+   INSTALL(FILES src/lib/libswre_interface_ada.dll
+           DESTINATION ${SAFIR_RUNTIME}/bin/)
+elseif (UNIX)
+   INSTALL(FILES src/lib/libswre_interface_ada.so
+           DESTINATION ${SAFIR_RUNTIME}/lib/)
+endif(WIN32)
 
 INSTALL(FILES data/swre_interface_ada.gpr
-        DESTINATION $ENV{SAFIR_SDK}/ada/)
+        DESTINATION ${SAFIR_SDK}/ada/)

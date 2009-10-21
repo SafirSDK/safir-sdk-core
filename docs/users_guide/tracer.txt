@@ -28,7 +28,7 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
  - *Ada*
 +
-[pascal]
+[ada]
 source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 debug.Put_Line("Testing logging " & Float'Wide_Image(myFloat) &
                ", " & Float'Wide_Image(myInt));

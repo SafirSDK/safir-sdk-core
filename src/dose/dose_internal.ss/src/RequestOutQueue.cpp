@@ -53,7 +53,7 @@ namespace Internal
     bool RequestOutQueue::PushRequest(const DistributionData & request)
     {
         boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
-        if ((m_size < m_capacity) && !m_simulateFull) //not full
+        if ((m_size < m_capacity) && m_simulateFull == 0) //not full
         {
             m_unhandledRequests.push_back(request);
             ++m_size;

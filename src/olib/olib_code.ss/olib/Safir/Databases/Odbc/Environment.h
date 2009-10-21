@@ -94,7 +94,7 @@ public:
     * See SQLGetEnvAttr in ODBC documentation for more info.
     *
     * @param [in] lAttribute - An integer representing the attribute
-    * @param [out] wszValue - The value of the attribute to be set
+    * @param [out] lValue - The value of the attribute to be set
     * @exception ReconnectException - SQLGetEnvAttr failed. Check GetDiagRec for info.
     */
     void GetEnvAttr(long lAttribute, long & lValue) const;

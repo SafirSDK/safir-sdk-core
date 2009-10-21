@@ -22,7 +22,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SubscribeRegistration</value>
               </member>
               <member>
@@ -62,7 +62,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.RegisterServiceHandlerPending</value>
               </member>
               <member>

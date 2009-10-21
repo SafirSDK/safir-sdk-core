@@ -53,7 +53,7 @@ namespace Dob
         /**
          * Constructor
          *
-         * @param ConnectionAspectMisc The connection that you want to operate through.
+         * @param connection The connection that you want to operate through.
          */
         ConnectionAspectPostpone(const ConnectionBase& connection) : ConnectionAspectBase(connection) {}
 

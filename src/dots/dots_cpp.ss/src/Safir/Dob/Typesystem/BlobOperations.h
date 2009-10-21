@@ -75,6 +75,7 @@ namespace Typesystem
          *
          * This method will recursively check if any member in the blob has its change flag set.
          *
+         * @param blob the blob to check.
          * @return True if any member has changed.
          */
          static bool IsChanged(char const * const blob);
@@ -90,6 +91,7 @@ namespace Typesystem
          * @param [in,out] blob - Blob to look in.
          * @param [in] member - The member to check.
          * @param [in] index - Array index in member to check. Shall be 0 if the member is not an array.
+         * @return true if member is changed.
          */
         static bool IsChanged(const char * const blob,
                               const Dob::Typesystem::MemberIndex member,
@@ -194,7 +196,7 @@ namespace Typesystem
 
 
         /**
-         * Set an Int64, TypeId, InstanceId, ChannelId or a HandlerId in a blob.
+         * Set an Int64 or TypeId in a blob.
          *
          * This method will set a Int64-based type member in a blob.
          * If the isNull parameter is true then only the isChange and isNull flags in the blob,
@@ -670,6 +672,7 @@ namespace Typesystem
          *
          * @param [in] value - The container whose values to use.
          * @param [in,out] blob - Blob to set the member in.
+         * @param [in,out] beginningOfUnused - The start of the unused dynamic part of the blob.
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
@@ -703,6 +706,7 @@ namespace Typesystem
          *
          * @param [in] value - The container whose values to use.
          * @param [in,out] blob - Blob to set the member in.
+         * @param [in,out] beginningOfUnused - The start of the unused dynamic part of the blob.
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
@@ -736,6 +740,7 @@ namespace Typesystem
          *
          * @param [in] value - The container whose values to use.
          * @param [in,out] blob - Blob to set the member in.
+         * @param [in,out] beginningOfUnused - The start of the unused dynamic part of the blob.
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
@@ -769,6 +774,7 @@ namespace Typesystem
          *
          * @param [in] value - The container whose values to use.
          * @param [in,out] blob - Blob to set the member in.
+         * @param [in,out] beginningOfUnused - The start of the unused dynamic part of the blob.
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
@@ -872,7 +878,6 @@ namespace Typesystem
          * @param [in] binary - The container whose values to use.
          * @param [in,out] blob - Blob to set the member in.
          * @param [in,out] beginningOfUnused - The start of the unused dynamic part of the blob.
-         * @param [in,out] beginningOfUnused - The start of the unused dynamic part of the blob.
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
@@ -883,7 +888,7 @@ namespace Typesystem
                         const Dob::Typesystem::ArrayIndex index);
 
         /**
-         * Get an Object from a blob.
+         * Get Binary from a blob.
          *
          * This method will get the member and the associated isNull and isChange values from a blob and
          * put them in the container.

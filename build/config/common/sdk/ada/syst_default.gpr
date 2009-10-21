@@ -1,6 +1,6 @@
 -- Default project setings for SS2000 systems.
 --
--- 2002-07-10 Added support for different release and debug configurations.
+-- 2002-07-10 Added support for different Release and Debug configurations.
 -- 2004-11-29 Removed -fstack-check since it is not mandatory under windows.
 -- 2005-12-12 Removed frontend inlining after recomendatios from AdaCore
 --              the backend is is doing a better job when left alone.
@@ -62,8 +62,8 @@
 --with "apex.gpr";
 project syst_Default is
 
-   type Build_Type is ("release", "debug","gcov","gperf","normal");
-   Build : Build_Type := external ("BUILD", "debug");
+   type Build_Type is ("Release", "Debug","gcov","gperf","normal");
+   Build : Build_Type := external ("BUILD", "Debug");
 
    type Warning_Levels is ("Default","Elaboration","Full");
    Warning_Level : Warning_Levels := external ("Warning_Level", "Default");
@@ -85,13 +85,13 @@ project syst_Default is
          "-j" &  external ("NUMBER_OF_PROCESSORS", "1"));
 
       case Build is
-         when "release" =>
+         when "Release" =>
             for Default_Switches("Ada") use
               Builder'Default_Switches("Ada");
-         when "debug" =>
+         when "Debug" =>
             for Default_Switches("Ada") use
               Builder'Default_Switches("Ada") &
-              ("-g"); -- debug.
+              ("-g"); -- Debug.
          when "gcov" | "gperf" |"normal" =>
             for Default_Switches("Ada") use
               Builder'Default_Switches("Ada");
@@ -112,7 +112,7 @@ project syst_Default is
 
 
       case Build is
-         when "release" =>
+         when "Release" =>
             for Default_Switches("Ada") use
               Compiler'Default_Switches("Ada") &
               ("-Os",    -- Full optimisation dont trade size for speed.
@@ -120,7 +120,7 @@ project syst_Default is
                "-Wuninitialized", -- Use backend to find uninitialized
               "-gnatn");-- Inlining of subprograms.
 
-         when "debug" =>
+         when "Debug" =>
             for Default_Switches("Ada") use
               Compiler'Default_Switches("Ada") &
               ("-g",

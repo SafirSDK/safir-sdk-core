@@ -5,18 +5,8 @@ project dots_id is
    for Source_Dirs use ();
 
    for library_dir use Externally_Built_Library'library_dir;
-
-   case Externally_Built_Library.OS is
-      when "Linux" =>
-          for library_name use "dots_id";
-      when "Windows_NT" =>
-          case Externally_Built_Library.Build is
-              when "debug" =>
-                  for library_name use "dots_idd";
-              when others =>
-                  for library_name use "dots_id";
-          end case;
-   end case;
+   
+   for library_name use "dots_id";
 
    for Library_kind  use "dynamic";
 

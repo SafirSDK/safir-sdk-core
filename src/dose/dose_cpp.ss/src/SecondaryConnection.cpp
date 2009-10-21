@@ -91,6 +91,7 @@ namespace Dob
                                &Internal::Callbacks::OnInitialInjectionsDone,
                                &Internal::Callbacks::OnNotRequestOverflow,
                                &Internal::Callbacks::OnNotMessageOverflow,
+                               NULL, // No drop reference callback needed for C++.
                                newCtrlId,
                                success);
         if (!success)

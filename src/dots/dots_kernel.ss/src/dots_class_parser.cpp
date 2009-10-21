@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Joel Ottosson / stjoot
 *
 *******************************************************************************
@@ -28,7 +28,6 @@
 #include "dots_basic_types.h"
 #include "dots_blob_serializer.h"
 #include "dots_file_parser.h"
-#include <boost/lexical_cast.hpp>
 #include <iostream>
 
 namespace Safir
@@ -39,7 +38,7 @@ namespace Typesystem
 {
 namespace Internal
 {
-    
+
     /**
      * Parses dou-files containing class definitions.
      */
@@ -169,7 +168,7 @@ namespace Internal
         {
         case StringMemberType:
             {
-                m_parameterBlobSize+=m_tmpParameterValue.m_value.size()+1;
+                m_parameterBlobSize+=m_tmpParameterValue.m_value.size()+1 + sizeof(void*);
             }
             break;
         case InstanceIdMemberType:
@@ -180,7 +179,7 @@ namespace Internal
                 m_parameterBlobSize+=BasicTypes::SizeOfType(m_tmpParameter.m_type);
                 if (!IsInt(m_tmpParameterValue.m_value.c_str()))
                 {
-                    m_parameterBlobSize += BasicTypes::SizeOfType(m_tmpParameter.m_type) + sizeof(Int32) + 
+                    m_parameterBlobSize += BasicTypes::SizeOfType(m_tmpParameter.m_type) + sizeof(void*) +
                         m_tmpParameterValue.m_value.size() +1;
                 }
             }
@@ -234,7 +233,7 @@ namespace Internal
     //---------------------------------------------------------
     // Element handlers
     //---------------------------------------------------------
-    bool ClassParser::StartElement(std::string element)
+    bool ClassParser::StartElement(const std::string& element)
     {
         const char* e=ValidElement(element.c_str());
         if (e==NULL)
@@ -267,7 +266,7 @@ namespace Internal
         return false;
     }
 
-    bool ClassParser::EndElement(std::string element)
+    bool ClassParser::EndElement(const std::string& element)
     {
         const char* e=ValidElement(element.c_str());
         if (e==NULL)
@@ -306,7 +305,7 @@ namespace Internal
         return false;
     }
 
-    bool ClassParser::Content(std::string str)
+    bool ClassParser::Content(const std::string& str)
     {
         if (m_uSummary || m_uCreateRoutines)
         {
@@ -386,7 +385,7 @@ namespace Internal
         return false;
     }
 
-    bool ClassParser::Content_Class(std::string& str)
+    bool ClassParser::Content_Class(const std::string& str)
     {
 
         if (m_uParameters)
@@ -553,7 +552,7 @@ namespace Internal
         return false;
     }
 
-    bool ClassParser::Content_Parameters(std::string& str)
+    bool ClassParser::Content_Parameters(const std::string& str)
     {
         if (m_uParameterArray)
         {
@@ -719,7 +718,7 @@ namespace Internal
         return false;
     }
 
-    bool ClassParser::Content_Parameters_Array(std::string& str)
+    bool ClassParser::Content_Parameters_Array(const std::string& str)
     {
         if (m_uObject>0)
         {
@@ -834,7 +833,7 @@ namespace Internal
         return false;
     }
 
-    bool ClassParser::Content_Parameters_EntityId(std::string& str)
+    bool ClassParser::Content_Parameters_EntityId(const std::string& str)
     {
         //TODO - better handling of entityId
         m_tmpParameterValue.m_value+=str;
@@ -875,7 +874,7 @@ namespace Internal
         return true;
     }
 
-    bool ClassParser::Content_Parameters_Object(std::string& str)
+    bool ClassParser::Content_Parameters_Object(const std::string& str)
     {
         m_tmpParameterValue.m_value+=str;
         return true;
@@ -993,7 +992,7 @@ namespace Internal
         return false;
     }
 
-    bool ClassParser::Content_Members(std::string& str)
+    bool ClassParser::Content_Members(const std::string& str)
     {
         if (m_uRef>0)
         {
@@ -1108,7 +1107,7 @@ namespace Internal
         return false;
     }
 
-    bool ClassParser::Content_Ref(std::string& str)
+    bool ClassParser::Content_Ref(const std::string& str)
     {
         if (m_elem.top()==XmlElements::NAME)
         {

@@ -48,15 +48,6 @@ namespace Internal
         m_pid = pid;
     }
 
-    void ConnectRequest::Set(disconnect_tag_t, const ConnectionPtr & connection)
-    {
-        ENSURE (m_kind == NotSet, << "Attempt to call Set(disconnect_tag_t, " << connection->Id()
-                << ") when something was already in the connect message");
-        m_kind = Disconnect;
-
-        m_connection = connection;
-    }
-
     void ConnectRequest::GetAndClear(connect_tag_t, std::string & connectionName, long & context, int & pid)
     {
         ENSURE (m_kind == Connect, << "Attempt to call GetAndClear(connect_tag_t, ...) when kind was " << m_kind);
@@ -68,16 +59,6 @@ namespace Internal
 
         pid = m_pid;
         m_pid = 0;
-
-        m_kind = NotSet;
-    }
-
-    void ConnectRequest::GetAndClear(disconnect_tag_t, ConnectionPtr & connection)
-    {
-        ENSURE (m_kind == Disconnect, << "Attempt to call GetAndClear(disconnect_tag_t, ...) when kind was " << m_kind);
-
-        connection = m_connection;
-        m_connection = NULL;
 
         m_kind = NotSet;
     }
@@ -106,14 +87,6 @@ namespace Internal
         m_connection = connection;
     }
 
-    void ConnectResponse::Set(disconnect_tag_t, const ConnectResult result)
-    {
-        ENSURE (m_kind == NotSet, << "Attempt to call Set(disconnect_tag_t, " << result
-                << ") when something was already in the connect result");
-        m_kind = Disconnect;
-        m_result = result;
-    }
-
     void ConnectResponse::GetAndClear(connect_tag_t, ConnectResult & result, ConnectionPtr & connection)
     {
         ENSURE (m_kind == Connect, << "Attempt to call GetAndClear(connect_tag_t, ...) when kind was " << m_kind);
@@ -122,16 +95,6 @@ namespace Internal
 
         connection = m_connection;
         m_connection = NULL;
-
-        m_kind = NotSet;
-    }
-
-    void ConnectResponse::GetAndClear(disconnect_tag_t, ConnectResult & result)
-    {
-        ENSURE (m_kind == Disconnect, << "Attempt to call GetAndClear(disconnect_tag_t, ...) when kind was " << m_kind);
-
-        result = m_result;
-        m_result = Undefined;
 
         m_kind = NotSet;
     }

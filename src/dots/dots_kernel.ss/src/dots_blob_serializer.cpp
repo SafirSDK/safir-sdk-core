@@ -36,7 +36,7 @@
 #include "dots_base64_conversions.h"
 
 #include <iostream>
-#include <boost/lexical_cast.hpp>
+
 namespace Safir
 {
 namespace Dob
@@ -45,6 +45,9 @@ namespace Typesystem
 {
 namespace Internal
 {
+    //fwd decl
+    static void HandleCharacters(const std::string & str);
+
     XmlToBlobSerializer::XmlToBlobSerializer()
     {
     }
@@ -153,7 +156,7 @@ namespace Internal
         DotsC_EntityId entityId;
         std::string instanceIdStr;
         std::string base64Binary;
-
+        std::string characterData;
         int insideRef;
         bool insideMember;
         bool insideArray;
@@ -195,11 +198,10 @@ namespace Internal
         {
             static ParsingState & Instance();
 
-
-
             XML_Parser parser;
             bool parseError;
             std::stack <ParseInfo> objects;
+            std::stack<bool> preserveSpace;
             char * theBlob;
 
             void Reset()
@@ -465,26 +467,10 @@ namespace Internal
             }
         case StringMemberType:
             {
-                const char* existingValue;
-                BlobLayout::GetDynamicMember(ParsingState::Instance().objects.top().blob,
+                BlobLayout::SetDynamicMember(val, dummy,
+                                             ParsingState::Instance().objects.top().blob,
                                              ParsingState::Instance().objects.top().member,
-                                             ParsingState::Instance().objects.top().index, existingValue, dummy);
-                if (existingValue==NULL)
-                {
-                    BlobLayout::SetDynamicMember(val, dummy,
-                                                 ParsingState::Instance().objects.top().blob,
-                                                 ParsingState::Instance().objects.top().member,
-                                                 ParsingState::Instance().objects.top().index);
-                }
-                else
-                {
-                    std::string mergedString = existingValue;
-                    mergedString+=val;
-                    BlobLayout::SetDynamicMember(mergedString.c_str(), dummy,
-                                                 ParsingState::Instance().objects.top().blob,
-                                                 ParsingState::Instance().objects.top().member,
-                                                 ParsingState::Instance().objects.top().index);
-                }
+                                             ParsingState::Instance().objects.top().index);
                 return;
             }
         case BinaryMemberType:
@@ -700,8 +686,48 @@ namespace Internal
     //---------------------------------------
     // Start Element
     //---------------------------------------
-    static void XMLCALL XmlObjStartElement(void * /*userData*/, const char *name, const char ** /*atts*/)
+    static void XMLCALL XmlObjStartElement(void * /*userData*/, const char *name, const char ** atts)
     {
+        ParsingState::Instance().objects.top().characterData.clear();
+        if (ParsingState::Instance().preserveSpace.empty())
+        {
+            ParsingState::Instance().preserveSpace.push(false);
+        }
+        else
+        {
+            ParsingState::Instance().preserveSpace.push(ParsingState::Instance().preserveSpace.top());
+        }
+
+        while(*atts != NULL)
+        {
+            const std::string attribute = *atts;
+            ++atts;
+            const std::string value = *atts;
+            ++atts;
+
+            if (attribute == "xml:space")
+            {
+                if (value == "default")
+                {
+                    ParsingState::Instance().preserveSpace.top() = false;
+                }
+                else if (value == "preserve")
+                {
+                    ParsingState::Instance().preserveSpace.top() = true;
+                }
+                else
+                {
+                    XML_StopParser(ParsingState::Instance().parser, false);
+                    ParsingState::Instance().parseError=true;
+                    std::string description="Unknown value for attribute xml:space: ";
+                    description+=value;
+                    ErrorHandler::Error("Serialization error", description, "dots_blob_serializer");
+                    return;
+                }
+
+            }
+        }
+
         const char* e=ValidElement(name);
 
         if (e==NULL)
@@ -823,6 +849,31 @@ namespace Internal
     //---------------------------------------
     static void XMLCALL XmlObjEndElement(void * /*userData*/, const char *name)
     {
+        //a scope so we can get some locals.
+        {
+            std::string & charData = ParsingState::Instance().objects.top().characterData;
+            if (!charData.empty())
+            {
+                if (!ParsingState::Instance().preserveSpace.top())
+                {
+                    const size_t startpos = charData.find_first_not_of(" \t\n");
+                    const size_t endpos = charData.find_last_not_of(" \t\n");
+
+                    if ((std::string::npos != startpos) && (std::string::npos != endpos))
+                    {
+                        HandleCharacters(charData.substr(startpos,endpos-startpos+1));
+                    }
+                }
+                else
+                {
+                    HandleCharacters(charData);
+                }
+                charData.clear();
+            }
+        }
+
+        ParsingState::Instance().preserveSpace.pop();
+
         Size dummy=0;
         const char* e=ValidElement(name);
         if (e==NULL)
@@ -985,27 +1036,49 @@ namespace Internal
         }
         else if (e==XmlElements::VALUE)
         {
-            if (ParsingState::Instance().objects.top().mde->GetMemberType()==BinaryMemberType)
+            if (ParsingState::Instance().objects.top().mde->GetMemberType()==StringMemberType)
             {
+                //we want to set the status regardless of whether there was any actual content or not
+                //so we set it here just in case HandleValue was never called
+                BlobLayout::SetStatus(false, true,
+                                      ParsingState::Instance().objects.top().blob,
+                                      ParsingState::Instance().objects.top().member,
+                                      ParsingState::Instance().objects.top().index);
+            }
+            else if (ParsingState::Instance().objects.top().mde->GetMemberType()==BinaryMemberType)
+            {
+                //we want to set the status regardless of whether there was any actual content or not
+                //so we set it here just in case HandleValue was never called
+                BlobLayout::SetStatus(false, true,
+                                      ParsingState::Instance().objects.top().blob,
+                                      ParsingState::Instance().objects.top().member,
+                                      ParsingState::Instance().objects.top().index);
+
                 //base 64 convert
                 int base64Size=(int)ParsingState::Instance().objects.top().base64Binary.size();
-                std::vector<char> binary (Base64Conversions::CalculateBinarySize(base64Size));
-                Int32 resultSize;
-                if (!Base64Conversions::ToBinary(&binary[0],
-                                                 static_cast<Int32>(binary.size()),
-                                                 ParsingState::Instance().objects.top().base64Binary.c_str(),
-                                                 base64Size,
-                                                 resultSize))
+                Int32 binarySize = Base64Conversions::CalculateBinarySize(base64Size);
+                std::vector<char> binary (binarySize);
+                const char * dataStart = NULL;
+                if (binarySize != 0) //for zero-size binaries we need not do the actual conversion...
                 {
-                    XML_StopParser(ParsingState::Instance().parser, false);
-                    ParsingState::Instance().parseError=true;
-                    std::string descr="Failed to deserialize binary member from base64 to binary. Element: ";
-                    descr+=ParsingState::Instance().objects.top().elem.top();
-                    ErrorHandler::Error("Serialization error", descr, "dots_blob_serializer");
-                    return;
+                    dataStart = &binary[0];
+                    Int32 resultSize;
+                    if (!Base64Conversions::ToBinary(&binary[0],
+                                                     static_cast<Int32>(binary.size()),
+                                                     ParsingState::Instance().objects.top().base64Binary.c_str(),
+                                                     base64Size,
+                                                     resultSize))
+                    {
+                        XML_StopParser(ParsingState::Instance().parser, false);
+                        ParsingState::Instance().parseError=true;
+                        std::string descr="Failed to deserialize binary member from base64 to binary. Element: ";
+                        descr+=ParsingState::Instance().objects.top().elem.top();
+                        ErrorHandler::Error("Serialization error", descr, "dots_blob_serializer");
+                        return;
+                    }
+                    binary.resize(resultSize);
                 }
-                binary.resize(resultSize);
-                BlobLayout::SetDynamicMember(&binary[0],
+                BlobLayout::SetDynamicMember(dataStart,
                                              static_cast<Int32>(binary.size()),
                                              ParsingState::Instance().objects.top().blob,
                                              ParsingState::Instance().objects.top().member,
@@ -1062,17 +1135,46 @@ namespace Internal
     //---------------------------------------
     static void XMLCALL XmlObjCharacters(void * /*userData*/, const XML_Char *s, int len)
     {
-        ////copy string
-        int startpos=0;
-        int endpos=len-1;
-        while((unsigned)s[startpos]<33 && startpos<len) startpos++;
-        while((unsigned)s[endpos]<33 && endpos>=0) endpos--;
-        if (startpos>endpos)
-            return;
-        std::string str="";
-        for (int i=startpos; i<=endpos; i++)
-            str+=s[i];
+        std::string charData(s,s+len);
+        if (!ParsingState::Instance().preserveSpace.top())
+        {
+            size_t startpos = charData.find_first_not_of(" \t\n");
+            size_t endpos = charData.find_last_not_of(" \t\n");
 
+            if ((std::string::npos == startpos) || (std::string::npos == endpos))
+            {
+                if (!ParsingState::Instance().objects.top().characterData.empty() &&
+                    *(ParsingState::Instance().objects.top().characterData.end()-1) != ' ')
+                {
+                    ParsingState::Instance().objects.top().characterData += ' ';
+                }
+                return;
+            }
+
+            if (0 != startpos &&
+                !ParsingState::Instance().objects.top().characterData.empty() &&
+                *(ParsingState::Instance().objects.top().characterData.end()-1) != ' ')
+            {
+                --startpos;
+                charData[startpos] = ' ';
+            }
+            if (charData.size() - 1 != endpos)
+            {
+                ++endpos;
+                charData[endpos] = ' ';
+            }
+
+            ParsingState::Instance().objects.top().characterData +=
+                charData.substr(startpos,endpos-startpos+1);
+        }
+        else
+        {
+            ParsingState::Instance().objects.top().characterData += charData;
+        }
+    }
+
+    static void HandleCharacters(const std::string & str)
+    {
         if (ParsingState::Instance().objects.top().elem.top()==XmlElements::NAME)
         {
             if (ParsingState::Instance().objects.top().insideRef>0)
@@ -1189,20 +1291,8 @@ namespace Internal
         }
         else if (eq(ParsingState::Instance().objects.top().elem.top(), XmlElements::VALUE))
         {
-            if (ParsingState::Instance().objects.top().mde->GetMemberType()==StringMemberType)
-            {
-                char* rawString = new char[len+1];
-                strncpy(rawString, s, len);
-                rawString[len]='\0';
-                HandleValue(rawString);
-                delete[] rawString;
-                return;
-            }
-            else
-            {
-                HandleValue(str.c_str());
-                return;
-            }
+            HandleValue(str.c_str());
+            return;
         }
     }
 

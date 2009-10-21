@@ -1,9 +1,10 @@
+// -*- coding: utf-8 -*-
 :encoding: UTF-8
 
 Safir SDK Core Users Guide
 ==========================
 Lars Hagström <lars.hagstrom@saabgroup.com>
-Version 1.0, Feb 2009
+Version 1.1, Oct 2009
 
 == Preface
 The purpose of this document is to provide a comprehensive guide to using the services in Safir SDK Core version 3.2. The reader should have general knowledge about object-oriented programming. Some knowledge of distributed real-time systems programming is also desirable, but not essential.
@@ -14,7 +15,7 @@ This document is intended to be used both as an introduction to new users of the
 === Acknowledgements
 This document is a combination of several other documents, so some parts of the text have different authors, or is based on texts authored by other people. 
 
-More specifically the database section is written by Jörgen Johansson, the software error reporting was originally written by Anders Widén and the section on Safir.Utilities.Foreach was written by Stefan Lindström. Most of the text on the basic Dob services is based on the original Dob Software Users Guide written by Jörgen Johansson.
+More specifically the database section is written by Jörgen Johansson, the software error reporting was originally written by Anders Widén, the section on Safir.Utilities.Foreach was written by Stefan Lindström, and the appendix about the example applications was written by Petter Lönnstedt. Most of the text on the basic Dob services is based on the original Dob Software Users Guide written by Jörgen Johansson.
 
 This document has also been reviewed by a number of people: Henrik Sundberg, Mattias Gålnander and Anders Widén. If I've left someone out, then I apologise and I'll happily add you.
 
@@ -91,13 +92,13 @@ Obviously it is possible to combine all these platforms into one system and use 
 
 An application should, written correctly using ACE and Boost and Safir SDK, be portable to all the supported platforms with no or very little effort.
 
-The compilers that are used for the C\+\+ code are GNU gcc (version 4.0 or later) or Microsoft Visual Studio 2005 SP1. For C# code we use Visual Studio 2005 SP1 or Mono (version 1.9.1 or later).
+The compilers that are used for the C\+\+ code are GNU gcc (version 4.0 or later) or Microsoft Visual Studio 2005 SP1. For C# code we use Visual Studio 2005 SP1 or Mono (version 1.9.1 or later). Any Java 5 compiler should be able to compile the Java code (we've used Sun's), and for Ada we use Adacore's GNAT Pro (6.1.0w) and GNAT GPL (2008 and 2009).
 
 == What is the Dob?
 This chapter describes what the Dob does and a little bit about why it does it the way it does.
 
 === What does the Dob do?
-The Dob provides several distribution mechanisms needed to create distributed real-time systems. It is possible to interface with the Dob from several languages (currently C\+\+, C#, with Ada, and Java support being re-added in Sdk version 3.2.2).
+The Dob provides several distribution mechanisms needed to create distributed real-time systems. It is possible to interface with the Dob from several languages (currently C\+\+, C#, Ada, and Java).
 
 The main ``selling points'' include:
 - Completely transparent addressing on single or multi-node systems.
@@ -106,6 +107,7 @@ The main ``selling points'' include:
 - Redundancy and hot-standby.
 - Language independent inter-process/inter-computer communication.
 - Allows modular information model.
+
 ==== A bit about the Dob architecture
 
 The Dob consists of two parts that together provide the object distribution mechanism. These two parts are the type system (Dots), which provides the language independent types and manages the definitions of the objects to distribute, and the distribution mechanism (Dose), which does the actual data distribution and synchronisation.
@@ -278,7 +280,7 @@ This means that there are some limitations to what you should do to a Struct. Do
 
 [[parameters]]
 === Parameters 
-Apart from members a class can also contain constant parameters. These parameters are not compile-time constants, instead they are read from the dou-files by the Dob when it starts and applications can ask for the values by a simple function call. This means that all that is needed to change a parameter is to change its value in the dou file (under $(SAFIR_RUNTIME)/data/text/dots/classes/) and restarting the Dob and all the applications that use the Dob (note that running +make+ in dots_generated as described below will overwrite these changes).
+Apart from members a class can also contain constant parameters. These parameters are not compile-time constants, instead they are read from the dou-files by the Dob when it starts and applications can ask for the values by a simple function call. This means that all that is needed to change a parameter is to change its value in the dou file (under $(SAFIR_RUNTIME)/data/text/dots/classes/) and restarting the Dob and all the applications that use the Dob (note that running the code generation, as described in <<code-generation>>, will overwrite these changes).
 
 Parameters are defined by a name, a type and a value. Here is an example of a parameter definition (it is cut out of its context, but it goes in the dou-file at the same level as the _members_-tag).
 
@@ -303,6 +305,86 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This defines a parameter MyParameter that is a 32 bit integer of value 25.
 
 It is recommended to keep most parameters in pure parameter classes, suffixed Parameters, that inherit from Safir.Dob.Parametrization. These classes should not contain any members. The reason for this is to make it easier to know where parameters can be found. The Dob does not enforce this recommendation in any way.
+
+
+==== Parameter arrays
+A parameter can also be an array of values, as shown below, where an array of string parameters are defined with two values.
+
+.A parameter array
+[xml]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>An example parameter file.</summary>
+    <name>Capabilities.MyParameters</name>
+    <baseClass>Safir.Dob.Parametrization</baseClass>
+    <parameters>
+        <parameter>
+            <name>StringParameter</name>
+            <type>String</type>
+            <arrayElements>
+                <arrayElement>
+                    <value>Safir(R)</value>
+                </arrayElement>
+                <arrayElement>
+                    <value>(R)rifaS</value>
+                </arrayElement>
+            </arrayElements>
+        </parameter>
+    </parameters>
+</class>
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Array indexing starts at 0 when accessing the values from code.
+
+==== Objects in parameters
+Parameters can also contain whole Dou-defined objects, not just the basic types. Below is an example from +Safir.Dob.NodeParameters+, where there is in fact an array of items in a parameter.
+
+.A parameter array
+[xml]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <parameters>
+       ...
+        <parameter>
+            <name>Nodes</name>
+            <type>Safir.Dob.NodeDefinition</type>
+            <arrayElements>
+                <arrayElement>
+                    <object>
+                        <name>Safir.Dob.NodeDefinition</name>
+                        <members> <!-- Node 0 -->
+                            <member>
+                                <name>NodeName</name>
+                                <value>My Server</value>
+                            </member>
+                        </members>
+                    </object>
+                </arrayElement>
+                <arrayElement>
+                    <object>
+                        <name>Safir.Dob.NodeDefinition</name>
+                        <members> <!-- Node 1 -->
+                            <member>
+                                <name>NodeName</name>
+                                <value>My Client</value>
+                            </member>
+                        </members>
+                    </object>
+                </arrayElement>
+            </arrayElements>
+        </parameter>
+    </parameters>
+</class>
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Each index in the array contains the xml serialization of an instance of the +Safir.Dob.NodeDefinition+ item (which currently only contains one member, the node name).
+Of course this can be done in non-array parameters as well, just leave out all the array stuff.
+
+One interesting feature is that you can put any item that _derives_ from +Safir.Dob.NodeDefinition+ into this array (that is the reason for the redundant specification of the +type+ at the top and the +name+ in the array item).
 
 [[environment_parameters]]
 ==== Environment variables in parameters
@@ -439,20 +521,21 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         <member>
             <name>Type</name>
             <arraySizeRef>
-                Capabilities.Vehicles.Vehicle.ArraySize</arraySizeRef>
+                <name>Capabilities.Vehicles.Vehicle.ArraySize</name>
+            </arraySizeRef>
             <type>Int32</type>
         </member>
         <member>
             <name>Callsign</name>
             <type>String</type>
             <maxLengthRef>
-                Capabilities.Vehicles.Vehicle.StringLength
+                <name>Capabilities.Vehicles.Vehicle.StringLength</name>
             </maxLengthRef>
         </member>
 source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Of course, as mentioned in <<parameters>> it is recommended that parameters are placed in separate parameter classes.
 
-It is possible - indeed it is even recommended - to add comments to most fields in dou-files. These comments will be put into the generated code where they be made into _doxygen_ comments (for C\+\+) or provide "intellisense" information (C#) for IDEs that support it. 
+It is possible - indeed it is even recommended - to add comments to most fields in dou-files. These comments will be put into the generated code where they will be made into _doxygen_/_javadoc_ comments (for C\+\+/Java) or provide "intellisense" information (C#) for IDEs that support it. 
 
 .A commented member
 [xml]
@@ -465,7 +548,7 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-=== Properties^adv^
+=== Properties ^adv^
 A property is not an object on its own. It is merely an interface into other objects. The way that a property interfaces into an object is defined at start-up, _so it is possible to change the way the interface works without recompiling any applications._
 
 The interface itself is specified in a dou-file which is slightly different from class definitions.
@@ -519,7 +602,9 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     </member>
     <member>
         <propertyMember>Int64Member</propertyMember>
-        <valueRef>Safir.UnitParameters.SomeParameter</valueRef>
+        <valueRef>
+            <name>Safir.UnitParameters.SomeParameter</name>
+        </valueRef>
     </member>
     <member>
         <propertyMember>NullMember</propertyMember>
@@ -569,11 +654,32 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Note that in the code above there is no reference at all to what kind of object +obj+ is. It could be any object that has the property mapped to it. It is possible to check if an object has a specific property mapped to it using the +HasProperty+ method on the property.
 
+[[code-generation]]
 === Generating code from Dou-files
 In order to use the classes defined by the Dou-file, interface code has to be generated in the wanted language. This code generation is performed by a tool called Dots_V. When the code is generated it has to be built into loadable libraries (e.g. dlls, shared libraries, or assemblies). 
 
-The generated code gets put in subdirectories under $(SAFIR_SDK)/dots/dots_generated (e.g. cpp/ dotnet/ etc). This code is built by the Makefile and put into loadable libraries (e.g. dots_generated-cpp.dll) that are copied to the $(SAFIR_RUNTIME)/bin directory. The C\+\+ header files are also copied to the $(SAFIR_SDK)/include directory so that they are available to include into your code.
+The generated code gets put in subdirectories under $(SAFIR_SDK)/dots/dots_generated (e.g. cpp/ dotnet/ etc). This code is built by the build system and put into loadable libraries (e.g. dots_generated-cpp.dll) that are copied to the $(SAFIR_RUNTIME)/bin or lib directory. The C\+\+ and Ada header files are also copied to the $(SAFIR_SDK)/include and ada directories so that they are available to include into your code.
 
+All this is performed by running a single script. Well, in fact it is two different scripts, depending on the version of your SDK, and of how it is built. Safir SDK 3.2.2 introduces a new command for performing this build and install, dobmake.py", but it maintains backward compatibility with the old way.
+
+If you've got the file "dobmake.py" under $(SAFIR_RUNTIME}/bin you're on an SDK which uses the new style, so jump to the section <<dobmake>>. If you don't, jump to <<make-my-day>>.
+
+Safir SDK Core 3.2.2 is the last version that will support the old-style building (non-dobmake.py).
+
+[[dobmake]]
+==== dobmake.py (new-style)
+Just run dobmake.py! And you're done!
+
+Well, you have to install Python (at least version 2.4, from http://www.python.org) and CMake (at least version 2.6 from http://www.cmake.org), but when you do, just run dobmake.py!
+
+A GUI will open, and you will be able to choose between some different actions and to disable build of some languages, but to just build you only need to press "Run".
+
+If you experience strangeness, it may be that the underlying build system has gotten confused, do a rebuild (click the "Rebuild" radio button) to start the build from scratch.
+
+If you want to run dobmake.py from a script, use the "-b" flag (for batch mode) to run without using the GUI. Use the --help flag to find out what other options there are.
+
+[[make-my-day]]
+==== Makefiles (old-style)
 This is done slightly differently on Windows and Linux:
 
 *Windows*
@@ -586,7 +692,7 @@ _If you experience strangeness (e.g. corrupted data) when using the Dob objects,
 
 *Linux*
 
-There is a CMake file (you're required to have at least CMake version 2.4 installed) provided under $SAFIR_SDK/dots/dots_generated, so open a terminal in that directory. Then do
+There is a CMake file (you're required to have at least CMake version 2.6 installed) provided under $SAFIR_SDK/dots/dots_generated, so open a terminal in that directory. Then do
 
 1. Run "cmake ." - note the period, for the directory where to run cmake. (This step is only needed if you've added or removed any files)
 2. Run "make"
@@ -609,57 +715,237 @@ image::images/rc_example_object.jpg["Example object", width=158]
 ==== A bit of history 
 First a little bit of history (that you can skip if you want to), among other things to explain what _Real Classes_ mean.
 
-In the first versions of the Dob all objects in all languages were stored internally as binary _blobs_ which only the Dob knows how to interpret. Calling a method to get an integer out of an object meant that the Dob would work out where in this blob the integer was stored and then cast the binary chunk into an integer and return it.
+In the first versions of the Dob all objects in all languages were stored internally as binary _blobs_ which only the Dob knows how to interpret. Calling a method to get an integer out of an object meant that the Dob would work out where in this blob the integer was stored and then type cast the binary chunk into an integer and return it.
 
 The advantage of this approach is that binary the blobs are language independent and also very good for sending across a network.
 
 There are many drawbacks to this approach, one of them being that objects do not behave like normal objects for that language, so the interfaces were changed to make objects behave like real objects, or real classes (hence the name _Real Classes_). These objects would be translated to blobs before being passed into the core of the Dob, so that the Dob can still work with several languages and be network efficient.
 
-Using "Real Classes" mean a few things (compared with using the old blob-based implementations):
+Using ``Real Classes'' mean a few things (compared with using the old blob-based implementations):
 
 1. Easier to debug (you can see member values in the debugger instead of just a blob)
 2. Easier handling of nested classes
 3. Better performance while handling nested classes.
 
-Originally only the C\+\+ and C# interfaces were updated to use Real Classes, and the Java and Ada interfaces were left for later. When the new features of global object id's, injections and handlers were introduced it was decided not to update the old interfaces, but rather to update the Java and Ada interfaces with Real Classes as well, at the same time. Unfortunately this has not yet been done (will be done as part of Sdk 3.2.2), so there is currently no support at all for Ada and Java.
+Originally only the C\+\+ and C# interfaces were updated to use Real Classes, and the Java and Ada interfaces were left for later. When the new features of global object id's, injections and handlers were introduced it was decided not to update the old interfaces, but rather to update the Java and Ada interfaces with Real Classes as well, at the same time. Due to time constraints the Ada and Java interfaces were left out of SDK 3.2 and 3.2.1, but as of SDK version 3.2.2 the Ada and Java interfaces are up to date.
+
+In versions 3.2.2 and later of Safir SDK all supported languages - C\+\+, C#, Ada and Java - have ``Real Classes'' interfaces.
 
 ==== Syntax in the different languages
-One part of the Real Classes idiom is to make use of the language's own features in the best possible way. Languages that support operator overloading should use them if it makes the interface "better", and languages that support properties should use them. This makes each language interface "as good as it can possibly be", but it has one obvious side effect, i.e. the interfaces are not "identical".
+One part of the Real Classes idiom is to make use of the language's own features in the best possible way. Languages that support operator overloading should use them if it makes the interface ``better'', and languages that support properties should use them. This makes each language interface ``as good as it can possibly be'', but it has one obvious side effect, i.e. the interfaces are _not identical_.
 
-<<top_level_syntax>> compares the operations in C\+\+ and C# on top-level members.
+The syntax for operating on top-level members in the different languages is shown in <<cpp-top-level>>, <<cs-top-level>>, <<java-top-level>> and <<ada-top-level>>. The code is identical, except in the C\+\+ example, where some alternative ways of accomplishing the same thing is shown.
 
-[[top_level_syntax]]
-.Syntax differences with top level members.
-[grid="all"]
-`20`40`40~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Action,                         C\+\+,                                                   C#                      
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Get MyFloat out of myA,         +myA.MyFloat()+ or +myA.MyFloat().GetVal()+,             +myA.MyFloat.Val+
-Set MyFloat in myA to 3.14,     +myA.MyFloat()=3.14+ or +myA.MyFloat(). SetVal(3.14)+,   +myA.MyFloat.Val=3.14+
-Check if MyFloat is null,       +myA.MyFloat().IsNull()+,                                +myA.MyFloat.IsNull()+
-Check if MyFloat is changed,    +myA.MyFloat(). IsChanged()+,                            +myA.MyFloat.IsChanged()+
-Set MyFloat to null,            +myA.MyFloat().SetNull()+,                               +myA.MyFloat.SetNull()+
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[[cpp-top-level]]
+.Operating on top-level members in C\+\+
+[cpp]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Get MyFloat out of myA
+int val = myA->MyFloat(); 
+// or 
+int val = myA->MyFloat().GetVal();
 
-The "extra level" to get to the actual values, i.e. the +GetVal()+ bit in C\+\+ and +Val+ bit in C# is needed due to the fact that the member are contained, together with the change and null flags, in a _container_. That there are two different ways of doing the operations in C\+\+ is because of a clever C\+\+ construction, _proxy objects_. More on containers and proxies later.
+// Set MyFloat in myA to 3.14
+myA->MyFloat() = 3.14; 
+// or 
+myA->MyFloat().SetVal(3.14);
 
-C# has only one way of doing the operations, and the C# interface uses properties for accessing the values - not as in Dob properties, but as in the language construct. (Look it up in your favourite C# reference if you don't know what they are.)
+// Check if MyFloat is null
+if (myA->MyFloat().IsNull())
+    ...
 
-Things get a bit more interesting when accessing nested members, see <<nested_syntax>>
+// Check if MyFloat is changed
+if (myA->MyFloat().IsChanged())
+    ...
 
-[[nested_syntax]]
-.Syntax differences when accessing nested members
-[grid="all"]
-`20`40`40~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Action,C\+\+,C#                      
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Get MyInt,                                       +myA.MyB()\->MyInt()+ or +myA.MyB()\-> MyInt().GetVal()+,           +myA.MyB.Obj.MyInt.Val+
-Set MyInt to 3 (if MyB is not null),             +myA.MyB()\->MyInt()=3+ or +myA.MyB()\-> MyInt().SetVal(3)+,        +myA.MyB.Obj.MyInt.Val=3+
-Set MyInt to 3 (if MyB is null),                 +myA.MyB() = B::Create(); myA.MyB()\-> MyInt() = 3;+,               +myA.MyB.Obj = new B(); myA.MyB.Obj. MyInt.Val=3+
-Check if MyInt is null,                          +myA.MyB()\-> MyInt().IsNull()+,                                    +myA.MyB.Obj.MyB.IsNull()+
-Check if MyInt is changed,                       +myA.MyB()\-> MyInt().IsChanged()+,                                 +myA.MyB.Obj.MyB. IsChanged()+
-Set MyInt to null,                               +myA.MyB()\-> MyInt().SetNull()+,                                   +myA.MyB.Obj.MyB. SetNull()+
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Set MyFloat to null
+myA->MyFloat().SetNull();
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[[cs-top-level]]
+.Operating on top-level members in C#
+[cs]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Get MyFloat out of myA
+int val = myA.MyFloat.Val;
+
+// Set MyFloat in myA to 3.14
+myA.MyFloat.Val = 3.14;
+
+// Check if MyFloat is null
+if (myA.MyFloat.IsNull())
+    ...
+
+// Check if MyFloat is changed
+if (myA.MyFloat.IsChanged())
+    ...
+
+// Set MyFloat to null
+myA.MyFloat.SetNull()
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[[java-top-level]]
+.Operating on top-level members in Java
+[java]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Get MyFloat out of myA
+int val = myA.myFloat().getVal(); 
+
+// Set MyFloat in myA to 3.14
+myA.myFloat().setVal(3.14);
+
+// Check if MyFloat is null
+if (myA.myFloat().isNull())
+    ...
+
+// Check if MyFloat is changed
+if (myA.myFloat().isChanged())
+    ...
+
+// Set MyFloat to null
+myA.myFloat().setNull();
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+[[ada-top-level]]
+.Operating on top-level members in Ada
+[ada]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- Get MyFloat out of My_A
+Val := My_A.Ref.My_Float.Get_Val;
+
+-- Set MyFloat in My_A to 3.14
+My_A.Ref.My_Float.Set_Val(3.14);
+
+-- Check if MyFloat is null
+if My_A.Ref.My_Float.Is_Null then
+    ...
+end if;
+
+-- Check if MyFloat is changed
+if My_A.Ref.My_Float.Is_Changed then
+    ...
+end if;
+
+-- Set MyFloat to null
+My_A.Ref.My_Float.Set_Null;
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The "extra level" to get to the actual values, e.g. the +GetVal()+ bit in C\+\+ and +Val+ bit in C# is needed due to the fact that the value is contained, together with the change and null flags, in a _container_. That there are two different ways of doing the operations in C\+\+ is because of a clever C\+\+ construction, _proxy objects_, combined with operator overloading. More on containers and proxies later.
+
+C#, Ada and Java has only one way of doing the operations, and the C# interface uses properties for accessing the values - not as in Dob properties, but as in the language construct. (Look it up in your favourite C# reference if you don't know what they are.)
+
+Things get a bit more interesting when accessing nested members, see <<cpp-nested>>, <<cs-nested>>, <<java-nested>> and <<ada-nested>>, that show operations on nested members in the different languages.
+
+[[cpp-nested]]
+.Operating on nested members in C\+\+
+[cpp]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Get MyInt
+int val = myA->MyB()->MyInt();
+// or 
+int val = myA->MyB()->MyInt().GetVal();
+
+// Set MyInt to 3 (if MyB is not null)
+myA->MyB()->MyInt() = 3;
+// or 
+myA->MyB()->MyInt().SetVal(3);
+
+// Create an empty B item for MyB and set B.MyInt to 3
+myA->MyB() = B::Create();
+myA->MyB()->MyInt() = 3;
+
+// Check if MyInt is null
+if (myA->MyB()->MyInt().IsNull())
+    ...
+
+// Check if MyInt is changed
+if (myA->MyB()->MyInt().IsChanged())
+    ...
+
+// Set MyInt to null
+myA->MyB()->MyInt().SetNull();
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[[cs-nested]]
+.Operating on nested members in C#
+[cs]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Get MyInt
+int val = myA.MyB.Obj.MyInt.Val;
+
+// Set MyInt to 3 (if MyB is not null)
+myA.MyB.Obj.MyInt.Val = 3;
+
+// Create an empty B item for MyB and set B.MyInt to 3
+myA.MyB.Obj = new B();
+myA.MyB.Obj.MyInt.Val = 3;
+
+// Check if MyInt is null
+if (myA.MyB.Obj.MyB.IsNull())
+    ...
+
+// Check if MyInt is changed
+if (myA.MyB.Obj.MyB.IsChanged())
+    ...
+
+// Set MyInt to null
+myA.MyB.Obj.MyB.SetNull();
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[[java-nested]]
+.Operating on nested members in Java
+[java]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Get MyInt
+int val = myA.myB().getObj().myInt().getVal();
+
+// Set MyInt to 3 (if MyB is not null)
+myA.myB().getObj().myInt().setVal(3);
+
+// Create an empty B item for MyB and set B.MyInt to 3
+myA.myB().setObj(new B());
+myA.myB().getObj().myInt().setVal(3);
+
+// Check if MyInt is null
+if (myA.myB().getObj().myInt().isNull())
+    ...
+
+// Check if MyInt is changed
+if (myA.myB().getObj().myInt().isChanged())
+    ...
+
+// Set MyInt to null
+myA.myB().getObj().myInt().setNull();
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[[ada-nested]]
+.Operating on nested members in Ada
+[ada]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- Get MyInt
+Val := My_A.Ref.My_B.Ref.My_Int.Get_Val;
+
+-- Set MyInt to 3 (if MyB is not null)
+My_A.Ref.My_B.Ref.My_Int.Set_Val(3);
+
+-- Create an empty B item for MyB and set B.MyInt to 3
+My_A.Ref.My_B.Set_Ptr(B.Create);
+My_A.Ref.My_B.Ref.My_Int.Set_Val(3);
+
+-- Check if MyInt is null
+if My_A.Ref.My_B.Ref.My_Int.Is_Null then
+    ...
+end if;
+
+-- Check if MyInt is changed
+if My_A.Ref.My_B.Ref.My_Int.Is_Changed then
+    ...
+end if;
+
+-- Set MyInt to null
+My_A.Ref.My_B.Ref.My_Int.Set_Null;
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Casting objects up and down in the inheritance hierarchy also differs between the languages, see <<type_casting>> for more information.
 
@@ -670,9 +956,11 @@ There are containers for all of the types in the Dob, e.g. Int32Container, Float
 
 The members of the class A would be of type BContainer and Float32Container, and B's would be of type Int64Container.
 
-The containers introduce an extra level of indirection, which shows itself in the "GetVal()", "SetVal()" and "Val" parts of the expressions above. This unfortunately has the effect of cluttering up the code a bit, so to reduce this cluttering (in C\+\+, which is the only supported language where it is possible) _container proxies_ were introduced. They are really just an intermediate object that allows safe use of operator overloading, and they are what allows "myA.MyB()\->MyInt().SetVal(3)" to be replaced with "myA.MyB()\->MyInt() = 3" (as shown in the tables above). The proxies are meant to be transparent, but they do not have all operations overloaded, so for example if you're manipulating a string, you will probably have to do GetVal() to be able to get to most of the string operations.
+The containers introduce an extra level of indirection, which shows itself in the "GetVal()", "SetVal()" and "Val" parts of the expressions above. This unfortunately has the effect of cluttering up the code a bit, so to reduce this cluttering (in C\+\+, which is the only supported language where it is possible) _container proxies_ with _operator overloading_ were introduced. They are really just an intermediate object that allows safe use of operator overloading, and they are what allows "myA.MyB()\->MyInt().SetVal(3)" to be replaced with "myA.MyB()\->MyInt() = 3" (as shown in the examples above). The proxies are meant to be transparent, but they do not have all operations overloaded, so for example if you're manipulating a string, you will probably have to do GetVal() to be able to get to most of the string operations.
 
-Note that these proxies (Container Proxies) should not be confused with the proxies that the Dob passes to the applications in the distribution callbacks. The Container Proxies are only meant to simplify use of the typesystems containers, whereas the proxies in the distribution callbacks are used to encapsulate a collection of data and metadata into a single object for the callback (basically allowing the callback to take just a few arguments, instead of a whole bunch, where most applications only use a few).
+Note that these proxies (container proxies) should not be confused with the proxies that the Dob passes to the applications in the distribution callbacks. The Container Proxies are only meant to simplify use of the typesystems containers, whereas the proxies in the distribution callbacks are used to encapsulate a collection of data and metadata into a single object for the callback (basically allowing the callback to take just a few arguments, instead of a whole bunch, where most applications only use a few).
+
+Ada uses container proxies to avoid exposing pointers into the internals of objects, but since Ada does not have the same support for operator overloading as C\+\+ it is not possible to use them to reduce code clutter.
 
 ===== Smart pointers - boost::shared_ptr
 To guarantee that all dynamically allocated memory is deallocated the Dob uses the +boost::shared_ptr+ implementation of smart pointers. You can find more information on how to use them here: http://www.boost.org/libs/smart_ptr/smart_ptr.htm.
@@ -689,7 +977,9 @@ Conceptually, smart pointers are seen as owning the object pointed to, and thus 
 
 The boost::shared_ptr type is going to be included in the next C\+\+ standard (TR1).
 
-In C# there is no need for a smart pointer, since it has a garbage collector.
+In C# and Java there is no need for smart pointers, since both these languages have garbage collection.
+
+//TBD Ada smart pointers?!
 
 See <<type_casting>> for more information on how to cast smart pointers.
 
@@ -700,9 +990,11 @@ It is possible to look at the contents of a Dob object in the debugger. Since th
 - Object containers have two values: m_pObject (which can be null) and m_bIsChanged.
 - Smart pointers have two pointers in them, the reference count (pn) and the pointer to the object they point to (px). It is px that you are interested in.
 
-The last point of course only applies to C\+\+ since C# does not have smart pointers.
+// TBD: Ada smart pointer internals?
 
-The naming of the container members is also slightly different in C#.
+The last point of course only applies to C\+\+ and Ada since C# and Java do not have smart pointers.
+
+The naming of the container members is also slightly different in the different languages.
 
 [[type_casting]]
 ==== Type casting
@@ -876,7 +1168,8 @@ if (child != null)
 source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Prefer using the _as_ operation in C#.
 
-
+===== Java
+Since Java is garbage collected the Dob can use normal Java pointers to objects. This means that the normal type casting operations can be used. Java also does not have an equivalent to static_cast, so there is really only the choice between different forms of the dynamic_cast-like operation to choose between. If you're unsure of how Java casting works you should look it up in your Java reference, since a complete explanation is outside the scope of this document.
 
 === Other details
 Details, details, details and even more details...
@@ -953,7 +1246,7 @@ So, what of all this stuff do you need to use? Probably only the IsChanged() met
 
 
 
-==== The reflection interface^adv^
+==== The reflection interface ^adv^
 The reflection interface can be used to interrogate (and modify) anonymous Objects about their member names, types and values. This is something that not many applications should have to do, and therefore it is not described fully in this document.
 
 But here are some hints:
@@ -1759,6 +2052,7 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ===== Some notes on the CreateRequest methods
 There are two variants of the +CreateRequest+ method in the Dob connection class:
 
+.The two variants of CreateRequest
 [cpp]
 source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Safir::Dob::RequestId CreateRequest
@@ -1847,10 +2141,10 @@ When you have registered your handler, it will become the owner of the entities 
 If you want to understand what is going on, please read the next section, <<advanced_persistence>>.
 
 [[advanced_persistence]]
-===== Understanding persistence^adv^
+===== Understanding persistence ^adv^
 To use persistence (of the volatile or permanent kind) there is a different consumer interface to implement, +Safir.Dob.EntityHandlerInjection+. This consumer has four additional callbacks, +OnInjectedNewEntity+, +OnInjectedUpdatedEntity+, +OnInjectedDeletedEntity+ and +OnInitialInjectionsDone+. The middle two of these are only used for asynchronous injections (i.e. the kind that uses deltas over a radio, as described above), so the only ones you might have to do anything in are +OnInjectedNewEntity+ and +OnInitialInjectionsDone+.
 
-In C\+\+ all the four _Injection callbacks_ have an empty default implementation. This is not possible in C# since C# interfaces cannot have default implementations of any kind. This means that in C\+\+ you don't have to override these callbacks if you don't want to do anything inside of them. For this example we assume that there is something that we need to do in these callbacks (but since this is a C\+\+ example we only need to override the two callbacks that are actually used for persistent entities).
+In C\+\+ and Ada all the four _Injection callbacks_ have an empty default implementation. This is not possible in C# or Java since their interfaces cannot have default implementations of any kind. This means that in C\+\+ and Ada you don't have to override these callbacks if you don't want to do anything inside of them. For this example we assume that there is something that we need to do in these callbacks (but since this is a C\+\+ example we only need to override the two callbacks that are actually used for persistent entities).
 
 .Injection entity handler class declaration
 [cpp]
@@ -1998,6 +2292,8 @@ void VehicleRegistrationSubscriber::OnRegistered
     ... do something useful ...
 }
 source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For entity handler registration subscriptions the +OnRegistered+ callback is called immediately when the registration is made (either when the +RegisterEntity...+ call is made or when a pending registration is completed), _not_ after +OnInitialInjectionsDone+ is called. Conceptually the handler is registered before the entity instances are injected.
 
 When a service or entity handler is unregistered the Dob will notify the application of this through a call to +OnUnregistered+. (A handler is unregistered when the owning application unregisters the handler or the application dies).
 
@@ -2320,7 +2616,7 @@ include::tracer.txt[]
 == The persistence service
 The persistence service is provided by the executable dope_main, which performs the storing of the entities to files on disk or to a database (configuration is described in <<persistence_config>>).
 
-Regardless of whether the database or file backend is used the entities are stored in binary format (blobs). There is a tool +dope_bin2xml+ (run with -h to get some brief help) that converts the binary blobs into xml, which is easier to read or manipulate. The xml is placed in the xmldata column of the database, or in a file with .xml as extension (the binaries are removed when this is done, so that there will be only one source of persistence data when starting the persistence service next time). When the persistence service starts, it first looks for xml data, and only when that is not found does it look for binary data.
+Regardless of whether the database or file backend is used the entities are stored in binary format (blobs). There is a tool +dope_bin2xml+ (run with --help to get some brief help) that converts the binary blobs into xml, which is easier to read or manipulate. The xml is placed in the xmldata column of the database, or in a file with .xml as extension (the binaries are removed when this is done, so that there will be only one source of persistence data when starting the persistence service next time). When the persistence service starts, it first looks for xml data, and only when that is not found does it look for binary data.
 
 This means that it is possible to run dope_bin2xml, edit the xml data, and then start the system to get the edited data presented as persistent data.
 
@@ -2424,6 +2720,15 @@ Letting an exception propagate out of a callback may cause your connection to th
 
 So catch all "expected" exceptions in the callbacks, but let all programming-error type exceptions propagate up to your main loop where you report the error and exit the program.
 
+=== Handling OnRevokedRegistration
+For most applications a call to +OnRevokedRegistration+ is completely unexpected. Unless your system uses overregistration as a feature getting this callback is a sign of an error, and the following is a recommendation on what to do in this case: 
+
+Send a _FatalErrorReport_ (see <<software_reports>>) that you have lost the registration. Make the report state clearly that a registration was lost, along with the type and the handler id. Then terminate the application.
+
+The Rationale for this is that this probably happened due to a configuration error, or because someone is playing around with Sate (see <<sate>>), so you want to tell whoever may be interested that the system is probably not working correctly now.
+
+The application should terminate, since it is no longer functioning correctly.
+
 [[multithreading]]
 === Multithreading
 A connection should only be used from within one thread. The queues and other states associated with a connection are not thread safe, for simplicity and efficiency. One thread can handle many connections, though.
@@ -2465,7 +2770,7 @@ There is no surefire way to handle all these cases, it must be decided on a case
 This also applies to applications that handle asynchronous injections, as described in <<systems_of_systems>>.
 
 [[systems_of_systems]]
-== Systems of Systems^adv^
+== Systems of Systems ^adv^
 
 This chapter contains information about how to write applications that support _Systems of Systems_, i.e. a number of Dob-systems communicating over some other media, using _asynchronous injections_.
 
@@ -2652,7 +2957,7 @@ image::images/dobexplorer_memory.jpg["Dobexplorer showing memory usage", width=4
 .Dobexplorer showing node statuses.
 image::images/dobexplorer_nodes.jpg["Dobexplorer showing node statuses", width=400, link="images/dobexplorer_nodes.jpg"]
 
-
+[[olib]]
 == C\+\+ ODBC database wrapper
 ////
 Olib text is located in a separate file, olib.txt
@@ -2664,9 +2969,9 @@ include::olib.txt[]
 Apart from this document there are other sources for help.
 
 === Doxygen help
-The C\+\+ interfaces (and soon the C# ones too) now have comments that enable us to generate html documentation using doxygen (http://www.doxygen.org[]).
+All the language interfaces have comments that can be used to generate documentation (doxygen for C++, javadoc for Java, etc).
 
-The generated documentation should be located under $(SAFIR_SDK)/docs/.
+The generated doxygen documentation is included in the downloads, and should be located under $(SAFIR_SDK)/docs/.
 
 _Use this documentation! It is the place where interface details are explained!_
 
@@ -2674,33 +2979,39 @@ _Use this documentation! It is the place where interface details are explained!_
 Questions can be posted in the Safir SDK Core forum at http://www.safirsdk.com[].
 
 == Appendix A: Example applications
-Along with the Safir SDK Core you should have received some example applications that show how to create a small application that will give you a starting point for your own applications.
+
+////
+Example app text is located in a separate file, example_applications.txt
+////
+
+include::example_applications.txt[]
+
 
 [[faq]]
 == Appendix C: FAQ
-Why do I get IllegalValueExceptions when sending message/request or setting an entity???
+Why do I get IllegalValueExceptions when sending message/request or setting an entity?::
   Most likely because you've got a string in your object that is longer than what is specified by the +maxLength+ field in your dou-file. For various reasons the string lengths are not checked until the object is "handed" to the Dob. This means that if you put a string which is 100 characters long into a message member that has +maxLength+ 10 you will not get the error until you call +Send+.
 +
 Remember that you can check the value of maxLength programmatically by calling +<member name>MaxStringLength()+ on your class (e.g. +Safir::Dob::ErrorResponse::AdditionalInfoMaxStringLength()+ to get the max length of the member AdditionalInfo).
 
-How are the callbacks invoked???
+How are the callbacks invoked?::
   When something occurs that an application may be interested in knowing about the Dob signals an event internally that results in a call to the +OnDoDispatch()+ callback. The application now has to _switch threads_ to the thread that owns the connection and call +Dispatch()+. The Dispatch call will in turn call all the required callbacks (e.g. OnMessage if a message has been received). Note that a dispatch may be triggered without actually resulting in any callbacks.
 
-Can I trust IsCreated???
+Can I trust IsCreated?::
   IsCreated can really only be trusted by the entity instance owner. All other applications can get true in one statement, and then get an exception (due to timing) on the next, where they to try to read the contents of an instance.
 
-Why does dope_main crash at startup???
+Why does dope_main crash at startup?::
   Chances are that you have changed you dou-files, and that the persisted data is no longer valid. There is a solution to this, which is outlined in <<persistence_service>>, but of course you can just delete the persistent data by removing the files or clearing the database table contents.
 
-What do I do with the +ResponseSender+ when I'm postponing a request???
+What do I do with the +ResponseSender+ when I'm postponing a request?::
   If you're postponing with the +redispatchCurrent+ flag set to true you need to call +Discard+ on the ResponseSender, otherwise it will get upset that you're not sending a response and cause your application to report an error and maybe crash.
  
-Why have overflows???
+Why have overflows?::
   One of the main design focuses of the Dob has been to facilitate creating systems that degrade gracefully, and the overflow mechanism is a result of this. When a Dob-based system comes under heavy load some data will be discarded (due to overflows), which ensures that there is an upper limit to the amount of memory and CPU used. If the Dob had not used the overflow mechanism, but instead had ``infinite queues'', more and more memory would be consumed, which would lead to more and more CPU load, and eventually to a crash or some other undefined behaviour.
 +
 This of course means that your application should not introduce infinite queues of its own, since that would reintroduce the ungraceful degradation problem. There is a little bit more information in <<overflow_handling>>.
 
-Why shouldn't I have an infinite queue in my application to avoid overflows???
+Why shouldn't I have an infinite queue in my application to avoid overflows?::
   This is described somewhat in <<overflow_handling>>, and the FAQ entry above.
 
 == Appendix D: Building from source
@@ -2712,39 +3023,39 @@ Since Safir SDK Core is released under an Open Source license (as described in <
 This glossary mostly contains Safir-related acronyms and terms. General computer terms are not included, like "UDP", "Multicast" and "ODBC". Wikipedia, for example, is a much better source for explanations of those terms than this glossary could ever be.
 
 
-Dob:-
+Dob::
     Distributed Objects. Consists of the components Dose and Dots.
 
-Dom:-
+Dom::
     Distributed Objects Mapping. File type for mapping Dob classes to properties (in Xml).
 
-Dope:-
+Dope::
     The Safir SDK Core component that provides the persistent storage of Dob entities.
 
-Dose:-
+Dose::
     Safir component that provides the object distribution.
 
-Dots:-
+Dots::
     Safir component that provides the type system.
 
-Dou:-
+Dou::
     Distributed Objects Unit. File type for defining Dob classes (in Xml).
 
-HSI:-
+HSI::
     Human - System Interface.
 
-Safir:-
+Safir::
     Software Architecture For Information And Real-time systems.
 
-Safir SDK:-
+Safir SDK::
     The technical platform of Safir.
 
-Safir SDK Core:-
+Safir SDK Core::
     The core part of the Safir SDK.
 
-SDK:-
+SDK::
     Software Development Kit.
 
-Swre:-
+Swre::
     A Safir SDK Core component that provides Software Reporting and Trace logging functionality.
 

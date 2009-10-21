@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
+#include "../defs/DoseUdpMsg.h"
 #define MAX_NUM_DEST_CHANNELS   32  // IpM channels
 #define MAX_NUM_PRIO_CHANNELS   6
 #define MAX_NUM_NODES           64  // must be 32 - 64
@@ -31,9 +31,9 @@ public:
     CConfig();
 
 public:
-    static int Dose_Config(unsigned char DoseId,
-                        const char* multicastAddress,
-                        const char* netAddress);
+    static int Dose_Config(dcom_uchar8 DoseId,
+                           const char* multicastAddress,
+                           const char* netAddress);
 
     static unsigned short   m_Dose_Port_Data;     // IpMc port for data
     static unsigned short   m_Dose_Port_Ack;      // UDP  port for ACK
@@ -43,7 +43,7 @@ public:
     static unsigned long    m_MyIpAddr_nw;
     static unsigned long    m_BaseIpMultiCastAddr_nw;
     static unsigned long    m_NetAddr_nw;
-    static ulong64          m_BitMapDestChannelMembers64[MAX_NUM_DEST_CHANNELS];
+    static dcom_ulong64          m_BitMapDestChannelMembers64[MAX_NUM_DEST_CHANNELS];
 
 private:
     typedef struct
@@ -60,15 +60,15 @@ public:
 
     static unsigned long Get_BaseIpMulticastAddress(void);
 
-    static void Add_UnicastIpAddr(int DoseId, unsigned long IpAddr_nw);
+    static void Add_UnicastIpAddr(int DoseId, dcom_ulong32 IpAddr_nw);
 
     static int Add_DestinationId(int     DestinationId,
                                 const char *IpMulticastAddr,
-                                ulong64 BitMapDestChanMembers64);
+                                dcom_ulong64 BitMapDestChanMembers64);
 
     static int GetDestinationItem(int ix,
-                                unsigned long *pIpMulticastAddr_nw,
-                                char *pIsUsedForReception);
+                                  dcom_ulong32 *pIpMulticastAddr_nw,
+                                  char *pIsUsedForReception);
 
     static void Get_Info(int Mode, char *pBuff);
 };

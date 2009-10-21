@@ -126,17 +126,103 @@ namespace Typesystem
             SetVal(GetVal() / val);
             return *this;
         }
-
-        /*        bool operator== (const T& val) const
+/*
+        bool operator== (const ContainedType& val) const
         {
             return m_container == val;
-            }*/
+        }
 
+        bool operator!= (const ContainedType& val) const
+        {
+            return m_container != val;
+        }
+*/
         const T& GetContainer() const {return m_container;}
         T& GetContainer() {return m_container;}
     private:
         T& m_container;
     };
+/*
+    template <class T>
+    static inline bool operator==(const ContainerProxy<T>& first, const typename T::ContainedType second)
+    {return first.GetContainer() == second;}
+
+    template <class T>
+    static inline bool operator==(const typename T::ContainedType first, const ContainerProxy<T>& second)
+    {return second == first;}
+
+    template <class T>
+    static inline bool operator!=(const typename T::ContainedType first, const ContainerProxy<T>& second)
+    {return second != first;}
+*/
+
+    static inline bool operator==(const ContainerProxy<ChannelIdContainer>& first, const ChannelId& second)
+    {return second == first;}
+    static inline bool operator!=(const ContainerProxy<ChannelIdContainer>& first, const ChannelId& second)
+    {return second != first;}
+    
+    static inline bool operator==(const ContainerProxy<HandlerIdContainer>& first, const HandlerId& second)
+    {return second == first;}
+    static inline bool operator!=(const ContainerProxy<HandlerIdContainer>& first, const HandlerId& second)
+    {return second != first;}
+
+    static inline bool operator==(const ContainerProxy<InstanceIdContainer>& first, const InstanceId& second)
+    {return second == first;}
+    static inline bool operator!=(const ContainerProxy<InstanceIdContainer>& first, const InstanceId& second)
+    {return second != first;}
+
+    static inline bool operator==(const ContainerProxy<EntityIdContainer>& first, const EntityId& second)
+    {return second == first;}
+    static inline bool operator!=(const ContainerProxy<EntityIdContainer>& first, const EntityId& second)
+    {return second != first;}
+
+/*
+    template <>
+    class ContainerProxy<BooleanContainer>
+    {
+    public:
+        typedef BooleanContainer::ContainedType ContainedType;
+
+        explicit ContainerProxy(BooleanContainer& container):m_container(container){}
+
+        ContainerProxy& operator=(const ContainerProxy& other)
+        {
+            if (other.IsNull())
+            {
+                m_container.SetNull();
+            }
+            else
+            {
+                m_container.SetVal(other.GetVal());
+            }
+            return *this;
+        }
+
+        ContainerProxy& operator=(const ContainedType other) {m_container.SetVal(other);return *this;}
+
+        operator const ContainedType() const {return m_container.GetVal();}
+
+        bool IsNull() const {return m_container.IsNull();}
+        void SetNull() {m_container.SetNull();}
+        bool IsChanged() const {return m_container.IsChanged();}
+        void SetChanged(const bool changed) {m_container.SetChanged(changed);}
+
+        void SetVal(const ContainedType value)  {m_container.SetVal(value);}
+
+        const ContainedType GetVal() const {return m_container.GetVal();}
+
+        void Copy (const ContainerProxy& that) {m_container.Copy(that.m_container);}
+
+        bool operator== (const ContainedType& val) const
+        {
+            return m_container == val;
+        }
+
+        const BooleanContainer& GetContainer() const {return m_container;}
+        BooleanContainer& GetContainer() {return m_container;}
+    private:
+        BooleanContainer& m_container;
+    };*/
 
     template <>
     class ContainerProxy<StringContainer>
@@ -186,12 +272,12 @@ namespace Typesystem
 
         bool operator== (const ContainedType& val) const
         {
-            return m_container == val;
+            return m_container.GetVal() == val;
         }
 
         bool operator!= (const ContainedType& val) const
         {
-            return m_container != val;
+            return m_container.GetVal() != val;
         }
 
         const StringContainer& GetContainer() const {return m_container;}
@@ -199,6 +285,12 @@ namespace Typesystem
     private:
         StringContainer& m_container;
     };
+
+    
+    static inline bool operator==(const std::wstring& first, const ContainerProxy<StringContainer>& second)
+    {return second == first;}
+    static inline bool operator!=(const std::wstring& first, const ContainerProxy<StringContainer>& second)
+    {return second != first;}
 
 
     template <>
@@ -237,12 +329,26 @@ namespace Typesystem
         const ContainedType& GetVal() const {return m_container.GetVal();}
         void Copy (const ContainerProxy& that) {m_container.Copy(that.m_container);}
 
+        bool operator== (const ContainedType& val) const
+        {
+            return m_container.GetVal() == val;
+        }
+
+        bool operator!= (const ContainedType& val) const
+        {
+            return m_container.GetVal() != val;
+        }
+
         const BinaryContainer& GetContainer() const {return m_container;}
         BinaryContainer& GetContainer() {return m_container;}
     private:
         BinaryContainer& m_container;
     };
 
+    static inline bool operator==(const Binary& first, const ContainerProxy<BinaryContainer>& second)
+    {return second == first;}
+    static inline bool operator!=(const Binary& first, const ContainerProxy<BinaryContainer>& second)
+    {return second != first;}
 
 
     template <class U>

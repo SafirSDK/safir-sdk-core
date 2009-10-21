@@ -63,8 +63,8 @@ namespace Internal
         void DispatchResponses(const DispatchResponseFunc & dispatchFunc);
 
 
-        bool SimulateFull() const {return m_simulateFull;}
-        void SimulateFull(const bool simulateFull) {m_simulateFull = simulateFull;}
+        bool SimulateFull() const {return m_simulateFull != 0;}
+        void SimulateFull(const bool simulateFull) {m_simulateFull = simulateFull?1:0;}
     private:
 
         class ResponseIdGenerator
@@ -72,7 +72,6 @@ namespace Internal
         public:
         //ResponseId handling
             ResponseId GetNextResponseId() {return m_nextResponseId++;}
-        //void UndoGetNextRequestId() {--m_nextRequestId;}
         private:
             ResponseId m_nextResponseId;
         };
@@ -113,7 +112,7 @@ namespace Internal
         Typesystem::Int32 m_noAttachedResponses; //number of responses sent from receiving application
         Typesystem::Int32 m_noDispatchedResponses; //number of responses picked up by dose_main and sent on
 
-        volatile bool m_simulateFull;
+        AtomicUint32 m_simulateFull;
 
         friend void StatisticsCollector(RequestInQueue&, void*);
     };

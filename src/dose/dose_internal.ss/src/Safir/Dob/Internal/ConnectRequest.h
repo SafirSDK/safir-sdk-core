@@ -36,10 +36,8 @@ namespace Dob
 namespace Internal
 {
     struct connect_tag_t {};
-    struct disconnect_tag_t {};
 
     const connect_tag_t connect_tag = connect_tag_t();
-    const disconnect_tag_t disconnect_tag = disconnect_tag_t();
 
     /** The possible results that can be in an ack. */
     enum ConnectResult
@@ -60,15 +58,13 @@ namespace Internal
         ConnectRequest();
 
         void Set(connect_tag_t, const std::string & connectionName, const long context, const int pid);
-        void Set(disconnect_tag_t, const ConnectionPtr & connection);
 
         void GetAndClear(connect_tag_t, std::string & connectionName, long & context, int & pid);
-        void GetAndClear(disconnect_tag_t, ConnectionPtr & connection);
 
         bool IsConnect() const;
 
     private:
-        enum Kind {NotSet, Connect, Disconnect};
+        enum Kind {NotSet, Connect};
         Kind m_kind;
         ShmString m_connectionName;
         long m_context;
@@ -85,59 +81,16 @@ namespace Internal
         ConnectResponse();
 
         void Set(connect_tag_t, const ConnectResult result, const ConnectionPtr & connection);
-        void Set(disconnect_tag_t, const ConnectResult result);
 
         void GetAndClear(connect_tag_t, ConnectResult & result, ConnectionPtr & connection);
-        void GetAndClear(disconnect_tag_t, ConnectResult & result);
-
-        //        bool IsConnect() const;
 
     private:
-        enum Kind {NotSet, Connect, Disconnect};
+        enum Kind {NotSet, Connect};
         Kind m_kind;
 
         ConnectResult m_result;
         ConnectionPtr m_connection;
     };
-
-
-
-    /*        enum ConnectRequestKind
-        {
-            NotSet,
-            Connect,
-            Disconnect,
-            Ack
-        };
-    */
-
-
-
-        /*
-        //This can't be a union, since there is stuff in the structs that have constructors etc.
-        //so we keep all the data always, but since there is only one instance of this thing allocated
-        //in shared memory anyway, it doesnt really matter.
-
-        struct
-        {
-            //            char m_connectionName[MAX_CONNECTION_NAME_LENGTH];
-            ShmString m_connectionName;
-            int m_pid;
-        } ConnectData;
-
-        struct
-        {
-            ConnectionId m_connectionId;
-        } DisconnectData;
-
-        struct
-        {
-            ShmString        m_connectionName;
-            //            char             m_connectionName[MAX_CONNECTION_NAME_LENGTH];
-            ConnectionResult m_result;
-            ConnectionPtr    m_connection;
-        } AckData;
-        */
 
 }
 }

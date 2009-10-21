@@ -46,9 +46,9 @@ namespace Internal
 
         //Inherited methods
         void Reset();
-        bool StartElement(std::string s);
-        bool EndElement(std::string s);
-        bool Content(std::string str);
+        bool StartElement(const std::string& s);
+        bool EndElement(const std::string& s);
+        bool Content(const std::string& str);
 
         //special ClassParser functions
         int GetIndex(TypeId t);
@@ -81,40 +81,40 @@ namespace Internal
         //-----------------------------------
         bool StartElement_Class(const char* e);
         bool EndElement_Class(const char* e);
-        bool Content_Class(std::string& str);
+        bool Content_Class(const std::string& str);
 
         //-----------------------------------
         //Parameters level
         //-----------------------------------
         bool StartElement_Parameters(const char* e);
         bool EndElement_Parameters(const char* e);
-        bool Content_Parameters(std::string& str);
+        bool Content_Parameters(const std::string& str);
         //--- parameter array ---
         bool StartElement_Parameters_Array(const char* e);
         bool EndElement_Parameters_Array(const char* e);
-        bool Content_Parameters_Array(std::string& str);
+        bool Content_Parameters_Array(const std::string& str);
         //--- parameter entityId ---
         bool StartElement_Parameters_EntityId(const char* e);
         bool EndElement_Parameters_EntityId(const char* e);
-        bool Content_Parameters_EntityId(std::string& str);
+        bool Content_Parameters_EntityId(const std::string& str);
         //--- parameter object ---
         bool StartElement_Parameters_Object(const char* e);
         bool EndElement_Parameters_Object(const char* e);
-        bool Content_Parameters_Object(std::string& str);
+        bool Content_Parameters_Object(const std::string& str);
 
         //-----------------------------------
         //Reference level
         //-----------------------------------
         bool StartElement_Ref(const char* e);
         bool EndElement_Ref(const char* e);
-        bool Content_Ref(std::string& str);
+        bool Content_Ref(const std::string& str);
 
         //-----------------------------------
         //Members level
         //-----------------------------------
         bool StartElement_Members(const char* e);
         bool EndElement_Members(const char* e);
-        bool Content_Members(std::string& str);
+        bool Content_Members(const std::string& str);
 
         //Flags telling us where in the element hierarchy we are
         bool m_uClass;

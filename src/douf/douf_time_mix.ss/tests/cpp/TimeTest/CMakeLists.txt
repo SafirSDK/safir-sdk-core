@@ -8,12 +8,11 @@ ADD_EXECUTABLE(douf_time_test ${sources})
 
 TARGET_LINK_LIBRARIES(douf_time_test 
                       dots_cpp 
-		      dots_generated-cpp
+					  dots_generated-cpp
                       douf_time_library 
-                      douf_time 
+                      douf_time_cpp
                       boost_date_time 
-                      dose_cpp 
-                      dose_dll)
+                      dose_cpp)
 
 INSTALL(TARGETS douf_time_test
         RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin

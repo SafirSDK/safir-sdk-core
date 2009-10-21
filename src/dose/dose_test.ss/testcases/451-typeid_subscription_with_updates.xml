@@ -22,7 +22,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.RegisterEntityHandler</value>
               </member>
               <member>
@@ -53,7 +53,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SubscribeEntity</value>
               </member>
               <member>
@@ -93,7 +93,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SetAll</value>
               </member>
               <member>
@@ -132,7 +132,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SetAll</value>
               </member>
               <member>
@@ -171,7 +171,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.Delete</value>
               </member>
               <member>

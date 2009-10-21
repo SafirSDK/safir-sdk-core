@@ -1,17 +1,39 @@
 @@-------------------------------------------------------------------------------
 @@--
-@@--  Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+@@--  Copyright Saab AB, 2005-2009 (http://www.safirsdk.com)
 @@--
 @@--  Created by: Henrik Sundberg / sthesu
 @@--
 @@-------------------------------------------------------------------------------
 @@IF@@ @_SECTION_@ = "Parameters"
-File_Extension:"h"
+File_Suffix:".h"
 Filename_Separator:"/"
 Output_Directory:"cpp/include/"
 Namespace_Separator:"::"
-Lowercase_Namespace:"False"
-Lowercase_Filenames:"False"
+@@-- Namspace prefixes are defined separately, since they are supposed to differ between projects.
+@@-- Files matching <Namespace><Namespace_Prefix_File_Suffix> are searched for a line containing the namespace prefix
+@@-- to use for <Namespace>. E.g. Namespace_Prefix_File_Prefix:"-java.namespace.txt" will match the file
+@@-- "Safir-java.namespace.txt". The first non comment line in the file is used as namespace prefix.
+@@-- Empty value is used when no namespace prefixes are to be added.
+Namespace_Prefix_File_Suffix:""
+@@-- Parent filename "" defaults to the namespace with added file suffix.
+Parent_Filename:""
+@@
+@@ *_Underscore_Style is one of: "Add", "Remove", "Keep"
+@@
+Namespace_Underscore_Style:"Keep"
+Filename_Underscore_Style:"Keep"
+Classname_Underscore_Style:"Keep"
+Membername_Underscore_Style:"Keep"
+Enum_Value_Underscore_Style:"Keep"
+@@
+@@ *_Case_Style is one of: "Upper", "Lower", "Camel", "Keep"
+@@
+Namespace_Case_Style:"Keep"
+Filename_Case_Style:"Keep"
+Classname_Case_Style:"Keep"
+Membername_Case_Style:"Keep"
+Enum_Value_Case_Style:"Keep"
 Object_Type:"Object"
 Index_Type:"Int32"
 @@--
@@ -23,13 +45,13 @@ Index_Type:"Int32"
 @@-- And "Safir::Dob::Typesystem::IllegalValue" to be used where the actual type is needed in the code.
 @@-- And that "Safir/Dob/Typesystem/Defs" (with file extension added below) is to be included due to this.
 @@--
-Exception:exception:"Safir::Dob::Typesystem::Exception":"Safir/Dob/Typesystem/Exceptions"
-Exception:fundamentalException:"Safir::Dob::Typesystem::FundamentalException":"Safir/Dob/Typesystem/Exceptions"
-Exception:configurationError:"Safir::Dob::Typesystem::ConfigurationError":"Safir/Dob/Typesystem/Exceptions"
-Exception:incompatibleTypes:"Safir::Dob::Typesystem::IncompatibleTypes":"Safir/Dob/Typesystem/Exceptions"
-Exception:illegalValue:"Safir::Dob::Typesystem::IllegalValue":"Safir/Dob/Typesystem/Exceptions"
-Exception:nullValue:"Safir::Dob::Typesystem::NullValue":"Safir/Dob/Typesystem/Exceptions"
-Exception:softwareViolation:"Safir::Dob::Typesystem::SoftwareViolation":"Safir/Dob/Typesystem/Exceptions"
+Exception:Exception:"Safir::Dob::Typesystem::Exception":"Safir/Dob/Typesystem/Exceptions"
+Exception:FundamentalException:"Safir::Dob::Typesystem::FundamentalException":"Safir/Dob/Typesystem/Exceptions"
+Exception:Safir.Dob.Typesystem.ConfigurationError:"Safir::Dob::Typesystem::ConfigurationError":"Safir/Dob/Typesystem/Exceptions"
+Exception:Safir.Dob.Typesystem.IncompatibleTypes:"Safir::Dob::Typesystem::IncompatibleTypes":"Safir/Dob/Typesystem/Exceptions"
+Exception:Safir.Dob.Typesystem.IllegalValue:"Safir::Dob::Typesystem::IllegalValue":"Safir/Dob/Typesystem/Exceptions"
+Exception:Safir.Dob.Typesystem.NullValue:"Safir::Dob::Typesystem::NullValue":"Safir/Dob/Typesystem/Exceptions"
+Exception:Safir.Dob.Typesystem.SoftwareViolation:"Safir::Dob::Typesystem::SoftwareViolation":"Safir/Dob/Typesystem/Exceptions"
 @@--
 @@-- Types are defined like this:
 @@--   Type:<dou>:<set/get>:"<generated>":"<dependency>"

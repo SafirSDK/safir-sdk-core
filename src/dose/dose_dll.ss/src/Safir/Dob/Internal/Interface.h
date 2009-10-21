@@ -25,22 +25,16 @@
 #ifndef _dose_interface_h
 #define _dose_interface_h
 
-#include <Safir/Dob/Internal/ConnectionId.h>
-#include <Safir/Dob/Typesystem/Defs.h>
-#include <Safir/Dob/Defs.h>
-#include <Safir/Dob/Typesystem/HandlerId.h>
+#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 
+typedef DotsC_Int32 DoseC_RequestId;
 
 #if defined _MSC_VER
 #  ifdef DOSE_EXPORTS
 #    define DOSE_API __declspec(dllexport)
 #  else
 #    define DOSE_API __declspec(dllimport)
-#    ifndef NDEBUG
-#      pragma comment( lib, "dose_dlld.lib" )
-#    else
-#      pragma comment( lib, "dose_dll.lib" )
-#    endif
+#    pragma comment( lib, "dose_dll.lib" )
 #  endif
 #  define CALLING_CONVENTION __cdecl
 #elif defined __GNUC__
@@ -61,10 +55,16 @@
 // you send the correct value of lang when using this API. See list
 // below.
 //--------------------------------------------------------------------
-const long DOSE_LANGUAGE_CPP = 0;
-//#define DOSE_LANGUAGE_ADA       1
-//#define DOSE_LANGUAGE_DOTNET    2
-//#define DOSE_LANGUAGE_JAVA      3
+const long DOSE_LANGUAGE_CPP    = 0;
+const long DOSE_LANGUAGE_ADA    = 1;
+const long DOSE_LANGUAGE_DOTNET = 2;
+const long DOSE_LANGUAGE_JAVA   = 3;
+
+// Define which languages use garbage collection
+static const bool g_garbageCollected[] = {false, //C++
+                                          false, //Ada
+                                          true,  //Dotnet
+                                          true}; //Java
 //--------------------------------------------------------------------
 
 #ifdef __cplusplus
@@ -107,31 +107,31 @@ extern "C"
     typedef void CALLING_CONVENTION OnCreateRequestCb(const char* const requestBlob,
                                                       const char* const state,
                                                       const long ctrl,
-                                                      const Safir::Dob::Typesystem::Int32 responseId,
+                                                      const DotsC_Int32 responseId,
                                                       void* const consumer,
                                                       bool& success);
 
     typedef void CALLING_CONVENTION OnUpdateRequestCb(const char* const requestBlob,
                                                       const char* const state,
                                                       const long ctrl,
-                                                      const Safir::Dob::Typesystem::Int32 responseId,
+                                                      const DotsC_Int32 responseId,
                                                       void* const consumer,
                                                       bool& success);
 
     typedef void CALLING_CONVENTION OnDeleteRequestCb(const char* const state,
                                                       const long ctrl,
-                                                      const Safir::Dob::Typesystem::Int32 responseId,
+                                                      const DotsC_Int32 responseId,
                                                       void* const consumer,
                                                       bool& success);
 
     typedef void CALLING_CONVENTION OnServiceRequestCb(const char* const requestBlob,
                                                        const char* const state,
                                                        const long ctrl,
-                                                       const Safir::Dob::Typesystem::Int32 responseId,
+                                                       const DotsC_Int32 responseId,
                                                        void* const consumer,
                                                        bool& success);
 
-    typedef void CALLING_CONVENTION OnResponseCb(const Safir::Dob::RequestId requestId,
+    typedef void CALLING_CONVENTION OnResponseCb(const DoseC_RequestId requestId,
                                                  const char* const responseBlob,
                                                  const char* const responseState,
                                                  const char* const requestBlob,
@@ -144,26 +144,26 @@ extern "C"
                                                 void* const consumer,
                                                 bool& success);
 
-    typedef void CALLING_CONVENTION OnRegisteredCb(const Safir::Dob::Typesystem::TypeId typeId,
-                                                   const Safir::Dob::Typesystem::Int64 handlerId,
+    typedef void CALLING_CONVENTION OnRegisteredCb(const DotsC_TypeId typeId,
+                                                   const DotsC_Int64 handlerId,
                                                    const char* const handlerIdStr,
                                                    void* const consumer,
                                                    bool& success);
 
-    typedef void CALLING_CONVENTION OnUnregisteredCb(const Safir::Dob::Typesystem::TypeId typeId,
-                                                     const Safir::Dob::Typesystem::Int64 handlerId,
+    typedef void CALLING_CONVENTION OnUnregisteredCb(const DotsC_TypeId typeId,
+                                                     const DotsC_Int64 handlerId,
                                                      const char* const handlerIdStr,
                                                      void* const consumer,
                                                      bool& success);
 
-    typedef void CALLING_CONVENTION OnRevokedRegistrationCb(const Safir::Dob::Typesystem::TypeId typeId,
-                                                            const Safir::Dob::Typesystem::Int64 handlerId,
+    typedef void CALLING_CONVENTION OnRevokedRegistrationCb(const DotsC_TypeId typeId,
+                                                            const DotsC_Int64 handlerId,
                                                             const char* const handlerIdStr,
                                                             void* const consumer,
                                                             bool& success);
 
-    typedef void CALLING_CONVENTION OnCompletedRegistrationCb(const Safir::Dob::Typesystem::TypeId typeId,
-                                                              const Safir::Dob::Typesystem::Int64 handlerId,
+    typedef void CALLING_CONVENTION OnCompletedRegistrationCb(const DotsC_TypeId typeId,
+                                                              const DotsC_Int64 handlerId,
                                                               const char* const handlerIdStr,
                                                               void* const consumer,
                                                               bool& success);
@@ -186,8 +186,8 @@ extern "C"
                                                               void* const consumer,
                                                               bool& success);
 
-    typedef void CALLING_CONVENTION OnInitialInjectionsDoneCb(const Safir::Dob::Typesystem::TypeId typeId,
-                                                              const Safir::Dob::Typesystem::Int64 handlerId,
+    typedef void CALLING_CONVENTION OnInitialInjectionsDoneCb(const DotsC_TypeId typeId,
+                                                              const DotsC_Int64 handlerId,
                                                               const char* const handlerIdStr,
                                                               void* const consumer,
                                                               bool& success);
@@ -197,6 +197,10 @@ extern "C"
 
     typedef void CALLING_CONVENTION OnNotMessageOverflowCb(void* const consumer,
                                                            bool& success);
+
+    typedef void CALLING_CONVENTION OnDropReferenceCb(void* const consumer,
+                                                      const long refCounter,
+                                                      bool& success);
 
 
     //----------------------------------------------
@@ -240,6 +244,7 @@ extern "C"
                                                    OnInitialInjectionsDoneCb* onInitialInjectionsDoneCb,
                                                    OnNotRequestOverflowCb* onNotRequestOverflowCb,
                                                    OnNotMessageOverflowCb* onNotMessageOverflowCb,
+                                                   OnDropReferenceCb* onDropReferenceCb,
                                                    bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_ConnectSecondary(const char* connectionNameCommonPart,
@@ -264,6 +269,7 @@ extern "C"
                                                             OnInitialInjectionsDoneCb* onInitialInjectionsDoneCb,
                                                             OnNotRequestOverflowCb* onNotRequestOverflowCb,
                                                             OnNotMessageOverflowCb* onNotMessageOverflowCb,
+                                                            OnDropReferenceCb* onDropReferenceCb,
                                                             long& newCtrlId,
                                                             bool& success);
 
@@ -285,8 +291,8 @@ extern "C"
                                                                          bool& success);
 
     DOSE_API  void CALLING_CONVENTION DoseC_RegisterServiceHandler(const long ctrl,
-                                                                   const Safir::Dob::Typesystem::TypeId typeId,
-                                                                   const Safir::Dob::Typesystem::Int64 handlerId,
+                                                                   const DotsC_TypeId typeId,
+                                                                   const DotsC_Int64 handlerId,
                                                                    const char* const handlerIdStr,
                                                                    const bool overrideRegistration,
                                                                    const long lang,
@@ -294,10 +300,10 @@ extern "C"
                                                                    bool& success);
 
     DOSE_API  void CALLING_CONVENTION DoseC_RegisterEntityHandler(const long ctrl,
-                                                                  const Safir::Dob::Typesystem::TypeId typeId,
-                                                                  const Safir::Dob::Typesystem::Int64 handlerId,
+                                                                  const DotsC_TypeId typeId,
+                                                                  const DotsC_Int64 handlerId,
                                                                   const char* const handlerIdStr,
-                                                                  const Safir::Dob::Typesystem::EnumerationValue instanceIdPolicy,
+                                                                  const DotsC_EnumerationValue instanceIdPolicy,
                                                                   const bool overrideRegistration,
                                                                   const bool injectionHandler,
                                                                   const long lang,
@@ -305,8 +311,8 @@ extern "C"
                                                                   bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_UnregisterHandler(const long ctrl,
-                                                             const Safir::Dob::Typesystem::TypeId typeId,
-                                                             const Safir::Dob::Typesystem::Int64 handlerId,
+                                                             const DotsC_TypeId typeId,
+                                                             const DotsC_Int64 handlerId,
                                                              const char* const handlerIdStr,
                                                              bool& success);
 
@@ -316,8 +322,8 @@ extern "C"
 
     // Subscribe on specific class type
     DOSE_API void CALLING_CONVENTION DoseC_SubscribeMessage(const long ctrl,
-                                                            const Safir::Dob::Typesystem::TypeId typeId,
-                                                            const Safir::Dob::Typesystem::Int64 channelId,
+                                                            const DotsC_TypeId typeId,
+                                                            const DotsC_Int64 channelId,
                                                             const char* const channelIdStr,
                                                             const bool includeSubclasses,
                                                             const long lang,
@@ -325,8 +331,8 @@ extern "C"
                                                             bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_UnsubscribeMessage(const long ctrl,
-                                                              const Safir::Dob::Typesystem::TypeId typeId,
-                                                              const Safir::Dob::Typesystem::Int64 channelId,
+                                                              const DotsC_TypeId typeId,
+                                                              const DotsC_Int64 channelId,
                                                               const char* const channelIdStr,
                                                               const bool includeSubclasses,
                                                               const long lang,
@@ -334,8 +340,8 @@ extern "C"
                                                               bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_SubscribeEntity(const long ctrl,
-                                                           const Safir::Dob::Typesystem::TypeId typeId,
-                                                           const Safir::Dob::Typesystem::Int64 instanceId,
+                                                           const DotsC_TypeId typeId,
+                                                           const DotsC_Int64 instanceId,
                                                            const char* const instanceIdStr,
                                                            const bool allInstances,
                                                            const bool includeUpdates,
@@ -346,7 +352,7 @@ extern "C"
                                                            bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_InjectorSubscribeEntity(const long ctrl,
-                                                                   const Safir::Dob::Typesystem::TypeId typeId,
+                                                                   const DotsC_TypeId typeId,
                                                                    const bool includeUpdates,
                                                                    const bool includeSubclasses,
                                                                    const bool restartSubscription,
@@ -360,8 +366,8 @@ extern "C"
                                                                    bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_UnsubscribeEntity(const long ctrl,
-                                                             const Safir::Dob::Typesystem::TypeId typeId,
-                                                             const Safir::Dob::Typesystem::Int64 instanceId,
+                                                             const DotsC_TypeId typeId,
+                                                             const DotsC_Int64 instanceId,
                                                              const char* const instanceIdStr,
                                                              const bool allInstances,
                                                              const bool includeSubclasses,
@@ -370,8 +376,8 @@ extern "C"
                                                              bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_SubscribeRegistration(const long ctrl,
-                                                                 const Safir::Dob::Typesystem::TypeId typeId,
-                                                                 const Safir::Dob::Typesystem::Int64 handlerId,
+                                                                 const DotsC_TypeId typeId,
+                                                                 const DotsC_Int64 handlerId,
                                                                  const char* const handlerIdStr,
                                                                  const bool includeSubclasses,
                                                                  const bool restartSubscription,
@@ -380,8 +386,8 @@ extern "C"
                                                                  bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_UnsubscribeRegistration(const long ctrl,
-                                                                   const Safir::Dob::Typesystem::TypeId typeId,
-                                                                   const Safir::Dob::Typesystem::Int64 handlerId,
+                                                                   const DotsC_TypeId typeId,
+                                                                   const DotsC_Int64 handlerId,
                                                                    const char* const handlerIdStr,
                                                                    const bool includeSubclasses,
                                                                    const long lang,
@@ -401,12 +407,17 @@ extern "C"
     DOSE_API void CALLING_CONVENTION DoseC_ExitDispatch(const long ctrl,
                                                         bool& success);
 
+    // Get the current callback id. callbackId is the ordinal of Safir::Dob::CallbackId enum
+    DOSE_API void CALLING_CONVENTION DoseC_GetCurrentCallbackId(const long ctrl,
+                                                                DotsC_Int32& callbackId,
+                                                                bool& success);
+
     //---------------------------
     // Message method
     //---------------------------
     DOSE_API void CALLING_CONVENTION DoseC_SendMessage(const long ctrl,
                                                        const char* const message,
-                                                       const Safir::Dob::Typesystem::Int64 channelId,
+                                                       const DotsC_Int64 channelId,
                                                        const char* const channelIdStr,
                                                        const long lang,
                                                        void* const consumer,
@@ -417,41 +428,41 @@ extern "C"
     //----------------------------
     DOSE_API void CALLING_CONVENTION DoseC_ServiceRequest(const long ctrl,
                                                           const char* const request,
-                                                          const Safir::Dob::Typesystem::Int64 handlerId,
+                                                          const DotsC_Int64 handlerId,
                                                           const char* const handlerIdStr,
                                                           const long lang,
                                                           void* const consumer,
-                                                          Safir::Dob::RequestId& reqId,
+                                                          DoseC_RequestId& reqId,
                                                           bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_CreateRequest(const long ctrl,
                                                          char const* const request,
                                                          const bool hasInstanceId,
-                                                         const Safir::Dob::Typesystem::Int64 instanceId,
+                                                         const DotsC_Int64 instanceId,
                                                          const char* const instanceIdStr,
-                                                         const Safir::Dob::Typesystem::Int64 handlerId,
+                                                         const DotsC_Int64 handlerId,
                                                          const char* const handlerIdStr,
                                                          const long lang,
                                                          void* const consumer,
-                                                         Safir::Dob::RequestId& reqId,
+                                                         DoseC_RequestId& reqId,
                                                          bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_UpdateRequest(const long ctrl,
                                                          char const* const request,
-                                                         const Safir::Dob::Typesystem::Int64 instanceId,
+                                                         const DotsC_Int64 instanceId,
                                                          const char* const instanceIdStr,
                                                          const long lang,
                                                          void* const consumer,
-                                                         Safir::Dob::RequestId& reqId,
+                                                         DoseC_RequestId& reqId,
                                                          bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_DeleteRequest(const long ctrl,
-                                                         const Safir::Dob::Typesystem::TypeId typeId,
-                                                         const Safir::Dob::Typesystem::Int64 instanceId,
+                                                         const DotsC_TypeId typeId,
+                                                         const DotsC_Int64 instanceId,
                                                          const char* const instanceIdStr,
                                                          const long lang,
                                                          void* const consumer,
-                                                         Safir::Dob::RequestId& reqId,
+                                                         DoseC_RequestId& reqId,
                                                          bool& success);
 
     //---------------------------
@@ -462,7 +473,7 @@ extern "C"
                                                         const char * const blob,
                                                         void * const consumer,
                                                         const long lang,
-                                                        const Safir::Dob::Typesystem::Int32 responseId,
+                                                        const DotsC_Int32 responseId,
                                                         bool& success);
 
     //----------------------------
@@ -471,63 +482,63 @@ extern "C"
     //Change flags will be set to false on SetEntity
     DOSE_API void CALLING_CONVENTION DoseC_SetEntity(const long ctrl,
                                                      const char* const blob,
-                                                     const Safir::Dob::Typesystem::Int64 instanceId,
+                                                     const DotsC_Int64 instanceId,
                                                      const char* const instanceIdStr,
-                                                     const Safir::Dob::Typesystem::Int64 handlerId,
+                                                     const DotsC_Int64 handlerId,
                                                      const char* const handlerIdStr,
                                                      const bool considerChangeFlags,
                                                      const bool initialInjection,
                                                      bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_DeleteEntity(const long ctrl,
-                                                        const Safir::Dob::Typesystem::TypeId typeId,
-                                                        const Safir::Dob::Typesystem::Int64 instanceId,
+                                                        const DotsC_TypeId typeId,
+                                                        const DotsC_Int64 instanceId,
                                                         const char* const instanceIdStr,
                                                         const bool allInstances,
-                                                        const Safir::Dob::Typesystem::Int64 handlerId,
+                                                        const DotsC_Int64 handlerId,
                                                         const char* const handlerIdStr,
                                                         bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_InjectEntity(const long ctrl,
                                                         const char* const blob,
-                                                        const Safir::Dob::Typesystem::Int64 instanceId,
+                                                        const DotsC_Int64 instanceId,
                                                         const char* const instanceIdStr,
-                                                        const Safir::Dob::Typesystem::Int64 handlerId,
+                                                        const DotsC_Int64 handlerId,
                                                         const char* const handlerIdStr,
-                                                        const Safir::Dob::Typesystem::Int64 timestamp,
+                                                        const DotsC_Int64 timestamp,
                                                         bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_InjectDeletedEntity(const long ctrl,
-                                                               const Safir::Dob::Typesystem::TypeId typeId,
-                                                               const Safir::Dob::Typesystem::Int64 instanceId,
+                                                               const DotsC_TypeId typeId,
+                                                               const DotsC_Int64 instanceId,
                                                                const char* const instanceIdStr,
-                                                               const Safir::Dob::Typesystem::Int64 handlerId,
+                                                               const DotsC_Int64 handlerId,
                                                                const char* const handlerIdStr,
-                                                               const Safir::Dob::Typesystem::Int64 timestamp,
+                                                               const DotsC_Int64 timestamp,
                                                                bool& success);
 
 
     DOSE_API void CALLING_CONVENTION DoseC_ReadEntity(const long ctrl,
-                                                      const Safir::Dob::Typesystem::TypeId typeId,
-                                                      const Safir::Dob::Typesystem::Int64 instanceId,
+                                                      const DotsC_TypeId typeId,
+                                                      const DotsC_Int64 instanceId,
                                                       const char* const instanceIdStr,
                                                       const char*& currentBlob,
                                                       const char*& currentState,
                                                       bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_IsCreated(const long ctrl,
-                                                     const Safir::Dob::Typesystem::TypeId typeId,
-                                                     const Safir::Dob::Typesystem::Int64 instanceId,
+                                                     const DotsC_TypeId typeId,
+                                                     const DotsC_Int64 instanceId,
                                                      const char* const instanceIdStr,
                                                      bool& isCreated,
                                                      bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_GetNumberOfInstances(const long ctrl,
-                                                                const Safir::Dob::Typesystem::TypeId typeId,
-                                                                const Safir::Dob::Typesystem::Int64 handlerId,
+                                                                const DotsC_TypeId typeId,
+                                                                const DotsC_Int64 handlerId,
                                                                 const char* const handlerIdStr,
                                                                 const bool includeSubclasses,
-                                                                Safir::Dob::Typesystem::Int64& numberOfInstances,
+                                                                DotsC_Int64& numberOfInstances,
                                                                 bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_Postpone(const long ctrl,
@@ -541,19 +552,19 @@ extern "C"
                                                                     bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_GetChannelId(const char* const state,
-                                                        Safir::Dob::Typesystem::Int64& channelId,
+                                                        DotsC_Int64& channelId,
                                                         bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_GetTypeId(const char* const state,
-                                                     Safir::Dob::Typesystem::TypeId& typeId,
+                                                     DotsC_TypeId& typeId,
                                                      bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_GetInstanceId(const char* const state,
-                                                        Safir::Dob::Typesystem::Int64& instanceId,
+                                                        DotsC_Int64& instanceId,
                                                         bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_GetHandlerId(const char* const state,
-                                                        Safir::Dob::Typesystem::Int64& handlerId,
+                                                        DotsC_Int64& handlerId,
                                                         bool& success);
 
 
@@ -565,22 +576,22 @@ extern "C"
                                                              bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_GetTopTimestamp(const char* const state,
-                                                           Safir::Dob::Typesystem::Int64& timestamp,
+                                                           DotsC_Int64& timestamp,
                                                            bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_GetMemberTimestamp(const char* const state,
-                                                              const Safir::Dob::Typesystem::MemberIndex member,
-                                                              Safir::Dob::Typesystem::Int64& timestamp,
+                                                              const DotsC_MemberIndex member,
+                                                              DotsC_Int64& timestamp,
                                                               bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_GetQueueCapacity(const long ctrl,
-                                                            const Safir::Dob::Typesystem::EnumerationValue queue,
-                                                            Safir::Dob::Typesystem::Int32& queueCapacity,
+                                                            const DotsC_EnumerationValue queue,
+                                                            DotsC_Int32& queueCapacity,
                                                             bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_GetQueueSize(const long ctrl,
-                                                        const Safir::Dob::Typesystem::EnumerationValue queue,
-                                                        Safir::Dob::Typesystem::Int32& queueSize,
+                                                        const DotsC_EnumerationValue queue,
+                                                        DotsC_Int32& queueSize,
                                                         bool& success);
 
     /**
@@ -609,34 +620,34 @@ extern "C"
     //-------------------------------
     //destroy needs to be called even if end is true!
     DOSE_API void CALLING_CONVENTION DoseC_EntityIteratorCreate(const long ctrl,
-                                                                const Safir::Dob::Typesystem::TypeId typeId,
+                                                                const DotsC_TypeId typeId,
                                                                 const bool includeSubclasses,
-                                                                Safir::Dob::Typesystem::Int32& iteratorId,
+                                                                DotsC_Int32& iteratorId,
                                                                 bool& end,
                                                                 bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_EntityIteratorDestroy(const long ctrl,
-                                                                 const Safir::Dob::Typesystem::Int32 iteratorId);
+                                                                 const DotsC_Int32 iteratorId);
 
     DOSE_API void CALLING_CONVENTION DoseC_EntityIteratorCopy(const long ctrl,
-                                                              const Safir::Dob::Typesystem::Int32 iteratorId,
-                                                              Safir::Dob::Typesystem::Int32& iteratorIdCopy,
+                                                              const DotsC_Int32 iteratorId,
+                                                              DotsC_Int32& iteratorIdCopy,
                                                               bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_EntityIteratorIncrement(const long ctrl,
-                                                                   const Safir::Dob::Typesystem::Int32 iteratorId,
+                                                                   const DotsC_Int32 iteratorId,
                                                                    bool& end,
                                                                    bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_EntityIteratorDereference(const long ctrl,
-                                                                     const Safir::Dob::Typesystem::Int32 iteratorId,
+                                                                     const DotsC_Int32 iteratorId,
                                                                      const char *& entityBlob,
                                                                      const char *& entityState,
                                                                      bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_EntityIteratorEqual(const long ctrl,
-                                                               const Safir::Dob::Typesystem::Int32 first,
-                                                               const Safir::Dob::Typesystem::Int32 second,
+                                                               const DotsC_Int32 first,
+                                                               const DotsC_Int32 second,
                                                                bool& equal,
                                                                bool& success);
 
@@ -647,97 +658,6 @@ extern "C"
                                                              const bool inQueues,
                                                              const bool outQueues,
                                                              bool& success);
-
-    /*     //\************************************************************************ */
-    /*     //No need to implement in all languages - currently only used by SATE */
-    /*     //\************************************************************************ */
-    /*     DOSE_API void CALLING_CONVENTION DoseC_TestSupp_GetConnectionStats(const char* connName[], */
-    /*                                                             int reqSent[], */
-    /*                                                             int reqRecv[], */
-    /*                                                             int reqSendOverflow[], */
-    /*                                                             int reqRecvOverflow[], */
-    /*                                                             int reqTimedOut[], */
-    /*                                                             int respSent[], */
-    /*                                                             int respRecv[], */
-    /*                                                             int msgSent[], */
-    /*                                                             int msgRecv[], */
-    /*                                                             int msgSendOverflow[], */
-    /*                                                             int msgRecvOverflow[], */
-    /*                                                             int arrSize, */
-    /*                                                             int& results, */
-    /*                                                             bool& gotAll, */
-    /*                                                             bool& success); */
-
-    /*     //arrays are assumed to be large enough, use Dots to find out number of typeIds */
-    /*     DOSE_API void CALLING_CONVENTION DoseC_TestSupp_GetObjectStats(Safir::Dob::Typesystem::TypeId tid[], int writes[], int& size, bool& success); */
-
-    /*     DOSE_API void CALLING_CONVENTION DoseC_TestSupp_GetSharedMemoryGeneralInfo(int& numberOfBlockGroups, */
-    /*                                                                     int& numberOfMemoryBlocks, */
-    /*                                                                     unsigned int& poolSizeInBytes, */
-    /*                                                                     bool& success); */
-
-    /*     //arrays are assumed to be at least of size numberOfBlockGroups */
-    /*     DOSE_API void CALLING_CONVENTION DoseC_TestSupp_GetSharedMemoryDetailedStats(int blockSize[], */
-    /*                                                                       int noBlocks[], */
-    /*                                                                       int noAllocs[], */
-    /*                                                                       int noDeallocs[], */
-    /*                                                                       int highWaterMark[], */
-    /*                                                                       bool& success); */
-
-    /*     //---------------------------------------------------------------------------- */
-    /*     //reading content in queues */
-    /*     // param queue: 0=msg_in, 1=msg_out, 2=req_in, 3=req_out */
-    /*     //---------------------------------------------------------------------------- */
-    /*     DOSE_API void CALLING_CONVENTION DoseC_TestSupp_GetConnectionId(const char* name, */
-    /*                                                          Safir::Dob::Typesystem::Int32& node, */
-    /*                                                          Safir::Dob::Typesystem::Int64& id, */
-    /*                                                          bool& nameExists , */
-    /*                                                          bool& success); */
-
-    /*     DOSE_API void CALLING_CONVENTION DoseC_TestSupp_GetQueueSize(Safir::Dob::Typesystem::Int64 connId, */
-    /*                                                       int queue, */
-    /*                                                       int& size, */
-    /*                                                       bool& success); */
-
-    /*     DOSE_API void CALLING_CONVENTION DoseC_TestSupp_GetMessageQueueContent( */
-    /*                                                                 Safir::Dob::Typesystem::Int64 connId, */
-    /*                                                                 bool outQ, //true if messageOutQ, false if messageInQ */
-    /*                                                                 Safir::Dob::Typesystem::TypeId types[], */
-    /*                                                                 Safir::Dob::Typesystem::InstanceNumber instances[], */
-    /*                                                                 int size, */
-    /*                                                                 int& noResults, */
-    /*                                                                 bool& success); */
-
-    /*     DOSE_API void CALLING_CONVENTION DoseC_TestSupp_GetRequestQueueContent( */
-    /*                                                                 Safir::Dob::Typesystem::Int64 connId, */
-    /*                                                                 bool outQ, //true if requestOut/responseIn, false if requestIn/responseOut */
-    /*                                                                 Safir::Dob::Typesystem::TypeId reqTypes[], */
-    /*                                                                 Safir::Dob::Typesystem::InstanceNumber reqInstances[], */
-    /*                                                                 Safir::Dob::Typesystem::TypeId respTypes[], */
-    /*                                                                 Safir::Dob::Typesystem::InstanceNumber respInstances[], */
-    /*                                                                 char typeOfReq[], */
-    /*                                                                 bool reqHandled[], */
-    /*                                                                 bool hasResponse[], */
-    /*                                                                 bool& validContent, */
-    /*                                                                 bool& success); */
-
-    /*     DOSE_API void CALLING_CONVENTION DoseC_TestSupp_GetQueueItemDetails(Safir::Dob::Typesystem::Int64 connId, */
-    /*                                                              int queue, */
-    /*                                                              Safir::Dob::Typesystem::Int64& sender, */
-    /*                                                              char *& blob, */
-    /*                                                              bool& success); */
-
-    /*     DOSE_API void CALLING_CONVENTION DoseC_TestSupp_GetSimulateFullQueue(Safir::Dob::Typesystem::Int64 connId, */
-    /*                                                               int queue, */
-    /*                                                               bool& simulateFull, */
-    /*                                                               bool& success); */
-
-    /*     DOSE_API void CALLING_CONVENTION DoseC_TestSupp_SetSimulateFullQueue(Safir::Dob::Typesystem::Int64 connId, */
-    /*                                                               int queue, */
-    /*                                                               bool simulateFull, */
-    /*                                                               bool& success); */
-
-
 
 #ifdef __cplusplus
 }

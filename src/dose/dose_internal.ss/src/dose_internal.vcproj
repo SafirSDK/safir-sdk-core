@@ -54,6 +54,7 @@
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="1"
+				DisableSpecificWarnings="4503"
 				ForcedIncludeFiles=""
 			/>
 			<Tool
@@ -137,6 +138,7 @@
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="0"
+				DisableSpecificWarnings="4503"
 				ForcedIncludeFiles=""
 			/>
 			<Tool

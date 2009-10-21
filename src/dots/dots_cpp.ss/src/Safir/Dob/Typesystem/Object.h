@@ -144,8 +144,8 @@ namespace Typesystem
          * @throws IllegalValueException If the index is not in the range of the array.
          * @throws SoftwareViolationException If the element is not an array and the index is not 0.
          */
-        virtual       ContainerBase & GetMember(const Dob::Typesystem::MemberIndex member,
-                                                const Dob::Typesystem::ArrayIndex  index);       //MUST BE OVERRIDDEN!
+        virtual ContainerBase & GetMember(const Dob::Typesystem::MemberIndex member,
+                                          const Dob::Typesystem::ArrayIndex  index);       //MUST BE OVERRIDDEN!
 
         /**
          * Get a const reference to a member container from an object.

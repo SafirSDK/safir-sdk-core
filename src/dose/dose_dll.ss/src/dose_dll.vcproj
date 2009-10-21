@@ -54,6 +54,7 @@
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="1"
+				DisableSpecificWarnings="4503"
 				ForcedIncludeFiles=""
 			/>
 			<Tool
@@ -71,7 +72,7 @@
 				AdditionalOptions=" "
 				AdditionalDependencies="ACEd.lib"
 				ShowProgress="0"
-				OutputFile="$(OutDir)\$(ProjectName)d.dll"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(SAFIR_SDK)\lib&quot;"
 				IgnoreAllDefaultLibraries="false"
@@ -143,6 +144,7 @@
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="0"
+				DisableSpecificWarnings="4503"
 				ForcedIncludeFiles=""
 			/>
 			<Tool
@@ -204,6 +206,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\dose_consumer_references.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\dose_controller.cpp"
 				>
 			</File>
@@ -229,6 +235,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\dose_consumer_references.h"
+				>
+			</File>
 			<File
 				RelativePath=".\dose_controller.h"
 				>

@@ -24,8 +24,6 @@
 
 #include "CommandLine.h"
 
-#include <boost/program_options/cmdline.hpp>
-#include <boost/program_options/parsers.hpp>
 #include <iostream>
 #include <Safir/Dob/Typesystem/Operations.h>
 

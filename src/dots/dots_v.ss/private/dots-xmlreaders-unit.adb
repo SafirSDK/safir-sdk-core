@@ -22,7 +22,6 @@
 --
 -------------------------------------------------------------------------------
 
-with Ada.Characters.Handling;
 with Ada.Exceptions;
 with Ada.Text_IO;
 with Interfaces.C;
@@ -62,6 +61,7 @@ package body Dots.Xmlreaders.Unit is
    svNamespace        : Templates_Parser.Vector_Tag;
    svRevNamespace     : Templates_Parser.Vector_Tag;
    svDependencies     : Templates_Parser.Vector_Tag;
+   svNsDependencies   : Templates_Parser.Vector_Tag;
    svBaseClass        : Templates_Parser.Vector_Tag;
    svParameter        : Templates_Parser.Vector_Tag;
    svParameterType    : Templates_Parser.Vector_Tag;
@@ -142,11 +142,22 @@ package body Dots.Xmlreaders.Unit is
             New_Item  => Xml_Exception,
             Position  => Dummy_Cursor,
             Inserted  => Dummy);
+         Dots.String_Sets.Insert
+           (Container => Conf.Dependencies_Base,
+            New_Item  => Dots.Utilities.Get_Base_Of (Xml_Exception),
+            Position  => Dummy_Cursor,
+            Inserted  => Dummy);
       else
          Dots.String_Sets.Insert
            (Container => Conf.Dependencies,
             New_Item  => Templates_Parser.Item
               (Templates_Parser.Get (Asso), 2),
+            Position  => Dummy_Cursor,
+            Inserted  => Dummy);
+         Dots.String_Sets.Insert
+           (Container => Conf.Dependencies_Base,
+            New_Item  => Dots.Utilities.Get_Base_Of (Templates_Parser.Item
+              (Templates_Parser.Get (Asso), 2)),
             Position  => Dummy_Cursor,
             Inserted  => Dummy);
       end if;
@@ -165,7 +176,12 @@ package body Dots.Xmlreaders.Unit is
          if Asso = Templates_Parser.Null_Association then
             Dots.String_Sets.Insert
               (Container => Conf.Dependencies,
-               New_Item  => Xml_Type,
+               New_Item  => Dots.Utilities.Apply_Prefixed_Class_Style (Xml_Type),
+               Position  => Dummy_Cursor,
+               Inserted  => Dummy);
+            Dots.String_Sets.Insert
+              (Container => Conf.Dependencies_Base,
+               New_Item  => Dots.Utilities.Get_Base_Of (Dots.Utilities.Apply_Prefixed_Class_Style (Xml_Type)),
                Position  => Dummy_Cursor,
                Inserted  => Dummy);
          else
@@ -173,6 +189,12 @@ package body Dots.Xmlreaders.Unit is
               (Container => Conf.Dependencies,
                New_Item  => Templates_Parser.Item
                  (Templates_Parser.Get (Asso), 3),
+               Position  => Dummy_Cursor,
+               Inserted  => Dummy);
+            Dots.String_Sets.Insert
+              (Container => Conf.Dependencies_Base,
+               New_Item  => Dots.Utilities.Get_Base_Of (Templates_Parser.Item
+                 (Templates_Parser.Get (Asso), 3)),
                Position  => Dummy_Cursor,
                Inserted  => Dummy);
          end if;
@@ -189,6 +211,8 @@ package body Dots.Xmlreaders.Unit is
       Conf : Dots.State.Output_Config renames
         Dots.State.Outputs (Dots.State.Current_Output);
 
+      use type Dots.State.Case_Style;
+
       function Local_Exception_Tag_Of
         (Xml_Exception : in String) return String;
 
@@ -196,21 +220,11 @@ package body Dots.Xmlreaders.Unit is
         (Xml_Exception : in String) return String is
          Asso : constant Templates_Parser.Association
            := Templates_Parser.Get (Conf.Exception_Set, Xml_Exception);
-         Tmp : String := Xml_Exception;
-         Dot_Found : Boolean := False;
+
       begin
          if Asso = Templates_Parser.Null_Association then
-            if Conf.Lowercase_Namespace then
-               for J in reverse Tmp'Range loop
-                  if Dot_Found then
-                     Tmp (J) := Ada.Characters.Handling.To_Lower (Tmp (J));
-                  elsif Tmp (J) = '.' then
-                     Dot_Found := True;
-                  end if;
-               end loop;
-            end if;
             return Dots.Utilities.Replace_Dots
-              (S         => Tmp,
+              (S         => Dots.Utilities.Apply_Prefixed_Class_Style (Xml_Exception),
                Separator => S (Conf.Namespace_Separator));
          else
             return Templates_Parser.Item
@@ -243,8 +257,11 @@ package body Dots.Xmlreaders.Unit is
                end if;
             end;
 
-         when Dots.Parser.stUnitName =>
-            Split (S (Dots.Parser.Simple_Contents), svNamespace, sClass);
+         when Dots.Parser.StUnitName =>
+            SRawNamespace := V (Dots.Utilities.Get_Base_Of
+                                (S (Dots.Parser.Simple_Contents)));
+            Split (Dots.Utilities.Mangle_Namespace
+                   (S (Dots.Parser.Simple_Contents)), SvNamespace, SClass);
             Templates_Parser.Clear (svRevNamespace);
             sNamespace := Nul;
             for J in 1 .. Templates_Parser.Size (svNamespace) loop
@@ -258,11 +275,9 @@ package body Dots.Xmlreaders.Unit is
                end if;
             end loop;
 
-            sRawNamespace := sNamespace;
-            if Conf.Lowercase_Namespace then
-               sNamespace := V (Ada.Characters.Handling.To_Lower
-                                (S (sNamespace)));
-            end if;
+            SvNamespace := Dots.Utilities.Apply_Style (Conf.Namespace_Style, SvNamespace);
+            SvRevNamespace := Dots.Utilities.Apply_Style (Conf.Namespace_Style, SvRevNamespace);
+            sNamespace := Dots.Utilities.Apply_Style (Conf.Namespace_Style, sNamespace);
 
             if Dots.Parser.Is_Child_Of (Dots.Parser.ctProperty) then
                Dots.Utilities.Define_Unit
@@ -288,31 +303,15 @@ package body Dots.Xmlreaders.Unit is
                           svCreateValueParameter &
                         V (Full_Name (J + 1 .. Full_Name'Last));
 
-                        declare
-                           CVPC : String :=
-                             Full_Name (Full_Name'First .. J - 1);
-                           Dot_Found : Boolean := False;
-                        begin
-                           if Conf.Lowercase_Namespace then
-                              for K in reverse CVPC'Range loop
-                                 if Dot_Found then
-                                    CVPC (K) := Ada.Characters.Handling.
-                                      To_Lower (CVPC (K));
-                                 elsif CVPC (K) = '.' then
-                                    Dot_Found := True;
-                                 end if;
-                              end loop;
-                           end if;
-                           svCreateValueParameterClass :=
-                             svCreateValueParameterClass &
-                           Dots.Utilities.Replace_Dots
-                             (S         => CVPC,
-                              Separator => S (Conf.Namespace_Separator),
-                              Lower     => False);
-                        end;
+                        SvCreateValueParameterClass :=
+                          SvCreateValueParameterClass &
+                        Dots.Utilities.Replace_Dots
+                          (S         => Dots.Utilities.Apply_Prefixed_Class_Style (Full_Name (Full_Name'First .. J - 1)),
+                           Separator => S (Conf.Namespace_Separator),
+                           Lower     => False);
 
                         if V (Full_Name (Full_Name'First .. J - 1)) /=
-                        Dots.State.Current_Unit then
+                          Dots.State.Current_Unit then
                            Add_Type_Dependency
                              (Full_Name (Full_Name'First .. J - 1));
                         end if;
@@ -406,6 +405,12 @@ package body Dots.Xmlreaders.Unit is
                          & Dots.Utilities.Get_Uniform_Member_Type
                        (Unit, S (Dots.Parser.Simple_Contents));
 
+                     if Unit /= Dots.State.Current_Unit then
+                        Add_Type_Dependency
+                          (Dots.Utilities.Get_Xml_Member_Type
+                             (Unit, S (Dots.Parser.Simple_Contents)));
+                     end if;
+
                      svCreateParameterType :=
                        svCreateParameterType
                          & Dots.Utilities.Get_Local_Member_Type
@@ -449,7 +454,7 @@ package body Dots.Xmlreaders.Unit is
             begin
                Add_Type_Dependency (S (Dots.Parser.Simple_Contents));
                if Dots.Parser.Is_Child_Of (Dots.Parser.ctMember) then
-                  svMemberClass := svMemberClass & sClass;
+                  svMemberClass := svMemberClass & Dots.Utilities.Apply_Prefixed_Class_Style (S (sClass));
                   svMemberType := svMemberType &
                   Dots.Utilities.Local_Type_Tag_Of
                     (S (Dots.Parser.Simple_Contents));
@@ -495,29 +500,54 @@ package body Dots.Xmlreaders.Unit is
               Dots.Parser.ctEnumeration | Dots.Parser.ctException =>
             declare
                procedure Process (Position : in Dots.String_Sets.Cursor);
+               procedure Process_Base (Position : in Dots.String_Sets.Cursor);
                procedure Process (Position : in Dots.String_Sets.Cursor) is
-                  Dependency : String :=
-                    Dots.String_Sets.Element (Position);
-                  Dot_Found : Boolean := False;
+                  Dependency : constant String :=
+                                 Dots.String_Sets.Element (Position);
+                  First : Integer := Dependency'First;
+
                begin
-                  if Conf.Lowercase_Namespace then
-                     for J in reverse Dependency'Range loop
-                        if Dot_Found then
-                           Dependency (J) :=
-                             Ada.Characters.Handling.To_Lower (Dependency (J));
-                        elsif Dependency (J) = '.' then
-                           Dot_Found := True;
+                  if Dependency /= "" then
+                     for Ix in Dependency'Range loop
+                        if Dependency (Ix) = '\' then
+                           SvDependencies := SvDependencies &
+                           Dots.Utilities.Apply_Prefixed_Class_Style
+                             (Dependency (First .. Ix - 1));
+                           First := Ix + 2;
                         end if;
                      end loop;
-                  end if;
 
-                  if Dependency /= "" then
-                     svDependencies := svDependencies & Dependency;
+                     SvDependencies := SvDependencies &
+                     Dots.Utilities.Apply_Prefixed_Class_Style
+                       (Dependency (First .. Dependency'Last));
+
                   end if;
                end Process;
 
+               procedure Process_Base (Position : in Dots.String_Sets.Cursor) is
+                  Dependency : constant String :=
+                                 Dots.String_Sets.Element (Position);
+                  First : Integer := Dependency'First;
+
+               begin
+                  if Dependency /= "" then
+                     for Ix in Dependency'Range loop
+                        if Dependency (Ix) = '\' then
+                           SvNsDependencies := SvNsDependencies &
+                           Dependency (First .. Ix - 1);
+                           First := Ix + 2;
+                        end if;
+                     end loop;
+
+                     SvNsDependencies := SvNsDependencies &
+                     Dependency (First .. Dependency'Last);
+
+                  end if;
+               end Process_Base;
+
             begin
                Dots.String_Sets.Iterate (Conf.Dependencies, Process'Access);
+               Dots.String_Sets.Iterate (Conf.Dependencies_Base, Process_Base'Access);
             end;
 
             Setup_Associations;
@@ -529,7 +559,7 @@ package body Dots.Xmlreaders.Unit is
             end if;
 
          when Dots.Parser.stEnumerationValue =>
-            svEnumValue := svEnumValue & Dots.Parser.Simple_Contents;
+            SvEnumValue := SvEnumValue & Dots.Parser.Simple_Contents;
 
          when Dots.Parser.ctCreateRoutine =>
             svCreateRoutineSummary := svCreateRoutineSummary
@@ -600,6 +630,7 @@ package body Dots.Xmlreaders.Unit is
    procedure Setup_Associations is
       Conf : Dots.State.Output_Config renames
         Dots.State.Outputs (Dots.State.Current_Output);
+      use Dots.Utilities;
       Translations : constant Templates_Parser.Translate_Table
         :=
           (1  => Templates_Parser.Assoc ("SECTION", "Code"),
@@ -608,13 +639,14 @@ package body Dots.Xmlreaders.Unit is
              ("NAMESPACE", Dots.Utilities.Replace_Dots
                 (S         => S (sNamespace),
                  Separator => S (Conf.Namespace_Separator))),
-           4  => Templates_Parser.Assoc ("UNIT", S (Dots.State.Current_Unit)),
+           4  => Templates_Parser.Assoc ("UNIT", Apply_Prefixed_Class_Style
+               (S (Dots.State.Current_Unit))),
            5  => Templates_Parser.Assoc ("DEPENDENCY", svDependencies),
-           6  => Templates_Parser.Assoc ("CLASS", sClass),
+           6  => Templates_Parser.Assoc ("CLASS", Apply_Style (Conf.Classname_Style, sClass)),
            7 => Templates_Parser.Assoc ("CLASSSUMMARY", sClassSummary),
            8  => Templates_Parser.Assoc ("UNITTYPE", sUnitType),
            9  => Templates_Parser.Assoc ("BASECLASS",  svBaseClass),
-           10 => Templates_Parser.Assoc ("PARAMETER", svParameter),
+           10 => Templates_Parser.Assoc ("PARAMETER", Apply_Style (Conf.Membername_Style, svParameter)),
            11 => Templates_Parser.Assoc ("PARAMETERSUMMARY",
                                          svParameterSummary),
            12 => Templates_Parser.Assoc ("UNIFORM_PARAMETERTYPE",
@@ -623,7 +655,7 @@ package body Dots.Xmlreaders.Unit is
            14 => Templates_Parser.Assoc ("PARAMETERCLASS", svParameterClass),
            15 => Templates_Parser.Assoc ("PARAMETERISARRAY",
                                          svParameterIsArray),
-           16 => Templates_Parser.Assoc ("MEMBER", svMember),
+           16 => Templates_Parser.Assoc ("MEMBER", Apply_Style (Conf.Membername_Style, svMember)),
            17 => Templates_Parser.Assoc ("MEMBERSUMMARY", svMemberSummary),
            18 => Templates_Parser.Assoc ("UNIFORM_MEMBERTYPE",
                                       svUniformMemberType),
@@ -635,13 +667,13 @@ package body Dots.Xmlreaders.Unit is
                                                              S (sClass),
                                                              svNull)),
            24 => Templates_Parser.Assoc ("REVNAMESPACE", svRevNamespace),
-           25 => Templates_Parser.Assoc ("ENUMVALUE", svEnumValue),
-           26 => Templates_Parser.Assoc ("CREATEROUTINE", svCreateRoutine),
+           25 => Templates_Parser.Assoc ("ENUMVALUE", Apply_Style (Conf.Enum_Value_Style, svEnumValue)),
+           26 => Templates_Parser.Assoc ("CREATEROUTINE", Apply_Style (Conf.Membername_Style, svCreateRoutine)),
            27 => Templates_Parser.Assoc ("CREATEROUTINESUMMARY",
                                          svCreateRoutineSummary),
            28 => Templates_Parser.Assoc ("UNIFORM_CREATEPARAMETERTYPE",
                                       smUniformCreateParameterType),
-           29 => Templates_Parser.Assoc ("CREATEPARAMETER", smCreateParameter),
+           29 => Templates_Parser.Assoc ("CREATEPARAMETER", Apply_Style (Conf.Membername_Style, smCreateParameter)),
            30 => Templates_Parser.Assoc ("CREATEPARAMETERTYPE",
                                          smCreateParameterType),
            31 => Templates_Parser.Assoc ("CREATEPARAMETERISARRAY",
@@ -650,19 +682,22 @@ package body Dots.Xmlreaders.Unit is
                                          smCreateParameterIsLast),
            33 => Templates_Parser.Assoc ("UNIFORM_CREATEVALUETYPE",
                                       smUniformCreateValueType),
-           34 => Templates_Parser.Assoc ("CREATEVALUE", smCreateValue),
+           34 => Templates_Parser.Assoc ("CREATEVALUE", Apply_Style (Conf.Membername_Style, smCreateValue)),
            35 => Templates_Parser.Assoc ("CREATEVALUETYPE",
                                          smCreateValueType),
            36 => Templates_Parser.Assoc ("CREATEVALUEISARRAY",
                                          smCreateValueIsArray),
            37 => Templates_Parser.Assoc ("CREATEVALUEPARAMETER",
-                                         smCreateValueParameter),
+                                         Apply_Style (Conf.Membername_Style, smCreateValueParameter)),
            38 => Templates_Parser.Assoc ("CREATEVALUEPARAMETERINDEX",
                                          smCreateValueParameterIndex),
            39 => Templates_Parser.Assoc ("CREATEVALUEPARAMETERCLASS",
                                          smCreateValueParameterClass),
            40 => Templates_Parser.Assoc ("CHECKSUM",
-             TypeIdOf (S (sRawNamespace), S (sClass), svEnumValue))
+             TypeIdOf (S (sRawNamespace), S (sClass), svEnumValue)),
+           41 => Templates_Parser.Assoc ("XMLMEMBER", svMember),
+           42 => Templates_Parser.Assoc ("XMLPARAMETER", svParameter),
+           43 => Templates_Parser.Assoc ("DEPENDENCYBASE", Apply_Style (Conf.Namespace_Style, svNsDependencies))
           );
    begin
       Trans_Set := Templates_Parser.To_Set
@@ -710,6 +745,7 @@ package body Dots.Xmlreaders.Unit is
               (S (Dots.State.Current_Unit));
 
             Conf.Dependencies := Dots.String_Sets.Empty_Set;
+            Conf.Dependencies_Base := Dots.String_Sets.Empty_Set;
 
             if Entered_Element_Type = Dots.Parser.ctProperty then
                sUnitType := V ("property");
@@ -727,6 +763,7 @@ package body Dots.Xmlreaders.Unit is
             Templates_Parser.Clear (svNamespace);
             Templates_Parser.Clear (svRevNamespace);
             Templates_Parser.Clear (svDependencies);
+            Templates_Parser.Clear (svNsDependencies);
             Templates_Parser.Clear (svBaseClass);
             Templates_Parser.Clear (svParameter);
             Templates_Parser.Clear (svParameterSummary);
@@ -868,8 +905,8 @@ package body Dots.Xmlreaders.Unit is
                            (S         => S (sNamespace & '.'),
                             Separator => S (Conf.Filename_Separator),
                             Lower     => False) &
-                     S (sClass) & '.' &
-                     S (Conf.File_Extension));
+                     S (sClass) &
+                     S (Conf.File_Suffix));
 
       Result : constant String :=
                  Templates_Parser.Parse

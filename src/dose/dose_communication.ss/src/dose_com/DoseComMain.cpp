@@ -49,8 +49,8 @@
 // external in other DoseCom files
 //---------------------------------
 
-extern int DOSE_KeepAlive_Init(uchar DoseId);
-extern ulong Get_Own_IpAddress(void);
+extern int DOSE_KeepAlive_Init(dcom_uchar8 DoseId);
+extern dcom_ulong32 Get_Own_IpAddress(void);
 
 extern volatile int * volatile pDbg;
 
@@ -70,7 +70,7 @@ extern volatile int * volatile pDbg;
 // Local variables
 //--------------------------------
 
-static ushort g_MyDoseId;
+static dcom_ushort16 g_MyDoseId;
 
 static bool bIsAllowedToCallDoseComAPI = FALSE;
 static bool g_bIsStandAlone = FALSE;
@@ -115,7 +115,8 @@ int DoseCom_FreeBuff(char *pBuf)
 void WakeUp_Reader(int PrioChannel)
 {
     //PrintDbg("WakeUp_Reader(%d)\n", PrioChannel);
-
+    if(*pDbg)
+        PrintDbg("WakeUp_Reader(%d)\n", PrioChannel);
     g_pNotificationHandler->NotifyIncomingData(PrioChannel);
 }
 /************************************************************************
@@ -204,7 +205,7 @@ int DoseCom_Init(DoseComAllocator  *pAllocator,  // the base class
     // 2) Tries to open and read config files and overwrite default values
     //--------------------------------------------------------------------
 
-    CConfig::Dose_Config((uchar) DoseId, multicastAddress, netAddress);
+    CConfig::Dose_Config((dcom_uchar8) DoseId, multicastAddress, netAddress);
 
     g_bIsStandAlone = FALSE;
 
@@ -234,7 +235,7 @@ int DoseCom_Init(DoseComAllocator  *pAllocator,  // the base class
 
     g_MyDoseId = CConfig::m_MyDoseId;
 
-    result = DOSE_KeepAlive_Init((uchar) g_MyDoseId);
+    result = DOSE_KeepAlive_Init((dcom_uchar8) g_MyDoseId);
 
     if(*pDbg)
         PrintDbg("/// DoseId = %d\n", g_MyDoseId);
@@ -255,14 +256,14 @@ int DoseCom_Init(DoseComAllocator  *pAllocator,  // the base class
     //------------------------------------------------------------------
 
     DOSE_SHARED_DATA_S *pShm = CNodeStatus::GetNodeSharedDataPointer();
-    ulong64 BitForMe64 = (ulong64)1 << (g_MyDoseId & 0x3F);
+    dcom_ulong64 BitForMe64 = (dcom_ulong64)1 << (g_MyDoseId & 0x3F);
 
     for(int jj=0 ; jj < 23; jj++)
     {
         if(
-                ((pShm->BitMapNodesUp64  & ~BitForMe64) != (ulong64) 0)
+                ((pShm->BitMapNodesUp64  & ~BitForMe64) != (dcom_ulong64) 0)
             ||
-                ((pShm->BitMapNodesNew64 & ~BitForMe64) != (ulong64) 0)
+                ((pShm->BitMapNodesNew64 & ~BitForMe64) != (dcom_ulong64) 0)
           )
         {
             bIsAllowedToCallDoseComAPI = TRUE;
@@ -283,7 +284,7 @@ int DoseCom_Init(DoseComAllocator  *pAllocator,  // the base class
 
 int DoseCom_Add_DestinationId(  int         DestinationId,
                                 const char  *IpMulticastAddr,
-                                ulong64 BitMapDestChanMembers)
+                                dcom_ulong64 BitMapDestChanMembers)
 {
     int result;
 
@@ -304,7 +305,7 @@ int DoseCom_Add_DestinationId(  int         DestinationId,
 * See DoseCom_Interface.h for description.
 *************************************************************************/
 
-int DoseCom_Send(const char *pMsg, unsigned long MsgLength,
+int DoseCom_Send(const char *pMsg, dcom_ulong32 MsgLength,
                  bool PoolDistribution, bool bUseAck,
                  int  Priority, int Destination)
 {
@@ -340,9 +341,9 @@ int DoseCom_Send(const char *pMsg, unsigned long MsgLength,
 * See DoseCom_Interface.h for description.
 *************************************************************************/
 
-int DoseCom_Read(unsigned long RxUseBitMap,
-                 unsigned long *pRxFromBitMap,
-                 char **ppBuf, ulong *pSize, bool *pIsNative)
+int DoseCom_Read(dcom_ulong32 RxUseBitMap,
+                 dcom_ulong32 *pRxFromBitMap,
+                 char **ppBuf, dcom_ulong32 *pSize, bool *pIsNative)
 {
     int result;
 
@@ -369,12 +370,12 @@ int DoseCom_Read(unsigned long RxUseBitMap,
 *   false if there was no more nodes to report
 *************************************************************************/
 
-bool DoseCom_GetNodeChange( ulong & DoseId, ulong & Status,
-                            ulong & IpAddr_nw)
+bool DoseCom_GetNodeChange( dcom_ulong32 & DoseId, dcom_ulong32 & Status,
+                            dcom_ulong32 & IpAddr_nw)
 {
-    uchar   NodeStatus;
-    ulong   TestedDoseId;
-    ulong   NodeIpAddr_nw;
+    dcom_uchar8   NodeStatus;
+    dcom_ulong32   TestedDoseId;
+    dcom_ulong32   NodeIpAddr_nw;
 
     if(!bIsAllowedToCallDoseComAPI) return(false);
 
@@ -422,7 +423,7 @@ void DoseCom_PoolDistributed(int Priority, int DestinationId)
 * If this is called too early, DoseIs is not valid.
 *************************************************************************/
 
-void DoseCom_GetDoseId(ulong & DoseId)
+void DoseCom_GetDoseId(dcom_ulong32 & DoseId)
 {
     DoseId = g_MyDoseId;
 }
@@ -433,7 +434,7 @@ void DoseCom_GetDoseId(ulong & DoseId)
 *
 *************************************************************************/
 
-void DoseCom_GetOwnIpAddr( unsigned long & IpAddr_nw)
+void DoseCom_GetOwnIpAddr( dcom_ulong32 & IpAddr_nw)
 {
     IpAddr_nw = CConfig::m_MyIpAddr_nw;
 }
@@ -444,7 +445,7 @@ void DoseCom_GetOwnIpAddr( unsigned long & IpAddr_nw)
 * 'D' - set Debug level  (used by DoseMonitor)
 *************************************************************************/
 
-void DoseCom_Test(ulong TestCode, ulong Param)
+void DoseCom_Test(dcom_ulong32 TestCode, dcom_ulong32 Param)
 {
     //PrintDbg("DoseCom_Test() pDbg=%X\n", pDbg);
 

@@ -6,17 +6,7 @@ project dots_kernel is
 
    for library_dir use Externally_Built_Library'library_dir;
 
-   case Externally_Built_Library.OS is
-      when "Linux" =>
-          for library_name use "dots_kernel";
-      when "Windows_NT" =>
-          case Externally_Built_Library.Build is
-              when "debug" =>
-                  for library_name use "dots_kerneld";
-              when others =>
-                  for library_name use "dots_kernel";
-          end case;
-   end case;
+   for library_name use "dots_kernel";
 
    for Library_kind  use "dynamic";
 

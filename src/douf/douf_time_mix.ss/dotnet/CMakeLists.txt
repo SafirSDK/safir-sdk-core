@@ -1,18 +1,19 @@
-PROJECT(douf_time_dotnet)
-
 cmake_minimum_required(VERSION 2.6)
 
-FILE(GLOB cs_files *.cs)
+PROJECT(douf_time_dotnet)
 
-ADD_CUSTOM_COMMAND(OUTPUT douf_time_dotnet.dll
-                  COMMAND gmcs -target:library -r:Safir.Dob.Typesystem.dll,Safir.Dob.dll,dots_generated-dotnet.dll -out:douf_time_dotnet.dll ${cs_files}
-				  DEPENDS ${cs_files}
-                  COMMENT "Building douf_time_dotnet.dll"
-                  VERBATIM)
+INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+find_package(CSharp REQUIRED)
+INCLUDE(CSharpMacros)
 
-ADD_CUSTOM_TARGET(douf_time_dotnet ALL
-				  DEPENDS douf_time_dotnet.dll)
+FILE(GLOB sources *.cs)
 
-INSTALL(FILES douf_time_dotnet.dll
-		DESTINATION $ENV{SAFIR_RUNTIME}/lib)
+SET(CS_FLAGS ${COMMON_CS_FLAGS} "-keyfile:${SAFIR_SDK}/data/build/safirkey.snk"
+								"-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dll,${SAFIR_RUNTIME}/bin/Safir.Dob.dll,${SAFIR_RUNTIME}/bin/dots_generated-dotnet.dll")
 
+ADD_CS_LIBRARY(douf_time_dotnet "${sources}" ALL)
+
+INSTALL(FILES ${target_DLL}
+		DESTINATION ${SAFIR_RUNTIME}/bin)
+
+INSTALL_CS_DEBUG_INFO()

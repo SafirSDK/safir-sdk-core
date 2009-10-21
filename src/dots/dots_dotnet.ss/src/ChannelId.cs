@@ -147,7 +147,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Stativ != operator
+        /// Static != operator
         /// </summary>
         /// <param name="first">First channel id.</param>
         /// <param name="second">Second channel id.</param>
@@ -193,7 +193,7 @@ namespace Safir.Dob.Typesystem
         #region Internal methods
 
         /// <summary>
-        /// Internal property.
+        /// Get the raw 64 bit integer identifier.
         /// </summary>
         public Int64 RawValue
         {
@@ -201,7 +201,9 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Internal property.
+        /// Get the string that was used to create this id.
+        /// <para/>
+        /// If no string was used this method returns an empty string.
         /// </summary>
         public string RawString
         {
@@ -209,9 +211,11 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Internal method.
+        /// Get the length of the string when converted to UTF-8 encoding.
+        /// <para/>
+        /// Includes one byte for a null termination.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The length of the string of the id when converted to UTF-8.</returns>
         public System.Int32 Utf8StringLength()
         {
             if (m_channelIdStr.Length == 0)
@@ -228,9 +232,11 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Internal method.
+        /// Convert the string to UTF-8.
+        /// <para/>
+        /// Returns an empty string if there is no string.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>UTF-8 representation of the string.</returns>
         public byte[] Utf8String()
         {
             if (m_CachedUtf8String == null)

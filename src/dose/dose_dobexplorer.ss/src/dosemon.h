@@ -23,9 +23,8 @@
 ******************************************************************************/
 #ifndef DOSEMON_H
 #define DOSEMON_H
-//#include "graphwidget.h"
+#include "common_header.h"
 #include "ui_dosemon.h"
-#include <QtGui>
 #include <set>
 #include <Safir/Dob/Internal/InternalFwd.h>
 

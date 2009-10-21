@@ -66,6 +66,8 @@ namespace Internal
 
         const Dob::Typesystem::ObjectPtr GetRequest() const;
 
+        const char * GetRequestBlob() const;
+
         const Dob::Typesystem::HandlerId GetRequestHandlerId() const;
     private:
         const long m_requestId;

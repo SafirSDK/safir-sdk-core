@@ -162,8 +162,18 @@ namespace VehicleMmiCsWinForms
 
             // Create vehicles entity subscriber and list view
             m_vehicleEntityListHandler = new EntityListHandler(listViewVehicles, statusStrip.Items["toolStripStatus"]);
+        }
+
+        private void EntityFrame_Load(object sender, EventArgs e)
+        {
+            // Start subscription to vehicle entities.
+            // Prior to this, the application must be ready to
+            // receive Dob events (the message pump must be
+            // started), which is the reason for why the subscription
+            // start is performed here.
             m_vehicleEntityListHandler.StartSubscription();
         }
+
         //StartRemoveInExercise
         /// <summary>
         /// Overrides Safir.Dob.Requestor. Response for sent request

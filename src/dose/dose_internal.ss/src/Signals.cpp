@@ -23,12 +23,24 @@
 ******************************************************************************/
 
 #include "Signals.h"
-#include <ace/Guard_T.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <boost/lexical_cast.hpp>
 #include <iostream>
+#include <ace/Guard_T.h>
+#include <boost/bind.hpp>
+
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4702)
+#endif
+
+#include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
+
 namespace Safir
 {
 namespace Dob
@@ -122,14 +134,26 @@ namespace Internal
         m_connectOrOutSignal.post();
     }
 
-    void Signals::WaitForConnectionSignal(const ConnectionId& connection)
+    void wait(const Signals::SemaphorePtr & sem)
+    {
+        sem->wait();
+        //remove any further signals from the semaphore
+        while(sem->try_wait())
+            ;
+    }
+
+    const boost::function<void(void)> Signals::GetConnectionSignalWaiter(const ConnectionId& connection)
+    {
+        return boost::bind(wait,m_waitSignals.GetSemaphore(connection));
+    }
+/*    void Signals::WaitForConnectionSignal(const ConnectionId& connection)
     {
         SemaphorePtr sem = m_waitSignals.GetSemaphore(connection);
         sem->wait();
         //remove any further signals from the semaphore
         while(sem->try_wait())
             ;
-    }
+    }*/
 
     void Signals::WaitForConnectOrOut()
     {

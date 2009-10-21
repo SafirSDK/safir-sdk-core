@@ -23,6 +23,9 @@
 -------------------------------------------------------------------------------
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with GNAT.Spitbol; use GNAT.Spitbol;
+with Templates_Parser;
+
 with Dots.State;
 
 package Dots.Utilities is
@@ -43,6 +46,10 @@ package Dots.Utilities is
       Member : String) return String;
 
    function Get_Uniform_Member_Type
+     (Unit   : String;
+      Member : String) return String;
+
+   function Get_Xml_Member_Type
      (Unit   : String;
       Member : String) return String;
 
@@ -71,6 +78,24 @@ package Dots.Utilities is
    function Uniform_Type_Tag_Of
      (Xml_Type : in String) return String;
 
+   function Apply_Style
+     (Style : Dots.State.Style;
+      To    : String) return String;
+
+   function Apply_Style
+     (Style : Dots.State.Style;
+      To    : VString) return VString;
+
+   function Apply_Style
+     (Style : Dots.State.Style;
+      To    : Templates_Parser.Tag) return Templates_Parser.Tag;
+
+   function Apply_Prefixed_Class_Style
+     (To    : String) return String;
+
+   function Get_Base_Of
+     (Class    : String) return String;
+
    function Replace_Dots
      (S         : String;
       Separator : String;
@@ -78,5 +103,8 @@ package Dots.Utilities is
 
    function Format_Summary
      (Summary : in Unbounded_String) return Unbounded_String;
+
+   function Mangle_Namespace
+     (Value : in String) return String;
 
 end Dots.Utilities;

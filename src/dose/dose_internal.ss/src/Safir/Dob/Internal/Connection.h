@@ -47,7 +47,7 @@ namespace Dob
 {
 namespace Internal
 {
-    typedef boost::interprocess::offset_ptr<volatile int> SignalPtr;
+    typedef boost::interprocess::offset_ptr<AtomicUint32> SignalPtr;
     typedef std::pair<Dob::Typesystem::TypeId, Dob::Typesystem::HandlerId> TypeHandlerPair;
 
     class DOSE_INTERNAL_API Connection:
@@ -100,7 +100,14 @@ namespace Internal
         SubscriptionQueue& GetDirtySubscriptionQueue() {return m_dirtySubscriptions;}
 
         //---------- Subscribed types ----------
-        void AddSubscription(const Typesystem::TypeId typeId);
+        // Note that a subscribed typeId will never be removed. This is due to the fact that
+        // it is a bit complicated to implement the removal, and we make the assumption that
+        // the set of subscribed typ id for an application is fairly static.
+        void AddSubscription(const Typesystem::TypeId   typeId,
+                             SubscriptionType           subscriptionType);
+
+        typedef Containers<Typesystem::TypeId>::set TypesSet;
+        TypesSet GetSubscriptions(SubscriptionType subscriptionType) const;
 
         //---------- Registrations ----------
         void AddRegistration(const Typesystem::TypeId              typeId,
@@ -146,7 +153,7 @@ namespace Internal
         // Get a copy of current revoked registrations.
         const RegistrationVector GetRevokedRegistrations() const;
         // Get a copy of revoked registrations. The underlaying structure is cleared.
-        void GetAndClearRevokedRegistrations(RegistrationVector& revokedRegistrations);
+        const RegistrationVector GetAndClearRevokedRegistrations();
 
          /**
          * @name Pending Registrations
@@ -184,13 +191,18 @@ namespace Internal
         //Signal in-event
         void SignalIn() const;
 
-        void SendStopOrder() {m_stopOrderPending = true; SignalIn();}
-        bool StopOrderPending() const {return m_stopOrderPending;}
-        void SetStopOrderHandled() {m_stopOrderPending = false;}
+        void SendStopOrder() {m_stopOrderPending = 1; SignalIn();}
+        bool StopOrderPending() const {return m_stopOrderPending != 0;}
+        void SetStopOrderHandled() {m_stopOrderPending = 0;}
 
-        void Died() {m_died = true; SignalOut();}
+        void Died() {m_died = 1; SignalOut();}
 
-        bool IsDead() const {return m_died;}
+        bool IsDead() const {return m_died != 0;}
+
+        // Flag valid only for non-local connections.
+        // Indicates that the remote node, from where the connection originates, is down.
+        void SetNodeDown() {m_nodeDown = 1;}
+        bool NodeIsDown() const {return m_nodeDown != 0;}
 
     private:
 
@@ -217,9 +229,9 @@ namespace Internal
         typedef Containers<PendingRegistration>::vector PendingOwnerships;
         PendingOwnerships m_pendingOwnerships;
 
-        typedef Containers<Typesystem::TypeId>::set TypesSet;
+        typedef Containers<TypesSet>::vector        TypesSetVector;
 
-        TypesSet m_subscribedTypes;
+        TypesSetVector    m_subscribedTypes;
 
         typedef Containers<Typesystem::InstanceId::UnderlyingType>::set     InitialInjectionValue;
         typedef PairContainers<TypeHandlerKey, InitialInjectionValue>::map   InitialInjectionInstances;
@@ -239,8 +251,10 @@ namespace Internal
         // One common out queue for all consumers.
         RequestOutQueue m_requestOutQueue; //requestOut - responseIn
 
-        bool m_stopOrderPending;
-        bool m_died;
+        AtomicUint32 m_stopOrderPending;
+        AtomicUint32 m_died;
+
+        AtomicUint32 m_nodeDown;
 
         const bool m_isLocal;
 

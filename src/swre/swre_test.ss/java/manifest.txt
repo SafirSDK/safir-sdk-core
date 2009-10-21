@@ -1,7 +1,0 @@
-Class-Path: 
-   safir.dob.jar
-   safir.dob.typesystem.jar 
-   dots_generated-java.jar
-   safir.swreports.jar
-Main-Class: SwreTest
-

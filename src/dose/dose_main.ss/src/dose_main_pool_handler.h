@@ -107,7 +107,7 @@ namespace Internal
 
         const Safir::Dob::Connection&       m_connection;
         const boost::function <void(void)>  m_dispatchFunc;
-        volatile int                        m_isNotified;
+        AtomicUint32                        m_isNotified;
     };
 
     class DummyDispatcher:

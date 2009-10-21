@@ -112,6 +112,11 @@ namespace Internal
         void UnsubscribeRegistrationAll(const ConnectionPtr&           connection,
                                         const Dob::Typesystem::TypeId  typeId);
 
+        // Returns true if the given connection/consumer has any registration subscription for the given type.
+        bool HasRegistrationSubscription(const ConnectionPtr&           connection,
+                                         const ConsumerId&              consumer,
+                                         const Dob::Typesystem::TypeId  typeId);
+
         /** @} */
 
         //also removes them from the PendingOwnerships shared vector.

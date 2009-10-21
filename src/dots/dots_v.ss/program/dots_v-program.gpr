@@ -9,7 +9,7 @@ project dots_v.program is
       ("Default", "Elaboration", "Full");
    Warning_Level : Warning_Levels := external ("Warning_Level");
    type Build_Type is
-      ("release", "debug", "gcov", "gperf", "normal");
+      ("Release", "Debug", "gcov", "gperf", "normal");
    Build : Build_Type := external ("BUILD");
 
    for Main use ("dots_v.adb");
@@ -19,7 +19,7 @@ project dots_v.program is
 
       case Build is
 
-         when "debug" =>
+         when "Debug" =>
             for Switches ("dots_v") use ("-f");
 
          when others =>
@@ -50,11 +50,11 @@ project dots_v.program is
                when "gcov" =>
                   for Default_Switches ("ada") use dots_v.Compiler'Default_Switches ("Ada");
 
-               when "debug" =>
+               when "Debug" =>
                   --for Default_Switches ("ada") use ("-gnatwcefijmpruv", "-gnatyabcefhiklmnoprst");
                   for Default_Switches ("ada") use dots_v.Compiler'Default_Switches ("Ada");
 
-               when "release" =>
+               when "Release" =>
                   for Default_Switches ("ada") use dots_v.Compiler'Default_Switches ("Ada");
             end case;
       end case;

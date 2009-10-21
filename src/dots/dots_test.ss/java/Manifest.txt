@@ -1,0 +1,2 @@
+Main-Class: Test
+Class-Path: dots_java.jar dots_generated-java.jar

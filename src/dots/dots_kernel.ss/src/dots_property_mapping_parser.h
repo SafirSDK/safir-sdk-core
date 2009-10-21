@@ -48,9 +48,9 @@ namespace Internal
 
         //Inherited methods
         void Reset();
-        bool StartElement(std::string element);
-        bool EndElement(std::string elsement);
-        bool Content(std::string str);
+        bool StartElement(const std::string& element);
+        bool EndElement(const std::string& elsement);
+        bool Content(const std::string& str);
 
         //special PropertyParser methods
         DobPropertyMappings & Result() {return m_PropertyMappings;}

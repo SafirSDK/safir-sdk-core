@@ -52,6 +52,9 @@ namespace Internal
     class ParameterDescription;
     typedef boost::interprocess::offset_ptr<const ParameterDescription> ParameterDescriptionConstPtr;
 
+    class ExceptionDescription;
+    typedef boost::interprocess::offset_ptr<const ExceptionDescription> ExceptionDescriptionConstPtr;
+
     class ClassDatabase;
     class EnumDatabase;
 

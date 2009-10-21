@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 2.6)
+
+project(dots_test_java Java)
+find_package(Java REQUIRED)
+
+INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE(JavaMacros)
+
+file(GLOB_RECURSE sources src/*.java)
+
+SET_JAVA_CLASSPATH(${SAFIR_RUNTIME}/bin/dots_java.jar ${SAFIR_RUNTIME}/bin/dots_generated-java.jar)
+
+SET(JAVA_MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
+
+ADD_JAR(dots_test_java "${sources}" ALL)
+
+INSTALL(FILES dots_test_java.jar
+  DESTINATION ${SAFIR_RUNTIME}/bin)
+

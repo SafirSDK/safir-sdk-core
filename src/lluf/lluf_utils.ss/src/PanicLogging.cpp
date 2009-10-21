@@ -22,11 +22,24 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/PanicLogging.h>
+
+//disable warnings in ace
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4267)
+#endif
+
 #include <ace/Thread.h>
 #include <ace/Process.h>
 #include <ace/SOCK_Dgram.h>
 #include <ace/OS_NS_sys_socket.h>
 #include <ace/OS_NS_unistd.h>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
 #include <Safir/Utilities/ProcessInfo.h>
 #include <sstream>
 namespace Safir

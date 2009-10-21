@@ -86,33 +86,6 @@ namespace Typesystem
          */
         T GetVal() const    {if (m_bIsNull) throw NullException(L"value is null",__WFILE__,__LINE__); return m_Value;}
 
-        //#ifndef CONTAINER_PROXIES
-        /**
-         * Equality operator for ValueContainer and value.
-         *
-         * This operator lets you compare the container with a value of the contained type.
-         * It will return false if the container is null or the values are not equal.
-         * The change flag is ignored.
-         *
-         * @param other [in] - Value to compare with.
-         * @return True if the container is non-null and the values are equal.
-         */
-        //bool operator==(const T other) const
-        //        {return !IsNull() && m_Value == other;}
-
-        /**
-         * Inequality operator for ValueContainer and value.
-         *
-         * Implemented as "opposite" of operator==(other).
-         *
-         * @param other [in] - Value to compare with.
-         * @return True if the container is null or the values are different.
-         * @see operator==
-         */
-        //        bool operator != (const T other) const
-        //        {return !(*this == other);}
-        //#endif
-
         //implementation of pure virtual in ContainerBase.
         virtual bool IsNull() const {return m_bIsNull;}
 
@@ -144,32 +117,6 @@ namespace Typesystem
         bool m_bIsNull;
         T m_Value;
     };
-
-
-    /**
-     * Equality operator for value and ValueContainer.
-     *
-     * @param first [in] - First value to compare.
-     * @param second [in] - Second value to compare.
-     * @return True if the container is non-null and the values are equal.
-     * @see ValueContainer::operator==
-     */
-    //    template <class T>
-    //    static inline bool operator==(const T first, const ValueContainer<T> second)
-    //    {return second == first;}
-
-    /**
-     * Inequality operator for value and ValueContainer.
-     *
-     * @param first [in] - First value to compare.
-     * @param second [in] - Second value to compare.
-     * @return  True if the container is null or the values are different.
-     * @see ValueContainer::operator!=
-     */
-    /*    template <class T>
-    static inline bool operator!=(const T first, const ValueContainer<T> second)
-    {return second != first;}
-    */
 
     /**
      * Container for strings (std::wstring).
@@ -206,31 +153,6 @@ namespace Typesystem
          * @throws NullException The container is null.
          */
         const std::wstring & GetVal() const    {if (m_bIsNull) throw NullException(L"value is null",__WFILE__,__LINE__); return m_Value;}
-
-        /**
-         * Equality operator for StringContainer and a std::wstring.
-         *
-         * This operator lets you compare the container with a string.
-         * It will return false if the container is null or the string values are not equal.
-         * The change flag is ignored.
-         *
-         * @param other [in] - String to compare with.
-         * @return True if the container is non-null and the strings are equal.
-         */
-        bool operator==(const std::wstring & other) const
-        {return !IsNull() && m_Value == other;}
-
-        /**
-         * Inequality operator for StringContainer and std::wstring.
-         *
-         * Implemented as "opposite" of operator==(other).
-         *
-         * @param other [in] - String to compare with.
-         * @return True if the container is null or the strings are different.
-         * @see operator==
-         */
-        bool operator != (const std::wstring & other) const
-        {return !(*this == other);}
 
         //implementation of pure virtual in ContainerBase.
         virtual bool IsNull() const {return m_bIsNull;}
@@ -313,10 +235,6 @@ namespace Typesystem
             {
                 m_CachedUtf8String = Utilities::ToUtf8(m_Value);
             }
-            if (m_Value.empty() != m_CachedUtf8String.empty())
-            {
-                throw SoftwareViolationException(L"Programming error in StringContainer, contact STLRHA",__WFILE__,__LINE__);
-            }
             return m_CachedUtf8String;
         }
 
@@ -331,29 +249,6 @@ namespace Typesystem
         std::wstring m_Value;
         mutable std::string m_CachedUtf8String;
     };
-
-
-    /**
-     * Equality operator for std::wstring and StringContainer.
-     *
-     * @param first [in] - First value to compare.
-     * @param second [in] - Second value to compare.
-     * @return True if the container is non-null and the strings are equal.
-     * @see StringContainer::operator==
-     */
-    static inline bool operator==(const std::wstring & first, const StringContainer & second)
-    {return second == first;}
-
-    /**
-     * Inequality operator for std::wstring and StringContainer.
-     *
-     * @param first [in] - First value to compare.
-     * @param second [in] - Second value to compare.
-     * @return  True if the container is null or the strings are different.
-     * @see StringContainer::operator!=
-     */
-    static inline bool operator!=(const std::wstring & first, const StringContainer & second)
-    {return second != first;}
 
     /**
      * Container for Binary
@@ -390,30 +285,6 @@ namespace Typesystem
          */
         void SetVal(const Binary & value)  {m_Value = value; m_bIsNull = false; m_bIsChanged = true;}
 
-        /**
-         * Equality operator for BinaryContainer and a Binary.
-         *
-         * This operator lets you compare the container with a Binary.
-         * It will return false if the container is null or the Binary values are not equal.
-         * The change flag is ignored.
-         *
-         * @param other [in] - Binary to compare with.
-         * @return True if the container is non-null and the binaries are equal.
-         */
-        bool operator==(const Binary& other) const
-        {return !IsNull() && m_Value == other;}
-
-        /**
-         * Inequality operator for BinaryContainer and Binary.
-         *
-         * Implemented as "opposite" of operator==(other).
-         *
-         * @param other [in] - Binary to compare with.
-         * @return True if the container is null or the binaries are different.
-         * @see operator==
-         */
-        bool operator != (const Binary& other) const
-        {return !(*this == other);}
 
         //implementation of pure virtual in ContainerBase.
         virtual bool IsNull() const {return m_bIsNull;}
@@ -446,30 +317,6 @@ namespace Typesystem
         bool m_bIsNull;
         Binary m_Value;
     };
-
-    /**
-     * Equality operator for Binary and BinaryContainer.
-     *
-     * @param first [in] - First value to compare.
-     * @param second [in] - Second value to compare.
-     * @return True if the container is non-null and the binaries are equal.
-     * @see BinaryContainer::operator==
-     */
-    static inline bool operator==(const Binary & first, const BinaryContainer & second)
-    {return second == first;}
-
-    /**
-     * Inequality operator for Binary and BinaryContainer.
-     *
-     * @param first [in] - First value to compare.
-     * @param second [in] - Second value to compare.
-     * @return  True if the container is null or the binaries are different.
-     * @see BinaryContainer::operator!=
-     */
-    static inline bool operator!=(const Binary & first, const BinaryContainer & second)
-    {return second != first;}
-
-
 
     /**
      * @name Basic type container typedefs

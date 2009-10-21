@@ -54,9 +54,10 @@ namespace Internal
 
 
 
-    LamportClock::LamportClock()
+    LamportClock::LamportClock():
+        m_currentClock(0)
     {
-        atomic_write32(&m_currentClock,0);
+
     }
 
     LamportClock::~LamportClock()
@@ -67,7 +68,7 @@ namespace Internal
 
     const LamportTimestamp LamportClock::GetCurrentTimestamp() const
     {
-        return LamportTimestamp(m_currentClock);
+        return LamportTimestamp(m_currentClock.value());
     }
 
 
@@ -81,14 +82,14 @@ namespace Internal
         //changes between the read and swap, and then we will try again.
         for(;;)
         {
-            const boost::uint32_t currentClock = atomic_read32(&m_currentClock);
+            const boost::uint32_t currentClock = m_currentClock.value();
             if (otherClock > currentClock)
             {
-                atomic_cas32(&m_currentClock,otherClock,currentClock);
+                m_currentClock.compare_exchange(otherClock,currentClock);
             }
             else
             {
-                atomic_inc32(&m_currentClock);
+                m_currentClock++;
                 return;
             }
         }
@@ -96,7 +97,7 @@ namespace Internal
 
     const LamportTimestamp LamportClock::GetNewTimestamp()
     {
-        return LamportTimestamp(atomic_inc32(&m_currentClock));
+        return LamportTimestamp(m_currentClock++);
     }
 
 

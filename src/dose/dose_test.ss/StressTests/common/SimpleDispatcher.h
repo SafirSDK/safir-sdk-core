@@ -27,9 +27,30 @@
 
 #include <Safir/Dob/Consumer.h>
 #include <boost/noncopyable.hpp>
+#include <stdlib.h>
+
+
+//we include a bunch of extra stuff in here that most of the stress tests use anyway, to reduce 
+//the number of places for the warning stuff.
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4267)
+  #pragma warning(disable: 4512)
+  #pragma warning(disable: 4702)
+#endif
+
+#include <boost/program_options/cmdline.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <boost/lexical_cast.hpp>
 #include <ace/Auto_Event.h>
 #include <ace/Time_Value.h>
-#include <stdlib.h>
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
+
+
 
 class SimpleDispatcher:
     public Safir::Dob::StopHandler,

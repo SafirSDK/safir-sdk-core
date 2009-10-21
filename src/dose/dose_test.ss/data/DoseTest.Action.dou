@@ -4,7 +4,7 @@
     <baseClass>Safir.Dob.Message</baseClass>
     <members>
         <member>
-            <name>ActionType</name>
+            <name>ActionKind</name>
             <type>DoseTest.ActionEnum</type>
         </member>
         <member>

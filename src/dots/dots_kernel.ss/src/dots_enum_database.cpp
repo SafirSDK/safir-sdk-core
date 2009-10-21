@@ -78,10 +78,16 @@ namespace Internal
         for (EnumTable::const_iterator it = m_enums->begin();
              it != m_enums->end(); ++it)
         {
+            //ignore the checksums.
+            if (it->first == it->second.Checksum())
+            {
+                continue;
+            }
+
             buf[resultSize] = it->first;
             ++resultSize;
 
-            if (resultSize > bufSize)
+            if (resultSize == bufSize)
             {
                 break;
             }

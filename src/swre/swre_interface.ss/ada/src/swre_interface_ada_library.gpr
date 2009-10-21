@@ -1,0 +1,21 @@
+with "safir_defaults";
+with "dots_ada";
+with "dose_ada";
+with "dots_generated_ada";
+with "swre_library";
+
+project Swre_Interface_Ada_Library is
+
+   for Source_Dirs use (".");
+   for Object_Dir use "obj";
+   for Library_Dir use "lib";
+   for Library_Src_Dir use "interface";
+   for Library_ALI_Dir use "ali";
+   for Library_Name use "swre_interface_ada";
+   for Library_Kind use "dynamic";
+
+   package Compiler is
+      for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
+   end Compiler;
+
+end Swre_Interface_Ada_Library;

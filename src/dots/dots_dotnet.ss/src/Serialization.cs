@@ -28,17 +28,23 @@ using System.Runtime.InteropServices;
 
 namespace Safir.Dob.Typesystem
 {
+    /// <summary>
+    /// Methods for serializing objects to binary and XML forms.
+    /// </summary>
     public class Serialization
     {
-        //************************************************************************************
-        //* Serialization
-        //************************************************************************************
+        /// <summary>
+        /// Serialize an object to XML.
+        /// </summary>
+        /// <param name="obj">The object to serialize</param>
+        /// <returns>The xml serialization</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is something wrong with the object.</exception>
         public static string ToXml(Dob.Typesystem.Object obj)
         {
             System.Int32 blobSize = obj.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize);
-            System.IntPtr beginningOfUnused = System.IntPtr.Zero;
-            Internal.Kernel.DotsC_FormatBlob(blob, blobSize, obj.GetTypeId(), ref beginningOfUnused);
+            System.IntPtr beginningOfUnused;
+            Internal.Kernel.DotsC_FormatBlob(blob, blobSize, obj.GetTypeId(), out beginningOfUnused);
             obj.WriteToBlob(blob, ref beginningOfUnused);
 
             int BUF_SIZE = 100000;
@@ -63,6 +69,30 @@ namespace Safir.Dob.Typesystem
             return str;
         }
 
+        /// <summary>
+        /// Convert a blob to XML.
+        /// </summary>
+        /// <param name="binary">The blob to convert to xml.</param>
+        /// <returns>The xml of the blob.</returns>
+        public static string ToXml(byte[] binary)
+        {
+            System.IntPtr blob = Marshal.AllocHGlobal(binary.Length);
+            Marshal.Copy(binary, 0, blob, binary.Length);
+            try
+            {
+                return ToXml(blob);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(blob);
+            }
+        }
+
+        /// <summary>
+        /// Convert a blob to XML.
+        /// </summary>
+        /// <param name="blob">The blob to convert to xml.</param>
+        /// <returns>The xml of the blob.</returns>
         public static string ToXml(System.IntPtr blob)
         {
             int BUF_SIZE = 100000;
@@ -86,23 +116,54 @@ namespace Safir.Dob.Typesystem
             return str;
         }
 
+        /// <summary>
+        /// Deserialize an XML serialization.
+        /// <para>
+        /// This method creates a new object from a given xml serialization.
+        /// It uses the ObjectFactory to accomplish this.
+        /// </para>
+        /// </summary>
+        /// <param name="xml">The xml serialization to deserialize.</param>
+        /// <returns>New object.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">If the type represented by the serialization isn't
+        /// found in the ObjectFactory.</exception>
         public static Object ToObject(string xml)
         {
             IntPtr blob;
             System.IntPtr sp = Internal.InternalOperations.CStringOf(xml);
-            Kernel.DotsC_XmlToBlob(out blob, sp);
+#if FUNC_PTR_WORKAROUND
+            System.IntPtr deleter;
+#else
+            Internal.Kernel.DotsC_BytePointerDeleter deleter;
+#endif
+            Kernel.DotsC_XmlToBlob(out blob, out deleter, sp);
             Marshal.FreeHGlobal(sp);
             Object obj = ObjectFactory.Instance.CreateObject(blob);
-            Internal.InternalOperations.Delete(ref blob);
+
+#if FUNC_PTR_WORKAROUND
+            Internal.Kernel.DotsC_DeleteBlob(ref blob);
+#else
+            deleter(ref blob);
+#endif
             return obj;
         }
 
+        /// <summary>
+        /// Serialize an object to binary form.
+        /// </summary>
+        /// <param name="obj">The object to serialize.</param>
+        /// <returns>Object in binary form.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is something wrong with the object.</exception>
         public static byte[] ToBinary(Dob.Typesystem.Object obj)
         {
             System.Int32 blobSize = obj.CalculateBlobSize();
+            if (blobSize == 0)
+            {
+                return new byte[0];
+            }
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize);
-            System.IntPtr beginningOfUnused = System.IntPtr.Zero;
-            Internal.Kernel.DotsC_FormatBlob(blob, blobSize, obj.GetTypeId(), ref beginningOfUnused);
+            System.IntPtr beginningOfUnused;
+            Internal.Kernel.DotsC_FormatBlob(blob, blobSize, obj.GetTypeId(), out beginningOfUnused);
             obj.WriteToBlob(blob, ref beginningOfUnused);
             byte[] result = new byte[blobSize];
             Marshal.Copy(blob, result, 0, blobSize);
@@ -110,6 +171,13 @@ namespace Safir.Dob.Typesystem
             return result;
         }
 
+        /// <summary>
+        /// Deserialize a binary serialization and create an object.
+        /// </summary>
+        /// <param name="binary">The binary serialization to deserialize.</param>
+        /// <returns>New object.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">If the type represented by the serialization isn't found
+        /// in the ObjectFactory.</exception>
         public static Object ToObject(byte[] binary)
         {
             System.IntPtr blob = Marshal.AllocHGlobal(binary.Length);
@@ -118,37 +186,5 @@ namespace Safir.Dob.Typesystem
             Marshal.FreeHGlobal(blob);
             return obj;
         }
-        /*
-        public static bool ToObject(Dob.Typesystem.Object obj,
-                                    System.IntPtr binary)
-        {
-            if (binary == IntPtr.Zero)
-            {
-                return false;
-            }
-            if (Operations.IsOfType(Kernel.DotsC_GetId(ref binary).TypeId, obj.GetObjectId().TypeId))
-            {
-                Internal.InternalOperations.DeleteBlob(ref obj.blob);
-                Internal.InternalOperations.CreateCopy(ref obj.blob, ref binary);
-                return true;
-            }
-            return false;
-        }
-
-        public static int SizeOfObject(Dob.Typesystem.Object obj)
-        {
-            return SizeOfBinary(Internal.InternalOperations.GetBlob(obj));
-        }
-
-        public static int SizeOfBinary(System.IntPtr binary)
-        {
-            return Internal.InternalOperations.GetSizeOfBlob(ref binary);
-        }
-
-        public static System.IntPtr GetBinaryReference(Dob.Typesystem.Object obj)
-        {
-            return Internal.InternalOperations.GetBlob(obj);
-        }
-        */
     }
 }

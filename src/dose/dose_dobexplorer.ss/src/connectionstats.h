@@ -23,8 +23,8 @@
 ******************************************************************************/
 #ifndef CONNECTIONSTATS_H
 #define CONNECTIONSTATS_H
+#include "common_header.h"
 #include "ui_connectionstats.h"
-#include <QtGui>
 
 #include <Safir/Dob/Internal/Connection.h>
 
@@ -41,7 +41,7 @@ public:
 
 
 public slots:
-    void UpdateStatistics();
+    void UpdateStatistics(const bool ignoreVisible = false);
 private:
 
     QTimer m_timer;

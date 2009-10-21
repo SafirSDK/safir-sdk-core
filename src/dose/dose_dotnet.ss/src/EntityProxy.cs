@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -103,7 +103,7 @@ namespace Safir.Dob
                 {
                     throw new Typesystem.SoftwareViolationException("Not possible to use call Entity on OnDeletedEntity proxy!");
                 }
-                return (Entity)Typesystem.ObjectFactory.Instance.CreateObject(m_currentBlob);            
+                return (Entity)Typesystem.ObjectFactory.Instance.CreateObject(m_currentBlob);
             }
         }
 
@@ -147,7 +147,7 @@ namespace Safir.Dob
                         Typesystem.LibraryExceptions.Instance.Throw();
                     }
                 }
-                return (Entity)Typesystem.ObjectFactory.Instance.CreateObject(m_currentBlobWithChangeInfo);   
+                return (Entity)Typesystem.ObjectFactory.Instance.CreateObject(m_currentBlobWithChangeInfo);
             }
         }
 
@@ -195,7 +195,7 @@ namespace Safir.Dob
                 {
                     Typesystem.LibraryExceptions.Instance.Throw();
                 }
-                
+
                 try
                 {
                     return (ConnectionInfo)Typesystem.ObjectFactory.Instance.CreateObject(blob);
@@ -276,7 +276,7 @@ namespace Safir.Dob
                         Typesystem.LibraryExceptions.Instance.Throw();
                     }
                 }
-                return m_currentBlobWithChangeInfo; 
+                return m_currentBlobWithChangeInfo;
             }
         }
         #endregion
@@ -300,7 +300,11 @@ namespace Safir.Dob
             get
             {
                 CheckNotDisposed();
-                return new PreviousEntityProxy(m_currentBlob,m_currentState,m_previousBlob,m_previousState,m_timestampDiff);
+                if (m_previousEntityProxy == null)
+                {
+                    m_previousEntityProxy = new PreviousEntityProxy(m_currentBlob,m_currentState,m_previousBlob,m_previousState,m_timestampDiff);
+                }
+                return m_previousEntityProxy;
             }
         }
 
@@ -330,10 +334,9 @@ namespace Safir.Dob
         /// <summary>
         /// Retrieves the timestamp for the latest create, update or delete.
         /// <para/>
-        /// Note that timestamps is only available for types configured with this option.
+        /// Note that this operation is only valid for Injectable types.
         /// </summary>
         /// <returns>Timestamp</returns>
-        /// <exception cref="Safir.Dob.NotFoundException">No timestamp available for this entity type.</exception>
         public System.Int64 GetTimestamp()
         {
             CheckNotDisposed();
@@ -350,11 +353,10 @@ namespace Safir.Dob
         /// <summary>
         /// Retrieves the timestamp for the given top member.
         /// <para/>
-        /// Note that timestamps is only available for types configured with this option.
+        /// Note that this operation is only valid for Injectable types.
         /// </summary>
         /// <param name="member">Top level member index.</param>
         /// <returns>Timestamp.</returns>
-        /// <exception cref="Safir.Dob.NotFoundException">No timestamp available for this entity type.</exception>
         public System.Int64 GetTimestamp(System.Int32 member)
         {
             CheckNotDisposed();
@@ -402,6 +404,13 @@ namespace Safir.Dob
             if (!disposed)
             {
                 disposed = true;
+
+                if (m_previousEntityProxy != null)
+                {
+                    m_previousEntityProxy.Dispose();
+                    m_previousEntityProxy = null;
+                }
+
 #if FUNC_PTR_WORKAROUND
                 if (m_currentBlobWithChangeInfo != System.IntPtr.Zero)
                 {
@@ -413,6 +422,7 @@ namespace Safir.Dob
                     m_blobDeleter(ref m_currentBlobWithChangeInfo);
                 }
 #endif
+
                 Interface.DoseC_DropReference(m_currentState);
                 Interface.DoseC_DropReference(m_previousState);
             }
@@ -436,11 +446,11 @@ namespace Safir.Dob
                                                      "Make sure you call Dispose on the proxy when you are done with it (you can also do this with a 'using' construct).\n" +
                                                      "The program will now exit!",
                                                      "Fatal Error",
-                                                     System.Windows.Forms.MessageBoxButtons.OK, 
-                                                     System.Windows.Forms.MessageBoxIcon.Stop, 
-                                                     System.Windows.Forms.MessageBoxDefaultButton.Button1, 
+                                                     System.Windows.Forms.MessageBoxButtons.OK,
+                                                     System.Windows.Forms.MessageBoxIcon.Stop,
+                                                     System.Windows.Forms.MessageBoxDefaultButton.Button1,
                                                      System.Windows.Forms.MessageBoxOptions.ServiceNotification);
-                System.Environment.Exit(-1);
+                System.Environment.Exit(123);
             }
         }
 
@@ -448,7 +458,7 @@ namespace Safir.Dob
         {
             if (disposed)
             {
-                throw new Typesystem.SoftwareViolationException("Attempt to use a MessageProxy that is disposed! Please do not use a MessageProxy outside the OnMessage callback!");
+                throw new Typesystem.SoftwareViolationException("Attempt to use an EntityProxy that is disposed!");
             }
         }
 
@@ -464,6 +474,8 @@ namespace Safir.Dob
         private Interface.DoseC_BlobDeleter m_blobDeleter = null;
 #endif
         private readonly bool m_timestampDiff;
+
+        private PreviousEntityProxy m_previousEntityProxy = null;
 
         #endregion
     }

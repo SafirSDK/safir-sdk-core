@@ -76,6 +76,11 @@ namespace Internal
 
     }
 
+//disable warnings about constant conditional
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4127)
+#endif
 
     ClassDescription * ClassDatabase::FindClass(const TypeId typeId)
     {
@@ -139,6 +144,11 @@ namespace Internal
             return NULL;
         }
     }
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
     const ClassDescription * ClassDatabase::FindClass(const TypeId typeId) const
     {//call the non-const version

@@ -2,5 +2,5 @@
 <exception xmlns="urn:safir-dots-unit">
     <summary>Thrown when not owner tries to set/delete an entity</summary>
     <name>Safir.Dob.AccessDeniedException</name>
-    <baseClass>fundamentalException</baseClass>
+    <baseClass>FundamentalException</baseClass>
 </exception>

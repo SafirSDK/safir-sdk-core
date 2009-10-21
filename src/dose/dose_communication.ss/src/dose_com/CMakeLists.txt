@@ -1,26 +1,36 @@
+cmake_minimum_required(VERSION 2.6)
+
 PROJECT (dose_com)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
-SET(CMAKE_CXX_FLAGS "-D_LINUX")
-
+FILE(GLOB headers *.h ../defs/*.h)
 FILE(GLOB sources *.cpp)
 
-ADD_LIBRARY(dose_com SHARED ${sources})
+ADD_LIBRARY(dose_com SHARED ${sources} ${headers})
+
+ADD_DEFINITIONS(-DDOSE_COM_EXPORTS)
+
+if (WIN32)
+    TARGET_LINK_LIBRARIES(dose_com ws2_32)
+endif()
 
 INSTALL(FILES ../defs/DoseCom_Interface.h 
               ../defs/DoseCom_Interface_Classes.h
-        DESTINATION $ENV{SAFIR_SDK}/include/Safir/Dob/Internal/)
+        DESTINATION ${SAFIR_SDK}/include/Safir/Dob/Internal/)
 
 INSTALL(FILES DosePlatform.h
               PrintError.h
               DoseOsInterface.h
               DoseOsSharedMem.cpp
               ../defs/DoseNodeStatus.h
-        DESTINATION $ENV{SAFIR_SDK}/include/Safir/Dob/Internal/DoseComAux/)
+        DESTINATION ${SAFIR_SDK}/include/Safir/Dob/Internal/DoseComAux/)
 
 
 INSTALL(TARGETS dose_com
-        RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION $ENV{SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION $ENV{SAFIR_SDK}/lib)
+        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+
+
+INSTALL_DEBUG_INFO(dose_com)

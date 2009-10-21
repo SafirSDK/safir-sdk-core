@@ -162,6 +162,9 @@ namespace Internal
 
         static void __cdecl OnNotMessageOverflow(void* const consumer,
                                                  bool & success);
+
+        static void __cdecl OnDropReference(void* const consumer,
+                                            bool & success);
     };
 }
 }

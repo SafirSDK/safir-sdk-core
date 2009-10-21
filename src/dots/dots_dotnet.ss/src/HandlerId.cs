@@ -28,28 +28,50 @@ using System.Text;
 
 namespace Safir.Dob.Typesystem
 {
+    /// <summary>
+    /// Class containing the identity of a handler.
+    /// </summary>
     public class HandlerId
     {
+        /// <summary>
+        /// Represents all handlers.
+        /// </summary>
         public static readonly HandlerId ALL_HANDLERS = new HandlerId("ALL_HANDLERS");
 
+        /// <summary>
+        /// Constructs a default handler id.
+        /// </summary>
         public HandlerId()
         {
             m_handlerId = Internal.Constants.DEFAULT_HANDLER_ID;
             m_handlerIdStr = Internal.Constants.DEFAULT_HANDLER_ID_STR;
         }
 
+        /// <summary>
+        /// Constructs a handler id from the given string.
+        /// </summary>
+        /// <param name="id">String identifying the handler.</param>
         public HandlerId(string id)
         {
             m_handlerId = Internal.Id.Generate64BitHash(id);
             m_handlerIdStr = id;
         }
 
+        /// <summary>
+        /// Constructs a handler id from the given id.
+        /// </summary>
+        /// <param name="id">Identifier identifying the handler.</param>
         public HandlerId(Int64 id)
         {
             m_handlerId = id;
             m_handlerIdStr = "";
         }
 
+        /// <summary>
+        /// Constructs a handler id from the given data.
+        /// </summary>
+        /// <param name="id">Identifier identifying the handler.</param>
+        /// <param name="idStr">String identifying the handler.</param>
         public HandlerId(Int64 id, string idStr)
         {
             m_handlerId = id;
@@ -68,12 +90,26 @@ namespace Safir.Dob.Typesystem
 #endif
         }
 
+        /// <summary>
+        /// Remove the included string from the handler id.
+        /// <para>
+        /// This is meant to be used when this type is used as a member of a Dob object.
+        /// Using this call before the object gets serialized to binary or xml (i.e.
+        /// also before sending it anywhere) means that the string will not be included
+        /// when the object is sent.
+        /// </para>
+        /// </summary>
         public void RemoveString()
         {
             m_handlerIdStr = "";
             m_CachedUtf8String = null;
         }
 
+        /// <summary>
+        /// Equality operator.
+        /// </summary>
+        /// <param name="obj">The HandlerId to compare with.</param>
+        /// <returns>True if equal.</returns>
         public override bool Equals(object obj)
         {
             HandlerId other = obj as HandlerId;
@@ -87,6 +123,12 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Equality operator.
+        /// </summary>
+        /// <param name="first">First HandlerId.</param>
+        /// <param name="second">Second HandlerId.</param>
+        /// <returns>True if equal.</returns>
         public static bool operator ==(HandlerId first, object second)
         {
             // If both are null, or both are same instance, return true.
@@ -105,11 +147,21 @@ namespace Safir.Dob.Typesystem
             return first.Equals(second);
         }
 
+        /// <summary>
+        /// Inequality operator.
+        /// </summary>
+        /// <param name="first">First HandlerId.</param>
+        /// <param name="second">Second HandlerId.</param>
+        /// <returns>True if not equal.</returns>
         public static bool operator !=(HandlerId first, object second)
         {
             return !(first == second);
         }
 
+        /// <summary>
+        /// Return a string representation of the handler id.
+        /// </summary>
+        /// <returns>A string representation of the handler id.</returns>
         public override string ToString()
         {
             if (m_handlerIdStr.Length != 0)
@@ -130,21 +182,41 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Hash code.
+        /// </summary>
+        /// <returns>Hash code.</returns>
         public override int GetHashCode()
         {
             return (int)m_handlerId;
         }
 
+        #region Internal methods
+
+        /// <summary>
+        /// Get the raw 64 bit integer identifier.
+        /// </summary>
         public Int64 RawValue
         {
             get { return m_handlerId; }
         }
 
+        /// <summary>
+        /// Get the string that was used to create this id.
+        /// <para/>
+        /// If no string was used this method returns an empty string.
+        /// </summary>
         public string RawString
         {
             get { return m_handlerIdStr; }
         }
 
+        /// <summary>
+        /// Get the length of the string when converted to UTF-8 encoding.
+        /// <para/>
+        /// Includes one byte for a null termination.
+        /// </summary>
+        /// <returns>The length of the string of the id when converted to UTF-8.</returns>
         public System.Int32 Utf8StringLength()
         {
             if (m_handlerIdStr.Length == 0)
@@ -160,22 +232,22 @@ namespace Safir.Dob.Typesystem
             return m_CachedUtf8String.Length + 1;
         }
 
+        /// <summary>
+        /// Convert the string to UTF-8.
+        /// <para/>
+        /// Returns an empty string if there is no string.
+        /// </summary>
+        /// <returns>UTF-8 representation of the string.</returns>
         public byte[] Utf8String()
         {
             if (m_CachedUtf8String == null)
             {
-                /*if (m_handlerIdStr.Length != 0)
-                {*/
-                    m_CachedUtf8String = System.Text.Encoding.UTF8.GetBytes(m_handlerIdStr);
-                /*}
-                else
-                {
-                    m_CachedUtf8String = System.Text.Encoding.UTF8.GetBytes("");
-                }*/
+                m_CachedUtf8String = System.Text.Encoding.UTF8.GetBytes(m_handlerIdStr);
             }
 
             return m_CachedUtf8String;
         }
+        #endregion
 
         #region Private part
         private Int64 m_handlerId = -1;

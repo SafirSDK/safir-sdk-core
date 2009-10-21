@@ -73,6 +73,11 @@ namespace VehicleMmiCsWinForms
         /// Dialog to present category information 
         /// </summary>
         private CategoryInfoDialog m_CategoryInfoDlg;
+
+        /// <summary>
+        /// Dialog to present vehicle message 
+        /// </summary>
+        private MessageDialog m_MessageDialog;
                
         /// <summary>
         /// Reference to frame status strip to show errors for operator
@@ -98,6 +103,7 @@ namespace VehicleMmiCsWinForms
             m_CalculateSpeedDlg = new ServiceDialog();
             //StopRemoveInExercise
             m_CategoryInfoDlg = new CategoryInfoDialog();
+            m_MessageDialog = new MessageDialog();
         }
 
 

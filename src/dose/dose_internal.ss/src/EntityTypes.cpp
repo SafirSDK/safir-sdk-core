@@ -241,6 +241,13 @@ namespace Internal
         }
     }
 
+    bool EntityTypes::HasRegistrationSubscription(const ConnectionPtr&             connection,
+                                                  const ConsumerId&                consumer,
+                                                  const Dob::Typesystem::TypeId    typeId)
+    {
+        return GetType(typeId).HasRegistrationSubscription(connection, consumer);
+    }
+
     void EntityTypes::SetEntity(const ConnectionPtr&                 connection,
                                 const Dob::Typesystem::HandlerId&    handlerId,
                                 const Dob::Typesystem::EntityId&     entityId,
@@ -394,6 +401,13 @@ namespace Internal
                                      const Dob::Typesystem::TypeId  typeId)
     {
         GetType(typeId).UnsubscribeAll(connection);
+    }
+
+    bool EntityTypes::HasEntitySubscription(const ConnectionPtr&             connection,
+                                            const ConsumerId&                consumer,
+                                            const Dob::Typesystem::TypeId    typeId)
+    {
+        return GetType(typeId).HasEntitySubscription(connection, consumer);
     }
 
     const DistributionData EntityTypes::ReadEntity(const Dob::Typesystem::EntityId& entityId) const

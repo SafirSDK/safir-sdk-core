@@ -337,22 +337,8 @@ package body Dots.Parser is
       ----------------------------
 
       procedure Check_Identifier_Rules is
-         Must_Be_Upper : Boolean := True;
       begin
-         for J in Value'Range loop
-            if Value (J) = '.' then
-               Must_Be_Upper := True;
-            else
-               if Must_Be_Upper and then not (Value (J) in 'A' .. 'Z') then
-                  Error_Not_Valid
-                    ("(Identifier must begin with upper case letter)");
-               end if;
-               if Value (J) = '_' then
-                  Error_Not_Valid ("('_' not allowed in identifier)");
-               end if;
-               Must_Be_Upper := False;
-            end if;
-         end loop;
+         return; -- No rules!
       end Check_Identifier_Rules;
 
       -------------------------

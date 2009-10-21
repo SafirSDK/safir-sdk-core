@@ -34,8 +34,10 @@
 
 #include <functional>
 #include <string>
+#include <set>
 #include <iostream>
 #include <boost/filesystem.hpp>
+#include <Safir/Dob/Typesystem/Internal/Id.h>
 
 
 namespace Safir
@@ -264,12 +266,31 @@ namespace Internal
         TypeId m_checkSum;
         std::string m_name;
         std::vector<std::string> m_values;
-        //        bool m_inserted;
     };
 
     typedef std::vector<DobEnumeration> DobEnumerations;
 
+    struct DobException
+    {
+        DobException(const std::string& name, 
+                     const std::string& baseClass):
+            m_name(name),
+            m_baseClass(baseClass),
+            m_typeId(DotsId_Generate64(name.c_str())),
+            m_baseClassTypeId(baseClass.empty()?0:DotsId_Generate64(baseClass.c_str())) {}
 
+        bool operator<(const DobException& other) const {return m_name < other.m_name;}
+        
+        const std::string m_name;
+        const std::string m_baseClass;
+        const TypeId      m_typeId;
+        const TypeId      m_baseClassTypeId;
+
+    private:
+        void operator=(const DobException&) const;
+    };
+
+    typedef std::set<DobException> DobExceptions;
 }
 }
 }

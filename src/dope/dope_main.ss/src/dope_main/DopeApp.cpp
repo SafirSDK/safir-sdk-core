@@ -28,7 +28,16 @@
 #include <Safir/Dob/ThisNodeParameters.h>
 #include "FilePersistor.h"
 #include <Safir/SwReports/SwReport.h>
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4702)
+#endif
+
 #include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #ifndef NO_DATABASE_SUPPORT
 #include "OdbcPersistor.h"

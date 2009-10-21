@@ -86,10 +86,14 @@ namespace Dob
         return m_pImpl->GetRequest();
     }
 
+    const char * ResponseProxy::GetRequestBlob() const
+    {
+        return m_pImpl->GetRequestBlob();
+    }
+
     const Dob::Typesystem::HandlerId ResponseProxy::GetRequestHandlerId() const
     {
         return m_pImpl->GetRequestHandlerId();
     }
-
 }
 }

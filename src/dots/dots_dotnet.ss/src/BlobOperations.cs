@@ -80,6 +80,21 @@ namespace Safir.Dob.Typesystem
 
         #region Value operations on blobs
 
+     
+        /// <summary>
+        /// Find out if a member is changed.
+        /// </summary>
+        /// <param name="blob">Blob to look in.</param>
+        /// <param name="member">The member to check.</param>
+        /// <param name="index">Array index in member to check. Shall be 0 if the member is not an array.</param>
+        /// <returns>true if member is changed</returns>
+        public static bool IsChanged(System.IntPtr blob,
+                                     System.Int32 member,
+                                     System.Int32 index)
+        {
+            return Internal.InternalOperations.BoolOf(Internal.Kernel.DotsC_IsChangedMember(blob, member, index));
+        }
+
         /// <summary>
         /// Set a member to null.
         /// <para/>
@@ -214,7 +229,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Set an Int64, TypeId, InstanceId, ChannelId or a HandlerId in a blob.
+        /// Set an Int64 or a TypeId in a blob.
         /// <para/>
         /// This method will set a Int64-based type member in a blob.
         /// If the isNull parameter is true then only the isChange and isNull flags are set in the blob,
@@ -990,6 +1005,7 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
         /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="beginningOfUnused">Beginning of unused part of dynamic part of blob.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(InstanceIdContainer container,
@@ -1000,7 +1016,7 @@ namespace Safir.Dob.Typesystem
         {
             if (!container.IsNull())
             {
-                //System.IntPtr stringStart = beginningOfUnused;
+                System.IntPtr stringStart = beginningOfUnused;
                 System.Int32 stringLength = container.Val.Utf8StringLength();
                 byte[] utf8Bytes = container.Val.Utf8String();
                 Internal.Kernel.DotsC_SetHashedIdMemberInPreallocated
@@ -1013,6 +1029,10 @@ namespace Safir.Dob.Typesystem
                      member,
                      index,
                      ref beginningOfUnused);
+                if (stringLength != 0)
+                {
+                    Marshal.WriteByte(stringStart, 8 + 4 + utf8Bytes.Length, 0); //add '\0'
+                }
             }
             else if (container.IsChanged())
             {
@@ -1050,6 +1070,7 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
         /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="beginningOfUnused">Beginning of unused part of dynamic part of blob.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(EntityIdContainer container,
@@ -1060,7 +1081,7 @@ namespace Safir.Dob.Typesystem
         {
             if (!container.IsNull())
             {
-                //System.IntPtr stringStart = beginningOfUnused;
+                System.IntPtr stringStart = beginningOfUnused;
                 System.Int32 stringLength = container.m_Value.InstanceId.Utf8StringLength();
                 byte[] utf8Bytes = container.m_Value.InstanceId.Utf8String();
                 Safir.Dob.Typesystem.Internal.DotsC_EntityId eid;
@@ -1076,6 +1097,11 @@ namespace Safir.Dob.Typesystem
                      member,
                      index,
                      ref beginningOfUnused);
+
+                if (stringLength != 0)
+                {
+                    Marshal.WriteByte(stringStart, 16 + 4 + utf8Bytes.Length, 0); //add '\0'
+                }
             }
             else if (container.IsChanged())
             {
@@ -1113,6 +1139,7 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
         /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="beginningOfUnused">Beginning of unused part of dynamic part of blob.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(ChannelIdContainer container,
@@ -1123,7 +1150,7 @@ namespace Safir.Dob.Typesystem
         {
             if (!container.IsNull())
             {
-                //System.IntPtr stringStart = beginningOfUnused;
+                System.IntPtr stringStart = beginningOfUnused;
                 System.Int32 stringLength = container.Val.Utf8StringLength();
                 byte[] utf8Bytes = container.Val.Utf8String();
                 Internal.Kernel.DotsC_SetHashedIdMemberInPreallocated
@@ -1136,6 +1163,11 @@ namespace Safir.Dob.Typesystem
                      member,
                      index,
                      ref beginningOfUnused);
+
+                if (stringLength != 0)
+                {
+                    Marshal.WriteByte(stringStart, 8 + 4 + utf8Bytes.Length, 0); //add '\0'
+                }
             }
             else if (container.IsChanged())
             {
@@ -1173,6 +1205,7 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
         /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="beginningOfUnused">Beginning of unused part of dynamic part of blob.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(HandlerIdContainer container,
@@ -1183,7 +1216,7 @@ namespace Safir.Dob.Typesystem
         {
             if (!container.IsNull())
             {
-                //System.IntPtr stringStart = beginningOfUnused;
+                System.IntPtr stringStart = beginningOfUnused;
                 System.Int32 stringLength = container.Val.Utf8StringLength();
                 byte[] utf8Bytes = container.Val.Utf8String();
                 Internal.Kernel.DotsC_SetHashedIdMemberInPreallocated
@@ -1196,6 +1229,11 @@ namespace Safir.Dob.Typesystem
                      member,
                      index,
                      ref beginningOfUnused);
+
+                if (stringLength != 0)
+                {
+                    Marshal.WriteByte(stringStart, 8 + 4 + utf8Bytes.Length, 0); //add '\0'
+                }
             }
             else if (container.IsChanged())
             {
@@ -1233,6 +1271,7 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
         /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="beginningOfUnused">Beginning of unused part of dynamic part of blob.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(StringContainer container,
@@ -1299,7 +1338,17 @@ namespace Safir.Dob.Typesystem
             }
         }
 
-
+        /// <summary>
+        /// Set an Object in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="beginningOfUnused">Beginning of unused part of dynamic part of blob.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(ObjectContainerBase container,
                                System.IntPtr blob,
                                ref System.IntPtr beginningOfUnused,
@@ -1324,7 +1373,16 @@ namespace Safir.Dob.Typesystem
             }
         }
 
-        //Binary
+        /// <summary>
+        /// Get a binary from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(BinaryContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1337,6 +1395,17 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set a binary in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="beginningOfUnused">Beginning of unused part of dynamic part of blob.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(BinaryContainer container,
                                System.IntPtr blob,
                                ref System.IntPtr beginningOfUnused,
@@ -1356,7 +1425,7 @@ namespace Safir.Dob.Typesystem
                                                          ref beginningOfUnused);
 
                 Marshal.WriteInt32(binaryStart, binarySize);
-                Marshal.Copy(container.Val, 0, (IntPtr)((int)binaryStart+4), binarySize);
+                Marshal.Copy(container.Val, 0, new IntPtr(binaryStart.ToInt64() + 4), binarySize);
             }
             else if (container.IsChanged())
             {
@@ -1364,12 +1433,18 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        #region SI types
 
-
-//SI types
-
-
-        //Si32.AmpereContainer
+        /// <summary>
+        /// Get a Si32.AmpereContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.AmpereContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1382,6 +1457,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.AmpereContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.AmpereContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1390,7 +1475,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.CubicMeterContainer
+        /// <summary>
+        /// Get a Si32.CubicMeterContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.CubicMeterContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1403,6 +1497,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.CubicMeterContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.CubicMeterContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1411,7 +1515,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.HertzContainer
+        /// <summary>
+        /// Get a Si32.HertzContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.HertzContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1424,6 +1537,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.HertzContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.HertzContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1432,7 +1555,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.JouleContainer
+        /// <summary>
+        /// Get a Si32.JouleContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.JouleContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1445,6 +1577,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.JouleContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.JouleContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1453,7 +1595,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.KelvinContainer
+        /// <summary>
+        /// Get a Si32.KelvinContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.KelvinContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1466,6 +1617,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.KelvinContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.KelvinContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1474,7 +1635,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.KilogramContainer
+        /// <summary>
+        /// Get a Si32.KilogramContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.KilogramContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1487,6 +1657,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.KilogramContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.KilogramContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1495,7 +1675,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.MeterContainer
+        /// <summary>
+        /// Get a Si32.MeterContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.MeterContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1508,6 +1697,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.MeterContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.MeterContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1516,7 +1715,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.MeterPerSecondContainer
+        /// <summary>
+        /// Get a Si32.MeterPerSecondContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.MeterPerSecondContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1529,6 +1737,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.MeterPerSecondContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.MeterPerSecondContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1537,7 +1755,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.MeterPerSecondSquaredContainer
+        /// <summary>
+        /// Get a Si32.MeterPerSecondSquaredContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.MeterPerSecondSquaredContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1550,6 +1777,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.MeterPerSecondSquaredContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.MeterPerSecondSquaredContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1558,7 +1795,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.NewtonContainer
+        /// <summary>
+        /// Get a Si32.NewtonContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.NewtonContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1571,6 +1817,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.NewtonContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.NewtonContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1579,7 +1835,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.PascalContainer
+        /// <summary>
+        /// Get a Si32.PascalContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.PascalContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1592,6 +1857,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.PascalContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.PascalContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1600,7 +1875,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.RadianContainer
+        /// <summary>
+        /// Get a Si32.RadianContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.RadianContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1613,6 +1897,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.RadianContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.RadianContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1621,7 +1915,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.RadianPerSecondContainer
+        /// <summary>
+        /// Get a Si32.RadianPerSecondContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.RadianPerSecondContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1634,6 +1937,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.RadianPerSecondContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.RadianPerSecondContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1642,7 +1955,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.RadianPerSecondSquaredContainer
+        /// <summary>
+        /// Get a Si32.RadianPerSecondSquaredContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.RadianPerSecondSquaredContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1655,6 +1977,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.RadianPerSecondSquaredContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.RadianPerSecondSquaredContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1663,7 +1995,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.SecondContainer
+        /// <summary>
+        /// Get a Si32.SecondContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.SecondContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1676,6 +2017,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.SecondContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.SecondContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1684,7 +2035,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.SquareMeterContainer
+        /// <summary>
+        /// Get a Si32.SquareMeterContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.SquareMeterContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1697,6 +2057,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.SquareMeterContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.SquareMeterContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1705,7 +2075,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.SteradianContainer
+        /// <summary>
+        /// Get a Si32.SteradianContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.SteradianContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1718,6 +2097,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.SteradianContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.SteradianContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1726,7 +2115,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.VoltContainer
+        /// <summary>
+        /// Get a Si32.VoltContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.VoltContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1739,6 +2137,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.VoltContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.VoltContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1747,7 +2155,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si32.WattContainer
+        /// <summary>
+        /// Get a Si32.WattContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.WattContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1760,6 +2177,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si32.WattContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.WattContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1768,8 +2195,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-
-        //Si64.AmpereContainer
+        /// <summary>
+        /// Get a Si64.AmpereContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.AmpereContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1782,6 +2217,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.AmpereContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.AmpereContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1790,7 +2235,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.CubicMeterContainer
+        /// <summary>
+        /// Get a Si64.CubicMeterContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.CubicMeterContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1803,6 +2257,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.CubicMeterContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.CubicMeterContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1811,7 +2275,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.HertzContainer
+        /// <summary>
+        /// Get a Si64.HertzContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.HertzContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1824,6 +2297,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.HertzContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.HertzContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1832,7 +2315,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.JouleContainer
+        /// <summary>
+        /// Get a Si64.JouleContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.JouleContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1845,6 +2337,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.JouleContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.JouleContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1853,7 +2355,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.KelvinContainer
+        /// <summary>
+        /// Get a Si64.KelvinContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.KelvinContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1866,6 +2377,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.KelvinContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.KelvinContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1874,7 +2395,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.KilogramContainer
+        /// <summary>
+        /// Get a Si64.KilogramContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.KilogramContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1887,6 +2417,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.KilogramContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.KilogramContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1895,7 +2435,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.MeterContainer
+        /// <summary>
+        /// Get a Si64.MeterContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.MeterContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1908,6 +2457,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.MeterContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.MeterContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1916,7 +2475,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.MeterPerSecondContainer
+        /// <summary>
+        /// Get a Si64.MeterPerSecondContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.MeterPerSecondContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1929,6 +2497,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.MeterPerSecondContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.MeterPerSecondContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1937,7 +2515,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.MeterPerSecondSquaredContainer
+        /// <summary>
+        /// Get a Si64.MeterPerSecondSquaredContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.MeterPerSecondSquaredContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1950,6 +2537,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.MeterPerSecondSquaredContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.MeterPerSecondSquaredContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1958,7 +2555,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.NewtonContainer
+        /// <summary>
+        /// Get a Si64.NewtonContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.NewtonContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1971,6 +2577,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.NewtonContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.NewtonContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1979,7 +2595,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.PascalContainer
+        /// <summary>
+        /// Get a Si64.PascalContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.PascalContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -1992,6 +2617,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.PascalContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.PascalContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2000,7 +2635,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.RadianContainer
+        /// <summary>
+        /// Get a Si64.RadianContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.RadianContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2013,6 +2657,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.RadianContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.RadianContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2021,7 +2675,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.RadianPerSecondContainer
+        /// <summary>
+        /// Get a Si64.RadianPerSecondContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.RadianPerSecondContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2034,6 +2697,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.RadianPerSecondContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.RadianPerSecondContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2042,7 +2715,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.RadianPerSecondSquaredContainer
+        /// <summary>
+        /// Get a Si64.RadianPerSecondSquaredContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.RadianPerSecondSquaredContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2055,6 +2737,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.RadianPerSecondSquaredContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.RadianPerSecondSquaredContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2063,7 +2755,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.SecondContainer
+        /// <summary>
+        /// Get a Si64.SecondContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.SecondContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2076,6 +2777,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.SecondContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.SecondContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2084,7 +2795,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.SquareMeterContainer
+        /// <summary>
+        /// Get a Si64.SquareMeterContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.SquareMeterContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2097,6 +2817,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.SquareMeterContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.SquareMeterContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2105,7 +2835,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.SteradianContainer
+        /// <summary>
+        /// Get a Si64.SteradianContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.SteradianContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2118,6 +2857,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.SteradianContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.SteradianContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2126,7 +2875,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.VoltContainer
+        /// <summary>
+        /// Get a Si64.VoltContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.VoltContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2139,6 +2897,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.VoltContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.VoltContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2147,7 +2915,16 @@ namespace Safir.Dob.Typesystem
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
 
-        //Si64.WattContainer
+        /// <summary>
+        /// Get a Si64.WattContainer from a blob.
+        /// <para/>
+        /// This method will get the member and the associated isNull and isChange values from a blob and
+        /// put them in the container.
+        /// </summary>
+        /// <param name="container">The container in which to put the values.</param>
+        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="member">The member to get.</param>
+        /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.WattContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2160,6 +2937,16 @@ namespace Safir.Dob.Typesystem
             Get(blob, member, index, out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged);
         }
 
+        /// <summary>
+        /// Set an Si64.WattContainer in a blob.
+        /// <para/>
+        /// If the container is null then the member will be set to null in the blob.
+        /// The change flag from the container will be set in the blob.
+        /// </summary>
+        /// <param name="container">The container whose values to use.</param>
+        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="member">The member to be set.</param>
+        /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.WattContainer container,
                                System.IntPtr blob,
                                System.Int32 member,
@@ -2167,11 +2954,19 @@ namespace Safir.Dob.Typesystem
         {
             Set(blob, member, index, container.m_Value, container.m_bIsNull, container.m_bIsChanged);
         }
-
+        #endregion
         #endregion
 
-        //This method does not do what you expect it to, not even if you believe that you do!
-        //TODO: rename this method and describe it carefully.
+        //TODO: Rename this function to something that reflects what it actually does.
+        /// <summary>
+        /// Get the static blob size of an type, but excluding the size that is inherited from parent classes.
+        /// <para>
+        /// This is very much an internal function!
+        /// Unless you have a really good reason to use this function you should stay clear of it.
+        /// </para>
+        /// </summary>
+        /// <param name="typeId">The TypeId of a DOB class.</param>
+        /// <returns></returns>
         public static System.Int32 GetInitialSize(System.Int64 typeId)
         {
             return Internal.Kernel.DotsC_GetInitialSize(typeId);

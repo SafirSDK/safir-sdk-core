@@ -1,119 +1,28 @@
---OLD: with "GNAT_default";
-with "syst_default.ss/syst_default.gpr";
-with "dots/dots_generated/dots_generated.gpr";
-with "dots_ada.ss/dots_ada.gpr";
-with "dose_ada.ss/dose_ada.gpr";
-with "swre_interface.ss/ada/swre_interface_ada.gpr";
-with "safir_sdk.gpr";
---OLD: with "dots_kernel_dlllib";
-with "dotskernel_dlllib";
-with "dots_id_dlllib";
---OLD: with "dose_sdk_dlllib";
-with "dosesdk_dlllib";
-with "swre_dlllib";
+with "safir_defaults";
+with "dots_ada";
+with "dots_generated_ada";
+with "dose_ada";
+with "swre_interface_ada";
+
 project swre_test_ada is
 
    for Source_Dirs use (".");
-   type Build_Type is
-      ("release", "debug", "gcov", "gperf", "normal");
-   type Warning_Levels is
-      ("Default", "Elaboration", "Full");
-   for Object_Dir use Syst_Default'Object_Dir;
-   for Exec_Dir use Syst_Default'Exec_Dir;
-   Warning_Level : Warning_Levels := external ("Warning_Level");
-   BUILD : Build_Type := external ("BUILD");
+   for Exec_Dir use "obj";
+   for Object_Dir use "obj";
 
    for Main use ("swre_test_ada.adb");
 
-   package Linker is
-      for Default_Switches ("ada") use Syst_Default.Linker'Default_Switches ("Ada");
-
-      case Build is
-
-         when "debug" =>
-            for Switches ("swre_test_ada") use ("-f");
-
-         when others =>
-            for Switches ("swre_test_ada") use ("-f");
-
-      end case;
-   end Linker;
-
-   package Compiler is
-
-      case Warning_Level is
-
-         when "Full" =>
-            for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada");
-
-         when "Elaboration" =>
-            for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada");
-
-         when "Default" =>
-
-            case BUILD is
-
-               when "normal" =>
-                  for Default_Switches ("ada") use ("-gnatwcfijpruv", "-gnatwe" ,"-gnaty3abcefhiklnprt", "-gnat05");
-                  --  for Default_Switches ("ada") use ("-gnatwcfijpruv", "-gnaty3abcefhiklnprt", "-gnat05");
-
-               when "gperf" =>
-                  for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada");
-
-               when "gcov" =>
-                  for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada");
-
-               when "debug" =>
-                  for Default_Switches ("ada") use ("-gnatwcfijpruv", "-gnatwe" ,"-gnaty3abcefhiklnprt", "-gnat05");
-
-               when "release" =>
-                  for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada") & "-gnat05";
-            end case;
-      end case;
-   end Compiler;
-
    package Builder is
-
-      case Warning_Level is
-
-         when "Full" =>
-            for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
-
-         when "Elaboration" =>
-            for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
-
-         when "Default" =>
-
-            case BUILD is
-
-               when "normal" =>
-                  for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
-
-               when "gperf" =>
-                  for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
-
-               when "gcov" =>
-                  for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
-
-               when "debug" =>
-                  for Default_Switches ("ada") use ("-s", "-k", "-g", "-C");
-
-               when "release" =>
-                  for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
-            end case;
-      end case;
+      for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
    end Builder;
 
-   package Binder is
-   end Binder;
+   package Compiler is
+      for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
+   end Compiler;
 
-   package Pretty_Printer is
-   end Pretty_Printer;
-
-   package Ide is
-
-      for Default_Switches ("gnade") use ("-DDBSOURCE=GNADE", "-DDBUSER=GNADE", "-DDBPASSWD=GNADE");
-   end Ide;
+   package Linker is
+      for Default_Switches ("ada") use Safir_Defaults.Linker'Default_Switches ("Ada");
+   end Linker;
 
 end swre_test_ada;
 

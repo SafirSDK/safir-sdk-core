@@ -64,7 +64,7 @@ unsigned long   CConfig::m_MyIpAddr_nw;
 unsigned long   CConfig::m_BaseIpMultiCastAddr_nw = 0;
 unsigned long   CConfig::m_NetAddr_nw = 0;
 
-ulong64   CConfig::m_BitMapDestChannelMembers64[MAX_NUM_DEST_CHANNELS];
+dcom_ulong64   CConfig::m_BitMapDestChannelMembers64[MAX_NUM_DEST_CHANNELS];
 
 unsigned long CConfig::m_UnicastIpAddr_nw[64] = {0}; //MAX_NUM_NODES];
 
@@ -88,7 +88,7 @@ CConfig::DEST_CHAN_S CConfig::m_DestChannel[MAX_NUM_DEST_CHANNELS];
 *
 **************************************************************************/
 
-int CConfig::Dose_Config(uchar DoseId,
+int CConfig::Dose_Config(dcom_uchar8 DoseId,
                         const char* multicastAddress,
                         const char* netAddress)
 {
@@ -155,7 +155,7 @@ Read_the_config_file:
 
             if(_strnicmp(line,"Port=",5) == 0)
             {
-                wTmp = (ushort) atoi(&line[5]);
+                wTmp = (dcom_ushort16) atoi(&line[5]);
                 m_Dose_Port_Data     = wTmp + 2;
                 m_Dose_Port_Ack      = wTmp + 1;
                 m_Dose_KeepAlivePort = wTmp;
@@ -188,7 +188,7 @@ Read_the_config_file:
             else
             if(_strnicmp(line,"DoseId=",7) == 0)
             {
-                m_MyDoseId = (uchar) atoi(&line[7]);
+                m_MyDoseId = (dcom_uchar8) atoi(&line[7]);
                 if(*pDbg) PrintDbg("DoseId = %d\n", m_MyDoseId);
             }
             else
@@ -216,7 +216,7 @@ Read_the_config_file:
 **********************************************************************/
 int CConfig::Add_DestinationId( int DestinationId,
                     const char  *IpMulticastAddr,
-                    ulong64 BitMapDestChanMembers64)
+                    dcom_ulong64 BitMapDestChanMembers64)
 {
     int ix;
 
@@ -259,7 +259,7 @@ int CConfig::Add_DestinationId( int DestinationId,
 /********************************************************
 *
 *********************************************************/
-void CConfig::Add_UnicastIpAddr(int DoseId, unsigned long IpAddr_nw)
+void CConfig::Add_UnicastIpAddr(int DoseId, dcom_ulong32 IpAddr_nw)
 {
     m_UnicastIpAddr_nw[DoseId] = IpAddr_nw;
 }
@@ -293,7 +293,7 @@ unsigned long CConfig::Get_DestinationIpAddress(int DestinationId)
 * Ix is in range 0 - MAX_NUM_DEST_CHANNELS
 *******************************************************/
 int CConfig::GetDestinationItem(int ix,
-                                unsigned long *pIpMulticastAddr_nw,
+                                dcom_ulong32 *pIpMulticastAddr_nw,
                                 char *pIsUsedForReception)
 {
     if(ix >= MAX_NUM_DEST_CHANNELS) return(-1);
@@ -302,7 +302,7 @@ int CConfig::GetDestinationItem(int ix,
 
     *pIpMulticastAddr_nw = m_DestChannel[ix].IpMulticastAddr_nw;
 
-    if(m_BitMapDestChannelMembers64[ix] & ((ulong64)1<<m_MyDoseId)) // if this bit is set
+    if(m_BitMapDestChannelMembers64[ix] & ((dcom_ulong64)1<<m_MyDoseId)) // if this bit is set
         *pIsUsedForReception = 1;
     else
         *pIsUsedForReception = 0;
@@ -336,12 +336,12 @@ void CConfig::Get_Info(int, // Mode,
 
     for(int ChNum = 0 ; ChNum < MAX_NUM_DEST_CHANNELS ; ChNum++)
     {
-        if(m_BitMapDestChannelMembers64[ChNum] != (ulong64) 0)
+        if(m_BitMapDestChannelMembers64[ChNum] != (dcom_ulong64) 0)
         {
             pos = strlen(pBuff);
-            sprintf(&pBuff[pos], "%2X %08lX %08lX\n",ChNum,
-                    (ulong)(m_BitMapDestChannelMembers64[ChNum]>>32),
-                    (ulong)(m_BitMapDestChannelMembers64[ChNum] & 0xFFFFFFFF));
+            sprintf(&pBuff[pos], "%2X %08X %08X\n",ChNum,
+                    (dcom_ulong32)(m_BitMapDestChannelMembers64[ChNum]>>32),
+                    (dcom_ulong32)(m_BitMapDestChannelMembers64[ChNum] & 0xFFFFFFFF));
         }
     }
 }

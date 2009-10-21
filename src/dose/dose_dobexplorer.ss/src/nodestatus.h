@@ -23,8 +23,8 @@
 ******************************************************************************/
 #ifndef NODESTATUS_H
 #define NODESTATUS_H
+#include "common_header.h"
 #include "ui_nodestatus.h"
-#include <QtGui>
 
 class NodeStatus :
   public QWidget,

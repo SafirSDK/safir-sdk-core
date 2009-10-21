@@ -27,12 +27,17 @@ using System;
 namespace Safir.Dob.Typesystem
 {
     /// <summary>
-    /// Summary description for Object.
+    /// The base class of all Dob-classes.
+    /// <para/>
+    /// This class is the base class for all automatically generated DOB classes.
     /// </summary>
     public class Object : ICloneable
     {
         #region Constructors
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public Object()
         {
            
@@ -42,8 +47,18 @@ namespace Safir.Dob.Typesystem
 
         #region TypeId
 
+        /// <summary>
+        /// The TypeId of the Object class.
+        /// </summary>
         public const System.Int64 ClassTypeId = 5955188366590963785;
 
+        /// <summary>
+        /// Get the type id of this object.
+        /// <para>
+        /// This method is overridden by all auto-generated classes.
+        /// </para>
+        /// </summary>
+        /// <returns>The TypeId of the object.</returns>
         virtual public System.Int64 GetTypeId() //MUST BE OVERRIDDEN!
         {
             return ClassTypeId;
@@ -53,8 +68,25 @@ namespace Safir.Dob.Typesystem
 
         #region Change flags
 
+        /// <summary>
+        /// Check if any member of this object is changed.
+        /// <para>
+        /// This method will recursively check if any member of the object has its change flag set.
+        /// </para>
+        /// <para>
+        /// This method is overridden by all auto-generated classes.
+        /// </para>
+        /// </summary>
+        /// <returns>True if any member has changed.</returns>
         virtual public bool IsChanged() { return false; }
 
+        /// <summary>
+        /// Recursively set change flags in all members of this object.
+        /// <para>
+        /// This method is overridden by all auto-generated classes.
+        /// </para>
+        /// </summary>
+        /// <param name="changed">The value to set the change flags to.</param>
         virtual public void SetChanged(bool changed) { }
 
         #endregion
@@ -66,12 +98,22 @@ namespace Safir.Dob.Typesystem
             return new Object(this);
         }
 
+        /// <summary>
+        /// Create a copy of the object.
+        /// <para>
+        /// Cast it to the type of object that you're after.
+        /// </para>
+        /// </summary>
+        /// <returns></returns>
         public virtual Object Clone()
         {
             return (Object)((ICloneable)this).Clone();
         }
 
-        //Copy constructor for use by Clone
+        /// <summary>
+        /// Copy constructor for use by Clone.
+        /// </summary>
+        /// <param name="other">Other object.</param>
         protected Object(Object other)
         {
 
@@ -80,11 +122,20 @@ namespace Safir.Dob.Typesystem
         #endregion
 
         #region Blob serialization and deserialization
+
+        /// <summary>
+        /// Create an Object from a blob.
+        /// </summary>
+        /// <param name="blob">The blob to deserialize.</param>
         public Object(System.IntPtr blob)
         {
 
         }
 
+        /// <summary>
+        /// Calculate the size of the blob-serialized form of this object.
+        /// </summary>
+        /// <returns>The needed size in bytes.</returns>
         virtual public System.Int32 CalculateBlobSize()
         {
             if (m_InitialSize == -1)
@@ -94,6 +145,14 @@ namespace Safir.Dob.Typesystem
             return m_InitialSize;
         }
 
+        /// <summary>
+        /// Write the object to a blob.
+        /// <para>
+        /// Note that the size of the blob is assumed to be correct! No checks are made!
+        /// </para>
+        /// </summary>
+        /// <param name="blob">The blob to write to.</param>
+        /// <param name="beginningOfUnused">The beginning of unused dynamic blob space.</param>
         virtual public void WriteToBlob(System.IntPtr blob, ref System.IntPtr beginningOfUnused)
         {
 
@@ -102,6 +161,21 @@ namespace Safir.Dob.Typesystem
 
         #region Reflection part
 
+        /// <summary>
+        /// Get a reference to a member container from an object.
+        /// <para>
+        /// Use the methods in Members to get member indices and array sizes for use
+        /// with this method.
+        /// </para>
+        /// <para>
+        /// Note: Do not use this method unless you're very sure it is the one you need!
+        /// </para>
+        /// </summary>
+        /// <param name="member">The index of the member to get.</param>
+        /// <param name="index">The array index of the member to get.</param>
+        /// <returns>A reference to the member container.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">If the index is not in the range of the array.</exception>
+        /// <exception cref="Safir.Dob.Typesystem.SoftwareViolationException">If the element is not an array and the index is not 0.</exception>
         public virtual ContainerBase GetMember(System.Int32 member,
                                                System.Int32 index)
         {

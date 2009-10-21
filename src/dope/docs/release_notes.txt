@@ -1,8 +1,0 @@
-Release: dope 2.0			   2008-11-27 STLRHA
----------------------------------------------------------------------
-Updated to new dob interfaces.
-The database access strategy changed, since the instance handling is a lot more dynamic.
-
-Release: dope 2.1			   2009-02-04 STAWI
----------------------------------------------------------------------
-Changed the project file. The d-suffix is removed when building the debug executable.

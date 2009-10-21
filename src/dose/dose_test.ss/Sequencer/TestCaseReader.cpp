@@ -24,13 +24,25 @@
 
 #include "TestCaseReader.h"
 #include <boost/regex.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <iostream>
+
+
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4702)
+#endif
+
+#include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
+
 
 //static member initialization
 TestCaseReader * TestCaseReader::m_instance = NULL;

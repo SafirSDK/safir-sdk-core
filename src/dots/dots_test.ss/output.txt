@@ -1,0 +1,1795 @@
+
+
+
+=====================================================
+Testing: Has Property
+=====================================================
+MemberTypes - MemberTypesProperty: true
+MemberTypes - MemberArraysProperty: false
+MemberArrays - MemberTypesProperty: false
+MemberArrays - MemberArraysProperty: true
+MemberItems - MemberTypesProperty: true
+MemberItems - MemberArraysProperty: true
+MemberItemsArray - MemberTypesProperty: true
+MemberItemsArray - MemberArraysProperty: true
+EmptyObject - MemberTypesProperty: true
+EmptyObject - MemberArraysProperty: true
+
+
+
+=====================================================
+Testing: Get Name
+=====================================================
+MemberTypes          - DotsTest.MemberTypes
+MemberArrays         - DotsTest.MemberArrays
+MemberTypesProperty  - DotsTest.MemberTypesProperty
+MemberArraysProperty - DotsTest.MemberArraysProperty
+MemberItems          - DotsTest.MemberItems
+MemberItemsArray     - DotsTest.MemberItemsArray
+EmptyObject          - DotsTest.EmptyObject
+
+
+
+=====================================================
+Testing: Get Number Of Members
+=====================================================
+MemberTypes          - 57
+MemberArrays         - 53
+MemberTypesProperty  - 57
+MemberArraysProperty - 53
+MemberItems          - 2
+MemberItemsArray     - 2
+EmptyObject          - 0
+ParameterTypes       - 0
+ParameterArrays      - 0
+
+
+
+=====================================================
+Testing: Get Number Of Parameters
+=====================================================
+MemberTypes          - 0
+MemberArrays         - 0
+MemberItems          - 0
+MemberItemsArray     - 1
+EmptyObject          - 0
+ParameterTypes       - 58
+ParameterArrays      - 53
+
+
+
+=====================================================
+Testing: Create routines (Types)
+=====================================================
+Create_ParameterTypes: <object xmlns="urn:safir-dots-unit"><name>DotsTest.MemberTypes</name><members><member><name>Int32Member</name><value>32</value></member><member><name>EnumerationMember</name><value>DotsTest.TestEnum.MyFirst</value></member><member><name>TestClassMember</name><object><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-32</value></member></members></object></member></members></object>
+CreateValueTypes     : <object xmlns="urn:safir-dots-unit"><name>DotsTest.MemberTypes</name><members><member><name>Int32Member</name><value>32</value></member><member><name>EnumerationMember</name><value>DotsTest.TestEnum.MyFirst</value></member><member><name>TestClassMember</name><object><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-32</value></member></members></object></member></members></object>
+Create_ValueArrays   : <object xmlns="urn:safir-dots-unit"><name>DotsTest.MemberTypes</name><members><member><name>Int32Member</name><value>-32</value></member><member><name>EnumerationMember</name><value>DotsTest.TestEnum.MySecond</value></member><member><name>TestClassMember</name><object><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-3200</value></member></members></object></member></members></object>
+
+
+
+=====================================================
+Testing: Create routines (Arrays)
+=====================================================
+Create_ParameterArrays: <object xmlns="urn:safir-dots-unit"><name>DotsTest.MemberArrays</name><members><member><name>Int32Member</name><arrayElements><arrayElement><value>32</value></arrayElement></arrayElements></member><member><name>EnumerationMember</name><arrayElements><arrayElement><value>DotsTest.TestEnum.MyFirst</value></arrayElement></arrayElements></member><member><name>TestClassMember</name><arrayElements><arrayElement><object><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-32</value></member></members></object></arrayElement></arrayElements></member></members></object>
+Create_ValueArraysOne : <object xmlns="urn:safir-dots-unit"><name>DotsTest.MemberArrays</name><members><member><name>Int32Member</name><arrayElements><arrayElement><value>-32</value></arrayElement></arrayElements></member><member><name>EnumerationMember</name><arrayElements><arrayElement><value>DotsTest.TestEnum.MySecond</value></arrayElement></arrayElements></member><member><name>TestClassMember</name><arrayElements><arrayElement><object><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-3200</value></member></members></object></arrayElement></arrayElements></member></members></object>
+Create_ValueArraysAll : <object xmlns="urn:safir-dots-unit"><name>DotsTest.MemberArrays</name><members><member><name>Int32Member</name><arrayElements><arrayElement><value>32</value></arrayElement><arrayElement><value>-32</value></arrayElement></arrayElements></member><member><name>EnumerationMember</name><arrayElements><arrayElement><value>DotsTest.TestEnum.MyFirst</value></arrayElement><arrayElement><value>DotsTest.TestEnum.MySecond</value></arrayElement></arrayElements></member><member><name>TestClassMember</name><arrayElements><arrayElement><object><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>3200</value></member></members></object></arrayElement><arrayElement><object><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-3200</value></member></members></object></arrayElement></arrayElements></member></members></object>
+
+
+
+=====================================================
+Testing: Int32
+=====================================================
+MemberId: 0
+MemberId (arr): 0
+Array Size Ok: true
+----Members---- 
+GetInfo: INT32MEMBERTYPE,Int32Member,-1,-1,true,2
+GetName: Int32Member
+GetTypeName: Int32
+----Parameters---- 
+GetName: Int32Parameter
+GetType: INT32MEMBERTYPE
+GetTypeName: Int32
+------------------ 
+Val: 32
+Item Val: 32
+Item Array Val: 32
+Property Parameter Val: 10
+Val 0: 32
+Array Item Val 0: 32
+Array Item Array Val 0: 32
+Parameter Array Val 0: 10
+Val 1: -32
+Array Item Val 1: -32
+Array Item Array Val 1: -32
+Parameter Array Val 1: 20
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Int64
+=====================================================
+MemberId: 1
+MemberId (arr): 1
+Array Size Ok: true
+----Members---- 
+GetInfo: INT64MEMBERTYPE,Int64Member,-1,-1,true,2
+GetName: Int64Member
+GetTypeName: Int64
+----Parameters---- 
+GetName: Int64Parameter
+GetType: INT64MEMBERTYPE
+GetTypeName: Int64
+------------------ 
+Val: 64
+Item Val: 64
+Item Array Val: 64
+Property Parameter Val: 10
+Val 0: 64
+Array Item Val 0: 64
+Array Item Array Val 0: 64
+Parameter Array Val 0: 10
+Val 1: -64
+Array Item Val 1: -64
+Array Item Array Val 1: -64
+Parameter Array Val 1: 20
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Float32
+=====================================================
+MemberId: 2
+MemberId (arr): 2
+Array Size Ok: true
+----Members---- 
+GetInfo: FLOAT32MEMBERTYPE,Float32Member,-1,-1,true,2
+GetName: Float32Member
+GetTypeName: Float32
+----Parameters---- 
+GetName: Float32Parameter
+GetType: FLOAT32MEMBERTYPE
+GetTypeName: Float32
+------------------ 
+Val: 32
+Item Val: 32
+Item Array Val: 32
+Property Parameter Val: 10
+Val 0: 32
+Array Item Val 0: 32
+Array Item Array Val 0: 32
+Parameter Array Val 0: 10
+Val 1: -32
+Array Item Val 1: -32
+Array Item Array Val 1: -32
+Parameter Array Val 1: 20
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Float64
+=====================================================
+MemberId: 3
+MemberId (arr): 3
+Array Size Ok: true
+----Members---- 
+GetInfo: FLOAT64MEMBERTYPE,Float64Member,-1,-1,true,2
+GetName: Float64Member
+GetTypeName: Float64
+----Parameters---- 
+GetName: Float64Parameter
+GetType: FLOAT64MEMBERTYPE
+GetTypeName: Float64
+------------------ 
+Val: 64
+Item Val: 64
+Item Array Val: 64
+Property Parameter Val: 10
+Val 0: 64
+Array Item Val 0: 64
+Array Item Array Val 0: 64
+Parameter Array Val 0: 10
+Val 1: -64
+Array Item Val 1: -64
+Array Item Array Val 1: -64
+Parameter Array Val 1: 20
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Boolean
+=====================================================
+MemberId: 4
+MemberId (arr): 4
+Array Size Ok: true
+----Members---- 
+GetInfo: BOOLEANMEMBERTYPE,BooleanMember,-1,-1,true,2
+GetName: BooleanMember
+GetTypeName: Boolean
+----Parameters---- 
+GetName: BooleanParameter
+GetType: BOOLEANMEMBERTYPE
+GetTypeName: Boolean
+------------------ 
+Val: true
+Item Val: true
+Item Array Val: true
+Property Parameter Val: false
+Val 0: true
+Array Item Val 0: true
+Array Item Array Val 0: true
+Parameter Array Val 0: false
+Val 1: false
+Array Item Val 1: false
+Array Item Array Val 1: false
+Parameter Array Val 1: true
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Enumeration
+=====================================================
+MemberId: 5
+MemberId (arr): 5
+Array Size Ok: true
+First: 0
+Last: 2
+Size: 3
+Test ToString (0): MyFirst
+Test ToValue (MySecond): 1
+----Members---- 
+GetInfo: ENUMERATIONMEMBERTYPE,EnumerationMember,7765043459684641017,-1,true,2
+GetName: EnumerationMember
+GetTypeName: Enumeration
+GetTypeId: 7765043459684641017
+----Parameters---- 
+GetName: EnumerationParameter
+GetType: ENUMERATIONMEMBERTYPE
+GetTypeName: Enumeration
+------------------ 
+Val: MyFirst
+Item Val: MyFirst
+Item Array Val: MyFirst
+Property Parameter Val: MyFirst
+Val 0: MyFirst
+Array Item Val 0: MyFirst
+Array Item Array Val 0: MyFirst
+Parameter Array Val 0: MyFirst
+Val 1: MySecond
+Array Item Val 1: MySecond
+Array Item Array Val 1: MySecond
+Parameter Array Val 1: MySecond
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: String
+=====================================================
+MemberId: 6
+MemberId (arr): 6
+Array Size Ok: true
+MaxStringLength Size Ok (10): true
+----Members---- 
+GetInfo: STRINGMEMBERTYPE,StringMember,-1,10,true,2
+GetName: StringMember
+GetTypeName: String
+----Parameters---- 
+GetName: StringParameter
+GetType: STRINGMEMBERTYPE
+GetTypeName: String
+------------------ 
+Val: <correct>
+Item Val: <correct>
+Item Array Val: <correct>
+Property Parameter Val: abcdABCD
+Val 0: <correct>
+Array Item Val 0: <correct>
+Array Item Array Val 0: <correct>
+Parameter Array Val 0: abcdABCD
+Val 1: <correct>
+Array Item Val 1: <correct>
+Array Item Array Val 1: <correct>
+Parameter Array Val 1: abcdABCDasdf
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: EntityId
+=====================================================
+MemberId: 7
+MemberId (arr): 7
+Array Size Ok: true
+----Members---- 
+GetInfo: ENTITYIDMEMBERTYPE,EntityIdMember,-1,-1,true,2
+GetName: EntityIdMember
+GetTypeName: EntityId
+----Parameters---- 
+GetName: EntityIdParameter
+GetType: ENTITYIDMEMBERTYPE
+GetTypeName: EntityId
+------------------ 
+Val: (DotsTest.TestItem, 0)
+Item Val: (DotsTest.TestItem, 0)
+Item Array Val:(DotsTest.TestItem, 0)
+Property Parameter Val: (DotsTest.TestItem, SomeInstance)
+Val 0: (DotsTest.TestItem, 0)
+Array Item Val 0: (DotsTest.TestItem, 0)
+Array Item Array Val 0: (DotsTest.TestItem, 0)
+Parameter Array Val 0: (DotsTest.TestItem, 1)
+Val 1: (DotsTest.TestItem, SomeInstance)
+Array Item Val 1: (DotsTest.TestItem, SomeInstance)
+Array Item Array Val 1: (DotsTest.TestItem, SomeInstance)
+Parameter Array Val 1: (DotsTest.TestItem, SomeInstance)
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: InstanceId
+=====================================================
+MemberId: 10
+MemberId (arr): 9
+Array Size Ok: true
+----Members---- 
+GetInfo: INSTANCEIDMEMBERTYPE,InstanceIdMember,-1,-1,true,2
+GetName: InstanceIdMember
+GetTypeName: InstanceId
+----Parameters---- 
+GetName: InstanceIdParameter
+GetType: INSTANCEIDMEMBERTYPE
+GetTypeName: InstanceId
+------------------ 
+Val: SomeInstance
+Item Val: SomeInstance
+Item Array Val:SomeInstance
+Property Parameter Val: SomeInstance
+Val 0: 0
+Array Item Val 0: 0
+Array Item Array Val 0: 0
+Parameter Array Val 0: 0
+Val 1: SomeInstance
+Array Item Val 1: SomeInstance
+Array Item Array Val 1: SomeInstance
+Parameter Array Val 1: SomeInstance
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: TypeId
+=====================================================
+MemberId: 9
+MemberId (arr): 8
+Array Size Ok: true
+----Members---- 
+GetInfo: TYPEIDMEMBERTYPE,TypeIdMember,-1,-1,true,2
+GetName: TypeIdMember
+GetTypeName: TypeId
+----Parameters---- 
+GetName: TypeIdParameter
+GetType: TYPEIDMEMBERTYPE
+GetTypeName: TypeId
+------------------ 
+Val: DotsTest.TestItem
+Item Val: DotsTest.TestItem
+Item Array Val: DotsTest.TestItem
+Property Parameter Val: DotsTest.TestItem
+Val 0: DotsTest.TestItem
+Array Item Val 0: DotsTest.TestItem
+Array Item Array Val 0: DotsTest.TestItem
+Parameter Array Val 0: DotsTest.TestItem
+Val 1: DotsTest.TestEnum
+Array Item Val 1: DotsTest.TestEnum
+Array Item Array Val 1: DotsTest.TestEnum
+Parameter Array Val 1: DotsTest.EmptyObject
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: ChannelId
+=====================================================
+MemberId: 12
+MemberId (arr): 10
+Array Size Ok: true
+----Members---- 
+GetInfo: CHANNELIDMEMBERTYPE,ChannelIdMember,-1,-1,true,2
+GetName: ChannelIdMember
+GetTypeName: ChannelId
+----Parameters---- 
+GetName: ChannelIdParameter
+GetType: CHANNELIDMEMBERTYPE
+GetTypeName: ChannelId
+------------------ 
+Val: SomeChannel
+Item Val: SomeChannel
+Item Array Val:SomeChannel
+Property Parameter Val: SomeChannel
+Val 0: 0
+Array Item Val 0: 0
+Array Item Array Val 0: 0
+Parameter Array Val 0: 0
+Val 1: SomeChannel
+Array Item Val 1: SomeChannel
+Array Item Array Val 1: SomeChannel
+Parameter Array Val 1: SomeChannel
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: HandlerId
+=====================================================
+MemberId: 14
+MemberId (arr): 11
+Array Size Ok: true
+----Members---- 
+GetInfo: HANDLERIDMEMBERTYPE,HandlerIdMember,-1,-1,true,2
+GetName: HandlerIdMember
+GetTypeName: HandlerId
+----Parameters---- 
+GetName: HandlerIdParameter
+GetType: HANDLERIDMEMBERTYPE
+GetTypeName: HandlerId
+------------------ 
+Val: SomeHandler
+Item Val: SomeHandler
+Item Array Val:SomeHandler
+Property Parameter Val: SomeHandler
+Val 0: 0
+Array Item Val 0: 0
+Array Item Array Val 0: 0
+Parameter Array Val 0: 0
+Val 1: SomeHandler
+Array Item Val 1: SomeHandler
+Array Item Array Val 1: SomeHandler
+Parameter Array Val 1: SomeHandler
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Object
+=====================================================
+MemberId: 16
+MemberId (arr): 12
+Array Size Ok: true
+----Members---- 
+GetInfo: OBJECTMEMBERTYPE,ObjectMember,5955188366590963785,-1,true,2
+GetName: ObjectMember
+GetTypeName: Object
+GetTypeId: 5955188366590963785
+----Parameters---- 
+GetName: ObjectParameter
+GetType: OBJECTMEMBERTYPE
+GetTypeName: Object
+------------------ 
+Val: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
+Item Val: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
+Item Array Val: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
+Property Parameter Val: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
+Val 0: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
+Array Item Val 0: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
+Array Item Array Val 0: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
+Parameter Array Val 0: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
+Val 1: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
+Array Item Val 1: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
+Array Item Array Val 1: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
+Parameter Array Val 1: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Binary
+=====================================================
+MemberId: 17
+MemberId (arr): 13
+Array Size Ok: true
+----Members---- 
+GetInfo: BINARYMEMBERTYPE,BinaryMember,-1,-1,true,2
+GetName: BinaryMember
+GetTypeName: Binary
+----Parameters---- 
+GetName: BinaryParameter
+GetType: BINARYMEMBERTYPE
+GetTypeName: Binary
+------------------ 
+Val: VGVzdGluZyBiaW5hcnkgdHlwZQ==
+Item Val: VGVzdGluZyBiaW5hcnkgdHlwZQ==
+Item Array Val: VGVzdGluZyBiaW5hcnkgdHlwZQ==
+Property Parameter Val: VGVzdGluZyBiaW5hcnkgdHlwZQ==
+Val 0: VGVzdGluZyBiaW5hcnkgdHlwZQ==
+Array Item Val 0: VGVzdGluZyBiaW5hcnkgdHlwZQ==
+Array Item Array Val 0: VGVzdGluZyBiaW5hcnkgdHlwZQ==
+Parameter Array Val 0: VGVzdGluZyBiaW5hcnkgdHlwZQ==
+Val 1: b25jZSBtb3JlLi4u
+Array Item Val 1: b25jZSBtb3JlLi4u
+Array Item Array Val 1: b25jZSBtb3JlLi4u
+Parameter Array Val 1: b25jZSBtb3JlLi4u
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: TestClass
+=====================================================
+MemberId: 18
+MemberId (arr): 14
+Array Size Ok: true
+----Members---- 
+GetInfo: OBJECTMEMBERTYPE,TestClassMember,6091706122362893070,-1,true,2
+GetName: TestClassMember
+GetTypeName: Object
+GetTypeId: 6091706122362893070
+----Parameters---- 
+GetName: TestClassParameter
+GetType: OBJECTMEMBERTYPE
+GetTypeName: Object
+------------------ 
+Val: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-32</value></member></members></object>
+Item Val: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-32</value></member></members></object>
+Item Array Val: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-32</value></member></members></object>
+Property Parameter Val: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>20</value></member></members></object>
+Val 0: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>3200</value></member></members></object>
+Array Item Val 0: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>3200</value></member></members></object>
+Array Item Array Val 0: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>3200</value></member></members></object>
+Parameter Array Val 0: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>20</value></member></members></object>
+Val 1: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-3200</value></member></members></object>
+Array Item Val 1: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-3200</value></member></members></object>
+Array Item Array Val 1: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-3200</value></member></members></object>
+Parameter Array Val 1: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>20</value></member></members></object>
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Ampere32
+=====================================================
+MemberId: 19
+MemberId (arr): 15
+Array Size Ok: true
+----Members---- 
+GetInfo: AMPERE32MEMBERTYPE,Ampere32Member,-1,-1,true,2
+GetName: Ampere32Member
+GetTypeName: Ampere32
+----Parameters---- 
+GetName: Ampere32Parameter
+GetType: AMPERE32MEMBERTYPE
+GetTypeName: Ampere32
+------------------ 
+Val: 32001
+Item Val: 32001
+Item Array Val: 32001
+Property Parameter Val: 10.01
+Val 0: 32001
+Array Item Val 0: 32001
+Array Item Array Val 0: 32001
+Parameter Array Val 0: 10.01
+Val 1: -32001
+Array Item Val 1: -32001
+Array Item Array Val 1: -32001
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: CubicMeter32
+=====================================================
+MemberId: 20
+MemberId (arr): 16
+Array Size Ok: true
+----Members---- 
+GetInfo: CUBICMETER32MEMBERTYPE,CubicMeter32Member,-1,-1,true,2
+GetName: CubicMeter32Member
+GetTypeName: CubicMeter32
+----Parameters---- 
+GetName: CubicMeter32Parameter
+GetType: CUBICMETER32MEMBERTYPE
+GetTypeName: CubicMeter32
+------------------ 
+Val: 32002
+Item Val: 32002
+Item Array Val: 32002
+Property Parameter Val: 10.01
+Val 0: 32002
+Array Item Val 0: 32002
+Array Item Array Val 0: 32002
+Parameter Array Val 0: 10.01
+Val 1: -32002
+Array Item Val 1: -32002
+Array Item Array Val 1: -32002
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Hertz32
+=====================================================
+MemberId: 21
+MemberId (arr): 17
+Array Size Ok: true
+----Members---- 
+GetInfo: HERTZ32MEMBERTYPE,Hertz32Member,-1,-1,true,2
+GetName: Hertz32Member
+GetTypeName: Hertz32
+----Parameters---- 
+GetName: Hertz32Parameter
+GetType: HERTZ32MEMBERTYPE
+GetTypeName: Hertz32
+------------------ 
+Val: 32003
+Item Val: 32003
+Item Array Val: 32003
+Property Parameter Val: 10.01
+Val 0: 32003
+Array Item Val 0: 32003
+Array Item Array Val 0: 32003
+Parameter Array Val 0: 10.01
+Val 1: -32003
+Array Item Val 1: -32003
+Array Item Array Val 1: -32003
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Joule32
+=====================================================
+MemberId: 22
+MemberId (arr): 18
+Array Size Ok: true
+----Members---- 
+GetInfo: JOULE32MEMBERTYPE,Joule32Member,-1,-1,true,2
+GetName: Joule32Member
+GetTypeName: Joule32
+----Parameters---- 
+GetName: Joule32Parameter
+GetType: JOULE32MEMBERTYPE
+GetTypeName: Joule32
+------------------ 
+Val: 32004
+Item Val: 32004
+Item Array Val: 32004
+Property Parameter Val: 10.01
+Val 0: 32004
+Array Item Val 0: 32004
+Array Item Array Val 0: 32004
+Parameter Array Val 0: 10.01
+Val 1: -32004
+Array Item Val 1: -32004
+Array Item Array Val 1: -32004
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Kelvin32
+=====================================================
+MemberId: 23
+MemberId (arr): 19
+Array Size Ok: true
+----Members---- 
+GetInfo: KELVIN32MEMBERTYPE,Kelvin32Member,-1,-1,true,2
+GetName: Kelvin32Member
+GetTypeName: Kelvin32
+----Parameters---- 
+GetName: Kelvin32Parameter
+GetType: KELVIN32MEMBERTYPE
+GetTypeName: Kelvin32
+------------------ 
+Val: 32005
+Item Val: 32005
+Item Array Val: 32005
+Property Parameter Val: 10.01
+Val 0: 32005
+Array Item Val 0: 32005
+Array Item Array Val 0: 32005
+Parameter Array Val 0: 10.01
+Val 1: -32005
+Array Item Val 1: -32005
+Array Item Array Val 1: -32005
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Kilogram32
+=====================================================
+MemberId: 24
+MemberId (arr): 20
+Array Size Ok: true
+----Members---- 
+GetInfo: KILOGRAM32MEMBERTYPE,Kilogram32Member,-1,-1,true,2
+GetName: Kilogram32Member
+GetTypeName: Kilogram32
+----Parameters---- 
+GetName: Kilogram32Parameter
+GetType: KILOGRAM32MEMBERTYPE
+GetTypeName: Kilogram32
+------------------ 
+Val: 32006
+Item Val: 32006
+Item Array Val: 32006
+Property Parameter Val: 10.01
+Val 0: 32006
+Array Item Val 0: 32006
+Array Item Array Val 0: 32006
+Parameter Array Val 0: 10.01
+Val 1: -32006
+Array Item Val 1: -32006
+Array Item Array Val 1: -32006
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Meter32
+=====================================================
+MemberId: 25
+MemberId (arr): 21
+Array Size Ok: true
+----Members---- 
+GetInfo: METER32MEMBERTYPE,Meter32Member,-1,-1,true,2
+GetName: Meter32Member
+GetTypeName: Meter32
+----Parameters---- 
+GetName: Meter32Parameter
+GetType: METER32MEMBERTYPE
+GetTypeName: Meter32
+------------------ 
+Val: 32007
+Item Val: 32007
+Item Array Val: 32007
+Property Parameter Val: 10.01
+Val 0: 32007
+Array Item Val 0: 32007
+Array Item Array Val 0: 32007
+Parameter Array Val 0: 10.01
+Val 1: -32007
+Array Item Val 1: -32007
+Array Item Array Val 1: -32007
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: MeterPerSecond32
+=====================================================
+MemberId: 26
+MemberId (arr): 22
+Array Size Ok: true
+----Members---- 
+GetInfo: METERPERSECOND32MEMBERTYPE,MeterPerSecond32Member,-1,-1,true,2
+GetName: MeterPerSecond32Member
+GetTypeName: MeterPerSecond32
+----Parameters---- 
+GetName: MeterPerSecond32Parameter
+GetType: METERPERSECOND32MEMBERTYPE
+GetTypeName: MeterPerSecond32
+------------------ 
+Val: 32008
+Item Val: 32008
+Item Array Val: 32008
+Property Parameter Val: 10.01
+Val 0: 32008
+Array Item Val 0: 32008
+Array Item Array Val 0: 32008
+Parameter Array Val 0: 10.01
+Val 1: -32008
+Array Item Val 1: -32008
+Array Item Array Val 1: -32008
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: MeterPerSecondSquared32
+=====================================================
+MemberId: 27
+MemberId (arr): 23
+Array Size Ok: true
+----Members---- 
+GetInfo: METERPERSECONDSQUARED32MEMBERTYPE,MeterPerSecondSquared32Member,-1,-1,true,2
+GetName: MeterPerSecondSquared32Member
+GetTypeName: MeterPerSecondSquared32
+----Parameters---- 
+GetName: MeterPerSecondSquared32Parameter
+GetType: METERPERSECONDSQUARED32MEMBERTYPE
+GetTypeName: MeterPerSecondSquared32
+------------------ 
+Val: 32009
+Item Val: 32009
+Item Array Val: 32009
+Property Parameter Val: 10.01
+Val 0: 32009
+Array Item Val 0: 32009
+Array Item Array Val 0: 32009
+Parameter Array Val 0: 10.01
+Val 1: -32009
+Array Item Val 1: -32009
+Array Item Array Val 1: -32009
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Newton32
+=====================================================
+MemberId: 28
+MemberId (arr): 24
+Array Size Ok: true
+----Members---- 
+GetInfo: NEWTON32MEMBERTYPE,Newton32Member,-1,-1,true,2
+GetName: Newton32Member
+GetTypeName: Newton32
+----Parameters---- 
+GetName: Newton32Parameter
+GetType: NEWTON32MEMBERTYPE
+GetTypeName: Newton32
+------------------ 
+Val: 32010
+Item Val: 32010
+Item Array Val: 32010
+Property Parameter Val: 10.01
+Val 0: 32010
+Array Item Val 0: 32010
+Array Item Array Val 0: 32010
+Parameter Array Val 0: 10.01
+Val 1: -32010
+Array Item Val 1: -32010
+Array Item Array Val 1: -32010
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Pascal32
+=====================================================
+MemberId: 29
+MemberId (arr): 25
+Array Size Ok: true
+----Members---- 
+GetInfo: PASCAL32MEMBERTYPE,Pascal32Member,-1,-1,true,2
+GetName: Pascal32Member
+GetTypeName: Pascal32
+----Parameters---- 
+GetName: Pascal32Parameter
+GetType: PASCAL32MEMBERTYPE
+GetTypeName: Pascal32
+------------------ 
+Val: 32011
+Item Val: 32011
+Item Array Val: 32011
+Property Parameter Val: 10.01
+Val 0: 32011
+Array Item Val 0: 32011
+Array Item Array Val 0: 32011
+Parameter Array Val 0: 10.01
+Val 1: -32011
+Array Item Val 1: -32011
+Array Item Array Val 1: -32011
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Radian32
+=====================================================
+MemberId: 30
+MemberId (arr): 26
+Array Size Ok: true
+----Members---- 
+GetInfo: RADIAN32MEMBERTYPE,Radian32Member,-1,-1,true,2
+GetName: Radian32Member
+GetTypeName: Radian32
+----Parameters---- 
+GetName: Radian32Parameter
+GetType: RADIAN32MEMBERTYPE
+GetTypeName: Radian32
+------------------ 
+Val: 32012
+Item Val: 32012
+Item Array Val: 32012
+Property Parameter Val: 10.01
+Val 0: 32012
+Array Item Val 0: 32012
+Array Item Array Val 0: 32012
+Parameter Array Val 0: 10.01
+Val 1: -32012
+Array Item Val 1: -32012
+Array Item Array Val 1: -32012
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: RadianPerSecond32
+=====================================================
+MemberId: 31
+MemberId (arr): 27
+Array Size Ok: true
+----Members---- 
+GetInfo: RADIANPERSECOND32MEMBERTYPE,RadianPerSecond32Member,-1,-1,true,2
+GetName: RadianPerSecond32Member
+GetTypeName: RadianPerSecond32
+----Parameters---- 
+GetName: RadianPerSecond32Parameter
+GetType: RADIANPERSECOND32MEMBERTYPE
+GetTypeName: RadianPerSecond32
+------------------ 
+Val: 32013
+Item Val: 32013
+Item Array Val: 32013
+Property Parameter Val: 10.01
+Val 0: 32013
+Array Item Val 0: 32013
+Array Item Array Val 0: 32013
+Parameter Array Val 0: 10.01
+Val 1: -32013
+Array Item Val 1: -32013
+Array Item Array Val 1: -32013
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: RadianPerSecondSquared32
+=====================================================
+MemberId: 32
+MemberId (arr): 28
+Array Size Ok: true
+----Members---- 
+GetInfo: RADIANPERSECONDSQUARED32MEMBERTYPE,RadianPerSecondSquared32Member,-1,-1,true,2
+GetName: RadianPerSecondSquared32Member
+GetTypeName: RadianPerSecondSquared32
+----Parameters---- 
+GetName: RadianPerSecondSquared32Parameter
+GetType: RADIANPERSECONDSQUARED32MEMBERTYPE
+GetTypeName: RadianPerSecondSquared32
+------------------ 
+Val: 32014
+Item Val: 32014
+Item Array Val: 32014
+Property Parameter Val: 10.01
+Val 0: 32014
+Array Item Val 0: 32014
+Array Item Array Val 0: 32014
+Parameter Array Val 0: 10.01
+Val 1: -32014
+Array Item Val 1: -32014
+Array Item Array Val 1: -32014
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Second32
+=====================================================
+MemberId: 33
+MemberId (arr): 29
+Array Size Ok: true
+----Members---- 
+GetInfo: SECOND32MEMBERTYPE,Second32Member,-1,-1,true,2
+GetName: Second32Member
+GetTypeName: Second32
+----Parameters---- 
+GetName: Second32Parameter
+GetType: SECOND32MEMBERTYPE
+GetTypeName: Second32
+------------------ 
+Val: 32015
+Item Val: 32015
+Item Array Val: 32015
+Property Parameter Val: 10.01
+Val 0: 32015
+Array Item Val 0: 32015
+Array Item Array Val 0: 32015
+Parameter Array Val 0: 10.01
+Val 1: -32015
+Array Item Val 1: -32015
+Array Item Array Val 1: -32015
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: SquareMeter32
+=====================================================
+MemberId: 34
+MemberId (arr): 30
+Array Size Ok: true
+----Members---- 
+GetInfo: SQUAREMETER32MEMBERTYPE,SquareMeter32Member,-1,-1,true,2
+GetName: SquareMeter32Member
+GetTypeName: SquareMeter32
+----Parameters---- 
+GetName: SquareMeter32Parameter
+GetType: SQUAREMETER32MEMBERTYPE
+GetTypeName: SquareMeter32
+------------------ 
+Val: 32016
+Item Val: 32016
+Item Array Val: 32016
+Property Parameter Val: 10.01
+Val 0: 32016
+Array Item Val 0: 32016
+Array Item Array Val 0: 32016
+Parameter Array Val 0: 10.01
+Val 1: -32016
+Array Item Val 1: -32016
+Array Item Array Val 1: -32016
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Steradian32
+=====================================================
+MemberId: 35
+MemberId (arr): 31
+Array Size Ok: true
+----Members---- 
+GetInfo: STERADIAN32MEMBERTYPE,Steradian32Member,-1,-1,true,2
+GetName: Steradian32Member
+GetTypeName: Steradian32
+----Parameters---- 
+GetName: Steradian32Parameter
+GetType: STERADIAN32MEMBERTYPE
+GetTypeName: Steradian32
+------------------ 
+Val: 32017
+Item Val: 32017
+Item Array Val: 32017
+Property Parameter Val: 10.01
+Val 0: 32017
+Array Item Val 0: 32017
+Array Item Array Val 0: 32017
+Parameter Array Val 0: 10.01
+Val 1: -32017
+Array Item Val 1: -32017
+Array Item Array Val 1: -32017
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Volt32
+=====================================================
+MemberId: 36
+MemberId (arr): 32
+Array Size Ok: true
+----Members---- 
+GetInfo: VOLT32MEMBERTYPE,Volt32Member,-1,-1,true,2
+GetName: Volt32Member
+GetTypeName: Volt32
+----Parameters---- 
+GetName: Volt32Parameter
+GetType: VOLT32MEMBERTYPE
+GetTypeName: Volt32
+------------------ 
+Val: 32018
+Item Val: 32018
+Item Array Val: 32018
+Property Parameter Val: 10.01
+Val 0: 32018
+Array Item Val 0: 32018
+Array Item Array Val 0: 32018
+Parameter Array Val 0: 10.01
+Val 1: -32018
+Array Item Val 1: -32018
+Array Item Array Val 1: -32018
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Watt32
+=====================================================
+MemberId: 37
+MemberId (arr): 33
+Array Size Ok: true
+----Members---- 
+GetInfo: WATT32MEMBERTYPE,Watt32Member,-1,-1,true,2
+GetName: Watt32Member
+GetTypeName: Watt32
+----Parameters---- 
+GetName: Watt32Parameter
+GetType: WATT32MEMBERTYPE
+GetTypeName: Watt32
+------------------ 
+Val: 32019
+Item Val: 32019
+Item Array Val: 32019
+Property Parameter Val: 10.01
+Val 0: 32019
+Array Item Val 0: 32019
+Array Item Array Val 0: 32019
+Parameter Array Val 0: 10.01
+Val 1: -32019
+Array Item Val 1: -32019
+Array Item Array Val 1: -32019
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Ampere64
+=====================================================
+MemberId: 38
+MemberId (arr): 34
+Array Size Ok: true
+----Members---- 
+GetInfo: AMPERE64MEMBERTYPE,Ampere64Member,-1,-1,true,2
+GetName: Ampere64Member
+GetTypeName: Ampere64
+----Parameters---- 
+GetName: Ampere64Parameter
+GetType: AMPERE64MEMBERTYPE
+GetTypeName: Ampere64
+------------------ 
+Val: 64001
+Item Val: 64001
+Item Array Val: 64001
+Property Parameter Val: 10.01
+Val 0: 64001
+Array Item Val 0: 64001
+Array Item Array Val 0: 64001
+Parameter Array Val 0: 10.01
+Val 1: -64001
+Array Item Val 1: -64001
+Array Item Array Val 1: -64001
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: CubicMeter64
+=====================================================
+MemberId: 39
+MemberId (arr): 35
+Array Size Ok: true
+----Members---- 
+GetInfo: CUBICMETER64MEMBERTYPE,CubicMeter64Member,-1,-1,true,2
+GetName: CubicMeter64Member
+GetTypeName: CubicMeter64
+----Parameters---- 
+GetName: CubicMeter64Parameter
+GetType: CUBICMETER64MEMBERTYPE
+GetTypeName: CubicMeter64
+------------------ 
+Val: 64002
+Item Val: 64002
+Item Array Val: 64002
+Property Parameter Val: 10.01
+Val 0: 64002
+Array Item Val 0: 64002
+Array Item Array Val 0: 64002
+Parameter Array Val 0: 10.01
+Val 1: -64002
+Array Item Val 1: -64002
+Array Item Array Val 1: -64002
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Hertz64
+=====================================================
+MemberId: 40
+MemberId (arr): 36
+Array Size Ok: true
+----Members---- 
+GetInfo: HERTZ64MEMBERTYPE,Hertz64Member,-1,-1,true,2
+GetName: Hertz64Member
+GetTypeName: Hertz64
+----Parameters---- 
+GetName: Hertz64Parameter
+GetType: HERTZ64MEMBERTYPE
+GetTypeName: Hertz64
+------------------ 
+Val: 64003
+Item Val: 64003
+Item Array Val: 64003
+Property Parameter Val: 10.01
+Val 0: 64003
+Array Item Val 0: 64003
+Array Item Array Val 0: 64003
+Parameter Array Val 0: 10.01
+Val 1: -64003
+Array Item Val 1: -64003
+Array Item Array Val 1: -64003
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Joule64
+=====================================================
+MemberId: 41
+MemberId (arr): 37
+Array Size Ok: true
+----Members---- 
+GetInfo: JOULE64MEMBERTYPE,Joule64Member,-1,-1,true,2
+GetName: Joule64Member
+GetTypeName: Joule64
+----Parameters---- 
+GetName: Joule64Parameter
+GetType: JOULE64MEMBERTYPE
+GetTypeName: Joule64
+------------------ 
+Val: 64004
+Item Val: 64004
+Item Array Val: 64004
+Property Parameter Val: 10.01
+Val 0: 64004
+Array Item Val 0: 64004
+Array Item Array Val 0: 64004
+Parameter Array Val 0: 10.01
+Val 1: -64004
+Array Item Val 1: -64004
+Array Item Array Val 1: -64004
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Kelvin64
+=====================================================
+MemberId: 42
+MemberId (arr): 38
+Array Size Ok: true
+----Members---- 
+GetInfo: KELVIN64MEMBERTYPE,Kelvin64Member,-1,-1,true,2
+GetName: Kelvin64Member
+GetTypeName: Kelvin64
+----Parameters---- 
+GetName: Kelvin64Parameter
+GetType: KELVIN64MEMBERTYPE
+GetTypeName: Kelvin64
+------------------ 
+Val: 64005
+Item Val: 64005
+Item Array Val: 64005
+Property Parameter Val: 10.01
+Val 0: 64005
+Array Item Val 0: 64005
+Array Item Array Val 0: 64005
+Parameter Array Val 0: 10.01
+Val 1: -64005
+Array Item Val 1: -64005
+Array Item Array Val 1: -64005
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Kilogram64
+=====================================================
+MemberId: 43
+MemberId (arr): 39
+Array Size Ok: true
+----Members---- 
+GetInfo: KILOGRAM64MEMBERTYPE,Kilogram64Member,-1,-1,true,2
+GetName: Kilogram64Member
+GetTypeName: Kilogram64
+----Parameters---- 
+GetName: Kilogram64Parameter
+GetType: KILOGRAM64MEMBERTYPE
+GetTypeName: Kilogram64
+------------------ 
+Val: 64006
+Item Val: 64006
+Item Array Val: 64006
+Property Parameter Val: 10.01
+Val 0: 64006
+Array Item Val 0: 64006
+Array Item Array Val 0: 64006
+Parameter Array Val 0: 10.01
+Val 1: -64006
+Array Item Val 1: -64006
+Array Item Array Val 1: -64006
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Meter64
+=====================================================
+MemberId: 44
+MemberId (arr): 40
+Array Size Ok: true
+----Members---- 
+GetInfo: METER64MEMBERTYPE,Meter64Member,-1,-1,true,2
+GetName: Meter64Member
+GetTypeName: Meter64
+----Parameters---- 
+GetName: Meter64Parameter
+GetType: METER64MEMBERTYPE
+GetTypeName: Meter64
+------------------ 
+Val: 64007
+Item Val: 64007
+Item Array Val: 64007
+Property Parameter Val: 10.01
+Val 0: 64007
+Array Item Val 0: 64007
+Array Item Array Val 0: 64007
+Parameter Array Val 0: 10.01
+Val 1: -64007
+Array Item Val 1: -64007
+Array Item Array Val 1: -64007
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: MeterPerSecond64
+=====================================================
+MemberId: 45
+MemberId (arr): 41
+Array Size Ok: true
+----Members---- 
+GetInfo: METERPERSECOND64MEMBERTYPE,MeterPerSecond64Member,-1,-1,true,2
+GetName: MeterPerSecond64Member
+GetTypeName: MeterPerSecond64
+----Parameters---- 
+GetName: MeterPerSecond64Parameter
+GetType: METERPERSECOND64MEMBERTYPE
+GetTypeName: MeterPerSecond64
+------------------ 
+Val: 64008
+Item Val: 64008
+Item Array Val: 64008
+Property Parameter Val: 10.01
+Val 0: 64008
+Array Item Val 0: 64008
+Array Item Array Val 0: 64008
+Parameter Array Val 0: 10.01
+Val 1: -64008
+Array Item Val 1: -64008
+Array Item Array Val 1: -64008
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: MeterPerSecondSquared64
+=====================================================
+MemberId: 46
+MemberId (arr): 42
+Array Size Ok: true
+----Members---- 
+GetInfo: METERPERSECONDSQUARED64MEMBERTYPE,MeterPerSecondSquared64Member,-1,-1,true,2
+GetName: MeterPerSecondSquared64Member
+GetTypeName: MeterPerSecondSquared64
+----Parameters---- 
+GetName: MeterPerSecondSquared64Parameter
+GetType: METERPERSECONDSQUARED64MEMBERTYPE
+GetTypeName: MeterPerSecondSquared64
+------------------ 
+Val: 64009
+Item Val: 64009
+Item Array Val: 64009
+Property Parameter Val: 10.01
+Val 0: 64009
+Array Item Val 0: 64009
+Array Item Array Val 0: 64009
+Parameter Array Val 0: 10.01
+Val 1: -64009
+Array Item Val 1: -64009
+Array Item Array Val 1: -64009
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Newton64
+=====================================================
+MemberId: 47
+MemberId (arr): 43
+Array Size Ok: true
+----Members---- 
+GetInfo: NEWTON64MEMBERTYPE,Newton64Member,-1,-1,true,2
+GetName: Newton64Member
+GetTypeName: Newton64
+----Parameters---- 
+GetName: Newton64Parameter
+GetType: NEWTON64MEMBERTYPE
+GetTypeName: Newton64
+------------------ 
+Val: 64010
+Item Val: 64010
+Item Array Val: 64010
+Property Parameter Val: 10.01
+Val 0: 64010
+Array Item Val 0: 64010
+Array Item Array Val 0: 64010
+Parameter Array Val 0: 10.01
+Val 1: -64010
+Array Item Val 1: -64010
+Array Item Array Val 1: -64010
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Pascal64
+=====================================================
+MemberId: 48
+MemberId (arr): 44
+Array Size Ok: true
+----Members---- 
+GetInfo: PASCAL64MEMBERTYPE,Pascal64Member,-1,-1,true,2
+GetName: Pascal64Member
+GetTypeName: Pascal64
+----Parameters---- 
+GetName: Pascal64Parameter
+GetType: PASCAL64MEMBERTYPE
+GetTypeName: Pascal64
+------------------ 
+Val: 64011
+Item Val: 64011
+Item Array Val: 64011
+Property Parameter Val: 10.01
+Val 0: 64011
+Array Item Val 0: 64011
+Array Item Array Val 0: 64011
+Parameter Array Val 0: 10.01
+Val 1: -64011
+Array Item Val 1: -64011
+Array Item Array Val 1: -64011
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Radian64
+=====================================================
+MemberId: 49
+MemberId (arr): 45
+Array Size Ok: true
+----Members---- 
+GetInfo: RADIAN64MEMBERTYPE,Radian64Member,-1,-1,true,2
+GetName: Radian64Member
+GetTypeName: Radian64
+----Parameters---- 
+GetName: Radian64Parameter
+GetType: RADIAN64MEMBERTYPE
+GetTypeName: Radian64
+------------------ 
+Val: 64012
+Item Val: 64012
+Item Array Val: 64012
+Property Parameter Val: 10.01
+Val 0: 64012
+Array Item Val 0: 64012
+Array Item Array Val 0: 64012
+Parameter Array Val 0: 10.01
+Val 1: -64012
+Array Item Val 1: -64012
+Array Item Array Val 1: -64012
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: RadianPerSecond64
+=====================================================
+MemberId: 50
+MemberId (arr): 46
+Array Size Ok: true
+----Members---- 
+GetInfo: RADIANPERSECOND64MEMBERTYPE,RadianPerSecond64Member,-1,-1,true,2
+GetName: RadianPerSecond64Member
+GetTypeName: RadianPerSecond64
+----Parameters---- 
+GetName: RadianPerSecond64Parameter
+GetType: RADIANPERSECOND64MEMBERTYPE
+GetTypeName: RadianPerSecond64
+------------------ 
+Val: 64013
+Item Val: 64013
+Item Array Val: 64013
+Property Parameter Val: 10.01
+Val 0: 64013
+Array Item Val 0: 64013
+Array Item Array Val 0: 64013
+Parameter Array Val 0: 10.01
+Val 1: -64013
+Array Item Val 1: -64013
+Array Item Array Val 1: -64013
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: RadianPerSecondSquared64
+=====================================================
+MemberId: 51
+MemberId (arr): 47
+Array Size Ok: true
+----Members---- 
+GetInfo: RADIANPERSECONDSQUARED64MEMBERTYPE,RadianPerSecondSquared64Member,-1,-1,true,2
+GetName: RadianPerSecondSquared64Member
+GetTypeName: RadianPerSecondSquared64
+----Parameters---- 
+GetName: RadianPerSecondSquared64Parameter
+GetType: RADIANPERSECONDSQUARED64MEMBERTYPE
+GetTypeName: RadianPerSecondSquared64
+------------------ 
+Val: 64014
+Item Val: 64014
+Item Array Val: 64014
+Property Parameter Val: 10.01
+Val 0: 64014
+Array Item Val 0: 64014
+Array Item Array Val 0: 64014
+Parameter Array Val 0: 10.01
+Val 1: -64014
+Array Item Val 1: -64014
+Array Item Array Val 1: -64014
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Second64
+=====================================================
+MemberId: 52
+MemberId (arr): 48
+Array Size Ok: true
+----Members---- 
+GetInfo: SECOND64MEMBERTYPE,Second64Member,-1,-1,true,2
+GetName: Second64Member
+GetTypeName: Second64
+----Parameters---- 
+GetName: Second64Parameter
+GetType: SECOND64MEMBERTYPE
+GetTypeName: Second64
+------------------ 
+Val: 64015
+Item Val: 64015
+Item Array Val: 64015
+Property Parameter Val: 10.01
+Val 0: 64015
+Array Item Val 0: 64015
+Array Item Array Val 0: 64015
+Parameter Array Val 0: 10.01
+Val 1: -64015
+Array Item Val 1: -64015
+Array Item Array Val 1: -64015
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: SquareMeter64
+=====================================================
+MemberId: 53
+MemberId (arr): 49
+Array Size Ok: true
+----Members---- 
+GetInfo: SQUAREMETER64MEMBERTYPE,SquareMeter64Member,-1,-1,true,2
+GetName: SquareMeter64Member
+GetTypeName: SquareMeter64
+----Parameters---- 
+GetName: SquareMeter64Parameter
+GetType: SQUAREMETER64MEMBERTYPE
+GetTypeName: SquareMeter64
+------------------ 
+Val: 64016
+Item Val: 64016
+Item Array Val: 64016
+Property Parameter Val: 10.01
+Val 0: 64016
+Array Item Val 0: 64016
+Array Item Array Val 0: 64016
+Parameter Array Val 0: 10.01
+Val 1: -64016
+Array Item Val 1: -64016
+Array Item Array Val 1: -64016
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Steradian64
+=====================================================
+MemberId: 54
+MemberId (arr): 50
+Array Size Ok: true
+----Members---- 
+GetInfo: STERADIAN64MEMBERTYPE,Steradian64Member,-1,-1,true,2
+GetName: Steradian64Member
+GetTypeName: Steradian64
+----Parameters---- 
+GetName: Steradian64Parameter
+GetType: STERADIAN64MEMBERTYPE
+GetTypeName: Steradian64
+------------------ 
+Val: 64017
+Item Val: 64017
+Item Array Val: 64017
+Property Parameter Val: 10.01
+Val 0: 64017
+Array Item Val 0: 64017
+Array Item Array Val 0: 64017
+Parameter Array Val 0: 10.01
+Val 1: -64017
+Array Item Val 1: -64017
+Array Item Array Val 1: -64017
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Volt64
+=====================================================
+MemberId: 55
+MemberId (arr): 51
+Array Size Ok: true
+----Members---- 
+GetInfo: VOLT64MEMBERTYPE,Volt64Member,-1,-1,true,2
+GetName: Volt64Member
+GetTypeName: Volt64
+----Parameters---- 
+GetName: Volt64Parameter
+GetType: VOLT64MEMBERTYPE
+GetTypeName: Volt64
+------------------ 
+Val: 64018
+Item Val: 64018
+Item Array Val: 64018
+Property Parameter Val: 10.01
+Val 0: 64018
+Array Item Val 0: 64018
+Array Item Array Val 0: 64018
+Parameter Array Val 0: 10.01
+Val 1: -64018
+Array Item Val 1: -64018
+Array Item Array Val 1: -64018
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: Watt64
+=====================================================
+MemberId: 56
+MemberId (arr): 52
+Array Size Ok: true
+----Members---- 
+GetInfo: WATT64MEMBERTYPE,Watt64Member,-1,-1,true,2
+GetName: Watt64Member
+GetTypeName: Watt64
+----Parameters---- 
+GetName: Watt64Parameter
+GetType: WATT64MEMBERTYPE
+GetTypeName: Watt64
+------------------ 
+Val: 64019
+Item Val: 64019
+Item Array Val: 64019
+Property Parameter Val: 10.01
+Val 0: 64019
+Array Item Val 0: 64019
+Array Item Array Val 0: 64019
+Parameter Array Val 0: 10.01
+Val 1: -64019
+Array Item Val 1: -64019
+Array Item Array Val 1: -64019
+Parameter Array Val 1: 20.02
+Is_Null OK: true
+Is_Changed OK: true
+
+
+
+=====================================================
+Testing: TestException
+=====================================================
+Caught exception: DotsTest.TestException
+
+
+
+=====================================================
+Testing: LibraryExceptions
+=====================================================
+Caught exception: DotsTest.TestException
+Caught native exception

@@ -120,6 +120,7 @@ namespace Safir.Dob
                                              Callbacks.onInitialInjectionsDoneCb,
                                              Callbacks.onNotRequestOverflowCb,
                                              Callbacks.onNotMessageOverflowCb,
+                                             Callbacks.onDropReferenceCb,
                                              out newCtrlId,
                                              out success);
 

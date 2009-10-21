@@ -99,6 +99,8 @@ private:
     void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
     void OnNotRequestOverflow();
 
+    const std::wstring CallbackId() const;
+
     Safir::Dob::SecondaryConnection     m_connection;
 
     const int                           m_consumerNumber;

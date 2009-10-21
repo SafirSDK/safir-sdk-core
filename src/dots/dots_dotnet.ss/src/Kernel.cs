@@ -34,12 +34,7 @@ namespace Safir.Dob.Typesystem.Internal
     /// </summary>
     internal class Id
     {
-
-#if DEBUG
-        internal const string DOTS_ID_NAME = "dots_idd.dll";
-#else
         internal const string DOTS_ID_NAME = "dots_id.dll";
-#endif
 
         internal static Int64 Generate64BitHash(string str)
         {
@@ -64,12 +59,7 @@ namespace Safir.Dob.Typesystem.Internal
     /// </summary>
     internal class Kernel
     {
-
-#if DEBUG
-        internal const string DOTS_KERNEL_NAME = "dots_kerneld.dll";
-#else
         internal const string DOTS_KERNEL_NAME = "dots_kernel.dll";
-#endif
 
         //********************************************************
         //* Base operations on blobs
@@ -163,10 +153,6 @@ namespace Safir.Dob.Typesystem.Internal
         //GetTypeName
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
         internal static extern System.IntPtr DotsC_GetTypeName(System.Int64 id);
-
-        //GetNumberOfInstances
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-        internal static extern System.Int32 DotsC_GetNumberOfInstances(System.Int64 id);
 
         //GetNumberOfEnumerationValues
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
@@ -317,11 +303,26 @@ namespace Safir.Dob.Typesystem.Internal
                                                           System.IntPtr blobSource,
                                                           System.Int32 bufSize,
                                                           out System.Int32 resultSize);
-
+#if FUNC_PTR_WORKAROUND
         //XmlToBlob
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
         internal static extern void DotsC_XmlToBlob(out System.IntPtr blobDest,
+                                                    out System.IntPtr dummy,
                                                     System.IntPtr val);
+
+
+#else
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal delegate void DotsC_BytePointerDeleter(ref System.IntPtr ptr);
+
+        //XmlToBlob
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DotsC_XmlToBlob(out System.IntPtr blobDest,
+                                                    out DotsC_BytePointerDeleter deleter,
+                                                    System.IntPtr val);
+#endif
+
+
 
         //CalculateBase64BufferSize
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
@@ -905,17 +906,6 @@ namespace Safir.Dob.Typesystem.Internal
 #endif
 
         //*********************************
-        //* For debug
-        //*********************************
-        //DumpClassDescriptions
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-        internal static extern void DotsC_DumpClassDescriptions();
-
-        //DumpMemoryBlockInfo
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-        internal static extern void DotsC_DumpMemoryBlockInfo();
-
-        //*********************************
         //* For real classes
         //*********************************
         //GetInitialSize
@@ -928,7 +918,7 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_FormatBlob(System.IntPtr blob,
                                                      System.Int32 blobSize,
                                                      System.Int64 typeId,
-                                                     ref System.IntPtr beginningOfUnused);
+                                                     out System.IntPtr beginningOfUnused);
         //DotsC_CreateObjectMember
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DotsC_CreateObjectMember(System.IntPtr insideBlob,
@@ -1165,9 +1155,6 @@ namespace Safir.Dob.Typesystem.Internal
                                                                out byte wasSet);
 
 #else
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void DotsC_BytePointerDeleter(ref System.IntPtr ptr);
-
         //DotsC_GetAndClearException
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DotsC_GetAndClearException(out System.Int64 exceptionId,

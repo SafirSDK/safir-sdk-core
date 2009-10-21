@@ -53,7 +53,7 @@ namespace Application
         /**
          * Constructor.
          * Create a logger with a certain prefix.
-         * @param name [in] The prefix for this logger.
+         * @param prefix [in] The prefix for this logger.
          */
         explicit Tracer(const std::wstring & prefix);
 

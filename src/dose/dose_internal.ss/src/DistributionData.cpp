@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagström / stlrhafsetchangeflags
 *
 *******************************************************************************
 *
@@ -90,7 +90,7 @@ namespace Internal
                             + 1  //m_explicitlyDeleted
                             + 1  //m_sourceIsPermanentStore
                             + 1  //m_hasBlob
-                            + 1  //padding
+                            + 1  //m_versionIsDecremented
                             + 4  //m_numTimestamps
                             );
 
@@ -125,6 +125,8 @@ namespace Internal
 
 
         BOOST_STATIC_ASSERT(sizeof (unsigned int) == sizeof(boost::uint32_t));
+
+        BOOST_STATIC_ASSERT(sizeof(AtomicUint32) == 4);
     }
 
 
@@ -440,6 +442,7 @@ namespace Internal
         entityStateHeader.m_explicitlyDeleted = explicitlyDeleted;
         entityStateHeader.m_sourceIsPermanentStore = sourceIsPermanentStore;
         entityStateHeader.m_hasBlob = blob != NULL;
+        entityStateHeader.m_versionIsDecremented = false;
         entityStateHeader.m_numTimestamps = numTimestamps;
 
         if (numTimestamps > 0)
@@ -1064,6 +1067,23 @@ namespace Internal
         Typesystem::Internal::SetChanged(blob, changed);
     }
 
+    void DistributionData::DecrementVersion()
+    {
+        ENSURE(!GetEntityStateHeader().m_versionIsDecremented, << "Can't decrement an already decremented version!");
+        --GetEntityStateHeader().m_version;
+        GetEntityStateHeader().m_versionIsDecremented = true;
+    }
+
+    const VersionNumber DistributionData::GetUndecrementedVersion() const
+    {
+        VersionNumber ver = GetEntityStateHeader().m_version;
+        if (GetEntityStateHeader().m_versionIsDecremented)
+        {
+            ++ver;
+        }
+        return ver;
+    }
+
     char * DistributionData::GetBlobCopy() const
     {
         return Dob::Typesystem::Internal::CreateCopy(GetBlob());
@@ -1098,7 +1118,7 @@ namespace Internal
         std::wostringstream oStr;
         const Header & header=GetHeader();
 
-        oStr << "\tuse_count: " << *IntrusiveOperations::GetCount(GetData()) << std::endl
+        oStr << "\tuse_count: " << IntrusiveOperations::GetCount(GetData()).value() << std::endl
              << "\tSender node: " << header.m_sender.m_node << std::endl
              << "\tSender id: " << header.m_sender.m_id;
 

@@ -107,7 +107,7 @@ namespace VehicleMmiCsWinForms
         {
             m_DobConnection = new Safir.Dob.Connection();
             m_DobConnection.Open("VehicleMmiCsWinForms", "Vehicle", 0, this, this); 
-            m_callDispatch = new MethodDelegate(m_DobConnection.Dispatch);            
+            m_callDispatch = new MethodDelegate(m_DobConnection.Dispatch);
         }
 
 

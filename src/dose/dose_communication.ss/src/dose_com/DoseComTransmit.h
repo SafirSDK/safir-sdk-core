@@ -28,9 +28,9 @@ class CDoseComTransmit
 public:
     int Xmit_Init(unsigned short DoseId);
 
-    int Xmit_Msg(const char *pMsg, unsigned long MsgLength,
-            unsigned char PoolDistribution, unsigned char bUseAck,
-            int Priority, int   Destination);
+    int Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
+                 dcom_uchar8 PoolDistribution, dcom_uchar8 bUseAck,
+                 int Priority, int   Destination);
 
     void Set_PoolDistributionIsCompleted(int Priority, int DestinationId);
     static void Get_Info(char *pBuf);

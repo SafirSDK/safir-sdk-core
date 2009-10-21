@@ -1,29 +1,18 @@
+cmake_minimum_required(VERSION 2.6)
+
 PROJECT (dots_v)
 
-cmake_minimum_required(VERSION 2.4)
+INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
-#This whole block is to make linux with xmlada3 use the correct code
-#rather "hackish" solution, but it appears to work, for now.
-SET(xmlada3_path "xmlada3_path-NOTFOUND" CACHE FILEPATH "Cleared." FORCE)
-FIND_FILE(xmlada3_path "libxmlada.so.3" "/usr/lib" "/usr/local/lib")
-SET(USE_XMLADA3 false)
-if (NOT xmlada3_path STREQUAL xmlada3_path-NOTFOUND)
-  SET(USE_XMLADA3 true)
-endif (NOT xmlada3_path STREQUAL xmlada3_path-NOTFOUND)
+SET(gprmake_arguments -q -XBUILD=${CUSTOM_BUILD_TYPE} -XWarning_Level=Default)
 
-SET(gprmake_arguments -q -XBUILD=release -XWarning_Level=Default -XUSE_XMLADA3=${USE_XMLADA3})
-
-SET(build_directories program/lib-obj/release 
-		      program/lib-obj/debug 
-                      lib-obj/release 
-		      lib-obj/debug)
+SET(build_directories 
+      program/lib-obj/Release 
+      program/lib-obj/Debug 
+      lib-obj/Release 
+      lib-obj/Debug)
 
 FILE(MAKE_DIRECTORY ${build_directories})
-
-#FILE(GLOB gpr_files data/*.gpr)
-#FOREACH(gpr_file ${gpr_files})
-#    CONFIGURE_FILE(${gpr_file} $ENV{SAFIR_SDK}/lib/projects/ COPYONLY)
-#ENDFOREACH(gpr_file)
 
 ADD_CUSTOM_TARGET(dots_v ALL
                   COMMAND gnatmake ${gprmake_arguments} -P dots_v-program.gpr 
@@ -31,18 +20,49 @@ ADD_CUSTOM_TARGET(dots_v ALL
                   COMMENT "Building dots_v using gprmake"
                   VERBATIM)
 
-#INSTALL(FILES data/dots_generated_ada.gpr
-#        DESTINATION $ENV{SAFIR_SDK}/ada)
+if (WIN32)
+   set (exe_name program/dots_v.exe)
+elseif (UNIX)
+   set (exe_name program/dots_v)
+endif (WIN32)
 
-
-INSTALL(PROGRAMS program/dots_v
-        DESTINATION $ENV{SAFIR_RUNTIME}/bin)
+INSTALL(PROGRAMS ${exe_name}
+        DESTINATION ${SAFIR_RUNTIME}/bin)
 
 FILE(GLOB dod_files data/*.dod)
-INSTALL(FILES ${dod_files}
-              data/dots_unit.xsd
-        DESTINATION $ENV{SAFIR_RUNTIME}/data/text/dots/config/)
+INSTALL(FILES 
+          ${dod_files} 
+          data/dots_unit.xsd
+        DESTINATION ${SAFIR_RUNTIME}/data/text/dots/config/)
 
-INSTALL(FILES data/CMakeLists.txt 
-              data/precompiled_header_for_cpp.h
-        DESTINATION $ENV{SAFIR_SDK}/dots/dots_generated)
+if (SAFIR_BUILD_SYSTEM_VERSION OR UNIX)
+    INSTALL(FILES 
+            data/AssemblyInfo.cs
+            data/dots_generated-dotnet.snk
+            data/CMakeLists.txt 
+            data/Manifest.java.txt
+            data/precompiled_header_for_cpp.h
+            data/Safir-java.namespace.txt
+            data/dots_generated_ada_library.gpr_template
+            data/dots_generated_ada.gpr
+           DESTINATION ${SAFIR_SDK}/dots/dots_generated)
+   INSTALL(FILES
+            data/gen/CMakeLists.txt
+           DESTINATION ${SAFIR_SDK}/dots/dots_generated/gen)
+   INSTALL(PROGRAMS
+            data/dobmake.py
+           DESTINATION ${SAFIR_RUNTIME}/bin)
+elseif(WIN32)
+    INSTALL(FILES 
+            data/AssemblyInfo.cs
+            data/dots_generated-dotnet.snk
+            data/Makefile
+            data/Makefile_cpp
+            data/Manifest.java.txt
+            data/precompiled_header_for_cpp.h
+            data/Safir-java.namespace.txt
+            data/dots_generated_ada.gpr
+        DESTINATION ${SAFIR_SDK}/dots/dots_generated)
+else()
+    MESSAGE(FATAL_ERROR "I don't know how to install myself on this platform!")
+endif()

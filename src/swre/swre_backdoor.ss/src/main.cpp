@@ -24,7 +24,18 @@
 #include <Safir/Utilities/AceDispatcher.h>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/NotOpenException.h>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4702)
+#endif
+
 #include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <Safir/Application/BackdoorCommand.h>
 #include <boost/program_options.hpp>
 #include <iostream>

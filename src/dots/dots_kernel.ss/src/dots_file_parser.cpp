@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2004-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Joel Ottosson / stjoot
 *
 *******************************************************************************
@@ -29,13 +29,13 @@
 #include "dots_error_handler.h"
 #include "dots_xml_elements.h"
 #include "dots_class_parser.h"
+#include "dots_exception_parser.h"
 #include "dots_property_parser.h"
 #include "dots_property_mapping_parser.h"
 #include "dots_enum_parser.h"
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <iostream>
 
@@ -80,6 +80,7 @@ namespace Internal
             classParser.Reset();
             ParsingState::Instance().propertyParser.Reset();
             mappingParser.Reset();
+            exceptionParser.Reset();
             ParsingState::Instance().enumParser.Reset();
             definitionType = UnknownDefinition;
         }
@@ -91,6 +92,7 @@ namespace Internal
             propertyParser = PropertyParser();
             mappingParser = PropertyMappingParser();
             enumParser = EnumParser();
+            exceptionParser = ExceptionParser();
         }
 
         boost::filesystem::path xmlFileName;
@@ -100,8 +102,14 @@ namespace Internal
         PropertyParser propertyParser;
         PropertyMappingParser mappingParser;
         EnumParser enumParser;
+        ExceptionParser exceptionParser;
         DefinitionType definitionType;
+        std::stack<bool> preserveSpace;
+        std::string characterData;
     };
+
+    //fwd decl
+    static void HandleCharacters(const std::string & str);
 
     ParsingState & ParsingState::Instance()
     {
@@ -118,8 +126,49 @@ namespace Internal
             line=-1;
     }
 
-    static void XMLCALL startElement(void * /*userData*/, const char *name, const char ** /*atts*/)
+    static void XMLCALL startElement(void * /*userData*/, const char *name, const char ** atts)
     {
+        ParsingState::Instance().characterData.clear();
+        if (ParsingState::Instance().preserveSpace.empty())
+        {
+            ParsingState::Instance().preserveSpace.push(false);
+        }
+        else
+        {
+            ParsingState::Instance().preserveSpace.push(ParsingState::Instance().preserveSpace.top());
+        }
+
+        while(*atts != NULL)
+        {
+            const std::string attribute = *atts;
+            ++atts;
+            const std::string value = *atts;
+            ++atts;
+
+            if (attribute == "xml:space")
+            {
+                if (value == "default")
+                {
+                    ParsingState::Instance().preserveSpace.top() = false;
+                }
+                else if (value == "preserve")
+                {
+                    ParsingState::Instance().preserveSpace.top() = true;
+                }
+                else
+                {
+                    XML_StopParser(ParsingState::Instance().parser, false);
+                    ParsingState::Instance().parseError=true;
+                    std::string description="Unknown value for attribute xml:space: ";
+                    description+=value;
+                    ErrorHandler::Error("Serialization error", description, "dots_blob_serializer");
+                    return;
+                }
+
+            }
+        }
+
+
         switch (ParsingState::Instance().definitionType)
         {
         case ClassDefinition:
@@ -159,6 +208,12 @@ namespace Internal
             break;
 
         case ExceptionDefinition:
+            if (!ParsingState::Instance().exceptionParser.StartElement(name))
+            {
+                XML_StopParser(ParsingState::Instance().parser, false);
+                ParsingState::Instance().parseError = true;
+                return;
+            }
             break;
 
         case UnknownDefinition:
@@ -180,6 +235,7 @@ namespace Internal
             }
             else if (eq(name, XmlElements::EXCEPTION)) {
                 ParsingState::Instance().definitionType = ExceptionDefinition;
+                ParsingState::Instance().exceptionParser.StartElement(name);
             }
             break;
         }
@@ -187,6 +243,32 @@ namespace Internal
 
     static void XMLCALL endElement(void * /*userData*/, const char *name)
     {
+        //a scope so we can get some locals.
+        {
+            std::string & charData = ParsingState::Instance().characterData;
+            if (!charData.empty())
+            {
+                if (!ParsingState::Instance().preserveSpace.top())
+                {
+                    const size_t startpos = charData.find_first_not_of(" \t\n");
+                    const size_t endpos = charData.find_last_not_of(" \t\n");
+
+                    if ((std::string::npos != startpos) && (std::string::npos != endpos))
+                    {
+                        HandleCharacters(charData.substr(startpos,endpos-startpos+1));
+                    }
+                }
+                else
+                {
+                    HandleCharacters(charData);
+                }
+                charData.clear();
+            }
+        }
+
+        ParsingState::Instance().preserveSpace.pop();
+
+
         switch (ParsingState::Instance().definitionType)
         {
         case ClassDefinition:
@@ -226,6 +308,12 @@ namespace Internal
             break;
 
         case ExceptionDefinition:
+            if (!ParsingState::Instance().exceptionParser.EndElement(name))
+            {
+                XML_StopParser(ParsingState::Instance().parser, false);
+                ParsingState::Instance().parseError = true;
+                return;
+            }
             break;
 
         default:
@@ -241,7 +329,47 @@ namespace Internal
 
     static void XMLCALL characters(void * /*userData*/, const XML_Char *s, int len)
     {
-        int startpos = 0;
+        std::string charData(s,s+len);
+        if (!ParsingState::Instance().preserveSpace.top())
+        {
+            size_t startpos = charData.find_first_not_of(" \t\n");
+            size_t endpos = charData.find_last_not_of(" \t\n");
+
+            if ((std::string::npos == startpos) || (std::string::npos == endpos))
+            {
+                if (!ParsingState::Instance().characterData.empty() &&
+                    *(ParsingState::Instance().characterData.end()-1) != ' ')
+                {
+                    ParsingState::Instance().characterData += ' ';
+                }
+                return;
+            }
+
+            if (0 != startpos &&
+                !ParsingState::Instance().characterData.empty() &&
+                *(ParsingState::Instance().characterData.end()-1) != ' ')
+            {
+                --startpos;
+                charData[startpos] = ' ';
+            }
+            if (charData.size() - 1 != endpos)
+            {
+                ++endpos;
+                charData[endpos] = ' ';
+            }
+
+            ParsingState::Instance().characterData +=
+                charData.substr(startpos,endpos-startpos+1);
+        }
+        else
+        {
+            ParsingState::Instance().characterData += charData;
+        }
+    }
+
+    static void HandleCharacters(const std::string & str)
+    {
+        /*int startpos = 0;
         int endpos = len-1;
         while((unsigned)s[startpos]<33 && startpos<len) startpos++;
         while((unsigned)s[endpos]<33 && endpos >= 0) endpos--;
@@ -249,7 +377,7 @@ namespace Internal
             return;
         std::string str = "";
         for (int i = startpos; i <= endpos; i++)
-                str += s[i];
+        str += s[i];*/
 
         switch (ParsingState::Instance().definitionType)
         {
@@ -290,6 +418,12 @@ namespace Internal
             break;
 
         case ExceptionDefinition:
+            if (!ParsingState::Instance().exceptionParser.Content(str))
+            {
+                XML_StopParser(ParsingState::Instance().parser, false);
+                ParsingState::Instance().parseError = true;
+                return;
+            }
             break;
 
         default:
@@ -755,7 +889,7 @@ namespace Internal
                                 {
                                     if (!IsInt(parIt->m_value.c_str()))
                                     {
-                                        m_propertyParametersSize += BasicTypes::SizeOfType(propertyMemberType) + sizeof(Int32) + 
+                                        m_propertyParametersSize += BasicTypes::SizeOfType(propertyMemberType) + sizeof(Int32) +
                                             parIt->m_value.size() +1;
                                     }
                                 }
@@ -1369,6 +1503,11 @@ namespace Internal
     const DobEnumerations& FileParser::ResultEnums() const
     {
         return ParsingState::Instance().enumParser.Result();
+    }
+
+    const DobExceptions& FileParser::ResultExceptions() const
+    {
+        return ParsingState::Instance().exceptionParser.Result();
     }
 
     size_t FileParser::ParameterSize()

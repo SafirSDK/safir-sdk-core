@@ -23,7 +23,17 @@
 ******************************************************************************/
 #include <Safir/Dob/Typesystem/Utilities.h>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4702)
+#endif
+
 #include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include "swre_report_filter.h"
 #include "swre_text_serializer.h"
 #include "swre_logger_app.h"

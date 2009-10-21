@@ -67,8 +67,9 @@ namespace Safir.Dob.Typesystem
             }
         }
 
-
-        // Property to retrieve the only instance of the Singleton
+        /// <summary>
+        /// Property to retrieve the only instance of the Singleton.
+        /// </summary>
         public static LibraryExceptions Instance
         {
             get
@@ -102,6 +103,15 @@ namespace Safir.Dob.Typesystem
             Set(exception.GetTypeId(), exception.Message);
         }
 
+        /// <summary>
+        /// Set the current exception.
+        /// <para>
+        /// When you have caught an exception that you would like to pass across language
+        /// boundaries, call this method with the exception. Then, on the other side of
+        /// the language boundary, call the Throw method, which will throw the exception in the other language.
+        /// </para>
+        /// </summary>
+        /// <param name="exception">The exception.</param>
         public void Set(System.Exception exception)
         {
             Safir.Dob.Typesystem.Exception exc = exception as Safir.Dob.Typesystem.Exception;
@@ -131,6 +141,13 @@ namespace Safir.Dob.Typesystem
             Marshal.FreeHGlobal(desc);
         }
 
+        /// <summary>
+        /// Throw the current exception.
+        /// <para>
+        /// Call this to throw the current exception. It is considered a programming
+        /// error to call this function if no exception is set.
+        /// </para>
+        /// </summary>
         public void Throw()
         {
             byte wasSetByte;
@@ -186,7 +203,11 @@ namespace Safir.Dob.Typesystem
             }
         }
 
-        //check if the exception that will be thrown by Throw is of a certain type.
+        /// <summary>
+        /// Check if the exception that will be thrown by Throw is of a certain type.
+        /// </summary>
+        /// <param name="exceptionTypeId">The exception type to compare to.</param>
+        /// <returns>True if the given exception type will be thrown.</returns>
         public bool Peek(System.Int64 exceptionTypeId)
         {
             System.Int64 exceptionId;

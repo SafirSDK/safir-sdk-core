@@ -31,24 +31,38 @@ package Dots.State is
    Max_Outputs : constant := 100;
 
    type Unit_Type is (Unknown, Class, Property, Enum, Xeption);
+   type Underscore_Style is (Add, Remove, Keep);
+   type Case_Style is (Upper, Lower, Camel, Keep);
+   type Style is record
+      Underscore : Underscore_Style;
+      Choose_Case : Case_Style;
+   end record;
 
    type Output_Config is record
       Name                  : VString;
       Full_Name             : VString;
-      File_Extension        : VString;
+      File_Suffix           : VString;
       Filename_Separator    : VString;
       Output_Directory      : VString;
       Namespace_Separator   : VString;
-      Lowercase_Namespace   : Boolean;
-      Lowercase_Filenames   : Boolean;
+      Namespace_Prefix_File_Suffix : VString;
+      Namespace_Style       : Style;
+      Filename_Style        : Style;
+      Classname_Style       : Style;
+      Membername_Style      : Style;
+      Enum_Value_Style      : Style;
       Create_Parents        : Boolean;
+      Parent_Filename       : VString;
       Object_Type           : VString;
       Index_Type            : VString;
       Exception_Set         : Templates_Parser.Translate_Set;
       Exception_List        : VString;
       Type_Set              : Templates_Parser.Translate_Set;
       Type_List             : VString;
+      Namspace_Prefix_Set   : Templates_Parser.Translate_Set;
+      Namspace_Prefix_Used  : Boolean;
       Dependencies          : Dots.String_Sets.Set;
+      Dependencies_Base     : Dots.String_Sets.Set;
    end record;
 
    Defined_Outputs : Natural := 0;

@@ -28,8 +28,27 @@ using System.Text;
 
 namespace Safir.Dob.Typesystem
 {
+    /// <summary>
+    ///  Base class for containers of enumeration values.
+    ///  <para>
+    ///  The containers for enumerations are defined in the automatically generated code,
+    ///  but this class defines the common functionality for them.
+    ///  Enumeration containers really store the ordinal values (integer representation of
+    ///  the enumeration), and this class has methods for setting and getting the ordinal.
+    ///  The derived class (in the generated code) has methods for setting and getting the
+    ///  value as an enumeration value.
+    ///  Most applications should not use the Ordinal property, but should
+    ///  use the Val property defined in the derived classes.
+    ///  </para>
+    /// </summary>
     abstract public class EnumerationContainerBase : ContainerBase, ICloneable
     {
+        /// <summary>
+        /// Default constructor.
+        /// <para>
+        /// Constructs an enumeration container that is null and not changed.
+        /// </para>
+        /// </summary>
         public EnumerationContainerBase(): base()
         {
             m_bIsNull = true;
@@ -42,12 +61,19 @@ namespace Safir.Dob.Typesystem
             throw new SoftwareViolationException("Cannot clone EnumerationContainerBase");
         }
 
+        /// <summary>
+        /// Clone.
+        /// </summary>
+        /// <returns></returns>
         public new EnumerationContainerBase Clone()
         {
             return (EnumerationContainerBase)((ICloneable)this).Clone(); 
         }
 
-        //Copy constructor for use by Clone
+        /// <summary>
+        /// Copy constructor for use by Clone.
+        /// </summary>
+        /// <param name="other">Other enumeration container.</param>
         protected EnumerationContainerBase(EnumerationContainerBase other)
             : base(other)
         {
@@ -55,6 +81,9 @@ namespace Safir.Dob.Typesystem
             m_Value = other.m_Value;
         }
 
+        /// <summary>
+        /// </summary>
+        /// <param name="other"></param>
         public override void Copy(ContainerBase other)
         {
             base.Copy(other);
@@ -65,13 +94,23 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
+        /// <summary>
+        /// Ordinal value of the enumeration container.
+        /// </summary>
         abstract public int Ordinal { get;  set; }
 
+        /// <summary>
+        /// Overrides method in ContainerBase.
+        /// </summary>
+        /// <returns>True if null.</returns>
         public override bool IsNull() 
         {
             return m_bIsNull;
         }
 
+        /// <summary>
+        /// Overrides method in ContainerBase.
+        /// </summary>
         public override void SetNull()
         {
             m_bIsNull = true;
@@ -79,48 +118,10 @@ namespace Safir.Dob.Typesystem
         }
 
        
-
+        /// <summary></summary>
         protected internal int m_Value;
+
+        /// <summary></summary>
         protected internal bool m_bIsNull;
     }
-
-    /*
-    public class EnumerationContainer <T> : EnumerationContainerBase where T : struct
-    {
-
-        public override int Ordinal
-        {
-            get
-            {
-                if (IsNull())
-                {
-                    throw new NullException("Value is null");
-                }
-                return m_Value;
-            }
-            set
-            {
-                if (!System.Enum.IsDefined(typeof(T),value))  //TODO can this be done in a better way?
-                {
-                    throw new IllegalValueException("Value is not in the enumeration range");
-                }
-                m_bIsNull = false;
-                m_bIsChanged = true;
-                m_Value = value;
-            }
-        }
-
-        public T Val
-        {
-            get
-            {
-                return (T)Ordinal;
-            }
-
-            set
-            {
-                Ordinal = (int)value;
-            }
-        }
-    }*/
 }

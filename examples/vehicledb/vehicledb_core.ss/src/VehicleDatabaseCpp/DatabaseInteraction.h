@@ -29,9 +29,6 @@
 #include <Capabilities/Vehicles/GetVehicleCategoryService.h>
 #include <Capabilities/Vehicles/SetVehicleCategoryService.h>
 
-//This is needed since Safir/Databases/Odbc/BinaryColumn.h is missing an include of string.h
-#include <string.h>
-
 #include <boost/noncopyable.hpp>
 #include <Safir/Databases/Odbc/Columns.h>
 #include <Safir/Databases/Odbc/Connection.h>

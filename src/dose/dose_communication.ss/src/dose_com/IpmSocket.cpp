@@ -159,9 +159,8 @@ IPADDR CIpmSocket::Get_OwnIpAddress(IPADDR NetAddr_nw)
 //----------------------------------------------------
 
 #ifdef _LINUX
-    unsigned char      *u;
     unsigned long       IpAddr_nw; // default = error
-    int                sockfd, size  = 1;
+    int                sockfd  = 1;
     struct ifreq       *ifr;  // size = 32
     struct ifconf      ifc;
     struct sockaddr_in sa;
@@ -594,7 +593,6 @@ int CIpmSocket::RecvFrom2(char *pBuf1, unsigned long Size1,
     int     result;
     struct  msghdr MsgHdr;  // see <sys/socket.h>
     struct  iovec IoVec[2];
-    struct sockaddr_in SockAddr;
 
 
     IoVec[0].iov_base = pBuf1;  // start addr

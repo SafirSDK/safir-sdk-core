@@ -28,35 +28,41 @@ using System.Runtime.InteropServices;
 namespace Safir.Dob.Typesystem.Internal
 {
     /// <summary>
-    /// Summary description for InternalOperations.
-    /// </summary>
-    
+    /// For internal usage. Use only if you know what you are doing.
+    /// </summary>    
     public class InternalOperations
     {
+        /// <summary>
+        /// format a piece of blank memory to be a blob of a desired type
+        /// does not check that the size of the blob is correct.
+        /// </summary>
+        /// <param name="blob">Blob to format.</param>
+        /// <param name="blobSize">Size of blob to format.</param>
+        /// <param name="typeId">Type id.</param>
+        /// <param name="beginningOfUnused">Pointer to unused part.</param>
         public static void FormatBlob(System.IntPtr blob,
                         System.Int32 blobSize,
                         System.Int64 typeId,
-                        ref System.IntPtr beginningOfUnused)
+                        out System.IntPtr beginningOfUnused)
         {
-            Kernel.DotsC_FormatBlob(blob, blobSize, typeId, ref beginningOfUnused);
-        }
-
-        //Debugging
-        public static void DumpClassDescriptions()
-        {
-            Kernel.DotsC_DumpClassDescriptions();
-        }
-
-        public static void DumpMemoryBlockInfo()
-        {
-            Kernel.DotsC_DumpMemoryBlockInfo();
+            Kernel.DotsC_FormatBlob(blob, blobSize, typeId, out beginningOfUnused);
         }
     
+        /// <summary>
+        /// byte to bool conversion.
+        /// </summary>
+        /// <param name="b">Byte</param>
+        /// <returns>bool</returns>
         public static bool BoolOf(byte b)
         {
             return b>0;
         }
 
+        /// <summary>
+        /// bool to byte conversion.
+        /// </summary>
+        /// <param name="b">bool</param>
+        /// <returns>byte</returns>
         public static byte ByteOf(bool b)
         {
             if (b)
@@ -65,6 +71,11 @@ namespace Safir.Dob.Typesystem.Internal
                 return 0;
         }
 
+        /// <summary>
+        /// Converts an UTF-8 encoded byte array to a string.
+        /// </summary>
+        /// <param name="p">Byte array.</param>
+        /// <returns>string</returns>
         public static string StringOf(System.IntPtr p)
         {
             if (p == System.IntPtr.Zero)
@@ -91,6 +102,11 @@ namespace Safir.Dob.Typesystem.Internal
             return System.Text.UTF8Encoding.UTF8.GetString(utf8Bytes);
         }
 
+        /// <summary>
+        /// Converts a string to an UTF-8 encoded CString.
+        /// </summary>
+        /// <param name="s">string</param>
+        /// <returns>UTF-8 encoded CString.</returns>
         public static System.IntPtr CStringOf(string s)
         {
             byte[] utf8Bytes=System.Text.Encoding.UTF8.GetBytes(s);
@@ -103,20 +119,23 @@ namespace Safir.Dob.Typesystem.Internal
             return p;
         }
 
-        public static System.IntPtr CreateCopy(System.IntPtr blob)
-        {
-            System.IntPtr copy;
-            Kernel.DotsC_CreateCopyOfBlob(out copy, blob);
-            return copy;
-        }
-
+        /// <summary>
+        /// Delete a blob.
+        /// <para>
+        /// Internal blobs can be deleted w8ith this function. Beware that you may call the wrong runtime!
+        /// </para>
+        /// </summary>
+        /// <param name="blob">The blob to delete.</param>
         public static void Delete(ref System.IntPtr blob)
         {
             Kernel.DotsC_DeleteBlob(ref blob);
         }
 
-
-        //Sets all changed flags in the blob to false
+        /// <summary>
+        /// Sets all changed flags in the blob.
+        /// </summary>
+        /// <param name="blob">The blob to modify.</param>
+        /// <param name="changed">The value to set the change flags to.</param>
         public static void SetChanged(System.IntPtr blob, bool changed)
         {
             Kernel.DotsC_SetChanged(blob, changed);
@@ -124,6 +143,14 @@ namespace Safir.Dob.Typesystem.Internal
 
         //Compare the two blobs and set the change flags in "mine" on all members that have
         //changed between "base" and "mine".
+        /// <summary>
+        /// Compare two blobs and set the change flags.
+        /// <para>
+        /// Change flags are set in "mine" on all members that have changed between "base" and "mine".
+        /// </para>
+        /// </summary>
+        /// <param name="_base">Original to compare.</param>
+        /// <param name="_mine">Compare to this and set change flags.</param>
         public static void Diff(System.IntPtr _base,
                                 System.IntPtr _mine)
         {

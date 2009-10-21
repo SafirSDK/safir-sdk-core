@@ -128,8 +128,8 @@ int Get_Status_Info(DOSE_SHARED_DATA_S *pShm, char *buff)
             "BeingPoolDistr    = %08lX  %08lX\r\n"
             "LatestPoolDistr   = %08lX  %08lX\r\n\r\n"
             "PoolDistributionWillStartSoon = %lu\r\n"   // ms has expired\r\n"
-            "PoolDistributionIsInProgress  = %ld\r\n"
-            "PoolDistributionWillEndSoon   = %ld\r\n\r\n"
+            "PoolDistributionIsInProgress  = %d\r\n"
+            "PoolDistributionWillEndSoon   = %d\r\n\r\n"
             ,
             MyIpAddrBuff, IpMcAddrBuff, IpNetAddrBuff,
             (ulong)(pShm->BitMapNodesNew64>>32),
@@ -151,13 +151,13 @@ int Get_Status_Info(DOSE_SHARED_DATA_S *pShm, char *buff)
     pos = strlen(buff);
     sprintf(&buff[pos],
             "Statistics:\r\n"
-            "Tot ReceiveCount      = %ld\r\n"
-            "Tot TransmitCount     = %ld\r\n"
-            "ReTransmitCount       = %ld\r\n"
-            "LostAckCount          = %ld\r\n"
+            "Tot ReceiveCount      = %d\r\n"
+            "Tot TransmitCount     = %d\r\n"
+            "ReTransmitCount       = %d\r\n"
+            "LostAckCount          = %d\r\n"
             //"BuffOverFlowCount     = %d\r\n"
-            "ReceiveQueueFullCount = %ld\r\n"
-            "TransmitQueueFullCount= %ld\r\n"
+            "ReceiveQueueFullCount = %d\r\n"
+            "TransmitQueueFullCount= %d\r\n"
             ,
             pShm->Statistics.TotRxCount,
             pShm->Statistics.TotTxCount,

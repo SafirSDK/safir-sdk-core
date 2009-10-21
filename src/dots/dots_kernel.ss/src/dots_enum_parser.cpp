@@ -57,7 +57,7 @@ namespace Internal
         return NULL;
     }
 
-    bool EnumParser::StartElement(std::string s)
+    bool EnumParser::StartElement(const std::string& s)
     {
         const char* elem=ValidElement(s.c_str());
         if (elem==NULL){
@@ -108,7 +108,7 @@ namespace Internal
         return true;
     }
 
-    bool EnumParser::EndElement(std::string s)
+    bool EnumParser::EndElement(const std::string& s)
     {
         const char* elem=ValidElement(s.c_str());
         if (elem==NULL){
@@ -142,7 +142,7 @@ namespace Internal
         return true;
     }
 
-    bool EnumParser::Content(std::string str)
+    bool EnumParser::Content(const std::string& str)
     {
         //comments, dont care about content
         if (m_uSummary)

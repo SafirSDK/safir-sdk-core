@@ -31,8 +31,6 @@ namespace Safir.Dob.Typesystem
     /// <summary>
     /// This class is an object factory for all automatically generated DOB classes.
     /// <para/>
-    /// Each generated class automatically registers itself with this class.
-    /// <para/>
     /// Users can call the CreateObject(TypeId) routine to create objects of a desired type
     /// (this is if they receive the type id from some other application so that they cannot
     /// call the Create routine of the class itself directly).

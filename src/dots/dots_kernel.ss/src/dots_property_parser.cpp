@@ -76,7 +76,7 @@ namespace Internal
         return NULL;
     }
 
-    bool PropertyParser::StartElement(std::string s)
+    bool PropertyParser::StartElement(const std::string& s)
     {
         const char* elem=ValidElement(s.c_str());
         if (elem==NULL){
@@ -150,7 +150,7 @@ namespace Internal
         return true;
     }
 
-    bool PropertyParser::EndElement(std::string s)
+    bool PropertyParser::EndElement(const std::string& s)
     {
         const char* elem=ValidElement(s.c_str());
         if (elem==NULL){
@@ -183,7 +183,7 @@ namespace Internal
         return true;
     }
 
-    bool PropertyParser::Content(std::string str)
+    bool PropertyParser::Content(const std::string& str)
     {
         //comments, dont care about content
         if (m_uSummary)

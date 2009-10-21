@@ -21,7 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/Operations.h>
@@ -32,6 +31,7 @@
 #include <boost/interprocess/sync/sharable_lock.hpp>
 #include "Signals.h"
 #include "ExitHandler.h"
+#include <ace/OS_NS_unistd.h>
 
 #include <vector>
 
@@ -55,7 +55,6 @@ namespace Internal
 
 
     Connections::Connections(private_constructor_t):
-        m_connectionOutSignals(MAX_NUM_CONNECTIONS,0),
         m_connectionOutIds(MAX_NUM_CONNECTIONS), //default constructed (-1,-1)
         m_lastUsedSlot(0),
         m_connectSignal(0),
@@ -66,7 +65,15 @@ namespace Internal
         m_connectMinusOneSemSignalled(false),
         m_connectSemSignalled(false)
     {
+        m_connectionOutSignals =
+            static_cast<AtomicUint32*>
+            (GetSharedMemory().allocate(sizeof(AtomicUint32)* MAX_NUM_CONNECTIONS));
 
+
+        for (int i = 0; i < MAX_NUM_CONNECTIONS; ++i)
+        {
+            m_connectionOutSignals.get()[i] = 0;
+        }
     }
 
     Connections::~Connections()
@@ -92,9 +99,9 @@ namespace Internal
         //std::wcout << "WaitForDoseMainSignal: connect = " << std::boolalpha << connect << ", connectionOut = " << connectionOut << std::endl;
     }
 
-    void Connections::WaitForConnectionSignal(const ConnectionId & connectionId)
+    const boost::function<void(void)> Connections::GetConnectionSignalWaiter(const ConnectionId & connectionId)
     {
-        Signals::Instance().WaitForConnectionSignal(connectionId);
+        return Signals::Instance().GetConnectionSignalWaiter(connectionId);
     }
 
 
@@ -201,72 +208,15 @@ namespace Internal
             AddToSignalHandling(connection.get());
 
             //We don't call the connect handler, since we assume that dose_main is able to
-            //do the bookkeeping for it's own connection by itself.
+            //do the bookkeeping for its own connection by itself.
         }
     }
 
     void Connections::Disconnect(const ConnectionPtr & connection)
     {
         ENSURE(connection != NULL, << "Cannot disconnect a NULL connection");
-
-        std::string connectionName(connection->NameWithoutCounter());
-
-        //is this a disconnect from within dose_main? if so, bypass normal disconnection handling
-        if (connectionName.find(";dose_main;") != connectionName.npos)
-        {
-            DisconnectDoseMain(connection);
-            return;
-        }
-
-        namespace bi = boost::interprocess;
-
-        bi::scoped_lock<bi::interprocess_mutex> lck(m_connectLock,bi::defer_lock);
-
-        //we only 'poll' the lock so that we can still exit if it is dose_main exiting
-        //that is causing this disconnect. (It is not enough to check it just once, since there
-        //may be multiple connections in one app, and all may not get the Died flag set before
-        //the app starts exiting.)
-        while (!lck)
-        {
-            if (connection->IsDead())
-            {
-                lllout << "dose_main appears to have died, so we disconnect quietly, without waiting for acks etc." << std::endl;
-                return;
-            }
-            lck.try_lock();
-            if (!lck)
-            {
-                ACE_OS::sleep(ACE_Time_Value(0,1000)); //1 millisecond
-            }
-        }
-
-        m_connectMessage.Set(disconnect_tag, connection);
-
-        m_connectSignal = 1;
-        Signals::Instance().SignalConnectOrOut();
-
-        //wait for response
-        m_connectResponseEvent.wait();
-        //TODO: check for existance of dose_main somehow here, then we can
-        //stop waiting if dose_main exits.
-
-        ConnectResult result;
-        m_connectResponse.GetAndClear(disconnect_tag, result);
-        ENSURE(result == Success, << "Disconnect should always succeed!!!");
+        connection->Died();
     }
-
-    void Connections::DisconnectDoseMain(const ConnectionPtr& connection)
-    {
-        lllout << "Handling a Disconnect for one of dose_mains own connections. name = " << connection->NameWithCounter() << std::endl;
-
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_upgradable_mutex> wlock(m_connectionTablesLock);
-
-        RemoveFromSignalHandling(connection);
-        m_connections.erase(connection->Id());
-
-        GetSharedMemory().destroy_ptr(connection.get());
-    }
-
 
     void Connections::HandleConnect(ConnectionConsumer & connectionHandler)
     {
@@ -332,29 +282,6 @@ namespace Internal
                 }
             }
 
-        }
-        else //is a disconnect message
-        {
-            lllout << "Handling a Disconnect" << std::endl;
-            ConnectionPtr connection;
-            m_connectMessage.GetAndClear(disconnect_tag, connection);
-
-            lllout << "ConnectionHandler::HandleDisconnect: Disconnecting " << connection->Id() << std::endl;
-            connectionHandler.HandleDisconnect(connection);
-
-            {
-                boost::interprocess::scoped_lock<boost::interprocess::interprocess_upgradable_mutex> wlock(m_connectionTablesLock);
-
-                RemoveFromSignalHandling(connection);
-                m_connections.erase(connection->Id());
-
-                GetSharedMemory().destroy_ptr(connection.get());
-            }
-
-            m_connectResponse.Set(disconnect_tag, Success);
-            ExitHandler::Instance().RemoveConnection(connection);
-
-            connectionHandler.DisconnectComplete();
         }
         //lllout << "Signalling the connector that the response is available" << std::endl;
         m_connectResponseEvent.post();
@@ -427,6 +354,7 @@ namespace Internal
             else
             {
                 m_connectMinusOneSem.post();
+                m_connectMinusOneSemSignalled = true;
             }
         }
         else
@@ -439,6 +367,7 @@ namespace Internal
             else
             {
                 m_connectSem.post();
+                m_connectSemSignalled = true;
             }
         }
     }
@@ -501,16 +430,15 @@ namespace Internal
         //the lock can be removed here since all writes to the table occur from
         //the same thread in dose_main, which is also the only caller of this function.
 
-        const Containers<int>::vector::iterator end = m_connectionOutSignals.begin() + m_lastUsedSlot + 1;
-        for (Containers<int>::vector::iterator it = m_connectionOutSignals.begin();
+        const AtomicUint32 * end = m_connectionOutSignals.get() + m_lastUsedSlot + 1;
+        for (AtomicUint32 * it = m_connectionOutSignals.get();
              it != end; ++it)
         {
-            volatile int & signal = *it;
-            if (signal != 0)
+            if (*it != 0)
             {
-                signal = 0;
+                *it = 0;
 
-                const ConnectionId & connId = m_connectionOutIds[std::distance(m_connectionOutSignals.begin(), it)];
+                const ConnectionId & connId = m_connectionOutIds[std::distance(m_connectionOutSignals.get(), it)];
 
                 //                std::wcout << "Handling event from connection " << connId << std::endl;
                 if (connId == ConnectionId()) //compare with dummy-connection

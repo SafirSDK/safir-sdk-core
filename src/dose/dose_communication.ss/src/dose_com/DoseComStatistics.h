@@ -28,27 +28,27 @@ namespace Statistics
 {
     typedef struct // one instance/TxQueue
     {
-        ulong   CountTxOverflow;    // Application send overflow
-        ulong   CountTxNoAckOk;     // Application send Ok
-        ulong   CountTxWithAckOk;   // Fragmented is counted as one
-        ulong   CountTxNoTargets;
-        ulong   CountTxGiveUp;
-        ulong   CountTxRetransmit; //???[MAX_NUM_NODES];
-        ulong   CountTxLostAck[MAX_NUM_NODES];
-        ulong   CountDown[MAX_NUM_NODES];
+        dcom_ulong32   CountTxOverflow;    // Application send overflow
+        dcom_ulong32   CountTxNoAckOk;     // Application send Ok
+        dcom_ulong32   CountTxWithAckOk;   // Fragmented is counted as one
+        dcom_ulong32   CountTxNoTargets;
+        dcom_ulong32   CountTxGiveUp;
+        dcom_ulong32   CountTxRetransmit; //???[MAX_NUM_NODES];
+        dcom_ulong32   CountTxLostAck[MAX_NUM_NODES];
+        dcom_ulong32   CountDown[MAX_NUM_NODES];
     }  TX_STATISTICS_S;
 
     typedef struct // one instance/RxQueue
     {
-        ulong   CountRxOverflow;    // overflow
-        ulong   CountRxWithAckOk;   //
-        ulong   CountRxNoAckOk;     //
-        ulong   CountRxDuplicate;   //
-        ulong   CountRxInvalidMsg;  // invalid messages
-        ulong   CountRxInvSeqNum;
-        ulong   CountRxMustWait;
-        ulong   CountRxInvFragmentNum;
-        ulong   CountRxOtherErr;
+        dcom_ulong32   CountRxOverflow;    // overflow
+        dcom_ulong32   CountRxWithAckOk;   //
+        dcom_ulong32   CountRxNoAckOk;     //
+        dcom_ulong32   CountRxDuplicate;   //
+        dcom_ulong32   CountRxInvalidMsg;  // invalid messages
+        dcom_ulong32   CountRxInvSeqNum;
+        dcom_ulong32   CountRxMustWait;
+        dcom_ulong32   CountRxInvFragmentNum;
+        dcom_ulong32   CountRxOtherErr;
     }  RX_STATISTICS_S;
 
     RX_STATISTICS_S *GetPtrToRxStatistics(int Ix);

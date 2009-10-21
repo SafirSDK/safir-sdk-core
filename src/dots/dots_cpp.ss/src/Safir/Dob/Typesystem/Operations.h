@@ -74,7 +74,7 @@ namespace Operations
     DOTS_API Dob::Typesystem::Int32 GetNumberOfEnumerations();
 
     /**
-     * Get a list of all type id's that exists in the system.
+     * Get all type id's that exists in the system.
      *
      * @return A vector containing all the type ids in the system.
      */
@@ -123,7 +123,7 @@ namespace Operations
      *
      * Note that this is a pure mathematical
      * function and will always return the correct typeId for a class with the specified
-     * name. This function does not give any information about wheter a class with the
+     * name. This function does not give any information about whether a class with the
      * specified name actually exist in the system. Use Exists to check if a class with
      * the typeId returned from this function exists.
      * TypeIds for classes and properties are based on namespaces and class name like this:
@@ -217,7 +217,7 @@ namespace Operations
 
     /**
      * Returns the typeId of the base class to the argument type. If type represents
-     * Object, then the typeId for Object is retured again.
+     * Object, then the typeId for Object is returned again.
      *
      * @param type [in] - The type for which the parent type is requested.
      * @return A typeId.

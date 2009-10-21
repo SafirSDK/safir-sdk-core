@@ -119,6 +119,13 @@ namespace Internal
     {
         m_handlerRegistrations.UnsubscribeAll(connection);
     }
+
+    bool ServiceType::HasRegistrationSubscription(const ConnectionPtr&    connection,
+                                                  const ConsumerId&       consumer) const
+    {
+        return m_handlerRegistrations.HasSubscription(connection,
+                                                      consumer);
+    }
 }
 }
 }

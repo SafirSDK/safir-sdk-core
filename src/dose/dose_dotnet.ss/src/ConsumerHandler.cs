@@ -73,20 +73,27 @@ namespace Safir.Dob
             }
 
             Reference reference;
+            m_consumerTableLock.AcquireReaderLock(System.Threading.Timeout.Infinite);
             try
             {
-                m_consumerTableLock.AcquireReaderLock(-1);
                 if (!m_consumerTable.TryGetValue(consumer, out reference))
                 {
-                    m_consumerTableLock.UpgradeToWriterLock(-1);
-                    reference = new Reference(GCHandle.Alloc(consumer));
-                    m_consumerTable.Add(consumer, reference);
+                    System.Threading.LockCookie lockCookie = m_consumerTableLock.UpgradeToWriterLock(System.Threading.Timeout.Infinite);
+                    try
+                    {
+                        reference = new Reference(GCHandle.Alloc(consumer));
+                        m_consumerTable.Add(consumer, reference);
+                    }
+                    finally
+                    {
+                        m_consumerTableLock.DowngradeFromWriterLock(ref lockCookie);
+                    }
                 }
                 System.Threading.Interlocked.Increment(ref reference.references);
             }
             finally
             {
-                m_consumerTableLock.ReleaseLock();
+                m_consumerTableLock.ReleaseReaderLock();
             }
             return GCHandle.ToIntPtr(reference.handle);
         }

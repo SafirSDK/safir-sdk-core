@@ -27,7 +27,6 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/Consumer.h>
-#include <boost/lexical_cast.hpp>
 #include "../common/SimpleDispatcher.h"
 #include "CommandLine.h"
 #include "Provider.h"

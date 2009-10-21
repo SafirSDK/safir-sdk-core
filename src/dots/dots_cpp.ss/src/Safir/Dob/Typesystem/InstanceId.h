@@ -75,18 +75,6 @@ namespace Typesystem
         /**
          * Constructor.
          *
-         * Creates a instance id from the given string.
-         *
-         * @param id [in] - String identifying the instance.
-         */
-        /*        InstanceId(const wchar_t * const id):
-            m_instanceId(Internal::Generate64BitHash(id)),
-            m_instanceIdStr(id)
-            {}*/
-
-        /**
-         * Constructor.
-         *
          * Creates an instance id using a 64 bit integer.
          *
          * @param id [in] - The 64bit integer id of the instance.
@@ -172,10 +160,28 @@ namespace Typesystem
 
         typedef Int64 UnderlyingType;
 
+        /**
+         * Get the raw 64 bit integer identifier.
+         *
+         * @return The raw 64 bit identifier.
+         */
         UnderlyingType GetRawValue() const {return m_instanceId;}
 
+        /**
+         * Get the string that was used to create this id.
+         * 
+         * If no string was used this method returns an empty string.
+         * 
+         * @return The string (if any) that was used to create this id.
+         */
         const std::wstring & GetRawString() const {return m_instanceIdStr;}
 
+        /**
+         * Get the length of the string when converted to UTF-8 encoding.
+         * Includes one byte for a null termination.
+         * 
+         * @return The length of the string of the id when converted to UTF-8
+         */
         Int32 Utf8StringLength() const
         {
             if (m_instanceIdStr.empty())
@@ -191,6 +197,13 @@ namespace Typesystem
             return static_cast<Int32>(m_CachedUtf8String.length() + 1);
         }
 
+        /**
+         * Convert the string to UTF-8.
+         * 
+         * Returns an empty string if there is no string.
+         * 
+         * @return UTF-8 representation of the string.
+         */
         const std::string & Utf8String() const
         {
             if (!m_instanceIdStr.empty() && m_CachedUtf8String.empty())

@@ -91,6 +91,11 @@ namespace Internal
 
         void UnsubscribeRegistrationAll(const ConnectionPtr& connection);
 
+        // Returns true if the given connection/consumer has any service handler registration
+        // subscription for this type.
+        bool HasRegistrationSubscription(const ConnectionPtr&    connection,
+                                         const ConsumerId&       consumer) const;
+
         /** @} */
 
 

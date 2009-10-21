@@ -36,7 +36,11 @@ namespace Safir.Dob
         /// </summary>
         public bool IsSuccess
         {
-            get { return Typesystem.Operations.IsOfType(TypeId, SuccessResponse.ClassTypeId); }
+            get
+            {
+                CheckNotDisposed();
+                return Typesystem.Operations.IsOfType(TypeId, SuccessResponse.ClassTypeId);
+            }
         }
 
         /// <summary>
@@ -194,6 +198,30 @@ namespace Safir.Dob
             }
         }
 
+
+        /// <summary>
+        /// Get the blob of the original request.
+        /// <para/>
+        /// Retrieves the blob of the original request.
+        /// If the request was a delete request NULL will be returned.
+        /// <para/>
+        /// This method will give you a pointer to the underlying representation of the object.
+        /// Note that this pointer is only valid while the ResponseProxy is in scope.
+        /// If you want to keep the blob you must copy it using methods in Safir::Dob::Typesystem.
+        /// <para/>
+        /// This method is mainly useful if all you want to do with a received object is to write it
+        /// to a database or pass it over a C-interface to a library or plugin.
+        /// </summary>
+        public System.IntPtr RequestBlob
+        {
+            get
+            {
+                CheckNotDisposed();
+                return m_requestBlob;
+            }
+        }
+
+
         /// <summary>
         /// Get the handler id to which the original request was sent.
         /// </summary>
@@ -246,7 +274,7 @@ namespace Safir.Dob
                 //This bit just makes sure we get rid of a mono warning
                 if (m_responseState != System.IntPtr.Zero)
                 {
-                    m_responseState = System.IntPtr.Zero; 
+                    m_responseState = System.IntPtr.Zero;
                 }
             }
         }
@@ -263,18 +291,18 @@ namespace Safir.Dob
         {
             if (disposed)
             {
-                throw new Typesystem.SoftwareViolationException("Attempt to use a MessageProxy that is disposed! Please do not use a MessageProxy outside the OnMessage callback!");
+                throw new Typesystem.SoftwareViolationException("Attempt to use a ResponseProxy that is disposed! Please do not use a ResponseProxy outside the OnResponse callback!");
             }
         }
 
 
         private bool disposed = false;
 
-        System.Int32 m_requestId;
-        System.IntPtr m_responseBlob;
-        System.IntPtr m_responseState;
-        System.IntPtr m_requestBlob;
-        System.IntPtr m_requestState;
+        private System.Int32 m_requestId;
+        private System.IntPtr m_responseBlob;
+        private System.IntPtr m_responseState;
+        private System.IntPtr m_requestBlob;
+        private System.IntPtr m_requestState;
         #endregion
 
     }

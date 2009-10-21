@@ -26,10 +26,22 @@
 #define __DOTS_EXCEPTION_KEEPER_H__
 
 #include <boost/noncopyable.hpp>
-#include <ace/Thread.h>
 #include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 #include <map>
+//disable warnings in boost and ace
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4267)
+#endif
+
+#include <ace/Thread.h>
 #include <ace/Thread_Mutex.h>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
 #include <string>
 
 namespace Safir

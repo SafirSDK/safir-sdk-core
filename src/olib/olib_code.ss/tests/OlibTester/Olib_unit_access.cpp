@@ -41,7 +41,8 @@ DbUnitAccess::DbUnitAccess() :
     m_bDeleteIsPrepared(false), m_bGetAllUnitsIsPrepared( false ), m_bPerfTestIsPrepared( false ), 
     m_bUseDbIsPrepared( false ), m_bBinaryReadIsPrepared( false ), m_bBinaryWriteIsPrepared( false ), 
     m_bWriteNClobIsPrepared(false), m_bReadNClobIsPrepared(false), m_bWriteBlobIsPrepared(false),
-    m_bReadBlobIsPrepared(false), bDobIsConnected(false)   
+    m_bReadBlobIsPrepared(false), bDobIsConnected(false), m_bLongTimeQueryIsPrepared(false),
+    m_bInsertInto42IsPrepared( false )
 {
 }
 
@@ -125,6 +126,8 @@ void DbUnitAccess::Disconnect()
     m_bReadNClobIsPrepared = false;
     m_bWriteBlobIsPrepared = false;
     m_bReadBlobIsPrepared = false;
+    m_bLongTimeQueryIsPrepared = false;
+    m_bInsertInto42IsPrepared = false;
 }
 
 void DbUnitAccess::AllocStmt()
@@ -368,6 +371,26 @@ void DbUnitAccess::AllocStmt()
         m_GetAllUnitsStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
 
         m_bGetAllUnitsIsPrepared = true;
+    }
+
+    m_LongTimeQuery.Alloc( m_connection );
+    if (!m_bLongTimeQueryIsPrepared && m_LongTimeQuery.IsValid())
+    {
+        m_LongTimeQuery.Prepare(  L"Update tblOlibTest set Latitude = 42.0;" );
+        m_LongTimeQuery.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 1L);  // Query timeout is 5 secs
+        m_bLongTimeQueryIsPrepared = true;
+    }    
+
+    m_InsertInto42.Alloc( m_connection );
+    if (!m_bInsertInto42IsPrepared && m_InsertInto42.IsValid())
+    {
+        m_InsertInto42.Prepare(  
+            L"insert into TBLOLIBTEST (UNITID, CALLSIGN, COMBATREADINESS, "
+            L"COMBATREADINESSDESCRIPTION, UNITSIZEID, UNITIDENTITYID, LATITUDE, "
+            L"LONGITUDE, SPEED, COURSE, MEASUREMENTTIME, ISALIVE, ALARGEINT) "
+            L"values (42, '', 0, '', '', '', 0, 0, 0, 0, NULL, 0, 0)" );
+        m_InsertInto42.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
+        m_bInsertInto42IsPrepared = true;
     }
 }
 
@@ -1513,6 +1536,93 @@ void DbUnitAccess::ReadBlob()
     {
         std::wcout 
             << "DbUnitAccess BinaryTest " 
+            << ex.GetExceptionInfo()  
+            << std::endl;
+        m_connection.Rollback();
+    }
+}
+
+void DbUnitAccess::LotsOfInput()
+{
+    if (!m_connection.IsConnected())
+    {
+        std::wcout << "Not Connected" << std::endl;
+        return;
+    }
+    try
+    {
+        m_paramCallsign.SetValue( L"ZG" );
+        m_paramUnitSizeId.SetValue( L"Brigade" );
+        m_paramUnitIdentityId.SetValue( L"Own" );
+        m_paramCombatReadiness.SetValue( 1 );
+        m_paramCombatReadinessDescription.SetValue( L"Text" );
+        m_paramLatitude.SetValue( 1.0 );
+        m_paramLongitude.SetValue( 1.0 );
+        m_paramSpeed.SetValue( 1.0 );
+        m_paramCourse.SetValue( 1.0 );
+        m_paramMeasurementTime.SetNull();
+        m_paramIsAlive.SetValue( true );
+        m_paramAlargeinteger.SetValue( 1 );
+        for (int i = 0; i< 100000; ++i)
+        {
+            m_CreateStmt.Execute();
+        }
+        std::wcout.flush();
+        m_connection.Commit();
+        ClearNoOfErrors();
+    }
+    catch(const Safir::Databases::Odbc::ReconnectException & ex)
+    {
+        std::wcout 
+            << "DbUnitAccess UpdateUnit " 
+            << ex.GetExceptionInfo()  
+            << std::endl;
+        m_connection.Rollback();
+    }
+}
+
+void DbUnitAccess::LongTimeQuery()
+{
+    if (!m_connection.IsConnected())
+    {
+        std::wcout << "Not Connected" << std::endl;
+        return;
+    }
+    try
+    {
+        m_LongTimeQuery.Execute();
+        std::wcout.flush();
+        m_connection.Commit();
+        ClearNoOfErrors();
+    }
+    catch(const Safir::Databases::Odbc::ReconnectException & ex)
+    {
+        std::wcout 
+            << "DbUnitAccess UpdateUnit " 
+            << ex.GetExceptionInfo()  
+            << std::endl;
+        m_connection.Rollback();
+    }
+}
+
+void DbUnitAccess::InsertInto42()
+{
+    if (!m_connection.IsConnected())
+    {
+        std::wcout << "Not Connected" << std::endl;
+        return;
+    }
+    try
+    {
+        m_InsertInto42.Execute();
+        std::wcout.flush();
+        m_connection.Commit();
+        ClearNoOfErrors();
+    }
+    catch(const Safir::Databases::Odbc::ReconnectException & ex)
+    {
+        std::wcout 
+            << "DbUnitAccess UpdateUnit " 
             << ex.GetExceptionInfo()  
             << std::endl;
         m_connection.Rollback();

@@ -27,6 +27,7 @@
 #include <ace/Reactor.h>
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Connection.h>
+#include <Safir/Dob/Internal/Atomic.h>
 
 namespace Safir
 {
@@ -46,7 +47,7 @@ namespace Utilities
         * Constructor.
         * The process wide ACE reactor is used and is excepted to be the owner of the running event loop.
         *
-        * @param [in] Connection - The dob connection.
+        * @param [in] connection - The dob connection.
         */
         AceDispatcher(const Safir::Dob::Connection & connection):
             ACE_Event_Handler(ACE_Reactor::instance()),
@@ -57,7 +58,7 @@ namespace Utilities
         * Constructor.
         * A pointer to a local ACE reactor is supplied by the user of this class.
         *
-        * @param [in] Connection - The dob connection.
+        * @param [in] connection - The dob connection.
         * @param [in] reactor    - A pointer to the reactor running the event loop
         */
         AceDispatcher(const Safir::Dob::Connection & connection,
@@ -94,7 +95,7 @@ namespace Utilities
 
 
         const Safir::Dob::Connection&   m_connection;
-        volatile int                    m_isNotified;
+        Safir::Dob::Internal::AtomicUint32                    m_isNotified;
 };
 
 } // namespace Utilities

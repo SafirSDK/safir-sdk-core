@@ -23,7 +23,7 @@
 ******************************************************************************/
 #ifndef GRAPHWIDGET_H
 #define GRAPHWIDGET_H
-#include <QtGui>
+#include "common_header.h"
 #include <map>
 
 class GraphWidget : public QFrame

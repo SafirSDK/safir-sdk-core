@@ -33,6 +33,9 @@
 #include <DoseTest/RootMessage.h>
 #include <DoseTest/Dump.h>
 #include <DoseTest/DumpResult.h>
+#include <DoseTest/ComplexGlobalMessage.h>
+#include <DoseTest/ComplexGlobalEntity.h>
+#include <DoseTest/ComplexGlobalService.h>
 #include <iostream>
 #include <sstream>
 #include <time.h>
@@ -42,8 +45,19 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <boost/lexical_cast.hpp>
 #include <ace/OS_NS_unistd.h>
+
+
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4702)
+#endif
+
+#include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
 
 
 #ifdef SendMessage
@@ -59,6 +73,7 @@ Sequencer::Sequencer(const int startTc, const int stopTc, const Languages & lang
     m_currentCaseNo(startTc),
     m_stopTc(stopTc),
     m_state(Created),
+    m_lastCleanupTime(boost::posix_time::second_clock::universal_time()),
     m_languages(languages),
     m_isDumpRequested(false)
 {
@@ -69,6 +84,47 @@ Sequencer::~Sequencer()
 {
 
 }
+
+void FillBinaryMemberInternal(Safir::Dob::Typesystem::BinaryContainer & cont)
+{
+    //we're only supposed to fill it if it is null
+    if (cont.IsNull())
+    {
+        std::wcout << "Filling a binary member!" << std::endl;
+        Safir::Dob::Typesystem::Binary b;
+        const size_t size = 10 * 1024 * 1024; //10 Mb of data!
+        b.reserve(size);
+        char val = 0;
+        for (size_t i = 0; i < size ; ++i)
+        {
+            b.push_back(val);
+            ++val;
+        }
+        cont.SetVal(b);
+    }
+}
+
+void MaybeFillBinaryMember(const Safir::Dob::Typesystem::ObjectPtr & object)
+{
+    if (object->GetTypeId() == DoseTest::ComplexGlobalMessage::ClassTypeId)
+    {
+        FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalMessage>(object)->BinaryMember().GetContainer());
+    }
+    else if (object->GetTypeId() == DoseTest::ComplexGlobalEntity::ClassTypeId)
+    {
+        FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryMember().GetContainer());
+        //in the entity we use the binary array as well
+        for (int i = 0; i < DoseTest::ComplexGlobalEntity::BinaryArrayMemberArraySize(); ++i)
+        {
+            FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryArrayMember()[i]);
+        }
+    }
+    else if (object->GetTypeId() == DoseTest::ComplexGlobalService::ClassTypeId)
+    {
+        FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalService>(object)->BinaryMember().GetContainer());
+    }
+}
+
 
 
 void Sequencer::PrepareTestcaseSetup()
@@ -121,14 +177,14 @@ void Sequencer::PrepareTestcaseSetup()
     out << std::endl << "--------- Setup -----------";
 
     DoseTest::ActionPtr msg = DoseTest::Action::Create();
-    msg->ActionType().SetVal(DoseTest::ActionEnum::Print);
+    msg->ActionKind().SetVal(DoseTest::ActionEnum::Print);
     msg->PrintString().SetVal(out.str());
     m_connection.Send(msg,Safir::Dob::Typesystem::ChannelId(),this);
 }
 void Sequencer::PrepareTestcaseExecution()
 {
     DoseTest::ActionPtr msg = DoseTest::Action::Create();
-    msg->ActionType().SetVal(DoseTest::ActionEnum::Print);
+    msg->ActionKind().SetVal(DoseTest::ActionEnum::Print);
     msg->PrintString().SetVal(L"--------- Test  -----------");
     m_connection.Send(msg,Safir::Dob::Typesystem::ChannelId(),this);
     m_currentActionNo=-1;
@@ -148,9 +204,8 @@ void Sequencer::ExecuteCurrentAction()
         std::wcerr << " in testcase " << m_currentCaseNo << " action " << m_currentActionNo << std::endl;
         return;
     }
-    if (m_currentAction->Partner().IsNull() && m_currentAction->ActionType() == DoseTest::ActionEnum::Sleep)
+    if (m_currentAction->Partner().IsNull() && m_currentAction->ActionKind() == DoseTest::ActionEnum::Sleep)
     {
-        // No partner given so it's a sequencer sleep.
         std::wcout << "Sleeping " << m_currentAction->SleepDuration().GetVal() << " seconds"<<std::endl;
         const double decimals = m_currentAction->SleepDuration() - static_cast<unsigned int>(m_currentAction->SleepDuration());
 
@@ -160,28 +215,53 @@ void Sequencer::ExecuteCurrentAction()
     }
     else
     {
+        //if it is a Complex* type we may need to put stuff in the binary member
+        if (!m_currentAction->Object().IsNull())
+        {
+            MaybeFillBinaryMember(m_currentAction->Object().GetPtr());
+        }
+
         m_connection.Send(m_currentAction,m_currentAction->Partner(),this);
+
+        if (m_currentAction->ActionKind() == DoseTest::ActionEnum::CheckReferences ||
+            m_currentAction->ActionKind() == DoseTest::ActionEnum::CloseAndCheckReferences ||
+            m_currentAction->ActionKind() == DoseTest::ActionEnum::RunGarbageCollector)
+        {
+            // These actions will force the garbage collector to be run by the partner (if
+            // the partner is of a GC type) so we wait a while before moving on.
+
+            const unsigned int sleepDuration = 1;
+            std::wcout << "Sleeping " << sleepDuration << " seconds" << std::endl;
+
+            const ACE_Time_Value time(sleepDuration);
+            ACE_OS::sleep(time);
+        }
     }
 }
 
 void Sequencer::SetState(const State newState)
 {
     m_state = newState;
+    if (newState == CleaningUpTestcase)
+    {
+        m_lastCleanupTime = boost::posix_time::second_clock::universal_time();
+    }
 }
 
 void Sequencer::Tick()
 {
-    /*
-    if (!m_partnerState.IsReady())
+    const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
+    if (now - m_lastCleanupTime > boost::posix_time::minutes(10))
     {
-        std::wcout << "Some partner is not ready!" <<std::endl;
-        m_state = Created;
-        return;
+        std::wcout << "TIMEOUT: Sequencer has not been in CleaningUpTestcase state for 10 minutes!"
+                   << "Maybe a partner crashed? "
+                   << "(" << m_languages.at(0).c_str() << ","
+                   <<        m_languages.at(1).c_str() << ","
+                   <<        m_languages.at(2).c_str() << ")"
+                   << std::endl
+                   << "Exiting." << std::endl;
+        exit(-1);
     }
-    else
-    {
-        std::wcout << "All partners are ready!" <<std::endl;
-    }*/
 
     switch (m_state)
     {
@@ -328,13 +408,13 @@ bool Sequencer::DeactivateAll()
 
 bool Sequencer::VerifyAction(DoseTest::ActionPtr action)
 {
-    if (action->Partner().IsNull() && action->ActionType() != DoseTest::ActionEnum::Sleep)
+    if (action->Partner().IsNull() && action->ActionKind() != DoseTest::ActionEnum::Sleep)
     {
         std::wcerr << "No partner specified";
         return false;
     }
 
-    switch (action->ActionType().GetVal())
+    switch (action->ActionKind().GetVal())
     {
     case DoseTest::ActionEnum::SendMessage:
         {

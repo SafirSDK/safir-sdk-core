@@ -22,9 +22,22 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/ProcessInfo.h>
+
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4702)
+#endif
+
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
 #include <fstream>
 #include <iostream>
 #include <ace/config.h>

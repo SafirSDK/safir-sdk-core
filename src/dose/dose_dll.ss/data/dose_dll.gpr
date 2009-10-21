@@ -6,17 +6,7 @@ project dose_dll is
 
    for library_dir use Externally_Built_Library'library_dir;
 
-   case Externally_Built_Library.OS is
-      when "Linux" =>
-          for library_name use "dose_dll";
-      when "Windows_NT" =>
-          case Externally_Built_Library.Build is
-              when "debug" =>
-                  for library_name use "dose_dlld";
-              when others =>
-                  for library_name use "dose_dll";
-          end case;
-   end case;
+   for library_name use "dose_dll";
 
    for Library_kind  use "dynamic";
 

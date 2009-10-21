@@ -71,8 +71,8 @@ namespace Safir.Dob
             //TODO: serialize directly to shared memory
             System.Int32 blobSize = response.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused = System.IntPtr.Zero;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, response.GetTypeId(), ref beginningOfUnused);
+            System.IntPtr beginningOfUnused;
+            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, response.GetTypeId(), out beginningOfUnused);
             response.WriteToBlob(blob, ref beginningOfUnused);
 
             Interface.DoseC_SendResponse(m_ctrl, blob, m_consumer, 

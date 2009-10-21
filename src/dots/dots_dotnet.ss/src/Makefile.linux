@@ -1,8 +1,0 @@
-build:
-	gmcs -define:FUNC_PTR_WORKAROUND *.cs -out:Safir.Dob.Typesystem.dll -target:library
-
-install: build
-	cp Safir.Dob.Typesystem.dll $(SAFIR_RUNTIME)/lib
-
-clean:
-	/bin/rm -f *.dll *~ *.mdb

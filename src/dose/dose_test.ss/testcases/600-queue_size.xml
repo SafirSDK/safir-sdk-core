@@ -25,7 +25,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.GetQueueSize</value>
               </member>
               <member>
@@ -48,7 +48,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.GetQueueSize</value>
               </member>
               <member>

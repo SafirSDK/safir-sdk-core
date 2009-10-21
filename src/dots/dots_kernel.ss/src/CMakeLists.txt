@@ -1,22 +1,57 @@
+cmake_minimum_required(VERSION 2.6)
+
 PROJECT (dots_kernel)
 
 INCLUDE_DIRECTORIES(.)
 
+#this library has a C interface, so we don't want the "d" suffix on debug builds on windows
+#Must be set before including cmake_settings.txt
+SET(NO_LIBRARY_POSTFIXES 1) 
+
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
+FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
-ADD_LIBRARY(dots_kernel SHARED ${sources})
-TARGET_LINK_LIBRARIES(dots_kernel ACE boost_regex boost_filesystem boost_date_time expat dots_id lluf_utils)
+ADD_LIBRARY(dots_kernel SHARED ${sources} ${headers})
 
-INSTALL(DIRECTORY Safir DESTINATION $ENV{SAFIR_SDK}/include
+find_library(EXPAT_LIBRARY NAMES expat libexpat)
+if (NOT EXPAT_LIBRARY)
+    message(FATAL_ERROR "Couldn't find expat.lib or libexpat.lib")
+endif()
+
+#on windows we don't trust that expat is installed on the INCLUDE path.
+#we also check where it ends up if you use the expat install package.
+if (WIN32)
+    find_path(EXPAT_HEADER NAMES expat.h
+              PATHS ENV PATH
+              PATH_SUFFIXES ../Source/lib)
+    if (NOT EXPAT_HEADER)
+        message(FATAL_ERROR "Couldn't find expat.h")
+    endif()
+    
+    INCLUDE_DIRECTORIES(${EXPAT_HEADER})
+endif()
+
+FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time)
+TARGET_LINK_LIBRARIES(dots_kernel ${ACE_LIBRARY} ${Boost_LIBRARIES} ${COMMON_LIBRARIES} ${EXPAT_LIBRARY} dots_id)
+
+IF (NOT MSVC)
+  TARGET_LINK_LIBRARIES(dots_kernel lluf_utils)
+ENDIF()
+
+ADD_DEFINITIONS(-DDOTSKERNEL_EXPORTS)
+
+INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)
 
 INSTALL(TARGETS dots_kernel
-        RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION $ENV{SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION $ENV{SAFIR_SDK}/lib)
+        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
 INSTALL(FILES ../data/dots_kernel.gpr
-        DESTINATION $ENV{SAFIR_SDK}/ada/)
+        DESTINATION ${SAFIR_SDK}/ada/)
+
+INSTALL_DEBUG_INFO(dots_kernel)

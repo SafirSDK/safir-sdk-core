@@ -51,7 +51,7 @@ namespace Safir.Dob.Typesystem
         /// Is the container set to null?
         /// </summary>
         /// <returns>True if the container is set to null.</returns>
-        abstract public bool IsNull(); //TODO should this be a property?
+        abstract public bool IsNull(); 
 
         /// <summary>
         /// Set the container to null.

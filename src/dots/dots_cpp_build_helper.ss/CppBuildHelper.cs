@@ -69,6 +69,9 @@ namespace dots_cpp_build_helper
                     }
                 }
             }
+
+            // Dirty fix to generate a proper gpr file for dots_generated
+            GenerateDotsGeneratedGprFile();
             return 0;
         }
 
@@ -93,7 +96,49 @@ namespace dots_cpp_build_helper
                 //Write(info, 0, info.Length);
         }
 
-   
+        public static void GenerateDotsGeneratedGprFile()
+        {
+            string[] filenames = System.IO.Directory.GetFiles("..\\ada", "*.ads");
+            if (filenames.Length == 0)
+            {
+                return;
+            }
+            string firstUnit = filenames[0].Replace("..\\ada\\", "");
+            firstUnit = firstUnit.Replace(".ads", "");
+            firstUnit = firstUnit.Replace("-", ".");
+
+            using (System.IO.FileStream fs = System.IO.File.Create("../dots_generated_ada_library.gpr"))
+            using (System.IO.StreamWriter sw = new System.IO.StreamWriter(fs))
+            {
+                sw.WriteLine("with \"safir_defaults.gpr\";");
+                sw.WriteLine("with \"dots_ada.gpr\";");
+                sw.WriteLine("");
+                sw.WriteLine("project Dots_Generated_Ada_Library is");
+                sw.WriteLine("\tfor Source_Dirs use (\"ada\");");
+                sw.WriteLine("\tfor Object_Dir use \"ada\\obj\";");
+                sw.WriteLine("\tfor Library_Dir use \"ada\\lib\";");
+                sw.WriteLine("\tfor Library_ALI_Dir use \"ada\\ali\";");
+                sw.WriteLine("\tfor Library_Src_Dir use \"ada\\interface\";");
+                sw.WriteLine("\tfor Library_Name use \"dots_generated_ada\";");
+
+                sw.Write("\tfor Library_Interface use (");
+                sw.Write("\"" + firstUnit + "\"");
+                for (int i = 1; i < filenames.Length; i++)
+                {
+                    string unit = filenames[i].Replace("..\\ada\\", "");
+                    unit = unit.Replace(".ads", "");
+                    unit = unit.Replace("-", ".");
+                    sw.Write(",\"" + unit + "\"");
+                }
+                sw.Write(");");
+                sw.WriteLine("");
+                sw.WriteLine("\tfor Library_Kind use \"dynamic\";");
+                sw.WriteLine("\tpackage Compiler is");
+                sw.WriteLine("\t\tfor Default_Switches (\"ada\") use Safir_Defaults.Compiler'Default_Switches (\"Ada\");");
+                sw.WriteLine("\tend Compiler;");
+                sw.WriteLine("end Dots_Generated_Ada_Library;");
+            }
+        }
     
     }
 }

@@ -25,7 +25,6 @@
 #include "Executor.h"
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
 #include <DoseTest/Partner.h>
 #include <boost/bind.hpp>
 #include "Logger.h"
@@ -33,6 +32,18 @@
 #include <DoseTest/DumpResult.h>
 #include <Safir/Dob/OverflowException.h>
 #include <ace/OS_NS_unistd.h>
+
+
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4702)
+#endif
+
+#include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
 
 
 #ifdef GetMessage
@@ -70,6 +81,8 @@ void Executor::OnStopOrder()
 
 void Executor::OnMessage(const Safir::Dob::MessageProxy messageProxy)
 {
+    ExecuteCallbackActions(Safir::Dob::CallbackId::OnMessage);
+
     DoseTest::ActionPtr action = boost::static_pointer_cast<DoseTest::Action>(messageProxy.GetMessage());
 
     if (action->Consumer().IsNull())
@@ -103,7 +116,7 @@ void Executor::OnMessage(const Safir::Dob::MessageProxy messageProxy)
 void
 Executor::ExecuteAction(DoseTest::ActionPtr action)
 {
-    switch (action->ActionType().GetVal())
+    switch (action->ActionKind().GetVal())
     {
     case DoseTest::ActionEnum::Activate:
         {
@@ -163,6 +176,8 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
                 }
 
                 m_consumers.swap(newConsumers);
+
+                std::for_each(m_callbackActions.begin(),m_callbackActions.end(),boost::bind(&Actions::clear,_1));
             }
         }
         break;
@@ -211,18 +226,29 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
 
     case DoseTest::ActionEnum::Sleep:
         {
-            std::wcout << "Sleeping " << action->SleepDuration().GetVal() << " seconds"<<std::endl;
-            const double decimals = action->SleepDuration() - static_cast<unsigned int>(action->SleepDuration());
+            if (m_isActive)
+            {
+                std::wcout << "Sleeping " << action->SleepDuration().GetVal() << " seconds"<<std::endl;
+                const double decimals = action->SleepDuration() - static_cast<unsigned int>(action->SleepDuration());
 
-            const ACE_Time_Value time(static_cast<unsigned int>(action->SleepDuration()),
-                                  static_cast<unsigned int>(decimals * 1000000));
-            ACE_OS::sleep(time);
+                const ACE_Time_Value time(static_cast<unsigned int>(action->SleepDuration()),
+                                          static_cast<unsigned int>(decimals * 1000000));
+                ACE_OS::sleep(time);
+            }
+        }
+        break;
+
+    case DoseTest::ActionEnum::CheckReferences:
+    case DoseTest::ActionEnum::CloseAndCheckReferences:
+    case DoseTest::ActionEnum::RunGarbageCollector:
+        {
+            // These actions are for garbage collected languages only.
         }
         break;
 
     default:
         {
-            lout << "Got unexpected action " << DoseTest::ActionEnum::ToString(action->ActionType().GetVal())<<std::endl;
+            lout << "Got unexpected action " << DoseTest::ActionEnum::ToString(action->ActionKind().GetVal())<<std::endl;
         }
     }
 }

@@ -24,18 +24,14 @@
 #ifndef __SWRE_LIBRARY_H__
 #define __SWRE_LIBRARY_H__
 
-#include <Safir/Dob/Typesystem/Defs.h>
+#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 
 #if defined _MSC_VER
     #ifdef SWRE_LIBRARY_EXPORTS
         #define SWRE_LIBRARY_API __declspec(dllexport)
     #else
         #define SWRE_LIBRARY_API __declspec(dllimport)
-        #ifdef _DEBUG
-            #pragma comment( lib, "swre_libraryd.lib" )
-        #else
-            #pragma comment( lib, "swre_library.lib" )
-       #endif
+        #pragma comment( lib, "swre_library.lib" )
     #endif
 #elif defined __GNUC__
     #define SWRE_LIBRARY_API
@@ -110,7 +106,7 @@ extern "C"
      * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
      */
     SWRE_LIBRARY_API void
-      SwreC_TraceAppendStringPrefix(const Safir::Dob::Typesystem::Int64 prefixId,
+      SwreC_TraceAppendStringPrefix(const DotsC_Int64 prefixId,
                                     const char * const str,
                                     bool & success);
 
@@ -135,7 +131,7 @@ extern "C"
      * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
      */
     SWRE_LIBRARY_API void
-      SwreC_TraceAppendCharPrefix(const Safir::Dob::Typesystem::Int64 prefixId,
+      SwreC_TraceAppendCharPrefix(const DotsC_Int64 prefixId,
                                   const char ch,
                                   bool & success);
 
@@ -149,7 +145,7 @@ extern "C"
      * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
      */
     SWRE_LIBRARY_API void
-      SwreC_TraceAppendWcharPrefix(const Safir::Dob::Typesystem::Int64 prefixId,
+      SwreC_TraceAppendWcharPrefix(const DotsC_Int64 prefixId,
                                    const wchar_t ch,
                                    bool & success);
 
@@ -186,7 +182,7 @@ extern "C"
      */
     SWRE_LIBRARY_API void
       SwreC_TracePrefixAdd(const char * const prefix,
-                           Safir::Dob::Typesystem::Int64 & prefixId,
+                           DotsC_Int64 & prefixId,
                            bool & success);
 
     /**
@@ -197,7 +193,7 @@ extern "C"
      * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
      */
     SWRE_LIBRARY_API void
-      SwreC_TracePrefixSetEnabled(const Safir::Dob::Typesystem::Int64 id,
+      SwreC_TracePrefixSetEnabled(const DotsC_Int64 id,
                                   const bool enabled,
                                   bool & success);
 
@@ -208,7 +204,7 @@ extern "C"
      * @return The state of the prefix.
      */
     SWRE_LIBRARY_API bool
-      SwreC_TracePrefixIsEnabled(const Safir::Dob::Typesystem::Int64 id);
+      SwreC_TracePrefixIsEnabled(const DotsC_Int64 id);
 
     /**
      * Get a direct pointer to the state of a prefix.
@@ -219,7 +215,7 @@ extern "C"
      * @return A pointer to the boolean that describes the state of the prefix.
      */
     SWRE_LIBRARY_API volatile bool *
-      SwreC_TracePrefixGetIsEnabledPointer(const Safir::Dob::Typesystem::Int64 id);
+      SwreC_TracePrefixGetIsEnabledPointer(const DotsC_Int64 id);
 
     /** @} */
 

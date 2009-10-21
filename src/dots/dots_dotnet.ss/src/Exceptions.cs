@@ -51,7 +51,7 @@ namespace Safir.Dob.Typesystem
         /// <summary>
         /// The TypeId of this exception.
         /// </summary>
-        public const System.Int64 ExceptionTypeId = 6297553511903368764;
+        public const System.Int64 ExceptionTypeId = 5177142987005172374;
 
         /// <summary>
         /// Get the type id. To be overidden by subclasses. 
@@ -62,7 +62,7 @@ namespace Safir.Dob.Typesystem
 
     /// <summary>
     /// This is the base class of all (non-Fundamental) Exceptions.
-    /// In comparis to FundamentalException the exceptions that derive from Exception
+    /// In comparison to FundamentalException the exceptions that derive from Exception
     /// are more of a dynamic nature. These exceptions are expected to be handled directly
     /// by the calling function and are possible to recover from.
     /// </summary>
@@ -81,7 +81,7 @@ namespace Safir.Dob.Typesystem
         /// <summary>
         /// The TypeId of this exception.
         /// </summary>
-        public const System.Int64 ExceptionTypeId = -2177307456017217044;
+        public const System.Int64 ExceptionTypeId = 8409897425067168944;
 
         /// <summary>
         /// Get the type id. To be overidden by subclasses. 

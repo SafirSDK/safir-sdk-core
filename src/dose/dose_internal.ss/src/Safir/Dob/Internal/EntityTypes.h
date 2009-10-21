@@ -143,6 +143,11 @@ namespace Internal
                                      const Dob::Typesystem::HandlerId&  handlerId,
                                      const bool                         includeSubclasses);
 
+        // Returns true if the given connection/consumer has any registration subscription for the given type.
+        bool HasRegistrationSubscription(const ConnectionPtr&           connection,
+                                         const ConsumerId&              consumer,
+                                         const Dob::Typesystem::TypeId  typeId);
+
         /** @} */
 
         /**
@@ -244,6 +249,11 @@ namespace Internal
                          const Dob::Typesystem::EntityId&   entityId,
                          const bool                         allInstances,
                          const bool                         includeSubclasses);
+
+       // Returns true if the given connection/consumer has any entity subscription for the given type.
+        bool HasEntitySubscription(const ConnectionPtr&           connection,
+                                   const ConsumerId&              consumer,
+                                   const Dob::Typesystem::TypeId  typeId);
 
         /** @} */
 

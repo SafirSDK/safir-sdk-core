@@ -31,9 +31,9 @@
     #define OLIB_API __declspec(dllimport)
 
     #ifdef _DEBUG
-      #pragma comment (lib, "olib_sdkd.lib")
+      #pragma comment (lib, "olibd.lib")
     #else
-      #pragma comment (lib, "olib_sdk.lib")
+      #pragma comment (lib, "olib.lib")
     #endif //_DEBUG
   #endif // OLIB_EXPORTS
 #else

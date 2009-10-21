@@ -38,13 +38,9 @@ namespace VehicleMmiCsWinForms
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButtonCreate = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonUpdate = new System.Windows.Forms.ToolStripButton();
-            //StartRemoveInExercise
             this.toolStripButtonDelete = new System.Windows.Forms.ToolStripButton();
-            //StopRemoveInExercise
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            //StartRemoveInExercise
             this.toolStripButtonSpeed = new System.Windows.Forms.ToolStripButton();
-            //StopRemoveInExercise
             this.toolStripButton1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButtonCategory = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonDeleteCategoryInfo = new System.Windows.Forms.ToolStripButton();
@@ -106,13 +102,9 @@ namespace VehicleMmiCsWinForms
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButtonCreate,
             this.toolStripButtonUpdate,
-            //StartRemoveInExercise
             this.toolStripButtonDelete,
-            //StopRemoveInExercise
             this.toolStripSeparator1,
-            //StartRemoveInExercise
             this.toolStripButtonSpeed,
-            //StopRemoveInExercise
             this.toolStripButton1,
             this.toolStripButtonCategory,
             this.toolStripButtonDeleteCategoryInfo});
@@ -141,7 +133,6 @@ namespace VehicleMmiCsWinForms
             this.toolStripButtonUpdate.Text = "Update";
             this.toolStripButtonUpdate.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.toolStripButtonUpdate.Click += new System.EventHandler(this.toolStripButtonUpdate_Click);
-            //StartRemoveInExercise
             // 
             // toolStripButtonDelete
             // 
@@ -153,13 +144,11 @@ namespace VehicleMmiCsWinForms
             this.toolStripButtonDelete.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.toolStripButtonDelete.ToolTipText = "Delete";
             this.toolStripButtonDelete.Click += new System.EventHandler(this.toolStripButtonDelete_Click);
-            //StopRemoveInExercise
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 37);
-            //StartRemoveInExercise
             // 
             // toolStripButtonSpeed
             // 
@@ -172,7 +161,6 @@ namespace VehicleMmiCsWinForms
             this.toolStripButtonSpeed.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.toolStripButtonSpeed.ToolTipText = "Calculate Speed";
             this.toolStripButtonSpeed.Click += new System.EventHandler(this.toolStripButtonSpeed_Click);
-            //StopRemoveInExercise
             // 
             // toolStripButton1
             // 
@@ -181,7 +169,7 @@ namespace VehicleMmiCsWinForms
             // 
             // toolStripButtonCategory
             // 
-            this.toolStripButtonCategory.Image = global::VehicleMmiCsWinForms.Properties.Resources.Properties;
+            this.toolStripButtonCategory.Image = global::VehicleMmiCsWinForms.Properties.Resources.properties;
             this.toolStripButtonCategory.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripButtonCategory.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButtonCategory.Name = "toolStripButtonCategory";
@@ -227,6 +215,7 @@ namespace VehicleMmiCsWinForms
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "EntityFrame";
             this.Text = "Vehicles";
+            this.Load += new System.EventHandler(this.EntityFrame_Load);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.statusStrip.ResumeLayout(false);

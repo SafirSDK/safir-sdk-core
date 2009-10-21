@@ -22,7 +22,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.RegisterEntityHandlerInjection</value>
               </member>
               <member>
@@ -53,7 +53,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SetAll</value>
               </member>
               <member>
@@ -92,7 +92,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.Close</value>
               </member>
             </members>
@@ -107,7 +107,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.Open</value>
               </member>
             </members>
@@ -122,7 +122,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.Delete</value>
               </member>
               <member>
@@ -156,7 +156,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.InjectorSubscribeEntity</value>
               </member>
               <member>
@@ -211,7 +211,7 @@
                 <value>2</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.InjectorSubscribeEntity</value>
               </member>
               <member>
@@ -271,7 +271,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.RegisterEntityHandlerInjection</value>
               </member>
               <member>

@@ -31,6 +31,7 @@
 #include <ace/Thread_Mutex.h>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
 #include <Safir/Dob/Internal/ConnectionId.h>
 
 //Make a hash_map available even though their locations are different
@@ -59,12 +60,16 @@ namespace Internal
         private boost::noncopyable
     {
     public:
+        typedef boost::shared_ptr<Semaphore> SemaphorePtr;
+
         static Signals & Instance();
 
         /**
          * Kick an application.
          */
         void SignalIn(const ConnectionId& connection);
+
+
 
         /**
          * This is for applications waiting for "things" to happen to its connection.
@@ -73,7 +78,7 @@ namespace Internal
          * undefined results...
          * Only meant to be called from inside Connections::WaitForConnectionSignal
          */
-        void WaitForConnectionSignal(const ConnectionId& connectionId);
+        const boost::function<void(void)> GetConnectionSignalWaiter(const ConnectionId& connectionId);
 
         /**
          * Signal that an application wants to connect or wants something else done by dose_main.
@@ -95,7 +100,6 @@ namespace Internal
         Signals();
         ~Signals();
 
-        typedef boost::shared_ptr<Semaphore> SemaphorePtr;
 
         class SignalTable
         {

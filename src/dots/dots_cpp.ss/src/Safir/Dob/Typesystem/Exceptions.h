@@ -152,7 +152,7 @@ namespace Typesystem
              *
              * Note: This method is overridden by all auto-generated classes.
              *
-             * @return The TypeId of the object.
+             * @return The TypeId of the exception.
              */
             virtual TypeId GetTypeId() const = 0;
 
@@ -198,7 +198,7 @@ namespace Typesystem
                              const Dob::Typesystem::Int64 lineNumber); //Use the __LINE__ macro
 
         /** The TypeId of this exception. */
-        static const TypeId ExceptionTypeId = 6297553511903368764LL;
+        static const TypeId ExceptionTypeId = 5177142987005172374LL;
 
         //override of CommonExceptionBase::GetTypeId
         virtual TypeId GetTypeId() const {return ExceptionTypeId;}
@@ -206,7 +206,7 @@ namespace Typesystem
 
     /**
      * This is the base class of all (non-Fundamental) Exceptions.
-     * In comparis to FundamentalException the exceptions that derive from Exception
+     * In comparison to FundamentalException the exceptions that derive from Exception
      * are more of a dynamic nature. These exceptions are expected to be handled directly
      * by the calling function and are possible to recover from.
      */
@@ -231,7 +231,7 @@ namespace Typesystem
                   const Dob::Typesystem::Int64 lineNumber); //Use the __LINE__ macro
 
         /** The TypeId of this exception. */
-        static const TypeId ExceptionTypeId = -2177307456017217044LL;
+        static const TypeId ExceptionTypeId = 8409897425067168944LL;
 
         //override of CommonExceptionBase::GetTypeId
         virtual TypeId GetTypeId() const {return ExceptionTypeId;}

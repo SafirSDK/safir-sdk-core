@@ -68,6 +68,11 @@ namespace Internal
         // Distribute a message to the subscribers in-queues
         void DistributeMsg(const DistributionData& msg);
 
+        // Returns true if the given connection/consumer has any message subscription for the given type.
+        bool HasSubscription(const ConnectionPtr&           connection,
+                             const ConsumerId&              consumer,
+                             const Dob::Typesystem::TypeId  typeId);
+
         //Debug and statistics
         void DumpSubscriptions() const;
 

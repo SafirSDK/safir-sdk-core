@@ -2,5 +2,5 @@
 <exception xmlns="urn:safir-dots-unit">
         <summary>The database is down.</summary>
   <name>Safir.Databases.Odbc.ReconnectException</name>
-  <baseClass>exception</baseClass>
+  <baseClass>Exception</baseClass>
 </exception>

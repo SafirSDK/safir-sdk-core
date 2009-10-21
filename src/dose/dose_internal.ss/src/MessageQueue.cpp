@@ -49,7 +49,7 @@ namespace Internal
     bool MessageQueue::push(const DistributionData & msg)
     {
         boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
-        if ((m_size < m_capacity) && !m_simulateFull) //not full
+        if ((m_size < m_capacity) && m_simulateFull == 0) //not full
         {
             m_data.push_back(msg);
             ++m_size;

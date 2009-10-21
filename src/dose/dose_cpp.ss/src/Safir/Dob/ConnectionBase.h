@@ -114,7 +114,7 @@ namespace Dob
          * @param [in] handlerId Handler id.
          * @param [in] instanceIdPolicy Specifies if the handler expects instance ids in create requests to be
          *                              assigned by the requestor (normal case) or if the handler assigns them by itself.
-         * @param [in] entityInjectionHandler Callback consumer object.
+         * @param [in] entityHandlerInjection Callback consumer object.
          */
         void RegisterEntityHandlerInjection(const Safir::Dob::Typesystem::TypeId      typeId,
                                             const Dob::Typesystem::HandlerId&         handlerId,
@@ -149,7 +149,7 @@ namespace Dob
          * @param [in] handlerId Handler id.
          * @param [in] instanceIdPolicy Specifies if the handler expects instance ids in create requests to be
          *                              assigned by the requestor (normal case) or if the handler assigns them by itself.
-         * @param [in] entityHandler Callback consumer object.
+         * @param [in] entityHandlerPending Callback consumer object.
          */
         void RegisterEntityHandlerPending(const Dob::Typesystem::TypeId             typeId,
                                           const Dob::Typesystem::HandlerId&         handlerId,
@@ -190,7 +190,7 @@ namespace Dob
          *
          * @param [in] typeId  Service type to register.
          * @param [in] handlerId Handler id.
-         * @param [in] serviceHandler Callback consumer object.
+         * @param [in] serviceHandlerPending Callback consumer object.
          */
         void RegisterServiceHandlerPending(const Dob::Typesystem::TypeId             typeId,
                                            const Dob::Typesystem::HandlerId&         handlerId,

@@ -34,9 +34,15 @@
 #  ifndef dcom_ulong64
      typedef unsigned _int64 dcom_ulong64;
 #  endif
+#  ifndef dcom_ulong32
+     typedef unsigned int dcom_ulong32;
+#  endif
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 #  ifndef dcom_ulong64
      typedef unsigned long long dcom_ulong64;
+#  endif
+#  ifndef dcom_ulong32
+     typedef unsigned int dcom_ulong32;
 #  endif
 
    #ifndef _LINUX
@@ -286,7 +292,7 @@ int DoseCom_Init(DoseComAllocator*  pAllocator,  // the base class
 //                           queueNotFullEvent.
 //--------------------------------------------------------------------
 DOSECOM_API
-int DoseCom_Send(const char *pMsg, unsigned long MsgLength,
+int DoseCom_Send(const char *pMsg, dcom_ulong32 MsgLength,
                  bool   PoolDistribution,
                  bool   bUseAck,
                  int    Priority,
@@ -322,8 +328,8 @@ int DoseCom_Send(const char *pMsg, unsigned long MsgLength,
 //-----------------------------------------------------------------------
 
 DOSECOM_API
-int DoseCom_Read(unsigned long RxUseBitMap, unsigned long *pRxFromBitMap,
-                 char **ppBuf, unsigned long *pSize,
+int DoseCom_Read(dcom_ulong32 RxUseBitMap, dcom_ulong32 *pRxFromBitMap,
+                 char **ppBuf, dcom_ulong32 *pSize,
                  bool *pIsNative);
 
 //---------------------------------------------------------------------
@@ -340,9 +346,9 @@ int DoseCom_Read(unsigned long RxUseBitMap, unsigned long *pRxFromBitMap,
 //---------------------------------------------------------------------
 
 DOSECOM_API
-bool DoseCom_GetNodeChange( unsigned long  & DoseId, //out range 0-63
-                            unsigned long  & Status, //out=NODESTATUS_UP/DOWN
-                            unsigned long  & IpAddr_nw);//out network byteorder
+bool DoseCom_GetNodeChange( dcom_ulong32  & DoseId, //out range 0-63
+                            dcom_ulong32  & Status, //out=NODESTATUS_UP/DOWN
+                            dcom_ulong32  & IpAddr_nw);//out network byteorder
 
 //-------------------------------------------------------------
 // Tell DoseCom that the pool distribution has ended.
@@ -360,14 +366,14 @@ void DoseCom_PoolDistributed(int Priority, int DestinationId);
 //-------------------------------------------------------------
 
 DOSECOM_API
-void DoseCom_GetDoseId( unsigned long  & DoseId);
+void DoseCom_GetDoseId( dcom_ulong32  & DoseId);
 
 //------------------------------------------------------------------------
 // Get own Ip Address (if called before Init will return undefined number)
 //------------------------------------------------------------------------
 
 DOSECOM_API
-void DoseCom_GetOwnIpAddr( unsigned long & IpAddr_nw);
+void DoseCom_GetOwnIpAddr( dcom_ulong32 & IpAddr_nw);
 
 
 //#ifdef __cplusplus

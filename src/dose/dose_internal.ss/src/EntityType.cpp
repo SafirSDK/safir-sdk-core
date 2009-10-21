@@ -135,6 +135,13 @@ namespace Internal
         m_handlerRegistrations.Unsubscribe(subscriptionId, handlerId);
     }
 
+    bool EntityType::HasRegistrationSubscription(const ConnectionPtr&    connection,
+                                                 const ConsumerId&       consumer) const
+    {
+        return m_handlerRegistrations.HasSubscription(connection,
+                                                      consumer);
+    }
+
     void EntityType::SetEntity(const ConnectionPtr&                 connection,
                                const Dob::Typesystem::HandlerId&    handlerId,
                                const Dob::Typesystem::InstanceId&   instanceId,
@@ -376,6 +383,14 @@ namespace Internal
         m_entityStates.Unsubscribe(subscriptionId,
                                    instanceId.GetRawValue(),
                                    allInstances);
+    }
+
+    bool EntityType::HasEntitySubscription(const ConnectionPtr&    connection,
+                                           const ConsumerId&       consumer) const
+    {
+        SubscriptionId subscriptionId(ConnectionConsumerPair(connection, consumer), EntitySubscription, 0);
+
+        return m_entityStates.HasSubscription(subscriptionId);
     }
 
     void EntityType::UnsubscribeAll(const ConnectionPtr& connection)
@@ -1566,6 +1581,7 @@ namespace Internal
             newRealState.IncrementVersion();
             newRealState.SetExplicitlyDeleted(true);
             newRealState.SetEntityStateKind(DistributionData::Real);
+            newRealState.ResetDecrementedFlag();
             newRealState.ResetSourceIsPermanentStore();
         }
 

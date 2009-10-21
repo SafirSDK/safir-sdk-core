@@ -58,7 +58,7 @@ namespace Internal
         bool full() const
         {
             boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
-            return m_size == m_capacity || m_simulateFull;
+            return m_size == m_capacity || (m_simulateFull != 0);
         }
 
         /** Returns the number of elements currently in the queue
@@ -67,7 +67,7 @@ namespace Internal
         size_t size() const
         {
             boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
-            return m_simulateFull ? m_capacity : m_size;
+            return m_simulateFull != 0 ? m_capacity : m_size;
         }
 
         /**
@@ -86,8 +86,8 @@ namespace Internal
 
         void ForEachDispatchedRequest(const ForEachDispatchedRequestFunc& foreachFunc) const;
 
-        bool SimulateFull() const {return m_simulateFull;}
-        void SimulateFull(const bool simulateFull) {m_simulateFull = simulateFull;}
+        bool SimulateFull() const {return m_simulateFull != 0;}
+        void SimulateFull(const bool simulateFull) {m_simulateFull = simulateFull?1:0;}
 
     private:
         //Locking Policy:
@@ -126,7 +126,7 @@ namespace Internal
         Typesystem::Int32 m_noAttachedResponses; //number of responses sent attached by dose_main
         Typesystem::Int32 m_noDispatchedResponses; //number of responses dispatched to application
 
-        volatile bool m_simulateFull;
+        AtomicUint32 m_simulateFull;
 
         friend void StatisticsCollector(RequestOutQueue&, void*);
     };

@@ -30,11 +30,8 @@
         #define DOTS_API __declspec(dllexport)
     #else
         #define DOTS_API __declspec(dllimport)
-        #ifndef NDEBUG
-            #pragma comment( lib, "dots_cppd.lib" )
-        #else
-            #pragma comment( lib, "dots_cpp.lib" )
-        #endif
+        #define SAFIR_LIBRARY_NAME "dots_cpp"
+        #include <Safir/Utilities/Internal/AutoLink.h>
     #endif
 #elif defined __GNUC__
     #define DOTS_API

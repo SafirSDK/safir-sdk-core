@@ -23,6 +23,7 @@
 ******************************************************************************/
 #ifndef MEMGRAPH_H
 #define MEMGRAPH_H
+#include "common_header.h"
 #include "graphwidget.h"
 #include "ui_memgraph.h"
 #include <Safir/Dob/Internal/SharedMemoryObject.h>

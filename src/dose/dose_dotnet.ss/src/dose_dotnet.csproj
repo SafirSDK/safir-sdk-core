@@ -26,7 +26,7 @@
     <DelaySign>true</DelaySign>
     <OutputType>Library</OutputType>
     <RootNamespace>Safir.Dob</RootNamespace>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
     <StartupObject>
     </StartupObject>
     <FileUpgradeFlags>
@@ -66,8 +66,7 @@
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
     <DefineConstants>TRACE</DefineConstants>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile>bin\Release\Safir.Dob.XML</DocumentationFile>
     <DebugSymbols>false</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
@@ -139,9 +138,7 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>xcopy /Y /C "$(TargetDir)$(TargetName).pdb*" "%25SAFIR_RUNTIME%25\bin\$(ConfigurationName)\"
-xcopy /Y /C "$(TargetDir)$(TargetName).pdb*" "%25SAFIR_RUNTIME%25\bin"
-copy /Y "$(TargetPath)" "%25SAFIR_RUNTIME%25\bin\$(ConfigurationName)\"
+    <PostBuildEvent>xcopy /Y /C "$(TargetDir)$(TargetName).pdb*" "%25SAFIR_RUNTIME%25\bin"
 copy /Y "$(TargetPath)" "%25SAFIR_RUNTIME%25\bin\"
 copy /Y "$(TargetDir)$(TargetName).xml" "%25SAFIR_RUNTIME%25\bin\"</PostBuildEvent>
   </PropertyGroup>

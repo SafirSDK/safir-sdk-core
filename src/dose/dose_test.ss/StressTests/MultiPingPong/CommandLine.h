@@ -27,7 +27,8 @@
 #include <iostream>
 #include <boost/noncopyable.hpp>
 
-#include <boost/program_options/variables_map.hpp>
+
+#include "../common/CommonIncludes.h"
 #include <Safir/Dob/Typesystem/Defs.h>
 
 class CommandLine:

@@ -30,6 +30,7 @@
 #include <iosfwd>
 #include <climits>
 #include <Safir/Dob/Internal/InternalExportDefs.h>
+#include <Safir/Dob/Internal/Atomic.h>
 
 namespace Safir
 {
@@ -88,7 +89,7 @@ namespace Internal
         const LamportTimestamp GetNewTimestamp();
 
     private:
-        volatile boost::uint32_t m_currentClock;
+        AtomicUint32 m_currentClock;
     };
 
 }

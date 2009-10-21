@@ -24,6 +24,14 @@
 #ifndef __LLUF_STARTUP_SYNCHRONIZER_H__
 #define __LLUF_STARTUP_SYNCHRONIZER_H__
 
+#include <Safir/Utilities/Internal/UtilsExportDefs.h>
+
+//disable warnings in boost and ace
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4267)
+#endif
+
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 #include <boost/filesystem/path.hpp>
@@ -31,23 +39,16 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <ace/Thread_Mutex.h>
 
-
+//and enable the warnings again
 #if defined _MSC_VER
-  #ifdef LLUF_UTILS_EXPORTS
-    #define LLUF_UTILS_API __declspec(dllexport)
-  #else
-    #define LLUF_UTILS_API __declspec(dllimport)
-    #ifdef _DEBUG
-      #pragma comment( lib, "lluf_utilsd.lib" )
-    #else
-      #pragma comment( lib, "lluf_utils.lib" )
-    #endif
-  #endif
-#elif defined __GNUC__
-  #define LLUF_UTILS_API
-  #define __cdecl
+  #pragma warning (pop)
 #endif
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4251) // warning C4251: 'Safir::Dob::Typesystem::LibraryExceptions::m_CallbackMap' : class 'stdext::hash_map<_Kty,_Ty>' needs to have dll-interface to be used by clients of class 'Safir::Dob::Typesystem::LibraryExceptions'
+#pragma warning (disable: 4275) // warning C4275: non dll-interface class 'boost::noncopyable_::noncopyable' used as base for dll-interface class 'Safir::Dob::Typesystem::LibraryExceptions'
+#endif
 
 namespace Safir
 {
@@ -104,6 +105,10 @@ namespace Utilities
 
 }
 }
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 #endif
 

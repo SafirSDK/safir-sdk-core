@@ -32,6 +32,18 @@ namespace Safir
 {
 namespace Dob
 {
+    const CallbackId::Enumeration ConnectionAspectMisc::GetCurrentCallbackId() const
+    {
+        DotsC_Int32 callback;
+        bool success;
+        DoseC_GetCurrentCallbackId(GetControllerId(),callback, success);
+
+        if (!success)
+        {
+            Typesystem::LibraryExceptions::Instance().Throw();
+        }
+        return static_cast<CallbackId::Enumeration>(callback);
+    }
 
     const std::wstring ConnectionAspectMisc::GetConnectionName() const
     {

@@ -1,7 +1,8 @@
+// -*- coding: utf-8 -*-
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Engdahl / stlsen
 *
 *******************************************************************************
@@ -52,16 +53,16 @@ import javax.swing.JOptionPane;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
- 
+
 /*******************************************
-* 
+*
 ********************************************/
 
-public class DoseMonInfo 
+public class DoseMonInfo
 {
         // A class variable's value is shared by all instances of that class.
         static int m_Counter = 0;
-        
+
         private class DoseDialog extends JPanel
         {
                 JButton m_buttHelp;
@@ -70,11 +71,11 @@ public class DoseMonInfo
                 JButton m_buttDbgMinus;
                 JPanel  m_txtPan;
                 JTextArea  m_txtArea;
-                                
+
                 /******************************************************
                 *  Listener for all buttons in the Info-Dialog
                 *******************************************************/
-                
+
                 private class ButtonListener implements ActionListener
                 {
                         //================================
@@ -85,22 +86,22 @@ public class DoseMonInfo
                                 DoseJni doseJni = new DoseJni();
                                 int rc;
                                 String str = " ";
-                                
+
                                 byte[] buff = new byte[1024];
-                
+
                                 buff[5] = 17;
                                 //System.out.println("*** call dose +++++++" );
                                 // Assuming th lib is already loaded
                                 rc = doseJni.GetInfo('D',4, buff);
                                 //System.out.println("*** ret Dose ++++++++" + rc );
                                 //for(byte ii = 0 ; ii< 8 ; ii++) System.out.print(" " + buff[ii]);
-                        
-                                for(byte ii = 0 ; ii< 8 ; ii++) 
+
+                                for(byte ii = 0 ; ii< 8 ; ii++)
                                         str += " " + buff[ii];
-                        
+
                                 System.out.println();
 
-                                m_txtArea.append(str + " appended");                            
+                                m_txtArea.append(str + " appended");
                         }
                         //==================================
                         // Called when butt Info is clicked
@@ -115,7 +116,7 @@ public class DoseMonInfo
                                 // Assuming th lib is already loaded
                                 rc = doseJni.GetInfo('S',4, buff);
 
-                                for(int ii = 0 ; ii<rc ; ii++) 
+                                for(int ii = 0 ; ii<rc ; ii++)
                                 {
                                         str += (char)buff[ii];
                                 }
@@ -130,7 +131,7 @@ public class DoseMonInfo
                         {
                                 DoseJni doseJni = new DoseJni();
                                 int retValue;
-                                
+
                                 // Assuming th lib is already loaded
                                 retValue = doseJni.GetInfo('D',param, null);
 
@@ -141,9 +142,9 @@ public class DoseMonInfo
                         //
                         //==================================
                         public void actionPerformed(ActionEvent event)
-                        {       
+                        {
                                 int retValue = 0;
-                                
+
                                 if(event.getSource() == m_buttHelp)
                                 {
                                         m_txtArea.setText(" Help\n To be implemented ....");
@@ -173,8 +174,8 @@ public class DoseMonInfo
                 //====================================================
                 private DoseDialog(char cmd)
                 {
-                        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));       
-                
+                        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
                         //---------- Buttons -------
 
                         JPanel pan = new JPanel(); add(pan);
@@ -193,12 +194,12 @@ public class DoseMonInfo
 
                         //---------- Text Area -------
 
-                        m_txtArea = new JTextArea("Text",30,30); // rows,cols           
-                        add(m_txtArea);         
+                        m_txtArea = new JTextArea("Text",30,30); // rows,cols
+                        add(m_txtArea);
                         m_txtArea.setBackground(Color.green);
-                        
+
                     Font font = new Font("Courier new", Font.ROMAN_BASELINE, 12);
-            m_txtArea.setFont(font);                    
+            m_txtArea.setFont(font);
                 }
         }
 
@@ -208,7 +209,7 @@ public class DoseMonInfo
         DoseMonInfo(char cmd)
         {
                 JFrame frame = new JFrame("Info");
-                //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);         
+                //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 DoseDialog info = new DoseDialog(cmd);
                 frame.getContentPane().add(info);
                 frame.setVisible(true);

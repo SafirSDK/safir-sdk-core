@@ -3,14 +3,15 @@ Linux Building and Installing
 
 *Prerequisites*
 
-First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core. The exact package names may vary with your distribution, but these are the package names for Kubuntu/Ubuntu 8.10 (Intrepid Ibex):
+First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core. The exact package names may vary with your distribution, but these are the package names for Kubuntu/Ubuntu 8.10 (Intrepid Ibex). (In brackets are the package names for Kubuntu/Ubuntu 9.04, Jaunty Jackalope.)
 
 libqt4-dev
 mono-2.0-devel
+mono-1.0-devel (mono-devel)
 libmono-winforms2.0-cil
-libboost1.35-dev *
+libboost1.35-dev (libboost1.37-dev) *
 libace-dev
-libtemplates-parser-dev *
+libtemplates-parser-dev
 libxmlada-dev *
 libiodbc2-dev
 cmake
@@ -18,15 +19,24 @@ g++
 openjdk-6-jdk
 doxygen
 graphviz
+python-tk
+
+To install these from the command line "in one go" on Ubuntu/Kubuntu 8.10, run:
+   sudo apt-get install libqt4-dev mono-2.0-devel mono-1.0-devel libmono-winforms2.0-cil libboost1.35-dev libace-dev libtemplates-parser-dev libxmlada-dev libiodbc2-dev cmake g++ openjdk-6-jdk doxygen graphviz make python-tk
+
+To install these from the command line "in one go" on Ubuntu/Kubuntu 9.04, run:
+   sudo apt-get install libqt4-dev mono-2.0-devel mono-devel libmono-winforms2.0-cil libboost1.37-dev libace-dev libtemplates-parser-dev libxmlada-dev libiodbc2-dev cmake g++ openjdk-6-jdk doxygen graphviz make python-tk
+
+To install these from the command line "in one go" on Ubuntu/Kubuntu 9.10, run:
+   sudo apt-get install libqt4-dev mono-devel libmono-winforms2.0-cil libboost1.38-dev libace-dev libtemplates-parser-dev libxmlada-dev libiodbc2-dev cmake g++ openjdk-6-jdk doxygen graphviz make python-tk
 
 These packages should cause quite a few extra packages to be installed (like the gnat Ada compiler and a lot more stuff), which is as it should be.
 
-The packages marked with a * contain some bugs that we need to fix in ubuntu 8.10 (well, the templates_parser thing is really our bug, which will be fixed in 3.2.2). In the directory "build/ubuntu_patches" there are a number of files that need to be installed into your system. Do a "cmake ." followed by a "sudo make install" which will cause the files to be installed into the correct places.
+The packages marked with a * contain some bugs that we need to patch. The directory "build/patches" contains these patches, and a CMake file that will automatically install the patches needed for your system. Go to the "build/patches" directory and do a "cmake ." followed by a "sudo make install" which will cause the files to be installed into the correct places.
 
-The patches installed are as follows:
-- file_lock.hpp, offset_ptr.hpp, os_file_functions.hpp, mapped_region.hpp, and sp_counted_impl.hpp contain bugfixes for boost 1.35 (just compare them with the originals to see what we've done).
-- xmlada.gpr contain a fix to make the xmlada library to be possible to use by importing a gpr file (the one in ubuntu 8.10 doesnt work)
-- aws.gpr is just a rename of the templates_parser.gpr, which is needed because that is how we import that library on windows. This should be fixed in 3.2.2.
+The patches installed are as follows (not all of the files are in all the patch directories):
+- file_lock.hpp, offset_ptr.hpp, os_file_functions.hpp, mapped_region.hpp, sp_counted_impl.hpp, win32_api.hpp contain bugfixes for boost (just compare them with the originals to see what we've done).
+- xmlada.gpr contain a fix to make the xmlada library to be possible to use by importing a gpr file (the one in ubuntu 8.10/9.04/9.10 doesn't work)
 
 *Hints for non-ubuntu users*
 (Instructions for other distributions will be added, but in the meantime here are some general hints)
@@ -50,12 +60,11 @@ export SAFIR_SDK=$HOME/safir/sdk
 export PATH=$PATH:$SAFIR_RUNTIME/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SAFIR_RUNTIME/lib
 export ADA_PROJECT_PATH=$SAFIR_SDK/ada
-export MONO_PATH=$MONO_PATH:$SAFIR_RUNTIME/lib
 export JAVA_HOME=/usr/lib/jvm/java-6-openjdk/
 -------------
 
 The easiest way to build Safir SDK Core is to use the build script (a python script that just uses cmake and/or make to build the components and subsystems). To run the build script go to the directory that contains the build and src directories, and run 
-    build/build_linux.py -f build/sdk_core_linux.txt
+    build/build.py -f build/sdk_core.txt
 This will build the Safir SDK Core components in the correct order and install them into the location specified by SAFIR_SDK and SAFIR_RUNTIME.
 
 With a bit of luck you should now have a working Safir SDK Core installed on your computer.
@@ -64,6 +73,6 @@ Try starting "dose_main" and "dope_main" and "mono $SAFIR_RUNTIME/bin/sate.exe",
 
 *Building example applications*
 The directory named "examples" contains some test applications. The simplest way to build these is to use the build script with a different configuration file (run after the build of the SDK as described above):
-    build/build_linux.py -f build/example_apps_linux.txt
+    build/build.py -f build/example_apps.txt
 When this is complete you should have a few new applications installed under $SAFIR_RUNTIME/bin: VehicleAppCpp, VehicleAppCs, VehicleMmiCppQt, VehicleMmiCsWinForms and VehicleAppDb. 
-Note: There is also a build script configuration file dob_tests_linux.txt, which builds the Dob test suite.
+Note: There is also a build script configuration file dob_tests.txt, which builds the Dob test suite.

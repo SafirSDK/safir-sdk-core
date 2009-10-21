@@ -65,8 +65,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libboost_crypto-vc80-mt-gd.lib ACEd.lib"
-				OutputFile="$(OutDir)\$(ProjectName)d.dll"
+				AdditionalDependencies="ACEd.lib"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(SAFIR_SDK)/lib&quot;"
 				GenerateDebugInformation="true"
@@ -98,7 +98,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; &quot;$(SAFIR_RUNTIME)\bin&quot;&#x0D;&#x0A;copy &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;$(SAFIR_RUNTIME)\bin&quot;&#x0D;&#x0A;copy &quot;$(TargetDir)$(TargetName).lib&quot; &quot;$(SAFIR_SDK)\lib&quot;&#x0D;&#x0A;&#x0D;&#x0A;"
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; &quot;$(SAFIR_RUNTIME)\bin&quot;&#x0D;&#x0A;copy &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;$(SAFIR_RUNTIME)\bin&quot;&#x0D;&#x0A;copy &quot;$(TargetDir)$(TargetName).lib&quot; &quot;$(SAFIR_SDK)\lib&quot;&#x0D;&#x0A;xcopy /E /Y ..\data\dots_id.gpr &quot;$(SAFIR_SDK)\ada&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -149,7 +149,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libboost_crypto-vc80-mt.lib ACE.lib"
+				AdditionalDependencies="ACE.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(SAFIR_SDK)/lib&quot;"
@@ -184,7 +184,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; &quot;$(SAFIR_RUNTIME)\bin&quot;&#x0D;&#x0A;copy &quot;$(TargetDir)$(TargetName).lib&quot; &quot;$(SAFIR_SDK)\lib&quot;&#x0D;&#x0A;"
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; &quot;$(SAFIR_RUNTIME)\bin&quot;&#x0D;&#x0A;copy &quot;$(TargetDir)$(TargetName).lib&quot; &quot;$(SAFIR_SDK)\lib&quot;&#x0D;&#x0A;xcopy /E /Y ..\data\dots_id.gpr &quot;$(SAFIR_SDK)\ada&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>

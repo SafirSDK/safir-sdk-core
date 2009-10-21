@@ -25,6 +25,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace dose_test_dotnet
 {
@@ -48,8 +49,9 @@ namespace dose_test_dotnet
                 m_callbackActions.Add(cb, new List<DoseTest.Action>());
             }
 
-            m_controlDispatcher = new Dispatcher(m_controlDispatchEvent);
+            m_controlDispatcher = new ControlDispatcher(m_controlDispatchEvent);
             m_testDispatcher = new Dispatcher(m_testDispatchEvent);
+            m_testStopHandler = new StopHandler();
             m_controlConnection.Open(m_controlConnectionName, m_instanceString, 0, this, m_controlDispatcher);
 
             //subscribe to messages going to everyone and to me.
@@ -59,6 +61,11 @@ namespace dose_test_dotnet
 
         public void Run()
         {
+            // Seems that subsequent garbage collections will execute faster after the first one so we start with
+            // a GC here.
+            System.GC.Collect();
+            System.GC.WaitForPendingFinalizers();
+
             System.Console.WriteLine(m_identifier + ":" + m_instance + " Started");
             System.Threading.AutoResetEvent[] waitHandles = new System.Threading.AutoResetEvent[]
             {
@@ -129,7 +136,7 @@ namespace dose_test_dotnet
 
         private void ExecuteAction(DoseTest.Action action)
         {
-            switch (action.ActionType.Val)
+            switch (action.ActionKind.Val)
             {
                 case DoseTest.ActionEnum.Enumeration.Activate:
                     if (action.Identifier == m_identifier)
@@ -169,7 +176,21 @@ namespace dose_test_dotnet
                     if (m_isActive)
                     {
                         m_testConnection.Close();
-                        System.GC.Collect();
+
+                        Dispatcher oldDispatcher = m_testDispatcher;  //keep this for a while, so we get a new dispatcher address.
+                        m_testDispatcher = new Dispatcher(m_testDispatchEvent);
+                        if (oldDispatcher != null) //add a check to avoid a warning from mono
+                        {
+                            oldDispatcher = null;
+                        }
+
+                        StopHandler oldStopHandler = m_testStopHandler;  //keep this for a while, so we get a new stopHandler address.
+                        m_testStopHandler = new StopHandler();
+                        if (oldStopHandler != null)
+                        {
+                            oldStopHandler = null;
+                        }
+
                         m_testConnection.Open(m_testConnectionName, m_instanceString, 0, null, m_testDispatcher);
                         using (Safir.Dob.EntityProxy ep = m_controlConnection.Read(m_partnerEntityId))
                         {
@@ -187,16 +208,112 @@ namespace dose_test_dotnet
 
                         if (oldCons != null)//avoid warning...
                         {
-                            oldCons = null; //avoid warning, again...
+                            oldCons = null;
+                        }
+
+                        foreach (KeyValuePair<Safir.Dob.CallbackId.Enumeration, List<DoseTest.Action>> cbActions
+                                 in m_callbackActions)
+                        {
+                            cbActions.Value.Clear();
                         }
                     }
                     break;
 
+                case DoseTest.ActionEnum.Enumeration.CheckReferences:
+                    if (m_isActive)
+                    {
+                        if (m_consumers != null)
+                        {
+                            m_consumers = null;
+                        }
+
+                        System.GC.Collect();
+                        System.GC.WaitForPendingFinalizers();
+
+                        // After releasing the executor's references and a garabage collection, there should be no
+                        // Consumer instances
+                        if (Consumer.instanceCount != 0)
+                        {
+                            Logger.Instance.WriteLine("Expected 0 consumer instances, but there is " + Consumer.instanceCount);
+                        }
+
+                        // restore consumers
+                        m_consumers = new Consumer[3];
+                        for (int i = 0; i < 3; ++i)
+                        {
+                            m_consumers[i] = new Consumer(i, m_testConnectionName, m_instanceString);
+                        }
+                    }
+                    break;
+                    
+                case DoseTest.ActionEnum.Enumeration.CloseAndCheckReferences:
+                    if (m_isActive)
+                    {
+                        m_testConnection.Close();
+
+                        if (m_consumers != null)
+                        {
+                            m_consumers = null;
+                        }
+
+                        if (m_testDispatcher != null)
+                        {
+                            m_testDispatcher = null;
+                        }
+
+                        if (m_testStopHandler != null)
+                        {
+                            m_testStopHandler = null;
+                        }
+
+                        System.GC.Collect();
+                        System.GC.WaitForPendingFinalizers();
+
+                        // After releasing the executor's references and a garabage collection, there should be no
+                        // Consumer instances and no Dispatcher instances
+                        if (Consumer.instanceCount != 0)
+                        {
+                            Logger.Instance.WriteLine("Expected 0 consumer instances, but there is " + Consumer.instanceCount);
+                        }
+                        if (Dispatcher.instanceCount != 0)
+                        {
+                            Logger.Instance.WriteLine("Expected 0 dispatcher instances, but there is " + Dispatcher.instanceCount);
+                        }
+                        if (StopHandler.instanceCount != 0)
+                        {
+                            Logger.Instance.WriteLine("Expected 0 stopHandler instances, but there is " + StopHandler.instanceCount);
+                        }
+
+                        // Restore dispatcher
+                        m_testDispatcher = new Dispatcher(m_testDispatchEvent);
+
+                        m_testConnection.Open(m_testConnectionName, m_instanceString, 0, null, m_testDispatcher);
+
+                        // Restore consumers
+                        m_consumers = new Consumer[3];
+                        for (int i = 0; i < 3; ++i)
+                        {
+                            m_consumers[i] = new Consumer(i, m_testConnectionName, m_instanceString);
+                        }
+
+                        // Restore stopHandler
+                        m_testStopHandler = new StopHandler();
+                    }
+                    break;
+
+                case DoseTest.ActionEnum.Enumeration.RunGarbageCollector:
+                    if (m_isActive)
+                    {
+                        System.GC.Collect();
+                        System.GC.WaitForPendingFinalizers();
+                    }
+                    break;
+                    
                 case DoseTest.ActionEnum.Enumeration.Open:
                     {
                         if (m_isActive)
                         {
-                            m_testConnection.Open(m_testConnectionName, m_instanceString, 0, null, m_testDispatcher);
+                            m_testConnection.Open(m_testConnectionName, m_instanceString, 0, m_testStopHandler, m_testDispatcher);
                         }
                     }
                     break;
@@ -244,7 +361,7 @@ namespace dose_test_dotnet
                     break;
 
                 default:
-                    Logger.Instance.WriteLine("Got unexpected action " + action.ActionType.Val);
+                    Logger.Instance.WriteLine("Got unexpected action " + action.ActionKind.Val);
                     break;
             }
         }
@@ -277,6 +394,8 @@ namespace dose_test_dotnet
 
         void Safir.Dob.MessageSubscriber.OnMessage(Safir.Dob.MessageProxy messageProxy)
         {
+            ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnMessage);
+
             DoseTest.Action action = messageProxy.Message as DoseTest.Action;
 
             if (action.Consumer.IsNull())
@@ -354,13 +473,44 @@ namespace dose_test_dotnet
 
         #endregion
 
-        #region Dispatcher subclass
-        private class Dispatcher : Safir.Dob.Dispatcher
+        #region ControlDispatcher subclass
+        private class ControlDispatcher : Safir.Dob.Dispatcher
         {
-            public Dispatcher(System.Threading.AutoResetEvent theEvent)
+            public ControlDispatcher(System.Threading.AutoResetEvent theEvent)
             {
                 m_event = theEvent;
             }
+
+            #region ControlDispatcher Members
+
+            void Safir.Dob.Dispatcher.OnDoDispatch()
+            {
+                m_event.Set();
+            }
+
+            #endregion
+
+            private System.Threading.AutoResetEvent m_event;
+        }
+        #endregion
+
+        #region Dispatcher subclass
+        private class Dispatcher : Safir.Dob.Dispatcher
+        {
+            public static int instanceCount = 0;
+
+            public Dispatcher(System.Threading.AutoResetEvent theEvent)
+            {
+                Interlocked.Increment(ref instanceCount);
+
+                m_event = theEvent;
+            }
+
+            ~Dispatcher()
+            {
+                Interlocked.Decrement(ref instanceCount);
+            }
+
             #region Dispatcher Members
 
             void Safir.Dob.Dispatcher.OnDoDispatch()
@@ -374,6 +524,31 @@ namespace dose_test_dotnet
         }
         #endregion
 
+        #region StopHandler subclass
+        private class StopHandler : Safir.Dob.StopHandler
+        {
+            public static int instanceCount = 0;
+
+            public StopHandler()
+            {
+                Interlocked.Increment(ref instanceCount);
+            }
+
+            ~StopHandler()
+            {
+                Interlocked.Decrement(ref instanceCount);
+            }
+
+            #region StopHandler Members
+
+            void Safir.Dob.StopHandler.OnStopOrder()
+            {
+            }
+
+            #endregion
+        }
+        #endregion
+
         #region Data members
 
         private readonly string m_identifier = "dotnet";
@@ -384,7 +559,7 @@ namespace dose_test_dotnet
         private readonly Safir.Dob.Typesystem.EntityId m_partnerEntityId;
         private bool m_isDone = false;
         private bool m_isActive = false;
-        Consumer[] m_consumers;
+        private Consumer[] m_consumers;
 
         private Safir.Dob.Connection m_controlConnection = new Safir.Dob.Connection();
         private Safir.Dob.Connection m_testConnection = new Safir.Dob.Connection();
@@ -395,8 +570,10 @@ namespace dose_test_dotnet
         private System.Threading.AutoResetEvent m_testDispatchEvent = new System.Threading.AutoResetEvent(false);
         private System.Threading.AutoResetEvent m_stopEvent = new System.Threading.AutoResetEvent(false);
 
-        private Dispatcher m_controlDispatcher;
+        private ControlDispatcher m_controlDispatcher;
         private Dispatcher m_testDispatcher;
+        private StopHandler m_testStopHandler;
+
         Dictionary<Safir.Dob.CallbackId.Enumeration, List<DoseTest.Action>> m_callbackActions;
         #endregion
 

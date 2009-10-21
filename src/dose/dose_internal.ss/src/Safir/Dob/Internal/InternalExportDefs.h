@@ -26,6 +26,7 @@
 #define _dose_internal_export_defs_h
 
 #if defined _MSC_VER
+    #pragma warning (disable: 4251 4275)
     #ifdef DOSE_INT_EXPORTS
         #define DOSE_INTERNAL_API __declspec(dllexport)
     #else

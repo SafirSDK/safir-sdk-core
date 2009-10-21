@@ -28,6 +28,7 @@
 #include <Safir/Dob/Internal/Interface.h>
 #include "dose_dispatcher.h"
 #include "dose_dispatch_thread.h"
+#include "dose_consumer_references.h"
 
 // Sdk
 #include <Safir/Dob/Internal/Connection.h>
@@ -95,9 +96,8 @@ namespace Internal
                      OnInjectedDeletedEntityCb* onInjectedDeletedEntityCb,
                      OnInitialInjectionsDoneCb* onInitialInjectionsDoneCb,
                      OnNotRequestOverflowCb* onNotRequestOverflowCb,
-                     OnNotMessageOverflowCb* onNotMessageOverflowCb);
-
-        void JavaDispatchThread();
+                     OnNotMessageOverflowCb* onNotMessageOverflowCb,
+                     OnDropReferenceCb* onDropReferenceCb);
 
         void ConnectSecondary(long lang,
                               OnNewEntityCb* onNewEntityCb,
@@ -118,7 +118,8 @@ namespace Internal
                               OnInjectedDeletedEntityCb* onInjectedDeletedEntityCb,
                               OnInitialInjectionsDoneCb* onInitialInjectionsDoneCb,
                               OnNotRequestOverflowCb* onNotRequestOverflowCb,
-                              OnNotMessageOverflowCb* onNotMessageOverflowCb);
+                              OnNotMessageOverflowCb* onNotMessageOverflowCb,
+                              OnDropReferenceCb* onDropReferenceCb);
 
         void Disconnect();
 
@@ -195,6 +196,8 @@ namespace Internal
         void Dispatch();
 
         void ExitDispatch();
+
+        Safir::Dob::CallbackId::Enumeration CurrentCallback() const;
 
         void Postpone(const bool redispatchCurrent);
         void ResumePostponed();
@@ -501,6 +504,9 @@ namespace Internal
         typedef unordered_map<Typesystem::Int32, Internal::EntityTypes::EntityIterator> EntityIteratorTable;
 
         EntityIteratorTable m_entityIterators;
+
+        // Holds reference counters for garbage collected languages.
+        ConsumerReferences m_consumerReferences;
 
         /*             // For test purposes */
         /*             void DumpDirtySub(std::vector<DirtySub>& ds); */

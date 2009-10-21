@@ -25,8 +25,20 @@
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Dob/Typesystem/BlobOperations.h>
+
+//disable warnings in ace
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4267)
+#endif
+
 #include <ace/Guard_T.h>
 #include <ace/Recursive_Thread_Mutex.h>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 namespace Safir
 {

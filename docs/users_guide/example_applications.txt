@@ -1,0 +1,247 @@
+///////
+This file is included into the main SUG document, and is located under header level "=="
+///////
+
+Along with the Safir SDK Core you should have received some example applications that show how to create a small application that will give you a starting point for your own applications. This appendix explains what these example applications intend to do, and why they were designed the way they were. These examples are also used in the Safir SDK training courses, so if you've attended one of them you will be in familiar territory.
+
+The example applications form a very small and simple Safir system. They may execute on one single node or be spread out on different nodes.
+Since the Dob provides interfaces in several different languages, the example applications are also provided in different languages.
+
+=== Some background
+The basic design tenets of Safir systems is the separation of business logic from GUI, and of breaking up responsibilities into several applications that each solve a small part of the problem.
+
+So Safir systems usually consist of a number of applications that execute on different computers (nodes), and they are classified as either _Business applications_ or _Presentation applications_. The first type handles all business logic – calculation, communication, request processing etc – while the latter takes care of all presentation of data in a GUI (also referred to as an MMI, Man-Machine Interface, or HMI, Human-Machine Interface). This is shown in <<logic-separation>>.
+
+The applications may execute on the same or different nodes, this is in fact one of the features of Safir SDK, that a developer can run everything on his development-machine, but when the system is deployed to the real or test environment the applications are run on multiple machines, completely transparently to the applications.
+
+[[logic-separation]]
+.Separation of logic from GUI
+image::images/separation_tenet.jpg["Separation tenet", width=300, link="images/separation_tenet.jpg"]
+
+=== The (example) problem
+The fictive problem is that we need a system that can give us an overview of a number of manually created vehicles. We also want some services associated with the vehicles.
+
+Presentation of information::
+The vehicle objects shall be distributed to all system nodes with real-time requirements. The critical information about a vehicle (position and speed) shall be presented in a table (applies to all vehicles) and in a detailed window (applies to a selected vehicle). It shall be possible to edit some of the vehicle information. All changes shall immediately be reflected on all nodes.
++
+In addition to the real-time requirements, it shall be possible to store and retrieve some information about a vehicle in a database. This information is not real-time critical and is only to be available upon request (i.e. it is not automatically distributed to all nodes).
+
+Capacity warning::
+If the number of created vehicles in the system reaches a parameter-specified limit, we want some kind of warning to be sent to all presentation nodes.
+
+Speed difference calculation::
+It shall be possible to calculate the difference between the speed for a selected vehicle and a given speed. We want to be able to use this calculation algorithm to all objects that have a speed – not only vehicles.
+
+=== The solution
+The problem is solved by the following applications:
+
+VehicleApp::
+A Safir business application that is the owner of all vehicle objects. It is designed to execute on one server node and has no GUI.
+
+VehicleMmi::
+A Safir presentation application that presents all vehicle information in a GUI. It is designed to execute on any number of presentation nodes.
+
+VehicleDb::
+A Safir database application that on request interacts with a database through the the Safir ODBC database interface (see <<olib>>). It is designed to execute on one server node that also runs the ODBC database.
+
+A deployment of the applications is shown in <<vehicle-deployment>> where the applications execute on one standalone node, but they could just as well execute on different nodes.
+
+[[vehicle-deployment]]
+.Deployment of the Vehicle system
+image::images/vehicle_deployment.jpg["Vehicle system deployment", width=300, link="images/vehicle_deployment.jpg"]
+
+=== VehicleApp - Business Application
+This application exists in the languages C++ and C#.
+
+VehicleApp is the business application in the system. It is the owner of all vehicle entity instances and is therefore the only application with right to create, update and delete vehicle instances. Other applications may send vehicle object requests but it is VehicleApps responsibility to check the requests and perform the changes.
+
+The vehicle information is modelled as global Dob entities, which will ensure that all object updates are distributed on all nodes with real-time requirements.
+
+To be an owner of vehicle objects, VehicleApp uses the Dob interface +EntityHandlerInjection+. This means the following things:
+- The application will not be a pending owner, i.e. it will override any current owners.
+- The application will allow injections from other systems and from the persistency service.
+
+VehicleApp handles and responds to create, update and delete requests in the implementation of the interface +EntityHandlerInjection+. The registration is also performed here.
+
+To send a warning when the number of vehicle parameters is reached, a +Message+ is used. To send a message, no registration is required, but the Dob interface +MessageSender+ has to implemented.
+
+==== Dou-files
+The following dou files are provided with VehicleApp. For details, see the corresponding dou file.
+
++Capabilities.Vehicles.Vehicle+::
+Definition of a vehicle object. This data will be distributed in the system.
+
++Capabilities.Vehicles.VehicleCategoryCode+::
+Enumeration of vehicle category codes.
+
++Capabilities.Vehicles.Vehicle-Safir.Dob.InjectionProperty+::
+Mapping that denotes the kind of injection. The vehicle object is SynchronousVolatile, which means that vehicle objects survives an application but not a Dob restart. No injections of vehicle objects from external systems will take place.
+
++Capabilities.Vehicles.VehicleMsg+::
+Definition of message that is sent when the number of created vehicle objects reaches the limit specified in VehicleParameters.
+
++Capabilities.CalculateSpeedDifference+::
+Definition of a service that calculates the speed difference between a vehicle object speed and a given speed. A property is used to obtain the speed from the vehicle object.
+
++Capabilities.CalculateSpeedDifferenceResponse+::
+Definition of the speed difference service response.
+
++Capabilities.SpeedObjectProperty+::
+Definition of the speed property.
+
++Capabilities.Vehicles.Vehicle-Capabilities.SpeedObjectProperty+::
+Mapping of the speed property onto the speed member of the vehicle class.
+
++Capabilities.Vehicles.VehicleParameters+::
+Definition of vehicle parameters. 
+
+==== Internal Design
+<<vehicleapp-class-diagram>> shows the classes of the C++ version of VehicleApp and the most important Dob classes and consumer interfaces that they use.
+
+[[vehicleapp-class-diagram]]
+.VehicleApp class diagram
+image::images/vehicleapp_class_diagram.jpg["Class Diagram", width=300, link="images/vehicleapp_class_diagram.jpg"]
+
+App::
+Main class. Called by the Dob on application stop. Contains the main Dob connection.
+
+EntityHandler::
+Registers ownership of the vehicle class and receives all vehicle object requests and injections.
+
+ServerHandler::
+Registers ownership of the speed difference service and receives all service requests.
+
+MessageSender::
+Sends message when number of vehicle objects has reached the limit specified through a parameter.
+
+=== VehicleMmi - Presentation Application
+This application exists in two variants, one in C++ with the Qt widget set and one in C# using WinForms.
+
+VehicleMmi is the presentation application in the system. It subscribes to, and presents all vehicle data in a table in the GUI. It also presens information for a selected vehicle object in a detailed window. In this window, it is possible to enter new data for a vehicle and send a request to change it. It is also possible to create a new vehicle object.
+
+Subscription to the vehicle entities is started through the Dob interface +EntitySubscriber+. As soon as an entity is updated, VehicleMmi will receive a subscription response.
+
+The application also receives the warning message that is sent by VehicleApp. This is done through implementation of the Dob interface +MessageSubscriber+.
+
+To obtain additional database information – that is not received throuh a subscription response – for a selected vehicle, it is possible to request this from the VehicleDb. If the database information does not exist, it is created by VehicleMmi.
+
+It is possible to calculate the difference between a selected vehicle object and an entered speed through the the speed difference calculation service. The calculation itself it vary basic since we want to focus on how to use a Dob service.
+
+==== Windows and Dialogs
+This section is an overview of the windows and dialogs of the VehicleMmi application.
+
+The list view in <<vehiclemmi-list>> contains all published vehicle objects in the system. All created, changed and deleted vehicle objects are received by VehicleMmi as entity subscription responses and presented in the list view. An object may be deleted from the list view, but not modified. It is also possible to delete category information for a category code from the list view.
+
+[[vehiclemmi-list]]
+.VehicleMmi list view.
+image::images/vehiclemmi_list.jpg["VehicleMmi List", width=450, link="images/vehiclemmi_list.jpg"]
+
+The dialog in <<vehiclemmi-create>> is opened from the list view and is used to send create requests for new vehicle objects. The requests are received by VehicleApp.
+
+[[vehiclemmi-create]]
+.VehicleMmi Create dialog
+image::images/vehiclemmi_create.jpg["VehicleMmi Create dialog", width=200, link="images/vehiclemmi_create.jpg"]
+
+The dialog in <<vehiclemmi-update>> is opened from the list view and is used to send update requests for existing vehicle objects. The requests are received by VehicleApp.
+
+[[vehiclemmi-update]]
+.VehicleMmi Update dialog
+image::images/vehiclemmi_update.jpg["VehicleMmi Update dialog", width=200, link="images/vehiclemmi_update.jpg"]
+
+The dialog in <<vehiclemmi-calculate-speed>> is opened from the list view and is used to send to calculate the difference between the speed for a selected vehicle object and an entered speed. The request is sent through a service to VehicleApp and the result is given in the sevice response.
+
+[[vehiclemmi-calculate-speed]]
+.VehicleMmi Speed calculation dialog
+image::images/vehiclemmi_calculate_speed.jpg["Speed calculation", width=200, link="images/vehiclemmi_calculate_speed.jpg"]
+
+The dialog in <<vehiclemmi-category-info>> is opened from the list view and is used to obtain category information for the selected vehicle object. If there is no information the category code in the database, the information entered in the dialog is instead stored for the given category code.
+
+[[vehiclemmi-category-info]]
+.VehicleMmi Category information dialog
+image::images/vehiclemmi_category_info.jpg["Category info", width=200, link="images/vehiclemmi_category_info.jpg"]
+
+==== Dou-files
+No dou files are provided by VehicleMmi.
+
+==== Internal Design
+<<vehiclemmi-class-diagram>> shows the classes of the C# version of VehicleMmi and the most important Dob classes and consumer interfaces that they use.
+
+[[vehiclemmi-class-diagram]]
+.VehicleMmi class diagram
+image::images/vehiclemmi_class_diagram.jpg["Class Diagram", width=350, link="images/vehiclemmi_class_diagram.jpg"]
+
+App::
+Main class. Called by the Dob on application stop.Contains the main Dob connection.
+
+EntityFrame::
+Contains the list view and the buttons that open the dialogs and operates on vehicle objects.
+
+EntityListHandler::
+Subscribes to vehicle objects. Updates the list view according to subscription responses.
+
+EntityDialog::
+Implements the Create vehicle and Update vehicle dialogs. Sends vehicle object requests that are received by 				VehicleApp.
+
+ServiceDialog::
+Implements the Speed difference calculator dialog. Sends a service request that is received by VehicleApp.
+
+MessageDialog:: 
+Implements the dialog that is presented when the number	of created vehicle objects has reached the limit specified by a parameter. Subscribes to a Dob message.
+
+CategoryInfoDialog::
+Implements the Category information dialog. Sends service requests to create new category information data code or to obtain existing data for a category information. The requests are received by VehicleDb.
+
+=== VehicleDb - Database Application
+VehicleDb is the database application in the system. It sets up a connection to an ODBC database and reads and writes data from and to it. These database transactions are triggered by Dob service requests.
+
+The database contains vehicle category information. I.e. for each category code there is additional information that is stored in a database.
+
+All database interaction is made through the Safir ODBC interface (see <<olib>>).
+
+A condition for the database application to work properly is that there is an ODBC database setup. A script is provided to set up a Mimer database with the correct tables, columns, stored procedures and user information.
+
+The database connection is setup by a few steps on startup of the application. VehicleDb provides the following services:
+- Get vehicle category information
+- Set vehicle category information
+- Delete vehicle category information
+
+When a service request is received, a corresponding database transaction is performed. The database transactions are performed by calling stored procedures.
+
+When a transaction is performed successfully, a service response is sent. The response depends on the request type.
+
+==== Dou-files
+The following dou files are provided with VehicleDb. For details, see the corresponding dou file.
+
++Capabilities.Vehicles.DatabaseParameters+::
+Database connection parameters.
+
++Capabilities.Vehicles.VehicleCategoryInfo+::
+Definition of a vehicle category.
+
++Capabilities.Vehicles.DeleteVehicleCategoryService+::
+This service is used for deletion of a vehicle category.
+
++Capabilities.Vehicles.GetVehicleCategoryService+::
+This service is used to obtain a vehicle category info.
+
++Capabilities.Vehicles.GetVehicleCategoryResponse+::
+The GetVehicleCategoryService response.
+
++Capabilities.Vehicles.SetVehicleCategoryService+::
+This service is used to create a new vehicle category info.
+
+==== Internal Design
+<<vehicledb-class-diagram>> shows the VehicleApp classes and the most important interfaces that they use.
+
+[[vehicledb-class-diagram]]
+.VehicleDb class diagram
+image::images/vehicledb_class_diagram.jpg["Class Diagram", width=300, link="images/vehicledb_class_diagram.jpg"]
+
+App::
+Main class. Called by the Dob on application stop. Contains the main Dob connection.
+
+VehicleDatabaseServices::
+Registers ownership of the Vehicle category	information services. Receives all service requests	and triggers action in the DatabaseInteraction class.
+
+DatabaseInteraction::
+Performs all database interaction. Sets up the database connection on startup. Prepares database statements that are executes on request.

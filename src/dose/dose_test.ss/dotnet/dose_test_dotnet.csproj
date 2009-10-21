@@ -28,6 +28,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="dots_generated-dotnet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=40df165d3a3cadbc, processorArchitecture=MSIL">

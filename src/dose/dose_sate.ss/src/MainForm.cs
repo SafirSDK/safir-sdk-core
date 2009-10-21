@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Joel Ottosson / stjoot
 *
 *******************************************************************************
@@ -64,7 +64,7 @@ namespace Sate
 
         //DOB
         private Safir.Dob.Connection dose = new Safir.Dob.Connection();
-       
+
         private AboutForm aboutForm = new AboutForm();
         private System.Windows.Forms.StatusBar statusBar;
         private System.Windows.Forms.Panel leftPanel;
@@ -120,7 +120,7 @@ namespace Sate
 
         public List<Int64> handlerDecidesTypeIdList = new List<long>();
         public List<Int64> requestorDecidesTypeIdList = new List<long>();
-       
+
 
         private MainForm()
         {
@@ -239,7 +239,7 @@ namespace Sate
                 tabControl.TabPages.RemoveAt(selectedIndex);
                 if ((tabControl.TabCount > 1) && (selectedIndex != 0))
                 {
-                 
+
                     if (selectedIndex < tabControl.TabCount)
                     {
                         tabControl.SelectTab(selectedIndex);
@@ -249,7 +249,7 @@ namespace Sate
                         tabControl.SelectTab(tabControl.TabCount - 1);
                     }
                 }
-                
+
             }
             if (tabControl.TabPages.Count == 0)
             {
@@ -392,9 +392,9 @@ namespace Sate
             this.fillfillpanel.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
+            //
             // imageList
-            // 
+            //
             this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
             this.imageList.TransparentColor = System.Drawing.Color.Transparent;
             this.imageList.Images.SetKeyName(0, "");
@@ -404,17 +404,17 @@ namespace Sate
             this.imageList.Images.SetKeyName(4, "");
             this.imageList.Images.SetKeyName(5, "");
             this.imageList.Images.SetKeyName(6, "");
-            // 
+            //
             // statusBar
-            // 
+            //
             this.statusBar.Location = new System.Drawing.Point(0, 744);
             this.statusBar.Name = "statusBar";
             this.statusBar.Size = new System.Drawing.Size(1042, 22);
             this.statusBar.TabIndex = 3;
             this.statusBar.Text = "Not connected!";
-            // 
+            //
             // bottomSplitter
-            // 
+            //
             this.bottomSplitter.BackColor = System.Drawing.SystemColors.Control;
             this.bottomSplitter.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.bottomSplitter.Location = new System.Drawing.Point(188, 621);
@@ -423,9 +423,9 @@ namespace Sate
             this.bottomSplitter.Size = new System.Drawing.Size(854, 3);
             this.bottomSplitter.TabIndex = 3;
             this.bottomSplitter.TabStop = false;
-            // 
+            //
             // bottomPanel
-            // 
+            //
             this.bottomPanel.BackColor = System.Drawing.SystemColors.Control;
             this.bottomPanel.Controls.Add(this.bottomFillPanel);
             this.bottomPanel.Controls.Add(this.bottomRightSplitter);
@@ -435,34 +435,34 @@ namespace Sate
             this.bottomPanel.Name = "bottomPanel";
             this.bottomPanel.Size = new System.Drawing.Size(854, 120);
             this.bottomPanel.TabIndex = 2;
-            // 
+            //
             // bottomFillPanel
-            // 
+            //
             this.bottomFillPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.bottomFillPanel.Location = new System.Drawing.Point(0, 0);
             this.bottomFillPanel.Name = "bottomFillPanel";
             this.bottomFillPanel.Size = new System.Drawing.Size(458, 120);
             this.bottomFillPanel.TabIndex = 2;
-            // 
+            //
             // bottomRightSplitter
-            // 
+            //
             this.bottomRightSplitter.Dock = System.Windows.Forms.DockStyle.Right;
             this.bottomRightSplitter.Location = new System.Drawing.Point(458, 0);
             this.bottomRightSplitter.Name = "bottomRightSplitter";
             this.bottomRightSplitter.Size = new System.Drawing.Size(3, 120);
             this.bottomRightSplitter.TabIndex = 1;
             this.bottomRightSplitter.TabStop = false;
-            // 
+            //
             // bottomRightPanel
-            // 
+            //
             this.bottomRightPanel.Dock = System.Windows.Forms.DockStyle.Right;
             this.bottomRightPanel.Location = new System.Drawing.Point(461, 0);
             this.bottomRightPanel.Name = "bottomRightPanel";
             this.bottomRightPanel.Size = new System.Drawing.Size(393, 120);
             this.bottomRightPanel.TabIndex = 0;
-            // 
+            //
             // leftSplitter
-            // 
+            //
             this.leftSplitter.BackColor = System.Drawing.SystemColors.Control;
             this.leftSplitter.Location = new System.Drawing.Point(185, 24);
             this.leftSplitter.MinSize = 185;
@@ -470,36 +470,36 @@ namespace Sate
             this.leftSplitter.Size = new System.Drawing.Size(3, 720);
             this.leftSplitter.TabIndex = 1;
             this.leftSplitter.TabStop = false;
-            // 
+            //
             // leftPanel
-            // 
+            //
             this.leftPanel.BackColor = System.Drawing.SystemColors.Control;
             this.leftPanel.Dock = System.Windows.Forms.DockStyle.Left;
             this.leftPanel.Location = new System.Drawing.Point(0, 24);
             this.leftPanel.Name = "leftPanel";
             this.leftPanel.Size = new System.Drawing.Size(185, 720);
             this.leftPanel.TabIndex = 0;
-            // 
+            //
             // fillPanel
-            // 
+            //
             this.fillPanel.Controls.Add(this.fillfillpanel);
             this.fillPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.fillPanel.Location = new System.Drawing.Point(188, 24);
             this.fillPanel.Name = "fillPanel";
             this.fillPanel.Size = new System.Drawing.Size(854, 597);
             this.fillPanel.TabIndex = 4;
-            // 
+            //
             // fillfillpanel
-            // 
+            //
             this.fillfillpanel.Controls.Add(this.tabControl);
             this.fillfillpanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.fillfillpanel.Location = new System.Drawing.Point(0, 0);
             this.fillfillpanel.Name = "fillfillpanel";
             this.fillfillpanel.Size = new System.Drawing.Size(854, 597);
             this.fillfillpanel.TabIndex = 1;
-            // 
+            //
             // tabControl
-            // 
+            //
             this.tabControl.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -510,9 +510,9 @@ namespace Sate
             this.tabControl.Size = new System.Drawing.Size(854, 597);
             this.tabControl.TabIndex = 0;
             this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_selectedIndexChanged);
-            // 
+            //
             // menuStrip1
-            // 
+            //
             this.menuStrip1.BackColor = System.Drawing.SystemColors.Menu;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.connectionToolStripMenuItem,
@@ -524,9 +524,9 @@ namespace Sate
             this.menuStrip1.Size = new System.Drawing.Size(1042, 24);
             this.menuStrip1.TabIndex = 5;
             this.menuStrip1.Text = "menuStrip1";
-            // 
+            //
             // connectionToolStripMenuItem
-            // 
+            //
             this.connectionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.connectToolStripMenuItem,
             this.connectWithContextToolStripMenuItem,
@@ -541,39 +541,39 @@ namespace Sate
             this.connectionToolStripMenuItem.Name = "connectionToolStripMenuItem";
             this.connectionToolStripMenuItem.Size = new System.Drawing.Size(73, 20);
             this.connectionToolStripMenuItem.Text = "Connection";
-            // 
+            //
             // connectToolStripMenuItem
-            // 
+            //
             this.connectToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("connectToolStripMenuItem.Image")));
             this.connectToolStripMenuItem.Name = "connectToolStripMenuItem";
             this.connectToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.connectToolStripMenuItem.Text = "Connect";
             this.connectToolStripMenuItem.Click += new System.EventHandler(this.connectmenuItem_Click);
-            // 
+            //
             // connectWithContextToolStripMenuItem
-            // 
+            //
             this.connectWithContextToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("connectWithContextToolStripMenuItem.Image")));
             this.connectWithContextToolStripMenuItem.Name = "connectWithContextToolStripMenuItem";
             this.connectWithContextToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.connectWithContextToolStripMenuItem.Text = "Connect with context...";
             this.connectWithContextToolStripMenuItem.Click += new System.EventHandler(this.connectWithContextToolStripMenuItem_Click);
-            // 
+            //
             // disconnectToolStripMenuItem
-            // 
+            //
             this.disconnectToolStripMenuItem.Enabled = false;
             this.disconnectToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("disconnectToolStripMenuItem.Image")));
             this.disconnectToolStripMenuItem.Name = "disconnectToolStripMenuItem";
             this.disconnectToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.disconnectToolStripMenuItem.Text = "Disconnect";
             this.disconnectToolStripMenuItem.Click += new System.EventHandler(this.disconnectmenuItem_Click);
-            // 
+            //
             // toolStripMenuItem1
-            // 
+            //
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
             this.toolStripMenuItem1.Size = new System.Drawing.Size(197, 6);
-            // 
+            //
             // openToolStripMenuItem
-            // 
+            //
             this.openToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.opendoufileToolStripMenuItem,
             this.openscenarioToolStripMenuItem,
@@ -582,66 +582,66 @@ namespace Sate
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.openToolStripMenuItem.Text = "Open";
-            // 
+            //
             // opendoufileToolStripMenuItem
-            // 
+            //
             this.opendoufileToolStripMenuItem.Name = "opendoufileToolStripMenuItem";
             this.opendoufileToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
             this.opendoufileToolStripMenuItem.Text = "Dou file...";
             this.opendoufileToolStripMenuItem.Click += new System.EventHandler(this.opendoufileToolStripMenuItem_Click);
-            // 
+            //
             // openscenarioToolStripMenuItem
-            // 
+            //
             this.openscenarioToolStripMenuItem.Name = "openscenarioToolStripMenuItem";
             this.openscenarioToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
             this.openscenarioToolStripMenuItem.Text = "Scenario file...";
             this.openscenarioToolStripMenuItem.Click += new System.EventHandler(this.openscenarioToolStripMenuItem_Click);
-            // 
+            //
             // openserializedObjectToolStripMenuItem
-            // 
+            //
             this.openserializedObjectToolStripMenuItem.Name = "openserializedObjectToolStripMenuItem";
             this.openserializedObjectToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
             this.openserializedObjectToolStripMenuItem.Text = "Serialized object...";
             this.openserializedObjectToolStripMenuItem.Click += new System.EventHandler(this.openserializedObjectToolStripMenuItem_Click);
-            // 
+            //
             // saveToolStripMenuItem
-            // 
+            //
             this.saveToolStripMenuItem.Enabled = false;
             this.saveToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("saveToolStripMenuItem.Image")));
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.saveToolStripMenuItem.Text = "Save...";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
-            // 
+            //
             // findToolStripMenuItem
-            // 
+            //
             this.findToolStripMenuItem.Enabled = false;
             this.findToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("findToolStripMenuItem.Image")));
             this.findToolStripMenuItem.Name = "findToolStripMenuItem";
             this.findToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.findToolStripMenuItem.Text = "Find...";
             this.findToolStripMenuItem.Click += new System.EventHandler(this.findToolStripMenuItem_Click);
-            // 
+            //
             // rescentFilesToolStripMenuItem
-            // 
+            //
             this.rescentFilesToolStripMenuItem.Name = "rescentFilesToolStripMenuItem";
             this.rescentFilesToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.rescentFilesToolStripMenuItem.Text = "Recent files";
-            // 
+            //
             // toolStripMenuItem4
-            // 
+            //
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
             this.toolStripMenuItem4.Size = new System.Drawing.Size(197, 6);
-            // 
+            //
             // exitToolStripMenuItem
-            // 
+            //
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
-            // 
+            //
             // viewToolStripMenuItem
-            // 
+            //
             this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.classExplorerToolStripMenuItem,
             this.inboxToolStripMenuItem,
@@ -649,36 +649,36 @@ namespace Sate
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(41, 20);
             this.viewToolStripMenuItem.Text = "View";
-            // 
+            //
             // classExplorerToolStripMenuItem
-            // 
+            //
             this.classExplorerToolStripMenuItem.Checked = true;
             this.classExplorerToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.classExplorerToolStripMenuItem.Name = "classExplorerToolStripMenuItem";
             this.classExplorerToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
             this.classExplorerToolStripMenuItem.Text = "Class Explorer";
             this.classExplorerToolStripMenuItem.Click += new System.EventHandler(this.classExplorermenuItem_Click);
-            // 
+            //
             // inboxToolStripMenuItem
-            // 
+            //
             this.inboxToolStripMenuItem.Checked = true;
             this.inboxToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.inboxToolStripMenuItem.Name = "inboxToolStripMenuItem";
             this.inboxToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
             this.inboxToolStripMenuItem.Text = "Inbox";
             this.inboxToolStripMenuItem.Click += new System.EventHandler(this.subrespmenuItem_Click);
-            // 
+            //
             // outputToolStripMenuItem
-            // 
+            //
             this.outputToolStripMenuItem.Checked = true;
             this.outputToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.outputToolStripMenuItem.Name = "outputToolStripMenuItem";
             this.outputToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
             this.outputToolStripMenuItem.Text = "Output";
             this.outputToolStripMenuItem.Click += new System.EventHandler(this.eventlogmenuItem_Click);
-            // 
+            //
             // toolsToolStripMenuItem
-            // 
+            //
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.calculatorsToolStripMenuItem,
             this.scenarioPlayrecordToolStripMenuItem,
@@ -689,9 +689,9 @@ namespace Sate
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
-            // 
+            //
             // calculatorsToolStripMenuItem
-            // 
+            //
             this.calculatorsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.typeIdToolStripMenuItem,
             this.timestampToolStripMenuItem});
@@ -699,56 +699,56 @@ namespace Sate
             this.calculatorsToolStripMenuItem.Name = "calculatorsToolStripMenuItem";
             this.calculatorsToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.calculatorsToolStripMenuItem.Text = "Calculators";
-            // 
+            //
             // typeIdToolStripMenuItem
-            // 
+            //
             this.typeIdToolStripMenuItem.Name = "typeIdToolStripMenuItem";
             this.typeIdToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.typeIdToolStripMenuItem.Text = "TypeId";
             this.typeIdToolStripMenuItem.Click += new System.EventHandler(this.typeIdToolStripMenuItem_Click);
-            // 
+            //
             // timestampToolStripMenuItem
-            // 
+            //
             this.timestampToolStripMenuItem.Name = "timestampToolStripMenuItem";
             this.timestampToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.timestampToolStripMenuItem.Text = "Timestamp";
             this.timestampToolStripMenuItem.Click += new System.EventHandler(this.timestampToolStripMenuItem_Click);
-            // 
+            //
             // scenarioPlayrecordToolStripMenuItem
-            // 
+            //
             this.scenarioPlayrecordToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("scenarioPlayrecordToolStripMenuItem.Image")));
             this.scenarioPlayrecordToolStripMenuItem.Name = "scenarioPlayrecordToolStripMenuItem";
             this.scenarioPlayrecordToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.scenarioPlayrecordToolStripMenuItem.Text = "Scenario play/record...";
             this.scenarioPlayrecordToolStripMenuItem.Click += new System.EventHandler(this.scenariomenuItem_Click);
-            // 
+            //
             // toolStripSeparator1
-            // 
+            //
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(193, 6);
-            // 
+            //
             // runGarbageCollectorToolStripMenuItem
-            // 
+            //
             this.runGarbageCollectorToolStripMenuItem.Name = "runGarbageCollectorToolStripMenuItem";
             this.runGarbageCollectorToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.runGarbageCollectorToolStripMenuItem.Text = "Run Garbage Collector";
             this.runGarbageCollectorToolStripMenuItem.Click += new System.EventHandler(this.runGarbageCollectorToolStripMenuItem_Click);
-            // 
+            //
             // toolStripMenuItem3
-            // 
+            //
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
             this.toolStripMenuItem3.Size = new System.Drawing.Size(193, 6);
-            // 
+            //
             // settingsToolStripMenuItem
-            // 
+            //
             this.settingsToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("settingsToolStripMenuItem.Image")));
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             this.settingsToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.settingsToolStripMenuItem.Text = "Settings...";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsmenuItem_Click);
-            // 
+            //
             // helpToolStripMenuItem
-            // 
+            //
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.helpToolStripMenuItem1,
             this.toolStripMenuItem2,
@@ -756,29 +756,29 @@ namespace Sate
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(40, 20);
             this.helpToolStripMenuItem.Text = "Help";
-            // 
+            //
             // helpToolStripMenuItem1
-            // 
+            //
             this.helpToolStripMenuItem1.Image = ((System.Drawing.Image)(resources.GetObject("helpToolStripMenuItem1.Image")));
             this.helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
             this.helpToolStripMenuItem1.Size = new System.Drawing.Size(154, 22);
             this.helpToolStripMenuItem1.Text = "Help...";
-            // 
+            //
             // toolStripMenuItem2
-            // 
+            //
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
             this.toolStripMenuItem2.Size = new System.Drawing.Size(151, 6);
-            // 
+            //
             // aboutSATEToolStripMenuItem
-            // 
+            //
             this.aboutSATEToolStripMenuItem.Image = global::Sate.Resources.sate_logo;
             this.aboutSATEToolStripMenuItem.Name = "aboutSATEToolStripMenuItem";
             this.aboutSATEToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.aboutSATEToolStripMenuItem.Text = "About SATE...";
             this.aboutSATEToolStripMenuItem.Click += new System.EventHandler(this.aboutmenuItem_Click);
-            // 
+            //
             // MainForm
-            // 
+            //
             this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.BackColor = System.Drawing.SystemColors.ControlDark;
             this.ClientSize = new System.Drawing.Size(1042, 766);
@@ -839,7 +839,7 @@ namespace Sate
             //---------------------------------------------
             //Fill class explorer with existing data types
             //---------------------------------------------
-            
+
             ExplorerPanel.Instance.LoadClassHierarchy();
 
             //------------------------------------------
@@ -918,22 +918,40 @@ namespace Sate
                 }
             }
 
-            
-            //start a thread that monitors dose_main
             isConnected = true;
-            System.Diagnostics.Process[] doseProcess=System.Diagnostics.Process.GetProcessesByName("dose_main");
-            if (doseProcess.Length==0)
+
+
+            //there seems to be a bug in a mono version that causes the DoseMainMonitor to fail
+            bool useMonitor = true;
+            try
             {
-                doseProcess=System.Diagnostics.Process.GetProcessesByName("dose_maind");
+                System.Reflection.Assembly ass = System.Reflection.Assembly.Load("Mono.Posix");
+                Console.WriteLine("Runtime Version of Mono.Posix.dll assembly = '{0}'", ass.ImageRuntimeVersion);
+                if (ass.ImageRuntimeVersion == "v2.0.50727")
+                {
+                    Console.WriteLine("Not using the DoseMainMonitor");
+                    useMonitor = false;
+                }
             }
-            if (doseProcess.Length>0)
+            catch (System.Exception)
             {
-                doseMainProcess=doseProcess[0];
-                System.Threading.Thread doseMon=new System.Threading.Thread(new System.Threading.ThreadStart(DoseMainMonitor));
-                doseMon.IsBackground=true;
-                doseMon.Start();
+
             }
 
+            if (useMonitor)
+            {
+                //monitor dose_main
+                System.Diagnostics.Process[] doseProcess=System.Diagnostics.Process.GetProcessesByName("dose_main");
+                if (doseProcess.Length==0)
+                {
+                    doseProcess=System.Diagnostics.Process.GetProcessesByName("dose_maind");
+                }
+                if (doseProcess.Length>0)
+                {
+                    doseMainProcess=doseProcess[0];
+                    doseMainProcess.Exited += new EventHandler(DoseMainMonitor);
+                }
+            }
 
             this.connectToolStripMenuItem.Enabled = false;
             this.connectWithContextToolStripMenuItem.Enabled = false;
@@ -986,7 +1004,7 @@ namespace Sate
 
                 ExplorerPanel.Instance.SubscribeRegistration(id);
             }
-        
+
         }
 
         //-------------------------------------------------
@@ -1277,11 +1295,11 @@ namespace Sate
             Safir.Dob.Typesystem.InstanceId instanceId = entityRequestProxy.InstanceId;
 
             OutputPanel.Instance.LogEvent("- Received delete request on instance '" + name + " : " + instanceId + "'", true);
-          
+
             EntityInfo entityInfo = new EntityInfo();
             entityInfo.setInstanceId(entityRequestProxy.InstanceId);
             entityInfo.setHandlerId(entityRequestProxy.ReceivingHandlerId);
-            
+
             InboxPanel.Instance.AddNonDisplayableResponse(entityId.TypeId, "Delete request");
             if (Settings.Sate.AutoUpdate)
             {
@@ -1319,13 +1337,13 @@ namespace Sate
             {
                 dose.SetChanges(entity, instanceId, entityInfo.getHandlerId());
             }
-          
+
             if (!Settings.Sate.NoResponse)
             {
                 OutputPanel.Instance.LogEvent("- Response sent", true);
                 responseSender.Send(Settings.Sate.AutoResponse);
             }
-            else 
+            else
             {
                 OutputPanel.Instance.LogEvent("- ResponseSender discarded", true);
                 responseSender.Discard();
@@ -1391,7 +1409,7 @@ namespace Sate
                 rs.Discard();
             }
         }
-        
+
 
         #endregion
 
@@ -1403,14 +1421,14 @@ namespace Sate
             regInfo.typeId = typeId;
             regInfo.handlerIdSer = new HandlerIdSerializeable(handlerId);
             ExplorerPanel.Instance.Unregister(regInfo);
-            
+
             // remove typeids
             requestorDecidesTypeIdList.Remove(typeId);
             handlerDecidesTypeIdList.Remove(typeId);
         }
 
-        #endregion 
-        
+        #endregion
+
 
         #region Requestor Members
 
@@ -1450,10 +1468,10 @@ namespace Sate
 
         public void OnMessage(Safir.Dob.MessageProxy messageProxy)
         {
-            
+
             string name=Safir.Dob.Typesystem.Operations.GetName(messageProxy.TypeId);
             OutputPanel.Instance.LogEvent("- Received message '"+name+"' on channel " + messageProxy.ChannelId.ToString(), true);
-          
+
             MessageInfo msgInfo = new MessageInfo();
             msgInfo.setChannelId(messageProxy.ChannelId);
             msgInfo.Obj = messageProxy.Message;
@@ -1540,11 +1558,8 @@ namespace Sate
         }
 
         //Event handler called if dose_main terminates in any way
-        private void DoseMainMonitor()
+        private void DoseMainMonitor(object sender, EventArgs args)
         {
-            doseMainProcess.Refresh();
-            doseMainProcess.WaitForExit();
-
             System.Windows.Forms.Application.Exit();
 
             // TODO : For now Sate is exiting without displaying any message boxes. If this is the desired
@@ -1615,9 +1630,9 @@ namespace Sate
                 dose.Close();
             }
             isConnected=false;
-      
+
             ExplorerPanel.Instance.LoadClassHierarchy(); //reset explorer
-          
+
             this.disconnectToolStripMenuItem.Enabled=false;
             this.connectToolStripMenuItem.Enabled=true;
             this.connectWithContextToolStripMenuItem.Enabled = true;
@@ -1849,7 +1864,7 @@ namespace Sate
                 return;
 
             ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.UpdateRequest, entityInfo);
-           
+
             try
             {
                 int reqId = dose.UpdateRequest((Safir.Dob.Entity)entityInfo.Obj, entityInfo.getInstanceId(), this);
@@ -1875,7 +1890,7 @@ namespace Sate
                 return;
 
             ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.DeleteRequest, entityInfo);
-            
+
             try
             {
                 Safir.Dob.Typesystem.EntityId entityId = new Safir.Dob.Typesystem.EntityId(entityInfo.Obj.GetTypeId(), entityInfo.getInstanceId());
@@ -1931,7 +1946,7 @@ namespace Sate
                 return;
 
             ScenarioTabPage.Instance.Player.Record(Scenarios.DobAction.ServiceRequest, srvInfo);
-            
+
             try
             {
                 dose.ServiceRequest((Safir.Dob.Service)srvInfo.Obj, srvInfo.getHandlerId(), this);
@@ -2074,7 +2089,7 @@ namespace Sate
                 //First try to open as serialized object
                 try
                 {
-                    
+
                     Safir.Dob.Typesystem.Object o = Safir.Dob.Typesystem.Serialization.ToObject(xml);
                     if (o is Safir.Dob.Service)
                     {
@@ -2106,7 +2121,7 @@ namespace Sate
                         objInfo.Obj = o;
                         AddTabPage(new ObjectEditTabPage(objInfo));
                     }
-                   
+
                     return;
                 }
                 catch
@@ -2260,7 +2275,7 @@ namespace Sate
             EntityInfo entityInfo = new EntityInfo();
             entityInfo.setInstanceId(entityProxy.InstanceId);
             entityInfo.setHandlerId(entityProxy.OwnerWithStringRepresentation);
-            
+
             OutputPanel.Instance.LogEvent("- Received deleted entity: '" + entityProxy.EntityId.ToString()
                + "' for handler '" + entityProxy.OwnerWithStringRepresentation.ToString() + "'", true);
             ExplorerPanel.Instance.DeleteObject(entityProxy.EntityId);

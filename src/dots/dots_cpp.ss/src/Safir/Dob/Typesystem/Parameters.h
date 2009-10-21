@@ -67,6 +67,7 @@ namespace Typesystem
          *
          * @param typeId [in] - TypeId of class.
          * @param parameterName [in] - Name of parameter.
+         * @return index of the named parameter.
          * @throws IllegalValueException There is no such type or parameter defined.
          */
         DOTS_API Dob::Typesystem::ParameterIndex GetIndex(const Dob::Typesystem::TypeId typeId,
@@ -149,15 +150,12 @@ namespace Typesystem
         /**
          * Get an enumeration parameter value.
          *
-         * @param enumId [in] - TypeId of the enumeration.
          * @param typeId [in] - TypeId of class.
          * @param parameter [in] - Index of parameter.
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
-         * @throws ConfigurationErrorException There was an enumeration mismatch.
          */
-        DOTS_API Dob::Typesystem::Int32 GetEnumeration(const Dob::Typesystem::TypeId enumId, //TODO: remove this!
-                                                       const Dob::Typesystem::TypeId typeId,
+        DOTS_API Dob::Typesystem::Int32 GetEnumeration(const Dob::Typesystem::TypeId typeId,
                                                        const Dob::Typesystem::ParameterIndex parameter,
                                                        const Dob::Typesystem::ArrayIndex index);
 

@@ -53,6 +53,10 @@ namespace Safir.Dob.Typesystem
             return new StringContainer(this);
         }
 
+        /// <summary>
+        /// Clone.
+        /// </summary>
+        /// <returns>StringContainer.</returns>
         public new StringContainer Clone()
         {
             return (StringContainer)((ICloneable)this).Clone(); 
@@ -69,6 +73,10 @@ namespace Safir.Dob.Typesystem
             m_Value = other.m_Value;
         }
 
+        /// <summary>
+        /// Override method from Containerbase
+        /// </summary>
+        /// <param name="other">Other container.</param>
         public override void Copy(ContainerBase other)
         {
             base.Copy(other);
@@ -170,12 +178,23 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
-
+        /// <summary>
+        /// Equality operator for StringContainer and a string.
+        /// </summary>
+        /// <param name="first">String container.</param>
+        /// <param name="second">string</param>
+        /// <returns>True if the container is non-null and the strings are equal.</returns>
         public static bool operator ==(StringContainer first, string second)
         {
             return !first.IsNull() && first.m_Value.Equals(second);
         }
 
+        /// <summary>
+        /// Inequality operator for StringContainer and a string.
+        /// </summary>
+        /// <param name="first">String container.</param>
+        /// <param name="second">string</param>
+        /// <returns>True if the container is null or the strings are different.</returns>
         public static bool operator !=(StringContainer first, string second)
         {
             return !(first == second);
@@ -192,16 +211,31 @@ namespace Safir.Dob.Typesystem
             return second == first;
         }
 
+        /// <summary>
+        /// Inequality operator for string and a StringContainer.
+        /// </summary>
+        /// <param name="first">string</param>
+        /// <param name="second">StringContainer</param>
+        /// <returns>True if the container is null or the strings are different.</returns>
         public static bool operator !=(string first, StringContainer second)
         {
             return !(second == first);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public override int GetHashCode()
         {
             throw new System.Exception("The method or operation is not implemented.");
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public override bool Equals(object obj)
         {
             throw new System.Exception("The method or operation is not implemented.");

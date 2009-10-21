@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit">
+    <name>NoNamespace.TestItem</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <member>
+            <name>MyInt</name>
+            <type>Int32</type>
+        </member>
+    </members>
+</class>

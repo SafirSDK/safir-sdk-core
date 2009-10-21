@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 2.6)
+
 PROJECT (swre_backdoor)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
@@ -6,9 +8,17 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(backdoor ${sources})
 
-TARGET_LINK_LIBRARIES(backdoor ACE dose_cpp boost_program_options)
+FIND_PACKAGE(Boost COMPONENTS program_options)
+TARGET_LINK_LIBRARIES(backdoor ${ACE_LIBRARY} dose_cpp ${Boost_LIBRARIES})
+
+if (NOT MSVC)
+    TARGET_LINK_LIBRARIES(backdoor dose_cpp)
+endif()
 
 INSTALL(TARGETS backdoor
-        RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION $ENV{SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION $ENV{SAFIR_SDK}/lib)
+        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+
+
+INSTALL_DEBUG_INFO(backdoor)

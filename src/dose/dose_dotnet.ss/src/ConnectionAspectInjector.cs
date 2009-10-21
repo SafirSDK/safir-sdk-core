@@ -60,8 +60,8 @@ namespace Safir.Dob
             //TODO: serialize directly to shared memory
             System.Int32 blobSize = entity.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused = System.IntPtr.Zero;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), ref beginningOfUnused);
+            System.IntPtr beginningOfUnused;
+            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), out beginningOfUnused);
             entity.WriteToBlob(blob, ref beginningOfUnused);
 
             System.IntPtr instanceIdStr = Dob.Typesystem.Internal.InternalOperations.CStringOf(instanceId.RawString);
@@ -136,8 +136,8 @@ namespace Safir.Dob
             //TODO: serialize directly to shared memory
             System.Int32 blobSize = entity.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused = System.IntPtr.Zero;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), ref beginningOfUnused);
+            System.IntPtr beginningOfUnused;
+            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), out beginningOfUnused);
             entity.WriteToBlob(blob, ref beginningOfUnused);
 
             System.IntPtr instanceIdStr = Dob.Typesystem.Internal.InternalOperations.CStringOf(instanceId.RawString);
@@ -200,6 +200,7 @@ namespace Safir.Dob
                                     EntitySubscriber entitySubscriber)
         {
             byte success;
+
             Interface.DoseC_InjectorSubscribeEntity(ControllerId,
                                                     typeId,
                                                     Interface.ByteOf(includeUpdates),
@@ -215,6 +216,8 @@ namespace Safir.Dob
                                                     out success);
             if (!Interface.BoolOf(success))
             {
+                ConsumerHandler.Instance.DropReference(entitySubscriber);
+
                 Typesystem.LibraryExceptions.Instance.Throw();
             }
         }

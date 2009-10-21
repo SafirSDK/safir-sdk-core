@@ -1,4 +1,4 @@
-with "aws";
+with "templates_parser";
 with "xmlada";
 with "dots_id";
 with "syst_default.gpr";
@@ -6,20 +6,11 @@ with "syst_default.gpr";
 project dots_v is
 
    type Build_Type is
-      ("release", "debug", "gcov", "gperf", "normal");
+      ("Release", "Debug", "gcov", "gperf", "normal");
    type Warning_Levels is
       ("Default", "Elaboration", "Full");
 
-   -- This bit is to allow cmake to tell gpr which code to use.
-   type Boolean is ("true", "false");
-   USE_XMLADA3 : Boolean := external ("USE_XMLADA3","false");
-   case USE_XMLADA3 is
-       when "true" =>
-          for Source_Dirs use ("private-xmlada3");       
-       when "false" =>
-          for Source_Dirs use ("private");
-   end case;
-
+   for Source_Dirs use ("private");
 
    for Object_Dir use Syst_Default'Object_Dir;
    for Exec_Dir use Syst_Default'Exec_Dir;
@@ -54,11 +45,11 @@ project dots_v is
                when "gcov" =>
                   for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada");
 
-               when "debug" =>
+               when "Debug" =>
                   --for Default_Switches ("ada") use ("-gnatwcfijmpruv", "-gnatwe" ,"-gnaty3abcefhiklmnoprst", "-gnat05");
                   for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada");
 
-               when "release" =>
+               when "Release" =>
                   for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada");
             end case;
       end case;
@@ -87,11 +78,11 @@ project dots_v is
                when "gcov" =>
                   for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
 
-               when "debug" =>
+               when "Debug" =>
                   for Default_Switches ("ada") use ("-s", "-k", "-g", "-C");
                   --for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
 
-               when "release" =>
+               when "Release" =>
                   for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
             end case;
       end case;

@@ -2,5 +2,5 @@
 <exception xmlns="urn:safir-dots-unit">
     <summary>Thrown when data could not be sent due to overflowing queues.</summary>
     <name>Safir.Dob.OverflowException</name>
-    <baseClass>exception</baseClass>
+    <baseClass>Exception</baseClass>
 </exception>

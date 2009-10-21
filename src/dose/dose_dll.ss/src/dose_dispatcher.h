@@ -53,15 +53,7 @@ namespace Internal
     struct CallbackData
     {
         explicit CallbackData(const CallbackId::Enumeration callbackId);
-        /*
-        CallbackData(const CallbackId::Enumeration callbackId, const ConnectionId requestSender);
-        CallbackData(const CallbackId::Enumeration callbackId, const DistributionData& response);
-        CallbackData(const CallbackId::Enumeration callbackId, const SubscriptionHandle& subHandle);
-*/
         CallbackId::Enumeration m_callbackId;
-  /*      ConnectionId            m_requestSender;
-        DistributionData        m_response;
-        SubscriptionHandle      m_subHandle;*/
     };
 
     typedef std::stack<CallbackData> CallbackStack;
@@ -92,7 +84,8 @@ namespace Internal
                           OnInjectedDeletedEntityCb* onInjectedDeletedEntityCb,
                           OnInitialInjectionsDoneCb* onInitialInjectionsDoneCb,
                           OnNotRequestOverflowCb* onNotRequestOverflowCb,
-                          OnNotMessageOverflowCb* onNotMessageOverflowCb);
+                          OnNotMessageOverflowCb* onNotMessageOverflowCb,
+                          OnDropReferenceCb* onDropReferenceCb);
 
         void SetConnectionOwner(const ConsumerId & connectionOwner,
                                 OnStopOrderCb* onStopOrderCb);
@@ -109,6 +102,10 @@ namespace Internal
         void AddResponseConsumer(const RequestId requestId,
                             const ConsumerId & overflowedConsumer)
         { m_responseConsumers.insert(std::make_pair(requestId,overflowedConsumer)); }
+
+        /** Remove consumer corresponding to the given request id */
+        void RemoveResponseConsumer(const RequestId requestId)
+        { m_responseConsumers.erase(requestId); }
 
         /** Dispatch a response to the requestor that issued the request (based on requestId). */
         void InvokeOnResponseCb(const DistributionData & response, const DistributionData & request);
@@ -179,6 +176,9 @@ namespace Internal
                                              const Safir::Dob::Typesystem::TypeId&      typeId,
                                              const Safir::Dob::Typesystem::HandlerId&   handlerId);
 
+        void InvokeDropReferenceCb(const ConsumerId&    consumer,
+                                   const long           refCounter);
+
         bool InCallback() const {return !m_callbackStack.empty();}
         bool InCallback(const CallbackId::Enumeration callbackId) const {return InCallback() && m_callbackStack.top().m_callbackId == callbackId;}
         const CallbackStack & GetCallbackStack() const {return m_callbackStack;}
@@ -230,7 +230,8 @@ namespace Internal
               m_onInjectedDeletedEntityCb(NULL),
               m_onInitialInjectionsDoneCb(NULL),
               m_onNotRequestOverflowCb(NULL),
-              m_onNotMessageOverflowCb(NULL) {}
+              m_onNotMessageOverflowCb(NULL),
+              m_onDropReferenceCb(NULL) {}
 
             bool m_initiated;
             OnNewEntityCb*                  m_onNewEntityCb;
@@ -252,6 +253,7 @@ namespace Internal
             OnInitialInjectionsDoneCb*      m_onInitialInjectionsDoneCb;
             OnNotRequestOverflowCb*         m_onNotRequestOverflowCb;
             OnNotMessageOverflowCb*         m_onNotMessageOverflowCb;
+            OnDropReferenceCb*              m_onDropReferenceCb;
         };
 
         Callbacks m_callbacks[4]; //see Interface.h for explaination of indices.

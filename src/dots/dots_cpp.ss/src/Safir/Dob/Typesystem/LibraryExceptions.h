@@ -63,6 +63,9 @@ namespace Dob
 {
 namespace Typesystem
 {
+    /**
+     * Contains methods used when passing exceptions across language boundaries.
+     */
     class DOTS_API LibraryExceptions:
         private boost::noncopyable
     {

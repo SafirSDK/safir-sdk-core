@@ -67,7 +67,7 @@ namespace Internal
 
             subIt = status.first;
 
-            connection->AddSubscription(m_typeId);
+            connection->AddSubscription(m_typeId, MessageSubscription);
         }
 
         // Set subscription state
@@ -139,14 +139,29 @@ namespace Internal
         {
             if (subIt->second.subscriptionState.IsSubscribed(msg.GetChannelId().GetRawValue()))
             {
+                /*
                 // Put the message in the in-queue ...
                 if (subIt->second.consumerInQueue->push(msg))
                 {
                     // ... and kick the application if it didn't overflow
                     subIt->first.connection->SignalIn();
                 }
+                */
+                //An attempt at workaround for #696, we kick even if there is an overflow.
+                subIt->second.consumerInQueue->push(msg);
+                subIt->first.connection->SignalIn();
             }
         }
+    }
+
+    bool MessageType::HasSubscription(const ConnectionPtr&    connection,
+                                      const ConsumerId&       consumer) const
+    {
+        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+
+        ConnectionConsumerPair key(connection, consumer);
+
+        return m_subscriptions.find(key) != m_subscriptions.end();
     }
 
     void MessageType::DumpSubscriptions() const

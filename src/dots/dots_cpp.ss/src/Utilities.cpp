@@ -34,8 +34,20 @@
 #include <iostream>
 #include <boost/shared_array.hpp>
 #include <Safir/Dob/Typesystem/ValueContainers.h>
-#include <boost/lexical_cast.hpp>
 #include <typeinfo>
+
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4702)
+#endif
+
+#include <boost/lexical_cast.hpp>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 namespace Safir
 {
@@ -253,9 +265,12 @@ namespace Utilities
     void Base64ToBinary(const std::string& base64, Dob::Typesystem::Binary & binary)
     {
         DotsC_Int32 resultSize=0;
-        DotsC_Int32 size = DotsC_CalculateBinaryBufferSize(static_cast<int>(binary.size()));
+        const DotsC_Int32 size = DotsC_CalculateBinaryBufferSize(static_cast<int>(base64.length()));
         binary.resize(size);
-        DotsC_Base64ToBinary(&binary[0], size, base64.c_str(), static_cast<int>(base64.length()), resultSize);
+        if (size != 0)
+        {
+            DotsC_Base64ToBinary(&binary[0], size, base64.c_str(), static_cast<int>(base64.length()), resultSize);
+        }
     }
 
 }  //namespace Utilities

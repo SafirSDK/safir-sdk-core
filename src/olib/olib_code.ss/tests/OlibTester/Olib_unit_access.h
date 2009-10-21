@@ -143,6 +143,10 @@ private:
     bool m_bWriteBlobIsPrepared;
     Safir::Databases::Odbc::Statement m_ReadBlobStmt;
     bool m_bReadBlobIsPrepared;
+    Safir::Databases::Odbc::Statement m_LongTimeQuery;
+    bool m_bLongTimeQueryIsPrepared;
+    Safir::Databases::Odbc::Statement m_InsertInto42;
+    bool m_bInsertInto42IsPrepared;
 
     DbUnitAccess(const DbUnitAccess &); // Disable copy constructor
     const DbUnitAccess & operator= (const DbUnitAccess & d);    // Disable assignment operator 
@@ -178,6 +182,9 @@ public:
     void ReadNClobs();
     void WriteBlob();
     void ReadBlob();
+    void LotsOfInput();
+    void LongTimeQuery();
+    void InsertInto42();
 
     long GetNoOfErrors() { return m_nNoOfErrors; }
     void ClearNoOfErrors() { m_nNoOfErrors = 0; }

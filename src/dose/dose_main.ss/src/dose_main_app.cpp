@@ -35,13 +35,24 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/PanicLogging.h>
 #include <ace/Reactor.h>
-#include <ace/Thread.h>
 #include <boost/bind.hpp>
 #include <iostream>
 #include "dose_main_timers.h"
 
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4267)
+#endif
+
+#include <ace/Thread.h>
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
+
 // Windows stuff to enable better timer resolution on windows plattforms.
 #ifdef _MSC_VER
+#pragma comment (lib, "winmm.lib")
 #pragma warning (push)
 #pragma warning (disable: 4201)
 #include <Mmsystem.h>
@@ -71,9 +82,9 @@ namespace Internal
 
     DoseApp::DoseApp():
         ACE_Event_Handler(ACE_Reactor::instance()),
-        m_connectEvent(false),
-        m_connectionOutEvent(false),
-        m_nodeStatusChangedEvent(false),
+        m_connectEvent(0),
+        m_connectionOutEvent(0),
+        m_nodeStatusChangedEvent(0),
         m_pendingRegistrationHandler(m_ecom, m_nodeHandler),
         m_handle_exception_notified(0),
         m_handle_input_notified(0)
@@ -154,11 +165,11 @@ namespace Internal
             //have not been handled yet.
             if (connect)
             {
-                This->m_connectEvent = true;
+                This->m_connectEvent = 1;
             }
             if (connectionOut)
             {
-                This->m_connectionOutEvent = true;
+                This->m_connectionOutEvent = 1;
             }
 
             if (This->m_handle_exception_notified == 0)
@@ -194,17 +205,26 @@ namespace Internal
     {
         m_handle_exception_notified = 0;
         int numEvents = 0;
-        if (m_connectEvent)
+
+        bool gotConnectEvent = false;
+        //if we have a connect event we want to ensure that
+        //we handle any outstanding disconnects ("died" flags in the
+        //connections), so we fake a connectionOutEvent.
+        //we must "harvest" the shared flag only once in this routine, so we
+        //use a local variable to avoid having a connector signal the connect
+        //event after we've already passed the out event handling code, but before
+        //we get to the connect event handling code.
+        if (m_connectEvent != 0)
         {
-            ++numEvents;
-            m_connectEvent = false;
-            Connections::Instance().HandleConnect(*this);
+            m_connectEvent = 0;
+            m_connectionOutEvent = 1;
+            gotConnectEvent = true;
         }
 
-        if (m_connectionOutEvent)
+        if (m_connectionOutEvent != 0)
         {
             ++numEvents;
-            m_connectionOutEvent = false;
+            m_connectionOutEvent = 0;
             std::vector<ConnectionPtr> deadConnections;
             Connections::Instance().HandleConnectionOutEvents(boost::bind(&DoseApp::HandleConnectionOutEvent,this,_1,boost::ref(deadConnections)));
 
@@ -216,10 +236,17 @@ namespace Internal
             }
         }
 
-        if (m_nodeStatusChangedEvent)
+        //we do this after connectionOutEvents
+        if (gotConnectEvent)
         {
             ++numEvents;
-            m_nodeStatusChangedEvent = false;
+            Connections::Instance().HandleConnect(*this);
+        }
+
+        if (m_nodeStatusChangedEvent != 0)
+        {
+            ++numEvents;
+            m_nodeStatusChangedEvent = 0;
 
 
             lllout << "Got NodeStatusChanged event" << std::endl;
@@ -398,10 +425,6 @@ namespace Internal
         m_blockingHandler.RemoveConnection(connection->Id().m_id);
     }
 
-    void DoseApp::DisconnectComplete()
-    {
-        lllout << "DisconnectComplete" << std::endl;
-    }
 
     void DoseApp::HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections)
     {
@@ -412,7 +435,7 @@ namespace Internal
 
         if (connection->IsDead())
         {
-            lllerr << "Connection is dead: " << connection->NameWithCounter() << ", disconnecting."<< std::endl;
+            lllout << "Connection is dead: " << connection->NameWithCounter() << ", disconnecting."<< std::endl;
             deadConnections.push_back(connection);
         }
     }

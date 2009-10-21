@@ -30,11 +30,7 @@
     #define DOTS_ID_API __declspec(dllexport)
   #else
     #define DOTS_ID_API __declspec(dllimport)
-    #ifndef NDEBUG
-      #pragma comment( lib, "dots_idd.lib" )
-    #else
-      #pragma comment( lib, "dots_id.lib" )
-    #endif
+    #pragma comment( lib, "dots_id.lib" )
   #endif
 #elif defined __GNUC__
   #define DOTS_ID_API

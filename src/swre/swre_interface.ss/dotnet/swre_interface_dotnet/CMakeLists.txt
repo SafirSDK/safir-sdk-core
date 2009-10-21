@@ -1,16 +1,21 @@
+cmake_minimum_required(VERSION 2.6)
+
 PROJECT(swre_interface_dotnet)
 
-FILE(GLOB cs_files *.cs)
 
-ADD_CUSTOM_COMMAND(OUTPUT swre_interface_dotnet.dll
-                  COMMAND gmcs -target:library -r:Safir.Dob.Typesystem.dll,Safir.Dob.dll,dots_generated-dotnet.dll -out:swre_interface_dotnet.dll ${cs_files}
-				  DEPENDS ${cs_files}
-                  COMMENT "Building swre_interface_dotnet.dll"
-                  VERBATIM)
+INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
-ADD_CUSTOM_TARGET(swre_interface_dotnet ALL
-				  DEPENDS swre_interface_dotnet.dll)
+find_package(CSharp REQUIRED)
+INCLUDE(CSharpMacros)
 
-INSTALL(FILES swre_interface_dotnet.dll
-		DESTINATION $ENV{SAFIR_RUNTIME}/lib)
+FILE(GLOB sources *.cs)
 
+SET(CS_FLAGS ${COMMON_CS_FLAGS} "-keyfile:${SAFIR_SDK}/data/build/safirkey.snk"
+								"-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dll,${SAFIR_RUNTIME}/bin/Safir.Dob.dll,${SAFIR_RUNTIME}/bin/dots_generated-dotnet.dll")
+
+ADD_CS_LIBRARY(swre_interface_dotnet "${sources}" ALL)
+
+INSTALL(FILES ${target_DLL}
+  DESTINATION ${SAFIR_RUNTIME}/bin)
+  
+INSTALL_CS_DEBUG_INFO()

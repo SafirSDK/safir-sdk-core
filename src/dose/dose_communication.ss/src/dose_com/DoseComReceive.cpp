@@ -80,6 +80,31 @@
 
 #include "../defs/DoseCom_Interface.h"
 
+//---------------------
+// This bit is to check the sizes of our data types,
+// bad sizes will cause compilation errors
+//---------------------
+template <bool> struct STATIC_ASSERTION_FAILURE;
+template <> struct STATIC_ASSERTION_FAILURE<true> { };
+
+#define STATIC_ASSERT( B ) (STATIC_ASSERTION_FAILURE<(B) != 0> ())
+
+namespace
+{
+    void dummy() {
+        STATIC_ASSERT(sizeof(dcom_ushort16) == 2);
+        STATIC_ASSERT(sizeof(dcom_uchar8) == 1);
+        STATIC_ASSERT(sizeof(dcom_ulong32) == 4);
+
+        STATIC_ASSERT(sizeof(DOSE_UDP_MSG_HDR) == 32);
+        STATIC_ASSERT(sizeof(DOSE_UDP_ACK_MSG) == 16);
+        STATIC_ASSERT(sizeof(DOSE_UDP_KEEPALIVE_MSG) == 12);
+        STATIC_ASSERT(sizeof(DOSE_UDP_GETINFO_MSG) == 12);
+    }
+}
+//---------------------
+
+
 //----------------------
 // externals
 //----------------------
@@ -114,18 +139,18 @@ extern volatile int * volatile pDbg;
 
 static struct
 {
-    volatile ulong   Put_Ix;
-    volatile ulong   Get_Ix;
-    volatile ushort  MaxUsedQueueLength;
-    ushort  spare;
+    volatile dcom_ulong32   Put_Ix;
+    volatile dcom_ulong32   Get_Ix;
+    volatile dcom_ushort16  MaxUsedQueueLength;
+    dcom_ushort16  spare;
 
     struct
     {
-        volatile ulong   UsrMsgLength;
-        volatile uchar   DoseId;         // From this DoseId - ??? is this used
-        volatile uchar   bIsNative;
-        uchar   spare2;
-        uchar   spare3;
+        volatile dcom_ulong32   UsrMsgLength;
+        volatile dcom_uchar8   DoseId;         // From this DoseId - ??? is this used
+        volatile dcom_uchar8   bIsNative;
+        dcom_uchar8   spare2;
+        dcom_uchar8   spare3;
         char    * volatile pReadDataBuf;
     } RxQueue[MAX_RX_QUEUE];
 
@@ -133,13 +158,13 @@ static struct
     struct  //DoseId is index in this
     {
         // 0 is for UniCast, 'N+2' is for DestChannel 'N'
-        volatile ushort  SeqNumber[MAX_NUM_DEST_CHANNELS+2];
+        volatile dcom_ushort16  SeqNumber[MAX_NUM_DEST_CHANNELS+2];
         char    * volatile pBuf;
-        volatile ulong   BufPos;
-        volatile uchar   bIsFragmented;
-        uchar   spare;
-        volatile ushort  FragmentNumber;
-        volatile uchar   SeqNumIsValid[MAX_NUM_DEST_CHANNELS+2]; // cleared when node comes up (restarts)
+        volatile dcom_ulong32   BufPos;
+        volatile dcom_uchar8   bIsFragmented;
+        dcom_uchar8   spare;
+        volatile dcom_ushort16  FragmentNumber;
+        volatile dcom_uchar8   SeqNumIsValid[MAX_NUM_DEST_CHANNELS+2]; // cleared when node comes up (restarts)
     } RxNodeStatus[NODESTATUS_TABLE_SIZE];  // one for each node
 } g_RxQ[MAX_NUM_PRIO_CHANNELS] = {{0}};
 
@@ -147,12 +172,12 @@ static struct
 //
 //-----------------------------------------------------
 
-static ulong g_MyDoseIdBitMap = 0;
-static ulong g_MyDoseIdBitMap_Index = 0; // 0 or 1
+static dcom_ulong32 g_MyDoseIdBitMap = 0;
+static dcom_ulong32 g_MyDoseIdBitMap_Index = 0; // 0 or 1
 
 static  DOSE_SHARED_DATA_S *g_pShm = NULL;
 
-static ushort   g_MyDoseId = 0xFFFF;
+static dcom_ushort16   g_MyDoseId = 0xFFFF;
 
 //########################################
 // Section Local routines
@@ -162,7 +187,7 @@ static ushort   g_MyDoseId = 0xFFFF;
 * This is called when a new node is up
 * .SeqNumIsValid must be set to false in case the node is restarted.
 *********************************************************************/
-void CDoseComReceive::UpdateNodeUp(uchar DoseId)
+void CDoseComReceive::UpdateNodeUp(dcom_uchar8 DoseId)
 {
     int PrioChan,ii;
 
@@ -177,9 +202,9 @@ void CDoseComReceive::UpdateNodeUp(uchar DoseId)
 *************************************************************************/
 
 static int Send_AckMsg( CIpmSocket *pTxSock, DOSE_UDP_ACK_MSG *pTxAckMsg,
-                       int MyIx, ulong IpAddrFrom_nw,
-                       ushort SequenceNumber, uchar TxMsgArray_Ix,
-                        ushort FragmentNumber, ushort Info)
+                       int MyIx, dcom_ulong32 IpAddrFrom_nw,
+                       dcom_ushort16 SequenceNumber, dcom_uchar8 TxMsgArray_Ix,
+                        dcom_ushort16 FragmentNumber, dcom_ushort16 Info)
 {
     int result = 0;
 
@@ -231,7 +256,7 @@ static THREAD_API RxThread(void *pChNum)
 {
     int                 jj;
     int                 result;
-    ulong               Next_PutIx;
+    dcom_ulong32               Next_PutIx;
     CIpmSocket          RxSock;
     CIpmSocket          TxSock;
     DOSE_UDP_MSG_HDR    MsgHdr;
@@ -239,12 +264,12 @@ static THREAD_API RxThread(void *pChNum)
     char                *pReadBuf = NULL;
     int                 MyIx;
     int                 NumUsedEntries;
-    ulong               Put_Ix;
-    ulong               IpmAddr_nw;
+    dcom_ulong32               Put_Ix;
+    dcom_ulong32               IpmAddr_nw;
     Statistics::RX_STATISTICS_S *pRxStatistics;
     char                bMsgIsCompleted;
-    uchar               DoseId;
-    ushort              LatestSequenceNumber = 0;
+    dcom_uchar8               DoseId;
+    dcom_ushort16              LatestSequenceNumber = 0;
     char                RxData[RXDATA_SIZE];
     char                IsUsedForReception;
 
@@ -294,7 +319,7 @@ static THREAD_API RxThread(void *pChNum)
     result = RxSock.CreateIpMulticastSocket(
                         1,0,    // Rx, not Tx
                         1, // 1 ==> disable loopback, but do not enable Rx
-                        (ushort) (CConfig::m_Dose_Port_Data + MyIx),
+                        (dcom_ushort16) (CConfig::m_Dose_Port_Data + MyIx),
                         65536,  // Opt_so_rcvbuf_size,  new_050426
                         0);     // Opt_So_Rcvbuf_Timeout,
 
@@ -351,7 +376,7 @@ static THREAD_API RxThread(void *pChNum)
     TxAckMsg.IpAddrFrom_nw  = CConfig::m_MyIpAddr_nw; // Senders IpAddr
     TxAckMsg.DoseIdFrom     = (unsigned char) g_MyDoseId;
     TxAckMsg.FragmentNumber = 0;
-    TxAckMsg.TxQueueNumber  = (uchar) MyIx;
+    TxAckMsg.TxQueueNumber  = (dcom_uchar8) MyIx;
 
     //======================
     // Loop here for ever
@@ -629,10 +654,10 @@ static THREAD_API RxThread(void *pChNum)
             PrintDbg("*** RxThread[%d] Rx Fragmented. SeqNum=%d FragmNum=%X\n",
                     MyIx,MsgHdr.SequenceNumber, MsgHdr.FragmentNumber);
 
-            ushort MsgHdr_FragmentNumber;
+            dcom_ushort16 MsgHdr_FragmentNumber;
 
             // get rid of flag 'Last segment'
-            MsgHdr_FragmentNumber = (ushort) (MsgHdr.FragmentNumber & 0x7FFF);
+            MsgHdr_FragmentNumber = (dcom_ushort16) (MsgHdr.FragmentNumber & 0x7FFF);
 
             //-----------------------------------------------------
             // First fragment - Check SequenceNumber
@@ -645,7 +670,7 @@ static THREAD_API RxThread(void *pChNum)
                 StartTime = GetTickCount();
 #endif
                 if (
-                    (MsgHdr.SequenceNumber == (ushort)(1+LatestSequenceNumber)) //OK
+                    (MsgHdr.SequenceNumber == (dcom_ushort16)(1+LatestSequenceNumber)) //OK
                     ||
                     (MsgHdr.bWantAck == 0)
                    )
@@ -685,7 +710,7 @@ static THREAD_API RxThread(void *pChNum)
                                 Send_AckMsg(&TxSock, &TxAckMsg,
                                    MyIx, MsgHdr.IpAddrFrom_nw,
                                    MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
-                                   MsgHdr.FragmentNumber, (ushort)(0x100 | MsgHdr.Info));
+                                   MsgHdr.FragmentNumber, (dcom_ushort16)(0x100 | MsgHdr.Info));
                             }
                             pRxStatistics->CountRxDuplicate++;
                             continue;
@@ -751,7 +776,7 @@ static THREAD_API RxThread(void *pChNum)
                 // If we come here, SequenceNumber was correct
                 // Check FragmentNumber
                 //---------------------------------------------
-                ushort CurrFragmentNumber;
+                dcom_ushort16 CurrFragmentNumber;
 
                 CurrFragmentNumber =
                         g_RxQ[MyIx].RxNodeStatus[DoseId].FragmentNumber;
@@ -761,7 +786,7 @@ static THREAD_API RxThread(void *pChNum)
                 {
                     // Set next expected
                     g_RxQ[MyIx].RxNodeStatus[DoseId].FragmentNumber
-                                        = (ushort)(CurrFragmentNumber + 1);
+                                        = (dcom_ushort16)(CurrFragmentNumber + 1);
                 }
                 else
                 // ERROR - incorrect FragmentNumber - No Ack
@@ -797,7 +822,7 @@ static THREAD_API RxThread(void *pChNum)
                             Send_AckMsg(&TxSock, &TxAckMsg,
                                MyIx, MsgHdr.IpAddrFrom_nw,
                                MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
-                               MsgHdr.FragmentNumber, (ushort)(0x200 | MsgHdr.Info));
+                               MsgHdr.FragmentNumber, (dcom_ushort16)(0x200 | MsgHdr.Info));
                         }
                         pRxStatistics->CountRxDuplicate++;
 
@@ -824,7 +849,7 @@ static THREAD_API RxThread(void *pChNum)
                                     MyIx, MsgHdr.IpAddrFrom_nw,
                                     MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
                                     MsgHdr_FragmentNumber,   // the number in the msg
-                                    (ushort)(1 + CurrFragmentNumber)); // expected this
+                                    (dcom_ushort16)(1 + CurrFragmentNumber)); // expected this
 
                             TxAckMsg.MsgType = MSG_TYPE_ACK; // restore default
                         }
@@ -922,7 +947,7 @@ static THREAD_API RxThread(void *pChNum)
                     if(MsgHdr.bWantAck)
                         Send_AckMsg(&TxSock, &TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw,
                                MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,1,
-                               (ushort)(0x8000 | MsgHdr.Info));
+                               (dcom_ushort16)(0x8000 | MsgHdr.Info));
 
                     PrintErr(0, "*   RxThread[%d]"
                                 " Can not get a buffer for receive data %d\n",
@@ -1026,7 +1051,7 @@ static THREAD_API RxThread(void *pChNum)
         //===========================
         {
             // This is NOT what we expected
-            if(MsgHdr.SequenceNumber != (ushort)(1+LatestSequenceNumber))
+            if(MsgHdr.SequenceNumber != (dcom_ushort16)(1+LatestSequenceNumber))
             {
                 if(!MsgHdr.bWantAck)
                 {
@@ -1109,9 +1134,9 @@ static THREAD_API RxThread(void *pChNum)
                 if(
                     (MsgHdr.SequenceNumber == LatestSequenceNumber)
                     ||
-                    (MsgHdr.SequenceNumber == (ushort)(LatestSequenceNumber-1))
+                    (MsgHdr.SequenceNumber == (dcom_ushort16)(LatestSequenceNumber-1))
                     ||
-                    (MsgHdr.SequenceNumber == (ushort)(LatestSequenceNumber-2))
+                    (MsgHdr.SequenceNumber == (dcom_ushort16)(LatestSequenceNumber-2))
                   )
                 {
                     if((MsgHdr.Info & 7) == 0) // If not retransmit indication
@@ -1132,15 +1157,15 @@ static THREAD_API RxThread(void *pChNum)
                     if(MsgHdr.bWantAck)
                         Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw,
                                MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
-                                 MsgHdr.FragmentNumber, (ushort)(0x100 | MsgHdr.Info));
+                                 MsgHdr.FragmentNumber, (dcom_ushort16)(0x100 | MsgHdr.Info));
                     continue;
                 }
 
                 // Case 4 - previous msg lost
                 if(
-                    (MsgHdr.SequenceNumber == (ushort)(LatestSequenceNumber+2))
+                    (MsgHdr.SequenceNumber == (dcom_ushort16)(LatestSequenceNumber+2))
                     ||
-                    (MsgHdr.SequenceNumber == (ushort)(LatestSequenceNumber+3))
+                    (MsgHdr.SequenceNumber == (dcom_ushort16)(LatestSequenceNumber+3))
                   )
                 {
                     if (*pDbg)
@@ -1155,7 +1180,7 @@ static THREAD_API RxThread(void *pChNum)
                         Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw,
                                MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
                                  MsgHdr.FragmentNumber,
-                                 (ushort)(1 + LatestSequenceNumber)); //expected this
+                                 (dcom_ushort16)(1 + LatestSequenceNumber)); //expected this
 
                         TxAckMsg.MsgType = MSG_TYPE_ACK;
                     }
@@ -1233,7 +1258,7 @@ A_Valid_Msg_Is_Received:
                 if(MsgHdr.bWantAck)
                     Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw,
                            MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix, 0,
-                           (ushort)(0x8000 | MsgHdr.Info));
+                           (dcom_ushort16)(0x8000 | MsgHdr.Info));
                 continue;
             }
 
@@ -1306,13 +1331,13 @@ A_Valid_Msg_Is_Received:
         }
 
         // Log max used queue length
-        ushort NumUsed;
+        dcom_ushort16 NumUsed;
 
         // Log max used queue length
         if(Next_PutIx < g_RxQ[MyIx].Get_Ix) //if wrapped
-            NumUsed = (ushort)(MAX_RX_QUEUE + Next_PutIx - g_RxQ[MyIx].Get_Ix);
+            NumUsed = (dcom_ushort16)(MAX_RX_QUEUE + Next_PutIx - g_RxQ[MyIx].Get_Ix);
         else
-            NumUsed = (ushort) (Next_PutIx - g_RxQ[MyIx].Get_Ix);
+            NumUsed = (dcom_ushort16) (Next_PutIx - g_RxQ[MyIx].Get_Ix);
 
         if(NumUsed > g_RxQ[MyIx].MaxUsedQueueLength)
                 g_RxQ[MyIx].MaxUsedQueueLength = NumUsed;
@@ -1361,13 +1386,13 @@ A_Valid_Msg_Is_Received:
 *   DOSE_OK     If OK
 *   DOSE_NO_MSG If nothing to read
 **********************************************************************/
-int CDoseComReceive::Read_Msg(ulong RxUseBitMap, ulong *pRxFromBitMap,
-                                char **ppBuf, ulong *pSize,
+int CDoseComReceive::Read_Msg(dcom_ulong32 RxUseBitMap, dcom_ulong32 *pRxFromBitMap,
+                                char **ppBuf, dcom_ulong32 *pSize,
                                  bool *pIsNative)
 {
     int     qIx;
-    ulong   Get_Ix ;
-    ulong   BitMap = 1;
+    dcom_ulong32   Get_Ix ;
+    dcom_ulong32   BitMap = 1;
 
 
     // Scan through all defined by RxUseBitMap (in priority order)
@@ -1409,7 +1434,7 @@ int CDoseComReceive::Read_Msg(ulong RxUseBitMap, ulong *pRxFromBitMap,
 *
 *
 ***********************************************************/
-int CDoseComReceive::Receive_Init(ushort DoseId)
+int CDoseComReceive::Receive_Init(dcom_ushort16 DoseId)
 {
     int jj;
     unsigned long tid[MAX_NUM_PRIO_CHANNELS];
@@ -1440,8 +1465,8 @@ int CDoseComReceive::Receive_Init(ushort DoseId)
 void CDoseComReceive::Get_Info(char *pBuf)
 {
 #if (MAX_NUM_PRIO_CHANNELS == 6)
-    sprintf(pBuf,"PutIx =%lu/%lu/%lu/%lu/%lu/%lu\n"
-                 "GetIx =%lu/%lu/%lu/%lu/%lu/%lu\n"
+    sprintf(pBuf,"PutIx =%u/%u/%u/%u/%u/%u\n"
+                 "GetIx =%u/%u/%u/%u/%u/%u\n"
                  "MaxUse=%d/%d/%d/%d/%d/%d\n",
         g_RxQ[0].Put_Ix, g_RxQ[1].Put_Ix,
         g_RxQ[2].Put_Ix, g_RxQ[3].Put_Ix,
@@ -1456,7 +1481,7 @@ void CDoseComReceive::Get_Info(char *pBuf)
         g_RxQ[4].MaxUsedQueueLength,
         g_RxQ[5].MaxUsedQueueLength);
 #else
-    sprintf(pBuf,"PutIx =%lu/%lu/%lu/%lu\nGetIx =%lu/%lu/%lu/%lu\n"
+    sprintf(pBuf,"PutIx =%u/%u/%u/%u\nGetIx =%u/%u/%u/%u\n"
                  "MaxUse=%d/%d/%d/%d\n",
         g_RxQ[0].Put_Ix, g_RxQ[1].Put_Ix,
         g_RxQ[2].Put_Ix, g_RxQ[3].Put_Ix,

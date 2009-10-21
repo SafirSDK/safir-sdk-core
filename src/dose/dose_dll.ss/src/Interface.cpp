@@ -118,6 +118,7 @@ void DoseC_Connect(const long ctrl,
                    OnInitialInjectionsDoneCb* onInitialInjectionsDoneCb,
                    OnNotRequestOverflowCb* onNotRequestOverflowCb,
                    OnNotMessageOverflowCb* onNotMessageOverflowCb,
+                   OnDropReferenceCb* onDropReferenceCb,
                    bool & success)
 {
     success = false;
@@ -161,27 +162,12 @@ void DoseC_Connect(const long ctrl,
                             onInjectedDeletedEntityCb,
                             onInitialInjectionsDoneCb,
                             onNotRequestOverflowCb,
-                            onNotMessageOverflowCb);
+                            onNotMessageOverflowCb,
+                            onDropReferenceCb);
         success = true;
     }
     CATCH_LIBRARY_EXCEPTIONS;
 }
-
-#if 0 //dob-v4
-
-void DoseC_JavaDispatchThread(long ctrl,
-                              bool & success)
-{
-    success = false;
-    try
-    {
-        ControllerPtr controller = ControllerTable::Instance().GetController(ctrl);
-        controller->JavaDispatchThread();
-        success = true;
-    }
-    CATCH_LIBRARY_EXCEPTIONS;
-}
-#endif
 
 void DoseC_ConnectSecondary(const char* connectionNameCommonPart,
                             const char* connectionNameInstancePart,
@@ -205,6 +191,7 @@ void DoseC_ConnectSecondary(const char* connectionNameCommonPart,
                             OnInitialInjectionsDoneCb* onInitialInjectionsDoneCb,
                             OnNotRequestOverflowCb* onNotRequestOverflowCb,
                             OnNotMessageOverflowCb* onNotMessageOverflowCb,
+                            OnDropReferenceCb* onDropReferenceCb,
                             long & newCtrlId,
                             bool & success)
 {
@@ -245,7 +232,8 @@ void DoseC_ConnectSecondary(const char* connectionNameCommonPart,
                                      onInjectedDeletedEntityCb,
                                      onInitialInjectionsDoneCb,
                                      onNotRequestOverflowCb,
-                                     onNotMessageOverflowCb);
+                                     onNotMessageOverflowCb,
+                                     onDropReferenceCb);
         newCtrlId = ctrl;
         success = true;
     }
@@ -605,6 +593,22 @@ void DoseC_ExitDispatch(const long ctrl,
     }
     CATCH_LIBRARY_EXCEPTIONS;
 }
+
+void DoseC_GetCurrentCallbackId(const long ctrl,
+                                DotsC_Int32& callbackId,
+                                bool& success)
+{
+    success = false;
+    try
+    {
+        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
+        callbackId = ControllerTable::Instance().GetController(ctrl)->CurrentCallback();
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS;
+}
+
+
 //--------------------------------
 // Message methods
 //--------------------------------

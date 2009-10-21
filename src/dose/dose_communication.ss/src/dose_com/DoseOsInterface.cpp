@@ -150,6 +150,7 @@ int DoseOs::CDoseComEvent::Set()
     //PrintDbg("-----SetEvent() Has Signal Event. rc=%d\n",rc);
 
     pthread_mutex_unlock(&m_Mutex);
+    return TRUE;
 #endif
 }
 
@@ -322,7 +323,7 @@ unsigned long DoseOs::CreateThread(unsigned long& tid,
     if (tid != 0x0L)
         return 0; // Ok
     else
-        return((ulong) -1); //error
+        return((dcom_ulong32) -1); //error
 #endif
 //---------------------------------
 #ifdef _LINUX
@@ -337,8 +338,8 @@ unsigned long DoseOs::CreateThread(unsigned long& tid,
     pthread_t  p_thread1;      // first thread's structure
 
     rc = pthread_create(&p_thread1, NULL, thread_function, param);
-    if(rc == 0) return((ulong) 0); //???? check error code
-    return((ulong) -1); //error
+    if(rc == 0) return((dcom_ulong32) 0); //???? check error code
+    return((dcom_ulong32) -1); //error
 #endif
 }
 

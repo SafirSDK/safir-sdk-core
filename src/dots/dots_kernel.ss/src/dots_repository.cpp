@@ -22,16 +22,15 @@
 *
 ******************************************************************************/
 
-#include <ace/Guard_T.h>
-#include <ace/OS_NS_unistd.h>
 #include "dots_repository.h"
 #include "dots_file_parser.h"
 #include "dots_param.h"
 #include "dots_error_handler.h"
-#include <boost/bind.hpp>
-#include <boost/lexical_cast.hpp>
 #include "dots_allocation_helper.h"
 #include <iostream>
+#include <ace/Guard_T.h>
+#include <ace/OS_NS_unistd.h>
+#include <boost/bind.hpp>
 
 namespace Safir
 {
@@ -120,6 +119,7 @@ namespace Internal
         m_parameterDb.reset(new ParameterDatabase(open_only,*m_sharedMemory));
         m_propertyDb.reset(new PropertyDatabase(open_only,*m_sharedMemory));
         m_enumDb.reset(new EnumDatabase(open_only,*m_sharedMemory));
+        m_exceptionDb.reset(new ExceptionDatabase(open_only,*m_sharedMemory));
     }
 
     void Repository::Destroy()
@@ -172,6 +172,7 @@ namespace Internal
 
         AllocationHelper allocHelper(m_sharedMemory.get());
 
+
         //Create class database in shared memory
         m_classDb.reset(new ClassDatabase(create_and_initialize, allocHelper));
 
@@ -184,9 +185,15 @@ namespace Internal
         //Create parameter database in shared memory
         m_parameterDb.reset(new ParameterDatabase(create_and_initialize, fp.ParameterSize(), allocHelper));
 
+        //Create exception database in shared memory
+        m_exceptionDb.reset(new ExceptionDatabase(create_and_initialize, allocHelper));
+
         //Store enum types in shared memory
         std::for_each(fp.ResultEnums().begin(),fp.ResultEnums().end(),
                       boost::bind(&EnumDatabase::Insert,m_enumDb.get(),_1,boost::ref(allocHelper)));
+
+        //store exceptions in shared memory
+        m_exceptionDb->InsertExceptions(fp.ResultExceptions(), allocHelper);
 
         //Store classes in shared memory
         m_classDb->InsertClasses(fp.ResultClasses(), *m_enumDb, allocHelper);

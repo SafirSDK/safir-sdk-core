@@ -41,7 +41,7 @@ namespace Internal
         typedef boost::function<bool (void)> ProcessFunction;
 
         SharedFlag() : m_flag(0) {}
-        explicit SharedFlag(bool isSet) {isSet ? m_flag = 1 : m_flag = 0;}
+        explicit SharedFlag(const bool isSet):m_flag(isSet? 1 : 0) {}
 
         //DONT EVER add an IsSet or something like that to this class!
         //It will not work to do something conditionally on whether the
@@ -51,7 +51,7 @@ namespace Internal
         /**
          * Set the flag.
          */
-        void Set() {atomic_write32(&m_flag, 1);}
+        void Set() {m_flag = 1;}
 
 
         /**
@@ -59,7 +59,7 @@ namespace Internal
          */
         void Set(const SetFunction& setFunc)
         {
-            const boost::uint32_t oldVal = atomic_cas32(&m_flag,1,0);
+            const boost::uint32_t oldVal = m_flag.compare_exchange(1,0);
             if (oldVal == 0) //if we changed it to 1 affected the flag
             {
                 setFunc();
@@ -81,12 +81,12 @@ namespace Internal
          */
         bool Process(const ProcessFunction& processFunc) const
         {
-            const boost::uint32_t oldVal = atomic_cas32(&m_flag,0,1);
+            const boost::uint32_t oldVal = m_flag.compare_exchange(0,1);
             if (oldVal == 1)
             {
                 if (!processFunc())
                 {
-                    const boost::uint32_t setAgain = atomic_cas32(&m_flag,1,0);
+                    const boost::uint32_t setAgain = m_flag.compare_exchange(1,0);
                     return setAgain != 0;
                 }
             }
@@ -94,7 +94,7 @@ namespace Internal
         }
 
     private:
-        mutable volatile boost::uint32_t m_flag;
+        mutable AtomicUint32 m_flag;
     };
 }
 }

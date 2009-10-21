@@ -2,5 +2,5 @@
 <exception xmlns="urn:safir-dots-unit">
         <summary>The operation failed try again.</summary>
   <name>Safir.Databases.Odbc.RetryException</name>
-  <baseClass>exception</baseClass>
+  <baseClass>Exception</baseClass>
 </exception>

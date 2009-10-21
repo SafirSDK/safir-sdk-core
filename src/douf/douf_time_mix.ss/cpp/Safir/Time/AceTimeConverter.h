@@ -93,7 +93,7 @@ namespace Time
          * @param [in] utcTime - The UTC time
          * @return The UTC time stored in a boost::posix_time::ptime object
          */
-        static boost::posix_time::ptime ToPtime(const ACE_Time_Value & time);
+        static boost::posix_time::ptime ToPtime(const ACE_Time_Value & utcTime);
 
     };
 

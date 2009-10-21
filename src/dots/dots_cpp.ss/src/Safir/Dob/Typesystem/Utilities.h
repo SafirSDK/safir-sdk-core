@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -42,8 +42,8 @@ namespace Typesystem
     typedef boost::shared_ptr<Object> ObjectPtr;
 
     /**
-    * Utility functions for users of the DOB type system.
-    */
+     * Utility functions for users of the DOB type system.
+     */
 namespace Utilities
 {
     /**
@@ -91,7 +91,7 @@ namespace Utilities
      * Will convert the binarySource to Base64 format.
      *
      * @param bin [in] - binary data to convert.
-     * @return The a string containing the Base64 representation of the binary source.
+     * @return A string containing the Base64 representation of the binary source.
      */
     DOTS_API const std::string BinaryToBase64(const Dob::Typesystem::Binary & bin);
 

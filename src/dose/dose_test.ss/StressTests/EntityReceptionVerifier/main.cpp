@@ -29,7 +29,6 @@
 #include <Safir/Dob/Consumer.h>
 #include "../common/SimpleDispatcher.h"
 
-#include <boost/lexical_cast.hpp>
 
 #include "CommandLine.h"
 

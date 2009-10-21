@@ -29,8 +29,19 @@
 #include <vector>
 #include <string>
 
+
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4267)
+#endif
+
 #include <ace/Thread_Mutex.h>
 #include <ace/Thread.h>
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
+
 #include <boost/shared_ptr.hpp>
 
 namespace Safir

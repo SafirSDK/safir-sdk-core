@@ -127,6 +127,11 @@ namespace Internal
         return Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(m_requestBlob);
     }
 
+    const char * ResponseProxyImpl::GetRequestBlob() const
+    {
+        return m_requestBlob;
+    }
+
     const Dob::Typesystem::HandlerId ResponseProxyImpl::GetRequestHandlerId() const
     {
         Typesystem::Int64 handlerId;

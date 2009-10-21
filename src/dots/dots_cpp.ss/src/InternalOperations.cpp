@@ -73,17 +73,6 @@ namespace Internal
         //TODO: rename the function in DOTS.
     }
 
-    //Debugging
-    void DumpClassDescriptions()
-    {
-        //        DotsC_DumpClassDescriptions();
-    }
-
-    void DumpMemoryBlockInfo()
-    {
-        //        DotsC_DumpMemoryBlockInfo();
-    }
-
     Int64 Generate64BitHash(const std::wstring & str)
     {
         if (str.empty())

@@ -70,7 +70,7 @@ PartnerState::Activate(const int which)
     {
         m_partnerInfoTable.at(which).m_incarnation = -1;
         DoseTest::ActionPtr activate = DoseTest::Action::Create();
-        activate->ActionType().SetVal(DoseTest::ActionEnum::Activate);
+        activate->ActionKind().SetVal(DoseTest::ActionEnum::Activate);
         activate->Identifier().SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(m_languages.at(which)));
 
         try
@@ -96,7 +96,7 @@ PartnerState::Deactivate(const int which)
     {
         m_partnerInfoTable.at(which).m_incarnation = -1;
         DoseTest::ActionPtr deactivate = DoseTest::Action::Create();
-        deactivate->ActionType().SetVal(DoseTest::ActionEnum::Deactivate);
+        deactivate->ActionKind().SetVal(DoseTest::ActionEnum::Deactivate);
         deactivate->Identifier().SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(m_languages.at(which)));
 
         try
@@ -128,7 +128,7 @@ PartnerState::Reset(const int which)
     else
     {
         DoseTest::ActionPtr reset = DoseTest::Action::Create();
-        reset->ActionType().SetVal(DoseTest::ActionEnum::Reset);
+        reset->ActionKind().SetVal(DoseTest::ActionEnum::Reset);
 
         try
         {

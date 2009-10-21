@@ -63,6 +63,9 @@ int main(int /*argc*/,char* /*argv*/[])
             std::wcout<<"21. Write Blob"<<std::endl;
             std::wcout<<"22. Read Blob"<<std::endl;
             std::wcout<<"23. Test binary read"<<std::endl;
+            std::wcout<<"24. Lots of input"<<std::endl;
+            std::wcout<<"25. Long time query"<<std::endl;
+            std::wcout<<"26. Insert into 42"<<std::endl;
             std::wcout<<"99. Quit"<<std::endl;
             std::wcout<<"Choose: ";
             std::wcout.flush();
@@ -143,7 +146,16 @@ int main(int /*argc*/,char* /*argv*/[])
                 break;
             case 23: 
                 unitAccess.BinaryTestRead();
-                break;      
+                break;     
+            case 24: 
+                unitAccess.LotsOfInput();
+                break;     
+            case 25: 
+                unitAccess.LongTimeQuery();
+                break;     
+            case 26: 
+                unitAccess.InsertInto42();
+                break;     
             }
         }
         catch(const Safir::Databases::Odbc::ReconnectException & ex)

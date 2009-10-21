@@ -71,7 +71,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="aced.lib"
-				OutputFile="$(OutDir)\$(ProjectName)d.dll"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(SAFIR_SDK)/lib&quot;"
 				GenerateDebugInformation="true"

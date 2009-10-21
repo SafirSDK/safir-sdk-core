@@ -24,24 +24,22 @@
 #ifndef __PROCESS_MONITOR_H__
 #define __PROCESS_MONITOR_H__
 
-#include <ace/OS.h>
-#include <boost/function.hpp>
+#include <Safir/Utilities/Internal/UtilsExportDefs.h>
 
+//disable warnings in ace
 #if defined _MSC_VER
-  #ifdef LLUF_UTILS_EXPORTS
-    #define LLUF_UTILS_API __declspec(dllexport)
-  #else
-    #define LLUF_UTILS_API __declspec(dllimport)
-    #ifdef _DEBUG
-      #pragma comment( lib, "lluf_utilsd.lib" )
-    #else
-      #pragma comment( lib, "lluf_utils.lib" )
-    #endif
-  #endif
-#elif defined __GNUC__
-  #define LLUF_UTILS_API
-  #define __cdecl
+  #pragma warning (push)
+  #pragma warning (disable : 4267 4127)
 #endif
+
+#include <ace/OS_NS_unistd.h>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
+#include <boost/function.hpp>
 
 
 namespace Safir

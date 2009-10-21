@@ -9,6 +9,9 @@
     <value>Activate</value>
     <value>Deactivate</value>
     <value>Reset</value>
+    <value>CheckReferences</value>
+    <value>CloseAndCheckReferences</value>
+    <value>RunGarbageCollector</value>
     <value>Open</value>
     <value>Close</value>
     <value>InhibitDispatch</value>

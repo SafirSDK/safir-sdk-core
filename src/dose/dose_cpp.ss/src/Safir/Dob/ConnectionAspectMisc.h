@@ -50,7 +50,7 @@ namespace Dob
         /**
          * Constructor
          *
-         * @param ConnectionAspectMisc The connection that you want to operate through.
+         * @param connection The connection that you want to operate through.
          */
         explicit ConnectionAspectMisc(const ConnectionBase& connection) : ConnectionAspectBase(connection) {}
 
@@ -59,7 +59,7 @@ namespace Dob
          *
          * @return Id of the callback you are currently inside, or None if not in a callback.
          */
-        const Dob::CallbackId GetCurrentCallbackId() const;
+        const Dob::CallbackId::Enumeration GetCurrentCallbackId() const;
 
         /**
          * @name Connection name

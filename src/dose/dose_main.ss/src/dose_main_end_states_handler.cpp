@@ -100,6 +100,23 @@ namespace Internal
             insertResult.first->second = m_lastTimestamp;
         }
     }
+
+    
+    void EndStatesHandler::ClearDisconnectsFromNode(const NodeNumber node)
+    {
+        for (ConnectionTable::iterator it = m_connections.begin();
+             it != m_connections.end(); )//iterator increment below
+        {
+            if (it->first.m_node == node)
+            {
+                m_connections.erase(it++);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+    }
 }
 }
 }

@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -196,15 +196,15 @@ namespace Safir.Dob
         {
             if (disposed)
             {
-                throw new Typesystem.SoftwareViolationException("Attempt to use a ServiceRequestProxy that is disposed! Please do not use a MessageProxy outside the OnMessage callback!");
+                throw new Typesystem.SoftwareViolationException("Attempt to use a ServiceRequestProxy that is disposed! Please do not use a ServiceRequestProxy outside the onServiceRequest callback!");
             }
         }
 
-        
+
         private bool disposed = false;
 
-        System.IntPtr m_requestBlob;
-        System.IntPtr m_state;
+        private System.IntPtr m_requestBlob;
+        private System.IntPtr m_state;
         #endregion
 
 

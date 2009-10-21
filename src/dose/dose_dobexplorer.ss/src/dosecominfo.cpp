@@ -21,7 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <QtGui>
+
+#include "common_header.h"
 #include "dosecominfo.h"
 #include "dosecom_stuff.h"
 #include <sstream>

@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -103,7 +103,7 @@ namespace Safir.Dob
                     throw new Typesystem.SoftwareViolationException("Not possible to use call Entity on this PreviousEntityProxy of entity "
                                                                     + EntityId);
                 }
-                return (Entity)Typesystem.ObjectFactory.Instance.CreateObject(m_previousBlob);            
+                return (Entity)Typesystem.ObjectFactory.Instance.CreateObject(m_previousBlob);
             }
         }
 
@@ -146,7 +146,7 @@ namespace Safir.Dob
                         Typesystem.LibraryExceptions.Instance.Throw();
                     }
                 }
-                return (Entity)Typesystem.ObjectFactory.Instance.CreateObject(m_previousBlobWithChangeInfo);   
+                return (Entity)Typesystem.ObjectFactory.Instance.CreateObject(m_previousBlobWithChangeInfo);
             }
         }
 
@@ -273,7 +273,7 @@ namespace Safir.Dob
                         Typesystem.LibraryExceptions.Instance.Throw();
                     }
                 }
-                return m_previousBlobWithChangeInfo; 
+                return m_previousBlobWithChangeInfo;
             }
         }
         #endregion
@@ -304,10 +304,9 @@ namespace Safir.Dob
         /// <summary>
         /// Retrieves the timestamp for the latest create, update or delete.
         /// <para/>
-        /// Note that timestamps is only available for types configured with this option.
+        /// Note that this operation is only valid for Injectable types.
         /// </summary>
         /// <returns>Timestamp</returns>
-        /// <exception cref="Safir.Dob.NotFoundException">No timestamp available for this entity type.</exception>
         public System.Int64 GetTimestamp()
         {
             CheckNotDisposed();
@@ -323,10 +322,11 @@ namespace Safir.Dob
 
         /// <summary>
         /// Retrieves the timestamp for the given top member.
+        /// <para/>
+        /// Note that this operation is only valid for Injectable type.
         /// </summary>
         /// <param name="member">Top level member index.</param>
         /// <returns>Timestamp</returns>
-        /// <exception cref="Safir.Dob.NotFoundException">No timestamp available for this entity type.</exception>
         public System.Int64 GetTimestamp(System.Int32 member)
         {
             CheckNotDisposed();
@@ -358,9 +358,6 @@ namespace Safir.Dob
             m_previousBlob = previousBlob;
             m_previousState = previousState;
             m_timestampDiff = timestampDiff;
-
-            Interface.DoseC_AddReference(currentState);
-            Interface.DoseC_AddReference(previousState);
         }
 
         /// <summary>
@@ -382,28 +379,31 @@ namespace Safir.Dob
                     m_blobDeleter(ref m_previousBlobWithChangeInfo);
                 }
 #endif
-                Interface.DoseC_DropReference(m_currentState);
-                Interface.DoseC_DropReference(m_previousState);
             }
         }
 
         /// <summary>
-        /// Dispose and destroy the object.
+        /// Check that the object was Disposed correctly and, if it wasn't, show
+        /// a dialog and kill the application.
         /// </summary>
         ~PreviousEntityProxy()
         {
-            Dispose();
+            if (!disposed)
+            {
+                Dispose();
+            }
         }
+
 
         private void CheckNotDisposed()
         {
             if (disposed)
             {
-                throw new Typesystem.SoftwareViolationException("Attempt to use a MessageProxy that is disposed! Please do not use a MessageProxy outside the OnMessage callback!");
+                throw new Typesystem.SoftwareViolationException("Attempt to use a PreviousEntityProxy that is disposed!");
             }
         }
 
-        
+
         private bool disposed = false;
 
         private readonly System.IntPtr m_currentBlob;

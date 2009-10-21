@@ -21,7 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <QtGui>
+
+#include "common_header.h"
 #include "nodestatus.h"
 #include <iostream>
 #include <Safir/Dob/NodeParameters.h>
@@ -142,7 +143,7 @@ void NodeStatus::UpdateTable()
         }
         else
         {
-            boost::uint64_t BitMap64 = (ulong64) 1 << jx;
+            boost::uint64_t BitMap64 = (dcom_ulong64) 1 << jx;
 
             if(pShm->NodeStatusTable[jx].Status == 'U')
             {

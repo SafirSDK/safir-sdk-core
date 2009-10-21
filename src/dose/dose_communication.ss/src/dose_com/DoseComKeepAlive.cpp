@@ -56,7 +56,7 @@ extern volatile int * volatile pDbg;
 // or the absence of KeepAlive messages (DOWN).
 //-----------------------------------------------------------
 
-static  ushort  g_MyDoseId = 123;
+static  dcom_ushort16  g_MyDoseId = 123;
 static  bool    g_bStartUpIsCompleted = FALSE;
 
 static bool     g_bAutoConfigure;
@@ -79,8 +79,8 @@ static void Handle_GetInfoRequest(CIpmSocket *pTxRxSock,
     int     jj;
     int     pos = 0;
     int     result;
-    unsigned long IpMulticastAddr_nw;
-    unsigned long IpAddr_nw;
+    dcom_ulong32 IpMulticastAddr_nw;
+    dcom_ulong32 IpAddr_nw;
     char    buff[3000];
 
     //PrintDbg("--- Handle_GetInfoRequest().\n");
@@ -93,13 +93,13 @@ static void Handle_GetInfoRequest(CIpmSocket *pTxRxSock,
         sprintf(buff,
             "Counters DoseId %d\n"
 #if (MAX_NUM_PRIO_CHANNELS == 6)
-            "TxNoAckOk   =%lu/%lu/%lu/%lu/%lu/%lu\n"
-            "TxWithAckOk =%lu/%lu/%lu/%lu/%lu/%lu\n"
-            "TxRetransm  =%lu/%lu/%lu/%lu/%lu/%lu\n",
+            "TxNoAckOk   =%u/%u/%u/%u/%u/%u\n"
+            "TxWithAckOk =%u/%u/%u/%u/%u/%u\n"
+            "TxRetransm  =%u/%u/%u/%u/%u/%u\n",
 #else
-            "TxNoAckOk   =%lu/%lu/%lu/%lu\n"
-            "TxWithAckOk =%lu/%lu/%lu/%lu\n"
-            "TxRetransm  =%lu/%lu/%lu/%lu\n",
+            "TxNoAckOk   =%u/%u/%u/%u\n"
+            "TxWithAckOk =%u/%u/%u/%u\n"
+            "TxRetransm  =%u/%u/%u/%u\n",
 #endif
             CConfig::m_MyDoseId,
             g_pTxStatistics[0].CountTxNoAckOk,
@@ -131,13 +131,13 @@ static void Handle_GetInfoRequest(CIpmSocket *pTxRxSock,
         pos = strlen(buff);
         sprintf(&buff[pos],
 #if (MAX_NUM_PRIO_CHANNELS == 6)
-            "TxOverflow  =%lu/%lu/%lu/%lu/%lu/%lu\n"
-            "TxNoTargets =%lu/%lu/%lu/%lu/%lu/%lu\n"
-            "TxGiveup    =%lu/%lu/%lu/%lu/%lu/%lu\n",
+            "TxOverflow  =%u/%u/%u/%u/%u/%u\n"
+            "TxNoTargets =%u/%u/%u/%u/%u/%u\n"
+            "TxGiveup    =%u/%u/%u/%u/%u/%u\n",
 #else
-            "TxOverflow  =%lu/%lu/%lu/%lu\n"
-            "TxNoTargets =%lu/%lu/%lu/%lu\n"
-            "TxGiveup    =%lu/%lu/%lu/%lu\n",
+            "TxOverflow  =%u/%u/%u/%u\n"
+            "TxNoTargets =%u/%u/%u/%u\n"
+            "TxGiveup    =%u/%u/%u/%u\n",
 #endif
             g_pTxStatistics[0].CountTxOverflow,
             g_pTxStatistics[1].CountTxOverflow,
@@ -168,15 +168,15 @@ static void Handle_GetInfoRequest(CIpmSocket *pTxRxSock,
         pos = strlen(buff);
         sprintf(&buff[pos],
 #if (MAX_NUM_PRIO_CHANNELS == 6)
-            "RxOverflow  =%lu/%lu/%lu/%lu/%lu/%lu\n"
-            "RxNoAckOk   =%lu/%lu/%lu/%lu/%lu/%lu\n"
-            "RxWithAckOk =%lu/%lu/%lu/%lu/%lu/%lu\n"
-            "RxDuplicate =%lu/%lu/%lu/%lu/%lu/%lu\n",
+            "RxOverflow  =%u/%u/%u/%u/%u/%u\n"
+            "RxNoAckOk   =%u/%u/%u/%u/%u/%u\n"
+            "RxWithAckOk =%u/%u/%u/%u/%u/%u\n"
+            "RxDuplicate =%u/%u/%u/%u/%u/%u\n",
 #else
-            "RxOverflow  =%lu/%lu/%lu/%lu\n"
-            "RxNoAckOk   =%lu/%lu/%lu/%lu\n"
-            "RxWithAckOk =%lu/%lu/%lu/%lu\n"
-            "RxDuplicate =%lu/%lu/%lu/%lu\n",
+            "RxOverflow  =%u/%u/%u/%u\n"
+            "RxNoAckOk   =%u/%u/%u/%u\n"
+            "RxWithAckOk =%u/%u/%u/%u\n"
+            "RxDuplicate =%u/%u/%u/%u\n",
 #endif
             g_pRxStatistics[0].CountRxOverflow,
             g_pRxStatistics[1].CountRxOverflow,
@@ -216,13 +216,13 @@ static void Handle_GetInfoRequest(CIpmSocket *pTxRxSock,
         pos = strlen(buff);
         sprintf(&buff[pos],
 #if (MAX_NUM_PRIO_CHANNELS == 6)
-            "RxInvalidMsg=%lu/%lu/%lu/%lu/%lu/%lu\n"
-            "RxRxMustWait=%lu/%lu/%lu/%lu/%lu/%lu\n"
-            "RxInvSeqNum =%lu/%lu/%lu/%lu/%lu/%lu\n",
+            "RxInvalidMsg=%u/%u/%u/%u/%u/%u\n"
+            "RxRxMustWait=%u/%u/%u/%u/%u/%u\n"
+            "RxInvSeqNum =%u/%u/%u/%u/%u/%u\n",
 #else
-            "RxInvalidMsg=%lu/%lu/%lu/%lu\n"
-            "RxRxMustWait=%lu/%lu/%lu/%lu\n"
-            "RxInvSeqNum =%lu/%lu/%lu/%lu\n",
+            "RxInvalidMsg=%u/%u/%u/%u\n"
+            "RxRxMustWait=%u/%u/%u/%u\n"
+            "RxInvSeqNum =%u/%u/%u/%u\n",
 #endif
             g_pRxStatistics[0].CountRxInvalidMsg,
             g_pRxStatistics[1].CountRxInvalidMsg,
@@ -254,11 +254,11 @@ static void Handle_GetInfoRequest(CIpmSocket *pTxRxSock,
         pos = strlen(buff);
         sprintf(&buff[pos],
 #if (MAX_NUM_PRIO_CHANNELS == 6)
-            "RxInvFragNum=%lu/%lu/%lu/%lu/%lu/%lu\n"
-            "RxOtherErr  =%lu/%lu/%lu/%lu/%lu/%lu\n",
+            "RxInvFragNum=%u/%u/%u/%u/%u/%u\n"
+            "RxOtherErr  =%u/%u/%u/%u/%u/%u\n",
 #else
-            "RxInvFragNum=%lu/%lu/%lu/%lu\n"
-            "RxOtherErr  =%lu/%lu/%lu/%lu\n",
+            "RxInvFragNum=%u/%u/%u/%u\n"
+            "RxOtherErr  =%u/%u/%u/%u\n",
 #endif
             g_pRxStatistics[0].CountRxInvFragmentNum,
             g_pRxStatistics[1].CountRxInvFragmentNum,
@@ -315,13 +315,13 @@ static void Handle_GetInfoRequest(CIpmSocket *pTxRxSock,
     {
         DOSE_SHARED_DATA_S *pS;
 
-        ulong NodeStatus;
+        dcom_ulong32 NodeStatus;
 
         sprintf(buff,"Up/Down Nodes for DoseId %d\n", g_MyDoseId);
 
         for(jj=0 ; jj<NODESTATUS_TABLE_SIZE ; jj++)
         {
-            result = CNodeStatus::GetNodeInfo((ushort)jj, &IpAddr_nw, &NodeStatus);
+            result = CNodeStatus::GetNodeInfo((dcom_ushort16)jj, &IpAddr_nw, &NodeStatus);
             if(result == -1) break;
 
             if(NodeStatus == 0) continue; // never up
@@ -338,13 +338,13 @@ static void Handle_GetInfoRequest(CIpmSocket *pTxRxSock,
         pS = CNodeStatus::GetNodeSharedDataPointer();
 
         sprintf(&buff[pos],
-            "\nNewMap= %08lX %08lX\nUpMap=  %08lX %08lX\nDownMap=%08lX %08lX\n",
-             (ulong)(pS->BitMapNodesNew64>>32),
-             (ulong)(pS->BitMapNodesNew64 & 0xFFFFFFFF),
-             (ulong)(pS->BitMapNodesUp64>>32),
-             (ulong)(pS->BitMapNodesUp64 & 0xFFFFFFFF),
-             (ulong)(pS->BitMapNodesDown64>>32),
-             (ulong)(pS->BitMapNodesDown64 & 0xFFFFFFFF));
+            "\nNewMap= %08X %08X\nUpMap=  %08X %08X\nDownMap=%08X %08X\n",
+             (dcom_ulong32)(pS->BitMapNodesNew64>>32),
+             (dcom_ulong32)(pS->BitMapNodesNew64 & 0xFFFFFFFF),
+             (dcom_ulong32)(pS->BitMapNodesUp64>>32),
+             (dcom_ulong32)(pS->BitMapNodesUp64 & 0xFFFFFFFF),
+             (dcom_ulong32)(pS->BitMapNodesDown64>>32),
+             (dcom_ulong32)(pS->BitMapNodesDown64 & 0xFFFFFFFF));
     }
     //---------------------------------
     // [I3] Tx/Rx Queue Info
@@ -404,12 +404,12 @@ static void Handle_GetInfoRequest(CIpmSocket *pTxRxSock,
 static THREAD_API KeepAlive_Thread(void *)
 {
     int     result;
-    ulong   dwPreviosSendTime = 0;
-    ulong   dwPreviosCheckTime = 0;  //NYTT 08-09-18
-    ulong   dwCurrentTime;
-    ulong   ErrCode;
+    dcom_ulong32   dwPreviosSendTime = 0;
+    dcom_ulong32   dwPreviosCheckTime = 0;  //NYTT 08-09-18
+    dcom_ulong32   dwCurrentTime;
+    dcom_ulong32   ErrCode;
     DOSE_UDP_KEEPALIVE_MSG TxMsg;
-    ulong   FromIpAddr_nw;
+    dcom_ulong32   FromIpAddr_nw;
     char    RxBuff[32];  // Must be at least sizeof(DOSE_UDP_GETINFO_MSG)
     DOSE_UDP_KEEPALIVE_MSG *pRxMsg;
     CIpmSocket TxRxSock;
@@ -430,8 +430,8 @@ static THREAD_API KeepAlive_Thread(void *)
     TxMsg.Magic         = DOSE_MSG_MAGIC;
     TxMsg.MsgType       = MSG_TYPE_KEEPALIVE;
     TxMsg.IpAddrFrom_nw = CConfig::m_MyIpAddr_nw;
-    TxMsg.DoseIdFrom    = (uchar) g_MyDoseId;
-    TxMsg.TimeStamp     = (ulong) time(NULL); // the time the prog is started
+    TxMsg.DoseIdFrom    = (dcom_uchar8) g_MyDoseId;
+    TxMsg.TimeStamp     = (dcom_ulong32) time(NULL); // the time the prog is started
     //---------------------------------------------
     // Create socket for Receive and Send
     //---------------------------------------------
@@ -641,14 +641,14 @@ Check_Timeout:
 *
 * Returns: DoseUd which could be auto configured here
 ***********************************************************/
-int DOSE_KeepAlive_Init(uchar DoseId)
+int DOSE_KeepAlive_Init(dcom_uchar8 DoseId)
 {
     if(*pDbg >= 1) PrintDbg("/// KeepAlive_Init().\n");
 
     // Add myself as the first node  ( ??? no effect)
 
-    CNodeStatus::UpdateNode_Up((uchar) g_MyDoseId,
-                                CConfig::m_MyIpAddr_nw, (ulong) time(NULL));
+    CNodeStatus::UpdateNode_Up((dcom_uchar8) g_MyDoseId,
+                                CConfig::m_MyIpAddr_nw, (dcom_ulong32) time(NULL));
 
     g_pRxStatistics = Statistics::GetPtrToRxStatistics(0);
     g_pTxStatistics = Statistics::GetPtrToTxStatistics(0);
@@ -669,8 +669,8 @@ int DOSE_KeepAlive_Init(uchar DoseId)
     unsigned long tid;
     DoseOs::CreateThread(tid, &KeepAlive_Thread, NULL);
 
-    CNodeStatus::UpdateNode_Up((uchar) g_MyDoseId,
-                                CConfig::m_MyIpAddr_nw, (ulong) time(NULL));
+    CNodeStatus::UpdateNode_Up((dcom_uchar8) g_MyDoseId,
+                                CConfig::m_MyIpAddr_nw, (dcom_ulong32) time(NULL));
 
     if(*pDbg>=1)
     PrintDbg("/   DOSE_KeepAlive_Init() done DoseId=%d\n", g_MyDoseId);

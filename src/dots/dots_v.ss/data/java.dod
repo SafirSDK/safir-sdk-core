@@ -1,0 +1,1500 @@
+@@-------------------------------------------------------------------------------
+@@--
+@@--  Copyright Saab AB, 2005-2009 (http://www.safirsdk.com)
+@@--
+@@--  Created by: Henrik Sundberg / sthesu
+@@--
+@@-------------------------------------------------------------------------------
+@@IF@@ @_SECTION_@ = "Parameters"
+File_Suffix:".java"
+Filename_Separator:"/"
+Output_Directory:"java/src/"
+Namespace_Separator:"."
+@@-- Namspace prefixes are defined separately, since they are supposed to differ between projects.
+@@-- Files matching <Namespace><Namespace_Prefix_File_Suffix> are searched for a line containing the namespace prefix
+@@-- to use for <Namespace>. E.g. Namespace_Prefix_File_Prefix:"-java.namespace.txt" will match the file
+@@-- "Safir-java.namespace.txt". The first non comment line in the file is used as namespace prefix.
+@@-- Empty value is used when no namespace prefixes are to be added.
+Namespace_Prefix_File_Suffix:"-java.namespace.txt"
+@@-- Parent filename "" defaults to the namespace with added file suffix.
+Parent_Filename:""
+@@--
+@@-- *_Underscore_Style is one of: "Add", "Remove", "Keep"
+@@--
+Namespace_Underscore_Style:"Keep"
+Filename_Underscore_Style:"Keep"
+Classname_Underscore_Style:"Keep"
+Membername_Underscore_Style:"Keep"
+Enum_Value_Underscore_Style:"Add"
+@@--
+@@-- *_Case_Style is one of: "Upper", "Lower", "Camel", "Keep"
+@@--
+Namespace_Case_Style:"Lower"
+Filename_Case_Style:"Keep"
+Classname_Case_Style:"Keep"
+Membername_Case_Style:"Keep"
+Enum_Value_Case_Style:"Upper"
+Object_Type:"Object"
+Index_Type:"Int32"
+@@--
+@@-- Exceptions are defined like this:
+@@--   Exception:<dou>:"<generated>":"<dependency>"
+@@-- E.g.:
+@@--   Exception:illegalValue:"safir::dob.typesystem::IllegalValue":"dots/dots_defs"
+@@-- defines "illegalValue" as an exceptionname in the xml-syntax (dou-file).
+@@-- And "safir::dob.typesystem::IllegalValue" to be used where the actual type is needed in the code.
+@@-- And that "dots/dots_defs" (with file extension added below) is to be included due to this.
+@@--
+Exception:Exception:"com.saabgroup.safir.dob.typesystem.Exception":"com.saabgroup.safir.dob.typesystem.Exception"
+Exception:FundamentalException:"com.saabgroup.safir.dob.typesystem.FundamentalException":"com.saabgroup.safir.dob.typesystem.FundamentalException"
+Exception:Safir.Dob.Typesystem.ConfigurationErrorException:"com.saabgroup.safir.dob.typesystem.ConfigurationErrorException":"com.saabgroup.safir.dob.typesystem.ConfigurationErrorException"
+Exception:Safir.Dob.Typesystem.IncompatibleTypesException:"com.saabgroup.safir.dob.typesystem.IncompatibleTypesException":"com.saabgroup.safir.dob.typesystem.IncompatibleTypesException"
+Exception:Safir.Dob.Typesystem.IllegalValueException:"com.saabgroup.safir.dob.typesystem.IllegalValueException":"com.saabgroup.safir.dob.typesystem.IllegalValueException"
+Exception:Safir.Dob.Typesystem.NullException:"com.saabgroup.safir.dob.typesystem.NullException":"com.saabgroup.safir.dob.typesystem.NullException"
+Exception:Safir.Dob.Typesystem.ReadOnlyException:"com.saabgroup.safir.dob.typesystem.ReadOnlyException":"com.saabgroup.safir.dob.typesystem.ReadOnlyException"
+Exception:Safir.Dob.Typesystem.SoftwareViolationException:"com.saabgroup.safir.dob.typesystem.SoftwareViolationException":"com.saabgroup.safir.dob.typesystem.SoftwareViolationException"
+@@--
+@@--
+@@-- Types are defined like this:
+@@--   Type:<dou>:<set/get>:"<generated>":"<dependency>"
+@@-- E.g.:
+@@--   Type:String:String:"safir::dob.typesystem::String":"dots/dots_defs"
+@@-- defines "String" as a typename in the xml-syntax (dou-file).
+@@-- And "String" to be the @_UNIFORM_MEMBERTYPE_@, used in the name of Set/Get routines.
+@@-- And "safir::dob.typesystem::String" to be used where the actual type is needed in the code.
+@@-- And that "dots/dots_defs" (with file extension added below) is to be included due to this.
+@@--
+Type:Int32:Int32:"int":""
+Type:Int64:Int64:"long":""
+Type:Float32:Float32:"float":""
+Type:Float64:Float64:"double":""
+Type:Boolean:Boolean:"boolean":""
+Type:String:String:"String":""
+Type:EntityId:EntityId:"com.saabgroup.safir.dob.typesystem.EntityId":""
+Type:TypeId:TypeId:"long":""
+Type:InstanceId:InstanceId:"com.saabgroup.safir.dob.typesystem.InstanceId":""
+Type:ChannelId:ChannelId:"com.saabgroup.safir.dob.typesystem.ChannelId":""
+Type:HandlerId:HandlerId:"com.saabgroup.safir.dob.typesystem.HandlerId":""
+Type:Binary:Binary:"byte[]":""
+Type:Object:Object:"com.saabgroup.safir.dob.typesystem.Object":""
+Type:Ampere32:si32.Ampere:"float":""
+Type:CubicMeter32:si32.CubicMeter:"float":""
+Type:Hertz32:si32.Hertz:"float":""
+Type:Joule32:si32.Joule:"float":""
+Type:Kelvin32:si32.Kelvin:"float":""
+Type:Kilogram32:si32.Kilogram:"float":""
+Type:Meter32:si32.Meter:"float":""
+Type:MeterPerSecond32:si32.MeterPerSecond:"float":""
+Type:MeterPerSecondSquared32:si32.MeterPerSecondSquared:"float":""
+Type:Newton32:si32.Newton:"float":""
+Type:Pascal32:si32.Pascal:"float":""
+Type:Radian32:si32.Radian:"float":""
+Type:RadianPerSecond32:si32.RadianPerSecond:"float":""
+Type:RadianPerSecondSquared32:si32.RadianPerSecondSquared:"float":""
+Type:Second32:si32.Second:"float":""
+Type:SquareMeter32:si32.SquareMeter:"float":""
+Type:Steradian32:si32.Steradian:"float":""
+Type:Volt32:si32.Volt:"float":""
+Type:Watt32:si32.Watt:"float":""
+Type:Ampere64:si64.Ampere:"double":""
+Type:CubicMeter64:si64.CubicMeter:"double":""
+Type:Hertz64:si64.Hertz:"double":""
+Type:Joule64:si64.Joule:"double":""
+Type:Kelvin64:si64.Kelvin:"double":""
+Type:Kilogram64:si64.Kilogram:"double":""
+Type:Meter64:si64.Meter:"double":""
+Type:MeterPerSecond64:si64.MeterPerSecond:"double":""
+Type:MeterPerSecondSquared64:si64.MeterPerSecondSquared:"double":""
+Type:Newton64:si64.Newton:"double":""
+Type:Pascal64:si64.Pascal:"double":""
+Type:Radian64:si64.Radian:"double":""
+Type:RadianPerSecond64:si64.RadianPerSecond:"double":""
+Type:RadianPerSecondSquared64:si64.RadianPerSecondSquared:"double":""
+Type:Second64:si64.Second:"double":""
+Type:SquareMeter64:si64.SquareMeter:"double":""
+Type:Steradian64:si64.Steradian:"double":""
+Type:Volt64:si64.Volt:"double":""
+Type:Watt64:si64.Watt:"double":""
+@@--
+@@--
+@@--
+@@--
+@@--
+@@--
+@@ELSIF@@ @_SECTION_@ = "Code"
+@@--
+@@-- HEADER
+@@--
+package @_NAMESPACE_@;
+
+@@IF@@ @_UNITTYPE_@=property
+@@--
+@@-- PROPERTY
+@@--
+//Dependencies as comments, since they are fully specified in the code:
+@@TABLE@@
+@@IF@@ @_EXIST:DEPENDENCY_@
+//import @_DEPENDENCY_@;
+@@END_IF@@
+@@END_TABLE@@
+//import com.saabgroup.safir.dob.typesystem.*;
+
+@@IF@@ @_EXIST:CLASSSUMMARY_@
+/**
+ * @_REPLACE_ALL(\n/\n * ):CLASSSUMMARY_@
+ */
+@@ELSE@@
+/**
+ * This property has no summary.
+ */
+@@END_IF@@
+public class @_CLASS_@
+{
+    /**
+     * Check if a certain object has a property mapping to this property.
+     * @param obj Object to check
+     * @return True if obj is mapped against this property.
+     */
+    public static boolean hasProperty(com.saabgroup.safir.dob.typesystem.Object obj)
+    {
+        return com.saabgroup.safir.dob.typesystem.Operations.hasProperty(obj.getTypeId(), ClassTypeId);
+    }
+
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+    //@_MEMBER_@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+    /**
+     * Get the array size of the member in obj that is mapped against the @_MEMBER_@ property member.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to check in.
+     * @return Size of the array.
+     */
+    public static int get@_MEMBER_@ArraySize(com.saabgroup.safir.dob.typesystem.Object obj)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Properties.getArraySize(obj.getTypeId(), ClassTypeId, @_LOWER:MEMBER_@Member);
+    }
+
+    /**
+     * Set the value of the member in obj that is mapped against the @_MEMBER_@ property member.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to modify.
+     * @param index index in array to modify.
+     * @param val Value to set @_MEMBER_@ to.
+     */
+    public static void set@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj, int index, @_MEMBERTYPE_@ val)
+    {
+        init();
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        com.saabgroup.safir.dob.typesystem.Properties.setEnum(obj, ClassTypeId, val.ordinal(), @_LOWER:MEMBER_@Member, index);
+@@ELSE@@
+        com.saabgroup.safir.dob.typesystem.Properties.set(obj, ClassTypeId, val, @_LOWER:MEMBER_@Member, index);
+@@END_IF@@
+    }
+
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+ /**
+     * Set the ordinal value of this enumeration member in obj that is mapped against the @_MEMBER_@ property member.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to modify.
+     * @param index index in array to modify.
+     * @param ordinal Ordinal value to set @_MEMBER_@ to.
+     */
+    public static void setOrdinal@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj, int index, int ordinal)
+    {
+        init();
+        com.saabgroup.safir.dob.typesystem.Properties.setEnum(obj, ClassTypeId, ordinal, @_LOWER:MEMBER_@Member, index);
+    }
+@@END_IF@@
+
+    /**
+     * Set the member in obj that is mapped against the @_MEMBER_@ property member to null.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to modify.
+     * @param index index in array to modify.
+     */
+    public static void setNull@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj, int index)
+    {
+        init();
+        com.saabgroup.safir.dob.typesystem.Properties.setNull(obj, ClassTypeId, @_LOWER:MEMBER_@Member, index);
+    }
+
+    /**
+     * Check if the member in obj that is mapped against the @_MEMBER_@ property member is null.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to check in.
+     * @param index index in array to check.
+     * @return Value of the isNull flag.
+     */
+    public static boolean isNull@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj, int index)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Properties.isNull(obj, ClassTypeId, @_LOWER:MEMBER_@Member, index);
+    }
+
+    /**
+     * Check if the member in obj that is mapped against the @_MEMBER_@ property member is changed.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to check in.
+     * @param index index in array to check.
+     * @return Value of the isChanged flag.
+     */
+    public static boolean isChanged@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj, int index)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Properties.isChanged(obj, ClassTypeId, @_LOWER:MEMBER_@Member, index);
+    }
+
+    /**
+     * Check if the member in obj that is mapped against the @_MEMBER_@ property member is read only.
+     * (If the property member is mapped to "null" or a parameter the value is read only.)
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to check in.
+     * @param index index in array to check.
+     * @return True if the member is read only.
+     */
+    public static boolean isReadOnly@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj, int index)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Properties.isReadOnly(obj, ClassTypeId, @_LOWER:MEMBER_@Member, index);
+    }
+
+    /**
+     * Get the member in obj that is mapped against the @_MEMBER_@ property member.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to get value from.
+     * @param index index in array to read from.
+     * @return The value of @_MEMBER_@.
+     */
+@@IF@@ @_MEMBERTYPE_@=com.saabgroup.safir.dob.typesystem.Object
+    public static @_MEMBERTYPE_@ get@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj, int index)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Properties.getObject(obj, ClassTypeId, @_LOWER:MEMBER_@Member, index);
+    }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+    public static @_MEMBERTYPE_@ get@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj, int index)
+    {
+        init();
+        return (@_MEMBERTYPE_@)com.saabgroup.safir.dob.typesystem.Properties.getObject(obj, ClassTypeId, @_LOWER:MEMBER_@Member, index);
+    }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    public static @_MEMBERTYPE_@ get@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj, int index)
+    {
+        init();
+        return @_MEMBERTYPE_@.values()
+            [com.saabgroup.safir.dob.typesystem.Properties.getEnum(obj, ClassTypeId, @_LOWER:MEMBER_@Member, index)];
+    }
+@@ELSE@@
+    public static @_MEMBERTYPE_@ get@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj, int index)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Properties.get@_REPLACE(^si(..)\..*/Float\1):UNIFORM_MEMBERTYPE_@(obj, ClassTypeId, @_LOWER:MEMBER_@Member, index);
+    }
+@@END_IF@@
+
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    /**
+     * Get the ordinal value of the enumeration member in obj that is mapped against the @_MEMBER_@ property member.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to get value from.
+     * @param index index in array to read from.
+     * @return The value of @_MEMBER_@.
+     */
+    public static int getOrdinal@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj, int index)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Properties.getEnum(obj, ClassTypeId, @_LOWER:MEMBER_@Member, index);
+    }
+@@END_IF@@
+@@ELSE@@
+    /**
+     * Set the value of the member in obj that is mapped against the @_MEMBER_@ property member.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     *  @param obj Object to modify.
+     *  @param val Value to set @_MEMBER_@ to.
+     */
+    public static void set@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj, @_MEMBERTYPE_@ val)
+    {
+        init();
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        com.saabgroup.safir.dob.typesystem.Properties.setEnum(obj, ClassTypeId, val.ordinal(), @_LOWER:MEMBER_@Member, 0);
+@@ELSE@@
+        com.saabgroup.safir.dob.typesystem.Properties.set(obj, ClassTypeId, val, @_LOWER:MEMBER_@Member, 0);
+@@END_IF@@
+    }
+
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+ /**
+     * Set the ordinal value of this enumeration member in obj that is mapped against the @_MEMBER_@ property member.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to modify.
+     * @param ordinal Ordinal value to set @_MEMBER_@ to.
+     */
+    public static void setOrdinal@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj, int ordinal)
+    {
+        init();
+        com.saabgroup.safir.dob.typesystem.Properties.setEnum(obj, ClassTypeId, ordinal, @_LOWER:MEMBER_@Member, 0);
+    }
+@@END_IF@@
+
+    /**
+     * Set the member in obj that is mapped against the @_MEMBER_@ property member to null.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to modify.
+     */
+    public static void setNull@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj)
+    {
+        init();
+        com.saabgroup.safir.dob.typesystem.Properties.setNull(obj, ClassTypeId, @_LOWER:MEMBER_@Member, 0);
+    }
+
+    /**
+     * Check if the member in obj that is mapped against the @_MEMBER_@ property member is null.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to check in.
+     * @return Value of the isNull flag.
+     */
+    public static boolean isNull@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Properties.isNull(obj, ClassTypeId, @_LOWER:MEMBER_@Member, 0);
+    }
+
+    /**
+     * Check if the member in obj that is mapped against the @_MEMBER_@ property member is changed.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to check in.
+     * @return Value of the isChanged flag.
+     */
+    public static boolean isChanged@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Properties.isChanged(obj, ClassTypeId, @_LOWER:MEMBER_@Member, 0);
+    }
+
+    /**
+     * Check if the member in obj that is mapped against the @_MEMBER_@ property member is read only.
+     * (If the property member is mapped to "null" or a parameter the value is read only.)
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to check in.
+     * @return True if the member is read only.
+     */
+    public static boolean isReadOnly@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Properties.isReadOnly(obj, ClassTypeId, @_LOWER:MEMBER_@Member, 0);
+    }
+
+    /**
+     * Get the member in obj that is mapped against the @_MEMBER_@ property member.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to get value from.
+     * @return The value of @_MEMBER_@.
+     */
+@@IF@@ @_MEMBERTYPE_@=com.saabgroup.safir.dob.typesystem.Object
+    public static @_MEMBERTYPE_@ get@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Properties.getObject(obj, ClassTypeId, @_LOWER:MEMBER_@Member, 0);
+    }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+    public static @_MEMBERTYPE_@ get@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj)
+    {
+        init();
+        return (@_MEMBERTYPE_@)com.saabgroup.safir.dob.typesystem.Properties.getObject(obj, ClassTypeId, @_LOWER:MEMBER_@Member, 0);
+    }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    public static @_MEMBERTYPE_@ get@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj)
+    {
+        init();
+        return @_MEMBERTYPE_@.values()
+            [com.saabgroup.safir.dob.typesystem.Properties.getEnum(obj, ClassTypeId, @_LOWER:MEMBER_@Member, 0)];
+    }
+@@ELSE@@
+    public static @_MEMBERTYPE_@ get@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Properties.get@_REPLACE(^si(..)\..*/Float\1):UNIFORM_MEMBERTYPE_@(obj, ClassTypeId, @_LOWER:MEMBER_@Member, 0);
+    }
+@@END_IF@@
+
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    /**
+     * Get the ordinal value of the enumeration member in obj that is mapped against the @_MEMBER_@ property member.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @param obj Object to get value from.
+     * @return The value of @_MEMBER_@.
+     */
+    public static int getOrdinal@_MEMBER_@(com.saabgroup.safir.dob.typesystem.Object obj)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Properties.getEnum(obj, ClassTypeId, @_LOWER:MEMBER_@Member, 0);
+    }
+@@END_IF@@
+@@END_IF@@
+
+@@END_IF@@
+@@END_TABLE@@
+    /** Type id for @_CLASS_@ */
+    public static final long ClassTypeId = @_TYPEID_@L;
+
+    private static void init()
+    {
+        if (!isInit)
+        {
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+            @_LOWER:MEMBER_@Member=com.saabgroup.safir.dob.typesystem.Members.getIndex(ClassTypeId, "@_MEMBER_@");
+@@END_IF@@
+@@END_TABLE@@
+            isInit=true;
+        }
+    }
+
+
+    private static boolean isInit = false;
+
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+    private static int @_LOWER:MEMBER_@Member = -1;
+@@END_IF@@
+@@END_TABLE@@
+}
+@@ELSIF@@ @_UNITTYPE_@=class
+@@--
+@@-- CLASS
+@@--
+//Dependencies as comments, since they are fully specified in the code:
+@@TABLE@@
+@@IF@@ @_EXIST:DEPENDENCY_@
+//import @_DEPENDENCY_@;
+@@END_IF@@
+@@END_TABLE@@
+//import com.saabgroup.safir.dob.typesystem.*;
+
+@@IF@@ @_EXIST:CLASSSUMMARY_@
+/**
+ * @_REPLACE_ALL(\n/\n * ):CLASSSUMMARY_@
+ */
+@@ELSE@@
+/**
+ * This class has no summary.
+ */
+@@END_IF@@
+public class @_CLASS_@
+    extends @_BASECLASS_@
+    implements Cloneable {
+    /**
+     * Default constructor.
+     */
+    public @_CLASS_@() {
+        super();
+@@TABLE@@
+
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration or @_UNIFORM_MEMBERTYPE_@=Object
+        m_@_MEMBER_@Member = new @_MEMBERTYPE_@.ContainerArray(get@_MEMBER_@ArraySize());
+@@ELSIF@@ @_MEMBERTYPE_@=float or @_MEMBERTYPE_@=double or not @_MATCH(.*\..*):UNIFORM_MEMBERTYPE_@
+        m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray(get@_MEMBER_@ArraySize());
+@@ELSE@@
+        m_@_MEMBER_@Member = new @_MEMBERTYPE_@ContainerArray(get@_MEMBER_@ArraySize());
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        m_@_MEMBER_@Member = new @_MEMBERTYPE_@.Container();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>();
+@@ELSIF@@ @_MEMBERTYPE_@=float or @_MEMBERTYPE_@=double or not @_MATCH(.*\..*):UNIFORM_MEMBERTYPE_@
+        m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container();
+@@ELSE@@
+        m_@_MEMBER_@Member = new @_UNIFORM_MEMBERTYPE_@Container();
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+    }
+
+@@TABLE@@
+@@IF@@ @_EXIST:PARAMETER_@
+@@IF@@ @_EXIST:PARAMETERISARRAY_@
+    /**
+     * Get the array size of the @_PARAMETER_@ parameter.
+     *
+     * @_PARAMETER_@ summary:
+@@IF@@ @_EXIST:PARAMETERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):PARAMETERSUMMARY_@
+@@ELSE@@
+     *     This parameter has no summary.
+@@END_IF@@
+     *
+     * @return The array size of the @_PARAMETER_@ parameter.
+     */
+    public static int get@_PARAMETER_@ArraySize ()
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Parameters.getArraySize(ClassTypeId, m_@_PARAMETER_@Parameter);
+    }
+
+    /**
+     * Get a value from the @_PARAMETER_@ parameter array.
+     *
+     * @_PARAMETER_@ summary:
+@@IF@@ @_EXIST:PARAMETERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):PARAMETERSUMMARY_@
+@@ELSE@@
+     *     This parameter has no summary.
+@@END_IF@@
+     *
+     * @param index Index of parameter to get.
+     * @return The parameter value.
+     */
+@@IF@@ @_PARAMETERTYPE_@=com.saabgroup.safir.dob.typesystem.Object
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@(int index)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
+    }
+@@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Object
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@(int index)
+    {
+        init();
+        return (@_PARAMETERTYPE_@)com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
+    }
+@@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@(int index)
+    {
+        init();
+        int enumVal = com.saabgroup.safir.dob.typesystem.Parameters.getEnumeration
+            (ClassTypeId,
+             m_@_PARAMETER_@Parameter,
+             index);
+
+        return @_PARAMETERTYPE_@.values()[enumVal];
+    }
+@@ELSE@@
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@(int index)
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Parameters.get@_REPLACE(^si(..)\..*/Float\1):UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
+    }
+@@END_IF@@
+@@ELSE@@
+    /**
+     * Get the value of the @_PARAMETER_@ parameter.
+     *
+     * @_PARAMETER_@ summary:
+@@IF@@ @_EXIST:PARAMETERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):PARAMETERSUMMARY_@
+@@ELSE@@
+     *     This parameter has no summary.
+@@END_IF@@
+     *
+     * @return The value of the @_PARAMETER_@ parameter.
+     */
+@@IF@@ @_PARAMETERTYPE_@=com.saabgroup.safir.dob.typesystem.Object
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@()
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, 0);
+    }
+@@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Object
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@()
+    {
+        init();
+        return (@_PARAMETERTYPE_@)com.saabgroup.safir.dob.typesystem.Parameters.getObject(ClassTypeId, m_@_PARAMETER_@Parameter, 0);
+    }
+@@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@()
+    {
+        init();
+        int enumVal = com.saabgroup.safir.dob.typesystem.Parameters.getEnumeration
+            (ClassTypeId,
+             m_@_PARAMETER_@Parameter,
+             0);
+
+        return @_PARAMETERTYPE_@.values()[enumVal];
+    }
+@@ELSE@@
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@()
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Parameters.get@_REPLACE(^si(..)\..*/Float\1):UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, 0);
+    }
+@@END_IF@@
+@@END_IF@@
+
+@@END_IF@@
+@@END_TABLE@@
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+    /**
+     * Get the member index for @_MEMBER_@.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @return The member index for @_MEMBER_@.
+     */
+    public static int get@_MEMBER_@MemberIndex() {
+        init();
+        return m_@_MEMBER_@MemberIndex;
+    }
+
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=String
+    /**
+     * Get the maximum length of the @_MEMBER_@ member.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @return The maximum length of the @_MEMBER_@ string member.
+     */
+    public static int get@_MEMBER_@MaxStringLength() {
+        init();
+        return m_@_MEMBER_@Length;
+    }
+
+@@END_IF@@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+    /**
+     * Get the array size of @_MEMBER_@.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @return The array size of @_MEMBER_@.
+     */
+    public static int get@_MEMBER_@ArraySize() {
+        init();
+        return m_@_MEMBER_@Size;
+    }
+
+@@END_IF@@
+
+    /**
+     * Get the member container for @_MEMBER_@.
+     *
+     * @_MEMBER_@ summary:
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):MEMBERSUMMARY_@
+@@ELSE@@
+     *     This member has no summary.
+@@END_IF@@
+     *
+     * @return The member container for @_MEMBER_@.
+     */
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    public @_MEMBERTYPE_@.ContainerArray @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+    public com.saabgroup.safir.dob.typesystem.ArrayContainer<com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSIF@@ @_MEMBERTYPE_@=float or @_MEMBERTYPE_@=double or not @_MATCH(.*\..*):UNIFORM_MEMBERTYPE_@
+    public com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSE@@
+    public @_UNIFORM_MEMBERTYPE_@Container @_LOWER:SLICE(1..1):MEMBER_@@_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+        m_@_MEMBER_@Member = new @_UNIFORM_MEMBERTYPE_@ContainerArray();
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    public @_MEMBERTYPE_@.Container @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+    public com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSIF@@ @_MEMBERTYPE_@=float or @_MEMBERTYPE_@=double or not @_MATCH(.*\..*):UNIFORM_MEMBERTYPE_@
+    public com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSE@@
+    public @_UNIFORM_MEMBERTYPE_@Container @_LOWER:SLICE(1..1):MEMBER_@@_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+        m_@_MEMBER_@Member = new @_UNIFORM_MEMBERTYPE_@Container();
+@@END_IF@@
+@@END_IF@@
+        return m_@_MEMBER_@Member;
+    }
+
+@@END_IF@@
+@@END_TABLE@@
+@@TABLE@@
+
+    /**
+     * Create routine for @_CLASS_@ objects.
+     * (A create routine is like a named constructor.)
+     *
+     * @_CREATEROUTINE_@ create routine summary:
+@@IF@@ @_EXIST:CREATEROUTINESUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):CREATEROUTINESUMMARY_@
+@@ELSE@@
+     *     This create routine has no summary.
+@@END_IF@@
+     *
+@@IF@@ @_EXIST:CREATEVALUE_@
+@@TABLE@@
+     * @_CREATEVALUE_@ is assigned a parameter value. See dou file for info.
+@@END_TABLE@@
+     *
+@@END_IF@@
+@@IF@@ @_EXIST:CREATEPARAMETER_@
+@@TABLE@@
+     * @param @_CREATEPARAMETER_@ Value for the @_CREATEPARAMETER_@ member.
+@@END_TABLE@@
+@@END_IF@@
+     * @return @_CLASS_@ Object created by create@_CREATEROUTINE_@
+     */
+@@IF@@ @_EXIST:CREATEPARAMETER_@
+    public static @_CLASS_@ create@_CREATEROUTINE_@ (
+@@ELSE@@
+    public static @_CLASS_@ create@_CREATEROUTINE_@ ()
+@@END_IF@@
+@@TABLE@@
+@@IF@@ @_EXIST:CREATEPARAMETER_@
+@@IF@@ @_EXIST:CREATEPARAMETERISLAST_@
+        @_CREATEPARAMETERTYPE_@ @_CREATEPARAMETER_@)
+@@ELSE@@
+        @_CREATEPARAMETERTYPE_@ @_CREATEPARAMETER_@,
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+    {
+        init();
+        @_CLASS_@ val = new @_CLASS_@();
+@@TABLE@@
+@@IF@@ @_EXIST:CREATEPARAMETER_@
+@@IF@@ @_EXIST:CREATEPARAMETERISARRAY_@
+@@IF@@ @_UNIFORM_CREATEPARAMETERTYPE_@=Object
+        val.@_LOWER:SLICE(1..1):CREATEPARAMETER_@@_REPLACE(./):CREATEPARAMETER_@().get(0).setObj(@_CREATEPARAMETER_@);
+@@ELSE@@
+        val.@_LOWER:SLICE(1..1):CREATEPARAMETER_@@_REPLACE(./):CREATEPARAMETER_@().get(0).setVal(@_CREATEPARAMETER_@);
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_CREATEPARAMETERTYPE_@=Object
+        val.@_LOWER:SLICE(1..1):CREATEPARAMETER_@@_REPLACE(./):CREATEPARAMETER_@().setObj(@_CREATEPARAMETER_@);
+@@ELSE@@
+        val.@_LOWER:SLICE(1..1):CREATEPARAMETER_@@_REPLACE(./):CREATEPARAMETER_@().setVal(@_CREATEPARAMETER_@);
+@@END_IF@@
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+@@TABLE@@
+@@IF@@ @_EXIST:CREATEVALUE_@
+@@IF@@ @_EXIST:CREATEVALUEISARRAY_@
+@@IF@@ @_EXIST:CREATEVALUEPARAMETERINDEX_@
+@@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
+        val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().get(0).setObj(@_CREATEVALUEPARAMETERCLASS_@.get@_CREATEVALUEPARAMETER_@ (@_CREATEVALUEPARAMETERINDEX_@));
+@@ELSE@@
+        val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().get(0).setVal(@_CREATEVALUEPARAMETERCLASS_@.get@_CREATEVALUEPARAMETER_@ (@_CREATEVALUEPARAMETERINDEX_@));
+@@END_IF@@
+@@ELSE@@
+        for (int i=0; i<@_CREATEVALUEPARAMETERCLASS_@.get@_CREATEVALUEPARAMETER_@ArraySize(); i++)
+        {
+@@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
+            val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().get(i).setObj(@_CREATEVALUEPARAMETERCLASS_@.get@_CREATEVALUEPARAMETER_@ (i));
+@@ELSE@@
+            val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().get(i).setVal(@_CREATEVALUEPARAMETERCLASS_@.get@_CREATEVALUEPARAMETER_@ (i));
+@@END_IF@@
+        }
+@@END_IF@@
+@@ELSIF@@ @_EXIST:CREATEVALUEPARAMETERINDEX_@
+@@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
+        val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().setObj(@_CREATEVALUEPARAMETERCLASS_@.get@_CREATEVALUEPARAMETER_@ (@_CREATEVALUEPARAMETERINDEX_@));
+@@ELSE@@
+        val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().setVal(@_CREATEVALUEPARAMETERCLASS_@.get@_CREATEVALUEPARAMETER_@ (@_CREATEVALUEPARAMETERINDEX_@));
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
+        val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().setObj(@_CREATEVALUEPARAMETERCLASS_@.get@_CREATEVALUEPARAMETER_@());
+@@ELSE@@
+        val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().setVal(@_CREATEVALUEPARAMETERCLASS_@.get@_CREATEVALUEPARAMETER_@());
+@@END_IF@@
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+        return val;
+    }
+
+@@END_TABLE@@
+    /** The TypeId of the @_UNIT_@ class. */
+    public static final long ClassTypeId = @_TYPEID_@L;
+
+    /**
+     * @see com.saabgroup.safir.dob.typesystem.Object#getTypeId()
+     */
+    public long getTypeId()
+    {
+        return ClassTypeId;
+    }
+
+    /**
+     * @see com.saabgroup.safir.dob.typesystem.Object#isChanged()
+     */
+    public boolean isChanged() {
+        return
+@@IF@@ @_EXIST:MEMBER_@
+            super.isChanged() ||
+@@ELSE@@
+            super.isChanged();
+@@END_IF@@
+@@TABLE@@
+@@IF@@ @_TABLE_LINE_@=@_MEMBER'length_@
+            m_@_MEMBER_@Member.isChanged();
+@@ELSE@@
+            m_@_MEMBER_@Member.isChanged() ||
+@@END_IF@@
+@@END_TABLE@@
+    }
+
+    /**
+     * @see com.saabgroup.safir.dob.typesystem.Object#setChanged(boolean)
+     */
+    public void setChanged(boolean changed) {
+        super.setChanged(changed);
+@@TABLE@@
+        m_@_MEMBER_@Member.setChanged(changed);
+@@END_TABLE@@
+    }
+
+    protected @_CLASS_@(@_CLASS_@ other){
+        super(other);
+@@TABLE@@
+        m_@_MEMBER_@Member = other.m_@_MEMBER_@Member.clone();
+@@END_TABLE@@
+    }
+
+    /**
+     * Member wise deep clone of object.
+     */
+    @Override
+    public @_CLASS_@ clone(){
+        return new @_CLASS_@(this);
+    }
+
+    /**
+     * Create @_CLASS_@ object from blob.
+     * @param blob the blob to deserialize.
+     */
+    public @_CLASS_@(java.nio.ByteBuffer blob) {
+        super(blob);
+
+        init();
+@@TABLE@@
+
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        m_@_MEMBER_@Member = new @_MEMBERTYPE_@.ContainerArray(m_@_MEMBER_@Size);
+        for (int i = 0; i < m_@_MEMBER_@Size; ++i) {
+            com.saabgroup.safir.dob.typesystem.BlobOperations.getEnumeration(m_@_MEMBER_@Member.get(i), blob, m_@_MEMBER_@MemberIndex, i);
+        }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        m_@_MEMBER_@Member = new @_MEMBERTYPE_@.ContainerArray(m_@_MEMBER_@Size);
+        for (int i = 0; i < m_@_MEMBER_@Size; ++i) {
+            com.saabgroup.safir.dob.typesystem.BlobOperations.getObject(m_@_MEMBER_@Member.get(i), blob, m_@_MEMBER_@MemberIndex, i);
+        }
+@@ELSE@@
+        java.util.ArrayList<com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@Tmp = new java.util.ArrayList<com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container>(m_@_MEMBER_@Size);
+        for (int i = 0; i < m_@_MEMBER_@Size; ++i) {
+            @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@Tmp.add(com.saabgroup.safir.dob.typesystem.BlobOperations.get@_REPLACE(^si(..)\.(.*)/\2\1):UNIFORM_MEMBERTYPE_@(blob, m_@_MEMBER_@MemberIndex, i));
+        }
+        m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray(@_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@Tmp);
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        m_@_MEMBER_@Member = new @_MEMBERTYPE_@.Container();
+        com.saabgroup.safir.dob.typesystem.BlobOperations.getEnumeration(m_@_MEMBER_@Member, blob, m_@_MEMBER_@MemberIndex, 0);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>();
+        com.saabgroup.safir.dob.typesystem.BlobOperations.getObject(m_@_MEMBER_@Member, blob, m_@_MEMBER_@MemberIndex, 0);
+@@ELSE@@
+        m_@_MEMBER_@Member = com.saabgroup.safir.dob.typesystem.BlobOperations.get@_REPLACE(^si(..)\.(.*)/\2\1):UNIFORM_MEMBERTYPE_@(blob, m_@_MEMBER_@MemberIndex, 0);
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+    }
+
+    /**
+     * @see com.saabgroup.safir.dob.typesystem.Object#calculateBlobSize()
+     */
+    @Override
+    public int calculateBlobSize() {
+        init();
+
+        int size = super.calculateBlobSize() + m_initialSize;
+@@TABLE@@
+
+        //@_MEMBER_@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=String
+        for (com.saabgroup.safir.dob.typesystem.StringContainer cont: m_@_MEMBER_@Member) {
+            size += cont.utf8StringLength();
+        }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=EntityId
+        for (@_MEMBERTYPE_@Container cont: m_@_MEMBER_@Member) {
+            if (!cont.isNull() && !cont.getVal().getInstanceId().getRawString().isEmpty()){
+                size += 16 + 4 + cont.getVal().getInstanceId().utf8StringLength();
+            }
+        }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=InstanceId or @_UNIFORM_MEMBERTYPE_@=ChannelId or @_UNIFORM_MEMBERTYPE_@=HandlerId
+        for (@_MEMBERTYPE_@Container cont: m_@_MEMBER_@Member){
+            if (!cont.isNull() && !cont.getVal().getRawString().isEmpty()){
+                size += 8 + 4 + cont.getVal().utf8StringLength();
+            }
+        }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        for (com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@> cont: m_@_MEMBER_@Member) {
+             size += cont.calculateBlobSize();
+        }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
+        for (com.saabgroup.safir.dob.typesystem.BinaryContainer cont: m_@_MEMBER_@Member){
+            if (!cont.isNull())
+                size += cont.getVal().length + 4;
+        }
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=String
+        size += m_@_MEMBER_@Member.utf8StringLength();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=EntityId
+        if (!m_@_MEMBER_@Member.isNull() && !m_@_MEMBER_@Member.getVal().getInstanceId().getRawString().isEmpty()){
+            size += 16 + 4 + m_@_MEMBER_@Member.getVal().getInstanceId().utf8StringLength();
+        }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=InstanceId or @_UNIFORM_MEMBERTYPE_@=ChannelId or @_UNIFORM_MEMBERTYPE_@=HandlerId
+        if (!m_@_MEMBER_@Member.isNull() && !m_@_MEMBER_@Member.getVal().getRawString().isEmpty()){
+            size += 8 + 4 + m_@_MEMBER_@Member.getVal().utf8StringLength();
+        }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        size += m_@_MEMBER_@Member.calculateBlobSize();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
+        if (!m_@_MEMBER_@Member.isNull())
+            size += m_@_MEMBER_@Member.getVal().length + 4;
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+
+        return size;
+    }
+
+
+    /**
+     * @see com.saabgroup.safir.dob.typesystem.Object#writeToBlob(java.nio.ByteBuffer, int)
+     */
+    @Override
+    public int writeToBlob(java.nio.ByteBuffer blob, int beginningOfUnused)
+    {
+        init();
+
+        beginningOfUnused = super.writeToBlob(blob, beginningOfUnused);
+@@TABLE@@
+
+        //@_MEMBER_@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=String or @_UNIFORM_MEMBERTYPE_@=EntityId or @_UNIFORM_MEMBERTYPE_@=InstanceId or @_UNIFORM_MEMBERTYPE_@=ChannelId or @_UNIFORM_MEMBERTYPE_@=HandlerId or @_UNIFORM_MEMBERTYPE_@=Object or @_UNIFORM_MEMBERTYPE_@=Binary
+        for (int i = 0; i < m_@_MEMBER_@Size; ++i) {
+            beginningOfUnused = com.saabgroup.safir.dob.typesystem.BlobOperations.set@_UNIFORM_MEMBERTYPE_@(m_@_MEMBER_@Member.get(i),blob,beginningOfUnused,m_@_MEMBER_@MemberIndex,i);
+        }
+@@ELSE@@
+        for (int i = 0; i < m_@_MEMBER_@Size; ++i) {
+            com.saabgroup.safir.dob.typesystem.BlobOperations.set@_REPLACE(^si(..)\.(.*)/\2\1):UNIFORM_MEMBERTYPE_@(m_@_MEMBER_@Member.get(i),blob,m_@_MEMBER_@MemberIndex,i);
+        }
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=String or @_UNIFORM_MEMBERTYPE_@=EntityId or @_UNIFORM_MEMBERTYPE_@=InstanceId or @_UNIFORM_MEMBERTYPE_@=ChannelId or @_UNIFORM_MEMBERTYPE_@=HandlerId or @_UNIFORM_MEMBERTYPE_@=Object or @_UNIFORM_MEMBERTYPE_@=Binary
+        beginningOfUnused = com.saabgroup.safir.dob.typesystem.BlobOperations.set@_UNIFORM_MEMBERTYPE_@(m_@_MEMBER_@Member,blob,beginningOfUnused,m_@_MEMBER_@MemberIndex,0);
+@@ELSE@@
+        com.saabgroup.safir.dob.typesystem.BlobOperations.set@_REPLACE(^si(..)\.(.*)/\2\1):UNIFORM_MEMBERTYPE_@(m_@_MEMBER_@Member,blob,m_@_MEMBER_@MemberIndex,0);
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+
+        return beginningOfUnused;
+    }
+
+
+    /**
+     * @see com.saabgroup.safir.dob.typesystem.Object#getMember(int, int)
+     */
+    public com.saabgroup.safir.dob.typesystem.ContainerBase getMember(int member, int index){
+        init();
+@@TABLE@@
+@@IF@@ @_TABLE_LINE_@=1
+        if (member == m_@_MEMBER_@MemberIndex) {
+@@ELSE@@
+        else if (member == m_@_MEMBER_@MemberIndex) {
+@@END_IF@@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+            if (index < 0 || index >= m_@_MEMBER_@Size) {
+                throw new com.saabgroup.safir.dob.typesystem.IllegalValueException("Invalid index into @_MEMBER_@ array");
+            }
+            return m_@_MEMBER_@Member.get(index);
+@@ELSE@@
+            if (index != 0) {
+                throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Member @_MEMBER_@ is not an array");
+            }
+            return m_@_MEMBER_@Member;
+@@END_IF@@
+        }
+@@END_TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+        else {
+            return super.getMember(member, index);
+        }
+@@ELSE@@
+        return super.getMember(member, index);
+@@END_IF@@
+    }
+
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    private @_MEMBERTYPE_@.ContainerArray m_@_MEMBER_@Member;
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+    private com.saabgroup.safir.dob.typesystem.ArrayContainer<com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> m_@_MEMBER_@Member;
+@@ELSE@@
+    private com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray m_@_MEMBER_@Member;
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    private @_MEMBERTYPE_@.Container m_@_MEMBER_@Member;
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+    private com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@> m_@_MEMBER_@Member;
+@@ELSE@@
+    private com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container m_@_MEMBER_@Member;
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+
+    private static void init() {
+        if(!m_isInitialized)
+        {
+@@TABLE@@
+@@IF@@ @_EXIST:PARAMETER_@
+            m_@_PARAMETER_@Parameter = com.saabgroup.safir.dob.typesystem.Parameters.getIndex(ClassTypeId, "@_PARAMETER_@");
+@@END_IF@@
+@@END_TABLE@@
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+            m_@_MEMBER_@MemberIndex = com.saabgroup.safir.dob.typesystem.Members.getIndex(ClassTypeId, "@_MEMBER_@");
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=String
+            m_@_MEMBER_@Length = com.saabgroup.safir.dob.typesystem.Members.getMaxStringLength(ClassTypeId, m_@_MEMBER_@MemberIndex);
+@@END_IF@@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+            m_@_MEMBER_@Size = com.saabgroup.safir.dob.typesystem.Members.getArraySize(ClassTypeId, m_@_MEMBER_@MemberIndex);
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+            m_initialSize = com.saabgroup.safir.dob.typesystem.BlobOperations.getInitialSize(ClassTypeId);
+
+            m_isInitialized = true;
+        }
+    }
+
+    private static boolean m_isInitialized = false;
+
+@@TABLE@@
+@@IF@@ @_EXIST:PARAMETER_@
+    private static int m_@_PARAMETER_@Parameter = -1;
+@@END_IF@@
+@@END_TABLE@@
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+    private static int m_@_MEMBER_@MemberIndex = -1;
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=String
+    private static int m_@_MEMBER_@Length = -1;
+@@END_IF@@
+@@IF@@ @_EXIST:MEMBERISARRAY_@
+    private static int m_@_MEMBER_@Size = -1;
+@@END_IF@@
+@@END_IF@@
+@@END_TABLE@@
+
+    private static int m_initialSize = -1;
+
+    /**
+     * Array for ObjectContainers
+     */
+    static public class ContainerArray
+        extends com.saabgroup.safir.dob.typesystem.ArrayContainer<com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_CLASS_@>>
+        implements Cloneable {
+
+        private static java.util.ArrayList<com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_CLASS_@>> createBlankArray(int size){
+            java.util.ArrayList<com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_CLASS_@>> initializedArray =
+                new java.util.ArrayList<com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_CLASS_@>>(size);
+            for (int i = 0; i < size; ++i) {
+                initializedArray.add(new com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_CLASS_@>());
+            }
+            return initializedArray;
+        }
+
+        /**
+         * Constructor with size.
+         *
+         * Creates an array of the given size. Remember that once it has been created the size cannot be changed.
+         *
+         * @param size The desired size of the array. Must be > 0.
+         */
+        public ContainerArray(int size) {
+            super(createBlankArray(size));
+        }
+
+        /**
+         * Construct an array containing the specified array.
+         *
+         * @param initializedArray the array to use.
+         */
+        public ContainerArray(java.util.ArrayList<com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_CLASS_@>> initializedArray) {
+            super(initializedArray);
+        }
+
+        protected ContainerArray(ContainerArray other) {
+            super(other);
+        }
+
+        /**
+         * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
+         */
+        @Override
+        public ContainerArray clone() {
+            return new ContainerArray(this);
+        }
+
+    }
+
+}
+@@ELSIF@@ @_UNITTYPE_@=enumeration
+@@--
+@@-- ENUMERATION
+@@--
+@@IF@@ @_EXIST:CLASSSUMMARY_@
+/**
+ * @_REPLACE_ALL(\n/\n * ):CLASSSUMMARY_@
+ */
+@@ELSE@@
+/**
+ * This enum has no summary.
+ */
+@@END_IF@@
+public enum @_CLASS_@
+{
+@@TABLE@@
+    /** @_ENUMVALUE_@ enum value */
+@@IF@@ @_TABLE_LINE_@=@_ENUMVALUE'length_@
+    @_ENUMVALUE_@;
+@@ELSE@@
+    @_ENUMVALUE_@,
+
+@@END_IF@@
+@@END_TABLE@@
+
+    /** EnumerationId for @_CLASS_@. */
+    public static final long EnumerationId = @_TYPEID_@L;
+
+    /** Checksum for @_CLASS_@. */
+    public static final long Checksum = @_CHECKSUM_@L;
+
+    /**
+     * Convert an enum value to the string as it is specified in the Dou file.
+     * The normal toString for enumerations will return "ENUM_VALUE", whereas this
+     * method will return "EnumValue".
+     *
+     * @return The string of the enumeration as specified in the dou file.
+     */
+    public String toDouString() {
+        return com.saabgroup.safir.dob.typesystem.Operations.getEnumerationValueName(EnumerationId, this.ordinal());
+    }
+
+    /**
+     * Convert the dou string value of an enum to an enum value.
+     * @see #toDouString for an explanation of "dou enum strings".
+     *
+     * @return The enum value corresponding to the string.
+     * @throws IllegalValueException There is no such type defined or it is not an enumeration.
+     */
+    static public @_CLASS_@ fromDouString(String str) {
+        return @_CLASS_@.values()[com.saabgroup.safir.dob.typesystem.Operations.getEnumerationValue(EnumerationId,str)];
+    }
+
+    /**
+     * Check that there is no enumeration mismatch
+     * throws an exception if there is - ConfigurationErrorException
+     * call this like this from your application (somewhere in the startup code):
+     *   @_UNIT_@.checkForMismatch(@_UNIT_@.Checksum);
+     * The checksum that you are passing to this function is compiled into your application
+     * so that if the enum changes the checksum in your application will be different than that
+     * in dots_generated, which will mean that an exception is thrown.
+     *
+     * @param checksum the checksum to check against.
+     */
+    public static void checkForMismatch(long checksum) {
+        if (checksum != Checksum)
+        {
+            throw new com.saabgroup.safir.dob.typesystem.ConfigurationErrorException("Type mismatch in type @_UNIT_@. Recompile your application!");
+        }
+    }
+
+    /**
+     * Container for the enumeration @_CLASS_@
+     */
+    static public class Container
+        extends com.saabgroup.safir.dob.typesystem.EnumerationContainerBase<@_UNIT_@>
+        implements Cloneable {
+        /**
+         * Default constructor (constructs a null and not changed container).
+         */
+       public Container() {
+           super();
+       }
+
+       @Override
+       protected int getNumValues() {
+           return @_UNIT_@.values().length;
+       }
+
+       /**
+        * @see com.saabgroup.safir.dob.typesystem.EnumerationContainerBase#getVal()
+        */
+       @Override
+       public @_CLASS_@ getVal() {
+           return @_UNIT_@.values()[getOrdinal()];
+       }
+
+       protected Container(Container other) {
+           super(other);
+       }
+
+       /**
+        * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
+        */
+       @Override
+           public Container clone() {
+           return new Container(this);
+       }
+    }
+
+    /**
+     * Array for @_CLASS_@Containers
+     */
+    static public class ContainerArray
+        extends com.saabgroup.safir.dob.typesystem.ArrayContainer<Container>
+        implements Cloneable {
+
+        private static java.util.ArrayList<Container> createBlankArray(int size){
+            java.util.ArrayList<Container> initializedArray = new java.util.ArrayList<Container>(size);
+            for (int i = 0; i < size; ++i) {
+                initializedArray.add(new Container());
+            }
+            return initializedArray;
+        }
+
+        /**
+         * Constructor with size.
+         *
+         * Creates an array of the given size. Remember that once it has been created the size cannot be changed.
+         *
+         * @param size The desired size of the array. Must be > 0.
+         */
+        public ContainerArray(int size) {
+            super(createBlankArray(size));
+        }
+
+        /**
+         * Construct an array containing the specified array.
+         *
+         * @param initializedArray the array to use.
+         */
+        public ContainerArray(java.util.ArrayList<Container> initializedArray) {
+            super(initializedArray);
+        }
+
+        protected ContainerArray(ContainerArray other) {
+            super(other);
+        }
+
+        /**
+         * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
+         */
+        @Override
+            public ContainerArray clone() {
+            return new ContainerArray(this);
+        }
+    }
+}
+@@ELSIF@@ @_UNITTYPE_@=exception
+@@--
+@@-- EXCEPTION
+@@--
+//Dependencies as comments, since they are fully specified in the code:
+@@TABLE@@
+@@IF@@ @_EXIST:DEPENDENCY_@
+//import @_DEPENDENCY_@;
+@@END_IF@@
+@@END_TABLE@@
+
+@@IF@@ @_EXIST:CLASSSUMMARY_@
+/**
+ * @_REPLACE_ALL(\n/\n * ):CLASSSUMMARY_@
+ */
+@@ELSE@@
+/**
+ * This exception has no summary.
+ */
+@@END_IF@@
+public class @_CLASS_@ extends @_BASECLASS_@ {
+
+    /**
+     * Constructor with exception information.
+     *
+     * @param message A message describing why the exception occurred.
+     */
+    public @_CLASS_@(String message) {
+        super(message);
+    }
+
+    /**
+     * The TypeId of this exception type.
+     */
+    public static final long ExceptionTypeId = @_TYPEID_@L;
+
+    /**
+     * Get the type id of this exception.
+     *
+     * Gets the type id of the exception. Method is virtual to ensure that the right
+     * value gets returned for pointers or references.
+     *
+     * Note: This method is overridden by all auto-generated classes.
+     *
+     * @return The TypeId of the exception object.
+     */
+    public long getTypeId() {
+        return ExceptionTypeId;
+    }
+
+    private static final long serialVersionUID = 1L;
+
+}
+@@END_IF@@
+@@END_IF@@

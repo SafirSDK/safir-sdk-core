@@ -186,6 +186,13 @@ namespace Internal
         }
     }
 
+    bool ServiceTypes::HasRegistrationSubscription(const ConnectionPtr&             connection,
+                                                   const ConsumerId&                consumer,
+                                                   const Dob::Typesystem::TypeId    typeId)
+    {
+        return GetType(typeId).HasRegistrationSubscription(connection, consumer);
+    }
+
     void
     ServiceTypes::RegisterAcceptedPendingRegistrations(const ConnectionPtr & connection,
                                                        PendingRegistrationVector & prv,

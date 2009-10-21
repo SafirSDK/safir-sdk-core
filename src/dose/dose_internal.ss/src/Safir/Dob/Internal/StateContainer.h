@@ -74,6 +74,9 @@ namespace Internal
 
         void UnsubscribeAll(const ConnectionPtr& connection);
 
+        // Returns true if the given subscription is active
+        bool HasSubscription(const SubscriptionId&   subscriptionId) const;
+
         typedef boost::function<void(const Dob::Typesystem::Int64 key,
                                      const UpgradeableStateResult& statePtrResult)> ActionFunc;
 

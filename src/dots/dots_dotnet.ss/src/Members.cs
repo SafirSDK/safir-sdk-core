@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -29,11 +29,23 @@ using System.Runtime.InteropServices;
 
 namespace Safir.Dob.Typesystem
 {
+    /// <summary>
+    /// Methods for getting member information from types.
+    /// <para>
+    /// With these operations you can get information on types regarding
+    /// their members. You can get member names and indexes. You can
+    /// get TypeIds of members etc.
+    /// </para>
+    /// </summary>
     public class Members
     {
-        //********************************************************
-        //* Functions for retrieving member info about object types
-        //********************************************************
+        /// <summary>
+        /// Get the number of members for a class or property.
+        /// Parameters are not included.
+        /// </summary>
+        /// <param name="typeId">TypeId of class or property.</param>
+        /// <returns>Number of members in the class.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type defined.</exception>
         public static int GetNumberOfMembers(System.Int64 typeId)
         {
             int result = Kernel.DotsC_GetNumberOfMembers(typeId);
@@ -47,6 +59,13 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Get the member index of a named member.
+        /// </summary>
+        /// <param name="typeId">TypeId of class or property.</param>
+        /// <param name="memberName">Name of member as specified in xml description, case sensitive.</param>
+        /// <returns>Member index of the member.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type defined or there is no such member in the type.</exception>
         public static int GetIndex(System.Int64 typeId,
                                    string memberName)
         {
@@ -63,6 +82,13 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Get the name of the specified member as it was defined in the xml description.
+        /// </summary>
+        /// <param name="typeId">TypeId of class or property.</param>
+        /// <param name="member">Index of member.</param>
+        /// <returns>Name of member.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type defined or there is no such member in the type.</exception>
         public static string GetName(System.Int64 typeId,
                                      int member)
         {
@@ -77,6 +103,18 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Get type id of object or enumeration member.
+        /// <para>
+        /// If a member is of type object or enumeration, this method can be used to get
+        /// the typeId for the class or enum that the member is of.
+        /// </para>
+        /// </summary>
+        /// <param name="typeId">TypeId of class or property.</param>
+        /// <param name="member">Index of member.</param>
+        /// <returns>The TypeId for the object or enumeration member.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type defined or there is no such member
+        /// in the type or the member is not an enum or object.</exception>
         public static System.Int64 GetTypeId(System.Int64 typeId,
                                              int member)
         {
@@ -91,10 +129,23 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Get information about a specific class member.
+        /// </summary>
+        /// <param name="typeId">TypeId of class or property.</param>
+        /// <param name="member">Index of member.</param>
+        /// <param name="theMemberType">The type of the member.</param>
+        /// <param name="memberTypeId">If memberType is object or enumeration, this is the typeId of that type.
+        /// If memberType is something else the value is -1.</param>
+        /// <param name="theTypeSize">If theMemberType is string and the type is a class (not property) then this is the length of the string.</param>
+        /// <param name="isArray">True if member is an array. Not applicable if type id is a property.</param>
+        /// <param name="arrayLength">Maximum capacity of array if the member is an array (1 if not an array). Not applicable if type id is a property.</param>
+        /// <returns>The name of the member.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type defined or there is no such member in the type.</exception>
         public static string GetInfo(System.Int64 typeId,
                                      int member,
                                      out MemberType theMemberType,
-                                     out System.Int64 complexType,
+                                     out System.Int64 memberTypeId,
                                      out int theTypeSize,
                                      out bool isArray,
                                      out int arrayLength)
@@ -105,7 +156,7 @@ namespace Safir.Dob.Typesystem
                                        member,
                                        out theMemberType,
                                        out name,
-                                       out complexType,
+                                       out memberTypeId,
                                        out theTypeSize,
                                        out isArr,
                                        out arrayLength);
@@ -120,6 +171,13 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Get the array size of a member.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="member">Index of member.</param>
+        /// <returns>The array size of the member.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type defined or there is no such member in the type.</exception>
         public static int GetArraySize(System.Int64 typeId,
                                              int member)
         {
@@ -134,7 +192,13 @@ namespace Safir.Dob.Typesystem
             }
         }
 
-
+        /// <summary>
+        /// Get the maximum string length of a member.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="member">Index of member.</param>
+        /// <returns>The maximum length of the string member.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such class defined or there is no such member in the type or the member is not a string.</exception>
         public static int GetMaxStringLength(System.Int64 typeId,
                                              int member)
         {
@@ -149,6 +213,13 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Get the name of the type as it was defined in the xml description.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="member">Index of member.</param>
+        /// <returns>The name of the type.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such class defined or there is no such member in the type or the member is not a string.</exception>
         public static string GetTypeName(System.Int64 typeId,
                                          int member)
         {

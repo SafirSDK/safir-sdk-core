@@ -138,6 +138,13 @@ namespace Internal
         GetType(msg.GetTypeId()).DistributeMsg(msg);
     }
 
+    bool MessageTypes::HasSubscription(const ConnectionPtr&             connection,
+                                       const ConsumerId&                consumer,
+                                       const Dob::Typesystem::TypeId    typeId)
+    {
+        return GetType(typeId).HasSubscription(connection, consumer);
+    }
+
     void MessageTypes::DumpSubscriptions() const
     {
         //AWI:todo

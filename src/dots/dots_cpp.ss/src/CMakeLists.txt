@@ -1,21 +1,30 @@
+cmake_minimum_required(VERSION 2.6)
+
 PROJECT (dots_cpp)
 
 INCLUDE_DIRECTORIES(.)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
+FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
-SET(CMAKE_CXX_FLAGS "-Wall -Wunused-parameter")
+ADD_LIBRARY(dots_cpp SHARED ${sources} ${headers})
+TARGET_LINK_LIBRARIES(dots_cpp ${ACE_LIBRARY})
 
-ADD_LIBRARY(dots_cpp SHARED ${sources})
-TARGET_LINK_LIBRARIES(dots_cpp dots_kernel ACE lluf_utils)
+ADD_DEFINITIONS(-DDOTS_EXPORTS)
 
-INSTALL(DIRECTORY Safir DESTINATION $ENV{SAFIR_SDK}/include
+if (NOT MSVC)
+  TARGET_LINK_LIBRARIES(dots_cpp dots_kernel lluf_utils)
+endif()
+
+INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)
 
 INSTALL(TARGETS dots_cpp
-        RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION $ENV{SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION $ENV{SAFIR_SDK}/lib)
+        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+
+INSTALL_DEBUG_INFO(dots_cpp)

@@ -37,6 +37,8 @@ namespace Internal
 
         VersionNumber& operator++(){++m_counter; return *this;}
 
+        VersionNumber& operator--(){--m_counter; return *this;}
+
         bool operator<(const VersionNumber & other) const
         {
             if (this->m_counter < other.m_counter)

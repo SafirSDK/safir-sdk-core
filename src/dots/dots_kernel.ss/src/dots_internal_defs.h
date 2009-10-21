@@ -45,6 +45,19 @@
 #include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 #include <vector>
 
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4702)
+#endif
+
+#include <boost/lexical_cast.hpp>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
 namespace Safir
 {
 namespace Dob
@@ -142,8 +155,8 @@ namespace Internal
 
         static void ToExternalFormat(const InternalMemberStatus internalFormat, bool& isNull, bool& isChanged)
         {
-            isNull = internalFormat & NULL_FLAG_MASK;
-            isChanged = internalFormat & CHANGE_FLAG_MASK;
+            isNull = (internalFormat & NULL_FLAG_MASK) != 0;
+            isChanged = (internalFormat & CHANGE_FLAG_MASK) != 0;
         }
 
         static InternalMemberStatus ToInternalFormat(const bool isNull, const bool isChanged)
@@ -159,12 +172,12 @@ namespace Internal
 
         static bool HasChanged(const InternalMemberStatus internalFormat)
         {
-            return internalFormat & CHANGE_FLAG_MASK;
+            return (internalFormat & CHANGE_FLAG_MASK) != 0;
         }
 
         static bool IsNull(const InternalMemberStatus internalFormat)
         {
-            return internalFormat & NULL_FLAG_MASK;
+            return (internalFormat & NULL_FLAG_MASK) != 0;
         }
 
         static bool ChangedOrNotNull(const InternalMemberStatus internalFormat)
@@ -186,7 +199,7 @@ namespace Internal
 
         static bool HasDynamicPart(const InternalMemberStatus internalFormat)
         {
-            return internalFormat & SEMIDYNAMIC_FLAG_MASK;
+            return (internalFormat & SEMIDYNAMIC_FLAG_MASK) != 0;
         }
     };
 

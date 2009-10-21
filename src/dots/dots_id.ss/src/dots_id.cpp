@@ -24,12 +24,28 @@
 
 #include <Safir/Dob/Typesystem/Internal/Id.h>
 #include "md5.h"
-#include <boost/random/ranlux.hpp>
 #include <boost/limits.hpp>
 #include <ctime>
+
+//disable warnings in boost and ace
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244)
+  #pragma warning (disable : 4127)
+  #pragma warning (disable : 4267)
+#endif
+
 #include <ace/Thread_Mutex.h>
 #include <ace/Guard_T.h>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/random/ranlux.hpp>
+
+
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 
 boost::int64_t __cdecl DotsId_Generate64(const char* str)

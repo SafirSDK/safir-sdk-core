@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2004-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Joel Ottosson / stjoot
 *
 *******************************************************************************
@@ -29,7 +29,6 @@
 #include "dots_xml_elements.h"
 #include "dots_base64_conversions.h"
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <boost/lexical_cast.hpp>
 
 //#define LOG_CALLSTACK
 
@@ -601,7 +600,7 @@ namespace Internal
         if (!MemberStatusHandler::IsNull(status))
         {
             const ClassDescription* cde=Repository::Classes().FindClass(val.typeId);
-            
+
             WriteStartElement(XmlElements::ENTITY_ID);
             if (cde!=NULL)
             {
@@ -634,16 +633,54 @@ namespace Internal
         InternalMemberStatus status=BlobLayout::GetDynamicMember(blob, member, ix, str, dummy);
         if (!MemberStatusHandler::IsNull(status))
         {
-            WriteStartElement(XmlElements::VALUE);
-            if (str != NULL)
+            if (strlen(str) == 0)
             {
-                xml+=str;
+                xml.append("<");
+                xml.append(XmlElements::VALUE);
+                xml.append("/>");
             }
             else
             {
-                WriteError("NULL string!");
+                xml.append("<");
+                xml.append(XmlElements::VALUE);
+                xml.append(" xml:space=\"preserve\">");
+                //                WriteStartElement(XmlElements::VALUE);
+                if (str != NULL)
+                {
+                    while (*str != 0) //keep going until we hit the null termination
+                    {
+                        //Perform replacement of characters that can't be in xml.
+                        switch (*str)
+                        {
+                        case '&':
+                            xml.append("&amp;");
+                            break;
+                        case '<':
+                            xml.append("&lt;");
+                            break;
+                        case '>':
+                            xml.append("&gt;");
+                            break;
+                        case '"':
+                            xml.append("&quot;");
+                            break;
+                        case '\'':
+                            xml.append("&apos;");
+                            break;
+                        default:
+                            xml += *str;
+                            break;
+                        }
+
+                        ++str;
+                    }
+                }
+                else
+                {
+                    WriteError("NULL string!");
+                }
+                WriteEndElement(XmlElements::VALUE);
             }
-            WriteEndElement(XmlElements::VALUE);
         }
         return MemberStatusHandler::ChangedOrNotNull(status);
     }
@@ -675,20 +712,28 @@ namespace Internal
         InternalMemberStatus status=BlobLayout::GetDynamicMember(blob, member, ix, const_cast<const char*&>(binary), size);
         if (!MemberStatusHandler::IsNull(status))
         {
-            //get required buffer size
-            std::vector<char> b64Dest(Base64Conversions::CalculateBase64Size(size));
-            Int32 resultSize;
-            Base64Conversions::ToBase64(&b64Dest[0], static_cast<Int32>(b64Dest.size()), binary, size, resultSize);
-            if(static_cast<size_t>(resultSize) != b64Dest.size())
+            if (size == 0)
             {
-                throw InternalException("Invalid lengths from Base64Conversions::ToBase64, probably a programming error in dots_kernel",__FILE__,__LINE__);
+                xml.append("<");
+                xml.append(XmlElements::VALUE);
+                xml.append("/>");
             }
-            WriteStartElement(XmlElements::VALUE);
-            xml.append("\n");
-            xml.append(b64Dest.begin(),b64Dest.end());
-            xml.append("\n");
-            WriteEndElement(XmlElements::VALUE);
-
+            else
+            {
+                //get required buffer size
+                std::vector<char> b64Dest(Base64Conversions::CalculateBase64Size(size));
+                Int32 resultSize;
+                Base64Conversions::ToBase64(&b64Dest[0], static_cast<Int32>(b64Dest.size()), binary, size, resultSize);
+                if(static_cast<size_t>(resultSize) != b64Dest.size())
+                {
+                    throw InternalException("Invalid lengths from Base64Conversions::ToBase64, probably a programming error in dots_kernel",__FILE__,__LINE__);
+                }
+                WriteStartElement(XmlElements::VALUE);
+                xml.append("\n");
+                xml.append(b64Dest.begin(),b64Dest.end());
+                xml.append("\n");
+                WriteEndElement(XmlElements::VALUE);
+            }
         }
         return MemberStatusHandler::ChangedOrNotNull(status);
     }

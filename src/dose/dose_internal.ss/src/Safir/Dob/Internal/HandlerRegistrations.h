@@ -126,11 +126,18 @@ namespace Internal
 
         void UnsubscribeAll(const ConnectionPtr& connection);
 
+        bool HasSubscription(const ConnectionPtr&    connection,
+                             const ConsumerId&       consumer) const;
+
         /** @} */
 
     private:
 
         Typesystem::TypeId m_typeId;
+
+        SubscriptionType m_subscriptionType;
+
+        void SetSubscriptionType();
 
         mutable StateContainer m_registrations;
 

@@ -167,6 +167,9 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
+        /// <summary>
+        /// Obj property.
+        /// </summary>
         public T Obj
         {
             set 
@@ -231,6 +234,12 @@ namespace Safir.Dob.Typesystem
         /// <returns>The needed size in bytes. 0 if the container is null.</returns>
         public System.Int32 CalculateBlobSize() {if (IsNull()) return 0; else return m_Object.CalculateBlobSize();}
 
+        /// <summary>
+        /// Access the contained object directly, without any checks.
+        /// No checks are made of the isNull flag, and the isChanged flag is not updated
+        /// <para/>
+        /// Note: Do not use this method unless you're very sure it is the one you need!
+        /// </summary>
         public override Object InternalObj
         {
             get

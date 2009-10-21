@@ -1,21 +1,32 @@
+cmake_minimum_required(VERSION 2.6)
+
 PROJECT (dots_id)
 
 INCLUDE_DIRECTORIES(.)
 
+#this library has a C interface, so we don't want the "d" suffix on debug builds on windows
+#Must be set before including cmake_settings.txt
+SET(NO_LIBRARY_POSTFIXES 1) 
+
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
-ADD_LIBRARY(dots_id SHARED dots_id.cpp md5.c)
+ADD_LIBRARY(dots_id SHARED dots_id.cpp md5.c md5.h Safir/Dob/Typesystem/Internal/Id.h)
 
-TARGET_LINK_LIBRARIES(dots_id ACE rt boost_date_time)
+FIND_PACKAGE(Boost COMPONENTS filesystem date_time)
+TARGET_LINK_LIBRARIES(dots_id ${ACE_LIBRARY} ${Boost_LIBRARIES} ${COMMON_LIBRARIES})
 
-INSTALL(DIRECTORY Safir DESTINATION $ENV{SAFIR_SDK}/include
+ADD_DEFINITIONS(-DDOTS_ID_EXPORTS)
+
+INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)
 
 INSTALL(TARGETS dots_id
-        RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION $ENV{SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION $ENV{SAFIR_SDK}/lib)
+        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
 INSTALL(FILES ../data/dots_id.gpr
-        DESTINATION $ENV{SAFIR_SDK}/ada/)
+        DESTINATION ${SAFIR_SDK}/ada/)
+
+INSTALL_DEBUG_INFO(dots_id)

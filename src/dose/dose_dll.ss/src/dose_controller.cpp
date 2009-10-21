@@ -89,7 +89,8 @@ namespace Internal
           m_context(0),
           m_exitDispatch(false),
           m_dispatchedInjection(no_state_tag),
-          m_originalInjectionState(no_state_tag)
+          m_originalInjectionState(no_state_tag),
+          m_consumerReferences()
     {
 
     }
@@ -133,8 +134,22 @@ namespace Internal
                              OnInjectedDeletedEntityCb* onInjectedDeletedEntityCb,
                              OnInitialInjectionsDoneCb* onInitialInjectionsDoneCb,
                              OnNotRequestOverflowCb* onNotRequestOverflowCb,
-                             OnNotMessageOverflowCb* onNotMessageOverflowCb)
+                             OnNotMessageOverflowCb* onNotMessageOverflowCb,
+                             OnDropReferenceCb* onDropReferenceCb)
     {
+        // If it is a garbage collected language the consumer reference counters must be incremented.
+        // This must be done even if we already are connected.
+        if (g_garbageCollected[lang])
+        {
+            m_consumerReferences.AddDispatcherReference(dispatcher);
+
+            // The connectionOwner cunsumer is allowed to be null. If it is, its
+            // reference counter must not be incremented.
+            if (connectionOwner.consumer != NULL)
+            {
+                m_consumerReferences.AddStopHandlerReference(connectionOwner);
+            }
+        }
 
         if (m_isConnected)
         {
@@ -166,7 +181,8 @@ namespace Internal
                                     onInjectedDeletedEntityCb,
                                     onInitialInjectionsDoneCb,
                                     onNotRequestOverflowCb,
-                                    onNotMessageOverflowCb);
+                                    onNotMessageOverflowCb,
+                                    onDropReferenceCb);
         // Save the original name parts
         m_connectionNameCommonPart = connectionNameCommonPart;
         m_connectionNameInstancePart = connectionNameInstancePart;
@@ -232,10 +248,7 @@ namespace Internal
         ENSURE(m_dispatchThread == NULL, << "DispatchThread was non-NULL when  was called!");
         m_dispatchThread.reset(new DispatchThread(m_connection->Id(), dispatcher, onDispatchCb));
 
-        if (lang!=3/*DOSE_LANGUAGE_JAVA*/)
-        {
-            m_dispatchThread->StartNewThread();
-        }
+        m_dispatchThread->StartNewThread();
 
         lllout << " complete for " << m_connectionName.c_str() << std::endl;
     }
@@ -259,7 +272,8 @@ namespace Internal
                                         OnInjectedDeletedEntityCb* onInjectedDeletedEntityCb,
                                         OnInitialInjectionsDoneCb* onInitialInjectionsDoneCb,
                                         OnNotRequestOverflowCb* onNotRequestOverflowCb,
-                                        OnNotMessageOverflowCb* onNotMessageOverflowCb)
+                                        OnNotMessageOverflowCb* onNotMessageOverflowCb,
+                                        OnDropReferenceCb* onDropReferenceCb)
     {
         if (!m_isConnected) //Must already be attached to dose_main, to be able to attach secondary
         {
@@ -285,23 +299,32 @@ namespace Internal
                                   onInjectedDeletedEntityCb,
                                   onInitialInjectionsDoneCb,
                                   onNotRequestOverflowCb,
-                                  onNotMessageOverflowCb);
+                                  onNotMessageOverflowCb,
+                                  onDropReferenceCb);
         lllout << "ConnectSecondary complete for " << m_connectionName.c_str() << std::endl;
     }
 
 
     void Controller::Disconnect()
     {
+        if (m_isConnected)
+        {
+            // The app must not get any callbacks after a disconnect
+            m_exitDispatch = true;
+        }
+
+        bool dispatchThreadStopped = true;
+
         //stop m_dispatchThread first of all
         if (m_dispatchThread != NULL)
         {
-            const bool stopped = m_dispatchThread->Stop(true);
+            dispatchThreadStopped = m_dispatchThread->Stop(true);
 
             //if it couldnt be stopped it - assuming that the user didn't do anything stupid - is
             //in user code waiting to tell the main thread about a dispatch. But the main thread is
             //in here (we're it...), trying to stop the dispatch thread. So we put the dispatch thread in
             //the "attic" so that we can stop and remove it when we're dispatched again.
-            if (!stopped)
+            if (!dispatchThreadStopped)
             {
                 lllout << "Failed to stop the DispatchThread (addr = "
                        << (void *)m_dispatchThread.get()
@@ -310,6 +333,10 @@ namespace Internal
                        << ", sticking it in the attic for later removal" << std::endl;
 
                 m_dispatchThreadAttic.insert(std::make_pair(m_dispatchThread,1));
+
+                // For GC collected languages: Since this thread can't be stopped we can't remove
+                // the referenses to the dispatcher, therefor the counter is saved in a "reference attic".
+                m_consumerReferences.MoveDispatcherReferencesToAttic(m_dispatchThread);
             }
 
             m_dispatchThread.reset();
@@ -336,6 +363,13 @@ namespace Internal
         //shared queues are deleted by dose_main.
         m_context = 0;
         m_connection = NULL;
+
+        // Drop any reference corresponding to a saved consumer (will be saved for
+        // garbage colleted languages only).
+        m_consumerReferences.DropAllReferences(boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                           m_dispatcher,
+                                                           _1,
+                                                           _2));
     }
 
     const char * const
@@ -405,15 +439,21 @@ namespace Internal
         if (overrideRegistration)
         {
             ServiceTypes::Instance().Register(m_connection,
-                                              typeId,
-                                              handlerId,
-                                              overrideRegistration,
-                                              consumer);
+                                               typeId,
+                                               handlerId,
+                                               overrideRegistration,
+                                               consumer);
         }
         else
         {
             m_connection->AddPendingRegistration(PendingRegistration(typeId, handlerId, consumer));
             m_connection->SignalOut();
+        }
+
+        // Add a reference for garbage collected languages
+        if (g_garbageCollected[consumer.lang])
+        {
+            m_consumerReferences.AddHandlerRegistrationReference(typeId, handlerId, consumer);
         }
     }
 
@@ -465,6 +505,12 @@ namespace Internal
             m_connection->AddPendingRegistration(PendingRegistration(typeId, handlerId, instanceIdPolicy, isInjectionHandler, consumer));
             m_connection->SignalOut();
         }
+
+        // Add a reference for garbage collected languages
+        if (g_garbageCollected[consumer.lang])
+        {
+            m_consumerReferences.AddHandlerRegistrationReference(typeId, handlerId, consumer);
+        }
     }
 
     void Controller::UnregisterHandler(const Dob::Typesystem::TypeId typeId,
@@ -503,6 +549,19 @@ namespace Internal
                  << Typesystem::Operations::GetName(typeId) << ")";
             throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
+
+        m_connection->RemoveRevokedRegistration(typeId, handlerId);
+
+        // For garbage collected languages the references must be dropped.
+        // Since UnregisterHandler doesn't have a consumer parameter, we don't know which language
+        // we are dealing with. However, it is ok to call the check routine anyway, a non GC language
+        // just won't have any references.
+        m_consumerReferences.DropHandlerRegistrationReferences(typeId,
+                                                               handlerId,
+                                                               boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                           m_dispatcher,
+                                                                           _1,
+                                                                           _2));
     }
 
     //----------------------------
@@ -534,6 +593,12 @@ namespace Internal
                                            channelId,
                                            includeSubclasses,
                                            messageSubscriber);
+
+        // Add a reference for garbage collected languages
+        if (g_garbageCollected[messageSubscriber.lang])
+        {
+            m_consumerReferences.AddMessageSubscriptionReference(messageSubscriber);
+        }
     }
 
     void Controller::UnsubscribeMessage(const Dob::Typesystem::TypeId typeId,
@@ -562,6 +627,17 @@ namespace Internal
                                              channelId,
                                              includeSubclasses,
                                              messageSubscriber);
+
+        // For garbage collected languages check if the consumer is used in any message subscription.
+        if (g_garbageCollected[messageSubscriber.lang])
+        {
+            m_consumerReferences.DropMessageSubscriptionReferences(m_connection,
+                                                                   messageSubscriber,
+                                                                   boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                               m_dispatcher,
+                                                                               _1,
+                                                                               _2));
+        }
     }
 
     void Controller::SubscribeEntity(const Typesystem::EntityId& entityId,
@@ -595,10 +671,10 @@ namespace Internal
             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        // All subscriptions/unsubscriptions made by the user is marked as a NormalSubscription.
-        // This makes it possible for dose to set up an internal subscription for the same connection/consumer
-        // that doesn't interfere with the normal subscription.
-        SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), NormalSubscription, 0);
+        // Set subscription type to EntitySubscription.
+        // The subscription type makes it possible for dose to set up an internal injection subscription for the same connection/consumer
+        // that doesn't interfere with the "normal" subscription.
+        SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), EntitySubscription, 0);
 
         EntityTypes::Instance().Subscribe(subscriptionId,
                                           entityId,
@@ -606,10 +682,13 @@ namespace Internal
                                           includeSubclasses,
                                           restartSubscription,
                                           subscriptionOptions);
+
+        // Add a reference for garbage collected languages
+        if (g_garbageCollected[consumer.lang])
+        {
+            m_consumerReferences.AddEntitySubscriptionReference(consumer);
+        }
     }
-
-
-
 
     void Controller::UnsubscribeEntity(const Typesystem::EntityId& entityId,
                                        const bool allInstances,
@@ -633,12 +712,23 @@ namespace Internal
         }
 
         // See comment for the SubscribeEntity method above.
-        SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), NormalSubscription, 0);
+        SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), EntitySubscription, 0);
 
         EntityTypes::Instance().Unsubscribe(subscriptionId,
                                             entityId,
                                             allInstances,
                                             includeSubclasses);
+
+        // For garbage collected languages check if the consumer is used in any entity subscription.
+        if (g_garbageCollected[consumer.lang])
+        {
+            m_consumerReferences.DropEntitySubscriptionReferences(m_connection,
+                                                                  consumer,
+                                                                  boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                              m_dispatcher,
+                                                                              _1,
+                                                                              _2));
+        }
     }
 
     void Controller::SubscribeRegistration(const Safir::Dob::Typesystem::TypeId typeId,
@@ -657,26 +747,39 @@ namespace Internal
             throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        // See comment for the SubscribeEntity method above.
-        SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), NormalSubscription, 0);
-
         if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
         {
+            SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), EntityRegistrationSubscription, 0);
+
             EntityTypes::Instance().SubscribeRegistration(subscriptionId,
                                                           typeId,
                                                           handlerId,
                                                           includeSubclasses,
                                                           restartSubscription,
                                                           subscriptionOptions);
+
+            // Add a reference for garbage collected languages
+            if (g_garbageCollected[consumer.lang])
+            {
+                m_consumerReferences.AddEntityRegistrationSubscriptionReference(consumer);
+            }
         }
         else if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Service::ClassTypeId))
         {
+            SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), ServiceRegistrationSubscription, 0);
+
             ServiceTypes::Instance().SubscribeRegistration(subscriptionId,
                                                            typeId,
                                                            handlerId,
                                                            includeSubclasses,
                                                            restartSubscription,
                                                            subscriptionOptions);
+
+            // Add a reference for garbage collected languages
+            if (g_garbageCollected[consumer.lang])
+            {
+                m_consumerReferences.AddServiceRegistrationSubscriptionReference(consumer);
+            }
         }
         else
         {
@@ -685,7 +788,6 @@ namespace Internal
                  << " used in SubscribeRegistration is not an Entity or Service type.";
             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
-
     }
 
     void Controller::UnsubscribeRegistration(const Safir::Dob::Typesystem::TypeId typeId,
@@ -702,22 +804,43 @@ namespace Internal
             throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        // See comment for the SubscribeEntity method above.
-        SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), NormalSubscription, 0);
-
         if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
         {
+            SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), EntityRegistrationSubscription, 0);
+
             EntityTypes::Instance().UnsubscribeRegistration(subscriptionId,
                                                             typeId,
                                                             handlerId,
                                                             includeSubclasses);
+            // For garbage collected languages check if the consumer is used in any registration subscription.
+            if (g_garbageCollected[consumer.lang])
+            {
+                m_consumerReferences.DropEntityRegistrationSubscriptionReferences(m_connection,
+                                                                                  consumer,
+                                                                                  boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                                              m_dispatcher,
+                                                                                              _1,
+                                                                                              _2));
+            }
         }
         else if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Service::ClassTypeId))
         {
+            SubscriptionId subscriptionId(ConnectionConsumerPair(m_connection, consumer), ServiceRegistrationSubscription, 0);
+
             ServiceTypes::Instance().UnsubscribeRegistration(subscriptionId,
                                                              typeId,
                                                              handlerId,
                                                              includeSubclasses);
+            // For garbage collected languages check if the consumer is used in any registration subscription.
+            if (g_garbageCollected[consumer.lang])
+            {
+                m_consumerReferences.DropServiceRegistrationSubscriptionReferences(m_connection,
+                                                                                   consumer,
+                                                                                   boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                                                m_dispatcher,
+                                                                                                _1,
+                                                                                                _2));
+            }
         }
         else
         {
@@ -1283,9 +1406,6 @@ namespace Internal
     //---------------------------------------
     void Controller::Dispatch()
     {
-        if (!m_isConnected)
-            return;
-
         //get rid of any old dispatch threads.
         if (!m_dispatchThreadAttic.empty())
         {
@@ -1300,6 +1420,13 @@ namespace Internal
                 if (it->first->Stop(false))
                 {
                     lllout << "Stop of DispatchThread was successful! Deleting it." << std::endl;
+
+                    // Drop dispatcher references related to this thread
+                    m_consumerReferences.DropAtticDispatcherReferences(it->first,
+                                                                       boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                                   m_dispatcher,
+                                                                                   _1,
+                                                                                   _2));
 
                     DispatchThreadPtrStopCountMap::iterator eraseIt = it;
                     ++it;
@@ -1324,6 +1451,11 @@ namespace Internal
         }
 
         m_exitDispatch=false;
+
+        if (!m_isConnected)
+        {
+            return;
+        }
 
         // First dispatch response in queue
         DispatchResponseInQueue();
@@ -1389,7 +1521,11 @@ namespace Internal
         if (m_connection->StopOrderPending() && !m_exitDispatch)
         {
             m_dispatcher.DispatchStopOrder();
-            m_connection->SetStopOrderHandled();
+
+            if (m_connection != NULL)
+            {
+                m_connection->SetStopOrderHandled();
+            }
         }
     }
 
@@ -1397,6 +1533,21 @@ namespace Internal
     {
         m_exitDispatch=true;
         m_connection->SignalIn();
+    }
+
+
+    Safir::Dob::CallbackId::Enumeration
+    Controller::CurrentCallback() const
+    {
+        const CallbackStack & cbStack = m_dispatcher.GetCallbackStack();
+        if (cbStack.empty())
+        {
+            return Safir::Dob::CallbackId::None;
+        }
+        else
+        {
+            return cbStack.top().m_callbackId;
+        }
     }
 
     void Controller::Postpone(const bool redispatchCurrent)
@@ -1605,6 +1756,7 @@ namespace Internal
         {
             m_postponeCurrent = false;
             m_postpone = false;
+
             m_dispatcher.InvokeOnMessageCb(consumer, msg);
 
             if (m_postpone)
@@ -1753,6 +1905,11 @@ namespace Internal
         deleted = false;
         deleteIsExplicit = false;
 
+        if (lastState == currState)
+        {
+            return;
+        }
+
         const StateKind lastKind = GetStateKind(lastState);
         const StateKind currKind = GetStateKind(currState);
 
@@ -1801,7 +1958,7 @@ namespace Internal
             }
             else
             { //equal creation time
-                if (lastState.GetVersion() < currState.GetVersion())
+                if (lastState.GetVersion() < currState.GetUndecrementedVersion())
                 {
                     updated = true;
                 }
@@ -1862,7 +2019,7 @@ namespace Internal
                 }
                 else
                 { //equal creation time
-                    if (lastState.GetVersion().IsDiffGreaterThanOne(currState.GetVersion()))
+                    if (lastState.GetVersion().IsDiffGreaterThanOne(currState.GetUndecrementedVersion()))
                     {
                         updated = true;
                     }
@@ -1896,8 +2053,8 @@ namespace Internal
                 {
                     //equal creation time
 
-                    if (currState.GetVersion() < lastState.GetVersion() ||
-                        lastState.GetVersion() < currState.GetVersion())
+                    if (currState.GetUndecrementedVersion() < lastState.GetVersion() ||
+                        lastState.GetVersion() < currState.GetUndecrementedVersion())
                     {
                         ENSURE(false, << "Got unexpected VersionNumbers and CreationTimes (in Ghost --> Ghost) for entity "
                                       << lastState.GetEntityId()
@@ -2075,7 +2232,7 @@ namespace Internal
             }
             break;
 
-            case NormalSubscription:
+            case EntitySubscription:
             {
                 subscription->DirtyFlag().Process(boost::bind(&Controller::ProcessEntitySubscription,
                                                               this,
@@ -2096,17 +2253,25 @@ namespace Internal
         dontRemove = false;
         lllout << "Controller::DispatchSubscription() called " << std::endl;
 
-        DistributionData realState = subscription->GetState()->GetRealState();
+        switch (subscription->GetSubscriptionId().subscriptionType)
+        {
+            case EntityRegistrationSubscription:
+            case ServiceRegistrationSubscription:
+            {
+                DispatchRegistrationSubscription(subscription, exitDispatch, dontRemove);
+            }
+            break;
 
-        if (!realState.IsNoState() && realState.GetType() == DistributionData::RegistrationState)
-        {
-            // Registration state
-             DispatchRegistrationSubscription(subscription, exitDispatch, dontRemove);
-        }
-        else
-        {
-            // Entity state
-            DispatchEntitySubscription(subscription, exitDispatch, dontRemove);
+            case EntitySubscription:
+            case InjectionSubscription:
+            {
+                DispatchEntitySubscription(subscription, exitDispatch, dontRemove);
+            }
+            break;
+
+            default:
+                ENSURE(false, << "Unexpectd subscription type!");
+
         }
     }
 
@@ -2248,6 +2413,7 @@ namespace Internal
 
         // Update the header
         dispatchedInjection.SetEntityStateKind(DistributionData::Real);
+        dispatchedInjection.ResetDecrementedFlag();
         if (dispatchedInjection.HasBlob())
         {
             dispatchedInjection.SetSenderId(connection->Id());
@@ -2535,15 +2701,20 @@ namespace Internal
     void Controller::SendRequest(const DistributionData & request,
                                  const ConsumerId & consumer)
     {
+        // Must add the consumer before pushing the request on the queue, so we
+        // can be sure that it is there no matter how things are dispatched.
+        m_dispatcher.AddResponseConsumer(request.GetRequestId().GetCounter(), consumer);
+
         const bool success = m_connection->GetRequestOutQueue().PushRequest(request);
 
         if (success)
         {
             m_connection->SignalOut();
-            m_dispatcher.AddResponseConsumer(request.GetRequestId().GetCounter(), consumer);
         }
         else
         {
+            m_dispatcher.RemoveResponseConsumer(request.GetRequestId().GetCounter());
+
             m_requestQueueInOverflowState = true;
             m_dispatcher.AddOverflowedRequestConsumer(consumer);
 
@@ -2554,15 +2725,24 @@ namespace Internal
 
     void Controller::HandleRevokedRegistrations()
     {
-        RegistrationVector revoked;
-
-        m_connection->GetAndClearRevokedRegistrations(revoked);
+        RegistrationVector revoked = m_connection->GetAndClearRevokedRegistrations();
 
         for (RegistrationVector::iterator it = revoked.begin(); it != revoked.end(); ++it)
         {
             m_dispatcher.InvokeOnRevokedRegistrationCb(it->consumer,
                                                        it->typeId,
                                                        it->handlerId);
+
+            // For garbage collected languages the references must be dropped
+            if (g_garbageCollected[it->consumer.lang])
+            {
+                m_consumerReferences.DropHandlerRegistrationReferences(it->typeId,
+                                                                       it->handlerId,
+                                                                       boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                                   m_dispatcher,
+                                                                                   _1,
+                                                                                   _2));
+            }
         }
     }
 

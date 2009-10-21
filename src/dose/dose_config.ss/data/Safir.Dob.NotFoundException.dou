@@ -2,5 +2,5 @@
 <exception xmlns="urn:safir-dots-unit">
     <summary>Thrown when eg GetFreeInstance can not find a free instance.</summary>
     <name>Safir.Dob.NotFoundException</name>
-    <baseClass>exception</baseClass>
+    <baseClass>Exception</baseClass>
 </exception>

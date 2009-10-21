@@ -1,40 +1,139 @@
-#Specify a minimum required version for cmake
-cmake_minimum_required(VERSION 2.4)
+#Set SAFIR_RUNTIME and SAFIR_SDK variables to paths that cmake likes.
+FILE(TO_CMAKE_PATH "$ENV{SAFIR_SDK}" SAFIR_SDK)
+FILE(TO_CMAKE_PATH "$ENV{SAFIR_RUNTIME}" SAFIR_RUNTIME)
 
-#Disable the need for cmake minimum required version in all files that
-#include this.
-IF (COMMAND cmake_policy)
-   cmake_policy(SET CMP0000 OLD)
-   cmake_policy(SET CMP0003 OLD)
-ENDIF (COMMAND cmake_policy)
+#Get some more env variables that may or may not exist (with a stupid way of doing it)
+if ("$ENV{BOOST_DIR}" STREQUAL "")
+   SET(foo "foo")
+else ()
+   FILE(TO_CMAKE_PATH "$ENV{BOOST_DIR}" BOOST_DIR)
+endif ()
 
-FILE(TO_CMAKE_PATH $ENV{SAFIR_SDK} SAFIR_SDK)
-FILE(TO_CMAKE_PATH $ENV{SAFIR_RUNTIME} SAFIR_RUNTIME)
+if ("$ENV{ACE_ROOT}" STREQUAL "")
+   set(foo "foo")
+else ()
+   FILE(TO_CMAKE_PATH $ENV{ACE_ROOT} ACE_ROOT)
+endif ()
 
-SET(PLATFORM $ENV{OS})
+#add include path
+INCLUDE_DIRECTORIES(${SAFIR_SDK}/include)
 
-if (NOT DEFINED PLATFORM)
-   SET(PLATFORM Linux)
-endif(NOT DEFINED PLATFORM)
+#if we're using gcc we need to set up some things
+if (CMAKE_COMPILER_IS_GNUCXX)
+   #link directory for libraries (will this work with gcc under windows?)
+   LINK_DIRECTORIES(${SAFIR_RUNTIME}/lib)
 
-if(${PLATFORM} STREQUAL Windows_NT)
-   SET(PLATFORM Windows)
-endif(${PLATFORM} STREQUAL Windows_NT)
-
-#MESSAGE("Platform is '${PLATFORM}'")
-
-INCLUDE_DIRECTORIES($ENV{SAFIR_SDK}/include)
-
-if (${PLATFORM} STREQUAL Linux)
-   LINK_DIRECTORIES($ENV{SAFIR_RUNTIME}/lib)
+   #turn on more warnings
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-endif (${PLATFORM} STREQUAL Linux)
 
-if (${PLATFORM} STREQUAL Windows)
-   INCLUDE_DIRECTORIES("$ENV{BOOST_DIR}" "$ENV{ACE_ROOT}")
-   LINK_DIRECTORIES($ENV{SAFIR_SDK}/lib "$ENV{BOOST_DIR}/lib" "$ENV{ACE_ROOT}/lib")
+   #define some common libraries
+   SET(COMMON_LIBRARIES rt)
+endif (CMAKE_COMPILER_IS_GNUCXX)
+
+if (MSVC)
+   LINK_DIRECTORIES(${SAFIR_SDK}/lib)
    ADD_DEFINITIONS(-DNOMINMAX)
    ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
    ADD_DEFINITIONS(-D_UNICODE -DUNICODE)
 
-endif (${PLATFORM} STREQUAL Windows)
+   #use multiprocessing for build
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+
+   #increase warning level
+   IF(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
+      # Use the highest warning level for visual studio.
+      SET(CMAKE_CXX_WARNING_LEVEL 4)
+      IF(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+         STRING(REGEX REPLACE "/W[0-4]" "/W4"
+                CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+      ELSE(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+      ENDIF(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+   ENDIF(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
+endif ()
+
+#Add some more boost library versions that we want to be able to use,
+# just to try to be "future safe"
+set (Boost_ADDITIONAL_VERSIONS "1.37" "1.38" "1.39" "1.40" "1.41" "1.42" "1.43" "1.44")
+
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost)
+
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+    link_directories(${Boost_LIBRARY_DIRS})
+else()
+    set (BOOST_ROOT ${SAFIR_SDK})
+    find_package(Boost)
+    if(Boost_FOUND)
+        include_directories(${Boost_INCLUDE_DIRS})
+        link_directories(${Boost_LIBRARY_DIRS})
+    else()
+        message(FATAL_ERROR "Failed to find the boost installation!")
+    endif()
+endif()
+
+#if we're using new style build system we want dynamic linking
+if (SAFIR_BUILD_SYSTEM_VERSION)
+   ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
+endif()
+
+#Boost 1.39 and vc80 don't play nicely together. 
+#we get multiply defined symbols. As a workaround we allow this.
+if (MSVC80 AND Boost_LIB_VERSION STREQUAL "1_39")
+	SET(CMAKE_EXE_LINKER_FLAGS /FORCE:MULTIPLE)
+	SET(CMAKE_SHARED_LINKER_FLAGS /FORCE:MULTIPLE)
+endif()
+
+#Work out what ACE lib is called
+if (UNIX)
+  set (ACE_LIBRARY "ACE")
+elseif (MSVC)
+  set (ACE_LIBRARY debug ACEd optimized ACE)
+endif ()
+
+if(ACE_ROOT)
+   #Add ace to linker path
+   if (MSVC)
+      LINK_DIRECTORIES(${ACE_ROOT}/lib)
+   endif ()
+
+    #And add ace to include path
+    INCLUDE_DIRECTORIES(${ACE_ROOT})
+endif()
+
+if (MSVC AND NOT NO_LIBRARY_POSTFIXES)
+  SET(CMAKE_DEBUG_POSTFIX "d")
+endif()
+
+MACRO(INSTALL_DEBUG_INFO target)
+  if(MSVC)
+    GET_TARGET_PROPERTY(location ${target} LOCATION)
+    STRING(REPLACE "$(OutDir)" Debug location ${location})
+    STRING(REPLACE .dll ${CMAKE_DEBUG_POSTFIX}.pdb location ${location})
+    INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
+
+    GET_TARGET_PROPERTY(location ${target} LOCATION)
+    STRING(REPLACE "$(OutDir)" RelWithDebInfo location ${location})
+    STRING(REPLACE .dll ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
+    INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
+  endif()
+ENDMACRO()
+
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SAFIR_SDK}/data/build/)
+SET(COMMON_CS_FLAGS "-warn:4")
+
+
+
+#work out if we've got a configuration on the command line or if 
+#we're running in an IDE.
+if (CMAKE_CONFIGURATION_TYPES AND CMAKE_BUILD_TYPE)
+	#MESSAGE("Both CMAKE_CONFIGURATION_TYPES and CMAKE_BUILD_TYPE are set! Using CMAKE_BUILD_TYPE as the CUSTOM_BUILD_TYPE")
+    SET(CUSTOM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+elseif(CMAKE_CONFIGURATION_TYPES)
+	SET(CUSTOM_BUILD_TYPE "$(OutDir)")
+elseif(CMAKE_BUILD_TYPE)
+    SET(CUSTOM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+else()
+    SET(CUSTOM_BUILD_TYPE "Release")
+endif()

@@ -28,17 +28,39 @@ using System.Runtime.InteropServices;
 
 namespace Safir.Dob.Typesystem
 {
+    /// <summary>
+    /// Functions for getting parameter information from types.
+    /// <para>
+    /// With these operations you can get parameter values from types.
+    /// You can also get information about the parameters in a type, such as
+    /// parameter names and indexes, TypeIds of parameters etc.
+    /// </para>
+    /// </summary>
     public class Parameters
     {
         #region ParameterInfo
         //********************************************************
         //* Functions handling parameters
         //********************************************************
+
+        /// <summary>
+        /// Get the number of parameters defined in a class.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <returns>The number of parameters.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type defined.</exception>
         public static int GetNumberOfParameters(System.Int64 typeId)
         {
             return Kernel.DotsC_GetNumberOfParameters(typeId);
         }
 
+        /// <summary>
+        /// Gets index of a named parameter.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameterName">Name of parameter.</param>
+        /// <returns>Index of given parameter.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type or parameter defined.</exception>
         public static int GetIndex(System.Int64 typeId,
                                          string parameterName)
         {
@@ -55,24 +77,65 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Get the name of the specified parameter as it was defined in the xml description.
+        /// <para>
+        /// If the parameter does not exist the returned value is undefined. Use
+        /// #GetIndex to get a valid ParameterIndex, which is guaranteed to exist.
+        /// </para>
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <returns>The name of the parameter.</returns>
         public static string GetName(System.Int64 typeId,
                                               int parameter)
         {
             return Internal.InternalOperations.StringOf(Kernel.DotsC_GetParameterName(typeId, parameter));
         }
 
+        /// <summary>
+        /// Get the type of a parameter.
+        /// <para>
+        /// If the parameter does not exist the returned value is undefined. Use
+        /// #GetIndex to get a valid ParameterIndex, which is guaranteed to exist.
+        /// </para>
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <returns>The type of the parameter.</returns>
         public static MemberType GetType(System.Int64 typeId,
                                                              int parameter)
         {
             return Kernel.DotsC_GetParameterType(typeId, parameter);
         }
 
+        /// <summary>
+        /// Gets a string representation of the type of a parameter.
+        /// <para>
+        /// If the parameter is not an object or enumeration the result is undefined.
+        /// If the parameter does not exist the returned value is undefined. Use
+        /// #GetIndex to get a valid ParameterIndex, which is guaranteed to exist.
+        /// </para>
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <returns>Name of the parameter type.</returns>
         public static string GetTypeName(System.Int64 typeId,
                                                   int parameter)
         {
             return Internal.InternalOperations.StringOf(Kernel.DotsC_GetParameterTypeName(typeId, parameter));
         }
 
+        /// <summary>
+        /// Get the array size of a parameter.
+        /// <para>
+        /// If the parameter does not exist the returned value is undefined. Use
+        /// #GetIndex to get a valid ParameterIndex, which is guaranteed to exist.
+        /// </para>
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <returns>The array size of the parameter, or 1 if it is not an array.</returns>
         public static int GetArraySize(System.Int64 typeId,
                                                 int parameter)
         {
@@ -85,6 +148,14 @@ namespace Safir.Dob.Typesystem
         //************************************************************************************
         //* Functions for retrieval of parameters
         //************************************************************************************
+
+        /// <summary>
+        /// Get a boolean parameter value.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <param name="index">Array index. If parameter is not an array this shall be 0.</param>
+        /// <returns>Parameter value.</returns>
         public static bool GetBoolean(System.Int64 typeId,
                                       int parameter,
                                       int index)
@@ -94,10 +165,16 @@ namespace Safir.Dob.Typesystem
             return Internal.InternalOperations.BoolOf(val);
         }
 
-        public static int GetEnumeration(System.Int64 enumId,
-                                                  System.Int64 typeId,
-                                                  int parameter,
-                                                  int index)
+        /// <summary>
+        /// Get an enumeration parameter value.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <param name="index">Array index. If parameter is not an array this shall be 0.</param>
+        /// <returns>Parameter value.</returns>
+        public static int GetEnumeration(System.Int64 typeId,
+                                         int parameter,
+                                         int index)
         {
             System.Int32 val;
             Kernel.DotsC_GetEnumerationParameter(typeId, parameter, index, out val);
@@ -105,6 +182,13 @@ namespace Safir.Dob.Typesystem
             return val;
         }
 
+        /// <summary>
+        /// Get an Int32 parameter value.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <param name="index">Array index. If parameter is not an array this shall be 0.</param>
+        /// <returns>Parameter value.</returns>
         public static int GetInt32(System.Int64 typeId,
                                    int parameter,
                                    int index)
@@ -114,6 +198,13 @@ namespace Safir.Dob.Typesystem
             return val;
         }
 
+        /// <summary>
+        /// Get an Int64 parameter value.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <param name="index">Array index. If parameter is not an array this shall be 0.</param>
+        /// <returns>Parameter value.</returns>
         public static long GetInt64(System.Int64 typeId,
                                              int parameter,
                                              int index)
@@ -123,6 +214,13 @@ namespace Safir.Dob.Typesystem
             return val;
         }
 
+        /// <summary>
+        /// Get a Float32 parameter value.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <param name="index">Array index. If parameter is not an array this shall be 0.</param>
+        /// <returns>Parameter value.</returns>
         public static float GetFloat32(System.Int64 typeId,
                                                 int parameter,
                                                 int index)
@@ -132,6 +230,14 @@ namespace Safir.Dob.Typesystem
             return val;
         }
 
+
+        /// <summary>
+        /// Get a Float64 parameter value.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <param name="index">Array index. If parameter is not an array this shall be 0.</param>
+        /// <returns>Parameter value.</returns>
         public static double GetFloat64(System.Int64 typeId,
                                                  int parameter,
                                                  int index)
@@ -141,6 +247,13 @@ namespace Safir.Dob.Typesystem
             return val;
         }
 
+        /// <summary>
+        /// Get a string parameter value.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <param name="index">Array index. If parameter is not an array this shall be 0.</param>
+        /// <returns>Parameter value.</returns>
         public static string GetString(System.Int64 typeId,
                                                 int parameter,
                                                 int index)
@@ -150,6 +263,13 @@ namespace Safir.Dob.Typesystem
             return Internal.InternalOperations.StringOf(sp);
         }
 
+        /// <summary>
+        /// Get a TypeId parameter value.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <param name="index">Array index. If parameter is not an array this shall be 0.</param>
+        /// <returns>Parameter value.</returns>
         public static System.Int64 GetTypeId(System.Int64 typeId,
                                                       int parameter,
                                                       int index)
@@ -159,6 +279,13 @@ namespace Safir.Dob.Typesystem
             return val;
         }
 
+        /// <summary>
+        /// Get an InstanceId parameter value.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <param name="index">Array index. If parameter is not an array this shall be 0.</param>
+        /// <returns>Parameter value.</returns>
         public static InstanceId GetInstanceId(System.Int64 typeId,
                                                  int parameter,
                                                  int index)
@@ -176,6 +303,13 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Get an EntityId parameter value.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <param name="index">Array index. If parameter is not an array this shall be 0.</param>
+        /// <returns>Parameter value.</returns>
         public static Dob.Typesystem.EntityId GetEntityId(System.Int64 typeId,
                                                           int parameter,
                                                           int index)
@@ -194,6 +328,13 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Get a ChannelId parameter value.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <param name="index">Array index. If parameter is not an array this shall be 0.</param>
+        /// <returns>Parameter value.</returns>
         public static ChannelId GetChannelId(System.Int64 typeId,
                                                  int parameter,
                                                  int index)
@@ -211,6 +352,13 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Get a handlerId parameter value.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <param name="index">Array index. If parameter is not an array this shall be 0.</param>
+        /// <returns>Parameter value.</returns>
         public static HandlerId GetHandlerId(System.Int64 typeId,
                                                  int parameter,
                                                  int index)
@@ -228,6 +376,13 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+        /// <summary>
+        /// Get an Object parameter value.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <param name="index">Array index. If parameter is not an array this shall be 0.</param>
+        /// <returns>Parameter value.</returns>
         public static Dob.Typesystem.Object GetObject(System.Int64 typeId,
                                                       int parameter,
                                                       int index)
@@ -239,6 +394,13 @@ namespace Safir.Dob.Typesystem
             return obj;
         }
 
+        /// <summary>
+        /// Get a Binary parameter value.
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <param name="index">Array index. If parameter is not an array this shall be 0.</param>
+        /// <returns>Parameter value.</returns>
         public static byte[] GetBinary( System.Int64 typeId,
                                         int parameter,
                                         int index)

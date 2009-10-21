@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -102,8 +102,9 @@ namespace Safir.Dob
 
         /// <summary>
         /// Get the entity request.
+        ///<para/>
+        /// Note that it is not valid to call this for a DeleteRequest.
         /// </summary>
-        /// <exception cref="Safir.Dob.NotFoundException">Thrown if called for a proxy object received in callback OnDeleteRequest.</exception>
         public Entity Request
         {
             get
@@ -250,15 +251,15 @@ namespace Safir.Dob
         {
             if (disposed)
             {
-                throw new Typesystem.SoftwareViolationException("Attempt to use a ServiceRequestProxy that is disposed! Please do not use a MessageProxy outside the OnMessage callback!");
+                throw new Safir.Dob.Typesystem.SoftwareViolationException("Attempt to use a EntityRequestProxy that is disposed! Please do not use a EntityRequestProxy outside the On*Request callbacks!");
             }
         }
 
 
         private bool disposed = false;
 
-        System.IntPtr m_requestBlob;
-        System.IntPtr m_state;
+        private System.IntPtr m_requestBlob;
+        private System.IntPtr m_state;
         #endregion
     }
 }

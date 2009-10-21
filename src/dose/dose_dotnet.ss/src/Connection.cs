@@ -84,10 +84,17 @@ namespace Safir.Dob
                          StopHandler stopHandler,
                          Dispatcher dispatcher)
         {
-            byte success;
+            // This check guarantees that there will be no call to DoseC_Connect if the connection is already opened.
+            // This solves the problem with dropping the incremented refrences in case of a NOP.
+            if (IsOpen())
+            {
+                return;
+            }
 
             System.IntPtr nameCommonPart = Dob.Typesystem.Internal.InternalOperations.CStringOf(connectionNameCommonPart);
             System.IntPtr nameInstancePart = Dob.Typesystem.Internal.InternalOperations.CStringOf(connectionNameInstancePart);
+
+            byte success;
 
             Interface.DoseC_Connect(m_ctrl,
                                     nameCommonPart,
@@ -117,6 +124,7 @@ namespace Safir.Dob
                                     Callbacks.onInitialInjectionsDoneCb,
                                     Callbacks.onNotRequestOverflowCb,
                                     Callbacks.onNotMessageOverflowCb,
+                                    Callbacks.onDropReferenceCb,
                                     out success);
 
             Marshal.FreeHGlobal(nameCommonPart);
@@ -124,6 +132,9 @@ namespace Safir.Dob
 
             if (!Interface.BoolOf(success))
             {
+                ConsumerHandler.Instance.DropReference(stopHandler);
+                ConsumerHandler.Instance.DropReference(dispatcher);
+
                 Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
             }
         }

@@ -21,6 +21,9 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#ifndef __DOSE_UDP_MSG_H__
+#define __DOSE_UDP_MSG_H__
+
 
 /************************************************************
 * DoseUdpMsg.h - a part of DoseComDll - For LINUX and WIN32
@@ -52,35 +55,35 @@
 #define PD_MOREDATA                 2   // remaining PD data
 #define PD_ISCOMPLETE               8   // PD is complete, might be ored with 1
 
-// Data msg, sent as IpMulticst to all nodes
+// Data msg, sent as IpMulticast to all nodes
 
-typedef unsigned short ushort;
-typedef unsigned char  uchar;
-typedef unsigned long  ulong;
+typedef unsigned short dcom_ushort16;
+typedef unsigned char  dcom_uchar8;
+typedef unsigned int  dcom_ulong32;
 
 typedef struct
 {
-    ushort  Magic;           // to be sure it is not some junk msg
-    uchar   MsgType;         // MSG_TYPE_DATA
-    uchar   DoseIdFrom;
-    ulong   IpAddrFrom_nw;   // Senders IpAddr
-    ulong   DoseIdBitMap[2]; // defines target nodes
-    ulong   TotalSize;       // Total size of fragmented msg
+    dcom_ushort16  Magic;           // to be sure it is not some junk msg
+    dcom_uchar8   MsgType;         // MSG_TYPE_DATA
+    dcom_uchar8   DoseIdFrom;
+    dcom_ulong32   IpAddrFrom_nw;   // Senders IpAddr
+    dcom_ulong32   DoseIdBitMap[2]; // defines target nodes
+    dcom_ulong32   TotalSize;       // Total size of fragmented msg
                              // Receiver uses it to allocate a buffer
-    ushort  Size;            // Size of data (in this fragment)
-    ushort  FragmentNumber;  // bit 15 set for last fragment,
+    dcom_ushort16  Size;            // Size of data (in this fragment)
+    dcom_ushort16  FragmentNumber;  // bit 15 set for last fragment,
                              // 0=not fragmented
                              // others are fragment number 1...nn
 
-    ushort  SequenceNumber;  // used by ACK
-    uchar   Info;            // currently IsRetransmittig flags bit 0-3
-    uchar   TxMsgArray_Ix;   // new fas2
-
-    uchar   TxQueueNumber;   // new fas2 = PriorityChannel
-    uchar   IsPoolDistribution;
+    dcom_ushort16  SequenceNumber;  // used by ACK
+    dcom_uchar8   Info;            // currently IsRetransmittig flags bit 0-3
+    dcom_uchar8   TxMsgArray_Ix;   // new fas2
+    dcom_uchar8   TxQueueNumber;   // new fas2 = PriorityChannel
+    dcom_uchar8   IsPoolDistribution;
                              // from each node. This defines which
-    uchar   bWantAck;        //
-    uchar   DestinationId;   // a
+    dcom_uchar8   bWantAck;        //
+    dcom_uchar8   DestinationId;   // a
+
 } DOSE_UDP_MSG_HDR;
 
 #define SIZEOF_UDP_MSG_HDR (sizeof(DOSE_UDP_MSG_HDR))
@@ -89,17 +92,17 @@ typedef struct
 
 typedef struct
 {
-    ushort  Magic;          // to be sure it is note some junk msg
-    uchar   MsgType;        // MSG_TYPE_ACK/NACK
-    uchar   DoseIdFrom;
-    ulong   IpAddrFrom_nw;  // Senders IpAddr
-    ushort  SequenceNumber; // from received DATA msg
-    uchar   TxQueueNumber;  // New fas2
-    uchar   TxMsgArray_Ix;  // New fas2
-    ushort  FragmentNumber; // received Fragment number
+    dcom_ushort16  Magic;          // to be sure it is note some junk msg
+    dcom_uchar8   MsgType;        // MSG_TYPE_ACK/NACK
+    dcom_uchar8   DoseIdFrom;
+    dcom_ulong32   IpAddrFrom_nw;  // Senders IpAddr
+    dcom_ushort16  SequenceNumber; // from received DATA msg
+    dcom_uchar8   TxQueueNumber;  // New fas2
+    dcom_uchar8   TxMsgArray_Ix;  // New fas2
+    dcom_ushort16  FragmentNumber; // received Fragment number
 
-    ushort  Info;           // These bits are for debugging with a NW listener
-                            // ACK:  bit 0-7  = info in received msg (a uchar)
+    dcom_ushort16  Info;           // These bits are for debugging with a NW listener
+                            // ACK:  bit 0-7  = info in received msg (a dcom_uchar8)
                             //       bit 8-15 = 0      if OK,
                             //                  0x0100 if duplicate,
                             //                  0x0200 if duplicate fragment
@@ -114,22 +117,24 @@ typedef struct
 
 typedef struct
 {
-    ushort  Magic;      // to be sure it is note some junk msg
-    uchar   MsgType;    // MSG_TYPE_KEEPALIVE or MSG_TYPE_GETINFO_1
-    uchar   DoseIdFrom;
-    ulong   IpAddrFrom_nw;  // Senders IpAddr
-    ulong   TimeStamp;      // the time the node was started
+    dcom_ushort16  Magic;      // to be sure it is note some junk msg
+    dcom_uchar8   MsgType;    // MSG_TYPE_KEEPALIVE or MSG_TYPE_GETINFO_1
+    dcom_uchar8   DoseIdFrom;
+    dcom_ulong32   IpAddrFrom_nw;  // Senders IpAddr
+    dcom_ulong32   TimeStamp;      // the time the node was started
 } DOSE_UDP_KEEPALIVE_MSG;
 
 typedef struct
 {
-    ushort  Magic;      // to be sure it is note some junk msg
-    uchar   MsgType;    // MSG_TYPE_KEEPALIVE or MSG_TYPE_GETINFO_1
-    uchar   DoseIdFrom;
-    ulong   IpAddrFrom_nw;  // Senders IpAddr
-    ushort  RespPort_nw;
-    uchar   ReqCode_1;
-    uchar   ReqCode_2;
+    dcom_ushort16  Magic;      // to be sure it is note some junk msg
+    dcom_uchar8   MsgType;    // MSG_TYPE_KEEPALIVE or MSG_TYPE_GETINFO_1
+    dcom_uchar8   DoseIdFrom;
+    dcom_ulong32   IpAddrFrom_nw;  // Senders IpAddr
+    dcom_ushort16  RespPort_nw;
+    dcom_uchar8   ReqCode_1;
+    dcom_uchar8   ReqCode_2;
 } DOSE_UDP_GETINFO_MSG;
 
 /*--------------- end DoseUdpMsh.h -------------------*/
+
+#endif

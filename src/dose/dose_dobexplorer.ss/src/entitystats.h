@@ -23,8 +23,8 @@
 ******************************************************************************/
 #ifndef ENTITYSTATS_H
 #define ENTITYSTATS_H
+#include "common_header.h"
 #include "ui_entitystats.h"
-#include <QtGui>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <set>

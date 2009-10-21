@@ -29,7 +29,6 @@
 #include "dots_blob_layout.h"
 #include "dots_xml_serializer.h"
 #include "dots_base64_conversions.h"
-#include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <Safir/Dob/Typesystem/Internal/Id.h>
 
@@ -456,10 +455,12 @@ namespace Internal
             const Int32 sourceSize = (Int32)val.m_values[ix].m_value.length();
 
             std::vector<char> bin(Base64Conversions::CalculateBinarySize(sourceSize));
-
-            if (!Base64Conversions::ToBinary(&bin[0], static_cast<Int32>(bin.size()), source, sourceSize, size))
+            if (bin.size() != 0)
             {
-                Error(val, ix, "Failed to deserialize binary data from base64.");
+                if (!Base64Conversions::ToBinary(&bin[0], static_cast<Int32>(bin.size()), source, sourceSize, size))
+                {
+                    Error(val, ix, "Failed to deserialize binary data from base64.");
+                }
             }
 
             ParameterOffset writeHere = static_cast<char*>(allocHelper.GetShmem()->allocate(size + sizeof(Size)));
@@ -469,9 +470,11 @@ namespace Internal
             //write the size:
             *ParameterOffsetCast<Size>(writeHere) = size;
 
-            //write the data after the size
-            memcpy((writeHere+sizeof(Size)).get(), &bin[0], size);
-
+            if (bin.size() != 0)
+            {
+                //write the data after the size
+                memcpy((writeHere+sizeof(Size)).get(), &bin[0], size);
+            }
             //write the pointer in the parameter blob
             *ParameterOffsetCast<ParameterOffset>(m_firstFree) = writeHere;
 

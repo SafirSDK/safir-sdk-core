@@ -1,0 +1,8 @@
+#COPY DOB FILES
+copy_dob_files   src/dots/dots_test.ss/data
+copy_dob_files   src/dose/dose_test.ss/data
+
+dobmake
+
+build_dir        src/dots/dots_test.ss       Release
+build_dir        src/dose/dose_test.ss       Release

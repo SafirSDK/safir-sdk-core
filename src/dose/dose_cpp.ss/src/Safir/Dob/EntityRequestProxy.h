@@ -93,9 +93,9 @@ namespace Dob
          *
          * Retrieves a smart pointer to the entity request.
          *
-         * @return Entity request
+         * Note that it is not valid to call this for a DeleteRequest.
          *
-         * @throws Safir::Dob::NotFoundException Thrown if called for a proxy object received in callback OnDeleteRequest.
+         * @return Entity request
          */
         const Dob::EntityPtr GetRequest() const;
 

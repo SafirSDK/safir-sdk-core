@@ -51,7 +51,7 @@ package Dots.Member_Reader is
       Except  : Sax.Exceptions.Sax_Parse_Exception'Class);
    procedure Set_Document_Locator
      (Handler : in out Reader;
-      Loc     : access Sax.Locators.Locator'Class);
+      Loc     : in out Sax.Locators.Locator);
    procedure Start_Document (Handler : in out Reader);
    procedure End_Document (Handler : in out Reader);
    procedure Start_Element
@@ -70,7 +70,7 @@ package Dots.Member_Reader is
 
 private
    type Reader is new Sax.Readers.Reader with record
-      Locator : Sax.Locators.Locator_Access;
+      Locator : Sax.Locators.Locator;
       Silent  : Boolean := False;
       Depth   : Integer := 0;
       Char : Unbounded_String;

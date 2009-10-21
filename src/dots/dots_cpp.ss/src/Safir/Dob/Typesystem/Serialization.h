@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -62,7 +62,7 @@ namespace Typesystem
          * This method creates a new object from a given xml serialization.
          * It uses the ObjectFactory to accomplish this.
          *
-         * @param [in] xml - The binary serialization to deserialize.
+         * @param [in] xml - The xml to convert.
          * @return A boost::shared_ptr to the new object
          * @exception IllegalValueException If the type represented by the serialization isn't found
          *                                   in the ObjectFactory.

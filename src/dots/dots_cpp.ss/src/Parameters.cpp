@@ -29,7 +29,7 @@
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
-
+#include <sstream>
 
 namespace Safir
 {
@@ -61,7 +61,11 @@ namespace Parameters
         const ParameterIndex result = DotsC_GetParameterId(typeId, Utilities::ToUtf8(parameterName).c_str());
         if (result == -1)
         {
-            throw IllegalValueException(L"There is no such type or parameter defined", __WFILE__, __LINE__);
+            std::wostringstream ostr;
+            ostr << "There is no such type or parameter defined: ("
+                 << typeId << ", " 
+                 << parameterName << ")";
+            throw IllegalValueException(ostr.str(), __WFILE__, __LINE__);
         }
         else
         {
@@ -109,8 +113,7 @@ namespace Parameters
     }
 
     Int32
-    GetEnumeration(const Dob::Typesystem::TypeId /*enumId*/,
-                   const TypeId typeId,
+    GetEnumeration(const TypeId typeId,
                    const ParameterIndex parameter,
                    const Dob::Typesystem::ArrayIndex index)
     {

@@ -50,7 +50,8 @@ namespace Internal
         m_threadId(0),
         m_threadHandle(0),
         m_stop(false),
-        m_threadState(NotStarted)
+        m_threadState(NotStarted),
+        m_stopSignalled(false)
     {
         lllout << "DispatchThread::DispatchThread() - called. tid: " << ACE_Thread::self() << std::endl;
     }
@@ -74,7 +75,7 @@ namespace Internal
          */
         lllout <<"DispatchThread::Stop() - called... waitAWhile: " << std::boolalpha << waitAWhile << std::endl;
 
-        m_stop = true;
+        m_stop = 1;
 
         switch (m_threadState)
         {
@@ -84,7 +85,11 @@ namespace Internal
 
         case RunningInNewThread:
             {
-                Connections::Instance().GetConnection(m_id)->SignalIn();
+                if (!m_stopSignalled)
+                {
+                    Connections::Instance().GetConnection(m_id)->SignalIn();
+                    m_stopSignalled = true;
+                }
 
                 ACE_Time_Value waitUntil = ACE_OS::gettimeofday();
                 if (waitAWhile)
@@ -114,7 +119,11 @@ namespace Internal
 
         case RunningInExistingThread:
             {
-                Connections::Instance().GetConnection(m_id)->SignalIn();
+                if (!m_stopSignalled)
+                {
+                    Connections::Instance().GetConnection(m_id)->SignalIn();
+                    m_stopSignalled = true;
+                }
 
                 ACE_Time_Value waitUntil = ACE_OS::gettimeofday();
                 if (waitAWhile)
@@ -180,15 +189,16 @@ namespace Internal
         m_startEvent.signal();
 
         lllout << "DispatchThread::Run() - m_startEvent.signal() done. tid: " << ACE_Thread::self() << std::endl;
-
+        const boost::function<void(void)> waiter = Connections::Instance().GetConnectionSignalWaiter(m_id);
         try
         {
             for (;;)
             {
-                Connections::Instance().WaitForConnectionSignal(m_id);
+                //wait for connection signal
+                waiter();
 
                 // Check stop-flag
-                if(m_stop)
+                if(m_stop != 0)
                 {
                     lllout << "DispatchThread::Run() - about to stop... tid: " << ACE_Thread::self() << std::endl;
 

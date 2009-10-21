@@ -1,0 +1,11 @@
+#COPY DOB FILES
+copy_dob_files   examples/vehicleapp/vehicleapp_core.ss/data/
+copy_dob_files   examples/vehicleapp/vehicleapp_core.ss/extra/
+copy_dob_files   examples/vehicledb/vehicledb_core.ss/data/
+
+dobmake
+
+build_dir        examples/vehicleapp/vehicleapp_core.ss/src     Release
+build_dir        examples/vehicledb/vehicledb_core.ss/src       Release
+build_dir        examples/vehiclemmi/vehiclemmi_core.ss/src/    Release
+

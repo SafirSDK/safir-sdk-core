@@ -25,7 +25,6 @@
 #ifndef __DOSE_CONNECTIONS_H__
 #define __DOSE_CONNECTIONS_H__
 
-#include <ace/OS_NS_unistd.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
 #include <Safir/Dob/Internal/InternalExportDefs.h>
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
@@ -61,6 +60,7 @@ namespace Internal
         explicit Connections(private_constructor_t);
         ~Connections();
 
+
         /**
          * This is for applications waiting for "things" to happen to its connection.
          * This blocks forever until SignalIn for that connection has been called.
@@ -68,7 +68,7 @@ namespace Internal
          * undefined results...
          * Is intended to be called from the dispatch thread in dose_dll.
          */
-        void WaitForConnectionSignal(const ConnectionId & connectionId);
+        const boost::function<void(void)> GetConnectionSignalWaiter(const ConnectionId & connectionId);
 
         /**
          * This is for DoseMain to wait for events from connections.
@@ -101,8 +101,6 @@ namespace Internal
         public:
             virtual ConnectResult CanAddConnection(const std::string & connectionName, const pid_t pid, const long context) = 0;
             virtual void HandleConnect(const ConnectionPtr & connection) = 0;
-            virtual void HandleDisconnect(const ConnectionPtr & connection) = 0;
-            virtual void DisconnectComplete() = 0;
 
             virtual ~ConnectionConsumer() {}
         };
@@ -204,8 +202,6 @@ namespace Internal
                              ConnectResult & result,
                              ConnectionPtr & connection);
 
-        void DisconnectDoseMain(const ConnectionPtr& connection);
-
         typedef PairContainers<ConnectionId, ConnectionPtr>::map ConnectionTable;
         ConnectionTable m_connections;
 
@@ -217,14 +213,14 @@ namespace Internal
         //RESIZING/MOVING THE STRUCTURE WILL INVALIDATE THE POINTERS!
         //the reason that this is an int is that assigns of 0 and 1 should be atomic, and
         //that any compiler should have int be the wordsize for that processor.
-        //TODO: make this volatile when boost makes it possible (submitted to boost as ticket #1634)
-        Containers<int>::vector m_connectionOutSignals;
+
+        boost::interprocess::offset_ptr<AtomicUint32> m_connectionOutSignals;
         Containers<ConnectionId>::vector m_connectionOutIds;
         size_t m_lastUsedSlot; //slot that marks the end of the region of used slots. optimization
 
 
         //Signal for when an application is trying to connect
-        volatile int m_connectSignal;
+        AtomicUint32 m_connectSignal;
 
         boost::interprocess::interprocess_semaphore m_connectSem;
         boost::interprocess::interprocess_semaphore m_connectMinusOneSem;

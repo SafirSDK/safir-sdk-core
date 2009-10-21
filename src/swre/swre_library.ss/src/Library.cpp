@@ -26,7 +26,16 @@
 #include <Safir/Dob/NotOpenException.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Application/BackdoorCommand.h>
+
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4702)
+#endif
 #include <boost/lexical_cast.hpp>
+#if _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <ace/Thread.h>
 #include <ace/Process.h>
 #include <ace/SOCK_Dgram_Bcast.h>

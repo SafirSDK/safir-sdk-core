@@ -54,6 +54,8 @@ namespace Internal
         bool HandleResponse(const DistributionData& response);
 
     private:
+        void operator=(const ResponseHandler&) const; //Disable assignment operator
+
         void DispatchResponse(const DistributionData& response, bool & dontRemove, bool & doseComOverflowed, const ConnectionPtr & sender);
         void DispatchResponsesFromRequestInQueue(RequestInQueue & queue, const ConnectionPtr & sender);
 

@@ -323,7 +323,8 @@ namespace Dob
         virtual RegistrationSubscriber * ToRegistrationSubscriber() {return this;}
     };
 
-    /** Interface to be implemented by subscribers of messages.
+    /**
+     * Interface to be implemented by subscribers of messages.
      */
     class DOSE_CPP_API MessageSubscriber:
         public virtual Internal::ConsumerBase
@@ -343,7 +344,8 @@ namespace Dob
         virtual MessageSubscriber * ToMessageSubscriber() {return this;}
     };
 
-    /** Interface to be implemented by subscribers of entities.
+    /**
+     * Interface to be implemented by subscribers of entities.
      */
     class DOSE_CPP_API EntitySubscriber:
         public virtual Internal::ConsumerBase

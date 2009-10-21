@@ -15,7 +15,7 @@ REM
 REM==============================================================
 
 REM username: sysadm  password: sysadm  script: mimer_database_structure.sql  database: SafirDb
-(echo sysadm & echo sysadm & echo read 'mimer_database_structure.sql'; & echo exit;) | "c:\Program Files\Mimer SQL 9.2\BSQL.exe" SyskDb
+(echo sysadm & echo sysadm & echo read 'mimer_database_structure.sql'; & echo exit;) | "c:\Program Files\Mimer SQL 9.2\BSQL.exe" SafirDb
 
 echo "Done..."
 

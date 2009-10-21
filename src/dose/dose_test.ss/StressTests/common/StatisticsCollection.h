@@ -29,10 +29,19 @@
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <boost/noncopyable.hpp>
 
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4267)
+  #pragma warning(disable: 4244)
+#endif
+
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <ace/OS_NS_unistd.h>
 #include <ace/Thread.h>
 
-//#include <Safir/Time/TimeProvider.h>
-
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
 
 double GetUtcTime();
 

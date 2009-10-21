@@ -58,7 +58,7 @@ procedure Dots_V is
       Index :        Positive;
       Quit  : in out Boolean);
 
-   procedure Dir is new GNAT.Directory_Operations.Iteration.Wildcard_Iterator
+   procedure Dir is new GNAT.Directory_Operations.Iteration.Find
      (Handle_Filename);
 
    function Expand_Env (P : in VString) return VString;
@@ -185,6 +185,70 @@ procedure Dots_V is
 
       end Setup_Exceptions;
 
+      procedure Setup_Namespace_Mangling is
+         File_Suffix  : constant String :=  S (Match ("Namespace_Prefix_File_Suffix"));
+         Namespace_Separator : constant String :=  S (Match ("Namespace_Separator"));
+         procedure Handle_Prefix_File
+            (Item  :        String;
+             Index :        Positive;
+             Quit  : in out Boolean);
+
+         procedure Prefix_Dir is new GNAT.Directory_Operations.Iteration.Wildcard_Iterator
+           (Handle_Prefix_File);
+
+         function Get_Prefix_From (Filename : String) return String is
+            F : Ada.Text_IO.File_Type;
+         begin
+            Ada.Text_IO.Open (F, Ada.Text_IO.In_File, Filename);
+            loop
+               declare
+                  Line : constant String := Ada.Text_IO.Get_Line (F);
+               begin
+                  if Line'Length > 0 then
+                     case  Line (Line'First) is
+                        when 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' =>
+                           Ada.Text_IO.Close (F);
+                           return Line;
+                        when others =>
+                           null;
+                     end case;
+                  end if;
+               end;
+            end loop;
+            return "";
+         end Get_Prefix_From;
+
+         procedure Handle_Prefix_File
+            (Item  :        String;
+             Index :        Positive;
+             Quit  : in out Boolean) is
+            pragma Unreferenced (Index, Quit);
+            Ns_First : Integer := Item'First;
+            Ns_Last  : constant Integer := Item'Last - File_Suffix'Length;
+         begin
+            for J in reverse Item'Range loop
+               if Item (J) = GNAT.Directory_Operations.Dir_Separator then
+                  Ns_First := J + 1;
+                  exit;
+               end if;
+            end loop;
+            Dots.State.Outputs (Dots.State.Defined_Outputs).Namspace_Prefix_Used := True;
+            Templates_Parser.Insert
+              (Dots.State.Outputs (Dots.State.Defined_Outputs).Namspace_Prefix_Set,
+               Templates_Parser.Assoc
+                 (Item (Ns_First .. Ns_Last) & '.',
+                  Get_Prefix_From (Item) & Namespace_Separator));
+            -- Ada.Text_IO.Put_Line("Prefix: " & Item (Ns_First .. Ns_Last) & " " & Get_Prefix_From (Item));
+         end Handle_Prefix_File;
+
+      begin
+         Dots.State.Outputs (Dots.State.Defined_Outputs).Namspace_Prefix_Used := False;
+         if File_Suffix = "" then
+            return;
+         end if;
+         Prefix_Dir ("*" & File_Suffix );
+      end Setup_Namespace_Mangling;
+
       procedure Setup_Types is
          Matches : GNAT.Regpat.Match_Array (0 .. 4);
          Regexp  : constant String := "Type:(.*?):(.*?):""(.*?)"":""(.*?)""";
@@ -235,7 +299,7 @@ procedure Dots_V is
 --        Ada.Text_IO.Put_Line ("Header => " & S (Match_Section ("Header")));
 
       for J in reverse Item'Range loop
-         if Item (J) = '\' then
+         if Item (J) = GNAT.Directory_Operations.Dir_Separator then
             Item_First := J + 1;
             exit;
          end if;
@@ -250,21 +314,45 @@ procedure Dots_V is
 
       Setup_Exceptions;
       Setup_Types;
+      Setup_Namespace_Mangling;
 
       Dots.State.Outputs (Dots.State.Defined_Outputs) :=
         Dots.State.Output_Config'
           (Name => V (Item (Item_First .. Item'Last - 4)),
            Full_Name => V (Item),
-           File_Extension => Match ("File_Extension"),
+           File_Suffix => Match ("File_Suffix"),
            Filename_Separator =>  Match ("Filename_Separator"),
            Output_Directory    =>  Expand_Env (Match ("Output_Directory")),
            Namespace_Separator =>  Match ("Namespace_Separator"),
-           Lowercase_Namespace =>
-             Boolean'Value (S (Match ("Lowercase_Namespace"))),
-           Lowercase_Filenames =>
-             Boolean'Value (S (Match ("Lowercase_Filenames"))),
+           Namespace_Prefix_File_Suffix =>  Match ("Namespace_Prefix_File_Suffix"),
+           Namespace_Style      =>
+             (Underscore => Dots.State.Underscore_Style'Value
+                (S (Match ("Namespace_Underscore_Style"))),
+              Choose_Case => Dots.State.Case_Style'Value
+                (S (Match ("Namespace_Case_Style")))),
+           Filename_Style      =>
+             (Underscore => Dots.State.Underscore_Style'Value
+                (S (Match ("Filename_Underscore_Style"))),
+              Choose_Case => Dots.State.Case_Style'Value
+                (S (Match ("Filename_Case_Style")))),
+           Classname_Style      =>
+             (Underscore => Dots.State.Underscore_Style'Value
+                (S (Match ("Classname_Underscore_Style"))),
+              Choose_Case => Dots.State.Case_Style'Value
+                (S (Match ("Classname_Case_Style")))),
+           Membername_Style      =>
+             (Underscore => Dots.State.Underscore_Style'Value
+                (S (Match ("Membername_Underscore_Style"))),
+              Choose_Case => Dots.State.Case_Style'Value
+                (S (Match ("Membername_Case_Style")))),
+           Enum_Value_Style      =>
+             (Underscore => Dots.State.Underscore_Style'Value
+                (S (Match ("Enum_Value_Underscore_Style"))),
+              Choose_Case => Dots.State.Case_Style'Value
+                (S (Match ("Enum_Value_Case_Style")))),
            Create_Parents => Parent_Contents /= "",
            Object_Type => Match ("Object_Type"),
+           Parent_Filename => Match ("Parent_Filename"),
            Index_Type => Match ("Index_Type"),
            Exception_Set =>  Dots.State.Outputs
              (Dots.State.Defined_Outputs).Exception_Set,
@@ -274,7 +362,12 @@ procedure Dots_V is
              (Dots.State.Defined_Outputs).Type_Set,
            Type_List =>  Dots.State.Outputs
              (Dots.State.Defined_Outputs).Type_List,
-           Dependencies => Dots.String_Sets.Empty_Set);
+           Namspace_Prefix_Set =>  Dots.State.Outputs
+             (Dots.State.Defined_Outputs).Namspace_Prefix_Set,
+           Namspace_Prefix_Used =>  Dots.State.Outputs
+             (Dots.State.Defined_Outputs).Namspace_Prefix_Used,
+           Dependencies => Dots.String_Sets.Empty_Set,
+           Dependencies_Base => Dots.String_Sets.Empty_Set);
 
    end Handle_Filename;
 
@@ -368,17 +461,7 @@ begin
             when 'o' =>
                Dots.State.Log_Output_Type := V (GNAT.Command_Line.Parameter);
             when 'd' =>
-               declare
-                  Tmp : constant String :=
-                    S (Expand_Env (V (GNAT.Command_Line.Parameter)));
-               begin
-                  if Tmp (Tmp'Last) /= '\' then
-                     Dod_Dir := V (Tmp) & '\';
-                  else
-                     Dod_Dir := V (Tmp);
-                  end if;
-               end;
-
+               Dod_Dir := Expand_Env (V (GNAT.Command_Line.Parameter));
             when 't' =>
                Dots.State.Log_Tokens := True;
             when others =>
@@ -393,6 +476,7 @@ begin
    if Help then
       Ada.Text_IO.Put_Line ("Usage:");
       Ada.Text_IO.Put_Line ("dots_v [options] xml-files...");
+      Ada.Text_IO.Put_Line ("-dod=<dir>  : Specifies the directory containing the dod-files.");
       Ada.Text_IO.Put_Line ("-info       : Displays handled files");
       Ada.Text_IO.Put_Line ("-verbose    : Displays parsing");
       Ada.Text_IO.Put_Line ("-output=xxx : Displays specified output." &
@@ -403,13 +487,18 @@ begin
    end if;
 
    if Dots.State.Log_Info then
-      Ada.Text_IO.Put_Line ("Looking for " & S (Dod_Dir) & "*.dod");
+      Ada.Text_IO.Put_Line ("Looking for *.dod in " & S (Dod_Dir) & ".");
    end if;
 
-   Dir (S (Dod_Dir) & "*.dod");
+   begin
+      Dir (S (Dod_Dir), ".*\.dod");
+   exception
+      when others =>
+         null;
+   end;
 
    if Dots.State.Defined_Outputs = 0 then
-      Ada.Text_IO.Put_Line ("No dod-files found");
+      Ada.Text_IO.Put_Line ("No dod-files found in " & S (Dod_Dir) & ".");
       GNAT.OS_Lib.OS_Exit (2);
    end if;
 

@@ -27,8 +27,17 @@
 
 #if defined (_WIN32)
 
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4267)
+#endif
+
 #  define DOSE_USE_ACE_PROCESS_SEMAPHORE_FOR_SIGNALS
 #  include <ace/Process_Semaphore.h>
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
 
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 

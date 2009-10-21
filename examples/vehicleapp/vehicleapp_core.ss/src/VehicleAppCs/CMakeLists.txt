@@ -1,15 +1,21 @@
+cmake_minimum_required(VERSION 2.6)
+
 PROJECT(VehicleAppCs)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+find_package(CSharp REQUIRED)
+INCLUDE(CSharpMacros)
 
-FILE(GLOB cs_files *.cs)
+FILE(GLOB sources *.cs)
 
-ADD_CUSTOM_TARGET(
-  VehicleAppCs.exe ALL 
-  COMMAND gmcs -target:exe -r:Safir.Dob.Typesystem.dll,Safir.Dob.dll,dots_generated-dotnet.dll,swre_interface_dotnet.dll -out:VehicleAppCs.exe ${cs_files}
-  DEPENDS ${cs_files}
-  )
+SET(CS_FLAGS ${COMMON_CS_FLAGS} "-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dll,${SAFIR_RUNTIME}/bin/Safir.Dob.dll,${SAFIR_RUNTIME}/bin/dots_generated-dotnet.dll,${SAFIR_RUNTIME}/bin/swre_interface_dotnet.dll" )
 
-INSTALL(FILES VehicleAppCs.exe
-        DESTINATION ${SAFIR_RUNTIME}/bin)
+ADD_CS_EXECUTABLE(VehicleAppCs "${sources}" ALL)
+
+#The csharp build renames the exe to XXXX.csexe, so we rename it back when we install
+INSTALL(PROGRAMS ${target_EXE} 
+ DESTINATION ${SAFIR_RUNTIME}/bin
+  RENAME VehicleAppCs.exe)
+
+INSTALL_CS_DEBUG_INFO()
 

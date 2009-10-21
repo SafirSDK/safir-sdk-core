@@ -22,7 +22,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.RegisterServiceHandler</value>
               </member>
               <member>
@@ -49,7 +49,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SimulateOverflows</value>
               </member>
               <member>
@@ -81,7 +81,7 @@
                 <value>0</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.ServiceRequest</value>
               </member>
               <member>
@@ -114,7 +114,7 @@
                 <value>1</value>
               </member>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.SimulateOverflows</value>
               </member>
               <member>
@@ -137,7 +137,7 @@
             <name>DoseTest.Action</name>
             <members>
               <member>
-                <name>ActionType</name>
+                <name>ActionKind</name>
                 <value>DoseTest.ActionEnum.Sleep</value>
               </member>
               <member>

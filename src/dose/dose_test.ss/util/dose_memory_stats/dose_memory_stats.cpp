@@ -72,10 +72,17 @@ private:
 int main(int argc, char* argv[])
 {
     bool brief = false;
+    bool once = false;
 
     if (argc==2 && std::string(argv[1]) == "-b")
     {
         brief = true;
+    }
+
+    if (argc==2 && std::string(argv[1]) == "-o")
+    {
+        brief = true;
+        once = true;
     }
 
     ShmStatistics stats(brief);
@@ -87,9 +94,13 @@ int main(int argc, char* argv[])
             std::wcout << "--------------------------------------------------" << std::endl;
         }
         stats.DumpMemoryUsage();
+        if (once)
+        {
+            break;
+        }
         ACE_OS::sleep(3);
     }
 
-//    return 0;
+    return 0;
 }
 

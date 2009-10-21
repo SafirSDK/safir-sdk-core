@@ -160,29 +160,29 @@ static int Get_Status_Info(DOSE_SHARED_DATA_S *pShm, char *buff)
             "My IpAddr         = %s\r\n"
             "IP MulticastAddr  = %s\r\n"
             "IP NetAddr        = %s\r\n"
-            "New               = %08lX  %08lX\r\n"
-            "Up                = %08lX  %08lX\r\n"
-            "Down              = %08lX  %08lX\r\n"
-            "ToBePoolDistr     = %08lX  %08lX\r\n"
-            "BeingPoolDistr    = %08lX  %08lX\r\n"
-            "LatestPoolDistr   = %08lX  %08lX\r\n\r\n"
+            "New               = %08X  %08X\r\n"
+            "Up                = %08X  %08X\r\n"
+            "Down              = %08X  %08X\r\n"
+            "ToBePoolDistr     = %08X  %08X\r\n"
+            "BeingPoolDistr    = %08X  %08X\r\n"
+            "LatestPoolDistr   = %08X  %08X\r\n\r\n"
             "PoolDistributionWillStartSoon = %lu\r\n"   // ms has expired\r\n"
-            "PoolDistributionIsInProgress  = %ld\r\n"
-            "PoolDistributionWillEndSoon   = %ld\r\n\r\n"
+            "PoolDistributionIsInProgress  = %d\r\n"
+            "PoolDistributionWillEndSoon   = %d\r\n\r\n"
             ,
             MyIpAddrBuff, IpMcAddrBuff, IpNetAddrBuff,
-            (ulong)(pShm->BitMapNodesNew64>>32),
-            (ulong)(pShm->BitMapNodesNew64 & 0xFFFFFFFF),
-            (ulong)(pShm->BitMapNodesUp64>>32),
-            (ulong)(pShm->BitMapNodesUp64 & 0xFFFFFFFF),
-            (ulong)(pShm->BitMapNodesDown64>>32),
-            (ulong)(pShm->BitMapNodesDown64 & 0xFFFFFFFF),
-            (ulong)(pShm->BitMapToBePoolDistributed64>>32),
-            (ulong)(pShm->BitMapToBePoolDistributed64 & 0xFFFFFFFF),
-            (ulong)(pShm->BitMapBeingPoolDistributed64>>32),
-            (ulong)(pShm->BitMapBeingPoolDistributed64 & 0xFFFFFFFF),
-            (ulong)(pShm->BitMapLatestPoolDistributed64>>32),
-            (ulong)(pShm->BitMapLatestPoolDistributed64 & 0xFFFFFFFF),
+            (dcom_ulong32)(pShm->BitMapNodesNew64>>32),
+            (dcom_ulong32)(pShm->BitMapNodesNew64 & 0xFFFFFFFF),
+            (dcom_ulong32)(pShm->BitMapNodesUp64>>32),
+            (dcom_ulong32)(pShm->BitMapNodesUp64 & 0xFFFFFFFF),
+            (dcom_ulong32)(pShm->BitMapNodesDown64>>32),
+            (dcom_ulong32)(pShm->BitMapNodesDown64 & 0xFFFFFFFF),
+            (dcom_ulong32)(pShm->BitMapToBePoolDistributed64>>32),
+            (dcom_ulong32)(pShm->BitMapToBePoolDistributed64 & 0xFFFFFFFF),
+            (dcom_ulong32)(pShm->BitMapBeingPoolDistributed64>>32),
+            (dcom_ulong32)(pShm->BitMapBeingPoolDistributed64 & 0xFFFFFFFF),
+            (dcom_ulong32)(pShm->BitMapLatestPoolDistributed64>>32),
+            (dcom_ulong32)(pShm->BitMapLatestPoolDistributed64 & 0xFFFFFFFF),
             WillStartSoon,
             pShm->PoolDistributionIsInProgress,
             pShm->PoolDistributionWillEndSoon);
@@ -190,13 +190,13 @@ static int Get_Status_Info(DOSE_SHARED_DATA_S *pShm, char *buff)
     pos = strlen(buff);
     sprintf(&buff[pos],
             "Statistics:\r\n"
-            "Tot ReceiveCount      = %ld\r\n"
-            "Tot TransmitCount     = %ld\r\n"
-            "ReTransmitCount       = %ld\r\n"
-            "LostAckCount          = %ld\r\n"
-            //"BuffOverFlowCount     = %ld\r\n"
-            "ReceiveQueueFullCount = %ld\r\n"
-            "TransmitQueueFullCount= %ld\r\n"
+            "Tot ReceiveCount      = %d\r\n"
+            "Tot TransmitCount     = %d\r\n"
+            "ReTransmitCount       = %d\r\n"
+            "LostAckCount          = %d\r\n"
+            //"BuffOverFlowCount     = %d\r\n"
+            "ReceiveQueueFullCount = %d\r\n"
+            "TransmitQueueFullCount= %d\r\n"
             ,
             pShm->Statistics.TotRxCount,
             pShm->Statistics.TotTxCount,
@@ -223,7 +223,7 @@ Java_DoseJni_GetInfo(JNIEnv *env, jclass, // myclass,
     int count = 0;
     jbyte buf[1024];    // be sure this is big enough
     DOSE_SHARED_DATA_S *pShm = NULL;
-    ulong64 BitMap64;
+    dcom_ulong64 BitMap64;
 
 
     //printf("DoseJni_GetInfo(%X)\n", Cmd);
@@ -267,15 +267,15 @@ Java_DoseJni_GetInfo(JNIEnv *env, jclass, // myclass,
             buf[8*count+2] = 0; // spare
             //buf[8*count+3] =  // see below
             buf[8*count+4]
-                    = (uchar)(pShm->NodeStatusTable[jx].IpAddr_nw & 0xFF);
+                    = (dcom_uchar8)(pShm->NodeStatusTable[jx].IpAddr_nw & 0xFF);
             buf[8*count+5]
-                    = (uchar)((pShm->NodeStatusTable[jx].IpAddr_nw>>8) & 0xFF);
+                    = (dcom_uchar8)((pShm->NodeStatusTable[jx].IpAddr_nw>>8) & 0xFF);
             buf[8*count+6]
-                    = (uchar)((pShm->NodeStatusTable[jx].IpAddr_nw>>16) & 0xFF);
+                    = (dcom_uchar8)((pShm->NodeStatusTable[jx].IpAddr_nw>>16) & 0xFF);
             buf[8*count+7]
-                    = (uchar)((pShm->NodeStatusTable[jx].IpAddr_nw>>24) & 0xFF);
+                    = (dcom_uchar8)((pShm->NodeStatusTable[jx].IpAddr_nw>>24) & 0xFF);
 
-            BitMap64 = (ulong64) 1 << jx;
+            BitMap64 = (dcom_ulong64) 1 << jx;
 
             if(pShm->NodeStatusTable[jx].IpAddr_nw == pShm->MyIpAddr_nw) // Me
             {
@@ -294,7 +294,7 @@ Java_DoseJni_GetInfo(JNIEnv *env, jclass, // myclass,
             // Indicates how I belive others see me.
             // Note myself is allways 'NEW'
             {
-                //BitMap64 = (ulong64) 1 << jx;
+                //BitMap64 = (dcom_ulong64) 1 << jx;
                 if(pShm->NodeStatusTable[jx].Status == 'U')
                 {
                     if((pShm->BitMapToBePoolDistributed64

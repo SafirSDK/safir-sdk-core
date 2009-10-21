@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Joel Ottosson / stjoot
 *
 *******************************************************************************
@@ -25,6 +25,8 @@
 #include "dots_blob_layout.h"
 #include "dots_repository.h"
 #include "dots_basic_types.h"
+
+static const char * EMPTY_STRING = "";
 
 namespace Safir
 {
@@ -495,7 +497,17 @@ namespace Internal
         InternalMemberStatus status=*AnyPtrCast<InternalMemberStatus> (blob + offset);
         if (MemberStatusHandler::IsNull(status) || dynOffs==0)
         {
-            val=NULL;
+            const MemberDescription * memberDesc = Repository::Classes().FindClass(GetTypeId(blob))->GetMember(member);
+            if (!MemberStatusHandler::IsNull(status) &&
+                (memberDesc->GetMemberType() == BinaryMemberType ||
+                 memberDesc->GetMemberType() == StringMemberType))
+            {
+                val = const_cast<char*>(EMPTY_STRING);
+            }
+            else
+            {
+                val=NULL;
+            }
         }
         else
         {

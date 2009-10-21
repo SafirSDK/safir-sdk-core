@@ -21,7 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <QtGui>
+
+#include "common_header.h"
 #include "memgraph.h"
 //#include <iostream>
 #include <sstream>
@@ -41,28 +42,28 @@ MemGraph::MemGraph(QWidget* /*parent*/):
     connect(verticalScale, SIGNAL(valueChanged(int)), this, SLOT(ScaleChanged(int)));
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(Timeout()));
     m_timer.setSingleShot(true);
-    m_timer.start(updatePeriod->value()*1000);
-    graph->SetHistoryLength(historyLength->value()*60);
+    m_timer.start(static_cast<int>(updatePeriod->value()*1000));
+    graph->SetHistoryLength(static_cast<int>(historyLength->value()*60));
 }
 
 
 void MemGraph::HistoryChanged(double newValue)
 {
-    graph->SetHistoryLength(newValue*60);
+    graph->SetHistoryLength(static_cast<int>(newValue*60));
 }
 
 void MemGraph::Timeout()
 {
-    m_timer.start(updatePeriod->value()*1000);
+    m_timer.start(static_cast<int>(updatePeriod->value()*1000));
     const size_t free = GetSharedMemory().get_free_memory();
 
-    graph->AddData(QDateTime::currentDateTime(),(m_capacity-free)/(double)m_capacity);
+    graph->AddData(QDateTime::currentDateTime(),static_cast<float>((m_capacity-free)/(double)m_capacity));
 }
 
 void MemGraph::PeriodChanged(double newPeriod)
 {
     m_timer.stop();
-    m_timer.start(newPeriod*1000);
+    m_timer.start(static_cast<int>(newPeriod*1000));
 }
 
 void MemGraph::ScaleChanged(int newValue)
@@ -70,5 +71,5 @@ void MemGraph::ScaleChanged(int newValue)
     std::ostringstream ostr;
     ostr << newValue << " %";
     scalePercent->setText(ostr.str().c_str());
-    graph->SetVerticalScale(newValue/100.0);
+    graph->SetVerticalScale(static_cast<float>(newValue/100.0));
 }

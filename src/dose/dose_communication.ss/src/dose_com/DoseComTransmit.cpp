@@ -111,7 +111,7 @@ extern volatile int * volatile pDbg;
 
 volatile static DOSE_SHARED_DATA_S *g_pShm;
 volatile static NODESTATUS_TABLE *g_pNodeStatusTable;
-volatile static ushort g_MyDoseId = 0xFFFF;
+volatile static dcom_ushort16 g_MyDoseId = 0xFFFF;
 volatile static Statistics::TX_STATISTICS_S *g_pTxStatistics;
 volatile static int g_QueueIndex_CurrPoolDistribution = -1;
 
@@ -158,19 +158,19 @@ extern volatile int * volatile pDbg;
 #define MAX_ACK_QUEUE 128
 
 // These are used by two different threads, so 'volatile' might be good here
-volatile static ulong g_Ack_Put_ix = 0;
-volatile static ulong g_Ack_Get_ix = 0;
+volatile static dcom_ulong32 g_Ack_Put_ix = 0;
+volatile static dcom_ulong32 g_Ack_Get_ix = 0;
 
 volatile static struct
 {
-    volatile ulong  SequenceNumber;
-    volatile ulong  IpAddrFrom_nw;
-    volatile ushort FragmentNumber;
-    volatile ushort Info;
-    volatile uchar  TxMsgArray_Ix;
-    volatile uchar  DoseIdFrom;
-    volatile uchar  TxQueueNumber;  // = PriorityChannel
-    volatile uchar  MsgType;
+    volatile dcom_ulong32  SequenceNumber;
+    volatile dcom_ulong32  IpAddrFrom_nw;
+    volatile dcom_ushort16 FragmentNumber;
+    volatile dcom_ushort16 Info;
+    volatile dcom_uchar8  TxMsgArray_Ix;
+    volatile dcom_uchar8  DoseIdFrom;
+    volatile dcom_uchar8  TxQueueNumber;  // = PriorityChannel
+    volatile dcom_uchar8  MsgType;
 } g_Ack_Queue[MAX_ACK_QUEUE] = {{0}};
 
 //=====================================================================
@@ -233,64 +233,64 @@ static const int g_MaxLapCount[NUM_TX_QUEUES] = {8,6,4,3,2,2};
 
 typedef volatile struct
 {
-    volatile ushort PutIx;          // See comment above
-    volatile ushort GetIxToAck;     // See comment above
-    volatile ushort GetIxToSend;            // See comment above
+    volatile dcom_ushort16 PutIx;          // See comment above
+    volatile dcom_ushort16 GetIxToAck;     // See comment above
+    volatile dcom_ushort16 GetIxToSend;            // See comment above
 
-    volatile ushort MaxUsedQueueLength;
+    volatile dcom_ushort16 MaxUsedQueueLength;
 
     // wA/wT tells us if Application/TxThread writes the data
     struct
     {
-        volatile ulong64 DstBitMap64;       //wA
-        volatile ulong64 ExpAckBitMap64[8]; //wT Nodes that not has sent Ack
+        volatile dcom_ulong64 DstBitMap64;       //wA
+        volatile dcom_ulong64 ExpAckBitMap64[8]; //wT Nodes that not has sent Ack
                                             //Fragm: Ix = (FrNum&7). NonFr: Ix = 0;
         char    * volatile pMsgBuff;        //wA
-        volatile ulong  UsrMsgLength;       //wA
-        volatile uchar  DestinationId;      //wA (0-63) + (64-MAX_NUM_DEST_CHANNELS)
-        volatile uchar  IsPoolDistr;        //wA
-        volatile uchar  bUseAck;            //wA
-        volatile uchar  bIsFragmented;      //wT
+        volatile dcom_ulong32  UsrMsgLength;       //wA
+        volatile dcom_uchar8  DestinationId;      //wA (0-63) + (64-MAX_NUM_DEST_CHANNELS)
+        volatile dcom_uchar8  IsPoolDistr;        //wA
+        volatile dcom_uchar8  bUseAck;            //wA
+        volatile dcom_uchar8  bIsFragmented;      //wT
 
         // These are bitmapped. Non-fragmented - bit 0 is used
         // Fragmented - bit number corresponds to  1<<(FragmentNumber & 3)
 
         volatile char    TransmitComplete;   //wT - Set when a msg or fragment is completed (ack rec)
-        volatile uchar   IsRetransmitting;   //wT one or more nodes needs rexmit
-        uchar   spare;              //SeqNumIsRestarted;
-        volatile uchar  ShallFreeBuffer;
+        volatile dcom_uchar8   IsRetransmitting;   //wT one or more nodes needs rexmit
+        dcom_uchar8   spare;              //SeqNumIsRestarted;
+        volatile dcom_uchar8  ShallFreeBuffer;
 
-        volatile ushort  IsTransmitting;     // wT - Set when msg is sent
+        volatile dcom_ushort16  IsTransmitting;     // wT - Set when msg is sent
                                     // Non-fragm: bit 0 is used
                                     // Fragm: Bit 0-7 <--> 1<<(fragmNum & 7).
                                     //        Bit 15 set until entire msg is completed.
 
-        volatile ushort  SequenceNumber;     // wT To this IpM_Addr (to cmp with Acks)
+        volatile dcom_ushort16  SequenceNumber;     // wT To this IpM_Addr (to cmp with Acks)
 
-        volatile ushort  NotAckedFragment;   // wT First not acked fragment.
+        volatile dcom_ushort16  NotAckedFragment;   // wT First not acked fragment.
                                     // Init to 0 for non-fragmented msg.
                                     // Init to 1 for fragmented msg
                                     // Inc to (FragmentNum + 1) when all ack to
                                     // FragmentNum has been received;
-        volatile ushort  SentFragment;       // Latest sent fragment. Inc when fragm is sent.
-        volatile ushort  LastFragment;       // Last fragment to be sent
+        volatile dcom_ushort16  SentFragment;       // Latest sent fragment. Inc when fragm is sent.
+        volatile dcom_ushort16  LastFragment;       // Last fragment to be sent
     } TxMsgArr[MAX_XMIT_QUEUE];     // 32 or 64
 
-    volatile ulong64 CurrFragmentedMsgAckBitMap64;  // used for entire fragmented msg
-    volatile ulong   StartSendTime;
-    volatile ushort  TxSequenceNumber[64+MAX_NUM_DEST_CHANNELS]; //wT
+    volatile dcom_ulong64 CurrFragmentedMsgAckBitMap64;  // used for entire fragmented msg
+    volatile dcom_ulong32   StartSendTime;
+    volatile dcom_ushort16  TxSequenceNumber[64+MAX_NUM_DEST_CHANNELS]; //wT
 #ifdef USE_RESTART_SEQNUM
-    volatile uchar   TxSeqNumIsRestarted[64+MAX_NUM_DEST_CHANNELS];  //wT
+    volatile dcom_uchar8   TxSeqNumIsRestarted[64+MAX_NUM_DEST_CHANNELS];  //wT
 #endif
-    volatile uchar   bIsSendingFragmented;   //
-    volatile uchar   RetryCount;
-    volatile ushort  Last_PoolDistribution_Put_Ix;
+    volatile dcom_uchar8   bIsSendingFragmented;   //
+    volatile dcom_uchar8   RetryCount;
+    volatile dcom_ushort16  Last_PoolDistribution_Put_Ix;
 
     volatile int LapCount; // Cleared before sending, increased for each sent message
 
     // incremented by DOSE_Xmit_msg() when overflow
     // cleared by Xmit_Thread() when free entries in Queue
-    volatile ushort TransmitQueueOverflow;
+    volatile dcom_ushort16 TransmitQueueOverflow;
 
 } DOSE_TXQUEUE_S;
 
@@ -414,6 +414,9 @@ static THREAD_API Ack_Thread(void *)
        //     //if(*pDbg) PrintDbg("+++ Ack_Thread() Got junk\n");;
        // }
     } // end for(;;)
+#ifndef _MSC_VER //disable warning in msvc
+    return 0;
+#endif
 }
 /*------------------end  Ack_Thread() ---------------*/
 
@@ -468,7 +471,7 @@ static int CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
     }
     else
     {
-        TxQ[qIx].TxMsgArr[TxMsgArrIx].TransmitComplete = (uchar) 0xFF;
+        TxQ[qIx].TxMsgArr[TxMsgArrIx].TransmitComplete = (dcom_uchar8) 0xFF;
     }
 
     // Increase GetIxToSend
@@ -489,7 +492,7 @@ static int CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
             PrintDbg("Clearing BitMapBeingPoolDistributed64\n");
         g_pShm->PoolDistributionWillEndSoon  = 0;
         g_pShm->PoolDistributionIsInProgress = 0;
-        g_pShm->BitMapBeingPoolDistributed64 = (ulong64)0; // just in case
+        g_pShm->BitMapBeingPoolDistributed64 = (dcom_ulong64)0; // just in case
 
         // Normally, this flag (TxSeqNumIsRestarted) is set when PD_COMPLETE
         // is transmitted. Now we must do it here.
@@ -618,7 +621,7 @@ static int CleanUp_After_Msg_Completed(int qIx)
             }
             g_pShm->PoolDistributionWillEndSoon  = 0;
             g_pShm->PoolDistributionIsInProgress = 0;
-            g_pShm->BitMapBeingPoolDistributed64 = (ulong64)0; // just in case
+            g_pShm->BitMapBeingPoolDistributed64 = (dcom_ulong64)0; // just in case
         }
     }
 
@@ -667,14 +670,14 @@ static int CleanUp_After_Msg_Completed(int qIx)
 * Clears bits in TxQ[qIx].TxMsgArr[TxMsgArray_Ix].ExpectedAckBitMap[]
 ********************************************************************/
 
-static ulong Check_Pending_Ack_Queue(void)
+static dcom_ulong32 Check_Pending_Ack_Queue(void)
 {
-    ulong   SequenceNum;
-    uchar   DoseIdFrom;
-    uchar   qIx;
-    uchar   TxMsgArr_Ix;
-    ulong   dwResult = 0;
-    ushort  FragmentNum;
+    dcom_ulong32   SequenceNum;
+    dcom_uchar8   DoseIdFrom;
+    dcom_uchar8   qIx;
+    dcom_uchar8   TxMsgArr_Ix;
+    dcom_ulong32   dwResult = 0;
+    dcom_ushort16  FragmentNum;
 
     //PrintDbg("Check_Pending_Ack_Queue() P/gS = %d/%d\n",g_Ack_Put_ix,g_Ack_Get_ix);
 
@@ -696,8 +699,8 @@ static ulong Check_Pending_Ack_Queue(void)
         //PrintDbg("#-  Got Ack SeqNum=%d DoseId=%d qIx=%d TxMsgArrIx=%d FragmNum=%X"
         //    " EXP=%X.%08X\n",
         //    SequenceNum, DoseIdFrom, qIx, TxMsgArr_Ix, FragmentNum,
-        //    (ulong)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32),
-        //    (ulong)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF));
+        //    (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32),
+        //    (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF));
 
         if(g_Ack_Queue[g_Ack_Get_ix].MsgType == MSG_TYPE_ACK) // the other is _NACK
         {
@@ -717,8 +720,8 @@ static ulong Check_Pending_Ack_Queue(void)
             //=================================================================
             if(FragmentNum != 0) // if a fragmented msg
             {
-                ulong   Ahead_Ix;
-                uchar   FragmBit;
+                dcom_ulong32   Ahead_Ix;
+                dcom_uchar8   FragmBit;
                 int bThisFragmentIsCompleted;
 
                 if(SequenceNum != TxQ[qIx].TxMsgArr[TxMsgArr_Ix].SequenceNumber) //ERROR
@@ -740,12 +743,12 @@ static ulong Check_Pending_Ack_Queue(void)
 
                 // Defines bit in IsTransmitting and index in ExpAckBitMap64[]
                 Ahead_Ix = FragmentNum & MASK_AHEAD;
-                FragmBit =  (uchar)(1 << (FragmentNum & 7));
+                FragmBit =  (dcom_uchar8)(1 << (FragmentNum & 7));
 
                 // Clear bit in Bitmask defining expected ACKs
 
                 TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[Ahead_Ix]
-                                &= ~((ulong64)1 << DoseIdFrom);
+                                &= ~((dcom_ulong64)1 << DoseIdFrom);
 
                 if(*pDbg>=4)
                 PrintDbg("#-  IsTransmitting=%X FragmBit=%X\n",
@@ -769,7 +772,7 @@ static ulong Check_Pending_Ack_Queue(void)
 
                 // If this was the last ack (if all receivers has acked)
                 if(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[Ahead_Ix]
-                        == (ulong64)0)
+                        == (dcom_ulong64)0)
                 {
                     // This fragment is completed
                     TxQ[qIx].TxMsgArr[TxMsgArr_Ix].TransmitComplete |= FragmBit;
@@ -819,7 +822,7 @@ static ulong Check_Pending_Ack_Queue(void)
                     TxQ[qIx].RetryCount = 0;  // ??? was in UPS nut not in my ver
                     if(FragmentNum == TxQ[qIx].TxMsgArr[TxMsgArr_Ix].NotAckedFragment)
                         TxQ[qIx].TxMsgArr[TxMsgArr_Ix].NotAckedFragment
-                                                            = (ushort)(FragmentNum + 1);
+                                                            = (dcom_ushort16)(FragmentNum + 1);
                 }
                 goto Continue_WithNext;
             }   // end fragmented message
@@ -873,7 +876,7 @@ static ulong Check_Pending_Ack_Queue(void)
             {
                 // Clear bit in Bitmask defining expected ACKs
                 TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]
-                                        &= ~((ulong64)1 << DoseIdFrom);
+                                        &= ~((dcom_ulong64)1 << DoseIdFrom);
 
                 // If the Ack is to another than to GetIxToAck, we must not call
 
@@ -881,7 +884,7 @@ static ulong Check_Pending_Ack_Queue(void)
                 {
                     // If this was the last
                     if(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]
-                                    == (ulong64)0)
+                                    == (dcom_ulong64)0)
                     {
                         //----------------------------------------------------
                         // This msg is completed
@@ -968,8 +971,8 @@ static ulong Check_Pending_Ack_Queue(void)
                 //if(*pDbg>3)
                 //PrintDbg("#-  Ack from %d SeqNum=%d. New Expected=%IX.%08X\n",
                 //  DoseIdFrom, SequenceNum,
-                //  (ulong)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32));
-                //  (ulong)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF);
+                //  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32));
+                //  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF);
             }
             else
             {
@@ -1056,12 +1059,12 @@ Continue_WithNext:
 *
 * Returns 0-63 if one and only one bit is set in BitMap
 **********************************************************/
-static ulong Check_IfUniCast_CanBeUsed(ulong64 BitMap)
+static dcom_ulong32 Check_IfUniCast_CanBeUsed(dcom_ulong64 BitMap)
 {
-    ulong   DestId = 999;
+    dcom_ulong32   DestId = 999;
     int     jj;
     int     Count = 0;
-    uchar   Max = g_pShm->MaxUsedDoseId;
+    dcom_uchar8   Max = g_pShm->MaxUsedDoseId;
 
 
     for(jj=0 ; jj<Max ; jj += 8, BitMap = BitMap>>8)
@@ -1118,12 +1121,12 @@ int Build_Tx_Message(int qIx, int GetIx, int DestinationId,
         if(TxQ[qIx].TxMsgArr[GetIx].SentFragment
                         == TxQ[qIx].TxMsgArr[GetIx].LastFragment)
         {
-            pTxMsgHdr->Size = (ushort)(TxQ[qIx].TxMsgArr[GetIx].UsrMsgLength-ix);
+            pTxMsgHdr->Size = (dcom_ushort16)(TxQ[qIx].TxMsgArr[GetIx].UsrMsgLength-ix);
             pTxMsgHdr->FragmentNumber |= 0x8000; //indicates last
         }
         else
         {
-            pTxMsgHdr->Size = (ushort)(FRAGMENT_SIZE - SIZEOF_UDP_MSG_HDR);
+            pTxMsgHdr->Size = (dcom_ushort16)(FRAGMENT_SIZE - SIZEOF_UDP_MSG_HDR);
         }
 
         *ppData = (char *) &TxQ[qIx].TxMsgArr[GetIx].pMsgBuff[ix];
@@ -1135,7 +1138,7 @@ int Build_Tx_Message(int qIx, int GetIx, int DestinationId,
         *ppData = (char*)TxQ[qIx].TxMsgArr[GetIx].pMsgBuff;
 
         pTxMsgHdr->FragmentNumber = 1; // first fragmented segment
-        pTxMsgHdr->Size      = (ushort)(FRAGMENT_SIZE - SIZEOF_UDP_MSG_HDR);
+        pTxMsgHdr->Size      = (dcom_ushort16)(FRAGMENT_SIZE - SIZEOF_UDP_MSG_HDR);
         pTxMsgHdr->TotalSize = TxQ[qIx].TxMsgArr[GetIx].UsrMsgLength;
     }
     else
@@ -1143,11 +1146,11 @@ int Build_Tx_Message(int qIx, int GetIx, int DestinationId,
         *ppData = (char*)TxQ[qIx].TxMsgArr[GetIx].pMsgBuff;
 
         pTxMsgHdr->FragmentNumber = 0; // not fragmented
-        pTxMsgHdr->Size      = (ushort) TxQ[qIx].TxMsgArr[GetIx].UsrMsgLength;
+        pTxMsgHdr->Size      = (dcom_ushort16) TxQ[qIx].TxMsgArr[GetIx].UsrMsgLength;
         pTxMsgHdr->TotalSize = pTxMsgHdr->Size;
     }
 
-    pTxMsgHdr->Info = (uchar) TxQ[qIx].TxMsgArr[GetIx].IsRetransmitting;
+    pTxMsgHdr->Info = (dcom_uchar8) TxQ[qIx].TxMsgArr[GetIx].IsRetransmitting;
 
     pTxMsgHdr->IsPoolDistribution = TxQ[qIx].TxMsgArr[GetIx].IsPoolDistr;
 
@@ -1187,19 +1190,19 @@ int Build_Tx_Message(int qIx, int GetIx, int DestinationId,
 #endif
 
     pTxMsgHdr->DoseIdBitMap[0]
-                = (ulong)(TxQ[qIx].TxMsgArr[GetIx].ExpAckBitMap64[Ahead_Ix]
-                                                            & (ulong64) 0xFFFFFFFF);
+                = (dcom_ulong32)(TxQ[qIx].TxMsgArr[GetIx].ExpAckBitMap64[Ahead_Ix]
+                                                            & (dcom_ulong64) 0xFFFFFFFF);
     pTxMsgHdr->DoseIdBitMap[1]
-                = (ulong)(TxQ[qIx].TxMsgArr[GetIx].ExpAckBitMap64[Ahead_Ix]>>32);
+                = (dcom_ulong32)(TxQ[qIx].TxMsgArr[GetIx].ExpAckBitMap64[Ahead_Ix]>>32);
 
     //remove nodes that are down
     TxQ[qIx].TxMsgArr[GetIx].ExpAckBitMap64[Ahead_Ix] &= ~g_pShm->BitMapNodesDown64;
 
-    pTxMsgHdr->TxMsgArray_Ix    = (uchar)GetIx; //phase2
+    pTxMsgHdr->TxMsgArray_Ix    = (dcom_uchar8)GetIx; //phase2
     pTxMsgHdr->bWantAck         = TxQ[qIx].TxMsgArr[GetIx].bUseAck;
-    pTxMsgHdr->TxQueueNumber    = (uchar)qIx;
+    pTxMsgHdr->TxQueueNumber    = (dcom_uchar8)qIx;
 
-    pTxMsgHdr->DestinationId = (uchar) DestinationId;
+    pTxMsgHdr->DestinationId = (dcom_uchar8) DestinationId;
 
     if(*pDbg>=3)
     PrintDbg("### Build_Tx_Msg(%d) "
@@ -1207,8 +1210,8 @@ int Build_Tx_Message(int qIx, int GetIx, int DestinationId,
             qIx, GetIx, TxQ[qIx].PutIx,
             pTxMsgHdr->SequenceNumber,pTxMsgHdr->FragmentNumber, DestinationId,
             pTxMsgHdr->Info,
-            (ulong)(TxQ[qIx].TxMsgArr[GetIx].ExpAckBitMap64[Ahead_Ix]>>32),
-            (ulong)(TxQ[qIx].TxMsgArr[GetIx].ExpAckBitMap64[Ahead_Ix]
+            (dcom_ulong32)(TxQ[qIx].TxMsgArr[GetIx].ExpAckBitMap64[Ahead_Ix]>>32),
+            (dcom_ulong32)(TxQ[qIx].TxMsgArr[GetIx].ExpAckBitMap64[Ahead_Ix]
                                                             & 0xFFFFFFFF));
     return(1);
 }
@@ -1255,7 +1258,7 @@ static int Handle_Timeout(int qIx)
                         &= (g_pShm->BitMapNodesNew64 | g_pShm->BitMapNodesUp64);
 
     // If no more nodes, the msg or fragment is completed
-    if (TxQ[qIx].TxMsgArr[GetIxToAck].ExpAckBitMap64[Ahead_Ix] == (ulong64) 0)
+    if (TxQ[qIx].TxMsgArr[GetIxToAck].ExpAckBitMap64[Ahead_Ix] == (dcom_ulong64) 0)
     {
         if(*pDbg)
 
@@ -1266,11 +1269,11 @@ static int Handle_Timeout(int qIx)
             TxQ[qIx].TxMsgArr[GetIxToAck].SequenceNumber,
             TxQ[qIx].TxMsgArr[GetIxToAck].SentFragment,
             TxQ[qIx].TxMsgArr[GetIxToAck].NotAckedFragment,
-            (ulong)(TxQ[qIx].TxMsgArr[GetIxToAck].ExpAckBitMap64[Ahead_Ix]>>32),
-            (ulong)(TxQ[qIx].TxMsgArr[GetIxToAck].ExpAckBitMap64[Ahead_Ix]
+            (dcom_ulong32)(TxQ[qIx].TxMsgArr[GetIxToAck].ExpAckBitMap64[Ahead_Ix]>>32),
+            (dcom_ulong32)(TxQ[qIx].TxMsgArr[GetIxToAck].ExpAckBitMap64[Ahead_Ix]
                                                                 & 0xFFFFFFFF),
-            (ulong)(g_pShm->BitMapNodesUp64>>32),
-            (ulong)(g_pShm->BitMapNodesUp64 & 0xFFFFFFFF));
+            (dcom_ulong32)(g_pShm->BitMapNodesUp64>>32),
+            (dcom_ulong32)(g_pShm->BitMapNodesUp64 & 0xFFFFFFFF));
 
         return('N');
     }
@@ -1331,12 +1334,12 @@ static int Handle_Timeout(int qIx)
         else
         // Does not work for retransmit when retransmit
         TxQ[qIx].TxMsgArr[GetIxToAck].IsRetransmitting
-            = (uchar)(1 + TxQ[qIx].TxMsgArr[GetIxToAck].SentFragment
+            = (dcom_uchar8)(1 + TxQ[qIx].TxMsgArr[GetIxToAck].SentFragment
                         - TxQ[qIx].TxMsgArr[GetIxToAck].NotAckedFragment);
 
         // Must be like this since it is increased later
         TxQ[qIx].TxMsgArr[GetIxToAck].SentFragment
-                = (ushort)(TxQ[qIx].TxMsgArr[GetIxToAck].NotAckedFragment - 1);
+                = (dcom_ushort16)(TxQ[qIx].TxMsgArr[GetIxToAck].NotAckedFragment - 1);
 
 
         int Ahead_Ix = TxQ[qIx].TxMsgArr[GetIxToAck].NotAckedFragment & MASK_AHEAD;
@@ -1405,14 +1408,14 @@ static THREAD_API TxThread(void *)
     int     qIx;
     int     result;
     int     Ahead_Ix;
-    uchar   FragmBit;
+    dcom_uchar8   FragmBit;
     int     Destination_Id;
     int     SendTo_DestinationId;
-    ulong   CurrentTime;
+    dcom_ulong32   CurrentTime;
     int     UseToSendIx;
-    ulong   WaitTimeOut = 1000;
-    ulong   TxMsgSize = 0;
-    ulong64 MyBitMapInv64;
+    dcom_ulong32   WaitTimeOut = 1000;
+    dcom_ulong32   TxMsgSize = 0;
+    dcom_ulong64 MyBitMapInv64;
     bool    bThereMightBeMore = FALSE;
     char    *pData;
     int     bWaitingForAck;
@@ -1422,7 +1425,7 @@ static THREAD_API TxThread(void *)
 
     // Init constant part of message
 
-    TxMsgHdr.DoseIdFrom = (uchar) g_MyDoseId;
+    TxMsgHdr.DoseIdFrom = (dcom_uchar8) g_MyDoseId;
     TxMsgHdr.IpAddrFrom_nw = CConfig::m_MyIpAddr_nw;
     TxMsgHdr.Magic      = DOSE_MSG_MAGIC;
     TxMsgHdr.MsgType    = MSG_TYPE_DATA;
@@ -1448,12 +1451,12 @@ static THREAD_API TxThread(void *)
     }
 
     // Need this for clearing bit for myself
-    MyBitMapInv64 = (ulong64)1 << g_MyDoseId;
+    MyBitMapInv64 = (dcom_ulong64)1 << g_MyDoseId;
     MyBitMapInv64 = ~MyBitMapInv64;  // invert
 
     if(*pDbg>=3)
         PrintDbg("### TxThread() MyBitMapInv=%X.%08X\n",
-            (ulong)(MyBitMapInv64>>32),(ulong)(MyBitMapInv64 & 0xFFFFFFFF));
+            (dcom_ulong32)(MyBitMapInv64>>32),(dcom_ulong32)(MyBitMapInv64 & 0xFFFFFFFF));
 
     //===============
     // Loop for ever
@@ -1558,7 +1561,7 @@ static THREAD_API TxThread(void *)
                 // RetryCount is increased by one for each retransmit.
                 // Times are in millisec.
                 //----------------------------------------------------
-                ulong MaxTimeToWaitForAck =
+                dcom_ulong32 MaxTimeToWaitForAck =
                             TIMEOUT_WAITING_FOR_ACK * (1+TxQ[qIx].RetryCount);
 
                 if(MaxTimeToWaitForAck > 500) MaxTimeToWaitForAck = 500;
@@ -1620,8 +1623,8 @@ static THREAD_API TxThread(void *)
 
                         if (TxQ[qIx].TxMsgArr[UseToSendIx].bIsFragmented)
                         {
-                            ushort FragNum = TxQ[qIx].TxMsgArr[UseToSendIx].NotAckedFragment;
-                            ushort FragBit = (uchar)(1<<(FragNum & 7));
+                            dcom_ushort16 FragNum = TxQ[qIx].TxMsgArr[UseToSendIx].NotAckedFragment;
+                            dcom_ushort16 FragBit = (dcom_uchar8)(1<<(FragNum & 7));
 
                             //PrintDbg("NYTT FragNum=%X\n", FragNum);
 
@@ -1664,7 +1667,7 @@ static THREAD_API TxThread(void *)
 
                                 if((TxQ[qIx].CurrFragmentedMsgAckBitMap64
                                      & (g_pShm->BitMapNodesUp64 | g_pShm->BitMapNodesNew64))
-                                            == (ulong64) 0)
+                                            == (dcom_ulong64) 0)
                                 {
                                     // if no more targets for next fragment (entire msg)
                                     if(*pDbg>1)
@@ -1949,7 +1952,7 @@ Continue_Fragmented_Msg:
             TxQ[qIx].TxMsgArr[GetIxToAck].SentFragment++;
 
             Ahead_Ix = TxQ[qIx].TxMsgArr[GetIxToAck].SentFragment & MASK_AHEAD;
-            FragmBit = (uchar) (1 << (TxQ[qIx].TxMsgArr[GetIxToAck].SentFragment & 7));
+            FragmBit = (dcom_uchar8) (1 << (TxQ[qIx].TxMsgArr[GetIxToAck].SentFragment & 7));
 
             // Use the same ExpAckBitMap64 as when we started
             TxQ[qIx].TxMsgArr[GetIxToAck].ExpAckBitMap64[Ahead_Ix]
@@ -2017,8 +2020,8 @@ Begin_A_New_Msg:
                         TxQ[qIx].TxSequenceNumber[Destination_Id] = 0;
 
                     //PrintDbg("BitMapBeingPoolDistributed64 = %X.%08X\n",
-                    //   (ulong)(g_pShm->BitMapBeingPoolDistributed64>>32),
-                    //   (ulong)(g_pShm->BitMapBeingPoolDistributed64 & 0xFFFFFFFF));
+                    //   (dcom_ulong32)(g_pShm->BitMapBeingPoolDistributed64>>32),
+                    //   (dcom_ulong32)(g_pShm->BitMapBeingPoolDistributed64 & 0xFFFFFFFF));
                 }
                 else // NOT PoolDistribution
                 {
@@ -2035,7 +2038,7 @@ Begin_A_New_Msg:
                 }
                 else // Unicast
                     TxQ[qIx].TxMsgArr[GetIxToSend].ExpAckBitMap64[Ahead_Ix]
-                                    &= ((ulong64)1<<Destination_Id);
+                                    &= ((dcom_ulong64)1<<Destination_Id);
 
                 // Clear bit for me
                 TxQ[qIx].TxMsgArr[GetIxToSend].ExpAckBitMap64[Ahead_Ix]
@@ -2043,8 +2046,8 @@ Begin_A_New_Msg:
 
                 if(*pDbg>3)
                 PrintDbg("#   ExpAckBitMap: %X.%08X   Ahead_Ix=%d\n",
-                  (ulong)(TxQ[qIx].TxMsgArr[GetIxToSend].ExpAckBitMap64[Ahead_Ix]>>32),
-                  (ulong)(TxQ[qIx].TxMsgArr[GetIxToSend].ExpAckBitMap64[Ahead_Ix]
+                  (dcom_ulong32)(TxQ[qIx].TxMsgArr[GetIxToSend].ExpAckBitMap64[Ahead_Ix]>>32),
+                  (dcom_ulong32)(TxQ[qIx].TxMsgArr[GetIxToSend].ExpAckBitMap64[Ahead_Ix]
                                                                       & 0xFFFFFFFF),
                   Ahead_Ix);
 
@@ -2054,7 +2057,7 @@ Begin_A_New_Msg:
 
                 // If no targets
                 if(TxQ[qIx].TxMsgArr[GetIxToSend].ExpAckBitMap64[Ahead_Ix]
-                                    == (ulong64) 0)
+                                    == (dcom_ulong64) 0)
                 {
                     if(*pDbg>=2)
                         PrintDbg("#   TxThread[%d] There are no targets."
@@ -2086,7 +2089,7 @@ Begin_A_New_Msg:
                     TxQ[qIx].TxMsgArr[GetIxToSend].SentFragment  = 1;
                     TxQ[qIx].TxMsgArr[GetIxToSend].NotAckedFragment = 1;
 
-                    TxQ[qIx].TxMsgArr[GetIxToSend].LastFragment = (ushort)
+                    TxQ[qIx].TxMsgArr[GetIxToSend].LastFragment = (dcom_ushort16)
                          (1 + (TxQ[qIx].TxMsgArr[GetIxToSend].UsrMsgLength - 1)
                                     / (FRAGMENT_SIZE - SIZEOF_UDP_MSG_HDR));
 
@@ -2179,7 +2182,7 @@ Send_The_Message:
 
                 // set next GetIxToSend
                 if((UseToSendIx + 1) >= MAX_XMIT_QUEUE) TxQ[qIx].GetIxToSend=0;
-                else TxQ[qIx].GetIxToSend = (ushort) (UseToSendIx + 1);
+                else TxQ[qIx].GetIxToSend = (dcom_ushort16) (UseToSendIx + 1);
 
                 if(*pDbg>3)
                     PrintDbg("#2* GetIxToSend --> %d\n", TxQ[qIx].GetIxToSend);
@@ -2213,10 +2216,10 @@ Send_The_Message:
                 //          qIx, TxQ[qIx].TxMsgArr[UseToSendIx].SequenceNumber,
                 //          SendTo_DestinationId, UseToSendIx);
 
-                 ulong DestIpAddr_nw
+                 dcom_ulong32 DestIpAddr_nw
                     = CConfig::Get_DestinationIpAddress(SendTo_DestinationId);
 
-                ushort DestPort = (ushort) (CConfig::m_Dose_Port_Data + qIx);
+                dcom_ushort16 DestPort = (dcom_ushort16) (CConfig::m_Dose_Port_Data + qIx);
 
                 if(pData == NULL) // something is wrong
                 {
@@ -2263,7 +2266,7 @@ Send_The_Message:
                             if((UseToSendIx + 1) >= MAX_XMIT_QUEUE)
                                 TxQ[qIx].GetIxToSend = 0;
                             else
-                                TxQ[qIx].GetIxToSend = (ushort) (UseToSendIx + 1);
+                                TxQ[qIx].GetIxToSend = (dcom_ushort16) (UseToSendIx + 1);
 
                             if(*pDbg>3)
                                 PrintDbg("#3* GetIxToSend --> %d\n",TxQ[qIx].GetIxToSend);
@@ -2283,7 +2286,7 @@ Send_The_Message:
                             if((UseToSendIx + 1) >= MAX_XMIT_QUEUE)
                                 TxQ[qIx].GetIxToSend = 0;
                             else
-                                TxQ[qIx].GetIxToSend = (ushort) (UseToSendIx + 1);
+                                TxQ[qIx].GetIxToSend = (dcom_ushort16) (UseToSendIx + 1);
 
                             if(*pDbg>3)
                                 PrintDbg("8* GetIxToSend --> %d\n",TxQ[qIx].GetIxToSend);
@@ -2303,7 +2306,7 @@ Send_The_Message:
                                 if((UseToSendIx + 1) >= MAX_XMIT_QUEUE)
                                     TxQ[qIx].GetIxToSend = 0;
                                 else
-                                    TxQ[qIx].GetIxToSend = (ushort) (UseToSendIx + 1);
+                                    TxQ[qIx].GetIxToSend = (dcom_ushort16) (UseToSendIx + 1);
 
                                 if(*pDbg>3)
                                     PrintDbg("#9* GetIxToSend --> %d\n",TxQ[qIx].GetIxToSend);
@@ -2338,6 +2341,9 @@ Send_The_Message:
 
         } // end for(qIx)
     } // end for(;;) // For ever
+#ifndef _MSC_VER //disable warning in msvc
+    return 0;
+#endif
 }
 /*----------------- end TxThread() --------------------*/
 
@@ -2371,17 +2377,17 @@ Send_The_Message:
 #define XMIT_QUEUE_MIN_FREE_ENTRIES 4
 #define XMIT_QUEUE_HYSTERISIS        4
 
-int CDoseComTransmit::Xmit_Msg(const char *pMsg, ulong MsgLength,
-                            uchar PoolDistribution, uchar bUseAck,
-                            int Priority, int Destination)
+int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
+                               dcom_uchar8 PoolDistribution, dcom_uchar8 bUseAck,
+                               int Priority, int Destination)
 {
-    ushort  Next_PutIx;
-    ushort  NumUsed;
+    dcom_ushort16  Next_PutIx;
+    dcom_ushort16  NumUsed;
     int     Qix = Priority;
     int     PutIx;
     int     GetIx;
     int     MightBeOverFlow = 0;
-    ulong64 ExpAckBitMap64;
+    dcom_ulong64 ExpAckBitMap64;
     static int bNextPdIsFirst = 1;
 
     if(*pDbg>2)
@@ -2425,9 +2431,9 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, ulong MsgLength,
     if(Destination >= 64)
         ExpAckBitMap64 &= CConfig::m_BitMapDestChannelMembers64[Destination - 64];
     else // Unicast
-        ExpAckBitMap64 &= ((ulong64)1<<Destination);
+        ExpAckBitMap64 &= ((dcom_ulong64)1<<Destination);
 
-    ulong64 MyBitMap64 = (ulong64)1 << g_MyDoseId;
+    dcom_ulong64 MyBitMap64 = (dcom_ulong64)1 << g_MyDoseId;
 
     ExpAckBitMap64 &= ~MyBitMap64;  // Clear bit for me
 
@@ -2437,7 +2443,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, ulong MsgLength,
     // If no targets
     if(*pDbg>2) PrintDbg(">>> Xmit_Msg() - check if any targets\n");
 
-    if(ExpAckBitMap64 == (ulong64) 0)
+    if(ExpAckBitMap64 == (dcom_ulong64) 0)
     {
         if(*pDbg>=2)
               PrintDbg(">>> There are no targets. Ignore this msg. Dst=%d\n",
@@ -2466,16 +2472,16 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, ulong MsgLength,
     // changed by the TxThread. So a copy must be used in this operation.
 
     if((TxQ[Qix].PutIx + 1) >= MAX_XMIT_QUEUE) Next_PutIx = 0;
-    else Next_PutIx = (ushort) (TxQ[Qix].PutIx + 1);
+    else Next_PutIx = (dcom_ushort16) (TxQ[Qix].PutIx + 1);
 
     GetIx = TxQ[Qix].GetIxToAck;                                // [A]
 
     // BUG fixed 071010
     // if(Next_PutIx <= GetIx)   // this caused == to make num_used = 0
     if(Next_PutIx <= GetIx)      // if wrapped
-        NumUsed = (ushort) (MAX_XMIT_QUEUE + Next_PutIx - GetIx);
+        NumUsed = (dcom_ushort16) (MAX_XMIT_QUEUE + Next_PutIx - GetIx);
     else
-        NumUsed = (ushort) (Next_PutIx - GetIx);
+        NumUsed = (dcom_ushort16) (Next_PutIx - GetIx);
 
     if(*pDbg>=3)
     {
@@ -2561,9 +2567,9 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, ulong MsgLength,
         GetIx = TxQ[Qix].GetIxToAck;                                // [C]
 
         if(Next_PutIx <= GetIx) //if wrapped
-            NumUsed = (ushort) (MAX_XMIT_QUEUE + Next_PutIx - GetIx);
+            NumUsed = (dcom_ushort16) (MAX_XMIT_QUEUE + Next_PutIx - GetIx);
         else
-            NumUsed = (ushort) (Next_PutIx - GetIx);
+            NumUsed = (dcom_ushort16) (Next_PutIx - GetIx);
 
         // if Queue still is full. - Case 4)
 
@@ -2646,16 +2652,16 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, ulong MsgLength,
                  TxQ[Qix].TxMsgArr[PutIx].IsRetransmitting);
 
         PrintDbg("ExpAck = %X.%08X %X.%08X %X.%08X %X.%08X UP=%X.%08X\n",
-                 (ulong) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[0]>>32),
-                 (ulong) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[0] & 0xFFFFFFFF),
-                 (ulong) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[1]>>32),
-                 (ulong) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[1] & 0xFFFFFFFF),
-                 (ulong) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[2]>>32),
-                 (ulong) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[2] & 0xFFFFFFFF),
-                 (ulong) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[3]>>32),
-                 (ulong) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[3] & 0xFFFFFFFF),
-                 (ulong) (g_pShm->BitMapNodesUp64>>32),
-                 (ulong) (g_pShm->BitMapNodesUp64 & 0xFFFFFFFF));
+                 (dcom_ulong32) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[0]>>32),
+                 (dcom_ulong32) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[0] & 0xFFFFFFFF),
+                 (dcom_ulong32) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[1]>>32),
+                 (dcom_ulong32) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[1] & 0xFFFFFFFF),
+                 (dcom_ulong32) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[2]>>32),
+                 (dcom_ulong32) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[2] & 0xFFFFFFFF),
+                 (dcom_ulong32) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[3]>>32),
+                 (dcom_ulong32) (TxQ[Qix].TxMsgArr[PutIx].ExpAckBitMap64[3] & 0xFFFFFFFF),
+                 (dcom_ulong32) (g_pShm->BitMapNodesUp64>>32),
+                 (dcom_ulong32) (g_pShm->BitMapNodesUp64 & 0xFFFFFFFF));
     }
     // end Nytt 08-09-30
 
@@ -2664,7 +2670,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, ulong MsgLength,
     TxQ[Qix].TxMsgArr[PutIx].pMsgBuff       = (char *) pMsg;
     TxQ[Qix].TxMsgArr[PutIx].IsPoolDistr    = PoolDistribution;
     TxQ[Qix].TxMsgArr[PutIx].bUseAck        = bUseAck;
-    TxQ[Qix].TxMsgArr[PutIx].DestinationId  = (uchar)Destination;
+    TxQ[Qix].TxMsgArr[PutIx].DestinationId  = (dcom_uchar8)Destination;
     TxQ[Qix].TxMsgArr[PutIx].bIsFragmented  = 0;
 
     TxQ[Qix].TxMsgArr[PutIx].IsRetransmitting = 0;
@@ -2710,7 +2716,7 @@ void CDoseComTransmit::Set_PoolDistributionIsCompleted(int Priority,
 *
 * Called once at startup
 ****************************************************/
-int CDoseComTransmit::Xmit_Init(ushort DoseId)
+int CDoseComTransmit::Xmit_Init(dcom_ushort16 DoseId)
 {
     unsigned long tid1,tid2;
     int result;

@@ -81,9 +81,9 @@ namespace VehicleMmiCsWinForms.Properties {
             }
         }
         
-        internal static System.Drawing.Bitmap Properties {
+        internal static System.Drawing.Bitmap properties {
             get {
-                object obj = ResourceManager.GetObject("Properties", resourceCulture);
+                object obj = ResourceManager.GetObject("properties", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

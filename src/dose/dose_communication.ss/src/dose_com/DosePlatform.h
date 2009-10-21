@@ -121,14 +121,14 @@
 #endif
 
 
-//ulong64
+//dcom_ulong64
 #if defined _WIN32
-#  ifndef ulong64
-     typedef unsigned _int64  ulong64;
+#  ifndef dcom_ulong64
+     typedef unsigned _int64  dcom_ulong64;
 #  endif
 #elif defined _LINUX
-#  ifndef ulong64
-     typedef unsigned long long  ulong64;
+#  ifndef dcom_ulong64
+     typedef unsigned long long  dcom_ulong64;
 #  endif
 #else
 #  error "Either _WIN32 or _LINUX must be defined!"

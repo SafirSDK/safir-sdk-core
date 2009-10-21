@@ -1,8 +1,0 @@
-build:
-	gmcs *.cs -out:DotsTestDotnet.exe -r:dots_generated-dotnet.dll,Safir.Dob.Typesystem.dll
-
-install: build
-	cp DotsTestDotnet.exe $(SAFIR_RUNTIME)/bin
-
-clean:
-	/bin/rm -f *.exe *~ *.mdb

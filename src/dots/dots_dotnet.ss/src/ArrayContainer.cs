@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -28,26 +28,13 @@ using System.Collections.Generic;
 namespace Safir.Dob.Typesystem
 {
     /// <summary>
-    /// STL container for arrays of DOB-containers.
+    /// Array of DOB-containers.
     ///
     /// <para/>
-    /// This template class is used for arrays of containers in objects.
+    /// This generic class is used for arrays of containers in objects.
     /// The arrays cannot change size once they have been created.
-    /// Apart from that they behave like a normal STL container.
+    /// Apart from that they behave like a normal C# collection.
     ///
-    /// <para/>
-    /// This class exports the following from std::vector:
-    ///
-    ///   Types: iterator, const_iterator, reference const_reference;
-    ///
-    ///    Methods: begin(), end().
-    ///
-    /// See your STL documentation for information on them
-    ///
-    /// <para/>
-    /// Note: This container is currently a random access container (based on std::vector).
-    ///       At some point in the future it may change to become a reversible container (based on a std::map).
-    ///       Do not assume that the [] operator is constant time.
     /// </summary>
     public class ArrayContainer<T> : IList<T>, ICloneable where T : ContainerBase, new()
     {
@@ -72,7 +59,7 @@ namespace Safir.Dob.Typesystem
         #region Change flags>
         /// <summary>
         /// Check if any element has a change flag set on it.
-        /// 
+        ///
         /// <para/>
         /// Note that if this array contains objects this call will be recursive.
         /// </summary>
@@ -91,12 +78,12 @@ namespace Safir.Dob.Typesystem
 
         /// <summary>
         /// Set the change flag on all elements in the array.
-        /// 
+        ///
         /// <para/>
         /// Note that if this array contains objects this call will be recursive.
         /// </summary>
         /// <param name="changed">The value to set the change flags to</param>
-        virtual public void SetChanged(bool changed) 
+        virtual public void SetChanged(bool changed)
         {
             for (System.Int32 i = 0; i < m_Array.Count; ++i)
             {
@@ -129,7 +116,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
@@ -160,7 +147,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
@@ -170,7 +157,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="array"></param>
         /// <param name="arrayIndex"></param>
@@ -184,7 +171,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public int Count
         {
@@ -192,7 +179,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public bool IsReadOnly
         {
@@ -200,7 +187,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
@@ -214,7 +201,7 @@ namespace Safir.Dob.Typesystem
         #region IEnumerable<T> Members
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         public IEnumerator<T> GetEnumerator()
@@ -241,7 +228,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         public ArrayContainer<T> Clone()
@@ -250,7 +237,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Copy constructor for use by Clone 
+        /// Copy constructor for use by Clone
         /// </summary>
         /// <param name="other"></param>
         protected ArrayContainer(ArrayContainer<T> other)
@@ -267,10 +254,10 @@ namespace Safir.Dob.Typesystem
         #region Private data
 
         private System.Collections.Generic.List<T> m_Array;
-        
+
         #endregion
 
     }
 
-    
+
 }

@@ -1,17 +1,39 @@
 @@-------------------------------------------------------------------------------
 @@--
-@@--  Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+@@--  Copyright Saab AB, 2005-2009 (http://www.safirsdk.com)
 @@--
 @@--  Created by: Henrik Sundberg / sthesu
 @@--
 @@-------------------------------------------------------------------------------
 @@IF@@ @_SECTION_@ = "Parameters"
-File_Extension:"cs"
+File_Suffix:".cs"
 Filename_Separator:"."
 Output_Directory:"dotnet/"
 Namespace_Separator:"."
-Lowercase_Namespace:"False"
-Lowercase_Filenames:"False"
+@@-- Namspace prefixes are defined separately, since they are supposed to differ between projects.
+@@-- Files matching <Namespace><Namespace_Prefix_File_Suffix> are searched for a line containing the namespace prefix
+@@-- to use for <Namespace>. E.g. Namespace_Prefix_File_Prefix:"-java.namespace.txt" will match the file
+@@-- "Safir-java.namespace.txt". The first non comment line in the file is used as namespace prefix.
+@@-- Empty value is used when no namespace prefixes are to be added.
+Namespace_Prefix_File_Suffix:""
+@@-- Parent filename "" defaults to the namespace with added file suffix.
+Parent_Filename:""
+@@
+@@ *_Underscore_Style is one of: "Add", "Remove", "Keep"
+@@
+Namespace_Underscore_Style:"Keep"
+Filename_Underscore_Style:"Keep"
+Classname_Underscore_Style:"Keep"
+Membername_Underscore_Style:"Keep"
+Enum_Value_Underscore_Style:"Keep"
+@@
+@@ *_Case_Style is one of: "Upper", "Lower", "Camel", "Keep"
+@@
+Namespace_Case_Style:"Keep"
+Filename_Case_Style:"Keep"
+Classname_Case_Style:"Keep"
+Membername_Case_Style:"Keep"
+Enum_Value_Case_Style:"Keep"
 Object_Type:"Object"
 Index_Type:"Int32"
 @@--
@@ -23,13 +45,13 @@ Index_Type:"Int32"
 @@-- And "Safir::Dots::IllegalValue" to be used where the actual type is needed in the code.
 @@-- And that "dots/dots_defs" (with file extension added below) is to be included due to this.
 @@--
-Exception:exception:"Safir.Dob.Typesystem.Exception":""
-Exception:fundamentalException:"Safir.Dob.Typesystem.FundamentalException":""
-Exception:configurationError:"Safir.Dob.Typesystem.ConfigurationErrorException":""
-Exception:incompatibleTypes:"Safir.Dob.Typesystem.IncompatibleTypesException":""
-Exception:illegalValue:"Safir.Dob.Typesystem.IllegalValueException":""
-Exception:nullValue:"Safir.Dob.Typesystem.NullValueException":""
-Exception:softwareViolation:"Safir.Dob.Typesystem.SoftwareViolationException":""
+Exception:Exception:"Safir.Dob.Typesystem.Exception":""
+Exception:FundamentalException:"Safir.Dob.Typesystem.FundamentalException":""
+Exception:Safir.Dob.Typesystem.ConfigurationError:"Safir.Dob.Typesystem.ConfigurationErrorException":""
+Exception:Safir.Dob.Typesystem.IncompatibleTypes:"Safir.Dob.Typesystem.IncompatibleTypesException":""
+Exception:Safir.Dob.Typesystem.IllegalValue:"Safir.Dob.Typesystem.IllegalValueException":""
+Exception:Safir.Dob.Typesystem.NullValue:"Safir.Dob.Typesystem.NullValueException":""
+Exception:Safir.Dob.Typesystem.SoftwareViolation:"Safir.Dob.Typesystem.SoftwareViolationException":""
 @@--
 @@-- Types are defined like this:
 @@--   Type:<dou>:<set/get>:"<generated>":"<dependency>"
@@ -145,13 +167,20 @@ namespace @_NAMESPACE_@
         {
             Init();
             Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, (System.Int32) val, @_LOWER:MEMBER_@MemberIndex, index);
+        }
+
+        public static void SetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index, System.Int32 ordinal)
+        {
+            Init();
+            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, ordinal, @_LOWER:MEMBER_@MemberIndex, index);
+        }
 @@ELSE@@
         public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index, @_MEMBERTYPE_@ val)
         {
             Init();
             Safir.Dob.Typesystem.Properties.Set(obj, ClassTypeId, val, @_LOWER:MEMBER_@MemberIndex, index);
-@@END_IF@@
         }
+@@END_IF@@
 
         public static void SetNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
@@ -202,6 +231,14 @@ namespace @_NAMESPACE_@
             Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, index);
             return (@_MEMBERTYPE_@.Enumeration) val;
         }
+
+        public static System.Int32 GetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        {
+            System.Int32 val;
+            Init();
+            Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, index);
+            return val;
+        }
 @@ELSE@@
         public static @_MEMBERTYPE_@ Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
@@ -220,6 +257,12 @@ namespace @_NAMESPACE_@
         {
             Init();
             Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, (System.Int32) val, @_LOWER:MEMBER_@MemberIndex, 0);
+        }
+
+        public static void SetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 ordinal)
+        {
+            Init();
+            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, ordinal, @_LOWER:MEMBER_@MemberIndex, 0);
         }
 @@ELSE@@
         public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, @_MEMBERTYPE_@ val)
@@ -276,6 +319,14 @@ namespace @_NAMESPACE_@
             Init();
             Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, 0);
             return (@_MEMBERTYPE_@.Enumeration) val;
+        }
+
+        public static System.Int32 GetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
+        {
+            System.Int32 val;
+            Init();
+            Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, 0);
+            return val;
         }
 @@ELSE@@
         public static @_MEMBERTYPE_@ Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
@@ -522,7 +573,7 @@ namespace @_NAMESPACE_@
         public static @_PARAMETERTYPE_@.Enumeration @_PARAMETER_@ (System.Int32 index)
         {
             Init();
-            return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(@_PARAMETERTYPE_@.EnumerationId, ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, index);
+            return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, index);
         }
 @@ELSIF@@ @_PARAMETERTYPE_@=System.Single
         public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
@@ -559,7 +610,7 @@ namespace @_NAMESPACE_@
             get
             {
                 Init();
-                return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(@_PARAMETERTYPE_@.EnumerationId, ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, 0);
+                return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, 0);
             }
         }
 @@ELSIF@@ @_PARAMETERTYPE_@=System.Single
@@ -761,13 +812,13 @@ namespace @_NAMESPACE_@
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
             for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
             {
-                if (!m_@_MEMBER_@Member[i].IsNull())
+                if (!m_@_MEMBER_@Member[i].IsNull() && m_@_MEMBER_@Member[i].Val.RawString.Length != 0)
                    size += 8 + 4 + m_@_MEMBER_@Member[i].Val.Utf8StringLength();
             }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
             for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
             {
-                if (!m_@_MEMBER_@Member[i].IsNull())
+                if (!m_@_MEMBER_@Member[i].IsNull() && m_@_MEMBER_@Member[i].Val.InstanceId.RawString.Length != 0)
                    size += 16 + 4 + m_@_MEMBER_@Member[i].Val.InstanceId.Utf8StringLength();
             }
 @@END_IF@@
@@ -780,10 +831,10 @@ namespace @_NAMESPACE_@
             if (!m_@_MEMBER_@Member.IsNull())
                size += (m_@_MEMBER_@Member.Val.Length+4);
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
-            if (!m_@_MEMBER_@Member.IsNull())
+            if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.Val.RawString.Length != 0)
                size += 8 + 4 + m_@_MEMBER_@Member.Val.Utf8StringLength();
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
-            if (!m_@_MEMBER_@Member.IsNull())
+            if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.Val.InstanceId.RawString.Length != 0)
                size += 16 + 4 + m_@_MEMBER_@Member.Val.InstanceId.Utf8StringLength();
 @@END_IF@@
 @@END_IF@@

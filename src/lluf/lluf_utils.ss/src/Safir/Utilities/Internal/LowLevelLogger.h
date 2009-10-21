@@ -49,6 +49,11 @@
 #define lllout if (!Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LoggingEnabled()) ; else Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
 #define lllerr Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4251) // warning C4251: 'Safir::Dob::Typesystem::LibraryExceptions::m_CallbackMap' : class 'stdext::hash_map<_Kty,_Ty>' needs to have dll-interface to be used by clients of class 'Safir::Dob::Typesystem::LibraryExceptions'
+#pragma warning (disable: 4275) // warning C4275: non dll-interface class 'boost::noncopyable_::noncopyable' used as base for dll-interface class 'Safir::Dob::Typesystem::LibraryExceptions'
+#endif
 
 namespace Safir
 {
@@ -113,5 +118,10 @@ namespace Internal
 }
 }
 }
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 #endif
 

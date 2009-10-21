@@ -1,0 +1,4 @@
+# This is a namespace prefix definition file. See how it is used in the dod-file.
+-- yet another company...
+
+org.yac

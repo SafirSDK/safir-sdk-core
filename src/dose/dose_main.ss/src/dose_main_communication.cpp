@@ -53,6 +53,12 @@ namespace Dob
 namespace Internal
 {
 
+    namespace
+    {
+        BOOST_STATIC_ASSERT(sizeof(dcom_ulong32) == 4);
+        BOOST_STATIC_ASSERT(sizeof(dcom_ulong64) == 8);
+    }
+
 #if 0 //DEBUG DoseCom memory handling
     struct MemData
     {
@@ -237,18 +243,18 @@ namespace Internal
 
     ExternNodeCommunication::ExternNodeCommunication():
         m_thisNode(Safir::Dob::ThisNodeParameters::NodeNumber()),
-        m_queueIsFull(new volatile bool [NUM_PRIORITY_CHANNELS]),
-        m_okToSignalPDComplete(false),
+        m_queueIsFull(new AtomicUint32 [NUM_PRIORITY_CHANNELS]),
+        m_okToSignalPDComplete(0),
         m_isNotified(0),
-        m_incomingDataEvents(new volatile bool [NUM_PRIORITY_CHANNELS]),
-        m_queueNotFullEvent(false),
-        m_startPoolDistributionEvent(false)
+        m_incomingDataEvents(new AtomicUint32 [NUM_PRIORITY_CHANNELS]),
+        m_queueNotFullEvent(0),
+        m_startPoolDistributionEvent(0)
     {
 
         for (int i = 0; i< NUM_PRIORITY_CHANNELS; ++i)
         {
-            m_queueIsFull[i] = false;
-            m_incomingDataEvents[i] = false;
+            m_queueIsFull[i] = 0;
+            m_incomingDataEvents[i] = 0;
         }
     }
 
@@ -336,7 +342,7 @@ namespace Internal
                 }
             }
 
-            if (m_queueIsFull[m_pdPriority])
+            if (m_queueIsFull[m_pdPriority] != 0)
             {
                 ACE_OS::sleep(ACE_Time_Value(0,1000)); //1 millisecond
                 continue;
@@ -371,7 +377,7 @@ namespace Internal
                 // lllout << "Overflow in Pooldistribution send to DoseCom" << std::endl;
                 DistributionData::DropReference(extRef);
 
-                m_queueIsFull[m_pdPriority] = true;
+                m_queueIsFull[m_pdPriority] = 1;
             }
             else
             {
@@ -383,10 +389,11 @@ namespace Internal
 
     void ExternNodeCommunication::PoolDistributionCompleted()
     {
-        lllout << "Waiting for m_okToSignalPDComplete to be set to true. Current value = " << m_okToSignalPDComplete << std::endl;
+        lllout << "Waiting for m_okToSignalPDComplete to be set to true. Current value = " << m_okToSignalPDComplete.value() << std::endl;
         //there is logic in dose_main_app.cpp that will tell us when/if it is okay to finish pd.
-        while (!m_okToSignalPDComplete)
+        while (m_okToSignalPDComplete == 0)
         {
+            lllout << "Waiting for m_okToSignalPDComplete to be set to true. Current value = " << m_okToSignalPDComplete.value() << std::endl;
             ACE_OS::sleep(ACE_Time_Value(0,20000)); //20 milliseconds
         }
         lllout << "m_okToSignalPDComplete is true!" << std::endl;
@@ -492,7 +499,7 @@ namespace Internal
             return true;
         }
 
-        if (m_queueIsFull[priority])
+        if (m_queueIsFull[priority] != 0)
         {
 #ifdef LOG_HEADERS
             lllout << L"While in Overflow: Wanted to send msg to external node" << std::endl
@@ -533,7 +540,7 @@ namespace Internal
             DistributionData::DropReference(extRef);
 
 
-            m_queueIsFull[priority] = true;
+            m_queueIsFull[priority] = 1;
 
             return false;
         default:
@@ -575,24 +582,24 @@ namespace Internal
     int ExternNodeCommunication::handle_exception(ACE_HANDLE)
     {
         m_isNotified = 0;
-        if (m_queueNotFullEvent)
+        if (m_queueNotFullEvent != 0)
         {
-            m_queueNotFullEvent = false;
+            m_queueNotFullEvent = 0;
             m_queueNotFullCb();
         }
 
         for (int i = 0; i < NUM_PRIORITY_CHANNELS; ++i)
         {
-            if (m_incomingDataEvents[i])
+            if (m_incomingDataEvents[i] != 0)
             {
-                m_incomingDataEvents[i] = false;
+                m_incomingDataEvents[i] = 0;
                 HandleIncomingData(i);
             }
         }
 
-        if (m_startPoolDistributionEvent)
+        if (m_startPoolDistributionEvent != 0)
         {
-            m_startPoolDistributionEvent = false;
+            m_startPoolDistributionEvent = 0;
             m_startPoolDistributionCb();
         }
         return 0;
@@ -623,9 +630,9 @@ namespace Internal
         {
             const unsigned long prioMask = 1<<currentChannel;
 
-            unsigned long size;
+            dcom_ulong32 size;
             bool isNative;
-            unsigned long fromChannel;
+            dcom_ulong32 fromChannel;
             char * data;
             int errCode=DoseCom_Read(prioMask, &fromChannel, &data, &size, &isNative);
 
@@ -661,7 +668,7 @@ namespace Internal
                 {
                     // lllout << "We've read enough times from this channel, so we'll break out and read from others" << std::endl;
 
-                    m_incomingDataEvents[currentChannel] = true;
+                    m_incomingDataEvents[currentChannel] = 1;
 
                     if (m_isNotified == 0)
                     {
@@ -712,7 +719,7 @@ namespace Internal
         }
         else
         {
-            unsigned long ipAddr;
+            dcom_ulong32 ipAddr;
             DoseCom_GetOwnIpAddr(ipAddr);
             return IpAddressToString(ipAddr);
         }
@@ -723,7 +730,7 @@ namespace Internal
     {
        //lllout << "ExternNodeCommunication::NotifyIncomingData() - priorityChannel: " << priorityChannel << std::endl;
 
-        m_incomingDataEvents[priorityChannel] = true;
+        m_incomingDataEvents[priorityChannel] = 1;
         if (m_isNotified == 0)
         {
             m_isNotified = 1;
@@ -738,9 +745,9 @@ namespace Internal
 
         {
             ACE_Guard<ACE_Thread_Mutex> lck(m_queueIsFullLock);
-            m_queueIsFull[priorityChannel] = false;
+            m_queueIsFull[priorityChannel] = 0;
         }
-        m_queueNotFullEvent = true;
+        m_queueNotFullEvent = 1;
         if (m_isNotified == 0)
         {
             m_isNotified = 1;
@@ -759,7 +766,7 @@ namespace Internal
     {
         // lllout << "ExternNodeCommunication::NotifyStartPoolDistribution() - called... " << std::endl;
 
-        m_startPoolDistributionEvent = true;
+        m_startPoolDistributionEvent = 1;
         if (m_isNotified == 0)
         {
             m_isNotified = 1;

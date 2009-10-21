@@ -72,7 +72,7 @@ namespace Safir.Dob
             byte success;
 
             System.IntPtr handlerIdStr = Dob.Typesystem.Internal.InternalOperations.CStringOf(handlerId.RawString);
-
+            
             Interface.DoseC_RegisterEntityHandler(ControllerId,
                                                   typeId,
                                                   handlerId.RawValue,
@@ -88,6 +88,8 @@ namespace Safir.Dob
 
             if (!Interface.BoolOf(success))
             {
+                ConsumerHandler.Instance.DropReference(entityHandler);
+
                 Typesystem.LibraryExceptions.Instance.Throw();
             }
         }
@@ -141,6 +143,8 @@ namespace Safir.Dob
 
             if (!Interface.BoolOf(success))
             {
+                ConsumerHandler.Instance.DropReference(entityHandlerInjection);
+
                 Typesystem.LibraryExceptions.Instance.Throw();
             }
         }
@@ -196,6 +200,8 @@ namespace Safir.Dob
 
             if (!Interface.BoolOf(success))
             {
+                ConsumerHandler.Instance.DropReference(entityHandlerPending);
+
                 Typesystem.LibraryExceptions.Instance.Throw();
             }
         }
@@ -233,6 +239,8 @@ namespace Safir.Dob
 
             if (!Interface.BoolOf(success))
             {
+                ConsumerHandler.Instance.DropReference(serviceHandler);
+
                 Typesystem.LibraryExceptions.Instance.Throw();
             }
         }
@@ -270,6 +278,8 @@ namespace Safir.Dob
 
             if (!Interface.BoolOf(success))
             {
+                ConsumerHandler.Instance.DropReference(serviceHandlerPending);
+
                 Typesystem.LibraryExceptions.Instance.Throw();
             }
         }
@@ -370,6 +380,8 @@ namespace Safir.Dob
 
             if (!Interface.BoolOf(success))
             {
+                ConsumerHandler.Instance.DropReference(messageSubscriber);
+
                 Typesystem.LibraryExceptions.Instance.Throw();
             }
         }
@@ -429,6 +441,8 @@ namespace Safir.Dob
                                                out success);
 
             Marshal.FreeHGlobal(channelIdStr);
+
+            ConsumerHandler.Instance.DropReference(messageSubscriber);
 
             if (!Interface.BoolOf(success))
             {
@@ -502,6 +516,8 @@ namespace Safir.Dob
 
             if (!Interface.BoolOf(success))
             {
+                ConsumerHandler.Instance.DropReference(entitySubscriber);
+
                 Typesystem.LibraryExceptions.Instance.Throw();
             }
         }
@@ -543,6 +559,8 @@ namespace Safir.Dob
 
             if (!Interface.BoolOf(success))
             {
+                ConsumerHandler.Instance.DropReference(entitySubscriber);
+
                 Typesystem.LibraryExceptions.Instance.Throw();
             }
         }
@@ -596,6 +614,8 @@ namespace Safir.Dob
 
             Marshal.FreeHGlobal(instanceIdStr);
 
+            ConsumerHandler.Instance.DropReference(entitySubscriber);
+
             if (!Interface.BoolOf(success))
             {
                 Typesystem.LibraryExceptions.Instance.Throw();
@@ -628,6 +648,8 @@ namespace Safir.Dob
                                               out success);
 
             Marshal.FreeHGlobal(instanceIdStr);
+
+            ConsumerHandler.Instance.DropReference(entitySubscriber);
 
             if (!Interface.BoolOf(success))
             {
@@ -683,6 +705,8 @@ namespace Safir.Dob
 
             if (!Interface.BoolOf(success))
             {
+                ConsumerHandler.Instance.DropReference(registrationSubscriber);
+
                 Typesystem.LibraryExceptions.Instance.Throw();
             }
         }
@@ -721,6 +745,8 @@ namespace Safir.Dob
 
             Marshal.FreeHGlobal(handlerIdStr);
 
+            ConsumerHandler.Instance.DropReference(registrationSubscriber);
+
             if (!Interface.BoolOf(success))
             {
                 Typesystem.LibraryExceptions.Instance.Throw();
@@ -752,8 +778,8 @@ namespace Safir.Dob
             //TODO: serialize directly to shared memory
             System.Int32 blobSize = message.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused = System.IntPtr.Zero;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, message.GetTypeId(), ref beginningOfUnused);
+            System.IntPtr beginningOfUnused;
+            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, message.GetTypeId(), out beginningOfUnused);
             message.WriteToBlob(blob, ref beginningOfUnused);
 
             IntPtr cons = ConsumerHandler.Instance.AddReference(messageSender);
@@ -817,8 +843,8 @@ namespace Safir.Dob
             //TODO: serialize directly to shared memory
             System.Int32 blobSize = entity.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused = System.IntPtr.Zero;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), ref beginningOfUnused);
+            System.IntPtr beginningOfUnused;
+            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), out beginningOfUnused);
             entity.WriteToBlob(blob, ref beginningOfUnused);
 
             IntPtr cons = ConsumerHandler.Instance.AddReference(requestor);
@@ -890,8 +916,8 @@ namespace Safir.Dob
             //TODO: serialize directly to shared memory
             System.Int32 blobSize = entity.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused = System.IntPtr.Zero;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), ref beginningOfUnused);
+            System.IntPtr beginningOfUnused;
+            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), out beginningOfUnused);
             entity.WriteToBlob(blob, ref beginningOfUnused);
 
             IntPtr cons = ConsumerHandler.Instance.AddReference(requestor);
@@ -954,8 +980,8 @@ namespace Safir.Dob
             //TODO: serialize directly to shared memory
             System.Int32 blobSize = entity.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused = System.IntPtr.Zero;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), ref beginningOfUnused);
+            System.IntPtr beginningOfUnused;
+            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), out beginningOfUnused);
             entity.WriteToBlob(blob, ref beginningOfUnused);
 
             IntPtr cons = ConsumerHandler.Instance.AddReference(requestor);
@@ -1058,8 +1084,8 @@ namespace Safir.Dob
             //TODO: serialize directly to shared memory
             System.Int32 blobSize = service.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused = System.IntPtr.Zero;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, service.GetTypeId(), ref beginningOfUnused);
+            System.IntPtr beginningOfUnused;
+            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, service.GetTypeId(), out beginningOfUnused);
             service.WriteToBlob(blob, ref beginningOfUnused);
 
             IntPtr cons = ConsumerHandler.Instance.AddReference(requestor);
@@ -1113,7 +1139,7 @@ namespace Safir.Dob
             Typesystem.EntityId eid = new Typesystem.EntityId(entity.GetTypeId(), instanceId);
             if (IsCreated(eid))
             {
-                using (EntityProxy entityProxy = Read(new Typesystem.EntityId(entity.GetTypeId(), instanceId)))
+                using (EntityProxy entityProxy = Read(eid))
                 {
                     Entity merged = entityProxy.Entity;
                     Typesystem.Utilities.MergeChanges(merged, entity);
@@ -1170,8 +1196,8 @@ namespace Safir.Dob
             //TODO: serialize directly to shared memory
             System.Int32 blobSize = entity.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused = System.IntPtr.Zero;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), ref beginningOfUnused);
+            System.IntPtr beginningOfUnused;
+            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), out beginningOfUnused);
             entity.WriteToBlob(blob, ref beginningOfUnused);
 
             System.IntPtr instanceIdStr = Dob.Typesystem.Internal.InternalOperations.CStringOf(instanceId.RawString);

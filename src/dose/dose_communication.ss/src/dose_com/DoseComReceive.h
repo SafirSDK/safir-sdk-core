@@ -26,11 +26,11 @@ class CDoseComReceive
 {
 
 public:
-    int Read_Msg(unsigned long RxUseBitMap, unsigned long *pRxFromBitMap,
-                  char **ppBuf, unsigned long *pSize, bool *pIsNative);
+    int Read_Msg(dcom_ulong32 RxUseBitMap, dcom_ulong32 *pRxFromBitMap,
+                  char **ppBuf, dcom_ulong32 *pSize, bool *pIsNative);
 
-    int Receive_Init(unsigned short DoseId);
+    int Receive_Init(dcom_ushort16 DoseId);
 
     static void Get_Info(char *pBuf);
-    static void UpdateNodeUp(unsigned char DoseId);
+    static void UpdateNodeUp(dcom_uchar8 DoseId);
 };

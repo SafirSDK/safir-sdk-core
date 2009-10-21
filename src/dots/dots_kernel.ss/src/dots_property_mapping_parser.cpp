@@ -133,7 +133,7 @@ namespace Internal
 
     }
 
-    bool PropertyMappingParser::StartElement(std::string element)
+    bool PropertyMappingParser::StartElement(const std::string& element)
     {
         if (!ValidElement(element))
         {
@@ -171,7 +171,7 @@ namespace Internal
         return true;
     }
 
-    bool PropertyMappingParser::EndElement(std::string element)
+    bool PropertyMappingParser::EndElement(const std::string& element)
     {
         if (m_ParseStack.back() != element)
         {
@@ -216,7 +216,7 @@ namespace Internal
         return true;
     }
 
-    bool PropertyMappingParser::Content(std::string str)
+    bool PropertyMappingParser::Content(const std::string& str)
     {
         if (m_CurrentElement != NULL)
         {

@@ -43,8 +43,15 @@ namespace Safir.Dob
         /// <returns>Id of the callback you are currently inside, or None if not in a callback.</returns>
         public CallbackId.Enumeration GetCurrentCallbackId()
         {
-            return CallbackId.Enumeration.None;
-            //TODO
+            byte success;
+            System.Int32 callbackId;
+            Interface.DoseC_GetCurrentCallbackId(ControllerId, out callbackId, out success);
+
+            if (!Interface.BoolOf(success))
+            {
+                Typesystem.LibraryExceptions.Instance.Throw();
+            }
+            return (Safir.Dob.CallbackId.Enumeration)callbackId;
         }
 
         #region Connection name

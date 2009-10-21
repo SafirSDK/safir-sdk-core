@@ -62,6 +62,10 @@ namespace Internal
 
         Dob::Typesystem::TypeId GetTypeId() const {return m_typeId;}
 
+        // Returns true if the given connection/consumer has any subscription for this type.
+        bool HasSubscription(const ConnectionPtr&    connection,
+                             const ConsumerId&       consumer) const;
+
         //Debug and statistics
         void DumpSubscriptions() const;
 

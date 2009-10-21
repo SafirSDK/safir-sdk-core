@@ -24,7 +24,6 @@
 
 #include "dose_main_connection_handler.h"
 #include "dose_main_node_handler.h"
-
 #include "dose_main_communication.h"
 #include "dose_main_process_info_handler.h"
 #include "dose_main_pending_registration_handler.h"
@@ -212,6 +211,7 @@ namespace Internal
         else
         {
             lllout << "  There are no new nodes, so we can let apps connect!"  << std::endl;
+            Connections::Instance().AllowConnect(-1);
             Connections::Instance().AllowConnect(0);
             m_connectSemHasBeenSignalled = true;
         }
