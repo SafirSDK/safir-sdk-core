@@ -38,10 +38,14 @@
     #define __cdecl
 #endif
 
-
 #if defined _MSC_VER
-   #include <hash_map>
-   #define unordered_map stdext::hash_map
+   #if (_MSC_VER >= 1500)
+       #include <unordered_map>
+       using std::tr1::unordered_map;
+    #else
+       #include <hash_map>
+       #define unordered_map stdext::hash_map
+    #endif
 #elif defined __GNUC__
    #include <tr1/unordered_map>
    using std::tr1::unordered_map;

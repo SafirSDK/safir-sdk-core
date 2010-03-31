@@ -758,6 +758,19 @@ namespace Dob
                                                     const Dob::Typesystem::HandlerId& handlerId,
                                                     const bool includeSubclasses) const;
 
+        /**
+        * This method is used to get the instanceIdPolicy for a specific class and handler.
+        *
+        * @param [in] typeId       The type of the class the handler is registered for.
+        * @param [in] handlerId    Get instanceIdPolicy for this handler.
+        * @return instanceIdPolicy Specifies if the handler expects instance ids in create requests to be
+        *                          assigned by the requestor or if the handler assigns them by itself.        
+        *
+        * @throws Safir::Dob::NotFoundException The given handlerId has not registered the given class.
+        */
+        Dob::InstanceIdPolicy::Enumeration GetInstanceIdPolicy(const Dob::Typesystem::TypeId typeId,
+                                                               const Dob::Typesystem::HandlerId& handlerId) const;
+
         /** @} */
 
         /**

@@ -728,6 +728,18 @@ package Safir.Dob.Connection_Bases is
       Handler_Id         : in Safir.Dob.Typesystem.Handler_Id.Handler_Id_Type;
       Include_Subclasses : in Boolean) return Safir.Dob.Typesystem.Int_64;
 
+
+   -- Parameters: Type_Id - The type of the class the handler is registered for.
+   --             Handler_Id - Get instanceIdPolicy for this handler.
+   --
+   -- Returns: instanceIdPolicy - Specifies if the handler expects instance ids in create requests to be
+   --                             assigned by the requestor or if the handler assigns them by itself.
+   --
+   function Get_Instance_Id_Policy
+     (Self               : in Connection_Base;
+      Type_Id            : in Safir.Dob.Typesystem.Type_Id;
+      Handler_Id         : in Safir.Dob.Typesystem.Handler_Id.Handler_Id_Type) return Safir.Dob.Instance_Id_Policy.Enumeration;
+
    ----------------
    -- Exit dispatch
    ----------------

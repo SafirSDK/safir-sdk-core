@@ -31,8 +31,9 @@
 #include <ace/Thread_Mutex.h>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/function.hpp>
 #include <Safir/Dob/Internal/ConnectionId.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
+#include <Safir/Dob/Internal/InternalDefs.h>
 
 //Make a hash_map available even though their locations are different
 //call it unordered_map, as it will be called in tr1
@@ -115,7 +116,11 @@ namespace Internal
             //remember to delete the semaphore if removing from map!
             typedef unordered_map<Identifier, SemaphorePtr> Semaphores;
             Semaphores m_semaphores;
-            ACE_RW_Thread_Mutex m_lock;
+
+            typedef Safir::Dob::Internal::LeveledLock<ACE_RW_Thread_Mutex,
+                                                      SIGNALS_LOCK_LEVEL,
+                                                      NO_MASTER_LEVEL_REQUIRED> SignalsLock;
+            SignalsLock m_lock;
         };
 
         SignalTable m_waitSignals; //signals that we wait for

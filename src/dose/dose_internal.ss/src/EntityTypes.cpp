@@ -25,6 +25,7 @@
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Internal/Connection.h>
+#include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Dob/Entity.h>
 
 namespace Safir
@@ -123,9 +124,10 @@ namespace Internal
     }
 
     bool EntityTypes::IsRegistered(const Dob::Typesystem::TypeId        typeId,
-                                   const Dob::Typesystem::HandlerId&    handlerId) const
+                                   const Dob::Typesystem::HandlerId&    handlerId,
+                                   const ContextId                      contextId) const
     {
-        return GetType(typeId).IsRegistered(handlerId);
+        return GetType(typeId).IsRegistered(handlerId, contextId);
     }
 
     void
@@ -163,18 +165,20 @@ namespace Internal
 
     const ConnectionConsumerPair
     EntityTypes::GetRegisterer(const Dob::Typesystem::TypeId     typeId,
-                               const Dob::Typesystem::HandlerId& handlerId) const
+                               const Dob::Typesystem::HandlerId& handlerId,
+                               const ContextId                   contextId) const
     {
-        return GetType(typeId).GetRegisterer(handlerId);
+        return GetType(typeId).GetRegisterer(handlerId, contextId);
     }
 
     void
     EntityTypes::GetRegisterer(const Dob::Typesystem::TypeId     typeId,
                                const Dob::Typesystem::HandlerId& handlerId,
+                               const ContextId                   contextId,
                                ConnectionConsumerPair&           registerer,
                                InstanceIdPolicy::Enumeration&    instanceIdPolicy) const
     {
-        GetType(typeId).GetRegisterer(handlerId, registerer, instanceIdPolicy);
+        GetType(typeId).GetRegisterer(handlerId, contextId, registerer, instanceIdPolicy);
     }
 
     bool
@@ -186,9 +190,9 @@ namespace Internal
     }
 
     const Dob::Typesystem::HandlerId
-    EntityTypes::GetHandlerOfInstance(const Dob::Typesystem::EntityId& entityId)
+    EntityTypes::GetHandlerOfInstance(const Dob::Typesystem::EntityId& entityId, const ContextId requestorContext)
     {
-        return GetType(entityId.GetTypeId()).GetHandlerOfInstance(entityId.GetInstanceId());
+        return GetType(entityId.GetTypeId()).GetHandlerOfInstance(entityId.GetInstanceId(), requestorContext);
     }
 
     void EntityTypes::SubscribeRegistration(const SubscriptionId&                subscriptionId,
@@ -320,9 +324,9 @@ namespace Internal
         GetType(entityId.GetTypeId()).DeleteInjection(connection, handlerId, entityId.GetInstanceId(), originalInjectionState);
     }
 
-    bool EntityTypes::IsCreated(const Dob::Typesystem::EntityId&  entityId) const
+    bool EntityTypes::IsCreated(const Dob::Typesystem::EntityId&  entityId, const ContextId requestorContext) const
     {
-        return GetType(entityId.GetTypeId()).IsCreated(entityId.GetInstanceId());
+        return GetType(entityId.GetTypeId()).IsCreated(entityId.GetInstanceId(), requestorContext);
     }
 
     void EntityTypes::RemoteSetGhostEntityState(const DistributionData& entityState)
@@ -410,9 +414,9 @@ namespace Internal
         return GetType(typeId).HasEntitySubscription(connection, consumer);
     }
 
-    const DistributionData EntityTypes::ReadEntity(const Dob::Typesystem::EntityId& entityId) const
+    const DistributionData EntityTypes::ReadEntity(const Dob::Typesystem::EntityId& entityId, const ContextId readerContext) const
     {
-        return GetType(entityId.GetTypeId()).ReadEntity(entityId.GetInstanceId());
+        return GetType(entityId.GetTypeId()).ReadEntity(entityId.GetInstanceId(), readerContext);
     }
 
     EntityType& EntityTypes::GetType(const Typesystem::TypeId typeId)
@@ -434,10 +438,13 @@ namespace Internal
 
     const EntityTypes::EntityIterator
     EntityTypes::CreateEntityIterator(const Typesystem::TypeId typeId,
+                                      const ContextId connectionContext,
                                       const bool includeSubclasses,
                                       bool& end) const
     {
         EntityIterator iterator;
+
+        iterator.m_connectionContext = connectionContext; 
 
         if (includeSubclasses)
         {
@@ -465,8 +472,11 @@ namespace Internal
             }
             iterator.m_currentType = m_entityTypes.find(iterator.m_remainingTypes.back());
             iterator.m_remainingTypes.pop_back();
+            iterator.m_currentContext =
+                ContextSharedTable::Instance().IsContextShared(iterator.m_currentType->first) ? 0 : iterator.m_connectionContext;
             bool myEnd;
-            iterator.m_stateContainerIterator = iterator.m_currentType->second->CreateEntityIterator(myEnd);
+            iterator.m_stateContainerIterator =
+                iterator.m_currentType->second->CreateEntityIterator(iterator.m_currentContext, myEnd);
 
             //if there were no states, force another round in this loop.
             if (myEnd)
@@ -491,7 +501,7 @@ namespace Internal
         }
         else
         {
-            end = !iterator.m_currentType->second->IncrementIterator(iterator.m_stateContainerIterator);
+            end = !iterator.m_currentType->second->IncrementIterator(iterator.m_stateContainerIterator, iterator.m_currentContext);
             if (end)
             {
                 iterator.m_currentType = m_entityTypes.end();

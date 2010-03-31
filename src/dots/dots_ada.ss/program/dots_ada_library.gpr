@@ -32,6 +32,7 @@ project Dots_Ada_Library is
                               "Safir.Dob.Typesystem.Si_32",
                               "Safir.Dob.Typesystem.Si_64",
                               "Safir.Dob.Typesystem.String_Container",
+                              "Safir.Dob.Typesystem.Binary_Container",
                               "Safir.Dob.Typesystem.Utilities",
                               "Safir.Dob.Typesystem.Value_Container",
                               "Safir.Dob.Typesystem",

@@ -35,34 +35,20 @@ INSTALL(FILES
           data/dots_unit.xsd
         DESTINATION ${SAFIR_RUNTIME}/data/text/dots/config/)
 
-if (SAFIR_BUILD_SYSTEM_VERSION OR UNIX)
-    INSTALL(FILES 
-            data/AssemblyInfo.cs
-            data/dots_generated-dotnet.snk
-            data/CMakeLists.txt 
-            data/Manifest.java.txt
-            data/precompiled_header_for_cpp.h
-            data/Safir-java.namespace.txt
-            data/dots_generated_ada_library.gpr_template
-            data/dots_generated_ada.gpr
-           DESTINATION ${SAFIR_SDK}/dots/dots_generated)
-   INSTALL(FILES
-            data/gen/CMakeLists.txt
-           DESTINATION ${SAFIR_SDK}/dots/dots_generated/gen)
-   INSTALL(PROGRAMS
-            data/dobmake.py
-           DESTINATION ${SAFIR_RUNTIME}/bin)
-elseif(WIN32)
-    INSTALL(FILES 
-            data/AssemblyInfo.cs
-            data/dots_generated-dotnet.snk
-            data/Makefile
-            data/Makefile_cpp
-            data/Manifest.java.txt
-            data/precompiled_header_for_cpp.h
-            data/Safir-java.namespace.txt
-            data/dots_generated_ada.gpr
+
+INSTALL(FILES 
+        data/AssemblyInfo.cs
+        data/dots_generated-dotnet.snk
+        data/CMakeLists.txt 
+        data/Manifest.java.txt
+        data/precompiled_header_for_cpp.h
+        data/Safir-java.namespace.txt
+        data/dots_generated_ada_library.gpr_template
+        data/dots_generated_ada.gpr
         DESTINATION ${SAFIR_SDK}/dots/dots_generated)
-else()
-    MESSAGE(FATAL_ERROR "I don't know how to install myself on this platform!")
-endif()
+INSTALL(FILES
+        data/gen/CMakeLists.txt
+       DESTINATION ${SAFIR_SDK}/dots/dots_generated/gen)
+INSTALL(PROGRAMS
+        data/dobmake.py
+        DESTINATION ${SAFIR_RUNTIME}/bin)

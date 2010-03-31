@@ -26,6 +26,7 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Dob/Internal/ContextSharedTable.h>
 
 namespace Safir
 {
@@ -42,7 +43,7 @@ namespace Internal
                                 const Dob::Typesystem::ChannelId& channelId,
                                 const ConsumerId&                 consumer)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedMessageTypeLock lck(m_lock);
 
         // Check if this connection/consumer already has a subscription
 
@@ -85,7 +86,7 @@ namespace Internal
                                   const Dob::Typesystem::ChannelId& channelId,
                                   const ConsumerId&                 consumer)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedMessageTypeLock lck(m_lock);
 
         ConnectionConsumerPair key(connection, consumer);
 
@@ -114,7 +115,7 @@ namespace Internal
 
     void MessageType::UnsubscribeAll(const ConnectionPtr& connection)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedMessageTypeLock lck(m_lock);
 
         for (ConsumerSubscriptions::iterator it = m_subscriptions.begin();
             it != m_subscriptions.end();)
@@ -133,11 +134,13 @@ namespace Internal
 
     void MessageType::DistributeMsg(const DistributionData& msg)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedMessageTypeLock lck(m_lock);
 
         for (ConsumerSubscriptions::iterator subIt = m_subscriptions.begin(); subIt != m_subscriptions.end(); ++subIt)
         {
-            if (subIt->second.subscriptionState.IsSubscribed(msg.GetChannelId().GetRawValue()))
+            if ((msg.GetSenderId().m_contextId == subIt->first.connection->Id().m_contextId ||
+                ContextSharedTable::Instance().IsContextShared(msg.GetTypeId())) &&                
+                subIt->second.subscriptionState.IsSubscribed(msg.GetChannelId().GetRawValue()))
             {
                 /*
                 // Put the message in the in-queue ...
@@ -157,7 +160,7 @@ namespace Internal
     bool MessageType::HasSubscription(const ConnectionPtr&    connection,
                                       const ConsumerId&       consumer) const
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedMessageTypeLock lck(m_lock);
 
         ConnectionConsumerPair key(connection, consumer);
 

@@ -117,7 +117,7 @@ namespace VehicleMmiCsWinForms
 
         private void buttonApply_Click(object sender, EventArgs e)
         {
-            m_apply = false;
+            m_apply = true;
             SendServiceRequest();
         }
 

@@ -23,6 +23,7 @@
 ******************************************************************************/
 
 #include "dots_error_handler.h"
+#include <Safir/Utilities/Internal/PanicLogging.h>
 
 #include <iostream>
 #include <string>
@@ -38,9 +39,14 @@ namespace Internal
 
     void ErrorHandler::Information(const std::string & msg)
     {
-        std::wcout<<"========== DOTS_KERNEL: information =========="<<std::endl;
-        std::wcout<<msg.c_str()<<std::endl;
-        std::wcout<<"==================== END ====================="<<std::endl<<std::endl;
+        std::ostringstream ostr;
+
+        ostr << "========== DOTS_KERNEL: information ==========" << std::endl
+             << msg.c_str() << std::endl
+             << "==================== END =====================" <<std::endl << std::endl;
+
+        std::wcout << ostr.str().c_str();
+        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
     }
 
     void ErrorHandler::Error(const std::string & label,
@@ -48,11 +54,16 @@ namespace Internal
                              const boost::filesystem::path & location)
                              //                             const std::string & severity)
     {
-        std::wcout<<"============= DOTS_KERNEL: error ============="<<std::endl;
-        std::wcout<<"Label:       "<<label.c_str()<<std::endl;
-        std::wcout<<"Location:    "<<location.string().c_str()<<std::endl;
-        std::wcout<<"Description: "<<description.c_str()<<std::endl;
-        std::wcout<<"==================== END ====================="<<std::endl<<std::endl;
+        std::ostringstream ostr;
+
+        ostr << "============= DOTS_KERNEL: error =============" << std::endl
+             << "Label:       " << label.c_str() << std::endl
+             << "Location:    " << location.string().c_str() << std::endl
+             << "Description: " << description.c_str() << std::endl
+             << "==================== END =====================" << std::endl << std::endl;
+
+        std::wcout << ostr.str().c_str();
+        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
     }
 
     void ErrorHandler::Error(const std::string & label,
@@ -62,14 +73,12 @@ namespace Internal
                              const std::string & /*location*/)
                              //                             const std::string & severity)
     {
-        std::wcout << filename.string().c_str() << ":" << linenumber << ": " << label.c_str() << ": " << description.c_str() << std::endl;
-/*        std::wcout<<"============= DOTS_KERNEL: error ============="<<std::endl;
-        std::wcout<<"Label:       "<<label.c_str()<<std::endl;
-        std::wcout<<"Location:    "<<location.c_str()<<std::endl;
-        std::wcout<<"Description: "<<description.c_str()<<std::endl;
-        std::wcout<<"File name:   "<<filename.string().c_str()<<std::endl;
-        std::wcout<<"Line number: "<<linenumber<<std::endl;
-        std::wcout<<"==================== END ====================="<<std::endl<<std::endl;*/
+        std::ostringstream ostr;
+
+        ostr << filename.string().c_str() << ":" << linenumber << ": " << label.c_str() << ": " << description.c_str() << std::endl;
+
+        std::wcout << ostr.str().c_str();
+        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
     }
 }
 }

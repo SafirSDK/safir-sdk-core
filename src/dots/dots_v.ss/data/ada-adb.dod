@@ -869,10 +869,10 @@ package body @_NAMESPACE_@.@_CLASS_@ is
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
    function @_MEMBER_@
      (Self   : in @_CLASS_@_Type)
-     return Safir.Dob.Typesystem.Container_Instantiations.Binary_Container.Array_Container_Proxy is
+     return Safir.Dob.Typesystem.Binary_Container.Array_Container_Proxy is
       Self_Ptr : constant Conv.Object_Pointer := Conv.To_Pointer (Self'Address);
    begin
-      return Safir.Dob.Typesystem.Container_Instantiations.Binary_Container.Create_Array_Container_Proxy (Self_Ptr.@_MEMBER_@_Member'Access);
+      return Safir.Dob.Typesystem.Binary_Container.Create_Array_Container_Proxy (Self_Ptr.@_MEMBER_@_Member'Access);
    end @_MEMBER_@;
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
    function @_MEMBER_@
@@ -937,10 +937,10 @@ package body @_NAMESPACE_@.@_CLASS_@ is
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
    function @_MEMBER_@
      (Self   : in @_CLASS_@_Type)
-     return Safir.Dob.Typesystem.Container_Instantiations.Binary_Container.Container_Proxy is
+     return Safir.Dob.Typesystem.Binary_Container.Container_Proxy is
       Self_Ptr : constant Conv.Object_Pointer := Conv.To_Pointer (Self'Address);
    begin
-      return Safir.Dob.Typesystem.Container_Instantiations.Binary_Container.Create_Container_Proxy (Self_Ptr.@_MEMBER_@_Member'Access);
+      return Safir.Dob.Typesystem.Binary_Container.Create_Container_Proxy (Self_Ptr.@_MEMBER_@_Member'Access);
    end @_MEMBER_@;
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
    function @_MEMBER_@
@@ -1571,7 +1571,7 @@ package body @_NAMESPACE_@.@_CLASS_@ is
                                  Is_Changed : in Boolean) is
          use Safir.Dob.Typesystem;
       begin
-         if Value > Enumeration'Pos (Enumeration'Last) then
+         if not Is_Null and then Value > Enumeration'Pos (Enumeration'Last) then
             Throw (Illegal_Value_Exception'Identity,
                    "The enumerated type @_NAMESPACE_@.@_CLASS_@ does not have such a value");
          end if;

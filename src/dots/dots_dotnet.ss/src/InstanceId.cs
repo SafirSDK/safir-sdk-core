@@ -132,6 +132,13 @@ namespace Safir.Dob.Typesystem
 
         /// <summary>
         /// Return a string representation of the instance id.
+        /// <para/>
+        /// If the string that created the instance id is available this is the string that will be returned,
+        /// otherwise it is the number that will be returned.
+        /// <para/>
+        /// The purpose of this function is for debug output and such.
+        /// The resulting string can *not* reliably be used in the "string constructor" for InstanceId to
+        /// recreate the same InstanceId.
         /// </summary>
         /// <returns>String representation of the instance id.</returns>
         public override string ToString()

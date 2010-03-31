@@ -33,6 +33,8 @@
 #include <Safir/Dob/Internal/SubscriptionId.h>
 #include <Safir/Dob/InjectionKind.h>
 #include <Safir/Dob/InstanceIdPolicy.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
+#include <Safir/Dob/Internal/ShmArray.h>
 
 namespace Safir
 {
@@ -74,11 +76,13 @@ namespace Internal
         /** Unregistration (an end state) from external node */
         void RemoteSetUnregistrationState(const DistributionData& registrationState);
 
-        bool IsRegistered(const Dob::Typesystem::HandlerId& handlerId) const;
+        bool IsRegistered(const Dob::Typesystem::HandlerId& handlerId, const ContextId context) const;
 
-        const ConnectionConsumerPair GetRegisterer(const Dob::Typesystem::HandlerId& handlerId) const;
+        const ConnectionConsumerPair GetRegisterer(const Dob::Typesystem::HandlerId& handlerId,
+                                                   const ContextId context) const;
 
         bool GetRegisterer(const Dob::Typesystem::HandlerId& handlerId,
+                           const ContextId                   context,
                            ConnectionConsumerPair&           registerer,
                            InstanceIdPolicy::Enumeration&    instanceIdPolicy) const;
 
@@ -208,31 +212,52 @@ namespace Internal
         // Removes all existing registration and entity subscriptions (all consumers) for the given connection.
         void UnsubscribeAll(const ConnectionPtr& connection);
 
-        const DistributionData ReadEntity(const Dob::Typesystem::InstanceId& instanceId) const;
+        const DistributionData ReadEntity(const Dob::Typesystem::InstanceId& instanceId,
+                                          const ContextId readerContext) const;
 
         //throws NotFoundException if no such instance
-        const Dob::Typesystem::HandlerId GetHandlerOfInstance(const Dob::Typesystem::InstanceId& instanceId) const;
+        const Dob::Typesystem::HandlerId GetHandlerOfInstance(const Dob::Typesystem::InstanceId& instanceId,
+                                                              const ContextId requestorContext) const;
 
-        bool IsCreated(const Dob::Typesystem::InstanceId& instanceId) const;
+        bool IsCreated(const Dob::Typesystem::InstanceId& instanceId, const ContextId requestorContext) const;
 
         bool IsOwner(const Dob::Typesystem::InstanceId& instanceId,
                      const Dob::Typesystem::HandlerId&  handlerId,
                      const ConnectionConsumerPair&      registerer) const;
 
-        const StateContainer::Iterator CreateEntityIterator(bool& end) const
-        {return m_entityStates.CreateStateIterator(end);}
+        const StateContainer::Iterator CreateEntityIterator(const ContextId context, bool& end) const
+        {return m_entityStates[context].CreateStateIterator(end);}
 
-        bool IncrementIterator(StateContainer::Iterator& iterator) const
-        {return m_entityStates.IncrementIterator(iterator);}
+        bool IncrementIterator(StateContainer::Iterator& iterator, const ContextId context) const
+        {return m_entityStates[context].IncrementIterator(iterator);}
 
     private:
         Typesystem::TypeId            m_typeId;
+        bool                          m_typeIsContextShared;
         InjectionKind::Enumeration    m_injectionKind;
         LamportClock                  m_clock;
 
-        mutable StateContainer m_entityStates;
+        typedef ShmArray<StateContainer> StateContainerVector;
+        mutable StateContainerVector m_entityStates;
 
-        HandlerRegistrations m_handlerRegistrations;
+        typedef ShmArray<HandlerRegistrations> HandlerRegistrationVector;
+        HandlerRegistrationVector m_handlerRegistrations;
+
+        // Locking Policy:
+        // The state uses a non-recursive lock, since there should be no recursive locking.
+        // Any attempts to take the lock recursively are to be regarded as programming errors.
+        // The TypeLock is needed because there are operations that take both a EntityState lock and
+        // a RegistrationState lock, and since these locks are taken in different order by different
+        // operations, there is a risk for a deadlock. The reason why we have locks at both type-level and
+        // state-level is that we want subscribers to fetch data from single states withot locking
+        // the whole type.
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  TYPE_LOCK_LEVEL, NO_MASTER_LEVEL_REQUIRED> TypeLock;
+        
+        typedef ShmArray<TypeLock> TypeLockVector;
+        TypeLockVector m_typeLocks;
+
+        typedef boost::interprocess::scoped_lock<TypeLock> ScopedTypeLock;
 
         void SetEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
                                const ConnectionPtr&                 connection,
@@ -245,12 +270,12 @@ namespace Internal
                                   const ConnectionPtr&                 connection,
                                   const Dob::Typesystem::HandlerId&    handlerId,
                                   const Dob::Typesystem::InstanceId&   instanceId,
-                                  bool&                                dontRelease);
+                                  StatePtrHandling&                    statePtrHandling);
 
         void DeleteAllInstancesInternal(const UpgradeableStateResult&       upgradeableStateResult,
                                         const ConnectionPtr&                connection,
                                         const Dob::Typesystem::HandlerId&   handlerId,
-                                        bool&                               dontRelease,
+                                        StatePtrHandling&                   statePtrHandling,
                                         bool&                               exitDispatch);
 
         void SetInitalGhostInternal(const UpgradeableStateResult&        upgradeableStateResult,
@@ -260,17 +285,19 @@ namespace Internal
                                     const char* const                    blob);
 
         void InjectEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
+                                  const ConnectionPtr&                 connection,
                                   const Dob::Typesystem::HandlerId&    handlerId,
                                   const Dob::Typesystem::InstanceId&   instanceId,
                                   const char* const                    blob,
                                   const Dob::Typesystem::Int64         timestamp,
-                                  bool&                                dontRelease);
+                                  StatePtrHandling&                    statePtrHandling);
 
         void InjectDeletedEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
+                                         const ConnectionPtr&                 connection,
                                          const Dob::Typesystem::HandlerId&    handlerId,
                                          const Dob::Typesystem::InstanceId&   instanceId,
                                          const Dob::Typesystem::Int64         timestamp,
-                                         bool&                                dontRelease);
+                                         StatePtrHandling&                    statePtrHandling);
 
         void AcceptInjectionInternal(const UpgradeableStateResult&  upgradeableStateResult,
                                      const ConnectionPtr&           connection,
@@ -281,7 +308,7 @@ namespace Internal
                                            const ConnectionPtr&           connection,
                                            DistributionData&              injectionState,
                                            const DistributionData&        originalInjectionState,
-                                           bool&                          dontRelease);
+                                           StatePtrHandling&              statePtrHandling);
 
         void CommonAcceptInjectionInternal(const UpgradeableStateResult&  upgradeableStateResult,
                                            const ConnectionPtr&           connection,
@@ -300,23 +327,23 @@ namespace Internal
                                      const Dob::Typesystem::HandlerId&    handlerId,
                                      const Dob::Typesystem::InstanceId&   instanceId,
                                      const DistributionData&              originalInjectionState,
-                                     bool&                                dontRelease);
+                                     StatePtrHandling&                    statePtrHandling);
 
         void RemoteSetGhostEntityStateInternal(const DistributionData&        remoteEntity,
                                                const UpgradeableStateResult&  upgradeableStateResult);
 
         void RemoteSetInjectionEntityStateInternal(const DistributionData&        remoteEntity,
                                                    const UpgradeableStateResult&  upgradeableStateResult,
-                                                   bool&                          dontRelease);
+                                                   StatePtrHandling&              statePtrHandling);
 
         void RemoteSetDeleteEntityStateInternal(const DistributionData&         remoteEntity,
                                                 const UpgradeableStateResult&   upgradeableStateResult,
-                                                bool&                           dontRelease);
+                                                StatePtrHandling&               statePtrHandling);
 
         void RemoteSetRealEntityStateInternal(const ConnectionPtr&           connection,
                                               const DistributionData&        remoteEntity,
                                               const UpgradeableStateResult&  upgradeableStateResult,
-                                              bool&                          dontRelease,
+                                              StatePtrHandling&              statePtrHandling,
                                               RemoteSetResult&               remoteSetResult);
 
         void SetEntityLocal(const UpgradeableStateResult&        upgradeableStateResult,
@@ -328,10 +355,11 @@ namespace Internal
                             const DistributionData&              injectionState);
 
         void DeleteEntityLocal(const StateSharedPtr&                statePtr,
+                               const ContextId                      context,
                                const Dob::Typesystem::HandlerId&    handlerId,
                                const Dob::Typesystem::InstanceId&   instanceId,
                                const DistributionData&              injectionState,
-                               bool&                                dontRelease);
+                               StatePtrHandling&                    statePtrHandling);
 
         // A state always has an owner. (Checks any real or injected state for a handler id.)
         void GetOwner(const StateSharedPtr&       statePtr,
@@ -375,7 +403,7 @@ namespace Internal
                            const DistributionData& timeBase,
                            const bool              considerChangeFlags) const;
 
-        void KickRegisterer(const Dob::Typesystem::HandlerId& handlerId) const;
+        void KickRegisterer(const Dob::Typesystem::HandlerId& handlerId, const ContextId context) const;
 
         friend void StatisticsCollector(EntityType&, void*);
     };

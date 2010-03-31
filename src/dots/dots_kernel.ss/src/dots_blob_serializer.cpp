@@ -211,8 +211,14 @@ namespace Internal
                     objects.pop();
                 }
 
-                ParsingState::Instance().parseError=false;
+                while (!preserveSpace.empty())
+                {
+                    preserveSpace.pop();
+                }
+
+                parseError=false;
                 objects.push(ParseInfo());
+                theBlob = NULL;
             }
 
         };
@@ -872,6 +878,12 @@ namespace Internal
             }
         }
 
+        // If HandleCharacters has detected a parse error we don't want to continue.
+        if (ParsingState::Instance().parseError == true)
+        {
+            return;
+        }
+
         ParsingState::Instance().preserveSpace.pop();
 
         Size dummy=0;
@@ -1213,6 +1225,7 @@ namespace Internal
                 std::string descr="Undefined member '";
                 descr+=str+"' for class '";
                 descr += ParsingState::Instance().objects.top().cde->Name();
+                descr += "'";
                 ErrorHandler::Error("Serialization error", descr, "dots_blob_serializer");
                 return;
             }

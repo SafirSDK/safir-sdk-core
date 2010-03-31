@@ -246,6 +246,22 @@
           </object>
         </arrayElement>
         <arrayElement>
+          <!-- Sleep a short while to reduce output diff -->
+          <object>
+            <name>DoseTest.Action</name>
+            <members>
+              <member>
+                <name>ActionKind</name>
+                <value>DoseTest.ActionEnum.Sleep</value>
+              </member>
+              <member>
+                <name>SleepDuration</name>
+                <value>0.5</value>
+              </member>
+            </members>
+          </object>
+        </arrayElement>        
+        <arrayElement>
           <object>
             <name>DoseTest.Action</name>
             <members>
@@ -298,7 +314,7 @@
               </member>
               <member>
                 <name>SleepDuration</name>
-                <value>0.1</value>
+                <value>0.5</value>
               </member>
             </members>
           </object>

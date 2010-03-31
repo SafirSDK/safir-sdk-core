@@ -280,7 +280,7 @@ class VisualStudioBuilder(object):
             cfg = ConfigParser() #make a new parser so that we're going on from here like nothing happened.
 
         cfg.read(cfgpath)
-        self.studio = os.path.normpath(cfg.get("main","VSPATH"))
+        self.studio = os.path.normcase(os.path.normpath(cfg.get("main","VSPATH")))
 
         if not os.path.isdir(self.studio) or not os.path.isfile(os.path.join(self.studio,"vsvars32.bat")):
             die("Something seems to have happened to your dobmake.ini or Visual Studio installations!\n"+
@@ -288,7 +288,7 @@ class VisualStudioBuilder(object):
         def getenv_and_normalize(variable):
             env = os.environ.get(variable)
             if env is not None:
-                return os.path.normpath(env)
+                return os.path.normcase(os.path.normpath(env))
             return None
 
         VS80 = getenv_and_normalize("VS80COMNTOOLS")
@@ -302,7 +302,7 @@ class VisualStudioBuilder(object):
             die("VSPATH (in dots_generated/dobmake.ini) is set to something I dont recognize\n" +
                 "It should be either the value of %VS80COMNTOOLS% or %VS90COMNTOOLS%")
 
-        
+        #work out where to put temp files
         self.tmpdir = os.environ.get("TEMP")
         if self.tmpdir is None:
             self.tmpdir = os.environ.get("TMP")
@@ -310,6 +310,17 @@ class VisualStudioBuilder(object):
                 die("Failed to find a temp directory!")
         if not os.path.isdir(self.tmpdir):
             die("I can't seem to use the temp directory " + self.tmpdir)
+
+        #work out whether to use devenv.com or vcexpress.exe to build
+        basepath = os.path.join(self.studio,"..","IDE")
+        vcexpresspath = os.path.join(basepath,"vcexpress.exe")
+        devenvpath = os.path.join(basepath,"devenv.com")
+        if os.path.exists(vcexpresspath):
+            self.build_cmd = vcexpresspath
+        elif  os.path.exists(devenvpath):
+            self.build_cmd = devenvpath
+        else:
+            die("I couldn't find either vcexpress.exe or devenv.com, so I dont know how to build stuff!")
             
     @staticmethod
     def can_use():
@@ -380,7 +391,7 @@ class VisualStudioBuilder(object):
             solution = self.find_sln()
             
             for config in ("Debug","Release"):
-                self.run_command("devenv.com " + solution + " /build " +config +" /Project INSTALL",
+                self.run_command("\"" + self.build_cmd + "\" " + solution + " /build " +config +" /Project INSTALL",
                                  "Build and Install " + config,what)
         finally:
             os.chdir(olddir)
@@ -400,7 +411,7 @@ class VisualStudioBuilder(object):
                              "Configure", what)
             solution = self.find_sln()
             
-            self.run_command("devenv.com " + solution + " /build " + default_config  +" /Project INSTALL",
+            self.run_command("\"" + self.build_cmd + "\" " + solution + " /build " + default_config  +" /Project INSTALL",
                              "Build and Install " + default_config, what)
         finally:
             os.chdir(olddir)
@@ -495,7 +506,11 @@ def load_gui():
             Tkinter.Frame.__init__(self,parent)
             self.parent = parent
             self.builder = builder
-            self.grid(row=0,column=0)
+            self.grid(row=0,column=0,sticky=Tkinter.W + Tkinter.E + Tkinter.N + Tkinter.S)
+
+            self.parent.grid_rowconfigure(0, weight=1)
+            self.parent.grid_columnconfigure(0, weight=1)
+
             self.buildType=Tkinter.StringVar()
             self.buildType.set(buildType)
             self.buildAda = Tkinter.IntVar()
@@ -511,47 +526,50 @@ def load_gui():
 
 
         def createWidgets(self):
+            self.grid_rowconfigure(4, weight=1)
+            self.grid_columnconfigure(4, weight=1)
+
             Tkinter.Label(self, 
-                          text='Build directory:').grid(row=0,column=0,sticky=Tkinter.W)
+                          text='Build directory:').grid(row=0,column=0,sticky=Tkinter.W + Tkinter.N)
 
             Tkinter.Label(self, 
                           text=os.path.join(SAFIR_SDK,"dots","dots_generated"), 
-                          relief=Tkinter.SUNKEN).grid(row=0,column=1,columnspan=10,sticky=Tkinter.W)
+                          relief=Tkinter.SUNKEN).grid(row=0,column=1,columnspan=5,sticky=Tkinter.W + Tkinter.N)
 
 
             Tkinter.Label(self, 
-                          text='Task:').grid(row=1,column=0,sticky=Tkinter.W)
+                          text='Task:').grid(row=1,column=0,sticky=Tkinter.W + Tkinter.N)
 
             Tkinter.Radiobutton(self,
                                 text="Build",
                                 variable=self.buildType,
                                 value="build",
-                                command=self.buildTypeChanged). grid(row=1,column=1, sticky=Tkinter.W)
+                                command=self.buildTypeChanged).grid(row=1,column=1, sticky=Tkinter.W + Tkinter.N)
 
             Tkinter.Radiobutton(self,
                                 text="Rebuild",
                                 variable=self.buildType,
                                 value="rebuild",
-                                command=self.buildTypeChanged).grid(row=1,column=2, sticky=Tkinter.W)
+                                command=self.buildTypeChanged).grid(row=1,column=2, sticky=Tkinter.W + Tkinter.N)
 
             Tkinter.Radiobutton(self,
                                 text="Clean",
                                 variable=self.buildType,
                                 value="clean",
-                                command=self.buildTypeChanged).grid(row=1,column=3, sticky=Tkinter.W)
+                                command=self.buildTypeChanged).grid(row=1,column=3, sticky=Tkinter.W + Tkinter.N)
             Tkinter.Label(self, 
-                          text='Languages:').grid(row=2,column=0,sticky=Tkinter.W)
+                          text='Languages:').grid(row=2,column=0,sticky=Tkinter.W + Tkinter.N)
             
             cppBox = Tkinter.Checkbutton(self,
                                          text="C++",
                                          state="disabled")
-            cppBox.grid(row=2,column=1,sticky=Tkinter.W)
+            cppBox.grid(row=2,column=1,sticky=Tkinter.W + Tkinter.N)
             cppBox.select()
             
             csBox = Tkinter.Checkbutton(self,
                                         text="C#",
                                         state="disabled")
-            csBox.grid(row=2,column=2,sticky=Tkinter.W)
+            csBox.grid(row=2,column=2,sticky=Tkinter.W + Tkinter.N)
             csBox.select()
             
             
@@ -559,17 +577,25 @@ def load_gui():
                                               text="Ada",
                                               variable = self.buildAda,
                                               command=self.adaBoxChanged)
-            self.adaBox.grid(row=2,column=3,sticky=Tkinter.W)
+            self.adaBox.grid(row=2,column=3,sticky=Tkinter.W + Tkinter.N)
             
             self.javaBox = Tkinter.Checkbutton(self,
                                                text="Java",
                                                variable = self.buildJava,
                                                command=self.javaBoxChanged)
-            self.javaBox.grid(row=2,column=4,sticky=Tkinter.W)
+            self.javaBox.grid(row=2,column=4,sticky=Tkinter.W + Tkinter.N)
             
-            Tkinter.Label(self, text='Build output').grid(row=3,column=0,sticky=Tkinter.W)
-            self.output = Tkinter.Text(self)
-            self.output.grid(row=4,column=0,columnspan=5,sticky=Tkinter.W + Tkinter.E + Tkinter.N + Tkinter.S)
+            Tkinter.Label(self, text='Build output').grid(row=3,column=0,sticky=Tkinter.W + Tkinter.N)
+          
+            scrollbar = Tkinter.Scrollbar(self)            
+            self.output = Tkinter.Text(self, yscrollcommand=scrollbar.set)
+            
+            scrollbar.grid(row=4,column=10,columnspan=1,sticky=Tkinter.W + Tkinter.E + Tkinter.N + Tkinter.S)
+
+            scrollbar.config(command=self.output.yview)
+            self.output.config(yscrollcommand=scrollbar.set)
+
+            self.output.grid(row=4,column=0,columnspan=10,sticky=Tkinter.W + Tkinter.E + Tkinter.N + Tkinter.S)
             self.output.tag_config("pre",foreground="darkgrey")
             self.output.tag_config("title",font = tkFont.Font(family="Times",size=-24,weight="bold"))
             self.output.tag_config("command",foreground="darkgreen")
@@ -577,11 +603,11 @@ def load_gui():
             self.output.tag_config("header",font = tkFont.Font(family="Times",size=-18))
             
             self.runButton = Tkinter.Button(self, text="Run", command=self.run)
-            self.runButton.grid(row=5,column=4,pady=10,padx=10,sticky=Tkinter.W)
+            self.runButton.grid(row=5,column=4,sticky=Tkinter.E )
+            Tkinter.Button(self, text="Clear",command=self.clear).grid(row=5,column=5,pady=10,padx=10,sticky=Tkinter.E)
             self.cancelButton = Tkinter.Button(self, text="Quit",command=self.quit)
-            self.cancelButton.grid(row=5,column=3,sticky=Tkinter.W)
+            self.cancelButton.grid(row=5,column=6,sticky=Tkinter.E)
 
-            Tkinter.Button(self, text="Clear",command=self.clear).grid(row=5,column=2,sticky=Tkinter.W)
 
         def clear(self):
             self.output.delete(1.0,Tkinter.END)
@@ -604,10 +630,7 @@ def load_gui():
                 self.adaBox.select()
                 self.adaBox.config(state ="disabled")
             else:
-                self.javaBox.select()
                 self.javaBox.config(state ="normal")
-
-                self.adaBox.select()
                 self.adaBox.config(state ="normal")
             self.adaBoxChanged()
             self.javaBoxChanged()

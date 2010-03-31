@@ -30,11 +30,20 @@
 #include <Safir/Dob/Typesystem/HandlerId.h>
 #include <Safir/Dob/Defs.h>
 #include <Safir/Dob/Internal/WrapAroundCounter.h>
-#include <boost/function.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <Safir/Dob/Internal/LamportClocks.h>
 #include <Safir/Dob/Internal/ConsumerId.h>
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable:4512)
+#endif
+
+#include <boost/function.hpp>
+#include <boost/tuple/tuple.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {
@@ -78,6 +87,42 @@ namespace Internal
     enum RemoteSetResult {RemoteSetAccepted,
                           RemoteSetDiscarded,
                           RemoteSetNeedRegistration};
+
+    enum StatePtrHandling {RestorePtr,
+                           ReleasePtr,
+                           KeepPtr};
+
+    //---------------------
+    // Lock levels used to check (in debug build code) that locks always
+    // are taken in a well defined order. This way we can detect deadlock
+    // situations without catching a real deadlock.
+    //---------------------
+
+    const unsigned short NO_MASTER_LEVEL_REQUIRED = 0;
+
+    const unsigned short TYPE_LOCK_LEVEL              = 50;
+    const unsigned short CONNECTIONS_TABLE_LOCK_LEVEL = 40;
+
+    const unsigned short STATE_CONTAINER_META_SUB_LOCK_LEVEL = 30;
+    const unsigned short STATE_CONTAINER_RW_LOCK_LEVEL       = 30;
+    const unsigned short STATE_LOCK_LEVEL                    = 30;
+
+    const unsigned short END_STATES_LOCK_LEVEL = 20;
+
+    const unsigned short MESSAGE_TYPE_LOCK_LEVEL = 10;
+
+    // Leaf locks
+    const unsigned short CONNECTION_LOCK_LEVEL                  = 1;
+    const unsigned short CONNECT_LOCK_LEVEL                     = 1;
+    const unsigned short CONSUMER_QUEUE_CONTAINER_LOCK_LEVEL    = 1;
+    const unsigned short MESSAGE_QUEUE_LOCK_LEVEL               = 1;
+    const unsigned short REQUEST_IN_QUEUE_LOCK_LEVEL            = 1;
+    const unsigned short REQUEST_OUT_QUEUE_LOCK_LEVEL           = 1;
+    const unsigned short SIGNALS_LOCK_LEVEL                     = 1;
+    const unsigned short SUBSCRIPTION_QUEUE_LOCK_LEVEL          = 1;
+    const unsigned short STATE_HOLDER_LOCK_LEVEL                = 1;
+    const unsigned short UPGRADABLE_PTR_LOCK_LEVEL              = 1;
+
 }
 }
 }

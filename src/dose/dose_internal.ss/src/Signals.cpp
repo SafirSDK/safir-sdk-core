@@ -90,7 +90,7 @@ namespace Internal
                << "It is not possible to signal or wait for a connection on other node!!! connId = " << connection);
 #endif
         {
-            ACE_Read_Guard<ACE_RW_Thread_Mutex> guard(m_lock);
+            ACE_Read_Guard<SignalsLock> guard(m_lock);
 
             Semaphores::iterator findIt = m_semaphores.find(connection.m_id);
             if (findIt != m_semaphores.end())
@@ -104,7 +104,7 @@ namespace Internal
             }
         }
         //tryacqure failed, so we have to wait for the write lock
-        ACE_Write_Guard<ACE_RW_Thread_Mutex> guard(m_lock);
+        ACE_Write_Guard<SignalsLock> guard(m_lock);
         return AddSemaphore(connection);
     }
 

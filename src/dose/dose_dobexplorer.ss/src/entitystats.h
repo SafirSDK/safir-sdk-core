@@ -44,6 +44,13 @@ public:
                       const Safir::Dob::Internal::UpgradeableStateResult& statePtrResult,
                       Arguments& arguments);
 
+    void AddContextRow(Safir::Dob::Internal::EntityType& entityType, Arguments& argumentsXS);
+
+    void InitRemoveInstances(Arguments& arguments);
+
+    void RemoveInstances();
+
+    void AddContextGlobalData(Arguments& arguments);
 
 public slots:
     void UpdateStatistics();
@@ -53,7 +60,9 @@ private:
     const Safir::Dob::Typesystem::TypeId m_typeId;
 
     typedef std::set<QTableWidgetItem*> WidgetSet;
+
     WidgetSet m_removeInstances;
+
 };
 
 

@@ -57,11 +57,7 @@ namespace Internal
         //only to be called when the service persistencedataready is called
         //or when we have fulfilled other criteria for receiving persistence data
         void SetPersistentDataReady();
-
         bool IsPersistentDataReady() const;
-
-        static bool ThisNodeIsPersistanceNode();
-        static bool SystemHasPersistence();
 
         void HandleMessageFromDoseCom(const DistributionData& data);
     private:

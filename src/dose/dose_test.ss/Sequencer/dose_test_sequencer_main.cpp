@@ -31,19 +31,19 @@
 
 #if defined _MSC_VER
   #pragma warning (push)
-  #pragma warning (disable : 4512 4702 4267)
+  #pragma warning (disable : 4127 4512 4702 4267)
 #endif
 
 #include <boost/program_options.hpp>
 #include <boost/lexical_cast.hpp>
 #include <ace/Thread.h>
+#include <boost/random.hpp>
+#include <boost/filesystem/path.hpp>
 
 #if defined _MSC_VER
   #pragma warning (pop)
 #endif
 
-
-#include <boost/random.hpp>
 #include <ace/Reactor.h>
 #include <ace/OS_NS_unistd.h>
 
@@ -87,21 +87,131 @@ std::string GetRandomLanguage()
 #endif
 }
 
+int GetRandomContext()
+{
+    return rand()%2;
+}
+
+void DumpAction(const DoseTest::ActionConstPtr currentAction) {
+
+    if (!currentAction->Partner().IsNull())
+    {
+        std::wcout << "P" << currentAction->Partner().GetVal();
+    }
+    if (!currentAction->Consumer().IsNull())
+    {
+        std::wcout << "," << "C" << currentAction->Consumer().GetVal();
+    }
+    if (!currentAction->ActionKind().IsNull())
+    {
+        if (!currentAction->Partner().IsNull())
+        {
+            std::wcout << ",";
+        }
+
+        std::wcout << DoseTest::ActionEnum::ToString(currentAction->ActionKind().GetVal()) << "(";
+        bool first = true;
+
+        if (!currentAction->Context().IsNull())
+        {
+            if (!first)
+                std::wcout << ",";
+            first = false;
+            std::wcout  << currentAction->Context().GetVal();
+        }        
+
+        if (!currentAction->Channel().IsNull())
+        {
+            if (!first)
+                std::wcout << ",";
+            first = false;
+            std::wcout << currentAction->Channel().GetVal().ToString();
+        }
+        if (!currentAction->Handler().IsNull())
+        {
+            if (!first)
+                std::wcout << ",";
+            first = false;
+            std::wcout << currentAction->Handler().GetVal().ToString();
+        }
+        if (!currentAction->TypeId().IsNull())
+        {
+            if (!first)
+                std::wcout << ",";
+            first = false;
+            const std::wstring name = Safir::Dob::Typesystem::Operations::GetName(currentAction->TypeId().GetVal());
+            const std::wstring::size_type index = name.find_last_of('.');
+            std::wcout << name.substr(index + 1, name.length() - index);
+        }
+        std::wcout << ")";
+    }
+
+    std::wcout << std::endl; 
+}
+
+void DumpTestcaseDetailedData(const int first,
+                              const int last)
+{
+
+    for (int testcaseNo = first; testcaseNo <= last; ++testcaseNo)
+    {
+        DoseTest::Items::TestCaseConstPtr tc = TestCaseReader::Instance().GetTestCase(testcaseNo);
+
+        if (tc == NULL)
+        {
+            if (first == last)
+            {
+                std::wcout << std::endl << "TESTCASE " << testcaseNo << "  (null)" << std::endl; 
+            }
+            continue;
+        }
+
+        std::wcout << std::endl << "---------------------------------------------------------" << std::endl;
+        std::wcout << std::endl << "TESTCASE " << testcaseNo << std::endl;
+        std::wcout << "Description: " << tc->Description().GetVal() << std::endl;
+        std::wcout  << "Expectation: " << tc->Expectation().GetVal() << std::endl;
+
+        std::wcout << std::endl << "Setup actions:" << std::endl; 
+        for (int i = 0; i < DoseTest::Items::TestCase::TestCaseSetupActionsArraySize(); ++i)
+        {
+            if (tc->TestCaseSetupActions()[i].IsNull())
+            {
+                continue;
+            }
+
+            DumpAction(tc->TestCaseSetupActions()[i].GetPtr());
+        }
+
+
+        std::wcout << std::endl << "Test actions:" << std::endl; 
+        for (int i = 0; i < DoseTest::Items::TestCase::TestActionsArraySize(); ++i)
+        {
+            if (tc->TestActions()[i].IsNull())
+            {
+                continue;
+            }
+
+            DumpAction(tc->TestActions()[i].GetPtr());
+        }
+    }
+
+}
+
 void DumpTestcaseData(const int first,
                       const int last,
                       const bool descriptions,
                       const bool expectations)
 {
-    for (int i = first; i < last; ++i)
+    for (int i = first; i <= last; ++i)
     {
         DoseTest::Items::TestCaseConstPtr tc = TestCaseReader::Instance().GetTestCase(i);
 
-        std::wcout << std::endl << "TESTCASE " << i;
         if (tc == NULL)
         {
-            std::wcout << "  (null)" << std::endl;
             continue;
         }
+
+        std::wcout << std::endl << "TESTCASE " << i;
         std::wcout << std::endl;
         if (descriptions)
         {
@@ -114,6 +224,17 @@ void DumpTestcaseData(const int first,
     }
 }
 
+const std::string GetTestcaseDir()
+{
+    const char * SAFIR_RUNTIME = getenv("SAFIR_RUNTIME");
+    boost::filesystem::path path = SAFIR_RUNTIME;
+    path /= "data";
+    path /= "text";
+    path /= "dose_test";
+    path /= "testcases";
+    return path.string();
+}
+
 
 struct CommandLineResults
 {
@@ -123,6 +244,9 @@ struct CommandLineResults
     int repeats;
     bool randomLanguages;
     std::string testcaseDirectory;
+    bool noTimeout;
+    int testcaseNo;
+    int context;
 };
 
 const CommandLineResults & HandleCommandLine(int argc, char* argv[])
@@ -134,13 +258,16 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
         po::options_description desc("Allowed options");
         desc.add_options()
             ("help,h", "show help message")
-            ("testcase-directory,d",po::value<std::string>(&results.testcaseDirectory)->default_value("."),"directory that contains the test cases")
+            ("testcase-directory,d",po::value<std::string>(&results.testcaseDirectory),"directory that contains the test cases")
             ("descriptions","show descriptions")
             ("expectations", "show expectations")
+            ("description", po::value<int>(&results.testcaseNo), "Detailed description of the given testcase (-1 = use first/last args)")
             ("repeats", po::value<int>(&results.repeats)->default_value(1), "number of times to run tests")
             ("languages,l", po::value<std::vector<std::string> >(&results.languages)->multitoken()->default_value(Languages(3,"cpp"),"cpp cpp cpp"), "choose languages to run, e.g.\n--languages cpp ada java or \n--languages random")
             ("first", po::value<int>(&results.first)->default_value(0), "first testcase")
-            ("last", po::value<int>(&results.last)->default_value(999), "last testcase");
+            ("last", po::value<int>(&results.last)->default_value(999), "last testcase")
+            ("no-timeout", "Do not time out and exit if a partner does not respond for a long time")
+            ("context", po::value<int>(&results.context)->default_value(0), "default context for partner test connection (-1 for random)");
 
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -153,15 +280,37 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
             std::wcout << ostr.str().c_str() << std::endl;
             exit(0);
         }
+        
+        TestCaseReader::Initialize(results.testcaseDirectory);
+
+        if (results.testcaseDirectory.empty())
+        {
+            results.testcaseDirectory = GetTestcaseDir();
+        }
 
         const bool descriptions = vm.count("descriptions") != 0;
         const bool expectations = vm.count("expectations") != 0;
+        const bool description = vm.count("description") != 0;
 
         if (descriptions || expectations)
         {
             DumpTestcaseData(results.first,results.last,descriptions,expectations);
             exit(0);
         }
+
+        if (description)
+        {
+            if (results.testcaseNo < 0){
+                DumpTestcaseDetailedData(results.first,results.last);
+            }
+            else
+            {
+                DumpTestcaseDetailedData(results.testcaseNo, results.testcaseNo);
+            }
+            exit(0);
+        }
+
+        results.noTimeout = vm.count("no-timeout") != 0;
 
         results.randomLanguages = results.languages.size() == 1 && results.languages[0] == "random";
 
@@ -195,7 +344,7 @@ int main(int argc, char* argv[])
     srand(static_cast<unsigned int>(time(NULL)));
 
     const CommandLineResults & commandLine = HandleCommandLine(argc,argv);
-    TestCaseReader::Initialize(commandLine.testcaseDirectory);
+
 
     try
     {
@@ -221,6 +370,8 @@ int main(int argc, char* argv[])
         {
             std::wcout << "Test run " << i << ", Languages: ";
             Languages languages = commandLine.languages;
+            int context = commandLine.context;
+
             if (commandLine.randomLanguages)
             {
                 for (Languages::iterator it = languages.begin();
@@ -234,12 +385,21 @@ int main(int argc, char* argv[])
             {
                 std::wcout << it->c_str() << " ";
             }
+
+            if (commandLine.context == -1)
+            {
+                // random context
+                context = GetRandomContext();
+            }
+
+            std::wcout << "Context: " << context;
+
             std::wcout << std::endl;
 
-            Sequencer sequencer(commandLine.first,commandLine.last,languages);
+            Sequencer sequencer(commandLine.first, commandLine.last, languages, commandLine.noTimeout, context);
             while (!sequencer.IsFinished())
             {
-                ACE_Time_Value time(ACE_Time_Value(0,100000)); //100ms
+                ACE_Time_Value time(ACE_Time_Value(0,150000)); //150ms
                 ACE_Reactor::instance()->run_reactor_event_loop(time);
                 sequencer.Tick();
             }

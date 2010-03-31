@@ -269,6 +269,7 @@ namespace Internal
                 if (!procInfo->ConnectionNames()[i].IsNull())
                 {
                     const ConnectionId id(Safir::Dob::ThisNodeParameters::NodeNumber(),
+                                          -1,  // dummy context (context is part of the connection name)
                                           (Connection::CalculateIdentifier
                                            (Typesystem::Utilities::ToUtf8(procInfo->ConnectionNames()[i].GetVal()))));
                     ConnectionPtr connection = Connections::Instance().GetConnection(id);

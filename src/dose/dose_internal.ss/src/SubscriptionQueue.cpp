@@ -40,7 +40,7 @@ namespace Internal
     //Returns false if queue is full
     void SubscriptionQueue::push(const SubscriptionPtr& subscription)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedSubscriptionQueueLock lck(m_lock);
 
         m_queue.push_back(subscription);
 
@@ -50,7 +50,7 @@ namespace Internal
     {
         if (!queue.empty())
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+            ScopedSubscriptionQueueLock lck(m_lock);
 
             m_queue.splice(m_queue.begin(),queue);
         }
@@ -69,7 +69,7 @@ namespace Internal
         //Algorithm: Swap the list into a local variable, to hold the lock as little as possible.
         //Then dispatch the subscriptions, and then retake the lock and put any remaining messages back.
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+            ScopedSubscriptionQueueLock lck(m_lock);
             m_queue.swap(toDispatch);
         }
 

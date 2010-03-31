@@ -73,7 +73,7 @@ namespace Dob
          *
          * Retrieves a smart pointer to the response.
          *
-         * @return Service request
+         * @return Response
          */
         const Dob::ResponsePtr GetResponse() const;
 

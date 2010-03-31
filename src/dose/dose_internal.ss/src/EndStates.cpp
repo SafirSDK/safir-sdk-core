@@ -25,6 +25,7 @@
 #include <Safir/Dob/Internal/EndStates.h>
 #include <Safir/Dob/Internal/StateContainer.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <vector>
 
 namespace Safir
 {
@@ -59,7 +60,7 @@ namespace Internal
 
     void EndStates::Add(const StateSharedPtr& state)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedEndStatesLock lck(m_lock);
 
         const std::pair<StateTable::iterator,bool> insertResult =
             m_states.insert(std::make_pair(state,m_lastTimestamp));
@@ -73,23 +74,29 @@ namespace Internal
 
     void EndStates::HandleTimeout()
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        std::vector<StateSharedPtr> ptrs;
 
-        for (StateTable::iterator it = m_states.begin();
-             it != m_states.end(); )//iterator increment below
         {
-            if (it->second < m_lastTimestamp)
+            ScopedEndStatesLock lck(m_lock);
+
+            for (StateTable::iterator it = m_states.begin();
+                 it != m_states.end(); )//iterator increment below
             {
-                m_states.erase(it++);
+                if (it->second < m_lastTimestamp)
+                {
+                    ptrs.push_back(it->first);
+                    m_states.erase(it++);
+                }
+                else
+                {
+                    ++it;
+                }
             }
-            else
-            {
-                ++it;
-            }
-        }
+        }  // here the EndStatesLock is released
 
         ++m_lastTimestamp;
-    }
+
+    }  // and here we drop the shared pointers (without holding the EndStatesLock)
 }
 }
 }

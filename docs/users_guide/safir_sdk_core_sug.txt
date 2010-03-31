@@ -4,7 +4,7 @@
 Safir SDK Core Users Guide
 ==========================
 Lars Hagström <lars.hagstrom@saabgroup.com>
-Version 1.1, Oct 2009
+Version 1.2a, Nov 2009
 
 == Preface
 The purpose of this document is to provide a comprehensive guide to using the services in Safir SDK Core version 3.2. The reader should have general knowledge about object-oriented programming. Some knowledge of distributed real-time systems programming is also desirable, but not essential.
@@ -15,12 +15,12 @@ This document is intended to be used both as an introduction to new users of the
 === Acknowledgements
 This document is a combination of several other documents, so some parts of the text have different authors, or is based on texts authored by other people. 
 
-More specifically the database section is written by Jörgen Johansson, the software error reporting was originally written by Anders Widén, the section on Safir.Utilities.Foreach was written by Stefan Lindström, and the appendix about the example applications was written by Petter Lönnstedt. Most of the text on the basic Dob services is based on the original Dob Software Users Guide written by Jörgen Johansson.
+More specifically the database section is written by Jörgen Johansson, the software error reporting section was originally written by Anders Widén, the section on Safir.Utilities.Foreach was written by Stefan Lindström, and the appendix about the example applications was written by Petter Lönnstedt. Most of the text on the basic Dob services is based on the original Dob Software Users Guide written by Jörgen Johansson. The bits on how to use the Ada interfaces were written by Anders Widén.
 
 This document has also been reviewed by a number of people: Henrik Sundberg, Mattias Gålnander and Anders Widén. If I've left someone out, then I apologise and I'll happily add you.
 
 === Versions of this document
-To obtain the latest revision, or the latest approved and reviewed revision, please visit http://www.safirsdk.com[].
+To obtain the latest revision, or the latest approved and reviewed revision, please visit http://www.safirsdk.com/downloads/users_guide[].
 
 [[licenses]]
 === Licences and Copying
@@ -101,6 +101,7 @@ This chapter describes what the Dob does and a little bit about why it does it t
 The Dob provides several distribution mechanisms needed to create distributed real-time systems. It is possible to interface with the Dob from several languages (currently C\+\+, C#, Ada, and Java).
 
 The main ``selling points'' include:
+
 - Completely transparent addressing on single or multi-node systems.
 - Supports _both_ request/response and publish/subscribe idioms.
 - Easy-to-use Persistency.
@@ -161,7 +162,7 @@ The xml files are used to generate language interfaces, that any application tha
 
 [[information_model]]
 .Defining the information model
-image::images/typesystem_information_model.jpg["Defining the information model", width=400]
+image::images/typesystem_information_model.jpg["Defining the information model", width=400, link="images/typesystem_information_model.jpg"]
 
 The figure <<information_model>> attempts to show how applications contribute to, or partake of, the information model. 
 
@@ -230,7 +231,7 @@ The SI unit types are all based on Float32 or Float64 respectively:
 
 .Types for SI units.
 `----------------------------`----------------------------
-4 byte type	             8 byte type
+4 byte type	                 8 byte type
 ----------------------------------------------------------
 Ampere32                     Ampere64
 CubicMeter32                 CubicMeter64
@@ -717,7 +718,7 @@ First a little bit of history (that you can skip if you want to), among other th
 
 In the first versions of the Dob all objects in all languages were stored internally as binary _blobs_ which only the Dob knows how to interpret. Calling a method to get an integer out of an object meant that the Dob would work out where in this blob the integer was stored and then type cast the binary chunk into an integer and return it.
 
-The advantage of this approach is that binary the blobs are language independent and also very good for sending across a network.
+The advantage of this approach is that the binary blobs are language independent and also very good for sending across a network.
 
 There are many drawbacks to this approach, one of them being that objects do not behave like normal objects for that language, so the interfaces were changed to make objects behave like real objects, or real classes (hence the name _Real Classes_). These objects would be translated to blobs before being passed into the core of the Dob, so that the Dob can still work with several languages and be network efficient.
 
@@ -735,6 +736,8 @@ In versions 3.2.2 and later of Safir SDK all supported languages - C\+\+, C#, Ad
 One part of the Real Classes idiom is to make use of the language's own features in the best possible way. Languages that support operator overloading should use them if it makes the interface ``better'', and languages that support properties should use them. This makes each language interface ``as good as it can possibly be'', but it has one obvious side effect, i.e. the interfaces are _not identical_.
 
 The syntax for operating on top-level members in the different languages is shown in <<cpp-top-level>>, <<cs-top-level>>, <<java-top-level>> and <<ada-top-level>>. The code is identical, except in the C\+\+ example, where some alternative ways of accomplishing the same thing is shown.
+
+(The attentive reader will notice the pointer stuff in the C\+\+ examples and the +Ref+ calls in the Ada examples. This is because the SDK uses smart pointers to manage memory in languages without a garbage collector. See <<smart-pointers>> for some info on smart pointers).
 
 [[cpp-top-level]]
 .Operating on top-level members in C\+\+
@@ -806,29 +809,34 @@ if (myA.myFloat().isChanged())
 myA.myFloat().setNull();
 source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
 [[ada-top-level]]
 .Operating on top-level members in Ada
 [ada]
 source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
--- Get MyFloat out of My_A
-Val := My_A.Ref.My_Float.Get_Val;
+declare
+   My_A_Ptr : A.Test_Item_Class_Access := My_A.Ref;
+begin
 
--- Set MyFloat in My_A to 3.14
-My_A.Ref.My_Float.Set_Val(3.14);
+   -- Get My_Float out of My_A
+   Val := My_A_Ptr.My_Float.Get_Val;
 
--- Check if MyFloat is null
-if My_A.Ref.My_Float.Is_Null then
-    ...
-end if;
+   -- Set My_Float in My_A to 3.14
+   My_A_Ptr.My_Float.Set_Val(3.14);
 
--- Check if MyFloat is changed
-if My_A.Ref.My_Float.Is_Changed then
-    ...
-end if;
+   -- Check if My_Float is null
+   if My_A_Ptr.My_Float.Is_Null then
+      ...
+   end if;
 
--- Set MyFloat to null
-My_A.Ref.My_Float.Set_Null;
+   -- Check if My_Float is changed
+   if My_A_Ptr.My_Float.Is_Changed then
+      ...
+   end if;
+
+   -- Set My_Float to null
+   My_A_Ptr.My_Float.Set_Null;
+
+end;
 source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The "extra level" to get to the actual values, e.g. the +GetVal()+ bit in C\+\+ and +Val+ bit in C# is needed due to the fact that the value is contained, together with the change and null flags, in a _container_. That there are two different ways of doing the operations in C\+\+ is because of a clever C\+\+ construction, _proxy objects_, combined with operator overloading. More on containers and proxies later.
@@ -920,31 +928,36 @@ myA.myB().getObj().myInt().setNull();
 source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 [[ada-nested]]
-.Operating on nested members in Ada
+.Operating on nested members in Ada 
 [ada]
 source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
--- Get MyInt
-Val := My_A.Ref.My_B.Ref.My_Int.Get_Val;
+declare
+   My_A_Ptr : A.Test_Item_Class_Access := My_A.Ref;
+begin
 
--- Set MyInt to 3 (if MyB is not null)
-My_A.Ref.My_B.Ref.My_Int.Set_Val(3);
+   -- Get My_Int
+   Val := My_A_Ptr.My_B.Ref.My_Int.Get_Val;
 
--- Create an empty B item for MyB and set B.MyInt to 3
-My_A.Ref.My_B.Set_Ptr(B.Create);
-My_A.Ref.My_B.Ref.My_Int.Set_Val(3);
+   -- Set My_Int to 3 (if My_B is not null)
+   My_A_Ptr.My_B.Ref.My_Int.Set_Val(3);
 
--- Check if MyInt is null
-if My_A.Ref.My_B.Ref.My_Int.Is_Null then
-    ...
-end if;
+   -- Create an empty B item for My_B and set B.My_Int to 3
+   My_A_Ptr.My_B.Set_Ptr(B.Create);
+   My_A_Ptr.My_B.Ref.My_Int.Set_Val(3);
 
--- Check if MyInt is changed
-if My_A.Ref.My_B.Ref.My_Int.Is_Changed then
-    ...
-end if;
+   -- Check if My_Int is null
+   if My_A_Ptr.My_B.Ref.My_Int.Is_Null then
+      ...
+   end if;
 
--- Set MyInt to null
-My_A.Ref.My_B.Ref.My_Int.Set_Null;
+   -- Check if My_Int is changed
+   if My_A_Ptr.My_B.Ref.My_Int.Is_Changed then
+      ...
+   end if;
+
+   -- Set My_Int to null
+   My_A_Ptr.My_B.Ref.My_Int.Set_Null;
+end;
 source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Casting objects up and down in the inheritance hierarchy also differs between the languages, see <<type_casting>> for more information.
@@ -962,10 +975,19 @@ Note that these proxies (container proxies) should not be confused with the prox
 
 Ada uses container proxies to avoid exposing pointers into the internals of objects, but since Ada does not have the same support for operator overloading as C\+\+ it is not possible to use them to reduce code clutter.
 
-===== Smart pointers - boost::shared_ptr
-To guarantee that all dynamically allocated memory is deallocated the Dob uses the +boost::shared_ptr+ implementation of smart pointers. You can find more information on how to use them here: http://www.boost.org/libs/smart_ptr/smart_ptr.htm.
+[[smart-pointers]]
+==== Smart pointers
+The generated classes (Real Classes) are allocated on the heap and then handled via pointers. Using pointers to objects is necessary for polymorphism to work properly in the Dob interfaces.
 
-The reason for using shared_ptr for all Dob objects is that we need to have pointers to objects for polymorphism to work properly, and since C\+\+ is not garbage collected we do not want to use raw pointers. +shared_ptr+ is a smart pointer that automatically deletes the object pointed to when there are no references to it.
+For C\+\+ and Ada, that are not garbage collected languages, we use the smart pointer concept. Smart pointers are _pointer wrapper objects_ that store pointers to dynamically allocated objects. They keep track of how many references there are to a certain object, and automatically deletes the referenced object when there are no more references to it.
+
+In C# and Java there is no need for smart pointers, since both these languages have garbage collection.
+
+
+===== Smart pointers in C\+\+
+In C\+\+, to guarantee that all dynamically allocated memory is deallocated, the Dob uses the +boost::shared_ptr+ implementation of smart pointers. You can find more information on how to use them here: http://www.boost.org/libs/smart_ptr/smart_ptr.htm.
+
+Since C\+\+ is not garbage collected we do not want to use raw pointers. +shared_ptr+ is a smart pointer that automatically deletes the object pointed to when there are no references to it.
 
 Here is part of the introduction from that page:
 
@@ -977,22 +999,56 @@ Conceptually, smart pointers are seen as owning the object pointed to, and thus 
 
 The boost::shared_ptr type is going to be included in the next C\+\+ standard (TR1).
 
-In C# and Java there is no need for smart pointers, since both these languages have garbage collection.
+See <<cpp_type_casting>> for more information on how to cast smart pointers in C\+\+.
 
-//TBD Ada smart pointers?!
+===== Smart pointers in Ada
+Ada doesn't have a ready-to-use smart pointer abstraction (as C\+\+), instead, each type defines a corresponding smart pointer type in the generated code.   
 
-See <<type_casting>> for more information on how to cast smart pointers.
+An Ada smart pointer exposes an operation called +Ref+ which could be tought of as corresponding to the "arrow" operator (\->) in C\+\+.
+
+Ada smart pointers work like you expect (Well, almost. See below), they are reference counted and the pointed-to object will be deleted when there are no more references to it.
+
+The user of an Ada smart pointer must be aware of some important differences when compared to a ``normal'' smart pointer. (The differences are due to Ada language rules). When accessing members via an Ada smart pointer using prefix notation you must start with a local variable holding the underlaying ``raw'' pointer (Ada access type). Assuming that we have a smart pointer My_A:
+
+.Smart pointer usage in Ada
+[ada]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- Do like this
+declare
+   My_A_Ptr : A.Test_Item_Class_Access := My_A.Ref;
+begin
+   My_A_Ptr.My_B.Ref.My_Int.Set_Val (3);
+end;
+
+-- This doesn't work. Ambigious.
+My_A.Ref.My_B.Ref.My_Int.Set_Val (3);
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+My_A_Ptr is a ``raw'' pointer and therefore not reference counted. This means that you should only use this variable as ``starting-point''. Do *not* store it in some data structure or use it as a subprogram parameter. In these situations the smart pointer should be used.
+
+Note that a ``raw'' pointer is needed only at top-level, nested levels can use the normal +Smart_Ptr.Ref+ syntax.
+ 
+Code style recommendation: Access members using the prefix notation since the ``normal'' Ada call style gives very hard-to-read code.  
+
+.Ada compiler bug
+*****************************
+For Adacore's GNAT Pro (6.1.0w) and GNAT GPL (2008 and 2009) we have found a compiler bug. In some cases a member reference not starting with a ``raw'' pointer actually compiles but the method for the base type is called instead of the overridden one. The problem is particulary nasty since the code will both compile and run without any error indication.
+
+So the bottom line is: _Always use a local variable holding the underlaying ``raw'' pointer._
+*****************************
+
+See <<ada_type_casting>> for more information on how to cast smart pointers in Ada.
 
 ===== Hints for Debugging
 It is possible to look at the contents of a Dob object in the debugger. Since the containers are all part of a class hierarchy the objects may seem a little difficult to understand at first. But just remember these things:
 
 - Value containers have three values: m_Value, m_bIsNull and m_bIsChanged (which is the member value and the null and change flag respectively).
 - Object containers have two values: m_pObject (which can be null) and m_bIsChanged.
-- Smart pointers have two pointers in them, the reference count (pn) and the pointer to the object they point to (px). It is px that you are interested in.
+- C\+\+ smart pointers have two pointers in them, the reference count (pn) and the pointer to the object they point to (px). It is px that you are interested in.
 
-// TBD: Ada smart pointer internals?
+Value containers and object containers in Ada are identical to the corresponding C\+\+ containers (the value names are slightly different). Ada smart pointers also have two pointers in them, the reference count (Counter_Ptr) and the pointer to the object (Data_Ptr). So, in the Ada case, it's the Data_Ptr that is of interest.
 
-The last point of course only applies to C\+\+ and Ada since C# and Java do not have smart pointers.
+For example, if you want to see the contents of a received smart pointer named Entity (that really points to a derived entity) using the GPS (GNAT Programming Studio) debugger, just type "print Entity.Data_Ptr.all" in the debugger console window. (It seems that the debugger Data Window can't display Dob objects correctly, so the recommendation is to use the debugger console window.)
 
 The naming of the container members is also slightly different in the different languages.
 
@@ -1006,7 +1062,8 @@ For the discussion in this section the object hierarchy in <<example_object_hier
 .Example object hierarchy
 image::images/object_hierarchy.jpg["Example object hierarchy", width=350, link="images/object_hierarchy.jpg"]
 
-===== C\+\+
+[[cpp_type_casting]]
+===== C\+\+ type casting
 The Dob C\+\+ interface uses +boost::shared_ptr+ (as described above) for passing around objects over the interfaces. For example this means that you get a +shared_ptr<Safir.Dob.Entity>+ (typedefed to +Safir.Dob.EntityPtr+ in the generated code) out of the +EntityProxy+ in +OnNewEntity+. If you're subscribing to +EntityParent+ you would want to somehow cast this +EntityPtr+ to an +EntityParentPtr+.
 
 If it was an ordinary pointer you would either use a +static_cast+ or a +dynamic_cast+ operation (if you're unfamiliar with them you should look them up in your C\+\+ reference now), but since these are shared_ptrs you have to use +boost::static_pointer_cast+ or +boost::dynamic_pointer_cast+ to accomplish the same thing.
@@ -1130,7 +1187,7 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This operation should _only_ be used when you need to check relationships between TypeIds. If you have an object you should be using +boost::dynamic_pointer_cast+.
 
-===== C#
+===== C# type casting
 Since C# is garbage collected the Dob can use normal C# pointers to objects. This means that the normal type casting operations can be used. C# also does not have an equivalent to static_cast, so there is really only the choice between different forms of the dynamic_cast-like operation to choose between. If you're unsure of how C# casting works you should look it up in your C# reference, since a complete explanation is outside the scope of this document. But here are some pointers:
 
 If you know the type of the object (by only having subscribed to one type), go right ahead and cast it:
@@ -1168,8 +1225,67 @@ if (child != null)
 source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Prefer using the _as_ operation in C#.
 
-===== Java
+===== Java type casting
 Since Java is garbage collected the Dob can use normal Java pointers to objects. This means that the normal type casting operations can be used. Java also does not have an equivalent to static_cast, so there is really only the choice between different forms of the dynamic_cast-like operation to choose between. If you're unsure of how Java casting works you should look it up in your Java reference, since a complete explanation is outside the scope of this document.
+
+[[ada_type_casting]]
+===== Ada type casting
+Ada is not garbage collected so smart pointers (as described above) are used for passing around objects over the interfaces. For example, this means that you get a +Safir.Dob.Entity.Smart_Pointer'Class+ out of the +Entity_Proxy+ in +On_New_Entity+. If you're subscribing to +Entity_Parent+ you would want to somehow cast this +Safir.Dob.Entity.Smart_Pointer'Class+ to an +Safir.Dob.Entity_Parent.Smart_Pointer+.
+
+If you know the type of the object (by only having subscribed to one type), this is the way to do it in Ada:
+
+.Type casting in Ada when handling a single type
+[ada]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+overriding
+procedure On_Updated_Entity
+  (Self         : in out Consumer;
+   Entity_Proxy : in Safir.Dob.Entity_Proxies.Entity_Proxy) is
+
+   Another_Ent : Another_Entity.Smart_Pointer :=
+      Another_Entity.Smart_Pointer (Entity_Proxy.Get_Entity);
+begin
+   ... do something with Another_Ent ...
+end;
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If, for some reason, the entity was not of the expected type +Constraint_Error+ will be raised, but remember that in this case that can be only due to a programmer error.
+
+When the pointer can be of several different types that you want to treat differently, for example if you have an Entity_Subscriber that has subscribed to Entity_Child _and_ Another_Entity, you can do like this:
+
+.Type casting in Ada when handling multiple types
+[ada]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+overriding
+procedure On_Updated_Entity
+  (Self         : in out Consumer;
+   Entity_Proxy : in Safir.Dob.Entity_Proxies.Entity_Proxy) is
+   
+   Entity : Safir.Dob.Entity.Smart_Pointer'Class := Entity_Proxy.Get_Entity; 
+begin
+   
+   if Entity in Entity_Child.Smart_Pointer then
+      declare
+         Child : Entity_Child.Smart_Pointer :=
+            Entity_Child.Smart_Pointer (Entity);
+      begin
+         Handle_Child (Child);
+         return;
+      end;
+   end if;
+
+   if Entity in Another_Entity.Smart_Pointer then
+      declare
+         Another : Another_Entity.Smart_Pointer :=
+            Another_Entity.Smart_Pointer (Entity);
+      begin
+         Handle_Another (Another);
+         return;
+      end;
+   end if;
+end;
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 === Other details
 Details, details, details and even more details...
@@ -1321,7 +1437,7 @@ When creating a secondary connection you can either specify a connection name an
 === Using the mechanisms
 The three different distribution mechanisms of the Dob are used in different ways and require different things from the user application.
 
-But before attacking the mechanisms themselves we need to talk about a addressing and something called proxies.
+But before attacking the mechanisms themselves we need to talk about addressing and something called proxies.
 
 [[addressing]]
 ==== Addressing
@@ -2010,6 +2126,27 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An aside: In this case it is not necessary to explicitly call +Dispose+ or somehow use +using+, since that is taken care of by the loop itself.
 
+Iterating over all Vehicles (including subclasses) in Ada:
+
+.Iterating over entities in Ada
+[ada]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+declare
+   use Safir.Dob.Entity_Iterators;
+   It : Safir.Dob.Entity_Iterators.Entity_Iterator :=
+      Self.Connection.Get_Entity_Iterator
+         (Type_Id            => Capabilities.Vehicles.Vehicle.Class_Type_Id,
+          Include_Subclasses => True);
+   Entity_Proxy : Safir.Dob.Entity_Proxies.Entity_Proxy;
+begin
+   while not Safir.Dob.Entity_Iterators.Done (It) loop
+      Entity_Proxy :=  Safir.Dob.Entity_Iterators.Get_Entity_Proxy (It);
+      ... do something with Entity_Proxy ...
+      Safir.Dob.Entity_Iterators.Next (It);
+   end loop;
+end;
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ===== Sending entity requests
 To be able to send requests on entities it is necessary to implement the +Requestor+ consumer interface, just like when sending service requests (so have a look at that section, because that example will not be repeated here...).
 
@@ -2418,7 +2555,7 @@ You should also set up the parameters +Safir.Dob.NodeParameters.NumberOfNodes+ a
 ==== Multinode
 This section could have a lot of examples, but I think it would become unwieldy with huge amounts of xml files, so I'm keeping it brief and descriptive instead.
 
-First of all you should specify the number of nodes that are part of your system. Do this using the two parameters +Safir.Dob.NodeParameters.NumberOfNodes+ and +Safir.Dob.NodeParameters.Nodes+. Then you have to decide which node is the persistence node, which you specify with the +Safir.Dob.NodeParameters.PersistentDbNode+ (if you're not using persistence, set it to -1 instead, as described in <<persistence_config>>).
+First of all you should specify the number of nodes that are part of your system. Do this using the two parameters +Safir.Dob.NodeParameters.NumberOfNodes+ and +Safir.Dob.NodeParameters.Nodes+. Then you have to decide which node is the persistence node, dope_main should be started on that node only. If you're not using persistence, set the parameter +Safir.Dob.PersistenceParameters.SystemHasPersistence+ to false, as described in <<persistence_config>>).
 
 Each node has to be configured to know which node number it is, which is done in the parameter +Safir.Dob.ThisNodeParameters.NodeNumber+. Change this to contain the node number of each node (yes, this means having different contents in that file on each node in the system, unless you use an environment variable in the parameter, as described in <<environment_parameters>>).
 
@@ -2428,6 +2565,14 @@ The last step to get a working multinode configuration is to change the Safir.Do
 Set the MulticastAddress members to be valid multicast addresses, that are not used for something else on your network (e.g. 224.10.10.127 and 224.10.10.128).
 
 Now you should be able to fire up +dose_main+ on the nodes of your system and start communicating. The easiest way to tell if it is working is to have a look at what +dose_main+ prints to its stdout. If there is stuff there about "NodeUp" you're on the right track. Then start up Sate (see <<sate>>) and send and subscribe to some stuff across the network. 
+
+[[routed_networks]]
+===== Routed networks
+In the default configuration the Dob assumes that it runs on a non-routed network. To run on a routed network there are some further considerations that need to be made.
+
+By default the _time-to-live_ (TTL) of the multicast packets of the Dob is set to 1. This means that packets will not cross routers and will stay within the current subnet. By changing the parameter +Safir.Dob.NodeParameters.RoutingHops+ you can modify this behaviour. For example, if it is set to 2 the packets will survive one routing hop.
+
+When using routed networks it is important to be sure that bidirectional multicast routing is enabled on the router. To test this I can recommend _iperf_ (http://sourceforge.net/projects/iperf[]) and the gui frontend _jperf_ (http://sourceforge.net/projects/jperf[]). One test strategy could be to run +iperf -u -s -B 224.20.20.20+ (listen to UDP packets on a multicast group) on all computers, and then run +iperf -u -c 224.20.20.20+ (send UDP multicast packets) in turn on each computer, checking that you get output on all listeners for every run of the sender. If you're not getting output on all listeners for a certain sender you've got some routing problem.
 
 [[local_objects]]
 ===== Local objects
@@ -2512,14 +2657,20 @@ The persistence service, provided by the +dope_main+ executable has a few differ
 
 A few relevant parameters for the persistence service, apart from the ones described in <<simple_persistence>>.
 
-_Safir.Dob.NodeParameters.PersistentDbNode_::
-        Specifies which node should be the node that the persistence service is expected to run on. -1 means no persistence in the system at all (in this case dope_main should not be started.)
+_Safir.Dob.PersistenceParameters.SystemHasPersistence_::
+        Specifies if persistence service is expected to run in the system. (in this case dope_main should not be started.)
 _Safir.Dob.PersistenceParameters.Backend_::
         Which backend should be used, Odbc database or files.
 _Safir.Dob.PersistenceParameters.FileStoragePath_::
         The path where files are stored if the file backend is chosen. Obviously dope_main needs write permissions here.
 _Safir.Dob.PersistenceParameters.OdbcStorageConnectString_::
         The connection string to use to connect to the database.
+
+The persistence service have support for hot-standby and redundancy.
+Configure the persistence storage to point out a shared network storage like a shared disk/NAS or a database/database cluster.
+Then you can start dope_main in 2 nodes. The dope_main that starts first become the active one, and the other one starts in a hot-standby mode.
+If the node running the active dope_main goes down, the hot-standby dope_main is activated and the persistence service will continue to run.
+
 
 There is more information about the persistence service in <<persistence_service>>.
 
@@ -2533,13 +2684,78 @@ Note that the RequestTimeoutProperty is inherited, whereas the RequestTimeoutOve
 
 [[queue_lengths]]
 === Queue lengths config
-It is currently only possible to adjust the default queue lengths of the Dob. These parameters are located in Safir.Dob.QueueParameters.dou. There are parameters for setting the default queue length for the in and out queues of messages and requests.
+By default all the length of the in and out queues of messages and requests is 10. The queue lengths can be customized by changing the parameter +Safir.Dob.QueueParameters.QueueRules+.
 
-This will soon^TM^ be improved by adding the possibility of changing the queue lengths for specific applications or connections.
+The QueueRules paramater is an array of +Safir.Dob.QueueRule+ items, each containing one rule to apply to the queue lengths. An example is shown below.
 
-The default queue lengths are 10 for all the queues.
+.A queue length parameterization
+[xml]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>Safir.Dob.QueueParameters</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters><parameter>
+      <name>QueueRules</name><type>Safir.Dob.QueueRule</type>
+      <arrayElements>
+<!-- The first array item is the default queue lengths.
+     It matches all connection names. -->
+        <arrayElement><object><name>Safir.Dob.QueueRule</name>
+            <members>
+              <member><name>MessageInQueueCapacity</name>
+                <value>10</value></member>
+              <member><name>MessageOutQueueCapacity</name>
+                <value>10</value></member>
+              <member><name>RequestInQueueCapacity</name>
+                <value>10</value></member>
+              <member><name>RequestOutQueueCapacity</name>
+                <value>10</value></member>
+            </members>
+        </object></arrayElement>
+<!-- let connections with 'long' in their connection names
+     have longer message in queues and request out queues. -->
+        <arrayElement><object><name>Safir.Dob.QueueRule</name>
+            <members>
+              <member><name>ConnectionNameRegex</name>
+                <value>long</value></member>
+              <member><name>MessageInQueueCapacity</name>
+                <value>20</value></member>
+              <member><name>RequestOutQueueCapacity</name>
+                <value>50</value></member>
+            </members>
+        </object></arrayElement>
+<!-- let connections with at least one capital letter in 
+     their connection name have longer message out queues. -->
+        <arrayElement><object><name>Safir.Dob.QueueRule</name>
+            <members>
+              <member><name>ConnectionNameRegex</name>
+                <value>[A-Z]+</value></member>
+              <member><name>MessageOutQueueCapacity</name>
+                <value>300</value></member>
+            </members>
+        </object></arrayElement>
+      </arrayElements>
+  </parameter></parameters>
+</class>
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-WARNING: Before deciding to increase the default queue lengths you should have read and understood <<overflow_handling>>, and the two items on overflows in <<faq>>. It is important to understand what effects, other than just increasing memory use, this may have on your system.
+When a new connection is opened the rules are scanned from top to bottom, and the _maximum values_ of all rules where the ConnectionName member matches are used. No ConnectionName in a rule means "match all". It is important to have one rule, like the first one in the example above, that provide default values. Finding no match causes undefined behavior.
+
+Here are some example connection names and their resulting queue lengths:
+
+
+`---------------------'---------'----------'---------'----------
+Connection Name       MsgInQ    MsgOutQ    ReqInQ    ReqOutQ
+----------------------------------------------------------------
+my_connection         10        10         10        10
+my_long_connection    20        10         10        50
+My_Connection         10        300        10        10
+my_long_Connection    20        300        10        50
+----------------------------------------------------------------
+
+
+WARNING: Before deciding to change the queue lengths you should have read and understood <<overflow_handling>>, and the two items on overflows in <<faq>>. It is important to understand what effects, other than just increasing memory use, this may have on your system.
 
 [[memory_config]]
 === Shared Memory config
@@ -2642,7 +2858,7 @@ Safir.Utilities.UpdateRequest::
 
 For each service you can choose which type of answer you want. _Immediate_, _Brief_ or _Full_. _Immediate_ means that you don't care if the operations are successful or not and you get this response immediately before all outstanding requests are finished. Brief waits for all operations to be finished before sending a response back. This information includes a summary of successful, non-successful and total operations. Full response is like Brief but you also get every single response from each operation in an array in the response.
 
-The foreach service is provided by the "douf_foreach" executable, which needs to be running for the foreach requests to be serviced.
+The foreach service is provided by the "foreach" executable, which needs to be running for the foreach requests to be serviced.
 
 [[ace_dispatcher]]
 === Ace Dispatcher

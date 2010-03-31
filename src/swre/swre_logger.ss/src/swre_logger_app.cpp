@@ -47,6 +47,10 @@ namespace Safir
 namespace Swre
 {
 
+    //swre_logger uses context 0 to connect to the dob. The strange looking negative number
+    //is a way to indicate that this is a connection with special privileges.
+    const Safir::Dob::Typesystem::Int32 SWRE_LOGGER_CONTEXT = -1000000;
+
     using namespace Safir::Dob::Typesystem;
 
 //-----------------------------------------------------------------------------
@@ -86,7 +90,7 @@ int LoggerApp::Run(const std::vector<std::string> & args)
     {
         try
         {
-            m_Connection.Open (L"SwreLogger", boost::lexical_cast<std::wstring>(++inst), -1, this, &m_dispatchEvent);
+            m_Connection.Open (L"SwreLogger", boost::lexical_cast<std::wstring>(++inst), SWRE_LOGGER_CONTEXT, this, &m_dispatchEvent);
             break;
         }
         catch (const Safir::Dob::NotOpenException&)

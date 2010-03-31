@@ -10,7 +10,9 @@ FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dose_internal SHARED ${sources} ${headers})
-TARGET_LINK_LIBRARIES(dose_internal ${ACE_LIBRARY})
+
+FIND_PACKAGE(Boost COMPONENTS regex)
+TARGET_LINK_LIBRARIES(dose_internal ${ACE_LIBRARY} ${Boost_LIBRARIES})
 
 ADD_DEFINITIONS(-DDOSE_INT_EXPORTS)
 

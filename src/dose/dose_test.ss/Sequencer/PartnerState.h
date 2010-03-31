@@ -41,7 +41,7 @@ class PartnerState:
 public:
     explicit PartnerState(const Languages & languages);
 
-    void Activate(const int which);
+    void Activate(const int which, const int contextId);
     void Deactivate(const int which);
 
     bool IsActive(const int which) const;

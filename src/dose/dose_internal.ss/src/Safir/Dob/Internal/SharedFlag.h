@@ -26,7 +26,16 @@
 
 #include <Safir/Dob/Internal/Atomic.h>
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable:4512)
+#endif
+
 #include <boost/function.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {

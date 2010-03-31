@@ -672,7 +672,14 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_XmlToBlob
     char * blob;
     DotsC_BytePointerDeleter deleter;
     DotsC_XmlToBlob(blob,deleter,GetUtf8(env,_xmlSource).get());
-    SetJArray(env,_blob,env->NewDirectByteBuffer(blob,DotsC_GetSize(blob)));
+    if (blob != NULL)
+    {
+        SetJArray(env,_blob,env->NewDirectByteBuffer(blob,DotsC_GetSize(blob)));
+    }
+    else
+    {
+        SetJArray(env,_blob,NULL);
+    }
     SetJArray(env,_deleter,env->NewDirectByteBuffer((void*)deleter,0)); //just passing a pointer!
 }
 

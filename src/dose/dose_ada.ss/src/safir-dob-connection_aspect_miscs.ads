@@ -47,24 +47,52 @@ package Safir.Dob.Connection_Aspect_Miscs is
    -- Connection name
    ------------------
 
-   -- AWI:todo comment
+   -- Get the name for this connection used in the system.
+   --
+   -- The connection name is composed of the name parts given by the application
+   -- when opening the connection, with some additional decoration made by the DOB.
+   --
+   -- Returns: The connection name.
+   --
    function Get_Connection_Name (Self : in Connection_Aspect_Misc)
                                  return Unbounded_Wide_String;
 
-   -- AWI:todo comment
+   -- Get the common part of the connection name.
+   --
+   -- Returns: The connection name common part specified when opening the connection.
+   --
    function Get_Connection_Name_Common_Part (Self : in Connection_Aspect_Misc)
                                              return Unbounded_Wide_String;
 
-   -- AWI:todo comment
+   -- Get the instance part of the connection name.
+   --
+   -- Returns: The connection name instance part specified when opening the connection.
    function Get_Connection_Name_Instance_Part (Self : in Connection_Aspect_Misc)
                                                return Unbounded_Wide_String;
 
-   -- AWI:todo comment
+
+   ---------------
+   -- Queue status
+   ---------------
+
+   -- Get the capacity of the specified queue.
+   --
+   -- This method returns the maximum number of items that the queue can hold.
+   --
+   -- Parameters: Queue - The queue to get info for.
+   -- Returns: The capacity of the queue.
+   --
    function Get_Queue_Capacity (Self  : in Connection_Aspect_Misc;
                                 Queue : in Safir.Dob.Connection_Queue_Id.Enumeration)
      return Safir.Dob.Typesystem.Int_32;
 
-   -- AWI:todo comment
+   -- Get the number of items currently in the queue.
+   --
+   -- This method returns the number of items that is currently in the specified queue.
+   --
+   -- Parameters: Queue - The queue to get info for.
+   -- Returns: The current size of the queue.
+   --
    function Get_Queue_Size (Self  : in Connection_Aspect_Misc;
                             Queue : in Safir.Dob.Connection_Queue_Id.Enumeration)
      return Safir.Dob.Typesystem.Int_32;
@@ -73,7 +101,20 @@ package Safir.Dob.Connection_Aspect_Miscs is
    -- Debug
    --------
 
-   -- AWI:todo comment
+   -- Turn simulation of overflow on/off. For test purposes.
+   --
+   -- Setting In_Queues to True means that no messages or requests are handled by the application.
+   -- An incoming request will result in an overflow, and an incoming message will be discarded.
+   -- Setting Out_Queues to true means that no messages or requests can be sent from the application,
+   -- instead these calls will throw an Overflow_Exception. When reset to false
+   -- On_Xxxx_Not_Overflow will be called as expected.
+   -- Use this to verify that your application handles overflows correctly.
+   --
+   -- Note that the In_Queues flag is not applied to new consumers added after this call.
+   --
+   -- Parameters: In_Queues - If True all incoming queues are simulated full.
+   --             Out_Queues - If True all outgoing queues are simulated full.
+   --
    procedure Simulate_Overflows (Self       : in Connection_Aspect_Misc;
                                  In_Queues  : in Boolean;
                                  Out_Queues : in Boolean);

@@ -48,7 +48,7 @@ namespace Internal
     //Returns false if queue is full
     bool MessageQueue::push(const DistributionData & msg)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedMessageQueueLock lck(m_lock);
         if ((m_size < m_capacity) && m_simulateFull == 0) //not full
         {
             m_data.push_back(msg);
@@ -65,7 +65,7 @@ namespace Internal
 
     void MessageQueue::FinishDispatch(QueueData& queue, const size_t& numDispatched, bool& isNoLongerFull)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedMessageQueueLock lck(m_lock);
 
         if (m_size == m_capacity && numDispatched > 0)
         {
@@ -101,7 +101,7 @@ namespace Internal
             //Algorith: Swap the list into a local variable, to hold the lock as little as possible.
             //Then dispatch the messages, and then retake the lock and put any remaining messages back.
             {
-                boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+                ScopedMessageQueueLock lck(m_lock);
                 m_data.swap(toDispatch);
             }
 

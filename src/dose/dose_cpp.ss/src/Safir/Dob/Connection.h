@@ -65,7 +65,7 @@ namespace Dob
          * There can be a number of contexts in the DOB. A connection is linked to the context specified in Open.
          * All operations using a connection is affecting only the context linked to that connection.
          * The intended primary usage is for recording/replay functionality. 0 is defined as the default
-         * context. THE CONTEXT FUNCTIONALITY IS NOT IMPLEMENTED YET.
+         * context.
          *
          * Note that connectionNameCommonPart together with connectionNameInstancePart must be unique
          * in the node.

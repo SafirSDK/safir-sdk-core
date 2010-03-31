@@ -63,6 +63,9 @@ public class Serialization {
         java.nio.ByteBuffer blob [] = new java.nio.ByteBuffer[1];
         java.nio.ByteBuffer deleter [] = new java.nio.ByteBuffer[1];
         Kernel.XmlToBlob(blob, deleter, xml);
+        if (blob[0] == null) {
+            throw new IllegalValueException("Something is wrong with the XML-formated object");
+        }
         com.saabgroup.safir.dob.typesystem.Object obj = ObjectFactory.getInstance().createObject(blob[0]);
         Kernel.InvokeDeleter(deleter[0],blob[0]);
         return obj;

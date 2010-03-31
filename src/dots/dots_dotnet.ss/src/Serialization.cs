@@ -125,8 +125,8 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         /// <param name="xml">The xml serialization to deserialize.</param>
         /// <returns>New object.</returns>
-        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">If the type represented by the serialization isn't
-        /// found in the ObjectFactory.</exception>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">If there is something wrong with the XML or if the type
+        ///  represented by the serialization isn't found in the ObjectFactory.</exception>
         public static Object ToObject(string xml)
         {
             IntPtr blob;
@@ -138,6 +138,10 @@ namespace Safir.Dob.Typesystem
 #endif
             Kernel.DotsC_XmlToBlob(out blob, out deleter, sp);
             Marshal.FreeHGlobal(sp);
+            if (blob == System.IntPtr.Zero)
+            {
+                throw new IllegalValueException("Something is wrong with the XML-formated object");
+            }
             Object obj = ObjectFactory.Instance.CreateObject(blob);
 
 #if FUNC_PTR_WORKAROUND

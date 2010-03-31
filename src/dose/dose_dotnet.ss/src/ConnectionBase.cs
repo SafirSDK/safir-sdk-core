@@ -1452,6 +1452,38 @@ namespace Safir.Dob
             }
             return numInstances;
         }
+
+        /// <summary>
+        /// This method is used to get the instanceIdPolicy for a specific class and handler.
+        /// </summary>
+        /// <param name="typeId">The type of the class the handler is registered for.</param>
+        /// <param name="handlerId">Get instanceIdPolicy for this handler.</param>
+        /// <returns>Specifies if the handler expects instance ids in create requests to be
+        ///                          assigned by the requestor or if the handler assigns them by itself.</returns>
+        /// <exception cref="Safir.Dob.NotFoundException">The given handlerId has not registered the given class.</exception>
+        public InstanceIdPolicy.Enumeration GetInstanceIdPolicy(System.Int64 typeId,
+                                                 Safir.Dob.Typesystem.HandlerId handlerId)
+        {
+            byte success;
+            System.Int32 policy;
+
+            System.IntPtr handlerIdStr = Dob.Typesystem.Internal.InternalOperations.CStringOf(handlerId.RawString);
+
+            Interface.DoseC_GetInstanceIdPolicy(ControllerId,
+                                                 typeId,
+                                                 handlerId.RawValue,
+                                                 out policy,
+                                                 out success);
+
+            Marshal.FreeHGlobal(handlerIdStr);
+
+            if (!Interface.BoolOf(success))
+            {
+                Typesystem.LibraryExceptions.Instance.Throw();
+            }
+            return (InstanceIdPolicy.Enumeration)policy;
+        }
+
         #endregion
 
         /// <summary>

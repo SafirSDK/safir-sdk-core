@@ -28,7 +28,18 @@
 
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/RequestOutQueue.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4702)
+#endif
+
 #include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 
 struct ReqQStat
 {
@@ -37,6 +48,8 @@ struct ReqQStat
     Safir::Dob::Typesystem::Int32 noDispatchedRequests;
     Safir::Dob::Typesystem::Int32 noAttachedResponses;
     Safir::Dob::Typesystem::Int32 noDispatchedResponses;
+    size_t capacity;
+    size_t size;
 
     Safir::Dob::Internal::ConsumerId    consumerId; // valid only for in queues
     Safir::Dob::Typesystem::Int32       noTimeouts; // valid only for out queues
@@ -46,19 +59,11 @@ struct MsgQStat
 {
     Safir::Dob::Typesystem::Int32 noPushedMsg;
     Safir::Dob::Typesystem::Int32 noOverflows;
+    size_t capacity;
+    size_t size;
 
     Safir::Dob::Internal::ConsumerId    consumerId; // valid only for in queues
 };
-
-/*struct ReqInQStat
-{
-    Safir::Dob::Internal::ConsumerId    consumerId;
-    Safir::Dob::Typesystem::Int32       noPushedRequests;  //number of requests successfully pushed onto an in-queue
-    Safir::Dob::Typesystem::Int32       noOverflows; //number of overflows when trying to push
-    Safir::Dob::Typesystem::Int32       noDispatchedRequests; //number of requests dispatched to receiving application
-    Safir::Dob::Typesystem::Int32       noAttachedResponses; //number of responses sent from receiving application
-    Safir::Dob::Typesystem::Int32       noDispatchedResponses; //number of responses picked up by dose_main and sent on
-};*/
 
 struct Stat
 {
@@ -79,6 +84,8 @@ inline void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::Requ
     p->noDispatchedRequests = requestOutQueue.m_noDispatchedRequests;
     p->noAttachedResponses = requestOutQueue.m_noAttachedResponses;
     p->noDispatchedResponses = requestOutQueue.m_noDispatchedResponses;
+    p->size = requestOutQueue.size();
+    p->capacity = requestOutQueue.capacity();
 }
 
 inline void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::MessageQueue& messageQueue, void* ptr)
@@ -87,6 +94,8 @@ inline void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::Mess
 
     p->noPushedMsg = messageQueue.m_noPushed;
     p->noOverflows = messageQueue.m_noOverflows;
+    p->size = messageQueue.size();
+    p->capacity = messageQueue.capacity();
 }
 
 inline void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::RequestInQueue& requestInQueue, void* ptr)
@@ -98,6 +107,8 @@ inline void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::Requ
     p->noDispatchedRequests = requestInQueue.m_noDispatchedRequests;
     p->noAttachedResponses = requestInQueue.m_noAttachedResponses;
     p->noDispatchedResponses = requestInQueue.m_noDispatchedResponses;
+    p->size = requestInQueue.size();
+    p->capacity = requestInQueue.capacity();
 }
 
 
@@ -115,6 +126,7 @@ ConnectionStats::ConnectionStats(QWidget* /*parent*/,  const QString& connection
     reqOutQTableWidget->verticalHeader()->hide();
     reqOutQTableWidget->resizeRowsToContents();
     reqOutQTableWidget->resizeColumnsToContents();
+    reqOutQTableWidget->setAlternatingRowColors(true);
 
     for (int col = 0; col < reqOutQTableWidget->columnCount(); ++col)
     {
@@ -129,6 +141,7 @@ ConnectionStats::ConnectionStats(QWidget* /*parent*/,  const QString& connection
     reqInQTableWidget->verticalHeader()->hide();
     reqInQTableWidget->resizeRowsToContents();
     reqInQTableWidget->resizeColumnsToContents();
+    reqInQTableWidget->setAlternatingRowColors(true);
 
     // Adjust the look of the message out queue table.
     msgOutQGroupBox->layout()->setAlignment(msgOutQTableWidget, Qt::AlignTop);
@@ -137,6 +150,7 @@ ConnectionStats::ConnectionStats(QWidget* /*parent*/,  const QString& connection
     msgOutQTableWidget->verticalHeader()->hide();
     msgOutQTableWidget->resizeRowsToContents();
     msgOutQTableWidget->resizeColumnsToContents();
+    msgOutQTableWidget->setAlternatingRowColors(true);
 
     for (int col = 0; col < msgOutQTableWidget->columnCount(); ++col)
     {
@@ -151,6 +165,7 @@ ConnectionStats::ConnectionStats(QWidget* /*parent*/,  const QString& connection
     msgInQTableWidget->verticalHeader()->hide();
     msgInQTableWidget->resizeRowsToContents();
     msgInQTableWidget->resizeColumnsToContents();
+    msgInQTableWidget->setAlternatingRowColors(true);
 
     try
     {
@@ -198,9 +213,11 @@ void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
         reqOutQTableWidget->item(0,3)->setText(boost::lexical_cast<std::string>(stat.reqOutQStat.noAttachedResponses).c_str());
         reqOutQTableWidget->item(0,4)->setText(boost::lexical_cast<std::string>(stat.reqOutQStat.noDispatchedResponses).c_str());
         reqOutQTableWidget->item(0,5)->setText(boost::lexical_cast<std::string>(stat.reqOutQStat.noTimeouts).c_str());
+        reqOutQTableWidget->item(0,6)->setText(boost::lexical_cast<std::string>(stat.reqOutQStat.capacity).c_str());
+        reqOutQTableWidget->item(0,7)->setText(boost::lexical_cast<std::string>(stat.reqOutQStat.size).c_str());
 
         //empty the table
-        reqInQTableWidget->clear();
+        reqInQTableWidget->clearContents();
         for(int row = 0; row < reqInQTableWidget->rowCount(); ++row)
         {
             reqInQTableWidget->removeRow(row);
@@ -249,6 +266,16 @@ void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
                         newItem->setText(boost::lexical_cast<std::string>(stat.reqInQStat[row].noDispatchedResponses).c_str());
                     }
                     break;
+                 case 6:
+                    {
+                        newItem->setText(boost::lexical_cast<std::string>(stat.reqInQStat[row].capacity).c_str());
+                    }
+                    break;
+                 case 7:
+                    {
+                        newItem->setText(boost::lexical_cast<std::string>(stat.reqInQStat[row].size).c_str());
+                    }
+                    break;
                 }
 
                 reqInQTableWidget->setItem(row, col, newItem);
@@ -258,6 +285,8 @@ void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
         // Message out queue
         msgOutQTableWidget->item(0,0)->setText(boost::lexical_cast<std::string>(stat.msgOutQStat.noPushedMsg).c_str());
         msgOutQTableWidget->item(0,1)->setText(boost::lexical_cast<std::string>(stat.msgOutQStat.noOverflows).c_str());
+        msgOutQTableWidget->item(0,2)->setText(boost::lexical_cast<std::string>(stat.msgOutQStat.capacity).c_str());
+        msgOutQTableWidget->item(0,3)->setText(boost::lexical_cast<std::string>(stat.msgOutQStat.size).c_str());
 
         //empty the table
         msgInQTableWidget->clearContents();
@@ -290,9 +319,19 @@ void ConnectionStats::UpdateStatistics(const bool ignoreVisible)
                         newItem->setText(boost::lexical_cast<std::string>(stat.msgInQStat[row].noPushedMsg).c_str());
                     }
                     break;
-                 case 2:
+                case 2:
                     {
                         newItem->setText(boost::lexical_cast<std::string>(stat.msgInQStat[row].noOverflows).c_str());
+                    }
+                    break;
+                case 3:
+                    {
+                        newItem->setText(boost::lexical_cast<std::string>(stat.msgInQStat[row].capacity).c_str());
+                    }
+                    break;
+                case 4:
+                    {
+                        newItem->setText(boost::lexical_cast<std::string>(stat.msgInQStat[row].size).c_str());
                     }
                     break;
                 }

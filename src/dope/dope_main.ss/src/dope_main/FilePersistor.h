@@ -26,6 +26,7 @@
 
 #include "PersistenceHandler.h"
 #include <boost/filesystem/path.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <Safir/Application/Tracer.h>
 
 
@@ -36,7 +37,7 @@ class FilePersistor :
     public PersistenceHandler
 {
 public:
-    typedef std::pair<Safir::Dob::Typesystem::EntityId, Safir::Dob::Typesystem::HandlerId> EntityIdAndHandlerId;
+    typedef boost::tuple<Safir::Dob::Typesystem::EntityId, Safir::Dob::Typesystem::HandlerId, std::wstring> EntityIdAndHandlerId;
 
 
     /**
@@ -63,6 +64,11 @@ private:
     virtual void Remove(const Safir::Dob::EntityProxy & entityProxy);
 
     boost::filesystem::path GetFilePath(const EntityIdAndHandlerId& entityAndHandler) const;
+
+    Safir::Dob::EntityPtr RestoreBinary(const boost::filesystem::path & path) const;
+    Safir::Dob::EntityPtr RestoreXml(const boost::filesystem::path & path) const;
+
+    void RemoveFile(const boost::filesystem::path& path) const;
 
     boost::filesystem::path m_storagePath;
 

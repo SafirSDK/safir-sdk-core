@@ -30,6 +30,7 @@
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/Internal/DoseCom_Interface.h>
+#include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
@@ -300,6 +301,8 @@ namespace Internal
 
         const int result = DoseCom_Init(&myAllocator,
                                         m_QualityOfServiceData.GetDistributionChannelTable().find(64)->second.multicastAddress.c_str(),
+                                        NodeParameters::RoutingHops(),
+
                                         netAddr.c_str(),
                                         m_thisNode,
                                         this);
@@ -473,8 +476,20 @@ namespace Internal
 
                 case DistributionData::Request_Service:
                     {
+                        ContextId context;
+                        if (ContextSharedTable::Instance().IsContextShared(data.GetTypeId()))
+                        {
+                            context = 0;
+                        }
+                        else
+                        {
+                            context = data.GetSenderId().m_contextId;
+                        }
+
                         distributionChannel = ServiceTypes::Instance().
-                            GetRegisterer(data.GetTypeId(),data.GetHandlerId()).connection->Id().m_node;
+                            GetRegisterer(data.GetTypeId(),
+                                          data.GetHandlerId(),
+                                          context).connection->Id().m_node;
                     }
                     break;
 
@@ -482,8 +497,20 @@ namespace Internal
                 case DistributionData::Request_EntityUpdate:
                 case DistributionData::Request_EntityDelete:
                     {
+                        ContextId context;
+                        if (ContextSharedTable::Instance().IsContextShared(data.GetTypeId()))
+                        {
+                            context = 0;
+                        }
+                        else
+                        {
+                            context = data.GetSenderId().m_contextId;
+                        }
+
                         distributionChannel = EntityTypes::Instance().
-                            GetRegisterer(data.GetTypeId(),data.GetHandlerId()).connection->Id().m_node;
+                            GetRegisterer(data.GetTypeId(),
+                                          data.GetHandlerId(),
+                                          context).connection->Id().m_node;
                     }
                     break;
 

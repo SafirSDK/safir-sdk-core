@@ -11,6 +11,7 @@
 --
 -- History:        2007-01-09      /stjth/   First version.
 --                 2007-03-07      /stlrha/  Adapted to DOPE from the ALRT variant
+--                 2010-01-19      /staeh/   Connect has to specify database, SafirDb.
 --
 --==============================================================
 
@@ -72,9 +73,7 @@ DISCONNECT;
 -- Connect as the DOPE database owner.
 --==============================================================
 
-CONNECT;
-dopeuser
-dopeuser
+CONNECT TO 'SafirDb' USER 'dopeuser' USING 'dopeuser';
 
 
 --==============================================================

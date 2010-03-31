@@ -206,7 +206,7 @@ Expectation: Consumer 0 should get a service request
 Consumer 0: OnResponse:
   Type       = DoseTest.SuccessfulService
   IsSuccess  = true
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulService</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalService</name></object>
 
@@ -230,7 +230,7 @@ Expectation: Partner0/Consumer 1 should get a time out response on a service req
 --------- Test  -----------
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
@@ -257,70 +257,70 @@ Consumer 0: SimulateOverflows(true, false)
 Consumer 0: SimulateOverflows(false, false)
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
@@ -345,70 +345,70 @@ Expectation: Partner0/Consumer 0 should get an overflow exception and then one r
 --------- Test  -----------
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalService</name></object>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalService</name></object>
@@ -437,7 +437,7 @@ Expectation: Each partner should receive one (and only one) request, and p0 shou
 --------- Test  -----------
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = 7471736682775137277
   HandlerStr = 7471736682775137277
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
@@ -601,7 +601,7 @@ Expectation: partner 0/consumer 0 receives one OnInjectedNewEntity and one OnInj
 Consumer 0: Read entity (DoseTest.InjectableEntity, 654321):
   EntityId  = (DoseTest.InjectableEntity, 654321):
   Owner     = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">Some new info</value></member></members></object>
 
@@ -622,7 +622,7 @@ Expectation: partner 0/consumer 0 receives one OnInjectedNewEntity and one OnInj
 Consumer 0: OnNewEntity:
   EntityId  = (DoseTest.InjectableEntity, 987654)
   Owner     = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">Some new info</value></member></members></object>
   Changed top-level members: 
@@ -653,14 +653,14 @@ Expectation: partner 0/consumer 0 receives one OnInitialInjectionsDone, one OnIn
 Consumer 0: Read entity (DoseTest.InjectableEntity, 654321):
   EntityId  = (DoseTest.InjectableEntity, 654321):
   Owner     = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">First inject</value></member></members></object>
 
 Consumer 0: Read entity (DoseTest.InjectableEntity, 654321):
   EntityId  = (DoseTest.InjectableEntity, 654321):
   Owner     = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">Second inject</value></member></members></object>
 
@@ -709,6 +709,49 @@ Expectation: partner 0/consumer 0 receives an OnInitialInjectionsDone and an OnI
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
+TESTCASE 369
+Description: Testing of Pending entity handler registrations between nodes
+Expectation: Partner 1 gets 4 OnInitialInjectionsDone, all but the first is preceeded by an OnInjectedNewEntity.  Partner 2 gets OnCompletedRegistration, OnInjectedNewEntity, OnInitialInjectionsDone, OnRevokedRegistration. This sequence is repeated 3 times.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousPermanentEntity
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousPermanentEntity, 0)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousPermanentEntity</name><members><member><name>Info</name><value xml:space="preserve">Some info</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousPermanentEntity
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousPermanentEntity, 0)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousPermanentEntity</name><members><member><name>Info</name><value xml:space="preserve">Some info</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousPermanentEntity
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousPermanentEntity, 0)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousPermanentEntity</name><members><member><name>Info</name><value xml:space="preserve">Some info</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousPermanentEntity
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
 TESTCASE 370
 Description: Test that unregistration of the owner makes created instances (of injectable type) become ghosts
 Expectation: Partner 0 receives OnNewEntity and OnDeletedEntity twice, P2 takes over ownership from P1
@@ -722,6 +765,218 @@ Consumer 0: OnInitialInjectionsDone:
 TESTCASE 375
 Description: Testing of injection for existing entity. Injector and handler reside on different nodes.
 Expectation: partner 0/consumer 0 receives an OnInitialInjectionsDone and an OnInjectedUpdatedEntity.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 376
+Description: Postpone OnServiceRequest, redispatch is True.
+Expectation: P0 receives three OnServiceRequest, the first and second with Info set to 'Service request 1' and the third with Info set to 'Service request 2'.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulService
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulService</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name><members><member><name>Info</name><value xml:space="preserve">Service request 1</value></member></members></object>
+
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulService
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulService</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name><members><member><name>Info</name><value xml:space="preserve">Service request 2</value></member></members></object>
+
+==========================================================================
+TESTCASE 377
+Description: Postpone OnServiceRequest, redispatch is True. ResumePostponed is called within the callback
+Expectation: P0 receives three OnServiceRequest, the first and second with Info set to 'Service request 1' and the third with Info set to 'Service request 2'.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulService
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulService</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name><members><member><name>Info</name><value xml:space="preserve">Service request 1</value></member></members></object>
+
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulService
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulService</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name><members><member><name>Info</name><value xml:space="preserve">Service request 2</value></member></members></object>
+
+==========================================================================
+TESTCASE 378
+Description: Postpone OnServiceRequest, redispatch is False.
+Expectation: P0 receives two OnServiceRequest, the first with Info set to 'Service request 1' and the second with Info set to 'Service request 2'.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulService
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulService</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name><members><member><name>Info</name><value xml:space="preserve">Service request 1</value></member></members></object>
+
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulService
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulService</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name><members><member><name>Info</name><value xml:space="preserve">Service request 2</value></member></members></object>
+
+==========================================================================
+TESTCASE 379
+Description: Postpone OnServiceRequest, redispatch is False. ResumePostponed is called within the callback
+Expectation: P0 receives two OnServiceRequest, the first with Info set to 'Service request 1' and the second with Info set to 'Service request 2'.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulService
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulService</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name><members><member><name>Info</name><value xml:space="preserve">Service request 1</value></member></members></object>
+
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulService
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulService</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name><members><member><name>Info</name><value xml:space="preserve">Service request 2</value></member></members></object>
+
+==========================================================================
+TESTCASE 380
+Description: Postpone OnCreateRequest, redispatch is True.
+Expectation: P0 receives three OnCreateRequest, the first and second for instance 121212 and the third for instance 343434.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulCreate
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulCreate</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Create request 1</value></member></members></object>
+
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulCreate
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulCreate</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Create request 2</value></member></members></object>
+
+==========================================================================
+TESTCASE 381
+Description: Postpone OnCreateRequest, redispatch is False.
+Expectation: P0 receives two OnCreateRequest, the first for instance 121212 and the second for instance 343434.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulCreate
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulCreate</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Create request 1</value></member></members></object>
+
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulCreate
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulCreate</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Create request 2</value></member></members></object>
+
+==========================================================================
+TESTCASE 382
+Description: Postpone OnUpdateRequest, redispatch is True.
+Expectation: P0 receives three OnUpdateRequest, the first and second for instance 121212 and the third for instance 343434.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulUpdate
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulUpdate</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Update request 1</value></member></members></object>
+
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulUpdate
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulUpdate</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Update request 2</value></member></members></object>
+
+==========================================================================
+TESTCASE 383
+Description: Postpone OnUpdateRequest, redispatch is False.
+Expectation: P0 receives two OnUpdateRequest, the first for instance 121212 and the second for instance 343434.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulUpdate
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulUpdate</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Update request 1</value></member></members></object>
+
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulUpdate
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulUpdate</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Update request 2</value></member></members></object>
+
+==========================================================================
+TESTCASE 384
+Description: Postpone OnDeleteRequest, redispatch is True.
+Expectation: P0 receives three OnDeleteRequest, the first and second for instance 121212 and the third for instance 343434.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulDelete
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulDelete</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = DeleteRequest on (DoseTest.GlobalEntity, 121212)
+
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulDelete
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulDelete</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = DeleteRequest on (DoseTest.GlobalEntity, 343434)
+
+==========================================================================
+TESTCASE 385
+Description: Postpone OnDeleteRequest, redispatch is False.
+Expectation: P0 receives two OnDeleteRequest, the first for instance 121212 and the second for instance 343434.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulDelete
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulDelete</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = DeleteRequest on (DoseTest.GlobalEntity, 121212)
+
+Consumer 1: OnResponse:
+  Type       = DoseTest.SuccessfulDelete
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulDelete</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = DeleteRequest on (DoseTest.GlobalEntity, 343434)
+
+==========================================================================
+TESTCASE 386
+Description: Postpone OnMessage, redispatch is True.
+Expectation: P0 receives three OnMessage, the first and second with Info set to 'Message 1' and the third with Info set to 'Message 2'.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 387
+Description: Postpone OnMessage, redispatch is False.
+Expectation: P0 receives two OnMessage, the first with Info set to 'Message 1' and the second with Info set to 'Message 2'.
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
@@ -1077,7 +1332,7 @@ Expectation: Partner 0/Consumer 0 receives a success response and the entity inf
 --------- Test  -----------
 Consumer 1: OnCreateRequest (Requestor decides instance id): 
   Entity     = (DoseTest.LocalEntity, 345678)
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalEntity</name><members><member><name>Info</name><value xml:space="preserve">Created</value></member></members></object>
@@ -1096,7 +1351,7 @@ Expectation: Partner 0/Consumer 1 receives a success response and the entity inf
 --------- Test  -----------
 Consumer 1: OnUpdateRequest: 
   Entity     = (DoseTest.LocalEntity, 565656)
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalEntity</name><members><member><name>Info</name><value xml:space="preserve">Updated</value></member></members></object>
@@ -1121,7 +1376,7 @@ Expectation: Partner 0/Consumer 1 receives a success response and exception Safi
 --------- Test  -----------
 Consumer 1: OnDeleteRequest: 
   Entity     = (DoseTest.LocalEntity, 0)
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
 
@@ -1145,7 +1400,7 @@ Expectation: Partner 0/Consumer 1 should get a time out response
 --------- Test  -----------
 Consumer 0: OnCreateRequest (Requestor decides instance id): 
   Entity     = (DoseTest.LocalEntity, 0)
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalEntity</name><members><member><name>Info</name><value xml:space="preserve">Created</value></member></members></object>
@@ -1207,7 +1462,7 @@ Expectation: P2 receives requests (cre, upd, del) with correct data in them, and
 Consumer 0: OnResponse:
   Type       = DoseTest.SuccessfulCreate
   IsSuccess  = true
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
   Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulCreate</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.ComplexGlobalEntity</name><members><member><name>Int32Member</name><value>32</value></member><member><name>Int64Member</name><value>64</value></member><member><name>Float32Member</name><value>32</value></member><member><name>Float64Member</name><value>64</value></member><member><name>BooleanMember</name><value>true</value></member><member><name>EnumerationMember</name><value>DoseTest.TestEnum.MyFirst</value></member><member><name>StringMember</name><value xml:space="preserve">Safir</value></member><member><name>EntityIdMember</name><entityId><name>DoseTest.TestItem</name><instanceId>0</instanceId></entityId></member><member><name>TypeIdMember</name><value>DoseTest.TestItem</value></member><member><name>InstanceIdMember</name><value>SomeInstance</value></member><member><name>ChannelIdMember</name><value>SomeChannel</value></member><member><name>HandlerIdMember</name><value>SomeHandler</value></member><member><name>ObjectMember</name><object><name>Object</name></object></member><member><name>BinaryMember</name><value/></member><member><name>TestClassMember</name><object><name>DoseTest.TestItem</name><members><member><name>MyInt</name><value>-32</value></member></members></object></member><member><name>Ampere32Member</name><value>32001</value></member><member><name>CubicMeter32Member</name><value>32002</value></member><member><name>Hertz32Member</name><value>32003</value></member><member><name>Joule32Member</name><value>32004</value></member><member><name>Kelvin32Member</name><value>32005</value></member><member><name>Kilogram32Member</name><value>32006</value></member><member><name>Meter32Member</name><value>32007</value></member><member><name>MeterPerSecond32Member</name><value>32008</value></member><member><name>MeterPerSecondSquared32Member</name><value>32009</value></member><member><name>Newton32Member</name><value>32010</value></member><member><name>Pascal32Member</name><value>32011</value></member><member><name>Radian32Member</name><value>32012</value></member><member><name>RadianPerSecond32Member</name><value>32013</value></member><member><name>RadianPerSecondSquared32Member</name><value>32014</value></member><member><name>Second32Member</name><value>32015</value></member><member><name>SquareMeter32Member</name><value>32016</value></member><member><name>Steradian32Member</name><value>32017</value></member><member><name>Volt32Member</name><value>32018</value></member><member><name>Watt32Member</name><value>32019</value></member><member><name>Ampere64Member</name><value>64001</value></member><member><name>CubicMeter64Member</name><value>64002</value></member><member><name>Hertz64Member</name><value>64003</value></member><member><name>Joule64Member</name><value>64004</value></member><member><name>Kelvin64Member</name><value>64005</value></member><member><name>Kilogram64Member</name><value>64006</value></member><member><name>Meter64Member</name><value>64007</value></member><member><name>MeterPerSecond64Member</name><value>64008</value></member><member><name>MeterPerSecondSquared64Member</name><value>64009</value></member><member><name>Newton64Member</name><value>64010</value></member><member><name>Pascal64Member</name><value>64011</value></member><member><name>Radian64Member</name><value>64012</value></member><member><name>RadianPerSecond64Member</name><value>64013</value></member><member><name>RadianPerSecondSquared64Member</name><value>64014</value></member><member><name>Second64Member</name><value>64015</value></member><member><name>SquareMeter64Member</name><value>64016</value></member><member><name>Steradian64Member</name><value>64017</value></member><member><name>Volt64Member</name><value>64018</value></member><member><name>Watt64Member</name><value>64019</value></member><member><name>Int32ArrayMember</name><arrayElements><arrayElement><value>32</value></arrayElement><arrayElement><value>-32</value></arrayElement></arrayElements></member><member><name>Int64ArrayMember</name><arrayElements><arrayElement><value>64</value></arrayElement><arrayElement><value>-64</value></arrayElement></arrayElements></member><member><name>Float32ArrayMember</name><arrayElements><arrayElement><value>32</value></arrayElement><arrayElement><value>-32</value></arrayElement></arrayElements></member><member><name>Float64ArrayMember</name><arrayElements><arrayElement><value>64</value></arrayElement><arrayElement><value>-64</value></arrayElement></arrayElements></member><member><name>BooleanArrayMember</name><arrayElements><arrayElement><value>true</value></arrayElement><arrayElement><value>false</value></arrayElement></arrayElements></member><member><name>EnumerationArrayMember</name><arrayElements><arrayElement><value>DoseTest.TestEnum.MyFirst</value></arrayElement><arrayElement><value>DoseTest.TestEnum.MySecond</value></arrayElement></arrayElements></member><member><name>StringArrayMember</name><arrayElements><arrayElement><value/></arrayElement><arrayElement><value xml:space="preserve">rifaS</value></arrayElement></arrayElements></member><member><name>EntityIdArrayMember</name><arrayElements><arrayElement><entityId><name>DoseTest.TestItem</name><instanceId>0</instanceId></entityId></arrayElement><arrayElement><entityId><name>DoseTest.TestItem</name><instanceId>SomeInstance</instanceId></entityId></arrayElement></arrayElements></member><member><name>TypeIdArrayMember</name><arrayElements><arrayElement><value>DoseTest.TestItem</value></arrayElement><arrayElement><value>DoseTest.TestEnum</value></arrayElement></arrayElements></member><member><name>InstanceIdArrayMember</name><arrayElements><arrayElement><value>0</value></arrayElement><arrayElement><value>SomeInstance</value></arrayElement></arrayElements></member><member><name>ChannelIdArrayMember</name><arrayElements><arrayElement><value>0</value></arrayElement><arrayElement><value>SomeChannel</value></arrayElement></arrayElements></member><member><name>HandlerIdArrayMember</name><arrayElements><arrayElement><value>0</value></arrayElement><arrayElement><value>SomeHandler</value></arrayElement></arrayElements></member><member><name>ObjectArrayMember</name><arrayElements><arrayElement><object><name>Object</name></object></arrayElement><arrayElement><object><name>Object</name></object></arrayElement></arrayElements></member><member><name>BinaryArrayMember</name><arrayElements><arrayElement><value/></arrayElement><arrayElement><value>
 b25jZSBtb3JlLi4u
@@ -1216,7 +1471,7 @@ b25jZSBtb3JlLi4u
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulUpdate
   IsSuccess  = true
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
   Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulUpdate</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.ComplexGlobalEntity</name><members><member><name>Int32Member</name><value>320</value></member><member><name>Int64Member</name><value>640</value></member><member><name>Float32Member</name><value>320</value></member><member><name>Float64Member</name><value>640</value></member><member><name>BooleanMember</name><value>false</value></member><member><name>EnumerationMember</name><value>DoseTest.TestEnum.MySecond</value></member><member><name>StringMember</name><value xml:space="preserve">Safir SDK </value></member><member><name>EntityIdMember</name><entityId><name>DoseTest.TestItem</name><instanceId>1</instanceId></entityId></member><member><name>TypeIdMember</name><value>Object</value></member><member><name>InstanceIdMember</name><value>AnotherInstance</value></member><member><name>ChannelIdMember</name><value>AnotherChannel</value></member><member><name>HandlerIdMember</name><value>AnotherHandler</value></member><member><name>ObjectMember</name><object><name>DoseTest.TestItem</name></object></member><member><name>BinaryMember</name><value>
 b25jZSBtb3JlLi4u
@@ -1229,7 +1484,7 @@ VGVzdGluZyBiaW5hcnkgdHlwZQ==
 Consumer 2: OnResponse:
   Type       = DoseTest.SuccessfulDelete
   IsSuccess  = true
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
   Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulDelete</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
   Request    = DeleteRequest on (DoseTest.ComplexGlobalEntity, 0)
 
@@ -1242,7 +1497,7 @@ Expectation: P2 receives requests (cre, upd, del) with correct data in them, and
 Consumer 0: OnResponse:
   Type       = DoseTest.SuccessfulCreate
   IsSuccess  = true
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
   Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulCreate</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.ComplexGlobalEntity</name><members><member><name>Int32Member</name><value>32</value></member><member><name>Int64Member</name><value>64</value></member><member><name>Float32Member</name><value>32</value></member><member><name>Float64Member</name><value>64</value></member><member><name>BooleanMember</name><value>true</value></member><member><name>EnumerationMember</name><value>DoseTest.TestEnum.MyFirst</value></member><member><name>StringMember</name><value/></member><member><name>EntityIdMember</name><entityId><name>DoseTest.TestItem</name><instanceId>0</instanceId></entityId></member><member><name>TypeIdMember</name><value>DoseTest.TestItem</value></member><member><name>InstanceIdMember</name><value>SomeInstance</value></member><member><name>ChannelIdMember</name><value>SomeChannel</value></member><member><name>HandlerIdMember</name><value>SomeHandler</value></member><member><name>ObjectMember</name><object><name>Object</name></object></member><member><name>BinaryMember</name></member><member><name>TestClassMember</name><object><name>DoseTest.TestItem</name><members><member><name>MyInt</name><value>-32</value></member></members></object></member><member><name>Ampere32Member</name><value>32001</value></member><member><name>CubicMeter32Member</name><value>32002</value></member><member><name>Hertz32Member</name><value>32003</value></member><member><name>Joule32Member</name><value>32004</value></member><member><name>Kelvin32Member</name><value>32005</value></member><member><name>Kilogram32Member</name><value>32006</value></member><member><name>Meter32Member</name><value>32007</value></member><member><name>MeterPerSecond32Member</name><value>32008</value></member><member><name>MeterPerSecondSquared32Member</name><value>32009</value></member><member><name>Newton32Member</name><value>32010</value></member><member><name>Pascal32Member</name><value>32011</value></member><member><name>Radian32Member</name><value>32012</value></member><member><name>RadianPerSecond32Member</name><value>32013</value></member><member><name>RadianPerSecondSquared32Member</name><value>32014</value></member><member><name>Second32Member</name><value>32015</value></member><member><name>SquareMeter32Member</name><value>32016</value></member><member><name>Steradian32Member</name><value>32017</value></member><member><name>Volt32Member</name><value>32018</value></member><member><name>Watt32Member</name><value>32019</value></member><member><name>Ampere64Member</name><value>64001</value></member><member><name>CubicMeter64Member</name><value>64002</value></member><member><name>Hertz64Member</name><value>64003</value></member><member><name>Joule64Member</name><value>64004</value></member><member><name>Kelvin64Member</name><value>64005</value></member><member><name>Kilogram64Member</name><value>64006</value></member><member><name>Meter64Member</name><value>64007</value></member><member><name>MeterPerSecond64Member</name><value>64008</value></member><member><name>MeterPerSecondSquared64Member</name><value>64009</value></member><member><name>Newton64Member</name><value>64010</value></member><member><name>Pascal64Member</name><value>64011</value></member><member><name>Radian64Member</name><value>64012</value></member><member><name>RadianPerSecond64Member</name><value>64013</value></member><member><name>RadianPerSecondSquared64Member</name><value>64014</value></member><member><name>Second64Member</name><value>64015</value></member><member><name>SquareMeter64Member</name><value>64016</value></member><member><name>Steradian64Member</name><value>64017</value></member><member><name>Volt64Member</name><value>64018</value></member><member><name>Watt64Member</name><value>64019</value></member><member><name>Int32ArrayMember</name><arrayElements><arrayElement><value>32</value></arrayElement><arrayElement><value>-32</value></arrayElement></arrayElements></member><member><name>Int64ArrayMember</name><arrayElements><arrayElement><value>64</value></arrayElement><arrayElement><value>-64</value></arrayElement></arrayElements></member><member><name>Float32ArrayMember</name><arrayElements><arrayElement><value>32</value></arrayElement><arrayElement><value>-32</value></arrayElement></arrayElements></member><member><name>Float64ArrayMember</name><arrayElements><arrayElement><value>64</value></arrayElement><arrayElement><value>-64</value></arrayElement></arrayElements></member><member><name>BooleanArrayMember</name><arrayElements><arrayElement><value>true</value></arrayElement><arrayElement><value>false</value></arrayElement></arrayElements></member><member><name>EnumerationArrayMember</name><arrayElements><arrayElement><value>DoseTest.TestEnum.MyFirst</value></arrayElement><arrayElement><value>DoseTest.TestEnum.MySecond</value></arrayElement></arrayElements></member><member><name>StringArrayMember</name><arrayElements><arrayElement><value xml:space="preserve">Safir</value></arrayElement><arrayElement><value/></arrayElement></arrayElements></member><member><name>EntityIdArrayMember</name><arrayElements><arrayElement><entityId><name>DoseTest.TestItem</name><instanceId>0</instanceId></entityId></arrayElement><arrayElement><entityId><name>DoseTest.TestItem</name><instanceId>SomeInstance</instanceId></entityId></arrayElement></arrayElements></member><member><name>TypeIdArrayMember</name><arrayElements><arrayElement><value>DoseTest.TestItem</value></arrayElement><arrayElement><value>DoseTest.TestEnum</value></arrayElement></arrayElements></member><member><name>InstanceIdArrayMember</name><arrayElements><arrayElement><value>0</value></arrayElement><arrayElement><value>SomeInstance</value></arrayElement></arrayElements></member><member><name>ChannelIdArrayMember</name><arrayElements><arrayElement><value>0</value></arrayElement><arrayElement><value>SomeChannel</value></arrayElement></arrayElements></member><member><name>HandlerIdArrayMember</name><arrayElements><arrayElement><value>0</value></arrayElement><arrayElement><value>SomeHandler</value></arrayElement></arrayElements></member><member><name>ObjectArrayMember</name><arrayElements><arrayElement><object><name>Object</name></object></arrayElement><arrayElement><object><name>Object</name></object></arrayElement></arrayElements></member><member><name>BinaryArrayMember</name><arrayElements><arrayElement><value>
 VGVzdGluZyBiaW5hcnkgdHlwZQ==
@@ -1251,7 +1506,7 @@ VGVzdGluZyBiaW5hcnkgdHlwZQ==
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulUpdate
   IsSuccess  = true
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
   Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulUpdate</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.ComplexGlobalEntity</name><members><member><name>Int32Member</name><value>320</value></member><member><name>Int64Member</name><value>640</value></member><member><name>Float32Member</name><value>320</value></member><member><name>Float64Member</name><value>640</value></member><member><name>BooleanMember</name><value>false</value></member><member><name>EnumerationMember</name><value>DoseTest.TestEnum.MySecond</value></member><member><name>StringMember</name><value xml:space="preserve">Safir SDK </value></member><member><name>EntityIdMember</name><entityId><name>DoseTest.TestItem</name><instanceId>1</instanceId></entityId></member><member><name>TypeIdMember</name><value>Object</value></member><member><name>InstanceIdMember</name><value>AnotherInstance</value></member><member><name>ChannelIdMember</name><value>AnotherChannel</value></member><member><name>HandlerIdMember</name><value>AnotherHandler</value></member><member><name>ObjectMember</name><object><name>DoseTest.TestItem</name></object></member><member><name>BinaryMember</name><value>
 b25jZSBtb3JlLi4u
@@ -1262,7 +1517,7 @@ b25jZSBtb3JlLi4u
 Consumer 2: OnResponse:
   Type       = DoseTest.SuccessfulDelete
   IsSuccess  = true
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
   Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulDelete</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
   Request    = DeleteRequest on (DoseTest.ComplexGlobalEntity, 0)
 
@@ -1310,7 +1565,7 @@ Expectation: Each partner should receive one (and only one) request, and P0 shou
 --------- Test  -----------
 Consumer 0: OnCreateRequest (Requestor decides instance id): 
   Entity     = (DoseTest.GlobalEntity, 1)
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = 7471736682775137277
   HandlerStr = 7471736682775137277
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Created</value></member></members></object>
@@ -1323,7 +1578,7 @@ Expectation: Each partner should receive one (and only one) request, and P0 shou
 --------- Test  -----------
 Consumer 0: OnUpdateRequest: 
   Entity     = (DoseTest.GlobalEntity, 1)
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = 7471736682775137277
   HandlerStr = 7471736682775137277
   Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Updated</value></member></members></object>
@@ -1336,7 +1591,7 @@ Expectation: Each partner should receive one (and only one) request, and P0 shou
 --------- Test  -----------
 Consumer 0: OnDeleteRequest: 
   Entity     = (DoseTest.GlobalEntity, 1)
-  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   Handler    = 7471736682775137277
   HandlerStr = 7471736682775137277
 
@@ -1348,7 +1603,7 @@ Expectation: Queue size should be 0 for all queues
 --------- Test  -----------
 ==========================================================================
 TESTCASE 601
-Description: Test of GetQueueSize
+Description: Test of GetQueueCapacity
 Expectation: Queue capacity should be 10 for all queues
 --------- Setup -----------
 --------- Test  -----------
@@ -1419,6 +1674,12 @@ Expectation: There should be two Local entities twice, then the ghosts are remov
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
+TESTCASE 720
+Description: Test GetInstanceIdPolicy.
+Expectation: Handler_1 uses RequestorDecidesInstanceId and Handler_2 uses HandlerDecidesInstanceId.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
 TESTCASE 800
 Description: Test of synchronous volatile persistence
 Expectation: Partner 0 receives OnNewInjectedEntity. Partner 1 receives OnNewEntity and OnDeletedEntity
@@ -1427,7 +1688,7 @@ Expectation: Partner 0 receives OnNewInjectedEntity. Partner 1 receives OnNewEnt
 Consumer 0: OnNewEntity:
   EntityId  = (DoseTest.SynchronousVolatileEntity, 12345)
   Owner     = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Blabla</value></member></members></object>
   Changed top-level members: 
@@ -1483,6 +1744,302 @@ Consumer 1: OnInjectedNewEntity:
 Consumer 1: OnInitialInjectionsDone:
   Type      = DoseTest.SynchronousVolatileEntity
   HandlerId = 1962097528835644014
+
+==========================================================================
+TESTCASE 900
+Description: Test of sending and subscribing of global messages in different contexts
+Expectation: Partner 0 recieves one global message with info "context 0". Partner 1 recieves one global message with info "context 1".
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnMessage:
+  Type       = DoseTest.GlobalMessage
+  ChannelId  = DEFAULT_CHANNEL
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  ChannelId  = DEFAULT_CHANNEL
+  Message    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalMessage</name><members><member><name>Info</name><value xml:space="preserve">context 1</value></member></members></object>
+
+
+==========================================================================
+TESTCASE 901
+Description: Test of sending and subscribing of a context shared message.
+Expectation: Both partner 0 and partner 1 recieves the context shared message.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnMessage:
+  Type       = DoseTest.ContextSharedMessage
+  ChannelId  = DEFAULT_CHANNEL
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  ChannelId  = DEFAULT_CHANNEL
+  Message    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.ContextSharedMessage</name><members><member><name>Info</name><value xml:space="preserve">context shared info</value></member></members></object>
+
+
+==========================================================================
+TESTCASE 902
+Description: Test of sending a context shared message from context != 0.
+Expectation: Partner 0 gets a Software violation exception
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 910
+Description: Test of registering/unregistering with different contexts
+Expectation: Partner 0(context 0) receives one OnRegistered and one OnUnregistered callback.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 911
+Description: Test of registering/unregistering with different contexts. Registration subcriber in context 1.
+Expectation: Partner 0 (context 1) receives one OnRegistered and one OnUnregistered callback.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 912
+Description: Test of registering/unregistering with different contexts
+Expectation: P0 receives one OnRegistered and one OnUnregistered callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 920
+Description: Testing of pending registration of global service handler in different contexts
+Expectation: Both partner 1 and 2 should receive an OnCompletedRegistration.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.GlobalService
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 921
+Description: Testing of pending registration of global service handler with contexts
+Expectation: P0 should receive OnRegistered, OnUnregistered and OnRegistered of Global Service. P1 should receive OnRegistered and OnUnregistered. P2 should receive OnCompletedRegistration
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnRegistered:
+  Type      = DoseTest.GlobalService
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 1: OnUnregistered:
+  Type      = DoseTest.GlobalService
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 922
+Description: Testing of pending registration of global service handler with contexts
+Expectation: P0 should receive OnRegistered and OnUnregistered. P1 should receive OnRegistered, OnUnregistered and OnRegistered. P2 should receive OnCompletedRegistration
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnRegistered:
+  Type      = DoseTest.GlobalService
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 1: OnUnregistered:
+  Type      = DoseTest.GlobalService
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 1: OnRegistered:
+  Type      = DoseTest.GlobalService
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 925
+Description: Test that a service request is sent to handler in correct context.
+Expectation: Partner 1 (context 1) receives one OnServiceRequest. Partner 0 (context 0) receives no service request.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnServiceRequest: 
+  Type       = DoseTest.GlobalService
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalService</name></object>
+
+==========================================================================
+TESTCASE 926
+Description: Test that a service request on a ContextShared service can be sent from any context.
+Expectation: P0 (context 0) receives two OnServiceRequest. P1 and P2 receive an OnResponse (DoseTest.SucessfullService)
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnResponse:
+  Type       = DoseTest.SuccessfulService
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulService</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.ContextSharedService</name></object>
+
+==========================================================================
+TESTCASE 927
+Description: Test of register a context shared service from context != 0.
+Expectation: Partner 0 gets a Software violation exception
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 940
+Description: Test of registering/unregistering entity handlers in different contexts
+Expectation: Partner 0(context 0) receives one OnRegistered and one OnUnregistered callback.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 941
+Description: Test of registering/unregistering entity handlers in different contexts. Registration subcriber in context 1.
+Expectation: Partner 0 (context 1) receives one OnRegistered and one OnUnregistered callback.
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 942
+Description: Test of registering/unregistering entity handlers in different contexts
+Expectation: P0 receives one OnRegistered and one OnUnregistered callback
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 950
+Description: Testing of pending registration of global entity handler in different contexts
+Expectation: Both partner 1 and 2 should receive one OnCompletedRegistration and one OnInitialInjectionsDone.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.GlobalEntity
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.GlobalEntity
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 951
+Description: Testing of pending registration of global entity handler with contexts
+Expectation: P0 should receive OnRegistered, OnUnregistered and OnRegistered of Global Entity. P1 should receive OnRegistered and OnUnregistered. P2 should receive OnCompletedRegistration and OnInitialInjectionsDone
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnRegistered:
+  Type      = DoseTest.GlobalEntity
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 1: OnUnregistered:
+  Type      = DoseTest.GlobalEntity
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 952
+Description: Testing of pending registration of global entity handler with contexts
+Expectation: P0 should receive OnRegistered and OnUnregistered. P1 should receive OnRegistered, OnUnregistered and OnRegistered. P2 should receive OnCompletedRegistration and OnInitialInjectionsDone
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnRegistered:
+  Type      = DoseTest.GlobalEntity
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 1: OnUnregistered:
+  Type      = DoseTest.GlobalEntity
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 1: OnRegistered:
+  Type      = DoseTest.GlobalEntity
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 955
+Description: Test that an entity create request is sent to handler in correct context.
+Expectation: P1 (context 1) receives one OnCreateRequest. P0 (context 0) receives no entity create request. P2 receives one OnResponse.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnCreateRequest (Requestor decides instance id): 
+  Entity     = (DoseTest.GlobalEntity, 543543)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Created</value></member></members></object>
+
+==========================================================================
+TESTCASE 956
+Description: Test that an entity update request is sent to handler in correct context.
+Expectation: P1 (context 1) receives one OnUpdateRequest. P0 (context 0) receives no entity update request. P2 receives one OnResponse.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnUpdateRequest: 
+  Entity     = (DoseTest.GlobalEntity, 123)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">BlaBla</value></member></members></object>
+
+==========================================================================
+TESTCASE 957
+Description: Test that an entity delete request is sent to handler in correct context.
+Expectation: P1 (context 1) receives one OnDeleteRequest. P0 (context 0) receives no entity delete request. P2 receives one OnResponse.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnDeleteRequest: 
+  Entity     = (DoseTest.GlobalEntity, 123)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = DEFAULT_HANDLER
+  HandlerStr = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 960
+Description: Test that an entity create request on a ContextShared entity can be sent from any context.
+Expectation: P0 (context 0) receives two OnCreateRequest(instance 111 and 222). P1 and P2 receive an OnResponse (DoseTest.SuccessfulCreate)
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnResponse:
+  Type       = DoseTest.SuccessfulCreate
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulCreate</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.ContextSharedEntity</name><members><member><name>Info</name><value xml:space="preserve">Create request from context 0</value></member></members></object>
+
+==========================================================================
+TESTCASE 961
+Description: Test that an entity update request on a ContextShared entity can be sent from any context.
+Expectation: P0 (context 0) receives two OnUpdateRequest. P1 and P2 receive an OnResponse (DoseTest.Success)
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnResponse:
+  Type       = DoseTest.Success
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.Success</name><members><member><name>Info</name><value xml:space="preserve">Succesful response</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.ContextSharedEntity</name><members><member><name>Info</name><value xml:space="preserve">Update request from context 0</value></member></members></object>
+
+==========================================================================
+TESTCASE 962
+Description: Test that an entity delete request on a ContextShared entity can be sent from any context.
+Expectation: P0 (context 0) receives two OnDeleteRequest. P1 and P2 receive an OnResponse (DoseTest.SuccessfulDelete)
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnResponse:
+  Type       = DoseTest.SuccessfulDelete
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SuccessfulDelete</name><members><member><name>Info</name><value xml:space="preserve">AutoResponse</value></member></members></object>
+  Request    = DeleteRequest on (DoseTest.ContextSharedEntity, 345)
+
+==========================================================================
+TESTCASE 965
+Description: Test that a connection in context 0 "sees" only entities in context 0.
+Expectation: P0 "sees" one GlobalEntity instance (321).
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 966
+Description: Test that a connection in context 1 "sees" entities in context 1 and ContextShared entities.
+Expectation: P2 "sees" one ContextSharedEntity instance (2222) and one GlobalEntity2 instance (3333).
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 970
+Description: Test that ghosts from correct context is injected
+Expectation: P0 receives OnNewInjectedEntity with SynchronousVolatileEntity (inst 54321), member 'Info' has value "Context 0". P1 receives OnNewInjectedEntity with SynchronousVolatileEntity (inst 54321), member 'Info' has value "Context 1".
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 54321)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Context 1</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = DEFAULT_HANDLER
 
 ==========================================================================
 TESTCASE 999

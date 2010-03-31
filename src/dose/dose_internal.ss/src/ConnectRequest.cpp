@@ -38,24 +38,24 @@ namespace Internal
 
     }
 
-    void ConnectRequest::Set(connect_tag_t, const std::string & connectionName, const long context, const int pid)
+    void ConnectRequest::Set(connect_tag_t, const std::string & connectionName, const ContextId contextId, const int pid)
     {
-        ENSURE (m_kind == NotSet, << "Attempt to call Set(connect_tag_t, " << connectionName.c_str() << ", " << context
+        ENSURE (m_kind == NotSet, << "Attempt to call Set(connect_tag_t, " << connectionName.c_str() << ", " << contextId
                 << ") when something was already in the connect message");
         m_kind = Connect;
         m_connectionName = connectionName.c_str();
-        m_context = context;
+        m_contextId = contextId;
         m_pid = pid;
     }
 
-    void ConnectRequest::GetAndClear(connect_tag_t, std::string & connectionName, long & context, int & pid)
+    void ConnectRequest::GetAndClear(connect_tag_t, std::string & connectionName, ContextId & contextId, int & pid)
     {
         ENSURE (m_kind == Connect, << "Attempt to call GetAndClear(connect_tag_t, ...) when kind was " << m_kind);
         connectionName = m_connectionName.c_str();
         m_connectionName.clear();
 
-        context = m_context;
-        m_context = 0;
+        contextId = m_contextId;
+        m_contextId = 0;
 
         pid = m_pid;
         m_pid = 0;

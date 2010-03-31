@@ -110,6 +110,7 @@ private:
     std::vector<std::vector<DoseTest::ActionPtr> > m_callbackActions;
 
     Safir::Dob::ResponseSenderPtr       m_responseSender;
+    bool                                m_responseSenderDiscarded;
     Safir::Dob::RequestId               m_latestRequestId;
 
     typedef boost::tuple<Safir::Dob::Typesystem::TypeId, Safir::Dob::Typesystem::HandlerId> PolicyKey;

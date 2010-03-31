@@ -5,6 +5,13 @@ DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wi
 
 default: safir_sdk_core_sug.pdf
 
+help:
+	echo "Some available targets:"
+	echo "   default                 - build pdf"
+	echo "   all                     - build pdf, htmls and compressed archives"
+	echo "   safir_sdk_core_sug.html - build single page html" 
+	echo " Check the Makefile for other targets"
+
 all: archives #will build other stuff due to deps
 
 archives: safir_sdk_core_sug.pdf.zip \

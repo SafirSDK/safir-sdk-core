@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>The different states of the persistence handling.</summary>
+  <name>Safir.Dob.PersistentDataState</name>
+  <values>
+    <value>Init</value>
+    <value>Started</value>
+  </values>
+</enumeration>

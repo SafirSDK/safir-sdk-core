@@ -26,7 +26,6 @@
 #define __DOSE_EXIT_HANDLER_H__
 
 #include <boost/noncopyable.hpp>
-#include <boost/function.hpp>
 #include <map>
 #include <Safir/Dob/Internal/InternalFwd.h>
 

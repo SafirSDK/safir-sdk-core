@@ -30,6 +30,7 @@
 #if defined _MSC_VER
   #pragma warning (push)
   #pragma warning (disable : 4267)
+  #pragma warning (disable : 4512)
 #endif
 
 #include <boost/noncopyable.hpp>

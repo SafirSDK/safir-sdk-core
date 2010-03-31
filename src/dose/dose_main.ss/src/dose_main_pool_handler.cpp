@@ -33,9 +33,11 @@
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/ConnectionAspectInjector.h>
+#include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Internal/State.h>
+#include <Safir/Dob/Internal/ContextIdComposer.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
@@ -58,10 +60,10 @@ namespace Internal
         m_persistHandler(NULL),
         m_endStates(NULL),
         m_connectionHandler(NULL),
-        m_connection(NULL),
+        m_stateSubscriptionConnections(Safir::Dob::NodeParameters::NumberOfContexts()),
         m_pdThreadHandle(NULL)
     {
-        m_stateDispatcher.reset(new StateDispatcher(m_stateSubscriptionConnection,boost::bind(&PoolHandler::DistributeStates,this)));
+        m_stateDispatcher.reset(new StateDispatcher(boost::bind(&PoolHandler::DistributeStates,this)));
     }
 
     PoolHandler::~PoolHandler()
@@ -115,16 +117,20 @@ namespace Internal
         m_endStates = &endStates;
         m_connectionHandler = &connectionHandler;
 
-        m_stateSubscriptionConnection.Open(L"dose_main",L"states",0,NULL,m_stateDispatcher.get());
+        // dose_main must subscribe for states in all contexts
+        for (ContextId context = 0; context < Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
+        {
+            m_stateSubscriptionConnections[context].m_connection.Open(L"dose_main",L"states", context, NULL, m_stateDispatcher.get());
 
-        //only include entity states when we're in a multinode system
-        StartSubscriptions(m_stateSubscriptionConnection,
-                           m_dummySubscriber,
-                           !m_ecom->GetQualityOfServiceData().IsStandalone(),
-                           true);
+            StartSubscriptions(m_stateSubscriptionConnections[context].m_connection,
+                               m_dummySubscriber,
+                               !m_ecom->GetQualityOfServiceData().IsStandalone(), //only include entity states when we're in a multinode system
+                               true);
 
-        const std::wstring connectionName = ConnectionAspectMisc(m_stateSubscriptionConnection).GetConnectionName();
-        m_connection = Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName)).get();
+            const std::wstring connectionName = ConnectionAspectMisc(m_stateSubscriptionConnections[context].m_connection).GetConnectionName();
+            m_stateSubscriptionConnections[context].m_connectionPtr =
+                Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName)).get();
+        }
     }
 
 
@@ -159,7 +165,8 @@ namespace Internal
                                  connection.NameWithoutCounter(),
                                  connection.Counter());
 
-            m_ecom->SendPoolDistributionData(msg);
+            // send later to avoid locking up shmem
+            ConnectionMsgsToSend.push_back(msg);
         }
     }
 
@@ -168,10 +175,10 @@ namespace Internal
     {
         lllout << "Pool distribution thread started" << std::endl;
 
-        // Wait until persistent data is ready if we're the persistance node
-        if (PersistHandler::SystemHasPersistence() &&  PersistHandler::ThisNodeIsPersistanceNode())
+        // Wait until persistent data is ready.
+        if (!m_persistHandler->IsPersistentDataReady())
         {
-            lllout << "Pool distribution thread is waiting for persistence data from DOPE (or from other node)" << std::endl;
+            lllout << "Pool distribution thread is waiting for persistence data from DOPE" << std::endl;
             while (!m_persistHandler->IsPersistentDataReady())
             {
                 ACE_OS::sleep(ACE_Time_Value(0,10000)); //10ms
@@ -182,23 +189,37 @@ namespace Internal
         try
         {
             lllout << "Distributing connections" << std::endl;
+            // get connections
+            ConnectionMsgsToSend.clear();
             Connections::Instance().ForEachConnection(boost::bind(&PoolHandler::PDConnection,this,_1));
+            // send connections
+            ConnectionMsgs::const_iterator msgIter;
+            for ( msgIter = ConnectionMsgsToSend.begin( ) ; msgIter != ConnectionMsgsToSend.end( ) ; msgIter++ )
+            {
+                m_ecom->SendPoolDistributionData(*msgIter);
+            }
+            ConnectionMsgsToSend.clear();
 
-            lllout << "Setting up connection for pool distribution" << std::endl;
+            lllout << "Setting up connection in each context for pool distribution" << std::endl;
             DummyDispatcher dispatcher;
             DummySubscriber dummySubscriber;
-            Safir::Dob::Connection pdConnection;
 
-            //Note the connection name, we do NOT want to get special treatment for being
-            //in dose_main, since we're a different thread. But we want to be allowed in
-            //early, so we use -1 for context.
-            pdConnection.Open(L"dose_main_pd",L"pool_distribution",-1,NULL, &dispatcher);
-            StartSubscriptions(pdConnection, dummySubscriber,true,false);
+            // Distribute all contexts
+            for (ContextId context = 0; context < Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
+            {
+                Safir::Dob::Connection pdConnection;
 
-            const std::wstring connectionName = ConnectionAspectMisc(pdConnection).GetConnectionName();
-            ConnectionPtr connection = Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName)).get();
+                //Note the connection name, we do NOT want to get special treatment for being
+                //in dose_main, since we're a different thread. But we want to be allowed in
+                //early, so we use "minus one" contexts.
+                pdConnection.Open(L"dose_main_pd",L"pool_distribution",ComposeMinusOneContext(context),NULL, &dispatcher);
+                StartSubscriptions(pdConnection, dummySubscriber,true,false);
 
-            connection->GetDirtySubscriptionQueue().Dispatch(boost::bind(&PoolHandler::PDDispatchSubscription,this,_1,_2,_3));
+                const std::wstring connectionName = ConnectionAspectMisc(pdConnection).GetConnectionName();
+                ConnectionPtr connection = Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName)).get();
+
+                connection->GetDirtySubscriptionQueue().Dispatch(boost::bind(&PoolHandler::PDDispatchSubscription,this,_1,_2,_3));
+            }
 
             lllout << "Pool distribution completed (calling ecom::PoolDistributionCompleted" << std::endl;
 
@@ -395,7 +416,11 @@ namespace Internal
 
     void PoolHandler::DistributeStates()
     {
-        m_connection->GetDirtySubscriptionQueue().Dispatch(boost::bind(&PoolHandler::DispatchSubscription,this,_1,_2,_3));
+        for (ContextId context = 0; context < Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
+        {
+            m_stateSubscriptionConnections[context].m_connectionPtr->
+                GetDirtySubscriptionQueue().Dispatch(boost::bind(&PoolHandler::DispatchSubscription,this,_1,_2,_3));
+        }
     }
 
     bool IsLocal(const DistributionData& state)

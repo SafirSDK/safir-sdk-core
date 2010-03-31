@@ -41,6 +41,8 @@ namespace Dob
      */
     typedef Safir::Dob::Typesystem::Int32 RequestId;
 
+    typedef Safir::Dob::Typesystem::Int32 ContextId;
+
 };
 };
 

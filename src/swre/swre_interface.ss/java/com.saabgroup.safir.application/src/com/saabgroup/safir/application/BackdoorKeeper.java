@@ -65,6 +65,12 @@ public class BackdoorKeeper
             return; // *** RETURN ***
         }
 
+        if (!m_connection.isAttached())
+        {
+            // Connection has been closed.
+            return;
+        }
+
         m_connection.unsubscribeMessage(com.saabgroup.safir.application.BackdoorCommand.ClassTypeId,
                                         com.saabgroup.safir.dob.typesystem.ChannelId.ALL_CHANNELS,
                                         this);

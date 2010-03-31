@@ -119,17 +119,19 @@ namespace Internal
     }
 
     bool ServiceTypes::IsRegistered(const Dob::Typesystem::TypeId typeId,
-                                    const Dob::Typesystem::HandlerId& handlerId) const
+                                    const Dob::Typesystem::HandlerId& handlerId,
+                                    const ContextId                   contextId) const
     {
-        return GetType(typeId).IsRegistered(handlerId);
+        return GetType(typeId).IsRegistered(handlerId, contextId);
     }
 
 
     const ConnectionConsumerPair
     ServiceTypes::GetRegisterer(const Dob::Typesystem::TypeId     typeId,
-                                const Dob::Typesystem::HandlerId& handlerId) const
+                                const Dob::Typesystem::HandlerId& handlerId,
+                                const ContextId                   contextId) const
     {
-        return GetType(typeId).GetRegisterer(handlerId);
+        return GetType(typeId).GetRegisterer(handlerId, contextId);
     }
 
 

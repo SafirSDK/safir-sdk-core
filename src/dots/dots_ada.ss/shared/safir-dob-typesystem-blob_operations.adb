@@ -868,15 +868,12 @@ package body Safir.Dob.Typesystem.Blob_Operations is
                   Beginning_Of_Unused : in out Safir.Dob.Typesystem.Blob_T;
                   Member              : in Safir.Dob.Typesystem.Member_Index;
                   Array_Index         : in Safir.Dob.Typesystem.Array_Index) is
-      --use Safir.Dob.Typesystem.Binary_Vectors;
       Binary_Start : Safir.Dob.Typesystem.Blob_T;
       Binary_Size  : Safir.Dob.Typesystem.Int_32;
-      Binary : Binary_Vectors.Vector;
    begin
       if not Value.Is_Null then
-         Binary := Value.Get_Val;
          Binary_Start := Beginning_Of_Unused;
-         Binary_Size := Safir.Dob.Typesystem.Int_32 (Binary.Length);
+         Binary_Size := Safir.Dob.Typesystem.Int_32 (Value.Get_Val.Length);
          Safir.Dob.Typesystem.Kernel.Create_Binary_Member
            (Blob,
             Binary_Size,
@@ -887,8 +884,8 @@ package body Safir.Dob.Typesystem.Blob_Operations is
          To_Int_Ptr (Binary_Start).all := Binary_Size;
          if Binary_Size > 0 then
             Binary_Start := Binary_Start + 4;  -- Adjust for the initial length Int
-            for I in Binary.First_Index .. Binary.Last_Index loop
-               Binary_Start.all := To_Char (Binary.Element (I));
+            for I in Value.Get_Val.First_Index .. Value.Get_Val.Last_Index loop
+               Binary_Start.all := To_Char (Value.Get_Val.Element (I));
                Binary_Start := Binary_Start + 1;
             end loop;
          end if;

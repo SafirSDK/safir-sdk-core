@@ -30,15 +30,42 @@ with Safir.Dob.Typesystem;
 package Safir.Dob.Connections is
 
    -- A connection to the DOB.
-   -- This class represents a "real" (as opposed to Secondary Connection) connection to the dob.
+   -- This type represents a "real" (as opposed to Secondary Connection) connection to the dob.
    -- Each DOB application must have at least one connection. Connections are not thread safe.
    --
    type Connection is limited new
      Safir.Dob.Connection_Bases.Connection_Base with private;
 
-   --type ClassAccess is access all Class'Class;
 
-   -- AWI:todo comment
+   -- Open a connection to the DOB.
+   --
+   -- The connection uses the On_Do_Dispatch callback to signal that there is incoming data available.
+   -- When On_Do_Dispatch is called the application shall trigg the thread (task)
+   -- that owns (has called Open) the connection. When trigged the thread shall
+   -- call the Dispatch operation.
+   --
+   -- There can be a number of contexts in the DOB. A connection is linked to the context specified in Open.
+   -- All operations using a connection is affecting only the context linked to that connection.
+   -- The intended primary usage is for recording/replay functionality. 0 is defined as the default
+   -- context.
+   --
+   -- Note that Connection_Name_Common_Part together with Connection_Name_Instance_Part must be unique
+   -- in the node.
+   --
+   -- If NULL  is passed as the Stop_Handler argument the connection will not receive a stop order.
+   -- Normally only the main thread of an application should pass a non-NULL stopHandler, and it
+   -- should then tell other parts of the application to exit. If multiple stop handlers are specified
+   -- there is NO guaranteed order between which gets called first when a process receives a stop signal.
+   --
+   -- Parameters: Connection_Name_Common_Part - Name that identifies the program but not any particular
+   --                                           program instance.
+   --             Connection_Name_Instance_Part - Name that identifies a particular program instance.
+   --             Context - Context functionality not implemented yet!
+   --             Stop_Handler - Object that implements the Stop_Handler interface.
+   --             Dispatcher - Object that implements the Dispatcher interface.
+   -- Exceptions: Not_Open_Exception - The connection name is already used by someone else.
+   --                                  Try another!
+   --
    procedure Open
      (Self                          : in Connection;
       Connection_Name_Common_Part   : in Unbounded_Wide_String;
@@ -47,11 +74,21 @@ package Safir.Dob.Connections is
       Stop_Handler                  : access Safir.Dob.Consumers.Stop_Handler'Class;
       Dispatcher                    : access Safir.Dob.Consumers.Dispatcher'Class);
 
-   -- AWI:todo comment
+   -- Close the connection to the DOB.
+   --
+   -- Closes the connection to the DOB and deallocates all resources. All subscriptions
+   -- and registrations will automatically be deleted and there is no need to call
+   -- Unsubscribe and Unregister before calling Close.
+   -- Note that all connections that were set up using Attach will also be closed after
+   -- a call to this method.
+   --
    procedure Close
      (Self : in Connection);
 
-   -- AWI:todo comment
+   -- Check if this Connection instance is open.
+   --
+   -- Returns: True if the connection is open.
+   --
    function Is_Open
      (Self : in Connection) return Boolean;
 

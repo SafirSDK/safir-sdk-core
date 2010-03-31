@@ -107,7 +107,8 @@ namespace Internal
 
 
     void Connections::Connect(const std::string & connectionName,
-                              const long context,
+                              const ContextId contextId,
+                              const bool isMinusOneConnection,
                               ConnectResult & result,
                               ConnectionPtr & connection)
     {
@@ -122,12 +123,12 @@ namespace Internal
         //is this a connect from within dose_main's main thread? if so, bypass normal connection handling
         if (connectionName.find(";dose_main;") != connectionName.npos)
         {
-            ConnectDoseMain(connectionName,context,result,connection);
+            ConnectDoseMain(connectionName,contextId,result,connection);
             return;
         }
 
         //guard against connections before dose_main has said that it is ok to start connecting.
-        if (context == -1)
+        if (isMinusOneConnection)
         {
             lllout << "Waiting on m_connectMinusOneSem" << std::endl;
             m_connectMinusOneSem.wait();
@@ -140,13 +141,11 @@ namespace Internal
             m_connectSem.post();
         }
 
-        namespace bi = boost::interprocess;
-
-        bi::scoped_lock<bi::interprocess_mutex> lck(m_connectLock);
+        ScopedConnectLock lck(m_connectLock);
 
         const pid_t pid = ACE_OS::getpid();
 
-        m_connectMessage.Set(connect_tag, connectionName, context, pid);
+        m_connectMessage.Set(connect_tag, connectionName, contextId, pid);
 
         m_connectSignal = 1;
         Signals::Instance().SignalConnectOrOut();
@@ -162,7 +161,7 @@ namespace Internal
     }
 
     void Connections::ConnectDoseMain(const std::string & connectionName,
-                                      const long context,
+                                      const ContextId contextId,
                                       ConnectResult & result,
                                       ConnectionPtr & connection)
     {
@@ -170,7 +169,7 @@ namespace Internal
 
         connection = NULL;
         result = Success;
-        boost::interprocess::upgradable_lock<boost::interprocess::interprocess_upgradable_mutex> rlock(m_connectionTablesLock);
+        boost::interprocess::upgradable_lock<ConnectionsTableLock> rlock(m_connectionTablesLock);
 
         bool foundName = false;
         for (ConnectionTable::const_iterator it = m_connections.begin();
@@ -195,10 +194,10 @@ namespace Internal
             const pid_t pid = ACE_OS::getpid();
 
             //upgrade the mutex
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_upgradable_mutex> wlock(move(rlock));
+            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
             connection = GetSharedMemory().construct<Connection>
                 (boost::interprocess::anonymous_instance)
-                (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), context, pid);
+                (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), contextId, pid);
 
             const bool success = m_connections.insert
                 (std::make_pair(connection->Id(),ConnectionPtr(connection))).second;
@@ -225,12 +224,12 @@ namespace Internal
             lllout << "Handling a Connect" << std::endl;
 
             std::string connectionName;
-            long context;
+            ContextId context;
             int pid;
 
             m_connectMessage.GetAndClear(connect_tag, connectionName, context, pid);
 
-            boost::interprocess::upgradable_lock<boost::interprocess::interprocess_upgradable_mutex> rlock(m_connectionTablesLock);
+            boost::interprocess::upgradable_lock<ConnectionsTableLock> rlock(m_connectionTablesLock);
 
             bool foundName = false;
             for (ConnectionTable::const_iterator it = m_connections.begin();
@@ -260,7 +259,7 @@ namespace Internal
                     Connection * connection = NULL;
                     {
                         //upgrade the mutex
-                        boost::interprocess::scoped_lock<boost::interprocess::interprocess_upgradable_mutex> wlock(move(rlock));
+                        boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
 
                         connection = GetSharedMemory().construct<Connection>(boost::interprocess::anonymous_instance)
                             (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), context, pid);
@@ -296,7 +295,7 @@ namespace Internal
                << "', context = " << context
                << ", id = " << id << std::endl;
 
-        boost::interprocess::upgradable_lock<boost::interprocess::interprocess_upgradable_mutex> rlock(m_connectionTablesLock);
+        boost::interprocess::upgradable_lock<ConnectionsTableLock> rlock(m_connectionTablesLock);
 
         ConnectionTable::const_iterator findIt = m_connections.find(id);
 
@@ -312,7 +311,7 @@ namespace Internal
 
 
         //upgrade the mutex
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_upgradable_mutex> wlock(move(rlock));
+        boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
 
         //remote connections have pid = -1
         Connection * connection = GetSharedMemory().construct<Connection>(boost::interprocess::anonymous_instance)
@@ -327,7 +326,7 @@ namespace Internal
     void Connections::RemoveConnection(const ConnectionPtr & connection)
     {
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_upgradable_mutex> wlock(m_connectionTablesLock);
+            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(m_connectionTablesLock);
 
             if (connection->IsLocal())
             {
@@ -335,8 +334,9 @@ namespace Internal
             }
             m_connections.erase(connection->Id());
 
-            GetSharedMemory().destroy_ptr(connection.get());
         }
+
+        GetSharedMemory().destroy_ptr(connection.get());
 
         ExitHandler::Instance().RemoveConnection(connection);
     }
@@ -418,53 +418,69 @@ namespace Internal
 
     void Connections::HandleConnectionOutEvents(const ConnectionOutEventHandler & handler)
     {
-        //        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        typedef std::vector<ConnectionId> ConnectionIds;
 
-        //Workaround to fix ticket #629
+        ConnectionIds signalledConnections;
 
-        //above line has been "temporarily" commented out to work around the fact that the
-        //interprocess_upgradable_mutex is semi-recursive. It allows a recursive lock, as long
-        //as no writer has queued itself on getting the exclusive lock after the first reader
-        //has been taken but before the second reader is taken.
-
-        //the lock can be removed here since all writes to the table occur from
-        //the same thread in dose_main, which is also the only caller of this function.
-
-        const AtomicUint32 * end = m_connectionOutSignals.get() + m_lastUsedSlot + 1;
-        for (AtomicUint32 * it = m_connectionOutSignals.get();
-             it != end; ++it)
+        //Take the lock while we loop through the signal vectors, but release it before we
+        //call the handler for the signalled connections.
         {
-            if (*it != 0)
+            boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
+            const AtomicUint32 * end = m_connectionOutSignals.get() + m_lastUsedSlot + 1;
+            for (AtomicUint32 * it = m_connectionOutSignals.get();
+                 it != end; ++it)
             {
-                *it = 0;
-
-                const ConnectionId & connId = m_connectionOutIds[std::distance(m_connectionOutSignals.get(), it)];
-
-                //                std::wcout << "Handling event from connection " << connId << std::endl;
-                if (connId == ConnectionId()) //compare with dummy-connection
+                if (*it != 0)
                 {
-                    lllout << "A signal was set for a slot that has no valid connection id! Resetting it!" << std::endl;
-                    std::wcout << "A signal was set for a slot that has no valid connection id! Resetting it!" << std::endl;
-                }
-                else
-                {
-                    ConnectionTable::const_iterator findIt = m_connections.find(connId);
-                    ENSURE(findIt != m_connections.end(), << "Connections::HandleConnectionOutEvents: Failed to find connection! connectionId = " << connId);
-                    handler(findIt->second);
+                    *it = 0;
+
+                    const ConnectionId & connId = m_connectionOutIds[std::distance(m_connectionOutSignals.get(), it)];
+
+                    if (connId == ConnectionId()) //compare with dummy-connection
+                    {
+                        lllout << "A signal was set for a slot that has no valid connection id! Resetting it!" << std::endl;
+                        std::wcout << "A signal was set for a slot that has no valid connection id! Resetting it!" << std::endl;
+                    }
+                    else
+                    {
+                        signalledConnections.push_back(connId);
+                    }
                 }
             }
-
         }
+
+        //The lock is released here, so at all points in the following loop where we're not holding the lock again,
+        // i.e. in the GetConnection call, a connection could theoretically have been removed.
+        // (we don't want to hold the lock while calling the callback, since it may want to take the lock itself at
+        // some stage).
+        //Note: This should probably not happen at the moment, since the only thread that removes connections 
+        //is the dose_main main thread, which is also the only caller of this function. And it should
+        //not be doing removes inside the callback.
+
+        for (ConnectionIds::iterator it = signalledConnections.begin();
+             it != signalledConnections.end(); ++it)
+        {
+            //                std::wcout << "Handling event from connection " << *it << std::endl;
+            const ConnectionPtr conn = GetConnection(*it,std::nothrow);
+            if (conn == NULL)
+            {
+                lllerr << "Looks like a connection disappeared while we were handling connection out events. "
+                       << "Ignoring disappeared connection with id " << *it << std::endl;
+                continue;
+            }
+            handler(conn);
+        }
+
     }
 
     bool
-    Connections::IsPendingAccepted(const Typesystem::TypeId typeId, const Typesystem::HandlerId & handlerId) const
+    Connections::IsPendingAccepted(const Typesystem::TypeId typeId, const Typesystem::HandlerId & handlerId, const ContextId contextId) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         for (ConnectionTable::const_iterator it = m_connections.begin();
              it != m_connections.end(); ++it)
         {
-            if (it->second->IsPendingAccepted(typeId,handlerId))
+            if (it->second->Id().m_contextId == contextId && it->second->IsPendingAccepted(typeId,handlerId))
             {
                 return true;
             }
@@ -475,7 +491,7 @@ namespace Internal
     const ConnectionPtr
     Connections::GetConnection(const ConnectionId & connId) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         ConnectionTable::const_iterator findIt = m_connections.find(connId);
         ENSURE(findIt != m_connections.end(), << "Connections::GetConnection: Failed to find connection! connectionId = " << connId);
         return findIt->second;
@@ -484,7 +500,7 @@ namespace Internal
     const ConnectionPtr
     Connections::GetConnection(const ConnectionId & connId, std::nothrow_t) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         ConnectionTable::const_iterator findIt = m_connections.find(connId);
         if (findIt != m_connections.end())
         {
@@ -499,7 +515,7 @@ namespace Internal
     const ConnectionPtr
     Connections::GetConnectionByName(const std::string & connectionName) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         for (ConnectionTable::const_iterator it = m_connections.begin();
             it != m_connections.end(); ++it)
         {
@@ -515,7 +531,7 @@ namespace Internal
     void
     Connections::GetConnections(const pid_t  pid, std::vector<ConnectionPtr>& connections) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
 
         connections.clear();
 
@@ -532,7 +548,7 @@ namespace Internal
 
     const std::string Connections::GetConnectionName(const ConnectionId & connectionId) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         ConnectionTable::const_iterator findIt = m_connections.find(connectionId);
 
         if (findIt != m_connections.end())
@@ -551,7 +567,7 @@ namespace Internal
 
         // Remove from m_connections and store in removeConnections
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_upgradable_mutex> wlock(m_connectionTablesLock);
+            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(m_connectionTablesLock);
 
             ConnectionTable::const_iterator it = m_connections.begin();
 
@@ -592,7 +608,7 @@ namespace Internal
 
     void Connections::ForEachConnection(const boost::function<void(const Connection & connection)> & connectionFunc) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         for (ConnectionTable::const_iterator it = m_connections.begin();
              it != m_connections.end(); ++it)
         {
@@ -602,7 +618,7 @@ namespace Internal
 
     void Connections::ForEachConnectionPtr(const boost::function<void(const ConnectionPtr & connection)> & connectionFunc) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         for (ConnectionTable::const_iterator it = m_connections.begin();
              it != m_connections.end(); ++it)
         {
@@ -613,7 +629,7 @@ namespace Internal
     void Connections::ForSpecificConnection(const ConnectionId& connectionId,
                                             const boost::function<void(const ConnectionPtr & connection)> & connectionFunc) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
 
         ConnectionTable::const_iterator it = m_connections.find(connectionId);
 

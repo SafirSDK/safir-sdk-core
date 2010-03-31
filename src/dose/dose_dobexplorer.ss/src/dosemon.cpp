@@ -47,7 +47,10 @@ DoseMon::DoseMon(QWidget * /*parent*/)
     treeWidget->setSortingEnabled(true);
     treeWidget->sortByColumn(0,Qt::AscendingOrder);
 
-    tabWidget->clear();
+    while (tabWidget->currentIndex() != -1)
+    {
+        tabWidget->removeTab(tabWidget->currentIndex());
+    }
 
     QPushButton * closeButton = new QPushButton("X");
     tabWidget->setCornerWidget(closeButton);

@@ -131,6 +131,12 @@ package body Safir.Application.Backdoor_Keepers is
          return;  -- *** RETURN ***
       end if;
 
+      if not Self.Connection.Is_Attached then
+         -- Connection has been closed.
+         return;
+      end if;
+
+
       Self.Connection.Unsubscribe_Message
          (Type_Id => Safir.Application.Backdoor_Command.Class_Type_Id,
           Channel_Id => Safir.Dob.Typesystem.Channel_Id.Default_Channel,

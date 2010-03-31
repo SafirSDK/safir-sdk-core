@@ -592,6 +592,14 @@ package Safir.Dob.Interf is
       Success               : out C.char);
    pragma Import (C, Get_Number_Of_Instances, "DoseC_GetNumberOfInstances");
 
+   procedure Get_Instance_Id_Policy
+     (Controller_Id         : in Safir.Dob.Defs.Controller_Id;
+      Type_Id               : in Safir.Dob.Typesystem.Type_Id;
+      Handler_Id            : in Safir.Dob.Typesystem.Int_64;
+      InstanceIdPolicy      : out Safir.Dob.Typesystem.Enumeration_Value;
+      Success               : out C.char);
+   pragma Import (C, Get_Instance_Id_Policy, "DoseC_GetInstanceIdPolicy");
+
    procedure Postpone
      (Controller_Id         : in Safir.Dob.Defs.Controller_Id;
       Redispatch_Current    : in C.char;

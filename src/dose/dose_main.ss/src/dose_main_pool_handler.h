@@ -29,12 +29,16 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/ConnectionId.h>
+#include <Safir/Dob/Internal/Array.h>
 #include <ace/Event_Handler.h>
 #include <map>
 #include <deque>
+#include <boost/array.hpp>
 #include <boost/function.hpp>
 #include <ace/Reactor.h>
 #include "dose_main_waiting_states.h"
+
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 
 namespace Safir
 {
@@ -80,10 +84,8 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        StateDispatcher(const Safir::Dob::Connection & connection,
-                      const boost::function <void(void)> & dispatchFunc):
+        StateDispatcher(const boost::function <void(void)> & dispatchFunc):
             ACE_Event_Handler(ACE_Reactor::instance()),
-            m_connection(connection),
             m_dispatchFunc(dispatchFunc),
             m_isNotified(0){}
 
@@ -104,8 +106,6 @@ namespace Internal
             }
         }
 
-
-        const Safir::Dob::Connection&       m_connection;
         const boost::function <void(void)>  m_dispatchFunc;
         AtomicUint32                        m_isNotified;
     };
@@ -180,12 +180,23 @@ namespace Internal
         EndStatesHandler* m_endStates;
         ConnectionHandler * m_connectionHandler;
 
-        Safir::Dob::Connection m_stateSubscriptionConnection;
+        typedef std::vector<DistributionData> ConnectionMsgs;
+        ConnectionMsgs ConnectionMsgsToSend;
+
+        struct SubcriptionConnection
+        {
+            Safir::Dob::Connection m_connection;
+
+            //This is the Internal representation of the m_stateSubscriptionConnection.
+            Safir::Dob::Internal::Connection* m_connectionPtr;
+        };
+
+        //Safir::Dob::Utilities::Array<SubcriptionConnection> m_stateSubscriptionConnections;
+
+        Safir::Dob::Internal::Array<SubcriptionConnection> m_stateSubscriptionConnections;
+        
         boost::shared_ptr<StateDispatcher> m_stateDispatcher;
         DummySubscriber m_dummySubscriber;
-
-        //This is the Internal representation of the m_stateSubscriptionConnection.
-        Safir::Dob::Internal::Connection * m_connection;
 
         ACE_hthread_t m_pdThreadHandle;
 

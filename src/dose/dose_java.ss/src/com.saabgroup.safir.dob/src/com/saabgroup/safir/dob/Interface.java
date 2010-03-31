@@ -321,6 +321,13 @@ final class Interface {
                                             long [] numberOfInstances,
                                             boolean [] success);
 
+    //dose_java_jni GetInstanceIdPolicy
+    static native void GetInstanceIdPolicy(int ctrl,
+                                           long typeId,
+                                           long handlerId,
+                                           int [] instanceIdPolicy,
+                                           boolean [] success);
+
     //dose_java_jni Postpone
     static native void Postpone(int ctrl,
                                 boolean redispatchCurrent,

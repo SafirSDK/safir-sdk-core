@@ -38,6 +38,8 @@
 #include <Safir/Dob/Internal/State.h>
 #include <Safir/Dob/Internal/SubscriptionId.h>
 #include <Safir/Dob/Internal/TimestampOperations.h>
+#include <Safir/Dob/Internal/ContextSharedTable.h>
+#include <Safir/Dob/Internal/ContextIdComposer.h>
 #include <Safir/Dob/Message.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/QueueParameters.h>
@@ -62,6 +64,16 @@
 
 #include <assert.h>
 #include <boost/shared_ptr.hpp>
+
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
+
 #include <iostream>
 
 #include <ace/OS_NS_unistd.h>
@@ -86,7 +98,7 @@ namespace Internal
           m_requestQueueInOverflowState(false),
           m_messageQueueInOverflowState(false),
           m_ctrlId(0),
-          m_context(0),
+          m_contextId(0),
           m_exitDispatch(false),
           m_dispatchedInjection(no_state_tag),
           m_originalInjectionState(no_state_tag),
@@ -110,7 +122,7 @@ namespace Internal
 
     void Controller::Connect(const char* connectionNameCommonPart,
                              const char* connectionNameInstancePart,
-                             long context,
+                             const ContextId contextId,
                              long lang,
                              const ConsumerId & connectionOwner,
                              const ConsumerId & dispatcher,
@@ -137,6 +149,47 @@ namespace Internal
                              OnNotMessageOverflowCb* onNotMessageOverflowCb,
                              OnDropReferenceCb* onDropReferenceCb)
     {
+        // The context parameter is used to signal wich context to connect to, and also to signal if this connection
+        // should be allowed to connect before "ordinary" apps. Originally, when there was only one context (0),
+        // -1 was used to signal a premature connect in context 0. Now when there are several contexts
+        // another scheme is required:
+        //
+        // contextId      Connection
+        // ---------      ----------
+        //    0           Ordinary connection in context 0.
+        //    1           Ordinary connection in context 1.
+        //    345         Ordinary connection in context 345.
+        //
+        //    -1000000    "minus one"-connection in context 0
+        //    -1000001    "minus one"-connection in context 1
+        //    -1000345    "minus one"-connection in context 345
+        // 
+        //
+        bool minusOneConnection = false;
+        if (contextId < 0)
+        {
+            minusOneConnection = true;
+            m_contextId = ComposeContext(contextId);
+        }
+        else
+        {
+            m_contextId = contextId;
+        }
+       
+        if (m_contextId >= NodeParameters::NumberOfContexts())
+        {
+            std::wostringstream ostr;
+            ostr << "Trying to open a ";
+            if (minusOneConnection)
+            {
+                ostr << "\"minus one\" ";
+            }
+            ostr <<  "connection in context " << m_contextId << ", but the system is configured for max context id "
+                 << NodeParameters::NumberOfContexts()-1 << ". (The number of contexts is " << NodeParameters::NumberOfContexts()
+                 << "). Consider changing parameter Safir.Dob.NodeParameters.NumberOfContexts.";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+
         // If it is a garbage collected language the consumer reference counters must be incremented.
         // This must be done even if we already are connected.
         if (g_garbageCollected[lang])
@@ -155,8 +208,6 @@ namespace Internal
         {
             return;
         }
-
-        m_context = context;
 
         lllout << "Starting  with (" << connectionNameCommonPart << ", " << connectionNameInstancePart << ")" << std::endl;
 
@@ -187,12 +238,12 @@ namespace Internal
         m_connectionNameCommonPart = connectionNameCommonPart;
         m_connectionNameInstancePart = connectionNameInstancePart;
 
-        m_connectionName = ComposeName(m_connectionNameCommonPart, m_connectionNameInstancePart);
+        m_connectionName = ComposeName(m_contextId, m_connectionNameCommonPart, m_connectionNameInstancePart);
 
         ConnectResult result;
         ConnectionPtr connection;
 
-        Connections::Instance().Connect(m_connectionName, context, result, connection);
+        Connections::Instance().Connect(m_connectionName, m_contextId, minusOneConnection, result, connection);
 
         switch (result)
         {
@@ -206,6 +257,7 @@ namespace Internal
                 ServiceTypes::Initialize();
                 InjectionKindTable::Initialize();
                 EntityTypes::Initialize();
+                ContextSharedTable::Initialize();
             }
             break;
         case TooManyProcesses:
@@ -361,7 +413,10 @@ namespace Internal
         m_dispatcher.Clear();
 
         //shared queues are deleted by dose_main.
-        m_context = 0;
+
+        //AWI:? Can be removed?
+        //m_contextId = 0;
+        
         m_connection = NULL;
 
         // Drop any reference corresponding to a saved consumer (will be saved for
@@ -556,12 +611,12 @@ namespace Internal
         // Since UnregisterHandler doesn't have a consumer parameter, we don't know which language
         // we are dealing with. However, it is ok to call the check routine anyway, a non GC language
         // just won't have any references.
-        m_consumerReferences.DropHandlerRegistrationReferences(typeId,
-                                                               handlerId,
-                                                               boost::bind(&Dispatcher::InvokeDropReferenceCb,
-                                                                           m_dispatcher,
-                                                                           _1,
-                                                                           _2));
+        m_consumerReferences.DropAllHandlerRegistrationReferences(typeId,
+                                                                  handlerId,
+                                                                  boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                              m_dispatcher,
+                                                                              _1,
+                                                                              _2));
     }
 
     //----------------------------
@@ -1000,8 +1055,8 @@ namespace Internal
         {
             std::wostringstream ostr;
             ostr << "Object passed to InjectEntity is not an entity! (Type = "
-                << Typesystem::Operations::GetName(typeId) << " and instance = " << instanceId
-                << " and handler = " << handlerId << ")";
+                 << Typesystem::Operations::GetName(typeId) << " and instance = " << instanceId
+                 << " and handler = " << handlerId << ")";
             throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
@@ -1050,7 +1105,7 @@ namespace Internal
             throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        const DistributionData state = EntityTypes::Instance().ReadEntity(entityId);
+        const DistributionData state = EntityTypes::Instance().ReadEntity(entityId, m_connection->Id().m_contextId);
         currentBlob = state.GetBlob();
         currentState = state.GetReference();
         //Note that we count up the refcount by one here, which the proxy *has* to drop
@@ -1059,32 +1114,60 @@ namespace Internal
 
     bool Controller::IsCreated(const Dob::Typesystem::EntityId& entityId)
     {
-        return EntityTypes::Instance().IsCreated(entityId);
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling IsCreated for " << entityId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        return EntityTypes::Instance().IsCreated(entityId, m_connection->Id().m_contextId);
     }
+
+    InstanceIdPolicy::Enumeration Controller::GetInstanceIdPolicy(const Typesystem::TypeId typeId,
+                                                      const Typesystem::HandlerId& handlerId) const
+    {
+        if (!m_isConnected)
+        {
+            std::wostringstream ostr;
+            ostr << "This connection to the DOB is not open. (While calling GetInstanceIdPolicy for typeId=" << typeId << ")";
+            throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
+        }
+        if (!Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
+        {
+            std::wostringstream ostr;
+            ostr << "TypeId passed to GetInstanceIdPolicy is not an entity! (typeId = "
+                 << typeId << ")";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+        }
+        if (!EntityTypes::Instance().IsRegistered(typeId, handlerId, m_connection->Id().m_contextId))
+        {
+            std::wostringstream ostr;
+            ostr << "TypeId passed to GetInstanceIdPolicy is not registered by the passed HandlerId! (typeId = "
+                << typeId << "handlerId = " << handlerId.GetRawValue() << ")";
+            throw Safir::Dob::NotFoundException(ostr.str(),__WFILE__,__LINE__);
+        }
+
+        
+        ConnectionConsumerPair regOwner;
+        InstanceIdPolicy::Enumeration policy;
+        EntityTypes::Instance().GetRegisterer(typeId, handlerId, m_connection->Id().m_contextId, regOwner, policy);
+
+        return policy;
+    }
+
 
     Typesystem::Int32
     Controller::GetQueueCapacity(const ConnectionQueueId::Enumeration queue)
     {
-        switch (queue)
+        if (queue < 0 || queue >= ConnectionQueueId::Size())
         {
-        case ConnectionQueueId::MessageInQueue:
-            return Dob::QueueParameters::DefaultMessageInQueueLength();
-
-        case ConnectionQueueId::MessageOutQueue:
-            return Dob::QueueParameters::DefaultMessageOutQueueLength();
-
-        case ConnectionQueueId::RequestInQueue:
-            return Dob::QueueParameters::DefaultRequestInQueueLength();
-
-        case ConnectionQueueId::RequestOutQueue:
-            return Dob::QueueParameters::DefaultRequestOutQueueLength();
-
-        default:
             std::wostringstream ostr;
             ostr << "Getting queue capacity for queue " << queue << "is not implemented (or that is not a queue!";
             throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
-
         }
+
+        return m_connection->QueueCapacity(queue);
     }
 
     Typesystem::Int32
@@ -1144,8 +1227,18 @@ namespace Internal
              throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        const bool success = m_connection->GetMessageOutQueue().push
-            (DistributionData(message_tag, m_connection->Id(), channel, blob));
+        DistributionData msg(message_tag, m_connection->Id(), channel, blob);
+
+        if (ContextSharedTable::Instance().IsContextShared(msg.GetTypeId()) &&
+            m_connection->Id().m_contextId != 0)
+        {
+            std::wostringstream ostr;
+            ostr << "A message that has the property ContextShared can only be sent from context 0 . TypeId = "
+                 << Typesystem::Operations::GetName(typeId);
+             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);            
+        }
+
+        const bool success = m_connection->GetMessageOutQueue().push(msg);
 
         if (success)
         {
@@ -1225,7 +1318,9 @@ namespace Internal
 
         ConnectionConsumerPair regOwner;
         InstanceIdPolicy::Enumeration policy;
-        EntityTypes::Instance().GetRegisterer(typeId,handlerId,regOwner,policy);
+        const ContextId context =
+            ContextSharedTable::Instance().IsContextShared(typeId) ? 0 : m_connection->Id().m_contextId;
+        EntityTypes::Instance().GetRegisterer(typeId, handlerId, context, regOwner, policy);
         //Only check the policy if the handler is registered. Otherwise we let dose_main
         //send an unregistered-response.
         if (regOwner.connection != NULL)
@@ -1344,7 +1439,9 @@ namespace Internal
         {
             ConnectionConsumerPair regOwner;
             InstanceIdPolicy::Enumeration policy;
-            EntityTypes::Instance().GetRegisterer(request.GetTypeId(),request.GetHandlerId(),regOwner,policy);
+            const ContextId context =
+                ContextSharedTable::Instance().IsContextShared(request.GetTypeId()) ? 0 : request.GetSenderId().m_contextId;
+            EntityTypes::Instance().GetRegisterer(request.GetTypeId(), request.GetHandlerId(), context, regOwner, policy);
 
             if (policy == InstanceIdPolicy::RequestorDecidesInstanceId)
             {
@@ -1390,10 +1487,13 @@ namespace Internal
     //--------------------------------------------
     // Compose name of the form <node name>:<common part>:<instance part>
     //--------------------------------------------
-    const std::string Controller::ComposeName(const std::string& commonPart,
+    const std::string Controller::ComposeName(const ContextId contextId,
+                                              const std::string& commonPart,
                                               const std::string& instancePart)
     {
         std::string name(Dob::Typesystem::Utilities::ToUtf8(NodeParameters::Nodes(Dob::ThisNodeParameters::NodeNumber())->NodeName().GetVal()));
+        name.append(";");
+        name.append(boost::lexical_cast<std::string>(contextId));
         name.append(";");
         name.append(commonPart);
         name.append(";");
@@ -1558,6 +1658,7 @@ namespace Internal
 
     void Controller::ResumePostponed()
     {
+        m_postpone = false;
         m_postponedTypes.Clear();
         m_connection->SignalIn();
     }
@@ -2051,22 +2152,7 @@ namespace Internal
                 }
                 else
                 {
-                    //equal creation time
-
-                    if (currState.GetUndecrementedVersion() < lastState.GetVersion() ||
-                        lastState.GetVersion() < currState.GetUndecrementedVersion())
-                    {
-                        ENSURE(false, << "Got unexpected VersionNumbers and CreationTimes (in Ghost --> Ghost) for entity "
-                                      << lastState.GetEntityId()
-                                      << ". CreationTime = " << lastState.GetCreationTime()
-                                      << ", lastV = " << lastState.GetVersion()
-                                      << ", currV = " << currState.GetVersion());
-                    }
-                    else
-                    { //equal times!
-                        //ignore it
-                    }
-
+                    //Ghosts with equal creation times can be ignored.
                 }
             }
 
@@ -2421,7 +2507,8 @@ namespace Internal
         }
         else
         {
-            dispatchedInjection.SetSenderId(ConnectionId(ThisNodeParameters::NodeNumber(),-1));  // Correct node number but no connection id for delete states
+            // Correct node number and context, but no connection id for delete states
+            dispatchedInjection.SetSenderId(ConnectionId(ThisNodeParameters::NodeNumber(), connection->Id().m_contextId, -1));
             dispatchedInjection.SetExplicitlyDeleted(true);
         }
 
@@ -2729,15 +2816,29 @@ namespace Internal
 
         for (RegistrationVector::iterator it = revoked.begin(); it != revoked.end(); ++it)
         {
+            long nbrOfRef = 0;
+
+            if (g_garbageCollected[it->consumer.lang])
+            {
+                // Since the user can make dob calls that adds references in the OnRevokedRegistration
+                // callback, we must read the number of references before the callback and then remove
+                // exactly that number of references after the callback.
+                nbrOfRef = m_consumerReferences.GetHandlerRegistrationReferenceCounter(it->typeId,
+                                                                                       it->handlerId,
+                                                                                       it->consumer);
+            }
+
             m_dispatcher.InvokeOnRevokedRegistrationCb(it->consumer,
                                                        it->typeId,
                                                        it->handlerId);
 
-            // For garbage collected languages the references must be dropped
-            if (g_garbageCollected[it->consumer.lang])
+            // For garbage collected languages the references related to the revoked registration must be dropped.
+            if (nbrOfRef > 0)
             {
                 m_consumerReferences.DropHandlerRegistrationReferences(it->typeId,
                                                                        it->handlerId,
+                                                                       it->consumer,
+                                                                       nbrOfRef,
                                                                        boost::bind(&Dispatcher::InvokeDropReferenceCb,
                                                                                    m_dispatcher,
                                                                                    _1,
@@ -2778,7 +2879,7 @@ namespace Internal
         }
 
         m_entityIterators.insert(std::make_pair(newIteratorId, EntityTypes::Instance().
-            CreateEntityIterator(typeId,includeSubclasses,end)));
+            CreateEntityIterator(typeId, m_connection->Id().m_contextId, includeSubclasses, end)));
         return newIteratorId;
     }
 

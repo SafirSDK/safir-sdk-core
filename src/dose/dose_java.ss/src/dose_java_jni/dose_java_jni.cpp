@@ -1199,6 +1199,32 @@ void JNICALL Java_com_saabgroup_safir_dob_Interface_GetNumberOfInstances
 
 /*
  * Class:     com_saabgroup_safir_dob_Interface
+ * Method:    GetInstanceIdPolicy
+ * Signature: (IJJ[I[Z)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_Interface_GetInstanceIdPolicy
+(JNIEnv * env,
+ jclass,
+ jint _ctrl,
+ jlong _typeId,
+ jlong _handlerId,
+ jintArray _instanceIdPolicy,
+ jbooleanArray _success)
+{
+    bool success;
+    DotsC_EnumerationValue instanceIdPolicy;
+ 
+    DoseC_GetInstanceIdPolicy(_ctrl,
+                              _typeId,
+                              _handlerId,
+                              instanceIdPolicy,
+                              success);
+    SetJArray(env,_instanceIdPolicy,instanceIdPolicy);
+    SetJArray(env,_success,success);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_Interface
  * Method:    Postpone
  * Signature: (IZ[Z)V
  */

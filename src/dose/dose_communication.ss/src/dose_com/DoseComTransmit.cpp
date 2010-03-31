@@ -328,6 +328,7 @@ static THREAD_API Ack_Thread(void *)
     result = RxSock.CreateIpMulticastSocket(
                         1,0,    // Rx, and not Tx
                         0,      //:m_IpMultiCastAddr_nw,
+                        0,      // Rx only, no ttl
                         CConfig::m_Dose_Port_Ack,
                         0,      // Opt_so_rcvbuf_size,
                         0);     // Opt_So_Rcvbuf_Timeout,
@@ -1439,6 +1440,7 @@ static THREAD_API TxThread(void *)
     result = TxSock.CreateIpMulticastSocket(
                         0,1,    // not Rx, but Tx
                         CConfig::m_BaseIpMultiCastAddr_nw,
+                        CConfig::m_MulticastTtl,
                         0,      // m_Dose_Port_Ack_nw,
                         0,      // Opt_so_rcvbuf_size,
                         0);     // Opt_So_Rcvbuf_Timeout,

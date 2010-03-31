@@ -104,6 +104,10 @@ namespace Typesystem
         xml8v.push_back(0); //null termination
         DotsC_BytePointerDeleter deleter;
         DotsC_XmlToBlob(blob, deleter, &xml8v[0]);
+        if (blob == NULL)
+        {
+            throw IllegalValueException(L"Something is wrong with the XML-formated object", __WFILE__,__LINE__);
+        }
         ObjectPtr p = ObjectFactory::Instance().CreateObject(blob);
         deleter(blob);
         return p;

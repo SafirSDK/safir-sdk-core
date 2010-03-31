@@ -52,7 +52,7 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(bool) == 1);
         BOOST_STATIC_ASSERT(sizeof(VersionNumber) == sizeof(boost::uint16_t));
         BOOST_STATIC_ASSERT(sizeof(ResponseId) == 4);
-        BOOST_STATIC_ASSERT(sizeof(ConnectionId) == 12);
+        BOOST_STATIC_ASSERT(sizeof(ConnectionId) == 16);
 #ifdef REGISTER_TIMES
         BOOST_STATIC_ASSERT(sizeof(Header) == 4 + sizeof(ConnectionId) + 4);
 #else

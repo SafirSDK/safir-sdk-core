@@ -47,32 +47,22 @@ namespace Internal
         m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(L"Pending Registrations Timer",*this);
     }
 
-    bool IsRegistered(const Dob::Typesystem::TypeId typeId, const Dob::Typesystem::HandlerId& handlerId)
+        bool IsRegistered(const Dob::Typesystem::TypeId typeId, const Dob::Typesystem::HandlerId& handlerId, const ContextId contextId)
     {
         if (Safir::Dob::Typesystem::Operations::IsOfType(typeId,Safir::Dob::Service::ClassTypeId))
         {
-            return ServiceTypes::Instance().IsRegistered(typeId,handlerId);
+            return ServiceTypes::Instance().IsRegistered(typeId,handlerId, contextId);
         }
         else
         {
-            return EntityTypes::Instance().IsRegistered(typeId, handlerId);
+            return EntityTypes::Instance().IsRegistered(typeId, handlerId, contextId);
         }
 
     }
 
-    bool IsPendingAccepted(const Dob::Typesystem::TypeId typeId,const Typesystem::HandlerId& handlerId)
+    bool IsPendingAccepted(const Dob::Typesystem::TypeId typeId, const Typesystem::HandlerId& handlerId, const ContextId contextId)
     {
-        return Connections::Instance().IsPendingAccepted(typeId,handlerId);
-        /*if (Safir::Dob::Typesystem::Operations::IsOfType(typeId,Safir::Dob::Service::ClassTypeId))
-        {
-            return ServiceTypes::Instance().IsPendingAccepted(typeId,handlerId);
-        }
-        else
-        {
-            return false;
-            //TODO:
-//            return EntityTypes::Instance().IsRegistered(typeId);
-        }*/
+        return Connections::Instance().IsPendingAccepted(typeId, handlerId, contextId);
     }
 
     void PendingRegistrationHandler::TryPendingRegistration(const long requestId)
@@ -80,7 +70,7 @@ namespace Internal
         PendingRegistrations::iterator findIt = m_pendingRegistrations.find(requestId);
         if (findIt != m_pendingRegistrations.end())
         {
-            if (!IsRegistered(findIt->second.typeId,findIt->second.handlerId))
+            if (!IsRegistered(findIt->second.typeId, findIt->second.handlerId, findIt->second.connectionId.m_contextId))
             {
                 const bool completed = HandleCompletion(requestId);
                 if (!completed)
@@ -112,7 +102,7 @@ namespace Internal
 
                 lllout << "Inserted a new pending RegistrationRequest for type: "
                        << Dob::Typesystem::Operations::GetName(reg.typeId) << ", connection: " << connection->NameWithCounter()
-                       << ", handler: " << reg.handlerId.GetHandlerId() << std::endl;
+                       << ", handler: " << reg.handlerId.GetHandlerId()  << ", context: " << connection->Id().m_contextId << std::endl;
 
                 ENSURE(result.second, << "Inserting new pending registration request failed!");
 
@@ -280,6 +270,7 @@ namespace Internal
             {
                 const Typesystem::TypeId typeId = msg.GetTypeId();
                 const Typesystem::HandlerId handlerId = msg.GetHandlerId();
+                const ContextId contextId = msg.GetSenderId().m_contextId;
                 const LamportTimestamp timestamp = msg.GetPendingRequestTimestamp();
                 m_pendingRegistrationClock.UpdateCurrentTimestamp(timestamp);
                 const long requestId = msg.GetPendingRequestId();
@@ -288,14 +279,17 @@ namespace Internal
                          << ", requestId = " << requestId
                          << ", type = " << Dob::Typesystem::Operations::GetName(typeId)
                          << ", handler = " << handlerId
+                         << ", context = " << contextId
                          << std::setprecision(20) << ", timestamp = " << timestamp << std::endl;
 
 
                 //create a response
                 DistributionData resp(pending_registration_response_tag,
-                                      msg,
-                                      ConnectionId(ThisNodeParameters::NodeNumber(),-1),
-                                      true);
+                    msg,
+                    ConnectionId(ThisNodeParameters::NodeNumber(),
+                    contextId,
+                    -1),
+                    true);
 
                 //check if we have a reason to say no!
 
@@ -303,7 +297,7 @@ namespace Internal
                 for (PendingRegistrations::iterator it = m_pendingRegistrations.begin();
                      it != m_pendingRegistrations.end(); ++it)
                 {
-                    if (it->second.typeId == typeId && it->second.handlerId == handlerId)
+                    if (it->second.typeId == typeId && it->second.handlerId == handlerId && it->second.connectionId.m_contextId == contextId)
                     {
                         if (!it->second.rejected && it->second.lastRequestTimestamp < timestamp)
                         {//no, mine is older!
@@ -316,14 +310,14 @@ namespace Internal
                 }
 
                 //check that it is not registered on this machine
-                if (IsRegistered(typeId,handlerId))
+                if (IsRegistered(typeId, handlerId, contextId))
                 {
                     lllout << "No, that type/handler is registered on my machine!" <<std::endl;
                     resp.SetPendingResponse(false);
                 }
 
                 //Check if it is accepted but not yet registered.
-                if (IsPendingAccepted(typeId,handlerId))
+                if (IsPendingAccepted(typeId, handlerId, contextId))
                 {
                     lllout << "No, I've got an accepted pending for that ObjectId!" <<std::endl;
                     resp.SetPendingResponse(false);

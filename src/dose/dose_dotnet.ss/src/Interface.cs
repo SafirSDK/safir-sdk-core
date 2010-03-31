@@ -576,6 +576,14 @@ namespace Safir.Dob
                                                                out System.Int64 numberOfInstances,
                                                                out byte success);
 
+        //DoseC_GetInstanceIdPolicy
+        [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DoseC_GetInstanceIdPolicy(System.Int32 ctrl,
+                                                               System.Int64 typeId,
+                                                               System.Int64 handlerId,
+                                                               out System.Int32 instanceIdPolicy,
+                                                               out byte success);
+
         //DoseC_Postpone
         [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DoseC_Postpone(System.Int32 ctrl,

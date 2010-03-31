@@ -78,7 +78,17 @@ package Safir.Dob.Typesystem.Entity_Id is
    --
    procedure Remove_String (Self   : in out Entity_Id_Type);
 
-   -- Return a string representation of the entity id.
+   -- Convert an entity id to a string.
+   --
+   -- Will convert the entity id to a string on the form "(Safir.Dob.Entity, 10)".
+   -- This is meant to be used for debug output only.
+   -- If the type does not exist output will be on the form "(Unknown type: 32873478348, 10)"
+   -- If the string representation of the instance exists, the numerical instance id may be
+   -- replaced by that string.
+   --
+   -- The purpose of this function is for debug output and such.
+   -- The resulting string can *not* reliably be parsed or passed to constructors to recreate the same
+   -- entity id.
    --
    function To_String (Entity_Id : in Entity_Id_Type)
                        return Ada.Strings.Wide_Unbounded.Unbounded_Wide_String;

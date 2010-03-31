@@ -117,6 +117,7 @@ public:
     long CreateIpMulticastSocket(int            bForReceive,
                                  int            bForSend,
                                  IPADDR         IpMulticastAddr_nw,
+                                 int            multicastTtl,
                                  unsigned short Port,
                                  unsigned long  Opt_so_rcvbuf_size,
                                  unsigned long  Opt_So_Rcvbuf_Timeout);

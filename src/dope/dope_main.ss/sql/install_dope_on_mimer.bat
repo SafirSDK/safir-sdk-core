@@ -12,11 +12,12 @@ REM Improvements:   None.
 REM
 REM History:        2007-01-09      /stjth/   First version.
 REM                 2007-03-07       stlrha   Adapted for DOPE from the ALRT variant
+REM                 2010-01-19       staeh    Removed absolute path to BSQL.
 REM
 REM==============================================================
 
 REM username: sysadm  password: sysadm  script: install_dope.sql  database: SafirDb
-(echo sysadm & echo sysadm & echo read 'install_dope.sql'; & echo exit;) | "c:\Program Files\Mimer SQL 9.2\BSQL.exe" SafirDb
+(echo sysadm & echo sysadm & echo read 'install_dope.sql'; & echo exit;) | BSQL.exe SafirDb
 
 echo "Done..."
 

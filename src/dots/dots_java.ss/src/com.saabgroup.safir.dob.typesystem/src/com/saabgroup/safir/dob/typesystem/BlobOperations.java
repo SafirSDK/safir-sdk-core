@@ -3139,7 +3139,11 @@ public class BlobOperations {
                                       index,
                                       container.isChangedHere(),
                                       beginningOfUnusedInOut);
-            beginningOfUnused = container.getObjInternal().writeToBlob(childBlob, beginningOfUnusedInOut[0]);
+                                      
+            int childBeginningOfUnused = beginningOfUnusedInOut[0] - beginningOfUnused;
+            childBeginningOfUnused = container.getObjInternal().writeToBlob(childBlob, childBeginningOfUnused);
+
+            beginningOfUnused = beginningOfUnused + childBeginningOfUnused;
         }
         else if (container.isChangedHere())
         {

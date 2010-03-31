@@ -235,13 +235,14 @@ private
      Safir.Dob.Consumers.Service_Handler_Pending and
      Safir.Dob.Consumers.Requestor
    with record
-      Connection             : Safir.Dob.Secondary_Connections.Secondary_Connection;
-      Consumer_Number        : Integer;
-      Response_Sender        : Safir.Dob.Response_Senders.Response_Sender;
-      Latest_Request_Id      : Safir.Dob.Defs.Request_Id;
-      Callback_Actions       : Callback_Actions_Table;
-      Instance_Id_Policy_Map : Policy_Maps.Map;
-      Timestamp_Requestor    : aliased Timestamp_Requestor_T;
+      Connection                : Safir.Dob.Secondary_Connections.Secondary_Connection;
+      Consumer_Number           : Integer;
+      Response_Sender           : Safir.Dob.Response_Senders.Response_Sender;
+      Response_Sender_Discarded : Boolean;
+      Latest_Request_Id         : Safir.Dob.Defs.Request_Id;
+      Callback_Actions          : Callback_Actions_Table;
+      Instance_Id_Policy_Map    : Policy_Maps.Map;
+      Timestamp_Requestor       : aliased Timestamp_Requestor_T;
    end record;
 
 

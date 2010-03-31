@@ -50,8 +50,7 @@ namespace Internal
 
         explicit HandlerRegistrations(const Typesystem::TypeId typeId);
 
-        HandlerRegistrations(const Typesystem::TypeId typeId,
-                             const StateContainerPtr& entityContainerPtr);
+        void SetStateContainer(const StateContainerPtr& entityContainerPtr);
 
         /**
          * @name Handler registrations
@@ -163,12 +162,13 @@ namespace Internal
                                 const Dob::Typesystem::HandlerId&   handlerId,
                                 const RegisterTime                  regTime,
                                 const NodeNumber                    nodeNumber,
+                                const ContextId                     contextId,
                                 const UpgradeableStateResult&       upgradeableStateResult,
-                                bool&                               dontRelease);
+                                StatePtrHandling&                   statePtrHandling);
 
         void UnregisterAllInternal(const ConnectionPtr&             connection,
                                    const UpgradeableStateResult&    upgradeableStateResult,
-                                   bool&                            dontRelease,
+                                   StatePtrHandling&                statePtrHandling,
                                    bool&                            exitDispatch);
 
         void IsRegisteredInternal(const UpgradeableStateResult& upgradeableStateResult,
@@ -185,7 +185,7 @@ namespace Internal
         void DeleteEntity(const UpgradeableStateResult&        upgradeableStateResult,
                           const ConnectionPtr&                 connection,
                           const Dob::Typesystem::HandlerId&    handlerId,
-                          bool&                                dontRelease,
+                          StatePtrHandling&                    statePtrHandling,
                           bool&                                exitDispatch);
 
         void RegisterInjectionHandler(const ConnectionPtr&                connection,

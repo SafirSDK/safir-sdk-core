@@ -423,6 +423,10 @@ namespace Internal
         }
     }
 
+    //The swre library thread uses context 0 to connect to the dob. The strange looking negative number
+    //is a way to indicate that this is a connection with special privileges.
+    const Safir::Dob::Typesystem::Int32 SWRE_LIBRARY_THREAD_CONTEXT = -1000000;
+
     void
     Library::Run()
     {
@@ -439,7 +443,7 @@ namespace Internal
                 Safir::Utilities::ProcessInfo proc(ACE_OS::getpid());
                 connName = Safir::Dob::Typesystem::Utilities::ToWstring(proc.GetProcessName());
             }
-            m_connection->Open(connName,boost::lexical_cast<std::wstring>(ACE_OS::getpid()),-1,NULL, &dispatcher);
+            m_connection->Open(connName,boost::lexical_cast<std::wstring>(ACE_OS::getpid()),SWRE_LIBRARY_THREAD_CONTEXT,NULL, &dispatcher);
 
             m_threadStartingEvent.signal();
             StartBackdoor();

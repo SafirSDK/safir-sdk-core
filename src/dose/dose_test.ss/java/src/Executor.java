@@ -152,7 +152,8 @@ class Executor implements
         case ACTIVATE:
             if (action.identifier().getVal().equals(m_identifier))
             {
-                System.out.println("Activating");
+                m_defaultContext = action.context().getVal();
+                System.out.println("Activating (default context is " + m_defaultContext + ")");
                 if (!m_isActive)
                 {
                     m_controlConnection.registerEntityHandler
@@ -204,7 +205,7 @@ class Executor implements
                     oldStopHandler = null;
                 }
 
-                m_testConnection.open(m_testConnectionName, m_instanceString, 0, null, m_testDispatcher);
+                m_testConnection.open(m_testConnectionName, m_instanceString, m_defaultContext, null, m_testDispatcher);
                 try {
                     com.saabgroup.safir.dob.EntityProxy ep = m_controlConnection.read(m_partnerEntityId);
                     try {
@@ -332,9 +333,21 @@ class Executor implements
             {
                 if (m_isActive)
                 {
-                    m_testConnection.open(m_testConnectionName,
+                    int context = m_defaultContext;
+                    if (!action.context().isNull())
+                    {
+                        context = action.context().getVal();
+                    }
+
+                    String connName = m_testConnectionName;
+                    if (!action.connectionName().isNull())
+                    {
+                        connName = action.connectionName().getVal();
+                    }
+
+                    m_testConnection.open(connName,
                                           m_instanceString,
-                                          0,
+                                          context,
                                           m_testStopHandler,
                                           m_testDispatcher);
                 }
@@ -625,6 +638,7 @@ class Executor implements
     private boolean m_isDone = false;
     private boolean m_isActive = false;
     private Consumer[] m_consumers;
+    private int m_defaultContext = 0;
 
     private com.saabgroup.safir.dob.Connection m_controlConnection = new com.saabgroup.safir.dob.Connection();
     private com.saabgroup.safir.dob.Connection m_testConnection = new com.saabgroup.safir.dob.Connection();

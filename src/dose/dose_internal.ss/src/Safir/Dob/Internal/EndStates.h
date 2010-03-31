@@ -29,6 +29,7 @@
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <Safir/Dob/Internal/InternalExportDefs.h>
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 
 namespace Safir
@@ -69,7 +70,11 @@ namespace Internal
         void HandleTimeout();
     private:
         //Locking Policy: Just lock when using the m_states table.
-        boost::interprocess::interprocess_mutex m_lock;
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  END_STATES_LOCK_LEVEL,
+                                                  NO_MASTER_LEVEL_REQUIRED> EndStatesLock;
+        EndStatesLock m_lock;
+        typedef boost::interprocess::scoped_lock<EndStatesLock> ScopedEndStatesLock;
 
         typedef PairContainers<StateSharedPtr,Typesystem::Int64>::map StateTable;
 

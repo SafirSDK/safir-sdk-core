@@ -130,5 +130,14 @@
             <name>RedispatchCurrent</name>
             <type>Boolean</type>
         </member>
+        <member>
+            <name>Context</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>ConnectionName</name>
+            <type>String</type>
+            <maxLength>30</maxLength>
+        </member>
     </members>
 </class>

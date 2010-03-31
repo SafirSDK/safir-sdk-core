@@ -26,6 +26,7 @@
 #define __DOSE_CONNECTION_H__
 
 #include <Safir/Dob/Internal/ConnectionId.h>
+#include <Safir/Dob/ConnectionQueueId.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
 #include <Safir/Dob/Internal/InternalExportDefs.h>
 #include <Safir/Dob/Internal/InternalFwd.h>
@@ -40,6 +41,7 @@
 #include <Safir/Dob/Internal/SubscriptionQueue.h>
 #include <Safir/Dob/Internal/State.h>
 #include <Safir/Dob/Internal/ShmWrappers.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 
 namespace Safir
 {
@@ -57,7 +59,7 @@ namespace Internal
         Connection(const std::string & name,
                    const Typesystem::Int32 counter,
                    const NodeNumber node,
-                   const int context,
+                   const ContextId contextId,
                    const int pid);
 
         ~Connection();
@@ -204,6 +206,9 @@ namespace Internal
         void SetNodeDown() {m_nodeDown = 1;}
         bool NodeIsDown() const {return m_nodeDown != 0;}
 
+        size_t QueueCapacity(const ConnectionQueueId::Enumeration queue) const
+        {return m_queueCapacities[queue];}
+
     private:
 
         const ShmString m_nameWithoutCounter;
@@ -211,6 +216,10 @@ namespace Internal
         const Typesystem::Int32 m_counter;
         ConnectionId m_id;
         const int m_pid;
+
+        //a vector with ConnectionQueueId as index.
+        typedef Containers<size_t>::vector QueueCapacities;
+        const QueueCapacities m_queueCapacities;
 
         //set to true if dose_main is to be told of queue changes.
         //Also the dose_main event must be set for it to wake up.
@@ -264,13 +273,19 @@ namespace Internal
         //not need to do recursive locking.
         //Any attempts to take the lock recursively are to be regarded as
         //programming errors.
-        mutable boost::interprocess::interprocess_mutex m_lock;
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  CONNECTION_LOCK_LEVEL,
+                                                  NO_MASTER_LEVEL_REQUIRED> ConnectionLock;
+        mutable ConnectionLock m_lock;
+        typedef boost::interprocess::scoped_lock<ConnectionLock> ScopedConnectionLock;
 
         void Unsubscribe(const Typesystem::TypeId typeId);
 
         void Unregister(const std::pair<TypeHandlerKey, ConsumerId>& reg);
 
         const RegistrationVector GetRegistrations(const RegistrationsMap& registrations) const;
+
+        static const QueueCapacities GetQueueCapacities(const std::string & connectionName);
     };
 }
 }

@@ -72,7 +72,7 @@ namespace Internal
 
         void Connect(const char* connectionNameCommonPart,
                      const char* connectionNameInstancePart,
-                     long context,
+                     const ContextId contextId,
                      long lang,
                      const ConsumerId & connectionOwner,
                      const ConsumerId & dispatcher,
@@ -268,6 +268,9 @@ namespace Internal
 
         bool IsCreated(const Dob::Typesystem::EntityId& entityId);
 
+        InstanceIdPolicy::Enumeration GetInstanceIdPolicy(const Typesystem::TypeId typeId,
+                                                          const Typesystem::HandlerId& handlerId) const;
+
         Typesystem::Int32 GetQueueCapacity(const ConnectionQueueId::Enumeration queue);
 
         Typesystem::Int32 GetQueueSize(const ConnectionQueueId::Enumeration queue);
@@ -393,7 +396,8 @@ namespace Internal
         //--------------------------------
         // Compose decorated name from name parts
         //--------------------------------
-        static const std::string ComposeName(const std::string& commonPart,
+        static const std::string ComposeName(const ContextId    contextId,
+                                             const std::string& commonPart,
                                              const std::string& instancePart);
 
         //---------------------------------
@@ -458,7 +462,7 @@ namespace Internal
         //Id of this instance of Controller
         long m_ctrlId;
 
-        int m_context;
+        int m_contextId;
 
         std::string m_connectionName;
 

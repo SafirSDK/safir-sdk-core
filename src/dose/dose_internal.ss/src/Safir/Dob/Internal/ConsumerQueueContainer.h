@@ -27,6 +27,7 @@
 
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <Safir/Dob/Internal/ConsumerId.h>
@@ -122,7 +123,7 @@ namespace Internal
         //current version of boost::interprocess.
         QueuePtr AddQueue(const shared_ptr& _this, const ConsumerId& consumer, const size_t capacity)
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+            ScopedContainerLock lck(m_lock);
 
             typename Queues::const_iterator qIt = m_queues.find(consumer);
 
@@ -164,7 +165,7 @@ namespace Internal
             TempQColl tmpQColl;
 
             {
-                boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);// Hold lock while creating temporary copies of the shared_ptr:s
+                ScopedContainerLock lck(m_lock);// Hold lock while creating temporary copies of the shared_ptr:s
 
                 for (typename Queues::const_iterator qIt = m_queues.begin(); qIt != m_queues.end(); ++qIt)
                 {
@@ -193,7 +194,7 @@ namespace Internal
             QueuePtr tmp;
 
             {
-                boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);// Hold lock while creating temporary copy of the shared_ptr
+                ScopedContainerLock lck(m_lock);// Hold lock while creating temporary copy of the shared_ptr
                 typename Queues::const_iterator findIt = m_queues.find(consumer);
                 tmp = findIt->second.lock();
             } // lock released here
@@ -220,7 +221,7 @@ namespace Internal
 
         void RemoveQueue(const ConsumerId& consumer)
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+            ScopedContainerLock lck(m_lock);
             m_queues.erase(consumer);
         }
 
@@ -229,7 +230,11 @@ namespace Internal
         //There should be no recursive uses of this class' functions.
         //Any attempts to take the lock recursively are to be regarded as
         //programming errors.
-        mutable boost::interprocess::interprocess_mutex m_lock;
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  CONSUMER_QUEUE_CONTAINER_LOCK_LEVEL,
+                                                  NO_MASTER_LEVEL_REQUIRED> ContainerLock;
+        mutable ContainerLock m_lock;
+        typedef boost::interprocess::scoped_lock<ContainerLock> ScopedContainerLock;
 
         typedef typename boost::interprocess::weak_ptr
         <

@@ -10,11 +10,11 @@ FILE(GLOB resx_files *.resx)
 FILE(GLOB property_resx_files Properties/*.resx)
 
 
-SET(CS_FLAGS ${COMMON_CS_FLAGS} "-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dll,${SAFIR_RUNTIME}/bin/Safir.Dob.dll,${SAFIR_RUNTIME}/bin/dots_generated-dotnet.dll,${SAFIR_RUNTIME}/bin/swre_interface_dotnet.dll,System.Windows.Forms.dll,System.Drawing.dll" )
+SET(CS_FLAGS ${COMMON_CS_FLAGS} "-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dll,${SAFIR_RUNTIME}/bin/Safir.Dob.dll,${SAFIR_RUNTIME}/bin/dots_generated-dotnet.dll,${SAFIR_RUNTIME}/bin/Safir.SwReports.dll,System.Windows.Forms.dll,System.Drawing.dll" )
 
 ADD_CS_RESOURCES("${resx_files}" VehicleMmiCsWinForms .)
 ADD_CS_RESOURCES("${property_resx_files}" VehicleMmiCsWinForms.Properties ${CMAKE_CURRENT_SOURCE_DIR}/Properties)
-ADD_CS_EXECUTABLE(VehicleMmiCsWinForms "${sources}" ALL)
+ADD_CS_GUI_EXECUTABLE(VehicleMmiCsWinForms "${sources}" ALL)
 
 #The csharp build renames the exe to XXXX.csexe, so we rename it back when we install
 INSTALL(PROGRAMS ${target_EXE} 

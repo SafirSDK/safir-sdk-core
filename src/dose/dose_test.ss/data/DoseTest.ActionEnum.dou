@@ -52,6 +52,7 @@
     <value>DeleteAllInstances</value>
     <value>IsCreated</value>
     <value>GetNumberOfInstances</value>
+    <value>GetInstanceIdPolicy</value>
     <value>Read</value>
 
     <value>GetEntityIterator</value>

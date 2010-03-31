@@ -47,13 +47,9 @@ namespace Internal
         SetSubscriptionType();
     }
 
-    HandlerRegistrations::HandlerRegistrations(const Typesystem::TypeId typeId,
-                                               const StateContainerPtr& entityContainerPtr)
-        : m_typeId(typeId),
-          m_registrations(typeId),
-          m_entityContainerPtr(entityContainerPtr)
+    void HandlerRegistrations::SetStateContainer(const StateContainerPtr& entityContainerPtr)
     {
-        SetSubscriptionType();
+        m_entityContainerPtr = entityContainerPtr;
     }
 
     void HandlerRegistrations::SetSubscriptionType()
@@ -119,6 +115,7 @@ namespace Internal
                                                                       boost::cref(handlerId),
                                                                       regTime,
                                                                       Safir::Dob::ThisNodeParameters::NodeNumber(),
+                                                                      connection->Id().m_contextId,
                                                                       _2,
                                                                       _3));
     }
@@ -214,6 +211,16 @@ namespace Internal
 
                     currentRegisterer->RemoveRegistration(m_typeId, handlerId);
 
+                    if (currentRegisterer->IsLocal())
+                    {
+                        ENSURE(registerer.connection->Id() != currentRegisterer->Id(),
+                            << "Not allowed for a connection to register a handler that is already registered by the same connection!!!");
+
+                        // If the current handler is an injection handler some additional work must be done
+                        UnregisterInjectionHandler(currentRegisterer, handlerId);
+                    }
+
+
                     if (m_entityContainerPtr != NULL)
                     {
                         // This is an unregistration for en entity type so delete (or set as ghost) all instances
@@ -229,12 +236,6 @@ namespace Internal
 
                     if (currentRegisterer->IsLocal())
                     {
-                        ENSURE(registerer.connection->Id() != currentRegisterer->Id(),
-                            << "Not allowed for a connection to register a handler that is already registered by the same connection!!!");
-
-                        // If the current handler is an injection handler some additional work must be done
-                        UnregisterInjectionHandler(currentRegisterer, handlerId);
-
                         currentRegisterer->AddRevokedRegistration(m_typeId, handlerId, currentConsumer);
                         currentRegisterer->SignalIn();
                     }
@@ -286,11 +287,10 @@ namespace Internal
                                                   const Dob::Typesystem::HandlerId& handlerId,
                                                   const RegisterTime                registerTime,
                                                   const NodeNumber                  nodeNumber,
+                                                  const ContextId                   contextId,
                                                   const UpgradeableStateResult&     upgradeableStateResult,
-                                                  bool&                             dontRelease)
+                                                  StatePtrHandling&                 statePtrHandling)
     {
-        dontRelease = true;
-
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
 
         DistributionData currentRegState = statePtr->GetRealState();
@@ -298,12 +298,8 @@ namespace Internal
         if (connection != NULL && connection->IsLocal())
         {
             // A local connection that thinks it is the current registrerer. Is this so?
-            if (currentRegState.IsNoState())
-            {
-                dontRelease = false;
-                return;
-            }
-            else if(!currentRegState.IsRegistered() || connection->Id() != statePtr->GetConnection()->Id())
+            if (currentRegState.IsNoState() || !currentRegState.IsRegistered() ||
+                statePtr->GetConnection() == NULL || connection->Id() != statePtr->GetConnection()->Id())
             {
                 return;
             }
@@ -357,7 +353,7 @@ namespace Internal
         statePtr->SetConnection(NULL);
 
         DistributionData newRegState(registration_state_tag,
-                                     ConnectionId(nodeNumber, -1),
+                                     ConnectionId(nodeNumber, contextId, -1),
                                      m_typeId,
                                      handlerId,
                                      InstanceIdPolicy::HandlerDecidesInstanceId, // Dummy for an unreg state
@@ -376,7 +372,7 @@ namespace Internal
         }
         
         // Drop the reference from the state container to this state.
-        dontRelease = false;
+        statePtrHandling = ReleasePtr;
     }
 
     void HandlerRegistrations::UnregisterAll(const ConnectionPtr& connection)
@@ -391,7 +387,7 @@ namespace Internal
 
     void HandlerRegistrations::UnregisterAllInternal(const ConnectionPtr&           connection,
                                                      const UpgradeableStateResult&  upgradeableStateResult,
-                                                     bool&                          dontRelease,
+                                                     StatePtrHandling&              statePtrHandling,
                                                      bool&                          exitDispatch)
     {
         exitDispatch = false;
@@ -405,12 +401,9 @@ namespace Internal
                                statePtr->GetRealState().GetHandlerId(),
                                RegisterTime(),
                                statePtr->GetConnection()->Id().m_node,
+                               statePtr->GetConnection()->Id().m_contextId,
                                upgradeableStateResult,
-                               dontRelease);
-        }
-        else
-        {
-            dontRelease = true;
+                               statePtrHandling);
         }
     }
 
@@ -437,6 +430,7 @@ namespace Internal
                                                                   boost::cref(handlerId),
                                                                   registrationState.GetRegistrationTime(),
                                                                   registrationState.GetSenderId().m_node,
+                                                                  registrationState.GetSenderId().m_contextId,
                                                                   _2,
                                                                   _3));
     }
@@ -600,10 +594,9 @@ namespace Internal
     void HandlerRegistrations::DeleteEntity(const UpgradeableStateResult&        upgradeableStateResult,
                                             const ConnectionPtr&                 connection,
                                             const Dob::Typesystem::HandlerId&    handlerId,
-                                            bool&                                dontRelease,
+                                            StatePtrHandling&                    statePtrHandling,
                                             bool&                                exitDispatch)
     {
-        dontRelease = true;
         exitDispatch = false;
 
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
@@ -628,6 +621,7 @@ namespace Internal
             return;
         }
 
+        
         statePtr->SetConnection(NULL);
         statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0)));
 
@@ -640,7 +634,7 @@ namespace Internal
             case InjectionKind::None:
             {
                 newRealState = realState.GetEntityStateCopy(false);  // don't include blob
-                dontRelease = false;  // This state should not be kept
+                statePtrHandling = ReleasePtr;  // This state should not be kept
             }
             break;
 
@@ -650,6 +644,7 @@ namespace Internal
             {
                 newRealState = realState.GetEntityStateCopy(true);  // include blob
                 newRealState.SetEntityStateKind(DistributionData::Ghost);
+                statePtrHandling = KeepPtr;
             }
             break;
         }

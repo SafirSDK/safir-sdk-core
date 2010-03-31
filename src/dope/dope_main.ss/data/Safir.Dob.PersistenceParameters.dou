@@ -4,16 +4,28 @@
     <baseClass>Safir.Dob.Parametrization</baseClass>
     <parameters>
       <parameter>
-          <summary>Which backend should DOPE use.</summary>
+        <summary>True if persistence is used in this system.</summary>
+        <name>SystemHasPersistence</name>
+        <type>Boolean</type>
+        <value>True</value>
+      </parameter>
+      <parameter>
+        <summary>TestMode allow initial injections without persistence started. Only valid if SystemHasPersistence flag is set to false.</summary>
+        <name>TestMode</name>
+        <type>Boolean</type>
+        <value>False</value>
+      </parameter>
+      <parameter>
+          <summary>Which backend should DOPE use (Currently 'File' and 'Odbc' are supported).</summary>
           <name>Backend</name>
           <type>Safir.Dob.PersistenceBackend</type>
           <value>File</value>
       </parameter>
       <parameter>
-        <summary>Relative path from SAFIR_RUNTIME to where the File storage backend stores its data. Use forward slashes as directory separator!</summary>
+        <summary>Full path where the File storage backend stores its data. Use forward slashes as directory separator!</summary>
         <name>FileStoragePath</name>
         <type>String</type>
-        <value>data/binary/dope</value>
+        <value>/safir/runtime/data/binary/dope</value>
       </parameter>
      <parameter>
         <summary>The string to use for connection to the physical storage.</summary>
@@ -22,7 +34,7 @@
         <value>Driver={MIMER};Database=SafirDb;Uid=dopeuser;Pwd=dopeuser</value>
      </parameter>
       <parameter>
-        <summary>The size of the XmlData column in the database. Unit is bytes or unicode characters, I don't know. Ask JRJO.</summary>
+        <summary>The size of the XmlData column in the database.</summary>
         <name>XmlDataColumnSize</name>
         <type>Int32</type>
         <value>10485760</value>

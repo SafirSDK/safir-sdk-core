@@ -47,20 +47,42 @@
 #include <string>
 #include <Safir/Dob/ConnectionAspectInjector.h>
 
+//-------------------------------------------------------
+void FilePersistor::RemoveFile(const boost::filesystem::path& path) const
+{
+    try
+    {
+        if (boost::filesystem::exists(path))
+        {
+            m_debug << "Removing file " << path.string().c_str() << std::endl; 
+            boost::filesystem::remove(path);
+        }
+    }
+    catch (const boost::filesystem::filesystem_error &)
+    {
+        Safir::SwReports::SendErrorReport
+            (L"Storage error",
+            L"FilePersistor::RemoveFile",
+            std::wstring(L"Could not remove ")
+            + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
+            + L", maybe it is read-only!.");
+    }    
+}
+
 
 //-------------------------------------------------------
 const boost::filesystem::path GetStorageDirectory()
 {
-    const char * const safir_runtime = getenv("SAFIR_RUNTIME");
-    if (safir_runtime == NULL)
-    {
-        throw Safir::Dob::Typesystem::SoftwareViolationException(L"Failed to read environment variable 'SAFIR_RUNTIME'",__WFILE__,__LINE__);
-    }
-    const std::string str = safir_runtime;
+    //const char * const safir_runtime = getenv("SAFIR_RUNTIME");
+    //if (safir_runtime == NULL)
+    //{
+    //    throw Safir::Dob::Typesystem::SoftwareViolationException(L"Failed to read environment variable 'SAFIR_RUNTIME'",__WFILE__,__LINE__);
+    //}
+    //const std::string str = safir_runtime;
 
     try
     {
-        boost::filesystem::path path = boost::filesystem::path(str,boost::filesystem::native);
+        boost::filesystem::path path;// = boost::filesystem::path(str,boost::filesystem::native);
 
         path /= Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Dob::PersistenceParameters::FileStoragePath());
 
@@ -128,10 +150,11 @@ Filename2EntityIdAndHandlerId(const boost::filesystem::path & filename)
     }
     const std::string handler = leaf.substr(secondSeparatorIndex + 1,extIndex - secondSeparatorIndex - 1);
 
-    return std::make_pair(Safir::Dob::Typesystem::EntityId
+    return boost::make_tuple(Safir::Dob::Typesystem::EntityId
         (Safir::Dob::Typesystem::Operations::GetTypeId(Safir::Dob::Typesystem::Utilities::ToWstring(typeName)),
         Safir::Dob::Typesystem::InstanceId( boost::lexical_cast<Safir::Dob::Typesystem::Int64>(instance))),
-        Safir::Dob::Typesystem::HandlerId(boost::lexical_cast<Safir::Dob::Typesystem::Int64>(handler)));
+        Safir::Dob::Typesystem::HandlerId(boost::lexical_cast<Safir::Dob::Typesystem::Int64>(handler)),
+        Safir::Dob::Typesystem::Utilities::ToWstring(typeName));
 }
 
 //-------------------------------------------------------
@@ -140,11 +163,11 @@ EntityId2Filename(const FilePersistor::EntityIdAndHandlerId& entityAndHandler,
                   const std::string & extension)
 {
     std::ostringstream out;
-    out << Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Dob::Typesystem::Operations::GetName(entityAndHandler.first.GetTypeId()))
+    out << Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Dob::Typesystem::Operations::GetName(entityAndHandler.get<0>().GetTypeId()))
         << "@"
-        << entityAndHandler.first.GetInstanceId().GetRawValue()
+        << entityAndHandler.get<0>().GetInstanceId().GetRawValue()
         << "@"
-        << entityAndHandler.second.GetRawValue()
+        << entityAndHandler.get<1>().GetRawValue()
         << extension;
     return out.str();
 }
@@ -180,7 +203,7 @@ FilePersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
                      Safir::Dob::Typesystem::BinarySerialization & bin,
                      const bool /*update*/)
 {
-    const boost::filesystem::path path = GetFilePath(std::make_pair(entityId,handlerId));
+    const boost::filesystem::path path = GetFilePath(boost::make_tuple(entityId,handlerId, std::wstring()));
 
     std::ofstream file(path.string().c_str(),std::ios::out | std::ios::binary);
     if(file.good())
@@ -213,14 +236,14 @@ FilePersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
 void
 FilePersistor::Remove(const Safir::Dob::EntityProxy & entityProxy)
 {
-    const boost::filesystem::path path = GetFilePath(std::make_pair(entityProxy.GetEntityId(),entityProxy.GetOwner()));
+    const boost::filesystem::path path = GetFilePath(boost::make_tuple(entityProxy.GetEntityId(),entityProxy.GetOwner(), std::wstring()));
 
-    boost::filesystem::remove(path);
+    RemoveFile(path);
 }
 
 //-------------------------------------------------------
 Safir::Dob::EntityPtr
-RestoreBinary(const boost::filesystem::path & path)
+FilePersistor::RestoreBinary(const boost::filesystem::path & path) const
 {
     //TODO: use the same vector for all restores to save on allocation...
     Safir::Dob::Typesystem::BinarySerialization bin;
@@ -233,7 +256,7 @@ RestoreBinary(const boost::filesystem::path & path)
             std::wstring(L"File ")
             + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
             + L" is empty, removing it.");
-        boost::filesystem::remove(path);
+        RemoveFile(path);
         return Safir::Dob::EntityPtr(); //NULL
     }
     bin.resize(fileSize);
@@ -257,7 +280,7 @@ RestoreBinary(const boost::filesystem::path & path)
 
 //-------------------------------------------------------
 Safir::Dob::EntityPtr
-RestoreXml(const boost::filesystem::path & path)
+FilePersistor::RestoreXml(const boost::filesystem::path & path) const
 {
     //TODO: use the same string for all restores to save on allocation...
     std::wstring xml;
@@ -270,7 +293,7 @@ RestoreXml(const boost::filesystem::path & path)
             std::wstring(L"File ")
             + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
             + L" is empty, removing it.");
-        boost::filesystem::remove(path);
+        RemoveFile(path);
         return Safir::Dob::EntityPtr(); //NULL
     }
     xml.resize(fileSize);
@@ -289,24 +312,28 @@ RestoreXml(const boost::filesystem::path & path)
     file.close();
 
     //remove .xml file
-    if (boost::filesystem::exists(path))
+    RemoveFile(path);
+
+    Safir::Dob::EntityPtr entityPtr;
+    try
     {
-        try
-        {
-            boost::filesystem::remove(path);
-        }
-        catch (const boost::filesystem::filesystem_error &)
-        {
-            Safir::SwReports::SendErrorReport
-                (L"Storage error",
-                L"FilePersistor::RestoreXml",
-                std::wstring(L"Could not remove ")
-                + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
-                + L", maybe it is read-only!.");
-        }
+        entityPtr = boost::dynamic_pointer_cast<Safir::Dob::Entity>(Safir::Dob::Typesystem::Serialization::ToObject(xml));
+    }
+    catch(const Safir::Dob::Typesystem::IllegalValueException &)
+    {
+        Safir::SwReports::SendErrorReport
+            (L"Storage error",
+            L"FilePersistor::RestoreXml",
+            std::wstring(L"Could not restore file ")
+            + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
+            + L", removing it. The corresponding bin file is also removed if it exists");
+        
+        RemoveFile(path);
+
+        RemoveFile(boost::filesystem::change_extension(path,".bin")); 
     }
 
-    return  boost::dynamic_pointer_cast<Safir::Dob::Entity>(Safir::Dob::Typesystem::Serialization::ToObject(xml));;
+    return entityPtr;
 }
 
 //-------------------------------------------------------
@@ -317,15 +344,29 @@ FilePersistor::RestoreAll()
     for (boost::filesystem::directory_iterator it (m_storagePath);
         it != boost::filesystem::directory_iterator(); ++it)
     {
+        if (!boost::filesystem::exists(*it))
+        {
+            // The file has been removed in an earlier step
+            continue;
+        }
+
         try
         {
-            const EntityIdAndHandlerId pair = Filename2EntityIdAndHandlerId(*it);
-            TypeIdSet::const_iterator findIt = GetPersistentTypes().find(pair.first.GetTypeId());
+            const EntityIdAndHandlerId tuple = Filename2EntityIdAndHandlerId(*it);
+            TypeIdSet::const_iterator findIt = GetPersistentTypes().find(tuple.get<0>().GetTypeId());
             if (findIt == GetPersistentTypes().end())
             { //not persistent any more, remove it
 
                 m_debug << "File " << it->string().c_str() << " is not persistent in this configuration, removing" << std::endl;
-                boost::filesystem::remove(*it);
+
+                Safir::SwReports::SendErrorReport
+                        (L"Storage error",
+                         L"FilePersistor::RestoreAll",
+                         L"Type " + tuple.get<2>()
+                         + L" is not persistent in this configuration, removing the corresponding xml and bin files"); 
+                
+                RemoveFile(boost::filesystem::change_extension(*it,".xml"));
+                RemoveFile(boost::filesystem::change_extension(*it,".bin"));
             }
             else
             {
@@ -336,8 +377,8 @@ FilePersistor::RestoreAll()
                 {
                     if (!boost::filesystem::exists(boost::filesystem::change_extension(*it,".bin")))
                     {
-                        entity = RestoreXml(*it);
                         m_debug << "This XML file is not an overlay, it is 'alone': " << it->string().c_str() << std::endl;
+                        entity = RestoreXml(*it);
                         store = true;
                     }
                 }
@@ -361,12 +402,12 @@ FilePersistor::RestoreAll()
                 { //if it was an xml file we want to store it as binary since the xml was removed
                     Safir::Dob::Typesystem::BinarySerialization bin;
                     Safir::Dob::Typesystem::Serialization::ToBinary( entity, bin);
-                    Store(pair.first, pair.second, bin, true);
+                    Store(tuple.get<0>(), tuple.get<1>(), bin, true);
                 }
 
-                m_debug << "Restored object " << pair.first << " with handlerId " << pair.second << std::endl;
+                m_debug << "Restored object " << tuple.get<0>() << " with handlerId " << tuple.get<1>() << std::endl;
 
-                injector.InitialSet(entity, pair.first.GetInstanceId(), pair.second );
+                injector.InitialSet(entity, tuple.get<0>().GetInstanceId(), tuple.get<1>() );
                 m_debug << "InitialSet successful"<<std::endl;
             }
         }
@@ -378,7 +419,7 @@ FilePersistor::RestoreAll()
                         std::wstring(L"Could not restore file ")
                         + Safir::Dob::Typesystem::Utilities::ToWstring(it->string())
                         + L" removing it.");
-            boost::filesystem::remove(*it);
+            RemoveFile(*it);
         }
         catch (const boost::filesystem::filesystem_error & e)
         {

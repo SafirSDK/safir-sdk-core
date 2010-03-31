@@ -48,7 +48,6 @@ public:
 
 protected:
     virtual void * GetValuePtr();
-    virtual unsigned long GetColumnSize();
 
 private:
     typedef Parameter<SQL_C_WCHAR, sSqlType, std::wstring *, sInputOutputType, 0> InstantiatedParameter;
@@ -75,14 +74,8 @@ inline void * NonBufferedWideStringParameter<sSqlType,sInputOutputType>::GetValu
 template<short sSqlType, short sInputOutputType>
 inline void NonBufferedWideStringParameter<sSqlType,sInputOutputType>::SetValue(std::wstring * strValue)
 {
-    InstantiatedParameter::SetValue( strValue );
-    InstantiatedParameter::m_lpLengthOrInd = SQL_NTS;
-}
-
-template<short sSqlType, short sInputOutputType>
-inline unsigned long NonBufferedWideStringParameter<sSqlType,sInputOutputType>::GetColumnSize()
-{
-    return InstantiatedParameter::m_nSize - sizeof(wchar_t); // Do not count end-of-string char in column size
+    InstantiatedParameter::m_value = strValue;
+    InstantiatedParameter::m_nSize = static_cast<int>(strValue->size() * sizeof (wchar_t));
 }
 
 } // End namespace Internal

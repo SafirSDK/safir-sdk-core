@@ -29,7 +29,6 @@
 #include <string>
 #include <Safir/Dob/Connection.h>
 #include <DoseTest/Items/TestCase.h>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <iostream>
 #include <fstream>
 #include <list>
@@ -38,13 +37,26 @@
 #include "TestCaseReader.h"
 #include "InjectionTimestampHandler.h"
 
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4702)
+#endif
+#include <boost/date_time/posix_time/posix_time.hpp>
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
 class Sequencer :
     public Safir::Dob::MessageSender,
     public Safir::Dob::Requestor,
     private boost::noncopyable
 {
 public:
-    Sequencer(const int startTc, const int stopTc, const Languages & languages);
+    Sequencer(const int startTc,
+              const int stopTc,
+              const Languages & languages,
+              const bool noTimeout,
+              const int contextId);
     ~Sequencer();
 
     void Tick();
@@ -101,6 +113,7 @@ private:
     boost::posix_time::ptime m_lastCleanupTime;
 
     const Languages m_languages;
+    const bool m_noTimeout;
 
     std::map<Safir::Dob::RequestId,int> m_dumpRequestIds;
 
@@ -109,6 +122,8 @@ private:
 
     //no need to do anything with this. Constructor sets up everything.
     InjectionTimestampHandler m_injectionTimestampHandler;
+
+    int m_contextId;
 };
 
 char const * const StateNames []=

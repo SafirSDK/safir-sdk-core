@@ -131,6 +131,21 @@
             </members>
           </object>
         </arrayElement>
+        <arrayElement>
+          <object>
+            <name>DoseTest.Action</name>
+            <members>
+              <member>
+                <name>ActionKind</name>
+                <value>DoseTest.ActionEnum.Sleep</value>
+              </member>
+              <member>
+                <name>SleepDuration</name>
+                <value>3</value>
+              </member>
+            </members>
+          </object>
+        </arrayElement>        
       </arrayElements>
     </member>
   </members>

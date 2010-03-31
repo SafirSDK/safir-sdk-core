@@ -43,7 +43,7 @@ public:
     /** Destructor */
     virtual ~PersistenceHandler();
 
-    void Start();
+    void Start(bool restore);
 
 
     // From Safir::Dob::EntitySubscriber

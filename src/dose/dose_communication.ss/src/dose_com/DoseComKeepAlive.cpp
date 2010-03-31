@@ -439,6 +439,7 @@ static THREAD_API KeepAlive_Thread(void *)
     result = TxRxSock.CreateIpMulticastSocket(
                         1,1,    //Rx, and Tx
                         CConfig::m_BaseIpMultiCastAddr_nw,
+                        CConfig::m_MulticastTtl,
                         CConfig::m_Dose_KeepAlivePort,
                         0,      // Opt_so_rcvbuf_size,
                         800);   //  Opt_So_Rcvbuf_Timeout,

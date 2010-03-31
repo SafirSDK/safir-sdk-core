@@ -57,6 +57,7 @@ with Safir.Dob.Entity_Iterators;
 with Safir.Dob.Typesystem.Blob_Operations;
 with Safir.Dob.Typesystem.Channel_Id;
 with Safir.Dob.Typesystem.Container_Instantiations;
+with Safir.Dob.Typesystem.Binary_Container;
 with Safir.Dob.Typesystem.Entity_Id;
 with Safir.Dob.Typesystem.Instance_Id;
 with Safir.Dob.Typesystem.Members;
@@ -106,28 +107,25 @@ package body Consumers is
    end Need_Binary_Check;
 
    procedure Check_Binary_Member_Internal
-      (Container          : in     Safir.Dob.Typesystem.Container_Instantiations.Binary_Container.Container_Proxy;
+      (Container          : in     Safir.Dob.Typesystem.Binary_Container.Container_Proxy;
        Needs_Modification :    out Boolean) is
       use type Ada.Containers.Count_Type;
    begin
       if not Container.Is_Null and then Container.Get_Val.Length > 10000 then -- only check for large sizes
          if Container.Get_Val.Length /= 10 * 1024 * 1024 then
             Logger.Put_Line ("Binary is wrong size!");
+         else
+            declare
+               use Safir.Dob.Typesystem.Binary_Vectors;
+            begin
+               for I in 0 .. Container.Get_Val.Length - 1 loop
+                  if Container.Get_Val.Element (Safir.Dob.Typesystem.Int_32 (I)) /= Safir.Dob.Typesystem.Int_8 (((I + 128) mod 256) - 128) then
+                     Logger.Put_Line ("Bad value in binary!");
+                     exit;
+                  end if;
+               end loop;
+            end;
          end if;
-         --TODO: Due to the slowness of binary_vectors as described in #734 we can't check the contents.
-         -- just pretend everything went well.
---           else
---              declare
---                 use Safir.Dob.Typesystem.Binary_Vectors;
---              begin
---                 for I in 0 .. Container.Get_Val.Length loop
---                    if Container.Get_Val.Element (Safir.Dob.Typesystem.Int_32 (I)) /= Safir.Dob.Typesystem.Int_8 (((I + 128) mod 256) - 128) then
---                       Logger.Put_Line ("Bad value in binary!");
---                       exit;
---                    end if;
---                 end loop;
---              end;
---           end if;
 
          -- we do NOT want to print all this out to stdout, so we set it to null once we've checked it.
          Container.Set_Null;
@@ -471,6 +469,7 @@ package body Consumers is
    begin
       Self.Connection.Exit_Dispatch;
       Self.Response_Sender := Response_Sender;
+      Self.Response_Sender_Discarded := False;
       Self.Execute_Callback_Actions (Safir.Dob.Callback_Id.On_Create_Request);
 
       if Need_Binary_Check (Entity_Req) then
@@ -500,22 +499,24 @@ package body Consumers is
          Logger.Put_Line (UWS ("  Request    = ") & Xml);
          Logger.New_Line;
 
-         Self.Connection.Set_All
-           (Entity_Req,
-            Safir.Dob.Typesystem.Instance_Id.Create_Instance_Id (Policy_Val.Instance),
-            Entity_Request_Proxy.Get_Receiving_Handler_Id);
+         if not Self.Response_Sender_Discarded then
+            Self.Connection.Set_All
+              (Entity_Req,
+               Safir.Dob.Typesystem.Instance_Id.Create_Instance_Id (Policy_Val.Instance),
+               Entity_Request_Proxy.Get_Receiving_Handler_Id);
 
-         Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": "
-                          & UWS ("Handler created instance ") & From_Utf_8 (Safir.Dob.Typesystem.Int_64'Image (Policy_Val.Instance)));
+            Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": "
+                             & UWS ("Handler created instance ") & From_Utf_8 (Safir.Dob.Typesystem.Int_64'Image (Policy_Val.Instance)));
 
-         Resp := Safir.Dob.Entity_Id_Response.Create;
-         Resp.Ref.Assigned.Set_Val (Safir.Dob.Typesystem.Entity_Id.Create_Entity_Id
-           (Entity_Request_Proxy.Get_Type_Id,
-              Safir.Dob.Typesystem.Instance_Id.Create_Instance_Id (Policy_Val.Instance)));
+            Resp := Safir.Dob.Entity_Id_Response.Create;
+            Resp.Ref.Assigned.Set_Val (Safir.Dob.Typesystem.Entity_Id.Create_Entity_Id
+              (Entity_Request_Proxy.Get_Type_Id,
+                 Safir.Dob.Typesystem.Instance_Id.Create_Instance_Id (Policy_Val.Instance)));
 
-         Response_Sender.Send (Resp);
-         Policy_Val.Instance := Policy_Val.Instance + 1;
-         Self.Instance_Id_Policy_Map.Replace_Element (Cursor, Policy_Val);
+            Response_Sender.Send (Resp);
+            Policy_Val.Instance := Policy_Val.Instance + 1;
+            Self.Instance_Id_Policy_Map.Replace_Element (Cursor, Policy_Val);
+         end if;
 
       else
          Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": "
@@ -527,10 +528,12 @@ package body Consumers is
          Logger.Put_Line (UWS ("  Request    = ") & Xml);
          Logger.New_Line;
 
-         Self.Connection.Set_All
-           (Entity_Req,
-            Entity_Request_Proxy.Get_Instance_Id,
-            Entity_Request_Proxy.Get_Receiving_Handler_Id);
+         if not Self.Response_Sender_Discarded then
+            Self.Connection.Set_All
+              (Entity_Req,
+               Entity_Request_Proxy.Get_Instance_Id,
+               Entity_Request_Proxy.Get_Receiving_Handler_Id);
+         end if;
       end if;
 
 
@@ -560,6 +563,7 @@ package body Consumers is
    begin
       Self.Connection.Exit_Dispatch;
       Self.Response_Sender := Response_Sender;
+      Self.Response_Sender_Discarded := False;
       Self.Execute_Callback_Actions (Safir.Dob.Callback_Id.On_Update_Request);
 
       if Need_Binary_Check (Req) then
@@ -577,10 +581,12 @@ package body Consumers is
       Logger.Put_Line (UWS ("  Request    = ") & Xml);
       Logger.New_Line;
 
-      Self.Connection.Set_Changes
-        (Req,
-         Entity_Request_Proxy.Get_Instance_Id,
-         Entity_Request_Proxy.Get_Receiving_Handler_Id);
+      if not Self.Response_Sender_Discarded then
+         Self.Connection.Set_Changes
+           (Req,
+            Entity_Request_Proxy.Get_Instance_Id,
+            Entity_Request_Proxy.Get_Receiving_Handler_Id);
+      end if;
 
       if not Response_Sender.Is_Done then
          declare
@@ -605,6 +611,7 @@ package body Consumers is
    begin
       Self.Connection.Exit_Dispatch;
       Self.Response_Sender := Response_Sender;
+      Self.Response_Sender_Discarded := False;
       Self.Execute_Callback_Actions (Safir.Dob.Callback_Id.On_Delete_Request);
 
       Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": "
@@ -615,9 +622,11 @@ package body Consumers is
       Logger.Put_Line (UWS ("  HandlerStr = ") & Safir.Dob.Typesystem.Handler_Id.To_String (Entity_Request_Proxy.Get_Receiver_With_String_Representation));
       Logger.New_Line;
 
-      Self.Connection.Delete
-        (Entity_Request_Proxy.Get_Entity_Id,
-         Entity_Request_Proxy.Get_Receiving_Handler_Id);
+      if not Self.Response_Sender_Discarded then
+         Self.Connection.Delete
+           (Entity_Request_Proxy.Get_Entity_Id,
+            Entity_Request_Proxy.Get_Receiving_Handler_Id);
+      end if;
 
       if not Response_Sender.Is_Done then
          declare
@@ -965,8 +974,16 @@ package body Consumers is
       Callback : in Safir.Dob.Callback_Id.Enumeration) is
 
       procedure Execute (Position : in Action_Vectors.Cursor) is
+         Action_Kind : constant Dose_Test.Action_Enum.Enumeration :=
+                         Action_Vectors.Element (Position).Ref.Action_Kind.Get_Val;
+         use type Dose_Test.Action_Enum.Enumeration;
       begin
          Execute_Action (Self, Action_Vectors.Element (Position));
+
+         if Action_Kind = Dose_Test.Action_Enum.Reset_Callback_Actions then
+            return;
+         end if;
+
       end Execute;
 
    begin
@@ -999,6 +1016,7 @@ package body Consumers is
 
                when Dose_Test.Action_Enum.Discard_Response_Sender =>
                   Self.Response_Sender.Discard;
+                  Self.Response_Sender_Discarded := True;
 
                when Dose_Test.Action_Enum.Register_Entity_Handler =>
                   declare
@@ -1357,6 +1375,17 @@ package body Consumers is
                       (Action_Ptr.Type_Id.Get_Val,
                          Action_Ptr.Handler.Get_Val,
                          Action_Ptr.Include_Subclasses.Get_Val))), Ada.Strings.Both));
+
+               when Dose_Test.Action_Enum.Get_Instance_Id_Policy =>
+                  Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": "
+                    & "GetInstanceIdPolicy (type = "
+                    & Safir.Dob.Typesystem.Operations.Get_Name (Action_Ptr.Type_Id.Get_Val)
+                    & ", handler = " & Safir.Dob.Typesystem.Handler_Id.To_String (Action_Ptr.Handler.Get_Val)
+                    & "): "
+                    & Trim (Safir.Dob.Typesystem.Operations.Get_Enumeration_Value_Name (
+                      Enumeration_Id => Safir.Dob.Instance_Id_Policy.Enumeration_Type_Id,
+                      Value          => Safir.Dob.Instance_Id_Policy.Enumeration'Pos (Self.Connection.Get_Instance_Id_Policy (Action_Ptr.Type_Id.Get_Val, Action_Ptr.Handler.Get_Val)))
+                      , Ada.Strings.Both));
 
                when Dose_Test.Action_Enum.Get_Queue_Capacity =>
                   Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": "

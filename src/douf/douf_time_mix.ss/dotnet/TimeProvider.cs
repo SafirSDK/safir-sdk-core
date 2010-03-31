@@ -32,17 +32,12 @@ namespace Safir.Time
     /// </summary>
     public class TimeProvider
     {
-#if DEBUG
-        [DllImport("douf_time_libraryd.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "DoufTimeC_GetUtcTime")]
-        internal static extern void GetUtcTime(ref double utcTime);
-        [DllImport("douf_time_libraryd.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "DoufTimeC_GetLocalTimeOffset")]
-        internal static extern void GetLocalTimeOffset(ref Int32 offset);
-#else
+
         [DllImport("douf_time_library.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "DoufTimeC_GetUtcTime")]
         internal static extern void GetUtcTime(ref double utcTime);
         [DllImport("douf_time_library.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "DoufTimeC_GetLocalTimeOffset")]
         internal static extern void GetLocalTimeOffset(ref Int32 offset);
-#endif
+
         private static System.DateTime _1_JAN_1970 = new DateTime( 1970, 1, 1 );
 
         /// <summary>

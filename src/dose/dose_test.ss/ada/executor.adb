@@ -292,7 +292,8 @@ package body Executor is
 
          when Dose_Test.Action_Enum.Activate =>
             if Action.Ref.Identifier.Get_Val = Self.Identifier then
-               Put_Line ("Activating");
+               Self.Default_Context := Action.Ref.Context.Get_Val;
+               Put_Line ("Activating (default context is " & Safir.Dob.Typesystem.Int_32'Image (Self.Default_Context) & ")");
                if not Self.Is_Active then
 
                   Self.Control_Connection.Register_Entity_Handler
@@ -339,7 +340,7 @@ package body Executor is
                Self.Test_Connection.Open
                  (Self.Test_Connection_Name,
                   Self.Instance_String,
-                  0,
+                  Self.Default_Context,
                   null,
                   Self.Test_Dispatcher'Access);
 
@@ -363,12 +364,27 @@ package body Executor is
 
          when Dose_Test.Action_Enum.Open =>
             if Self.Is_Active then
-               Self.Test_Connection.Open
-                 (Self.Test_Connection_Name,
-                  Self.Instance_String,
-                  0,
-                  null,
-                  Self.Test_Dispatcher'Access);
+               declare
+                  Context : Safir.Dob.Typesystem.Int_32 := Self.Default_Context;
+                  Conn_Name : Ada.Strings.Wide_Unbounded.Unbounded_Wide_String :=
+                     Self.Test_Connection_Name;
+               begin
+                  if not Action.Ref.Context.Is_Null then
+                     Context := Action.Ref.Context.Get_Val;
+                  end if;
+
+                  if not Action.Ref.Connection_Name.Is_Null then
+                     Conn_Name := Action.Ref.Connection_Name.Get_Val;
+                  end if;
+
+                  Self.Test_Connection.Open
+                    (Conn_Name,
+                     Self.Instance_String,
+                     Context,
+                     null,
+                     Self.Test_Dispatcher'Access);
+               end;
+
             end if;
 
          when Dose_Test.Action_Enum.Close =>

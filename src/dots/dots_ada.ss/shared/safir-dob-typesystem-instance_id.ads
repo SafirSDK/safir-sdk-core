@@ -82,6 +82,12 @@ package Safir.Dob.Typesystem.Instance_Id is
    function "<" (L, R : Instance_Id_Type) return Boolean;
 
    -- Return a string representation of the instance id.
+   -- If the string that created the instance id is available this is the string that will be returned,
+   -- otherwise it is the number that will be returned.
+   --
+   -- The purpose of this function is for debug output and such.
+   -- The resulting string can *not* reliably be used in the "string constructor" for InstanceId to
+   -- recreate the same InstanceId.
    --
    function To_String (Self : in Instance_Id_Type) return Unbounded_Wide_String;
 

@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Henrik Sundberg / sthesu
 *
 *******************************************************************************
@@ -39,7 +39,7 @@ namespace dose_test_dotnet
         {
             m_instance = int.Parse(args[0]);
             m_instanceString = m_instance.ToString();
-            m_partnerEntityId = new Safir.Dob.Typesystem.EntityId(DoseTest.Partner.ClassTypeId, 
+            m_partnerEntityId = new Safir.Dob.Typesystem.EntityId(DoseTest.Partner.ClassTypeId,
                                                                   new Safir.Dob.Typesystem.InstanceId(m_instance));
             m_controlConnectionName = m_identifier + "_control";
             m_testConnectionName = "partner_test_connection";
@@ -87,13 +87,13 @@ namespace dose_test_dotnet
                         }
                         catch (Safir.Dob.Typesystem.Exception exc)
                         {
-                            Logger.Instance.WriteLine("Caught Exception when Dispatching controlConnection: " + 
+                            Logger.Instance.WriteLine("Caught Exception when Dispatching controlConnection: " +
                                 exc.GetType().Name);
                             System.Console.WriteLine("Exception info: " + exc);
                         }
                         catch (Safir.Dob.Typesystem.FundamentalException exc)
                         {
-                            Logger.Instance.WriteLine("Caught FundamentalException when Dispatching controlConnection: " + 
+                            Logger.Instance.WriteLine("Caught FundamentalException when Dispatching controlConnection: " +
                                 exc.GetType().Name);
                             System.Console.WriteLine("Exception info: " + exc);
                         }
@@ -141,7 +141,8 @@ namespace dose_test_dotnet
                 case DoseTest.ActionEnum.Enumeration.Activate:
                     if (action.Identifier == m_identifier)
                     {
-                        System.Console.WriteLine("Activating");
+                        m_defaultContext = action.Context.Val;
+                        System.Console.WriteLine("Activating (default context is " + m_defaultContext + ")");
                         if (!m_isActive)
                         {
                             m_controlConnection.RegisterEntityHandler(m_partnerEntityId.TypeId,
@@ -191,7 +192,7 @@ namespace dose_test_dotnet
                             oldStopHandler = null;
                         }
 
-                        m_testConnection.Open(m_testConnectionName, m_instanceString, 0, null, m_testDispatcher);
+                        m_testConnection.Open(m_testConnectionName, m_instanceString, m_defaultContext, null, m_testDispatcher);
                         using (Safir.Dob.EntityProxy ep = m_controlConnection.Read(m_partnerEntityId))
                         {
                             DoseTest.Partner partner = ep.Entity as DoseTest.Partner;
@@ -245,7 +246,7 @@ namespace dose_test_dotnet
                         }
                     }
                     break;
-                    
+
                 case DoseTest.ActionEnum.Enumeration.CloseAndCheckReferences:
                     if (m_isActive)
                     {
@@ -308,12 +309,23 @@ namespace dose_test_dotnet
                         System.GC.WaitForPendingFinalizers();
                     }
                     break;
-                    
+
                 case DoseTest.ActionEnum.Enumeration.Open:
                     {
                         if (m_isActive)
                         {
-                            m_testConnection.Open(m_testConnectionName, m_instanceString, 0, m_testStopHandler, m_testDispatcher);
+                            System.Int32 context = m_defaultContext;
+                            if (!action.Context.IsNull())
+                            {
+                                context = action.Context.Val;
+                            }
+
+                            string connName = m_testConnectionName;
+                            if (!action.ConnectionName.IsNull())
+                            {
+                                connName = action.ConnectionName.Val;
+                            }
+                            m_testConnection.Open(connName, m_instanceString, context, m_testStopHandler, m_testDispatcher);
                         }
                     }
                     break;
@@ -560,6 +572,7 @@ namespace dose_test_dotnet
         private bool m_isDone = false;
         private bool m_isActive = false;
         private Consumer[] m_consumers;
+        private int m_defaultContext = 0;
 
         private Safir.Dob.Connection m_controlConnection = new Safir.Dob.Connection();
         private Safir.Dob.Connection m_testConnection = new Safir.Dob.Connection();

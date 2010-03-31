@@ -79,6 +79,12 @@ namespace Application
             return; // *** RETURN ***
         }
 
+        if (!m_connection.IsAttached())
+        {
+            // Connection has been closed.
+            return;
+        }
+
         m_connection.UnsubscribeMessage(PI_CMD_TYPE_ID, PI_CMD_CHANNEL_ID, this);
         m_connection.Detach();
         m_backdoor = NULL;

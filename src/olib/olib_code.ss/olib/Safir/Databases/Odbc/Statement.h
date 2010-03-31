@@ -455,7 +455,7 @@ void Statement::PutData(Internal::Parameter<sCType, sSqlType, Type, sInputOutput
 
     ret = ::SQLPutData( m_hStatement,                   // StatementHandle
                         param.GetValuePtr(),            // ParameterValuePtr
-                        param.GetLengthOrInd() );       // StrLen_or_Ind
+                        param.GetSize() );       // StrLen_or_Ind
 
     if (!SQL_SUCCEEDED(ret))
     {

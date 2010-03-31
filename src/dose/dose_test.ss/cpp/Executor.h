@@ -142,6 +142,8 @@ private:
     typedef std::vector<DoseTest::ActionPtr> Actions;
     typedef std::vector<Actions> CallbackActions;
     std::vector<std::vector<DoseTest::ActionPtr> > m_callbackActions;
+
+    int m_defaultContext;
 };
 
 typedef boost::shared_ptr<Executor> ExecutorPtr;

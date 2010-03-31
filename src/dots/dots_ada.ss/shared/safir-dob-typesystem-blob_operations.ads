@@ -25,6 +25,7 @@ with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 with Safir.Dob.Typesystem.Container_Instantiations; use Safir.Dob.Typesystem.Container_Instantiations;
 with Safir.Dob.Typesystem.Enumeration_Container_Base; use Safir.Dob.Typesystem.Enumeration_Container_Base;
 with Safir.Dob.Typesystem.String_Container; use Safir.Dob.Typesystem.String_Container;
+with Safir.Dob.Typesystem.Binary_Container; use Safir.Dob.Typesystem.Binary_Container;
 with Safir.Dob.Typesystem.Object_Container_Base; use Safir.Dob.Typesystem.Object_Container_Base;
 with Safir.Dob.Typesystem.Instance_Id;
 with Safir.Dob.Typesystem.Entity_Id;

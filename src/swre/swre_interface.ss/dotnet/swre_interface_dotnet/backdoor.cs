@@ -31,8 +31,8 @@ namespace Safir.Application
 {
     /// <summary>
     /// <para>Interface for handling PI commands.</para>
-    /// <para>Provides the interface needed for classes that want to handle PI commands. 
-    /// The class must use a BackdoorKeeper class to set up the subscriptions, and 
+    /// <para>Provides the interface needed for classes that want to handle PI commands.
+    /// The class must use a BackdoorKeeper class to set up the subscriptions, and
     /// pass "itself" to its Start-routine. After this the methods in the interface
     /// will be called when a PI command is received.</para>
     /// </summary>
@@ -54,9 +54,9 @@ namespace Safir.Application
 
     /// <summary>
     /// <para>Class that provides subscription and filtering for BackdoorCommands</para>
-    /// <para>Use this class to "keep" the Backdoor. Call the Start routine with 
-    /// the backdoor and a dob connection to set up subscriptions and then your 
-    /// Backdoor class will be called every time there is a Command aimed for that 
+    /// <para>Use this class to "keep" the Backdoor. Call the Start routine with
+    /// the backdoor and a dob connection to set up subscriptions and then your
+    /// Backdoor class will be called every time there is a Command aimed for that
     /// connection.</para>
     /// </summary>
     public class BackdoorKeeper : Safir.Dob.MessageSubscriber
@@ -105,6 +105,12 @@ namespace Safir.Application
             {
                 // Never started, just return
                 return; // *** RETURN ***
+            }
+
+            if (!m_connection.IsAttached())
+            {
+                // Connection has been closed.
+                return;
             }
 
             m_connection.UnsubscribeMessage(m_piCmdTypeId, m_piCmdChannelId, this);

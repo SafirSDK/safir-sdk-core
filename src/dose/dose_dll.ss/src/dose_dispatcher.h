@@ -273,6 +273,16 @@ namespace Internal
 
         CallbackStack m_callbackStack;
 
+        /**
+         * Check that no locks are taken when calling into user code.
+         * Only done in debug builds
+         */
+#ifndef NDEBUG
+        void CheckLocks() const;
+#else
+        inline void CheckLocks() const {}
+#endif
+
     };
 
     class DispatcherIsInCallback:

@@ -176,7 +176,8 @@ namespace VehicleMmiCsWinForms
                 }
                 catch
                 {
-                    statusStrip.Items["toolStripStatus"].Text = "Illegal speed format!";                            
+                    statusStrip.Items["toolStripStatus"].Text = "Illegal speed format!";
+                    return;        
                 }
             }
 

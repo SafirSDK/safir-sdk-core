@@ -219,7 +219,7 @@ extern "C"
     DOSE_API void CALLING_CONVENTION DoseC_Connect(const long ctrl,
                                                    const char* connectionNameCommonPart,
                                                    const char* connectionNameInstancePart,
-                                                   const long context,
+                                                   const DotsC_Int32 contextId,
                                                    const long lang,
                                                    void* const connectionOwner,
                                                    void* const dispatcher,
@@ -540,6 +540,12 @@ extern "C"
                                                                 const bool includeSubclasses,
                                                                 DotsC_Int64& numberOfInstances,
                                                                 bool& success);
+
+    DOSE_API void CALLING_CONVENTION DoseC_GetInstanceIdPolicy(const long ctrl,
+                                                               const DotsC_TypeId typeId,
+                                                               const DotsC_Int64 handlerId,
+                                                               DotsC_EnumerationValue& instanceIdPolicy,
+                                                               bool& success);
 
     DOSE_API void CALLING_CONVENTION DoseC_Postpone(const long ctrl,
                                                     const bool redispatchCurrent,

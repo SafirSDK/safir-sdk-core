@@ -214,7 +214,14 @@ namespace dose_test_dotnet
         {
             foreach (DoseTest.Action action in m_callbackActions[callback])
             {
+                DoseTest.ActionEnum.Enumeration actionKind = action.ActionKind.Val;
+
                 ExecuteAction(action);
+
+                if (actionKind == DoseTest.ActionEnum.Enumeration.ResetCallbackActions)
+                {
+                    return;
+                }
             }
         }
 
@@ -266,6 +273,7 @@ namespace dose_test_dotnet
                             case DoseTest.ActionEnum.Enumeration.DiscardResponseSender:
                                 {
                                     m_responseSender.Discard();
+                                    m_responseSenderDiscarded = true;
                                 }
                                 break;
                             case DoseTest.ActionEnum.Enumeration.RegisterEntityHandler:
@@ -619,6 +627,18 @@ namespace dose_test_dotnet
                                         + m_connection.GetNumberOfInstances(action.TypeId.Val,
                                                                              action.Handler.Val,
                                                                              action.IncludeSubclasses.Val));
+                                }
+                                break;
+
+                            case DoseTest.ActionEnum.Enumeration.GetInstanceIdPolicy:
+                                {
+                                    Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": "
+                                        + "GetInstanceIdPolicy (type = "
+                                        + Safir.Dob.Typesystem.Operations.GetName(action.TypeId.Val)
+                                        + ", handler = " + action.Handler.Val
+                                        + "): "
+                                        + Safir.Dob.Typesystem.Operations.GetEnumerationValueName(Safir.Dob.InstanceIdPolicy.EnumerationId,
+                                    (int)m_connection.GetInstanceIdPolicy(action.TypeId.Val, action.Handler.Val)));
                                 }
                                 break;
 
@@ -980,6 +1000,7 @@ namespace dose_test_dotnet
         {
             m_connection.ExitDispatch();
             m_responseSender = responseSender;
+            m_responseSenderDiscarded = false;
             ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnCreateRequest);
 
             DoseTest.RootEntity req = entityRequestProxy.Request as DoseTest.RootEntity;
@@ -1016,19 +1037,22 @@ namespace dose_test_dotnet
                      + "  Request    = " + xml);
                 Logger.Instance.WriteLine();
 
-                m_connection.SetAll(req,
-                                    new Safir.Dob.Typesystem.InstanceId(value.Second),
-                                    entityRequestProxy.ReceivingHandlerId);
+                if (!m_responseSenderDiscarded)
+                {
+                    m_connection.SetAll(req,
+                                        new Safir.Dob.Typesystem.InstanceId(value.Second),
+                                        entityRequestProxy.ReceivingHandlerId);
 
-                Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": "
-                     + "Handler created instance " + value.Second);
+                    Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": "
+                         + "Handler created instance " + value.Second);
 
 
-                Safir.Dob.EntityIdResponse resp = new Safir.Dob.EntityIdResponse();
-                resp.Assigned.Val = new Safir.Dob.Typesystem.EntityId(entityRequestProxy.TypeId,
-                                                                      new Safir.Dob.Typesystem.InstanceId(value.Second));
-                responseSender.Send(resp);
-                ++value.Second;
+                    Safir.Dob.EntityIdResponse resp = new Safir.Dob.EntityIdResponse();
+                    resp.Assigned.Val = new Safir.Dob.Typesystem.EntityId(entityRequestProxy.TypeId,
+                                                                          new Safir.Dob.Typesystem.InstanceId(value.Second));
+                    responseSender.Send(resp);
+                    ++value.Second;
+                }
             }
             else
             {
@@ -1042,9 +1066,12 @@ namespace dose_test_dotnet
                      + "  Request    = " + xml);
                 Logger.Instance.WriteLine();
 
-                m_connection.SetAll(req,
-                                    entityRequestProxy.InstanceId,
-                                    entityRequestProxy.ReceivingHandlerId);
+                if (!m_responseSenderDiscarded)
+                {
+                    m_connection.SetAll(req,
+                                        entityRequestProxy.InstanceId,
+                                        entityRequestProxy.ReceivingHandlerId);
+                }
             }
 
             if (!responseSender.IsDone())
@@ -1060,6 +1087,7 @@ namespace dose_test_dotnet
         {
             m_connection.ExitDispatch();
             m_responseSender = responseSender;
+            m_responseSenderDiscarded = false;
             ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnDeleteRequest);
 
             Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": "
@@ -1071,7 +1099,10 @@ namespace dose_test_dotnet
 
             Logger.Instance.WriteLine();
 
-            m_connection.Delete(entityRequestProxy.EntityId, entityRequestProxy.ReceivingHandlerId);
+            if (!m_responseSenderDiscarded)
+            {
+                m_connection.Delete(entityRequestProxy.EntityId, entityRequestProxy.ReceivingHandlerId);
+            }
 
             if (!responseSender.IsDone())
             {
@@ -1086,6 +1117,7 @@ namespace dose_test_dotnet
         {
             m_connection.ExitDispatch();
             m_responseSender = responseSender;
+            m_responseSenderDiscarded = false;
             ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnUpdateRequest);
 
             DoseTest.RootEntity req = entityRequestProxy.Request as DoseTest.RootEntity;
@@ -1110,9 +1142,12 @@ namespace dose_test_dotnet
                  + "  Request    = " + xml);
             Logger.Instance.WriteLine();
 
-            m_connection.SetChanges(req,
-                                    entityRequestProxy.InstanceId,
-                                    entityRequestProxy.ReceivingHandlerId);
+            if (!m_responseSenderDiscarded)
+            {
+                m_connection.SetChanges(req,
+                                        entityRequestProxy.InstanceId,
+                                        entityRequestProxy.ReceivingHandlerId);
+            }
 
             if (!responseSender.IsDone())
             {
@@ -1274,6 +1309,8 @@ namespace dose_test_dotnet
         private Dictionary<Safir.Dob.CallbackId.Enumeration, List<DoseTest.Action>> m_callbackActions;
 
         private Safir.Dob.ResponseSender m_responseSender = null;
+
+        private bool m_responseSenderDiscarded;
 
         public class Pair
         {

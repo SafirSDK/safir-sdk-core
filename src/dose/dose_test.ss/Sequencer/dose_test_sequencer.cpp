@@ -68,14 +68,20 @@
 #undef GetMessage
 #endif
 
-Sequencer::Sequencer(const int startTc, const int stopTc, const Languages & languages):
+Sequencer::Sequencer(const int startTc,
+                     const int stopTc,
+                     const Languages & languages,
+                     const bool noTimeout,
+                     const int contextId):
     m_partnerState(languages),
     m_currentCaseNo(startTc),
     m_stopTc(stopTc),
     m_state(Created),
     m_lastCleanupTime(boost::posix_time::second_clock::universal_time()),
     m_languages(languages),
-    m_isDumpRequested(false)
+    m_noTimeout(noTimeout),
+    m_isDumpRequested(false),
+    m_contextId(contextId)
 {
     m_connection.Attach();
 }
@@ -250,17 +256,20 @@ void Sequencer::SetState(const State newState)
 
 void Sequencer::Tick()
 {
-    const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
-    if (now - m_lastCleanupTime > boost::posix_time::minutes(10))
+    if (!m_noTimeout)
     {
-        std::wcout << "TIMEOUT: Sequencer has not been in CleaningUpTestcase state for 10 minutes!"
-                   << "Maybe a partner crashed? "
-                   << "(" << m_languages.at(0).c_str() << ","
-                   <<        m_languages.at(1).c_str() << ","
-                   <<        m_languages.at(2).c_str() << ")"
-                   << std::endl
-                   << "Exiting." << std::endl;
-        exit(-1);
+        const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
+        if (now - m_lastCleanupTime > boost::posix_time::minutes(10))
+        {
+            std::wcout << "TIMEOUT: Sequencer has not been in CleaningUpTestcase state for 10 minutes!"
+                       << "Maybe a partner crashed? "
+                       << "(" << m_languages.at(0).c_str() << ","
+                       <<        m_languages.at(1).c_str() << ","
+                       <<        m_languages.at(2).c_str() << ")"
+                       << std::endl
+                       << "Exiting." << std::endl;
+            exit(-1);
+        }
     }
 
     switch (m_state)
@@ -279,7 +288,7 @@ void Sequencer::Tick()
                 if (!m_partnerState.IsActive(i))
                 {
                     allStarted = false;
-                    m_partnerState.Activate(i);
+                    m_partnerState.Activate(i, m_contextId);
                     std::wcout << "Sending Activate to " << i << std::endl;
                 }
             }
@@ -870,6 +879,13 @@ Sequencer::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
         + "-" + m_languages.at(0) + "-" + m_languages.at(1) + "-" + m_languages.at(2);
     boost::filesystem::create_directory(directory);
 
+    // Create context dir if not context 0
+    if (m_contextId > 0)
+    {
+        directory = directory / ("context_" + boost::lexical_cast<std::string>(m_contextId));
+        boost::filesystem::create_directory(directory);
+    }
+
     std::ostringstream filename;
     filename << "partner"
         << partner
@@ -880,9 +896,9 @@ Sequencer::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 
     if (result == NULL)
     {
-        std::wcout << "GOT BAD RESPONSE FROM PARTNER" << partner << std::endl;
+        std::wcout << "GOT BAD RESPONSE FROM PARTNER " << partner << std::endl;
 
-        file << "GOT BAD RESPONSE FROM PARTNER" << partner << std::endl
+        file << "GOT BAD RESPONSE FROM PARTNER " << partner << std::endl
             << Safir::Dob::Typesystem::Serialization::ToXml(responseProxy.GetBlob());
     }
     else

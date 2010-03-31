@@ -175,14 +175,11 @@ namespace Sate
                 if (i >= 0)
                 {
                     isNullCheckBox[i].Checked = false;
-#if STSYLI
-                    if (!ValidInput(i, false))
-#else
-                    // STSYLI: Varför var detta false förrut?????????
-                    // utan true sparas ej resultatet i Tag och inget data från ett ifyllt fält skickas iväg i t.ex. ett meddelande
+
                     if (!ValidInput(i, true))
-#endif
+                    {
                         this.fieldValueControl[i].BackColor = ColorMap.ERROR;
+                    }
                 }
 
                 parentObjectEditPanel.ChangedDataField();
@@ -355,16 +352,6 @@ namespace Sate
             location.Y += fieldValueControl[index].Height + Y_STEP;
         }
 
-#if REMOVED_CODE
-        private void InitializeComponent()
-        {
-            //
-            // ObjectDataFieldControl
-            //
-            this.Name = "ObjectDataFieldControl";
-
-        }
-#endif
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>

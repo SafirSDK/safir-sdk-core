@@ -32,6 +32,7 @@
 #include <Safir/Dob/Typesystem/ChannelId.h>
 #include <Safir/Dob/Internal/MessageQueue.h>
 #include <Safir/Dob/Internal/ConnectionConsumerPair.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 
 namespace Safir
@@ -72,8 +73,11 @@ namespace Internal
     private:
         Typesystem::TypeId m_typeId;
 
-        //const methods may need to lock this
-        mutable boost::interprocess::interprocess_mutex m_lock;
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  MESSAGE_TYPE_LOCK_LEVEL,
+                                                  NO_MASTER_LEVEL_REQUIRED> MessageTypeLock;
+        mutable MessageTypeLock m_lock;
+        typedef boost::interprocess::scoped_lock<MessageTypeLock> ScopedMessageTypeLock;
 
         struct ConsumerSubscription
         {

@@ -30,6 +30,7 @@
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/Internal/EndStates.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
+#include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
@@ -256,16 +257,13 @@ namespace Internal
             const bool atLeastOneNodeIsUp = std::count(nodeStatuses.begin(),nodeStatuses.end(),NodeStatus::Started) >= 1;
 
             //if there is at least one UP node we will have received persistence data from someone else
-            if (PersistHandler::SystemHasPersistence() && //we have persistence in the system
-                !m_persistHandler.IsPersistentDataReady() && //we havent already signalled persistence available
+            if (!m_persistHandler.IsPersistentDataReady() && //we havent already signalled persistence available
                 atLeastOneNodeIsUp) //someone else than me up
             {
                 m_persistHandler.SetPersistentDataReady();
             }
 
-            if (!PersistHandler::SystemHasPersistence() ||
-                m_persistHandler.IsPersistentDataReady() ||
-                atLeastOneNodeIsUp)
+            if (m_persistHandler.IsPersistentDataReady())
             {
                 lllout << "Calling SetOkToSignalPDComplete, since this node has now fulfilled the requirements for signalling PD complete" << std::endl;
                 m_ecom.SetOkToSignalPDComplete();
@@ -317,6 +315,7 @@ namespace Internal
     {
         try
         {
+            ContextSharedTable::Initialize();
             MessageTypes::Initialize(/*iAmDoseMain = */ true);
             EndStates::Initialize();
             ServiceTypes::Initialize(/*iAmDoseMain = */ true);
@@ -500,7 +499,7 @@ namespace Internal
             for (IdentifierSet::iterator it = waiting.begin();
                 it != waiting.end(); ++it)
             {
-                const ConnectionPtr connection = Connections::Instance().GetConnection(ConnectionId(ThisNodeParameters::NodeNumber(),*it));
+                const ConnectionPtr connection = Connections::Instance().GetConnection(ConnectionId(ThisNodeParameters::NodeNumber(), -1, *it));
                 m_messageHandler.DistributeMessages(connection);
             }
         }

@@ -126,6 +126,10 @@ public class InstanceId {
      * If the string that created the instance id is available this is the string that will be returned,
      * otherwise it is the number that will be returned.
      *
+     * The purpose of this function is for debug output and such.
+     * The resulting string can *not* reliably be used in the "string constructor" for InstanceId to
+     * recreate the same InstanceId.
+     *
      * @return String representation of the handler id.
      */
     public String toString(){

@@ -143,7 +143,7 @@ Add an environment variable ADA_PROJECT_PATH containing %SAFIR_SDK%\ada
 #The building of C# applications require one more thing, the creation of a K: drive that points to %SAFIR_RUNTIME%\bin. The reason for this is that Visual Studio does not support the use of environment variables for locating dependent assemblies, and since we don't add the assemblies to the GAC we have to provide some other way of locating them. So create the folder "C:\safir\runtime\bin" (assuming that is where you put your tower), and open a command prompt and run "subst k: %SAFIR_RUNTIME%\bin". (This creates a K: drive that is mapped to C:\safir\runtime\bin. The mapping will disappear when you restart your computer, so if you want it to be persistent put that command in a .bat file and place it in your Startup folder.)
 
 Now open a Visual Studio 2005 command prompt and go to the directory that contains the build and src directories, and run 
-    build\build_windows.py -f build\sdk_core_windows.txt
+    build\build.py -f build\sdk_core.txt
 
 This will build the Safir SDK Core components in the correct order and install them into the location specified by SAFIR_SDK and SAFIR_RUNTIME.
 

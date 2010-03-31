@@ -74,9 +74,5 @@ package Safir.Dob.Typesystem.Container_Instantiations is
                       Initial_Value  => Create_Handler_Id
                         (To_Unbounded_Wide_String ("DEFAULT_HANDLER")));
 
-   package Binary_Container is new
-     Value_Container (Contained_Type => Binary_Vectors.Vector,
-                      Initial_Value  => Binary_Vectors.Empty_Vector);
-
 
 end Safir.Dob.Typesystem.Container_Instantiations;

@@ -1,160 +1,134 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>EntityStatistics</class>
- <widget class="QWidget" name="EntityStatistics" >
-  <property name="geometry" >
+ <widget class="QWidget" name="EntityStatistics">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>628</width>
-    <height>567</height>
+    <width>777</width>
+    <height>797</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>EntityStatistics</string>
   </property>
-  <layout class="QVBoxLayout" >
-   <item>
-    <layout class="QGridLayout" >
-     <item row="0" column="0" >
-      <widget class="QLabel" name="label" >
-       <property name="text" >
-        <string>Number of States:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1" >
-      <widget class="QLineEdit" name="numStates" >
-       <property name="enabled" >
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <layout class="QGridLayout" name="stateGrid">
+     <item row="0" column="0">
+      <widget class="QLabel" name="contextSharedLabel">
+       <property name="enabled">
         <bool>true</bool>
        </property>
-       <property name="text" >
-        <string>Not available</string>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
        </property>
-       <property name="readOnly" >
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0" >
-      <widget class="QLabel" name="label_2" >
-       <property name="text" >
-        <string>Real states:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1" >
-      <widget class="QLineEdit" name="numReal" >
-       <property name="enabled" >
-        <bool>true</bool>
-       </property>
-       <property name="text" >
-        <string>Not available</string>
-       </property>
-       <property name="readOnly" >
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0" >
-      <widget class="QLabel" name="label_3" >
-       <property name="text" >
-        <string>Ghost states:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1" >
-      <widget class="QLineEdit" name="numGhost" >
-       <property name="enabled" >
-        <bool>true</bool>
-       </property>
-       <property name="text" >
-        <string>Not available</string>
-       </property>
-       <property name="readOnly" >
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0" >
-      <widget class="QLabel" name="label_4" >
-       <property name="text" >
-        <string>Injection States</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1" >
-      <widget class="QLineEdit" name="numInjections" >
-       <property name="enabled" >
-        <bool>true</bool>
-       </property>
-       <property name="text" >
-        <string>Not available</string>
-       </property>
-       <property name="readOnly" >
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1" >
-      <widget class="QLineEdit" name="numDowngraded" >
-       <property name="enabled" >
-        <bool>true</bool>
-       </property>
-       <property name="text" >
-        <string>Not available</string>
-       </property>
-       <property name="readOnly" >
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0" >
-      <widget class="QLabel" name="label_5" >
-       <property name="text" >
-        <string>Downgraded</string>
+       <property name="text">
+        <string>This entity type is Context Shared.</string>
        </property>
       </widget>
      </item>
     </layout>
    </item>
-   <item>
-    <widget class="QSplitter" name="splitter" >
-     <property name="orientation" >
+   <item row="1" column="0">
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <widget class="QTableWidget" name="instances" >
+     <widget class="QTableWidget" name="contexts">
+      <property name="showGrid">
+       <bool>false</bool>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+       <bool>false</bool>
+      </attribute>
       <column>
-       <property name="text" >
+       <property name="text">
         <string>Show</string>
        </property>
       </column>
       <column>
-       <property name="text" >
+       <property name="text">
+        <string>Context</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Number of States</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Downgraded</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Real states</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Ghost states</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Injection states</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QTableWidget" name="instances">
+      <property name="showGrid">
+       <bool>false</bool>
+      </property>
+      <column>
+       <property name="text">
+        <string>Show</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>InstanceId</string>
        </property>
       </column>
       <column>
-       <property name="text" >
+       <property name="text">
+        <string>Context</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>Connection</string>
        </property>
       </column>
       <column>
-       <property name="text" >
+       <property name="text">
         <string>Kind</string>
        </property>
       </column>
       <column>
-       <property name="text" >
+       <property name="text">
         <string>Handler</string>
        </property>
       </column>
       <column>
-       <property name="text" >
+       <property name="text">
         <string># Subscribers</string>
        </property>
       </column>
      </widget>
-     <widget class="QTextEdit" name="information" />
+     <widget class="QTextEdit" name="information"/>
     </widget>
    </item>
   </layout>

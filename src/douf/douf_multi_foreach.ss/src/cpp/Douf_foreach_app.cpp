@@ -38,6 +38,10 @@
 #include <Safir/Dob/NotOpenException.h>
 #include <Safir/SwReports/SwReport.h>
 
+//Currently 'foreach' uses context 0 to connect to the dob. The strange looking negative number
+//is a way to indicate that this is a connection with special privileges (a -1 connection).
+const Safir::Dob::Typesystem::Int32 FOREACH_CONTEXT = -1000000;
+
 namespace Safir
 {
     namespace Utilities
@@ -62,7 +66,7 @@ namespace Safir
                 try
                 {
                     // Open the DOB connection.
-                    m_connection.Open(L"ForEach", boost::lexical_cast<std::wstring>(++inst), -1, this, &m_dispatcher);
+                    m_connection.Open(L"ForEach", boost::lexical_cast<std::wstring>(++inst), FOREACH_CONTEXT, this, &m_dispatcher);
                     break;
                 }
                 catch (const Safir::Dob::NotOpenException&)

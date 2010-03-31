@@ -749,5 +749,24 @@ namespace Dob
     }
 
 
+
+   Dob::InstanceIdPolicy::Enumeration ConnectionBase::GetInstanceIdPolicy(const Dob::Typesystem::TypeId typeId,
+                                                          const Dob::Typesystem::HandlerId& handlerId) const
+   {
+        bool success;
+        Dob::Typesystem::EnumerationValue instanceIdPolicy;
+        DoseC_GetInstanceIdPolicy(GetControllerId(),
+                                  typeId,
+                                  handlerId.GetRawValue(),
+                                  instanceIdPolicy,
+                                  success);
+        if (!success)
+        {
+            Typesystem::LibraryExceptions::Instance().Throw();
+        }
+        return static_cast<Dob::InstanceIdPolicy::Enumeration>(instanceIdPolicy);
+
+   }
+
 }
 }

@@ -181,11 +181,12 @@ void WakeUp_DistributePool(void)
 *   ERR_DOSECOM_INVALID_PARAM if invalid DoseId
 *********************************************************************/
 
-int DoseCom_Init(DoseComAllocator  *pAllocator,  // the base class
-                const char*         multicastAddress,
-                const char*         netAddress,
-                int                 DoseId,
-                DoseComNotificationHandler *pNotificationHandler)
+int DoseCom_Init(DoseComAllocator    *pAllocator,  // the base class
+                 const char*         multicastAddress,
+                 int                 multicastTtl,
+                 const char*         netAddress,
+                 int                 DoseId,
+                 DoseComNotificationHandler *pNotificationHandler)
 {
     int result;
 
@@ -205,7 +206,7 @@ int DoseCom_Init(DoseComAllocator  *pAllocator,  // the base class
     // 2) Tries to open and read config files and overwrite default values
     //--------------------------------------------------------------------
 
-    CConfig::Dose_Config((dcom_uchar8) DoseId, multicastAddress, netAddress);
+    CConfig::Dose_Config((dcom_uchar8) DoseId, multicastAddress, multicastTtl, netAddress);
 
     g_bIsStandAlone = FALSE;
 

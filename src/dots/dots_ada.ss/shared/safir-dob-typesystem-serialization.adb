@@ -95,6 +95,8 @@ package body Safir.Dob.Typesystem.Serialization is
    function To_Object (Xml : in Unbounded_Wide_String) return
      Safir.Dob.Typesystem.Object.Smart_Pointer'Class is
 
+      use type Blob_T;
+
       Deleter     : Safir.Dob.Typesystem.Kernel.Blob_Deleter_Cb_Type;
       pragma Convention (C, Deleter);
 
@@ -102,6 +104,11 @@ package body Safir.Dob.Typesystem.Serialization is
       Xml_8 : constant String := Safir.Dob.Typesystem.Utilities.To_Utf_8 (Xml);
    begin
       Safir.Dob.Typesystem.Kernel.Xml_To_Blob (Blob, Deleter, C.To_C (Xml_8));
+
+      if Blob = null then
+         Throw (Illegal_Value_Exception'Identity,
+                "Something is wrong with the XML-formated object");
+      end if;
 
       declare
          Obj_Ptr : constant Safir.Dob.Typesystem.Object.Smart_Pointer'Class :=

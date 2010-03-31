@@ -319,6 +319,7 @@ static THREAD_API RxThread(void *pChNum)
     result = RxSock.CreateIpMulticastSocket(
                         1,0,    // Rx, not Tx
                         1, // 1 ==> disable loopback, but do not enable Rx
+                        0, //no Tx, so no ttl
                         (dcom_ushort16) (CConfig::m_Dose_Port_Data + MyIx),
                         65536,  // Opt_so_rcvbuf_size,  new_050426
                         0);     // Opt_So_Rcvbuf_Timeout,
@@ -360,6 +361,7 @@ static THREAD_API RxThread(void *pChNum)
     result = TxSock.CreateIpMulticastSocket(
                                 0,1,    // not Rx, but Tx
                                 0,      // CConfig::m_IpMultiCastAddr_nw,
+                                0,      // unicast socket, no ttl needed
                                 0,      // CConfig::m_Dose_Port_Data_nw,
                                 0,      // Opt_so_rcvbuf_size,
                                 0);     // Opt_So_Rcvbuf_Timeout,

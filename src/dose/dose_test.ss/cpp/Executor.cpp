@@ -50,6 +50,10 @@
 #undef GetMessage
 #endif
 
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4355)
+#endif
 Executor::Executor(const std::vector<std::string> & commandLine):
     m_identifier(L"cpp"),
     m_instance(boost::lexical_cast<int>(commandLine.at(1))),
@@ -62,7 +66,8 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_dispatchTestConnection(true),
     m_testDispatcher(boost::bind(&Executor::DispatchTestConnection,this)),
     m_controlDispatcher(boost::bind(&Executor::DispatchControlConnection,this)),
-    m_callbackActions(Safir::Dob::CallbackId::Size())
+    m_callbackActions(Safir::Dob::CallbackId::Size()),
+    m_defaultContext(0)
 {
     m_controlConnection.Open(m_controlConnectionName, m_instanceString, 0, this, &m_controlDispatcher);
 
@@ -70,6 +75,9 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_controlConnection.SubscribeMessage(DoseTest::Action::ClassTypeId, Safir::Dob::Typesystem::ChannelId(m_instance),this);
     m_controlConnection.SubscribeMessage(DoseTest::Action::ClassTypeId, Safir::Dob::Typesystem::ChannelId(),this);
 }
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
 
 void Executor::OnStopOrder()
 {
@@ -122,7 +130,8 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
         {
             if (action->Identifier() == m_identifier)
             {
-                std::wcout << "Activating" << std::endl;
+                m_defaultContext = action->Context().GetVal();
+                std::wcout << "Activating (default context is " << m_defaultContext << ")" << std::endl;
                 if (!m_isActive)
                 {
                     m_controlConnection.RegisterEntityHandler(m_partnerEntityId.GetTypeId(),
@@ -160,7 +169,7 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
             if (m_isActive)
             {
                 m_testConnection.Close();
-                m_testConnection.Open(m_testConnectionName,m_instanceString,0,NULL,&m_testDispatcher);
+                m_testConnection.Open(m_testConnectionName,m_instanceString,m_defaultContext,NULL,&m_testDispatcher);
 
                 DoseTest::PartnerPtr partner =
                     boost::static_pointer_cast<DoseTest::Partner>
@@ -186,7 +195,17 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
         {
             if (m_isActive)
             {
-                m_testConnection.Open(m_testConnectionName,m_instanceString,0,NULL,&m_testDispatcher);
+                Safir::Dob::Typesystem::Int32 context = m_defaultContext;
+                if (!action->Context().IsNull())
+                {
+                    context = action->Context();
+                }
+                std::wstring connName = m_testConnectionName;
+                if (!action->ConnectionName().IsNull())
+                {
+                    connName = action->ConnectionName();
+                }
+                m_testConnection.Open(connName,m_instanceString,context,NULL,&m_testDispatcher);
             }
         }
         break;

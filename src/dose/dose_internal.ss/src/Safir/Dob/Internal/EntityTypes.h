@@ -93,14 +93,16 @@ namespace Internal
         void RemoteSetUnregistrationState(const DistributionData& registrationState);
 
         bool IsRegistered(const Dob::Typesystem::TypeId     typeId,
-                          const Dob::Typesystem::HandlerId& handlerId) const;
+                          const Dob::Typesystem::HandlerId& handlerId,
+                          const ContextId                   contextId) const;
 
         /**
          * Find the connection/consumer that has registered the given handler
          * If the handler is not registered this method returns (NULL,(NULL,0))
          */
         const ConnectionConsumerPair GetRegisterer(const Dob::Typesystem::TypeId     typeId,
-                                                   const Dob::Typesystem::HandlerId& handlerId) const;
+                                                   const Dob::Typesystem::HandlerId& handlerId,
+                                                   const ContextId                   contextId) const;
 
         /**
          * Find the connection/consumer that has registered the given handler.
@@ -108,11 +110,12 @@ namespace Internal
          */
         void GetRegisterer(const Dob::Typesystem::TypeId     typeId,
                            const Dob::Typesystem::HandlerId& handlerId,
+                           const ContextId                   contextId,
                            ConnectionConsumerPair&           registerer,
                            InstanceIdPolicy::Enumeration&    instanceIdPolicy) const;
 
         //throws NotFoundException if no such instance
-        const Dob::Typesystem::HandlerId GetHandlerOfInstance(const Dob::Typesystem::EntityId& entityId);
+        const Dob::Typesystem::HandlerId GetHandlerOfInstance(const Dob::Typesystem::EntityId& entityId, const ContextId requestorContext);
 
         bool IsOwner(const Dob::Typesystem::EntityId& entityId,
                      const Dob::Typesystem::HandlerId& handlerId,
@@ -167,7 +170,7 @@ namespace Internal
                           const Dob::Typesystem::EntityId&  entityId,
                           const bool                        allInstances);
 
-        bool IsCreated(const Dob::Typesystem::EntityId&  entityId) const;
+        bool IsCreated(const Dob::Typesystem::EntityId&  entityId, const ContextId requestorContext) const;
         /** @} */
 
         /**
@@ -266,7 +269,7 @@ namespace Internal
          */
         /** @{ */
 
-        const DistributionData ReadEntity(const Dob::Typesystem::EntityId& entityId) const;
+        const DistributionData ReadEntity(const Dob::Typesystem::EntityId& entityId, const ContextId readerContext) const;
 
         /** @} */
 
@@ -290,12 +293,15 @@ namespace Internal
         private:
             friend class EntityTypes;
 
+            ContextId m_connectionContext;  // The context of the connection that initiated the iteration
             TypeIdVector m_remainingTypes;
             StateContainer::Iterator m_stateContainerIterator;
             EntityTypeTable::const_iterator m_currentType;
+            ContextId m_currentContext;  // The context we use for the current type
         };
 
         const EntityIterator CreateEntityIterator(const Typesystem::TypeId typeId,
+                                                  const ContextId connectionContext,  // context in which the iterating connection is running
                                                   const bool includeSubclasses,
                                                   bool& end) const;
 

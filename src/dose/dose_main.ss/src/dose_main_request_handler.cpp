@@ -31,6 +31,7 @@
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
+#include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Dob/Service.h>
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/InstanceIdPolicy.h>
@@ -85,15 +86,27 @@ namespace Internal
     {
         const Typesystem::TypeId typeId = request.GetTypeId();
 
+        // If it is a ContextShared type we serach for the owner in context 0, otherwise
+        // we search in the same context as the sender 
+        ContextId context;
+        if (ContextSharedTable::Instance().IsContextShared(typeId))
+        {
+            context = 0;
+        }
+        else
+        {
+            context = request.GetSenderId().m_contextId;
+        }
+
         if (Typesystem::Operations::IsOfType(typeId,Service::ClassTypeId))
         {
             // Service
-            return ServiceTypes::Instance().GetRegisterer(typeId, request.GetHandlerId());
+            return ServiceTypes::Instance().GetRegisterer(typeId, request.GetHandlerId(), context);
         }
         else
         {
             // Entity
-            return EntityTypes::Instance().GetRegisterer(typeId, request.GetHandlerId());
+            return EntityTypes::Instance().GetRegisterer(typeId, request.GetHandlerId(), context);
         }
 
     }
@@ -114,12 +127,17 @@ namespace Internal
 
         const DistributionData::Type requestType = request.GetType();
 
+        // Find out which context to use.
+        ContextId context =
+            ContextSharedTable::Instance().IsContextShared(typeId) ? 0 : request.GetSenderId().m_contextId;
+
         switch (requestType)
         {
         case DistributionData::Request_Service:
             {
                 // Service request
-                receiver = ServiceTypes::Instance().GetRegisterer(typeId, request.GetHandlerId());
+
+                receiver = ServiceTypes::Instance().GetRegisterer(typeId, request.GetHandlerId(), context);
 
                 if (receiver.connection == NULL)
                 {
@@ -147,7 +165,7 @@ namespace Internal
                 {
                     //set the handler correctly so that we have all the needed info when we fall through
                     //to the next case statement.
-                    const Typesystem::HandlerId handler = EntityTypes::Instance().GetHandlerOfInstance(request.GetEntityId());
+                    const Typesystem::HandlerId handler = EntityTypes::Instance().GetHandlerOfInstance(request.GetEntityId(), context);
                     request.SetHandlerId(handler);
                 }
                 catch (const NotFoundException&)
@@ -171,7 +189,7 @@ namespace Internal
             {
                 InstanceIdPolicy::Enumeration instanceIdPolicy;
 
-                EntityTypes::Instance().GetRegisterer(request.GetTypeId(), request.GetHandlerId(), receiver, instanceIdPolicy);
+                EntityTypes::Instance().GetRegisterer(request.GetTypeId(), request.GetHandlerId(), context, receiver, instanceIdPolicy);
 
                 if (receiver.connection == NULL)
                 {
@@ -389,7 +407,10 @@ namespace Internal
             const RequestTimerInfo& timerInfo = boost::static_pointer_cast<ReqTimer>(timer)->UserData();
 
             const ConnectionPtr sender = Connections::Instance().GetConnection
-                (ConnectionId(ThisNodeParameters::NodeNumber(), timerInfo.m_connectionIdentifier), std::nothrow);
+                (ConnectionId(ThisNodeParameters::NodeNumber(),
+                              -1,
+                              timerInfo.m_connectionIdentifier),
+                 std::nothrow);
 
             if (sender == NULL)
             {

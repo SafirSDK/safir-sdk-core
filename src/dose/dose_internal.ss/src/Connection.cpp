@@ -28,6 +28,7 @@
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/Service.h>
 #include <Safir/Dob/Message.h>
+#include <Safir/Dob/QueueParameters.h>
 #include <Safir/Dob/Internal/DistributionData.h>
 #include <Safir/Dob/Internal/Subscription.h>
 #include <Safir/Dob/Internal/MessageTypes.h>
@@ -35,7 +36,6 @@
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Dob/ThisNodeParameters.h>
-#include <Safir/Dob/QueueParameters.h>
 #include <Safir/Dob/Typesystem/Internal/Id.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
@@ -44,6 +44,7 @@
 #include <boost/lambda/algorithm.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/static_assert.hpp>
+#include <boost/regex.hpp>
 
 #ifdef _MSC_VER
   #pragma warning(push)
@@ -62,8 +63,8 @@ namespace Dob
 {
 namespace Internal
 {
-    
-    
+
+
 
     Identifier Connection::CalculateIdentifier(const std::string & name)
     {
@@ -73,17 +74,18 @@ namespace Internal
     Connection::Connection(const std::string & name,
                            const Typesystem::Int32 counter,
                            const NodeNumber node,
-                           const int /*context*/,
+                           const ContextId contextId,
                            const int pid):
         m_nameWithoutCounter(name.begin(),name.end()),
         m_counter(counter),
         m_id(),
         m_pid(pid),
+        m_queueCapacities(GetQueueCapacities(name)),
         m_subscribedTypes(NumberOfSubscriptionTypes),
         m_messageInQueues(GetSharedMemory().construct<MessageQueueContainer>(boost::interprocess::anonymous_instance)()),
-        m_messageOutQueue(Dob::QueueParameters::DefaultMessageOutQueueLength()),
+        m_messageOutQueue(QueueCapacity(ConnectionQueueId::MessageOutQueue)),
         m_requestInQueues(GetSharedMemory().construct<RequestInQueueContainer>(boost::interprocess::anonymous_instance)()),
-        m_requestOutQueue(Dob::QueueParameters::DefaultRequestOutQueueLength()),
+        m_requestOutQueue(QueueCapacity(ConnectionQueueId::RequestOutQueue)),
         m_stopOrderPending(0),
         m_died(0),
         m_nodeDown(0),
@@ -92,7 +94,7 @@ namespace Internal
         const std::wstring wNameWithCounter = Typesystem::Utilities::ToWstring(name) + L"#" + boost::lexical_cast<std::wstring>(counter);
         const std::string nameWithCounter = Typesystem::Utilities::ToUtf8(wNameWithCounter);
         m_nameWithCounter = ShmString(nameWithCounter.begin(),nameWithCounter.end());
-        m_id = ConnectionId(node,CalculateIdentifier(nameWithCounter));
+        m_id = ConnectionId(node, contextId, CalculateIdentifier(nameWithCounter));
         lllout << "In Connection constructor: Constructing '" << name.c_str() << "' id = " << m_id <<" pid = " << m_pid << std::endl;
     }
 
@@ -142,7 +144,10 @@ namespace Internal
             return RequestInQueuePtr();  // null pointer
         }
 
-        return m_requestInQueues->AddQueue(m_requestInQueues,consumer, Dob::QueueParameters::DefaultRequestInQueueLength());
+        return m_requestInQueues->AddQueue
+            (m_requestInQueues,
+             consumer,
+             QueueCapacity(ConnectionQueueId::RequestInQueue));
     }
 
     void Connection::ForEachRequestInQueue(const RequestInQueueContainer::QueueFunc& queueFunc) const
@@ -163,7 +168,9 @@ namespace Internal
 
     MessageQueuePtr Connection::AddMessageInQueue(const ConsumerId& consumer)
     {
-        return m_messageInQueues->AddQueue(m_messageInQueues,consumer, Dob::QueueParameters::DefaultMessageInQueueLength());
+        return m_messageInQueues->AddQueue
+            (m_messageInQueues,consumer,
+             QueueCapacity(ConnectionQueueId::MessageInQueue));
     }
 
     void Connection::ForEachMessageInQueue(const MessageQueueContainer::QueueFunc& queueFunc) const
@@ -278,7 +285,7 @@ namespace Internal
                                          const Dob::Typesystem::HandlerId&     handlerId,
                                          const ConsumerId&                     consumer)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         m_injectionHandlers.insert(std::make_pair(std::make_pair(typeId, ShmHandlerId(handlerId)), consumer));
     }
@@ -286,7 +293,7 @@ namespace Internal
     void Connection::RemoveInjectionHandler(const Typesystem::TypeId              typeId,
                                             const Dob::Typesystem::HandlerId&     handlerId)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         m_injectionHandlers.erase(std::make_pair(typeId, ShmHandlerId(handlerId)));
     }
@@ -294,7 +301,7 @@ namespace Internal
     const ConsumerId Connection::GetInjectionHandlerConsumer(const Typesystem::TypeId              typeId,
                                                              const Dob::Typesystem::HandlerId&     handlerId) const
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         RegistrationsMap::const_iterator it = m_injectionHandlers.find(std::make_pair(typeId, ShmHandlerId(handlerId)));
         ENSURE(it != m_injectionHandlers.end(), << "Didn't find given type/handler");
@@ -303,7 +310,7 @@ namespace Internal
 
     const RegistrationVector Connection::GetInjectionHandlers() const
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
         return GetRegistrations(m_injectionHandlers);
     }
 
@@ -311,7 +318,7 @@ namespace Internal
                                      const Dob::Typesystem::HandlerId&     handlerId,
                                      const ConsumerId&                     consumer)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         m_registrations.insert(std::make_pair(std::make_pair(typeId, ShmHandlerId(handlerId)), consumer));
     }
@@ -319,7 +326,7 @@ namespace Internal
     void Connection::RemoveRegistration(const Typesystem::TypeId              typeId,
                                         const Dob::Typesystem::HandlerId&     handlerId)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         m_registrations.erase(std::make_pair(typeId, ShmHandlerId(handlerId)));
     }
@@ -330,7 +337,7 @@ namespace Internal
     {
         if (!IsLocal()) return;
 
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         m_revokedRegistrations.insert(std::make_pair(std::make_pair(typeId, ShmHandlerId(handlerId)), consumer));
     }
@@ -340,20 +347,20 @@ namespace Internal
     {
         if (!IsLocal()) return;
 
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         m_revokedRegistrations.erase(std::make_pair(typeId, ShmHandlerId(handlerId)));
     }
 
     const RegistrationVector Connection::GetRevokedRegistrations() const
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
         return GetRegistrations(m_revokedRegistrations);
     }
 
     const RegistrationVector Connection::GetAndClearRevokedRegistrations()
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         RegistrationVector tmp = GetRegistrations(m_revokedRegistrations);
         m_revokedRegistrations.clear();
@@ -376,7 +383,7 @@ namespace Internal
     void Connection::AddPendingRegistration(const PendingRegistration & reg)
     {
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
         lllout << "AddPendingRegistration for type " << Dob::Typesystem::Operations::GetName(reg.typeId)
             << " for connection " << NameWithCounter() << std::endl;
 
@@ -427,7 +434,7 @@ namespace Internal
     void Connection::SetPendingRegistrationAccepted(const long requestId)
     {
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         for (PendingOwnerships::iterator it = m_pendingOwnerships.begin();
              it != m_pendingOwnerships.end(); ++it)
@@ -452,13 +459,14 @@ namespace Internal
     bool Connection::IsPendingAccepted(const Dob::Typesystem::TypeId typeId,
                                        const Dob::Typesystem::HandlerId & handlerId) const
     {
-        // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
 
         if (IsLocal())
         {
+            // Acquire connection lock
+            ScopedConnectionLock lck(m_lock);
+
             for (PendingOwnerships::const_iterator it = m_pendingOwnerships.begin();
-                 it != m_pendingOwnerships.end(); ++it)
+                it != m_pendingOwnerships.end(); ++it)
             {
                 const PendingRegistration & reg = *it;
                 if (reg.accepted && reg.typeId == typeId && reg.handlerId == handlerId)
@@ -477,7 +485,7 @@ namespace Internal
         PendingRegistrationVector prv;
 
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         PendingOwnerships::iterator firstRemoved =
             std::partition(m_pendingOwnerships.begin(),m_pendingOwnerships.end(),!boost::bind(&PendingRegistration::IsRemoved,_1));
@@ -489,7 +497,7 @@ namespace Internal
     void Connection::RetryAcceptedPendingOwnership(const long requestId)
     {
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         for (PendingOwnerships::iterator it = m_pendingOwnerships.begin();
              it != m_pendingOwnerships.end(); ++it)
@@ -513,7 +521,7 @@ namespace Internal
     void Connection::RemoveAcceptedPendingOwnership(const long requestId)
     {
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         PendingOwnerships::iterator removeEnd = std::remove_if(m_pendingOwnerships.begin(),m_pendingOwnerships.end(),
                                                                boost::bind(RequestIdMatches,_1,requestId));
@@ -535,7 +543,7 @@ namespace Internal
     const PendingRegistrationVector Connection::GetPendingRegistrations()
     {
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         PendingRegistrationVector prv;
         std::copy(m_pendingOwnerships.begin(),m_pendingOwnerships.end(),std::back_inserter(prv));
@@ -545,7 +553,7 @@ namespace Internal
     bool Connection::GetNextNewPendingRegistration(const long requestId, PendingRegistration & reg)
     {
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         for (PendingOwnerships::iterator it = m_pendingOwnerships.begin();
              it != m_pendingOwnerships.end(); ++it)
@@ -566,7 +574,7 @@ namespace Internal
     {
         bool somethingRemoved = false;
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         for (PendingOwnerships::iterator it = m_pendingOwnerships.begin();
              it != m_pendingOwnerships.end(); ++it)
@@ -595,6 +603,103 @@ namespace Internal
         }
 
         return regVec;
+    }
+
+    const Connection::QueueCapacities
+    Connection::GetQueueCapacities(const std::string & connectionNameUtf8)
+    {
+        const std::wstring connectionName = Safir::Dob::Typesystem::Utilities::ToWstring(connectionNameUtf8);
+        QueueCapacities capacities(ConnectionQueueId::Size(),0);
+
+        for (Typesystem::Int32 i = 0; i < Dob::QueueParameters::QueueRulesArraySize(); ++i)
+        {
+            Dob::QueueRulePtr rule = Dob::QueueParameters::QueueRules(i);
+
+            bool match = false;
+
+            if (rule->ConnectionNameRegex().IsNull() || rule->ConnectionNameRegex().GetVal().empty())
+            {
+                match = true;
+            }
+            else
+            { //we need to see if the regex matches
+                try
+                {
+                    const boost::wregex::flag_type regExpFlags = boost::regex::perl;
+
+                    if (boost::regex_search(connectionName,
+                                            boost::wregex(rule->ConnectionNameRegex().GetVal(), regExpFlags)))
+                    {
+                        match = true;
+                    }
+                }
+                catch (const boost::bad_expression & e)
+                {
+                    std::wostringstream ostr;
+                    ostr << "Got an exception while attempting to figure out the queue size" << std::endl
+                         << "for connection '" << connectionName << "'." << std::endl
+                         << "There is a problem with the regex '"<< rule->ConnectionNameRegex().GetVal() << "'" << std::endl
+                         << "in Safir.Dob.QueueParameters.QueueRules[" << i << "]" << std::endl
+                         << "The original exception was " << e.what() << std::endl;
+                    throw Safir::Dob::Typesystem::SoftwareViolationException
+                        (ostr.str(),__WFILE__,__LINE__);
+                }
+            }
+
+            if (match)
+            {
+                //we've got a match, need to get the values, if they are set.
+
+                if (!rule->MessageInQueueCapacity().IsNull())
+                {
+                    capacities[ConnectionQueueId::MessageInQueue] =
+                        std::max(capacities[ConnectionQueueId::MessageInQueue],
+                                 static_cast<size_t>(rule->MessageInQueueCapacity().GetVal()));
+                }
+
+                if (!rule->MessageOutQueueCapacity().IsNull())
+                {
+                    capacities[ConnectionQueueId::MessageOutQueue] =
+                        std::max(capacities[ConnectionQueueId::MessageOutQueue],
+                                 static_cast<size_t>(rule->MessageOutQueueCapacity().GetVal()));
+                }
+
+                if (!rule->RequestInQueueCapacity().IsNull())
+                {
+                    capacities[ConnectionQueueId::RequestInQueue] =
+                        std::max(capacities[ConnectionQueueId::RequestInQueue],
+                                 static_cast<size_t>(rule->RequestInQueueCapacity().GetVal()));
+                }
+
+                if (!rule->RequestOutQueueCapacity().IsNull())
+                {
+                    capacities[ConnectionQueueId::RequestOutQueue] =
+                        std::max(capacities[ConnectionQueueId::RequestOutQueue],
+                                 static_cast<size_t>(rule->RequestOutQueueCapacity().GetVal()));
+                }
+
+            }
+
+        }
+
+        //Check that all sizes are > 0
+        for (int i = 0; i < ConnectionQueueId::Size(); ++i)
+        {
+            if (capacities[i] == 0)
+            {
+                std::wostringstream ostr;
+                ostr << "The queue capacity of the "
+                     << ConnectionQueueId::ToString(static_cast<ConnectionQueueId::Enumeration>(i)) << std::endl
+                     << "for connection '" << connectionName << "' has ended up being 0!" << std::endl
+                     << "There is a problem with Safir.Dob.QueueParameters.QueueRules." << std::endl
+                     << "All queues have to have some room in them!" << std::endl;
+                throw Safir::Dob::Typesystem::SoftwareViolationException
+                    (ostr.str(),__WFILE__,__LINE__);
+
+            }
+        }
+
+        return capacities;
     }
 }
 }

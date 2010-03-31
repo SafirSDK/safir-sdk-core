@@ -228,15 +228,18 @@ package body Safir.Dob.Typesystem.Utilities is
       Dummy : Safir.Dob.Typesystem.Int_32 := 0;
 
    begin
-      Safir.Dob.Typesystem.Kernel.Base_64_To_Binary
-        (Dest_Ptr, Dest_Buf_Size, C.To_C (Value, False), Value'Length, Dummy);
 
-      Result.Reserve_Capacity (Ada.Containers.Count_Type (Dest_Buf_Size));
-      Tmp_Dest_Ptr := Dest_Ptr;
-      for I in 0 .. Dest_Buf_Size - 1 loop
-         Result.Append (To_Int_8 (Tmp_Dest_Ptr.all));
-         Char_Ptrs.Increment (Tmp_Dest_Ptr);
-      end loop;
+      if Dest_Buf_Size /= 0 then
+         Safir.Dob.Typesystem.Kernel.Base_64_To_Binary
+           (Dest_Ptr, Dest_Buf_Size, C.To_C (Value, False), Value'Length, Dummy);
+
+         Result.Reserve_Capacity (Ada.Containers.Count_Type (Dest_Buf_Size));
+         Tmp_Dest_Ptr := Dest_Ptr;
+         for I in 0 .. Dest_Buf_Size - 1 loop
+            Result.Append (To_Int_8 (Tmp_Dest_Ptr.all));
+            Char_Ptrs.Increment (Tmp_Dest_Ptr);
+         end loop;
+      end if;
 
       C_Free (Dest_Ptr);
 

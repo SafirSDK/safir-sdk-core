@@ -33,6 +33,7 @@ public:
 public:
     static int Dose_Config(dcom_uchar8 DoseId,
                            const char* multicastAddress,
+                           int multicastTtl,
                            const char* netAddress);
 
     static unsigned short   m_Dose_Port_Data;     // IpMc port for data
@@ -42,9 +43,9 @@ public:
     static unsigned char    m_spare1;
     static unsigned long    m_MyIpAddr_nw;
     static unsigned long    m_BaseIpMultiCastAddr_nw;
+    static int              m_MulticastTtl;
     static unsigned long    m_NetAddr_nw;
-    static dcom_ulong64          m_BitMapDestChannelMembers64[MAX_NUM_DEST_CHANNELS];
-
+    static dcom_ulong64     m_BitMapDestChannelMembers64[MAX_NUM_DEST_CHANNELS];
 private:
     typedef struct
     {

@@ -60,7 +60,7 @@ PartnerState::SetNotReady()
 
 
 void
-PartnerState::Activate(const int which)
+PartnerState::Activate(const int which, const int contextId)
 {
     if (IsActive(which))
     {
@@ -72,6 +72,7 @@ PartnerState::Activate(const int which)
         DoseTest::ActionPtr activate = DoseTest::Action::Create();
         activate->ActionKind().SetVal(DoseTest::ActionEnum::Activate);
         activate->Identifier().SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(m_languages.at(which)));
+        activate->Context().SetVal(contextId);
 
         try
         {

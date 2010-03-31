@@ -32,6 +32,7 @@
 #include <Safir/Dob/Internal/RequestInQueue.h>
 #include <Safir/Dob/Internal/ConsumerQueueContainer.h>
 #include <Safir/Dob/Internal/SubscriptionOptions.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 
 namespace Safir
@@ -93,7 +94,15 @@ namespace Internal
         // recursive locking.
         // Any attempts to take the lock recursively are to be regarded as
         // programming errors.
-        mutable boost::interprocess::interprocess_mutex m_lock;
+        // In some scenarios a StateContainerRwLock is acquired while holding a StateLock and in other
+        // scenarios a StateLock is acquired while holding a StateContainerRwLock. There are also
+        // scenarios when an EntityState lock is acquired while holding a RegistrationState lock
+        // (and vice versa). To avoid deadlocks a master lock at type level must be held in those cases.
+        // The LeveledLock is therefor instantiated to enforce this restriction.
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  STATE_LOCK_LEVEL,
+                                                  TYPE_LOCK_LEVEL> StateLock;
+        mutable StateLock m_lock;
 
         ConnectionPtr                           m_connection;
         ConsumerId                              m_consumer;

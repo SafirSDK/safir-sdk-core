@@ -1359,6 +1359,34 @@ public abstract class ConnectionBase
             return numInstances[0];
         }
 
+        /**
+         * This method is used to get the number of instances of an entity that exists.
+         *
+         * @param typeId The type of the class the handler is registered for.
+         * @param handlerId Get instanceIdPolicy for this handler.
+         * @return instanceIdPolicy Specifies if the handler expects instance ids in create requests to be
+         *                          assigned by the requestor or if the handler assigns them by itself.
+         * @throws com.saabgroup.safir.dob.NotFoundException The given handlerId has not registered the given class.
+         */
+    public InstanceIdPolicy GetInstanceIdPolicy(long typeId,
+            com.saabgroup.safir.dob.typesystem.HandlerId handlerId)
+    {
+            boolean [] success = new boolean [1];
+            int [] instanceIdPolicy = new int [1];
+
+            Interface.GetInstanceIdPolicy(getControllerId(),
+                                          typeId,
+                                          handlerId.getRawValue(),
+                                          instanceIdPolicy,
+                                          success);
+
+            if (!success[0]) {
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            }
+            return InstanceIdPolicy.class.getEnumConstants()[instanceIdPolicy[0]];
+        }
+
     /**
      * Interrupt the ongoing Dispatch even if all data to the application have not been distpatched.
      * The dispatch-event will be automatically set to trigger a new Dispatch again.

@@ -28,6 +28,19 @@
 #include <Safir/Dob/Internal/InternalExportDefs.h>
 #include <Safir/Utilities/StartupSynchronizer.h>
 #include <ace/Recursive_Thread_Mutex.h>
+
+
+
+#ifdef _MSC_VER
+//this needs to be disabled "permanently", not just for the file inclusion bit.
+#pragma warning (disable:4503)
+
+#pragma warning (push)
+#pragma warning (disable:4512)
+#pragma warning (disable:4100)
+#pragma warning (disable:4189)
+#endif
+
 #include <boost/interprocess/containers/map.hpp>
 #include <boost/interprocess/containers/set.hpp>
 #include <boost/interprocess/containers/string.hpp>
@@ -40,6 +53,10 @@
 #include <boost/interprocess/smart_ptr/weak_ptr.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {
@@ -211,6 +228,14 @@ namespace Internal
                 my_allocator<T>
             >
             set;
+
+            typedef typename boost::interprocess::multiset
+            <
+                T,
+                std::less<T>,
+                my_allocator<T>
+            >
+            multiset;
 
 
             typedef typename boost::interprocess::basic_string

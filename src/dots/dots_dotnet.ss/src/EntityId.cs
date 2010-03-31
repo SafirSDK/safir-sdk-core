@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -51,19 +51,19 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         /// <param name="type">The type id of the entity that the EntityId is to refer to.</param>
         /// <param name="instanceId">The instance of the entity that the EntityId is to refer to.</param>
-        public EntityId (System.Int64 type, InstanceId instanceId) 
+        public EntityId (System.Int64 type, InstanceId instanceId)
         {
             if (instanceId == null)
             {
                 throw new SoftwareViolationException("instance cannot be null in EntityId constructor");
             }
-            m_typeId = type; 
+            m_typeId = type;
             m_instanceId = instanceId;
         }
 
         /// <summary>
         /// Remove the included string from the instance id of the entity id.
-        /// 
+        ///
         /// <para/>
         /// This is meant to be used when this type is used as a member of a Dob object.
         /// Using this call before the object gets serialized to binary or xml (i.e.
@@ -105,9 +105,13 @@ namespace Safir.Dob.Typesystem
         /// <para/>
         /// Will convert the entity id to a string on the form "(Safir.Dob.Entity, 10)".
         /// This is meant to be used for debug output only.
-        /// If the type does not exist output will be on the form "(Unknown TypeId: 32873478348, 10)"
+        /// If the type does not exist output will be on the form "(Unknown type: 32873478348, 10)"
         /// If the string representation of the instance exists, the numerical instance id may be
         /// replaced by that string.
+        /// <para/>
+        /// The purpose of this function is for debug output and such.
+        /// The resulting string can *not* reliably be parsed or passed to constructors to recreate the same
+        /// entity id.
         /// </summary>
         /// <returns>The entity id as a string.</returns>
         public override string ToString()
@@ -182,7 +186,7 @@ namespace Safir.Dob.Typesystem
             {
                 return false;
             }
-            
+
             // Return true if the fields match:
             return first.Equals(second);
         }

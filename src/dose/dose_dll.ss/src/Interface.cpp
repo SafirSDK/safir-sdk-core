@@ -93,7 +93,7 @@ void DoseC_IsConnected(const long ctrl, bool & isConnected, bool & success)
 void DoseC_Connect(const long ctrl,
                    const char* connectionNameCommonPart,
                    const char* connectionNameInstancePart,
-                   const long context,
+                   const DotsC_Int32 contextId,
                    const long lang,
                    void* const connectionOwner,
                    void* const dispatcher,
@@ -124,7 +124,11 @@ void DoseC_Connect(const long ctrl,
     success = false;
     try
     {
-        if (context == -1)
+        //AWI:todo Here we should check that a program doesn't call open with a common part and an instance part
+        //      that it has already used for another connection in any context (software violation). This means that a
+        //      secondary attach using common part and an instance part identifies a unique connection in a certain context.
+
+        if (contextId == -1)
         {
             // Connect with context -1 means that a special controller shall be
             // used for this connection. Replace the existing "normal" controller.
@@ -138,7 +142,7 @@ void DoseC_Connect(const long ctrl,
 
         controller->Connect(connectionNameCommonPart,
                             connectionNameInstancePart,
-                            context,
+                            contextId,
                             lang,
                             ConsumerId(connectionOwner, lang),
                             ConsumerId(dispatcher, lang),
@@ -946,6 +950,25 @@ void DoseC_GetNumberOfInstances(const long ctrl,
             controller->EntityIteratorIncrement(iteratorId, end);
         }
 
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS;
+}
+
+void DoseC_GetInstanceIdPolicy(const long ctrl,
+                               const Safir::Dob::Typesystem::TypeId typeId,
+                               const Safir::Dob::Typesystem::Int64 handlerId,
+                               Safir::Dob::Typesystem::EnumerationValue& instanceIdPolicy,
+                               bool& success)
+{
+    success = false;
+    try
+    {
+        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
+
+        const ControllerPtr controller = ControllerTable::Instance().GetController(ctrl);
+
+        instanceIdPolicy = static_cast<Safir::Dob::Typesystem::EnumerationValue>(controller->GetInstanceIdPolicy(typeId, Typesystem::HandlerId(handlerId)));
         success = true;
     }
     CATCH_LIBRARY_EXCEPTIONS;

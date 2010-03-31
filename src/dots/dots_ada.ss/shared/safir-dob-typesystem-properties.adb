@@ -28,6 +28,7 @@ with Safir.Dob.Typesystem.Object_Container_Base;
 with Safir.Dob.Typesystem.Container_Instantiations; use Safir.Dob.Typesystem.Container_Instantiations;
 with Safir.Dob.Typesystem.Enumeration_Container_Base;
 with Safir.Dob.Typesystem.String_Container;
+with Safir.Dob.Typesystem.Binary_Container;
 with Safir.Dob.Typesystem.Object_Factory;
 with Safir.Dob.Typesystem.Kernel;
 with Safir.Dob.Typesystem.Utilities; use Safir.Dob.Typesystem.Utilities;
@@ -1445,9 +1446,9 @@ package body Safir.Dob.Typesystem.Properties is
                   Value              : in Safir.Dob.Typesystem.Binary_Vectors.Vector;
                   Member             : in Safir.Dob.Typesystem.Member_Index;
                   Index              : in Safir.Dob.Typesystem.Array_Index) is
-      use type Safir.Dob.Typesystem.Container_Instantiations.Binary_Container.Container_Access;
+      use type Safir.Dob.Typesystem.Binary_Container.Container_Access;
 
-      Container : Safir.Dob.Typesystem.Container_Instantiations.Binary_Container.Container_Access;
+      Container : Safir.Dob.Typesystem.Binary_Container.Container_Access;
       Parent_Is_Changed : Boolean := False;
 
    begin
@@ -1484,9 +1485,9 @@ package body Safir.Dob.Typesystem.Properties is
                   Value              : out Safir.Dob.Typesystem.Binary_Vectors.Vector;
                   Member             : in Safir.Dob.Typesystem.Member_Index;
                   Index              : in Safir.Dob.Typesystem.Array_Index) is
-      use type Safir.Dob.Typesystem.Container_Instantiations.Binary_Container.Container_Access;
+      use type Safir.Dob.Typesystem.Binary_Container.Container_Access;
 
-      Container : Safir.Dob.Typesystem.Container_Instantiations.Binary_Container.Container_Access;
+      Container : Safir.Dob.Typesystem.Binary_Container.Container_Access;
       Parent_Is_Changed : Boolean := False;
 
       Val : Char_Ptrs.Pointer;
@@ -1519,7 +1520,7 @@ package body Safir.Dob.Typesystem.Properties is
                Throw (Read_Only_Exception'Identity, "Unable to dereference property, some parent is null");
             end if;
 
-            Value := Container.Get_Val;
+            Value := Container.Get_Val.all;
       end case;
    end Get;
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<property xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Used to determine if a class should be visible in all contexts. This value overrides the
+             inherited value, and it is not inherited by child classes.</summary>
+    <name>Safir.Dob.ContextSharedOverrideProperty</name>
+    <members>
+        <member>
+            <summary>>Defines if this class should be visible in all contexts.</summary>
+            <name>ContextShared</name>s
+            <type>Boolean</type>
+        </member>
+    </members>
+</property>

@@ -80,14 +80,16 @@ namespace Internal
         void RemoteSetUnregistrationState(const DistributionData& registrationState);
 
         bool IsRegistered(const Dob::Typesystem::TypeId     typeId,
-                          const Dob::Typesystem::HandlerId& handlerId) const;
+                          const Dob::Typesystem::HandlerId& handlerId,
+                          const ContextId                   contextId) const;
 
         /**
          * Find the connection/consumer that has registered the given type/handler
          * If no-one owns it this method returns (NULL,(NULL,0))
          */
         const ConnectionConsumerPair GetRegisterer(const Dob::Typesystem::TypeId     typeId,
-                                                   const Dob::Typesystem::HandlerId& handlerId) const;
+                                                   const Dob::Typesystem::HandlerId& handlerId,
+                                                   const ContextId                   contextId) const;
 
         /** @} */
 

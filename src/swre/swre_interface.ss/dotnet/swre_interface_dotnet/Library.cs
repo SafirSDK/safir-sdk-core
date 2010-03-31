@@ -28,12 +28,8 @@ namespace Safir.SwReports
 {
     internal class Library
     {
-
-#if DEBUG
-        internal const string SWRE_LIBRARY_NAME = "swre_libraryd.dll";
-#else
         internal const string SWRE_LIBRARY_NAME = "swre_library.dll";
-#endif
+
         //--------------------------------------------------------------------
         // Exported interface from swre_library interface.h (unmanaged code)
         //--------------------------------------------------------------------

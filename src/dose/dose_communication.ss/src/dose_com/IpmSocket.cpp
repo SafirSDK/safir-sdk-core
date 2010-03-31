@@ -259,13 +259,13 @@ int CIpmSocket::EnableForRxIpMulticast(unsigned long IpMulticastAddr_nw)
 *
 * what shall I return  Now SockId
 ************************************************************************/
-long CIpmSocket::CreateIpMulticastSocket(
-                            int             bForReceive,
-                            int             bForSend,
-                            IPADDR          IpMulticastAddr_nw,
-                            unsigned short  Port,
-                            unsigned long   Opt_So_Rcvbuf_Size,
-                            unsigned long   Opt_So_RcvTimeo_Timeout)
+long CIpmSocket::CreateIpMulticastSocket(int             bForReceive,
+                                         int             bForSend,
+                                         IPADDR          IpMulticastAddr_nw,
+                                         int             multicastTtl,
+                                         unsigned short  Port,
+                                         unsigned long   Opt_So_Rcvbuf_Size,
+                                         unsigned long   Opt_So_RcvTimeo_Timeout)
 {
     struct sockaddr_in  sname;
     SOCKET              Sock_id;
@@ -421,6 +421,7 @@ if(IpMulticastAddr_nw != 1)
     if( bForSend && IpMulticastAddr_nw)
     {
         ttl = 1;
+        if (multicastTtl > 1) ttl = multicastTtl;
         result = setsockopt( Sock_id,  IPPROTO_IP, IP_MULTICAST_TTL,
                             (char *) &ttl, sizeof(ttl));
         if (result != 0)

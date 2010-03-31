@@ -135,7 +135,7 @@ namespace @_NAMESPACEV_@
 
 #ifdef _GNUC
     //obligatory static member initialization is needed by gcc
-    const Safir::Dob::Typesystem::TypeId @_CLASS_@::ClassTypeId;;
+    const Safir::Dob::Typesystem::TypeId @_CLASS_@::ClassTypeId;
 #endif 
 
     static bool isInitialised = false;
@@ -446,7 +446,7 @@ namespace @_NAMESPACEV_@
 
 #ifdef __GNUC__
     //obligatory static member initialization is needed by gcc
-    const Safir::Dob::Typesystem::TypeId @_CLASS_@::ClassTypeId;;
+    const Safir::Dob::Typesystem::TypeId @_CLASS_@::ClassTypeId;
 #endif
 
     //An anonymous namespace for object factory registration

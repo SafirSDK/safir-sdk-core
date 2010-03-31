@@ -27,6 +27,7 @@
 #include <Safir/Dob/Internal/MessageTypes.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/Internal/ServiceTypes.h>
+#include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 
 namespace Safir
 {
@@ -118,9 +119,9 @@ namespace Internal
         ++findIt->second;        
     }
 
-    void ConsumerReferences::DropHandlerRegistrationReferences(const Dob::Typesystem::TypeId       typeId,
-                                                               const Dob::Typesystem::HandlerId&   handlerId,
-                                                               const DropReferencesFunc&           dropReferencesFunc)
+    void ConsumerReferences::DropAllHandlerRegistrationReferences(const Dob::Typesystem::TypeId       typeId,
+                                                                  const Dob::Typesystem::HandlerId&   handlerId,
+                                                                  const DropReferencesFunc&           dropReferencesFunc)
     {
         for (RegistrationCounterMap::iterator it = m_registrationCounterMap.begin();
              it != m_registrationCounterMap.end();) //note the missing ++it, see below for explanation
@@ -158,6 +159,55 @@ namespace Internal
         return false;
 
     }
+
+    long ConsumerReferences::GetHandlerRegistrationReferenceCounter(const Dob::Typesystem::TypeId      typeId,
+                                                                    const Dob::Typesystem::HandlerId&  handlerId,
+                                                                    const ConsumerId&                  consumer) const
+    {
+        RegistrationKey key = boost::make_tuple(typeId, handlerId, consumer);
+
+        RegistrationCounterMap::const_iterator it = m_registrationCounterMap.find(key);
+
+        if (it != m_registrationCounterMap.end())
+        {
+            return it->second;
+        }
+        return 0;
+    }
+
+    void ConsumerReferences::DropHandlerRegistrationReferences(const Dob::Typesystem::TypeId       typeId,
+                                                               const Dob::Typesystem::HandlerId&   handlerId,
+                                                               const ConsumerId&                   consumer,
+                                                               const long                          nbrOfReferences,
+                                                               const DropReferencesFunc&           dropReferencesFunc)
+     {
+        RegistrationKey key = boost::make_tuple(typeId, handlerId, consumer);
+
+        RegistrationCounterMap::iterator it = m_registrationCounterMap.find(key);
+
+        if (it != m_registrationCounterMap.end())
+        {
+            ENSURE(it->second >= nbrOfReferences, <<
+                   "The number of handler registration refrences to drop exceeds the actual number of references!");
+
+            dropReferencesFunc(consumer,
+                               nbrOfReferences);
+
+            if (it->second == nbrOfReferences)
+            {
+                // No more references, erase from map.
+                m_registrationCounterMap.erase(it);
+            }
+            else
+            {
+                it->second = it->second - nbrOfReferences;
+            }
+        }
+        else if (nbrOfReferences > 0)
+        {
+            ENSURE(false, << "The number of handler registration refrences to drop exceeds the actual number of references!");
+        }
+     }
 
     void ConsumerReferences::AddMessageSubscriptionReference(const ConsumerId& consumer)
     {

@@ -31,6 +31,8 @@
 #include <Safir/Dob/Internal/MonotonicClock.h>
 #include <Safir/Dob/Internal/TimestampOperations.h>
 #include <Safir/Dob/Internal/EndStates.h>
+#include <Safir/Dob/NodeParameters.h>
+#include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 
@@ -45,10 +47,17 @@ namespace Internal
 {
     EntityType::EntityType(const Typesystem::TypeId typeId)
         : m_typeId(typeId),
+          m_typeIsContextShared(ContextSharedTable::Instance().IsContextShared(typeId)),
           m_injectionKind(InjectionKindTable::Instance().GetInjectionKind(typeId)),
-          m_entityStates(typeId),
-          m_handlerRegistrations(typeId, &m_entityStates)
+          m_entityStates(Safir::Dob::NodeParameters::NumberOfContexts(), typeId),
+          m_handlerRegistrations(Safir::Dob::NodeParameters::NumberOfContexts(), typeId),
+          m_typeLocks(Safir::Dob::NodeParameters::NumberOfContexts())
     {
+        // Set the correct state container pointer in each registration handler.
+        for (ContextId context = 0; context < Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
+        {
+            m_handlerRegistrations[context].SetStateContainer(&m_entityStates[context]);
+        }
     }
 
     bool EntityType::Register(const ConnectionPtr&                  connection,
@@ -59,31 +68,59 @@ namespace Internal
                               const bool                            overrideRegistration,
                               const ConsumerId&                     consumer)
     {
-        return m_handlerRegistrations.Register(connection,
-                                               handlerId,
-                                               instanceIdPolicy,
-                                               isInjectionHandler,
-                                               regTime,
-                                               overrideRegistration,
-                                               consumer);
+        const ContextId context = connection->Id().m_contextId;
+
+        if (m_typeIsContextShared && context != 0)
+        {
+            std::wostringstream ostr;
+            ostr << "Entity " << Typesystem::Operations::GetName(m_typeId) <<
+                    ", which is ContextShared, can only be registered from context 0.";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);         
+        }
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
+        return m_handlerRegistrations[context].Register(connection,
+                                                        handlerId,
+                                                        instanceIdPolicy,
+                                                        isInjectionHandler,
+                                                        regTime,
+                                                        overrideRegistration,
+                                                        consumer);
     }
 
     void EntityType::Unregister(const ConnectionPtr&                connection,
                                 const Dob::Typesystem::HandlerId&   handlerId)
     {
+        const ContextId context = connection->Id().m_contextId;
+
+        if (m_typeIsContextShared && context != 0)
+        {
+            std::wostringstream ostr;
+            ostr << "Entity " << Typesystem::Operations::GetName(m_typeId) <<
+                    ", which is ContextShared, can only be unregistered from context 0.";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);         
+        }
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
         if (handlerId == Dob::Typesystem::HandlerId::ALL_HANDLERS)
         {
-            m_handlerRegistrations.UnregisterAll(connection);
+            m_handlerRegistrations[context].UnregisterAll(connection);
         }
         else
         {
-            m_handlerRegistrations.Unregister(connection, handlerId, RegisterTime());
+            m_handlerRegistrations[context].Unregister(connection, handlerId, RegisterTime());
         }
     }
 
     void EntityType::UnregisterAll(const ConnectionPtr& connection)
     {
-        m_handlerRegistrations.UnregisterAll(connection);
+        const ContextId context = connection->Id().m_contextId;
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
+        m_handlerRegistrations[context].UnregisterAll(connection);
     }
 
     void EntityType::RemoteSetRegistrationState(const ConnectionPtr& connection,
@@ -91,32 +128,41 @@ namespace Internal
     {
         ENSURE(!connection->IsLocal(), << "EntityType::RemoteSetRegistrationState can only be used by remote connections!");
 
-        m_handlerRegistrations.RemoteSetRegistrationState(connection, registrationState);
+        const ContextId context = connection->Id().m_contextId;
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
+        m_handlerRegistrations[context].RemoteSetRegistrationState(connection, registrationState);
 
     }
 
     void EntityType::RemoteSetUnregistrationState(const DistributionData& registrationState)
     {
-        m_handlerRegistrations.RemoteSetUnregistrationState(registrationState);
+        const ContextId context = registrationState.GetSenderId().m_contextId;
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
+        m_handlerRegistrations[context].RemoteSetUnregistrationState(registrationState);
     }
 
-    bool EntityType::IsRegistered(const Dob::Typesystem::HandlerId& handlerId) const
+    bool EntityType::IsRegistered(const Dob::Typesystem::HandlerId& handlerId, const ContextId context) const
     {
-        return m_handlerRegistrations.IsRegistered(handlerId);
+        return m_handlerRegistrations[context].IsRegistered(handlerId);
     }
 
     const ConnectionConsumerPair
-    EntityType::GetRegisterer(const Dob::Typesystem::HandlerId& handlerId) const
+    EntityType::GetRegisterer(const Dob::Typesystem::HandlerId& handlerId, const ContextId context) const
     {
-        return m_handlerRegistrations.GetRegisterer(handlerId);
+        return m_handlerRegistrations[context].GetRegisterer(handlerId);
     }
 
     bool
     EntityType::GetRegisterer(const Dob::Typesystem::HandlerId& handlerId,
+                              const ContextId                   context,
                               ConnectionConsumerPair&           registerer,
                               InstanceIdPolicy::Enumeration&    instanceIdPolicy) const
     {
-       return m_handlerRegistrations.GetRegisterer(handlerId, registerer, instanceIdPolicy);
+       return m_handlerRegistrations[context].GetRegisterer(handlerId, registerer, instanceIdPolicy);
     }
 
     void EntityType::SubscribeRegistration(const SubscriptionId&                subscriptionId,
@@ -124,22 +170,31 @@ namespace Internal
                                            const bool                           restartSubscription,
                                            const SubscriptionOptionsPtr&        subscriptionOptions)
     {
-        lllout << "SubscribeRegistration for " << Typesystem::Operations::GetName(m_typeId) <<
-            ", handlerId " << handlerId << std::endl;
-        m_handlerRegistrations.Subscribe(subscriptionId, handlerId, restartSubscription, subscriptionOptions);
+        // If it is a ContextShared type we use context 0, otherwise we use the same context as the subscriber.
+        const ContextId context = m_typeIsContextShared ? 0 : subscriptionId.connectionConsumer.connection->Id().m_contextId;
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+        m_handlerRegistrations[context].Subscribe(subscriptionId, handlerId, restartSubscription, subscriptionOptions);
     }
 
     void EntityType::UnsubscribeRegistration(const SubscriptionId&              subscriptionId,
                                              const Dob::Typesystem::HandlerId&  handlerId)
     {
-        m_handlerRegistrations.Unsubscribe(subscriptionId, handlerId);
+        // If it is a ContextShared type we use context 0, otherwise we use the same context as the "unsubscriber".
+        const ContextId context = m_typeIsContextShared ? 0 : subscriptionId.connectionConsumer.connection->Id().m_contextId;;
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+        m_handlerRegistrations[context].Unsubscribe(subscriptionId, handlerId);
     }
 
     bool EntityType::HasRegistrationSubscription(const ConnectionPtr&    connection,
                                                  const ConsumerId&       consumer) const
     {
-        return m_handlerRegistrations.HasSubscription(connection,
-                                                      consumer);
+        // If it is a ContextShared type we use context 0, otherwise we use the same context as the "requestor".
+        const ContextId context = m_typeIsContextShared ? 0 : connection->Id().m_contextId;
+
+        return m_handlerRegistrations[context].HasSubscription(connection,
+                                                               consumer);
     }
 
     void EntityType::SetEntity(const ConnectionPtr&                 connection,
@@ -149,30 +204,42 @@ namespace Internal
                                const bool                           considerChangeFlags,
                                const bool                           initialInjection)
     {
+        const ContextId context = connection->Id().m_contextId;
+
+        if (m_typeIsContextShared && context != 0)
+        {
+            std::wostringstream ostr;
+            ostr << "Entity " << Typesystem::Operations::GetName(m_typeId) <<
+                    ", which is ContextShared, can only be set from context 0.";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);            
+        }
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
         if (!initialInjection)
         {
             // Add a state if it is not already present
-            m_entityStates.ForSpecificStateAdd(instanceId.GetRawValue(),
-                                               boost::bind(&EntityType::SetEntityInternal,
-                                                           this,
-                                                           _2,
-                                                           boost::cref(connection),
-                                                           boost::cref(handlerId),
-                                                           boost::cref(instanceId),
-                                                           considerChangeFlags,
-                                                           blob));
+            m_entityStates[context].ForSpecificStateAdd(instanceId.GetRawValue(),
+                                                        boost::bind(&EntityType::SetEntityInternal,
+                                                                    this,
+                                                                    _2,
+                                                                    boost::cref(connection),
+                                                                    boost::cref(handlerId),
+                                                                    boost::cref(instanceId),
+                                                                    considerChangeFlags,
+                                                                    blob));
         }
         else
         {
             // Add a state if it is not already present
-            m_entityStates.ForSpecificStateAdd(instanceId.GetRawValue(),
-                                               boost::bind(&EntityType::SetInitalGhostInternal,
-                                                           this,
-                                                           _2,
-                                                           boost::cref(connection),
-                                                           boost::cref(handlerId),
-                                                           boost::cref(instanceId),
-                                                           blob));
+            m_entityStates[context].ForSpecificStateAdd(instanceId.GetRawValue(),
+                                                        boost::bind(&EntityType::SetInitalGhostInternal,
+                                                                    this,
+                                                                    _2,
+                                                                    boost::cref(connection),
+                                                                    boost::cref(handlerId),
+                                                                    boost::cref(instanceId),
+                                                                    blob));
         }
     }
 
@@ -181,30 +248,42 @@ namespace Internal
                                   const Dob::Typesystem::InstanceId&    instanceId,
                                   const bool                            allInstances)
     {
+        const ContextId context = connection->Id().m_contextId;
+
+        if (m_typeIsContextShared && context != 0)
+        {
+            std::wostringstream ostr;
+            ostr << "Entity " << Typesystem::Operations::GetName(m_typeId) <<
+                    ", which is ContextShared, can only be deleted from context 0.";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);            
+        }
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
         if (allInstances)
         {
-            m_entityStates.ReleaseEachState(boost::bind(&EntityType::DeleteAllInstancesInternal,
-                                                        this,
-                                                        _2,
-                                                        boost::cref(connection),
-                                                        boost::cref(handlerId),
-                                                        _3,
-                                                        _4));
+            m_entityStates[context].ReleaseEachState(boost::bind(&EntityType::DeleteAllInstancesInternal,
+                                                                 this,
+                                                                 _2,
+                                                                 boost::cref(connection),
+                                                                 boost::cref(handlerId),
+                                                                 _3,
+                                                                 _4));
         }
         else
         {
-            m_entityStates.ReleaseSpecificState(instanceId.GetRawValue(),
-                                                boost::bind(&EntityType::DeleteEntityInternal,
-                                                            this,
-                                                            _2,
-                                                            boost::cref(connection),
-                                                            boost::cref(handlerId),
-                                                            boost::cref(instanceId),
-                                                            _3));
+            m_entityStates[context].ReleaseSpecificState(instanceId.GetRawValue(),
+                                                         boost::bind(&EntityType::DeleteEntityInternal,
+                                                                     this,
+                                                                     _2,
+                                                                     boost::cref(connection),
+                                                                     boost::cref(handlerId),
+                                                                     boost::cref(instanceId),
+                                                                     _3));
         }
     }
 
-    void EntityType::InjectEntity(const ConnectionPtr&                 /*connection*/,  // AWI:Can be removed
+    void EntityType::InjectEntity(const ConnectionPtr&                 connection,
                                   const Dob::Typesystem::HandlerId&    handlerId,
                                   const Dob::Typesystem::InstanceId&   instanceId,
                                   const char* const                    blob,
@@ -214,18 +293,31 @@ namespace Internal
         ENSURE(m_injectionKind == InjectionKind::Injectable,
                << "Trying to call InjectEntity with a non-injectable type");
 
-        m_entityStates.ForSpecificStateAddAndRelease(instanceId.GetRawValue(),
-                                                     boost::bind(&EntityType::InjectEntityInternal,
-                                                                 this,
-                                                                 _2,
-                                                                 boost::cref(handlerId),
-                                                                 boost::cref(instanceId),
-                                                                 blob,
-                                                                 timestamp,
-                                                                 _3));
+        const ContextId context = connection->Id().m_contextId;
+
+        if (m_typeIsContextShared && context != 0)
+        {
+            std::wostringstream ostr;
+            ostr << "Entity " << Typesystem::Operations::GetName(m_typeId) <<
+                    ", which is ContextShared, can only be injected from context 0.";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);            
+        }
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
+        m_entityStates[context].ForSpecificStateAddAndRelease(instanceId.GetRawValue(),
+                                                              boost::bind(&EntityType::InjectEntityInternal,
+                                                                          this,
+                                                                          _2,
+                                                                          connection,
+                                                                          boost::cref(handlerId),
+                                                                          boost::cref(instanceId),
+                                                                          blob,
+                                                                          timestamp,
+                                                                          _3));
     }
 
-    void EntityType::InjectDeletedEntity(const ConnectionPtr&                 /*connection*/,  // AWI: can be removed?
+    void EntityType::InjectDeletedEntity(const ConnectionPtr&                 connection,
                                          const Dob::Typesystem::HandlerId&    handlerId,
                                          const Dob::Typesystem::InstanceId&   instanceId,
                                          const Dob::Typesystem::Int64         timestamp)
@@ -233,41 +325,64 @@ namespace Internal
         ENSURE(m_injectionKind == InjectionKind::Injectable,
                << "Trying to call InjectDeletedEntity with a non-injectable type");
 
-        m_entityStates.ForSpecificStateAddAndRelease(instanceId.GetRawValue(),
-                                                     boost::bind(&EntityType::InjectDeletedEntityInternal,
-                                                                 this,
-                                                                 _2,
-                                                                 boost::cref(handlerId),
-                                                                 boost::cref(instanceId),
-                                                                 timestamp,
-                                                                 _3));
+        const ContextId context = connection->Id().m_contextId;
+
+        if (m_typeIsContextShared && context != 0)
+        {
+            std::wostringstream ostr;
+            ostr << "Entity " << Typesystem::Operations::GetName(m_typeId) <<
+                    ", which is ContextShared, can only be deleteInjected from context 0.";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);            
+        }
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
+        m_entityStates[context].ForSpecificStateAddAndRelease(instanceId.GetRawValue(),
+                                                              boost::bind(&EntityType::InjectDeletedEntityInternal,
+                                                                          this,
+                                                                          _2,
+                                                                          connection,
+                                                                          boost::cref(handlerId),
+                                                                          boost::cref(instanceId),
+                                                                          timestamp,
+                                                                          _3));
     }
 
     void EntityType::AcceptInjection(const ConnectionPtr&       connection,
                                      DistributionData&          injectionState,
                                      const DistributionData&    originalInjectionState)
     {
+        const ContextId context = connection->Id().m_contextId;
+
+        if (m_typeIsContextShared)
+        {
+            ENSURE(context == 0, << "Entity " << Typesystem::Operations::GetName(m_typeId) <<
+                    ", which is ContextShared, can only be accepted from context 0.");          
+        }
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
         if (injectionState.HasBlob())
         {
-            m_entityStates.ForSpecificState(injectionState.GetInstanceId().GetRawValue(),
-                                            boost::bind(&EntityType::AcceptInjectionInternal,
-                                                        this,
-                                                        _2,
-                                                        boost::cref(connection),
-                                                        boost::ref(injectionState),
-                                                        boost::cref(originalInjectionState)),
-                                            false); // false => don't include released states;
+            m_entityStates[context].ForSpecificState(injectionState.GetInstanceId().GetRawValue(),
+                                                     boost::bind(&EntityType::AcceptInjectionInternal,
+                                                                 this,
+                                                                 _2,
+                                                                 boost::cref(connection),
+                                                                 boost::ref(injectionState),
+                                                                 boost::cref(originalInjectionState)),
+                                                     false); // false => don't include released states;
         }
         else
         {
-            m_entityStates.ReleaseSpecificState(injectionState.GetInstanceId().GetRawValue(),
-                                                boost::bind(&EntityType::AcceptDeleteInjectionInternal,
-                                                            this,
-                                                            _2,
-                                                            boost::cref(connection),
-                                                            boost::ref(injectionState),
-                                                            boost::cref(originalInjectionState),
-                                                            _3));
+            m_entityStates[context].ReleaseSpecificState(injectionState.GetInstanceId().GetRawValue(),
+                                                         boost::bind(&EntityType::AcceptDeleteInjectionInternal,
+                                                                     this,
+                                                                     _2,
+                                                                     boost::cref(connection),
+                                                                     boost::ref(injectionState),
+                                                                     boost::cref(originalInjectionState),
+                                                                     _3));
         }
     }
 
@@ -278,17 +393,29 @@ namespace Internal
                                   const char* const                    blob,
                                   const DistributionData&              originalInjectionState)
     {
-        m_entityStates.ForSpecificState(instanceId.GetRawValue(),
-                                        boost::bind(&EntityType::SetInjectionInternal,
-                                                    this,
-                                                    _2,
-                                                    boost::cref(connection),
-                                                    boost::cref(handlerId),
-                                                    boost::cref(instanceId),
-                                                    considerChangeFlags,
-                                                    blob,
-                                                    boost::cref(originalInjectionState)),
-                                        false); // false => don't include released states;
+        const ContextId context = connection->Id().m_contextId;
+
+        if (m_typeIsContextShared && context != 0)
+        {
+            std::wostringstream ostr;
+            ostr << "SetInjection for Entity " << Typesystem::Operations::GetName(m_typeId) <<
+                    ", which is ContextShared, is not allowed from context " << context << "!";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);            
+        }
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
+        m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
+                                                 boost::bind(&EntityType::SetInjectionInternal,
+                                                             this,
+                                                             _2,
+                                                             boost::cref(connection),
+                                                             boost::cref(handlerId),
+                                                             boost::cref(instanceId),
+                                                             considerChangeFlags,
+                                                             blob,
+                                                             boost::cref(originalInjectionState)),
+                                                 false); // false => don't include released states;
     }
 
 
@@ -298,67 +425,124 @@ namespace Internal
                                      const Dob::Typesystem::InstanceId&   instanceId,
                                      const DistributionData&              originalInjectionState)
     {
-        m_entityStates.ReleaseSpecificState(instanceId.GetRawValue(),
-                                            boost::bind(&EntityType::DeleteInjectionInternal,
-                                                        this,
-                                                        _2,
-                                                        boost::cref(connection),
-                                                        boost::cref(handlerId),
-                                                        boost::cref(instanceId),
-                                                        boost::cref(originalInjectionState),
-                                                        _3));
+        const ContextId context = connection->Id().m_contextId;
+
+        if (m_typeIsContextShared && context != 0)
+        {
+            std::wostringstream ostr;
+            ostr << "DeleteInjection for Entity " << Typesystem::Operations::GetName(m_typeId) <<
+                    ", which is ContextShared, is not allowed from context 0.";
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);            
+        }
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
+        m_entityStates[context].ReleaseSpecificState(instanceId.GetRawValue(),
+                                                     boost::bind(&EntityType::DeleteInjectionInternal,
+                                                                 this,
+                                                                 _2,
+                                                                 boost::cref(connection),
+                                                                 boost::cref(handlerId),
+                                                                 boost::cref(instanceId),
+                                                                 boost::cref(originalInjectionState),
+                                                                 _3));
     }
 
     void EntityType::RemoteSetGhostEntityState(const DistributionData& entityState)
     {
+        const ContextId context = entityState.GetSenderId().m_contextId;
+
+        if (m_typeIsContextShared)
+        {
+            ENSURE(context == 0, << "EntityType::RemoteSetGhostEntityState. Received Entity " <<
+                                    Typesystem::Operations::GetName(m_typeId) <<
+                                    ", which is ContextShared, in context " << context);
+        }
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
         m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
 
-        m_entityStates.ForSpecificStateAdd(entityState.GetInstanceId().GetRawValue(),
-                                           boost::bind(&EntityType::RemoteSetGhostEntityStateInternal,
-                                                       this,
-                                                       boost::cref(entityState),
-                                                       _2));
+        m_entityStates[context].ForSpecificStateAdd(entityState.GetInstanceId().GetRawValue(),
+                                                    boost::bind(&EntityType::RemoteSetGhostEntityStateInternal,
+                                                                this,
+                                                                boost::cref(entityState),
+                                                                _2));
     }
 
     void EntityType::RemoteSetInjectionEntityState(const DistributionData& entityState)
     {
+        
+        const ContextId context = entityState.GetSenderId().m_contextId;
+
+        if (m_typeIsContextShared)
+        {
+            ENSURE(context == 0, << "EntityType::RemoteSetInjectionEntityState. Received Entity " <<
+                                    Typesystem::Operations::GetName(m_typeId) <<
+                                    ", which is ContextShared, in context " << context);
+        }
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
         m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
 
-        m_entityStates.ForSpecificStateAddAndRelease(entityState.GetInstanceId().GetRawValue(),
-                                                     boost::bind(&EntityType::RemoteSetInjectionEntityStateInternal,
-                                                                 this,
-                                                                 boost::cref(entityState),
-                                                                 _2,
-                                                                 _3));
+        m_entityStates[context].ForSpecificStateAddAndRelease(entityState.GetInstanceId().GetRawValue(),
+                                                              boost::bind(&EntityType::RemoteSetInjectionEntityStateInternal,
+                                                                          this,
+                                                                          boost::cref(entityState),
+                                                                          _2,
+                                                                          _3));
     }
 
     void EntityType::RemoteSetDeleteEntityState(const DistributionData&   entityState)
     {
+        const ContextId context = entityState.GetSenderId().m_contextId;
+
+        if (m_typeIsContextShared)
+        {
+            ENSURE(context == 0, << "EntityType::RemoteSetDeleteEntityState. Received Entity " <<
+                                    Typesystem::Operations::GetName(m_typeId) <<
+                                    ", which is ContextShared, in context " << context);
+        }
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
         m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
 
-        m_entityStates.ForSpecificStateAddAndRelease(entityState.GetInstanceId().GetRawValue(),
-                                                     boost::bind(&EntityType::RemoteSetDeleteEntityStateInternal,
-                                                                 this,
-                                                                 boost::cref(entityState),
-                                                                 _2,
-                                                                 _3));
+        m_entityStates[context].ForSpecificStateAddAndRelease(entityState.GetInstanceId().GetRawValue(),
+                                                              boost::bind(&EntityType::RemoteSetDeleteEntityStateInternal,
+                                                                          this,
+                                                                          boost::cref(entityState),
+                                                                          _2,
+                                                                          _3));
     }
 
     RemoteSetResult EntityType::RemoteSetRealEntityState(const ConnectionPtr&      connection,
                                                          const DistributionData&   entityState)
     {
+        const ContextId context = entityState.GetSenderId().m_contextId;
+
+        if (m_typeIsContextShared)
+        {
+            ENSURE(context == 0, << "EntityType::RemoteSetRealEntityState. Received Entity " <<
+                                    Typesystem::Operations::GetName(m_typeId) <<
+                                    ", which is ContextShared, in context " << context);
+        }
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
         m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
 
         RemoteSetResult result;
 
-        m_entityStates.ForSpecificStateAddAndRelease(entityState.GetInstanceId().GetRawValue(),
-                                                     boost::bind(&EntityType::RemoteSetRealEntityStateInternal,
-                                                                 this,
-                                                                 boost::cref(connection),
-                                                                 boost::cref(entityState),
-                                                                 _2,
-                                                                 _3,
-                                                                 boost::ref(result)));
+        m_entityStates[context].ForSpecificStateAddAndRelease(entityState.GetInstanceId().GetRawValue(),
+                                                              boost::bind(&EntityType::RemoteSetRealEntityStateInternal,
+                                                                          this,
+                                                                          boost::cref(connection),
+                                                                          boost::cref(entityState),
+                                                                          _2,
+                                                                          _3,
+                                                                          boost::ref(result)));
 
         return result;
     }
@@ -369,20 +553,30 @@ namespace Internal
                                const bool                           restartSubscription,
                                const SubscriptionOptionsPtr&        subscriptionOptions)
     {
-        m_entityStates.Subscribe(subscriptionId,
-                                 instanceId.GetRawValue(),
-                                 allInstances,
-                                 restartSubscription,
-                                 subscriptionOptions);
+        // If it is a ContextShared type we use context 0, otherwise we use the same context as the subscriber.
+        const ContextId context = m_typeIsContextShared ? 0 : subscriptionId.connectionConsumer.connection->Id().m_contextId;
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
+        m_entityStates[context].Subscribe(subscriptionId,
+                                          instanceId.GetRawValue(),
+                                          allInstances,
+                                          restartSubscription,
+                                          subscriptionOptions);
     }
 
     void EntityType::Unsubscribe(const SubscriptionId&              subscriptionId,
                                  const Dob::Typesystem::InstanceId& instanceId,
                                  const bool                         allInstances)
     {
-        m_entityStates.Unsubscribe(subscriptionId,
-                                   instanceId.GetRawValue(),
-                                   allInstances);
+        // If it is a ContextShared type we use context 0, otherwise we use the same context as the subscriber.
+        const ContextId context = m_typeIsContextShared ? 0 : subscriptionId.connectionConsumer.connection->Id().m_contextId;
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
+        m_entityStates[context].Unsubscribe(subscriptionId,
+                                            instanceId.GetRawValue(),
+                                            allInstances);
     }
 
     bool EntityType::HasEntitySubscription(const ConnectionPtr&    connection,
@@ -390,25 +584,37 @@ namespace Internal
     {
         SubscriptionId subscriptionId(ConnectionConsumerPair(connection, consumer), EntitySubscription, 0);
 
-        return m_entityStates.HasSubscription(subscriptionId);
+        // If it is a ContextShared type we use context 0, otherwise we use the same context as the "requestor".
+        const ContextId context = m_typeIsContextShared ? 0 : subscriptionId.connectionConsumer.connection->Id().m_contextId;
+
+        return m_entityStates[context].HasSubscription(subscriptionId);
     }
 
     void EntityType::UnsubscribeAll(const ConnectionPtr& connection)
     {
-        m_handlerRegistrations.UnsubscribeAll(connection);
-        m_entityStates.UnsubscribeAll(connection);
+        // If it is a ContextShared type we use context 0, otherwise we use the same context as the "unsubscriber".
+        const ContextId context = m_typeIsContextShared ? 0 : connection->Id().m_contextId;
+
+        ScopedTypeLock lck(m_typeLocks[context]);
+
+        m_handlerRegistrations[context].UnsubscribeAll(connection);
+        m_entityStates[context].UnsubscribeAll(connection);
     }
 
-    const DistributionData EntityType::ReadEntity(const Dob::Typesystem::InstanceId& instanceId) const
+    const DistributionData EntityType::ReadEntity(const Dob::Typesystem::InstanceId& instanceId,
+                                                  const ContextId readerContext) const
     {
+        // If it is a ContextShared type we use context 0, otherwise we use the same context as the reader.
+        const ContextId context = m_typeIsContextShared ? 0 : readerContext;
+
         DistributionData realState(no_state_tag);
 
-        m_entityStates.ForSpecificState(instanceId.GetRawValue(),
-                                        boost::bind(&EntityType::ReadEntityInternal,
-                                                    this,
-                                                    _2,
-                                                    boost::ref(realState)),
-                                        false); // false => don't include released states
+        m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
+                                                 boost::bind(&EntityType::ReadEntityInternal,
+                                                             this,
+                                                             _2,
+                                                             boost::ref(realState)),
+                                                 false); // false => don't include released states
 
         if (realState.IsNoState())
         {
@@ -423,18 +629,22 @@ namespace Internal
 
     }
 
-    const Dob::Typesystem::HandlerId EntityType::GetHandlerOfInstance(const Dob::Typesystem::InstanceId& instanceId) const
+    const Dob::Typesystem::HandlerId EntityType::GetHandlerOfInstance(const Dob::Typesystem::InstanceId& instanceId,
+                                                                      const ContextId requestorContext) const
     {
+        // If it is a ContextShared type we use context 0, otherwise we use the same context as the "requestor".
+        const ContextId context = m_typeIsContextShared ? 0 : requestorContext;
+
         Dob::Typesystem::HandlerId handlerId;
         bool gotIt = false;
 
-        m_entityStates.ForSpecificState(instanceId.GetRawValue(),
-                                         boost::bind(&EntityType::GetHandlerOfInstanceInternal,
-                                                     this,
-                                                     _2,
-                                                     boost::ref(handlerId),
-                                                     boost::ref(gotIt)),
-                                         false); // false => don't include released states
+        m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
+                                                 boost::bind(&EntityType::GetHandlerOfInstanceInternal,
+                                                             this,
+                                                             _2,
+                                                             boost::ref(handlerId),
+                                                             boost::ref(gotIt)),
+                                                 false); // false => don't include released states
 
         if (!gotIt)
         {
@@ -447,16 +657,19 @@ namespace Internal
         return handlerId;
     }
 
-    bool EntityType::IsCreated(const Dob::Typesystem::InstanceId& instanceId) const
+    bool EntityType::IsCreated(const Dob::Typesystem::InstanceId& instanceId, const ContextId requestorContext) const
     {
+        // If it is a ContextShared type we use context 0, otherwise we use the same context as the "requestor".
+        const ContextId context = m_typeIsContextShared ? 0 : requestorContext;
+
         bool isCreated = false;
 
-        m_entityStates.ForSpecificState(instanceId.GetRawValue(),
-                                        boost::bind(&EntityType::IsCreatedInternal,
-                                                    this,
-                                                    _2,
-                                                    boost::ref(isCreated)),
-                                        false); // false => don't include released states
+        m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
+                                                 boost::bind(&EntityType::IsCreatedInternal,
+                                                             this,
+                                                             _2,
+                                                             boost::ref(isCreated)),
+                                                 false); // false => don't include released states
 
         return isCreated;
     }
@@ -465,16 +678,19 @@ namespace Internal
                              const Dob::Typesystem::HandlerId&  handlerId,
                              const ConnectionConsumerPair&      registerer) const
     {
+        // If it is a ContextShared type we use context 0, otherwise we use the same context as the registerer.
+        const ContextId context = m_typeIsContextShared ? 0 : registerer.connection->Id().m_contextId;
+
         bool isOwner = false;
 
-        m_entityStates.ForSpecificState(instanceId.GetRawValue(),
-                                        boost::bind(&EntityType::IsOwnerInternal,
-                                                    this,
-                                                    _2,
-                                                    boost::cref(handlerId),
-                                                    boost::cref(registerer),
-                                                    boost::ref(isOwner)),
-                                        false); // false => don't include released states
+        m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
+                                                 boost::bind(&EntityType::IsOwnerInternal,
+                                                             this,
+                                                             _2,
+                                                             boost::cref(handlerId),
+                                                             boost::cref(registerer),
+                                                             boost::ref(isOwner)),
+                                                 false); // false => don't include released states
 
         return isOwner;
     }
@@ -550,7 +766,7 @@ namespace Internal
                                           const ConnectionPtr&                 connection,
                                           const Dob::Typesystem::HandlerId&    handlerId,
                                           const Dob::Typesystem::InstanceId&   instanceId,
-                                          bool&                                dontRelease)
+                                          StatePtrHandling&                    statePtrHandling)
     {
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
 
@@ -600,12 +816,13 @@ namespace Internal
         }
 
         DeleteEntityLocal(statePtr,
+                          connection->Id().m_contextId,
                           handlerId,
                           instanceId,
                           DistributionData(no_state_tag),  // No injection state to consider in this case (is used to set correct top timestamps)
-                          dontRelease);
+                          statePtrHandling);
 
-        if (!dontRelease)
+        if (statePtrHandling == ReleasePtr)
         {
             if (statePtr->GetInjectionState().IsNoState())
             {
@@ -617,7 +834,7 @@ namespace Internal
             else
             {
                 // There is an unhandled injection state.
-                dontRelease = true;
+                statePtrHandling = KeepPtr;
             }
         }
     }
@@ -625,10 +842,9 @@ namespace Internal
     void EntityType::DeleteAllInstancesInternal(const UpgradeableStateResult&       upgradeableStateResult,
                                                 const ConnectionPtr&                connection,
                                                 const Dob::Typesystem::HandlerId&   handlerId,
-                                                bool&                               dontRelease,
+                                                StatePtrHandling&                   statePtrHandling,
                                                 bool&                               exitDispatch)
     {
-        dontRelease = true;
         exitDispatch = false;
 
         ConnectionConsumerPair owner;
@@ -650,7 +866,7 @@ namespace Internal
                              connection,
                              handlerId,
                              statePtr->GetRealState().GetInstanceId(),
-                             dontRelease);
+                             statePtrHandling);
 
     }
 
@@ -673,7 +889,7 @@ namespace Internal
         {
             DistributionData newRealState =
                 DistributionData(entity_state_tag,
-                                 ConnectionId(ThisNodeParameters::NodeNumber(),-1), // Correct node number but no connection id for ghost states
+                                 ConnectionId(ThisNodeParameters::NodeNumber(), connection->Id().m_contextId, -1), // Correct node number and context but no connection id for ghost states
                                  m_typeId,
                                  handlerId,
                                  LamportTimestamp(),             // an "old" registration time
@@ -690,13 +906,14 @@ namespace Internal
     }
 
     void EntityType::InjectEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
+                                          const ConnectionPtr&                 connection,
                                           const Dob::Typesystem::HandlerId&    handlerId,
                                           const Dob::Typesystem::InstanceId&   instanceId,
                                           const char* const                    blob,
                                           const Dob::Typesystem::Int64         timestamp,
-                                          bool&                                dontRelease)
+                                          StatePtrHandling&                    statePtrHandling)
     {
-        dontRelease = true;
+        statePtrHandling = KeepPtr;
 
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
         const bool& isRevived = upgradeableStateResult.second;
@@ -735,7 +952,8 @@ namespace Internal
         {
             // There is no existing injection state, create a new one
             newInjectionState = DistributionData(entity_state_tag,
-                                                 ConnectionId(ThisNodeParameters::NodeNumber(),-1), // Dummy connectionId for injection states, but correct node number
+                                                 // Dummy connectionId for injection states, but correct node number and context
+                                                 ConnectionId(ThisNodeParameters::NodeNumber(), connection->Id().m_contextId, -1),
                                                  m_typeId,
                                                  handlerId,
                                                  LamportTimestamp(),            // dummy registration time for injection states
@@ -767,7 +985,8 @@ namespace Internal
 
             newInjectionState = mergeResult.first;
 
-            newInjectionState.SetSenderId(ConnectionId(ThisNodeParameters::NodeNumber(),-1)); // Dummy connectionId for injection states, but correct node number
+            // Dummy connectionId for injection states, but correct node number and context
+            newInjectionState.SetSenderId(ConnectionId(ThisNodeParameters::NodeNumber(), connection->Id().m_contextId, -1));
             newInjectionState.SetHandlerId(handlerId);
         }
 
@@ -775,11 +994,7 @@ namespace Internal
         if (!realState.IsNoState() && TimestampOperations::HaveChanges(realState,newInjectionState))
         {
             // All the stuff in the new injection state is already in the real state. We can drop the new injection state.
-            if (isRevived)
-            {
-                // Downgrade the state if it was downgraded before.
-                dontRelease = false;
-            }
+            statePtrHandling = RestorePtr;
             return;
         }
 
@@ -787,16 +1002,17 @@ namespace Internal
         // Set new injection state
         statePtr->SetInjectionState(newInjectionState);
 
-        KickRegisterer(handlerId);
+        KickRegisterer(handlerId, connection->Id().m_contextId);
     }
 
     void EntityType::InjectDeletedEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
+                                                 const ConnectionPtr&                 connection,
                                                  const Dob::Typesystem::HandlerId&    handlerId,
                                                  const Dob::Typesystem::InstanceId&   instanceId,
                                                  const Dob::Typesystem::Int64         timestamp,
-                                                 bool&                                dontRelease)
+                                                 StatePtrHandling&                    statePtrHandling)
     {
-        dontRelease = true;
+        statePtrHandling = KeepPtr;
 
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
         const bool& isRevived = upgradeableStateResult.second;
@@ -823,7 +1039,7 @@ namespace Internal
         {
             // There is no existing injection state, create a deleted state
             newInjectionState = DistributionData(entity_state_tag,
-                                                 ConnectionId(ThisNodeParameters::NodeNumber(),-1), // Dummy connection for injection states
+                                                 ConnectionId(ThisNodeParameters::NodeNumber(), connection->Id().m_contextId, -1),
                                                  m_typeId,
                                                  handlerId,
                                                  LamportTimestamp(),            // No registration time for injection states
@@ -855,7 +1071,8 @@ namespace Internal
 
             newInjectionState = mergeResult.first;
 
-            newInjectionState.SetSenderId(ConnectionId(ThisNodeParameters::NodeNumber(),-1)); // Dummy connectionId for injection states, but correct node number
+            // Dummy connectionId for injection states, but correct node number and context.
+            newInjectionState.SetSenderId(ConnectionId(ThisNodeParameters::NodeNumber(), connection->Id().m_contextId, -1));
             newInjectionState.SetHandlerId(handlerId);
         }
 
@@ -864,18 +1081,14 @@ namespace Internal
         if (!realState.IsNoState() && TimestampOperations::HaveChanges(realState,newInjectionState))
         {
             // All the stuff in the new injection state is already in the real state. We can drop the new injection state.
-            if (isRevived)
-            {
-                // Downgrade the state if it was downgraded before.
-                dontRelease = false;
-            }
+            statePtrHandling = RestorePtr;
             return;
         }
 
         // Set new injection state
         statePtr->SetInjectionState(newInjectionState);
 
-        KickRegisterer(handlerId);
+        KickRegisterer(handlerId, connection->Id().m_contextId);
     }
 
     void EntityType::AcceptInjectionInternal(const UpgradeableStateResult&  upgradeableStateResult,
@@ -899,9 +1112,9 @@ namespace Internal
                                                    const ConnectionPtr&             connection,
                                                    DistributionData&                injectionState,
                                                    const DistributionData&          originalInjectionState,
-                                                   bool&                            dontRelease)
+                                                   StatePtrHandling&                statePtrHandling)
     {
-        dontRelease = true;
+        statePtrHandling = KeepPtr;
 
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
 
@@ -912,7 +1125,7 @@ namespace Internal
             statePtr->SetInjectionState(DistributionData(no_state_tag));
 
             // ... and release the injection state
-            dontRelease = false;
+            statePtrHandling = ReleasePtr;
         }
 
         CommonAcceptInjectionInternal(upgradeableStateResult, connection, injectionState);
@@ -956,10 +1169,12 @@ namespace Internal
         DistributionData realState = statePtr->GetRealState();
 
         {
+            const ContextId context = connection->Id().m_contextId;
+
             // Get the registration state. The state will be locked within this scope.
             LockedStateResult lockedStateResult =
-                m_handlerRegistrations.GetLockedRegistrationState(handlerId,
-                                                                  false); // false => don't include released states
+                m_handlerRegistrations[context].GetLockedRegistrationState(handlerId,
+                                                                           false); // false => don't include released states
 
             // Get  a better name
             const StateSharedPtr& regStatePtr = lockedStateResult.first.first;
@@ -1070,7 +1285,7 @@ namespace Internal
                                              const Dob::Typesystem::HandlerId&      handlerId,
                                              const Dob::Typesystem::InstanceId&     instanceId,
                                              const DistributionData&                originalInjectionState,
-                                             bool&                                  dontRelease)
+                                             StatePtrHandling&                      statePtrHandling)
     {
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
 
@@ -1113,12 +1328,13 @@ namespace Internal
         }
 
         DeleteEntityLocal(statePtr,
+                          connection->Id().m_contextId,
                           handlerId,
                           instanceId,
                           originalInjectionState,   // is used to get correct top timestamps
-                          dontRelease);
+                          statePtrHandling);
 
-        if (!dontRelease)
+        if (statePtrHandling == ReleasePtr)
         {
             // We must also check that no new injections has been done while we were
             // dispatching the injection to the app, before the final descion to release
@@ -1134,7 +1350,7 @@ namespace Internal
             else
             {
                 // There is an unhandled injection state.
-                dontRelease = true;
+                statePtrHandling = KeepPtr;
             }
         }
     }
@@ -1171,9 +1387,9 @@ namespace Internal
 
     void EntityType::RemoteSetInjectionEntityStateInternal(const DistributionData&        remoteEntity,
                                                            const UpgradeableStateResult&  upgradeableStateResult,
-                                                           bool&                          dontRelease)
+                                                           StatePtrHandling&              statePtrHandling)
     {
-        dontRelease = true;
+        statePtrHandling = KeepPtr;
 
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
         const bool& isRevived = upgradeableStateResult.second;
@@ -1218,25 +1434,19 @@ namespace Internal
         if (!realState.IsNoState() && TimestampOperations::HaveChanges(realState,newInjectionState))
         {
             // All the stuff in the new injection state is already in the real state. We can drop the new injection state.
-            if (isRevived)
-            {
-                // Downgrade the state if it was downgraded before.
-                dontRelease = false;
-            }
+            statePtrHandling = RestorePtr;
             return;
         }
 
         statePtr->SetInjectionState(newInjectionState);
 
-        KickRegisterer(newInjectionState.GetHandlerId());
+        KickRegisterer(newInjectionState.GetHandlerId(), remoteEntity.GetSenderId().m_contextId);
     }
 
     void EntityType::RemoteSetDeleteEntityStateInternal(const DistributionData&         remoteEntity,
                                                         const UpgradeableStateResult&   upgradeableStateResult,
-                                                        bool&                           dontRelease)
+                                                        StatePtrHandling&               statePtrHandling)
     {
-        dontRelease = true;
-
         bool needToCheckRegistrationState = true;
 
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
@@ -1280,9 +1490,11 @@ namespace Internal
 
         if (needToCheckRegistrationState)
         {
+            const ContextId context = remoteEntity.GetSenderId().m_contextId;
+
             lockedRegStateResult =
-                m_handlerRegistrations.GetLockedRegistrationState(remoteEntity.GetHandlerId(),
-                                                                  true); // true => include released states
+                m_handlerRegistrations[context].GetLockedRegistrationState(remoteEntity.GetHandlerId(),
+                                                                           true); // true => include released states
 
             // Get  a better name
             const StateSharedPtr& regStatePtr = lockedRegStateResult.first.first;
@@ -1301,7 +1513,7 @@ namespace Internal
                 if (localEntity.IsNoState())
                 {
                     // Remember to get rid of the newly created state
-                    dontRelease = false;
+                    statePtrHandling = ReleasePtr;
                 }
                 return;
             }
@@ -1313,7 +1525,7 @@ namespace Internal
         if (injectionState.IsNoState())
         {
             //we can release the state since there is no injection
-            dontRelease = false;
+            statePtrHandling = ReleasePtr;
         }
         else
         {
@@ -1324,7 +1536,7 @@ namespace Internal
                 // The remote entity already has all what is in the injection state, so the injection state can be removed
                 // and the state released.
                 statePtr->SetInjectionState(DistributionData(no_state_tag));
-                dontRelease = false;
+                statePtrHandling = ReleasePtr;
             }
         }
 
@@ -1340,10 +1552,10 @@ namespace Internal
     void EntityType::RemoteSetRealEntityStateInternal(const ConnectionPtr&           connection,
                                                       const DistributionData&        remoteEntity,
                                                       const UpgradeableStateResult&  upgradeableStateResult,
-                                                      bool&                          dontRelease,
+                                                      StatePtrHandling&              statePtrHandling,
                                                       RemoteSetResult&               remoteSetResult)
     {
-        dontRelease = true;
+        statePtrHandling = KeepPtr;
         remoteSetResult = RemoteSetAccepted;
 
         bool needToCheckRegistrationState = true;
@@ -1400,9 +1612,11 @@ namespace Internal
 
         if (needToCheckRegistrationState)
         {
+            const ContextId context = remoteEntity.GetSenderId().m_contextId;
+
             lockedRegStateResult =
-                m_handlerRegistrations.GetLockedRegistrationState(remoteEntity.GetHandlerId(),
-                                                                  true); // true => include released states
+                m_handlerRegistrations[context].GetLockedRegistrationState(remoteEntity.GetHandlerId(),
+                                                                           true); // true => include released states
 
             // Get  a better name
             const StateSharedPtr& regStatePtr = lockedRegStateResult.first.first;
@@ -1418,7 +1632,7 @@ namespace Internal
                 if (localEntity.IsNoState())
                 {
                     // Remember to get rid of the newly created state
-                    dontRelease = false;
+                    statePtrHandling = ReleasePtr;
                 }
                 return;
             }
@@ -1430,7 +1644,7 @@ namespace Internal
                 if (localEntity.IsNoState())
                 {
                     // Remember to get rid of the newly created state
-                    dontRelease = false;
+                    statePtrHandling = ReleasePtr;
                 }
                 return;
             }
@@ -1469,7 +1683,8 @@ namespace Internal
         // it is therefor safe to get the registerer without a registration state lock.
         ConnectionConsumerPair          registerer;
         RegisterTime                    registrationTime;
-        m_handlerRegistrations.GetRegisterer(handlerId, registerer, registrationTime);
+        const ContextId context = connection->Id().m_contextId;
+        m_handlerRegistrations[context].GetRegisterer(handlerId, registerer, registrationTime);
 
         DistributionData newRealState(no_state_tag);
 
@@ -1534,12 +1749,13 @@ namespace Internal
     }
 
     void EntityType::DeleteEntityLocal(const StateSharedPtr&                statePtr,
+                                       const ContextId                      context,
                                        const Dob::Typesystem::HandlerId&    handlerId,
                                        const Dob::Typesystem::InstanceId&   instanceId,
                                        const DistributionData&              injectionState,
-                                       bool&                                dontRelease)
+                                       StatePtrHandling&                    statePtrHandling)
     {
-        dontRelease = false;
+        statePtrHandling = ReleasePtr;
 
         DistributionData realState = statePtr->GetRealState();
 
@@ -1553,7 +1769,7 @@ namespace Internal
         // it is therefor safe to get the registerer without a registration state lock.
         ConnectionConsumerPair          registerer;
         RegisterTime                    registrationTime;
-        m_handlerRegistrations.GetRegisterer(handlerId, registerer, registrationTime);
+        m_handlerRegistrations[context].GetRegisterer(handlerId, registerer, registrationTime);
 
         DistributionData newRealState(no_state_tag);
 
@@ -1561,7 +1777,8 @@ namespace Internal
         {
             // There is no existing real state, create a new real state 'deleted'
             newRealState = DistributionData(entity_state_tag,
-                                            ConnectionId(ThisNodeParameters::NodeNumber(),-1), // Correct node number but no connection id for delete states
+                                            // Correct node number and context but no connection id for delete states
+                                            ConnectionId(ThisNodeParameters::NodeNumber(), registerer.connection->Id().m_contextId, -1),
                                             m_typeId,
                                             handlerId,
                                             registrationTime,
@@ -1577,7 +1794,8 @@ namespace Internal
             // Get a copy of the existing state without the blob
             newRealState = realState.GetEntityStateCopy(false);
 
-            newRealState.SetSenderId(ConnectionId(ThisNodeParameters::NodeNumber(),-1));  // Correct node number but no connection id for delete states
+            // Correct node number and context but no connection id for delete states
+            newRealState.SetSenderId(ConnectionId(ThisNodeParameters::NodeNumber(), registerer.connection->Id().m_contextId, -1));
             newRealState.IncrementVersion();
             newRealState.SetExplicitlyDeleted(true);
             newRealState.SetEntityStateKind(DistributionData::Real);
@@ -1666,7 +1884,9 @@ namespace Internal
             }
         }
 
-        ConnectionConsumerPair  registerer = m_handlerRegistrations.GetRegisterer(handlerId);
+        const ContextId context = connection->Id().m_contextId;
+
+        ConnectionConsumerPair  registerer = m_handlerRegistrations[context].GetRegisterer(handlerId);
 
         if (registerer.connection == NULL || registerer.connection->Id() != connection->Id())
         {
@@ -1792,18 +2012,22 @@ namespace Internal
         else if (localState.GetCreationTime() < remoteState.GetCreationTime())
         {
             // The remote state is newer than the local state, no need to check the version.
+            return true;
         }
         else
         {
             // The creation time is the same, check the version.
-            if (remoteState.GetVersion() < localState.GetVersion())
+            if (localState.GetVersion() < remoteState.GetVersion())
             {
-                // The remote state isn't newer than the local state.
+                return true;
+            }
+            else
+            {
+                // The remote state is older, or has the same version number. Skip it.
                 return false;
             }
         }
 
-        return true;
     }
 
     void EntityType::SetTimestamps(DistributionData&       newState,
@@ -1835,11 +2059,11 @@ namespace Internal
         }
     }
 
-    void EntityType::KickRegisterer(const Dob::Typesystem::HandlerId& handlerId) const
+    void EntityType::KickRegisterer(const Dob::Typesystem::HandlerId& handlerId, const ContextId context) const
     {
         LockedStateResult lockedStateResult =
-                m_handlerRegistrations.GetLockedRegistrationState(handlerId,
-                                                                  false); // false => don't include released states
+                m_handlerRegistrations[context].GetLockedRegistrationState(handlerId,
+                                                                           false); // false => don't include released states
 
         // Get  a better name
         const StateSharedPtr& regStatePtr = lockedStateResult.first.first;

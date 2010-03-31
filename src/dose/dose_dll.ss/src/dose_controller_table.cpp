@@ -25,7 +25,9 @@
 #include "dose_controller_table.h"
 #include <Safir/Dob/NotOpenException.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
+#include <Safir/Dob/NodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/PanicLogging.h>
 #include <iostream>
 #include <string>
 #include "dose_controller.h"
@@ -70,7 +72,8 @@ namespace Internal
         return *m_instance;
     }
 
-    ControllerTable::ControllerTable()
+    ControllerTable::ControllerTable():
+        m_threadWarningsEnabled(Safir::Dob::NodeParameters::ThreadingWarningsEnabled())
     {
 
     }
@@ -132,12 +135,15 @@ namespace Internal
         m_controllers[ctrl] = newController;
     }
 
-#ifndef NDEBUG
     void ControllerTable::CheckThread(const long ctrl) const
     {
+        if (!m_threadWarningsEnabled)
+        {
+            return;
+        }
+
         ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
 
-        bool found = false;
         ThreadControllersTable::const_iterator findIt = m_threadControllersTable.find(ACE_Thread::self());
         if (findIt != m_threadControllersTable.end())
         {
@@ -151,55 +157,53 @@ namespace Internal
             }
         }
 
-        if (!found)
+
+        std::wostringstream ostr;
+        ostr << "You are trying to use a connection from a different thread than it was Opened in." << std::endl
+             << "Getting connection name (this may fail if you've done something really wrong): " <<std::endl;
+        const char * name;
+        try
         {
-            std::wostringstream ostr;
-            ostr << "You are trying to use a connection from a different thread than it was Opened in." << std::endl
-                 << "Getting connection name (this may fail if you've done something really wrong): " <<std::endl;
-            const char * name;
-            try
-            {
-                name = m_controllers[ctrl]->GetConnectionName();
-                ostr << "Got it: '" << name << "'" << std::endl;
-            }
-            catch (const std::exception & exc)
-            {
-                ostr << "Failed: "<< exc.what() <<std::endl;
-            }
+            name = m_controllers[ctrl]->GetConnectionName();
+            ostr << "Got it: '" << name << "'" << std::endl;
+        }
+        catch (const std::exception & exc)
+        {
+            ostr << "Failed: "<< exc.what() <<std::endl;
+        }
 
-            bool found = false;
-            //try to find it anyway (we want to remove it so nothing strange happens..
-            for (ThreadControllersTable::const_iterator it = m_threadControllersTable.begin();
-                 it != m_threadControllersTable.end(); ++it)
+        bool found = false;
+        //try to find it anyway (we want to remove it so nothing strange happens..
+        for (ThreadControllersTable::const_iterator it = m_threadControllersTable.begin();
+             it != m_threadControllersTable.end(); ++it)
+        {
+            for (ControllerInfoList::const_iterator it2 = it->second.begin();
+                 it2 != it->second.end(); ++it2)
             {
-                for (ControllerInfoList::const_iterator it2 = it->second.begin();
-                     it2 != it->second.end(); ++it2)
+                if (ctrl == it2->m_ctrl)
                 {
-                    if (ctrl == it2->m_ctrl)
-                    {
-                        ostr << "The thread id that you called from was "
-                             << ACE_Thread::self()
-                             << " but DOSE expected you to call it from "
-                             << it->first
-                             <<std::endl;
+                    ostr << "The thread id that you called from was "
+                         << ACE_Thread::self()
+                         << " but DOSE expected you to call it from "
+                         << it->first
+                         <<std::endl;
 
-                        found = true;
-                        break;
-                    }
+                    found = true;
+                    break;
                 }
             }
-
-            if (!found)
-            {
-                ostr << "Could not find the connection in any thread at all!" <<std::endl;
-            }
-
-            std::wcout << ostr.str();
-            lllout << ostr.str();
         }
+
+        if (!found)
+        {
+            ostr << "Could not find the connection in any thread at all!" <<std::endl;
+        }
+
+        std::wcout << ostr.str();
+        lllout << ostr.str();
+        Safir::Utilities::Internal::PanicLogging::Log(Safir::Dob::Typesystem::Utilities::ToUtf8(ostr.str()));
     }
-#endif
- 
+
     ControllerPtr ControllerTable::GetController(const long ctrl)
     {
         //Avoid code duplication between the const and non-const version of this method.

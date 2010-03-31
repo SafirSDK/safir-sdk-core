@@ -210,7 +210,15 @@ class Consumer implements
     {
         for (com.saabgroup.dosetest.Action action : m_callbackActions.get(callback))
         {
+            com.saabgroup.dosetest.ActionEnum actionKind = action.actionKind().getVal();
+
             executeAction(action);
+
+            if (actionKind == com.saabgroup.dosetest.ActionEnum.RESET_CALLBACK_ACTIONS)
+            {
+               return;
+            }
+
         }
     }
 
@@ -268,6 +276,7 @@ class Consumer implements
                     case DISCARD_RESPONSE_SENDER:
                         {
                             m_responseSender.discard();
+                            m_responseSenderDiscarded = true;
                         }
                         break;
                     case REGISTER_ENTITY_HANDLER:
@@ -634,6 +643,20 @@ class Consumer implements
                                                       + m_connection.getNumberOfInstances(action.typeId().getVal(),
                                                                                           action.handler().getVal(),
                                                                                           action.includeSubclasses().getVal()));
+                        }
+                        break;
+
+                    case GET_INSTANCE_ID_POLICY:
+                        {
+                            Logger.instance().println(PREFIX + m_consumerNumber + ": "
+                                                      + "GetInstanceIdPolicy (type = "
+                                                      + com.saabgroup.safir.dob.typesystem.Operations.getName(action.typeId().getVal())
+                                                      + ", handler = " + action.handler().getVal()
+                                                      + "): "
+                                                      + com.saabgroup.safir.dob.typesystem.Operations.getEnumerationValueName(
+                                                        com.saabgroup.safir.dob.InstanceIdPolicy.EnumerationId,
+                                                        (m_connection.GetInstanceIdPolicy(action.typeId().getVal(),
+                                                                                          action.handler().getVal()).ordinal())));
                         }
                         break;
 
@@ -1010,6 +1033,7 @@ class Consumer implements
     {
         m_connection.exitDispatch();
         m_responseSender = responseSender;
+        m_responseSenderDiscarded = false;
         executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_CREATE_REQUEST);
 
         com.saabgroup.dosetest.RootEntity req = (com.saabgroup.dosetest.RootEntity)entityRequestProxy.getRequest();
@@ -1042,19 +1066,22 @@ class Consumer implements
                                       + "  Request    = " + xml);
             Logger.instance().println();
 
-            m_connection.setAll(req,
-                                new com.saabgroup.safir.dob.typesystem.InstanceId(value.instanceId),
-                                entityRequestProxy.getReceivingHandlerId());
+            if (!m_responseSenderDiscarded)
+            {
+                m_connection.setAll(req,
+                                    new com.saabgroup.safir.dob.typesystem.InstanceId(value.instanceId),
+                                    entityRequestProxy.getReceivingHandlerId());
 
-            Logger.instance().println(PREFIX + m_consumerNumber + ": "
-                                      + "Handler created instance " + value.instanceId);
+                Logger.instance().println(PREFIX + m_consumerNumber + ": "
+                                          + "Handler created instance " + value.instanceId);
 
 
-            com.saabgroup.safir.dob.EntityIdResponse resp = new com.saabgroup.safir.dob.EntityIdResponse();
-            resp.assigned().setVal(new com.saabgroup.safir.dob.typesystem.EntityId(entityRequestProxy.getTypeId(),
-                                                                                   new com.saabgroup.safir.dob.typesystem.InstanceId(value.instanceId)));
-            responseSender.send(resp);
-            ++value.instanceId;
+                com.saabgroup.safir.dob.EntityIdResponse resp = new com.saabgroup.safir.dob.EntityIdResponse();
+                resp.assigned().setVal(new com.saabgroup.safir.dob.typesystem.EntityId(entityRequestProxy.getTypeId(),
+                                                                                       new com.saabgroup.safir.dob.typesystem.InstanceId(value.instanceId)));
+                responseSender.send(resp);
+                ++value.instanceId;
+            }
         }
         else
         {
@@ -1067,9 +1094,13 @@ class Consumer implements
                                       + "  Request    = " + xml);
             Logger.instance().println();
 
-            m_connection.setAll(req,
-                                entityRequestProxy.getInstanceId(),
-                                entityRequestProxy.getReceivingHandlerId());
+            
+            if (!m_responseSenderDiscarded)
+            {                        
+                m_connection.setAll(req,
+                                    entityRequestProxy.getInstanceId(),
+                                    entityRequestProxy.getReceivingHandlerId());
+            }
         }
 
         if (!responseSender.isDone())
@@ -1084,6 +1115,7 @@ class Consumer implements
     {
         m_connection.exitDispatch();
         m_responseSender = responseSender;
+        m_responseSenderDiscarded = false;
         executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_DELETE_REQUEST);
 
         Logger.instance().println(PREFIX + m_consumerNumber + ": "
@@ -1095,7 +1127,10 @@ class Consumer implements
 
         Logger.instance().println();
 
-        m_connection.delete(entityRequestProxy.getEntityId(), entityRequestProxy.getReceivingHandlerId());
+        if (!m_responseSenderDiscarded)
+        {
+            m_connection.delete(entityRequestProxy.getEntityId(), entityRequestProxy.getReceivingHandlerId());
+        }
 
         if (!responseSender.isDone())
         {
@@ -1109,6 +1144,7 @@ class Consumer implements
     {
         m_connection.exitDispatch();
         m_responseSender = responseSender;
+        m_responseSenderDiscarded = false;
         executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_UPDATE_REQUEST);
 
         com.saabgroup.dosetest.RootEntity req = (com.saabgroup.dosetest.RootEntity)entityRequestProxy.getRequest();
@@ -1132,9 +1168,12 @@ class Consumer implements
                                   + "  Request    = " + xml);
         Logger.instance().println();
 
-        m_connection.setChanges(req,
-                                entityRequestProxy.getInstanceId(),
-                                entityRequestProxy.getReceivingHandlerId());
+        if (!m_responseSenderDiscarded)
+        {
+            m_connection.setChanges(req,
+                                    entityRequestProxy.getInstanceId(),
+                                    entityRequestProxy.getReceivingHandlerId());
+        }
 
         if (!responseSender.isDone())
         {
@@ -1302,6 +1341,8 @@ class Consumer implements
     private java.util.EnumMap<com.saabgroup.safir.dob.CallbackId, java.util.Vector<com.saabgroup.dosetest.Action>> m_callbackActions;
 
     private com.saabgroup.safir.dob.ResponseSender m_responseSender = null;
+
+    private boolean m_responseSenderDiscarded;
 
     public class Key implements Comparable<Key>{
         public Key(long _typeId, com.saabgroup.safir.dob.typesystem.HandlerId _handlerId) {

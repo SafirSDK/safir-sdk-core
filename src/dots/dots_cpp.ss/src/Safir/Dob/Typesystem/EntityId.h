@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -143,9 +143,13 @@ namespace Typesystem
          *
          * Will convert the entity id to a string on the form "(Safir.Dob.Entity, 10)".
          * This is meant to be used for debug output only.
-         * If the type does not exist output will be on the form "(Unknown TypeId: 32873478348, 10)"
+         * If the type does not exist output will be on the form "(Unknown type: 32873478348, 10)"
          * If the string representation of the instance exists, the numerical instance id may be
          * replaced by that string.
+         *
+         * The purpose of this function is for debug output and such.
+         * The resulting string can *not* reliably be parsed or passed to constructors to recreate the same
+         * entity id.
          *
          * @return The entity id as a string.
          */

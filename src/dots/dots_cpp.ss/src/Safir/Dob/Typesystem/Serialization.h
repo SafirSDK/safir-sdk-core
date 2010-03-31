@@ -64,8 +64,9 @@ namespace Typesystem
          *
          * @param [in] xml - The xml to convert.
          * @return A boost::shared_ptr to the new object
-         * @exception IllegalValueException If the type represented by the serialization isn't found
-         *                                   in the ObjectFactory.
+         * @exception IllegalValueException If there is something wrong with the XML or if the type
+         *                                  represented by the serialization isn't found
+         *                                  in the ObjectFactory.
          */
         static Dob::Typesystem::ObjectPtr ToObject(const std::wstring & xml);
 

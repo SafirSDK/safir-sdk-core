@@ -49,12 +49,10 @@ public:
 protected:
 
     virtual void * GetValuePtr();
-    virtual unsigned long GetColumnSize();
 
 private:
     typedef Parameter<SQL_C_BINARY, sSqlType, byte *, sInputOutputType, 0> InstantiatedParameter;
     friend class Safir::Databases::Odbc::Statement;
-    unsigned int m_nCurrentSize;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -63,7 +61,7 @@ private:
 
 template<short sSqlType, short sInputOutputType>
 NonBufferedBinaryParameter<sSqlType,sInputOutputType>::NonBufferedBinaryParameter(unsigned int nDbSize)
-    : InstantiatedParameter((nDbSize+1) * sizeof(byte)), m_nCurrentSize(0)
+    : InstantiatedParameter((nDbSize+1) * sizeof(byte))
 {
 }
 
@@ -78,15 +76,8 @@ template<short sSqlType, short sInputOutputType>
 inline void NonBufferedBinaryParameter<sSqlType,sInputOutputType>::SetValue(byte *byteString,
                                                                             unsigned int nSize)
 {
-    InstantiatedParameter::SetValue( byteString );
-    m_nCurrentSize = nSize;
-    InstantiatedParameter::m_lpLengthOrInd = nSize;
-}
-
-template<short sSqlType, short sInputOutputType>
-inline unsigned long NonBufferedBinaryParameter<sSqlType,sInputOutputType>::GetColumnSize()
-{
-    return m_nCurrentSize;
+    InstantiatedParameter::m_value = byteString;
+    InstantiatedParameter::m_nSize = nSize;
 }
 
 } // End namespace Internal

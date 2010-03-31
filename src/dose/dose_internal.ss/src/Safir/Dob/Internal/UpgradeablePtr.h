@@ -26,9 +26,9 @@
 #define __DOSE_UPGRADEABLE_PTR_H__
 
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
-#include <boost/interprocess/sync/interprocess_recursive_mutex.hpp>
+#include <Safir/Dob/Internal/LeveledLock.h>
+#include <Safir/Dob/Internal/InternalDefs.h>
 #include <boost/interprocess/sync/scoped_lock.hpp>
-
 
 namespace Safir
 {
@@ -49,7 +49,7 @@ namespace Internal
                : m_sharedPtr(rawPtr),
                  m_weakPtr(m_sharedPtr)
         {
-            m_lockPtr = LockPtr(GetSharedMemory().template construct<boost::interprocess::interprocess_recursive_mutex>
+            m_lockPtr = LockPtr(GetSharedMemory().template construct<UpgradablePtrLock>
                                 (boost::interprocess::anonymous_instance)());
         }
 
@@ -57,7 +57,7 @@ namespace Internal
                     : m_sharedPtr(sharedPtr),
                       m_weakPtr(m_sharedPtr)
         {
-            m_lockPtr = LockPtr(GetSharedMemory().template construct<boost::interprocess::interprocess_recursive_mutex>
+            m_lockPtr = LockPtr(GetSharedMemory().template construct<UpgradablePtrLock>
                                 (boost::interprocess::anonymous_instance)());
         }
 
@@ -117,11 +117,15 @@ namespace Internal
         SharedPtrT  m_sharedPtr;
         WeakPtrT    m_weakPtr;
 
-        typedef SmartPointers<boost::interprocess::interprocess_recursive_mutex>::shared_ptr LockPtr;
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_recursive_mutex,
+                                                  UPGRADABLE_PTR_LOCK_LEVEL,
+                                                  NO_MASTER_LEVEL_REQUIRED> UpgradablePtrLock;
+
+        typedef SmartPointers<UpgradablePtrLock>::shared_ptr LockPtr;
 
         LockPtr m_lockPtr;
 
-        typedef boost::interprocess::scoped_lock<boost::interprocess::interprocess_recursive_mutex> ScopedLock;
+        typedef boost::interprocess::scoped_lock<UpgradablePtrLock> ScopedLock;
     };
 }
 }

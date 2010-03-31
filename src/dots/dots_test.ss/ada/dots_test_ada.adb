@@ -2781,7 +2781,7 @@ procedure Dots_Test_Ada is
       -- MemberTypes
       Null_Ok := Null_Ok and Dots_Test.Member_Types_Property.Is_Null_Binary_Member (MT2_Smart_Ptr);
       In_Req_Ok := In_Req_Ok and not Dots_Test.Member_Types_Property.Is_Changed_Binary_Member (MT2_Smart_Ptr);
-      Dots_Test.Member_Types_Property.Set_Binary_Member (MT2_Smart_Ptr, MT1_Ptr.Binary_Member.Get_Val);
+      Dots_Test.Member_Types_Property.Set_Binary_Member (MT2_Smart_Ptr, MT1_Ptr.Binary_Member.Get_Val.all);
       Print ("Val: ", Safir.Dob.Typesystem.Utilities.Binary_To_Base_64 (Dots_Test.Member_Types_Property.Get_Binary_Member (MT2_Smart_Ptr)));
       Null_Ok := Null_Ok and not Dots_Test.Member_Types_Property.Is_Null_Binary_Member (MT2_Smart_Ptr);
       In_Req_Ok := In_Req_Ok and Dots_Test.Member_Types_Property.Is_Changed_Binary_Member (MT2_Smart_Ptr);
@@ -2790,7 +2790,7 @@ procedure Dots_Test_Ada is
       MI_Ptr.Types_Item.Set_Ptr (Dots_Test.Types_Item.Create);
       Null_Ok := Null_Ok and Dots_Test.Member_Types_Property.Is_Null_Binary_Member (MI_Smart_Ptr);
       In_Req_Ok := In_Req_Ok and Dots_Test.Member_Types_Property.Is_Changed_Binary_Member (MI_Smart_Ptr);
-      Dots_Test.Member_Types_Property.Set_Binary_Member (MI_Smart_Ptr, MT2_Ptr.Binary_Member.Get_Val);
+      Dots_Test.Member_Types_Property.Set_Binary_Member (MI_Smart_Ptr, MT2_Ptr.Binary_Member.Get_Val.all);
       Print ("Item Val: ", Safir.Dob.Typesystem.Utilities.Binary_To_Base_64 (Dots_Test.Member_Types_Property.Get_Binary_Member (MI_Smart_Ptr)));
       Null_Ok := Null_Ok and not Dots_Test.Member_Types_Property.Is_Null_Binary_Member (MI_Smart_Ptr);
       In_Req_Ok := In_Req_Ok and Dots_Test.Member_Types_Property.Is_Changed_Binary_Member (MI_Smart_Ptr);
@@ -2799,8 +2799,8 @@ procedure Dots_Test_Ada is
       Null_Ok := Null_Ok and Dots_Test.Member_Types_Property.Is_Null_Binary_Member (MIA_Smart_Ptr);
       In_Req_Ok := In_Req_Ok and Dots_Test.Member_Types_Property.Is_Changed_Binary_Member (MIA_Smart_Ptr);
       MIA_Ptr.Types_Item_Array.Element (1).Set_Ptr (Dots_Test.Types_Item.Create);
-      Dots_Test.Member_Types_Property.Set_Binary_Member (MIA_Smart_Ptr, MT2_Ptr.Binary_Member.Get_Val);
-      Print ("Item Array Val: ", Safir.Dob.Typesystem.Utilities.Binary_To_Base_64 (MIA_Ptr.Types_Item_Array.Element (1).Get_Ptr.Ref.Binary_Member.Get_Val));
+      Dots_Test.Member_Types_Property.Set_Binary_Member (MIA_Smart_Ptr, MT2_Ptr.Binary_Member.Get_Val.all);
+      Print ("Item Array Val: ", Safir.Dob.Typesystem.Utilities.Binary_To_Base_64 (MIA_Ptr.Types_Item_Array.Element (1).Get_Ptr.Ref.Binary_Member.Get_Val.all));
       Null_Ok := Null_Ok and not Dots_Test.Member_Types_Property.Is_Null_Binary_Member (MIA_Smart_Ptr);
       In_Req_Ok := In_Req_Ok and Dots_Test.Member_Types_Property.Is_Changed_Binary_Member (MIA_Smart_Ptr);
 
@@ -2824,7 +2824,7 @@ procedure Dots_Test_Ada is
          -- MemberArray
          Null_Ok := Null_Ok and Dots_Test.Member_Arrays_Property.Is_Null_Binary_Member (MA2_Smart_Ptr, Ix);
          In_Req_Ok := In_Req_Ok and not Dots_Test.Member_Arrays_Property.Is_Changed_Binary_Member (MA2_Smart_Ptr, Ix);
-         MA2_Ptr.Binary_Member.Element (Ix).Set_Val (MA1_Ptr.Binary_Member.Element (Ix).Get_Val);
+         MA2_Ptr.Binary_Member.Element (Ix).Set_Val (MA1_Ptr.Binary_Member.Element (Ix).Get_Val.all);
          Null_Ok := Null_Ok and not Dots_Test.Member_Arrays_Property.Is_Null_Binary_Member (MA2_Smart_Ptr, Ix);
          In_Req_Ok := In_Req_Ok and Dots_Test.Member_Arrays_Property.Is_Changed_Binary_Member (MA2_Smart_Ptr, Ix);
 
@@ -2833,7 +2833,7 @@ procedure Dots_Test_Ada is
          -- Member Item
          Arrays_Item_Smart_Ptr := Dots_Test.Arrays_Item.Create;
          Arrays_Item_Ptr := Arrays_Item_Smart_Ptr.Ref;
-         Arrays_Item_Ptr.Binary_Member.Element (Ix).Set_Val (MA1_Ptr.Binary_Member.Element (Ix).Get_Val);
+         Arrays_Item_Ptr.Binary_Member.Element (Ix).Set_Val (MA1_Ptr.Binary_Member.Element (Ix).Get_Val.all);
 
          MI_Ptr.Arrays_Item.Set_Ptr (Arrays_Item_Smart_Ptr);
          Print ("Array Item Val " & Trim (Safir.Dob.Typesystem.Int_32'Image (Ix)) & ": ", Safir.Dob.Typesystem.Utilities.Binary_To_Base_64 (Dots_Test.Member_Arrays_Property.Get_Binary_Member (MI_Smart_Ptr, Ix)));

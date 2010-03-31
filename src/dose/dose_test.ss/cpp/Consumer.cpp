@@ -93,7 +93,14 @@ void Consumer::ExecuteCallbackActions(const Safir::Dob::CallbackId::Enumeration 
     for (Actions::iterator it = m_callbackActions[callback].begin();
          it != m_callbackActions[callback].end(); ++it)
     {
+        DoseTest::ActionEnum::Enumeration actionKind = (*it)->ActionKind().GetVal();
+
         ExecuteAction(*it);
+
+        if (actionKind == DoseTest::ActionEnum::ResetCallbackActions)
+        {
+            return;
+        }
     }
 }
 
@@ -544,6 +551,7 @@ Consumer::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityProxy,
 {
     m_connection.ExitDispatch();
     m_responseSender = rs;
+    m_responseSenderDiscarded = false;
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnCreateRequest);
 
     DoseTest::RootEntityPtr req = boost::dynamic_pointer_cast<DoseTest::RootEntity>(entityProxy.GetRequest());
@@ -575,19 +583,22 @@ Consumer::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityProxy,
              << "  Request    = " << xml << std::endl;
         lout << std::endl;
 
-        m_connection.SetAll(req,
-                            Safir::Dob::Typesystem::InstanceId(it->second.second),
-                            entityProxy.GetReceivingHandlerId());
+        if (!m_responseSenderDiscarded)
+        {
+            m_connection.SetAll(req,
+                                Safir::Dob::Typesystem::InstanceId(it->second.second),
+                                entityProxy.GetReceivingHandlerId());
 
-        lout << PREFIX << m_consumerNumber << ": "
-             << "Handler created instance " << it->second.second << std::endl;
+            lout << PREFIX << m_consumerNumber << ": "
+                 << "Handler created instance " << it->second.second << std::endl;
 
 
-        Safir::Dob::EntityIdResponsePtr resp = Safir::Dob::EntityIdResponse::Create();
-        resp->Assigned().SetVal(Safir::Dob::Typesystem::EntityId(entityProxy.GetTypeId(),
-                                                                 Safir::Dob::Typesystem::InstanceId(it->second.second)));
-        rs->Send(resp);
-        ++(it->second.second);
+            Safir::Dob::EntityIdResponsePtr resp = Safir::Dob::EntityIdResponse::Create();
+            resp->Assigned().SetVal(Safir::Dob::Typesystem::EntityId(entityProxy.GetTypeId(),
+                                                                     Safir::Dob::Typesystem::InstanceId(it->second.second)));
+            rs->Send(resp);
+            ++(it->second.second);
+        }
     }
     else
     {
@@ -600,9 +611,12 @@ Consumer::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityProxy,
              << "  Request    = " << xml << std::endl;
         lout << std::endl;
 
-        m_connection.SetAll(req,
-                            entityProxy.GetInstanceId(),
-                            entityProxy.GetReceivingHandlerId());
+        if (!m_responseSenderDiscarded)
+        {
+            m_connection.SetAll(req,
+                                entityProxy.GetInstanceId(),
+                                entityProxy.GetReceivingHandlerId());
+        }
     }
 
     if (!rs->IsDone())
@@ -619,6 +633,7 @@ Consumer::OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityProxy,
 {
     m_connection.ExitDispatch();
     m_responseSender = rs;
+    m_responseSenderDiscarded = false;
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnUpdateRequest);
 
     DoseTest::RootEntityPtr req = boost::dynamic_pointer_cast<DoseTest::RootEntity>(entityProxy.GetRequest());
@@ -642,9 +657,12 @@ Consumer::OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityProxy,
          << "  Request    = " << xml << std::endl;
     lout << std::endl;
 
-    m_connection.SetChanges(req,
-                            entityProxy.GetInstanceId(),
-                            entityProxy.GetReceivingHandlerId());
+    if (!m_responseSenderDiscarded)
+    {
+        m_connection.SetChanges(req,
+                                entityProxy.GetInstanceId(),
+                                entityProxy.GetReceivingHandlerId());
+    }
 
     if (!rs->IsDone())
     {
@@ -660,6 +678,7 @@ Consumer::OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityProxy,
 {
     m_connection.ExitDispatch();
     m_responseSender = rs;
+    m_responseSenderDiscarded = false;
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnDeleteRequest);
 
     lout << PREFIX << m_consumerNumber << ": "
@@ -671,7 +690,10 @@ Consumer::OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityProxy,
 
     lout << std::endl;
 
-    m_connection.Delete(entityProxy.GetEntityId(),entityProxy.GetReceivingHandlerId());
+    if (!m_responseSenderDiscarded)
+    {
+        m_connection.Delete(entityProxy.GetEntityId(),entityProxy.GetReceivingHandlerId());
+    }
 
     if (!rs->IsDone())
     {
@@ -779,6 +801,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                 case DoseTest::ActionEnum::DiscardResponseSender:
                     {
                         m_responseSender->Discard();
+                        m_responseSenderDiscarded = true;
                     }
                     break;
                 case DoseTest::ActionEnum::RegisterEntityHandler:
@@ -1118,6 +1141,19 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                             << m_connection.GetNumberOfInstances(action->TypeId(),
                                                                  action->Handler(),
                                                                  action->IncludeSubclasses())
+                            << std::endl;
+                    }
+                    break;
+
+                case DoseTest::ActionEnum::GetInstanceIdPolicy:
+                    {
+                        lout << PREFIX << m_consumerNumber << ": "
+                            << "GetInstanceIdPolicy (type = "
+                            << Safir::Dob::Typesystem::Operations::GetName(action->TypeId())
+                            << ", handler = " << action->Handler()
+                            << "): "
+                            << Safir::Dob::Typesystem::Operations::GetEnumerationValueName(Safir::Dob::InstanceIdPolicy::EnumerationTypeId, 
+                            m_connection.GetInstanceIdPolicy(action->TypeId(), action->Handler()))
                             << std::endl;
                     }
                     break;

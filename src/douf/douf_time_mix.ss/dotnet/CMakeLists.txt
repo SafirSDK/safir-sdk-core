@@ -11,7 +11,7 @@ FILE(GLOB sources *.cs)
 SET(CS_FLAGS ${COMMON_CS_FLAGS} "-keyfile:${SAFIR_SDK}/data/build/safirkey.snk"
 								"-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dll,${SAFIR_RUNTIME}/bin/Safir.Dob.dll,${SAFIR_RUNTIME}/bin/dots_generated-dotnet.dll")
 
-ADD_CS_LIBRARY(douf_time_dotnet "${sources}" ALL)
+ADD_CS_LIBRARY(Safir.Time "${sources}" ALL)
 
 INSTALL(FILES ${target_DLL}
 		DESTINATION ${SAFIR_RUNTIME}/bin)

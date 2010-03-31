@@ -24,7 +24,7 @@
 #
 ###############################################################################
 
-import os, shutil, stat
+import os, shutil, stat, subprocess
 
 PATH = os.environ.get("PATH").split(";")
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
@@ -168,17 +168,6 @@ def copy_docs_dir(dir, targetname, exclude_regex=None):
     dst = os.path.join(DOCS_DESTINATION,targetname)
     copy_tree(dir, dst, exclude_regex=re.compile(exclude_regex))
 
-def clean_dir(dir):
-    olddir = os.getcwd()
-    try:
-        import subprocess
-        os.chdir(dir)
-        retcode = subprocess.call([".\make", "clean"])
-        if retcode != 0:
-            print "Failed to do 'make clean' in " + dir
-    finally:
-        os.chdir(olddir)
-
 def main():
     #Copy Boost stuff
     boost_dir = os.environ.get("BOOST_DIR")
@@ -234,14 +223,9 @@ def main():
 
     #do a make clean or dobmake clean in dots_generated
     dobmake_path = os.path.join(SAFIR_RUNTIME,"bin","dobmake.py")
-    if os.path.exists(dobmake_path):
-        import subprocess
-        retcode = subprocess.call(["python",dobmake_path, "-b", "--clean"])
-        if retcode != 0:
-            print "Failed to do 'dobmake.py -b --clean'"
-    else:
-        clean_dir(os.path.join(SAFIR_SDK,"dots","dots_generated"))
-        return 0
+    retcode = subprocess.call(["python",dobmake_path, "-b", "--clean"])
+    if retcode != 0:
+        print "Failed to do 'dobmake.py -b --clean'"
 
 if __name__ == "__main__":
     import sys

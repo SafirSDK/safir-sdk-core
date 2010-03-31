@@ -182,8 +182,13 @@ namespace Internal
         if (newRealState.GetType() == DistributionData::RegistrationState)
         {
             DistributionData currRealState = m_realState.GetState();
-            if (!currRealState.IsNoState() && currRealState.IsRegistered() && !newRealState.IsRegistered())
+
+            if (!currRealState.IsNoState() && currRealState.IsRegistered())
             {
+                // Changing the registration state when the current state is Registered
+                // shall always set the flag.
+                // Reg->Unreg => Normal unregistration.
+                // Reg->Reg => Overregistration.
                 hasBeenDeleted = true;
             }
         }

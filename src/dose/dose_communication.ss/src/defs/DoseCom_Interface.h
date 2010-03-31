@@ -168,6 +168,9 @@ int DoseCom_Add_DestinationId(int              DestinationId,
 // multicastAddress
 //      The IP multicast address used for KeepAlive messages.
 //
+// multicastTtl
+//      The value to use for TTL (time to live) for the UDP packets.
+//
 // netAddress
 // This info is used to define which network interface that shall be used
 // for IpMulticast. This is important if a node is multihomed. (Has more
@@ -248,6 +251,7 @@ int DoseCom_Add_DestinationId(int              DestinationId,
 DOSECOM_API
 int DoseCom_Init(DoseComAllocator*  pAllocator,  // the base class
                  const char*        multicastAddress,
+                 int                multicastTtl,
                  const char*        netAddress,
                  int                nodeId,
                  DoseComNotificationHandler* pNotificationHandler);

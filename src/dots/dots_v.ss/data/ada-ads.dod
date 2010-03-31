@@ -75,7 +75,7 @@ Type:InstanceId:Instance_Id:"Safir.Dob.Typesystem.Instance_Id":":Instance_Id:"
 Type:ChannelId:Channel_Id:"Safir.Dob.Typesystem.Channel_Id":":Channel_Id:"
 Type:HandlerId:Handler_Id:"Safir.Dob.Typesystem.Handler_Id":":Handler_Id:"
 Type:Object:Object:"Safir.Dob.Typesystem.Object":""
-Type:Binary:Binary:"Safir.Dob.Typesystem.Binary_Vectors.Vector":""
+Type:Binary:Binary:"Safir.Dob.Typesystem.Binary_Vectors.Vector":"Binary"
 Type:Ampere32:Float_32:"Safir.Dob.Typesystem.Si_32.Ampere":"Safir.Dob.Typesystem.Si_32"
 Type:CubicMeter32:Float_32:"Safir.Dob.Typesystem.Si_32.Cubic_Meter":"Safir.Dob.Typesystem.Si_32"
 Type:Hertz32:Float_32:"Safir.Dob.Typesystem.Si_32.Hertz":"Safir.Dob.Typesystem.Si_32"
@@ -142,6 +142,7 @@ use type Safir.Dob.Typesystem.Type_Id;
 with Safir.Dob.Typesystem.@_REPLACE_ALL(:/):DEPENDENCY_@;
 @@ELSIF@@ @_DEPENDENCY_@ = String
 with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
+@@ELSIF@@ @_DEPENDENCY_@ = Binary
 @@ELSE@@
 with @_DEPENDENCY_@;
 @@END_IF@@
@@ -333,6 +334,9 @@ pragma Warnings (Off, Safir.Dob.Typesystem.@_REPLACE_ALL(:/):DEPENDENCY_@);
 with Safir.Dob.Typesystem.String_Container; use Safir.Dob.Typesystem.String_Container;
 pragma Warnings (Off, Safir.Dob.Typesystem.String_Container);
 @@END_IF@@
+@@ELSIF@@ @_DEPENDENCY_@ = Binary
+with Safir.Dob.Typesystem.Binary_Container; use Safir.Dob.Typesystem.Binary_Container;
+pragma Warnings (Off, Safir.Dob.Typesystem.Binary_Container);
 @@ELSE@@
 with @_DEPENDENCY_@;
 @@IF@@ @_CREATEROUTINE'Length_@>0
@@ -763,7 +767,7 @@ package @_NAMESPACE_@.@_CLASS_@ is
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Boolean
      return Safir.Dob.Typesystem.Container_Instantiations.Boolean_Container.Array_Container_Proxy;
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
-     return Safir.Dob.Typesystem.Container_Instantiations.Binary_Container.Array_Container_Proxy;
+     return Safir.Dob.Typesystem.Binary_Container.Array_Container_Proxy;
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
      return @_REPLACE(Safir.Dob.Typesystem/Safir.Dob.Typesystem.Container_Instantiations):MEMBERTYPE_@.Array_Containers.Array_Container_Proxy;
 @@ELSIF@@ @_MATCH(Safir\.Dob\.Typesystem\.Si_..\..*):MEMBERTYPE_@
@@ -783,7 +787,7 @@ package @_NAMESPACE_@.@_CLASS_@ is
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Boolean
      return Safir.Dob.Typesystem.Container_Instantiations.Boolean_Container.Container_Proxy;
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
-     return Safir.Dob.Typesystem.Container_Instantiations.Binary_Container.Container_Proxy;
+     return Safir.Dob.Typesystem.Binary_Container.Container_Proxy;
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
      return @_REPLACE(Safir.Dob.Typesystem/Safir.Dob.Typesystem.Container_Instantiations):MEMBERTYPE_@.Containers.Container_Proxy;
 @@ELSIF@@ @_MATCH(Safir\.Dob\.Typesystem\.Si_..\..*):MEMBERTYPE_@
@@ -866,7 +870,7 @@ private
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Boolean
          @_MEMBER_@_Member : aliased Safir.Dob.Typesystem.Container_Instantiations.Boolean_Container.Array_Container (Max_Index => @_MEMBER_@_Size - 1);
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
-         @_MEMBER_@_Member : aliased Safir.Dob.Typesystem.Container_Instantiations.Binary_Container.Array_Container (Max_Index => @_MEMBER_@_Size - 1);
+         @_MEMBER_@_Member : aliased Safir.Dob.Typesystem.Binary_Container.Array_Container (Max_Index => @_MEMBER_@_Size - 1);
 @@ELSIF@@ @_MATCH(Safir\.Dob\.Typesystem\.Si_..\..*):MEMBERTYPE_@
          @_MEMBER_@_Member : aliased @_MEMBERTYPE_@_Container.Array_Container (Max_Index => @_MEMBER_@_Size - 1);
 @@ELSE@@
@@ -886,7 +890,7 @@ private
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Boolean
          @_MEMBER_@_Member : aliased Safir.Dob.Typesystem.Container_Instantiations.Boolean_Container.Container;
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
-         @_MEMBER_@_Member : aliased Safir.Dob.Typesystem.Container_Instantiations.Binary_Container.Container;
+         @_MEMBER_@_Member : aliased Safir.Dob.Typesystem.Binary_Container.Container;
 @@ELSIF@@ @_MATCH(Safir\.Dob\.Typesystem\.Si_..\..*):MEMBERTYPE_@
          @_MEMBER_@_Member : aliased @_MEMBERTYPE_@_Container.Container;
 @@ELSE@@

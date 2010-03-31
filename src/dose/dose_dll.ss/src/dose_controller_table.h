@@ -95,11 +95,7 @@ namespace Internal
          * Check that the controller is set to the current thread.
          * Only done in debug builds
          */
-#ifndef NDEBUG
         void CheckThread(const long ctrl) const;
-#else
-        inline void CheckThread(const long) const {}
-#endif
 
     private:
         ControllerTable();
@@ -125,6 +121,8 @@ namespace Internal
         typedef std::map<ACE_thread_t, ControllerInfoList > ThreadControllersTable;
 
         ThreadControllersTable m_threadControllersTable;
+
+        const bool m_threadWarningsEnabled;
 
         //Singleton stuff
         static ControllerTable * volatile m_instance;

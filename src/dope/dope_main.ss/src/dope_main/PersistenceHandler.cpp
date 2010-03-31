@@ -65,26 +65,34 @@ PersistenceHandler::~PersistenceHandler()
 
 //-------------------------------------------------------
 void
-PersistenceHandler::Start()
+PersistenceHandler::Start(bool restore)
 {
     m_debug << "Starting Persistence handling"<< std::endl;
     m_dobConnection.Attach();
 
-    try
+    if (restore)
     {
-        m_debug << "Restoring all stored entities"<< std::endl;
-        RestoreAll();
+        // Normal startup
+        try
+        {
+            m_debug << "Restoring all stored entities"<< std::endl;
+            RestoreAll();
+        }
+        catch (const Safir::Dob::AccessDeniedException & e)
+        {
+            throw Safir::Dob::Typesystem::SoftwareViolationException
+                (std::wstring(L"DOSE gave me AccessDeniedException when I was trying to Set persisted data! AccessDeniedException info: ") +
+                e.GetExceptionInfo(),__WFILE__,__LINE__);
+        }
+
+        StartSubscriptions();
+        ReportPersistentDataReady();
     }
-    catch (const Safir::Dob::AccessDeniedException & e)
+    else
     {
-        throw Safir::Dob::Typesystem::SoftwareViolationException
-            (std::wstring(L"DOSE gave me AccessDeniedException when I was trying to Set persisted data! AccessDeniedException info: ") +
-             e.GetExceptionInfo(),__WFILE__,__LINE__);
+        // Failover startup, don't restore anything.
+        StartSubscriptions();
     }
-
-    StartSubscriptions();
-
-    ReportPersistentDataReady();
 
     //we do not need the list of types any longer, so we free the memory.
     m_persistentTypes->clear();

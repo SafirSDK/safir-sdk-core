@@ -31,6 +31,7 @@
 #include "dose_main_request_handler.h"
 #include "dose_main_persist_handler.h"
 #include "dose_main_end_states_handler.h"
+#include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 
@@ -140,11 +141,15 @@ namespace Internal
     {
         const std::string name = connectMsg.GetConnectionName();
         const ConnectionId id = connectMsg.GetSenderId();
+
+        ENSURE(id.m_contextId >= 0 && id.m_contextId < NodeParameters::NumberOfContexts(),
+               << "Received a connect with context " << id.m_contextId << " but this node is configured for "
+               << NodeParameters::NumberOfContexts() << " contexts.");
+
         lllout << "Got a Connect message from DoseCom: '" << name.c_str() << "' " << id << std::endl;
 
-
         //we don't know the context of remote connections, so we give a strange context number...
-        Connections::Instance().AddConnection(name,connectMsg.GetCounter(), -2, id);
+        Connections::Instance().AddConnection(name,connectMsg.GetCounter(), id.m_contextId, id);
 
         lllout << "New connection from dose_com added successfully" << std::endl;
     }
@@ -193,28 +198,19 @@ namespace Internal
                          << " (and maybe others) are still Starting" << std::endl;
             return;
         }
-        lllout << "  SystemHasPersistence = " << m_persistHandler->SystemHasPersistence() << std::endl;
 
-        if (m_persistHandler->SystemHasPersistence())
+        if (m_persistHandler->IsPersistentDataReady())
         {
-            if (m_persistHandler->IsPersistentDataReady())
-            {
-                lllout << "  We have received persistence data (either from DOPE or other node), ok to let apps connect!" << std::endl;
-                Connections::Instance().AllowConnect(0);
-                m_connectSemHasBeenSignalled = true;
-            }
-            else
-            {
-                lllout << "  No persistence data, so can't let apps connect" << std::endl;
-            }
-        }
-        else
-        {
-            lllout << "  There are no new nodes, so we can let apps connect!"  << std::endl;
+            lllout << "  We have received persistence data (either from DOPE or other node), ok to let apps connect!" << std::endl;
             Connections::Instance().AllowConnect(-1);
             Connections::Instance().AllowConnect(0);
             m_connectSemHasBeenSignalled = true;
         }
+        else
+        {
+            lllout << "  No persistence data, so can't let apps connect" << std::endl;
+        }
+
     }
 
 }

@@ -9,11 +9,12 @@ INCLUDE(CSharpMacros)
 
 FILE(GLOB sources *.cs)
 
-SET(CS_FLAGS ${COMMON_CS_FLAGS} "-keyfile:${SAFIR_SDK}/data/build/safirkey.snk")
+SET(CS_FLAGS ${COMMON_CS_FLAGS} "-doc:Safir.Dob.Typesystem.xml" "-keyfile:${SAFIR_SDK}/data/build/safirkey.snk")
 
 ADD_CS_LIBRARY(Safir.Dob.Typesystem "${sources}" ALL)
 
 INSTALL(FILES ${target_DLL}
+              Safir.Dob.Typesystem.xml
   DESTINATION ${SAFIR_RUNTIME}/bin)
   
 INSTALL_CS_DEBUG_INFO()

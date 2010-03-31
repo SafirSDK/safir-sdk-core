@@ -2,11 +2,14 @@ cmake_minimum_required(VERSION 2.6)
 
 PROJECT (dose_main)
 
+INCLUDE_DIRECTORIES(.)
+
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
+FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 
-ADD_EXECUTABLE(dose_main ${sources})
+ADD_EXECUTABLE(dose_main ${sources} ${headers})
 TARGET_LINK_LIBRARIES(dose_main ${ACE_LIBRARY})
 
 if (MSVC)

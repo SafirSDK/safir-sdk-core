@@ -42,6 +42,9 @@
 #include <boost/filesystem/exception.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include <ace/Thread_Mutex.h>
+#include <ace/Guard_T.h>
+
 #include <boost/regex.hpp>
 #include "dots_property_helper_functions.h"
 
@@ -955,10 +958,16 @@ void DotsC_BetterBlobToXml(char * const xmlDest, const char * const blobSource, 
     }
 }
 
+ACE_Thread_Mutex g_xmlToBlobLock;
+
 void DotsC_XmlToBlob(char * & blobDest, 
                      DotsC_BytePointerDeleter & deleter,
                      const char* xmlSource)
 {
+    // XmlToBlobSerializer holds data in global variabels while parsing
+    // so we can't allow more than one thread at a time to execute.
+    ACE_Guard<ACE_Thread_Mutex> lck(g_xmlToBlobLock);
+
     XmlToBlobSerializer ser;
     blobDest = ser.Serialize(xmlSource);
     deleter = DeleteBytePointer;

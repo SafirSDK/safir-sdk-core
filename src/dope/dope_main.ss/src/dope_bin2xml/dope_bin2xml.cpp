@@ -59,20 +59,23 @@ void ParseCommandLine(int argc, char * argv[])
 {
     namespace po = boost::program_options;
     // Declare the supported options.
-    po::options_description desc("Allowed options");
-    desc.add_options()
+    po::options_description options("Allowed options");
+    options.add_options()
         ("help", "produce help message")
         ("db", "Convert the db")
         ("files", "Convert the files")
         ;
 
     po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::store(po::parse_command_line(argc, argv, options), vm);
     po::notify(vm);
 
     if (vm.count("help"))
     {
-        std::cout<< desc << "\n";
+        std::cout << "Converts persistent data in binary format to XML\n\n"
+                     "If no option is given the choice between db or files\n"
+                     "is determined by Safir.Dob.PersistenceParameters.Backend.\n\n"
+                  << options << "\n";
         exit(1);
     }
 
@@ -88,6 +91,28 @@ void ParseCommandLine(int argc, char * argv[])
     else if (vm.count("files"))
     {
         g_whatToConvert = files;
+    }
+    else
+    {
+        // No command line parameter given. We read the persistence
+        // configuration parameter instead. 
+        switch (Safir::Dob::PersistenceParameters::Backend())
+        {
+            case Safir::Dob::PersistenceBackend::File:
+            {
+                g_whatToConvert = files;
+            }
+            break;
+
+            case Safir::Dob::PersistenceBackend::Odbc:
+            {
+                g_whatToConvert = db;
+            }
+            break;
+
+            default:
+                throw Safir::Dob::Typesystem::SoftwareViolationException(L"Unknown backend!",__WFILE__,__LINE__);
+        }
     }
 }
 

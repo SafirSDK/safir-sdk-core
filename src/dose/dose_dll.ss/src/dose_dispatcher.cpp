@@ -26,6 +26,7 @@
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/Interface.h>
 #include <Safir/Dob/Internal/Subscription.h>
+#include <Safir/Dob/Internal/LeveledLockHelper.h>
 #include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
@@ -131,6 +132,8 @@ namespace Internal
 
         const bool requestHasBlob = request.GetType() != DistributionData::Request_EntityDelete;
 
+        CheckLocks();
+
         m_callbacks[consumer.lang].m_onResponseCb(response.GetRequestId().GetCounter(),
                                                   response.GetBlob(),
                                                   responseRefHolder.get(),
@@ -179,6 +182,7 @@ namespace Internal
         if (m_connectionOwner.consumer != NULL)
         {
             bool success;
+            CheckLocks();
             m_onStopOrderCb(m_connectionOwner.consumer,
                             success);
             if (!success)
@@ -194,6 +198,9 @@ namespace Internal
         bool success;
 
         boost::shared_ptr<const char> refHolder (message.GetReference(), &DistributionData::DropReference);
+
+        CheckLocks();
+
         m_callbacks[consumer.lang].m_onMessageCb(message.GetBlob(),
                                                  refHolder.get(),
                                                  consumer.consumer,
@@ -216,6 +223,8 @@ namespace Internal
     {
         DispatcherIsInCallback push(m_callbackStack,CallbackId::OnRegistered);
         bool success;
+
+        CheckLocks();
 
         m_callbacks[consumer.lang].m_onRegisteredCb(typeId,
                                                     handlerId.GetRawValue(),
@@ -240,6 +249,8 @@ namespace Internal
         DispatcherIsInCallback push(m_callbackStack,CallbackId::OnUnregistered);
         bool success;
 
+        CheckLocks();
+
         m_callbacks[consumer.lang].m_onUnregisteredCb(typeId,
                                                       handlerId.GetRawValue(),
                                                       handlerId.Utf8String().c_str(),
@@ -262,6 +273,8 @@ namespace Internal
     {
         DispatcherIsInCallback push(m_callbackStack, CallbackId::OnRevokedRegistration);
         bool success;
+
+        CheckLocks();
 
         m_callbacks[consumer.lang].m_onRevokedRegistrationCb(typeId,
                                                              handlerId.GetRawValue(),
@@ -286,6 +299,8 @@ namespace Internal
     {
         DispatcherIsInCallback push(m_callbackStack, CallbackId::OnCompletedRegistration);
         bool success;
+
+        CheckLocks();
 
         m_callbacks[consumer.lang].m_onCompletedRegistrationCb(typeId,
                                                               handlerId.GetRawValue(),
@@ -314,6 +329,9 @@ namespace Internal
 
         bool success;
         boost::shared_ptr<const char> refHolder (request.GetReference(), &DistributionData::DropReference);
+
+        CheckLocks();
+
         m_callbacks[consumer.lang].m_onServiceRequestCb(request.GetBlob(),
                                                         refHolder.get(),
                                                         ctrl,
@@ -340,6 +358,9 @@ namespace Internal
 
         bool success;
         boost::shared_ptr<const char> refHolder (request.GetReference(), &DistributionData::DropReference);
+
+        CheckLocks();
+
         m_callbacks[consumer.lang].m_onCreateRequestCb(request.GetBlob(),
                                                        refHolder.get(),
                                                        ctrl,
@@ -366,6 +387,9 @@ namespace Internal
 
         bool success;
         boost::shared_ptr<const char> refHolder (request.GetReference(), &DistributionData::DropReference);
+
+        CheckLocks();
+
         m_callbacks[consumer.lang].m_onUpdateRequestCb(request.GetBlob(),
                                                        refHolder.get(),
                                                        ctrl,
@@ -392,6 +416,9 @@ namespace Internal
 
         bool success;
         boost::shared_ptr<const char> refHolder (request.GetReference(), &DistributionData::DropReference);
+
+        CheckLocks();
+
         m_callbacks[consumer.lang].m_onDeleteRequestCb(refHolder.get(),
                                                        ctrl,
                                                        request.GetResponseId().GetCounter(),
@@ -418,6 +445,8 @@ namespace Internal
 
         bool success;
         boost::shared_ptr<const char> refHolder (currentState.GetReference(), &DistributionData::DropReference);
+
+        CheckLocks();
 
         m_callbacks[consumer.lang].m_onNewEntityCb(currentState.GetBlob(),
                                                    refHolder.get(),
@@ -448,6 +477,8 @@ namespace Internal
         bool success;
         boost::shared_ptr<const char> currentHolder (currentState.GetReference(), &DistributionData::DropReference);
         boost::shared_ptr<const char> lastHolder (lastState.GetReference(), &DistributionData::DropReference);
+
+        CheckLocks();
 
         m_callbacks[consumer.lang].m_onUpdatedEntityCb(currentState.GetBlob(),
                                                        currentHolder.get(),
@@ -480,6 +511,8 @@ namespace Internal
         boost::shared_ptr<const char> currentHolder (currentState.GetReference(), &DistributionData::DropReference);
         boost::shared_ptr<const char> lastHolder (lastState.GetReference(), &DistributionData::DropReference);
 
+        CheckLocks();
+
         m_callbacks[consumer.lang].m_onDeletedEntityCb(currentHolder.get(),
                                                        lastState.GetBlob(),
                                                        lastHolder.get(),
@@ -508,6 +541,9 @@ namespace Internal
         boost::shared_ptr<const char> refHolder (injectionState.GetReference(), &DistributionData::DropReference);
         boost::shared_ptr<char> blobHolder(injectionState.GetBlobCopy(), Typesystem::Internal::Delete);
         Typesystem::Internal::SetChanged(blobHolder.get(), true);
+
+        CheckLocks();
+
         m_callbacks[consumer.lang].m_onInjectedNewEntityCb(blobHolder.get(),
                                                            refHolder.get(),
                                                            consumer.consumer,
@@ -533,6 +569,8 @@ namespace Internal
         bool success;
         boost::shared_ptr<const char> injectionHolder (injectionState.GetReference(), &DistributionData::DropReference);
         boost::shared_ptr<const char> currentHolder (currentState.GetReference(), &DistributionData::DropReference);
+
+        CheckLocks();
 
         m_callbacks[consumer.lang].m_onInjectedUpdatedEntityCb(injectionState.GetBlob(),
                                                                injectionHolder.get(),
@@ -562,6 +600,8 @@ namespace Internal
         boost::shared_ptr<const char> injectionHolder (injectionState.GetReference(), &DistributionData::DropReference);
         boost::shared_ptr<const char> currentHolder (currentState.GetReference(), &DistributionData::DropReference);
 
+        CheckLocks();
+
         m_callbacks[consumer.lang].m_onInjectedDeletedEntityCb(injectionHolder.get(),
                                                                currentState.GetBlob(),
                                                                currentHolder.get(),
@@ -586,6 +626,9 @@ namespace Internal
         DispatcherIsInCallback push(m_callbackStack, CallbackId::OnInitialInjectionsDone);
 
         bool success;
+
+        CheckLocks();
+
         m_callbacks[consumer.lang].m_onInitialInjectionsDoneCb(typeId,
                                                                handlerId.GetRawValue(),
                                                                handlerId.Utf8String().c_str(),
@@ -608,6 +651,9 @@ namespace Internal
         ENSURE(g_garbageCollected[consumer.lang], << "Dispatcher::InvokeDropReferenceCb called for a non GC language");
 
         bool success;
+
+        CheckLocks();
+
         m_callbacks[consumer.lang].m_onDropReferenceCb(consumer.consumer,
                                                        refCounter,
                                                        success);
@@ -631,6 +677,9 @@ namespace Internal
     {
         DispatcherIsInCallback push(m_callbackStack,CallbackId::OnNotRequestOverflow);
         bool success;
+
+        CheckLocks();
+
         m_callbacks[consumer.lang].m_onNotRequestOverflowCb(consumer.consumer, success);
         if (!success)
         {
@@ -642,12 +691,23 @@ namespace Internal
     {
         DispatcherIsInCallback push(m_callbackStack,CallbackId::OnNotMessageOverflow);
         bool success;
+
+        CheckLocks();
+
         m_callbacks[consumer.lang].m_onNotMessageOverflowCb(consumer.consumer, success);
         if (!success)
         {
             Typesystem::LibraryExceptions::Instance().Throw();
         }
     }
+
+#ifndef NDEBUG
+    void Dispatcher::CheckLocks() const
+    {
+        ENSURE(LeveledLockHelper::Instance().GetNumberOfHeldLocks() == 0,
+               << "A lock is held when making a callback into user code!");
+    }
+#endif
 
     CallbackData::CallbackData(const CallbackId::Enumeration callbackId)
         : m_callbackId(callbackId)

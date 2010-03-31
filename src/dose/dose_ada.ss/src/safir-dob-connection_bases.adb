@@ -1228,6 +1228,33 @@ package body Safir.Dob.Connection_Bases is
    end Get_Number_Of_Instances;
 
 
+   function Get_Instance_Id_Policy
+     (Self               : in Connection_Base;
+      Type_Id            : in Safir.Dob.Typesystem.Type_Id;
+      Handler_Id         : in Safir.Dob.Typesystem.Handler_Id.Handler_Id_Type) return Safir.Dob.Instance_Id_Policy.Enumeration is
+
+      use Safir.Dob.Typesystem.Handler_Id;
+
+      Success : C.char;
+      Policy : Safir.Dob.Typesystem.Enumeration_Value;
+   begin
+
+      Safir.Dob.Interf.Get_Instance_Id_Policy
+        (Get_Controller_Id (Connection_Base'Class (Self)),
+         Type_Id,
+         Get_Raw_Value (Handler_Id),
+         Policy,
+         Success);
+
+      if C.char'Pos (Success) = 0 then
+         Safir.Dob.Typesystem.Library_Exceptions.Throw;
+      end if;
+
+      return Safir.Dob.Instance_Id_Policy.Enumeration'Val (Policy);
+
+   end Get_Instance_Id_Policy;
+
+
    procedure Exit_Dispatch (Self : in Connection_Base) is
       Success : C.char;
    begin

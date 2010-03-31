@@ -30,6 +30,7 @@
 #include <Safir/Dob/Internal/DistributionData.h>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <Safir/Dob/Internal/ConsumerQueueContainer.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 
 namespace Safir
 {
@@ -62,6 +63,21 @@ namespace Internal
 
         void DispatchResponses(const DispatchResponseFunc & dispatchFunc);
 
+        /** Returns the number of elements currently in the queue
+        * If simulateFull is set it will return capacity instead, so that it appears that the queue is full
+        */
+        size_t size() const
+        {
+            ScopedRequestInQueueLock lck(m_lock);
+            return m_simulateFull != 0 ? m_capacity : m_size;
+        }
+
+        /** Get the capacity of the queue. */
+        size_t capacity() const
+        {
+            ScopedRequestInQueueLock lck(m_lock);
+            return m_capacity;
+        }
 
         bool SimulateFull() const {return m_simulateFull != 0;}
         void SimulateFull(const bool simulateFull) {m_simulateFull = simulateFull?1:0;}
@@ -84,7 +100,11 @@ namespace Internal
         //made with the lock unlocked).
         //Any attempts to take the lock recursively are to be regarded as
         //programming errors.
-        mutable boost::interprocess::interprocess_mutex m_lock;
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  REQUEST_IN_QUEUE_LOCK_LEVEL,
+                                                  NO_MASTER_LEVEL_REQUIRED> RequestInQueueLock;
+        mutable RequestInQueueLock m_lock;
+        typedef boost::interprocess::scoped_lock<RequestInQueueLock> ScopedRequestInQueueLock;
 
         size_t m_capacity;
         size_t m_size;

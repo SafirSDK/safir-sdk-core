@@ -32,6 +32,10 @@
 #include <Safir/Dob/Internal/HandlerRegistrations.h>
 #include <Safir/Dob/Internal/SubscriptionOptions.h>
 #include <Safir/Dob/Internal/SubscriptionId.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
+#include <Safir/Dob/Internal/ShmArray.h>
+
+#include <boost/interprocess/offset_ptr.hpp>
 
 namespace Safir
 {
@@ -72,9 +76,10 @@ namespace Internal
         void RemoteSetUnregistrationState(const DistributionData& registrationState);
 
 
-        bool IsRegistered(const Dob::Typesystem::HandlerId& handlerId) const;
+        bool IsRegistered(const Dob::Typesystem::HandlerId& handlerId, const ContextId context) const;
 
-        const ConnectionConsumerPair GetRegisterer(const Dob::Typesystem::HandlerId& handlerId) const;
+        const ConnectionConsumerPair GetRegisterer(const Dob::Typesystem::HandlerId& handlerId,
+                                                   const ContextId context) const;
         /** @} */
 
         /**
@@ -101,8 +106,20 @@ namespace Internal
 
     private:
         Typesystem::TypeId m_typeId;
+        bool m_typeIsContextShared;
 
-        HandlerRegistrations m_handlerRegistrations;
+        typedef ShmArray<HandlerRegistrations> HandlerRegistrationVector;
+        HandlerRegistrationVector m_handlerRegistrations;
+
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  TYPE_LOCK_LEVEL, NO_MASTER_LEVEL_REQUIRED> TypeLock;
+
+
+        typedef ShmArray<TypeLock> TypeLockVector;
+        TypeLockVector m_typeLocks;
+
+        //mutable TypeLock m_typeLock;
+        typedef boost::interprocess::scoped_lock<TypeLock> ScopedTypeLock;
     };
 }
 }

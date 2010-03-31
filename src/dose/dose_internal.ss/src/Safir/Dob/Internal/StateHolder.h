@@ -26,6 +26,7 @@
 #define _dose_internal_state_holder_h
 
 #include <Safir/Dob/Internal/DistributionData.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 
@@ -44,13 +45,13 @@ namespace Internal
 
         DistributionData GetState() const
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+            ScopedStateHolderLock lck(m_lock);
             return m_currentState;
         }
 
         void SetState(const DistributionData& state)
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+            ScopedStateHolderLock lck(m_lock);
             m_currentState = state;
         }
 
@@ -61,7 +62,11 @@ namespace Internal
         //This class uses a non-recursive lock, since the lock is
         //only there to protect the assignment of one reference
         //counted variable.
-        mutable boost::interprocess::interprocess_mutex m_lock;
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  STATE_HOLDER_LOCK_LEVEL,
+                                                  NO_MASTER_LEVEL_REQUIRED> StateHolderLock;
+        mutable StateHolderLock m_lock;
+        typedef boost::interprocess::scoped_lock<StateHolderLock> ScopedStateHolderLock;
     };
 }
 }

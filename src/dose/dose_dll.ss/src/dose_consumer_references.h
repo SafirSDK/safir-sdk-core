@@ -111,9 +111,9 @@ namespace Internal
         /**
          * To be called after a handler unregistration has been performed.
          */
-        void DropHandlerRegistrationReferences(const Dob::Typesystem::TypeId       typeId,
-                                               const Dob::Typesystem::HandlerId&   handlerId,
-                                               const DropReferencesFunc&           dropReferencesFunc);
+        void DropAllHandlerRegistrationReferences(const Dob::Typesystem::TypeId       typeId,
+                                                  const Dob::Typesystem::HandlerId&   handlerId,
+                                                  const DropReferencesFunc&           dropReferencesFunc);
 
         /**
          * Returns true if there is at least one handler registration reference for
@@ -122,6 +122,22 @@ namespace Internal
         bool HasHandlerRegistrationReference(const Dob::Typesystem::TypeId      typeId,
                                              const Dob::Typesystem::HandlerId&  handlerId,
                                              const ConsumerId&                  consumer) const;
+
+        /**
+         * Returns the current number of references for the given type id, handler id and consumer.
+         */
+        long GetHandlerRegistrationReferenceCounter(const Dob::Typesystem::TypeId      typeId,
+                                                    const Dob::Typesystem::HandlerId&  handlerId,
+                                                    const ConsumerId&                  consumer) const;
+
+        /**
+         * Drop the given number of refreneces
+         */
+        void DropHandlerRegistrationReferences(const Dob::Typesystem::TypeId       typeId,
+                                               const Dob::Typesystem::HandlerId&   handlerId,
+                                               const ConsumerId&                   consumer,
+                                               const long                          nbrOfReferences,
+                                               const DropReferencesFunc&           dropReferencesFunc);
 
         /** @} */
 

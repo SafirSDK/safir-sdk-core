@@ -98,6 +98,8 @@ private
          Control_Dispatcher         : aliased Dispatcher := (Conn => Control);
 
          Callback_Actions           : Callback_Actions_Table;
+
+         Default_Context            : Safir.Dob.Typesystem.Int_32 := 0;
       end record;
 
    overriding

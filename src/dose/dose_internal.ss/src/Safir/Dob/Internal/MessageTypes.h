@@ -22,8 +22,8 @@
 *
 ******************************************************************************/
 
-#ifndef _dose_internal_mesage_types_h
-#define _dose_internal_mesage_types_h
+#ifndef _dose_internal_message_types_h
+#define _dose_internal_message_types_h
 
 #include <Safir/Dob/Internal/InternalExportDefs.h>
 #include <Safir/Dob/Typesystem/ChannelId.h>

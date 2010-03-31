@@ -45,8 +45,9 @@ package Safir.Dob.Typesystem.Serialization is
    --
    -- Parameters: Xml - The xml to convert.
    -- Returns: A smart pointer to the new object.
-   -- Exceptions: Illegal_Value_Exception - The type represented by the serialization
-   --                                       isn't found in the object factory.
+   -- Exceptions: Illegal_Value_Exception - If there is something wrong with the XML
+   --                                       or if the type represented by the serialization
+   --                                       isn't found in the ObjectFactory.
    function To_Object (Xml : in Unbounded_Wide_String) return
      Safir.Dob.Typesystem.Object.Smart_Pointer'Class;
 

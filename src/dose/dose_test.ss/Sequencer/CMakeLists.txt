@@ -3,9 +3,10 @@ PROJECT (dose_test_sequencer)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
+FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 
-ADD_EXECUTABLE(dose_test_sequencer ${sources})
+ADD_EXECUTABLE(dose_test_sequencer ${sources} ${headers})
 
 TARGET_LINK_LIBRARIES(dose_test_sequencer ${COMMON_LIBRARIES} ${ACE_LIBRARY})
 

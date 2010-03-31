@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2008 (http://www.safirsdk.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -151,6 +151,12 @@ namespace Typesystem
          * Return a string representation of the instance id.
          * If the string that created the instance id is available this is the string that will be returned,
          * otherwise it is the number that will be returned.
+         *
+         * The purpose of this function is for debug output and such.
+         * The resulting string can *not* reliably be used in the "string constructor" for InstanceId to
+         * recreate the same InstanceId.
+         *
+         * @return The instance id as a string.
          */
         DOTS_API const std::wstring ToString() const;
 
@@ -169,9 +175,9 @@ namespace Typesystem
 
         /**
          * Get the string that was used to create this id.
-         * 
+         *
          * If no string was used this method returns an empty string.
-         * 
+         *
          * @return The string (if any) that was used to create this id.
          */
         const std::wstring & GetRawString() const {return m_instanceIdStr;}
@@ -179,7 +185,7 @@ namespace Typesystem
         /**
          * Get the length of the string when converted to UTF-8 encoding.
          * Includes one byte for a null termination.
-         * 
+         *
          * @return The length of the string of the id when converted to UTF-8
          */
         Int32 Utf8StringLength() const
@@ -199,9 +205,9 @@ namespace Typesystem
 
         /**
          * Convert the string to UTF-8.
-         * 
+         *
          * Returns an empty string if there is no string.
-         * 
+         *
          * @return UTF-8 representation of the string.
          */
         const std::string & Utf8String() const

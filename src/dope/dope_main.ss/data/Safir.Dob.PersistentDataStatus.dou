@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Safir.Dob.PersistentDataStatus</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <members>
+        <member>
+            <summary>The state of the persistence handling.</summary>
+            <name>State</name>
+            <type>Safir.Dob.PersistentDataState</type>
+        </member>
+    </members>
+</class>

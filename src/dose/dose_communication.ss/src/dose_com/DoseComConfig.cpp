@@ -62,6 +62,7 @@ unsigned char   CConfig::m_MyDoseId = 0xFF;
 unsigned char   CConfig::m_spare1 = 0xFF;
 unsigned long   CConfig::m_MyIpAddr_nw;
 unsigned long   CConfig::m_BaseIpMultiCastAddr_nw = 0;
+int             CConfig::m_MulticastTtl = 0;
 unsigned long   CConfig::m_NetAddr_nw = 0;
 
 dcom_ulong64   CConfig::m_BitMapDestChannelMembers64[MAX_NUM_DEST_CHANNELS];
@@ -89,8 +90,9 @@ CConfig::DEST_CHAN_S CConfig::m_DestChannel[MAX_NUM_DEST_CHANNELS];
 **************************************************************************/
 
 int CConfig::Dose_Config(dcom_uchar8 DoseId,
-                        const char* multicastAddress,
-                        const char* netAddress)
+                         const char* multicastAddress,
+                         int multicastTtl,
+                         const char* netAddress)
 {
     FILE    *pFile;
     unsigned long dwTmp;
@@ -118,6 +120,7 @@ int CConfig::Dose_Config(dcom_uchar8 DoseId,
         m_NetAddr_nw = 0;
 
     m_MyDoseId = DoseId;
+    m_MulticastTtl = multicastTtl;
 
     //----------------------------------
     // Open and Read configuration file
@@ -190,6 +193,12 @@ Read_the_config_file:
             {
                 m_MyDoseId = (dcom_uchar8) atoi(&line[7]);
                 if(*pDbg) PrintDbg("DoseId = %d\n", m_MyDoseId);
+            }
+            else
+            if(_strnicmp(line,"McTtl=",6) == 0)
+            {
+                m_MulticastTtl = atoi(&line[6]);
+                if(*pDbg) PrintDbg("McTtl = %d\n", m_MulticastTtl);
             }
             else
                 PrintErr(0,"Invalid line in CFG file= <%s>\n",line);

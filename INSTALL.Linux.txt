@@ -3,22 +3,23 @@ Linux Building and Installing
 
 *Prerequisites*
 
-First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core. The exact package names may vary with your distribution, but these are the package names for Kubuntu/Ubuntu 8.10 (Intrepid Ibex). (In brackets are the package names for Kubuntu/Ubuntu 9.04, Jaunty Jackalope.)
+First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core. The exact package names may vary with your distribution, but these are the names from Ubuntu/Kubuntu 9.10:
 
-libqt4-dev
-mono-2.0-devel
-mono-1.0-devel (mono-devel)
-libmono-winforms2.0-cil
-libboost1.35-dev (libboost1.37-dev) *
-libace-dev
-libtemplates-parser-dev
-libxmlada-dev *
-libiodbc2-dev
-cmake
-g++
-openjdk-6-jdk
-doxygen
-graphviz
+libqt4-dev 
+mono-devel 
+libmono-winforms2.0-cil 
+libboost1.40-all-dev 
+libace-dev 
+libtemplates-parser-dev 
+libxmlada-dev 
+libiodbc2-dev 
+cmake 
+make
+g++ 
+openjdk-6-jdk 
+doxygen 
+graphviz 
+libexpat1-dev
 python-tk
 
 To install these from the command line "in one go" on Ubuntu/Kubuntu 8.10, run:
@@ -28,7 +29,10 @@ To install these from the command line "in one go" on Ubuntu/Kubuntu 9.04, run:
    sudo apt-get install libqt4-dev mono-2.0-devel mono-devel libmono-winforms2.0-cil libboost1.37-dev libace-dev libtemplates-parser-dev libxmlada-dev libiodbc2-dev cmake g++ openjdk-6-jdk doxygen graphviz make python-tk
 
 To install these from the command line "in one go" on Ubuntu/Kubuntu 9.10, run:
-   sudo apt-get install libqt4-dev mono-devel libmono-winforms2.0-cil libboost1.38-dev libace-dev libtemplates-parser-dev libxmlada-dev libiodbc2-dev cmake g++ openjdk-6-jdk doxygen graphviz make python-tk
+   sudo apt-get install libqt4-dev mono-devel libmono-winforms2.0-cil libboost1.40-all-dev libace-dev libtemplates-parser-dev libxmlada-dev libiodbc2-dev cmake g++ openjdk-6-jdk doxygen graphviz make python-tk
+
+To install these from the command line "in one go" on Debian 5.0.3 (Lenny), run:
+   sudo apt-get install libqt4-dev mono-2.0-devel mono-1.0-devel libmono-winforms2.0-cil libboost1.35-dev libace-dev libtemplates-parser-dev libxmlada-dev libiodbc2-dev cmake g++ openjdk-6-jdk doxygen graphviz make python-tk libexpat1-dev
 
 These packages should cause quite a few extra packages to be installed (like the gnat Ada compiler and a lot more stuff), which is as it should be.
 
@@ -45,8 +49,7 @@ Some distributions may not contain all the above packages, in which case you wil
 
 For boost you need at least version 1.35 (with the patches in ubuntu_patches) or later (1.36 and 1.37 should only need the sp_counted_impl.hpp patch above, and 1.38 should need no fixes). Mono should work with anything later than 1.2.6. For ACE anything in the 5.6.x series should work (earlier versions work too, probably). You can use any JDK version later than 5.0.
 
-To compile the Ada component (src/dots/dots_v.ss) you need the Gnat Ada compiler, and the templates-parser and xmlada libraries. On a linux platform the dots_v build selects the code that works with version 3 of the xmlada libraries. If you've got version 2 of xmlada you will have to modify the dots_v build files (check out the CMakeLists.txt and the two gpr files in src/dots/dots_v.ss).
-
+To compile the Ada components you need the Gnat Ada compiler, and the templates-parser and xmlada libraries. 
 
 *Building*
 

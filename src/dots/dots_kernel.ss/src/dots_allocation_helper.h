@@ -25,12 +25,21 @@
 #ifndef __DOTS_ALLOCATION_HELPER_H__
 #define __DOTS_ALLOCATION_HELPER_H__
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4189)
+#endif
+
 #include <boost/noncopyable.hpp>
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/containers/string.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/containers/map.hpp>
 #include <boost/interprocess/smart_ptr/shared_ptr.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 
 namespace Safir

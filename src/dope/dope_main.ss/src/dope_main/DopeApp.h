@@ -27,6 +27,7 @@
 #include <Safir/Application/Backdoor.h>
 #include <Safir/Application/BackdoorKeeper.h>
 #include <Safir/Dob/Connection.h>
+#include <Safir/Dob/ResponseSender.h>
 #include "PersistenceHandler.h"
 #include <Safir/Application/Tracer.h>
 #include <ace/Reactor.h>
@@ -34,6 +35,8 @@
 
 class DopeApp :
     public Safir::Dob::StopHandler,
+    public Safir::Dob::EntityHandlerPending,
+    public Safir::Dob::EntitySubscriber,
     public Safir::Application::Backdoor
 {
 public:
@@ -51,7 +54,7 @@ public:
 
 private:
     /** Implements Safir::Dob::StopHandler. */
-    void  OnStopOrder();
+    virtual void  OnStopOrder();
 
     /** Implements Safir::Application::Backdoor. */
     virtual void HandleCommand(const std::vector<std::wstring>& cmdTokens);
@@ -59,8 +62,37 @@ private:
     /** Implements Safir::Application::Backdoor. */
     virtual std::wstring GetHelpText();
 
+    /** Implements Safir::Dob::EntityHandler. */
+    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
+        const Safir::Dob::Typesystem::HandlerId& handlerId);
+
+    virtual void OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
+        const Safir::Dob::Typesystem::HandlerId& handlerId);
+
+    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+        Safir::Dob::ResponseSenderPtr        responseSender);
+
+    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+        Safir::Dob::ResponseSenderPtr        responseSender);
+
+    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+        Safir::Dob::ResponseSenderPtr        responseSender);
+
+
+    /** Implements Safir::Dob::EntitySubscriber. */
+    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy);
+    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy){};
+    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool ){};
+
+
+    void StartUp(bool restore);
+
     Safir::Dob::Connection  m_dobConnection;
     Safir::Utilities::AceDispatcher m_dispatcher;
+    Safir::Dob::Typesystem::HandlerId m_handlerId;
+    Safir::Dob::Typesystem::InstanceId m_instanceId;
+
+    bool m_persistenceStarted; // Any dope has started successfully and loaded persistent data into the system.
 
     Safir::Application::BackdoorKeeper m_keeper;
 
