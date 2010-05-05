@@ -40,6 +40,7 @@
 #include <Safir/Dob/Internal/SubscriptionQueue.h>
 #include <Safir/Dob/Internal/State.h>
 #include <Safir/Dob/Internal/ShmWrappers.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 
 namespace Safir
 {
@@ -264,7 +265,11 @@ namespace Internal
         //not need to do recursive locking.
         //Any attempts to take the lock recursively are to be regarded as
         //programming errors.
-        mutable boost::interprocess::interprocess_mutex m_lock;
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  CONNECTION_LOCK_LEVEL,
+                                                  NO_MASTER_LEVEL_REQUIRED> ConnectionLock;
+        mutable ConnectionLock m_lock;
+        typedef boost::interprocess::scoped_lock<ConnectionLock> ScopedConnectionLock;
 
         void Unsubscribe(const Typesystem::TypeId typeId);
 

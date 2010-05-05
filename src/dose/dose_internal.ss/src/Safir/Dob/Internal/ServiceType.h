@@ -32,6 +32,7 @@
 #include <Safir/Dob/Internal/HandlerRegistrations.h>
 #include <Safir/Dob/Internal/SubscriptionOptions.h>
 #include <Safir/Dob/Internal/SubscriptionId.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 
 namespace Safir
 {
@@ -103,6 +104,11 @@ namespace Internal
         Typesystem::TypeId m_typeId;
 
         HandlerRegistrations m_handlerRegistrations;
+
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  TYPE_LOCK_LEVEL, NO_MASTER_LEVEL_REQUIRED> TypeLock;
+        mutable TypeLock m_typeLock;
+        typedef boost::interprocess::scoped_lock<TypeLock> ScopedTypeLock;
     };
 }
 }

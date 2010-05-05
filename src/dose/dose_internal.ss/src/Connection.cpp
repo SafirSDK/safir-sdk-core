@@ -278,7 +278,7 @@ namespace Internal
                                          const Dob::Typesystem::HandlerId&     handlerId,
                                          const ConsumerId&                     consumer)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         m_injectionHandlers.insert(std::make_pair(std::make_pair(typeId, ShmHandlerId(handlerId)), consumer));
     }
@@ -286,7 +286,7 @@ namespace Internal
     void Connection::RemoveInjectionHandler(const Typesystem::TypeId              typeId,
                                             const Dob::Typesystem::HandlerId&     handlerId)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         m_injectionHandlers.erase(std::make_pair(typeId, ShmHandlerId(handlerId)));
     }
@@ -294,7 +294,7 @@ namespace Internal
     const ConsumerId Connection::GetInjectionHandlerConsumer(const Typesystem::TypeId              typeId,
                                                              const Dob::Typesystem::HandlerId&     handlerId) const
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         RegistrationsMap::const_iterator it = m_injectionHandlers.find(std::make_pair(typeId, ShmHandlerId(handlerId)));
         ENSURE(it != m_injectionHandlers.end(), << "Didn't find given type/handler");
@@ -303,7 +303,7 @@ namespace Internal
 
     const RegistrationVector Connection::GetInjectionHandlers() const
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
         return GetRegistrations(m_injectionHandlers);
     }
 
@@ -311,7 +311,7 @@ namespace Internal
                                      const Dob::Typesystem::HandlerId&     handlerId,
                                      const ConsumerId&                     consumer)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         m_registrations.insert(std::make_pair(std::make_pair(typeId, ShmHandlerId(handlerId)), consumer));
     }
@@ -319,7 +319,7 @@ namespace Internal
     void Connection::RemoveRegistration(const Typesystem::TypeId              typeId,
                                         const Dob::Typesystem::HandlerId&     handlerId)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         m_registrations.erase(std::make_pair(typeId, ShmHandlerId(handlerId)));
     }
@@ -330,7 +330,7 @@ namespace Internal
     {
         if (!IsLocal()) return;
 
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         m_revokedRegistrations.insert(std::make_pair(std::make_pair(typeId, ShmHandlerId(handlerId)), consumer));
     }
@@ -340,20 +340,20 @@ namespace Internal
     {
         if (!IsLocal()) return;
 
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         m_revokedRegistrations.erase(std::make_pair(typeId, ShmHandlerId(handlerId)));
     }
 
     const RegistrationVector Connection::GetRevokedRegistrations() const
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
         return GetRegistrations(m_revokedRegistrations);
     }
 
     const RegistrationVector Connection::GetAndClearRevokedRegistrations()
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         RegistrationVector tmp = GetRegistrations(m_revokedRegistrations);
         m_revokedRegistrations.clear();
@@ -376,7 +376,7 @@ namespace Internal
     void Connection::AddPendingRegistration(const PendingRegistration & reg)
     {
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
         lllout << "AddPendingRegistration for type " << Dob::Typesystem::Operations::GetName(reg.typeId)
             << " for connection " << NameWithCounter() << std::endl;
 
@@ -427,7 +427,7 @@ namespace Internal
     void Connection::SetPendingRegistrationAccepted(const long requestId)
     {
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         for (PendingOwnerships::iterator it = m_pendingOwnerships.begin();
              it != m_pendingOwnerships.end(); ++it)
@@ -453,7 +453,7 @@ namespace Internal
                                        const Dob::Typesystem::HandlerId & handlerId) const
     {
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         if (IsLocal())
         {
@@ -477,7 +477,7 @@ namespace Internal
         PendingRegistrationVector prv;
 
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         PendingOwnerships::iterator firstRemoved =
             std::partition(m_pendingOwnerships.begin(),m_pendingOwnerships.end(),!boost::bind(&PendingRegistration::IsRemoved,_1));
@@ -489,7 +489,7 @@ namespace Internal
     void Connection::RetryAcceptedPendingOwnership(const long requestId)
     {
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         for (PendingOwnerships::iterator it = m_pendingOwnerships.begin();
              it != m_pendingOwnerships.end(); ++it)
@@ -513,7 +513,7 @@ namespace Internal
     void Connection::RemoveAcceptedPendingOwnership(const long requestId)
     {
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         PendingOwnerships::iterator removeEnd = std::remove_if(m_pendingOwnerships.begin(),m_pendingOwnerships.end(),
                                                                boost::bind(RequestIdMatches,_1,requestId));
@@ -535,7 +535,7 @@ namespace Internal
     const PendingRegistrationVector Connection::GetPendingRegistrations()
     {
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         PendingRegistrationVector prv;
         std::copy(m_pendingOwnerships.begin(),m_pendingOwnerships.end(),std::back_inserter(prv));
@@ -545,7 +545,7 @@ namespace Internal
     bool Connection::GetNextNewPendingRegistration(const long requestId, PendingRegistration & reg)
     {
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         for (PendingOwnerships::iterator it = m_pendingOwnerships.begin();
              it != m_pendingOwnerships.end(); ++it)
@@ -566,7 +566,7 @@ namespace Internal
     {
         bool somethingRemoved = false;
         // Acquire connection lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedConnectionLock lck(m_lock);
 
         for (PendingOwnerships::iterator it = m_pendingOwnerships.begin();
              it != m_pendingOwnerships.end(); ++it)

@@ -74,6 +74,7 @@ namespace Internal
         m_requestQ.RemoveConnection(id);
         m_responseQ.RemoveConnection(id);
         m_stateQ.RemoveConnection(id);
+        m_messageQ.RemoveConnection(id);
     }
 
 }

@@ -42,7 +42,7 @@ namespace Internal
                                 const Dob::Typesystem::ChannelId& channelId,
                                 const ConsumerId&                 consumer)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedMessageTypeLock lck(m_lock);
 
         // Check if this connection/consumer already has a subscription
 
@@ -85,7 +85,7 @@ namespace Internal
                                   const Dob::Typesystem::ChannelId& channelId,
                                   const ConsumerId&                 consumer)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedMessageTypeLock lck(m_lock);
 
         ConnectionConsumerPair key(connection, consumer);
 
@@ -114,7 +114,7 @@ namespace Internal
 
     void MessageType::UnsubscribeAll(const ConnectionPtr& connection)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedMessageTypeLock lck(m_lock);
 
         for (ConsumerSubscriptions::iterator it = m_subscriptions.begin();
             it != m_subscriptions.end();)
@@ -133,7 +133,7 @@ namespace Internal
 
     void MessageType::DistributeMsg(const DistributionData& msg)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedMessageTypeLock lck(m_lock);
 
         for (ConsumerSubscriptions::iterator subIt = m_subscriptions.begin(); subIt != m_subscriptions.end(); ++subIt)
         {
@@ -157,7 +157,7 @@ namespace Internal
     bool MessageType::HasSubscription(const ConnectionPtr&    connection,
                                       const ConsumerId&       consumer) const
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedMessageTypeLock lck(m_lock);
 
         ConnectionConsumerPair key(connection, consumer);
 

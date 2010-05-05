@@ -54,7 +54,7 @@ namespace Internal
                                    const SubscriptionOptionsPtr&      subscriptionOptions)
     {
         // Lock the meta subscriptions
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_metaSubLock);
+        ScopedMetaSubLock lck(m_metaSubLock);
 
         // Check if a metasubscription for this subscritionId already exists.
 
@@ -127,7 +127,7 @@ namespace Internal
                                      const bool                         allKeys)
     {
         // Lock the meta subscriptions
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_metaSubLock);
+        ScopedMetaSubLock lck(m_metaSubLock);
 
         MetaSubscriptions::iterator subIt = m_metaSubscriptions.find(subscriptionId);
 
@@ -142,7 +142,7 @@ namespace Internal
     void StateContainer::UnsubscribeAll(const ConnectionPtr& connection)
     {
         // Lock the meta subscriptions
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_metaSubLock);
+        ScopedMetaSubLock lck(m_metaSubLock);
 
         for (MetaSubscriptions::iterator subIt = m_metaSubscriptions.begin();
              subIt != m_metaSubscriptions.end();)
@@ -163,7 +163,7 @@ namespace Internal
     bool StateContainer::HasSubscription(const SubscriptionId&   subscriptionId) const
     {
         // Lock the meta subscriptions
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_metaSubLock);
+        ScopedMetaSubLock lck(m_metaSubLock);
 
         return m_metaSubscriptions.find(subscriptionId) != m_metaSubscriptions.end();
     }
@@ -178,7 +178,7 @@ namespace Internal
         {
             {
                 // Lock state
-                boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(upgradeableStateResult.first->m_lock);
+                boost::interprocess::scoped_lock<State::StateLock> lck(upgradeableStateResult.first->m_lock);
 
                 actionFunc(it->first, upgradeableStateResult);
 
@@ -201,7 +201,7 @@ namespace Internal
         }
 
         // Lock state
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(upgradeableStateResult.first->m_lock);
+        boost::interprocess::scoped_lock<State::StateLock> lck(upgradeableStateResult.first->m_lock);
 
         actionFunc(it->first, upgradeableStateResult);
     }
@@ -234,7 +234,7 @@ namespace Internal
 
         {
             // Lock state while in callback
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(upgradeableStateResult.first->m_lock);
+            boost::interprocess::scoped_lock<State::StateLock> lck(upgradeableStateResult.first->m_lock);
             actionFunc(key, upgradeableStateResult);
         }
     }
@@ -246,27 +246,48 @@ namespace Internal
         UpgradeableStateResult upgradeableStateResult = GetFirstExistingState(false, // false => don't include already released states
                                                                               it);
 
-        StateSharedPtr statePtr = upgradeableStateResult.first;
+        const StateSharedPtr& statePtr = upgradeableStateResult.first;  // get better name
 
         while (statePtr != NULL)
         {
             {
                 // Lock state
-                boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(statePtr->m_lock);
+                boost::interprocess::scoped_lock<State::StateLock> lck(statePtr->m_lock);
 
-                bool dontRelease;
+                // default state pointer handling when returning from callback
+                StatePtrHandling statePtrHandling = RestorePtr;
+
                 bool exitDispatch;
 
-                releaseActionFunc(it->first, upgradeableStateResult, dontRelease, exitDispatch);
+                releaseActionFunc(it->first, upgradeableStateResult, statePtrHandling, exitDispatch);
 
-                if (!dontRelease)
+                switch (statePtrHandling)
                 {
-                    // Ok, the state should be released. First make the pointers that the state
-                    // has to its subscriptions weak ones.
-                    statePtr->ReleaseSubscribers();
+                case RestorePtr:
+                    {
+                        if (upgradeableStateResult.second)
+                        {
+                            // The state ptr is originally upgraded from a weak ptr
+                            it->second.Downgrade();
+                        }
+                    }
+                    break;
 
-                    // then make the pointer from this state container to the state a weak one
-                    it->second.Downgrade();
+                case ReleasePtr:
+                    {
+                        // First make the pointers that the state has to its subscriptions weak ones.
+                        statePtr->ReleaseSubscribers();
+
+                        // then make the pointer from this state container to the state a weak one
+                        it->second.Downgrade();
+                    }
+                    break;
+
+                case KeepPtr:
+                    break;
+
+                default:
+                    ENSURE(false, << "Unknown enum value!");
                 }
 
                 if (exitDispatch)
@@ -277,8 +298,6 @@ namespace Internal
             } // state released here
 
             upgradeableStateResult = GetNextExistingState(false, it);
-            statePtr = upgradeableStateResult.first;
-
         }
     }
 
@@ -302,20 +321,40 @@ namespace Internal
         }
 
         // Lock state
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(statePtr->m_lock);
+        boost::interprocess::scoped_lock<State::StateLock> lck(statePtr->m_lock);
 
-        bool dontRelease;
+        // default state pointer handling when returning from callback
+        StatePtrHandling statePtrHandling = RestorePtr;
 
-        releaseActionFunc(key, upgradeableStateResult, dontRelease);
+        releaseActionFunc(key, upgradeableStateResult, statePtrHandling);
 
-        if (!dontRelease)
+        switch (statePtrHandling)
         {
-            // Ok, the state should be released. First make the pointers that the state
-            // has to its subscriptions weak ones.
-            statePtr->ReleaseSubscribers();
+        case RestorePtr:
+            {
+                if (upgradeableStateResult.second)
+                {
+                    // The state ptr is originally upgraded from a weak ptr
+                    it->second.Downgrade();
+                }
+            }
+            break;
 
-            // then make the pointer from this state container to the state a weak one
-            it->second.Downgrade();
+        case ReleasePtr:
+            {
+                // First make the pointers that the state has to its subscriptions weak ones.
+                statePtr->ReleaseSubscribers();
+
+                // then make the pointer from this state container to the state a weak one
+                it->second.Downgrade();
+            }
+            break;
+
+        case KeepPtr:
+            break;
+
+        default:
+            ENSURE(false, << "Unknown enum value!");
         }
     }
 
@@ -332,27 +371,47 @@ namespace Internal
         StateSharedPtr& statePtr = upgradeableStateResult.first;
 
         // Lock state
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(statePtr->m_lock);
+        boost::interprocess::scoped_lock<State::StateLock> lck(statePtr->m_lock);
 
-        bool dontRelease;
+        // default state pointer handling when returning from callback
+        StatePtrHandling statePtrHandling = RestorePtr;
 
-        releaseActionFunc(key, upgradeableStateResult, dontRelease);
+        releaseActionFunc(key, upgradeableStateResult, statePtrHandling);
 
-        if (!dontRelease)
+        switch (statePtrHandling)
         {
-            // Ok, the state should be released. First make the pointers that the state
-            // has to its subscriptions weak ones.
-            statePtr->ReleaseSubscribers();
+        case RestorePtr:
+            {
+                if (upgradeableStateResult.second)
+                {
+                    // The state ptr is originally upgraded from a weak ptr
+                    it->second.Downgrade();
+                }
+            }
+            break;
 
-            // then make the pointer from this state container to the state a weak one
-            it->second.Downgrade();
+        case ReleasePtr:
+            {
+                // First make the pointers that the state has to its subscriptions weak ones.
+                statePtr->ReleaseSubscribers();
+
+                // then make the pointer from this state container to the state a weak one
+                it->second.Downgrade();
+            }
+            break;
+
+        case KeepPtr:
+            break;
+
+        default:
+            ENSURE(false, << "Unknown enum value!");
         }
     }
 
     void StateContainer::RemoveState(ThisPtr _this, const Dob::Typesystem::Int64 key)
     {
         // Get container writer lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_upgradable_mutex> wlock(_this->m_stateReaderWriterlock);
+        ScopedStateContainerRwLock wlock(_this->m_stateReaderWriterlock);
 
         States::iterator it = _this->m_states.find(key);
 
@@ -366,7 +425,7 @@ namespace Internal
     StateContainer::GetState(const Dob::Typesystem::Int64 key)
     {
         // Get container reader lock
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> rlock(m_stateReaderWriterlock);
+        SharableStateContainerRwLock rlock(m_stateReaderWriterlock);
 
         UpgradeableStateResult result;
 
@@ -412,7 +471,7 @@ namespace Internal
     StateContainer::AddState(const Dob::Typesystem::Int64 key)
     {
         // Get writer lock
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_upgradable_mutex> wlock(m_stateReaderWriterlock);
+        ScopedStateContainerRwLock wlock(m_stateReaderWriterlock);
 
         States::iterator it = m_states.find(key);
 
@@ -519,7 +578,7 @@ namespace Internal
     {
         if (sub.second.IsSubscribed(key))
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(statePtr->m_lock);
+            boost::interprocess::scoped_lock<State::StateLock> lck(statePtr->m_lock);
 
             statePtr->AddSubscription(sub.first,
                                       false,                // don't mark as dirty
@@ -600,7 +659,7 @@ namespace Internal
 
         {
             // Get container reader lock
-            boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> rlock(m_stateReaderWriterlock);
+            SharableStateContainerRwLock rlock(m_stateReaderWriterlock);
 
             iterator.m_underlyingIterator = m_states.begin();
             if (iterator.m_underlyingIterator == m_states.end())
@@ -638,7 +697,7 @@ namespace Internal
 
         {
             // Get container reader lock
-            boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> rlock(m_stateReaderWriterlock);
+            SharableStateContainerRwLock rlock(m_stateReaderWriterlock);
 
             return IncrementIteratorInternal(iterator, keepStates);
         }
@@ -682,7 +741,7 @@ namespace Internal
     StateContainer::GetFirstExistingState(const bool includeReleasedStates, States::iterator& it) const
     {
         // Get container reader lock
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> rlock(m_stateReaderWriterlock);
+        SharableStateContainerRwLock rlock(m_stateReaderWriterlock);
 
         UpgradeableStateResult upgradeableStateResult = std::make_pair(StateSharedPtr(),
                                                                        false);    // false => not obtained from weak
@@ -710,7 +769,7 @@ namespace Internal
     StateContainer::GetNextExistingState(const bool includeReleasedStates, States::iterator& it) const
     {
         // Get container reader lock
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> rlock(m_stateReaderWriterlock);
+        SharableStateContainerRwLock rlock(m_stateReaderWriterlock);
 
         UpgradeableStateResult upgradeableStateResult = std::make_pair(StateSharedPtr(),
                                                                        false);    // false => not obtained from weak
@@ -747,7 +806,7 @@ namespace Internal
                                      States::iterator&               it) const
     {
         // Get container reader lock
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> rlock(m_stateReaderWriterlock);
+        SharableStateContainerRwLock rlock(m_stateReaderWriterlock);
 
         UpgradeableStateResult upgradeableStateResult = std::make_pair(StateSharedPtr(),
                                                                        false);    // false => not obtained from weak

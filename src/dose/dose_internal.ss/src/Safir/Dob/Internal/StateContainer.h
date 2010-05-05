@@ -33,6 +33,7 @@
 #include <Safir/Dob/Internal/MetaSubscription.h>
 #include <Safir/Dob/Internal/SubscriptionId.h>
 #include <Safir/Dob/Internal/SubscriptionOptions.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <boost/function.hpp>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
@@ -98,7 +99,7 @@ namespace Internal
 
         typedef boost::function<void(const Dob::Typesystem::Int64 key,
                                      const UpgradeableStateResult& statePtrResult,
-                                     bool& dontRelease,
+                                     StatePtrHandling& statePtrHandling,
                                      bool& exitDispatch)> ReleaseEachActionFunc;
 
         // Calls releaseActionFunc for each existing state. Each state is locked during the callback.
@@ -106,7 +107,7 @@ namespace Internal
 
         typedef boost::function<void(const Dob::Typesystem::Int64 key,
                                      const UpgradeableStateResult& statePtrResult,
-                                     bool& dontRelease)> ReleaseSpecificActionFunc;
+                                     StatePtrHandling& statePtrHandling)> ReleaseSpecificActionFunc;
 
         // Calls releaseActionFunc for the specific state. The state is locked during the callback.
         void ReleaseSpecificState(const Dob::Typesystem::Int64 key, const ReleaseSpecificActionFunc& releaseActionFunc);
@@ -151,7 +152,11 @@ namespace Internal
         // recursive locking.
         // Any attempts to take the lock recursively are to be regarded as
         // programming errors.
-        mutable boost::interprocess::interprocess_mutex         m_metaSubLock;
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  STATE_CONTAINER_META_SUB_LOCK_LEVEL,
+                                                  TYPE_LOCK_LEVEL> MetaSubLock;
+        mutable MetaSubLock m_metaSubLock;
+        typedef boost::interprocess::scoped_lock<MetaSubLock> ScopedMetaSubLock;
 
         // Locking Policy:
         // This lock is used to protect the state container. It is a readerWriter lock which allows
@@ -159,7 +164,16 @@ namespace Internal
         // threads that read and threads that modify or between threads that modify. This kind of lock
         // is non-recursive so attempts to take the lock recursively are to be regarded as
         // programming errors.
-        mutable boost::interprocess::interprocess_upgradable_mutex   m_stateReaderWriterlock;
+        // In some scenarios a StateLock is acquired while holding a StateContainerRwLock and in other
+        // scenarios a StateContainerRwLock is acquired while holding a StateLock. To avoid deadlocks
+        // a master lock at type level must be held in those cases. The LeveledLock is therefor
+        // instantiated to enforce this restriction.
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_upgradable_mutex,
+                                                  STATE_CONTAINER_RW_LOCK_LEVEL,
+                                                  TYPE_LOCK_LEVEL> StateContainerRwLock;
+        mutable StateContainerRwLock m_stateReaderWriterlock;
+        typedef boost::interprocess::scoped_lock<StateContainerRwLock> ScopedStateContainerRwLock;
+        typedef boost::interprocess::sharable_lock<StateContainerRwLock> SharableStateContainerRwLock;
 
         Dob::Typesystem::TypeId m_typeId;
 

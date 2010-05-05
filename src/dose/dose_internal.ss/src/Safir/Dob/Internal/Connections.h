@@ -32,6 +32,7 @@
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
 #include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
 #include <Safir/Dob/Internal/ConnectRequest.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 
 namespace Safir
 {
@@ -224,12 +225,21 @@ namespace Internal
 
         boost::interprocess::interprocess_semaphore m_connectSem;
         boost::interprocess::interprocess_semaphore m_connectMinusOneSem;
-        boost::interprocess::interprocess_mutex m_connectLock;
+
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  CONNECT_LOCK_LEVEL,
+                                                  NO_MASTER_LEVEL_REQUIRED> ConnectLock;
+        mutable ConnectLock m_connectLock;
+        typedef boost::interprocess::scoped_lock<ConnectLock> ScopedConnectLock;
+        
         boost::interprocess::interprocess_semaphore m_connectResponseEvent;
 
         //lock for m_connections, m_connectionOutIds, and m_connectionOutSignals
         //Note that this is an upgradable lock!!!! Not a normal mutex!
-        mutable boost::interprocess::interprocess_upgradable_mutex m_connectionTablesLock;
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_upgradable_mutex,
+                                                  CONNECTIONS_TABLE_LOCK_LEVEL,
+                                                  NO_MASTER_LEVEL_REQUIRED> ConnectionsTableLock;
+        mutable ConnectionsTableLock m_connectionTablesLock;
 
         ConnectRequest m_connectMessage;
         ConnectResponse m_connectResponse;

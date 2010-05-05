@@ -2051,22 +2051,7 @@ namespace Internal
                 }
                 else
                 {
-                    //equal creation time
-
-                    if (currState.GetUndecrementedVersion() < lastState.GetVersion() ||
-                        lastState.GetVersion() < currState.GetUndecrementedVersion())
-                    {
-                        ENSURE(false, << "Got unexpected VersionNumbers and CreationTimes (in Ghost --> Ghost) for entity "
-                                      << lastState.GetEntityId()
-                                      << ". CreationTime = " << lastState.GetCreationTime()
-                                      << ", lastV = " << lastState.GetVersion()
-                                      << ", currV = " << currState.GetVersion());
-                    }
-                    else
-                    { //equal times!
-                        //ignore it
-                    }
-
+                    //Ghosts with equal creation times can be ignored.
                 }
             }
 

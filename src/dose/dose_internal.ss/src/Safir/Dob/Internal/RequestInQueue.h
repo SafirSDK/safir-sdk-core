@@ -30,6 +30,7 @@
 #include <Safir/Dob/Internal/DistributionData.h>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <Safir/Dob/Internal/ConsumerQueueContainer.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 
 namespace Safir
 {
@@ -84,7 +85,11 @@ namespace Internal
         //made with the lock unlocked).
         //Any attempts to take the lock recursively are to be regarded as
         //programming errors.
-        mutable boost::interprocess::interprocess_mutex m_lock;
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  REQUEST_IN_QUEUE_LOCK_LEVEL,
+                                                  NO_MASTER_LEVEL_REQUIRED> RequestInQueueLock;
+        mutable RequestInQueueLock m_lock;
+        typedef boost::interprocess::scoped_lock<RequestInQueueLock> ScopedRequestInQueueLock;
 
         size_t m_capacity;
         size_t m_size;

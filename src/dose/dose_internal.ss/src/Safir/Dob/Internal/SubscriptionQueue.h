@@ -28,6 +28,7 @@
 #include <Safir/Dob/Internal/InternalExportDefs.h>
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Dob/Internal/Subscription.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 
@@ -63,7 +64,11 @@ namespace Internal
         //made with the lock unlocked).
         //Any attempts to take the lock recursively are to be regarded as
         //programming errors.
-        mutable boost::interprocess::interprocess_mutex m_lock;
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  SUBSCRIPTION_QUEUE_LOCK_LEVEL,
+                                                  NO_MASTER_LEVEL_REQUIRED> SubscriptionQueueLock;
+        mutable SubscriptionQueueLock m_lock;
+        typedef boost::interprocess::scoped_lock<SubscriptionQueueLock> ScopedSubscriptionQueueLock;
 
         typedef Containers<SubscriptionPtr>::list Queue;
 

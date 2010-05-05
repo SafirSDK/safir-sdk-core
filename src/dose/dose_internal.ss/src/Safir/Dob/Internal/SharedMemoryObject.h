@@ -212,6 +212,14 @@ namespace Internal
             >
             set;
 
+            typedef typename boost::interprocess::multiset
+            <
+                T,
+                std::less<T>,
+                my_allocator<T>
+            >
+            multiset;
+
 
             typedef typename boost::interprocess::basic_string
             <

@@ -61,7 +61,7 @@ namespace Internal
                                                 const size_t& numDispatched,
                                                 bool& isNoLongerFull)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedRequestInQueueLock lck(m_lock);
 
         if (m_size == m_capacity && numDispatched > 0)
         {
@@ -102,7 +102,7 @@ namespace Internal
                                                   boost::ref(isNoLongerFull)));
 
             {
-                boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+                ScopedRequestInQueueLock lck(m_lock);
                 m_unhandledRequests.swap(toDispatch);
             }
 
@@ -164,7 +164,7 @@ namespace Internal
 
     void RequestInQueue::AttachResponse(const ResponseId responseId, const ConnectionId & sender, const char * const blob, const AttachResponseChecker & checker)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedRequestInQueueLock lck(m_lock);
 
         //it may be the response to the request we're currently dispatching
         if (m_currentlyDispatchingRequest != NULL && (*m_currentlyDispatchingRequest)->GetResponseId() == responseId)
@@ -212,7 +212,7 @@ namespace Internal
 
     bool RequestInQueue::PushRequest(DistributionData request)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedRequestInQueueLock lck(m_lock);
         if ((m_size < m_capacity) && m_simulateFull == 0) //not full
         {
             request.SetResponseId(m_responseIdGenerator.GetNextResponseId());
@@ -230,7 +230,7 @@ namespace Internal
 
     void RequestInQueue::FinishDispatchResponses(RequestsAndResponses& queue, const size_t& numDispatched)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedRequestInQueueLock lck(m_lock);
 
         m_size -= numDispatched;
         m_noDispatchedResponses += static_cast<Typesystem::Int32>(numDispatched);
@@ -255,7 +255,7 @@ namespace Internal
                                               boost::cref(numDispatched)));
 
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+            ScopedRequestInQueueLock lck(m_lock);
             m_handledRequests.swap(toDispatch);
         }
 

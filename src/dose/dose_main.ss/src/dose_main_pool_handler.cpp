@@ -159,7 +159,8 @@ namespace Internal
                                  connection.NameWithoutCounter(),
                                  connection.Counter());
 
-            m_ecom->SendPoolDistributionData(msg);
+            // send later to avoid locking up shmem
+            ConnectionMsgsToSend.push_back(msg);
         }
     }
 
@@ -182,7 +183,16 @@ namespace Internal
         try
         {
             lllout << "Distributing connections" << std::endl;
+            // get connections
+            ConnectionMsgsToSend.clear();
             Connections::Instance().ForEachConnection(boost::bind(&PoolHandler::PDConnection,this,_1));
+            // send connections
+            ConnectionMsgs::const_iterator msgIter;
+            for ( msgIter = ConnectionMsgsToSend.begin( ) ; msgIter != ConnectionMsgsToSend.end( ) ; msgIter++ )
+            {
+                m_ecom->SendPoolDistributionData(*msgIter);
+            }
+            ConnectionMsgsToSend.clear();
 
             lllout << "Setting up connection for pool distribution" << std::endl;
             DummyDispatcher dispatcher;

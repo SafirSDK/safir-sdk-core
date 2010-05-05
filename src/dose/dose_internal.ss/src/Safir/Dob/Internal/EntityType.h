@@ -33,6 +33,7 @@
 #include <Safir/Dob/Internal/SubscriptionId.h>
 #include <Safir/Dob/InjectionKind.h>
 #include <Safir/Dob/InstanceIdPolicy.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 
 namespace Safir
 {
@@ -234,6 +235,19 @@ namespace Internal
 
         HandlerRegistrations m_handlerRegistrations;
 
+        // Locking Policy:
+        // The state uses a non-recursive lock, since there should be no recursive locking.
+        // Any attempts to take the lock recursively are to be regarded as programming errors.
+        // The TypeLock is needed because there are operations that take both a EntityState lock and
+        // a RegistrationState lock, and since these locks are taken in different order by different
+        // operations, there is a risk for a deadlock. The reason why we have locks at both type-level and
+        // state-level is that we want subscribers to fetch data from single states withot locking
+        // the whole type.
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  TYPE_LOCK_LEVEL, NO_MASTER_LEVEL_REQUIRED> TypeLock;
+        mutable TypeLock m_typeLock;
+        typedef boost::interprocess::scoped_lock<TypeLock> ScopedTypeLock;
+
         void SetEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
                                const ConnectionPtr&                 connection,
                                const Dob::Typesystem::HandlerId&    handlerId,
@@ -245,12 +259,12 @@ namespace Internal
                                   const ConnectionPtr&                 connection,
                                   const Dob::Typesystem::HandlerId&    handlerId,
                                   const Dob::Typesystem::InstanceId&   instanceId,
-                                  bool&                                dontRelease);
+                                  StatePtrHandling&                    statePtrHandling);
 
         void DeleteAllInstancesInternal(const UpgradeableStateResult&       upgradeableStateResult,
                                         const ConnectionPtr&                connection,
                                         const Dob::Typesystem::HandlerId&   handlerId,
-                                        bool&                               dontRelease,
+                                        StatePtrHandling&                   statePtrHandling,
                                         bool&                               exitDispatch);
 
         void SetInitalGhostInternal(const UpgradeableStateResult&        upgradeableStateResult,
@@ -264,13 +278,13 @@ namespace Internal
                                   const Dob::Typesystem::InstanceId&   instanceId,
                                   const char* const                    blob,
                                   const Dob::Typesystem::Int64         timestamp,
-                                  bool&                                dontRelease);
+                                  StatePtrHandling&                    statePtrHandling);
 
         void InjectDeletedEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
                                          const Dob::Typesystem::HandlerId&    handlerId,
                                          const Dob::Typesystem::InstanceId&   instanceId,
                                          const Dob::Typesystem::Int64         timestamp,
-                                         bool&                                dontRelease);
+                                         StatePtrHandling&                    statePtrHandling);
 
         void AcceptInjectionInternal(const UpgradeableStateResult&  upgradeableStateResult,
                                      const ConnectionPtr&           connection,
@@ -281,7 +295,7 @@ namespace Internal
                                            const ConnectionPtr&           connection,
                                            DistributionData&              injectionState,
                                            const DistributionData&        originalInjectionState,
-                                           bool&                          dontRelease);
+                                           StatePtrHandling&              statePtrHandling);
 
         void CommonAcceptInjectionInternal(const UpgradeableStateResult&  upgradeableStateResult,
                                            const ConnectionPtr&           connection,
@@ -300,23 +314,23 @@ namespace Internal
                                      const Dob::Typesystem::HandlerId&    handlerId,
                                      const Dob::Typesystem::InstanceId&   instanceId,
                                      const DistributionData&              originalInjectionState,
-                                     bool&                                dontRelease);
+                                     StatePtrHandling&                    statePtrHandling);
 
         void RemoteSetGhostEntityStateInternal(const DistributionData&        remoteEntity,
                                                const UpgradeableStateResult&  upgradeableStateResult);
 
         void RemoteSetInjectionEntityStateInternal(const DistributionData&        remoteEntity,
                                                    const UpgradeableStateResult&  upgradeableStateResult,
-                                                   bool&                          dontRelease);
+                                                   StatePtrHandling&              statePtrHandling);
 
         void RemoteSetDeleteEntityStateInternal(const DistributionData&         remoteEntity,
                                                 const UpgradeableStateResult&   upgradeableStateResult,
-                                                bool&                           dontRelease);
+                                                StatePtrHandling&               statePtrHandling);
 
         void RemoteSetRealEntityStateInternal(const ConnectionPtr&           connection,
                                               const DistributionData&        remoteEntity,
                                               const UpgradeableStateResult&  upgradeableStateResult,
-                                              bool&                          dontRelease,
+                                              StatePtrHandling&              statePtrHandling,
                                               RemoteSetResult&               remoteSetResult);
 
         void SetEntityLocal(const UpgradeableStateResult&        upgradeableStateResult,
@@ -331,7 +345,7 @@ namespace Internal
                                const Dob::Typesystem::HandlerId&    handlerId,
                                const Dob::Typesystem::InstanceId&   instanceId,
                                const DistributionData&              injectionState,
-                               bool&                                dontRelease);
+                               StatePtrHandling&                    statePtrHandling);
 
         // A state always has an owner. (Checks any real or injected state for a handler id.)
         void GetOwner(const StateSharedPtr&       statePtr,

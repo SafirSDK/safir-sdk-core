@@ -93,10 +93,8 @@ elseif (MSVC)
 endif ()
 
 if(ACE_ROOT)
-   #Add ace to linker path
-   if (MSVC)
-      LINK_DIRECTORIES(${ACE_ROOT}/lib)
-   endif ()
+    #Add ace to linker path
+    LINK_DIRECTORIES(${ACE_ROOT}/lib)
 
     #And add ace to include path
     INCLUDE_DIRECTORIES(${ACE_ROOT})

@@ -59,6 +59,8 @@ namespace Internal
                               const bool                            overrideRegistration,
                               const ConsumerId&                     consumer)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         return m_handlerRegistrations.Register(connection,
                                                handlerId,
                                                instanceIdPolicy,
@@ -71,6 +73,8 @@ namespace Internal
     void EntityType::Unregister(const ConnectionPtr&                connection,
                                 const Dob::Typesystem::HandlerId&   handlerId)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         if (handlerId == Dob::Typesystem::HandlerId::ALL_HANDLERS)
         {
             m_handlerRegistrations.UnregisterAll(connection);
@@ -83,6 +87,8 @@ namespace Internal
 
     void EntityType::UnregisterAll(const ConnectionPtr& connection)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_handlerRegistrations.UnregisterAll(connection);
     }
 
@@ -91,12 +97,16 @@ namespace Internal
     {
         ENSURE(!connection->IsLocal(), << "EntityType::RemoteSetRegistrationState can only be used by remote connections!");
 
+        ScopedTypeLock lck(m_typeLock);
+
         m_handlerRegistrations.RemoteSetRegistrationState(connection, registrationState);
 
     }
 
     void EntityType::RemoteSetUnregistrationState(const DistributionData& registrationState)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_handlerRegistrations.RemoteSetUnregistrationState(registrationState);
     }
 
@@ -126,12 +136,15 @@ namespace Internal
     {
         lllout << "SubscribeRegistration for " << Typesystem::Operations::GetName(m_typeId) <<
             ", handlerId " << handlerId << std::endl;
+
+        ScopedTypeLock lck(m_typeLock);
         m_handlerRegistrations.Subscribe(subscriptionId, handlerId, restartSubscription, subscriptionOptions);
     }
 
     void EntityType::UnsubscribeRegistration(const SubscriptionId&              subscriptionId,
                                              const Dob::Typesystem::HandlerId&  handlerId)
     {
+        ScopedTypeLock lck(m_typeLock);
         m_handlerRegistrations.Unsubscribe(subscriptionId, handlerId);
     }
 
@@ -149,6 +162,8 @@ namespace Internal
                                const bool                           considerChangeFlags,
                                const bool                           initialInjection)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         if (!initialInjection)
         {
             // Add a state if it is not already present
@@ -181,6 +196,8 @@ namespace Internal
                                   const Dob::Typesystem::InstanceId&    instanceId,
                                   const bool                            allInstances)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         if (allInstances)
         {
             m_entityStates.ReleaseEachState(boost::bind(&EntityType::DeleteAllInstancesInternal,
@@ -214,6 +231,8 @@ namespace Internal
         ENSURE(m_injectionKind == InjectionKind::Injectable,
                << "Trying to call InjectEntity with a non-injectable type");
 
+        ScopedTypeLock lck(m_typeLock);
+
         m_entityStates.ForSpecificStateAddAndRelease(instanceId.GetRawValue(),
                                                      boost::bind(&EntityType::InjectEntityInternal,
                                                                  this,
@@ -233,6 +252,8 @@ namespace Internal
         ENSURE(m_injectionKind == InjectionKind::Injectable,
                << "Trying to call InjectDeletedEntity with a non-injectable type");
 
+        ScopedTypeLock lck(m_typeLock);
+
         m_entityStates.ForSpecificStateAddAndRelease(instanceId.GetRawValue(),
                                                      boost::bind(&EntityType::InjectDeletedEntityInternal,
                                                                  this,
@@ -247,6 +268,8 @@ namespace Internal
                                      DistributionData&          injectionState,
                                      const DistributionData&    originalInjectionState)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         if (injectionState.HasBlob())
         {
             m_entityStates.ForSpecificState(injectionState.GetInstanceId().GetRawValue(),
@@ -278,6 +301,8 @@ namespace Internal
                                   const char* const                    blob,
                                   const DistributionData&              originalInjectionState)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_entityStates.ForSpecificState(instanceId.GetRawValue(),
                                         boost::bind(&EntityType::SetInjectionInternal,
                                                     this,
@@ -298,6 +323,8 @@ namespace Internal
                                      const Dob::Typesystem::InstanceId&   instanceId,
                                      const DistributionData&              originalInjectionState)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_entityStates.ReleaseSpecificState(instanceId.GetRawValue(),
                                             boost::bind(&EntityType::DeleteInjectionInternal,
                                                         this,
@@ -311,6 +338,8 @@ namespace Internal
 
     void EntityType::RemoteSetGhostEntityState(const DistributionData& entityState)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
 
         m_entityStates.ForSpecificStateAdd(entityState.GetInstanceId().GetRawValue(),
@@ -322,6 +351,8 @@ namespace Internal
 
     void EntityType::RemoteSetInjectionEntityState(const DistributionData& entityState)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
 
         m_entityStates.ForSpecificStateAddAndRelease(entityState.GetInstanceId().GetRawValue(),
@@ -334,6 +365,8 @@ namespace Internal
 
     void EntityType::RemoteSetDeleteEntityState(const DistributionData&   entityState)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
 
         m_entityStates.ForSpecificStateAddAndRelease(entityState.GetInstanceId().GetRawValue(),
@@ -347,6 +380,8 @@ namespace Internal
     RemoteSetResult EntityType::RemoteSetRealEntityState(const ConnectionPtr&      connection,
                                                          const DistributionData&   entityState)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
 
         RemoteSetResult result;
@@ -369,6 +404,8 @@ namespace Internal
                                const bool                           restartSubscription,
                                const SubscriptionOptionsPtr&        subscriptionOptions)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_entityStates.Subscribe(subscriptionId,
                                  instanceId.GetRawValue(),
                                  allInstances,
@@ -380,6 +417,8 @@ namespace Internal
                                  const Dob::Typesystem::InstanceId& instanceId,
                                  const bool                         allInstances)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_entityStates.Unsubscribe(subscriptionId,
                                    instanceId.GetRawValue(),
                                    allInstances);
@@ -395,6 +434,8 @@ namespace Internal
 
     void EntityType::UnsubscribeAll(const ConnectionPtr& connection)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_handlerRegistrations.UnsubscribeAll(connection);
         m_entityStates.UnsubscribeAll(connection);
     }
@@ -550,7 +591,7 @@ namespace Internal
                                           const ConnectionPtr&                 connection,
                                           const Dob::Typesystem::HandlerId&    handlerId,
                                           const Dob::Typesystem::InstanceId&   instanceId,
-                                          bool&                                dontRelease)
+                                          StatePtrHandling&                    statePtrHandling)
     {
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
 
@@ -603,9 +644,9 @@ namespace Internal
                           handlerId,
                           instanceId,
                           DistributionData(no_state_tag),  // No injection state to consider in this case (is used to set correct top timestamps)
-                          dontRelease);
+                          statePtrHandling);
 
-        if (!dontRelease)
+        if (statePtrHandling == ReleasePtr)
         {
             if (statePtr->GetInjectionState().IsNoState())
             {
@@ -617,7 +658,7 @@ namespace Internal
             else
             {
                 // There is an unhandled injection state.
-                dontRelease = true;
+                statePtrHandling = KeepPtr;
             }
         }
     }
@@ -625,10 +666,9 @@ namespace Internal
     void EntityType::DeleteAllInstancesInternal(const UpgradeableStateResult&       upgradeableStateResult,
                                                 const ConnectionPtr&                connection,
                                                 const Dob::Typesystem::HandlerId&   handlerId,
-                                                bool&                               dontRelease,
+                                                StatePtrHandling&                   statePtrHandling,
                                                 bool&                               exitDispatch)
     {
-        dontRelease = true;
         exitDispatch = false;
 
         ConnectionConsumerPair owner;
@@ -650,7 +690,7 @@ namespace Internal
                              connection,
                              handlerId,
                              statePtr->GetRealState().GetInstanceId(),
-                             dontRelease);
+                             statePtrHandling);
 
     }
 
@@ -694,9 +734,9 @@ namespace Internal
                                           const Dob::Typesystem::InstanceId&   instanceId,
                                           const char* const                    blob,
                                           const Dob::Typesystem::Int64         timestamp,
-                                          bool&                                dontRelease)
+                                          StatePtrHandling&                    statePtrHandling)
     {
-        dontRelease = true;
+        statePtrHandling = KeepPtr;
 
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
         const bool& isRevived = upgradeableStateResult.second;
@@ -775,11 +815,7 @@ namespace Internal
         if (!realState.IsNoState() && TimestampOperations::HaveChanges(realState,newInjectionState))
         {
             // All the stuff in the new injection state is already in the real state. We can drop the new injection state.
-            if (isRevived)
-            {
-                // Downgrade the state if it was downgraded before.
-                dontRelease = false;
-            }
+            statePtrHandling = RestorePtr;
             return;
         }
 
@@ -794,9 +830,9 @@ namespace Internal
                                                  const Dob::Typesystem::HandlerId&    handlerId,
                                                  const Dob::Typesystem::InstanceId&   instanceId,
                                                  const Dob::Typesystem::Int64         timestamp,
-                                                 bool&                                dontRelease)
+                                                 StatePtrHandling&                    statePtrHandling)
     {
-        dontRelease = true;
+        statePtrHandling = KeepPtr;
 
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
         const bool& isRevived = upgradeableStateResult.second;
@@ -864,11 +900,7 @@ namespace Internal
         if (!realState.IsNoState() && TimestampOperations::HaveChanges(realState,newInjectionState))
         {
             // All the stuff in the new injection state is already in the real state. We can drop the new injection state.
-            if (isRevived)
-            {
-                // Downgrade the state if it was downgraded before.
-                dontRelease = false;
-            }
+            statePtrHandling = RestorePtr;
             return;
         }
 
@@ -899,9 +931,9 @@ namespace Internal
                                                    const ConnectionPtr&             connection,
                                                    DistributionData&                injectionState,
                                                    const DistributionData&          originalInjectionState,
-                                                   bool&                            dontRelease)
+                                                   StatePtrHandling&                statePtrHandling)
     {
-        dontRelease = true;
+        statePtrHandling = KeepPtr;
 
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
 
@@ -912,7 +944,7 @@ namespace Internal
             statePtr->SetInjectionState(DistributionData(no_state_tag));
 
             // ... and release the injection state
-            dontRelease = false;
+            statePtrHandling = ReleasePtr;
         }
 
         CommonAcceptInjectionInternal(upgradeableStateResult, connection, injectionState);
@@ -1070,7 +1102,7 @@ namespace Internal
                                              const Dob::Typesystem::HandlerId&      handlerId,
                                              const Dob::Typesystem::InstanceId&     instanceId,
                                              const DistributionData&                originalInjectionState,
-                                             bool&                                  dontRelease)
+                                             StatePtrHandling&                      statePtrHandling)
     {
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
 
@@ -1116,9 +1148,9 @@ namespace Internal
                           handlerId,
                           instanceId,
                           originalInjectionState,   // is used to get correct top timestamps
-                          dontRelease);
+                          statePtrHandling);
 
-        if (!dontRelease)
+        if (statePtrHandling == ReleasePtr)
         {
             // We must also check that no new injections has been done while we were
             // dispatching the injection to the app, before the final descion to release
@@ -1134,7 +1166,7 @@ namespace Internal
             else
             {
                 // There is an unhandled injection state.
-                dontRelease = true;
+                statePtrHandling = KeepPtr;
             }
         }
     }
@@ -1171,9 +1203,9 @@ namespace Internal
 
     void EntityType::RemoteSetInjectionEntityStateInternal(const DistributionData&        remoteEntity,
                                                            const UpgradeableStateResult&  upgradeableStateResult,
-                                                           bool&                          dontRelease)
+                                                           StatePtrHandling&              statePtrHandling)
     {
-        dontRelease = true;
+        statePtrHandling = KeepPtr;
 
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
         const bool& isRevived = upgradeableStateResult.second;
@@ -1218,11 +1250,7 @@ namespace Internal
         if (!realState.IsNoState() && TimestampOperations::HaveChanges(realState,newInjectionState))
         {
             // All the stuff in the new injection state is already in the real state. We can drop the new injection state.
-            if (isRevived)
-            {
-                // Downgrade the state if it was downgraded before.
-                dontRelease = false;
-            }
+            statePtrHandling = RestorePtr;
             return;
         }
 
@@ -1233,10 +1261,8 @@ namespace Internal
 
     void EntityType::RemoteSetDeleteEntityStateInternal(const DistributionData&         remoteEntity,
                                                         const UpgradeableStateResult&   upgradeableStateResult,
-                                                        bool&                           dontRelease)
+                                                        StatePtrHandling&               statePtrHandling)
     {
-        dontRelease = true;
-
         bool needToCheckRegistrationState = true;
 
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
@@ -1301,7 +1327,7 @@ namespace Internal
                 if (localEntity.IsNoState())
                 {
                     // Remember to get rid of the newly created state
-                    dontRelease = false;
+                    statePtrHandling = ReleasePtr;
                 }
                 return;
             }
@@ -1313,7 +1339,7 @@ namespace Internal
         if (injectionState.IsNoState())
         {
             //we can release the state since there is no injection
-            dontRelease = false;
+            statePtrHandling = ReleasePtr;
         }
         else
         {
@@ -1324,7 +1350,7 @@ namespace Internal
                 // The remote entity already has all what is in the injection state, so the injection state can be removed
                 // and the state released.
                 statePtr->SetInjectionState(DistributionData(no_state_tag));
-                dontRelease = false;
+                statePtrHandling = ReleasePtr;
             }
         }
 
@@ -1340,10 +1366,10 @@ namespace Internal
     void EntityType::RemoteSetRealEntityStateInternal(const ConnectionPtr&           connection,
                                                       const DistributionData&        remoteEntity,
                                                       const UpgradeableStateResult&  upgradeableStateResult,
-                                                      bool&                          dontRelease,
+                                                      StatePtrHandling&              statePtrHandling,
                                                       RemoteSetResult&               remoteSetResult)
     {
-        dontRelease = true;
+        statePtrHandling = KeepPtr;
         remoteSetResult = RemoteSetAccepted;
 
         bool needToCheckRegistrationState = true;
@@ -1418,7 +1444,7 @@ namespace Internal
                 if (localEntity.IsNoState())
                 {
                     // Remember to get rid of the newly created state
-                    dontRelease = false;
+                    statePtrHandling = ReleasePtr;
                 }
                 return;
             }
@@ -1430,7 +1456,7 @@ namespace Internal
                 if (localEntity.IsNoState())
                 {
                     // Remember to get rid of the newly created state
-                    dontRelease = false;
+                    statePtrHandling = ReleasePtr;
                 }
                 return;
             }
@@ -1537,9 +1563,9 @@ namespace Internal
                                        const Dob::Typesystem::HandlerId&    handlerId,
                                        const Dob::Typesystem::InstanceId&   instanceId,
                                        const DistributionData&              injectionState,
-                                       bool&                                dontRelease)
+                                       StatePtrHandling&                    statePtrHandling)
     {
-        dontRelease = false;
+        statePtrHandling = ReleasePtr;
 
         DistributionData realState = statePtr->GetRealState();
 
@@ -1792,18 +1818,22 @@ namespace Internal
         else if (localState.GetCreationTime() < remoteState.GetCreationTime())
         {
             // The remote state is newer than the local state, no need to check the version.
+            return true;
         }
         else
         {
             // The creation time is the same, check the version.
-            if (remoteState.GetVersion() < localState.GetVersion())
+            if (localState.GetVersion() < remoteState.GetVersion())
             {
-                // The remote state isn't newer than the local state.
+                return true;
+            }
+            else
+            {
+                // The remote state is older, or has the same version number. Skip it.
                 return false;
             }
         }
 
-        return true;
     }
 
     void EntityType::SetTimestamps(DistributionData&       newState,

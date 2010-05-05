@@ -190,6 +190,10 @@ namespace Internal
         ACE_hthread_t m_pdThreadHandle;
 
         WaitingStates m_waitingStates;
+
+        typedef std::vector<DistributionData> ConnectionMsgs;
+        ConnectionMsgs ConnectionMsgsToSend;
+
     };
 }
 }

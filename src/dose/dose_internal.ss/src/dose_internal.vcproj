@@ -244,6 +244,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LeveledLockHelper.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\MessageQueue.cpp"
 				>
 			</File>
@@ -391,6 +395,14 @@
 			</File>
 			<File
 				RelativePath=".\Safir\Dob\Internal\LamportClocks.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Safir\Dob\Internal\LeveledLock.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Safir\Dob\Internal\LeveledLockHelper.h"
 				>
 			</File>
 			<File

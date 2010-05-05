@@ -287,10 +287,8 @@ namespace Internal
                                                   const RegisterTime                registerTime,
                                                   const NodeNumber                  nodeNumber,
                                                   const UpgradeableStateResult&     upgradeableStateResult,
-                                                  bool&                             dontRelease)
+                                                  StatePtrHandling&                 statePtrHandling)
     {
-        dontRelease = true;
-
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
 
         DistributionData currentRegState = statePtr->GetRealState();
@@ -298,12 +296,8 @@ namespace Internal
         if (connection != NULL && connection->IsLocal())
         {
             // A local connection that thinks it is the current registrerer. Is this so?
-            if (currentRegState.IsNoState())
-            {
-                dontRelease = false;
-                return;
-            }
-            else if(!currentRegState.IsRegistered() || connection->Id() != statePtr->GetConnection()->Id())
+            if (currentRegState.IsNoState() || !currentRegState.IsRegistered() ||
+                statePtr->GetConnection() == NULL || connection->Id() != statePtr->GetConnection()->Id())
             {
                 return;
             }
@@ -376,7 +370,7 @@ namespace Internal
         }
         
         // Drop the reference from the state container to this state.
-        dontRelease = false;
+        statePtrHandling = ReleasePtr;
     }
 
     void HandlerRegistrations::UnregisterAll(const ConnectionPtr& connection)
@@ -391,7 +385,7 @@ namespace Internal
 
     void HandlerRegistrations::UnregisterAllInternal(const ConnectionPtr&           connection,
                                                      const UpgradeableStateResult&  upgradeableStateResult,
-                                                     bool&                          dontRelease,
+                                                     StatePtrHandling&              statePtrHandling,
                                                      bool&                          exitDispatch)
     {
         exitDispatch = false;
@@ -406,11 +400,7 @@ namespace Internal
                                RegisterTime(),
                                statePtr->GetConnection()->Id().m_node,
                                upgradeableStateResult,
-                               dontRelease);
-        }
-        else
-        {
-            dontRelease = true;
+                               statePtrHandling);
         }
     }
 
@@ -600,10 +590,9 @@ namespace Internal
     void HandlerRegistrations::DeleteEntity(const UpgradeableStateResult&        upgradeableStateResult,
                                             const ConnectionPtr&                 connection,
                                             const Dob::Typesystem::HandlerId&    handlerId,
-                                            bool&                                dontRelease,
+                                            StatePtrHandling&                    statePtrHandling,
                                             bool&                                exitDispatch)
     {
-        dontRelease = true;
         exitDispatch = false;
 
         const StateSharedPtr& statePtr = upgradeableStateResult.first;
@@ -628,6 +617,7 @@ namespace Internal
             return;
         }
 
+        
         statePtr->SetConnection(NULL);
         statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0)));
 
@@ -640,7 +630,7 @@ namespace Internal
             case InjectionKind::None:
             {
                 newRealState = realState.GetEntityStateCopy(false);  // don't include blob
-                dontRelease = false;  // This state should not be kept
+                statePtrHandling = ReleasePtr;  // This state should not be kept
             }
             break;
 
@@ -650,6 +640,7 @@ namespace Internal
             {
                 newRealState = realState.GetEntityStateCopy(true);  // include blob
                 newRealState.SetEntityStateKind(DistributionData::Ghost);
+                statePtrHandling = KeepPtr;
             }
             break;
         }

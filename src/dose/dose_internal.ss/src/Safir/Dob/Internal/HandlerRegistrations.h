@@ -164,11 +164,11 @@ namespace Internal
                                 const RegisterTime                  regTime,
                                 const NodeNumber                    nodeNumber,
                                 const UpgradeableStateResult&       upgradeableStateResult,
-                                bool&                               dontRelease);
+                                StatePtrHandling&                   statePtrHandling);
 
         void UnregisterAllInternal(const ConnectionPtr&             connection,
                                    const UpgradeableStateResult&    upgradeableStateResult,
-                                   bool&                            dontRelease,
+                                   StatePtrHandling&                statePtrHandling,
                                    bool&                            exitDispatch);
 
         void IsRegisteredInternal(const UpgradeableStateResult& upgradeableStateResult,
@@ -185,7 +185,7 @@ namespace Internal
         void DeleteEntity(const UpgradeableStateResult&        upgradeableStateResult,
                           const ConnectionPtr&                 connection,
                           const Dob::Typesystem::HandlerId&    handlerId,
-                          bool&                                dontRelease,
+                          StatePtrHandling&                    statePtrHandling,
                           bool&                                exitDispatch);
 
         void RegisterInjectionHandler(const ConnectionPtr&                connection,

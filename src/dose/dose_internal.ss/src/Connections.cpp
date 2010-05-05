@@ -140,9 +140,7 @@ namespace Internal
             m_connectSem.post();
         }
 
-        namespace bi = boost::interprocess;
-
-        bi::scoped_lock<bi::interprocess_mutex> lck(m_connectLock);
+        ScopedConnectLock lck(m_connectLock);
 
         const pid_t pid = ACE_OS::getpid();
 
@@ -170,7 +168,7 @@ namespace Internal
 
         connection = NULL;
         result = Success;
-        boost::interprocess::upgradable_lock<boost::interprocess::interprocess_upgradable_mutex> rlock(m_connectionTablesLock);
+        boost::interprocess::upgradable_lock<ConnectionsTableLock> rlock(m_connectionTablesLock);
 
         bool foundName = false;
         for (ConnectionTable::const_iterator it = m_connections.begin();
@@ -195,7 +193,7 @@ namespace Internal
             const pid_t pid = ACE_OS::getpid();
 
             //upgrade the mutex
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_upgradable_mutex> wlock(move(rlock));
+            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
             connection = GetSharedMemory().construct<Connection>
                 (boost::interprocess::anonymous_instance)
                 (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), context, pid);
@@ -230,7 +228,7 @@ namespace Internal
 
             m_connectMessage.GetAndClear(connect_tag, connectionName, context, pid);
 
-            boost::interprocess::upgradable_lock<boost::interprocess::interprocess_upgradable_mutex> rlock(m_connectionTablesLock);
+            boost::interprocess::upgradable_lock<ConnectionsTableLock> rlock(m_connectionTablesLock);
 
             bool foundName = false;
             for (ConnectionTable::const_iterator it = m_connections.begin();
@@ -260,7 +258,7 @@ namespace Internal
                     Connection * connection = NULL;
                     {
                         //upgrade the mutex
-                        boost::interprocess::scoped_lock<boost::interprocess::interprocess_upgradable_mutex> wlock(move(rlock));
+                        boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
 
                         connection = GetSharedMemory().construct<Connection>(boost::interprocess::anonymous_instance)
                             (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), context, pid);
@@ -296,7 +294,7 @@ namespace Internal
                << "', context = " << context
                << ", id = " << id << std::endl;
 
-        boost::interprocess::upgradable_lock<boost::interprocess::interprocess_upgradable_mutex> rlock(m_connectionTablesLock);
+        boost::interprocess::upgradable_lock<ConnectionsTableLock> rlock(m_connectionTablesLock);
 
         ConnectionTable::const_iterator findIt = m_connections.find(id);
 
@@ -312,7 +310,7 @@ namespace Internal
 
 
         //upgrade the mutex
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_upgradable_mutex> wlock(move(rlock));
+        boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
 
         //remote connections have pid = -1
         Connection * connection = GetSharedMemory().construct<Connection>(boost::interprocess::anonymous_instance)
@@ -327,7 +325,7 @@ namespace Internal
     void Connections::RemoveConnection(const ConnectionPtr & connection)
     {
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_upgradable_mutex> wlock(m_connectionTablesLock);
+            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(m_connectionTablesLock);
 
             if (connection->IsLocal())
             {
@@ -335,8 +333,9 @@ namespace Internal
             }
             m_connections.erase(connection->Id());
 
-            GetSharedMemory().destroy_ptr(connection.get());
         }
+
+        GetSharedMemory().destroy_ptr(connection.get());
 
         ExitHandler::Instance().RemoveConnection(connection);
     }
@@ -460,7 +459,7 @@ namespace Internal
     bool
     Connections::IsPendingAccepted(const Typesystem::TypeId typeId, const Typesystem::HandlerId & handlerId) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         for (ConnectionTable::const_iterator it = m_connections.begin();
              it != m_connections.end(); ++it)
         {
@@ -475,7 +474,7 @@ namespace Internal
     const ConnectionPtr
     Connections::GetConnection(const ConnectionId & connId) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         ConnectionTable::const_iterator findIt = m_connections.find(connId);
         ENSURE(findIt != m_connections.end(), << "Connections::GetConnection: Failed to find connection! connectionId = " << connId);
         return findIt->second;
@@ -484,7 +483,7 @@ namespace Internal
     const ConnectionPtr
     Connections::GetConnection(const ConnectionId & connId, std::nothrow_t) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         ConnectionTable::const_iterator findIt = m_connections.find(connId);
         if (findIt != m_connections.end())
         {
@@ -499,7 +498,7 @@ namespace Internal
     const ConnectionPtr
     Connections::GetConnectionByName(const std::string & connectionName) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         for (ConnectionTable::const_iterator it = m_connections.begin();
             it != m_connections.end(); ++it)
         {
@@ -515,7 +514,7 @@ namespace Internal
     void
     Connections::GetConnections(const pid_t  pid, std::vector<ConnectionPtr>& connections) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
 
         connections.clear();
 
@@ -532,7 +531,7 @@ namespace Internal
 
     const std::string Connections::GetConnectionName(const ConnectionId & connectionId) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         ConnectionTable::const_iterator findIt = m_connections.find(connectionId);
 
         if (findIt != m_connections.end())
@@ -551,7 +550,7 @@ namespace Internal
 
         // Remove from m_connections and store in removeConnections
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_upgradable_mutex> wlock(m_connectionTablesLock);
+            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(m_connectionTablesLock);
 
             ConnectionTable::const_iterator it = m_connections.begin();
 
@@ -592,7 +591,7 @@ namespace Internal
 
     void Connections::ForEachConnection(const boost::function<void(const Connection & connection)> & connectionFunc) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         for (ConnectionTable::const_iterator it = m_connections.begin();
              it != m_connections.end(); ++it)
         {
@@ -602,7 +601,7 @@ namespace Internal
 
     void Connections::ForEachConnectionPtr(const boost::function<void(const ConnectionPtr & connection)> & connectionFunc) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
         for (ConnectionTable::const_iterator it = m_connections.begin();
              it != m_connections.end(); ++it)
         {
@@ -613,7 +612,7 @@ namespace Internal
     void Connections::ForSpecificConnection(const ConnectionId& connectionId,
                                             const boost::function<void(const ConnectionPtr & connection)> & connectionFunc) const
     {
-        boost::interprocess::sharable_lock<boost::interprocess::interprocess_upgradable_mutex> lock(m_connectionTablesLock);
+        boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
 
         ConnectionTable::const_iterator it = m_connections.find(connectionId);
 

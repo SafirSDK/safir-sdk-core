@@ -46,6 +46,8 @@ namespace Internal
                                const bool                            overrideRegistration,
                                const ConsumerId&                     consumer)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         return m_handlerRegistrations.Register(connection,
                                                handlerId,
                                                Dob::InstanceIdPolicy::RequestorDecidesInstanceId, // Dummy for services
@@ -58,6 +60,8 @@ namespace Internal
     void ServiceType::Unregister(const ConnectionPtr&                connection,
                                  const Dob::Typesystem::HandlerId&   handlerId)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         if (handlerId == Dob::Typesystem::HandlerId::ALL_HANDLERS)
         {
             m_handlerRegistrations.UnregisterAll(connection);
@@ -70,6 +74,8 @@ namespace Internal
 
     void ServiceType::UnregisterAll(const ConnectionPtr& connection)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_handlerRegistrations.UnregisterAll(connection);
     }
 
@@ -78,11 +84,15 @@ namespace Internal
     {
         ENSURE(!connection->IsLocal(), << "EntityType::RemoteSetRegistrationState can only be used by remote connections!");
 
+        ScopedTypeLock lck(m_typeLock);
+
         m_handlerRegistrations.RemoteSetRegistrationState(connection, registrationState);
     }
 
     void ServiceType::RemoteSetUnregistrationState(const DistributionData& registrationState)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_handlerRegistrations.RemoteSetUnregistrationState(registrationState);
     }
 
@@ -103,6 +113,8 @@ namespace Internal
                                             const bool                           restartSubscription,
                                             const SubscriptionOptionsPtr&        subscriptionOptions)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_handlerRegistrations.Subscribe(subscriptionId,
                                          handlerId,
                                          restartSubscription,
@@ -112,11 +124,14 @@ namespace Internal
     void ServiceType::UnsubscribeRegistration(const SubscriptionId&              subscriptionId,
                                               const Dob::Typesystem::HandlerId&  handlerId)
     {
+        ScopedTypeLock lck(m_typeLock);
+
         m_handlerRegistrations.Unsubscribe(subscriptionId, handlerId);
     }
 
     void ServiceType::UnsubscribeRegistrationAll(const ConnectionPtr& connection)
     {
+        ScopedTypeLock lck(m_typeLock);
         m_handlerRegistrations.UnsubscribeAll(connection);
     }
 

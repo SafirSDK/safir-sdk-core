@@ -28,6 +28,7 @@
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Dob/Internal/DistributionData.h>
+#include <Safir/Dob/Internal/LeveledLock.h>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 
@@ -57,7 +58,7 @@ namespace Internal
         /**Checks if the queue is full. Will also return true if queue is set to simulate overflows. */
         bool full() const
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+            ScopedRequestOutQueueLock lck(m_lock);
             return m_size == m_capacity || (m_simulateFull != 0);
         }
 
@@ -66,7 +67,7 @@ namespace Internal
         */
         size_t size() const
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+            ScopedRequestOutQueueLock lck(m_lock);
             return m_simulateFull != 0 ? m_capacity : m_size;
         }
 
@@ -96,7 +97,11 @@ namespace Internal
         //made with the lock unlocked).
         //Any attempts to take the lock recursively are to be regarded as
         //programming errors.
-        mutable boost::interprocess::interprocess_mutex m_lock;
+        typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
+                                                  REQUEST_OUT_QUEUE_LOCK_LEVEL,
+                                                  NO_MASTER_LEVEL_REQUIRED> RequestOutQueueLock;
+        mutable RequestOutQueueLock m_lock;
+        typedef boost::interprocess::scoped_lock<RequestOutQueueLock> ScopedRequestOutQueueLock;
 
         size_t m_capacity;
         size_t m_size;

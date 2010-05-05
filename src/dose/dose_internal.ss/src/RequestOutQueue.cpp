@@ -52,7 +52,7 @@ namespace Internal
 
     bool RequestOutQueue::PushRequest(const DistributionData & request)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedRequestOutQueueLock lck(m_lock);
         if ((m_size < m_capacity) && m_simulateFull == 0) //not full
         {
             m_unhandledRequests.push_back(request);
@@ -76,7 +76,7 @@ namespace Internal
                                                  Requests& dispatchedRequests,
                                                  const size_t& numDispatched)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedRequestOutQueueLock lck(m_lock);
 
         m_noDispatchedRequests += static_cast<Typesystem::Int32>(numDispatched);
 
@@ -106,7 +106,7 @@ namespace Internal
                                               boost::cref(numDispatched)));
 
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+            ScopedRequestOutQueueLock lck(m_lock);
             m_unhandledRequests.swap(toDispatch);
         }
 
@@ -155,7 +155,7 @@ namespace Internal
     void RequestOutQueue::FinishDispatchResponses(RequestsAndResponses& queue,
                                                   const size_t& numDispatched)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedRequestOutQueueLock lck(m_lock);
 
         m_size -= numDispatched;
         m_noDispatchedResponses += static_cast<Typesystem::Int32>(numDispatched);
@@ -179,7 +179,7 @@ namespace Internal
                                               boost::cref(numDispatched)));
 
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+            ScopedRequestOutQueueLock lck(m_lock);
             m_handledRequests.swap(toDispatch);
         }
 
@@ -212,7 +212,7 @@ namespace Internal
 
     void RequestOutQueue::AttachResponse(const DistributionData& response)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedRequestOutQueueLock lck(m_lock);
 
         const InternalRequestId requestId = response.GetRequestId();
 
@@ -252,7 +252,7 @@ namespace Internal
 
     void RequestOutQueue::RequestTimeout(const InternalRequestId & requestId)
     {
-        boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+        ScopedRequestOutQueueLock lck(m_lock);
 
         //find the request with the correct requestId
 
@@ -299,7 +299,7 @@ namespace Internal
         std::vector<DistributionData> dispatchedRequests;
         //Lock the class and copy the requests, so we take the lock for as short a time as possible
         {
-            boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_lock);
+            ScopedRequestOutQueueLock lck(m_lock);
             std::copy(m_dispatchedRequests.begin(),m_dispatchedRequests.end(),std::back_inserter(dispatchedRequests));
         }
         std::for_each(dispatchedRequests.begin(),dispatchedRequests.end(),foreachFunc);
