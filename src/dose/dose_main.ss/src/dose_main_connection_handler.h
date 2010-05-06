@@ -65,7 +65,7 @@ namespace Internal
         void HandleConnect(const ConnectionPtr & connection);
         void HandleDisconnect(const ConnectionPtr & connection);
 
-        void HandleUnsent();
+        bool HandleUnsent();
 
         void HandleConnectFromDoseCom(const DistributionData & connectMsg);
         void HandleDisconnectFromDoseCom(const DistributionData & disconnectMsg);

@@ -200,18 +200,9 @@ void ConvertDb()
 //-------------------------------------------------------
 boost::filesystem::path GetStorageDirectory()
 {
-    const char * const safir_runtime = getenv("SAFIR_RUNTIME");
-    if (safir_runtime == NULL)
-    {
-        throw Safir::Dob::Typesystem::SoftwareViolationException(L"Failed to read environment variable 'SAFIR_RUNTIME'",__WFILE__,__LINE__);
-    }
-    const std::string str = safir_runtime;
-
     try
     {
-        boost::filesystem::path path = boost::filesystem::path(str,boost::filesystem::native);
-
-        path /= Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Dob::PersistenceParameters::FileStoragePath());
+        boost::filesystem::path path = boost::filesystem::path(Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Dob::PersistenceParameters::FileStoragePath()),boost::filesystem::native);
 
         if (boost::filesystem::exists(path))
         {

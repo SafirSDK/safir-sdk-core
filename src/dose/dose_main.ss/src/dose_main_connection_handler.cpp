@@ -86,10 +86,22 @@ namespace Internal
                                  connection->NameWithoutCounter(),
                                  connection->Counter());
 
-        lllout << "Sending a new connection to dose_com: " << connection->NameWithCounter() << std::endl;
-        if (!m_ecom->Send(connMsg))
+        
+        if (!HandleUnsent())
         {
-            lllout << "Nope, overflow in dose_com, adding to m_unsent" << std::endl;
+            // There are unsent connect/disconnect messages, can't continue.
+            m_unsent.push_back(connMsg);
+            return;
+        }
+
+        if (m_ecom->Send(connMsg))
+        {
+            lllout << "Sent a new connection to dose_com: " << connection->NameWithCounter() << std::endl; 
+        }
+        else
+        {
+            lllout << "Overflow when sending new connection to dose_com, adding to m_unsent: "
+                   << connection->NameWithCounter() << std::endl;
             m_unsent.push_back(connMsg);
         }
     }
@@ -111,6 +123,14 @@ namespace Internal
             }
 
             DistributionData msg(disconnect_message_tag, connection->Id());
+
+            if (!HandleUnsent())
+            {
+                // There are unsent connect/disconnect messages, can't continue.
+                m_unsent.push_back(msg);
+                return;
+            }
+
             if (!m_ecom->Send(msg))
             {
                 m_unsent.push_back(msg);
@@ -119,7 +139,7 @@ namespace Internal
     }
 
 
-    void ConnectionHandler::HandleUnsent()
+    bool ConnectionHandler::HandleUnsent()
     {
         while (!m_unsent.empty())
         {
@@ -129,9 +149,10 @@ namespace Internal
             }
             else
             {
-                break;
+                return false;
             }
         }
+        return true;
     }
 
     //-----------------------

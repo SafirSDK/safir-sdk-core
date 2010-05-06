@@ -401,6 +401,8 @@ namespace Internal
         }
         lllout << "m_okToSignalPDComplete is true!" << std::endl;
 
+        // m_queueIsFullLock used to prevent dose_com_send to interfere with this message.
+        ACE_Guard<ACE_Thread_Mutex> lck(m_queueIsFullLock);
         DoseCom_PoolDistributed(m_pdPriority,m_pdChannel);
 
         lllout << "Pool distribution completed" << std::endl;
@@ -785,14 +787,12 @@ namespace Internal
     void ExternNodeCommunication::NotifyNodeStatusChanged()
     {
         // lllout << "ExternNodeCommunication::NotifyNodeStatusChanged() - called... " << std::endl;
-
         m_nodeStatusChangedNotifierCb();
     }
 
     void ExternNodeCommunication::NotifyStartPoolDistribution()
     {
         // lllout << "ExternNodeCommunication::NotifyStartPoolDistribution() - called... " << std::endl;
-
         m_startPoolDistributionEvent = 1;
         if (m_isNotified == 0)
         {

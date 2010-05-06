@@ -1,0 +1,9 @@
+Safir SDK Core 4.0 beta 2 is a beta release that contains fixes for some important bugs that have been found in previous version. 
+
+Changes since Safir SDK Core 4.0 beta 1:
+========================================
+* Fixed a bug that caused the dispatcher thread (and thus the application) to terminate when running on systems with Linux kernel 2.6.22 or earlier. 
+
+* Fixed bug that could cause faulty node status.
+
+* Fixed file path bug in dope_bin2xml when operating on files.

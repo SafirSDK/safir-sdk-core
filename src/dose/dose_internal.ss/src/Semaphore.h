@@ -139,7 +139,27 @@ namespace Internal
 
     inline void Semaphore::wait()
     {
-        m_semaphore.wait();
+        // On Linux, even in the absence of signal handlers, certain blocking interfaces
+        // can fail with the error EINTR. This includes sem_wait wich is what
+        // boost::interprocess::named_semaphore will use. I (STAWI) don't know why this
+        // isn't handled transparantly by boost interprocess, but since this seems not to
+        // be the case it is handled at this level.
+        for (;;)
+        {
+            try
+            {
+                m_semaphore.wait();
+                break;
+            }
+            catch (const boost::interprocess::interprocess_exception& e)
+            {
+                if (e.get_native_error() != EINTR)
+                {
+                    throw;
+                }
+
+            }
+        }  
     }
 
     inline bool Semaphore::try_wait()

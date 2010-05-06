@@ -39,6 +39,7 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 
+
 namespace Safir
 {
     namespace Dob
@@ -237,9 +238,8 @@ namespace Safir
             }
             else
             {     
-                responseSender->Send(Dob::ErrorResponse::CreateErrorResponse
-                    (Safir::Dob::ResponseGeneralErrorCodes::SafirNoPermission(),
-                     L"Persistence data has already been loaded! Do not run multiple persistence handlers on the same node!"));
+                // Generate a success response
+                responseSender->Send(Dob::SuccessResponse::Create());
             }
 
             //unregister so we can't be called again!

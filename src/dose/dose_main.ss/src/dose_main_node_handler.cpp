@@ -43,6 +43,7 @@
 #include <boost/bind.hpp>
 #include <Safir/Dob/Internal/DoseCom_Interface.h>
 
+
 namespace Safir
 {
 namespace Dob
