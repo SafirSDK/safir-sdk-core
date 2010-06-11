@@ -52,6 +52,7 @@
 
 #endif
 
+#include <boost/interprocess/sync/interprocess_semaphore.hpp>
 #include <boost/noncopyable.hpp>
 
 
@@ -61,14 +62,14 @@ namespace Dob
 {
 namespace Internal
 {
-    class Semaphore:
+    class NamedSemaphore:
         private boost::noncopyable
     {
     public:
         /** defaults to an unsignalled state */
-        explicit Semaphore(const std::string& name);
+        explicit NamedSemaphore(const std::string& name);
 
-        ~Semaphore();
+        ~NamedSemaphore();
 
         void remove();
 
@@ -88,56 +89,56 @@ namespace Internal
 
 #ifdef DOSE_USE_ACE_PROCESS_SEMAPHORE_FOR_SIGNALS
 
-    inline Semaphore::Semaphore(const std::string& name):
+    inline NamedSemaphore::NamedSemaphore(const std::string& name):
         m_semaphore(0, name.c_str())
     {
 
     }
 
-    inline Semaphore::~Semaphore()
+    inline NamedSemaphore::~NamedSemaphore()
     {
 
     }
 
-    inline void Semaphore::remove()
+    inline void NamedSemaphore::remove()
     {
 
     }
 
-    inline void Semaphore::wait()
+    inline void NamedSemaphore::wait()
     {
         m_semaphore.acquire();
     }
 
-    inline bool Semaphore::try_wait()
+    inline bool NamedSemaphore::try_wait()
     {
         return 0 == m_semaphore.tryacquire();
     }
 
-    inline void Semaphore::post()
+    inline void NamedSemaphore::post()
     {
         m_semaphore.release();
     }
 
 #else
-    inline Semaphore::Semaphore(const std::string& name):
+    inline NamedSemaphore::NamedSemaphore(const std::string& name):
         m_semaphore(boost::interprocess::open_or_create, name.c_str(), 0),
         m_name(name)
     {
 
     }
 
-    inline Semaphore::~Semaphore()
+    inline NamedSemaphore::~NamedSemaphore()
     {
 
     }
 
-    inline void Semaphore::remove()
+    inline void NamedSemaphore::remove()
     {
         boost::interprocess::named_semaphore::remove(m_name.c_str());
     }
 
-    inline void Semaphore::wait()
+    inline void NamedSemaphore::wait()
     {
         // On Linux, even in the absence of signal handlers, certain blocking interfaces
         // can fail with the error EINTR. This includes sem_wait wich is what
@@ -162,17 +163,58 @@ namespace Internal
         }  
     }
 
-    inline bool Semaphore::try_wait()
+    inline bool NamedSemaphore::try_wait()
     {
         return m_semaphore.try_wait();
     }
 
-    inline void Semaphore::post()
+    inline void NamedSemaphore::post()
     {
         m_semaphore.post();
     }
 #endif
 
+    class Semaphore:
+        private boost::noncopyable
+    {
+    public:
+        Semaphore(unsigned int initialCount) : m_semaphore(initialCount) {};
+
+        ~Semaphore() {};
+
+        void wait();
+        bool try_wait() {m_semaphore.try_wait();};
+        void post() {m_semaphore.post();};
+
+    private:
+
+        boost::interprocess::interprocess_semaphore m_semaphore;
+    };
+
+    inline void Semaphore::wait()
+    {
+        // On Linux, even in the absence of signal handlers, certain blocking interfaces
+        // can fail with the error EINTR. This includes sem_wait wich is what
+        // boost::interprocess::interprocess_semaphore will use. I (STAWI) don't know why this
+        // isn't handled transparantly by boost interprocess, but since this seems not to
+        // be the case it is handled at this level.
+        for (;;)
+        {
+            try
+            {
+                m_semaphore.wait();
+                break;
+            }
+            catch (const boost::interprocess::interprocess_exception& e)
+            {
+                if (e.get_native_error() != EINTR)
+                {
+                    throw;
+                }
+
+            }
+        }  
+    }
 }
 }
 }

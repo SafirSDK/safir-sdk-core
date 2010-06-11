@@ -26,7 +26,7 @@
 #define __DOSE_SIGNALS_H__
 
 
-#include "Semaphore.h"
+#include <Safir/Dob/Internal/Semaphore.h>
 #include <ace/RW_Thread_Mutex.h>
 #include <ace/Thread_Mutex.h>
 #include <boost/noncopyable.hpp>
@@ -62,7 +62,7 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        typedef boost::shared_ptr<Semaphore> SemaphorePtr;
+        typedef boost::shared_ptr<NamedSemaphore> SemaphorePtr;
 
         static Signals & Instance();
 
@@ -127,7 +127,7 @@ namespace Internal
         SignalTable m_waitSignals; //signals that we wait for
         SignalTable m_signalSignals; //signals that we signal.
 
-        Semaphore m_connectOrOutSignal;
+        NamedSemaphore m_connectOrOutSignal;
 
         //Singleton stuff
         static Signals* volatile m_instance;

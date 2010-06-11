@@ -1,11 +1,20 @@
-Safir SDK Core 3.2.2.1 is a backport release that contains fixes for some important bugs that have been found in upstream development. 
+Safir SDK Core 3.2.2.2 is a backport release that contains a fix for an bug that have been found in upstream development. 
 
 Changes since Safir SDK Core 3.2.2:
 ===================================
+
+3.2.2.1 fixes:
+==============
 * Fixed a potential deadlock situation which could occur during the pool distribution phase when connecting a node.
 
 * Improved handling of entity states received from other node.
 
 * Improved lock handling. Before, dose_main could in some situations end up in a deadlock.
 
-* Fixed a bug that caused the dispatcher thread (and thus the application) to terminate when running on systems with Linux kernel 2.6.22 or earlier. 
+* Fixed a bug that caused the dispatcher thread (and thus the application) to terminate when running on systems with Linux kernel 2.6.22 or earlier.
+
+
+3.2.2.2 fixes:
+==============
+* Added a wrapper for boost::interprocess::interprocess_semaphore so that we now handle interrupted system calls that won't be restarted when
+  using Linux kernel 2.6.22 or earlier.

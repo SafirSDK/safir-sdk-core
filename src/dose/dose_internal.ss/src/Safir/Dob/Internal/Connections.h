@@ -29,7 +29,7 @@
 #include <Safir/Dob/Internal/InternalExportDefs.h>
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Dob/Internal/Connection.h>
-#include <boost/interprocess/sync/interprocess_semaphore.hpp>
+#include <Safir/Dob/Internal/Semaphore.h>
 #include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
 #include <Safir/Dob/Internal/ConnectRequest.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
@@ -223,8 +223,8 @@ namespace Internal
         //Signal for when an application is trying to connect
         AtomicUint32 m_connectSignal;
 
-        boost::interprocess::interprocess_semaphore m_connectSem;
-        boost::interprocess::interprocess_semaphore m_connectMinusOneSem;
+        Semaphore m_connectSem;
+        Semaphore m_connectMinusOneSem;
 
         typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
                                                   CONNECT_LOCK_LEVEL,
@@ -232,7 +232,7 @@ namespace Internal
         mutable ConnectLock m_connectLock;
         typedef boost::interprocess::scoped_lock<ConnectLock> ScopedConnectLock;
         
-        boost::interprocess::interprocess_semaphore m_connectResponseEvent;
+        Semaphore m_connectResponseEvent;
 
         //lock for m_connections, m_connectionOutIds, and m_connectionOutSignals
         //Note that this is an upgradable lock!!!! Not a normal mutex!
