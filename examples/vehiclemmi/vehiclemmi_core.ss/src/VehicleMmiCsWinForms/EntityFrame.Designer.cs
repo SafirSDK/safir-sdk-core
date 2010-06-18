@@ -232,10 +232,8 @@ namespace VehicleMmiCsWinForms
         private System.Windows.Forms.ToolStripButton toolStripButtonCreate;
         private System.Windows.Forms.ToolStripButton toolStripButtonUpdate;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        //StartRemoveInExercise
         private System.Windows.Forms.ToolStripButton toolStripButtonSpeed;
         private System.Windows.Forms.ToolStripButton toolStripButtonDelete;
-        //StopRemoveInExercise
         private System.Windows.Forms.ColumnHeader columnSpeed;
         private System.Windows.Forms.ColumnHeader columnCategory;
         private System.Windows.Forms.ColumnHeader columnIdentification;

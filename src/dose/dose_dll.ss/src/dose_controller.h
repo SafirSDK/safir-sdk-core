@@ -61,7 +61,7 @@ namespace Internal
     {
         // Contruction/destruction
     public:
-        explicit Controller(bool persistController);
+        Controller();
 
         void SetInstanceId(long id); //set id of this instance of Controller object
 
@@ -374,12 +374,6 @@ namespace Internal
     private:
         void SendRequest(const DistributionData& request,
                          const ConsumerId& consumer);
-
-        // Indicates that this is a controller with special priviliges
-        bool m_persistController;
-
-        // Determines if ghosts shall be considered as created
-        bool m_considerGhost;
 
         bool m_isConnected;
 

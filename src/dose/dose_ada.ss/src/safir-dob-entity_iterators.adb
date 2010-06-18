@@ -39,9 +39,9 @@ package body Safir.Dob.Entity_Iterators is
                     Type_Id            : in Safir.Dob.Typesystem.Type_Id;
                     Include_Subclasses : in Boolean) return Entity_Iterator is
       It : Entity_Iterator;
+      End_It : Entity_Iterator;
       Success : C.char;
-      Iterator_Id : Safir.Dob.Typesystem.Int_32;
-      It_End  : C.char;
+      Is_End_It  : C.char;
    begin
       It.Controller_Id := Controller_Id;
 
@@ -49,20 +49,20 @@ package body Safir.Dob.Entity_Iterators is
         (Controller_Id,
          Type_Id,
          C.char'Val (Boolean'Pos (Include_Subclasses)),
-         Iterator_Id,
-         It_End,
+         It.Iterator_Id,
+         Is_End_It,
          Success);
 
       if C.char'Pos (Success) = 0 then
          Safir.Dob.Typesystem.Library_Exceptions.Throw;
       end if;
 
-      if C.char'Pos (It_End) /= 0 then
+      if C.char'Pos (Is_End_It) /= 0 then
+         -- The assignment will make Finalize for the just created end iterator
+         -- to be run, which is excatly what we want.
+         It := End_It;
          return It;
       end if;
-
-      It.Controller_Id := Controller_Id;
-      It.Iterator_Id := Iterator_Id;
 
       return It;
    end Create;
@@ -74,7 +74,8 @@ package body Safir.Dob.Entity_Iterators is
 
    procedure Next (Self : in out Entity_Iterator) is
       Success : C.char;
-      It_End  : C.char;
+      Is_End_It  : C.char;
+      End_It : Entity_Iterator;
    begin
       if Self.Iterator_Id = -1 then
          Throw (Safir.Dob.Typesystem.Software_Violation_Exception'Identity,
@@ -84,16 +85,17 @@ package body Safir.Dob.Entity_Iterators is
       Safir.Dob.Interf.Entity_Iterator_Increment
         (Self.Controller_Id,
          Self.Iterator_Id,
-         It_End,
+         Is_End_It,
          Success);
 
       if C.char'Pos (Success) = 0 then
          Safir.Dob.Typesystem.Library_Exceptions.Throw;
       end if;
 
-      if C.char'Pos (It_End) /= 0 then
-         Self.Controller_Id := -1;
-         Self.Iterator_Id := -1;
+      if C.char'Pos (Is_End_It) /= 0 then
+         -- The assignment will make Finalize for Self
+         -- to be run, which is excatly what we want.
+         Self := End_It;
       end if;
    end Next;
 
@@ -174,9 +176,10 @@ package body Safir.Dob.Entity_Iterators is
    overriding
    procedure Finalize (Self : in out Entity_Iterator) is
    begin
-      if Self.Iterator_Id = -1 then
+      if Self.Iterator_Id /= -1 then
          Safir.Dob.Interf.Entity_Iterator_Destroy (Self.Controller_Id,
                                                    Self.Iterator_Id);
+         Self.Iterator_Id := -1;
       end if;
    end Finalize;
 

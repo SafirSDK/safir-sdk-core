@@ -88,7 +88,7 @@ namespace VehicleMmiCsWinForms
                 vehicle.VehicleCategory.Val = (Capabilities.Vehicles.VehicleCategoryCode.Enumeration)sel;
             }
 
-            //StartRemoveInExercise
+            //StartRemoveInExercise5
             // Speed
             if (textBoxSpeed.Text == "")
             {
@@ -105,6 +105,7 @@ namespace VehicleMmiCsWinForms
                     statusStrip.Items["toolStripStatus"].Text = "Illegal speed format!";        
                 }
             }
+            //StopRemoveInExercise5
 
             // Position
             Safir.Geodesy.Position pos = new Safir.Geodesy.Position();
@@ -117,8 +118,8 @@ namespace VehicleMmiCsWinForms
                 }
                 else
                 {
-                    pos.Latitude.Val = (float)(Convert.ToDecimal(textBoxPosLat.Text));
-                    pos.Longitude.Val = (float)(Convert.ToDecimal(textBoxPosLong.Text));
+                    pos.Latitude.Val = float.Parse(textBoxPosLat.Text);
+                    pos.Longitude.Val = float.Parse(textBoxPosLong.Text);
                     pos.Altitude.Val = Safir.Geodesy.Position.DummyAltitude;
 
                     vehicle.Position.Obj = pos;
@@ -129,7 +130,8 @@ namespace VehicleMmiCsWinForms
                 statusStrip.Items["toolStripStatus"].Text = "Position must be a float";
                 return;
             }
-            //StopRemoveInExercise
+
+            //StartRemoveInExercise5
             try
             {
                 m_secDobConnection.CreateRequest(vehicle, 
@@ -140,6 +142,7 @@ namespace VehicleMmiCsWinForms
                 statusStrip.Items["toolStripStatus"].Text = "Overflow when sending, please wait!";
                 return;
             }
+            //StopRemoveInExercise5
         }
 
 
@@ -162,7 +165,7 @@ namespace VehicleMmiCsWinForms
                 vehicle.VehicleCategory.Val = (Capabilities.Vehicles.VehicleCategoryCode.Enumeration)sel;
             }
 
-            //StartRemoveInExercise
+            //StartRemoveInExercise5
             // Speed
             if (textBoxSpeed.Text == "")
             {
@@ -180,6 +183,7 @@ namespace VehicleMmiCsWinForms
                     return;        
                 }
             }
+            //StopRemoveInExercise5
 
             // Position
             Safir.Geodesy.Position pos = new Safir.Geodesy.Position();
@@ -192,8 +196,8 @@ namespace VehicleMmiCsWinForms
                 }
                 else
                 {
-                    pos.Latitude.Val = (float)(Convert.ToDecimal(textBoxPosLat.Text));
-                    pos.Longitude.Val = (float)(Convert.ToDecimal(textBoxPosLong.Text));
+                    pos.Latitude.Val = float.Parse(textBoxPosLat.Text);
+                    pos.Longitude.Val = float.Parse(textBoxPosLong.Text);
                     pos.Altitude.Val = Safir.Geodesy.Position.DummyAltitude;
 
                     vehicle.Position.Obj = pos;
@@ -205,8 +209,8 @@ namespace VehicleMmiCsWinForms
                 return;
             }
 
-            //StopRemoveInExercise
             // Send request
+            //StartRemoveInExercise5
             try
             {
                 m_secDobConnection.UpdateRequest(vehicle, 
@@ -216,6 +220,7 @@ namespace VehicleMmiCsWinForms
             {
                 statusStrip.Items["toolStripStatus"].Text = "Overflow when sending, please wait!";
             }
+            //StopRemoveInExercise5
         }
 
         /// <summary>
@@ -314,7 +319,6 @@ namespace VehicleMmiCsWinForms
                 return false;
             }
 
-            //StartRemoveInExercise
             if (!m_vehicle.Identification.IsNull())
             {
                 textBoxIdentification.Text = m_vehicle.Identification.Val.ToString();
@@ -348,7 +352,6 @@ namespace VehicleMmiCsWinForms
                     textBoxPosLong.Text = m_vehicle.Position.Obj.Longitude.Val.ToString();
                 }
             }
-            //StopRemoveInExercise
 
             this.Show();
 
@@ -362,11 +365,9 @@ namespace VehicleMmiCsWinForms
         {
             textBoxIdentification.ReadOnly = false;
             textBoxIdentification.Text = "";
-            //StartRemoveInExercise
             textBoxSpeed.Text = "";
             textBoxPosLat.Text = "";
             textBoxPosLong.Text = "";
-            //StopRemoveInExercise
             comboBoxCategory.SelectedItem = Capabilities.Vehicles.VehicleCategoryCode.Enumeration.Car.ToString();
             statusStrip.Items["toolStripStatus"].Text = "OK";
         }
@@ -388,20 +389,26 @@ namespace VehicleMmiCsWinForms
                     this.Hide();
                 }
             }
-            //StartRemoveInExercise
+            //StartRemoveInExercise6
             else 
             {
                 Safir.Dob.ErrorResponse errorResponse = (Safir.Dob.ErrorResponse)responseProxy.Response;
-                if (errorResponse.AdditionalInfo.IsNull())
+                //if (errorResponse.AdditionalInfo.IsNull())
+                if(errorResponse.Code.IsNull())
                 {
-                    statusStrip.Items["toolStripStatus"].Text = "Error";
+                    // No error code.
+                    statusStrip.Items["toolStripStatus"].Text = "Unspecified error";
                 }
                 else
                 {
-                    statusStrip.Items["toolStripStatus"].Text = "Error: " + errorResponse.AdditionalInfo.Val;
+                    // Error code specified.
+                    if (errorResponse.Code.Val == Safir.Dob.ResponseGeneralErrorCodes.SafirReqErr)
+                    {
+                        statusStrip.Items["toolStripStatus"].Text = "General request error";
+                    }
                 }
             }
-            //StopRemoveInExercise
+            //StopRemoveInExercise6
         }
 
         /// <summary>

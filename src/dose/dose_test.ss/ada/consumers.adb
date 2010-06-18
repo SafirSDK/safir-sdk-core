@@ -973,21 +973,26 @@ package body Consumers is
      (Self     : in out Consumer;
       Callback : in Safir.Dob.Callback_Id.Enumeration) is
 
-      procedure Execute (Position : in Action_Vectors.Cursor) is
-         Action_Kind : constant Dose_Test.Action_Enum.Enumeration :=
-                         Action_Vectors.Element (Position).Ref.Action_Kind.Get_Val;
-         use type Dose_Test.Action_Enum.Enumeration;
-      begin
-         Execute_Action (Self, Action_Vectors.Element (Position));
+      use type Action_Vectors.Cursor;
+      use type Dose_Test.Action_Enum.Enumeration;
+      My_Cursor : Action_Vectors.Cursor := Action_Vectors.No_Element;
+      Action_Kind : Dose_Test.Action_Enum.Enumeration;
+
+   begin
+      My_Cursor := Self.Callback_Actions (Callback).First;
+
+      while My_Cursor /= Action_Vectors.No_Element loop
+         Action_Kind := Action_Vectors.Element (My_Cursor).Ref.Action_Kind.Get_Val;
+
+         Execute_Action (Self, Action_Vectors.Element (My_Cursor));
 
          if Action_Kind = Dose_Test.Action_Enum.Reset_Callback_Actions then
             return;
          end if;
 
-      end Execute;
+         My_Cursor := Action_Vectors.Next (My_Cursor);
+      end loop;
 
-   begin
-      Self.Callback_Actions (Callback).Iterate (Execute'Access);
    end Execute_Callback_Actions;
 
 

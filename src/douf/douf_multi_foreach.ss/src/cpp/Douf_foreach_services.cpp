@@ -94,10 +94,11 @@ namespace Safir
             reactor()->cancel_timer(this);
         }
 
-        void Services::Init()
+        void Services::Init(const std::wstring& connectionNameCommonPart,
+                            const std::wstring& connectionNameInstancePart)
         {
             m_debug << "**** Initializing Services ****"<<std::endl;
-            m_connection.Attach();
+            m_connection.Attach(connectionNameCommonPart, connectionNameInstancePart);
             Safir::Dob::ConnectionAspectMisc connnectionAspectMisc(m_connection);
 
             // Register service.
@@ -105,7 +106,7 @@ namespace Safir
             // Register as service provider.
             m_connection.RegisterServiceHandler(Safir::Utilities::ForEach::UpdateRequest::ClassTypeId, Safir::Dob::Typesystem::HandlerId(), this);
             m_connection.RegisterServiceHandler(Safir::Utilities::ForEach::DeleteRequest::ClassTypeId, Safir::Dob::Typesystem::HandlerId(), this);
-m_connection.RegisterServiceHandler(Safir::Utilities::ForEach::DeleteAllRequest::ClassTypeId, Safir::Dob::Typesystem::HandlerId(), this);
+            m_connection.RegisterServiceHandler(Safir::Utilities::ForEach::DeleteAllRequest::ClassTypeId, Safir::Dob::Typesystem::HandlerId(), this);
 #if NOT_YET
             // Start backdoor keeper
             m_backdoorKeeper.Start(*this);
@@ -609,142 +610,6 @@ m_connection.RegisterServiceHandler(Safir::Utilities::ForEach::DeleteAllRequest:
                                     m_debug << "UpdateRequest on type " << Safir::Dob::Typesystem::Operations::GetName(templateObject->GetTypeId()) << std::endl;
 
                                 }
-#if 0
-                                else if (Safir::Dob::Typesystem::Operations::IsOfType(requestSpecificData->TemplateEntityRequest()->GetTypeId(),
-                                    entry.entityId.GetTypeId()))
-                                {
-                                    m_debug << "TER is of the same (sub) type as entry object" << std::endl;
-                                    Safir::Dob::Typesystem::ObjectPtr obj = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(entry.entityId.GetTypeId());
-
-                                    Safir::Dob::Typesystem::Int32 no_of_members = Safir::Dob::Typesystem::Members::GetNumberOfMembers(entry.entityId.GetTypeId());
-
-                                    Safir::Dob::Typesystem::MemberType memberType;
-                                    char *  memberName;
-                                    Safir::Dob::Typesystem::TypeId memberTypeId;
-                                    Safir::Dob::Typesystem::Int32 stringLength; 
-                                    bool isArray;
-                                    Safir::Dob::Typesystem::Int32 arrayLength;
-
-                                    for (int i = 0; i < no_of_members; i++)
-                                    {
-                                        Safir::Dob::Typesystem::Members::GetInfo(
-                                            entry.entityId.GetTypeId(),
-                                            i,
-                                            memberType,
-                                            (const char *&)memberName,
-                                            memberTypeId,
-                                            stringLength,
-                                            isArray,
-                                            arrayLength
-                                            );
-
-                                        Safir::Dob::EntityPtr entryEntity;
-                                        try 
-                                        {
-                                            entryEntity = m_connection.Read(entry.entityId);
-                                        }
-                                        catch (Safir::Dob::NotFoundException &e)
-                                        {
-                                            m_debug << e.what() << std::endl;
-                                        }
-                                        if (isArray)
-                                        {
-                                            // loopa över arrayen
-                                            // Safir::Dob::Typesystem::Object::GetMember(i, X);
-                                        }
-                                        else
-                                        {
-                                            Safir::Dob::Typesystem::ContainerBase *cb = &entryEntity->GetMember(i, 0);
-                                            cb;
-
-                                            switch (memberType)
-                                            {
-
-                                                case BooleanMemberType = 0,
-                                                    EnumerationMemberType,
-                                                    Int32MemberType,
-                                                    Int64MemberType,
-                                                    Float32MemberType,
-                                                    Float64MemberType,
-                                                    TypeIdMemberType,
-                                                    EntityIdMemberType,
-                                                    StringMemberType,
-                                                    ObjectMemberType,
-                                                    BinaryMemberType,
-
-                                                    //  SI32 Types
-                                                    Ampere32MemberType,
-                                                    CubicMeter32MemberType,
-                                                    Hertz32MemberType,
-                                                    Joule32MemberType,
-                                                    Kelvin32MemberType,
-                                                    Kilogram32MemberType,
-                                                    Meter32MemberType,
-                                                    MeterPerSecond32MemberType,
-                                                    MeterPerSecondSquared32MemberType,
-                                                    Newton32MemberType,
-                                                    Pascal32MemberType,
-                                                    Radian32MemberType,
-                                                    RadianPerSecond32MemberType,
-                                                    RadianPerSecondSquared32MemberType,
-                                                    Second32MemberType,
-                                                    SquareMeter32MemberType,
-                                                    Steradian32MemberType,
-                                                    Volt32MemberType,
-                                                    Watt32MemberType,
-
-                                                    //  SI Long Types
-                                                    Ampere64MemberType,
-                                                    CubicMeter64MemberType,
-                                                    Hertz64MemberType,
-                                                    Joule64MemberType,
-                                                    Kelvin64MemberType,
-                                                    Kilogram64MemberType,
-                                                    Meter64MemberType,
-                                                    MeterPerSecond64MemberType,
-                                                    MeterPerSecondSquared64MemberType,
-                                                    Newton64MemberType,
-                                                    Pascal64MemberType,
-                                                    Radian64MemberType,
-                                                    RadianPerSecond64MemberType,
-                                                    RadianPerSecondSquared64MemberType,
-                                                    Second64MemberType,
-                                                    SquareMeter64MemberType,
-                                                    Steradian64MemberType,
-                                                    Volt64MemberType,
-                                                    Watt64MemberType
-                                            }
-
-                                        }
-
-
-                                        Safir::Dob::Typesystem::ObjectPtr TERobj =  requestSpecificData->TemplateEntityRequest();
-                                        *obj = *TERobj;
-                                        obj->SetInstanceNumber(entry.entityId.GetInstance());
-
-                                        Safir::Dob::EntityPtr entityPtr = boost::dynamic_pointer_cast<Safir::Dob::Entity>(obj);
-
-
-                                        requestToSend = true;
-
-                                        if (entityPtr != NULL)
-                                        {
-                                            reqId = m_connection.UpdateRequest(entityPtr, this, reqId);
-                                            m_debug << "UpdateRequest on type " << Safir::Dob::Typesystem::Operations::GetName(entityPtr->GetTypeId()) << std::endl;
-                                        }
-                                        else
-                                        {
-                                            m_debug << "entityPtr is NULL" << std::endl;
-                                        }
-
-
-                                    }
-                                else if (Safir::Dob::Typesystem::Operations::IsOfType(entry.entityId.GetTypeId(), 
-                                    requestSpecificData->TemplateEntityRequest()->GetTypeId()))
-                                {
-                                    m_debug << "entry object is of the same (sub) type as TER" << std::endl;
-                                }
-#endif
                                 else
                                 {
                                     m_debug << "No relation between objects" << std::endl;

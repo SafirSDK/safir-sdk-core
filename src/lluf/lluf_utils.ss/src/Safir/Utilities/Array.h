@@ -28,9 +28,7 @@
 
 namespace Safir
 {
-namespace Dob
-{
-namespace Internal
+namespace Utilities
 {
     /**
      * STL-like fixed size array.
@@ -86,8 +84,6 @@ namespace Internal
         const ArrayPtr    arrayPtr;
     };
 
-
-}
 }
 }
 

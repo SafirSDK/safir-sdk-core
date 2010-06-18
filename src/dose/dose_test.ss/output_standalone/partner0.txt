@@ -4736,7 +4736,227 @@ Consumer 0: OnInitialInjectionsDone:
   HandlerId = DEFAULT_HANDLER
 
 ==========================================================================
-TESTCASE 999
+TESTCASE 1000
+Description: Test a foreach update request with a brief response
+Expectation: Partner 1 and 2 should get an update request and partner 0 should get a successful brief response. The read instances should have the Info element set to KalleKula
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = Safir.Utilities.ForEach.BriefResponse
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;ForEach-context0;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.BriefResponse</name><members><member><name>NumberOfSuccessResponses</name><value>2</value></member><member><name>NumberOfErrorResponses</name><value>0</value></member><member><name>NumberOfResponses</name><value>2</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.UpdateRequest</name><members><member><name>TemplateEntityRequest</name><object><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object></member><member><name>ResponseType</name><value>Safir.Utilities.ForEach.ResponseType.Brief</value></member><member><name>OperateOn</name><arrayElements><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>123</instanceId></entityId></arrayElement><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>456</instanceId></entityId></arrayElement></arrayElements></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 123):
+  EntityId  = (DoseTest.GlobalEntity, 123):
+  Owner     = -5453762115588730630
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;1</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -5453762115588730630
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 456):
+  EntityId  = (DoseTest.GlobalEntity, 456):
+  Owner     = -6040750362377884435
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -6040750362377884435
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+==========================================================================
+TESTCASE 1001
+Description: Test a foreach update request with a brief response containing both one successful and two unsuccessful response.
+Expectation: Partner 1 and 2 should get an update request. Partner 0 should get a brief response with one success and two errors. The read instances should have the Info element set to KalleKula
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = Safir.Utilities.ForEach.BriefResponse
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;ForEach-context0;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.BriefResponse</name><members><member><name>NumberOfSuccessResponses</name><value>1</value></member><member><name>NumberOfErrorResponses</name><value>2</value></member><member><name>NumberOfResponses</name><value>3</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.UpdateRequest</name><members><member><name>TemplateEntityRequest</name><object><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object></member><member><name>ResponseType</name><value>Safir.Utilities.ForEach.ResponseType.Brief</value></member><member><name>OperateOn</name><arrayElements><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>123</instanceId></entityId></arrayElement><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>456</instanceId></entityId></arrayElement><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>789</instanceId></entityId></arrayElement></arrayElements></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 123):
+  EntityId  = (DoseTest.GlobalEntity, 123):
+  Owner     = -5453762115588730630
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;1</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -5453762115588730630
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 456):
+  EntityId  = (DoseTest.GlobalEntity, 456):
+  Owner     = -6040750362377884435
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -6040750362377884435
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+==========================================================================
+TESTCASE 1002
+Description: Test a foreach update request with a full response
+Expectation: Partner 1 and 2 should get an update request and partner 0 should get a successful full response. The read instances should have the Info element set to KalleKula
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = Safir.Utilities.ForEach.FullResponse
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;ForEach-context0;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.FullResponse</name><members><member><name>NumberOfSuccessResponses</name><value>2</value></member><member><name>NumberOfErrorResponses</name><value>0</value></member><member><name>NumberOfResponses</name><value>2</value></member><member><name>Response</name><arrayElements><arrayElement><object><name>DoseTest.Success</name><members><member><name>Info</name><value xml:space="preserve">Succesful response</value></member></members></object></arrayElement><arrayElement><object><name>DoseTest.Success</name><members><member><name>Info</name><value xml:space="preserve">Succesful response</value></member></members></object></arrayElement></arrayElements></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.UpdateRequest</name><members><member><name>TemplateEntityRequest</name><object><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object></member><member><name>ResponseType</name><value>Safir.Utilities.ForEach.ResponseType.Full</value></member><member><name>OperateOn</name><arrayElements><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>123</instanceId></entityId></arrayElement><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>456</instanceId></entityId></arrayElement></arrayElements></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 123):
+  EntityId  = (DoseTest.GlobalEntity, 123):
+  Owner     = -5453762115588730630
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;1</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -5453762115588730630
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 456):
+  EntityId  = (DoseTest.GlobalEntity, 456):
+  Owner     = -6040750362377884435
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -6040750362377884435
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+==========================================================================
+TESTCASE 1003
+Description: Test a foreach update request with a full response containing both a successful and an unsuccessful response.
+Expectation: Partner 1 and 2 should get an update request. Partner 0 should get a full response with one success and one error. The read instances should have the Info element set to KalleKula
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = Safir.Utilities.ForEach.FullResponse
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;ForEach-context0;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.FullResponse</name><members><member><name>NumberOfSuccessResponses</name><value>1</value></member><member><name>NumberOfErrorResponses</name><value>1</value></member><member><name>NumberOfResponses</name><value>2</value></member><member><name>Response</name><arrayElements><arrayElement><object><name>DoseTest.Success</name><members><member><name>Info</name><value xml:space="preserve">Succesful response</value></member></members></object></arrayElement><arrayElement><object><name>Safir.Dob.ErrorResponse</name><members><member><name>Code</name><value xml:space="preserve">BadBadbad</value></member></members></object></arrayElement></arrayElements></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.UpdateRequest</name><members><member><name>TemplateEntityRequest</name><object><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object></member><member><name>ResponseType</name><value>Safir.Utilities.ForEach.ResponseType.Full</value></member><member><name>OperateOn</name><arrayElements><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>123</instanceId></entityId></arrayElement><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>456</instanceId></entityId></arrayElement></arrayElements></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 123):
+  EntityId  = (DoseTest.GlobalEntity, 123):
+  Owner     = -5453762115588730630
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;1</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -5453762115588730630
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 456):
+  EntityId  = (DoseTest.GlobalEntity, 456):
+  Owner     = -6040750362377884435
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -6040750362377884435
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+==========================================================================
+TESTCASE 1004
+Description: Test a foreach update request with a immediate response
+Expectation: Partner 1 and 2 should get an update request and partner 0 should get a successful immediate response. The read instances should have the Info element set to KalleKula
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = Safir.Dob.SuccessResponse
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;ForEach-context0;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.SuccessResponse</name></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.UpdateRequest</name><members><member><name>TemplateEntityRequest</name><object><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object></member><member><name>ResponseType</name><value>Safir.Utilities.ForEach.ResponseType.Immediate</value></member><member><name>OperateOn</name><arrayElements><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>123</instanceId></entityId></arrayElement><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>456</instanceId></entityId></arrayElement></arrayElements></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 123):
+  EntityId  = (DoseTest.GlobalEntity, 123):
+  Owner     = -5453762115588730630
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;1</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -5453762115588730630
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 456):
+  EntityId  = (DoseTest.GlobalEntity, 456):
+  Owner     = -6040750362377884435
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -6040750362377884435
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+==========================================================================
+TESTCASE 1005
+Description: Test a foreach delete request with a brief response
+Expectation: Partner 1 and 2 should get a delete request and partner 0 should get a successful brief response. The read of the instances should give Not Found
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = Safir.Utilities.ForEach.BriefResponse
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;ForEach-context0;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.BriefResponse</name><members><member><name>NumberOfSuccessResponses</name><value>2</value></member><member><name>NumberOfErrorResponses</name><value>0</value></member><member><name>NumberOfResponses</name><value>2</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.DeleteRequest</name><members><member><name>ResponseType</name><value>Safir.Utilities.ForEach.ResponseType.Brief</value></member><member><name>OperateOn</name><arrayElements><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>123</instanceId></entityId></arrayElement><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>456</instanceId></entityId></arrayElement></arrayElements></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 123):
+Caught Exception in ExecuteAction: Safir.Dob.NotFoundException
+Consumer 0: Read entity (DoseTest.GlobalEntity, 456):
+Caught Exception in ExecuteAction: Safir.Dob.NotFoundException
+==========================================================================
+TESTCASE 1006
+Description: Test a foreach delete request with a brief response containing both a successful and an unsuccessful response.
+Expectation: Partner 1 and 2 should get a delete request. Partner 0 should get a brief response with one success and one error. The read of the instances should give NotFound
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = Safir.Utilities.ForEach.BriefResponse
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;ForEach-context0;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.BriefResponse</name><members><member><name>NumberOfSuccessResponses</name><value>1</value></member><member><name>NumberOfErrorResponses</name><value>1</value></member><member><name>NumberOfResponses</name><value>2</value></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.DeleteRequest</name><members><member><name>ResponseType</name><value>Safir.Utilities.ForEach.ResponseType.Brief</value></member><member><name>OperateOn</name><arrayElements><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>123</instanceId></entityId></arrayElement><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>456</instanceId></entityId></arrayElement></arrayElements></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 123):
+Caught Exception in ExecuteAction: Safir.Dob.NotFoundException
+Consumer 0: Read entity (DoseTest.GlobalEntity, 456):
+Caught Exception in ExecuteAction: Safir.Dob.NotFoundException
+==========================================================================
+TESTCASE 1007
+Description: Test a foreach delete request with a full response
+Expectation: Partner 1 and 2 should get a delete request and partner 0 should get a successful full response. The read of the instances should give NotFound
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = Safir.Utilities.ForEach.FullResponse
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;ForEach-context0;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.FullResponse</name><members><member><name>NumberOfSuccessResponses</name><value>2</value></member><member><name>NumberOfErrorResponses</name><value>0</value></member><member><name>NumberOfResponses</name><value>2</value></member><member><name>Response</name><arrayElements><arrayElement><object><name>DoseTest.Success</name><members><member><name>Info</name><value xml:space="preserve">Succesful response</value></member></members></object></arrayElement><arrayElement><object><name>DoseTest.Success</name><members><member><name>Info</name><value xml:space="preserve">Succesful response</value></member></members></object></arrayElement></arrayElements></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.DeleteRequest</name><members><member><name>ResponseType</name><value>Safir.Utilities.ForEach.ResponseType.Full</value></member><member><name>OperateOn</name><arrayElements><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>123</instanceId></entityId></arrayElement><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>456</instanceId></entityId></arrayElement></arrayElements></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 123):
+Caught Exception in ExecuteAction: Safir.Dob.NotFoundException
+Consumer 0: Read entity (DoseTest.GlobalEntity, 456):
+Caught Exception in ExecuteAction: Safir.Dob.NotFoundException
+==========================================================================
+TESTCASE 1008
+Description: Test a foreach delete request with a full response containing both a successful and an unsuccessful response.
+Expectation: Partner 1 and 2 should get a delete request. Partner 0 should get a full response with one success and one error. The read of the instances should give NotFound
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = Safir.Utilities.ForEach.FullResponse
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;ForEach-context0;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.FullResponse</name><members><member><name>NumberOfSuccessResponses</name><value>1</value></member><member><name>NumberOfErrorResponses</name><value>1</value></member><member><name>NumberOfResponses</name><value>2</value></member><member><name>Response</name><arrayElements><arrayElement><object><name>DoseTest.Success</name><members><member><name>Info</name><value xml:space="preserve">Succesful response</value></member></members></object></arrayElement><arrayElement><object><name>Safir.Dob.ErrorResponse</name><members><member><name>Code</name><value xml:space="preserve">BadBadbad</value></member></members></object></arrayElement></arrayElements></member></members></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.DeleteRequest</name><members><member><name>ResponseType</name><value>Safir.Utilities.ForEach.ResponseType.Full</value></member><member><name>OperateOn</name><arrayElements><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>123</instanceId></entityId></arrayElement><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>456</instanceId></entityId></arrayElement></arrayElements></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 123):
+Caught Exception in ExecuteAction: Safir.Dob.NotFoundException
+Consumer 0: Read entity (DoseTest.GlobalEntity, 456):
+Caught Exception in ExecuteAction: Safir.Dob.NotFoundException
+==========================================================================
+TESTCASE 1009
+Description: Test a foreach delete request with a immediate response
+Expectation: Partner 1 and 2 should get a delete request and partner 0 should get a successful immediate response. The read of the instances should give NotFound
+--------- Setup -----------
+--------- Test  -----------
+Consumer 1: OnResponse:
+  Type       = Safir.Dob.SuccessResponse
+  IsSuccess  = true
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;ForEach-context0;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Response   = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.SuccessResponse</name></object>
+  Request    = <object xmlns="urn:safir-dots-unit"><name>Safir.Utilities.ForEach.DeleteRequest</name><members><member><name>ResponseType</name><value>Safir.Utilities.ForEach.ResponseType.Immediate</value></member><member><name>OperateOn</name><arrayElements><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>123</instanceId></entityId></arrayElement><arrayElement><entityId><name>DoseTest.GlobalEntity</name><instanceId>456</instanceId></entityId></arrayElement></arrayElements></member></members></object>
+
+Consumer 0: Read entity (DoseTest.GlobalEntity, 123):
+Caught Exception in ExecuteAction: Safir.Dob.NotFoundException
+Consumer 0: Read entity (DoseTest.GlobalEntity, 456):
+Caught Exception in ExecuteAction: Safir.Dob.NotFoundException
+==========================================================================
+TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing
 --------- Setup -----------

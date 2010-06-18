@@ -23,6 +23,7 @@
 ******************************************************************************/
 
 #include "Douf_foreach_app.h"
+#include <Safir/Dob/NodeParameters.h>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -38,59 +39,78 @@
 #include <Safir/Dob/NotOpenException.h>
 #include <Safir/SwReports/SwReport.h>
 
-//Currently 'foreach' uses context 0 to connect to the dob. The strange looking negative number
-//is a way to indicate that this is a connection with special privileges (a -1 connection).
-const Safir::Dob::Typesystem::Int32 FOREACH_CONTEXT = -1000000;
-
 namespace Safir
 {
-    namespace Utilities
-    {
-        namespace ForEach
-        {
-            ForEachApp::ForEachApp() :
-            m_dispatcher(m_connection),
-            m_debug(L"ForEachApp")
-        {
-            // Send something to the tracer to open the connection.
-            // This line will hopefully not be needed in the future.
-            m_debug << " "<<std::endl;
-        }
+namespace Utilities
+{
+namespace ForEach  
+{
 
-        int ForEachApp::Run()
+    const Safir::Dob::Typesystem::Int32 ComposeMinusOneContext(const Safir::Dob::Typesystem::Int32 context)
+    {        
+        return (context + 1000000) * -1;
+    }
+
+    ForEachApp::ForEachApp()
+        : m_context(Safir::Dob::NodeParameters::NumberOfContexts())
+        //: m_dispatcher(m_connection),
+        //m_debug(L"ForEachApp")
+    {
+        // Send something to the tracer to open the connection.
+        // This line will hopefully not be needed in the future.
+        //m_debug << " "<<std::endl;
+    }
+
+    int ForEachApp::Run()
+    {
+        // Open a connection in each context
+        for (unsigned int context = 0; context < m_context.size(); ++context)
         {
-            static int inst = 0;
+            int inst = 0;
+            std::wstring connectionName(L"ForEach-context");
+            connectionName += boost::lexical_cast<std::wstring>(context);
 
             for (;;)
             {
                 try
                 {
                     // Open the DOB connection.
-                    m_connection.Open(L"ForEach", boost::lexical_cast<std::wstring>(++inst), FOREACH_CONTEXT, this, &m_dispatcher);
+                    m_context[context].m_connection.Open(connectionName,
+                                            boost::lexical_cast<std::wstring>(inst),
+                                            ComposeMinusOneContext(context),
+                                            this,
+                                            &m_context[context].m_dispatcher);
                     break;
                 }
                 catch (const Safir::Dob::NotOpenException&)
                 {
+                    ++inst;
                 }
             }
 
+            // Send something to the tracer to open the connection.
+            // This line will hopefully not be needed in the future.
+            m_context[context].m_debug << " " << std::endl;
+
             // Call the init method on startup.
             // Register as a service provider.
-            m_service.Init();      
-
-            ACE_Reactor::instance()->run_reactor_event_loop();
-
-             // Stop swre before exiting
-            Safir::SwReports::Stop();
-
-            return 0;
+            m_context[context].m_service.Init(connectionName,
+                                              boost::lexical_cast<std::wstring>(inst));
         }
 
+        ACE_Reactor::instance()->run_reactor_event_loop();
 
-        void ForEachApp::OnStopOrder()
-        {
-            ACE_Reactor::end_event_loop();
-        } 
-        }
+         // Stop swre before exiting
+        Safir::SwReports::Stop();
+
+        return 0;
     }
+
+
+    void ForEachApp::OnStopOrder()
+    {
+        ACE_Reactor::end_event_loop();
+    } 
+}
+}
 }

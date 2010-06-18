@@ -63,7 +63,7 @@ TestCaseReader & TestCaseReader::Instance()
 
 TestCaseReader::TestCaseReader(const boost::filesystem::path & testCaseDir)
 {
-    const boost::regex expr("(\\d{3})-(.*)\\.xml");
+    const boost::regex expr("(\\d{3,4})-(.*)\\.xml");
     for (boost::filesystem::directory_iterator path = boost::filesystem::directory_iterator(testCaseDir);
          path != boost::filesystem::directory_iterator(); ++path)
     {

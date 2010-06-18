@@ -62,12 +62,10 @@ namespace VehicleMmiCsWinForms
         /// </summary>
         private EntityDialog m_VehicleDialog;
 
-        //StartRemoveInExercise
         /// <summary>
         /// Dialog to calculate bearing and distance for a vehicle
         /// </summary>
         private ServiceDialog m_CalculateSpeedDlg;
-        //StopRemoveInExercise
             
         /// <summary>
         /// Dialog to present category information 
@@ -99,9 +97,7 @@ namespace VehicleMmiCsWinForms
 
             // Create dialogs
             m_VehicleDialog = new EntityDialog();
-            //StartRemoveInExercise
             m_CalculateSpeedDlg = new ServiceDialog();
-            //StopRemoveInExercise
             m_CategoryInfoDlg = new CategoryInfoDialog();
             m_MessageDialog = new MessageDialog();
         }
@@ -112,9 +108,9 @@ namespace VehicleMmiCsWinForms
         /// </summary>
         public void StartSubscription()
         {
-            //StartRemoveInExercise
+            //StartRemoveInExercise3
              m_secDobConnection.SubscribeEntity(Capabilities.Vehicles.Vehicle.ClassTypeId, this);
-            //StopRemoveInExercise
+            //StopRemoveInExercise3
         }
 
 
@@ -178,7 +174,7 @@ namespace VehicleMmiCsWinForms
         public void OnUpdatedEntity(Safir.Dob.EntityProxy entityProxy)
         {
             Capabilities.Vehicles.Vehicle vehicle = (Capabilities.Vehicles.Vehicle)entityProxy.Entity;
-            //StartRemoveInExercise
+            
             int index = m_ListView.Items.IndexOfKey(entityProxy.EntityId.InstanceId.ToString());
             ListViewItem item = m_ListView.Items[index];
 
@@ -202,6 +198,7 @@ namespace VehicleMmiCsWinForms
                 item.SubItems[c_iColumnCategory].Text = "-";
             }
 
+            //StartRemoveInExercise4
             // Speed
             if (!vehicle.Speed.IsNull())
             {
@@ -211,6 +208,7 @@ namespace VehicleMmiCsWinForms
             {
                 item.SubItems[c_iColumnSpeed].Text = "-";
             }
+            //StopRemoveInExercise4
 
             // Position
             item.SubItems[3].Text = "-";
@@ -229,7 +227,6 @@ namespace VehicleMmiCsWinForms
                     item.SubItems[4].Text = vehicle.Position.Obj.Longitude.Val.ToString();
                 }
             }
-            //StopRemoveInExercise
         }
 
 
@@ -238,9 +235,7 @@ namespace VehicleMmiCsWinForms
         /// </summary>
         public void OnDeletedEntity(Safir.Dob.EntityProxy entityProxy, bool deletedByOwner)
         {
-            //StartRemoveInExercise
             m_ListView.Items.RemoveByKey(entityProxy.InstanceId.ToString());
-            //StopRemoveInExercise
         }
 
 
@@ -259,7 +254,6 @@ namespace VehicleMmiCsWinForms
         /// </summary>
         public void OpenVehicleUpdateDlg()
         {
-            //StartRemoveInExercise
             if (m_ListView.SelectedItems.Count > 0)
             {
                 ListViewItem lastSelectedItem =
@@ -281,11 +275,8 @@ namespace VehicleMmiCsWinForms
             {
                 m_frameStatusStrip.Text = "No vehicle selected.";
             }
-            //StopRemoveInExercise
         }
 
-
-        //StartRemoveInExercise
         /// <summary>
         /// Open a calculation of speed dialog for the last selected item
         /// </summary>
@@ -312,7 +303,6 @@ namespace VehicleMmiCsWinForms
                 m_frameStatusStrip.Text = "No vehicle selected.";
             }
         }
-        //StopRemoveInExercise
             
 
         public void OpenCategoryInfoDlg()

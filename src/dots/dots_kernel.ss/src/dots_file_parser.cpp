@@ -462,21 +462,39 @@ namespace Internal
 
     boost::filesystem::path GetDobFileDirectory()
     {
-        char * env = getenv(RUNTIME_ENV);
+        char * env = getenv("SAFIR_DOTS_CLASSES_DIR");
+        
         if (env == NULL)
         {
-            ErrorHandler::Error("Dou/Dom file parsing","Failed to get environment variable SAFIR_RUNTIME","dots_file_parser");
-            exit(1);
+            // Read the dou/dom files from the standard location 
+            env = getenv(RUNTIME_ENV);
+
+            if (env == NULL)
+            {
+                ErrorHandler::Error("Dou/Dom file parsing","Failed to get environment variable SAFIR_RUNTIME","dots_file_parser");
+                exit(1);
+            }
+            boost::filesystem::path filename(env,boost::filesystem::native);
+
+            filename /= DOB_CLASSES_DIR;
+            ENSURE(boost::filesystem::exists(filename) && boost::filesystem::is_directory(filename),
+                << "The directory for dou and dom files could not be found. Using $(SAFIR_RUNTIME)/" << DOB_CLASSES_DIR << " it evaluates to " << filename.string());
+
+
+            return filename;
+
         }
-        boost::filesystem::path filename(env,boost::filesystem::native);
+        else
+        {
+            // Read the dou/dom files from a non-standard location
+            boost::filesystem::path filename(env,boost::filesystem::native);
 
-        filename /= DOB_CLASSES_DIR;
-        ENSURE(boost::filesystem::exists(filename) && boost::filesystem::is_directory(filename),
-               << "The directory for dou and dom files could not be found. Using $(SAFIR_RUNTIME)/" << DOB_CLASSES_DIR << " it evaluates to " << filename.string());
+            ENSURE(boost::filesystem::exists(filename) && boost::filesystem::is_directory(filename),
+                << "The directory for dou and dom files could not be found. $(SAFIR_DOTS_CLASSES_DIR) evaluates to " << filename.string());
 
+            return filename;
 
-        return filename;
-
+        }
     }
 
     bool FileParser::ParseDouFiles()

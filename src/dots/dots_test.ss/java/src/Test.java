@@ -25,7 +25,7 @@
 
 import com.saabgroup.dotstest.*;
 import com.saabgroup.safir.dob.typesystem.*;
-
+import java.util.Locale;
 /**
  * Mait test class
  */
@@ -651,7 +651,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedFloat32Member(MT2);
         MemberTypesProperty.setFloat32Member(MT2, MT1.float32Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getFloat32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullFloat32Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -662,7 +662,7 @@ public class Test {
         Null_Ok = Null_Ok && MemberTypesProperty.isNullFloat32Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedFloat32Member(MI);
         MemberTypesProperty.setFloat32Member(MI, MT2.float32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getFloat32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullFloat32Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedFloat32Member(MI);
@@ -673,7 +673,7 @@ public class Test {
                 && MemberTypesProperty.isChangedFloat32Member(MIA);
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setFloat32Member(MIA, MT2.float32Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().float32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullFloat32Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -683,7 +683,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullFloat32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedFloat32Member(EO);
-        System.out.format("Property Parameter Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.0f%n", MemberTypesProperty
                 .getFloat32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullFloat32Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -711,7 +711,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedFloat32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getFloat32Member(MA2, ix));
 
             // Member Item
@@ -719,7 +719,7 @@ public class Test {
             item.float32Member().get(ix).setVal(
                     MA1.float32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getFloat32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullFloat32Member(MI, ix);
@@ -728,7 +728,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getFloat32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullFloat32Member(MIA, ix);
@@ -740,7 +740,7 @@ public class Test {
                     && !MemberArraysProperty.isNullFloat32Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedFloat32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getFloat32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullFloat32Member(EO, ix);
@@ -829,7 +829,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedFloat64Member(MT2);
         MemberTypesProperty.setFloat64Member(MT2, MT1.float64Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getFloat64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullFloat64Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -840,7 +840,7 @@ public class Test {
         Null_Ok = Null_Ok && MemberTypesProperty.isNullFloat64Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedFloat64Member(MI);
         MemberTypesProperty.setFloat64Member(MI, MT2.float64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getFloat64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullFloat64Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedFloat64Member(MI);
@@ -851,7 +851,7 @@ public class Test {
                 && MemberTypesProperty.isChangedFloat64Member(MIA);
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setFloat64Member(MIA, MT2.float64Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().float64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullFloat64Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -861,7 +861,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullFloat64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedFloat64Member(EO);
-        System.out.format("Property Parameter Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.0f%n", MemberTypesProperty
                 .getFloat64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullFloat64Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -889,7 +889,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedFloat64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getFloat64Member(MA2, ix));
 
             // Member Item
@@ -897,7 +897,7 @@ public class Test {
             item.float64Member().get(ix).setVal(
                     MA1.float64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getFloat64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullFloat64Member(MI, ix);
@@ -906,7 +906,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getFloat64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullFloat64Member(MIA, ix);
@@ -918,7 +918,7 @@ public class Test {
                     && !MemberArraysProperty.isNullFloat64Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedFloat64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getFloat64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullFloat64Member(EO, ix);
@@ -3106,7 +3106,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedAmpere32Member(MT2);
         MemberTypesProperty.setAmpere32Member(MT2, MT1.ampere32Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getAmpere32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullAmpere32Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -3119,7 +3119,7 @@ public class Test {
                 && MemberTypesProperty.isChangedAmpere32Member(MI);
         MemberTypesProperty
                 .setAmpere32Member(MI, MT2.ampere32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getAmpere32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullAmpere32Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -3132,7 +3132,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setAmpere32Member(MIA, MT2.ampere32Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().ampere32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullAmpere32Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -3142,7 +3142,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullAmpere32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedAmpere32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getAmpere32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullAmpere32Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -3170,7 +3170,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedAmpere32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getAmpere32Member(MA2, ix));
 
             // Member Item
@@ -3178,7 +3178,7 @@ public class Test {
             item.ampere32Member().get(ix).setVal(
                     MA1.ampere32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getAmpere32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullAmpere32Member(MI, ix);
@@ -3187,7 +3187,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getAmpere32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullAmpere32Member(MIA, ix);
@@ -3199,7 +3199,7 @@ public class Test {
                     && !MemberArraysProperty.isNullAmpere32Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedAmpere32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getAmpere32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullAmpere32Member(EO, ix);
@@ -3291,7 +3291,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedCubicMeter32Member(MT2);
         MemberTypesProperty.setCubicMeter32Member(MT2, MT1.cubicMeter32Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getCubicMeter32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullCubicMeter32Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -3304,7 +3304,7 @@ public class Test {
                 && MemberTypesProperty.isChangedCubicMeter32Member(MI);
         MemberTypesProperty.setCubicMeter32Member(MI, MT2.cubicMeter32Member()
                 .getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getCubicMeter32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullCubicMeter32Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -3317,7 +3317,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setCubicMeter32Member(MIA, MT2.cubicMeter32Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().cubicMeter32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullCubicMeter32Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -3327,7 +3327,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullCubicMeter32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedCubicMeter32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getCubicMeter32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullCubicMeter32Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -3360,7 +3360,7 @@ public class Test {
                     && MemberArraysProperty
                             .isChangedCubicMeter32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getCubicMeter32Member(MA2, ix));
 
             // Member Item
@@ -3368,7 +3368,7 @@ public class Test {
             item.cubicMeter32Member().get(ix).setVal(
                     MA1.cubicMeter32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getCubicMeter32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullCubicMeter32Member(MI, ix);
@@ -3377,7 +3377,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getCubicMeter32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullCubicMeter32Member(MIA, ix);
@@ -3391,7 +3391,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty
                             .isChangedCubicMeter32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getCubicMeter32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullCubicMeter32Member(EO, ix);
@@ -3481,7 +3481,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedHertz32Member(MT2);
         MemberTypesProperty.setHertz32Member(MT2, MT1.hertz32Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getHertz32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullHertz32Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -3492,7 +3492,7 @@ public class Test {
         Null_Ok = Null_Ok && MemberTypesProperty.isNullHertz32Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedHertz32Member(MI);
         MemberTypesProperty.setHertz32Member(MI, MT2.hertz32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getHertz32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullHertz32Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedHertz32Member(MI);
@@ -3503,7 +3503,7 @@ public class Test {
                 && MemberTypesProperty.isChangedHertz32Member(MIA);
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setHertz32Member(MIA, MT2.hertz32Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().hertz32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullHertz32Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -3513,7 +3513,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullHertz32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedHertz32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getHertz32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullHertz32Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -3541,7 +3541,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedHertz32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getHertz32Member(MA2, ix));
 
             // Member Item
@@ -3549,7 +3549,7 @@ public class Test {
             item.hertz32Member().get(ix).setVal(
                     MA1.hertz32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getHertz32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullHertz32Member(MI, ix);
@@ -3558,7 +3558,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getHertz32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullHertz32Member(MIA, ix);
@@ -3570,7 +3570,7 @@ public class Test {
                     && !MemberArraysProperty.isNullHertz32Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedHertz32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getHertz32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullHertz32Member(EO, ix);
@@ -3659,7 +3659,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedJoule32Member(MT2);
         MemberTypesProperty.setJoule32Member(MT2, MT1.joule32Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getJoule32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullJoule32Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -3670,7 +3670,7 @@ public class Test {
         Null_Ok = Null_Ok && MemberTypesProperty.isNullJoule32Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedJoule32Member(MI);
         MemberTypesProperty.setJoule32Member(MI, MT2.joule32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getJoule32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullJoule32Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedJoule32Member(MI);
@@ -3681,7 +3681,7 @@ public class Test {
                 && MemberTypesProperty.isChangedJoule32Member(MIA);
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setJoule32Member(MIA, MT2.joule32Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().joule32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullJoule32Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -3691,7 +3691,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullJoule32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedJoule32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getJoule32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullJoule32Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -3719,7 +3719,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedJoule32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getJoule32Member(MA2, ix));
 
             // Member Item
@@ -3727,7 +3727,7 @@ public class Test {
             item.joule32Member().get(ix).setVal(
                     MA1.joule32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getJoule32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullJoule32Member(MI, ix);
@@ -3736,7 +3736,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getJoule32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullJoule32Member(MIA, ix);
@@ -3748,7 +3748,7 @@ public class Test {
                     && !MemberArraysProperty.isNullJoule32Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedJoule32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getJoule32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullJoule32Member(EO, ix);
@@ -3838,7 +3838,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedKelvin32Member(MT2);
         MemberTypesProperty.setKelvin32Member(MT2, MT1.kelvin32Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getKelvin32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKelvin32Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -3851,7 +3851,7 @@ public class Test {
                 && MemberTypesProperty.isChangedKelvin32Member(MI);
         MemberTypesProperty
                 .setKelvin32Member(MI, MT2.kelvin32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getKelvin32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKelvin32Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -3864,7 +3864,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setKelvin32Member(MIA, MT2.kelvin32Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().kelvin32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKelvin32Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -3874,7 +3874,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKelvin32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedKelvin32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getKelvin32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKelvin32Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -3902,7 +3902,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedKelvin32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getKelvin32Member(MA2, ix));
 
             // Member Item
@@ -3910,7 +3910,7 @@ public class Test {
             item.kelvin32Member().get(ix).setVal(
                     MA1.kelvin32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getKelvin32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullKelvin32Member(MI, ix);
@@ -3919,7 +3919,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getKelvin32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullKelvin32Member(MIA, ix);
@@ -3931,7 +3931,7 @@ public class Test {
                     && !MemberArraysProperty.isNullKelvin32Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedKelvin32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getKelvin32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullKelvin32Member(EO, ix);
@@ -4021,7 +4021,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedKilogram32Member(MT2);
         MemberTypesProperty.setKilogram32Member(MT2, MT1.kilogram32Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getKilogram32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKilogram32Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -4034,7 +4034,7 @@ public class Test {
                 && MemberTypesProperty.isChangedKilogram32Member(MI);
         MemberTypesProperty.setKilogram32Member(MI, MT2.kilogram32Member()
                 .getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getKilogram32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKilogram32Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -4047,7 +4047,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setKilogram32Member(MIA, MT2.kilogram32Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().kilogram32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKilogram32Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -4057,7 +4057,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKilogram32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedKilogram32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getKilogram32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKilogram32Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -4086,7 +4086,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedKilogram32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getKilogram32Member(MA2, ix));
 
             // Member Item
@@ -4094,7 +4094,7 @@ public class Test {
             item.kilogram32Member().get(ix).setVal(
                     MA1.kilogram32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getKilogram32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullKilogram32Member(MI, ix);
@@ -4103,7 +4103,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getKilogram32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullKilogram32Member(MIA, ix);
@@ -4115,7 +4115,7 @@ public class Test {
                     && !MemberArraysProperty.isNullKilogram32Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedKilogram32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getKilogram32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullKilogram32Member(EO, ix);
@@ -4204,7 +4204,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedMeter32Member(MT2);
         MemberTypesProperty.setMeter32Member(MT2, MT1.meter32Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getMeter32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullMeter32Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -4215,7 +4215,7 @@ public class Test {
         Null_Ok = Null_Ok && MemberTypesProperty.isNullMeter32Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedMeter32Member(MI);
         MemberTypesProperty.setMeter32Member(MI, MT2.meter32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getMeter32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullMeter32Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedMeter32Member(MI);
@@ -4226,7 +4226,7 @@ public class Test {
                 && MemberTypesProperty.isChangedMeter32Member(MIA);
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setMeter32Member(MIA, MT2.meter32Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().meter32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullMeter32Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -4236,7 +4236,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullMeter32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedMeter32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getMeter32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullMeter32Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -4264,7 +4264,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedMeter32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getMeter32Member(MA2, ix));
 
             // Member Item
@@ -4272,7 +4272,7 @@ public class Test {
             item.meter32Member().get(ix).setVal(
                     MA1.meter32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getMeter32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullMeter32Member(MI, ix);
@@ -4281,7 +4281,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getMeter32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullMeter32Member(MIA, ix);
@@ -4293,7 +4293,7 @@ public class Test {
                     && !MemberArraysProperty.isNullMeter32Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedMeter32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getMeter32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullMeter32Member(EO, ix);
@@ -4387,7 +4387,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedMeterPerSecond32Member(MT2);
         MemberTypesProperty.setMeterPerSecond32Member(MT2, MT1
                 .meterPerSecond32Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getMeterPerSecond32Member(MT2));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullMeterPerSecond32Member(MT2);
@@ -4402,7 +4402,7 @@ public class Test {
                 && MemberTypesProperty.isChangedMeterPerSecond32Member(MI);
         MemberTypesProperty.setMeterPerSecond32Member(MI, MT2
                 .meterPerSecond32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getMeterPerSecond32Member(MI));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullMeterPerSecond32Member(MI);
@@ -4417,7 +4417,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setMeterPerSecond32Member(MIA, MT2
                 .meterPerSecond32Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().meterPerSecond32Member().getVal());
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullMeterPerSecond32Member(MIA);
@@ -4429,7 +4429,7 @@ public class Test {
                 && !MemberTypesProperty.isNullMeterPerSecond32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedMeterPerSecond32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getMeterPerSecond32Member(EO));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullMeterPerSecond32Member(EO);
@@ -4465,7 +4465,7 @@ public class Test {
                     && MemberArraysProperty.isChangedMeterPerSecond32Member(
                             MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getMeterPerSecond32Member(MA2, ix));
 
             // Member Item
@@ -4473,7 +4473,7 @@ public class Test {
             item.meterPerSecond32Member().get(ix).setVal(
                     MA1.meterPerSecond32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getMeterPerSecond32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullMeterPerSecond32Member(MI,
@@ -4484,7 +4484,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getMeterPerSecond32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullMeterPerSecond32Member(MIA,
@@ -4500,7 +4500,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedMeterPerSecond32Member(
                             EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getMeterPerSecond32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullMeterPerSecond32Member(EO,
@@ -4598,7 +4598,7 @@ public class Test {
                         .isChangedMeterPerSecondSquared32Member(MT2);
         MemberTypesProperty.setMeterPerSecondSquared32Member(MT2, MT1
                 .meterPerSecondSquared32Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getMeterPerSecondSquared32Member(MT2));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty
@@ -4616,7 +4616,7 @@ public class Test {
                         .isChangedMeterPerSecondSquared32Member(MI);
         MemberTypesProperty.setMeterPerSecondSquared32Member(MI, MT2
                 .meterPerSecondSquared32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getMeterPerSecondSquared32Member(MI));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullMeterPerSecondSquared32Member(MI);
@@ -4633,7 +4633,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setMeterPerSecondSquared32Member(MIA, MT2
                 .meterPerSecondSquared32Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().meterPerSecondSquared32Member().getVal());
         Null_Ok = Null_Ok
                 && !MemberTypesProperty
@@ -4648,7 +4648,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty
                         .isChangedMeterPerSecondSquared32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getMeterPerSecondSquared32Member(EO));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullMeterPerSecondSquared32Member(EO);
@@ -4687,7 +4687,7 @@ public class Test {
                     && MemberArraysProperty
                             .isChangedMeterPerSecondSquared32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getMeterPerSecondSquared32Member(MA2, ix));
 
             // Member Item
@@ -4695,7 +4695,7 @@ public class Test {
             item.meterPerSecondSquared32Member().get(ix).setVal(
                     MA1.meterPerSecondSquared32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getMeterPerSecondSquared32Member(MI,
                             ix));
             Null_Ok = Null_Ok
@@ -4707,7 +4707,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getMeterPerSecondSquared32Member(MIA,
                             ix));
             Null_Ok = Null_Ok
@@ -4724,7 +4724,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty
                             .isChangedMeterPerSecondSquared32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getMeterPerSecondSquared32Member(EO,
                             ix));
             Null_Ok = Null_Ok
@@ -4819,7 +4819,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedNewton32Member(MT2);
         MemberTypesProperty.setNewton32Member(MT2, MT1.newton32Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getNewton32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullNewton32Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -4832,7 +4832,7 @@ public class Test {
                 && MemberTypesProperty.isChangedNewton32Member(MI);
         MemberTypesProperty
                 .setNewton32Member(MI, MT2.newton32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getNewton32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullNewton32Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -4845,7 +4845,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setNewton32Member(MIA, MT2.newton32Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().newton32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullNewton32Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -4855,7 +4855,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullNewton32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedNewton32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getNewton32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullNewton32Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -4883,7 +4883,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedNewton32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getNewton32Member(MA2, ix));
 
             // Member Item
@@ -4891,7 +4891,7 @@ public class Test {
             item.newton32Member().get(ix).setVal(
                     MA1.newton32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getNewton32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullNewton32Member(MI, ix);
@@ -4900,7 +4900,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getNewton32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullNewton32Member(MIA, ix);
@@ -4912,7 +4912,7 @@ public class Test {
                     && !MemberArraysProperty.isNullNewton32Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedNewton32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getNewton32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullNewton32Member(EO, ix);
@@ -5002,7 +5002,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedPascal32Member(MT2);
         MemberTypesProperty.setPascal32Member(MT2, MT1.pascal32Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getPascal32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullPascal32Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -5015,7 +5015,7 @@ public class Test {
                 && MemberTypesProperty.isChangedPascal32Member(MI);
         MemberTypesProperty
                 .setPascal32Member(MI, MT2.pascal32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getPascal32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullPascal32Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -5028,7 +5028,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setPascal32Member(MIA, MT2.pascal32Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().pascal32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullPascal32Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -5038,7 +5038,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullPascal32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedPascal32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getPascal32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullPascal32Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -5066,7 +5066,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedPascal32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getPascal32Member(MA2, ix));
 
             // Member Item
@@ -5074,7 +5074,7 @@ public class Test {
             item.pascal32Member().get(ix).setVal(
                     MA1.pascal32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getPascal32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullPascal32Member(MI, ix);
@@ -5083,7 +5083,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getPascal32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullPascal32Member(MIA, ix);
@@ -5095,7 +5095,7 @@ public class Test {
                     && !MemberArraysProperty.isNullPascal32Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedPascal32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getPascal32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullPascal32Member(EO, ix);
@@ -5185,7 +5185,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedRadian32Member(MT2);
         MemberTypesProperty.setRadian32Member(MT2, MT1.radian32Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getRadian32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullRadian32Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -5198,7 +5198,7 @@ public class Test {
                 && MemberTypesProperty.isChangedRadian32Member(MI);
         MemberTypesProperty
                 .setRadian32Member(MI, MT2.radian32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getRadian32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullRadian32Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -5211,7 +5211,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setRadian32Member(MIA, MT2.radian32Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().radian32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullRadian32Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -5221,7 +5221,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullRadian32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedRadian32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getRadian32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullRadian32Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -5249,7 +5249,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedRadian32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getRadian32Member(MA2, ix));
 
             // Member Item
@@ -5257,7 +5257,7 @@ public class Test {
             item.radian32Member().get(ix).setVal(
                     MA1.radian32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getRadian32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullRadian32Member(MI, ix);
@@ -5266,7 +5266,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getRadian32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullRadian32Member(MIA, ix);
@@ -5278,7 +5278,7 @@ public class Test {
                     && !MemberArraysProperty.isNullRadian32Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedRadian32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getRadian32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullRadian32Member(EO, ix);
@@ -5372,7 +5372,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedRadianPerSecond32Member(MT2);
         MemberTypesProperty.setRadianPerSecond32Member(MT2, MT1
                 .radianPerSecond32Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getRadianPerSecond32Member(MT2));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullRadianPerSecond32Member(MT2);
@@ -5387,7 +5387,7 @@ public class Test {
                 && MemberTypesProperty.isChangedRadianPerSecond32Member(MI);
         MemberTypesProperty.setRadianPerSecond32Member(MI, MT2
                 .radianPerSecond32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getRadianPerSecond32Member(MI));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullRadianPerSecond32Member(MI);
@@ -5402,7 +5402,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setRadianPerSecond32Member(MIA, MT2
                 .radianPerSecond32Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().radianPerSecond32Member().getVal());
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullRadianPerSecond32Member(MIA);
@@ -5414,7 +5414,7 @@ public class Test {
                 && !MemberTypesProperty.isNullRadianPerSecond32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedRadianPerSecond32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getRadianPerSecond32Member(EO));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullRadianPerSecond32Member(EO);
@@ -5451,7 +5451,7 @@ public class Test {
                     && MemberArraysProperty.isChangedRadianPerSecond32Member(
                             MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getRadianPerSecond32Member(MA2, ix));
 
             // Member Item
@@ -5459,7 +5459,7 @@ public class Test {
             item.radianPerSecond32Member().get(ix).setVal(
                     MA1.radianPerSecond32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getRadianPerSecond32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullRadianPerSecond32Member(MI,
@@ -5470,7 +5470,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getRadianPerSecond32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullRadianPerSecond32Member(MIA,
@@ -5486,7 +5486,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedRadianPerSecond32Member(
                             EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getRadianPerSecond32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullRadianPerSecond32Member(EO,
@@ -5585,7 +5585,7 @@ public class Test {
                         .isChangedRadianPerSecondSquared32Member(MT2);
         MemberTypesProperty.setRadianPerSecondSquared32Member(MT2, MT1
                 .radianPerSecondSquared32Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getRadianPerSecondSquared32Member(MT2));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty
@@ -5603,7 +5603,7 @@ public class Test {
                         .isChangedRadianPerSecondSquared32Member(MI);
         MemberTypesProperty.setRadianPerSecondSquared32Member(MI, MT2
                 .radianPerSecondSquared32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getRadianPerSecondSquared32Member(MI));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty
@@ -5622,7 +5622,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setRadianPerSecondSquared32Member(MIA, MT2
                 .radianPerSecondSquared32Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().radianPerSecondSquared32Member().getVal());
         Null_Ok = Null_Ok
                 && !MemberTypesProperty
@@ -5638,7 +5638,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty
                         .isChangedRadianPerSecondSquared32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getRadianPerSecondSquared32Member(EO));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty
@@ -5679,7 +5679,7 @@ public class Test {
                     && MemberArraysProperty
                             .isChangedRadianPerSecondSquared32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getRadianPerSecondSquared32Member(MA2, ix));
 
             // Member Item
@@ -5687,7 +5687,7 @@ public class Test {
             item.radianPerSecondSquared32Member().get(ix).setVal(
                     MA1.radianPerSecondSquared32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getRadianPerSecondSquared32Member(MI,
                             ix));
             Null_Ok = Null_Ok
@@ -5699,7 +5699,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getRadianPerSecondSquared32Member(MIA,
                             ix));
             Null_Ok = Null_Ok
@@ -5716,7 +5716,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty
                             .isChangedRadianPerSecondSquared32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getRadianPerSecondSquared32Member(EO,
                             ix));
             Null_Ok = Null_Ok
@@ -5812,7 +5812,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedSecond32Member(MT2);
         MemberTypesProperty.setSecond32Member(MT2, MT1.second32Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getSecond32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSecond32Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -5825,7 +5825,7 @@ public class Test {
                 && MemberTypesProperty.isChangedSecond32Member(MI);
         MemberTypesProperty
                 .setSecond32Member(MI, MT2.second32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getSecond32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSecond32Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -5838,7 +5838,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setSecond32Member(MIA, MT2.second32Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().second32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSecond32Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -5848,7 +5848,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSecond32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedSecond32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getSecond32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSecond32Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -5876,7 +5876,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedSecond32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getSecond32Member(MA2, ix));
 
             // Member Item
@@ -5884,7 +5884,7 @@ public class Test {
             item.second32Member().get(ix).setVal(
                     MA1.second32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getSecond32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSecond32Member(MI, ix);
@@ -5893,7 +5893,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getSecond32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSecond32Member(MIA, ix);
@@ -5905,7 +5905,7 @@ public class Test {
                     && !MemberArraysProperty.isNullSecond32Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedSecond32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getSecond32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSecond32Member(EO, ix);
@@ -5997,7 +5997,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedSquareMeter32Member(MT2);
         MemberTypesProperty.setSquareMeter32Member(MT2, MT1
                 .squareMeter32Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getSquareMeter32Member(MT2));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullSquareMeter32Member(MT2);
@@ -6011,7 +6011,7 @@ public class Test {
                 && MemberTypesProperty.isChangedSquareMeter32Member(MI);
         MemberTypesProperty.setSquareMeter32Member(MI, MT2
                 .squareMeter32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getSquareMeter32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSquareMeter32Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -6024,7 +6024,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setSquareMeter32Member(MIA, MT2
                 .squareMeter32Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().squareMeter32Member().getVal());
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullSquareMeter32Member(MIA);
@@ -6035,7 +6035,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSquareMeter32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedSquareMeter32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getSquareMeter32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSquareMeter32Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -6068,7 +6068,7 @@ public class Test {
                     && MemberArraysProperty.isChangedSquareMeter32Member(MA2,
                             ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getSquareMeter32Member(MA2, ix));
 
             // Member Item
@@ -6076,7 +6076,7 @@ public class Test {
             item.squareMeter32Member().get(ix).setVal(
                     MA1.squareMeter32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getSquareMeter32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSquareMeter32Member(MI, ix);
@@ -6086,7 +6086,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getSquareMeter32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSquareMeter32Member(MIA, ix);
@@ -6100,7 +6100,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedSquareMeter32Member(EO,
                             ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getSquareMeter32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSquareMeter32Member(EO, ix);
@@ -6192,7 +6192,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedSteradian32Member(MT2);
         MemberTypesProperty.setSteradian32Member(MT2, MT1.steradian32Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getSteradian32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSteradian32Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -6205,7 +6205,7 @@ public class Test {
                 && MemberTypesProperty.isChangedSteradian32Member(MI);
         MemberTypesProperty.setSteradian32Member(MI, MT2.steradian32Member()
                 .getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getSteradian32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSteradian32Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -6218,7 +6218,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setSteradian32Member(MIA, MT2.steradian32Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().steradian32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSteradian32Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -6228,7 +6228,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSteradian32Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedSteradian32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getSteradian32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSteradian32Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -6260,7 +6260,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedSteradian32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getSteradian32Member(MA2, ix));
 
             // Member Item
@@ -6268,7 +6268,7 @@ public class Test {
             item.steradian32Member().get(ix).setVal(
                     MA1.steradian32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getSteradian32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSteradian32Member(MI, ix);
@@ -6277,7 +6277,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getSteradian32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSteradian32Member(MIA, ix);
@@ -6289,7 +6289,7 @@ public class Test {
                     && !MemberArraysProperty.isNullSteradian32Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedSteradian32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getSteradian32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSteradian32Member(EO, ix);
@@ -6379,7 +6379,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedVolt32Member(MT2);
         MemberTypesProperty.setVolt32Member(MT2, MT1.volt32Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getVolt32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullVolt32Member(MT2);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedVolt32Member(MT2);
@@ -6389,7 +6389,7 @@ public class Test {
         Null_Ok = Null_Ok && MemberTypesProperty.isNullVolt32Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedVolt32Member(MI);
         MemberTypesProperty.setVolt32Member(MI, MT2.volt32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getVolt32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullVolt32Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedVolt32Member(MI);
@@ -6399,7 +6399,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedVolt32Member(MIA);
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setVolt32Member(MIA, MT2.volt32Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().volt32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullVolt32Member(MIA);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedVolt32Member(MIA);
@@ -6407,7 +6407,7 @@ public class Test {
         // EmptyObject
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullVolt32Member(EO);
         In_Req_Ok = In_Req_Ok && !MemberTypesProperty.isChangedVolt32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getVolt32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullVolt32Member(EO);
         In_Req_Ok = In_Req_Ok && !MemberTypesProperty.isChangedVolt32Member(EO);
@@ -6434,7 +6434,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedVolt32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getVolt32Member(MA2, ix));
 
             // Member Item
@@ -6442,7 +6442,7 @@ public class Test {
             item.volt32Member().get(ix).setVal(
                     MA1.volt32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getVolt32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullVolt32Member(MI, ix);
@@ -6451,7 +6451,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getVolt32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullVolt32Member(MIA, ix);
@@ -6463,7 +6463,7 @@ public class Test {
                     && !MemberArraysProperty.isNullVolt32Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedVolt32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getVolt32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullVolt32Member(EO, ix);
@@ -6553,7 +6553,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedWatt32Member(MT2);
         MemberTypesProperty.setWatt32Member(MT2, MT1.watt32Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getWatt32Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullWatt32Member(MT2);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedWatt32Member(MT2);
@@ -6563,7 +6563,7 @@ public class Test {
         Null_Ok = Null_Ok && MemberTypesProperty.isNullWatt32Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedWatt32Member(MI);
         MemberTypesProperty.setWatt32Member(MI, MT2.watt32Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getWatt32Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullWatt32Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedWatt32Member(MI);
@@ -6573,7 +6573,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedWatt32Member(MIA);
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setWatt32Member(MIA, MT2.watt32Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().watt32Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullWatt32Member(MIA);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedWatt32Member(MIA);
@@ -6581,7 +6581,7 @@ public class Test {
         // EmptyObject
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullWatt32Member(EO);
         In_Req_Ok = In_Req_Ok && !MemberTypesProperty.isChangedWatt32Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getWatt32Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullWatt32Member(EO);
         In_Req_Ok = In_Req_Ok && !MemberTypesProperty.isChangedWatt32Member(EO);
@@ -6608,7 +6608,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedWatt32Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getWatt32Member(MA2, ix));
 
             // Member Item
@@ -6616,7 +6616,7 @@ public class Test {
             item.watt32Member().get(ix).setVal(
                     MA1.watt32Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getWatt32Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullWatt32Member(MI, ix);
@@ -6625,7 +6625,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getWatt32Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullWatt32Member(MIA, ix);
@@ -6637,7 +6637,7 @@ public class Test {
                     && !MemberArraysProperty.isNullWatt32Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedWatt32Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getWatt32Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullWatt32Member(EO, ix);
@@ -6727,7 +6727,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedAmpere64Member(MT2);
         MemberTypesProperty.setAmpere64Member(MT2, MT1.ampere64Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getAmpere64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullAmpere64Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -6740,7 +6740,7 @@ public class Test {
                 && MemberTypesProperty.isChangedAmpere64Member(MI);
         MemberTypesProperty
                 .setAmpere64Member(MI, MT2.ampere64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getAmpere64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullAmpere64Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -6753,7 +6753,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setAmpere64Member(MIA, MT2.ampere64Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().ampere64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullAmpere64Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -6763,7 +6763,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullAmpere64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedAmpere64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getAmpere64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullAmpere64Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -6791,7 +6791,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedAmpere64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getAmpere64Member(MA2, ix));
 
             // Member Item
@@ -6799,7 +6799,7 @@ public class Test {
             item.ampere64Member().get(ix).setVal(
                     MA1.ampere64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getAmpere64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullAmpere64Member(MI, ix);
@@ -6808,7 +6808,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getAmpere64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullAmpere64Member(MIA, ix);
@@ -6820,7 +6820,7 @@ public class Test {
                     && !MemberArraysProperty.isNullAmpere64Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedAmpere64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getAmpere64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullAmpere64Member(EO, ix);
@@ -6912,7 +6912,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedCubicMeter64Member(MT2);
         MemberTypesProperty.setCubicMeter64Member(MT2, MT1.cubicMeter64Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getCubicMeter64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullCubicMeter64Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -6925,7 +6925,7 @@ public class Test {
                 && MemberTypesProperty.isChangedCubicMeter64Member(MI);
         MemberTypesProperty.setCubicMeter64Member(MI, MT2.cubicMeter64Member()
                 .getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getCubicMeter64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullCubicMeter64Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -6938,7 +6938,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setCubicMeter64Member(MIA, MT2.cubicMeter64Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().cubicMeter64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullCubicMeter64Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -6948,7 +6948,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullCubicMeter64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedCubicMeter64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getCubicMeter64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullCubicMeter64Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -6981,7 +6981,7 @@ public class Test {
                     && MemberArraysProperty
                             .isChangedCubicMeter64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getCubicMeter64Member(MA2, ix));
 
             // Member Item
@@ -6989,7 +6989,7 @@ public class Test {
             item.cubicMeter64Member().get(ix).setVal(
                     MA1.cubicMeter64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getCubicMeter64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullCubicMeter64Member(MI, ix);
@@ -6998,7 +6998,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getCubicMeter64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullCubicMeter64Member(MIA, ix);
@@ -7012,7 +7012,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty
                             .isChangedCubicMeter64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getCubicMeter64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullCubicMeter64Member(EO, ix);
@@ -7102,7 +7102,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedHertz64Member(MT2);
         MemberTypesProperty.setHertz64Member(MT2, MT1.hertz64Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getHertz64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullHertz64Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -7113,7 +7113,7 @@ public class Test {
         Null_Ok = Null_Ok && MemberTypesProperty.isNullHertz64Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedHertz64Member(MI);
         MemberTypesProperty.setHertz64Member(MI, MT2.hertz64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getHertz64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullHertz64Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedHertz64Member(MI);
@@ -7124,7 +7124,7 @@ public class Test {
                 && MemberTypesProperty.isChangedHertz64Member(MIA);
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setHertz64Member(MIA, MT2.hertz64Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().hertz64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullHertz64Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -7134,7 +7134,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullHertz64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedHertz64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getHertz64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullHertz64Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -7162,7 +7162,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedHertz64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getHertz64Member(MA2, ix));
 
             // Member Item
@@ -7170,7 +7170,7 @@ public class Test {
             item.hertz64Member().get(ix).setVal(
                     MA1.hertz64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getHertz64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullHertz64Member(MI, ix);
@@ -7179,7 +7179,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getHertz64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullHertz64Member(MIA, ix);
@@ -7191,7 +7191,7 @@ public class Test {
                     && !MemberArraysProperty.isNullHertz64Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedHertz64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getHertz64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullHertz64Member(EO, ix);
@@ -7280,7 +7280,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedJoule64Member(MT2);
         MemberTypesProperty.setJoule64Member(MT2, MT1.joule64Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getJoule64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullJoule64Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -7291,7 +7291,7 @@ public class Test {
         Null_Ok = Null_Ok && MemberTypesProperty.isNullJoule64Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedJoule64Member(MI);
         MemberTypesProperty.setJoule64Member(MI, MT2.joule64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getJoule64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullJoule64Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedJoule64Member(MI);
@@ -7302,7 +7302,7 @@ public class Test {
                 && MemberTypesProperty.isChangedJoule64Member(MIA);
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setJoule64Member(MIA, MT2.joule64Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().joule64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullJoule64Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -7312,7 +7312,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullJoule64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedJoule64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getJoule64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullJoule64Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -7340,7 +7340,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedJoule64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getJoule64Member(MA2, ix));
 
             // Member Item
@@ -7348,7 +7348,7 @@ public class Test {
             item.joule64Member().get(ix).setVal(
                     MA1.joule64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getJoule64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullJoule64Member(MI, ix);
@@ -7357,7 +7357,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getJoule64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullJoule64Member(MIA, ix);
@@ -7369,7 +7369,7 @@ public class Test {
                     && !MemberArraysProperty.isNullJoule64Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedJoule64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getJoule64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullJoule64Member(EO, ix);
@@ -7459,7 +7459,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedKelvin64Member(MT2);
         MemberTypesProperty.setKelvin64Member(MT2, MT1.kelvin64Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getKelvin64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKelvin64Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -7472,7 +7472,7 @@ public class Test {
                 && MemberTypesProperty.isChangedKelvin64Member(MI);
         MemberTypesProperty
                 .setKelvin64Member(MI, MT2.kelvin64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getKelvin64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKelvin64Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -7485,7 +7485,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setKelvin64Member(MIA, MT2.kelvin64Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().kelvin64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKelvin64Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -7495,7 +7495,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKelvin64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedKelvin64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getKelvin64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKelvin64Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -7523,7 +7523,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedKelvin64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getKelvin64Member(MA2, ix));
 
             // Member Item
@@ -7531,7 +7531,7 @@ public class Test {
             item.kelvin64Member().get(ix).setVal(
                     MA1.kelvin64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getKelvin64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullKelvin64Member(MI, ix);
@@ -7540,7 +7540,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getKelvin64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullKelvin64Member(MIA, ix);
@@ -7552,7 +7552,7 @@ public class Test {
                     && !MemberArraysProperty.isNullKelvin64Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedKelvin64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getKelvin64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullKelvin64Member(EO, ix);
@@ -7642,7 +7642,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedKilogram64Member(MT2);
         MemberTypesProperty.setKilogram64Member(MT2, MT1.kilogram64Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getKilogram64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKilogram64Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -7655,7 +7655,7 @@ public class Test {
                 && MemberTypesProperty.isChangedKilogram64Member(MI);
         MemberTypesProperty.setKilogram64Member(MI, MT2.kilogram64Member()
                 .getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getKilogram64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKilogram64Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -7668,7 +7668,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setKilogram64Member(MIA, MT2.kilogram64Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().kilogram64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKilogram64Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -7678,7 +7678,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKilogram64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedKilogram64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getKilogram64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullKilogram64Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -7707,7 +7707,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedKilogram64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getKilogram64Member(MA2, ix));
 
             // Member Item
@@ -7715,7 +7715,7 @@ public class Test {
             item.kilogram64Member().get(ix).setVal(
                     MA1.kilogram64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getKilogram64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullKilogram64Member(MI, ix);
@@ -7724,7 +7724,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getKilogram64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullKilogram64Member(MIA, ix);
@@ -7736,7 +7736,7 @@ public class Test {
                     && !MemberArraysProperty.isNullKilogram64Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedKilogram64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getKilogram64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullKilogram64Member(EO, ix);
@@ -7825,7 +7825,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedMeter64Member(MT2);
         MemberTypesProperty.setMeter64Member(MT2, MT1.meter64Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getMeter64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullMeter64Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -7836,7 +7836,7 @@ public class Test {
         Null_Ok = Null_Ok && MemberTypesProperty.isNullMeter64Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedMeter64Member(MI);
         MemberTypesProperty.setMeter64Member(MI, MT2.meter64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getMeter64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullMeter64Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedMeter64Member(MI);
@@ -7847,7 +7847,7 @@ public class Test {
                 && MemberTypesProperty.isChangedMeter64Member(MIA);
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setMeter64Member(MIA, MT2.meter64Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().meter64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullMeter64Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -7857,7 +7857,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullMeter64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedMeter64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getMeter64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullMeter64Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -7885,7 +7885,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedMeter64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getMeter64Member(MA2, ix));
 
             // Member Item
@@ -7893,7 +7893,7 @@ public class Test {
             item.meter64Member().get(ix).setVal(
                     MA1.meter64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getMeter64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullMeter64Member(MI, ix);
@@ -7902,7 +7902,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getMeter64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullMeter64Member(MIA, ix);
@@ -7914,7 +7914,7 @@ public class Test {
                     && !MemberArraysProperty.isNullMeter64Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedMeter64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getMeter64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullMeter64Member(EO, ix);
@@ -8008,7 +8008,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedMeterPerSecond64Member(MT2);
         MemberTypesProperty.setMeterPerSecond64Member(MT2, MT1
                 .meterPerSecond64Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getMeterPerSecond64Member(MT2));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullMeterPerSecond64Member(MT2);
@@ -8023,7 +8023,7 @@ public class Test {
                 && MemberTypesProperty.isChangedMeterPerSecond64Member(MI);
         MemberTypesProperty.setMeterPerSecond64Member(MI, MT2
                 .meterPerSecond64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getMeterPerSecond64Member(MI));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullMeterPerSecond64Member(MI);
@@ -8038,7 +8038,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setMeterPerSecond64Member(MIA, MT2
                 .meterPerSecond64Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().meterPerSecond64Member().getVal());
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullMeterPerSecond64Member(MIA);
@@ -8050,7 +8050,7 @@ public class Test {
                 && !MemberTypesProperty.isNullMeterPerSecond64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedMeterPerSecond64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getMeterPerSecond64Member(EO));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullMeterPerSecond64Member(EO);
@@ -8086,7 +8086,7 @@ public class Test {
                     && MemberArraysProperty.isChangedMeterPerSecond64Member(
                             MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getMeterPerSecond64Member(MA2, ix));
 
             // Member Item
@@ -8094,7 +8094,7 @@ public class Test {
             item.meterPerSecond64Member().get(ix).setVal(
                     MA1.meterPerSecond64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getMeterPerSecond64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullMeterPerSecond64Member(MI,
@@ -8105,7 +8105,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getMeterPerSecond64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullMeterPerSecond64Member(MIA,
@@ -8121,7 +8121,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedMeterPerSecond64Member(
                             EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getMeterPerSecond64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullMeterPerSecond64Member(EO,
@@ -8219,7 +8219,7 @@ public class Test {
                         .isChangedMeterPerSecondSquared64Member(MT2);
         MemberTypesProperty.setMeterPerSecondSquared64Member(MT2, MT1
                 .meterPerSecondSquared64Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getMeterPerSecondSquared64Member(MT2));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty
@@ -8237,7 +8237,7 @@ public class Test {
                         .isChangedMeterPerSecondSquared64Member(MI);
         MemberTypesProperty.setMeterPerSecondSquared64Member(MI, MT2
                 .meterPerSecondSquared64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getMeterPerSecondSquared64Member(MI));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullMeterPerSecondSquared64Member(MI);
@@ -8254,7 +8254,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setMeterPerSecondSquared64Member(MIA, MT2
                 .meterPerSecondSquared64Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().meterPerSecondSquared64Member().getVal());
         Null_Ok = Null_Ok
                 && !MemberTypesProperty
@@ -8269,7 +8269,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty
                         .isChangedMeterPerSecondSquared64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getMeterPerSecondSquared64Member(EO));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullMeterPerSecondSquared64Member(EO);
@@ -8308,7 +8308,7 @@ public class Test {
                     && MemberArraysProperty
                             .isChangedMeterPerSecondSquared64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getMeterPerSecondSquared64Member(MA2, ix));
 
             // Member Item
@@ -8316,7 +8316,7 @@ public class Test {
             item.meterPerSecondSquared64Member().get(ix).setVal(
                     MA1.meterPerSecondSquared64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getMeterPerSecondSquared64Member(MI,
                             ix));
             Null_Ok = Null_Ok
@@ -8328,7 +8328,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getMeterPerSecondSquared64Member(MIA,
                             ix));
             Null_Ok = Null_Ok
@@ -8345,7 +8345,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty
                             .isChangedMeterPerSecondSquared64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getMeterPerSecondSquared64Member(EO,
                             ix));
             Null_Ok = Null_Ok
@@ -8440,7 +8440,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedNewton64Member(MT2);
         MemberTypesProperty.setNewton64Member(MT2, MT1.newton64Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getNewton64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullNewton64Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -8453,7 +8453,7 @@ public class Test {
                 && MemberTypesProperty.isChangedNewton64Member(MI);
         MemberTypesProperty
                 .setNewton64Member(MI, MT2.newton64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getNewton64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullNewton64Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -8466,7 +8466,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setNewton64Member(MIA, MT2.newton64Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().newton64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullNewton64Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -8476,7 +8476,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullNewton64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedNewton64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getNewton64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullNewton64Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -8504,7 +8504,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedNewton64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getNewton64Member(MA2, ix));
 
             // Member Item
@@ -8512,7 +8512,7 @@ public class Test {
             item.newton64Member().get(ix).setVal(
                     MA1.newton64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getNewton64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullNewton64Member(MI, ix);
@@ -8521,7 +8521,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getNewton64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullNewton64Member(MIA, ix);
@@ -8533,7 +8533,7 @@ public class Test {
                     && !MemberArraysProperty.isNullNewton64Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedNewton64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getNewton64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullNewton64Member(EO, ix);
@@ -8623,7 +8623,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedPascal64Member(MT2);
         MemberTypesProperty.setPascal64Member(MT2, MT1.pascal64Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getPascal64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullPascal64Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -8636,7 +8636,7 @@ public class Test {
                 && MemberTypesProperty.isChangedPascal64Member(MI);
         MemberTypesProperty
                 .setPascal64Member(MI, MT2.pascal64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getPascal64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullPascal64Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -8649,7 +8649,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setPascal64Member(MIA, MT2.pascal64Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().pascal64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullPascal64Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -8659,7 +8659,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullPascal64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedPascal64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getPascal64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullPascal64Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -8687,7 +8687,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedPascal64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getPascal64Member(MA2, ix));
 
             // Member Item
@@ -8695,7 +8695,7 @@ public class Test {
             item.pascal64Member().get(ix).setVal(
                     MA1.pascal64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getPascal64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullPascal64Member(MI, ix);
@@ -8704,7 +8704,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getPascal64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullPascal64Member(MIA, ix);
@@ -8716,7 +8716,7 @@ public class Test {
                     && !MemberArraysProperty.isNullPascal64Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedPascal64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getPascal64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullPascal64Member(EO, ix);
@@ -8806,7 +8806,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedRadian64Member(MT2);
         MemberTypesProperty.setRadian64Member(MT2, MT1.radian64Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getRadian64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullRadian64Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -8819,7 +8819,7 @@ public class Test {
                 && MemberTypesProperty.isChangedRadian64Member(MI);
         MemberTypesProperty
                 .setRadian64Member(MI, MT2.radian64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getRadian64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullRadian64Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -8832,7 +8832,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setRadian64Member(MIA, MT2.radian64Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().radian64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullRadian64Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -8842,7 +8842,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullRadian64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedRadian64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getRadian64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullRadian64Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -8870,7 +8870,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedRadian64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getRadian64Member(MA2, ix));
 
             // Member Item
@@ -8878,7 +8878,7 @@ public class Test {
             item.radian64Member().get(ix).setVal(
                     MA1.radian64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getRadian64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullRadian64Member(MI, ix);
@@ -8887,7 +8887,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getRadian64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullRadian64Member(MIA, ix);
@@ -8899,7 +8899,7 @@ public class Test {
                     && !MemberArraysProperty.isNullRadian64Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedRadian64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getRadian64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullRadian64Member(EO, ix);
@@ -8993,7 +8993,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedRadianPerSecond64Member(MT2);
         MemberTypesProperty.setRadianPerSecond64Member(MT2, MT1
                 .radianPerSecond64Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getRadianPerSecond64Member(MT2));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullRadianPerSecond64Member(MT2);
@@ -9008,7 +9008,7 @@ public class Test {
                 && MemberTypesProperty.isChangedRadianPerSecond64Member(MI);
         MemberTypesProperty.setRadianPerSecond64Member(MI, MT2
                 .radianPerSecond64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getRadianPerSecond64Member(MI));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullRadianPerSecond64Member(MI);
@@ -9023,7 +9023,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setRadianPerSecond64Member(MIA, MT2
                 .radianPerSecond64Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().radianPerSecond64Member().getVal());
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullRadianPerSecond64Member(MIA);
@@ -9035,7 +9035,7 @@ public class Test {
                 && !MemberTypesProperty.isNullRadianPerSecond64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedRadianPerSecond64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getRadianPerSecond64Member(EO));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullRadianPerSecond64Member(EO);
@@ -9072,7 +9072,7 @@ public class Test {
                     && MemberArraysProperty.isChangedRadianPerSecond64Member(
                             MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getRadianPerSecond64Member(MA2, ix));
 
             // Member Item
@@ -9080,7 +9080,7 @@ public class Test {
             item.radianPerSecond64Member().get(ix).setVal(
                     MA1.radianPerSecond64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getRadianPerSecond64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullRadianPerSecond64Member(MI,
@@ -9091,7 +9091,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getRadianPerSecond64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullRadianPerSecond64Member(MIA,
@@ -9107,7 +9107,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedRadianPerSecond64Member(
                             EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getRadianPerSecond64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullRadianPerSecond64Member(EO,
@@ -9206,7 +9206,7 @@ public class Test {
                         .isChangedRadianPerSecondSquared64Member(MT2);
         MemberTypesProperty.setRadianPerSecondSquared64Member(MT2, MT1
                 .radianPerSecondSquared64Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getRadianPerSecondSquared64Member(MT2));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty
@@ -9224,7 +9224,7 @@ public class Test {
                         .isChangedRadianPerSecondSquared64Member(MI);
         MemberTypesProperty.setRadianPerSecondSquared64Member(MI, MT2
                 .radianPerSecondSquared64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getRadianPerSecondSquared64Member(MI));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty
@@ -9243,7 +9243,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setRadianPerSecondSquared64Member(MIA, MT2
                 .radianPerSecondSquared64Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().radianPerSecondSquared64Member().getVal());
         Null_Ok = Null_Ok
                 && !MemberTypesProperty
@@ -9259,7 +9259,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty
                         .isChangedRadianPerSecondSquared64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getRadianPerSecondSquared64Member(EO));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty
@@ -9300,7 +9300,7 @@ public class Test {
                     && MemberArraysProperty
                             .isChangedRadianPerSecondSquared64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getRadianPerSecondSquared64Member(MA2, ix));
 
             // Member Item
@@ -9308,7 +9308,7 @@ public class Test {
             item.radianPerSecondSquared64Member().get(ix).setVal(
                     MA1.radianPerSecondSquared64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getRadianPerSecondSquared64Member(MI,
                             ix));
             Null_Ok = Null_Ok
@@ -9320,7 +9320,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getRadianPerSecondSquared64Member(MIA,
                             ix));
             Null_Ok = Null_Ok
@@ -9337,7 +9337,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty
                             .isChangedRadianPerSecondSquared64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getRadianPerSecondSquared64Member(EO,
                             ix));
             Null_Ok = Null_Ok
@@ -9433,7 +9433,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedSecond64Member(MT2);
         MemberTypesProperty.setSecond64Member(MT2, MT1.second64Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getSecond64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSecond64Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -9446,7 +9446,7 @@ public class Test {
                 && MemberTypesProperty.isChangedSecond64Member(MI);
         MemberTypesProperty
                 .setSecond64Member(MI, MT2.second64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getSecond64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSecond64Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -9459,7 +9459,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setSecond64Member(MIA, MT2.second64Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().second64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSecond64Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -9469,7 +9469,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSecond64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedSecond64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getSecond64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSecond64Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -9497,7 +9497,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedSecond64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getSecond64Member(MA2, ix));
 
             // Member Item
@@ -9505,7 +9505,7 @@ public class Test {
             item.second64Member().get(ix).setVal(
                     MA1.second64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getSecond64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSecond64Member(MI, ix);
@@ -9514,7 +9514,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getSecond64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSecond64Member(MIA, ix);
@@ -9526,7 +9526,7 @@ public class Test {
                     && !MemberArraysProperty.isNullSecond64Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedSecond64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getSecond64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSecond64Member(EO, ix);
@@ -9618,7 +9618,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedSquareMeter64Member(MT2);
         MemberTypesProperty.setSquareMeter64Member(MT2, MT1
                 .squareMeter64Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getSquareMeter64Member(MT2));
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullSquareMeter64Member(MT2);
@@ -9632,7 +9632,7 @@ public class Test {
                 && MemberTypesProperty.isChangedSquareMeter64Member(MI);
         MemberTypesProperty.setSquareMeter64Member(MI, MT2
                 .squareMeter64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getSquareMeter64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSquareMeter64Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -9645,7 +9645,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setSquareMeter64Member(MIA, MT2
                 .squareMeter64Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().squareMeter64Member().getVal());
         Null_Ok = Null_Ok
                 && !MemberTypesProperty.isNullSquareMeter64Member(MIA);
@@ -9656,7 +9656,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSquareMeter64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedSquareMeter64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getSquareMeter64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSquareMeter64Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -9689,7 +9689,7 @@ public class Test {
                     && MemberArraysProperty.isChangedSquareMeter64Member(MA2,
                             ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getSquareMeter64Member(MA2, ix));
 
             // Member Item
@@ -9697,7 +9697,7 @@ public class Test {
             item.squareMeter64Member().get(ix).setVal(
                     MA1.squareMeter64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getSquareMeter64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSquareMeter64Member(MI, ix);
@@ -9707,7 +9707,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getSquareMeter64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSquareMeter64Member(MIA, ix);
@@ -9721,7 +9721,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedSquareMeter64Member(EO,
                             ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getSquareMeter64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSquareMeter64Member(EO, ix);
@@ -9813,7 +9813,7 @@ public class Test {
                 && !MemberTypesProperty.isChangedSteradian64Member(MT2);
         MemberTypesProperty.setSteradian64Member(MT2, MT1.steradian64Member()
                 .getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getSteradian64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSteradian64Member(MT2);
         In_Req_Ok = In_Req_Ok
@@ -9826,7 +9826,7 @@ public class Test {
                 && MemberTypesProperty.isChangedSteradian64Member(MI);
         MemberTypesProperty.setSteradian64Member(MI, MT2.steradian64Member()
                 .getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getSteradian64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSteradian64Member(MI);
         In_Req_Ok = In_Req_Ok
@@ -9839,7 +9839,7 @@ public class Test {
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setSteradian64Member(MIA, MT2.steradian64Member()
                 .getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().steradian64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSteradian64Member(MIA);
         In_Req_Ok = In_Req_Ok
@@ -9849,7 +9849,7 @@ public class Test {
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSteradian64Member(EO);
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedSteradian64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getSteradian64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullSteradian64Member(EO);
         In_Req_Ok = In_Req_Ok
@@ -9881,7 +9881,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedSteradian64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getSteradian64Member(MA2, ix));
 
             // Member Item
@@ -9889,7 +9889,7 @@ public class Test {
             item.steradian64Member().get(ix).setVal(
                     MA1.steradian64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getSteradian64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSteradian64Member(MI, ix);
@@ -9898,7 +9898,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getSteradian64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSteradian64Member(MIA, ix);
@@ -9910,7 +9910,7 @@ public class Test {
                     && !MemberArraysProperty.isNullSteradian64Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedSteradian64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getSteradian64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullSteradian64Member(EO, ix);
@@ -10000,7 +10000,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedVolt64Member(MT2);
         MemberTypesProperty.setVolt64Member(MT2, MT1.volt64Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getVolt64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullVolt64Member(MT2);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedVolt64Member(MT2);
@@ -10010,7 +10010,7 @@ public class Test {
         Null_Ok = Null_Ok && MemberTypesProperty.isNullVolt64Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedVolt64Member(MI);
         MemberTypesProperty.setVolt64Member(MI, MT2.volt64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getVolt64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullVolt64Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedVolt64Member(MI);
@@ -10020,7 +10020,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedVolt64Member(MIA);
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setVolt64Member(MIA, MT2.volt64Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().volt64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullVolt64Member(MIA);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedVolt64Member(MIA);
@@ -10028,7 +10028,7 @@ public class Test {
         // EmptyObject
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullVolt64Member(EO);
         In_Req_Ok = In_Req_Ok && !MemberTypesProperty.isChangedVolt64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getVolt64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullVolt64Member(EO);
         In_Req_Ok = In_Req_Ok && !MemberTypesProperty.isChangedVolt64Member(EO);
@@ -10055,7 +10055,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedVolt64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getVolt64Member(MA2, ix));
 
             // Member Item
@@ -10063,7 +10063,7 @@ public class Test {
             item.volt64Member().get(ix).setVal(
                     MA1.volt64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getVolt64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullVolt64Member(MI, ix);
@@ -10072,7 +10072,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getVolt64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullVolt64Member(MIA, ix);
@@ -10084,7 +10084,7 @@ public class Test {
                     && !MemberArraysProperty.isNullVolt64Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedVolt64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getVolt64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullVolt64Member(EO, ix);
@@ -10174,7 +10174,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok
                 && !MemberTypesProperty.isChangedWatt64Member(MT2);
         MemberTypesProperty.setWatt64Member(MT2, MT1.watt64Member().getVal());
-        System.out.format("Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Val: %.0f%n", MemberTypesProperty
                 .getWatt64Member(MT2));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullWatt64Member(MT2);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedWatt64Member(MT2);
@@ -10184,7 +10184,7 @@ public class Test {
         Null_Ok = Null_Ok && MemberTypesProperty.isNullWatt64Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedWatt64Member(MI);
         MemberTypesProperty.setWatt64Member(MI, MT2.watt64Member().getVal());
-        System.out.format("Item Val: %.0f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Item Val: %.0f%n", MemberTypesProperty
                 .getWatt64Member(MI));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullWatt64Member(MI);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedWatt64Member(MI);
@@ -10194,7 +10194,7 @@ public class Test {
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedWatt64Member(MIA);
         MIA.typesItemArray().get(1).setObj(new TypesItem());
         MemberTypesProperty.setWatt64Member(MIA, MT2.watt64Member().getVal());
-        System.out.format("Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
+        System.out.format(Locale.US, "Item Array Val: %.0f%n", MIA.typesItemArray().get(1)
                 .getObj().watt64Member().getVal());
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullWatt64Member(MIA);
         In_Req_Ok = In_Req_Ok && MemberTypesProperty.isChangedWatt64Member(MIA);
@@ -10202,7 +10202,7 @@ public class Test {
         // EmptyObject
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullWatt64Member(EO);
         In_Req_Ok = In_Req_Ok && !MemberTypesProperty.isChangedWatt64Member(EO);
-        System.out.format("Property Parameter Val: %.2f%n", MemberTypesProperty
+        System.out.format(Locale.US, "Property Parameter Val: %.2f%n", MemberTypesProperty
                 .getWatt64Member(EO));
         Null_Ok = Null_Ok && !MemberTypesProperty.isNullWatt64Member(EO);
         In_Req_Ok = In_Req_Ok && !MemberTypesProperty.isChangedWatt64Member(EO);
@@ -10229,7 +10229,7 @@ public class Test {
             In_Req_Ok = In_Req_Ok
                     && MemberArraysProperty.isChangedWatt64Member(MA2, ix);
 
-            System.out.format("Val %d: %.0f%n", ix, MemberArraysProperty
+            System.out.format(Locale.US, "Val %d: %.0f%n", ix, MemberArraysProperty
                     .getWatt64Member(MA2, ix));
 
             // Member Item
@@ -10237,7 +10237,7 @@ public class Test {
             item.watt64Member().get(ix).setVal(
                     MA1.watt64Member().get(ix).getVal());
             MI.arraysItem().setObj(item);
-            System.out.format("Array Item Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Val %d: %.0f%n", ix,
                     MemberArraysProperty.getWatt64Member(MI, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullWatt64Member(MI, ix);
@@ -10246,7 +10246,7 @@ public class Test {
 
             // Member Item Array
             MIA.arraysItemArray().get(1).setObj(item);
-            System.out.format("Array Item Array Val %d: %.0f%n", ix,
+            System.out.format(Locale.US, "Array Item Array Val %d: %.0f%n", ix,
                     MemberArraysProperty.getWatt64Member(MIA, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullWatt64Member(MIA, ix);
@@ -10258,7 +10258,7 @@ public class Test {
                     && !MemberArraysProperty.isNullWatt64Member(EO, ix);
             In_Req_Ok = In_Req_Ok
                     && !MemberArraysProperty.isChangedWatt64Member(EO, ix);
-            System.out.format("Parameter Array Val %d: %.2f%n", ix,
+            System.out.format(Locale.US, "Parameter Array Val %d: %.2f%n", ix,
                     MemberArraysProperty.getWatt64Member(EO, ix));
             Null_Ok = Null_Ok
                     && !MemberArraysProperty.isNullWatt64Member(EO, ix);

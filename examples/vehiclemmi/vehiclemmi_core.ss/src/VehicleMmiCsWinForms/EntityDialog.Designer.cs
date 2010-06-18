@@ -218,23 +218,17 @@ namespace VehicleMmiCsWinForms
         private System.Windows.Forms.Label labelIdentification;
         private System.Windows.Forms.TextBox textBoxIdentification;
         private System.Windows.Forms.ComboBox comboBoxCategory;
-        //StartRemoveInExercise
         private System.Windows.Forms.Label labelSpeed;
-        //StopRemoveInExercise
         private System.Windows.Forms.Label labelCategory;
-        //StartRemoveInExercise
         private System.Windows.Forms.TextBox textBoxSpeed;
-        //StopRemoveInExercise
         private System.Windows.Forms.Button buttonApply;
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Button buttonOk;
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatus;
-        //StartRemoveInExercise
         private System.Windows.Forms.Label labelPosLong;
         private System.Windows.Forms.Label labelPosLat;
         private System.Windows.Forms.TextBox textBoxPosLong;
         private System.Windows.Forms.TextBox textBoxPosLat;
-        //StopRemoveInExercise
     }
 }

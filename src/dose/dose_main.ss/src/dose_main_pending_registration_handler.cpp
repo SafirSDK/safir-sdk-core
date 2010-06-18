@@ -164,17 +164,18 @@ namespace Internal
                 if (!reg.acceptedNodes[std::distance(statuses.begin(),it)])
                 {
                     gotAll = false;
-                    lllout << "Need accept from node " << nodeId << std::endl;
+                    lllout << "Request " << requestId << " need accept from node " << nodeId << std::endl;
                 }
                 else
                 {
-                    lllout << "Have accept from node " << nodeId << std::endl;
+                    lllout << "Request " << requestId << " have accept from node " << nodeId << std::endl;
                 }
             }
         }
 
         if (gotAll)
         {
+            lllout << "Request " << requestId << " got accept from all nodes. Erasing it from m_pendingRegistrations" << std::endl;
             const ConnectionPtr conn = Connections::Instance().GetConnection(reg.connectionId);
             conn->SetPendingRegistrationAccepted(requestId);
             conn->SignalIn();
@@ -183,6 +184,7 @@ namespace Internal
         }
         else
         {
+            lllout << "Request " << requestId << " does not have accept from all nodes" << std::endl;
             return false;
         }
     }
@@ -196,16 +198,16 @@ namespace Internal
 
         const Safir::Dob::Typesystem::Si64::Second now = GetUtcTime();
 
-        if (fabs(now - findIt->second.lastRequestTime) > 1.0)
+        TimerInfoPtr timerInfo(new ResendPendingTimerInfo(m_timerId,requestId));
+
+        if (now > findIt->second.nextRequestTime)
         {
-            findIt->second.lastRequestTime = now;
             findIt->second.lastRequestTimestamp = m_pendingRegistrationClock.GetNewTimestamp();
             findIt->second.rejected = false;
 
             lllout << "Sending Smt_Action_PendingRegistrationRequest requestId = " << requestId
-                << ", type = " << Dob::Typesystem::Operations::GetName(findIt->second.typeId)
-                   << std::setprecision(20) << ", time = " << findIt->second.lastRequestTime
-                   << "timestamp = " << findIt->second.lastRequestTimestamp<< std::endl;
+                   << ", type = " << Dob::Typesystem::Operations::GetName(findIt->second.typeId)
+                   << std::setprecision(20) << "timestamp = " << findIt->second.lastRequestTimestamp << std::endl;
 
             DistributionData msg(pending_registration_request_tag,
                                  findIt->second.connectionId,
@@ -216,11 +218,29 @@ namespace Internal
 
             const bool success = m_ecom.Send(msg);
 
-            //timeout in ten milliseconds if failure and 1 second if success.
-            TimerInfoPtr timerInfo(new ResendPendingTimerInfo(m_timerId,requestId));
+            if (success)
+            {
+                // Set the first timeout to now + 1.0, the second to now + 1.5, and so on. This is to handle
+                // any node that for some reason is permanently slow.
+                findIt->second.nextRequestTime = now + 1.0 + findIt->second.nbrOfSentRequests * 0.5;
+                ++findIt->second.nbrOfSentRequests;
+            }
+            else
+            {
+                findIt->second.nextRequestTime = now + 0.01;
+            }
+
             TimerHandler::Instance().Set(Discard,
                                          timerInfo,
-                                         findIt->second.lastRequestTime + (success?1.0:0.01));
+                                         findIt->second.nextRequestTime);
+        }
+        else
+        {
+            // If for some reason the timer for this pending request has fired but nextRequestTime
+            // has not yet been reached, we must insert the timer again.
+            TimerHandler::Instance().Set(Discard,
+                                         timerInfo,
+                                         findIt->second.nextRequestTime);
         }
 
         //TODO: hook on to NotOverflow from doseCom instead of polling.
@@ -281,7 +301,6 @@ namespace Internal
                          << ", handler = " << handlerId
                          << ", context = " << contextId
                          << std::setprecision(20) << ", timestamp = " << timestamp << std::endl;
-
 
                 //create a response
                 DistributionData resp(pending_registration_response_tag,
@@ -410,10 +429,10 @@ namespace Internal
         for (PendingRegistrations::iterator it = m_pendingRegistrations.begin();
              it != m_pendingRegistrations.end();)
         {
-
-            lllout << "  " << it->second.handlerId << std::endl;
             if (it->second.connectionId == id)
             {
+                lllout << "  " << it->second.handlerId << std::endl;
+
                 m_pendingRegistrations.erase(it++);
             }
             else

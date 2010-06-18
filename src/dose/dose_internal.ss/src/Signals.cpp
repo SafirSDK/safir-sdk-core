@@ -124,7 +124,7 @@ namespace Internal
         }
         const std::string name = Prefix + boost::lexical_cast<std::string>(connection.m_id);
         return m_semaphores.insert(std::make_pair(connection.m_id,
-                                                  new Semaphore(name))).
+                                                  new NamedSemaphore(name))).
             first->second;
     }
 

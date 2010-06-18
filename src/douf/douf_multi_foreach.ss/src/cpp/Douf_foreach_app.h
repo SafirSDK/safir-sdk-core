@@ -28,50 +28,65 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Application/Tracer.h>
 #include <Safir/Utilities/AceDispatcher.h>
+#include <Safir/Utilities/Array.h>
 
 #include "Douf_foreach_services.h"
 
 namespace Safir
 {
-    namespace Utilities
+namespace Utilities
+{
+namespace ForEach
+{
+
+    /** 
+    * Main class. Controls startup, closedown and receives events.
+    */
+    class ForEachApp :
+        // Allows this class to receive a stop order.
+        public Safir::Dob::StopHandler
     {
-        namespace ForEach
+    public:
+
+        /** Constructor
+        */
+        ForEachApp();
+
+        int Run();
+
+        /** 
+        * Called by the stop handler.
+        */
+        void OnStopOrder();
+
+    private:
+
+        struct ContextData
         {
-            /** 
-            * Main class. Controls startup, closedown and receives events.
-            */
-            class ForEachApp :
-                // Allows this class to receive a stop order.
-                public Safir::Dob::StopHandler
-            {
-            public:
+            ContextData() : m_dispatcher(m_connection), m_debug(L"ForEachApp") {}
 
-                /** Constructor
-                */
-                ForEachApp();
+            Safir::Dob::Connection m_connection;
 
-                int Run();
+            Safir::Utilities::AceDispatcher m_dispatcher;
 
-                /** 
-                * Called by the stop handler.
-                */
-                void OnStopOrder();
+            Safir::Utilities::ForEach::Services m_service;
 
-            private:
+            Safir::Application::Tracer m_debug;
 
-                // DOB connection.
-                Safir::Dob::Connection m_connection;
+        private:
 
-                // The DOB dispatch event.
-                Safir::Utilities::AceDispatcher     m_dispatcher;
+            //Disable copying and assignment
+            ContextData(const ContextData&);
+            ContextData& operator=(const ContextData&);
 
-                // DOB object handlers.
-                Safir::Utilities::ForEach::Services m_service;
+        };
 
-                // Tracer.
-                Safir::Application::Tracer m_debug;
-            };
-        }
-    }
+        typedef Safir::Utilities::Array<ContextData> ContextVector;
+
+        ContextVector m_context;
+
+    };
+}
+}
 }
 #endif

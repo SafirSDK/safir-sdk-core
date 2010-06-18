@@ -2042,7 +2042,132 @@ Consumer 0: OnInitialInjectionsDone:
   HandlerId = DEFAULT_HANDLER
 
 ==========================================================================
-TESTCASE 999
+TESTCASE 1000
+Description: Test a foreach update request with a brief response
+Expectation: Partner 1 and 2 should get an update request and partner 0 should get a successful brief response. The read instances should have the Info element set to KalleKula
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnUpdateRequest: 
+  Entity     = (DoseTest.GlobalEntity, 123)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;ForEach-context1;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = -5453762115588730630
+  HandlerStr = -5453762115588730630
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+==========================================================================
+TESTCASE 1001
+Description: Test a foreach update request with a brief response containing both one successful and two unsuccessful response.
+Expectation: Partner 1 and 2 should get an update request. Partner 0 should get a brief response with one success and two errors. The read instances should have the Info element set to KalleKula
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnUpdateRequest: 
+  Entity     = (DoseTest.GlobalEntity, 123)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;ForEach-context1;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = -5453762115588730630
+  HandlerStr = -5453762115588730630
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+==========================================================================
+TESTCASE 1002
+Description: Test a foreach update request with a full response
+Expectation: Partner 1 and 2 should get an update request and partner 0 should get a successful full response. The read instances should have the Info element set to KalleKula
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnUpdateRequest: 
+  Entity     = (DoseTest.GlobalEntity, 123)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;ForEach-context1;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = -5453762115588730630
+  HandlerStr = -5453762115588730630
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+==========================================================================
+TESTCASE 1003
+Description: Test a foreach update request with a full response containing both a successful and an unsuccessful response.
+Expectation: Partner 1 and 2 should get an update request. Partner 0 should get a full response with one success and one error. The read instances should have the Info element set to KalleKula
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnUpdateRequest: 
+  Entity     = (DoseTest.GlobalEntity, 123)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;ForEach-context1;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = -5453762115588730630
+  HandlerStr = -5453762115588730630
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+==========================================================================
+TESTCASE 1004
+Description: Test a foreach update request with a immediate response
+Expectation: Partner 1 and 2 should get an update request and partner 0 should get a successful immediate response. The read instances should have the Info element set to KalleKula
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnUpdateRequest: 
+  Entity     = (DoseTest.GlobalEntity, 123)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;ForEach-context1;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = -5453762115588730630
+  HandlerStr = -5453762115588730630
+  Request    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">KalleKula</value></member></members></object>
+
+==========================================================================
+TESTCASE 1005
+Description: Test a foreach delete request with a brief response
+Expectation: Partner 1 and 2 should get a delete request and partner 0 should get a successful brief response. The read of the instances should give Not Found
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnDeleteRequest: 
+  Entity     = (DoseTest.GlobalEntity, 123)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;ForEach-context1;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = -5453762115588730630
+  HandlerStr = -5453762115588730630
+
+==========================================================================
+TESTCASE 1006
+Description: Test a foreach delete request with a brief response containing both a successful and an unsuccessful response.
+Expectation: Partner 1 and 2 should get a delete request. Partner 0 should get a brief response with one success and one error. The read of the instances should give NotFound
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnDeleteRequest: 
+  Entity     = (DoseTest.GlobalEntity, 123)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;ForEach-context1;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = -5453762115588730630
+  HandlerStr = -5453762115588730630
+
+==========================================================================
+TESTCASE 1007
+Description: Test a foreach delete request with a full response
+Expectation: Partner 1 and 2 should get a delete request and partner 0 should get a successful full response. The read of the instances should give NotFound
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnDeleteRequest: 
+  Entity     = (DoseTest.GlobalEntity, 123)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;ForEach-context1;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = -5453762115588730630
+  HandlerStr = -5453762115588730630
+
+==========================================================================
+TESTCASE 1008
+Description: Test a foreach delete request with a full response containing both a successful and an unsuccessful response.
+Expectation: Partner 1 and 2 should get a delete request. Partner 0 should get a full response with one success and one error. The read of the instances should give NotFound
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnDeleteRequest: 
+  Entity     = (DoseTest.GlobalEntity, 123)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;ForEach-context1;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = -5453762115588730630
+  HandlerStr = -5453762115588730630
+
+==========================================================================
+TESTCASE 1009
+Description: Test a foreach delete request with a immediate response
+Expectation: Partner 1 and 2 should get a delete request and partner 0 should get a successful immediate response. The read of the instances should give NotFound
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnDeleteRequest: 
+  Entity     = (DoseTest.GlobalEntity, 123)
+  Sender     = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;1;ForEach-context1;0</value></member><member><name>ConnectionId</name></member></members></object>
+  Handler    = -5453762115588730630
+  HandlerStr = -5453762115588730630
+
+==========================================================================
+TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing
 --------- Setup -----------

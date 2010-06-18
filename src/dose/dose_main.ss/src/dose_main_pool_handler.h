@@ -29,7 +29,7 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/ConnectionId.h>
-#include <Safir/Dob/Internal/Array.h>
+#include <Safir/Utilities/Array.h>
 #include <ace/Event_Handler.h>
 #include <map>
 #include <deque>
@@ -193,7 +193,7 @@ namespace Internal
 
         //Safir::Dob::Utilities::Array<SubcriptionConnection> m_stateSubscriptionConnections;
 
-        Safir::Dob::Internal::Array<SubcriptionConnection> m_stateSubscriptionConnections;
+        Safir::Utilities::Array<SubcriptionConnection> m_stateSubscriptionConnections;
         
         boost::shared_ptr<StateDispatcher> m_stateDispatcher;
         DummySubscriber m_dummySubscriber;

@@ -76,7 +76,8 @@ namespace Internal
                 connectionId(connId),
                 typeId(type),
                 handlerId(handler),
-                lastRequestTime(),
+                nextRequestTime(),
+                nbrOfSentRequests(0),
                 lastRequestTimestamp(),
                 acceptedNodes(false),
                 rejected(false){}
@@ -84,7 +85,8 @@ namespace Internal
             ConnectionId connectionId;
             Dob::Typesystem::TypeId typeId;
             Dob::Typesystem::HandlerId handlerId;
-            double lastRequestTime;
+            double nextRequestTime;
+            unsigned int nbrOfSentRequests;
             LamportTimestamp lastRequestTimestamp;
             std::bitset<NUM_NODES> acceptedNodes;
             bool rejected;

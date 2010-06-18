@@ -82,7 +82,8 @@ namespace Safir
                 * Initiates this class. Creates a secondary DOB
                 * connection and registeres the service.
                 */
-                void Init();
+                void Init(const std::wstring& connectionNameCommonPart,
+                          const std::wstring& connectionNameInstancePart);
 
                 void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
                                            const Safir::Dob::Typesystem::HandlerId& handlerId);

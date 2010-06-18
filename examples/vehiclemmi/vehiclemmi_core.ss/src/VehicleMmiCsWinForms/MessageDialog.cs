@@ -32,11 +32,11 @@ namespace VehicleMmiCsWinForms
     /// with the text received the message.
     /// </summary>
     public partial class MessageDialog : Form
-        //StartRemoveInExercise
+        //StartRemoveInExercise8
         ,
         // Allows this class to subscribe for messages
         Safir.Dob.MessageSubscriber
-        //StopRemoveInExercise
+        //StopRemoveInExercise8
     {
         ////////////////////////////////////////
         // Private members and functions
@@ -64,14 +64,14 @@ namespace VehicleMmiCsWinForms
             InitializeComponent();
             m_secDobConnection = new Safir.Dob.SecondaryConnection();
             m_secDobConnection.Attach();
-            //StartRemoveInExercise
+            //StartRemoveInExercise8
             m_secDobConnection.SubscribeMessage(Capabilities.Vehicles.VehicleMsg.ClassTypeId,
                 new Safir.Dob.Typesystem.ChannelId(), this);
-            //StopRemoveInExercise
+            //StopRemoveInExercise8
         }
 
 
-        //StartRemoveInExercise
+        //StartRemoveInExercise8
         /// <summary>
         /// Overrides Safir.Dob.MessageSubscriber. Called by the Dob 
         /// when a message is sent that is subscribed for.
@@ -90,6 +90,6 @@ namespace VehicleMmiCsWinForms
             }
             this.Show();
         }
-        //StopRemoveInExercise
+        //StopRemoveInExercise8
     }
 }

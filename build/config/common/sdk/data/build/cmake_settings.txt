@@ -36,10 +36,8 @@ if (MSVC)
    ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
    ADD_DEFINITIONS(-D_UNICODE -DUNICODE)
 
-   #use multiprocessing for build for msvc90 and newer
-   if (MSVC_VERSION GREATER 1400)
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-   endif()
+   #use multiprocessing 
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 
    #increase warning level
    IF(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
@@ -75,10 +73,7 @@ else()
     endif()
 endif()
 
-#if we're using new style build system we want dynamic linking
-if (SAFIR_BUILD_SYSTEM_VERSION)
-   ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
-endif()
+ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 
 #Boost 1.39 and vc80 don't play nicely together. 
 #we get multiply defined symbols. As a workaround we allow this.

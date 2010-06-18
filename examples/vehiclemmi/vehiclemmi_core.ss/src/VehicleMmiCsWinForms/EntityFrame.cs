@@ -34,10 +34,10 @@ namespace VehicleMmiCsWinForms
     
     public partial class EntityFrame : 
         Form
+        //StartRemoveInExercise1
         // Allows this class to receive response on sent requests
-        //StartRemoveInExercise
         ,Safir.Dob.Requestor
-        //StopRemoveInExercise
+        //StopRemoveInExercise1
     {
         //////////////////////////////////
         // Private members and functions
@@ -65,12 +65,9 @@ namespace VehicleMmiCsWinForms
         /// </summary>
         private void toolStripButtonUpdate_Click(object sender, EventArgs e)
         {
-            //StartRemoveInExercise
             m_vehicleEntityListHandler.OpenVehicleUpdateDlg();
-            //StopRemoveInExercise
         }
 
-        //StartRemoveInExercise
         /// <summary>
         /// Removes selected vehicle
         /// </summary>
@@ -80,7 +77,9 @@ namespace VehicleMmiCsWinForms
 
             if (m_vehicleEntityListHandler.GetSelectedEntityId(out entityId))
             {
+                //StartRemoveInExercise7
                 m_secDobConnection.DeleteRequest(entityId, this);
+                //StopRemoveInExercise7
                 statusStrip.Items["toolStripStatus"].Text = "OK";
             }
             else
@@ -97,7 +96,6 @@ namespace VehicleMmiCsWinForms
             m_vehicleEntityListHandler.OpenCalculateSpeedDiffDlg();
         }
 
-        //StopRemoveInExercise
         /// <summary>
         /// Opens dialog to show category information
         /// </summary>
@@ -114,7 +112,6 @@ namespace VehicleMmiCsWinForms
         /// <param name="e"></param>
         private void toolStripButtonDeleteCategoryInfo_Click(object sender, EventArgs e)
         {
-            //StartRemoveInExercise
             Safir.Dob.Typesystem.EntityId entityId = new Safir.Dob.Typesystem.EntityId();
 
             if (m_vehicleEntityListHandler.GetSelectedEntityId(out entityId))
@@ -147,7 +144,6 @@ namespace VehicleMmiCsWinForms
             {
                 statusStrip.Items["toolStripStatus"].Text = "No vehicle selected.";
             }
-            //StopRemoveInExercise
         }
 
         /// <summary>
@@ -174,7 +170,7 @@ namespace VehicleMmiCsWinForms
             m_vehicleEntityListHandler.StartSubscription();
         }
 
-        //StartRemoveInExercise
+        //StartRemoveInExercise1
         /// <summary>
         /// Overrides Safir.Dob.Requestor. Response for sent request
         /// </summary>
@@ -216,6 +212,6 @@ namespace VehicleMmiCsWinForms
             // No automatic resending is made. 
             statusStrip.Items["toolStripStatus"].Text = "Overflow situation solved. Make request again!";
         }
-        //StopRemoveInExercise
+        //StopRemoveInExercise1
     }
 }

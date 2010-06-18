@@ -78,7 +78,7 @@ private:
 
 std::string GetRandomLanguage()
 {
-#if 0
+#if 1
     static const char * languages[] = {"cpp", "ada", "java", "dotnet"};
     return languages[rand()%4];
 #else
@@ -265,7 +265,7 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
             ("repeats", po::value<int>(&results.repeats)->default_value(1), "number of times to run tests")
             ("languages,l", po::value<std::vector<std::string> >(&results.languages)->multitoken()->default_value(Languages(3,"cpp"),"cpp cpp cpp"), "choose languages to run, e.g.\n--languages cpp ada java or \n--languages random")
             ("first", po::value<int>(&results.first)->default_value(0), "first testcase")
-            ("last", po::value<int>(&results.last)->default_value(999), "last testcase")
+            ("last", po::value<int>(&results.last)->default_value(9999), "last testcase")
             ("no-timeout", "Do not time out and exit if a partner does not respond for a long time")
             ("context", po::value<int>(&results.context)->default_value(0), "default context for partner test connection (-1 for random)");
 

@@ -90,10 +90,8 @@ namespace Dob
 {
 namespace Internal
 {
-    Controller::Controller(bool persistController)
-        : m_persistController(persistController),
-          m_considerGhost(persistController),  // A persist controller considers ghosts
-          m_isConnected(false),
+    Controller::Controller()
+        : m_isConnected(false),
           m_connection(NULL),
           m_requestQueueInOverflowState(false),
           m_messageQueueInOverflowState(false),
@@ -2871,6 +2869,8 @@ namespace Internal
                                                        const bool includeSubclasses,
                                                        bool& end)
     {
+        ENSURE(m_entityIterators.size() < RAND_MAX, << "It seems that the application isn't releasing its Entity Iterators");
+
         //Generate a unique iterator id
         Typesystem::Int32 newIteratorId = rand();
         while (m_entityIterators.find(newIteratorId) != m_entityIterators.end())
@@ -2880,6 +2880,7 @@ namespace Internal
 
         m_entityIterators.insert(std::make_pair(newIteratorId, EntityTypes::Instance().
             CreateEntityIterator(typeId, m_connection->Id().m_contextId, includeSubclasses, end)));
+
         return newIteratorId;
     }
 

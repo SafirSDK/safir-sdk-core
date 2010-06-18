@@ -25,7 +25,34 @@ FOREACH(dou_file ${dou_files})
      WORKING_DIRECTORY ..)
 ENDFOREACH()
 
-ADD_CUSTOM_TARGET(generated_code ALL
-  DEPENDS ${dependencies})
+#Add several targets in order to enable parallel builds on multicore machines.
+#Ideally number_of_targets should be adapted to the build machine HW, but I
+#haven't figured out how to get this information, so for the time being, we use
+#a hardcoded value 
 
+SET(number_of_targets 8)
+
+LIST(LENGTH dependencies number_of_dependencies)
+MATH(EXPR target_size ${number_of_dependencies}/${number_of_targets})
+
+FOREACH(target RANGE 0 ${number_of_targets})
+  
+  SET(dependencies_subset)
+  FOREACH(idx RANGE 1 ${target_size})
+
+    LIST(LENGTH dependencies remaining_number_of_dependencies)
+    IF(${remaining_number_of_dependencies} EQUAL 0)
+      BREAK()
+    ENDIF()
+
+    LIST(GET dependencies 0 dependency)
+    SET(dependencies_subset "${dependencies_subset};${dependency}")
+    LIST(REMOVE_AT dependencies 0)
+
+  ENDFOREACH()
+  
+  ADD_CUSTOM_TARGET(generated_code_${target} ALL
+    DEPENDS ${dependencies_subset})
+  
+ENDFOREACH()
 

@@ -63,6 +63,7 @@ namespace VehicleMmiCsWinForms
         /// </summary>
         private void buttonApply_Click(object sender, EventArgs e)
         {
+            //StartRemoveInExercise9
             if (textBoxCurrentSpeed.Text.Length == 0)
             {
                 statusStrip.Items["toolStripStatus"].Text = "Current speed must exist.";
@@ -101,6 +102,7 @@ namespace VehicleMmiCsWinForms
             {
                 statusStrip.Items["toolStripStatus"].Text = "Overflow when sending, please wait!";
             }
+            //StopRemoveInExercise9
         }
         ////////////////////////////////////////////////
         // Public members and functions

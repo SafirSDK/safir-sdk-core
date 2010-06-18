@@ -70,7 +70,16 @@ namespace dose_test_dotnet
             System.Console.Write(buffer, index, count);
             m_buf.Write(buffer, index, count);
         }
-    
+
+        public override void WriteLine(string value)
+        {
+            this.Write(value + "\n");
+        }
+
+        public override void WriteLine()
+        {
+            this.Write("\n");
+        }
 
         public override string ToString()
         {

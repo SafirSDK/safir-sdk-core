@@ -31,6 +31,9 @@ To install these from the command line "in one go" on Ubuntu/Kubuntu 9.04, run:
 To install these from the command line "in one go" on Ubuntu/Kubuntu 9.10, run:
    sudo apt-get install libqt4-dev mono-devel libmono-winforms2.0-cil libboost1.40-all-dev libace-dev libtemplates-parser-dev libxmlada-dev libiodbc2-dev cmake g++ openjdk-6-jdk doxygen graphviz make python-tk
 
+To install these from the command line "in one go" on Ubuntu/Kubuntu 10.04, run:
+   sudo apt-get install libqt4-dev mono-devel libmono-winforms2.0-cil libboost1.40-all-dev libace-dev libtemplates-parser11.5-dev libxmlada3.2-dev libiodbc2-dev cmake g++ openjdk-6-jdk doxygen graphviz make python-tk libexpat1-dev
+
 To install these from the command line "in one go" on Debian 5.0.3 (Lenny), run:
    sudo apt-get install libqt4-dev mono-2.0-devel mono-1.0-devel libmono-winforms2.0-cil libboost1.35-dev libace-dev libtemplates-parser-dev libxmlada-dev libiodbc2-dev cmake g++ openjdk-6-jdk doxygen graphviz make python-tk libexpat1-dev
 

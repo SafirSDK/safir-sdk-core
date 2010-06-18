@@ -45,14 +45,12 @@ class Logger
     }
     public void println()
     {
-        m_stream.println();
-        System.out.println();
+        print("\n");
     }
 
     public void println(String str)
     {
-        m_stream.println(str);
-        System.out.println(str);
+        print(str + "\n");
     }
 
     public void print(String str)

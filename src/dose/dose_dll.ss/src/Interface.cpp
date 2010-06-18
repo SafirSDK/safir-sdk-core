@@ -48,7 +48,7 @@ void DoseC_Constructor(long & ctrl,
     success = false;
     try
     {
-        Safir::Dob::Internal::ControllerPtr controller(new Safir::Dob::Internal::Controller(false));
+        Safir::Dob::Internal::ControllerPtr controller(new Safir::Dob::Internal::Controller());
         ctrl = ControllerTable::Instance().AddController(controller);
         success = true;
     }
@@ -127,14 +127,6 @@ void DoseC_Connect(const long ctrl,
         //AWI:todo Here we should check that a program doesn't call open with a common part and an instance part
         //      that it has already used for another connection in any context (software violation). This means that a
         //      secondary attach using common part and an instance part identifies a unique connection in a certain context.
-
-        if (contextId == -1)
-        {
-            // Connect with context -1 means that a special controller shall be
-            // used for this connection. Replace the existing "normal" controller.
-            Safir::Dob::Internal::ControllerPtr persistController(new Safir::Dob::Internal::Controller(true));
-            ControllerTable::Instance().ReplaceController(ctrl, persistController);
-        }
 
         ControllerPtr controller = ControllerTable::Instance().GetController(ctrl);
 

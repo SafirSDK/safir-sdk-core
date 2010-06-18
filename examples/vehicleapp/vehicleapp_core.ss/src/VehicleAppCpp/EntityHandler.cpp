@@ -75,11 +75,12 @@ namespace VehicleAppCpp
 
         // Send notification message when the number of created vehicles
         // has reached the limit.
-        Safir::Dob::Typesystem::Int64 iNumOfCreatedInstances =
-            m_connection.GetNumberOfInstances(
-              Capabilities::Vehicles::Vehicle::ClassTypeId,
-              Safir::Dob::Typesystem::HandlerId(),
-              false);
+        Safir::Dob::Typesystem::Int64 iNumOfCreatedInstances = 1;
+            // This can by incommented as soon as the vehicle dou file is created!
+            //m_connection.GetNumberOfInstances(
+            //  Capabilities::Vehicles::Vehicle::ClassTypeId,
+            //  Safir::Dob::Typesystem::HandlerId(),
+            //  false);
 
         if(iNumOfCreatedInstances == Capabilities::Vehicles::VehicleParameters::VehicleLimit())
             MessageSender::Instance().SendMaxNofVehicleMsg();
