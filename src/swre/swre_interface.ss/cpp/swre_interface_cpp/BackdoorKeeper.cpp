@@ -54,17 +54,28 @@ namespace Application
     }
 
     //-----------------------------------------------------------------------------
-    void BackdoorKeeper::Start(Safir::Application::Backdoor & handler)
+    void BackdoorKeeper::Start(Safir::Application::Backdoor & backdoor)
     {
-        if (m_started)
+        Start(backdoor,L"",L"");
+    }
+
+    void BackdoorKeeper::Start(Safir::Application::Backdoor & backdoor,
+                               const std::wstring& connectionNameCommonPart,
+                               const std::wstring& connectionNameInstancePart)
+    {
+        Stop();
+
+        if (connectionNameCommonPart.empty() && connectionNameInstancePart.empty())
         {
-            // Already started, just return
-            return; // *** RETURN ***
+            m_connection.Attach();
+        }
+        else
+        {
+            m_connection.Attach(connectionNameCommonPart, connectionNameInstancePart);
         }
 
         // Save pointer to Dose interface and handler
-        m_connection.Attach();
-        m_backdoor = &handler;
+        m_backdoor = &backdoor;
 
         m_connection.SubscribeMessage(PI_CMD_TYPE_ID, PI_CMD_CHANNEL_ID, this);
         m_started = true;

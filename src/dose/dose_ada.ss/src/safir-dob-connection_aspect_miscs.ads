@@ -44,7 +44,7 @@ package Safir.Dob.Connection_Aspect_Miscs is
                                      return Safir.Dob.Callback_Id.Enumeration;
 
    ------------------
-   -- Connection name
+   -- Connection info
    ------------------
 
    -- Get the name for this connection used in the system.
@@ -70,6 +70,12 @@ package Safir.Dob.Connection_Aspect_Miscs is
    function Get_Connection_Name_Instance_Part (Self : in Connection_Aspect_Misc)
                                                return Unbounded_Wide_String;
 
+   -- Get the context that the connection is opened in.
+   --
+   -- Returns: Context
+   --
+   function Get_Context (Self : in Connection_Aspect_Misc)
+                         return Safir.Dob.Typesystem.Int_32;
 
    ---------------
    -- Queue status

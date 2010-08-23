@@ -26,6 +26,8 @@
 #define __DOSE_TEST_CPP_LOGGER_H__
 
 #include <Safir/Dob/Connection.h>
+#include <Safir/Application/Backdoor.h>
+#include <Safir/Application/BackdoorKeeper.h>
 #include <DoseTest/Action.h>
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
@@ -42,6 +44,7 @@ class Consumer:
     public Safir::Dob::ServiceHandler,
     public Safir::Dob::ServiceHandlerPending,
     public Safir::Dob::Requestor,
+    public Safir::Application::Backdoor,
     private boost::noncopyable
 {
 public:
@@ -99,11 +102,20 @@ private:
     void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
     void OnNotRequestOverflow();
 
+    // Backdoor functions
+    virtual void HandleCommand(const std::vector<std::wstring>& cmdTokens);
+    virtual std::wstring GetHelpText();
+    Safir::Application::BackdoorKeeper m_backdoorKeeper;
+
+
     const std::wstring CallbackId() const;
 
     Safir::Dob::SecondaryConnection     m_connection;
 
+
     const int                           m_consumerNumber;
+    const std::wstring                  m_connectionName;
+    const std::wstring                  m_connectionInstance;
 
     typedef std::vector<DoseTest::ActionPtr> Actions;
     typedef std::vector<Actions> CallbackActions;

@@ -46,6 +46,7 @@ MACRO(SET_JAVA_CLASSPATH)
   endforeach(arg ${ARGV})
 ENDMACRO()
 
+
 MACRO(ADD_JAR target source)
 	GET_JAR_TARGET_DIR()
 	
@@ -75,7 +76,7 @@ MACRO(ADD_JAR target source)
 	
 	ADD_CUSTOM_COMMAND (OUTPUT ${target_JAR} ${JAR_TARGET_DIR}/bin
 		COMMAND ${CMAKE_COMMAND} -E make_directory ${JAR_TARGET_DIR}/bin
-		COMMAND ${JAVA_COMPILE} @${relative_response_file}
+		COMMAND ${JAVA_COMPILE} @${relative_response_file} -J-Xms256m -J-Xmx256m 
 		COMMAND ${JAVA_ARCHIVE} ${command_start} ${target_JAR} -C "${JAR_TARGET_DIR}/bin"  .
 		DEPENDS ${source} ${JAVA_MANIFEST}
 		COMMENT "Building ${relative_path}")

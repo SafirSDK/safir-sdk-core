@@ -43,7 +43,9 @@ with Ada.Containers.Vectors;
 with Ada.Containers.Ordered_Maps;
 with Safir.Dob.Callback_Id;
 with Safir.Dob.Service_Request_Proxies;
-with Ada.Strings.Wide_Unbounded;
+with Safir.Application.Backdoors;
+with Safir.Application.Backdoor_Keepers;
+with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 
 package Consumers is
    type Consumer is limited new
@@ -56,7 +58,8 @@ package Consumers is
      Safir.Dob.Consumers.Entity_Handler_Pending and
      Safir.Dob.Consumers.Service_Handler and
      Safir.Dob.Consumers.Service_Handler_Pending and
-     Safir.Dob.Consumers.Requestor
+     Safir.Dob.Consumers.Requestor and
+     Safir.Application.Backdoors.Backdoor
    with private;
 
    type Consumer_Access is access Consumer;
@@ -187,6 +190,14 @@ private
    procedure On_Not_Request_Overflow
      (Self : in out Consumer);
 
+   overriding
+   procedure Handle_Command (Self           : in Consumer;
+                             Command_Tokens : in Safir.Application.Backdoors.Strings.Vector);
+
+   overriding
+   function Get_Help_Text (Self : in Consumer)
+                             return Wide_String;
+
    function "=" (Left, Right : in Dose_Test.Action.Smart_Pointer) return Boolean;
 
    package Action_Vectors is new Ada.Containers.Vectors
@@ -233,10 +244,14 @@ private
      Safir.Dob.Consumers.Entity_Handler_Pending and
      Safir.Dob.Consumers.Service_Handler and
      Safir.Dob.Consumers.Service_Handler_Pending and
-     Safir.Dob.Consumers.Requestor
+     Safir.Dob.Consumers.Requestor and
+     Safir.Application.Backdoors.Backdoor
    with record
       Connection                : Safir.Dob.Secondary_Connections.Secondary_Connection;
+      Backdoor_Keeper           : Safir.Application.Backdoor_Keepers.Backdoor_Keeper;
       Consumer_Number           : Integer;
+      Connection_Name           : Unbounded_Wide_String;
+      Connection_Instance       : Unbounded_Wide_String;
       Response_Sender           : Safir.Dob.Response_Senders.Response_Sender;
       Response_Sender_Discarded : Boolean;
       Latest_Request_Id         : Safir.Dob.Defs.Request_Id;

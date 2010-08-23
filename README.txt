@@ -1,4 +1,4 @@
-Welcome to Safir SDK Core 4.0-beta3.
+Welcome to the snapshot of Safir SDK Core 4.0-beta4.
 
 Safir SDK Core is released under the GPL v3 license, a copy of which can be found in COPYING.txt.
 

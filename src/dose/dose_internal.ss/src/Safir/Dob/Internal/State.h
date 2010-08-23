@@ -82,6 +82,9 @@ namespace Internal
         DistributionData GetInjectionState() const;
         void SetInjectionState(const DistributionData& newInjectionState);
 
+        bool IsReleased() const;
+        void SetReleased(bool released);
+
         // Make all subscription pointers held by this state weak.
         void ReleaseSubscribers();
 
@@ -109,6 +112,8 @@ namespace Internal
         RequestInQueuePtr                       m_ownerRequestInQueue;
         StateHolder                             m_realState;
         StateHolder                             m_injectionState;
+
+        bool m_released;
 
         typedef PairContainers<SubscriptionId, UpgradeableSubscriptionPtr>::map Subscriptions;
 

@@ -10,7 +10,7 @@ SET(NO_LIBRARY_POSTFIXES 1)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
-FILE(GLOB_RECURSE headers *.hpp)
+FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(swre_library SHARED ${sources} ${headers})

@@ -154,7 +154,7 @@ namespace Internal
             bool                            overrideRegistration;
         };
 
-        void RegisterInternal(const UpgradeableStateResult& upgradeableStateResult,
+        void RegisterInternal(const StateSharedPtr&         statePtr,
                               const RegisterInternalInput&  inputPar,
                               bool&                         registrationDone);
 
@@ -163,29 +163,26 @@ namespace Internal
                                 const RegisterTime                  regTime,
                                 const NodeNumber                    nodeNumber,
                                 const ContextId                     contextId,
-                                const UpgradeableStateResult&       upgradeableStateResult,
-                                StatePtrHandling&                   statePtrHandling);
+                                const StateSharedPtr&               statePtr);
 
         void UnregisterAllInternal(const ConnectionPtr&             connection,
-                                   const UpgradeableStateResult&    upgradeableStateResult,
-                                   StatePtrHandling&                statePtrHandling,
+                                   const StateSharedPtr&            statePtr,
                                    bool&                            exitDispatch);
 
-        void IsRegisteredInternal(const UpgradeableStateResult& upgradeableStateResult,
+        void IsRegisteredInternal(const StateSharedPtr&         statePtr,
                                   bool&                         isRegistered) const;
 
 
         bool IsRegisteredInternal(const StateSharedPtr& statePtr) const;
 
-        void GetRegistererInternal(const UpgradeableStateResult&        upgradeableStateResult,
+        void GetRegistererInternal(const StateSharedPtr&                statePtr,
                                    ConnectionConsumerPair&              registerer,
                                    InstanceIdPolicy::Enumeration&       instanceIdPolicy,
                                    RegisterTime&                        registrationTime) const;
 
-        void DeleteEntity(const UpgradeableStateResult&        upgradeableStateResult,
+        void DeleteEntity(const StateSharedPtr&                statePtr,
                           const ConnectionPtr&                 connection,
                           const Dob::Typesystem::HandlerId&    handlerId,
-                          StatePtrHandling&                    statePtrHandling,
                           bool&                                exitDispatch);
 
         void RegisterInjectionHandler(const ConnectionPtr&                connection,

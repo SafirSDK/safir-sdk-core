@@ -68,28 +68,59 @@ namespace Safir.Application
 
         /// <summary>
         /// Starts subscription for Program Information commands to be sent to the Backdoor.
-        /// <para>This method can be called several times, but only the first call does anything.
-        /// The class supports restarting/pausing by calling stop and then start again.</para>
+        /// <para>A backdoor will be established for the "first" connection that is opened in
+        /// the thread that calls this method. (That is, a secondary connection Attach is used
+        /// internally</para>
+        /// <para>If the main connection is closed and opened again (maybe in a different context),
+        /// this method must be called again</para>
+        /// <para>The class supports restarting/pausing by calling stop and then start again.</para>
         /// </summary>
         /// <param name="backdoor">PI command backdoor</param>
         /// <exception cref=" Safir.Dob.NotOpenException">
-        /// Programming Error, 'Start' called before connect to Dose
+        /// 'Start' called before connect to Dose
         /// </exception>
         public void Start(Backdoor backdoor)
         {
-            if (m_started)
-            {
-                //already started
-                return;
-            }
+            Start(backdoor, "", "");
+        }
 
+        /// <summary>
+        /// Starts subscription for Program Information commands to be sent to the Backdoor using
+        /// the given named connection.
+        /// <para>A backdoor will be established for the named connection that is opened in
+        /// the thread that calls this method</para>
+        /// <para>If the main connection is closed and opened again (maybe in a different context),
+        /// this method must be called again. </para>
+        /// <para>The class supports restarting/pausing by calling stop and then start again.</para>
+        /// </summary>
+        /// <param name="backdoor">PI command backdoor</param>
+        /// <param name="connectionNameCommonPart"> Name that identifies the connection but not any particular
+        ///                                        instance.</param>
+        /// <param name="connectionNameInstancePart">Name that identifies a particular connection instance.</param>
+        /// <exception cref=" Safir.Dob.NotOpenException">
+        /// 'Start' called before connect to Dose
+        /// </exception>
+        public void Start(Backdoor backdoor,
+                          string connectionNameCommonPart,
+                          string connectionNameInstancePart)
+        {
             if (backdoor == null)
             {
                 throw new Dob.Typesystem.SoftwareViolationException("You must pass a valid backdoor");
             }
-            m_backdoor = backdoor;
 
-            m_connection.Attach();
+            Stop();
+
+            if (connectionNameCommonPart.Length == 0 && connectionNameInstancePart.Length == 0)
+            {
+                m_connection.Attach();
+            }
+            else
+            {
+                m_connection.Attach(connectionNameCommonPart, connectionNameInstancePart);
+            }
+
+            m_backdoor = backdoor;
 
             m_connection.SubscribeMessage(m_piCmdTypeId, m_piCmdChannelId, this);
             m_started = true;
@@ -117,6 +148,11 @@ namespace Safir.Application
             m_connection.Detach();
             m_backdoor = null;
             m_started = false;
+        }
+
+        public bool IsStarted()
+        {
+            return m_started;
         }
 
         void Safir.Dob.MessageSubscriber.OnMessage(Safir.Dob.MessageProxy messageProxy)

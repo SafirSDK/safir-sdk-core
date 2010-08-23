@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 --
---  Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
+--  Copyright Saab AB, 2010 (http://www.safirsdk.com)
 --
---  Created by: Anders Widén / stawi
+--  Created by: Mikael Wennerberg / stmiwn
 --
 -------------------------------------------------------------------------------
 --
@@ -21,23 +21,15 @@
 --  along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 --
 -------------------------------------------------------------------------------
-with Ada.Containers.Vectors;
-with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 
-package Safir.Application.Backdoors is
+package Dots.File_Map is
 
-   type Backdoor is limited interface;
+   procedure Include(Key : in String; Value : in String);
+   --
+   -- Add Key/Value pair to file map.
 
-   type Backdoor_Access is access all Backdoor'Class;
+   function Get_Value(Key : in String) return String;
+   --
+   -- Get the value that corresponds to the given key from file map.
 
-   package Strings is new Ada.Containers.Vectors
-     (Index_Type => Natural,
-      Element_Type => Unbounded_Wide_String);
-
-   procedure Handle_Command (Self           : in Backdoor;
-                             Command_Tokens : in Strings.Vector) is abstract;
-
-   function Get_Help_Text (Self : in Backdoor)
-                          return Wide_String is abstract;
-
-end Safir.Application.Backdoors;
+end Dots.File_Map;

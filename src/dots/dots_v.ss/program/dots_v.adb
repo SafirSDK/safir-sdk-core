@@ -22,6 +22,7 @@
 --
 -------------------------------------------------------------------------------
 
+with Ada.Directories;
 with Ada.Exceptions;
 with Ada.Text_IO;
 
@@ -36,6 +37,7 @@ with Sax.Readers;
 
 with Templates_Parser;
 
+with Dots.File_Map;
 with Dots.Parser;
 with Dots.String_Sets;
 with Dots.State;
@@ -46,6 +48,7 @@ procedure Dots_V is
    use type VString;
 
    Dod_Dir : VString := V ("");
+   Dou_Dir : VString := V ("");
 
    function Is_Unit (Name : in String) return Boolean;
 
@@ -53,13 +56,31 @@ procedure Dots_V is
                     Effort_Only : in Boolean;
                     Err    : out Boolean);
 
+   procedure Process (F : in String);
+
    procedure Handle_Filename
+     (Item  :        String;
+      Index :        Positive;
+      Quit  : in out Boolean);
+
+   procedure Handle_Dou_File
+     (Item  :        String;
+      Index :        Positive;
+      Quit  : in out Boolean);
+
+   procedure Handle_Root_Dou_File
      (Item  :        String;
       Index :        Positive;
       Quit  : in out Boolean);
 
    procedure Dir is new GNAT.Directory_Operations.Iteration.Find
      (Handle_Filename);
+
+   procedure Dir_Dou is new GNAT.Directory_Operations.Iteration.Find
+     (Handle_Dou_File);
+
+   procedure Dir_Root_Dou is new GNAT.Directory_Operations.Iteration.Find
+     (Handle_Root_Dou_File);
 
    function Expand_Env (P : in VString) return VString;
 
@@ -101,6 +122,30 @@ procedure Dots_V is
       return V (Env (Tmp (Tmp'First + 2 .. First_After - 2)) &
                 Tmp (First_After .. Tmp'Last));
    end Expand_Env;
+
+   procedure Handle_Dou_File
+     (Item  :        String;
+      Index :        Positive;
+      Quit  : in out Boolean) is
+      pragma Unreferenced (Index, Quit);
+   begin
+
+--        Ada.Text_IO.Put_Line ("Handle_Dou_File : " & Item);
+      Process(Item);
+
+   end Handle_Dou_File;
+
+   procedure Handle_Root_Dou_File
+     (Item  :        String;
+      Index :        Positive;
+      Quit  : in out Boolean) is
+      pragma Unreferenced (Index, Quit);
+   begin
+
+      Dots.File_Map.Include(Key => GNAT.Directory_Operations.File_Name(Item),
+                            Value => Item);
+
+   end Handle_Root_Dou_File;
 
    procedure Handle_Filename
      (Item  :        String;
@@ -215,7 +260,7 @@ procedure Dots_V is
                   end if;
                end;
             end loop;
-            return "";
+            --return "";
          end Get_Prefix_From;
 
          procedure Handle_Prefix_File
@@ -440,8 +485,25 @@ procedure Dots_V is
          Input_Sources.File.Close (Read);
    end Parse;
 
+
    Err : Boolean := False;
    Help : Boolean := False;
+
+   procedure Process (F : in String) is
+   begin
+      declare
+         Dou_File : constant String := GNAT.Directory_Operations.File_Name(F);
+      begin
+         Dots.State.Current_Unit := V (Dou_File (Dou_File'First .. Dou_File'Last - 4));
+         Parse (S => F, Effort_Only => False, Err => Err);
+         if Err then
+            GNAT.OS_Lib.OS_Exit (1);
+         end if;
+      end;
+
+   end Process;
+
+   use type Ada.Directories.File_Kind;
 
 begin
    --  Parse the command line
@@ -449,7 +511,7 @@ begin
    loop
       begin
          case GNAT.Command_Line.Getopt
-              ("dod= verbose info tokens output= help") is
+              ("dod= xdir= verbose info tokens output= help") is
             when ASCII.Nul =>
                exit;
             when 'h' =>
@@ -462,6 +524,8 @@ begin
                Dots.State.Log_Output_Type := V (GNAT.Command_Line.Parameter);
             when 'd' =>
                Dod_Dir := Expand_Env (V (GNAT.Command_Line.Parameter));
+            when 'x' =>
+               Dou_Dir := Expand_Env (V (GNAT.Command_Line.Parameter));
             when 't' =>
                Dots.State.Log_Tokens := True;
             when others =>
@@ -477,6 +541,7 @@ begin
       Ada.Text_IO.Put_Line ("Usage:");
       Ada.Text_IO.Put_Line ("dots_v [options] xml-files...");
       Ada.Text_IO.Put_Line ("-dod=<dir>  : Specifies the directory containing the dod-files.");
+      Ada.Text_IO.Put_Line ("-xdir=<dir>  : Specifies the top directory containing the dou-files.");
       Ada.Text_IO.Put_Line ("-info       : Displays handled files");
       Ada.Text_IO.Put_Line ("-verbose    : Displays parsing");
       Ada.Text_IO.Put_Line ("-output=xxx : Displays specified output." &
@@ -502,28 +567,40 @@ begin
       GNAT.OS_Lib.OS_Exit (2);
    end if;
 
-   --  Check the arguments
+   if Dou_Dir = "" or Ada.Directories.Kind(S (Dou_Dir)) = Ada.Directories.Directory then
+      Dots.State.Dou_Dir := Dou_Dir;
+      if Dou_Dir /= "" then
+         Dir_Root_Dou( S(Dou_Dir), ".*\.dou");
+      end if;
+   else
+      Ada.Text_IO.Put_Line (S(Dod_Dir) & " is not a valid directory.");
+      GNAT.OS_Lib.OS_Exit (2);
+   end if;
 
+
+   --  Check the arguments
    loop
       declare
          F : constant String := GNAT.Command_Line.Get_Argument (True);
       begin
          exit when F = "";
          if not Is_Unit (F) then
-            Ada.Text_IO.Put_Line (F & " is not a unit file (.dou)");
+            if Ada.Directories.Kind(F) = Ada.Directories.Directory then
+               -- Directory.
+               Dir_Dou (F, ".*\.dou");
+            else
+               Ada.Text_IO.Put_Line (F & " is not a unit file (.dou) or directory");
+            end if;
          else
-
+            -- DOU file
             if Dots.State.Log_Info then
                Ada.Text_IO.Put_Line (F & " will be parsed");
             end if;
 
-            Dots.State.Current_Unit := V (F (F'First .. F'Last - 4));
-            Parse (S => F, Effort_Only => False, Err => Err);
-            if Err then
-               GNAT.OS_Lib.OS_Exit (1);
-            end if;
+            Process(F);
          end if;
       end;
    end loop;
+
 
 end Dots_V;

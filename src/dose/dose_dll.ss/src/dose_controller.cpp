@@ -2523,6 +2523,13 @@ namespace Internal
                                                     dispatchedInjection,
                                                     injectionState);
 
+            // ... and we also have to mark this delet-inject instance as "handled" even though it will not
+            // be dispatched to the app.
+            InitialInjectionHandled(Dob::Typesystem::HandlerId(subscription->GetSubscriptionId().id),
+                                    consumer,
+                                    typeId,
+                                    instanceId);
+
             subscription->SetLastInjectionState(injectionState);
             return true; // Remove from queue and reset dirty flag
         }
@@ -2935,6 +2942,10 @@ namespace Internal
         return firstIt->second == secondIt->second;
     }
 
+    ContextId Controller::GetContext() const
+    {
+        return m_contextId; 
+    }
 
     void Controller::SimulateOverflows(const bool inQueues, const bool outQueues)
     {

@@ -86,6 +86,11 @@ namespace Safir
                     //Get the statuses of the other nodes
                     RequestPersistenceInfo();
                 }
+                else
+                {
+                    // No other nodes are up, let -1 connections in.
+                    Connections::Instance().AllowConnect(-1);
+                }
             } 
             else
             {
@@ -98,7 +103,9 @@ namespace Safir
                 {
                     EntityTypes::Instance().DisallowInitialSet();
                 }
-            }
+                // No persistence is used, let -1 connections in.
+                Connections::Instance().AllowConnect(-1);
+           }
         }
 
         void PersistHandler::RequestPersistenceInfo()

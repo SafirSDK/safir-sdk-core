@@ -84,6 +84,19 @@ namespace Dob
         return Typesystem::Utilities::ToWstring(name);
     }
 
+    Dob::Typesystem::Int32 ConnectionAspectMisc::GetContext() const
+    {
+        Dob::Typesystem::Int32 context;
+        bool success;
+        DoseC_GetContext(GetControllerId(), context, success);
+
+        if (!success)
+        {
+            Typesystem::LibraryExceptions::Instance().Throw();
+        }
+        return context;
+    }
+
     Safir::Dob::Typesystem::Int32
     ConnectionAspectMisc::GetQueueCapacity(const Safir::Dob::ConnectionQueueId::Enumeration queue) const
     {

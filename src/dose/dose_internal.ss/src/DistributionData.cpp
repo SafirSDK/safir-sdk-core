@@ -101,6 +101,9 @@ namespace Internal
                             + 2 * 4
                             + sizeof(ConnectionId));
 
+        BOOST_STATIC_ASSERT(sizeof (RequestPDHeader) == sizeof(Header)
+                            + sizeof(ConnectionId));
+
         BOOST_STATIC_ASSERT(sizeof (HavePersistenceDataResponseMsg) == sizeof(Header)
                             + 4); //bool plus padding
 
@@ -175,6 +178,15 @@ namespace Internal
     {
         ENSURE(m_data, << "Trying to GetHeader from a NULL DistributionData!");
         return *AnyPtrCast<Header>(GetData());
+    }
+
+    DistributionData::RequestPDHeader &
+    DistributionData::GetRequestPDHeader()
+    {
+        ENSURE(m_data, << "Trying to GetHeader from a NULL DistributionData!");
+        ENSURE(GetType() == Action_RequestPoolDistribution,
+               << "GetRequestPDHeader called on DistributionData that was not a Action_RequestPoolDistribution (type = " << GetType() << ")");
+        return *AnyPtrCast<RequestPDHeader>(GetData());
     }
 
     DistributionData::ConnectHeader &
@@ -524,7 +536,6 @@ namespace Internal
         header.m_sender=sender;
     }
 
-
     DistributionData::DistributionData(have_persistence_data_response_tag_t,
                                        const ConnectionId& sender,
                                        const bool iHavePersistenceData)
@@ -537,6 +548,21 @@ namespace Internal
 
         HavePersistenceDataResponseMsg& response = GetHavePersistenceDataResponseMsg();
         response.m_iHavePersistenceData = iHavePersistenceData;
+    }
+
+
+    DistributionData::DistributionData(request_pool_distribution_request_tag_t,
+                                       const ConnectionId& sender,
+                                       const ConnectionId& receiver)
+    {
+        Allocate(sizeof(RequestPDHeader));
+
+        Header & header = GetHeader();
+        header.m_type=Action_RequestPoolDistribution;
+        header.m_sender=sender;
+
+        RequestPDHeader & pdRequest = GetRequestPDHeader();
+        pdRequest.m_receiver = receiver;
     }
 
 
@@ -710,6 +736,8 @@ namespace Internal
         case Action_HavePersistenceDataResponse:
             return sizeof (HavePersistenceDataResponseMsg);
 
+        case Action_RequestPoolDistribution:
+            return sizeof (RequestPDHeader);
         default:
             ENSURE(false, << "DistributionData::Size: Invalid message kind: " << GetType());
             return 0;
@@ -1243,6 +1271,13 @@ namespace Internal
                 //TODO
             }
             break;
+
+        case Action_RequestPoolDistribution:
+            {
+                //TODO
+            }
+            break;
+
 
         case Message:
             {

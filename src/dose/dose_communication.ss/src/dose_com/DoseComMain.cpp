@@ -161,6 +161,14 @@ void WakeUp_DistributePool(void)
     g_pNotificationHandler->NotifyStartPoolDistribution();
 }
 
+/************************************************************************
+*
+*************************************************************************/
+void WakeUp_RequestPoolDistribution(int doseId)
+{
+    g_pNotificationHandler->NotifyRequestPoolDistribution(doseId);
+}
+
 //####################################
 // Section DLL entry routines
 //####################################

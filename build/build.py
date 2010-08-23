@@ -244,7 +244,7 @@ class VisualStudioBuilder(object):
         bat = open(batpath,"w")
         bat.write("@echo off\n" +
                   "call \"" + os.path.join(self.studio,"vsvars32.bat") + "\"\n" +
-                  "\"" + os.path.join(SAFIR_RUNTIME,"bin","dobmake.py") + "\" -b --html-output\n") #batch mode (no gui)
+                  "\"" + os.path.join(SAFIR_RUNTIME,"bin","dobmake.py") + "\" -b --html-output --rebuild\n") #batch mode (no gui)
         bat.close()
         process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         result = process.communicate()

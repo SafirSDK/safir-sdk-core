@@ -50,13 +50,15 @@ namespace Internal
         typedef boost::function<void(void)> QueueNotFullCallback;
         typedef boost::function<void(void)> NodeStatusChangedNotifierCallback;
         typedef boost::function<void(void)> StartPoolDistributionCallback;
+        typedef boost::function<void(const int nodeId)> RequestPoolDistributionCallback;
 
         ExternNodeCommunication();
 
         bool Init (const IncomingDataCallback & dataCb,
                    const QueueNotFullCallback & queueNotFullCb,
                    const NodeStatusChangedNotifierCallback & nodeStatusChangedNotifierCb,
-                   const StartPoolDistributionCallback & startPoolDistributionCb);
+                   const StartPoolDistributionCallback & startPoolDistributionCb,
+                   const RequestPoolDistributionCallback & requestPoolDistributionCallback);
 
         bool Send(const DistributionData & msg);
 
@@ -89,11 +91,13 @@ namespace Internal
         virtual void NotifyQueueNotFull(const int priorityChannel);
         virtual void NotifyNodeStatusChanged();
         virtual void NotifyStartPoolDistribution();
+        virtual void NotifyRequestPoolDistribution(const int nodeId);
 
         IncomingDataCallback m_handleDataCb;
         QueueNotFullCallback m_queueNotFullCb;
         NodeStatusChangedNotifierCallback m_nodeStatusChangedNotifierCb;
         StartPoolDistributionCallback m_startPoolDistributionCb;
+        RequestPoolDistributionCallback m_requestPoolDistributionCallback;
 
 
         QualityOfServiceData m_QualityOfServiceData;
@@ -109,6 +113,7 @@ namespace Internal
         bool m_pdIsAcked;
 
         boost::scoped_array<AtomicUint32> m_incomingDataEvents;
+        boost::scoped_array<AtomicUint32> m_requestPDEvents; // Request pooldistribution from these nodes.
         AtomicUint32 m_queueNotFullEvent;
         AtomicUint32 m_startPoolDistributionEvent;
     };

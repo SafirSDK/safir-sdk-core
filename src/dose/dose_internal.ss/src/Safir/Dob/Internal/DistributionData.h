@@ -81,6 +81,9 @@ namespace Internal
     struct have_persistence_data_response_tag_t {};
     const have_persistence_data_response_tag_t have_persistence_data_response_tag = have_persistence_data_response_tag_t();
 
+    struct request_pool_distribution_request_tag_t {};
+    const request_pool_distribution_request_tag_t request_pool_distribution_request_tag = request_pool_distribution_request_tag_t();
+
     struct service_request_tag_t {};
     const service_request_tag_t service_request_tag = service_request_tag_t();
 
@@ -120,6 +123,8 @@ namespace Internal
 
             Action_HavePersistenceDataRequest,
             Action_HavePersistenceDataResponse,
+
+            Action_RequestPoolDistribution,
 
             //Request types
             Request_Service,
@@ -246,6 +251,11 @@ namespace Internal
         DistributionData(have_persistence_data_response_tag_t,
                          const ConnectionId& sender,
                          const bool iHavePersistence);
+
+        //Create an Action_RequestPoolDistribution
+        DistributionData(request_pool_distribution_request_tag_t,
+                         const ConnectionId& sender,
+                         const ConnectionId& receiver);
 
         //Create a Request_Service
         DistributionData(service_request_tag_t,
@@ -403,6 +413,13 @@ namespace Internal
          * Not valid for requests.
          */
         const ConnectionId GetReceiverId() const {return GetResponseHeader().m_receiver;}
+        /** @} */
+
+       /**
+         * Reads receiver app id from PDrequest:
+         * 
+         */
+        const ConnectionId GetPDRequestReceiverId() const {return GetRequestPDHeader().m_receiver;}
         /** @} */
 
         /**
@@ -668,6 +685,13 @@ namespace Internal
             InternalRequestId m_requestId;
             ConnectionId m_receiver;
         };
+
+        struct RequestPDHeader
+        {
+            Header m_commonHeader;
+            ConnectionId m_receiver;
+        };
+
 #pragma pack (pop)
 
         //This method is meant to contain BOOST_STATIC_ASSERTs, and is not meant to be called
@@ -677,6 +701,10 @@ namespace Internal
         Header & GetHeader();
         const Header & GetHeader() const  //just call non-const version
         {return const_cast<DistributionData *>(this)->GetHeader();}
+        
+        RequestPDHeader& GetRequestPDHeader();
+        const RequestPDHeader & GetRequestPDHeader() const  //just call non-const version
+        {return const_cast<DistributionData *>(this)->GetRequestPDHeader();}
 
         ConnectHeader& GetConnectHeader();
         const ConnectHeader & GetConnectHeader() const  //just call non-const version

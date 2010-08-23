@@ -294,7 +294,7 @@ namespace Internal
                                  const Safir::Dob::Typesystem::Int32 second);
 
 
-
+        ContextId GetContext() const;
 
         //-------------------------------
         // Debug

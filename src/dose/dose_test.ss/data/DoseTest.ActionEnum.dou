@@ -72,6 +72,12 @@
     <value>GetQueueCapacity</value>
     <value>GetQueueSize</value>
     <value>SimulateOverflows</value>
+    <value>GetContext</value>
+
+    <!-- Swre Backdoor Interface -->
+    <value>StartBackdoor</value>
+    <value>StopBackdoor</value>
+    <value>IsBackdoorStarted</value>
 
 
     <!-- dob-v4 -->

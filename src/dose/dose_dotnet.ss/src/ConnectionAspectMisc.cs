@@ -54,7 +54,7 @@ namespace Safir.Dob
             return (Safir.Dob.CallbackId.Enumeration)callbackId;
         }
 
-        #region Connection name
+        #region Connection info
         /// <summary>
         /// Get the name for this connection used in the system.
         /// <para/>
@@ -108,6 +108,22 @@ namespace Safir.Dob
                 Typesystem.LibraryExceptions.Instance.Throw();
             }
             return Typesystem.Internal.InternalOperations.StringOf(name);
+        }
+
+        /// <summary>
+        /// Get the context that the connection is opened in.
+        /// </summary>
+        /// <returns>Context</returns>
+        public System.Int32 GetContext()
+        {
+            System.Int32 context;
+            byte success;
+            Interface.DoseC_GetContext(ControllerId, out context, out success);
+            if (!Interface.BoolOf(success))
+            {
+                Typesystem.LibraryExceptions.Instance.Throw();
+            }
+            return context;
         }
         #endregion
 

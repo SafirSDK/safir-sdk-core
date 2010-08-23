@@ -336,7 +336,8 @@ namespace Internal
                 m_ecom.Init(boost::bind(&DoseApp::HandleIncomingData, this, _1, _2),
                             boost::bind(&DoseApp::QueueNotFull, this),
                             boost::bind(&DoseApp::NodeStatusChangedNotifier, this),
-                            boost::bind(&DoseApp::StartPoolDistribution,this));
+                            boost::bind(&DoseApp::StartPoolDistribution,this),
+                            boost::bind(&DoseApp::RequestPoolDistribution,this, _1));
 
             //we notify so that even if there were no new nodes we trigger
             //the call to MaybeSignal...() to start letting applications connect.
@@ -363,16 +364,12 @@ namespace Internal
 
             m_nodeHandler.Init (m_ecom, m_requestHandler, m_poolHandler);
 
-            m_persistHandler.Init(m_ecom,m_connectionHandler,m_nodeHandler,otherNodesExistAtStartup);
-
             ACE_Thread::spawn(&DoseApp::ConnectionThread,this);
+
+            m_persistHandler.Init(m_ecom,m_connectionHandler,m_nodeHandler,otherNodesExistAtStartup);
 
             ACE_Thread::spawn(&DoseApp::MemoryMonitorThread,NULL);
 
-            if (!otherNodesExistAtStartup)
-            {
-                Connections::Instance().AllowConnect(-1);
-            }
         }
         catch (const std::exception & exc)
         {
@@ -528,6 +525,8 @@ namespace Internal
         }
     }
 
+ 
+
 
     //----------------------------------------------------------------
     // Handling of Dose_Communication events
@@ -568,6 +567,12 @@ namespace Internal
         case DistributionData::Action_HavePersistenceDataResponse:
             {
                 m_persistHandler.HandleMessageFromDoseCom(data);
+            }
+            break;
+
+        case DistributionData::Action_RequestPoolDistribution:
+            {
+                m_poolHandler.HandleMessageFromDoseCom(data);
             }
             break;
 
@@ -631,6 +636,11 @@ namespace Internal
     void DoseApp::StartPoolDistribution()
     {
         m_poolHandler.StartPoolDistribution();
+    }
+
+    void DoseApp::RequestPoolDistribution(const int nodeId)
+    {
+       m_poolHandler.RequestPoolDistribution(nodeId);
     }
 
     class MemoryMonitor:

@@ -108,6 +108,20 @@ package body Safir.Dob.Connection_Aspect_Miscs is
 
    end Get_Connection_Name_Instance_Part;
 
+   function Get_Context (Self : in Connection_Aspect_Misc)
+                         return Safir.Dob.Typesystem.Int_32 is
+      Success : C.char;
+      Context : Safir.Dob.Typesystem.Int_32;
+   begin
+      Safir.Dob.Interf.Get_Context (Self.Controller_Id,
+                                    Context,
+                                    Success);
+      if C.char'Pos (Success) = 0 then
+         Safir.Dob.Typesystem.Library_Exceptions.Throw;
+      end if;
+      return Context;
+   end Get_Context;
+
    function Get_Queue_Capacity (Self  : in Connection_Aspect_Misc;
                                 Queue : in Safir.Dob.Connection_Queue_Id.Enumeration)
                                 return Safir.Dob.Typesystem.Int_32 is

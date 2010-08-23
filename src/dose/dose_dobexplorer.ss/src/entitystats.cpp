@@ -312,11 +312,11 @@ void EntityStats::RemoveInstances()
 
 
 void EntityStats::ProcessState(const Safir::Dob::Typesystem::Int64 instance,
-                               const Safir::Dob::Internal::UpgradeableStateResult& statePtrResult,
+                                const Safir::Dob::Internal::StateSharedPtr& statePtr,
                                Arguments& arguments)
 {
     ++arguments.numStates;
-    if (statePtrResult.second)
+    if (statePtr->IsReleased())
     {
         ++arguments.downgraded;
     }
@@ -327,7 +327,7 @@ void EntityStats::ProcessState(const Safir::Dob::Typesystem::Int64 instance,
         // If this state belongs to a context that is not shown we just get some statics
         // and then return.
         arguments.getInfo = false;
-        StatisticsCollector(*statePtrResult.first, &arguments);
+        StatisticsCollector(*statePtr, &arguments);
         return;  // ***RETURN***
     }
 
@@ -374,7 +374,7 @@ void EntityStats::ProcessState(const Safir::Dob::Typesystem::Int64 instance,
     arguments.kind.clear();
     arguments.handler.clear();
 
-    StatisticsCollector(*statePtrResult.first, &arguments);
+    StatisticsCollector(*statePtr, &arguments);
 
     if(!arguments.info.empty())
     {

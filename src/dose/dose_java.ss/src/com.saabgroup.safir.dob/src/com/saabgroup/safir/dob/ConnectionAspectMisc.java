@@ -61,7 +61,7 @@ public class ConnectionAspectMisc
     }
 
     //
-    // Connection name
+    // Connection info
     //
 
 
@@ -123,6 +123,24 @@ public class ConnectionAspectMisc
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
         }
         return name[0];
+    }
+
+    /**
+     * Get the context that the connection is opened in.
+     *
+     * @param queue [in] The queue to get info for.
+     * @return The current size of the queue.
+     */
+    public int getContext()
+    {
+        int [] context = new int[1];
+        boolean [] success = new boolean [1];
+        Interface.GetContext(getControllerId(), context, success);
+        if (!success[0]) {
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+        }
+        return context[0];
     }
 
     //

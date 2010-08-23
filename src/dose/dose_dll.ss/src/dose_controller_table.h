@@ -63,7 +63,6 @@ namespace Internal
 
         long AddController(ControllerPtr controller);
         void RemoveController(const long ctrl);
-        void ReplaceController(const long ctrl, ControllerPtr newController);
 
         ControllerPtr GetController(const long ctrl);
         ControllerConstPtr GetController(const long ctrl) const;
@@ -105,10 +104,12 @@ namespace Internal
         explicit ControllerTable(const ControllerTable &);
         ControllerTable & operator=(const ControllerTable &);
 
+        ControllerConstPtr GetControllerInternal(const long ctrl) const;
+
         mutable ACE_Thread_Mutex m_lock;
 
-        typedef std::vector<ControllerPtr> ControllerList;
-        ControllerList m_controllers;
+        typedef std::map<long, ControllerPtr> ControllerMap;
+        ControllerMap m_controllers;
 
         struct ControllerInfo
         {

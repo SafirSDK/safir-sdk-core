@@ -262,24 +262,24 @@ namespace Internal
 
         if (allInstances)
         {
-            m_entityStates[context].ReleaseEachState(boost::bind(&EntityType::DeleteAllInstancesInternal,
+            m_entityStates[context].ForEachState(boost::bind(&EntityType::DeleteAllInstancesInternal,
+                                                             this,
+                                                             _2,
+                                                             boost::cref(connection),
+                                                             boost::cref(handlerId),
+                                                             _3),
+                                                 false); // no need to include already released states
+        }
+        else
+        {
+            m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
+                                                     boost::bind(&EntityType::DeleteEntityInternal,
                                                                  this,
                                                                  _2,
                                                                  boost::cref(connection),
                                                                  boost::cref(handlerId),
-                                                                 _3,
-                                                                 _4));
-        }
-        else
-        {
-            m_entityStates[context].ReleaseSpecificState(instanceId.GetRawValue(),
-                                                         boost::bind(&EntityType::DeleteEntityInternal,
-                                                                     this,
-                                                                     _2,
-                                                                     boost::cref(connection),
-                                                                     boost::cref(handlerId),
-                                                                     boost::cref(instanceId),
-                                                                     _3));
+                                                                 boost::cref(instanceId)),
+                                                     false); // no need to include already released state
         }
     }
 
@@ -305,16 +305,15 @@ namespace Internal
 
         ScopedTypeLock lck(m_typeLocks[context]);
 
-        m_entityStates[context].ForSpecificStateAddAndRelease(instanceId.GetRawValue(),
-                                                              boost::bind(&EntityType::InjectEntityInternal,
-                                                                          this,
-                                                                          _2,
-                                                                          connection,
-                                                                          boost::cref(handlerId),
-                                                                          boost::cref(instanceId),
-                                                                          blob,
-                                                                          timestamp,
-                                                                          _3));
+        m_entityStates[context].ForSpecificStateAdd(instanceId.GetRawValue(),
+                                                    boost::bind(&EntityType::InjectEntityInternal,
+                                                                this,
+                                                                _2,
+                                                                connection,
+                                                                boost::cref(handlerId),
+                                                                boost::cref(instanceId),
+                                                                blob,
+                                                                timestamp));
     }
 
     void EntityType::InjectDeletedEntity(const ConnectionPtr&                 connection,
@@ -337,15 +336,14 @@ namespace Internal
 
         ScopedTypeLock lck(m_typeLocks[context]);
 
-        m_entityStates[context].ForSpecificStateAddAndRelease(instanceId.GetRawValue(),
-                                                              boost::bind(&EntityType::InjectDeletedEntityInternal,
-                                                                          this,
-                                                                          _2,
-                                                                          connection,
-                                                                          boost::cref(handlerId),
-                                                                          boost::cref(instanceId),
-                                                                          timestamp,
-                                                                          _3));
+        m_entityStates[context].ForSpecificStateAdd(instanceId.GetRawValue(),
+                                                    boost::bind(&EntityType::InjectDeletedEntityInternal,
+                                                                this,
+                                                                _2,
+                                                                connection,
+                                                                boost::cref(handlerId),
+                                                                boost::cref(instanceId),
+                                                                timestamp));
     }
 
     void EntityType::AcceptInjection(const ConnectionPtr&       connection,
@@ -362,28 +360,17 @@ namespace Internal
 
         ScopedTypeLock lck(m_typeLocks[context]);
 
-        if (injectionState.HasBlob())
-        {
-            m_entityStates[context].ForSpecificState(injectionState.GetInstanceId().GetRawValue(),
-                                                     boost::bind(&EntityType::AcceptInjectionInternal,
-                                                                 this,
-                                                                 _2,
-                                                                 boost::cref(connection),
-                                                                 boost::ref(injectionState),
-                                                                 boost::cref(originalInjectionState)),
-                                                     false); // false => don't include released states;
-        }
-        else
-        {
-            m_entityStates[context].ReleaseSpecificState(injectionState.GetInstanceId().GetRawValue(),
-                                                         boost::bind(&EntityType::AcceptDeleteInjectionInternal,
-                                                                     this,
-                                                                     _2,
-                                                                     boost::cref(connection),
-                                                                     boost::ref(injectionState),
-                                                                     boost::cref(originalInjectionState),
-                                                                     _3));
-        }
+
+        m_entityStates[context].ForSpecificState(injectionState.GetInstanceId().GetRawValue(),
+                                                 boost::bind(&EntityType::AcceptInjectionInternal,
+                                                             this,
+                                                             _2,
+                                                             boost::cref(connection),
+                                                             boost::ref(injectionState),
+                                                             boost::cref(originalInjectionState)),
+                                                 false); // false => don't include released states;
+
+
     }
 
     void EntityType::SetInjection(const ConnectionPtr&                 connection,
@@ -437,15 +424,15 @@ namespace Internal
 
         ScopedTypeLock lck(m_typeLocks[context]);
 
-        m_entityStates[context].ReleaseSpecificState(instanceId.GetRawValue(),
-                                                     boost::bind(&EntityType::DeleteInjectionInternal,
-                                                                 this,
-                                                                 _2,
-                                                                 boost::cref(connection),
-                                                                 boost::cref(handlerId),
-                                                                 boost::cref(instanceId),
-                                                                 boost::cref(originalInjectionState),
-                                                                 _3));
+        m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
+                                                 boost::bind(&EntityType::DeleteInjectionInternal,
+                                                             this,
+                                                             _2,
+                                                             boost::cref(connection),
+                                                             boost::cref(handlerId),
+                                                             boost::cref(instanceId),
+                                                             boost::cref(originalInjectionState)),
+                                                  false); // No need to include already released states
     }
 
     void EntityType::RemoteSetGhostEntityState(const DistributionData& entityState)
@@ -486,12 +473,11 @@ namespace Internal
 
         m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
 
-        m_entityStates[context].ForSpecificStateAddAndRelease(entityState.GetInstanceId().GetRawValue(),
-                                                              boost::bind(&EntityType::RemoteSetInjectionEntityStateInternal,
-                                                                          this,
-                                                                          boost::cref(entityState),
-                                                                          _2,
-                                                                          _3));
+        m_entityStates[context].ForSpecificStateAdd(entityState.GetInstanceId().GetRawValue(),
+                                                    boost::bind(&EntityType::RemoteSetInjectionEntityStateInternal,
+                                                                this,
+                                                                boost::cref(entityState),
+                                                                _2));
     }
 
     void EntityType::RemoteSetDeleteEntityState(const DistributionData&   entityState)
@@ -509,12 +495,11 @@ namespace Internal
 
         m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
 
-        m_entityStates[context].ForSpecificStateAddAndRelease(entityState.GetInstanceId().GetRawValue(),
-                                                              boost::bind(&EntityType::RemoteSetDeleteEntityStateInternal,
-                                                                          this,
-                                                                          boost::cref(entityState),
-                                                                          _2,
-                                                                          _3));
+        m_entityStates[context].ForSpecificStateAdd(entityState.GetInstanceId().GetRawValue(),
+                                                    boost::bind(&EntityType::RemoteSetDeleteEntityStateInternal,
+                                                                this,
+                                                                boost::cref(entityState),
+                                                                _2));
     }
 
     RemoteSetResult EntityType::RemoteSetRealEntityState(const ConnectionPtr&      connection,
@@ -535,14 +520,13 @@ namespace Internal
 
         RemoteSetResult result;
 
-        m_entityStates[context].ForSpecificStateAddAndRelease(entityState.GetInstanceId().GetRawValue(),
-                                                              boost::bind(&EntityType::RemoteSetRealEntityStateInternal,
-                                                                          this,
-                                                                          boost::cref(connection),
-                                                                          boost::cref(entityState),
-                                                                          _2,
-                                                                          _3,
-                                                                          boost::ref(result)));
+        m_entityStates[context].ForSpecificStateAdd(entityState.GetInstanceId().GetRawValue(),
+                                                    boost::bind(&EntityType::RemoteSetRealEntityStateInternal,
+                                                                this,
+                                                                boost::cref(connection),
+                                                                boost::cref(entityState),
+                                                                _2,
+                                                                boost::ref(result)));
 
         return result;
     }
@@ -695,7 +679,7 @@ namespace Internal
         return isOwner;
     }
 
-    void EntityType::SetEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
+    void EntityType::SetEntityInternal(const StateSharedPtr&                statePtr,
                                        const ConnectionPtr&                 connection,
                                        const Dob::Typesystem::HandlerId&    handlerId,
                                        const Dob::Typesystem::InstanceId&   instanceId,
@@ -703,8 +687,6 @@ namespace Internal
                                        const char* const                    blob)
     {
         ENSURE(blob != NULL, << "Trying to call a SetEntity with a NULL blob! connId = " << connection->Id());
-
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
 
         EntityAccessStatus accessStatus = VerifyEntityAccess(statePtr,
                                                              connection,
@@ -753,7 +735,7 @@ namespace Internal
             break;
         }
 
-        SetEntityLocal(upgradeableStateResult,
+        SetEntityLocal(statePtr,
                        connection,
                        handlerId,
                        instanceId,
@@ -762,14 +744,11 @@ namespace Internal
                        DistributionData(no_state_tag));  // No injection state to consider in this case (is used to set correct top timestamps)
     }
 
-    void EntityType::DeleteEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
+    void EntityType::DeleteEntityInternal(const StateSharedPtr&                statePtr,
                                           const ConnectionPtr&                 connection,
                                           const Dob::Typesystem::HandlerId&    handlerId,
-                                          const Dob::Typesystem::InstanceId&   instanceId,
-                                          StatePtrHandling&                    statePtrHandling)
+                                          const Dob::Typesystem::InstanceId&   instanceId)
     {
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-
         EntityAccessStatus accessStatus = VerifyEntityAccess(statePtr,
                                                              connection,
                                                              handlerId);
@@ -819,30 +798,13 @@ namespace Internal
                           connection->Id().m_contextId,
                           handlerId,
                           instanceId,
-                          DistributionData(no_state_tag),  // No injection state to consider in this case (is used to set correct top timestamps)
-                          statePtrHandling);
+                          DistributionData(no_state_tag));  // No injection state to consider in this case (is used to set correct top timestamps)
 
-        if (statePtrHandling == ReleasePtr)
-        {
-            if (statePtr->GetInjectionState().IsNoState())
-            {
-                // There is no unhandled injection state.
-
-                // The released end state must be saved "a while".
-                EndStates::Instance().Add(statePtr);
-            }
-            else
-            {
-                // There is an unhandled injection state.
-                statePtrHandling = KeepPtr;
-            }
-        }
     }
 
-    void EntityType::DeleteAllInstancesInternal(const UpgradeableStateResult&       upgradeableStateResult,
+    void EntityType::DeleteAllInstancesInternal(const StateSharedPtr&               statePtr,
                                                 const ConnectionPtr&                connection,
                                                 const Dob::Typesystem::HandlerId&   handlerId,
-                                                StatePtrHandling&                   statePtrHandling,
                                                 bool&                               exitDispatch)
     {
         exitDispatch = false;
@@ -850,8 +812,6 @@ namespace Internal
         ConnectionConsumerPair owner;
         Typesystem::HandlerId  ownerHandlerId;
         bool hasOwner;
-
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
 
         GetOwner(statePtr, owner, ownerHandlerId, hasOwner);
 
@@ -862,15 +822,14 @@ namespace Internal
             return;
         }
 
-        DeleteEntityInternal(upgradeableStateResult,
+        DeleteEntityInternal(statePtr,
                              connection,
                              handlerId,
-                             statePtr->GetRealState().GetInstanceId(),
-                             statePtrHandling);
+                             statePtr->GetRealState().GetInstanceId());
 
     }
 
-    void EntityType::SetInitalGhostInternal(const UpgradeableStateResult&        upgradeableStateResult,
+    void EntityType::SetInitalGhostInternal(const StateSharedPtr&                statePtr,
                                             const ConnectionPtr&                 connection,
                                             const Dob::Typesystem::HandlerId&    handlerId,
                                             const Dob::Typesystem::InstanceId&   instanceId,
@@ -878,14 +837,11 @@ namespace Internal
     {
         ENSURE(blob != NULL, << "Trying to do a SetInitalGhostEntity with a NULL blob! connId = " << connection->Id());
 
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-        const bool& isRevived = upgradeableStateResult.second;
-
         // Shouldn't check owner in this case
 
         DistributionData realState = statePtr->GetRealState();
 
-        if (realState.IsNoState() || isRevived)
+        if (realState.IsNoState() || statePtr->IsReleased())
         {
             DistributionData newRealState =
                 DistributionData(entity_state_tag,
@@ -902,27 +858,23 @@ namespace Internal
 
             // Set the distribution state in the container state. All subscribers will be notified.
             statePtr->SetRealState(newRealState);
+
+            statePtr->SetReleased(false);
         }
     }
 
-    void EntityType::InjectEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
+    void EntityType::InjectEntityInternal(const StateSharedPtr&                statePtr,
                                           const ConnectionPtr&                 connection,
                                           const Dob::Typesystem::HandlerId&    handlerId,
                                           const Dob::Typesystem::InstanceId&   instanceId,
                                           const char* const                    blob,
-                                          const Dob::Typesystem::Int64         timestamp,
-                                          StatePtrHandling&                    statePtrHandling)
+                                          const Dob::Typesystem::Int64         timestamp)
     {
-        statePtrHandling = KeepPtr;
-
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-        const bool& isRevived = upgradeableStateResult.second;
-
         DistributionData injectionState = statePtr->GetInjectionState();
 
         bool handlerIdOk = true;
 
-        if (!isRevived && (IsCreated(statePtr) || IsGhost(statePtr)))
+        if (IsCreated(statePtr) || IsGhost(statePtr))
         {
             // In this case we can check that the injected handlerId corresponds to
             // the handler id in the existing or ghost instance.
@@ -948,7 +900,7 @@ namespace Internal
 
         DistributionData newInjectionState(no_state_tag);
 
-        if (injectionState.IsNoState() || isRevived)
+        if (injectionState.IsNoState())
         {
             // There is no existing injection state, create a new one
             newInjectionState = DistributionData(entity_state_tag,
@@ -968,10 +920,14 @@ namespace Internal
             TimestampOperations::SetTimestampForChangedMembers(newInjectionState,
                                                                timestamp,
                                                                true); // true => set timestamp for unchanged members to 0
+            statePtr->SetReleased(false);
         }
         else
         {
             // There is an existing injection state
+
+            ENSURE(!statePtr->IsReleased(), << "EntityType::InjectEntityInternal. "
+                                           << "Found a released state with an existing injection!");
 
             // Create a copy based on timestamps
             const TimestampOperations::MergeResult mergeResult = TimestampOperations::Merge(injectionState,
@@ -994,7 +950,6 @@ namespace Internal
         if (!realState.IsNoState() && TimestampOperations::HaveChanges(realState,newInjectionState))
         {
             // All the stuff in the new injection state is already in the real state. We can drop the new injection state.
-            statePtrHandling = RestorePtr;
             return;
         }
 
@@ -1005,19 +960,13 @@ namespace Internal
         KickRegisterer(handlerId, connection->Id().m_contextId);
     }
 
-    void EntityType::InjectDeletedEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
+    void EntityType::InjectDeletedEntityInternal(const StateSharedPtr&                statePtr,
                                                  const ConnectionPtr&                 connection,
                                                  const Dob::Typesystem::HandlerId&    handlerId,
                                                  const Dob::Typesystem::InstanceId&   instanceId,
-                                                 const Dob::Typesystem::Int64         timestamp,
-                                                 StatePtrHandling&                    statePtrHandling)
+                                                 const Dob::Typesystem::Int64         timestamp)
     {
-        statePtrHandling = KeepPtr;
-
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-        const bool& isRevived = upgradeableStateResult.second;
-
-        if (!isRevived && (IsCreated(statePtr) || IsGhost(statePtr)))
+        if (IsCreated(statePtr) || IsGhost(statePtr))
         {
             // In this case we can check that the injected handlerId corresponds to
             // the handler id in the existing or ghost instance.
@@ -1035,7 +984,7 @@ namespace Internal
         DistributionData injectionState = statePtr->GetInjectionState();
         DistributionData newInjectionState(no_state_tag);
 
-        if (injectionState.IsNoState() || isRevived)
+        if (injectionState.IsNoState())
         {
             // There is no existing injection state, create a deleted state
             newInjectionState = DistributionData(entity_state_tag,
@@ -1059,9 +1008,10 @@ namespace Internal
             // There is an existing injection state
 
             // Create a copy based on timestamps
-            const TimestampOperations::MergeResult mergeResult = TimestampOperations::Merge(injectionState,
-                                                                                      NULL, // no blob
-                                                                                      timestamp);
+            const TimestampOperations::MergeResult mergeResult =
+                TimestampOperations::Merge(injectionState,
+                                           NULL, // no blob
+                                           timestamp);
 
             if (mergeResult.second == false)
             {
@@ -1080,8 +1030,8 @@ namespace Internal
         const DistributionData& realState = statePtr->GetRealState();
         if (!realState.IsNoState() && TimestampOperations::HaveChanges(realState,newInjectionState))
         {
-            // All the stuff in the new injection state is already in the real state. We can drop the new injection state.
-            statePtrHandling = RestorePtr;
+            // All the stuff in the new injection state is already in the real state.
+            // We can drop the new injection state.
             return;
         }
 
@@ -1089,59 +1039,22 @@ namespace Internal
         statePtr->SetInjectionState(newInjectionState);
 
         KickRegisterer(handlerId, connection->Id().m_contextId);
+
+        // Ensure that the state will be kept in the container.
+        statePtr->SetReleased(false);
     }
 
-    void EntityType::AcceptInjectionInternal(const UpgradeableStateResult&  upgradeableStateResult,
+    void EntityType::AcceptInjectionInternal(const StateSharedPtr&          statePtr,
                                              const ConnectionPtr&           connection,
                                              DistributionData&              injectionState,
                                              const DistributionData&        originalInjectionState)
     {
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-
         if (originalInjectionState == statePtr->GetInjectionState())
         {
             // No new injections has been done while we were dispatching the injection to the app.
             // In this case we can remove the injection state ...
             statePtr->SetInjectionState(DistributionData(no_state_tag));
         }
-
-        CommonAcceptInjectionInternal(upgradeableStateResult, connection, injectionState);
-    }
-
-    void EntityType::AcceptDeleteInjectionInternal(const UpgradeableStateResult&    upgradeableStateResult,
-                                                   const ConnectionPtr&             connection,
-                                                   DistributionData&                injectionState,
-                                                   const DistributionData&          originalInjectionState,
-                                                   StatePtrHandling&                statePtrHandling)
-    {
-        statePtrHandling = KeepPtr;
-
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-
-        if (originalInjectionState == statePtr->GetInjectionState())
-        {
-            // No new injections has been done while we were dispatching the injection to the app.
-            // In this case we can remove the injection state ...
-            statePtr->SetInjectionState(DistributionData(no_state_tag));
-
-            // ... and release the injection state
-            statePtrHandling = ReleasePtr;
-        }
-
-        CommonAcceptInjectionInternal(upgradeableStateResult, connection, injectionState);
-
-        statePtr->SetConnection(NULL);  // No connection since its a delete state
-        statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0))); //dummy consumer
-
-        // This is an end state so it must be saved "a while".
-        EndStates::Instance().Add(statePtr);
-    }
-
-    void EntityType::CommonAcceptInjectionInternal(const UpgradeableStateResult&  upgradeableStateResult,
-                                                   const ConnectionPtr&           connection,
-                                                   DistributionData&              injectionState)
-    {
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
 
         Dob::Typesystem::HandlerId handlerId = injectionState.GetHandlerId();
 
@@ -1177,7 +1090,7 @@ namespace Internal
                                                                            false); // false => don't include released states
 
             // Get  a better name
-            const StateSharedPtr& regStatePtr = lockedStateResult.first.first;
+            const StateSharedPtr& regStatePtr = lockedStateResult.first;
 
             if (regStatePtr == NULL || !regStatePtr->GetRealState().IsRegistered())
             {
@@ -1200,7 +1113,6 @@ namespace Internal
                 injectionState.SetRegistrationTime(registrationTime);
                 injectionState.ResetVersion();
                 injectionState.SetCreationTime(m_clock.GetNewTimestamp());
-                injectionState.SetExplicitlyDeleted(false);
             }
             else
             {
@@ -1213,9 +1125,27 @@ namespace Internal
 
             statePtr->SetRealState(injectionState);
         }   // Registration state is released here
+
+        if (!injectionState.HasBlob())
+        {
+            // It's an accept of an injected delete
+
+            if (statePtr->GetInjectionState().IsNoState())
+            {
+                // There is no unhandled injection state so the
+                // state could be released
+                statePtr->SetReleased(true);
+
+                statePtr->SetConnection(NULL);  // No connection since its a delete state
+                statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0))); //dummy consumer
+
+                // The released end state must be saved "a while".
+                EndStates::Instance().Add(statePtr);                
+            }
+        }
     }
 
-    void EntityType::SetInjectionInternal(const UpgradeableStateResult&        upgradeableStateResult,
+    void EntityType::SetInjectionInternal(const StateSharedPtr&                statePtr,
                                           const ConnectionPtr&                 connection,
                                           const Dob::Typesystem::HandlerId&    handlerId,
                                           const Dob::Typesystem::InstanceId&   instanceId,
@@ -1223,9 +1153,6 @@ namespace Internal
                                           const char* const                    blob,
                                           const DistributionData&              originalInjectionState)
     {
-
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-
         EntityAccessStatus accessStatus = VerifyEntityAccess(statePtr,
                                                              connection,
                                                              handlerId);
@@ -1264,7 +1191,7 @@ namespace Internal
             break;
         }
 
-        SetEntityLocal(upgradeableStateResult,
+        SetEntityLocal(statePtr,
                        connection,
                        handlerId,
                        instanceId,
@@ -1280,15 +1207,12 @@ namespace Internal
         }
     }
 
-    void EntityType::DeleteInjectionInternal(const UpgradeableStateResult&          upgradeableStateResult,
+    void EntityType::DeleteInjectionInternal(const StateSharedPtr&                  statePtr,
                                              const ConnectionPtr&                   connection,
                                              const Dob::Typesystem::HandlerId&      handlerId,
                                              const Dob::Typesystem::InstanceId&     instanceId,
-                                             const DistributionData&                originalInjectionState,
-                                             StatePtrHandling&                      statePtrHandling)
+                                             const DistributionData&                originalInjectionState)
     {
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-
         EntityAccessStatus accessStatus = VerifyEntityAccess(statePtr,
                                                              connection,
                                                              handlerId);
@@ -1331,39 +1255,15 @@ namespace Internal
                           connection->Id().m_contextId,
                           handlerId,
                           instanceId,
-                          originalInjectionState,   // is used to get correct top timestamps
-                          statePtrHandling);
-
-        if (statePtrHandling == ReleasePtr)
-        {
-            // We must also check that no new injections has been done while we were
-            // dispatching the injection to the app, before the final descion to release
-            // the state can be made
-            if (originalInjectionState == statePtr->GetInjectionState())
-            {
-                // There is no unhandled injection state.
-                statePtr->SetInjectionState(DistributionData(no_state_tag));
-
-                // The released end state must be saved "a while".
-                EndStates::Instance().Add(statePtr);
-            }
-            else
-            {
-                // There is an unhandled injection state.
-                statePtrHandling = KeepPtr;
-            }
-        }
+                          originalInjectionState);   // is used to get correct top timestamps
     }
 
-    void EntityType::RemoteSetGhostEntityStateInternal(const DistributionData&        remoteEntity,
-                                                       const UpgradeableStateResult&  upgradeableStateResult)
+    void EntityType::RemoteSetGhostEntityStateInternal(const DistributionData&  remoteEntity,
+                                                       const StateSharedPtr&    statePtr)
     {
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-        const bool& isRevived = upgradeableStateResult.second;
-
         DistributionData localEntity = statePtr->GetRealState();
 
-        if (!localEntity.IsNoState() && !isRevived)
+        if (!localEntity.IsNoState() && !statePtr->IsReleased())
         {
             // There is an existing local entity. Check if the received remote entity is newer.
             if (!RemoteEntityStateIsAccepted(remoteEntity, localEntity))
@@ -1383,28 +1283,28 @@ namespace Internal
         statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0))); //dummy consumer
 
         statePtr->SetRealState(remoteEntity);
+
+        statePtr->SetReleased(false);
     }
 
     void EntityType::RemoteSetInjectionEntityStateInternal(const DistributionData&        remoteEntity,
-                                                           const UpgradeableStateResult&  upgradeableStateResult,
-                                                           StatePtrHandling&              statePtrHandling)
+                                                           const StateSharedPtr&          statePtr)
     {
-        statePtrHandling = KeepPtr;
-
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-        const bool& isRevived = upgradeableStateResult.second;
-
         DistributionData injectionState = statePtr->GetInjectionState();
         DistributionData newInjectionState(no_state_tag);
 
-        if (injectionState.IsNoState() || isRevived)
+        if (injectionState.IsNoState())
         {
             // There is no existing injection state, create a new one
             newInjectionState = remoteEntity;
+            statePtr->SetReleased(false);
         }
         else
         {
             // There is an existing injection state
+
+            ENSURE(!statePtr->IsReleased(), << "EntityType::RemoteSetInjectionEntityStateInternal. "
+                                            << "Found a released state with an existing injection!");
 
             if (injectionState.GetHandlerId() != remoteEntity.GetHandlerId())
             {
@@ -1433,8 +1333,8 @@ namespace Internal
         const DistributionData& realState = statePtr->GetRealState();
         if (!realState.IsNoState() && TimestampOperations::HaveChanges(realState,newInjectionState))
         {
-            // All the stuff in the new injection state is already in the real state. We can drop the new injection state.
-            statePtrHandling = RestorePtr;
+            // All the stuff in the new injection state is already in the real state.
+            // We can drop the new injection state.
             return;
         }
 
@@ -1444,12 +1344,9 @@ namespace Internal
     }
 
     void EntityType::RemoteSetDeleteEntityStateInternal(const DistributionData&         remoteEntity,
-                                                        const UpgradeableStateResult&   upgradeableStateResult,
-                                                        StatePtrHandling&               statePtrHandling)
+                                                        const StateSharedPtr&           statePtr)
     {
         bool needToCheckRegistrationState = true;
-
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
 
         DistributionData localEntity = statePtr->GetRealState();
 
@@ -1466,7 +1363,7 @@ namespace Internal
             {
                 if (localEntity.IsCreated())
                 {
-                    ENSURE(false, << "Receive a remote deleted entity state when there is an existig created entity belonging to an old registration");
+                    ENSURE(false, << "Receive a remote deleted entity state when there is an existig created entity belonging to an old registration (" << remoteEntity.GetEntityId() << ").");
                 }
             }
             else
@@ -1497,7 +1394,7 @@ namespace Internal
                                                                            true); // true => include released states
 
             // Get  a better name
-            const StateSharedPtr& regStatePtr = lockedRegStateResult.first.first;
+            const StateSharedPtr& regStatePtr = lockedRegStateResult.first;
 
             if (regStatePtr == NULL ||
                 regStatePtr->GetRealState().IsNoState() ||
@@ -1509,12 +1406,6 @@ namespace Internal
             else if (remoteEntity.GetRegistrationTime() < regStatePtr->GetRealState().GetRegistrationTime())
             {
                 // There is already a newer registration. Discard the remote state.
-
-                if (localEntity.IsNoState())
-                {
-                    // Remember to get rid of the newly created state
-                    statePtrHandling = ReleasePtr;
-                }
                 return;
             }
         }
@@ -1525,7 +1416,7 @@ namespace Internal
         if (injectionState.IsNoState())
         {
             //we can release the state since there is no injection
-            statePtrHandling = ReleasePtr;
+            statePtr->SetReleased(true);
         }
         else
         {
@@ -1536,7 +1427,7 @@ namespace Internal
                 // The remote entity already has all what is in the injection state, so the injection state can be removed
                 // and the state released.
                 statePtr->SetInjectionState(DistributionData(no_state_tag));
-                statePtrHandling = ReleasePtr;
+                statePtr->SetReleased(true);
             }
         }
 
@@ -1551,17 +1442,12 @@ namespace Internal
 
     void EntityType::RemoteSetRealEntityStateInternal(const ConnectionPtr&           connection,
                                                       const DistributionData&        remoteEntity,
-                                                      const UpgradeableStateResult&  upgradeableStateResult,
-                                                      StatePtrHandling&              statePtrHandling,
+                                                      const StateSharedPtr&          statePtr,
                                                       RemoteSetResult&               remoteSetResult)
     {
-        statePtrHandling = KeepPtr;
         remoteSetResult = RemoteSetAccepted;
 
         bool needToCheckRegistrationState = true;
-
-        // get a better name
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
 
         DistributionData localEntity = statePtr->GetRealState();
 
@@ -1619,7 +1505,7 @@ namespace Internal
                                                                            true); // true => include released states
 
             // Get  a better name
-            const StateSharedPtr& regStatePtr = lockedRegStateResult.first.first;
+            const StateSharedPtr& regStatePtr = lockedRegStateResult.first;
 
             if (regStatePtr == NULL ||
                 regStatePtr->GetRealState().IsNoState() ||
@@ -1629,11 +1515,6 @@ namespace Internal
                 // There is no active registration or it is an old one
                 remoteSetResult = RemoteSetNeedRegistration;
 
-                if (localEntity.IsNoState())
-                {
-                    // Remember to get rid of the newly created state
-                    statePtrHandling = ReleasePtr;
-                }
                 return;
             }
             else if (remoteEntity.GetRegistrationTime() < regStatePtr->GetRealState().GetRegistrationTime())
@@ -1641,11 +1522,6 @@ namespace Internal
                 // There is already a newer registration
                 remoteSetResult = RemoteSetDiscarded;
 
-                if (localEntity.IsNoState())
-                {
-                    // Remember to get rid of the newly created state
-                    statePtrHandling = ReleasePtr;
-                }
                 return;
             }
         }
@@ -1662,10 +1538,11 @@ namespace Internal
         statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0))); //dummy consumer for remote entities
         statePtr->SetRealState(remoteEntity);
 
+        statePtr->SetReleased(false);
     }
 
 
-    void EntityType::SetEntityLocal(const UpgradeableStateResult&        upgradeableStateResult,
+    void EntityType::SetEntityLocal(const StateSharedPtr&                statePtr,
                                     const ConnectionPtr&                 connection,
                                     const Dob::Typesystem::HandlerId&    handlerId,
                                     const Dob::Typesystem::InstanceId&   instanceId,
@@ -1673,9 +1550,6 @@ namespace Internal
                                     const char* const                    blob,
                                     const DistributionData&              injectionState)
     {
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-        const bool& isRevived = upgradeableStateResult.second;
-
         DistributionData realState = statePtr->GetRealState();
 
         // Since this connection has been verified to be the owner (update case) with
@@ -1688,7 +1562,7 @@ namespace Internal
 
         DistributionData newRealState(no_state_tag);
 
-        if (!realState.IsCreated() || isRevived)
+        if (!realState.IsCreated() || statePtr->IsReleased())
         {
             // There is no existing real state. Create a new one.
 
@@ -1746,16 +1620,17 @@ namespace Internal
 
         // Set new state, subscribers will be notified
         statePtr->SetRealState(newRealState);
+
+        statePtr->SetReleased(false);
     }
 
     void EntityType::DeleteEntityLocal(const StateSharedPtr&                statePtr,
                                        const ContextId                      context,
                                        const Dob::Typesystem::HandlerId&    handlerId,
                                        const Dob::Typesystem::InstanceId&   instanceId,
-                                       const DistributionData&              injectionState,
-                                       StatePtrHandling&                    statePtrHandling)
+                                       const DistributionData&              injectionState)
     {
-        statePtrHandling = ReleasePtr;
+        statePtr->SetReleased(true);
 
         DistributionData realState = statePtr->GetRealState();
 
@@ -1833,6 +1708,34 @@ namespace Internal
 
         // Set new state, subscribers will be notified
         statePtr->SetRealState(newRealState);
+
+        // Figure out if the end state could be released
+
+        if (!injectionState.IsNoState())
+        {
+            // This delete originates from an injection so check that
+            // no new injections have been inserted while we were
+            // dispatching the injection to the app.
+            if (injectionState == statePtr->GetInjectionState())
+            {
+                // Clear the injection state.
+                statePtr->SetInjectionState(DistributionData(no_state_tag));
+            }
+
+        }
+
+        if (statePtr->GetInjectionState().IsNoState())
+        {
+            // There is no unhandled injection state.
+
+            // The released end state must be saved "a while".
+            EndStates::Instance().Add(statePtr);
+        }
+        else
+        {
+            // There is an unhandled injection state.
+            statePtr->SetReleased(false);
+        }
     }
 
     void EntityType::GetOwner(const StateSharedPtr&         statePtr,
@@ -1917,21 +1820,24 @@ namespace Internal
 
     bool EntityType::IsCreated(const StateSharedPtr& statePtr) const
     {
-        return statePtr->GetRealState().IsCreated();
+        DistributionData realState = statePtr->GetRealState();
+
+        return !statePtr->IsReleased() &&
+               !realState.IsNoState() &&
+               realState.IsCreated();
     }
 
     bool EntityType::IsGhost(const StateSharedPtr& statePtr) const
     {
         DistributionData realState = statePtr->GetRealState();
 
-        return !realState.IsNoState() &&
+        return !statePtr->IsReleased() &&
+               !realState.IsNoState() &&
                realState.GetEntityStateKind() == DistributionData::Ghost;
     }
 
-    void EntityType::ReadEntityInternal(const UpgradeableStateResult& upgradeableStateResult, DistributionData& realState) const
+    void EntityType::ReadEntityInternal(const StateSharedPtr& statePtr, DistributionData& realState) const
     {
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-
         if (!IsCreated(statePtr))
         {
             realState = DistributionData(no_state_tag);
@@ -1942,12 +1848,10 @@ namespace Internal
     }
 
 
-    void EntityType::GetHandlerOfInstanceInternal(const UpgradeableStateResult& upgradeableStateResult,
+    void EntityType::GetHandlerOfInstanceInternal(const StateSharedPtr& statePtr,
                                                   Dob::Typesystem::HandlerId& handlerId,
                                                   bool& gotIt) const
     {
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-
         gotIt = true;
         DistributionData realState = statePtr->GetRealState();
 
@@ -1961,20 +1865,16 @@ namespace Internal
         handlerId = realState.GetHandlerId();
     }
 
-    void EntityType::IsCreatedInternal(const UpgradeableStateResult& upgradeableStateResult, bool& isCreated) const
+    void EntityType::IsCreatedInternal(const StateSharedPtr& statePtr, bool& isCreated) const
     {
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-
         isCreated = IsCreated(statePtr);
     }
 
-    void EntityType::IsOwnerInternal(const UpgradeableStateResult&      upgradeableStateResult,
+    void EntityType::IsOwnerInternal(const StateSharedPtr&              statePtr,
                                      const Dob::Typesystem::HandlerId&  handlerId,
                                      const ConnectionConsumerPair&      registerer,
                                      bool&                              isOwner) const
     {
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;
-
         isOwner = false;
 
         if (!IsCreated(statePtr))
@@ -2066,7 +1966,7 @@ namespace Internal
                                                                            false); // false => don't include released states
 
         // Get  a better name
-        const StateSharedPtr& regStatePtr = lockedStateResult.first.first;
+        const StateSharedPtr& regStatePtr = lockedStateResult.first;
 
         if (regStatePtr == NULL)
         {

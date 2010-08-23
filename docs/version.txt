@@ -1,3 +1,3 @@
-safir_sdk_core_src-4.0-beta3
-Saab Subversion repository URL: http://safir.corp.saab.se/svn/safir/systems/sdk_core/tags/sdk_core/4.0-beta3/
-Saab Subversion repository revision: 148483
+safir_sdk_core_src-4.0-beta4
+Saab Subversion repository URL: http://safir.corp.saab.se/svn/safir/systems/sdk_core/tags/sdk_core/4.0-beta4/
+Saab Subversion repository revision: 150353 150353 150353 150353 150353 150353 150353 150353 150353 150353 150353 150353

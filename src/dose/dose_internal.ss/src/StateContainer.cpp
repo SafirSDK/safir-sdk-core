@@ -87,6 +87,26 @@ namespace Internal
             subIt->second.Subscribe(key);
         }
 
+        bool includeReleased = false;
+
+        if (subscriptionId.subscriptionType == EntityRegistrationSubscription ||
+            subscriptionId.subscriptionType == ServiceRegistrationSubscription)
+        {
+            //include released states for registration subscriptions, since dose_main needs them (see #726),
+            //but dont include them for any other type of subscription, since they are not needed, and
+            //the injectionsubscriptions get upset by them...
+            includeReleased = true;
+        }
+        else if (subscriptionId.subscriptionType == EntitySubscription)
+        {
+            if (strstr(subscriptionId.connectionConsumer.connection->NameWithoutCounter(), ";dose_main_pd;") != NULL)
+            {
+                //include released states for entity subscriptions when doing pool distribution to
+                // sync lamport clock on newly started node.
+                includeReleased = true;
+            }
+        }
+
         // Check all existing states that corresponds to this subscription (not the states that corresponds to the meta
         // subscription) and create subscription objects
         if (allKeys)
@@ -98,11 +118,7 @@ namespace Internal
                                      boost::cref(subscriptionId),
                                      restartSubscription,
                                      boost::cref(subIt->second.GetSubscriptionOptions())),
-                         subscriptionId.subscriptionType == EntityRegistrationSubscription ||
-                         subscriptionId.subscriptionType == ServiceRegistrationSubscription);
-            //include released states for registration subscriptions, since dose_main needs them (see #726),
-            //but dont include them for any other type of subscription, since they are not needed, and
-            //the injectionsubscriptions get upset by them...
+                         includeReleased);
         }
         else
         {
@@ -114,11 +130,7 @@ namespace Internal
                                          boost::cref(subscriptionId),
                                          restartSubscription,
                                          boost::cref(subIt->second.GetSubscriptionOptions())),
-                             subscriptionId.subscriptionType == EntityRegistrationSubscription ||
-                             subscriptionId.subscriptionType == ServiceRegistrationSubscription);
-            //include released states for registration subscriptions, since dose_main needs them (see #726),
-            //but dont include them for any other type of subscription, since they are not needed, and
-            //the injectionsubscriptions get upset by them...
+                             includeReleased);
         }
     }
 
@@ -168,112 +180,29 @@ namespace Internal
         return m_metaSubscriptions.find(subscriptionId) != m_metaSubscriptions.end();
     }
 
-    void StateContainer::ForEachState(const ActionFunc& actionFunc, const bool includeReleasedStates)
+    void StateContainer::ForEachState(const ForEachStateActionFunc& actionFunc,
+                                      const bool includeReleasedStates)
     {
+
         States::iterator it;
 
-        UpgradeableStateResult upgradeableStateResult = GetFirstExistingState(includeReleasedStates, it);
-
-        while (upgradeableStateResult.first != NULL)
-        {
-            {
-                // Lock state
-                boost::interprocess::scoped_lock<State::StateLock> lck(upgradeableStateResult.first->m_lock);
-
-                actionFunc(it->first, upgradeableStateResult);
-
-            } // state released here
-
-            upgradeableStateResult = GetNextExistingState(includeReleasedStates, it);
-        }
-    }
-
-    void StateContainer::ForSpecificState(const Dob::Typesystem::Int64 key, const ActionFunc& actionFunc, const bool includeReleasedStates)
-    {
-        States::iterator it;
-
-        UpgradeableStateResult upgradeableStateResult = GetExistingState(key,
-                                                                         includeReleasedStates,
-                                                                         it);
-        if (upgradeableStateResult.first == NULL)
-        {
-            return;
-        }
-
-        // Lock state
-        boost::interprocess::scoped_lock<State::StateLock> lck(upgradeableStateResult.first->m_lock);
-
-        actionFunc(it->first, upgradeableStateResult);
-    }
-
-    LockedStateResult StateContainer::GetSpecificState(const Dob::Typesystem::Int64 key, const bool includeReleasedStates)
-    {
-        States::iterator it;
-
-        UpgradeableStateResult upgradeableStateResult = GetExistingState(key,
-                                                                         includeReleasedStates,
-                                                                         it);
-        if (upgradeableStateResult.first == NULL)
-        {
-            // Return null pointer without a locked lock.
-            return std::make_pair(upgradeableStateResult, SharedLock());
-        }
-
-        // Return pointer and the associated lock.
-        return std::make_pair(upgradeableStateResult, SharedLock(upgradeableStateResult.first->m_lock));
-    }
-
-    void StateContainer::ForSpecificStateAdd(const Dob::Typesystem::Int64 key,
-                                             const ActionFunc& actionFunc)
-    {
-        // Try to get an existing state or create a new one.
-        UpgradeableStateResultAndIter state = GetState(key);
-
-        // Get a better name
-        UpgradeableStateResult& upgradeableStateResult = state.first;
-
-        {
-            // Lock state while in callback
-            boost::interprocess::scoped_lock<State::StateLock> lck(upgradeableStateResult.first->m_lock);
-            actionFunc(key, upgradeableStateResult);
-        }
-    }
-
-    void StateContainer::ReleaseEachState(const ReleaseEachActionFunc& releaseActionFunc)
-    {
-        States::iterator it;
-
-        UpgradeableStateResult upgradeableStateResult = GetFirstExistingState(false, // false => don't include already released states
-                                                                              it);
-
-        const StateSharedPtr& statePtr = upgradeableStateResult.first;  // get better name
+        StateSharedPtr statePtr = GetFirstExistingState(includeReleasedStates, it);
 
         while (statePtr != NULL)
         {
             {
-                // Lock state
+                // lock state
                 boost::interprocess::scoped_lock<State::StateLock> lck(statePtr->m_lock);
 
-                // default state pointer handling when returning from callback
-                StatePtrHandling statePtrHandling = RestorePtr;
+                bool savedReleaseStatus = statePtr->IsReleased();
+                bool exitDispatch = false;
 
-                bool exitDispatch;
+                // make callback
+                actionFunc(it->first, statePtr, exitDispatch);
 
-                releaseActionFunc(it->first, upgradeableStateResult, statePtrHandling, exitDispatch);
-
-                switch (statePtrHandling)
+                if (savedReleaseStatus != statePtr->IsReleased())
                 {
-                case RestorePtr:
-                    {
-                        if (upgradeableStateResult.second)
-                        {
-                            // The state ptr is originally upgraded from a weak ptr
-                            it->second.Downgrade();
-                        }
-                    }
-                    break;
-
-                case ReleasePtr:
+                    if (statePtr->IsReleased())
                     {
                         // First make the pointers that the state has to its subscriptions weak ones.
                         statePtr->ReleaseSubscribers();
@@ -281,40 +210,30 @@ namespace Internal
                         // then make the pointer from this state container to the state a weak one
                         it->second.Downgrade();
                     }
-                    break;
-
-                case KeepPtr:
-                    break;
-
-                default:
-                    ENSURE(false, << "Unknown enum value!");
+                    else
+                    {
+                        ENSURE(false, << "Can't revive a released state using the ForEachState method.");
+                    }
                 }
 
                 if (exitDispatch)
                 {
-                    return;
+                    break;
                 }
 
             } // state released here
 
-            upgradeableStateResult = GetNextExistingState(false, it);
+            statePtr = GetNextExistingState(includeReleasedStates, it);
         }
     }
 
-    void StateContainer::ReleaseSpecificState(const Dob::Typesystem::Int64 key,
-                                              const ReleaseSpecificActionFunc& releaseActionFunc)
+    void StateContainer::ForSpecificState(const Dob::Typesystem::Int64 key,
+                                          const ForSpecificStateActionFunc& actionFunc,
+                                          const bool includeReleasedStates)
     {
         States::iterator it;
 
-        UpgradeableStateResult upgradeableStateResult = GetExistingState(key,
-                                                                         false, // false => don't include already released states
-                                                                         it);
-
-        // Get a better name
-        StateSharedPtr& statePtr = upgradeableStateResult.first;
-
-        // don't need to check upgradedFromWeak since we are not concerned with already released states
-
+        StateSharedPtr statePtr = GetExistingState(key, includeReleasedStates, it);
         if (statePtr == NULL)
         {
             return;
@@ -323,24 +242,15 @@ namespace Internal
         // Lock state
         boost::interprocess::scoped_lock<State::StateLock> lck(statePtr->m_lock);
 
-        // default state pointer handling when returning from callback
-        StatePtrHandling statePtrHandling = RestorePtr;
+        bool savedReleaseStatus = statePtr->IsReleased();
 
-        releaseActionFunc(key, upgradeableStateResult, statePtrHandling);
+        // make callback
+        actionFunc(it->first, statePtr);
 
-        switch (statePtrHandling)
+        if (savedReleaseStatus != statePtr->IsReleased())
         {
-        case RestorePtr:
-            {
-                if (upgradeableStateResult.second)
-                {
-                    // The state ptr is originally upgraded from a weak ptr
-                    it->second.Downgrade();
-                }
-            }
-            break;
-
-        case ReleasePtr:
+            // The state pointer in the container should be upgraded or downgraded
+            if (statePtr->IsReleased())
             {
                 // First make the pointers that the state has to its subscriptions weak ones.
                 statePtr->ReleaseSubscribers();
@@ -348,63 +258,56 @@ namespace Internal
                 // then make the pointer from this state container to the state a weak one
                 it->second.Downgrade();
             }
-            break;
-
-        case KeepPtr:
-            break;
-
-        default:
-            ENSURE(false, << "Unknown enum value!");
+            else
+            {
+                ENSURE(false, << "Can't revive a released state using the ForEachState method.");
+            }
         }
     }
 
-    void StateContainer::ForSpecificStateAddAndRelease(const Dob::Typesystem::Int64 key, const ReleaseSpecificActionFunc& releaseActionFunc)
+    LockedStateResult StateContainer::GetSpecificState(const Dob::Typesystem::Int64 key, const bool includeReleasedStates)
+    {
+        States::iterator it;
+
+        StateSharedPtr statePtr = GetExistingState(key,
+                                                   includeReleasedStates,
+                                                   it);
+        if (statePtr == NULL)
+        {
+            // Return null pointer without a locked lock.
+            return std::make_pair(statePtr, SharedLock());
+        }
+
+        // Return pointer and the associated lock.
+        return std::make_pair(statePtr, SharedLock(statePtr->m_lock));
+    }
+
+    void StateContainer::ForSpecificStateAdd(const Dob::Typesystem::Int64 key,
+                                             const ForSpecificStateActionFunc& actionFunc)
     {
         // Try to get an existing state or create a new one.
-        UpgradeableStateResultAndIter state = GetState(key);
+        StateAndIter stateRes = GetState(key);
 
-        // Get better names
-        UpgradeableStateResult& upgradeableStateResult = state.first;
-        States::iterator& it = state.second;
+        // Get a better names
+        StateSharedPtr& statePtr = stateRes.first;
+        States::iterator& it = stateRes.second;
 
-        // Get a better name
-        StateSharedPtr& statePtr = upgradeableStateResult.first;
-
-        // Lock state
+        // Lock state while in callback
         boost::interprocess::scoped_lock<State::StateLock> lck(statePtr->m_lock);
 
-        // default state pointer handling when returning from callback
-        StatePtrHandling statePtrHandling = RestorePtr;
+        bool savedReleaseStatus = statePtr->IsReleased();
 
-        releaseActionFunc(key, upgradeableStateResult, statePtrHandling);
+        // make callback
+        actionFunc(key, statePtr);
 
-        switch (statePtrHandling)
+        if (statePtr->IsReleased())
         {
-        case RestorePtr:
-            {
-                if (upgradeableStateResult.second)
-                {
-                    // The state ptr is originally upgraded from a weak ptr
-                    it->second.Downgrade();
-                }
-            }
-            break;
-
-        case ReleasePtr:
-            {
-                // First make the pointers that the state has to its subscriptions weak ones.
-                statePtr->ReleaseSubscribers();
-
-                // then make the pointer from this state container to the state a weak one
-                it->second.Downgrade();
-            }
-            break;
-
-        case KeepPtr:
-            break;
-
-        default:
-            ENSURE(false, << "Unknown enum value!");
+            statePtr->ReleaseSubscribers();
+            it->second.Downgrade();
+        }
+        else if (savedReleaseStatus != statePtr->IsReleased())
+        {
+            it->second.Upgrade();
         }
     }
 
@@ -421,50 +324,48 @@ namespace Internal
         }
     }
 
-    StateContainer::UpgradeableStateResultAndIter
+    StateContainer::StateAndIter
     StateContainer::GetState(const Dob::Typesystem::Int64 key)
     {
         // Get container reader lock
         SharableStateContainerRwLock rlock(m_stateReaderWriterlock);
 
-        UpgradeableStateResult result;
+        StateSharedPtr statePtr;
 
         States::iterator it = m_states.find(key);
 
+        bool addState = false;
         if (it != m_states.end())
         {
             // State found
-            result = it->second.UpgradeAndGet();
+            statePtr = it->second.GetIncludeWeak();
 
-            if (result.first == NULL || result.second)
+            if (statePtr == NULL || statePtr->IsReleased())
             {
                 // The state pointer is NULL (this can happen if the found pointer is a weak pointer that is NULL
-                // but it hasn't yet been removed from the container) OR the state pointer is obtained from a weak
-                // pointer. In both cases we must run the AddState method to get an fully elaborated state including
+                // but it hasn't yet been removed from the container) OR the state is released. In both cases
+                // we must run the AddState method to get an fully elaborated state including
                 // all subscribers.
-                rlock.unlock();  // Must release sharable lock here because an exclusive lock will be acquired
-                                        // by AddState.
-
-                StateAndIter addRes = AddState(key);
-                result.first = addRes.first;
-                it = addRes.second;
+                addState = true;
             }
         }
         else
         {
             // No state found in container, create a new one.
-
-            rlock.unlock();  // Must release sharable lock here because an exclusive lock will be acquired
-                                    // by AddState.
-
-            StateAndIter addRes = AddState(key);
-            result.first = addRes.first;
-            it = addRes.second;
-
-            result.second = false;  // false => not upgraded from weak
+            addState = true;
         }
 
-        return std::make_pair(result, it);
+        if (addState)
+        {
+            rlock.unlock();  // Must release sharable lock here because an exclusive lock will be acquired
+                             // by AddState.
+
+            StateAndIter addRes = AddState(key);
+            statePtr = addRes.first;
+            it = addRes.second;
+        }
+
+        return std::make_pair(statePtr, it);
     }
 
     StateContainer::StateAndIter
@@ -475,16 +376,16 @@ namespace Internal
 
         States::iterator it = m_states.find(key);
 
-        StateSharedPtr retVal;
+        StateSharedPtr statePtr;
 
         if (it != m_states.end())
         {
             // State found
-            retVal = it->second.Get();
+            statePtr = it->second.Get();
 
-            if (retVal == NULL)
+            if (statePtr == NULL)
             {
-                // retVal can be NULL even if a state was found in the container. This can happen if
+                // statePtr can be NULL even if a state was found in the container. This can happen if
                 // the found pointer is a weak pointer that is NULL but it hasn't yet been removed from the
                 // container (the oops case).
                 m_states.erase(it);
@@ -492,23 +393,26 @@ namespace Internal
             }
         }
 
-        if (retVal == NULL)
+        if (statePtr == NULL)
         {
             // State doesn't exist, create it.
-            StateSharedPtr stateSharedPtr(GetSharedMemory().construct<State>
+            StateSharedPtr newStateSharedPtr(GetSharedMemory().construct<State>
                 (boost::interprocess::anonymous_instance)(),
                  my_allocator<State>(),
                  StateDeleter(this, key));
 
-            UpgradeableStatePtr state(stateSharedPtr);
+            UpgradeableStatePtr upgradeableStatePtr(newStateSharedPtr);
+            upgradeableStatePtr.Downgrade();  // A new state is 'released' so the pointer to the state from
+                                              // the state container should be downgraded.
 
-            std::pair<States::iterator, bool> insertRes = m_states.insert(std::make_pair(key, state));
+            std::pair<States::iterator, bool> insertRes =
+                m_states.insert(std::make_pair(key, upgradeableStatePtr));
 
             ENSURE(insertRes.second, << "StateContainer::AddState: Failed to insert state in map!" );
 
             it = insertRes.first;
 
-            retVal = state.Get();
+            statePtr = newStateSharedPtr;
         }
 
         // Check each meta subscription and create subscriptions accordingly
@@ -518,9 +422,9 @@ namespace Internal
                                   this,
                                   _1,
                                   key,
-                                  boost::cref(retVal)));
+                                  boost::cref(statePtr)));
 
-        return std::make_pair(retVal, it);
+        return std::make_pair(statePtr, it);
     }
 
     void StateContainer::UnsubscribeInternal(const MetaSubscriptions::iterator&             subIt,
@@ -588,13 +492,11 @@ namespace Internal
         }
     }
 
-    void StateContainer::AddSubscription(const UpgradeableStateResult&  upgradeableStateResult,
+    void StateContainer::AddSubscription(const StateSharedPtr&          statePtr,
                                          const SubscriptionId&          subscriptionId,
                                          const bool                     restartSubscription,
                                          const SubscriptionOptionsPtr&  subscriptionOptions)
     {
-        StateSharedPtr statePtr = upgradeableStateResult.first;
-
         if (subscriptionId.subscriptionType == InjectionSubscription)
         {
             // Need to do some additional stuff when creating an injection subscription
@@ -634,11 +536,9 @@ namespace Internal
                                   statePtr);
     }
 
-    void StateContainer::RemoveSubscription(const UpgradeableStateResult&       upgradeableStateResult,
+    void StateContainer::RemoveSubscription(const StateSharedPtr&   statePtr,
                                             const SubscriptionId&   subscriptionId)
     {
-        StateSharedPtr statePtr = upgradeableStateResult.first;
-
         statePtr->RemoveSubscription(subscriptionId);
     }
 
@@ -737,46 +637,44 @@ namespace Internal
         }
     }
 
-    const UpgradeableStateResult
+    const StateSharedPtr
     StateContainer::GetFirstExistingState(const bool includeReleasedStates, States::iterator& it) const
     {
         // Get container reader lock
         SharableStateContainerRwLock rlock(m_stateReaderWriterlock);
 
-        UpgradeableStateResult upgradeableStateResult = std::make_pair(StateSharedPtr(),
-                                                                       false);    // false => not obtained from weak
+        StateSharedPtr statePtr;
 
         for (it = m_states.begin(); it != m_states.end(); ++it)
         {
             if (includeReleasedStates)
             {
-                upgradeableStateResult = it->second.GetIncludeWeak();
+                statePtr = it->second.GetIncludeWeak();
             }
             else
             {
-                upgradeableStateResult.first = it->second.Get();
+                statePtr = it->second.Get();
             }
 
-            if (upgradeableStateResult.first != NULL)
+            if (statePtr != NULL)
             {
                 break;
             }
         }
-        return upgradeableStateResult;
+        return statePtr;
     }
 
-    const UpgradeableStateResult
+    const StateSharedPtr
     StateContainer::GetNextExistingState(const bool includeReleasedStates, States::iterator& it) const
     {
         // Get container reader lock
         SharableStateContainerRwLock rlock(m_stateReaderWriterlock);
 
-        UpgradeableStateResult upgradeableStateResult = std::make_pair(StateSharedPtr(),
-                                                                       false);    // false => not obtained from weak
+        StateSharedPtr statePtr;
 
         if (it == m_states.end())
         {
-            return upgradeableStateResult;
+            return statePtr;
         }
 
         ++it;
@@ -785,22 +683,22 @@ namespace Internal
         {
             if (includeReleasedStates)
             {
-                upgradeableStateResult = it->second.GetIncludeWeak();
+                statePtr = it->second.GetIncludeWeak();
             }
             else
             {
-                upgradeableStateResult.first = it->second.Get();
+                statePtr = it->second.Get();
             }
 
-            if (upgradeableStateResult.first != NULL)
+            if (statePtr != NULL)
             {
                 break;
             }
         }
-        return upgradeableStateResult;
+        return statePtr;
     }
 
-    const UpgradeableStateResult
+    const StateSharedPtr
     StateContainer::GetExistingState(const Dob::Typesystem::Int64    key,
                                      const bool                      includeReleasedStates,
                                      States::iterator&               it) const
@@ -808,23 +706,21 @@ namespace Internal
         // Get container reader lock
         SharableStateContainerRwLock rlock(m_stateReaderWriterlock);
 
-        UpgradeableStateResult upgradeableStateResult = std::make_pair(StateSharedPtr(),
-                                                                       false);    // false => not obtained from weak
-
         it = m_states.find(key);
 
-        if (it != m_states.end())
+        if (it == m_states.end())
         {
-            if (includeReleasedStates)
-            {
-                upgradeableStateResult = it->second.GetIncludeWeak();
-            }
-            else
-            {
-                upgradeableStateResult.first = it->second.Get();
-            }
+            return StateSharedPtr();
         }
-        return upgradeableStateResult;
+
+        if (includeReleasedStates)
+        {
+            return it->second.GetIncludeWeak();
+        }
+        else
+        {
+            return it->second.Get();
+        }
     }
 }
 }

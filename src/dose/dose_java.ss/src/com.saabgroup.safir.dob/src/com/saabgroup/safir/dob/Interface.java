@@ -456,4 +456,9 @@ final class Interface {
     static native void InvokeDeleter(java.nio.ByteBuffer deleter,
                                      java.nio.ByteBuffer toDelete);
 
+    //dose_java_jni GetContext
+    static native void GetContext(int ctrl,
+                                  int[] context,
+                                  boolean[] success);
+
 }

@@ -2695,7 +2695,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
 /***************************************************
 * Context: Application
 *
-* Called from application when PD is completed ?????????
+* Called from application when PD is completed 
 ****************************************************/
 void CDoseComTransmit::Set_PoolDistributionIsCompleted(int Priority,
                                                        int DestinationId)

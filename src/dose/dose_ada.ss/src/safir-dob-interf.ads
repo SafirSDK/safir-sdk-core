@@ -748,4 +748,10 @@ package Safir.Dob.Interf is
       Success       : out C.char);
    pragma Import (C, Simulate_Overflows, "DoseC_SimulateOverflows");
 
+   procedure Get_Context
+     (Controller_Id   : in Safir.Dob.Defs.Controller_Id;
+      Context         : out Safir.Dob.Typesystem.Int_32;
+      Success         : out C.char);
+   pragma Import (C, Get_Context, "DoseC_GetContext");
+
 end Safir.Dob.Interf;

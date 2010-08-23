@@ -665,6 +665,13 @@ extern "C"
                                                              const bool outQueues,
                                                              bool& success);
 
+    //-----------
+    // Context
+    //-----------
+    DOSE_API void CALLING_CONVENTION DoseC_GetContext(const long ctrl,
+                                                      DotsC_Int32& context,
+                                                      bool& success);
+
 #ifdef __cplusplus
 }
 #endif

@@ -25,7 +25,6 @@ with Ada.Characters.Conversions; use Ada.Characters.Conversions;
 with Ada.Characters.Wide_Latin_1; use Ada.Characters.Wide_Latin_1;
 with Ada.Containers;
 with Ada.Strings.Fixed;
-with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 with GNAT.Regexp;
 with GNAT.Wide_String_Split;
 
@@ -105,19 +104,33 @@ package body Safir.Application.Backdoor_Keepers is
    procedure Start (Self     : in out Backdoor_Keeper;
                     Backdoor : in     not null Safir.Application.Backdoors.Backdoor_Access) is
    begin
-      if Self.Started then
-         return;
+      Start (Self,
+             Backdoor,
+             To_Unbounded_Wide_String (""),
+             To_Unbounded_Wide_String (""));
+
+   end Start;
+
+   procedure Start (Self       : in out Backdoor_Keeper;
+                    Backdoor   : in     not null Safir.Application.Backdoors.Backdoor_Access;
+                    Connection_Name_Common_Part   : in Unbounded_Wide_String;
+                    Connection_Name_Instance_Part : in Unbounded_Wide_String) is
+   begin
+      Stop (Self);
+
+      if Length (Connection_Name_Common_Part) = 0 and Length (Connection_Name_Instance_Part) = 0 then
+         Self.Connection.Attach;
+      else
+         Self.Connection.Attach (Connection_Name_Common_Part, Connection_Name_Instance_Part);
       end if;
 
-      Self.Connection.Attach;
       Self.Backdoor := Backdoor;
       Self.Connection.Subscribe_Message
-         (Type_Id => Safir.Application.Backdoor_Command.Class_Type_Id,
-          Channel_Id => Safir.Dob.Typesystem.Channel_Id.Default_Channel,
-          Message_Subscriber => Self'Access);
+        (Type_Id => Safir.Application.Backdoor_Command.Class_Type_Id,
+         Channel_Id => Safir.Dob.Typesystem.Channel_Id.Default_Channel,
+         Message_Subscriber => Self'Access);
 
       Self.Started := True;
-
    end Start;
 
    ----------------------------------------------------------------------------
@@ -147,6 +160,13 @@ package body Safir.Application.Backdoor_Keepers is
       Self.Started := False;
    end Stop;
 
+   ----------------------------------------------------------------------------
+   -- Is_Started
+   ----------------------------------------------------------------------------
+   function Is_Started (Self : in Backdoor_Keeper) return Boolean is
+   begin
+      return Self.Started;
+   end Is_Started;
 
    ----------------------------------------------------------------------------
    -- OnMessage
@@ -159,6 +179,7 @@ package body Safir.Application.Backdoor_Keepers is
          Safir.Application.Backdoor_Command.Smart_Pointer (Message_Proxy.Get_Message);
       Cmd_Tokens : Safir.Application.Backdoors.Strings.Vector;
    begin
+
       if not Cmd.Ref.all.Node_Name.Is_Null then
          if not GNAT.Regexp.Match
                         (To_String (Safir.Dob.Node_Parameters.Nodes (Safir.Dob.This_Node_Parameters.Node_Number).Ref.all.Node_Name.Get_Val),

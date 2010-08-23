@@ -1309,6 +1309,12 @@ A_Valid_Msg_Is_Received:
             continue;
         }
 
+        // This is the first message for a PD
+        if (MsgHdr.IsPoolDistribution & PD_FIRSTDATA)
+        {
+            CNodeStatus::Set_HasReceivedPdStart(DoseId);
+        }
+
         // Wait until there is space on g_RxQ
         // new_050426 - shall we have a timeout ?
         int WaitCount = 0;

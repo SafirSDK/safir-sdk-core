@@ -41,7 +41,7 @@ public:
     EntityStats(QWidget *parent, const Safir::Dob::Typesystem::TypeId typeId);
 
     void ProcessState(const Safir::Dob::Typesystem::Int64 instance,
-                      const Safir::Dob::Internal::UpgradeableStateResult& statePtrResult,
+                      const Safir::Dob::Internal::StateSharedPtr& statePtr,
                       Arguments& arguments);
 
     void AddContextRow(Safir::Dob::Internal::EntityType& entityType, Arguments& argumentsXS);

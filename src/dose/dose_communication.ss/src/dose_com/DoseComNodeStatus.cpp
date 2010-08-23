@@ -47,6 +47,7 @@ static unsigned long g_TickPrev = 0;
 
 extern void WakeUp_NodeChange(void);
 extern void WakeUp_DistributePool(void);
+extern void WakeUp_RequestPoolDistribution(int doseId);
 
 //--------------------------------------------------------
 // Local non-shared data
@@ -244,6 +245,7 @@ void CNodeStatus::SetNodeDownWhenInvalidTimeStamp(dcom_uchar8 DoseId)
     g_pNodeStatusTable[DoseId].ToBeGivenToAppl       = 2;
     g_pNodeStatusTable[DoseId].ToBePoolDistributed   = 0;
     g_pNodeStatusTable[DoseId].HasReceivedPdComplete = 0;
+    g_pNodeStatusTable[DoseId].HasReceivedPdStart = 0;
 
     UpdateNodeStatusBitMap();
     WakeUp_NodeChange();
@@ -303,6 +305,7 @@ int CNodeStatus::UpdateNode_Up(unsigned char DoseId,
         if(g_pNodeStatusTable[DoseId].HasReceivedPdComplete)
         {
             g_pNodeStatusTable[DoseId].HasReceivedPdComplete = 0;
+            g_pNodeStatusTable[DoseId].HasReceivedPdStart = 0;
             g_pNodeStatusTable[DoseId].Status                = NODESTATUS_UP;
             g_pNodeStatusTable[DoseId].ToBeGivenToAppl       = 3;
 
@@ -331,6 +334,7 @@ int CNodeStatus::UpdateNode_Up(unsigned char DoseId,
         g_pNodeStatusTable[DoseId].LatestTime = DoseOs::Get_TickCount();
         g_pNodeStatusTable[DoseId].Status     = NODESTATUS_NEW;
         g_pNodeStatusTable[DoseId].TimeStamp  = TimeStamp; //06-03-07
+        g_pNodeStatusTable[DoseId].NewTime  = DoseOs::Get_TickCount(); 
         g_pNodeStatusTable[DoseId].ToBeGivenToAppl     = 2;
         g_pNodeStatusTable[DoseId].ToBePoolDistributed = 2;
     }
@@ -347,6 +351,7 @@ int CNodeStatus::UpdateNode_Up(unsigned char DoseId,
         g_pNodeStatusTable[DoseId].Status     = NODESTATUS_NEW;
         g_pNodeStatusTable[DoseId].IpAddr_nw  = IpAddr_nw;
         g_pNodeStatusTable[DoseId].TimeStamp  = TimeStamp; //06-03-07
+        g_pNodeStatusTable[DoseId].NewTime  = DoseOs::Get_TickCount(); 
 
         CConfig::Add_UnicastIpAddr(DoseId, IpAddr_nw);
     }
@@ -431,7 +436,33 @@ int CNodeStatus::CheckTimedOutNodes(void)
                 g_pNodeStatusTable[jj].ToBeGivenToAppl       = 2;
                 g_pNodeStatusTable[jj].ToBePoolDistributed   = 0;
                 g_pNodeStatusTable[jj].HasReceivedPdComplete = 0;
+                g_pNodeStatusTable[jj].HasReceivedPdStart = 0;
                 ChangeCount++;
+            }
+            // 2010-06-14 - miwn: added check of timeout if stuck in status new and no pd start have been received.
+            else if (g_pNodeStatusTable[jj].Status == NODESTATUS_NEW && 
+                !g_pNodeStatusTable[jj].HasReceivedPdStart && 
+                !g_pNodeStatusTable[jj].HasReceivedPdComplete) 
+            {
+                if((dwCurrentTime - g_pNodeStatusTable[jj].NewTime) > NODESTATUS_NEW_TIMEOUT)
+                {
+                    TickNow = DoseOs::Get_TickCount();
+                    if(*pDbg)
+                        PrintDbg("%4d *** Node %d timed out in status NEW. Request PD.\n", TickNow - g_TickPrev, jj);
+                    // save time so we send request once and can retry later.
+                    g_pNodeStatusTable[jj].NewTime = TickNow; 
+                    //
+                    // kick application to send request for pool distribution
+                    WakeUp_RequestPoolDistribution(jj);
+                    if(*pDbg>2)
+                        PrintDbg("%4d *** A node is stuck in status NEW, request PD from: IP=%u.%u.%u.%u\n",
+                                 TickNow - g_TickPrev,
+                                 g_pNodeStatusTable[jj].IpAddr_nw & 0xFF,
+                                (g_pNodeStatusTable[jj].IpAddr_nw>>8) & 0xFF,
+                                (g_pNodeStatusTable[jj].IpAddr_nw>>16) & 0xFF,
+                                (g_pNodeStatusTable[jj].IpAddr_nw>>24) & 0xFF);
+                    g_TickPrev = TickNow;
+                }
             }
         }
     }
@@ -522,6 +553,17 @@ dcom_ulong32 CNodeStatus::GetNextChangedNode(unsigned char *pNodeStatus,
 void CNodeStatus::Set_HasReceivedPdComplete(int DoseId)
 {
     g_pNodeStatusTable[DoseId].HasReceivedPdComplete = 1;
+    //PrintDbg("Set_HasReceivedPdComplete()\n");
+}
+
+/*********************************************************
+* Called from RxThread when the first Pd msg is received
+**********************************************************/
+
+void CNodeStatus::Set_HasReceivedPdStart(int DoseId)
+{
+    g_pNodeStatusTable[DoseId].HasReceivedPdStart = 1;
+    //PrintDbg("Set_HasReceivedPdStart()\n");
 }
 
 /******************************************************************

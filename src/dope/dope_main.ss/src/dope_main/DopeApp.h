@@ -36,8 +36,10 @@
 class DopeApp :
     public Safir::Dob::StopHandler,
     public Safir::Dob::EntityHandlerPending,
+    public Safir::Dob::EntityHandler,
     public Safir::Dob::EntitySubscriber,
-    public Safir::Application::Backdoor
+    public Safir::Application::Backdoor,
+    public ACE_Event_Handler
 {
 public:
     /**
@@ -91,6 +93,17 @@ private:
     Safir::Utilities::AceDispatcher m_dispatcher;
     Safir::Dob::Typesystem::HandlerId m_handlerId;
     Safir::Dob::Typesystem::InstanceId m_instanceId;
+
+    /*
+    Dope connects on context -1, before all other apps.
+    But to ensure that registration time is set correct we must wait with registration and entity(dope owned) creation
+    until it is ok to connect as a normal app on context 0.
+    The connection thread is waiting to it is ok to connect on context 0.
+    Then we can register entityhander and create our entity.
+    */
+    static ACE_THR_FUNC_RETURN ConnectionThread(void *);
+    //Handler when ok to connect for applications.
+    virtual int handle_input(ACE_HANDLE);
 
     bool m_persistenceStarted; // Any dope has started successfully and loaded persistent data into the system.
 

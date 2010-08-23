@@ -259,62 +259,48 @@ namespace Internal
 
         typedef boost::interprocess::scoped_lock<TypeLock> ScopedTypeLock;
 
-        void SetEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
+        void SetEntityInternal(const StateSharedPtr&                statePtr,
                                const ConnectionPtr&                 connection,
                                const Dob::Typesystem::HandlerId&    handlerId,
                                const Dob::Typesystem::InstanceId&   instanceId,
                                const bool                           considerChangeFlags,
                                const char* const                    blob);
 
-        void DeleteEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
+        void DeleteEntityInternal(const StateSharedPtr&                statePtr,
                                   const ConnectionPtr&                 connection,
                                   const Dob::Typesystem::HandlerId&    handlerId,
-                                  const Dob::Typesystem::InstanceId&   instanceId,
-                                  StatePtrHandling&                    statePtrHandling);
+                                  const Dob::Typesystem::InstanceId&   instanceId);
 
-        void DeleteAllInstancesInternal(const UpgradeableStateResult&       upgradeableStateResult,
+        void DeleteAllInstancesInternal(const StateSharedPtr&               statePtr,
                                         const ConnectionPtr&                connection,
                                         const Dob::Typesystem::HandlerId&   handlerId,
-                                        StatePtrHandling&                   statePtrHandling,
                                         bool&                               exitDispatch);
 
-        void SetInitalGhostInternal(const UpgradeableStateResult&        upgradeableStateResult,
+        void SetInitalGhostInternal(const StateSharedPtr&                statePtr,
                                     const ConnectionPtr&                 connection,
                                     const Dob::Typesystem::HandlerId&    handlerId,
                                     const Dob::Typesystem::InstanceId&   instanceId,
                                     const char* const                    blob);
 
-        void InjectEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
+        void InjectEntityInternal(const StateSharedPtr&                statePtr,
                                   const ConnectionPtr&                 connection,
                                   const Dob::Typesystem::HandlerId&    handlerId,
                                   const Dob::Typesystem::InstanceId&   instanceId,
                                   const char* const                    blob,
-                                  const Dob::Typesystem::Int64         timestamp,
-                                  StatePtrHandling&                    statePtrHandling);
+                                  const Dob::Typesystem::Int64         timestamp);
 
-        void InjectDeletedEntityInternal(const UpgradeableStateResult&        upgradeableStateResult,
+        void InjectDeletedEntityInternal(const StateSharedPtr&                statePtr,
                                          const ConnectionPtr&                 connection,
                                          const Dob::Typesystem::HandlerId&    handlerId,
                                          const Dob::Typesystem::InstanceId&   instanceId,
-                                         const Dob::Typesystem::Int64         timestamp,
-                                         StatePtrHandling&                    statePtrHandling);
+                                         const Dob::Typesystem::Int64         timestamp);
 
-        void AcceptInjectionInternal(const UpgradeableStateResult&  upgradeableStateResult,
+        void AcceptInjectionInternal(const StateSharedPtr&          statePtr,
                                      const ConnectionPtr&           connection,
                                      DistributionData&              injectionState,
                                      const DistributionData&        originalInjectionState);
 
-        void AcceptDeleteInjectionInternal(const UpgradeableStateResult&  upgradeableStateResult,
-                                           const ConnectionPtr&           connection,
-                                           DistributionData&              injectionState,
-                                           const DistributionData&        originalInjectionState,
-                                           StatePtrHandling&              statePtrHandling);
-
-        void CommonAcceptInjectionInternal(const UpgradeableStateResult&  upgradeableStateResult,
-                                           const ConnectionPtr&           connection,
-                                           DistributionData&              injectionState);
-
-        void SetInjectionInternal(const UpgradeableStateResult&        upgradeableStateResult,
+        void SetInjectionInternal(const StateSharedPtr&                statePtr,
                                   const ConnectionPtr&                 connection,
                                   const Dob::Typesystem::HandlerId&    handlerId,
                                   const Dob::Typesystem::InstanceId&   instanceId,
@@ -322,31 +308,27 @@ namespace Internal
                                   const char* const                    blob,
                                   const DistributionData&              originalInjectionState);
 
-        void DeleteInjectionInternal(const UpgradeableStateResult&        upgradeableStateResult,
+        void DeleteInjectionInternal(const StateSharedPtr&                statePtr,
                                      const ConnectionPtr&                 connection,
                                      const Dob::Typesystem::HandlerId&    handlerId,
                                      const Dob::Typesystem::InstanceId&   instanceId,
-                                     const DistributionData&              originalInjectionState,
-                                     StatePtrHandling&                    statePtrHandling);
+                                     const DistributionData&              originalInjectionState);
 
-        void RemoteSetGhostEntityStateInternal(const DistributionData&        remoteEntity,
-                                               const UpgradeableStateResult&  upgradeableStateResult);
+        void RemoteSetGhostEntityStateInternal(const DistributionData&  remoteEntity,
+                                               const StateSharedPtr&    statePtr);
 
         void RemoteSetInjectionEntityStateInternal(const DistributionData&        remoteEntity,
-                                                   const UpgradeableStateResult&  upgradeableStateResult,
-                                                   StatePtrHandling&              statePtrHandling);
+                                                   const StateSharedPtr&          statePtr);
 
-        void RemoteSetDeleteEntityStateInternal(const DistributionData&         remoteEntity,
-                                                const UpgradeableStateResult&   upgradeableStateResult,
-                                                StatePtrHandling&               statePtrHandling);
+        void RemoteSetDeleteEntityStateInternal(const DistributionData&     remoteEntity,
+                                                const StateSharedPtr&       statePtr);
 
         void RemoteSetRealEntityStateInternal(const ConnectionPtr&           connection,
                                               const DistributionData&        remoteEntity,
-                                              const UpgradeableStateResult&  upgradeableStateResult,
-                                              StatePtrHandling&              statePtrHandling,
+                                              const StateSharedPtr&          statePtr,
                                               RemoteSetResult&               remoteSetResult);
 
-        void SetEntityLocal(const UpgradeableStateResult&        upgradeableStateResult,
+        void SetEntityLocal(const StateSharedPtr&                statePtr,
                             const ConnectionPtr&                 connection,
                             const Dob::Typesystem::HandlerId&    handlerId,
                             const Dob::Typesystem::InstanceId&   instanceId,
@@ -358,8 +340,7 @@ namespace Internal
                                const ContextId                      context,
                                const Dob::Typesystem::HandlerId&    handlerId,
                                const Dob::Typesystem::InstanceId&   instanceId,
-                               const DistributionData&              injectionState,
-                               StatePtrHandling&                    statePtrHandling);
+                               const DistributionData&              injectionState);
 
         // A state always has an owner. (Checks any real or injected state for a handler id.)
         void GetOwner(const StateSharedPtr&       statePtr,
@@ -383,15 +364,15 @@ namespace Internal
         bool IsCreated(const StateSharedPtr& statePtr) const;
         bool IsGhost(const StateSharedPtr& statePtr) const;
 
-        void ReadEntityInternal(const UpgradeableStateResult& upgradeableStateResult, DistributionData& realState) const;
+        void ReadEntityInternal(const StateSharedPtr& statePtr, DistributionData& realState) const;
 
-        void GetHandlerOfInstanceInternal(const UpgradeableStateResult& upgradeableStateResult,
+        void GetHandlerOfInstanceInternal(const StateSharedPtr&       statePtr,
                                           Dob::Typesystem::HandlerId& handlerId,
                                           bool& gotIt) const;
 
-        void IsCreatedInternal(const UpgradeableStateResult& upgradeableStateResult, bool& isCreated) const;
+        void IsCreatedInternal(const StateSharedPtr& statePtr, bool& isCreated) const;
 
-        void IsOwnerInternal(const UpgradeableStateResult&      upgradeableStateResult,
+        void IsOwnerInternal(const StateSharedPtr&              statePtr,
                              const Dob::Typesystem::HandlerId&  handlerId,
                              const ConnectionConsumerPair&      registerer,
                              bool&                              isOwner) const;

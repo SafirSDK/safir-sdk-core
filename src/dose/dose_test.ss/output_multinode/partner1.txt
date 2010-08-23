@@ -586,7 +586,7 @@ Expectation: partner 0/consumer 1 receives an OnInitialInjectionsDone and an OnI
 ==========================================================================
 TESTCASE 356
 Description: Testing that iex injections are transfered to application when registering a corresponding handler
-Expectation: partner 0/consumer 1 receives OnInjectedNewEntity for InjectableEntity instance 888888 (Info is "Some new info" and Int32Member is 123) and instance 999999 (Int64Member is 123456). The read values correspond to the injected ones.
+Expectation: partner 0/consumer 1 receives OnInjectedNewEntity for InjectableEntity instance 888888 (Info is "Some new info" and Int32Member is 123) and instance 999999 (Int64Member is 123456) followed by an OnInitialInjectionsDone. The read values correspond to the injected ones.
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
@@ -2045,6 +2045,13 @@ Consumer 0: OnInitialInjectionsDone:
   HandlerId = DEFAULT_HANDLER
 
 ==========================================================================
+TESTCASE 980
+Description: Test to read the current context for a connection.
+Expectation: Partner 0 's test connection is opened in context 0 and Partner 1 's test connection is opened in context 1
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: The test connection is opened in context 1
+==========================================================================
 TESTCASE 1000
 Description: Test a foreach update request with a brief response
 Expectation: Partner 1 and 2 should get an update request and partner 0 should get a successful brief response. The read instances should have the Info element set to KalleKula
@@ -2169,6 +2176,18 @@ Consumer 0: OnDeleteRequest:
   Handler    = -5453762115588730630
   HandlerStr = -5453762115588730630
 
+==========================================================================
+TESTCASE 1100
+Description: Test of the backdoor keeper.
+Expectation: Partner 0 shall report: 1.Backdoor is not started. 2.Backdoor is started. 3.Received command "test-command 2 olle" 4.Backdoor is not started. 5.Backdoor is started. 6.Received command "test-command 4 bertil bertilsson".
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
+TESTCASE 1101
+Description: Test that a backdoor keeper can be "restarted" when the main connection has been closed and opened in a different context.
+Expectation: Partner 0 shall receive command "test-command 1" and "test-command 3"
+--------- Setup -----------
+--------- Test  -----------
 ==========================================================================
 TESTCASE 9999
 Description: Empty Test case

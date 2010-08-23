@@ -78,44 +78,35 @@ namespace Internal
         bool HasSubscription(const SubscriptionId&   subscriptionId) const;
 
         typedef boost::function<void(const Dob::Typesystem::Int64 key,
-                                     const UpgradeableStateResult& statePtrResult)> ActionFunc;
+                                     const StateSharedPtr& stateSharedPtr,
+                                     bool& exitDispatch)> ForEachStateActionFunc;
 
         // Calls actionFunc for each existing state. Each state is locked during the callback.
-        void ForEachState(const ActionFunc& actionFunc, const bool includeReleasedStates);
+        // The state 'Released' flag will be checked before and after the callback and if it
+        // has changed from 'not released' to 'released' the state subscriptions will be released and
+        // the container pointer will be downgraded.
+        void ForEachState(const ForEachStateActionFunc& actionFunc, const bool includeReleasedStates);
+
+        typedef boost::function<void(const Dob::Typesystem::Int64 key,
+                                     const StateSharedPtr& stateSharedPtr)> ForSpecificStateActionFunc;
 
         // Calls actionFunc for the specific state. The state is locked during the callback.
-        void ForSpecificState(const Dob::Typesystem::Int64 key, const ActionFunc& actionFunc, const bool includeReleasedStates);
+        // The state 'Released' flag will be checked before and after the callback and if it
+        // has changed from 'not released' to 'released' the state subscriptions will be released and
+        // the container pointer will be downgraded.
+        void ForSpecificState(const Dob::Typesystem::Int64 key,
+                              const ForSpecificStateActionFunc& actionFunc,
+                              const bool includeReleasedStates);
 
         // Returns a pointer, along with a lock management object, to the specific state. The state is locked until
         // the lock management object is destructed.
         LockedStateResult GetSpecificState(const Dob::Typesystem::Int64 key, const bool includeReleasedStates);
 
         // Calls actionFunc for the specific state. The state is locked during the callback.
-        // If the state doesn't already exist it is created. A downgraded state is revived.
-        // Subscriptions is added to the state according to the corresponding meta subscription.
+        // If the state doesn't already exist a released state is created.
+        // Subscriptions are added to the state according to the corresponding meta subscription.
         // The subscriptions are not marked as dirty.
-        void ForSpecificStateAdd(const Dob::Typesystem::Int64 key, const ActionFunc& actionFunc);
-
-        typedef boost::function<void(const Dob::Typesystem::Int64 key,
-                                     const UpgradeableStateResult& statePtrResult,
-                                     StatePtrHandling& statePtrHandling,
-                                     bool& exitDispatch)> ReleaseEachActionFunc;
-
-        // Calls releaseActionFunc for each existing state. Each state is locked during the callback.
-        void ReleaseEachState(const ReleaseEachActionFunc& releaseActionFunc);
-
-        typedef boost::function<void(const Dob::Typesystem::Int64 key,
-                                     const UpgradeableStateResult& statePtrResult,
-                                     StatePtrHandling& statePtrHandling)> ReleaseSpecificActionFunc;
-
-        // Calls releaseActionFunc for the specific state. The state is locked during the callback.
-        void ReleaseSpecificState(const Dob::Typesystem::Int64 key, const ReleaseSpecificActionFunc& releaseActionFunc);
-
-        // Calls releaseActionFunc for the specific state. The state is locked during the callback.
-        // If the state doesn't already exist it is created. A downgraded state is revived.
-        // Subscriptions is added to the state according to the corresponding meta subscription.
-        // The subscriptions are not marked as dirty.
-        void ForSpecificStateAddAndRelease(const Dob::Typesystem::Int64 key, const ReleaseSpecificActionFunc& releaseActionFunc);
+        void ForSpecificStateAdd(const Dob::Typesystem::Int64 key, const ForSpecificStateActionFunc& actionFunc);
 
         typedef boost::interprocess::offset_ptr<StateContainer> ThisPtr;
         static void RemoveState(ThisPtr _this, const Dob::Typesystem::Int64 key);
@@ -182,11 +173,10 @@ namespace Internal
 
         MetaSubscriptions m_metaSubscriptions;
 
-        typedef std::pair<UpgradeableStateResult, States::iterator> UpgradeableStateResultAndIter;
         typedef std::pair<StateSharedPtr, States::iterator> StateAndIter;
 
         // Get a state as a reader
-        UpgradeableStateResultAndIter GetState(const Dob::Typesystem::Int64 key);
+        StateAndIter GetState(const Dob::Typesystem::Int64 key);
 
         // Add a state as a writer
         StateAndIter AddState(const Dob::Typesystem::Int64 key);
@@ -200,12 +190,12 @@ namespace Internal
                                      const StateSharedPtr&                              statePtr);
 
 
-        void AddSubscription(const UpgradeableStateResult&       upgradeableStateResult,
+        void AddSubscription(const StateSharedPtr&               statePtr,
                              const SubscriptionId&               subscriptionId,
                              const bool                          restartSubscription,
                              const SubscriptionOptionsPtr&       subscriptionOptions);
 
-        void RemoveSubscription(const UpgradeableStateResult&       upgradeableStateResult,
+        void RemoveSubscription(const StateSharedPtr&               statePtr,
                                 const SubscriptionId&               subscriptionId);
 
 
@@ -213,13 +203,13 @@ namespace Internal
 
         // Note that the iterator returned from these methods is valid only as long as the returned
         // StateSharedPtr is kept.
-        const UpgradeableStateResult GetFirstExistingState(const bool        includeReleasedStates,
-                                                           States::iterator& it) const;
-        const UpgradeableStateResult GetNextExistingState(const bool        includeReleasedStates,
-                                                          States::iterator& it) const;
-        const UpgradeableStateResult GetExistingState(const Dob::Typesystem::Int64    key,
-                                                      const bool                      includeReleasedStates,
-                                                      States::iterator&               it) const;
+        const StateSharedPtr GetFirstExistingState(const bool        includeReleasedStates,
+                                                   States::iterator& it) const;
+        const StateSharedPtr GetNextExistingState(const bool        includeReleasedStates,
+                                                  States::iterator& it) const;
+        const StateSharedPtr GetExistingState(const Dob::Typesystem::Int64    key,
+                                              const bool                      includeReleasedStates,
+                                              States::iterator&               it) const;
 
         friend void StatisticsCollector(StateContainer&, void*);
     };

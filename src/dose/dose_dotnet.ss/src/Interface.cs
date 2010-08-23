@@ -730,7 +730,11 @@ namespace Safir.Dob
                                                                     out System.IntPtr entityState,
                                                                     out byte success);
 
-
+        //DoseC_GetContext
+        [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DoseC_GetContext(System.Int32 ctrl,
+                                                     out System.Int32 context,
+                                                     out byte success);
 
         //DoseC_SetAlwaysOverflowFlag
         [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]

@@ -144,11 +144,45 @@ namespace Internal
     void PoolHandler::StartPoolDistribution()
     {
         lllout << "Starting pool distribution thread" << std::endl;
-        ENSURE(m_pdThreadHandle == 0, << "It appears that there are multiple pool distribution threads running! m_pdThreadHandle = 0x"
-                                      <<std::hex<< (void*)m_pdThreadHandle<<std::dec);
+        if (m_pdThreadHandle != 0)
+        {
+            lllerr << "PoolHandler: The pool distribution thread is already running, request ignored." << std::endl;
+            return;
+        }
+        //ENSURE(m_pdThreadHandle == 0, << "It appears that there are multiple pool distribution threads running! m_pdThreadHandle = 0x"
+        //                              <<std::hex<< (void*)m_pdThreadHandle<<std::dec);
         ACE_Thread::spawn(&PoolHandler::PoolDistributionThreadFunc,this,THR_NEW_LWP|THR_JOINABLE,NULL,&m_pdThreadHandle);
     }
 
+    void PoolHandler::RequestPoolDistribution(const int nodeId)
+    {
+        lllout << "PoolHandler::RequestPoolDistribution(" << nodeId << ") called." << std::endl;
+
+        // Startup sequence, we must wait for persistence.
+        // Ok, if nodes hang in state NEW at this stage.
+        if (!m_persistHandler->IsPersistentDataReady())
+        {
+            lllout << "PoolHandler::RequestPoolDistribution(" << nodeId << "). Waiting for persistence - request ignored." << std::endl;
+            return;
+        }
+
+        lllerr << "PoolHandler::RequestPoolDistribution: request sent to node " << nodeId << "." << std::endl;
+        DistributionData PDRequest
+            (request_pool_distribution_request_tag,
+            ConnectionId(ThisNodeParameters::NodeNumber(), -1, -1), //Sender - dummy connection id, only nodeNumber is of interest.
+            ConnectionId(nodeId, -1, -1)); //Receiver - dummy connection id, only nodeNumber is of interest.
+
+        m_ecom->Send(PDRequest);
+    }
+
+    void PoolHandler::HandleMessageFromDoseCom(const DistributionData& data)
+    {
+        if (data.GetType() == DistributionData::Action_RequestPoolDistribution)
+        {
+            lllerr << "Starting pool distribution thread on request from node " << data.GetSenderId().m_node << "." << std::endl;
+            this->StartPoolDistribution();
+        }
+    }
 
     void PoolHandler::PDConnection(const Connection & connection)
     {
@@ -199,8 +233,8 @@ namespace Internal
                 m_ecom->SendPoolDistributionData(*msgIter);
             }
             ConnectionMsgsToSend.clear();
-
             lllout << "Setting up connection in each context for pool distribution" << std::endl;
+
             DummyDispatcher dispatcher;
             DummySubscriber dummySubscriber;
 
@@ -211,10 +245,10 @@ namespace Internal
 
                 //Note the connection name, we do NOT want to get special treatment for being
                 //in dose_main, since we're a different thread. But we want to be allowed in
-                //early, so we use "minus one" contexts.
-                pdConnection.Open(L"dose_main_pd",L"pool_distribution",ComposeMinusOneContext(context),NULL, &dispatcher);
+                //always, so don't change connection string "dose_main_pd" because it is always allowed to connect,
+                // even before we let -1 connections in.
+                pdConnection.Open(L"dose_main_pd",L"pool_distribution", context,NULL, &dispatcher);
                 StartSubscriptions(pdConnection, dummySubscriber,true,false);
-
                 const std::wstring connectionName = ConnectionAspectMisc(pdConnection).GetConnectionName();
                 ConnectionPtr connection = Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName)).get();
 

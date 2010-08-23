@@ -497,12 +497,55 @@ namespace Internal
         }
     }
 
+    bool FileParser::ParseDouDir(const boost::filesystem::path & dirName)
+    {
+        lllout << "ParseDouDir: Parsing directory " << dirName.string().c_str() << std::endl;
+
+        for (boost::filesystem::directory_iterator path = boost::filesystem::directory_iterator(dirName);
+             path != boost::filesystem::directory_iterator(); ++path)
+        {
+            const std::string extension = boost::filesystem::extension(*path);
+
+            if ( boost::filesystem::is_directory(*path) )
+            {
+                if (!ParseDouDir(*path))
+                    return false;
+                else
+                    continue;
+            }
+
+            if (extension != UNIT_FILE_EXT)
+            {
+                continue;
+            }
+
+            lllout << "ParseDouFiles: Parsing file " << path->string().c_str() << std::endl;
+
+            if (!ParseFile(*path))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
     bool FileParser::ParseDouFiles()
     {
         for (boost::filesystem::directory_iterator path = boost::filesystem::directory_iterator(GetDobFileDirectory());
              path != boost::filesystem::directory_iterator(); ++path)
         {
             const std::string extension = boost::filesystem::extension(*path);
+
+            if ( boost::filesystem::is_directory(*path) )
+            {
+                if (!ParseDouDir(*path))
+                    return false;
+                else
+                    continue;
+            }
+
             if (extension != UNIT_FILE_EXT)
             {
                 continue;
@@ -523,12 +566,55 @@ namespace Internal
         return true;
     }
 
+    bool FileParser::ParseDomDir(const boost::filesystem::path & dirName)
+    {
+        lllout << "ParseDomDir: Parsing directory " << dirName.string().c_str() << std::endl;
+        for (boost::filesystem::directory_iterator path = boost::filesystem::directory_iterator(dirName);
+             path != boost::filesystem::directory_iterator(); ++path)
+        {
+            const std::string extension = boost::filesystem::extension(*path);
+
+            if ( boost::filesystem::is_directory(*path) )
+            {
+                if (!ParseDomDir(*path))
+                    return false;
+                else
+                    continue;
+            }
+
+            if (extension != PROPERTY_MAPPING_FILE_EXT)
+            {
+                continue;
+            }
+
+            lllout << "ParseDomFiles: Parsing file " << path->string().c_str() << std::endl;
+
+            ParsingState::Instance().mappingParser.SetFileName(*path);
+            if (!ParseFile(*path))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
     bool FileParser::ParseDomFiles()
     {
         for (boost::filesystem::directory_iterator path = boost::filesystem::directory_iterator(GetDobFileDirectory());
              path != boost::filesystem::directory_iterator(); ++path)
         {
             const std::string extension = boost::filesystem::extension(*path);
+
+            if ( boost::filesystem::is_directory(*path) )
+            {
+                if (!ParseDomDir(*path))
+                    return false;
+                else
+                    continue;
+            }
+
             if (extension != PROPERTY_MAPPING_FILE_EXT)
             {
                 continue;

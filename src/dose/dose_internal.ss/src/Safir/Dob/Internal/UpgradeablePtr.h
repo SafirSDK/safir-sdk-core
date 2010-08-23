@@ -75,6 +75,16 @@ namespace Internal
             return m_sharedPtr == NULL;
         }
 
+        void Upgrade()
+        {
+            ScopedLock lck(*m_lockPtr);
+
+            if (m_sharedPtr == NULL)
+            {
+                m_sharedPtr = m_weakPtr.lock();
+            }
+        }
+
         // Might return NULL!
         // The bool component of the returned pair is true if and only if the SharedPtrT component has been upgraded (obtained from a the weak pointer).
         std::pair<SharedPtrT, bool> UpgradeAndGet()
@@ -99,18 +109,12 @@ namespace Internal
             return m_sharedPtr;
         }
 
-        // The bool component of the returned pair is true if and only if the SharedPtrT component has been obtained from a the weak pointer.
-        std::pair<SharedPtrT, bool> GetIncludeWeak() const
+        // Might return NULL!
+        SharedPtrT GetIncludeWeak() const
         {
             ScopedLock lck(*m_lockPtr);
 
-            bool obtainedFromWeak = false;
-
-            if (m_sharedPtr == NULL)
-            {
-                obtainedFromWeak = true;
-            }
-            return std::make_pair(m_weakPtr.lock(), obtainedFromWeak);
+            return m_weakPtr.lock();
         }
 
     private:

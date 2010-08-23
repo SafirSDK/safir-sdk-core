@@ -80,9 +80,7 @@ namespace Internal
     >
     StateSharedPtr;
 
-    typedef std::pair<StateSharedPtr, bool> UpgradeableStateResult;
-
-    typedef std::pair<UpgradeableStateResult, SharedLock> LockedStateResult;
+    typedef std::pair<StateSharedPtr, SharedLock> LockedStateResult;
 
     class RequestInQueue;
     class RequestOutQueue;

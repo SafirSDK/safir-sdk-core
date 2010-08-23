@@ -409,7 +409,6 @@ static THREAD_API KeepAlive_Thread(void *)
     dcom_ulong32   dwCurrentTime;
     dcom_ulong32   ErrCode;
     DOSE_UDP_KEEPALIVE_MSG TxMsg;
-    dcom_ulong32   FromIpAddr_nw;
     char    RxBuff[32];  // Must be at least sizeof(DOSE_UDP_GETINFO_MSG)
     DOSE_UDP_KEEPALIVE_MSG *pRxMsg;
     CIpmSocket TxRxSock;
@@ -525,45 +524,18 @@ static THREAD_API KeepAlive_Thread(void *)
         if( pRxMsg->MsgType == MSG_TYPE_KEEPALIVE)
         {
             //if(*pDbg>3) PrintDbg("=   KeepAlive got a msg. 3\n");
+            //PrintDbg("=   KeepAlive call UpdateNode_Up(%X,%X)\n",
+            //          pRxMsg->DoseIdFrom, pRxMsg->IpAddrFrom_nw);
 
-            FromIpAddr_nw = pRxMsg->IpAddrFrom_nw;
+            result = CNodeStatus::UpdateNode_Up(pRxMsg->DoseIdFrom,
+                pRxMsg->IpAddrFrom_nw, pRxMsg->TimeStamp);
+            //pRxMsg->BitMapDestChannelMemberShip);
 
-            // if(FromIpAddr_nw != CConfig::m_MyIpAddr_nw)
+            if (result != 0) // If a change (a new node)
             {
-                //PrintDbg("=   KeepAlive call UpdateNode_Up(%X,%X)\n",
-                //          pRxMsg->DoseIdFrom, pRxMsg->IpAddrFrom_nw);
-
-                result = CNodeStatus::UpdateNode_Up(pRxMsg->DoseIdFrom,
-                                    pRxMsg->IpAddrFrom_nw, pRxMsg->TimeStamp);
-                                        //pRxMsg->BitMapDestChannelMemberShip);
-
-                if (result != 0) // If a change (a new node)
-                {
-                    if(*pDbg>=2)
-                        PrintDbg("=   KeepAlive Adding a node IP=%s\n",
-                            DoseOs::Inet_Ntoa(pRxMsg->IpAddrFrom_nw));
-                }
-            }
-        }
-        else
-        // Is this used any more ???
-        if( pRxMsg->MsgType == MSG_TYPE_KEEPALIVE_START)
-        {
-            //if(*pDbg) PrintDbg("=   Got an MSG_TYPE_KEEPALIVE_START msg\n");
-            FromIpAddr_nw = pRxMsg->IpAddrFrom_nw;
-
-            if((pRxMsg->DoseIdFrom == g_MyDoseId)
-                && (FromIpAddr_nw != CConfig::m_MyIpAddr_nw))
-            {
-                if(*pDbg)
-                    PrintDbg("=   KeepAliveThread DoseId conflict with %s\n",
-                            DoseOs::Inet_Ntoa(FromIpAddr_nw));
-
-                // Normally the node that is sending MSG_TYPE_KEEPALIVE_START
-                // will detect me and select another DoseId so we are
-                // not doing anything here.
-                // What we could do is to implement a counter to check if
-                // the messages continues to come.
+                if(*pDbg>=2)
+                    PrintDbg("=   KeepAlive Adding a node IP=%s\n",
+                    DoseOs::Inet_Ntoa(pRxMsg->IpAddrFrom_nw));
             }
         }
         else

@@ -8,7 +8,7 @@
     </member>
     <member>
       <name>Expectation</name>
-      <value>partner 0/consumer 1 receives OnInjectedNewEntity for InjectableEntity instance 888888 (Info is "Some new info" and Int32Member is 123) and instance 999999 (Int64Member is 123456). The read values correspond to the injected ones.</value>
+      <value>partner 0/consumer 1 receives OnInjectedNewEntity for InjectableEntity instance 888888 (Info is "Some new info" and Int32Member is 123) and instance 999999 (Int64Member is 123456) followed by an OnInitialInjectionsDone. The read values correspond to the injected ones.</value>
     </member>
     <member>
       <name>TestCaseSetupActions</name>
@@ -141,7 +141,43 @@
               </member>
             </members>
           </object>
-        </arrayElement>        
+        </arrayElement>
+
+        <arrayElement>
+          <object>
+            <name>DoseTest.Action</name>
+            <members>
+              <member>
+                <name>Partner</name>
+                <value>1</value>
+              </member>
+              <member>
+                <name>ActionKind</name>
+                <value>DoseTest.ActionEnum.InjectDelete</value>
+              </member>
+              <member>
+                <name>EntityId</name>
+                <entityId>
+                  <name>DoseTest.InjectableEntity</name>
+                  <instanceId>4545</instanceId>
+                </entityId>
+              </member>
+              <member>
+                <name>Handler</name>
+                <value>DEFAULT_HANDLER</value>
+              </member>
+              <member>
+                <name>TimestampDelta</name>
+                <value>10</value>
+              </member>
+              <member>
+                <name>Consumer</name>
+                <value>1</value>
+              </member>
+            </members>
+          </object>
+        </arrayElement>
+        
       </arrayElements>
     </member>
     <member>

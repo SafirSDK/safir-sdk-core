@@ -133,12 +133,20 @@ namespace Internal
 
         void StartPoolDistribution();
 
+        // Request pooldistribution from nodeId
+        void RequestPoolDistribution(const int nodeId);
+
         void DistributeStates();
 
         /** Handle a state from another node.
          * This must only be called with EntityState or RegistrationState DDs.
          */
         void HandleStateFromDoseCom(const DistributionData & state, const bool isAckedData);
+
+
+        /** Handle a pooldistribution request from another node.
+         */
+        void HandleMessageFromDoseCom(const DistributionData& data);
 
         /** when a new connection arrives a list of waiting states need to be checked
           * to see if there are any states that need to be "set".

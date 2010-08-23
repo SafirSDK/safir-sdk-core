@@ -1342,6 +1342,19 @@ void DoseC_EntityIteratorEqual(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
+void DoseC_GetContext(const long ctrl,
+                      DotsC_Int32& context,
+                      bool& success)
+{
+    success = false;
+    try
+    {
+        ControllerTable::Instance().CheckThread(ctrl); 
+        context = ControllerTable::Instance().GetController(ctrl)->GetContext();
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS;
+}
 
 
 

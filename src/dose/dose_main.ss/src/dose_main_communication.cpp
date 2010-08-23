@@ -242,12 +242,15 @@ namespace Internal
         BOOST_STATIC_ASSERT(NUM_PRIORITY_CHANNELS == MAX_NUM_PRIO_CHANNELS);
     }
 
+    const Typesystem::Int32 NumberOfNodes = Safir::Dob::NodeParameters::NumberOfNodes();
+
     ExternNodeCommunication::ExternNodeCommunication():
         m_thisNode(Safir::Dob::ThisNodeParameters::NodeNumber()),
         m_queueIsFull(new AtomicUint32 [NUM_PRIORITY_CHANNELS]),
         m_okToSignalPDComplete(0),
         m_isNotified(0),
         m_incomingDataEvents(new AtomicUint32 [NUM_PRIORITY_CHANNELS]),
+        m_requestPDEvents(new AtomicUint32 [NumberOfNodes]),
         m_queueNotFullEvent(0),
         m_startPoolDistributionEvent(0)
     {
@@ -262,12 +265,14 @@ namespace Internal
     bool ExternNodeCommunication::Init(const IncomingDataCallback & dataCb,
                                        const QueueNotFullCallback & queueNotFullCb,
                                        const NodeStatusChangedNotifierCallback & nodeStatusChangedNotifierCb,
-                                       const StartPoolDistributionCallback & startPoolDistributionCb)
+                                       const StartPoolDistributionCallback & startPoolDistributionCb,
+                                       const RequestPoolDistributionCallback & requestPoolDistributionCallback)
     {
         m_handleDataCb = dataCb;
         m_queueNotFullCb = queueNotFullCb;
         m_nodeStatusChangedNotifierCb = nodeStatusChangedNotifierCb;
         m_startPoolDistributionCb = startPoolDistributionCb;
+        m_requestPoolDistributionCallback = requestPoolDistributionCallback;
 
         m_QualityOfServiceData.Init();
 
@@ -384,7 +389,7 @@ namespace Internal
             }
             else
             {
-                ENSURE(false, << "ExternNodeCommunication::DistributePool, DoseCom returned error code "<<errCode);
+                ENSURE(false, << "ExternNodeCommunication::SendPoolDistributionData, DoseCom returned error code "<<errCode);
             }
         }
     }
@@ -437,11 +442,18 @@ namespace Internal
         if (dataType == DistributionData::Action_Connect ||
             dataType == DistributionData::Action_Disconnect ||
             dataType == DistributionData::Action_HavePersistenceDataRequest ||
-            dataType == DistributionData::Action_HavePersistenceDataResponse)
+            dataType == DistributionData::Action_HavePersistenceDataResponse ||
+            dataType == DistributionData::Action_RequestPoolDistribution)
         {
             m_QualityOfServiceData.GetQualityOfServiceInfoForInternalDistribution(distributionChannel,
                                                                                   priority,
                                                                                   isAcked);
+
+            // Request PD shall only be sent unicast to one node.
+            if (dataType == DistributionData::Action_RequestPoolDistribution)
+            {
+                distributionChannel = data.GetPDRequestReceiverId().m_node;
+            }
         }
         else
         {
@@ -573,7 +585,7 @@ namespace Internal
 
             return false;
         default:
-            ENSURE(false, << "ExternNodeCommunication::DistributePool, DoseCom returned error code "<<errCode);
+            ENSURE(false, << "ExternNodeCommunication::Send, DoseCom returned error code "<<errCode);
             return false; //keep compiler happy
         }
     }
@@ -589,6 +601,7 @@ namespace Internal
         case DistributionData::Action_Disconnect:
         case DistributionData::Action_HavePersistenceDataRequest:
         case DistributionData::Action_HavePersistenceDataResponse:
+        case DistributionData::Action_RequestPoolDistribution:
             return false;
 
         default:
@@ -625,6 +638,16 @@ namespace Internal
                 HandleIncomingData(i);
             }
         }
+
+        for (int nodeId = 0; nodeId < NumberOfNodes; ++nodeId)
+        {
+            if (m_requestPDEvents[nodeId] != 0)
+            {
+                m_requestPDEvents[nodeId] = 0;
+                m_requestPoolDistributionCallback(nodeId);
+            }
+        }
+        
 
         if (m_startPoolDistributionEvent != 0)
         {
@@ -794,6 +817,18 @@ namespace Internal
     {
         // lllout << "ExternNodeCommunication::NotifyStartPoolDistribution() - called... " << std::endl;
         m_startPoolDistributionEvent = 1;
+        if (m_isNotified == 0)
+        {
+            m_isNotified = 1;
+            ACE_Reactor::instance()->notify(this);
+        }
+    }
+
+    void ExternNodeCommunication::NotifyRequestPoolDistribution(const int nodeId)
+    {
+        lllout << "ExternNodeCommunication::NotifyRequestPoolDistribution(" << nodeId << ") - called... " << std::endl;
+
+        m_requestPDEvents[nodeId] = 1;
         if (m_isNotified == 0)
         {
             m_isNotified = 1;

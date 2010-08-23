@@ -33,10 +33,11 @@ with GNAT.OS_Lib;
 
 with Input_Sources.File;
 with Sax.Readers;
--- with Templates_Parser.Query;
 with Templates_Parser.Utils;
 
+with Dots.File_Map;
 with Dots.Member_Reader;
+
 
 package body Dots.Utilities is
 
@@ -744,7 +745,6 @@ package body Dots.Utilities is
      is
       use type Handled_Unit.Cursor;
 
-      procedure Parse (S : in String);
       procedure Parse (S : in String) is
 
          Silent : constant Boolean := not Dots.State.Log_Parsing;
@@ -757,6 +757,8 @@ package body Dots.Utilities is
          Input_Sources.File.Open
            (Filename => S,
             Input    => Read);
+
+--           Ada.Text_IO.Put_Line("OPEN FILE: " & S);
 
          Dots.Member_Reader.Set_Silent (My_Reader, Silent);
 
@@ -773,8 +775,6 @@ package body Dots.Utilities is
 
       end Parse;
 
-      Dou_File : constant String := Name & ".dou";
-
    begin
       if Handled_Unit.Find
         (Container => Unit_Map,
@@ -782,7 +782,8 @@ package body Dots.Utilities is
          return;
       end if;
 
-      Parse (Dou_File);
+      Parse (Dots.File_Map.Get_Value(Name & ".dou"));
+
    end Setup_Unit;
 
    -------------------------

@@ -238,7 +238,10 @@ namespace Internal
     Library::PrefixId
     Library::AddPrefix(const std::wstring & prefix)
     {
-        StartBackdoor();
+        // Always start own thread so its connection is the one that will be used to
+        // establish the backdoor subscription.
+
+        StartThread();
         ACE_Guard<ACE_Recursive_Thread_Mutex> lck(m_prefixSearchLock);
         Prefixes::iterator findIt = std::find(m_prefixes.begin(), m_prefixes.end(), prefix);
         if (findIt != m_prefixes.end())
@@ -493,26 +496,18 @@ namespace Internal
             return;
         }
 
-        ACE_Guard<ACE_Recursive_Thread_Mutex> lck(m_backdoorStartingLock);
+        // The backdoor subscription should always be done from the own thread connection. If we
+        // were to use a connection controlled by the application the backdoor subscription would
+        // be lost if that connection is closed. This has always been true but is even more accentuated
+        // now when an application may close its connection and then open it in a different context.
 
-        if (m_isBackdoorStarted)
-        {
-            return;
-        }
+        m_backdoorConnection.Attach();
 
-        try
-        {
-            m_backdoorConnection.Attach();
-            using namespace Safir::Dob::Typesystem;
-            m_backdoorConnection.SubscribeMessage(Safir::Application::BackdoorCommand::ClassTypeId,
-                                                  Safir::Dob::Typesystem::ChannelId(),
-                                                  this);
-            m_isBackdoorStarted = true;
-        }
-        catch (const Safir::Dob::NotOpenException &)
-        {
-            StartThread();
-        }
+        using namespace Safir::Dob::Typesystem;
+        m_backdoorConnection.SubscribeMessage(Safir::Application::BackdoorCommand::ClassTypeId,
+                                              Safir::Dob::Typesystem::ChannelId(),
+                                              this);
+        m_isBackdoorStarted = true;
     }
 
     void
@@ -696,6 +691,13 @@ namespace Internal
         try
         {
             conn.Attach();
+
+            Safir::Dob::ConnectionAspectMisc connAspectMisc(conn);            
+            if (connAspectMisc.GetContext() != 0)
+            {
+                // Reports must be sent from context 0
+                return false;
+            }
         }
         catch (const Safir::Dob::NotOpenException &)
         {

@@ -57,12 +57,42 @@ namespace Application
 
         /**
          * Starts subscription for Program Information commands to be sent to the Backdoor.
-         * Note: This method can be called several times, but only the first call does anything.
+         * 
+         * A backdoor will be established for the "first" connection that is opened in
+         * the thread that calls this method. (That is, a secondary connection Attach is used
+         * internally)
+         *
+         * If the main connection is closed and opened again (maybe in a different context),
+         * this method must be called again
+         *
          * The class supports restarting/pausing by calling stop and then start again.
+         *
          * @param backdoor [in] - Class that implements the Backdoor interface.
-         * @exception Safir::Dob::NotOpenException Programming Error, 'Start' was called before connect to Dob.
+         * @exception Safir::Dob::NotOpenException 'Start' was called before connect to Dob.
          */
         void Start(Safir::Application::Backdoor & backdoor);
+
+        /**
+         * Starts subscription for Program Information commands to be sent to the Backdoor using
+         * the given named connection.
+         *
+         * A backdoor will be established for the named connection that is opened in
+         * the thread that calls this method.
+         * 
+         * If the main connection is closed and opened again (maybe in a different context),
+         * this method must be called again
+         *
+         * The class supports restarting/pausing by calling stop and then start again.
+         *
+         * @param backdoor [in] - Class that implements the Backdoor interface.
+         * @param connectionNameCommonPart [in] - Name that identifies the connection but not any particular
+         *                                        instance.
+         * @param [in] connectionNameInstancePart Name that identifies a particular connection instance.
+         * @exception Safir::Dob::NotOpenException The named connection is not opened. 
+         */
+        void Start(Safir::Application::Backdoor & backdoor,
+                   const std::wstring& connectionNameCommonPart,
+                   const std::wstring& connectionNameInstancePart);
 
         /**
          * Stops subscription for Program Information commands.

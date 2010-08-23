@@ -331,16 +331,19 @@ namespace Internal
 
     void EntityTypes::RemoteSetGhostEntityState(const DistributionData& entityState)
     {
+        m_registrationClock.UpdateCurrentTimestamp(entityState.GetRegistrationTime());
         GetType(entityState.GetTypeId()).RemoteSetGhostEntityState(entityState);
     }
 
     void EntityTypes::RemoteSetInjectionEntityState(const DistributionData& entityState)
     {
+        m_registrationClock.UpdateCurrentTimestamp(entityState.GetRegistrationTime());
         GetType(entityState.GetTypeId()).RemoteSetInjectionEntityState(entityState);
     }
 
     void EntityTypes::RemoteSetDeleteEntityState(const DistributionData&    entityState)
     {
+        m_registrationClock.UpdateCurrentTimestamp(entityState.GetRegistrationTime());
         GetType(entityState.GetTypeId()).RemoteSetDeleteEntityState(entityState);
     }
 
@@ -348,6 +351,7 @@ namespace Internal
     EntityTypes::RemoteSetRealEntityState(const ConnectionPtr&      connection,
                                           const DistributionData&   entityState)
     {
+        m_registrationClock.UpdateCurrentTimestamp(entityState.GetRegistrationTime());
         return GetType(entityState.GetTypeId()).RemoteSetRealEntityState(connection, entityState);
     }
 

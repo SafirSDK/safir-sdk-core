@@ -69,6 +69,7 @@ public:
     virtual void NotifyQueueNotFull(const int priorityChannel) = 0;
     virtual void NotifyNodeStatusChanged() = 0;
     virtual void NotifyStartPoolDistribution() = 0;
+    virtual void NotifyRequestPoolDistribution(const int nodeId) = 0;
 };
 
 #endif //_DoseCom_Interface_Classes_h

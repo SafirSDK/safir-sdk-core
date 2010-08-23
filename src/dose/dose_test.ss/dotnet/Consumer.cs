@@ -40,7 +40,8 @@ namespace dose_test_dotnet
         Safir.Dob.EntityHandlerPending,
         Safir.Dob.ServiceHandler,
         Safir.Dob.ServiceHandlerPending,
-        Safir.Dob.Requestor
+        Safir.Dob.Requestor,
+        Safir.Application.Backdoor
     {
         public static long instanceCount = 0;
 
@@ -53,12 +54,14 @@ namespace dose_test_dotnet
             Interlocked.Increment(ref instanceCount);
 
             m_consumerNumber = consumerNumber;
+            m_connectionName = connectionName;
+            m_connectionInstance = instance;
             m_callbackActions = new Dictionary<Safir.Dob.CallbackId.Enumeration, List<DoseTest.Action>>();
             foreach (Safir.Dob.CallbackId.Enumeration cb in Enum.GetValues(typeof(Safir.Dob.CallbackId.Enumeration)))
             {
                 m_callbackActions.Add(cb, new List<DoseTest.Action>());
             }
-            m_connection.Attach(connectionName,instance);
+            m_connection.Attach(m_connectionName,m_connectionInstance);
         }
 
         ~Consumer()
@@ -662,6 +665,14 @@ namespace dose_test_dotnet
                                 }
                                 break;
 
+                            case DoseTest.ActionEnum.Enumeration.GetContext:
+                                {
+                                    Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": "
+                                        + "The test connection is opened in context "
+                                        + new Safir.Dob.ConnectionAspectMisc(m_connection).GetContext());
+                                }
+                                break;
+
                             case DoseTest.ActionEnum.Enumeration.ResetCallbackActions:
                                 {
                                     Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": ResetCallbackActions");
@@ -671,6 +682,27 @@ namespace dose_test_dotnet
                                     {
                                         cbActions.Value.Clear();
                                     }
+                                }
+                                break;
+
+                            case DoseTest.ActionEnum.Enumeration.StartBackdoor:
+                                {
+                                    Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": StartBackdoor");
+                                    m_backdoorKeeper.Start(this, m_connectionName, m_connectionInstance);
+                                }
+                                break;
+
+                            case DoseTest.ActionEnum.Enumeration.StopBackdoor:
+                                {
+                                    Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": StopBackdoor");
+                                    m_backdoorKeeper.Stop();
+                                }
+                                break;
+
+                            case DoseTest.ActionEnum.Enumeration.IsBackdoorStarted:
+                                {
+                                    Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": The backdoor is " +
+                                                             (m_backdoorKeeper.IsStarted() ? "" : "not ") + "started");
                                 }
                                 break;
 
@@ -1289,6 +1321,25 @@ namespace dose_test_dotnet
 
         #endregion
 
+        #region Backdoor callbacks
+
+        void Safir.Application.Backdoor.HandleCommand(string[] cmdTokens)
+        {
+            Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": Got a backdoor HandleCommand callback. Command tokens:");
+            foreach (string cmd in cmdTokens)
+            {
+                Logger.Instance.Write(cmd + ' ');
+            }
+            Logger.Instance.WriteLine();
+        }
+
+        string Safir.Application.Backdoor.GetHelpText()
+        {
+            Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": Got a backdoor GetHelpText callback.");
+            return "This is a help text";
+        }
+        #endregion
+
         private string ConnInfoToXml(Safir.Dob.ConnectionInfo connInfo)
         {
             connInfo.ConnectionId.SetNull();
@@ -1305,6 +1356,9 @@ namespace dose_test_dotnet
         private Safir.Dob.SecondaryConnection m_connection = new Safir.Dob.SecondaryConnection();
 
         private readonly int m_consumerNumber;
+        private readonly string m_connectionName;
+        private readonly string m_connectionInstance;
+        private Safir.Application.BackdoorKeeper m_backdoorKeeper = new Safir.Application.BackdoorKeeper();
 
         private Dictionary<Safir.Dob.CallbackId.Enumeration, List<DoseTest.Action>> m_callbackActions;
 

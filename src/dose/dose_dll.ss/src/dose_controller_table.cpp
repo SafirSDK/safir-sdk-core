@@ -85,22 +85,19 @@ namespace Internal
 
     long ControllerTable::AddController(ControllerPtr controller)
     {
-        long ctrl = -1;
-
         ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
 
-        //try to find a free spot in the vector
-        const ControllerList::iterator findIt =
-            std::find(m_controllers.begin(),m_controllers.end(), ControllerPtr());
-        if (findIt == m_controllers.end())
-        { //could not find an unused spot
-            m_controllers.push_back(controller);
-            ctrl=static_cast<long>(m_controllers.size()-1);
-        }
-        else
-        { //found an unused spot
-            *findIt = controller;
-            ctrl = static_cast<long>(std::distance(m_controllers.begin(),findIt));
+        long ctrl = -1;
+
+        for (;;)
+        {
+            // Generate a unique id for the controller
+            ctrl = abs(static_cast<long>(Safir::Dob::Typesystem::Internal::GenerateRandom64Bit()));
+
+            if (m_controllers.insert(std::make_pair(ctrl, controller)).second)
+            {
+                break;
+            }
         }
 
         controller->SetInstanceId(ctrl);
@@ -112,27 +109,16 @@ namespace Internal
     {
         ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
 
-        size_t size=m_controllers.size();
-        if (size>0)
+        ControllerMap::iterator it = m_controllers.find(ctrl);
+
+        if (it != m_controllers.end())
         {
-            if (m_controllers[ctrl]!=NULL)
+            if (it->second != NULL)
             {
-                m_controllers[ctrl]->Disconnect();
-                m_controllers[ctrl].reset();
+                it->second->Disconnect();
             }
+            m_controllers.erase(it);
         }
-    }
-
-    void ControllerTable::ReplaceController(const long ctrl, ControllerPtr newController)
-    {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
-
-        long size = static_cast<long>(m_controllers.size());
-        ENSURE(size > 0 && ctrl >= 0 && ctrl < size, << "Invalid ctrl index");
-
-        newController->SetInstanceId(ctrl);
-
-        m_controllers[ctrl] = newController;
     }
 
     void ControllerTable::CheckThread(const long ctrl) const
@@ -164,8 +150,12 @@ namespace Internal
         const char * name;
         try
         {
-            name = m_controllers[ctrl]->GetConnectionName();
-            ostr << "Got it: '" << name << "'" << std::endl;
+            ControllerConstPtr ctrlPtr = GetControllerInternal(ctrl);
+            if (ctrlPtr != NULL)
+            {
+                name = ctrlPtr->GetConnectionName();
+                ostr << "Got it: '" << name << "'" << std::endl;
+            }
         }
         catch (const std::exception & exc)
         {
@@ -214,36 +204,28 @@ namespace Internal
     {
         ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
 
-        if (ctrl < 0 || static_cast<size_t>(ctrl) >= m_controllers.size())
-        {
-            throw Safir::Dob::Typesystem::SoftwareViolationException
-                (std::wstring(L"Internal error! An unknown controllerId was used: ") +
-                 boost::lexical_cast<std::wstring>(ctrl),__WFILE__,__LINE__);
-        }
-
-        return m_controllers[ctrl];
+        return GetControllerInternal(ctrl);
     }
-
 
     ControllerPtr ControllerTable::GetControllerByName(const std::string & name)
     {
         ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
 
-        for (ControllerList::iterator it=m_controllers.begin();
+        for (ControllerMap::iterator it=m_controllers.begin();
              it != m_controllers.end(); ++it)
         {
-            if ((*it) != NULL)
+            if (it->second != NULL)
             {
                 const char* tmpName;
                 //if it is not connected there is no connection name to get
-                if ((*it)->IsConnected())
+                if (it->second->IsConnected())
                 {
-                    tmpName = (*it)->GetConnectionName();
-                    CheckThread(static_cast<long>(std::distance(m_controllers.begin(),it))); //check the threading if we're in debug build
+                    tmpName = it->second->GetConnectionName();
+                    CheckThread(it->first); //check the threading if we're in debug build
 
                     if (name == std::string(tmpName))
                     {
-                        return *it;
+                        return it->second;
                     }
                 }
             }
@@ -296,7 +278,8 @@ namespace Internal
             for (ControllerInfoList::const_iterator it = findIt->second.begin();
                  it != findIt->second.end(); ++it)
             {
-                if (m_controllers[it->m_ctrl]->NameIsEqual(connectionNameCommonPart,connectionNameInstancePart))
+                ControllerConstPtr ctrlPtr = GetControllerInternal(it->m_ctrl);
+                if (ctrlPtr != NULL && ctrlPtr->NameIsEqual(connectionNameCommonPart,connectionNameInstancePart))
                 {
                     return it->m_ctrl;
                 }
@@ -338,8 +321,12 @@ namespace Internal
             const char * name;
             try
             {
-                name = m_controllers[ctrl]->GetConnectionName();
-                ostr << "Got it: '" << name << "'" << std::endl;
+                ControllerConstPtr ctrlPtr = GetControllerInternal(ctrl);
+                if (ctrlPtr != NULL)
+                {
+                    name = ctrlPtr->GetConnectionName();
+                    ostr << "Got it: '" << name << "'" << std::endl;
+                }
             }
             catch (const std::exception & exc)
             {
@@ -392,6 +379,20 @@ namespace Internal
             }
             throw;
         }
+    }
+
+    ControllerConstPtr ControllerTable::GetControllerInternal(const long ctrl) const
+    {
+        ControllerMap::const_iterator it = m_controllers.find(ctrl);
+
+        if (it == m_controllers.end())
+        {
+            throw Safir::Dob::Typesystem::SoftwareViolationException
+                (std::wstring(L"Internal error! An unknown controllerId was used: ") +
+                 boost::lexical_cast<std::wstring>(ctrl),__WFILE__,__LINE__);
+        }
+
+        return it->second;
     }
 }
 }

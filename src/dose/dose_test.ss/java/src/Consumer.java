@@ -33,7 +33,8 @@ class Consumer implements
                    com.saabgroup.safir.dob.EntityHandlerPending,
                    com.saabgroup.safir.dob.ServiceHandler,
                    com.saabgroup.safir.dob.ServiceHandlerPending,
-                   com.saabgroup.safir.dob.Requestor
+                   com.saabgroup.safir.dob.Requestor,
+                   com.saabgroup.safir.application.Backdoor
 {
     public static long instanceCount = 0;
 
@@ -46,6 +47,8 @@ class Consumer implements
         //TODO: Interlocked.Increment(ref instanceCount);
 
         m_consumerNumber = consumerNumber;
+        m_connectionName = connectionName;
+        m_connectionInstance = instance;
         m_callbackActions = new java.util.EnumMap<com.saabgroup.safir.dob.CallbackId, java.util.Vector<com.saabgroup.dosetest.Action>>(com.saabgroup.safir.dob.CallbackId.class);
         for (com.saabgroup.safir.dob.CallbackId cb : com.saabgroup.safir.dob.CallbackId.values())
         {
@@ -680,6 +683,14 @@ class Consumer implements
                         }
                         break;
 
+                    case GET_CONTEXT:
+                        {
+                            Logger.instance().println(PREFIX + m_consumerNumber + ": "
+                                                      + "The test connection is opened in context "
+                                                      + new com.saabgroup.safir.dob.ConnectionAspectMisc(m_connection).getContext());
+                        }
+                        break;
+
                     case RESET_CALLBACK_ACTIONS:
                         {
                             Logger.instance().println(PREFIX + m_consumerNumber + ": ResetCallbackActions");
@@ -687,6 +698,31 @@ class Consumer implements
                             for (com.saabgroup.safir.dob.CallbackId callback: com.saabgroup.safir.dob.CallbackId.values()) {
                                 m_callbackActions.get(callback).clear();
                             }
+                        }
+                        break;
+
+                    case START_BACKDOOR:
+                        {
+                            Logger.instance().println(PREFIX + m_consumerNumber + ": StartBackdoor");
+
+                            m_backdoorKeeper.start(this, m_connectionName, m_connectionInstance);
+                        }
+                        break;
+
+                    case STOP_BACKDOOR:
+                        {
+                            Logger.instance().println(PREFIX + m_consumerNumber + ": StopBackdoor");
+
+                            m_backdoorKeeper.stop();
+                        }
+                        break;
+
+                    case IS_BACKDOOR_STARTED:
+                        {
+                            Logger.instance().println(PREFIX + m_consumerNumber +
+                                    ": The backdoor is " +
+                                    (m_backdoorKeeper.isStarted() ? "" : "not ") +
+                                    "started");
                         }
                         break;
 
@@ -1317,7 +1353,26 @@ class Consumer implements
         Logger.instance().println();
     }
 
+///
+/// Backdoor
+///
+    public void handleCommand(String[] cmdTokens)
+    {
+        Logger.instance().println(PREFIX + m_consumerNumber +
+                ": Got a backdoor HandleCommand callback. Command tokens:");
+        for (String cmd: cmdTokens)
+        {
+            Logger.instance().print(cmd + ' ');
+        }
+        Logger.instance().println();
+    }
 
+    public String getHelpText()
+    {
+        Logger.instance().println(PREFIX + m_consumerNumber +
+                ": Got a backdoor GetHelpText callback.");
+        return "This is a help text";
+    }
 
     private String connInfoToXml(com.saabgroup.safir.dob.ConnectionInfo connInfo)
     {
@@ -1336,7 +1391,11 @@ class Consumer implements
 
     private com.saabgroup.safir.dob.SecondaryConnection m_connection = new com.saabgroup.safir.dob.SecondaryConnection();
 
+    private com.saabgroup.safir.application.BackdoorKeeper m_backdoorKeeper = new com.saabgroup.safir.application.BackdoorKeeper();
+    
     private final int m_consumerNumber;
+    private final String m_connectionName;
+    private final String m_connectionInstance;
 
     private java.util.EnumMap<com.saabgroup.safir.dob.CallbackId, java.util.Vector<com.saabgroup.dosetest.Action>> m_callbackActions;
 

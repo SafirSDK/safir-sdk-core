@@ -1667,3 +1667,22 @@ void JNICALL Java_com_saabgroup_safir_dob_Interface_InvokeDeleter
     char * toDelete = static_cast<char*>(env->GetDirectBufferAddress(_toDelete));
     deleter(toDelete);
 }
+
+/*
+ * Class:     com_saabgroup_safir_dob_Interface
+ * Method:    GetContext
+ * Signature: (I[I[Z)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_Interface_GetContext
+(JNIEnv * env,
+ jclass,
+ jint _ctrl,
+ jintArray _context,
+ jbooleanArray _success)
+{
+    bool success;
+    DotsC_Int32 context;
+    DoseC_GetContext(_ctrl,context,success);
+    SetJArray(env,_success,success);
+    SetJArray(env,_context,context);
+}

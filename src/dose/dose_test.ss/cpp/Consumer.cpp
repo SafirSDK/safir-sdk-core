@@ -77,9 +77,11 @@ Consumer::Consumer(int consumerNumber,
                    const std::wstring & connectionName,
                    const std::wstring & instance):
     m_consumerNumber(consumerNumber),
+    m_connectionName(connectionName),
+    m_connectionInstance(instance),
     m_callbackActions(Safir::Dob::CallbackId::Size())
 {
-    m_connection.Attach(connectionName,instance);
+    m_connection.Attach(m_connectionName, m_connectionInstance);
 }
 
 
@@ -744,6 +746,25 @@ void Consumer::OnNotRequestOverflow()
     lout << PREFIX << m_consumerNumber << ": " << CallbackId() << std::endl;
 }
 
+// Backdoor command
+void Consumer::HandleCommand(const std::vector<std::wstring>& cmdTokens)
+{
+    lout << PREFIX << m_consumerNumber << ": Got a backdoor HandleCommand callback. Command tokens:" << std::endl;
+    for (std::vector<std::wstring>::const_iterator it = cmdTokens.begin(); it != cmdTokens.end(); ++it)
+    {
+        lout << *it << ' ';
+    }
+    lout << std::endl;
+}
+
+// Backdoor help text
+std::wstring Consumer::GetHelpText()
+{
+    lout << PREFIX << m_consumerNumber << ": Got a backdoor GetHelpText callback." << std::endl;
+    return L"This is a help text";
+}
+
+
 const std::wstring ToUpper(const std::wstring & str)
 {
     std::wstring result;
@@ -1180,10 +1201,41 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                     }
                     break;
 
+                case DoseTest::ActionEnum::GetContext:
+                    {
+                        lout << PREFIX << m_consumerNumber << ": "
+                             << "The test connection is opened in context "
+                             << Safir::Dob::ConnectionAspectMisc(m_connection).GetContext()
+                             << std::endl;
+                    }
+                    break;
+
                 case DoseTest::ActionEnum::ResetCallbackActions:
                     {
                         lout << PREFIX << m_consumerNumber << ": ResetCallbackActions"<<std::endl;
                         std::for_each(m_callbackActions.begin(),m_callbackActions.end(),boost::bind(&Actions::clear,_1));
+                    }
+                    break;
+
+                case DoseTest::ActionEnum::StartBackdoor:
+                    {
+                        lout << PREFIX << m_consumerNumber << ": StartBackdoor" << std::endl;
+
+                        m_backdoorKeeper.Start(*this, m_connectionName, m_connectionInstance);
+                    }
+                    break;
+
+                case DoseTest::ActionEnum::StopBackdoor:
+                    {
+                        lout << PREFIX << m_consumerNumber << ": StopBackdoor" << std::endl;
+                        m_backdoorKeeper.Stop();
+                    }
+                    break;
+
+                case DoseTest::ActionEnum::IsBackdoorStarted:
+                    {
+                        lout << PREFIX << m_consumerNumber << ": The backdoor is "
+                             << (m_backdoorKeeper.IsStarted()?"":"not ") << "started" << std::endl;
                     }
                     break;
 

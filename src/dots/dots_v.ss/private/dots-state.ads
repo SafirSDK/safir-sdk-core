@@ -69,6 +69,8 @@ package Dots.State is
    Current_Output : Natural := 0;
    Outputs     : array (1 .. Max_Outputs) of Output_Config;
    Current_Unit : VString;
+   Dou_Dir : VString;
+
 
    Log_Parsing     : Boolean := False;
    Log_Info        : Boolean := False;

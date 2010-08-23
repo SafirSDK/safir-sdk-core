@@ -26,6 +26,7 @@
 #include <ace/Thread.h>
 #include <Safir/Dob/NotOpenException.h>
 #include <Safir/Utilities/Internal/PanicLogging.h> 
+#include <Safir/Dob/ConnectionAspectMisc.h>
 #include <ace/Time_Value.h>
 #include <sstream>
 extern bool cyclic;
@@ -45,6 +46,7 @@ namespace SwreTest
     const int RESOURCE_TIMER_T1 = 4;
     const int PROGRAM_INFO_TIMER_T1 = 5;
     const int TRACE_TIMER_T1 = 6;
+    const int SWITCH_CONTEXT_TIMER_T1 = 7;
 
 
     const ACE_Time_Value FATAL_ERROR_TIMEOUT_T1 = ACE_Time_Value(0,500000);
@@ -53,6 +55,8 @@ namespace SwreTest
     const ACE_Time_Value RESOURCE_TIMEOUT_T1 = ACE_Time_Value(2);
     const ACE_Time_Value PROGRAM_INFO_TIMEOUT_T1 = ACE_Time_Value(0,200000);
     const ACE_Time_Value TRACE_TIMEOUT_T1 = ACE_Time_Value(2);
+    const ACE_Time_Value SWITCH_CONTEXT_TIMEOUT_T1 = ACE_Time_Value(5);
+
     /*
     // Thread 2 timers
     const int FATAL_ERROR_TIMER_T2 = 7;
@@ -104,6 +108,7 @@ namespace SwreTest
         reactor()->schedule_timer(this, (void*)PROGRAMMING_ERROR_TIMER_T1,ACE_Time_Value(0));
         reactor()->schedule_timer(this, (void*)RESOURCE_TIMER_T1,ACE_Time_Value(0));
         reactor()->schedule_timer(this, (void*)PROGRAM_INFO_TIMER_T1,ACE_Time_Value(0));
+        reactor()->schedule_timer(this, (void*)SWITCH_CONTEXT_TIMER_T1,ACE_Time_Value(0));
         if (!noTracer)
         {
             reactor()->schedule_timer(this, (void*)TRACE_TIMER_T1,ACE_Time_Value(0));
@@ -143,7 +148,7 @@ namespace SwreTest
 
 
 
-    int TestApp::handle_timeout (const ACE_Time_Value & current_time,
+    int TestApp::handle_timeout (const ACE_Time_Value & /*current_time*/,
                                  const void * act)
     {
         switch ((int)act)
@@ -208,6 +213,30 @@ namespace SwreTest
               //  if (cyclic)
                 {
                     reactor()->schedule_timer(this, (void*)TRACE_TIMER_T1,TRACE_TIMEOUT_T1);
+                }
+
+            }
+            break;
+
+        case SWITCH_CONTEXT_TIMER_T1:
+            {
+                std::wcout << "Switching context" << std::endl;
+
+                Safir::Dob::ConnectionAspectMisc c = Safir::Dob::ConnectionAspectMisc(m_connection);
+
+                Safir::Dob::Typesystem::Int32 newContext = 0;
+                if (c.GetContext() == 0)
+                {
+                    newContext = 1;
+                }
+
+                m_connection.Close();
+                m_connection.Open (L"SWRE_CPLUSPLUS_TEST", L"0", newContext, this, &m_dispatcher1);
+
+
+                if (cyclic)
+                {
+                    reactor()->schedule_timer(this, (void*)SWITCH_CONTEXT_TIMER_T1, SWITCH_CONTEXT_TIMEOUT_T1);
                 }
 
             }

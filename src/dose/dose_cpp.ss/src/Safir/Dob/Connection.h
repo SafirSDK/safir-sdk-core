@@ -78,7 +78,7 @@ namespace Dob
          * @param [in] connectionNameCommonPart Name that identifies the program but not any particular
          *                                        program instance.
          * @param [in] connectionNameInstancePart Name that identifies a particular program instance.
-         * @param [in] context Context functionality not implemented yet!
+         * @param [in] context Context
          * @param [in] stopHandler Object that implements the StopHandler interface.
          * @param [in] dispatcher Object that implements the Dispatcher interface.
          *

@@ -22,7 +22,6 @@
 --
 -------------------------------------------------------------------------------
 with Ada.Exceptions;
-with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 with Dose_Test.Action_Enum;
@@ -311,6 +310,8 @@ package body Consumers is
       The_Consumer : constant Consumer_Access := new Consumer;
    begin
       The_Consumer.Consumer_Number := Instance;
+      The_Consumer.Connection_Name := Connection_Name;
+      The_Consumer.Connection_Instance := Instance_String;
       The_Consumer.Connection.Attach (Connection_Name, Instance_String);
       return The_Consumer;
    end Create;
@@ -955,6 +956,33 @@ package body Consumers is
                        & Callback_Id (Self));
    end On_Not_Request_Overflow;
 
+   overriding
+   procedure Handle_Command (Self           : in Consumer;
+                             Command_Tokens : in Safir.Application.Backdoors.Strings.Vector) is
+      use Safir.Application.Backdoors.Strings;
+      procedure P (Pos : in Cursor) is
+      begin
+         Logger.Put (Element (Pos) & ' ');
+      end P;
+
+   begin
+      Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) &
+                       ": Got a backdoor HandleCommand callback. Command tokens:");
+      Command_Tokens.Iterate (P'Access);
+      Logger.New_Line;
+
+   end Handle_Command;
+
+   overriding
+   function Get_Help_Text (Self : in Consumer)
+                           return Wide_String is
+   begin
+      Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) &
+                       ": Got a backdoor GetHelpText callback.");
+      return "This is a help text";
+   end Get_Help_Text;
+
+
    function "=" (Left, Right : in Dose_Test.Action.Smart_Pointer) return Boolean is
       pragma Unreferenced (Left, Right);
    begin
@@ -1408,11 +1436,31 @@ package body Consumers is
                     & Trim (From_Utf_8 (Safir.Dob.Typesystem.Int_32'Image (Safir.Dob.Connection_Aspect_Miscs.Create (Self.Connection).Get_Queue_Size
                       (Action_Ptr.Connection_Queue_Id.Get_Val))), Ada.Strings.Both));
 
+               when Dose_Test.Action_Enum.Get_Context =>
+                  Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": "
+                    & "The test connection is opened in context "
+                    & Trim (From_Utf_8 (Safir.Dob.Typesystem.Int_32'Image (Safir.Dob.Connection_Aspect_Miscs.Create (Self.Connection).Get_Context)), Ada.Strings.Both));
+
                when Dose_Test.Action_Enum.Reset_Callback_Actions =>
                   Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": ResetCallbackActions");
                   for I in Self.Callback_Actions'Range loop
                      Self.Callback_Actions (I).Clear;
                   end loop;
+
+               when Dose_Test.Action_Enum.Start_Backdoor =>
+                  Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": StartBackdoor");
+                  Self.Backdoor_Keeper.Start (Self'Unchecked_Access, Self.Connection_Name, Self.Connection_Instance);
+
+               when Dose_Test.Action_Enum.Stop_Backdoor =>
+                  Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": StopBackdoor");
+                  Self.Backdoor_Keeper.Stop;
+
+               when Dose_Test.Action_Enum.Is_Backdoor_Started =>
+                  Logger.Put (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": The backdoor is ");
+                  if not Self.Backdoor_Keeper.Is_Started then
+                     Logger.Put ("not ");
+                  end if;
+                  Logger.Put_Line ("started");
 
                when others =>
                   Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & UWS (": ResetCallbackActions") &

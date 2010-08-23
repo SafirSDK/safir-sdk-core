@@ -33,13 +33,13 @@ namespace Dob
 namespace Internal
 {
     State::State()
+        : m_released(true)
     {
     }
 
 
     State::~State()
     {
-        lllout << "STATE DESTRUCTOR EXECUTED!" << std::endl;
     }
 
     void State::AddSubscription(const SubscriptionId&           subscriptionId,
@@ -208,6 +208,16 @@ namespace Internal
         m_injectionState.SetState(newInjectionState);
 
         KickSubscribers(false);
+    }
+
+    bool State::IsReleased() const
+    {
+        return m_released;
+    }
+
+    void State::SetReleased(bool released)
+    {
+        m_released = released;
     }
 
     void State::ReleaseSubscribers()

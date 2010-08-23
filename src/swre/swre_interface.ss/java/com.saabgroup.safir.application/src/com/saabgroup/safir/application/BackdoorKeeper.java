@@ -31,31 +31,54 @@ public class BackdoorKeeper
 {
     public BackdoorKeeper() { }
 
+    /**
+     * Starts subscription for Program Information commands to be sent to the Backdoor.
+     *
+     * A backdoor will be established for the "first" connection that is opened in
+     * the thread that calls this method. (That is, a secondary connection Attach is used
+     * internally)
+     *
+     * If the main connection is closed and opened again (maybe in a different context),
+     * this method must be called again
+     *
+     * The class supports restarting/pausing by calling stop and then start again.
+     *
+     * @param backdoor Class that implements the Backdoor interface.
+     *
+     * @throws NotOpenException 'Start' was called before connect to Dob.
+     */
     public void start(Backdoor backdoor)
     {
-        if (m_started)
-        {
-            //already started
-            return;
-        }
+        start(backdoor, "", "");
+    }
 
+    public void start(Backdoor backdoor,
+                      String connectionNameCommonPart,
+                      String connectionNameInstancePart)
+    {
         if (backdoor == null)
         {
             throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("You must pass a valid backdoor");
         }
-        m_backdoor = backdoor;
 
-        m_connection.attach();
+        stop();
+
+        if (connectionNameCommonPart.isEmpty() && connectionNameInstancePart.isEmpty())
+        {
+            m_connection.attach();
+        }
+        else
+        {
+            m_connection.attach(connectionNameCommonPart, connectionNameInstancePart);
+        }
+
+        m_backdoor = backdoor;
 
         m_connection.subscribeMessage(com.saabgroup.safir.application.BackdoorCommand.ClassTypeId,
                                       new com.saabgroup.safir.dob.typesystem.ChannelId(),
                                       this);
         m_started = true;
     }
-
-
-
-
 
     public void stop()
     {
@@ -77,6 +100,11 @@ public class BackdoorKeeper
         m_connection.detach();
         m_backdoor = null;
         m_started = false;
+    }
+
+    public boolean isStarted()
+    {
+        return m_started;
     }
 
     public void onMessage(com.saabgroup.safir.dob.MessageProxy messageProxy)

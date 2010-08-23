@@ -38,8 +38,9 @@ typedef unsigned int  dcom_ulong32;
 #define NODESTATUS_NEW      'N'
 
 #define KEEP_ALIVE_TIMEOUT  3000
+#define NODESTATUS_NEW_TIMEOUT  30000       // timeout when stuck in status NEW
 
-#define POOLDISTRIBUTION_DELAYTIME  10000 //2900  // 2.9 sec
+#define POOLDISTRIBUTION_DELAYTIME  10000 //wait time before starting pool distribution.
 
 //------------------------------------------------------------------
 // This is kept in a shared data area
@@ -53,17 +54,19 @@ typedef volatile struct
 {
     volatile dcom_uchar8  Status;          // NODESTATUS_xxxx (Up/Down)
     volatile dcom_uchar8  ToBeGivenToAppl; // Set by KeepAlive when Status change
-                                     // cleared when Appl has fetched it
-    volatile dcom_uchar8  ToBePoolDistributed; // ??? needed Set by KeepAlive when a new up
-    volatile dcom_uchar8  HasReceivedPdComplete;
+                                           // cleared when Appl has fetched it
+    volatile dcom_uchar8  ToBePoolDistributed; // Set by KeepAlive when a new node comes up
+    volatile dcom_uchar8  HasReceivedPdComplete;  // Pool distribution received from this node
+    volatile dcom_uchar8  HasReceivedPdStart;     // Pool distribution start received from this node
+    volatile dcom_uchar8  spare1;
 
     volatile dcom_ushort16 RetryCount;     // # retry send to this node
-    volatile dcom_ushort16 spare2;
 
     volatile dcom_ulong32  RxCount;        // received from this node
     volatile dcom_ulong32  IpAddr_nw;
     volatile dcom_ulong32  LatestTime;     // Time when latest a msg arrived (keep alive)
     volatile dcom_ulong32  TimeStamp;      // from KeepAlive msg. Time when node started.
+    volatile dcom_ulong32  NewTime;        // Time when node set to new or pd request sent.
 } NODESTATUS_TABLE;
 
 typedef volatile struct
@@ -151,6 +154,7 @@ public:
 
     static void Set_HasReceivedPdComplete(int DoseId);
 
+    static void Set_HasReceivedPdStart(int DoseId);
 private:
     static void SetNodeDownWhenInvalidTimeStamp(dcom_uchar8 DoseId);
 

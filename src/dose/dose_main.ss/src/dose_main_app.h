@@ -101,6 +101,7 @@ namespace Internal
         void NodeStatusChangedNotifier();
         void QueueNotFull();
         void StartPoolDistribution();
+        void RequestPoolDistribution(const int nodeId);
 
         void HandleIncomingData(const DistributionData & data, const bool isAckedData);
 

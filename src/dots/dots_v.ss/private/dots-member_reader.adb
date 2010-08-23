@@ -23,6 +23,7 @@
 -------------------------------------------------------------------------------
 
 with Ada.Exceptions;
+with GNAT.Directory_Operations;
 
 with Sax.Readers;    use Sax.Readers;
 with Sax.Exceptions; use Sax.Exceptions;
@@ -70,17 +71,17 @@ package body Dots.Member_Reader is
       use type Dots.State.Unit_Type;
       Stack : constant String := To_String (Handler.Stack);
       File_Name : constant Unbounded_String :=
-                    To_Unbounded_String (Get_Public_Id (Handler.Locator));
+        To_Unbounded_String (Get_Public_Id (Handler.Locator));
+      Short_Name : constant String := GNAT.Directory_Operations.File_Name(To_String(File_Name));
    begin
       if Handler.Depth = 2 then
          if Local_Name = "name" then
             Handler.Unit_Name := Handler.Char;
-            if Handler.Unit_Name & ".dou" /= File_Name then
+            if Handler.Unit_Name & ".dou" /= Short_Name then
                Dots.Parser.Error :=
                  To_Unbounded_String
                    ("(" & To_String (Handler.Unit_Name) & " /= " &
-                    To_String (Head (File_Name,
-                                     Length (File_Name) - 4)) & ")");
+                    Short_Name (Short_Name'First .. Short_Name'Last - 4) & ")");
                raise Error_Found;
             end if;
             if Handler.Unit_Type = Dots.State.Enum or

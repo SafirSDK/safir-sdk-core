@@ -158,12 +158,10 @@ namespace Internal
         Prefixes m_prefixes;
         ACE_Recursive_Thread_Mutex m_prefixSearchLock; //lock for anyone that loops through the prefixes or adds elements to it.
 
-        //a secondary connection for the backdoor handling. This will be attached to the connection
-        //of the first caller of AddPrefix, or if there is no connection in that thread the
-        //main thread will be started and this connection will be attached to it.
+        //a secondary connection for the backdoor handling. This will be attached to
+        // the own thread connection.
         Safir::Dob::SecondaryConnection m_backdoorConnection;
         volatile bool m_isBackdoorStarted;
-        ACE_Recursive_Thread_Mutex m_backdoorStartingLock;
 
 
         //trace buffer and the associated lock

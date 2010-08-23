@@ -1,7 +1,7 @@
 ﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{0367B749-9B64-4F68-BEBA-81951D8AA0F0}</ProjectGuid>
     <SccProjectName>
@@ -84,11 +84,11 @@
   <ItemGroup>
     <Reference Include="dots_generated-dotnet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=40df165d3a3cadbc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\tower\safir\runtime\bin\dots_generated-dotnet.dll</HintPath>
+      <HintPath>K:\dots_generated-dotnet.dll</HintPath>
     </Reference>
     <Reference Include="Safir.Dob.Typesystem, Version=1.0.0.0, Culture=neutral, PublicKeyToken=fef88a5dbbc2e7c6, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\tower\safir\runtime\bin\Safir.Dob.Typesystem.dll</HintPath>
+      <HintPath>K:\Safir.Dob.Typesystem.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>

@@ -35,9 +35,11 @@
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning (disable: 4702)
+#pragma warning(disable: 4267)
 #endif
 
 #include <boost/lexical_cast.hpp>
+#include <ace/Thread.h>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -66,6 +68,7 @@ DopeApp::DopeApp():
         Safir::SwReports::SendFatalErrorReport
             (L"Bad Configuration",L"DopeApp::DopeApp",
              L"DOPE was started even though Safir.Dob.PersistenceParameters.SystemHasPersistence is set to false. Please check your configuration");
+        Safir::SwReports::Stop();
         exit(-1);
     }
 
@@ -178,9 +181,9 @@ void DopeApp::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
 
 void DopeApp::StartUp(bool restore)
 {
-    Safir::Dob::PersistentDataStatusPtr status = Safir::Dob::PersistentDataStatus::Create();
-    status->State().SetVal( Safir::Dob::PersistentDataState::Init);
-    m_dobConnection.SetAll(status, m_instanceId, m_handlerId);
+    //Safir::Dob::PersistentDataStatusPtr status = Safir::Dob::PersistentDataStatus::Create();
+    //status->State().SetVal( Safir::Dob::PersistentDataState::Init);
+    //m_dobConnection.SetAll(status, m_instanceId, m_handlerId);
 
     switch (Safir::Dob::PersistenceParameters::Backend())
     {
@@ -206,9 +209,8 @@ void DopeApp::StartUp(bool restore)
 
     m_persistenceHandler->Start(restore);
 
-    status->State().SetVal( Safir::Dob::PersistentDataState::Started);
-    m_dobConnection.SetAll(status, m_instanceId, m_handlerId);
-
+    // waith for ok to connect on context 0
+    ACE_Thread::spawn(&DopeApp::ConnectionThread,this);
 }
 
 //-------------------------------------------------------
@@ -233,4 +235,46 @@ void
 DopeApp::Run()
 {
     ACE_Reactor::instance()->run_reactor_event_loop();
+}
+//-------------------------------------------------------
+/*
+ dummy dispather
+*/
+class DummyDispatcher:
+    public Safir::Dob::Dispatcher
+{
+    virtual void OnDoDispatch() {}
+};
+
+/*
+ Just wait for ok to connect on context 0
+*/
+ACE_THR_FUNC_RETURN DopeApp::ConnectionThread(void * _this)
+{
+    DopeApp * This = static_cast<DopeApp *>(_this);
+    DummyDispatcher dispatcher;
+    Safir::Dob::Connection tmpConnection;
+
+    tmpConnection.Open(L"DOPE_TMP",L"0",0,NULL,&dispatcher);
+    ACE_Reactor::instance()->notify(This,ACE_Event_Handler::READ_MASK);
+
+    return NULL;
+}
+
+int DopeApp::handle_input(ACE_HANDLE)
+{
+    // use a different hander to overregister PersistentDataStatus to get the correct registration time.
+    Safir::Dob::Typesystem::HandlerId entityHandler(L"DOPE_ENTITY_HANDLER"); 
+
+    m_dobConnection.RegisterEntityHandler(Safir::Dob::PersistentDataStatus::ClassTypeId, 
+        entityHandler,
+        Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
+        this);
+
+    Safir::Dob::PersistentDataStatusPtr status = Safir::Dob::PersistentDataStatus::Create();
+    status->State().SetVal( Safir::Dob::PersistentDataState::Started);
+    m_dobConnection.SetAll(status, m_instanceId, entityHandler);
+
+
+    return 0;
 }

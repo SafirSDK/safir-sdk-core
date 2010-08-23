@@ -62,7 +62,7 @@ namespace Dob
         const Dob::CallbackId::Enumeration GetCurrentCallbackId() const;
 
         /**
-         * @name Connection name
+         * @name Connection info
          */
         /** @{ */
 
@@ -89,6 +89,13 @@ namespace Dob
          * @return The connection name instance part specified when opening the connection.
          */
         const std::wstring GetConnectionNameInstancePart() const;
+
+        /**
+         * Get the context that the connection is opened in.
+         *
+         * @return Context
+         */
+        Dob::Typesystem::Int32 GetContext() const;
 
         /** @} */
 

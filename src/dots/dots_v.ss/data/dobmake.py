@@ -103,6 +103,7 @@ def remove(path):
     try:
         chmod(path)
         os.rmdir(path)
+
     except Exception, e:
         die ("Failed to remove directory " + path + ". Got exception " + str(e))
 
@@ -170,6 +171,9 @@ class Logger(object):
         self.write(data,"title")
 
     def writeCommand(self, data):
+        import time
+        if not no_gui:
+            self.write(time.strftime("%H:%M:%S", time.localtime()) + "\n","command")
         self.write(data,"command")
 
     def writeError(self,data):
@@ -398,13 +402,17 @@ class VisualStudioBuilder(object):
         mkdir(self.generator)
         olddir = os.getcwd();
         os.chdir(self.generator)
+        Rebuild = "FALSE"
+        if buildType == "rebuild":
+            Rebuild = "TRUE"
         try:
             self.run_command2("cmake -G \""+ self.generator + "\" "+
                               "-D NO_JAVA:string=TRUE " + 
                               "-D NO_DOTNET:string=TRUE " + 
-                              "-D NO_ADA:string=TRUE" + 
+                              "-D NO_ADA:string=TRUE " + 
                               "-D NO_DOU_INSTALL:string=TRUE " + 
-                              "-D NO_GENERATE_CODE:string=TRUE " + 
+                              "-D NO_GENERATE_CODE:string=TRUE " +
+                              "-D REBUILD=" + Rebuild + " " +
                               "..",
                               "Configure", what)
 
@@ -427,11 +435,16 @@ class VisualStudioBuilder(object):
         mkdir("others")
         olddir = os.getcwd();
         os.chdir("others")
+        Rebuild = "FALSE"
+        if buildType == "rebuild":
+            Rebuild = "TRUE"
         try:
             self.run_command(("cmake -G \""+ self.generator + "\" "+
                               "-D NO_CXX:string=TRUE " +
                               "-D NO_ADA:string=" + str(not build_ada) + " " + 
                               "-D NO_JAVA:string=" + str(not build_java) + " " + 
+                              "-D NO_DOU_INSTALL:string=FALSE "
+                              "-D REBUILD=" + Rebuild + " " +
                               ".."),
                              "Configure", what)
             solution = self.find_sln()
@@ -443,7 +456,7 @@ class VisualStudioBuilder(object):
         
 
     def clean(self):
-        buildlog.write("Cleaning!\n")
+        buildlog.writeHeader("Cleaning...\n")
 
         remove("others")
         remove(self.generator)
@@ -455,7 +468,9 @@ class VisualStudioBuilder(object):
         for name in os.listdir("gen"):
             if name != "CMakeLists.txt":
                 remove(os.path.join("gen",name))
-            
+
+        buildlog.write("Cleaning done.\n")
+           
     def build(self):
         self.build_others()
         self.build_cpp()
@@ -536,9 +551,10 @@ def check_config_dots_generated():
     run_dots_configuration_check()
         
 def load_gui():
-    import Tkinter, tkMessageBox, tkFont
+    import Tkinter, tkMessageBox, tkFont, time
     from ConfigParser import RawConfigParser
     global MainDialog
+    
     class MainDialog(Tkinter.Frame):
         def __init__(self,parent, builder):
             Tkinter.Frame.__init__(self,parent)
@@ -564,6 +580,7 @@ def load_gui():
             self.commandList = list()
             self.commandThread = None
             self.after(10,self.updateLog)
+            self.start_time = time.time()
 
 
         def writeGuiConfiguration(self):
@@ -686,9 +703,9 @@ def load_gui():
             self.output.config(yscrollcommand=scrollbar.set)
 
             self.output.grid(row=5,column=0,columnspan=10,sticky=Tkinter.W + Tkinter.E + Tkinter.N + Tkinter.S)
-            self.output.tag_config("pre",foreground="darkgrey")
+            self.output.tag_config("pre",foreground="black")
             self.output.tag_config("title",font = tkFont.Font(family="Times",size=-24,weight="bold"))
-            self.output.tag_config("command",foreground="darkgreen")
+            self.output.tag_config("command",foreground="blue", underline=True)
             self.output.tag_config("error",foreground="red")
             self.output.tag_config("header",font = tkFont.Font(family="Times",size=-18))
             
@@ -745,6 +762,7 @@ def load_gui():
         def run(self):
             self.runButton.config(state="disabled")
             self.cancelButton.config(state="disabled")
+            self.start_time = time.time()
             if buildType == "clean" or buildType == "rebuild":
                 self.commandList.append(self.builder.clean)
 
@@ -778,6 +796,7 @@ def load_gui():
             else:
                 self.runButton.config(state="normal")
                 self.cancelButton.config(state="normal")
+                buildlog.write("dobmake took " + time.strftime("%H:%M:%S", time.gmtime(time.time() - self.start_time)) + "\n")
 
         class CommandThread(threading.Thread):
             def __init__(self, command):

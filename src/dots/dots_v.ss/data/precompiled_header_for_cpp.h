@@ -39,5 +39,7 @@
 #include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 
+#include <Safir/Dob/Typesystem/ArrayContainer.h>
+
 
 
