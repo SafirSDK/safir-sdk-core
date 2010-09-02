@@ -4,7 +4,7 @@ This file is included into the main SUG document, and is located under header le
 
 The Tracer is intended to be used for developer/integration logging inside applications. It should never be used as the sole target for logging errors, since the output can only be viewed by developers or integration. A common way to use trace logging is to log "significant events" or other points of interest, so that the developer can find out what his component is doing when running in a reference site or when running in a situation when it is not desirable or possible to halt execution with a debugger.
 
-The functionality is supported in C\+\+, C#, Ada and Java. The interface to the trace logging functionality is a class named _Tracer_ (which is how it will be referred to in the rest of this chapter).
+The functionality is supported in C++, C#, Ada and Java. The interface to the trace logging functionality is a class named _Tracer_ (which is how it will be referred to in the rest of this chapter).
 
 ==== How to use
 
@@ -12,34 +12,34 @@ The main goal of the Tracer class is for it to be as easy to use as possible, an
 
 1. Instantiate the Tracer class in each of the classes/packages where you want to use trace logging. Each instantiation requires a "prefix" which is used to enable and disable the logging from each tracer instantiation (described below). Several Tracer instances can use the same prefix, and will then all be enabled/disabled by the same command.
 2. Log to the tracer-instance (in this example the instance is called "debug"):
- - *C\+\+*
+ - *C++*
 +
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 debug << "Testing logging " << myFloat << ", " << myInt << std::endl;
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
  - *C#*
 +
-[cs]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{csharp}]
+----------------------------
 debug.WriteLine("Testing logging {0}, {1}",myFloat,myInt);
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
  - *Ada*
 +
-[ada]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,ada]
+----------------------------
 debug.Put_Line("Testing logging " & Float'Wide_Image(myFloat) &
                ", " & Float'Wide_Image(myInt));
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
  - *Java*
 +
-[java]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,java]
+----------------------------
 debug.println("Testing logging " + myFloat + ", " + myInt);
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 3. Enable and disable the logging by using the "backdoor" command. Send "<prefix> on" to turn on the logging of a prefix (also try "help" to see what prefixes are registered and what their current states are). To do this, type "backdoor -c myconnection myprefix on" in a command line window (if you skip the "-c myconnection" bit you will send the command to all applications in the system, which may have undesired consequences).
  - It is possible to turn on/off all prefixes by sending "all on" to your application.
@@ -63,48 +63,50 @@ Some notes on how the Tracer works and is implemented.
 
 The checking of whether a prefix is enabled happens in slightly different ways in the different languages, which means that depending on how you use the logger you may pay for string expansion or you may not.
 
-- In C\+\+ the check is made once for every "<<", but since the check is inlined it can be considered cheap. Floats and suchlike are not expanded into strings until after the check has "been successful", so it is ok to log most stuff using lines like 
+- In C++ the check is made once for every "<<", but since the check is inlined it can be considered cheap. Floats and suchlike are not expanded into strings until after the check has "been successful", so it is ok to log most stuff using lines like 
 +
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 debug << "Testing logging " << myFloat << ", " << myInt << std::endl;
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 - In C# the check is made for every +Write+ or +WriteLine+ call, which means that if you log using the form
 +
-[cs]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{csharp}]
+----------------------------
 debug.WriteLine("Hello " + 123.098);
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 +
 the whole string expansion will be performed before the check is made. It is better to use the form
 +
-[cs]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{csharp}]
+----------------------------
 debug.WriteLine("Hello {0}", 123.098);
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 +
 since the string expansion will not be performed until the check has passed.
+
 - In Ada the check is made for every call to Put or Put_Line. As far as the author is aware there is no equivalent of the C# functionality in Ada, so it is not possible to avoid the check without encapsulating the debugging inside if-statements.
+
 - In Java the check is made for every +print+ or +println+ call that is made. The tracer supports the +printf(...)+ functions that will give the similar functionality as C# described above. Check out the documentation for javas +PrintWriter+ to find out how to use this syntax.
 
 Sometimes you might have something that is expensive to calculate in your logs, for example something like 
 
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 debug << "Average: " << ExpensiveAverageCalculation() << std::endl;
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 where the expensive function will be called every time the statement executed whether or not the prefix is enabled. In this situation it is better to check whether logging is enabled using +debug.IsEnabled()+ before doing the logging, like this:
 
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 if (debug.IsEnabled()) 
 {
     debug << "Average: " << ExpensiveAverageCalculation() << std::endl;
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
-This applies to all languages, even if this example was in C\+\+.
+This applies to all languages, even if this example was in C++.
 
 
 [[force_log]]

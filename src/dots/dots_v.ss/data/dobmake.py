@@ -502,11 +502,15 @@ class UnixGccBuilder(object):
         mkdir("build")
         olddir = os.getcwd()
         os.chdir("build")
+        Rebuild = "FALSE"
+        if buildType == "rebuild":
+            Rebuild = "TRUE"
         try:
             self.run_command(("cmake",
                               "-D", "CMAKE_BUILD_TYPE:string=" + default_config,
                               "-D", "NO_ADA:string="+ str(not build_ada), 
                               "-D", "NO_JAVA:string=" + str(not build_java),
+                              "-D", "REBUILD=" + Rebuild,
                               ".."),
                              "Configure", what)
             

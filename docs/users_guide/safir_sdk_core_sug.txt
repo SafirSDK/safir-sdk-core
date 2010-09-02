@@ -3,11 +3,12 @@
 
 Safir SDK Core Users Guide
 ==========================
-Lars Hagström <lars.hagstrom@saabgroup.com>
-Version 1.2a, Nov 2009
+:Author: Lars Hagström (main author), Anders Widén, Mikael Wennerberg
+Author
+30 Aug 2010
 
 == Preface
-The purpose of this document is to provide a comprehensive guide to using the services in Safir SDK Core version 3.2. The reader should have general knowledge about object-oriented programming. Some knowledge of distributed real-time systems programming is also desirable, but not essential.
+The purpose of this document is to provide a comprehensive guide to using the services in Safir SDK Core. The reader should have general knowledge about object-oriented programming. Some knowledge of distributed real-time systems programming is also desirable, but not essential.
 
 === How to read
 This document is intended to be used both as an introduction to new users of the Safir SDK Core, and as a reference for those who have used the SDK for a long time. Because of this the level of the different sections vary quite a lot. Some sections are marked as advanced (with an ^adv^ tag to them), to signal that they cover advanced topics that can be skipped by "beginners".
@@ -15,7 +16,7 @@ This document is intended to be used both as an introduction to new users of the
 === Acknowledgements
 This document is a combination of several other documents, so some parts of the text have different authors, or is based on texts authored by other people. 
 
-More specifically the database section is written by Jörgen Johansson, the software error reporting section was originally written by Anders Widén, the section on Safir.Utilities.Foreach was written by Stefan Lindström, and the appendix about the example applications was written by Petter Lönnstedt. Most of the text on the basic Dob services is based on the original Dob Software Users Guide written by Jörgen Johansson. The bits on how to use the Ada interfaces were written by Anders Widén.
+More specifically the database section is written by Jörgen Johansson, the software error reporting section was originally written by Anders Widén, the section on Safir.Utilities.Foreach was written by Stefan Lindström, and the appendix about the example applications was written by Petter Lönnstedt. Most of the text on the basic Dob services is based on the original Dob Software Users Guide written by Jörgen Johansson. The context section, and the bits on how to use the Ada interfaces, are written by Anders Widén.
 
 This document has also been reviewed by a number of people: Henrik Sundberg, Mattias Gålnander and Anders Widén. If I've left someone out, then I apologise and I'll happily add you.
 
@@ -49,17 +50,19 @@ Safir SDK Core consists of a number of _components_, that have cryptic four-lett
 
 [[sdk_service_summary]]
 .Components and Services in Safir SDK Core
-`15`25`60~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Acronym,Full name,Provided Service(s)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Lluf,Low Level Utility Functions,Low level functions that are not provided by ACE or Boost
-Dots,Distributed Objects Type system,The type system used for the distributed objects
-Dose,Distributed Objects Service,Inter-process and inter-computer distribution
-Douf,Dob Utility Functions,Utility functions for applications using the Dob
-Swre,Software Reports,Software error reporting and debug trace logging
-Olib,ODBC Library,C\+\+ wrapper classes for Odbc database access.
-Dope,Dob Persistence,Persistent storage of Dob entities
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[width="70%", cols="15%,25%,60%",options="header",frame="topbot",grid="none"]
+|=========================================================================
+|Acronym |Full name                       |Provided Service(s)
+
+|Lluf    |Low Level Utility Functions     |Low level functions that are not provided by ACE or Boost
+|Dots    |Distributed Objects Type system |The type system used for the distributed objects
+|Dose    |Distributed Objects Service     |Inter-process and inter-computer distribution
+|Douf    |Dob Utility Functions           |Utility functions for applications using the Dob
+|Swre    |Software Reports                |Software error reporting and debug trace logging
+|Olib    |ODBC Library                    |C++ wrapper classes for Odbc database access.
+|Dope    |Dob Persistence                 |Persistent storage of Dob entities
+
+|=========================================================================
 
 When we talk about _the Dob_ what is really meant is the services provided by Dots, Dose and Dope, i.e. distributed objects with optional persistence.
 
@@ -81,9 +84,9 @@ Contact Saab AB for more information (contact information at http://www.safirsdk
 === Prerequisites / Dependencies
 Safir SDK Core uses two open-source products to provide low level functionality and operating system independence wrappers.
 
-*ACE*, The ADAPTIVE Communication Environment, a freely available, open-source, C\+\+ network programming toolkit. See http://www.cs.wustl.edu/~schmidt/ACE.html[] for more information. At Saab we are is using 5.6.3 and later, but Safir SDK Core is quite likely to work with earlier versions.
+*ACE*, The ADAPTIVE Communication Environment, a freely available, open-source, C++ network programming toolkit. See http://www.cs.wustl.edu/~schmidt/ACE.html[] for more information. At Saab we are is using 5.6.3 and later, but Safir SDK Core is quite likely to work with earlier versions.
 
-*Boost*, a collection of portable high-quality C\+\+ libraries. See http://www.boost.org/[] for more information. Safir SDK Core requires boost version 1.36 or later (it is possible to use 1.35 by patching a few bugs, or 1.34 by installing the Boost.Interprocess library separately).
+*Boost*, a collection of portable high-quality C++ libraries. See http://www.boost.org/[] for more information. Safir SDK Core requires boost version 1.36 or later (it is possible to use 1.35 by patching a few bugs, or 1.34 by installing the Boost.Interprocess library separately).
 
 === Supported Platforms
 Safir SDK Core supports both the Windows and Linux platforms on the x86 platform. It also supports Linux on 64 bit x86_64 platforms, but this has not been extensively tested. It should work well on 64 bit Windows platforms as well.
@@ -92,13 +95,13 @@ Obviously it is possible to combine all these platforms into one system and use 
 
 An application should, written correctly using ACE and Boost and Safir SDK, be portable to all the supported platforms with no or very little effort.
 
-The compilers that are used for the C\+\+ code are GNU gcc (version 4.0 or later) or Microsoft Visual Studio 2005 SP1. For C# code we use Visual Studio 2005 SP1 or Mono (version 1.9.1 or later). Any Java 5 compiler should be able to compile the Java code (we've used Sun's), and for Ada we use Adacore's GNAT Pro (6.1.0w) and GNAT GPL (2008 and 2009).
+The compilers that we know can be used for the C++ code are GNU gcc (version 4.0 or later), Microsoft Visual Studio (2005 SP1 or later). For C# code we use Visual Studio (2005 SP1 or later) or Mono (version 1.9.1 or later). Any Java 5 compiler should be able to compile the Java code (we've used Sun's), and for Ada we use Adacore's GNAT Pro (6.1.0w) and GNAT GPL (2008 and 2009).
 
 == What is the Dob?
 This chapter describes what the Dob does and a little bit about why it does it the way it does.
 
 === What does the Dob do?
-The Dob provides several distribution mechanisms needed to create distributed real-time systems. It is possible to interface with the Dob from several languages (currently C\+\+, C#, Ada, and Java).
+The Dob provides several distribution mechanisms needed to create distributed real-time systems. It is possible to interface with the Dob from several languages. Currently we provide C++, C#, Ada, and Java interfaces.
 
 The main ``selling points'' include:
 
@@ -113,7 +116,7 @@ The main ``selling points'' include:
 
 The Dob consists of two parts that together provide the object distribution mechanism. These two parts are the type system (Dots), which provides the language independent types and manages the definitions of the objects to distribute, and the distribution mechanism (Dose), which does the actual data distribution and synchronisation.
 
-To use the Dob an application includes the language specific interface part of the Dob interface into the application. This language specific interface in turn uses language independent libraries (written in C\+\+) to manage the objects and to communicate with other parts of the Dob.
+To use the Dob an application includes the language specific interface part of the Dob interface into the application. This language specific interface in turn uses language independent libraries (written in C++) to manage the objects and to communicate with other parts of the Dob.
 
 To run the Dob there is an executable, "dose_main", that must be running. This executable is responsible for managing the distribution of data between applications and nodes in the system.
 
@@ -128,9 +131,9 @@ The Dob is appropriate for distribution of data between applications (in the sam
 - Is asynchronous (no RPC, no blocking calls).
 - Has a bounded latency.
 
-The Dob implements a distributed cache, making it possible to either read information synchronously from shared memory, or to subscribe to object changes.
+The Dob implements a distributed object cache, making it possible to either read object information synchronously from shared memory, or to subscribe to object changes.
 
-The Dob supports Windows and Linux, allowing computers running different operating systems to communicate transparently.
+The Dob provide services so that applications (possibly written in different languages) running on Windows and Linux platforms can communicate transparently.
 
 === Quick intro
 
@@ -146,7 +149,7 @@ No record is kept of messages, i.e. they are not stored in the Dob in any way. S
 Messages do not have guaranteed delivery. If some application cannot keep up with the rate of messages it will miss messages. If you need guaranteed delivery, messages are not what you are looking for.
 
 ==== Services
-A Service has one or more handlers (known as a Service Handler) to which any application (known as a Requestor) can send service requests. For each service request sent a response is received. The response is sent by the Service Handler, and should indicate the result of the operation (i.e. success or failure, with or without result data). If the service handler does not send a response within a reasonable amount of time (configurable, see <<request_timeouts>>), the Dob will send a timeout response to the requestor.
+A Service has one or more handlers (known as a Service Handler) to which any application (known as a Requestor) can send service requests. For each service request that is sent, a response is received. The response is sent by the Service Handler, and should indicate the result of the operation (i.e. success or failure, with or without result data). If the service handler does not send a response within a reasonable amount of time (configurable, see <<request_timeouts>>), the Dob will send a timeout response to the requestor.
 
 Service requests and responses are guaranteed to be delivered. And you are guaranteed a response if you have sent a request.
 
@@ -178,8 +181,8 @@ When a member is added to an object it is only necessary to regenerate/recompile
 Here is an example of a dou-file for a simple entity (containing one 32-bit integer):
 
 .A simple dou-file
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
 <?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -191,7 +194,7 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     <type>Int32</type>
   </member></members>
 </class>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 This is described in greater detail in the next chapter.
 
 == The type system
@@ -204,25 +207,27 @@ A Dob object is made up of _members_, that can be simple or complex types (and a
 The type system also provides functionality for defining run-time parameters (values are loaded at start-up) and properties, that provide a common interface for accessing members of different classes.
 
 === The simple types 
-These are the simple types that class members can have, either as single members or as arrays (it is also possible to put objects inside objects, which is described below). 
+These are the simple types that class members can have, either as single members or as arrays (it is also possible to put objects inside objects, which is described below).
 
 .The simple Dob type system types.
-`------------`---------------------------------------------------------------------
-Type         Description
------------------------------------------------------------------------------------
-Boolean      As defined in each supported language.
-Enumeration  Routines for conversion to/from strings are generated.
-Int32        4 byte signed integer.
-Int64        8 byte signed integer.
-Float32      4 byte floating point value.
-Float64      8 byte floating point value.
-TypeId       Reference to a Dob class or enumeration.
-ChannelId    A Message channel identifier (see <<hashed_types>>).
-HandlerId    A Service or Entity handler identifier (see <<hashed_types>>)
-InstanceId   An Entity instance identifier (see <<hashed_types>>).
-EntityId     An aggregate of a TypeId and an InstanceId. A reference to an Entity instance
-String       Unicode string. Size is defined in number of Unicode characters.
------------------------------------------------------------------------------------
+[width="70%", cols="20%,80%",options="header",frame="topbot",grid="none"]
+|=========================================================================
+|Type         |Description
+
+|Boolean      |As defined in each supported language.
+|Enumeration  |Routines for conversion to/from strings are generated.
+|Int32        |4 byte signed integer.
+|Int64        |8 byte signed integer.
+|Float32      |4 byte floating point value.
+|Float64      |8 byte floating point value.
+|TypeId       |Reference to a Dob class or enumeration.
+|ChannelId    |A Message channel identifier (see <<hashed_types>>).
+|HandlerId    |A Service or Entity handler identifier (see <<hashed_types>>)
+|InstanceId   |An Entity instance identifier (see <<hashed_types>>).
+|EntityId     |An aggregate of a TypeId and an InstanceId. A reference to an Entity instance
+|String       |Unicode string. Size is defined in number of Unicode characters.
+
+|=========================================================================
 
 ==== SI Types 
 The Dob type system also has definitions for the SI units. This makes it easier to specify what values are expected in objects. If a member is called "Angle" it should have a type of Radian32; this makes it easy for object users to know what to expect from the member. If it had been defined as a Float32 the users would have to find out from somewhere else what the expected contents are supposed to be; should there be radians, degrees, gons or mils in there?
@@ -230,29 +235,31 @@ The Dob type system also has definitions for the SI units. This makes it easier 
 The SI unit types are all based on Float32 or Float64 respectively:
 
 .Types for SI units.
-`----------------------------`----------------------------
-4 byte type	                 8 byte type
-----------------------------------------------------------
-Ampere32                     Ampere64
-CubicMeter32                 CubicMeter64
-Hertz32                      Hertz64
-Joule32                      Joule64
-Kelvin32                     Kelvin64
-Kilogram32                   Kilogram64
-Meter32                      Meter64
-MeterPerSecond32             MeterPerSecond64
-MeterPerSecondSquared32      MeterPerSecondSquared64
-Newton32                     Newton64
-Pascal32                     Pascal64
-Radian32                     Radian64
-RadianPerSecond32            RadianPerSecond64
-RadianPerSecondSquared32     RadianPerSecondSquared64
-Second32                     Second64
-SquareMeter32                SquareMeter64
-Steradian32                  Steradian64
-Volt32                       Volt64
-Watt32                       Watt64
--------------------------------------------------------
+[width="60%", cols="50%,50%",options="header",frame="topbot",grid="none"]
+|=========================================================================
+|4 byte type	                 |8 byte type
+
+|Ampere32                        |Ampere64
+|CubicMeter32                    |CubicMeter64
+|Hertz32                         |Hertz64
+|Joule32                         |Joule64
+|Kelvin32                        |Kelvin64
+|Kilogram32                      |Kilogram64
+|Meter32                         |Meter64
+|MeterPerSecond32                |MeterPerSecond64
+|MeterPerSecondSquared32         |MeterPerSecondSquared64
+|Newton32                        |Newton64
+|Pascal32                        |Pascal64
+|Radian32                        |Radian64
+|RadianPerSecond32               |RadianPerSecond64
+|RadianPerSecondSquared32        |RadianPerSecondSquared64
+|Second32                        |Second64
+|SquareMeter32                   |SquareMeter64
+|Steradian32                     |Steradian64
+|Volt32                          |Volt64
+|Watt32                          |Watt64
+
+|=========================================================================
 
 [[hashed_types]]
 ==== Hashed types
@@ -286,8 +293,8 @@ Apart from members a class can also contain constant parameters. These parameter
 Parameters are defined by a name, a type and a value. Here is an example of a parameter definition (it is cut out of its context, but it goes in the dou-file at the same level as the _members_-tag).
 
 .A parameter definition
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
 <?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -302,7 +309,7 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         </parameter>
     </parameters>
 </class>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 This defines a parameter MyParameter that is a 32 bit integer of value 25.
 
 It is recommended to keep most parameters in pure parameter classes, suffixed Parameters, that inherit from Safir.Dob.Parametrization. These classes should not contain any members. The reason for this is to make it easier to know where parameters can be found. The Dob does not enforce this recommendation in any way.
@@ -312,8 +319,8 @@ It is recommended to keep most parameters in pure parameter classes, suffixed Pa
 A parameter can also be an array of values, as shown below, where an array of string parameters are defined with two values.
 
 .A parameter array
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
 <?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -335,7 +342,7 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         </parameter>
     </parameters>
 </class>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 Array indexing starts at 0 when accessing the values from code.
 
@@ -343,8 +350,8 @@ Array indexing starts at 0 when accessing the values from code.
 Parameters can also contain whole Dou-defined objects, not just the basic types. Below is an example from +Safir.Dob.NodeParameters+, where there is in fact an array of items in a parameter.
 
 .A parameter array
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
 <?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -380,7 +387,7 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         </parameter>
     </parameters>
 </class>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 Each index in the array contains the xml serialization of an instance of the +Safir.Dob.NodeDefinition+ item (which currently only contains one member, the node name).
 Of course this can be done in non-array parameters as well, just leave out all the array stuff.
@@ -389,20 +396,20 @@ One interesting feature is that you can put any item that _derives_ from +Safir.
 
 [[environment_parameters]]
 ==== Environment variables in parameters
-For parameters it is also possible to use environment variables in the parameter value. (In the 3.2 and earlier releases of Safir SDK Core it is only possible to use them in string parameters, but for later releases, including 3.2.1, it is possible to use them in all kinds of parameters.)
+For parameters it is also possible to use environment variables in the parameter value.
 
 The syntax for environment variables is +$(ENVIRONMENT_VARIABLE_NAME)+, and there can be several environment variables in one parameter. An example use is shown below.
 
 .Environment variable in parameter.
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
 <parameter>
     <name>MyParameterWithEnv</name>
     <type>String</type>
     <value>Safir SDK Core runtime is located 
            in $(SAFIR_RUNTIME), and the sdk in $(SAFIR_SDK)</value>
 </parameter>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 Remember that all parameters are loaded 'when the first application that uses parameters starts', so any environment variables set after that time will not be seen by the type system environment variable expansion.
 
@@ -412,8 +419,8 @@ Create routines allow the designer of a Dob class to define custom routines for 
 Create routines are similar to constructors. The members to be given as parameters to the routine, and those to be fetched from parameter definitions are defined. For example: 
 
 .A create routine definition.
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
 <createRoutines>
     <createRoutine>
         <summary>Create a position with dummy altitude.</summary>
@@ -430,20 +437,20 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         </values>
     </createRoutine>
 </createRoutines>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 Will result in generated code like:
 
-.Generated C\+\+ create routine
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.Generated C++ create routine
+[source,{cpp}]
+-----------------------------------------------------
 /**
  * Create a position with dummy altitude.
  */
 static PositionPtr CreatePosition
     (const Safir::Dob::Typesystem::Si64::Radian Latitude,
      const Safir::Dob::Typesystem::Si64::Radian Longitude);
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------------
 
 Using the +CreatePosition+ method will allow the user to create a two-dimensional Position object using only one line of code, instead of having to first create the object, and then set the three members to correct values (Position is a Struct, so it doesn't have the null flag for its members, hence the dummy position is used to signal that it is a two-dimensional position).
 
@@ -451,23 +458,21 @@ The Altitude member will be set to the value specified in the +Safir.Geodesy.Pos
 
 The Position class also supplies a create routine for a three-dimensional position, but the two-dimensional one is a better example, since it uses a parameter.
 
-(The Position class is part of the Geodesy component that Saab is releasing under an Open Source license. Geodesy is not part of Safir SDK Core, but it will be available for download from http://www.safirsdk.com[].)
-
 === The syntax - putting it all together
 As mentioned above classes are defined by creating an Xml-file called a dou-file. The dou-file describes the class and is used to generate the interface code used by the components to interface the Dob. All dou-files have two mandatory fields that describe the name of the class and its base class. The _name_ field contains both the name of class and the namespace the class is located in, and the _baseClass_ field contains the base class (and its namespace) to inherit from.
 
 In the example below the name is Vehicle and the Vehicle class is located in the namespace Vehicles which is located in the namespace Capabilities. The class is referenced by other classes as Capabilities.Vehicles.Vehicle. The Vehicle class is an Entity (that resides in the Safir.Dob namespace).
 
 .Start of a dou-file class declaration
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
 <?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit" 
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <summary>Definition of vehicle entity</summary>   
     <name>Capabilities.Vehicles.Vehicle</name>
     <baseClass>Safir.Dob.Entity</baseClass>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 .A note on namespaces
 *****************************
@@ -481,31 +486,31 @@ Saab uses _Capabilities_ as the top-level namespace for reusable components buil
 Arrays are declared by adding the field arraySize to an element or constant as shown in the example below.
 
 .Array member declaration
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
     <member>
         <name>Type</name>
         <arraySize>10</arraySize>
         <type>Int32</type>
     </member>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 For strings the maximum length in number of Unicode characters must be defined using the maxLength tag.
 
 .String member declaration
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
     <member>
         <name>Callsign</name>
         <type>String</type>
         <maxLength>10</maxLength>
     </member>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 The string lengths and array sizes can be specified with parameters as well. The tags used for this is arraySizeRef and maxLenghtRef, and the parameter name must be fully qualified (full namespace and class name).
 
 .Parameters and members
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
     <parameters>
         <parameter>
             <name>ArraySize</name>
@@ -533,20 +538,20 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 <name>Capabilities.Vehicles.Vehicle.StringLength</name>
             </maxLengthRef>
         </member>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 Of course, as mentioned in <<parameters>> it is recommended that parameters are placed in separate parameter classes.
 
-It is possible - indeed it is even recommended - to add comments to most fields in dou-files. These comments will be put into the generated code where they will be made into _doxygen_/_javadoc_ comments (for C\+\+/Java) or provide "intellisense" information (C#) for IDEs that support it. 
+It is possible - indeed it is even recommended - to add comments to most fields in dou-files since these comments will be put into the generated code in a style that is appropriate for the specific language. (For C++/Java they will be made into _doxygen_/_javadoc_ comments.)
 
 .A commented member
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
         <member>
             <summary>This is a callsign.</summary>
             <name>Callsign</name>
             <type>Int32</type>
         </member>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 
 === Properties ^adv^
@@ -555,8 +560,8 @@ A property is not an object on its own. It is merely an interface into other obj
 The interface itself is specified in a dou-file which is slightly different from class definitions.
 
 .A simple property (NamedObject)
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
 <?xml version="1.0" encoding="utf-8" ?>
 <property xmlns="urn:safir-dots-unit" 
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -568,13 +573,13 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         </member>
     </members>
 </property>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 The next step is to create a _dom_-file (has .dom as its extension) to define to which object member the property member is mapped.
 
 .A NamedObject mapping for Vehicle
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
 <?xml version="1.0" encoding="utf-8" ?>
 <propertyMapping xmlns="urn:safir-obj" 
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -589,14 +594,14 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         </member>
     </memberMapping>
 </propertyMapping>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 The mapping above specifies that the member Name in the NamedObject property is mapped to the Callsign member of the Vehicle object.
 
 It is also possible to map property members to values (either to direct values or to references to parameters) or to null.
 
 .Property mapping to value or parameter
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
     <member>
         <propertyMember>Int32Member</propertyMember>
         <value>10</value>
@@ -610,13 +615,13 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     <member>
         <propertyMember>NullMember</propertyMember>
     </member>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 It is even possible to map to members that reside inside an item array inside the mapped class.
 
 .Property mapping into an array
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
     <member>
         <propertyMember>Int64Member</propertyMember>
         <classMemberReference>
@@ -627,7 +632,7 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             </classMemberReference>
         </classMemberReference>
     </member>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 And so on...
 
 
@@ -644,63 +649,41 @@ Property mappings are inherited, so, for example, any class that inherits from S
 To use the property you need to have an object of a type that is mapped to it. For example you could have set up a subscription to Capabilities.Vehicles.Vehicle (which is mapped to the NamedObject property). 
 
 .Using a property
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void DisplayName(const Safir::Dob::Typesystem::ObjectPtr & obj)
 {
     const std::wstring name = Safir::NamedObject::GetName(obj);
     ... display the name ...
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 Note that in the code above there is no reference at all to what kind of object +obj+ is. It could be any object that has the property mapped to it. It is possible to check if an object has a specific property mapped to it using the +HasProperty+ method on the property.
 
 [[code-generation]]
 === Generating code from Dou-files
-In order to use the classes defined by the Dou-file, interface code has to be generated in the wanted language. This code generation is performed by a tool called Dots_V. When the code is generated it has to be built into loadable libraries (e.g. dlls, shared libraries, or assemblies). 
+In order to use the classes defined by the Dou-files, interface code has to be generated for the different languages. First, source code will be generated from the dou-files and then this source code is built into loadable libraries suitable for your specific platform (e.g. dlls, shared libraries, or assemblies). All these steps are performed by running a single script, dobmake.py.
 
-The generated code gets put in subdirectories under $(SAFIR_SDK)/dots/dots_generated (e.g. cpp/ dotnet/ etc). This code is built by the build system and put into loadable libraries (e.g. dots_generated-cpp.dll) that are copied to the $(SAFIR_RUNTIME)/bin or lib directory. The C\+\+ and Ada header files are also copied to the $(SAFIR_SDK)/include and ada directories so that they are available to include into your code.
+The code generation tools expect the dou-files to be located under $(SAFIR_SDK)/dots/dots_generated, so this is where you put your own defined dou-files. It is possible to place the files in sub-directories under this directory which can be a good idea for projects with a large number of dou-files. For instance, all dou-files containing parameter values can be placed under a separate sub-directory.
 
-All this is performed by running a single script. Well, in fact it is two different scripts, depending on the version of your SDK, and of how it is built. Safir SDK 3.2.2 introduces a new command for performing this build and install, dobmake.py", but it maintains backward compatibility with the old way.
+The generated source code gets put in subdirectories under $(SAFIR_SDK)/dots/dots_generated (e.g. cpp/ dotnet/ etc). The C++ and Ada header files are also copied to the $(SAFIR_SDK)/include and $(SAFIR_SDK)/ada directories so that they are available to include into your code.
 
-If you've got the file "dobmake.py" under $(SAFIR_RUNTIME}/bin you're on an SDK which uses the new style, so jump to the section <<dobmake>>. If you don't, jump to <<make-my-day>>.
+The generated loadable libraries (e.g. dots_generated-cpp.dll) are copied to the $(SAFIR_RUNTIME)/bin or lib directory.
 
-Safir SDK Core 3.2.2 is the last version that will support the old-style building (non-dobmake.py).
+As part of the code generation procedure the original dou-files are copied from $(SAFIR_SDK)/dots/dots_generated to $(SAFIR_RUNTIME}/data/text/dots/classes (the sub-directory structure is preserved). This is the directory used by the Dob at runtime to parse dou-files, including parameters. 
 
-[[dobmake]]
-==== dobmake.py (new-style)
-Just run dobmake.py! And you're done!
+Note that any changes to parameter files under $(SAFIR_RUNTIME}/data/text/dots/classes will be overwritten when dobmake.py is executed. If you want the parameter change to "survive" make the change under $(SAFIR_SDK)/dots/dots_generated.
 
-Well, you have to install Python (at least version 2.4, from http://www.python.org) and CMake (at least version 2.6 from http://www.cmake.org), but when you do, just run dobmake.py!
+==== Running dobmake.py
+To execute all code generations steps just run dobmake.py (located under $(SAFIR_RUNTIME}/bin) and you're done!
 
-A GUI will open, and you will be able to choose between some different actions and to disable build of some languages, but to just build you only need to press "Run".
+The script requires that Python (at least version 2.4, from http://www.python.org) and CMake (at least version 2.6 from http://www.cmake.org) are installed.
 
-If you experience strangeness, it may be that the underlying build system has gotten confused, do a rebuild (click the "Rebuild" radio button) to start the build from scratch.
+A GUI will open, and you will be able to choose between some different actions and to disable build of some languages. To get the fastest possible build time, select 'Rebuild' (radio button) if you are building for the first time or if you have changed a lot of dou-files, otherwise select 'Build'.
 
-If you want to run dobmake.py from a script, use the "-b" flag (for batch mode) to run without using the GUI. Use the --help flag to find out what other options there are.
+If you experience strangeness, it may be that the underlying build system has gotten confused. A rebuild might solve the problem in this case.
 
-[[make-my-day]]
-==== Makefiles (old-style)
-This is done slightly differently on Windows and Linux:
-
-*Windows*
-
-There is a Makefile provided under %SAFIR_SDK%/dots/dots_generated (a make executable is distributed with the sdk), so open a command prompt in that directory and run "make". This will only generate and build code for the dou-files that have changed since the last time make was run. 
-
-Since the Makefile currently isn't very good at working out dependencies you may have to run "make clean rebuild" (or the alias "make my day") to get all source files regenerated and rebuilt.
-
-_If you experience strangeness (e.g. corrupted data) when using the Dob objects, always run "make clean rebuild" before asking for help!_
-
-*Linux*
-
-There is a CMake file (you're required to have at least CMake version 2.6 installed) provided under $SAFIR_SDK/dots/dots_generated, so open a terminal in that directory. Then do
-
-1. Run "cmake ." - note the period, for the directory where to run cmake. (This step is only needed if you've added or removed any files)
-2. Run "make"
-3. Run "make install" if the make step was successful
-(Of course you can do all this at once by running "cmake . && make install")
-
-If you experience problems you can do a "make clean" and start over again. Remember that you can use the -jN flag to speed up compilation, so a "make -j3" might be a bit quicker than just a "make".
+If you want to run dobmake.py from a script, use the "-b" flag (for batch mode) to run without using the GUI. Use the --help flag to find out what other command line options there are.
 
 === Using the generated types
 This section contains some pointers on how to use the generated types, and what the different operations and classes "mean".
@@ -713,36 +696,17 @@ So an A object (myA) could look like in <<example_object>>.
 .Example object
 image::images/rc_example_object.jpg["Example object", width=158]
 
-==== A bit of history 
-First a little bit of history (that you can skip if you want to), among other things to explain what _Real Classes_ mean.
-
-In the first versions of the Dob all objects in all languages were stored internally as binary _blobs_ which only the Dob knows how to interpret. Calling a method to get an integer out of an object meant that the Dob would work out where in this blob the integer was stored and then type cast the binary chunk into an integer and return it.
-
-The advantage of this approach is that the binary blobs are language independent and also very good for sending across a network.
-
-There are many drawbacks to this approach, one of them being that objects do not behave like normal objects for that language, so the interfaces were changed to make objects behave like real objects, or real classes (hence the name _Real Classes_). These objects would be translated to blobs before being passed into the core of the Dob, so that the Dob can still work with several languages and be network efficient.
-
-Using ``Real Classes'' mean a few things (compared with using the old blob-based implementations):
-
-1. Easier to debug (you can see member values in the debugger instead of just a blob)
-2. Easier handling of nested classes
-3. Better performance while handling nested classes.
-
-Originally only the C\+\+ and C# interfaces were updated to use Real Classes, and the Java and Ada interfaces were left for later. When the new features of global object id's, injections and handlers were introduced it was decided not to update the old interfaces, but rather to update the Java and Ada interfaces with Real Classes as well, at the same time. Due to time constraints the Ada and Java interfaces were left out of SDK 3.2 and 3.2.1, but as of SDK version 3.2.2 the Ada and Java interfaces are up to date.
-
-In versions 3.2.2 and later of Safir SDK all supported languages - C\+\+, C#, Ada and Java - have ``Real Classes'' interfaces.
-
 ==== Syntax in the different languages
-One part of the Real Classes idiom is to make use of the language's own features in the best possible way. Languages that support operator overloading should use them if it makes the interface ``better'', and languages that support properties should use them. This makes each language interface ``as good as it can possibly be'', but it has one obvious side effect, i.e. the interfaces are _not identical_.
+The design approach is that the generated code should make use of the language's own features in the best possible way. Languages that support operator overloading should use them if it makes the interface ``better'', and languages that support properties should use them. This makes each language interface ``as good as it can possibly be'', but it has one obvious side effect, i.e. the interfaces are _not identical_.
 
-The syntax for operating on top-level members in the different languages is shown in <<cpp-top-level>>, <<cs-top-level>>, <<java-top-level>> and <<ada-top-level>>. The code is identical, except in the C\+\+ example, where some alternative ways of accomplishing the same thing is shown.
+The syntax for operating on top-level members in the different languages is shown in <<cpp-top-level>>, <<cs-top-level>>, <<java-top-level>> and <<ada-top-level>>. The code is identical, except in the C++ example, where some alternative ways of accomplishing the same thing is shown.
 
-(The attentive reader will notice the pointer stuff in the C\+\+ examples and the +Ref+ calls in the Ada examples. This is because the SDK uses smart pointers to manage memory in languages without a garbage collector. See <<smart-pointers>> for some info on smart pointers).
+(The attentive reader will notice the pointer stuff in the C++ examples and the +Ref+ calls in the Ada examples. This is because the SDK uses smart pointers to manage memory in languages without a garbage collector. See <<smart-pointers>> for some info on smart pointers).
 
 [[cpp-top-level]]
-.Operating on top-level members in C\+\+
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.Operating on top-level members in C++
+[source,{cpp}]
+----------------------------
 // Get MyFloat out of myA
 int val = myA->MyFloat(); 
 // or 
@@ -763,12 +727,12 @@ if (myA->MyFloat().IsChanged())
 
 // Set MyFloat to null
 myA->MyFloat().SetNull();
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 [[cs-top-level]]
 .Operating on top-level members in C#
-[cs]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{csharp}]
+----------------------------
 // Get MyFloat out of myA
 int val = myA.MyFloat.Val;
 
@@ -785,12 +749,12 @@ if (myA.MyFloat.IsChanged())
 
 // Set MyFloat to null
 myA.MyFloat.SetNull()
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 [[java-top-level]]
 .Operating on top-level members in Java
-[java]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,java]
+----------------------------
 // Get MyFloat out of myA
 int val = myA.myFloat().getVal(); 
 
@@ -807,12 +771,12 @@ if (myA.myFloat().isChanged())
 
 // Set MyFloat to null
 myA.myFloat().setNull();
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 [[ada-top-level]]
 .Operating on top-level members in Ada
-[ada]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,ada]
+----------------------------
 declare
    My_A_Ptr : A.Test_Item_Class_Access := My_A.Ref;
 begin
@@ -837,18 +801,18 @@ begin
    My_A_Ptr.My_Float.Set_Null;
 
 end;
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
-The "extra level" to get to the actual values, e.g. the +GetVal()+ bit in C\+\+ and +Val+ bit in C# is needed due to the fact that the value is contained, together with the change and null flags, in a _container_. That there are two different ways of doing the operations in C\+\+ is because of a clever C\+\+ construction, _proxy objects_, combined with operator overloading. More on containers and proxies later.
+The "extra level" to get to the actual values, e.g. the +GetVal()+ bit in C\++ and +Val+ bit in C# is needed due to the fact that the value is contained, together with the change and null flags, in a _container_. That there are two different ways of doing the operations in C\++ is because of a clever C++ construction, _proxy objects_, combined with operator overloading. More on containers and proxies later.
 
 C#, Ada and Java has only one way of doing the operations, and the C# interface uses properties for accessing the values - not as in Dob properties, but as in the language construct. (Look it up in your favourite C# reference if you don't know what they are.)
 
 Things get a bit more interesting when accessing nested members, see <<cpp-nested>>, <<cs-nested>>, <<java-nested>> and <<ada-nested>>, that show operations on nested members in the different languages.
 
 [[cpp-nested]]
-.Operating on nested members in C\+\+
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.Operating on nested members in C++
+[source,{cpp}]
+----------------------------
 // Get MyInt
 int val = myA->MyB()->MyInt();
 // or 
@@ -873,12 +837,12 @@ if (myA->MyB()->MyInt().IsChanged())
 
 // Set MyInt to null
 myA->MyB()->MyInt().SetNull();
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 [[cs-nested]]
 .Operating on nested members in C#
-[cs]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{csharp}]
+----------------------------
 // Get MyInt
 int val = myA.MyB.Obj.MyInt.Val;
 
@@ -899,12 +863,12 @@ if (myA.MyB.Obj.MyB.IsChanged())
 
 // Set MyInt to null
 myA.MyB.Obj.MyB.SetNull();
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 [[java-nested]]
 .Operating on nested members in Java
-[java]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,java]
+----------------------------
 // Get MyInt
 int val = myA.myB().getObj().myInt().getVal();
 
@@ -925,12 +889,12 @@ if (myA.myB().getObj().myInt().isChanged())
 
 // Set MyInt to null
 myA.myB().getObj().myInt().setNull();
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 [[ada-nested]]
 .Operating on nested members in Ada 
-[ada]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,ada]
+----------------------------
 declare
    My_A_Ptr : A.Test_Item_Class_Access := My_A.Ref;
 begin
@@ -958,7 +922,7 @@ begin
    -- Set My_Int to null
    My_A_Ptr.My_B.Ref.My_Int.Set_Null;
 end;
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 Casting objects up and down in the inheritance hierarchy also differs between the languages, see <<type_casting>> for more information.
 
@@ -969,50 +933,50 @@ There are containers for all of the types in the Dob, e.g. Int32Container, Float
 
 The members of the class A would be of type BContainer and Float32Container, and B's would be of type Int64Container.
 
-The containers introduce an extra level of indirection, which shows itself in the "GetVal()", "SetVal()" and "Val" parts of the expressions above. This unfortunately has the effect of cluttering up the code a bit, so to reduce this cluttering (in C\+\+, which is the only supported language where it is possible) _container proxies_ with _operator overloading_ were introduced. They are really just an intermediate object that allows safe use of operator overloading, and they are what allows "myA.MyB()\->MyInt().SetVal(3)" to be replaced with "myA.MyB()\->MyInt() = 3" (as shown in the examples above). The proxies are meant to be transparent, but they do not have all operations overloaded, so for example if you're manipulating a string, you will probably have to do GetVal() to be able to get to most of the string operations.
+The containers introduce an extra level of indirection, which shows itself in the "GetVal()", "SetVal()" and "Val" parts of the expressions above. This unfortunately has the effect of cluttering up the code a bit, so to reduce this cluttering (in C++, which is the only supported language where it is possible) _container proxies_ with _operator overloading_ were introduced. They are really just an intermediate object that allows safe use of operator overloading, and they are what allows "myA.MyB()\->MyInt().SetVal(3)" to be replaced with "myA.MyB()\->MyInt() = 3" (as shown in the examples above). The proxies are meant to be transparent, but they do not have all operations overloaded, so for example if you're manipulating a string, you will probably have to do GetVal() to be able to get to most of the string operations.
 
 Note that these proxies (container proxies) should not be confused with the proxies that the Dob passes to the applications in the distribution callbacks. The Container Proxies are only meant to simplify use of the typesystems containers, whereas the proxies in the distribution callbacks are used to encapsulate a collection of data and metadata into a single object for the callback (basically allowing the callback to take just a few arguments, instead of a whole bunch, where most applications only use a few).
 
-Ada uses container proxies to avoid exposing pointers into the internals of objects, but since Ada does not have the same support for operator overloading as C\+\+ it is not possible to use them to reduce code clutter.
+Ada uses container proxies to avoid exposing pointers into the internals of objects, but since Ada does not have the same support for operator overloading as C++ it is not possible to use them to reduce code clutter.
 
 [[smart-pointers]]
 ==== Smart pointers
-The generated classes (Real Classes) are allocated on the heap and then handled via pointers. Using pointers to objects is necessary for polymorphism to work properly in the Dob interfaces.
+The generated classes are allocated on the heap and then handled via pointers. Using pointers to objects is necessary for polymorphism to work properly in the Dob interfaces.
 
-For C\+\+ and Ada, that are not garbage collected languages, we use the smart pointer concept. Smart pointers are _pointer wrapper objects_ that store pointers to dynamically allocated objects. They keep track of how many references there are to a certain object, and automatically deletes the referenced object when there are no more references to it.
+For C++ and Ada, that are not garbage collected languages, we use the smart pointer concept. Smart pointers are _pointer wrapper objects_ that store pointers to dynamically allocated objects. They keep track of how many references there are to a certain object, and automatically deletes the referenced object when there are no more references to it.
 
 In C# and Java there is no need for smart pointers, since both these languages have garbage collection.
 
 
-===== Smart pointers in C\+\+
-In C\+\+, to guarantee that all dynamically allocated memory is deallocated, the Dob uses the +boost::shared_ptr+ implementation of smart pointers. You can find more information on how to use them here: http://www.boost.org/libs/smart_ptr/smart_ptr.htm.
+===== Smart pointers in C++
+In C++ to guarantee that all dynamically allocated memory is deallocated, the Dob uses the +boost::shared_ptr+ implementation of smart pointers. You can find more information on how to use them here: http://www.boost.org/libs/smart_ptr/smart_ptr.htm.
 
-Since C\+\+ is not garbage collected we do not want to use raw pointers. +shared_ptr+ is a smart pointer that automatically deletes the object pointed to when there are no references to it.
+Since C++ is not garbage collected we do not want to use raw pointers. +shared_ptr+ is a smart pointer that automatically deletes the object pointed to when there are no references to it.
 
 Here is part of the introduction from that page:
 
 *********************************************
-Smart pointers are objects which store pointers to dynamically allocated (heap) objects. They behave much like built-in C\+\+ pointers except that they automatically delete the object pointed to at the appropriate time. Smart pointers are particularly useful in the face of exceptions as they ensure proper destruction of dynamically allocated objects. They can also be used to keep track of dynamically allocated objects shared by multiple owners.
+Smart pointers are objects which store pointers to dynamically allocated (heap) objects. They behave much like built-in C++ pointers except that they automatically delete the object pointed to at the appropriate time. Smart pointers are particularly useful in the face of exceptions as they ensure proper destruction of dynamically allocated objects. They can also be used to keep track of dynamically allocated objects shared by multiple owners.
 
 Conceptually, smart pointers are seen as owning the object pointed to, and thus responsible for deletion of the object when it is no longer needed.
 *********************************************
 
-The boost::shared_ptr type is going to be included in the next C\+\+ standard (TR1).
+The boost::shared_ptr type is going to be included in the next C++ standard (TR1).
 
-See <<cpp_type_casting>> for more information on how to cast smart pointers in C\+\+.
+See <<cpp_type_casting>> for more information on how to cast smart pointers in C++.
 
 ===== Smart pointers in Ada
-Ada doesn't have a ready-to-use smart pointer abstraction (as C\+\+), instead, each type defines a corresponding smart pointer type in the generated code.   
+Ada doesn't have a ready-to-use smart pointer abstraction (as C++), instead, each type defines a corresponding smart pointer type in the generated code.   
 
-An Ada smart pointer exposes an operation called +Ref+ which could be tought of as corresponding to the "arrow" operator (\->) in C\+\+.
+An Ada smart pointer exposes an operation called +Ref+ which could be tought of as corresponding to the "arrow" operator (\->) in C++.
 
 Ada smart pointers work like you expect (Well, almost. See below), they are reference counted and the pointed-to object will be deleted when there are no more references to it.
 
 The user of an Ada smart pointer must be aware of some important differences when compared to a ``normal'' smart pointer. (The differences are due to Ada language rules). When accessing members via an Ada smart pointer using prefix notation you must start with a local variable holding the underlaying ``raw'' pointer (Ada access type). Assuming that we have a smart pointer My_A:
 
 .Smart pointer usage in Ada
-[ada]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,ada]
+----------------------------
 -- Do like this
 declare
    My_A_Ptr : A.Test_Item_Class_Access := My_A.Ref;
@@ -1022,7 +986,7 @@ end;
 
 -- This doesn't work. Ambigious.
 My_A.Ref.My_B.Ref.My_Int.Set_Val (3);
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 My_A_Ptr is a ``raw'' pointer and therefore not reference counted. This means that you should only use this variable as ``starting-point''. Do *not* store it in some data structure or use it as a subprogram parameter. In these situations the smart pointer should be used.
 
@@ -1044,9 +1008,9 @@ It is possible to look at the contents of a Dob object in the debugger. Since th
 
 - Value containers have three values: m_Value, m_bIsNull and m_bIsChanged (which is the member value and the null and change flag respectively).
 - Object containers have two values: m_pObject (which can be null) and m_bIsChanged.
-- C\+\+ smart pointers have two pointers in them, the reference count (pn) and the pointer to the object they point to (px). It is px that you are interested in.
+- C++ smart pointers have two pointers in them, the reference count (pn) and the pointer to the object they point to (px). It is px that you are interested in.
 
-Value containers and object containers in Ada are identical to the corresponding C\+\+ containers (the value names are slightly different). Ada smart pointers also have two pointers in them, the reference count (Counter_Ptr) and the pointer to the object (Data_Ptr). So, in the Ada case, it's the Data_Ptr that is of interest.
+Value containers and object containers in Ada are identical to the corresponding C++ containers (the value names are slightly different). Ada smart pointers also have two pointers in them, the reference count (Counter_Ptr) and the pointer to the object (Data_Ptr). So, in the Ada case, it's the Data_Ptr that is of interest.
 
 For example, if you want to see the contents of a received smart pointer named Entity (that really points to a derived entity) using the GPS (GNAT Programming Studio) debugger, just type "print Entity.Data_Ptr.all" in the debugger console window. (It seems that the debugger Data Window can't display Dob objects correctly, so the recommendation is to use the debugger console window.)
 
@@ -1063,25 +1027,25 @@ For the discussion in this section the object hierarchy in <<example_object_hier
 image::images/object_hierarchy.jpg["Example object hierarchy", width=350, link="images/object_hierarchy.jpg"]
 
 [[cpp_type_casting]]
-===== C\+\+ type casting
-The Dob C\+\+ interface uses +boost::shared_ptr+ (as described above) for passing around objects over the interfaces. For example this means that you get a +shared_ptr<Safir.Dob.Entity>+ (typedefed to +Safir.Dob.EntityPtr+ in the generated code) out of the +EntityProxy+ in +OnNewEntity+. If you're subscribing to +EntityParent+ you would want to somehow cast this +EntityPtr+ to an +EntityParentPtr+.
+===== C++ type casting
+The Dob C++ interface uses +boost::shared_ptr+ (as described above) for passing around objects over the interfaces. For example this means that you get a +shared_ptr<Safir.Dob.Entity>+ (typedefed to +Safir.Dob.EntityPtr+ in the generated code) out of the +EntityProxy+ in +OnNewEntity+. If you're subscribing to +EntityParent+ you would want to somehow cast this +EntityPtr+ to an +EntityParentPtr+.
 
-If it was an ordinary pointer you would either use a +static_cast+ or a +dynamic_cast+ operation (if you're unfamiliar with them you should look them up in your C\+\+ reference now), but since these are shared_ptrs you have to use +boost::static_pointer_cast+ or +boost::dynamic_pointer_cast+ to accomplish the same thing.
+If it was an ordinary pointer you would either use a +static_cast+ or a +dynamic_cast+ operation (if you're unfamiliar with them you should look them up in your C++ reference now), but since these are shared_ptrs you have to use +boost::static_pointer_cast+ or +boost::dynamic_pointer_cast+ to accomplish the same thing.
 
 *boost::static_pointer_cast*
 
 Use boost::static_pointer_cast when you know that the cast will succeed (i.e. you know what type the pointer really has). For example if you have an EntitySubscriber that has subscribed to EntityParent _only_ you can do:
 
 .Using boost::static_pointer_cast
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void MyEntitySubscriber::OnUpdatedEntity
     (const Safir::Dob::EntityProxy entityProxy)
 {
     EntityParentPtr parent =
         boost::static_pointer_cast<EntityParent>(entityProxy.GetEntity());
     ... Your code for handling the entity ...
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 (Note that this code will be used to handle updates to both of the subclasses of EntityParent too, but the assumption here is that you want to handle EntityParent and all its subclasses in the same way.)
 
@@ -1092,8 +1056,8 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Use boost::dynamic_pointer_cast when the pointer could be of several different types that you want to treat differently. For example if you have an EntitySubscriber that has subscribed to EntityChild _and_ AnotherEntity you can do:
 
 .Using boost::dynamic_pointer_cast
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void MyEntitySubscriber::OnUpdatedEntity
     (const Safir::Dob::EntityProxy entityProxy)
 {
@@ -1114,13 +1078,13 @@ void MyEntitySubscriber::OnUpdatedEntity
         HandleAnother(another);
         return;
     }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 This would use a different routine to handle the different entities. Another example would be if you have subscribed to EntityParent _only_ but want to treat EntityChild2 differently:
 
 .Another boost::dynamic_pointer_cast example
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void MyEntitySubscriber::OnUpdatedEntity
         (const Safir::Dob::EntityProxy entityProxy)
 {
@@ -1134,21 +1098,21 @@ void MyEntitySubscriber::OnUpdatedEntity
         return;
     }
     HandleParent(boost::static_pointer_cast<EntityParent>(entity));
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 In this code HandleChild2 gets called for all objects of the EntityChild2 type (remember that it can be a subclass of EntityChild2 too) and all others will be handled by HandleParent.
 
 *Remember:* Dynamic casts are a lot more expensive than static casts. So use +static_cast+ when you can!
 
-*Note:* You may have noticed that in both the above examples we extract the entity out of the proxy separately (and not inline in the casts). This is because the call to GetEntity in the callback proxy includes a deserialization of a binary blob into a "real class" (as explained briefly in the history section above). This is a non-trivial operation, so don't call it several times if you don't need to.
+*Note:* You may have noticed that in both the above examples we extract the entity out of the proxy separately (and not inline in the casts). This is because the call to GetEntity in the callback proxy includes a deserialization of a binary blob into a language specific class. This is a non-trivial operation, so don't call it several times if you don't need to.
 
 *Direct TypeId comparison*
 
 You should *only* use direct TypeId comparison when you want to check that a type is of _one specific type but not a subtype._ For example if you have subscribed to EntityParent and you want to handle EntityParent differently from the subclasses you can do:
 
 .Direct TypeId comparison
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void MyEntitySubscriber::OnUpdatedEntity
     (const Safir::Dob::EntityProxy entityProxy)
 {
@@ -1161,7 +1125,7 @@ void MyEntitySubscriber::OnUpdatedEntity
     }
 
     HandleChildren(boost::static_pointer_cast<EntityParent>(entity));
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 Here the HandleParent routine would be called for EntityParent objects _only_ and all other objects would be handled by HandleChildren.
 
@@ -1171,8 +1135,8 @@ This construction should be used _very_ sparingly. It is probably not the behavi
 The Dob provides an operation Safir::Dob::Typesystem::Operations::IsOfType that can be used to check the relationship between TypeIds while taking inheritance into account.
 
 .IsOfType logic
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 IsOfType(EntityParent::ClassTypeId,
          EntityParent::ClassTypeId)  //True
 IsOfType(EntityParent::ClassTypeId,
@@ -1183,7 +1147,7 @@ IsOfType(EntityParent::ClassTypeId,
          EntityChild::ClassTypeId)   //False
 IsOfType(EntityChild2::ClassTypeId,
          EntityChild::ClassTypeId)   //False
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 This operation should _only_ be used when you need to check relationships between TypeIds. If you have an object you should be using +boost::dynamic_pointer_cast+.
 
@@ -1193,36 +1157,36 @@ Since C# is garbage collected the Dob can use normal C# pointers to objects. Thi
 If you know the type of the object (by only having subscribed to one type), go right ahead and cast it:
 
 .Type casting in C#
-[cs]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{csharp}]
+----------------------------
     AnotherEntity ent = (AnotherEntity)entity;
    ... do something ...
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 If for some reason the entity was not of the expected type an exception will be thrown, but remember that in this case that can be only due to a programmer error.
 
 If you need to find out the type there are two ways to do it. One good and one not so good. Either you can use the _is_ operation to check that the type is of the right kind and then cast it using c-style casts to get an object of the right type:
 
 .Using the +is+ operator
-[cs]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{csharp}]
+----------------------------
 if (entity is EntityChild) //not recommended way of checking type
 {
     EntityChild child = (EntityChild)entity;
     ... do something ...
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 The drawback of using this approach is that you in fact get two type checks, one in the is operation and one in the cast operation. C# provides another operation that means that you only get one type check:
 
 .Using the +as+ operator
-[cs]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{csharp}]
+----------------------------
 EntityChild child = entity as EntityChild;
 if (child != null)
 {
     ... do something ...
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 Prefer using the _as_ operation in C#.
 
 ===== Java type casting
@@ -1235,8 +1199,8 @@ Ada is not garbage collected so smart pointers (as described above) are used for
 If you know the type of the object (by only having subscribed to one type), this is the way to do it in Ada:
 
 .Type casting in Ada when handling a single type
-[ada]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,ada]
+----------------------------
 overriding
 procedure On_Updated_Entity
   (Self         : in out Consumer;
@@ -1247,15 +1211,15 @@ procedure On_Updated_Entity
 begin
    ... do something with Another_Ent ...
 end;
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 If, for some reason, the entity was not of the expected type +Constraint_Error+ will be raised, but remember that in this case that can be only due to a programmer error.
 
 When the pointer can be of several different types that you want to treat differently, for example if you have an Entity_Subscriber that has subscribed to Entity_Child _and_ Another_Entity, you can do like this:
 
 .Type casting in Ada when handling multiple types
-[ada]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,ada]
+----------------------------
 overriding
 procedure On_Updated_Entity
   (Self         : in out Consumer;
@@ -1284,7 +1248,7 @@ begin
       end;
    end if;
 end;
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 
 === Other details
@@ -1305,24 +1269,27 @@ The change flags' values can be checked using the IsChanged()-methods on the mem
 An example to make this clearer:
 
 [[my_object]]
-.Type definition for MyObject type.
-`-----------------`----------
-Member Name       Type
------------------------------
-A                 Int64
-B                 String
-C                 MyItem
------------------------------
+.Type definition for MyObject type
+[width="40%", cols="50%,50%",options="header",frame="topbot",grid="none"]
+|=======================
+|Member Name       |Type
 
+|A                 |Int64
+|B                 |String
+|C                 |MyItem
+
+|=======================
 
 [[my_item]]
 .Type definition for MyItem type.
-`-----------------`----------
-Member Name       Type
------------------------------
-X                 Int32
-Y                 Float64
---------------------------
+[width="40%", cols="50%,50%",options="header",frame="topbot",grid="none"]
+|=======================
+|Member Name       |Type
+
+|X                 |Int32
+|Y                 |Float64
+
+|=======================
 
 We have two types, MyObject and MyItem (<<my_object>> and <<my_item>>), where MyObject contains among other things an item of type MyItem.
 
@@ -1331,30 +1298,31 @@ If we have an object with change flags set like in <<object_with_changeflags>> (
 
 [[object_with_changeflags]]
 .An object with change flags
-`-----------`-------------------------
-Member      Change flag
---------------------------------------
-A           true
-B           false
-C           false
-C::X        true
-C::Y        false
---------------------------------------
+[width="40%", cols="50%,50%",options="header",frame="topbot",grid="none"]
+|========================
+|Member      |Change flag
+
+|A           |true
+|B           |false
+|C           |false
+|C::X        |true
+|C::Y        |false
+
+|========================
 
 [[ischanged_results]]
 .Result of IsChanged() and IsChangedHere()
-`-----------`------------`---------------------
-Member      IsChanged    IsChangedHere
------------------------------------------------
-A           true         N/A
-B           false        N/A
-C           true         false
-C::X        true         N/A
-C::Y        false        N/A
---------------------------------------------
+[width="50%", cols="34%,33%,33%",options="header",frame="topbot",grid="none"]
+|========================================
+|Member      |IsChanged    |IsChangedHere
 
+|A           |true         |N/A
+|B           |false        |N/A
+|C           |true         |false
+|C::X        |true         |N/A
+|C::Y        |false        |N/A
 
-
+|========================================
 
 There are also methods to explicitly set the change flags, SetChanged(bool) and SetChangedHere(bool). As in the case of IsChanged the SetChanged-method on items is recursive, so if you need to change only the flag on the item itself you will have to use SetChangedHere. (In fact the above example could only be produced from a newly created object using some SetChanged methods).
 
@@ -1383,7 +1351,7 @@ Before learning about how to connect to the Dob we need to define a few basic co
 
 The first basic concept is a +Consumer+. A consumer is an interface, or an abstract base class, which represents a _role_ or a set of functionality that an application can have. For example, the +MessageSubscriber+ consumer is an interface that an application has to implement in order to be able to receive messages through a subscription.
 
-The second basic concept is are +Callbacks+. Each consumer has one or more callbacks, which are abstract methods that application has to implement. The MessageSubscriber consumer interface has one callback +OnMessage+, which is called by the Dob each time a message is received.
+The second basic concept is +Callbacks+. Each consumer has one or more callbacks, which are abstract methods that application has to implement. The MessageSubscriber consumer interface has one callback +OnMessage+, which is called by the Dob each time a message is received.
 
 The third concept is +Dispatching+, which is the name of the strategy that the Dob uses to be able to call the callbacks. We will get to dispatching in a moment (<<dispatching>>), but for the moment all you need to know is that Dispatching is what causes the callbacks to be called.
 
@@ -1395,7 +1363,7 @@ First we'll describe primary connections, and we'll cover secondary connections 
 To create a primary connection the application must create a Connection object and then call +Open+ on it. The +Open+ method takes a number of parameters:
 
 - A connection name and a connection instance. These are used to uniquely identify the connection in the system. No two connections can have the same name and instance.
-- A context, which is something that the Dob will (it is not implemented yet) use for Replay. Currently all applications should connect with context 0.
+- A context, which specify the data "universe" that the connection will operate in. A normal application that is not concerned with Replay should connect with context 0. See <<contexts>> for further details.
 - A +StopHandler+ consumer, which the Dob uses to tell the application to stop executing. Stop orders are described in <<stop_orders>>.
 - A +Dispatcher+ consumer, which the Dob uses to tell the application that there is data available to it, which it will receive if it calls the +Dispatch+ method. Dispatching is discussed in the next section.
 
@@ -1420,7 +1388,7 @@ The upshot is that all callbacks (except, of course, the +OnDoDispatch+ one) are
 .Dispatching sequence diagram
 image::images/dispatching_sequence_diagram.jpg["Dispatching Sequence Diagram", width=450, link="images/dispatching_sequence_diagram.jpg"]
 
-If you're using C\+\+ and ACE the SDK provides a Dispatcher class that does the thread switch and calls Dispatch, see <<ace_dispatcher>>.
+If you're using C++ and ACE the SDK provides a Dispatcher class that does the thread switch and calls Dispatch, see <<ace_dispatcher>>.
 
 [[secondary_connections]]
 ==== Secondary Connections
@@ -1428,7 +1396,7 @@ Whereas a primary connection is a real connection to the Dob, a secondary connec
 
 Each application needs one primary connection (at least, see <<multithreading>>). This connection is the one that the Dob knows about and through which data is dispatched. A secondary connection is used by other parts of the application to "attach" to the primary connection.
 
-The reason for providing this functionality is so that different modules of an application can use the same connection without passing around the primary connection object, something that is not even possible if the parts are written in different languages (like a C# plugin to a C\+\+ application). Instead the modules attach to the main program's connection using a secondary connection.
+The reason for providing this functionality is so that different modules of an application can use the same connection without passing around the primary connection object, something that is not even possible if the parts are written in different languages (like a C# plugin to a C++ application). Instead the modules attach to the main program's connection using a secondary connection.
 
 When creating a secondary connection you can either specify a connection name and instance to get a specific connection instance, or not specify anything at all, in which case you will be given the first connection that was created in the current thread.
 
@@ -1461,7 +1429,7 @@ Internally the proxies contain direct references into the Dob shared memory, whi
 
 Proxies are (with a couple of exceptions) received as parameters to callbacks. After returning from the callback the shared memory that the proxy refers to is released, and the proxy therefore becomes invalid. If you try to use a proxy obtained through a callback after returning from that callback an exception will be thrown!
 
-Of course it is possible to pass proxies to other methods, as long as the proxy is not copied. Passing it as a const-reference (+const EntityProxy& proxy+) works very well in C\+\+.
+Of course it is possible to pass proxies to other methods, as long as the proxy is not copied. Passing it as a const-reference (+const EntityProxy& proxy+) works very well in C++.
 
 ==== Messages
 <<messages_sequence_diagram>> shows a sequence diagram of how Dob Messages are handled.
@@ -1487,31 +1455,31 @@ It is worth noting that the channel is all the addressing there is for messages,
 Two steps are necessary to receive messages. The first is to implement the Safir.Dob.MessageSubscriber interface:
 
 .Message subscriber class declaration
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 class VehicleMessageSubscriber : public Safir::Dob::MessageSubscriber
 {
 public:
     virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy);
 };
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 The second step is to start the subscription by calling the +SubscribeMessage+ method on the Dob connection object. This method takes a TypeId (the message type to subscribe to), a ChannelId (the channel to listen to) and a pointer to a class that implements the MessageSubscriber interface.
 
 .Subscribing to a message
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 m_connection.SubscribeMessage
         (Capabilities::Vehicles::VehicleMsg::ClassTypeId,
          Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS,
          this);
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 This subscribes to VehicleMsg (and all messages that inherit from VehicleMsg) on all channels, and the +OnMessage+ callback will be called by the Dob for each received VehicleMsg.
 
 If you do not want to include subclasses in your subscription, there is an overload to the +SubscribeMessage+ method that allows you to specify whether or not to include subclasses. Default behaviour of most applications should be to include subclasses.
 
 .Handling OnMessage callback
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void VehicleMessageSubscriber::OnMessage
                     (const Safir::Dob::MessageProxy messageProxy)
 {
@@ -1521,19 +1489,19 @@ void VehicleMessageSubscriber::OnMessage
 
     ... do something with vehicle ...
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 See <<type_casting>> for more information on the casting in the example above.
 
 To cancel a subscription you call the +UnsubscribeMessage+ method on the Dob connection object. (It is not necessary to do this before closing a connection or before the application shuts down, the Dob will handle that automatically when the connection is destroyed/closed.)
 
 .Removing a message subscription (unsubscribing)
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 m_connection.UnsubscribeMessage
     (Capabilities::Vehicles::VehicleMsg::ClassTypeId,
      Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS,
      this);
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 A note on combinations of subscribe and unsubscribe: If you subscribe to ALL_CHANNELS, but unsubscribe the default channel you will receive all VehicleMsg:es except those sent on the default channel. You can also do things like subscribe to VehicleMsg including subclasses, and then do an unsubscribe to VehicleMsg not including subclasses, which would make you only receive subclasses to VehicleMsg, but not VehicleMsg itself. These rules apply _per consumer_, so subscriptions set up with one consumer are not affected by unsubscribes made with another consumer.
 
@@ -1541,22 +1509,22 @@ A note on combinations of subscribe and unsubscribe: If you subscribe to ALL_CHA
 To send messages it is necessary to implement the Dob interface _MessageSender._ The MessageSender interface is used to manage overflow situations when sending messages.
 
 .Message sender class declaration
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 class VehicleMessageSender : public Safir::Dob::MessageSender
 {
 public:
     // Overrides MessageSender
     virtual void OnNotMessageOverflow();
 };
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 Messages are sent with the +Send+ function in the Safir.Dob.Connection class. This function takes the message as a parameter and a pointer to the MessageSender interface.
 
 When an overflow occurs the +Send+ function will throw an exception (Safir.Dob.OverflowException). This means that the applications message out queue is full, and that the application should not try to send any more messages until told otherwise (and the message that was passed to the Send function was not sent). When the message out queue is no longer full the Dob will call the +OnNotMessageOverflow+ method in the MessageSender passed in the send call that failed, which means that it is now okay to start sending messages again.
 
 .Sending a message
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 Capabilities::Vehicles::VehicleMsgPtr msg =
                             Capabilities::Vehicles::VehicleMsg::Create();
 msg->MessageText() = L"Something happened to a vehicle!!!";
@@ -1570,7 +1538,7 @@ catch (const Safir::Dob::OverflowException &)
     // send it again after I have received an OnNotMessageOverflow
     // callback
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 ==== Services
 <<services_sequence_diagram>> contains a sequence diagram for how services are handled.
@@ -1601,8 +1569,8 @@ Two things need to be done to register a service handler. The first is to implem
 _Overregistration_ occurs when another application registers the same handler for the same service. This will cause the current handler to loose the registration, which is known as an overregistration.
 
 .Service handler class declaration
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 class VehicleServiceHandler : public Safir::Dob::ServiceHandler
 {
 public:
@@ -1616,17 +1584,17 @@ public:
         (const Safir::Dob::Typesystem::TypeId     typeId,
          const Safir::Dob::Typesystem::HandlerId& handlerId);
 };
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 The second thing that needs to be done is to call the RegisterServiceHandler method on the Dob connection object.
 
 .Registering a service handler
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 m_connection.RegisterServiceHandler
     (Safir::BearingDistanceService::ClassTypeId,
      Safir::Dob::Typesystem::HandlerId(),
      this);
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 After this call is complete the service handler is registered, with the default handler id. If another application had previously registered the same handler for the same type it will now get a call to +OnRevokedRegistration+, to tell it that someone has _overregistered_ its handler.
 
 The above registration mechanism is "hard" in the way that it overregisters previous registerers. There is an alternative, _pending registration_ which is described in <<pending_registrations>>.
@@ -1638,8 +1606,8 @@ The +OnServiceRequest+ callback will now be called whenever the application rece
 Every service request must be responded to with an object that inherits from the Safir::Dob::Response class. The response is sent using the ResponseSender that is received in the +OnServiceRequest+ callback.
 
 .Handling the OnServiceRequest callback
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void VehicleServiceHandler::OnServiceRequest
     (const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
      Safir::Dob::ResponseSenderPtr         responseSender)
@@ -1667,17 +1635,17 @@ void VehicleServiceHandler::OnServiceRequest
         responseSender->Send(response);
     }
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 It is possible to keep the +responseSender+ "for later" if it is not possible to send the response immediately (e.g. if the application has to wait for a database query to complete before sending the response). It is considered a programming error to not send a response to a request (and the ResponseSender destructor will try to alert you to that fact if you fail to use it).
 
 To stop handling a service you call the UnregisterHandler method. (It is not necessary to do this before closing a connection or before the application shuts down, the Dob will handle that automatically when the connection is destroyed/closed.)
 
 .Unregistering the handler
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 m_connection.UnregisterHandler(Safir::BearingDistanceService::ClassTypeId,
                                Safir::Dob::Typesystem::HandlerId()));
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 ===== Response types
 There are two base classes for responses, +Safir.Dob.SuccessResponse+ and +Safir.Dob.ErrorResponse+ (they in turn inherit from +Safir.Dob.Response+, but no other responses should do that). If a custom response is needed (e.g. responding with the result of a database query, or with error information from a database query), create your own dou-file, inheriting from either of these two.
@@ -1690,8 +1658,8 @@ The parameter file +Safir.Dob.ResponseGeneralErrorCodes.dou+ contains some prede
 To send a service request you have to have a class that implements the Requestor consumer interface and create a request and send it using the +ServiceRequest+ method in the Dob connection object.
 
 .Request sender class declaration
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 class VehicleServiceRequestSender : public Safir::Dob::Requestor
 {
 public:
@@ -1700,14 +1668,14 @@ public:
 
     virtual void OnNotRequestOverflow();
 };
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 The +OnResponse+ callback will be called with the response to your request, and the +OnNotRequestOverflow+ callback will be called when it is okay to start sending requests again after an overflow has occurred.
 
 Sending a request is done like this:
 
 .Sending a service request
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 Capabilities::Vehicles::VehicleServicePtr request =
     Capabilities::Vehicles::VehicleService::Create();
 
@@ -1724,7 +1692,7 @@ catch (const Safir::Dob::OverflowException &)
     //Doh! I got an exception! Better tell the operator to
     //press that button again in a little while.
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 The RequestId that is returned by the +ServiceRequest+ call is a unique identifier for that request. When the response is received the request id for the request that generated the response can be gotten from the ResponseProxy using the +GetRequestId()+ method. This is to allow applications to know which request generated which response.
 
 If, for some reason, no response is sent from the service handler a time-out response is generated by the Dob to ensure that the sender of the request always receives a response.
@@ -1792,8 +1760,8 @@ It is also not legal for the handler to send an EntityIdResponse in this case (e
 Again there is a consumer interface to implement, +EntityHandler+, which allows the application to receive Create, Update and Delete requests. The interface also allows the applications to be told of overregistrations, just as for ServiceHandler registrations.
 
 .Entity handler class declaration
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 class VehicleHandler :
     public Safir::Dob::EntityHandler
 {
@@ -1815,38 +1783,38 @@ public:
          (const Safir::Dob::Typesystem::TypeId     typeId,
           const Safir::Dob::Typesystem::HandlerId& handlerId);
 };
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 The +OnRevokedRegistration+ callback works exactly as for Services, as does the +responseSender+.
 
 Applications register an entity handler by calling the +RegisterEntityHandler+ method in the Dob connection object. This method takes an EntityHandler (like the one declared above), a HandlerId, an InstanceIdPolicy and an entity TypeId.
 
 .Registering an entity handler
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 m_connection.RegisterEntityHandler
     (Capabilities::Vehicles::Vehicle::ClassTypeId,
      Safir::Dob::Typesystem::HandlerId(),
      Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
      this);
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 After the call to RegisterEntityHandler the application can immediately use the handler to set entity instances, and other applications can send entity requests to the EntityHandler.
 
 To stop handling an entity you call the UnregisterHandler method. (It is not necessary to do this before closing a connection or before the application shuts down, the Dob will handle that automatically when the connection is destroyed/closed.)
 
 .Unregistering an entity handler
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 m_connection.UnregisterHandler(Capabilities::Vehicles::Vehicle::ClassTypeId,
                                Safir::Dob::Typesystem::HandlerId()));
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 ===== Handling Create Requests
 The method OnCreateRequest is used by the Dob to notify the entity handler of a create request. The arguments to the method is an EntityRequestProxy which contains the request data and metadata, and a ResponseSender which must be used to send the mandatory response to the request.
 
 .Handling a create request
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void VehicleHandler::OnCreateRequest
      (const Safir::Dob::EntityRequestProxy entityRequestProxy,
       Safir::Dob::ResponseSenderPtr        responseSender);
@@ -1882,7 +1850,7 @@ void VehicleHandler::OnCreateRequest
         (Safir::Dob::Typesystem::EntityId(vehicle.GetTypeId(),instance));
     responseSender->Send(response);
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 Note the use of the EntityIdResponse class for the response, which must be used as the success response when HandlerDecidesInstanceId is used as the InstanceIdPolicy for the handler. See <<instanceid_and_entityid>>.
 
 ===== Handling Update Requests
@@ -1891,8 +1859,8 @@ The method +OnUpdateRequest+ is used by the Dob to notify the entity handler of 
 Note that the Dob guarantees that the update request is on an existing entity. There is no need to check for the existence of the entity inside +OnUpdateRequest+.
 
 .Handling an update request
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void VehicleHandler::OnUpdateRequest
     (const Safir::Dob::EntityRequestProxy entityRequestProxy,
      Safir::Dob::ResponseSenderPtr        responseSender);
@@ -1928,7 +1896,7 @@ void VehicleHandler::OnUpdateRequest
     // send a success response
     responseSender->Send(Safir::Dob::SuccessResponse::Create());
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 Note the use of +SetChanges+ instead of +SetAll+ above. +SetChanges+ will take the members that have its change flag set in the passed object and merge them into the existing entity that is stored in the Dob shared memory.
 
 ===== Handling Delete Requests
@@ -1937,8 +1905,8 @@ The method +OnDeleteRequest+ is used by the Dob to notify the entity handler of 
 Note that the Dob guarantees that the delete request is on an existing entity. There is no need to check for the existence of the entity inside +OnDeletedRequest+.
 
 .Handling a delete request
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void VehicleHandler::OnDeleteRequest
     (const Safir::Dob::EntityRequestProxy entityRequestProxy,
      Safir::Dob::ResponseSenderPtr        responseSender);
@@ -1949,7 +1917,7 @@ void VehicleHandler::OnDeleteRequest
     // send a response
     responseSender->Send(Safir::Dob::SuccessResponse::Create());
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 Note that it is also possible to delete all entity instances owned by a handler by calling +DeleteAllInstances+ (but obviously this is not something that should be done as a result of a DeleteRequest, which is something that should operate on only one object).
 
 
@@ -1961,8 +1929,8 @@ Once more there is a consumer interface to be implemented to subscribe to entiti
 
 
 .Entity subscriber class declaration
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 class VehicleSubscriber : public Safir::Dob::EntitySubscriber
 {
     // Override EntitySubscriber
@@ -1976,23 +1944,23 @@ class VehicleSubscriber : public Safir::Dob::EntitySubscriber
         (const Safir::Dob::EntityProxy entityProxy,
          const bool                    deletedByOwner);
 };
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 The subscription is started by a call to the +SubscribeEntity+ method on the Dob connection object.
 
 .Subscribing to an entity
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 m_connection.SubscribeEntity
     (Capabilities::Vehicles::Vehicle::ClassTypeId, this);
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 The subscription will be to all instances of that entity, including subclasses. There are a couple of overloads to the +SubscribeEntity+ method that the subscriber can use if it wants to exclude subclasses, or just subscribe to a single entity instance.
 
 After the call to +SubscribeEntity+ the Dob will start calling the +OnNewEntity+ callback for all entities that already existed when the subscription was set up, and thereafter it will call the callbacks whenever an entity is created, updated or deleted.
 
 .Handling the +OnNewEntity+ callback
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void VehicleSubscriber::OnNewEntity
     (const Safir::Dob::EntityProxy entityProxy)
 {
@@ -2011,13 +1979,13 @@ void VehicleSubscriber::OnNewEntity
 
     ... process other fields ...
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 See <<type_casting>> for more information on what +boost::static_pointer_cast+ is.
 
 .Handling the +OnUpdatedEntity+ callback
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void VehicleSubscriber::OnUpdatedEntity
     (const Safir::Dob::EntityProxy entityProxy)
 {
@@ -2035,19 +2003,19 @@ void VehicleSubscriber::OnUpdatedEntity
 
     ... process other fields ...
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 Note the use of +GetEntityWithChangeInfo()+ and the change flag on the callsign member to only look at it if it changes. See <<interpreting_change_flags>> for more information on how to interpret change flags. It is also possible to get hold of the _previous_ entity that was seen by a subscription. Use +entityProxy.GetPrevious()+ to get information about the previous subscription response.
 
 .Handling the +OnDeletedEntity+ callback
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void VehicleSubscriber::OnDeletedEntity
     (const Safir::Dob::EntityProxy entityProxy,
      const bool                    deletedByOwner)
 {
     ... do something ...
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 If this class had been used to subscribe to several entities it can use +entityProxy.GetTypeId()+ to work out which way to handle the remove.
 
 It is also possible to use +entityProxy.GetPrevious()+ to get hold of information about the entity that was deleted, such as actually looking at the entity like it was when it was previously dispatched to the subscriber.
@@ -2057,12 +2025,12 @@ The +deletedByOwner+ flag will be set to true if the owner deleted the entity wi
 To stop subscribing to an entity the application calls the +Unsubscribe+ method in the Dob connection object. (It is not necessary to do this before closing a connection or before the application shuts down, the Dob will handle that automatically when the connection is destroyed/closed.)
 
 .Removing an entity subscription (unsubscribing)
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 m_connection.UnsubscribeEntity
     (Capabilities::Vehicles::Vehicle::ClassTypeId,
      this);
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 *Note:* You should read the section on <<interpreting_change_flags>> for more information about the change flags during entity subscriptions. The change flags are a very powerful tool to allow the subscriber to determine what has changed during an entity subscription.
 
@@ -2077,13 +2045,13 @@ Do not keep the proxy (it is possible, and it will appear to work, but remember 
 If you're using C#, you _must_ dispose of the proxy before letting go of your reference to it. The proxy is an +IDisposable+ object, and C# best practice states that +IDisposable+ objects shall always be disposed explicitly. The easiest way to do this in an exception safe way is to use the +using+ construct:
 
 .Using the +using+ construction with EntityProxy
-[cs]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{csharp}]
+----------------------------
 using (Safir.Dob.EntityProxy ep = m_connection.Read(anEntityId))
 {
     ... do something with the read entity ...
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 The advantage of using the above construct is that the +Dispose+ method of EntityProxy is guaranteed to be called regardless of whether an exception is thrown or a "return" is done inside the curly brackets.
 
@@ -2094,18 +2062,18 @@ The Dob also provides a way of iterating over all instances of a certain entity 
 
 Before looking at how this is done, a *word of warning*: Iterating over lots of instances can be quite time-consuming (e.g. imagine a system that can have 10000 vehicles, and every time an update occurs to one of them, a badly written application iterates over all of them), so in cases where an application wants to do it frequently it is preferable to maintain some kind of lookup table instead, using entity subscriptions. Or maybe using a better algorithm for choosing instance numbers, so that the iteration can be avoided.
 
-Iterating over all Vehicles (including subclasses) in C\+\+:
+Iterating over all Vehicles (including subclasses) in C++:
 
-.Iterating over entities in C\+\+
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.Iterating over entities in C++
+[source,{cpp}]
+----------------------------
 for (Safir::Dob::EntityIterator it = m_connection.GetEntityIterator
          (Capabilities::Vehicles::Vehicle::ClassTypeId,true);
      it != Safir::Dob::EntityIterator(); ++it)
 {
     ... do something with it ...
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 Dereferencing +it+ will give an entity proxy.
 
@@ -2114,23 +2082,23 @@ Note that the default constructor for EntityIterator creates an "end" iterator, 
 Iterating over all Vehicles (including subclasses) in C#:
 
 .Iterating over entities in C#
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 foreach (Safir.Dob.EntityProxy entityProxy in
          m_connection.GetEntityEnumerator
             (Capabilties.Vehicles.Vehicle.ClassTypeId,true))
 {
     ... do something with entityProxy ...
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 An aside: In this case it is not necessary to explicitly call +Dispose+ or somehow use +using+, since that is taken care of by the loop itself.
 
 Iterating over all Vehicles (including subclasses) in Ada:
 
 .Iterating over entities in Ada
-[ada]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,ada]
+----------------------------
 declare
    use Safir.Dob.Entity_Iterators;
    It : Safir.Dob.Entity_Iterators.Entity_Iterator :=
@@ -2145,7 +2113,7 @@ begin
       Safir.Dob.Entity_Iterators.Next (It);
    end loop;
 end;
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 ===== Sending entity requests
 To be able to send requests on entities it is necessary to implement the +Requestor+ consumer interface, just like when sending service requests (so have a look at that section, because that example will not be repeated here...).
@@ -2155,8 +2123,8 @@ There are four methods in the Dob connection object that are used for sending re
 All the request methods return a unique RequestId to allow the Requestor to know which response was generated by which request in the +OnResponse+ callback.
 
 .Sending an update request.
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 Capabilities::Vehicles::VehiclePtr request =
     Capabilities::Vehicles::Vehicle::Create();
 
@@ -2164,14 +2132,14 @@ Capabilities::Vehicles::VehiclePtr request =
 
 Safir::Dob::RequestId reqId =
     m_connection.UpdateRequest(request, myVehicleInstance, this);
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 When the handler has processed the request it sends a response back telling the sender the status of the request. The Dob sends this response to the OnResponse callback in the Requestor interface. If the response was successful then the change of the entity is also sent if the requestor has a subscription. There is no predetermined order between the response and subscription messages and no assumptions should be made on what is received first.
 
 If, for some reason, no response is sent from the owner then a time-out reply will be generated to ensure that the sender of the request always receives a response.
 
 .Handling the OnResponse callback
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void VehicleSubscriber::OnResponse
     (const Safir::Dob::ResponseProxy responseProxy)
 {
@@ -2183,15 +2151,15 @@ void VehicleSubscriber::OnResponse
 
     ... handle the error ...
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 
 ===== Some notes on the CreateRequest methods
 There are two variants of the +CreateRequest+ method in the Dob connection class:
 
 .The two variants of CreateRequest
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 Safir::Dob::RequestId CreateRequest
     (const Safir::Dob::EntityPtr&               request,
      const Safir::Dob::Typesystem::HandlerId&   handlerId,
@@ -2202,7 +2170,7 @@ Safir::Dob::RequestId CreateRequest
      const Safir::Dob::Typesystem::InstanceId& instanceId,
      const Safir::Dob::Typesystem::HandlerId&  handlerId,
      Safir::Dob::Requestor* const              requestor) const;
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 The second one is (obviously, since it contains an InstanceId parameter) only possible to use when the handler uses +RequestorDecidesInstanceId+, but contrary to what might be expected the first one can be used for *both* types of handlers. If the handler is +RequestorDecidesInstanceId+ an instance id will be randomly generated. This behaviour can be used when the requestor doesn't care what instance id gets generated.
 
@@ -2248,13 +2216,13 @@ When starting a system with persistence the Dob does not allow connections to be
 ===== Using persistence
 If you just want entities to survive a system restart it is very easy to do. This section describes how to do this in the easiest possible way, but if you want more control and understanding over what is going on you probably want to read <<advanced_persistence>>.
 
-Instead of inheriting from +Safir::Dob::EntityHandler+ you must inherit from +Safir::Dob::EntityHandlerInjection+. This will give you an additional four callbacks, which _you can leave empty_. If you're using C\+\+ you don't even have to create empty callback bodies, since the base class has empty default implementations.
+Instead of inheriting from +Safir::Dob::EntityHandler+ you must inherit from +Safir::Dob::EntityHandlerInjection+. This will give you an additional four callbacks, which _you can leave empty_. If you're using C++ you don't even have to create empty callback bodies, since the base class has empty default implementations.
 
 You need to configure the Dob to persist your entity, and that is done by creating a dom-file for your class that specifies that permanent persistence is to be used:
 
 .Permanent persistence dom file
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
 <?xml version="1.0" encoding="utf-8" ?>
 <propertyMapping xmlns="urn:safir-dots-unit"
                  xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
@@ -2267,7 +2235,7 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         </member>
     </memberMapping>
 </propertyMapping>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 The file must be named on the form <class name>-<property name>.dom, e.g. +Capabilties.Vehicles.Vehicle-Safir.Dob.InjectionProperty.dom+, and placed in the same directory as the dou file for Vehicle.
 
@@ -2281,11 +2249,11 @@ If you want to understand what is going on, please read the next section, <<adva
 ===== Understanding persistence ^adv^
 To use persistence (of the volatile or permanent kind) there is a different consumer interface to implement, +Safir.Dob.EntityHandlerInjection+. This consumer has four additional callbacks, +OnInjectedNewEntity+, +OnInjectedUpdatedEntity+, +OnInjectedDeletedEntity+ and +OnInitialInjectionsDone+. The middle two of these are only used for asynchronous injections (i.e. the kind that uses deltas over a radio, as described above), so the only ones you might have to do anything in are +OnInjectedNewEntity+ and +OnInitialInjectionsDone+.
 
-In C\+\+ and Ada all the four _Injection callbacks_ have an empty default implementation. This is not possible in C# or Java since their interfaces cannot have default implementations of any kind. This means that in C\+\+ and Ada you don't have to override these callbacks if you don't want to do anything inside of them. For this example we assume that there is something that we need to do in these callbacks (but since this is a C\+\+ example we only need to override the two callbacks that are actually used for persistent entities).
+In C\++ and Ada all the four _Injection callbacks_ have an empty default implementation. This is not possible in C# or Java since their interfaces cannot have default implementations of any kind. This means that in C\++ and Ada you don't have to override these callbacks if you don't want to do anything inside of them. For this example we assume that there is something that we need to do in these callbacks (but since this is a C++ example we only need to override the two callbacks that are actually used for persistent entities).
 
 .Injection entity handler class declaration
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 class VehicleHandler :
     public Safir::Dob::EntityHandlerInjection
 {
@@ -2313,22 +2281,24 @@ public:
          (const Safir::Dob::Typesystem::TypeId typeId,
           const Safir::Dob::Typesystem::HandlerId& handlerId);
 };
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 The first four overrides are of course the same as when registering an entity handler without persistence or injection support (see <<registering_entity_handler>>). I won't mention them again in this section, as they work exactly the same.
 
 The handler is registered by calling +RegisterEntityHandlerInjection+, which has the same signature as +RegisterEntityHandler+ except that it takes an EntityHandlerInjection instead of an EntityHandler as its fourth argument.
 
 .Registering an injection entity handler
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 m_connection.RegisterEntityHandlerInjection
     (Capabilities::Vehicles::Vehicle::ClassTypeId,
      Safir::Dob::Typesystem::HandlerId(),
      Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
      this);
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 When this call is complete the Dob will call +OnInjectedNewEntity+ for every entity instance that has been persisted using the specified +HandlerId+ (this last bit is important, _persisted objects remember the HandlerId it was created by, and can only be resurrected by the that HandlerId_). Doing nothing in the callback means that the _injection is accepted_, i.e. the application has approved the data and the entity can be created (before this it is not visible to other applications, it is a _ghost_). If the application wishes to reject the instance, it can call +Connection::Delete(...)+ which will cause the persisted entity not to become a "real" entity, and to be deleted from persistence storage.
+
+A not so common case is when the application accepts the injected instance but there are some data in the instance that it wants to change before the instance is resurrected. In this case the application can call +Connection::SetAll(...)+ in the +OnInjectedNewEntity+ callback.
 
 Once all persisted instances have been accepted or rejected by the application the +OnInitialInjectionsDone+ will be called. This signals that all persistent objects for a certain handler have been injected. Again, you don't have to do anything in the callback.
 
@@ -2339,8 +2309,8 @@ Once all persisted instances have been accepted or rejected by the application t
 For our Vehicle example, let's assume that the vehicle handler application has to keep an internal instance lookup table (again, it shouldn't keep all the vehicle data internally, but it might be necessary to have lookup tables to quickly know which instance to +Read+, to get at the data). In this case we will want to add instances to the tables in +OnInjectedNewEntity+ and maybe update some status in +OnInitialInjectionsDone+.
 
 .Handling the OnInjectedNewEntity callback
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void VehicleSubscriber::OnInjectedNewEntity
      (const Safir::Dob::InjectedEntityProxy injectedEntityProxy);
 {
@@ -2353,12 +2323,12 @@ void VehicleSubscriber::OnInjectedNewEntity
 
     ... do something else ...
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 
 .Handling the OnInitialInjectionsDone callback
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void VehicleSubscriber::OnInitialInjectionsDone
      (const Safir::Dob::Typesystem::TypeId typeId,
       const Safir::Dob::Typesystem::HandlerId& handlerId);
@@ -2367,7 +2337,7 @@ void VehicleSubscriber::OnInitialInjectionsDone
         << "Woohoo! I've got all my persisted entity instances"
         << std::endl;
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 Now you need to create a dom file as described in <<simple_persistence>>, and then you are ready to go.
 
@@ -2387,8 +2357,8 @@ This is useful to be able to monitor the status of other applications in the sys
 The application needs a class that implements the +Safir::Dob::RegistrationSubscriber+ consumer interface.
 
 .Registration subscriber class declaration
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 class VehicleRegistrationSubscriber :
     public Safir::Dob::RegistrationSubscriber
 {
@@ -2400,50 +2370,50 @@ class VehicleRegistrationSubscriber :
          (const Safir::Dob::Typesystem::TypeId      typeId,
           const Safir::Dob::Typesystem::HandlerId&  handlerId);
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 Then start the subscription (remember that you can do this on a service handler too!):
 
 .Starting a registration subscription
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 m_connection.SubscribeRegistration
     (Capabilities::Vehicles::Vehicle::ClassTypeId,
      Safir::Dob::Typesystem::HandlerId::ALL_HANDLERS,
      true, //includeSubclasses
      true, //restartSubscription
      this) const;
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 Note the use of +ALL_HANDLERS+ above, that means that we're subscribing to the registration of all handlers for the specified type, rather than a specific handler, and since we've also specified +includeSubclasses+ we will also get a subscription response if a subclass of Vehicle gets registered.
 
 When someone registers an entity handler or a service handler the Dob will notify the application of this through a call to the +OnRegistered+ method. (Note that the function has a TypeId and HandlerId as parameters and if the implementation of the interface is used for several different classes then these can be inspected to ascertain how to handle the information).
 
 .Handling the OnRegistered callback
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void VehicleRegistrationSubscriber::OnRegistered
     (const Safir::Dob::Typesystem::TypeId      typeId,
      const Safir::Dob::Typesystem::HandlerId&  handlerId)
 {
     ... do something useful ...
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 For entity handler registration subscriptions the +OnRegistered+ callback is called immediately when the registration is made (either when the +RegisterEntity...+ call is made or when a pending registration is completed), _not_ after +OnInitialInjectionsDone+ is called. Conceptually the handler is registered before the entity instances are injected.
 
 When a service or entity handler is unregistered the Dob will notify the application of this through a call to +OnUnregistered+. (A handler is unregistered when the owning application unregisters the handler or the application dies).
 
 .Handling the OnUnregistered callback
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void VehicleRegistrationSubscriber::OnUnregistered
     (const Safir::Dob::Typesystem::TypeId      typeId,
      const Safir::Dob::Typesystem::HandlerId&  handlerId)
 {
     ... do something useful ...
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 If a registration goes down and up ``very quickly'', the subscriber is guaranteed to get first an OnUnregistered and then an OnRegistered callback. I.e. registration subscribers are guaranteed to be notified of the intermediate unregistrations, as opposed entity subscribers, who are not guaranteed to get told if an entity is deleted and then recreated immediately.
 
@@ -2481,7 +2451,7 @@ The change flags described in <<change_flags>> are used by the Dob distribution 
 Change flags are sent unchanged from a sender to all receivers. In a received message a change flag signifies something that the sender has changed, or wants the receiver to do. A member whose change flag is not set is something that the sender does not care about.
 
 ==== Entity subscriptions
-Upon receiving an entity subscription callback the application can ask the Dob to provide change information for the entity (using +GetEntitWithChangeInfo()+ instead of +GetEntity()+). If +GetEntity+ is used all change flags will be set to false, but when +GetEntityWithChangeInfo+ is used the Dob will set the change flags to signal what has changed since the last subscription response.
+Upon receiving an entity subscription callback the application can ask the Dob to provide change information for the entity (using +GetEntityWithChangeInfo()+ instead of +GetEntity()+). If +GetEntity+ is used all change flags will be set to false, but when +GetEntityWithChangeInfo+ is used the Dob will set the change flags to signal what has changed since the last subscription response.
 
 So on the first subscription response (+OnNewEntity+) all change flags are set to true. On subsequent subscription responses for that instance (+OnUpdatedEntity+) only the members that have changed are marked as changed.
 
@@ -2499,7 +2469,7 @@ Change flags are sent unchanged from a requestor to the service provider. In a s
 
 [[pending_registrations]]
 === Pending Registrations
-A pending registration means ``I want to register this handler if there is no handler already. And if there is handler already registered, I want to become the registerer when that one disappears.''
+A pending registration means ``I want to register this handler if there is no handler already. And if there is a handler already registered, I want to become the registerer when that one disappears.''
 
 This functionality is to be used for applications that implement hot-standby and/or redundancy. I.e. the application is started in several nodes and if the active instance fails, another should become active instead. See <<hot_standby>> for more information on how to implement hot-standby and redundancy.
 
@@ -2530,8 +2500,8 @@ A Safir SDK Core system can have two basic configurations, with respect to netwo
 To configure a system to be Standalone (which is the default configuration anyway) you need only change one parameter in Safir.Dob.DistributionChannelParameters.dou (and you can do that without recompilation, as described in <<parameters>>). Set the +MulticastAddress+ of the first DistributionChannel in the array (the one named _System_) to be "127.0.0.1" (i.e. localhost), and your system is now standalone, and _no data is sent over the network by the Dob_. 
 
 .Standalone configuration
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
 <arrayElements>
   <arrayElement>
     <object>
@@ -2546,7 +2516,7 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           <name>MulticastAddress</name>
           <value>127.0.0.1</value>
         </member>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 Once the MulticastAddress is set to 127.0.0.1 all the rest of the network configuration files are ignored.
 
@@ -2555,7 +2525,7 @@ You should also set up the parameters +Safir.Dob.NodeParameters.NumberOfNodes+ a
 ==== Multinode
 This section could have a lot of examples, but I think it would become unwieldy with huge amounts of xml files, so I'm keeping it brief and descriptive instead.
 
-First of all you should specify the number of nodes that are part of your system. Do this using the two parameters +Safir.Dob.NodeParameters.NumberOfNodes+ and +Safir.Dob.NodeParameters.Nodes+. Then you have to decide which node is the persistence node, dope_main should be started on that node only. If you're not using persistence, set the parameter +Safir.Dob.PersistenceParameters.SystemHasPersistence+ to false, as described in <<persistence_config>>).
+First of all you should specify the number of nodes that are part of your system. Do this using the two parameters +Safir.Dob.NodeParameters.NumberOfNodes+ and +Safir.Dob.NodeParameters.Nodes+. If you're not using persistence, set the parameter +Safir.Dob.PersistenceParameters.SystemHasPersistence+ to false, otherwise configure the persistence as described in <<persistence_config>>).
 
 Each node has to be configured to know which node number it is, which is done in the parameter +Safir.Dob.ThisNodeParameters.NodeNumber+. Change this to contain the node number of each node (yes, this means having different contents in that file on each node in the system, unless you use an environment variable in the parameter, as described in <<environment_parameters>>).
 
@@ -2583,8 +2553,8 @@ For some entities, services and messages it is not desirable to have them sent o
 An object is specified as Local by mapping the +Safir.Dob.DistributionChannelProperty+ to it, with the value "Local" as DistributionChannel, using a dom file. 
 
 .Specifying that an object is local.
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
 <?xml version="1.0" encoding="utf-8" ?>
 <propertyMapping xmlns="urn:safir-dots-unit"
                  xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
@@ -2597,7 +2567,7 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         </member>
     </memberMapping>
 </propertyMapping>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 ===== Distribution Channels
 In a system with many nodes with different tasks it is not always necessary or desirable (e.g. for shared memory usage reasons) to send all data to all nodes. For example say there is one server that handles database stuff, and one that handles real-time tracking of all vessel in a harbour (using a radar or transponders or something like that). The applications on the database server have no need of the vessel data, and having them there would only use memory and generate CPU load (the Dob would still have to process them).
@@ -2609,8 +2579,8 @@ For the above example you could set up a distribution channel called VesselData,
 For each type that is associated with the vessels (e.g. the vessel entities, and maybe some messages) you then specify that they use that distribution channel, using properties.
 
 .A DistributionChannel for VesselEntity
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
 <?xml version="1.0" encoding="utf-8" ?>
 <propertyMapping xmlns="urn:safir-dots-unit"
                  xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
@@ -2623,7 +2593,7 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         </member>
     </memberMapping>
 </propertyMapping>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 There is no need to do any modifications to the applications involved.
 
@@ -2640,14 +2610,16 @@ An acked entity update, for example, will generate one packet for the entity upd
 
 ===== Ports used
 The Dob uses the following ports:
-`-------------`--------------------------------------------------------
-Port(s)       Use
------------------------------------------------------------------------
-6970          KeepAlive messages, to know which nodes are running.
-6971          Acknowledgements
-6972-6977     Data (one port for every priority level)
-31221         Low level error logs (from components that can't use Software Reports)
------------------------------------------------------------------------
+[width="70%", cols="20%,80%",options="header",frame="topbot",grid="none"]
+|==================
+|Port(s)       |Use
+
+|6970          |KeepAlive messages, to know which nodes are running.
+|6971          |Acknowledgements
+|6972-6977     |Data (one port for every priority level)
+|31221         |Low level error logs (from components that can't use Software Reports)
+
+|==================
 
 If the system is configured to be StandAlone (as described in <<standalone_config>>) only the 31221 port is used, the others are not opened or used.
 
@@ -2658,7 +2630,7 @@ The persistence service, provided by the +dope_main+ executable has a few differ
 A few relevant parameters for the persistence service, apart from the ones described in <<simple_persistence>>.
 
 _Safir.Dob.PersistenceParameters.SystemHasPersistence_::
-        Specifies if persistence service is expected to run in the system. (in this case dope_main should not be started.)
+        Specifies if persistence service is expected to run in the system. (if set to false dope_main should not be started.)
 _Safir.Dob.PersistenceParameters.Backend_::
         Which backend should be used, Odbc database or files.
 _Safir.Dob.PersistenceParameters.FileStoragePath_::
@@ -2666,7 +2638,7 @@ _Safir.Dob.PersistenceParameters.FileStoragePath_::
 _Safir.Dob.PersistenceParameters.OdbcStorageConnectString_::
         The connection string to use to connect to the database.
 
-The persistence service have support for hot-standby and redundancy.
+The persistence service has support for hot-standby and redundancy.
 Configure the persistence storage to point out a shared network storage like a shared disk/NAS or a database/database cluster.
 Then you can start dope_main in 2 nodes. The dope_main that starts first become the active one, and the other one starts in a hot-standby mode.
 If the node running the active dope_main goes down, the hot-standby dope_main is activated and the persistence service will continue to run.
@@ -2689,8 +2661,8 @@ By default all the length of the in and out queues of messages and requests is 1
 The QueueRules paramater is an array of +Safir.Dob.QueueRule+ items, each containing one rule to apply to the queue lengths. An example is shown below.
 
 .A queue length parameterization
-[xml]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,xml]
+----------------------------
 <?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -2738,22 +2710,22 @@ source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       </arrayElements>
   </parameter></parameters>
 </class>
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 When a new connection is opened the rules are scanned from top to bottom, and the _maximum values_ of all rules where the ConnectionName member matches are used. No ConnectionName in a rule means "match all". It is important to have one rule, like the first one in the example above, that provide default values. Finding no match causes undefined behavior.
 
 Here are some example connection names and their resulting queue lengths:
 
+[width="70%", cols="40%,15%,15%,15%,15%",options="header",frame="topbot",grid="none"]
+|================================================================
+|Connection Name       |MsgInQ    |MsgOutQ    |ReqInQ    |ReqOutQ
 
-`---------------------'---------'----------'---------'----------
-Connection Name       MsgInQ    MsgOutQ    ReqInQ    ReqOutQ
-----------------------------------------------------------------
-my_connection         10        10         10        10
-my_long_connection    20        10         10        50
-My_Connection         10        300        10        10
-my_long_Connection    20        300        10        50
-----------------------------------------------------------------
+|my_connection         |10        |10         |10        |10
+|my_long_connection    |20        |10         |10        |50
+|My_Connection         |10        |300        |10        |10
+|my_long_Connection    |20        |300        |10        |50
 
+|================================================================
 
 WARNING: Before deciding to change the queue lengths you should have read and understood <<overflow_handling>>, and the two items on overflows in <<faq>>. It is important to understand what effects, other than just increasing memory use, this may have on your system.
 
@@ -2783,7 +2755,7 @@ There are five predefined report types with the following intended usage:
 - *Programming Error Report:* Use it to report programming errors, i.e. errors of assert-type. After reporting the application should terminate.
 
 === Send interface
-To make the sending of a software report as simple as possible, Software Reporting provides interfaces (currently available for C\+\+, C#, Java and Ada) to be used by applications. The interface adds common information to the report before it is sent. The following information is added:
+To make the sending of a software report as simple as possible, Software Reporting provides interfaces (currently available for C++, C#, Java and Ada) to be used by applications. The interface adds common information to the report before it is sent. The following information is added:
 
 - Timestamp
 - Sequence Numbers: A software report has two sequence numbers. The Connection Sequence Number is incremented for each software report sent from a particular Dob connection. The Type Sequence Number is related to the report type and each type (Fatal Error, Error etc) has its own numbering series. This makes it easy to detect missing reports even when a certain report type isn't logged.
@@ -2862,7 +2834,7 @@ The foreach service is provided by the "foreach" executable, which needs to be r
 
 [[ace_dispatcher]]
 === Ace Dispatcher
-For applications written in C\+\+ and using ACE the class +Safir.Utilities.AceDispatcher+ provides a +Dispatcher+ class that performs the thread switch and call to +Dispatch+ as described in <<dispatching>>.
+For applications written in C++ and using ACE the class +Safir.Utilities.AceDispatcher+ provides a +Dispatcher+ class that performs the thread switch and call to +Dispatch+ as described in <<dispatching>>.
 
 Just instantiate the +AceDispatcher+ passing it your ACE_Reactor, and pass a pointer to the instance to your connection when calling +Open+, and you're done. The +AceDispatcher+ will now perform the thread switch through the reactor main loop using +notify+.
 
@@ -2871,7 +2843,7 @@ Under the namespace +Safir.Time+ there are a few classes that provide functional
 
 The time library also has support for loading an external library at runtime which could provide a higher accuracy time. The full Safir SDK provides such a library, which provides a much higher accuracy multi-node synchronised clock than NTP can provide on both GNU/Linux or Windows based systems. For more information on this, contact Saab AB (contact information at http://www.safirsdk.com[]).
 
-== Tips & Tricks
+== Tips and Tricks
 This section discusses some good design strategies for applications
 
 [[overflow_handling]]
@@ -2881,8 +2853,8 @@ The correct way of managing overflow is to use the designated functions telling 
 For example, if you get an overflow when sending a message (and that message should then be retried according to your application requirements/design) you can do something like this:
 
 .Handling OverflowException
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 try
 {
     m_connection.Send(myMessage,this);
@@ -2891,13 +2863,13 @@ catch (const Safir::Dob::OverflowException &)
 {
     m_unsentMessage = myMessage;
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 And then handle resending like this:
 
 .Resending messages in OnNotMessageOverflow
-[cpp]
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source,{cpp}]
+----------------------------
 void MyMessageSender::OnNotMessageOverflow()
 {
     try
@@ -2911,7 +2883,7 @@ void MyMessageSender::OnNotMessageOverflow()
         //to resume sending the messages that have not yet been sent.
     }
 }
-source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 It might be tempting to use a list to keep the unsent messages in, but beware! The Dob design tries very hard to restrict queue sizes to be able to handle graceful degradation, don't ruin it by introducing infinite queues in your application! There might be cases when a queue of a _limited size_ may be applicable.
 
@@ -3050,87 +3022,93 @@ In <<ts_merge_1>> an application owns an entity (and has done a single +SetChang
 
 [[ts_merge_1]]
 .Timestamp merge, initial entity
-[grid="all"]
-`---------`-------------`---------
-Member    Timestamp     Value
-----------------------------------
-0         100           Foo
-1         100           _Null_
-2         100           Bar
-3         100           _Null_
-----------------------------------
+[width="40%", cols="30%,35%,35%",options="header",frame="topbot",grid="all"]
+|===============================
+|Member    |Timestamp     |Value
+
+|0         |100           |Foo
+|1         |100           |_Null_
+|2         |100           |Bar
+|3         |100           |_Null_
+
+|===============================
 
 On another system (at time 110) the application does a +SetChanges+ with Member 0 set to "hello" and Member 1 set to "33". This will cause the injector on "our" system to make the injection shown in <<ts_merge_2>>.
 
 [[ts_merge_2]]
 .Timestamp merge, first injection
-[grid="all"]
-`---------`-------------`-------------`---------
-Member    IsChanged     Timestamp     Value
-------------------------------------------------
-0         *True*        *110*         *hello*
-1         *True*        *110*         *33*
-2         False         0             _Null_
-3         False         0             _Null_
-------------------------------------------------
+[width="40%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
+|==============================================
+|Member    |IsChanged     |Timestamp     |Value
+
+|0         |*True*        |*110*         |*hello*
+|1         |*True*        |*110*         |*33*
+|2         |False         |0             |_Null_
+|3         |False         |0             |_Null_
+
+|==============================================
 
 This will be merged with the current entity (again, on "our" system) into the object in <<ts_merge_3>>.
 
 [[ts_merge_3]]
 .Timestamp merge, merged object
-[grid="all"]
-`---------`-------------`-------------`---------
-Member    IsChanged     Timestamp     Value
-------------------------------------------------
-0         *True*        *110*         *hello*
-1         *True*        *110*         *33*
-2         False         100           Bar
-3         False         100           _Null_
-------------------------------------------------
+[width="40%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
+|==============================================
+|Member    |IsChanged     |Timestamp     |Value
+
+|0         |*True*        |*110*         |*hello*
+|1         |*True*        |*110*         |*33*
+|2         |False         |100           |Bar
+|3         |False         |100           |_Null_
+
+|==============================================
 
 This merged object will be presented to the application through a call to +OnInjectedUpdatedEntity+ with the change flags set as indicated, and if the application accepts that injection (by just returning) the entity instance shown in <<ts_merge_4>> will be set in the Dob (and shown to subscribers or readers).
 
 [[ts_merge_4]]
 .Timestamp merge, resultant entity
-[grid="all"]
-`---------`-------------`---------
-Member    Timestamp     Value
-----------------------------------
-0         110           hello
-1         110           33
-2         100           Bar
-3         100           _Null_
-----------------------------------
+[width="40%", cols="34%,33%,33%",options="header",frame="topbot",grid="all"]
+|===============================
+|Member    |Timestamp     |Value
+
+|0         |110           |hello
+|1         |110           |33
+|2         |100           |Bar
+|3         |100           |_Null_
+
+|===============================
 
 While all this was happening, a third system (at time 105) the application did a SetChanges with Member 0 set to "Lemon" and Member 3 set to "Curry". On our system the injector will then do the injection shown in <<ts_merge_5>> (but note that this delta arrives to our system after the 110-delta).
 
 
 [[ts_merge_5]]
 .Timestamp merge, another injection
-[grid="all"]
-`---------`-------------`-------------`---------
-Member    IsChanged     Timestamp     Value
-------------------------------------------------
-0         *True*        *105*         *Lemon*
-1         False         0             _Null_
-2         False         0             _Null_
-3         *True*        *105*         *Curry*
-------------------------------------------------
+[width="40%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
+|==============================================
+|Member    |IsChanged     |Timestamp     |Value
+
+|0         |*True*        |*105*         |*Lemon*
+|1         |False         |0             |_Null_
+|2         |False         |0             |_Null_
+|3         |*True*        |*105*         |*Curry*
+
+|==============================================
 
 Which will be merged with the current entity to become the object shown in <<ts_merge_6>>
 
 
 [[ts_merge_6]]
 .Timestamp merge, second merge result
-[grid="all"]
-`---------`-------------`-------------`---------
-Member    IsChanged     Timestamp     Value
-------------------------------------------------
-0         False         110           hello
-1         False         110           33
-2         False         100           bar
-3         *True*        *105*         *Curry*
-------------------------------------------------
+[width="40%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
+|==============================================
+|Member    |IsChanged     |Timestamp     |Value
+
+|0         |False         |110           |hello
+|1         |False         |110           |33
+|2         |False         |100           |bar
+|3         |*True*        |*105*         |*Curry*
+
+|==============================================
 
 This object will be presented to the application and, if accepted, will be set into the Dob and shown to subscribers and readers.
 
@@ -3139,6 +3117,116 @@ At this stage all systems will have the exact same entity, since the timestamp m
 [[incomplete_injection_state]]
 ==== IncompleteInjectionState
 The method +IncompleteInjectionState+ (can be found in the +ConnectionAspectPostpone+ aspect) can be used if an application thinks that an asynchronous injection (in one of the injection callbacks) is missing some information which should be injected "soon". Since entities are updated as deltas it is possible that two deltas arrive in the "wrong order" (due to bad or low connectivity). The application may be able to detect this, and decide that it wants to wait for more entity information. A call to IncompleteInjectionState will cause the injection to be held back until another injection is received for the same instance, when the merged injections will be presented to the application again.
+
+[[contexts]]
+== Contexts ^adv^
+The Dob makes it possible to have several "data universes" side by side. Such a universe is called a context.
+
+The main principle is that there is no mixing of data (entities, messages etc) between different contexts.
+
+It is possible to override the default no-mixing behaviour by marking a type as ContextShared, thereby making it visible in all contexts. (See below for a motivation and explanation of the ContextShared mechanism.)
+
+=== What contexts can be used for
+This description presumes that the context functionality is used to support different system modes (changing either the whole system mode, or just one operator console). However, note that from a Safir SDK perspective the context functionality is a general mechanism which can be used for any purpose.
+
+The system modes that systems may want to support includes:
+
+- Normal - displaying real world data.
+- Replay - replaying data that was previously recorded in a Normal session.
+- Simulation - displaying data that is generated by simulators. Typically used for training. 
+
+Here we will focus on Normal and Replay. Simulation should be possible to support with this design, but any recommendations how to implement Simulation using Safir are not included for now.
+
+The safety issue is very important when mixing real data sessions and Replay sessions and the intention of the design is that it should be as difficult as possible to do things like "shoot a real gun at a replayed target".
+
+Safir applications are usually classified as either Business applications (APP) or Presentation applications (PRSes). The first type handles all business logic while the latter takes care of all presentation of data in a GUI (see <<appendix_a>>). This section contains some recommendations for how APPs and PRSes should use contexts to support Replay sessions.
+
+=== Design principles
+A Dob connection is always related to one, and only one, context. The context is given as parameter in the Open call. The contexts are numbered from 0 and upwards where 0 is used to identify the Normal context. Any data (except the ContextShared types, see below), such as entities, services and messages, produced by a connection, can only be seen by connections that is opened in the same context.
+
+In a system that supports Replay there must be at least some data that is control data, i.e. some things that need to be displayed from the Normal context while we're replaying. Typically this is the entities that control the Replay, software error reports, and a few more things. Fort example, a PRS that is showing a Replay session must be able to pick up changes to the Replay control entities, so that it will know when to switch out of Replay and back to Normal.
+
+Forcing applications to have multiple Dob connections, one in context 0 for the control data, and one in the Replay context, and then dynamically working out which kind of data goes where, is considered a potential security risk. Therefore, Safir SDK Core has a concept of ContextShared types which eliminates the need to have parallel connections to different contexts.
+
+=== ContextShared types
+A type could be marked as being visible in all contexts by mapping the ContextShared property to it. ContextShared types are typically control types, e.g. types used to control the system mode, or types used for logging purposes, e.g. Swre reports.
+
+For example, an APP or PRS that is connected to context 0 can "see" all that goes on in context 0 and the ContextShared types. An APP or PRS that is connected to context 1 can "see" all that goes on in context 1 and the ContextShared types.
+
+The following rules applies to ContextShared types:
+
+- A ContextShared Message can only be sent from context 0.
+- A ContextShared Service can only be registered in context 0.
+- A ContextShared Entity can only be registered and set from context 0.
+- Requests on ContextShared Services and Entities can be done from any context.
+- ContextShared Messages, Entities and Registration can be subscribed to from any context.
+- It is possible to iterate over ContextShared Entities from any context.
+- In all other respects all contexts are equal, i.e. all Dob functionality is available in all contexts.
+- It is not possible to override the ContextShared property. Thus, types derived from a type with the ContextShared property will also be ContextShared.
+
+These rules prevent a Replay application from accidentally (due to misconfiguration) replaying data that is configured to be ContextShared. If ContextShared types could be produced from any context nothing would stop the Replay application from over-registering a ContextShared entity and producing entity updates that may produce an inconsistent system leading to a number of security issues.
+
+ContextShared types removes the need for PRSes to have connections to several contexts at once. Without ContextShared types PRSes would have to have one connection to context 0 that subscribes to the control entities, and one connection to the context that contains the data that it should currently be displaying. So the PRS would have two connections, and it would probably be easy to use the wrong connection, for example sending a "fire" request accidentally on the context 0 connection instead of on the Replay connection (where it would get ignored).
+
+By introducing ContextShared types this same PRS will only have to have one connection to the Dob. It can subscribe to both the control entities and the data that it displays through the same connection. This makes it impossible for this PRS to send a request in the wrong context, since it only knows of one context at a time. 
+
+=== Using the context mechanism
+This section contains some hints on how APPs and PRSes should be designed to support Replay in different kind of systems.
+
+==== Terminology
+- Replay - the mode that a console is in while showing Replay data.
+- ReplayApp - the component that performs the Replay. Typically an application that reads from a database produced by a "recorder" application, and sets entities and sends messages as if they were owned/sent by the real applications.  
+ 
+==== Each operator console has one mode (Type 1)
+This is a multinode system with one or more server nodes (that is running the APPs) and one or (probably) more operator consoles (running the PRSes). Each console can display either the Normal data, or one Replay session. Different consoles can be in different modes, and several consoles can display the same Replay session.
+
+An elaborate example would be: Console 1 and 2 are in Normal mode, console 3 is replaying yesterdays recorded data at three times the speed, and console 4 and 5 is looking at the Replay of data from last week.
+
+ReplayApp runs in one of the server nodes, and there is a PRS in each of the operator consoles that allow the operator to start a Replay session, or to "attach" to a Replay session that another operator is running. This results in changes to some control entities (owned by the ReplayApp) that reflect the mode of each console.
+
+The APPs whose responsibility it is to maintain the Normal context data are not aware of any of the mode changes (the server nodes don't switch modes), and they only connect to context 0. 
+
+PRSes that are meant to show Replay data must subscribe to the ReplayApp control entities, and when a mode change occurs they must reconnect to the Dob in the desired Replay context.
+
+There might be some PRSes in the console that does not listen to the mode change, e.g. the PRS that shows alerts.
+
+==== StandAlone system supporting one mode (Type 2)
+Very similar to a Type 1 system. The only difference is that the APPs are running on the same node as the PRSes. A correct implemented APP or PRS will work without any modification in both a Type 1 and a Type 2 system.
+
+==== Starting extra PRSes showing a Replay session (Type 3)
+In this kind of system Replay sessions are started in a new set of windows, enabling the user to look at both Normal and one or more Replay sessions at the same time. When a Replay session is started a new set of PRSes (either new instances of the ones that show Normal data, or special replay-PRSes) are started to show the Replay data.
+
+In this case the PRSes don't listen to the ReplayApp control entities. The PRSes that were started in the Normal context stay in that context. When the operator wants to start a Replay session the system will launch a new set of PRSes (either new instances of the Normal PRSes, or special replay-PRSes), telling them which context to connect to.
+
+PRSes in this type of system must have a way of being told which context to connect to, and this could be either a command line parameter, or by setting an environment variable (the latter is probably better, since it makes it easy for plugins and libraries to get at the value, without having to pass around and parse the command reliably). 
+
+==== Several Replay sessions in one console (Type 4)
+In this kind of system the user interface shows replayed and real objects intermingled, allowing operations on all objects.
+
+The PRSes in this type of system must connect to all contexts that are used on the console. The PRSes have many Dob connections, and they must be explicitly be written to be fully aware of which objects belong to which contexts, and what operations are legal on which objects, e.g. knowing that a track from context 3 (Replay) cannot be sent to the Fire service in context 0.
+
+Although supported, this kind of system is usually considered dangerous, since the possibility for mistaking the nature of an object is high.
+
+=== APP design
+Almost all applications should only be aware of context 0. An obvious exception to this rule is the the ReplayApp itself.
+
+=== PRS design
+In a Type 1 or Type 2 system a well behaved PRS should be designed according to the following rules:
+
+All PRSes (that want to be able to show Replay data) must subscribe to a ContextShared entity that shows which context the console should "display".
+
+When the PRS gets notified that the console is switching context it:
+
+* Closes its current connection.
+* Opens the connection in the "new" context.
+* Tells all its "parts" to restart, i.e
+** Clear all internal state information.
+** Attach to the connection.
+** Set up subscriptions again (A PRS normally does not own entities, but if it does, registrations and creation of entities must be done again.) 
+
+The attach and subscription are the same actions that the PRS must take when it starts up the first time. What is very important when changing context (but not when starting for the first time) is the clearing of internal state information. Leaving any internal state information is a serious safety risk!
+
+A ReplayApp will probably send error responses to all requests on entities it owns. Therefore, PRSes in Replay mode needs to disable buttons etc that would generate requests, or be able to ignore the error responses from the ReplayApp.
 
 == Test support and Tools
 Safir SDK Core contains some tools that are useful for, among other things, application and system testing.
@@ -3174,7 +3262,7 @@ image::images/dobexplorer_memory.jpg["Dobexplorer showing memory usage", width=4
 image::images/dobexplorer_nodes.jpg["Dobexplorer showing node statuses", width=400, link="images/dobexplorer_nodes.jpg"]
 
 [[olib]]
-== C\+\+ ODBC database wrapper
+== C++ ODBC database wrapper
 ////
 Olib text is located in a separate file, olib.txt
 ////
@@ -3194,6 +3282,7 @@ _Use this documentation! It is the place where interface details are explained!_
 === Forum
 Questions can be posted in the Safir SDK Core forum at http://www.safirsdk.com[].
 
+[[appendix_a]]
 == Appendix A: Example applications
 
 ////
@@ -3235,7 +3324,6 @@ Since Safir SDK Core is released under an Open Source license (as described in <
 
 [[glossary]]
 == Glossary
-
 This glossary mostly contains Safir-related acronyms and terms. General computer terms are not included, like "UDP", "Multicast" and "ODBC". Wikipedia, for example, is a much better source for explanations of those terms than this glossary could ever be.
 
 
@@ -3274,4 +3362,5 @@ SDK::
 
 Swre::
     A Safir SDK Core component that provides Software Reporting and Trace logging functionality.
+
 

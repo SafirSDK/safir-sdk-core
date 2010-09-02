@@ -23,7 +23,7 @@ archives: safir_sdk_core_sug.pdf.zip \
 
 safir_sdk_core_sug.pdf: $(DEPS)
 	echo "Building pdf"
-	a2x -f pdf -d book --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" safir_sdk_core_sug.txt 2>&1 |grep -v "Ignoring property: border-right-color"|grep -v "Ignoring property: border-bottom-color" |grep -v "convertAttributeToProperty" |grep -v "DeprecationWarning"
+	a2x -L -f pdf -d book --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" safir_sdk_core_sug.txt 2>&1
 
 #The grepping above is to get rid of some warnings from 
 #some underlying component that cant handle some properties.
@@ -41,7 +41,7 @@ safir_sdk_core_sug.pdf.bz2: safir_sdk_core_sug.pdf
 
 safir_sdk_core_sug.chunked/index.html: $(DEPS)
 	echo "Building chunked html"
-	a2x -f chunked -d book safir_sdk_core_sug.txt
+	a2x -L -f chunked -d book safir_sdk_core_sug.txt
 	-mkdir -p safir_sdk_core_sug.chunked/images
 	-cp -r images/*.jpg safir_sdk_core_sug.chunked/images/
 
