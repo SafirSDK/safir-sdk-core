@@ -179,11 +179,13 @@ def main():
                               "boost_date_time-vc80-mt-1_40.dll",
                               "boost_date_time-vc80-mt-1_41.dll",
                               "boost_date_time-vc80-mt-1_42.dll",
+                              "boost_date_time-vc80-mt-1_44.dll",
                               "boost_date_time-vc90-mt-1_38.dll",
                               "boost_date_time-vc90-mt-1_39.dll",
                               "boost_date_time-vc90-mt-1_40.dll",
                               "boost_date_time-vc90-mt-1_41.dll",
-                              "boost_date_time-vc90-mt-1_42.dll"))
+                              "boost_date_time-vc90-mt-1_42.dll",
+                              "boost_date_time-vc90-mt-1_44.dll"))
         boost_dir = os.path.join(boost_dir,"..")
     copy_libs_from_dir(os.path.join(boost_dir, "lib"))
     copy_dlls_from_dir(os.path.join(boost_dir, "lib"))

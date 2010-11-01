@@ -87,28 +87,9 @@ namespace Internal
             subIt->second.Subscribe(key);
         }
 
-        bool includeReleased = false;
-
-        if (subscriptionId.subscriptionType == EntityRegistrationSubscription ||
-            subscriptionId.subscriptionType == ServiceRegistrationSubscription)
-        {
-            //include released states for registration subscriptions, since dose_main needs them (see #726),
-            //but dont include them for any other type of subscription, since they are not needed, and
-            //the injectionsubscriptions get upset by them...
-            includeReleased = true;
-        }
-        else if (subscriptionId.subscriptionType == EntitySubscription)
-        {
-            if (strstr(subscriptionId.connectionConsumer.connection->NameWithoutCounter(), ";dose_main_pd;") != NULL)
-            {
-                //include released states for entity subscriptions when doing pool distribution to
-                // sync lamport clock on newly started node.
-                includeReleased = true;
-            }
-        }
-
         // Check all existing states that corresponds to this subscription (not the states that corresponds to the meta
-        // subscription) and create subscription objects
+        // subscription) and create subscription objects.
+        // For an explanation regarding why we include released states here see the corresponding comment for ReadEntiy
         if (allKeys)
         {
             // Create a subscription for each existing state
@@ -118,7 +99,7 @@ namespace Internal
                                      boost::cref(subscriptionId),
                                      restartSubscription,
                                      boost::cref(subIt->second.GetSubscriptionOptions())),
-                         includeReleased);
+                         true);    // true => include released states
         }
         else
         {
@@ -130,7 +111,7 @@ namespace Internal
                                          boost::cref(subscriptionId),
                                          restartSubscription,
                                          boost::cref(subIt->second.GetSubscriptionOptions())),
-                             includeReleased);
+                             true); // true => include released states
         }
     }
 
@@ -497,6 +478,32 @@ namespace Internal
                                          const bool                     restartSubscription,
                                          const SubscriptionOptionsPtr&  subscriptionOptions)
     {
+        // First decide if released states should be discarded
+        bool includeReleased = false;
+
+        if (subscriptionId.subscriptionType == EntityRegistrationSubscription ||
+            subscriptionId.subscriptionType == ServiceRegistrationSubscription)
+        {
+            //include released states for registration subscriptions, since dose_main needs them (see #726),
+            //but dont include them for any other type of subscription, since they are not needed, and
+            //the injectionsubscriptions get upset by them...
+            includeReleased = true;
+        }
+        else if (subscriptionId.subscriptionType == EntitySubscription)
+        {
+            if (strstr(subscriptionId.connectionConsumer.connection->NameWithoutCounter(), ";dose_main_pd;") != NULL)
+            {
+                //include released states for entity subscriptions when doing pool distribution to
+                // sync lamport clock on newly started node.
+                includeReleased = true;
+            }
+        }
+
+        if (statePtr->IsReleased() && !includeReleased)
+        {
+            return;
+        }
+
         if (subscriptionId.subscriptionType == InjectionSubscription)
         {
             // Need to do some additional stuff when creating an injection subscription
@@ -568,13 +575,24 @@ namespace Internal
                 return Iterator();
             }
 
-            iterator.m_state = iterator.m_underlyingIterator->second.Get();
+            iterator.m_state = iterator.m_underlyingIterator->second.GetIncludeWeak();
+            if (iterator.m_state != NULL)
+            {
+                // lock state
+                boost::interprocess::scoped_lock<State::StateLock> lck(iterator.m_state->m_lock);
+
+                if (iterator.m_state->IsReleased())
+                {
+                    iterator.m_state.reset();  // set to NULL
+                }
+            } // state lock released here
+
             if (iterator.m_state != NULL)
             {
                 iterator.m_entity = iterator.m_state->GetRealState();
             }
 
-            //if it is downgraded m_entity will still be null, so we get into IncrementIterator below.
+            // if it is a released state IsCreated will return false, so we get into IncrementIterator below.
 
             if (!iterator.m_entity.IsCreated())
             {
@@ -622,7 +640,18 @@ namespace Internal
                 return false;
             }
 
-            iterator.m_state = iterator.m_underlyingIterator->second.Get();
+            iterator.m_state = iterator.m_underlyingIterator->second.GetIncludeWeak();
+            if (iterator.m_state != NULL)
+            {
+                // lock state
+                boost::interprocess::scoped_lock<State::StateLock> lck(iterator.m_state->m_lock);
+
+                if (iterator.m_state->IsReleased())
+                {
+                    iterator.m_state.reset();  // set to NULL
+                }
+            } // state lock released here
+
             if (iterator.m_state == NULL)
             {
                 continue;

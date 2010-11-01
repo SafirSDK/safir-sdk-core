@@ -429,12 +429,14 @@ namespace Internal
     {
         bool isRegistered = false;
 
+        // For an explanation regarding why we include released states here see the corresponding
+        // comment for EntityType::ReadEntiy
         m_registrations.ForSpecificState(handlerId.GetRawValue(),
                                          boost::bind(&HandlerRegistrations::IsRegisteredInternal,
                                                      this,
                                                      _2,
                                                      boost::ref(isRegistered)),
-                                         false); // false => don't include released states);
+                                         true); // true => include released states);
 
         return isRegistered;
     }
@@ -447,6 +449,8 @@ namespace Internal
         InstanceIdPolicy::Enumeration instanceIdPolicy;  // Dummy in this case
         RegisterTime registrationTime;  // Dummy in this case
 
+        // For an explanation regarding why we include released states here see the corresponding
+        // comment for EntityType::ReadEntiy
         m_registrations.ForSpecificState(handlerId.GetRawValue(),
                                          boost::bind(&HandlerRegistrations::GetRegistererInternal,
                                                      this,
@@ -454,7 +458,7 @@ namespace Internal
                                                      boost::ref(registerer),
                                                      boost::ref(instanceIdPolicy),
                                                      boost::ref(registrationTime)),
-                                         false); // false => don't include released states
+                                         true); // true => include released states
         return registerer;
     }
 
@@ -465,6 +469,8 @@ namespace Internal
     {
         InstanceIdPolicy::Enumeration instanceIdPolicy;  // Dummy in this case
 
+        // For an explanation regarding why we include released states here see the corresponding
+        // comment for EntityType::ReadEntiy
         m_registrations.ForSpecificState(handlerId.GetRawValue(),
                                          boost::bind(&HandlerRegistrations::GetRegistererInternal,
                                                      this,
@@ -472,7 +478,7 @@ namespace Internal
                                                      boost::ref(registerer),
                                                      boost::ref(instanceIdPolicy),
                                                      boost::ref(registrationTime)),
-                                         false); // false => don't include released states
+                                         true); // true => include released states
 
         return registerer.connection != NULL;
     }
@@ -484,6 +490,8 @@ namespace Internal
     {
         RegisterTime registrationTime; // Dummy in this case
 
+        // For an explanation regarding why we include released states here see the corresponding
+        // comment for EntityType::ReadEntiy
         m_registrations.ForSpecificState(handlerId.GetRawValue(),
                                          boost::bind(&HandlerRegistrations::GetRegistererInternal,
                                                      this,
@@ -491,7 +499,7 @@ namespace Internal
                                                      boost::ref(registerer),
                                                      boost::ref(instanceIdPolicy),
                                                      boost::ref(registrationTime)),
-                                         false); // false => don't include released states
+                                         true); // true => include released states
 
         return registerer.connection != NULL;
     }
@@ -548,7 +556,7 @@ namespace Internal
 
     bool HandlerRegistrations::IsRegisteredInternal(const StateSharedPtr& statePtr) const
     {
-        if (!statePtr)
+        if (!statePtr || statePtr->IsReleased())
         {
             return false;
         }

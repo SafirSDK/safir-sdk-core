@@ -593,12 +593,17 @@ namespace Internal
 
         DistributionData realState(no_state_tag);
 
+        // ReadEntity is not protected by a type lock, so there might be an owner in here that
+        // is about to create an entity but the entity is still in the released state. As a reader we don't want
+        // to skip this entity but wait for it to be set to not released. (Of course, a released entity can also
+        // be just released so that case must be handled properly.) All this explains why we include
+        // released states here.
         m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
                                                  boost::bind(&EntityType::ReadEntityInternal,
                                                              this,
                                                              _2,
                                                              boost::ref(realState)),
-                                                 false); // false => don't include released states
+                                                 true); // true => include released states. 
 
         if (realState.IsNoState())
         {
@@ -622,13 +627,14 @@ namespace Internal
         Dob::Typesystem::HandlerId handlerId;
         bool gotIt = false;
 
+        // For an explanation regarding why we include released states here see the corresponding comment for ReadEntiy
         m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
                                                  boost::bind(&EntityType::GetHandlerOfInstanceInternal,
                                                              this,
                                                              _2,
                                                              boost::ref(handlerId),
                                                              boost::ref(gotIt)),
-                                                 false); // false => don't include released states
+                                                 true); // true => include released states
 
         if (!gotIt)
         {
@@ -648,12 +654,13 @@ namespace Internal
 
         bool isCreated = false;
 
+        // For an explanation regarding why we include released states here see the corresponding comment for ReadEntiy
         m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
                                                  boost::bind(&EntityType::IsCreatedInternal,
                                                              this,
                                                              _2,
                                                              boost::ref(isCreated)),
-                                                 false); // false => don't include released states
+                                                 true); // true => include released states
 
         return isCreated;
     }
@@ -667,6 +674,7 @@ namespace Internal
 
         bool isOwner = false;
 
+        // For an explanation regarding why we include released states here see the corresponding comment for ReadEntiy
         m_entityStates[context].ForSpecificState(instanceId.GetRawValue(),
                                                  boost::bind(&EntityType::IsOwnerInternal,
                                                              this,
@@ -674,7 +682,7 @@ namespace Internal
                                                              boost::cref(handlerId),
                                                              boost::cref(registerer),
                                                              boost::ref(isOwner)),
-                                                 false); // false => don't include released states
+                                                 true); // true => include released states
 
         return isOwner;
     }
@@ -1855,7 +1863,8 @@ namespace Internal
         gotIt = true;
         DistributionData realState = statePtr->GetRealState();
 
-        if (!realState.HasBlob() ||
+        if (statePtr->IsReleased() ||
+            !realState.HasBlob() ||
             realState.GetEntityStateKind() != DistributionData::Real)
         {
             gotIt = false;
