@@ -366,6 +366,16 @@ DOSECOM_API
 void DoseCom_PoolDistributed(int Priority, int DestinationId);
 
 //-------------------------------------------------------------
+// Tell DoseCom to force pool distribution to node specified in 
+// RequestorDoseId.
+// This will cause DoseCom initialize a PD and notify application
+// when it's time to start PD.
+//-------------------------------------------------------------
+
+DOSECOM_API
+void DoseCom_ForcePoolDistribution(int RequestorDoseId);
+
+//-------------------------------------------------------------
 // Get own DoseId
 //-------------------------------------------------------------
 

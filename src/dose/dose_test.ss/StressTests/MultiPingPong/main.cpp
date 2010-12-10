@@ -29,14 +29,24 @@
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/Consumer.h>
-#include <boost/lexical_cast.hpp>
 #include "CommandLine.h"
 #include "Pinger.h"
 #include "Ponger.h"
 #include <Safir/Dob/NotOpenException.h>
 
 #include <Safir/Dob/OverflowException.h>
+
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4127)
+#endif
+
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/lexical_cast.hpp>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 int main(int argc, char* argv[])
 {

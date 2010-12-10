@@ -35,10 +35,17 @@
 #include <Safir/SwReports/SwReport.h>
 #include <Safir/Dob/ConnectionAspectInjector.h>
 #include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/NotOpenException.h>
+
+//Dope uses context 0 to connect to the dob. The strange looking negative number
+//is a way to indicate that this is a connection with special privileges.
+const Safir::Dob::Typesystem::Int32 PERSISTANCE_CONTEXT = -1000000;
 
 //-------------------------------------------------------
 PersistenceHandler::PersistenceHandler():
-    m_debug(L"PersistenceHandler")
+    m_dispatcher(m_dobConnection),
+    m_debug(L"PersistenceHandler"),
+    m_started(false)
 {
     m_persistentTypes.reset(new TypeIdSet());
 
@@ -64,11 +71,28 @@ PersistenceHandler::~PersistenceHandler()
 }
 
 //-------------------------------------------------------
-void
-PersistenceHandler::Start(bool restore)
+void PersistenceHandler::Start(bool restore)
 {
+    if (m_started)
+    {
+        m_debug << "Persistence handling already started."<< std::endl;
+        return;
+    }
+
     m_debug << "Starting Persistence handling"<< std::endl;
-    m_dobConnection.Attach();
+    //m_dobConnection.Attach();
+    try
+    {
+        m_dobConnection.Open(L"DOPE_SUBSCRIBE", L"0", PERSISTANCE_CONTEXT, NULL, &m_dispatcher);
+        m_debug << "Opened DOB connection DOPE_SUBSCRIBE"<<std::endl;
+    }
+    catch (Safir::Dob::NotOpenException e)
+    {
+        Safir::SwReports::SendFatalErrorReport
+            (L"Failed to connect to DOB.",L"PersistenceHandler::Start",
+            L"Maybe DOPE is already started on this node.");
+        exit(-1);
+    }
 
     if (restore)
     {
@@ -85,21 +109,35 @@ PersistenceHandler::Start(bool restore)
                 e.GetExceptionInfo(),__WFILE__,__LINE__);
         }
 
-        StartSubscriptions();
+        StartSubscriptions(false);
         ReportPersistentDataReady();
     }
     else
     {
         // Failover startup, don't restore anything.
-        StartSubscriptions();
+        if (Safir::Dob::PersistenceParameters::StandaloneMode())
+        {
+            // If standalone mode then clear all and then subscribe for all
+            RemoveAll();
+            StartSubscriptions(true);
+        }
+        else
+        {
+            StartSubscriptions(false);
+        }
     }
 
-    //we do not need the list of types any longer, so we free the memory.
-    m_persistentTypes->clear();
-    m_persistentTypes.reset();
-
+    m_started = true;
     m_debug << "PersistenceHandler::Allocate successful"<<std::endl;
 }
+
+//-------------------------------------------------------
+void PersistenceHandler::Stop()
+{
+    m_started = false;
+    m_dobConnection.Close();
+}
+
 
 //-------------------------------------------------------
 bool
@@ -138,7 +176,7 @@ PersistenceHandler::ShouldPersist(const Safir::Dob::Typesystem::TypeId typeId)
 
 //-------------------------------------------------------
 void
-PersistenceHandler::StartSubscriptions()
+PersistenceHandler::StartSubscriptions(bool subscribeAll)
 {
     Safir::Dob::ConnectionAspectInjector inject(m_dobConnection);
 
@@ -151,20 +189,19 @@ PersistenceHandler::StartSubscriptions()
         // DoesntWantSourceIsPermanent == true. we dont want our own sets
         // timestampChangeInfo == false, we dont want change info at all...
         // WantsAllStateChanges == false. This is for DOSE only. Shall be false.
-        inject.SubscribeEntity(*it,     // Dob::Typesystem::TypeId      typeId
-                               true,    // bool                         includeUpdates
-                               false,   // bool                         includeSubclasses
-                               false,   // bool                         restartSubscription
-                               true,    // bool                         wantsGhostDelete
-                               true,    // bool                         wantsLastState
-                               true,    // bool                         doesntWantSourceIsPermanentStore
-                               false,   // bool                         wantsAllStateChanges
-                               false,   // bool                         timestampChangeInfo
-                               this );  // Dob::EntitySubscriber* const entitySubscriber
+        inject.SubscribeEntity(*it,              // Dob::Typesystem::TypeId      typeId
+                               true,             // bool                         includeUpdates
+                               false,            // bool                         includeSubclasses
+                               false,            // bool                         restartSubscription
+                               true,             // bool                         wantsGhostDelete
+                               true,             // bool                         wantsLastState
+                               !subscribeAll,    // bool                         doesntWantSourceIsPermanentStore
+                               false,            // bool                         wantsAllStateChanges
+                               false,            // bool                         timestampChangeInfo
+                               this );           // Dob::EntitySubscriber* const entitySubscriber
     }
     m_debug << "Subscriptions have been set up" <<std::endl;
 }
-
 
 //-------------------------------------------------------
 void 

@@ -24,7 +24,7 @@
 #
 ###############################################################################
 
-import os, glob, subprocess, threading, sys, stat
+import os, glob, subprocess, threading, sys, stat, shutil
 
 def num_cpus():
     """Detects the number of CPUs on a system. Cribbed from pp."""
@@ -107,6 +107,39 @@ def remove(path):
     except Exception, e:
         die ("Failed to remove directory " + path + ". Got exception " + str(e))
 
+def save_installed_files_manifest():
+    installed_files = open(os.path.join(SAFIR_SDK,"dots","dots_generated","installed_files.txt"), 'a')
+    manifest = open('install_manifest.txt', 'r')
+
+    shutil.copyfileobj(manifest, installed_files)
+    
+    manifest.close()
+    installed_files.close()
+
+def uninstall():
+    buildlog.writeHeader("Uninstalling...\n")
+        
+    path = os.path.join(SAFIR_SDK,"dots","dots_generated","installed_files.txt")
+    if not os.path.exists(path):
+        buildlog.write("Can't find " + path + ", files are probably already uninstalled.\n")        
+        return
+    files = open(path)
+    for file in files:
+        remove(file[0:-1])
+
+        # Remove the directory if it is empty
+        try:
+            os.rmdir(os.path.dirname(file))
+        except OSError:
+            # not empty, continue
+            pass
+            
+    files.close()
+
+    remove(path)
+    
+    buildlog.write("Uninstalling done.\n")
+    
 def get_config_file():
     return os.path.join(SAFIR_SDK,"dots","dots_generated","dobmake.ini")
 
@@ -217,7 +250,6 @@ class Logger(object):
 
 buildType = "build"
 default_config="Release"
-
 build_java = True
 build_ada = True
 build_cpp_release = True
@@ -231,7 +263,9 @@ def parse_command_line():
     parser.add_option("--clean", action="store_true",dest="clean",default=False,
                       help="Remove all intermediary build files")
     parser.add_option("--rebuild", action="store_true",dest="rebuild",default=False,
-                      help="Remove all old build files before starting the build")
+                      help="Remove all old build files and installed files before starting the build")
+    parser.add_option("--uninstall", action="store_true",dest="uninstall",default=False,
+                      help="Remove all installed files")    
     parser.add_option("--no-ada", action="store_true",dest="no_ada",default=False,
                       help="Dont attempt to build Ada code")
     parser.add_option("--no-java", action="store_true",dest="no_java",default=False,
@@ -247,10 +281,19 @@ def parse_command_line():
     if options.clean and options.rebuild:
         print "Specifying both --clean and --rebuild is redundant, ignoring --clean"
 
+    if options.uninstall and options.rebuild:
+        print "Specifying both --uninstall and --rebuild is redundant, ignoring --uninstall"         
+
     global buildType
-    
+
     if options.clean:
         buildType="clean"
+    elif options.uninstall:
+        buildType="uninstall"
+        
+    if options.clean and options.uninstall:
+        buildType="clean_and_uninstall"
+    
     if options.rebuild:
         buildType="rebuild"
 
@@ -273,6 +316,16 @@ def parse_command_line():
 
     global html
     html = options.html
+
+def run_dots_depends():
+    buildlog.writeHeader("Checking dependencies in dou files\n")
+    buildlog.writeCommand("Running dots_depends...\n")
+    process = subprocess.Popen("dots_depends",stdout=subprocess.PIPE, stderr=subprocess.STDOUT)    
+    buildlog.logOutput(process)
+    if process.returncode != 0:
+        die("dots_depends failed!")
+        
+    
 
 class VisualStudioBuilder(object):
     def __init__(self):
@@ -397,7 +450,7 @@ class VisualStudioBuilder(object):
         return sln_files[0]
 
     def build_cpp(self):
-        what = "dots_generated"
+        what = "CPP - dots_generated"
         buildlog.writeHeader("Building C++ using "+self.generator + "\n")
         mkdir(self.generator)
         olddir = os.getcwd();
@@ -425,13 +478,42 @@ class VisualStudioBuilder(object):
                 cppconfig += ["Release"]
             for config in cppconfig:
                 self.run_command("\"" + self.build_cmd + "\" " + solution + " /build " + config +" /Project INSTALL",
-                                 "Build and Install CPP" + config,what)
+                                 "Build and Install CPP " + config,what)
+                save_installed_files_manifest()
+            
         finally:
             os.chdir(olddir)
             
     def build_others(self):
-        what = "dots_generated"
+        what = "DOTNET JAVA ADA - dots_generated"
         buildlog.writeHeader("Building others using "+self.generator+"\n")
+        olddir = os.getcwd();
+        os.chdir("others")
+        Rebuild = "FALSE"
+        if buildType == "rebuild":
+            Rebuild = "TRUE"
+        try:
+            self.run_command(("cmake -G \""+ self.generator + "\" "+
+                              "-D NO_GENERATE_CODE:string=TRUE " +
+                              "-D NO_CXX:string=TRUE " +
+                              "-D NO_DOTNET:string=FALSE " +
+                              "-D NO_ADA:string=" + str(not build_ada) + " " + 
+                              "-D NO_JAVA:string=" + str(not build_java) + " " + 
+                              "-D NO_DOU_INSTALL:string=TRUE "
+                              "-D REBUILD=" + Rebuild + " " +
+                              ".."),
+                             "Configure", what)
+            solution = self.find_sln()
+            
+            self.run_command("\"" + self.build_cmd + "\" " + solution + " /build " + default_config  +" /Project INSTALL",
+                             "Build and Install " + default_config, what)
+            save_installed_files_manifest()
+        finally:
+            os.chdir(olddir)
+        
+    def build_dots(self):
+        what = "Process DOU files - dots_generated"
+        buildlog.writeHeader("Building dots using "+self.generator+"\n")
         mkdir("others")
         olddir = os.getcwd();
         os.chdir("others")
@@ -441,9 +523,11 @@ class VisualStudioBuilder(object):
         try:
             self.run_command(("cmake -G \""+ self.generator + "\" "+
                               "-D NO_CXX:string=TRUE " +
-                              "-D NO_ADA:string=" + str(not build_ada) + " " + 
-                              "-D NO_JAVA:string=" + str(not build_java) + " " + 
+                              "-D NO_DOTNET:string=TRUE " +
+                              "-D NO_ADA:string=TRUE " +
+                              "-D NO_JAVA:string=TRUE " +
                               "-D NO_DOU_INSTALL:string=FALSE "
+                              "-D NO_GENERATE_CODE:string=FALSE " +
                               "-D REBUILD=" + Rebuild + " " +
                               ".."),
                              "Configure", what)
@@ -451,13 +535,15 @@ class VisualStudioBuilder(object):
             
             self.run_command("\"" + self.build_cmd + "\" " + solution + " /build " + default_config  +" /Project INSTALL",
                              "Build and Install " + default_config, what)
-        finally:
-            os.chdir(olddir)
-        
 
+            save_installed_files_manifest()
+                        
+        finally:
+            os.chdir(olddir)    
+            
     def clean(self):
         buildlog.writeHeader("Cleaning...\n")
-
+        
         remove("others")
         remove(self.generator)
         remove("cpp")
@@ -465,6 +551,12 @@ class VisualStudioBuilder(object):
         remove("ada")
         remove("dotnet")
         remove("tags")
+        remove("dll_imports.cpp")
+
+        # empty file, must exist
+        tmp_file = open('cmake_depend.txt', 'w')
+        tmp_file.close()
+        
         for name in os.listdir("gen"):
             if name != "CMakeLists.txt":
                 remove(os.path.join("gen",name))
@@ -472,6 +564,8 @@ class VisualStudioBuilder(object):
         buildlog.write("Cleaning done.\n")
            
     def build(self):
+        self.build_dots()
+        run_dots_depends()
         self.build_others()
         self.build_cpp()
 
@@ -497,41 +591,87 @@ class UnixGccBuilder(object):
             else:
                 buildlog.write("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing\n")    
 
-    def build(self):
-        what = "dots_generated"        
-        mkdir("build")
+    def build_dots(self):
+        what = "Process DOU files - dots_generated"        
+        mkdir("build_1")
         olddir = os.getcwd()
-        os.chdir("build")
+        os.chdir("build_1")
         Rebuild = "FALSE"
         if buildType == "rebuild":
             Rebuild = "TRUE"
         try:
             self.run_command(("cmake",
                               "-D", "CMAKE_BUILD_TYPE:string=" + default_config,
-                              "-D", "NO_ADA:string="+ str(not build_ada), 
-                              "-D", "NO_JAVA:string=" + str(not build_java),
+                              "-D", "NO_CXX:string=TRUE",
+                              "-D", "NO_DOTNET:string=TRUE", 
+                              "-D", "NO_ADA:string=TRUE", 
+                              "-D", "NO_JAVA:string=TRUE",
+                              "-D", "NO_DOU_INSTALL:string=FALSE",
+                              "-D", "NO_GENERATE_CODE:string=FALSE",
                               "-D", "REBUILD=" + Rebuild,
                               ".."),
                              "Configure", what)
             
             self.run_command(("make","-j",str(self.num_jobs),"install"),
                              "Build and Install " + default_config, what)
+
+            save_installed_files_manifest()
         finally:
             os.chdir(olddir)
 
+    def build_others(self):
+        what = "dots_generated"        
+        mkdir("build_2")
+        olddir = os.getcwd()
+        os.chdir("build_2")
+        Rebuild = "FALSE"
+        if buildType == "rebuild":
+            Rebuild = "TRUE"
+        try:
+            self.run_command(("cmake",
+                              "-D", "CMAKE_BUILD_TYPE:string=" + default_config,
+                              "-D", "NO_DOU_INSTALL:string=TRUE",
+                              "-D", "NO_GENERATE_CODE:string=TRUE",
+                              "-D", "NO_ADA:string="+ str(not build_ada), 
+                              "-D", "NO_JAVA:string=" + str(not build_java),
+                              "-D", "REBUILD=" + Rebuild,
+                              ".."),
+                             "Configure", what)
+            
+            os.putenv("MONO_PATH", SAFIR_RUNTIME + "/bin")
+
+            self.run_command(("make","-j",str(self.num_jobs),"install"),
+                             "Build and Install " + default_config, what)
+
+            save_installed_files_manifest()
+            
+        finally:
+            os.chdir(olddir)
+        
+    def build(self):
+        self.build_dots()
+        run_dots_depends()
+        self.build_others()
+
     def clean(self):
         buildlog.write("Cleaning!\n")
-
-        remove("build")
+                                         
+        remove("build_1")
+        remove("build_2")
         remove("cpp")
         remove("java")
         remove("ada")
         remove("dotnet")
         remove("tags")
+        remove("dll_imports.cpp")
+
+        # empty file, must exist
+        tmp_file = open('cmake_depend.txt', 'w')
+        tmp_file.close()
+
         for name in os.listdir("gen"):
             if name != "CMakeLists.txt":
                 remove(os.path.join("gen",name))
-
 
 def run_dots_configuration_check():
     process = subprocess.Popen("dots_configuration_check",stdout=subprocess.PIPE, stderr=subprocess.STDOUT)    
@@ -770,6 +910,9 @@ def load_gui():
             if buildType == "clean" or buildType == "rebuild":
                 self.commandList.append(self.builder.clean)
 
+            if buildType == "uninstall" or buildType == "rebuild":
+                self.commandList.append(uninstall)
+
             if buildType == "build" or buildType == "rebuild":
                 self.commandList.append(check_config_dots_generated)
                 self.commandList.append(self.builder.build)
@@ -849,8 +992,11 @@ def main():
     if no_gui:
         print "Running in batch mode"
         
-        if buildType == "clean" or buildType == "rebuild":
+        if buildType == "clean" or buildType == "clean_and_uninstall" or buildType == "rebuild":
             builder.clean()
+        
+        if buildType == "uninstall" or buildType == "clean_and_uninstall" or buildType == "rebuild":
+            uninstall();
             
         if buildType == "build" or buildType == "rebuild":
             check_config_dots_generated()

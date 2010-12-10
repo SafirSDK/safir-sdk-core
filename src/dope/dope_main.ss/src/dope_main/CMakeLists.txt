@@ -4,6 +4,11 @@ PROJECT (dope_main)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
+if (UNIX)
+    FIND_PACKAGE(IODBC REQUIRED)
+    INCLUDE_DIRECTORIES(${IODBC_INCLUDE_DIRS})
+endif()
+
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 

@@ -24,6 +24,8 @@
 ******************************************************************************/
 package com.saabgroup.safir.dob.typesystem;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This singleton can be used to find out mappings between the "dou-namespaces"
@@ -107,19 +109,35 @@ public class NamespaceMappings {
         }
         throw new SoftwareViolationException("Failed to find a valid namespace in " + filename);
     }
+    
+    private void GetNamespaceFiles(File dir, final List<String> list) {
+
+        File[] files = dir.listFiles(new FileFilter() {
+
+            public boolean accept(File pathname) {
+                if (pathname.isDirectory()) 
+                {
+                    GetNamespaceFiles(pathname, list);
+                }
+                    return pathname.getName().endsWith("-java.namespace.txt");
+                }
+        });
+        
+        for (File f: files) {
+            list.add(f.getAbsolutePath());
+        }
+       
+    }
 
     private NamespaceMappings() {
         String dirpath = System.getenv("SAFIR_RUNTIME") + "/data/text/dots/classes/";
         File dir = new File(dirpath);
-        String [] children = dir.list(new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    return name.endsWith("-java.namespace.txt");
-                }
-            });
-        
-        for (String str: children) {
-            String javaNamespacePrefix = readNamespacePrefix(dirpath + str);
-            String douNamespace = str.substring(0,str.lastIndexOf("-java.namespace.txt"));
+        List<String> files = new ArrayList<String>();
+        GetNamespaceFiles(dir, files);
+
+        for (String str: files) {
+            String javaNamespacePrefix = readNamespacePrefix(str);
+            String douNamespace = str.substring(str.lastIndexOf(File.separatorChar)+1,str.lastIndexOf("-java.namespace.txt"));
             m_toJavaMapping.put(douNamespace, javaNamespacePrefix);
         }
     }

@@ -67,12 +67,18 @@ private:
     //implementation of pure virtual from Backend
     virtual void Remove(const Safir::Dob::EntityProxy & entityProxy);
 
+    //implementation of pure virtual from Backend
+    virtual void RemoveAll();
+
     //Insert an empty row into the db
     void Insert(const Safir::Dob::Typesystem::EntityId & entityId);
 
     //Delete a row into the db
     void Delete(Safir::Databases::Odbc::Connection & connectionToUse,
                 const Safir::Dob::Typesystem::EntityId & entityId);
+
+    //Delete all rows from the db
+    void DeleteAll(Safir::Databases::Odbc::Connection & connectionToUse);
 
     /**
      * The main database connection.
@@ -101,6 +107,11 @@ private:
     Safir::Databases::Odbc::Int64Parameter m_insertTypeIdInsertParam;
     Safir::Databases::Odbc::Int64Parameter m_insertInstanceInsertParam;
     Safir::Databases::Odbc::WideStringParameter m_insertTypeNameParam; //236
+
+    /**
+     * Statement used to delete all rows in db
+     */
+    Safir::Databases::Odbc::Statement      m_deleteAllStatement;
 
     /**
      * Statement used to delete a row in db

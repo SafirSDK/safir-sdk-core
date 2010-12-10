@@ -40,6 +40,7 @@
 #if defined _MSC_VER
   #pragma warning (push)
   #pragma warning (disable : 4702)
+  #pragma warning (disable : 4127)
 #endif
 #include <boost/date_time/posix_time/posix_time.hpp>
 #if defined _MSC_VER

@@ -233,12 +233,14 @@ procedure Dots_V is
       procedure Setup_Namespace_Mangling is
          File_Suffix  : constant String :=  S (Match ("Namespace_Prefix_File_Suffix"));
          Namespace_Separator : constant String :=  S (Match ("Namespace_Separator"));
+         Root_Dir : VString := V ("");
+
          procedure Handle_Prefix_File
             (Item  :        String;
              Index :        Positive;
              Quit  : in out Boolean);
 
-         procedure Prefix_Dir is new GNAT.Directory_Operations.Iteration.Wildcard_Iterator
+         procedure Prefix_Dir is new GNAT.Directory_Operations.Iteration.Find
            (Handle_Prefix_File);
 
          function Get_Prefix_From (Filename : String) return String is
@@ -291,7 +293,15 @@ procedure Dots_V is
          if File_Suffix = "" then
             return;
          end if;
-         Prefix_Dir ("*" & File_Suffix );
+
+         if dou_dir = "" then
+            Root_Dir := V (GNAT.Directory_Operations.Get_Current_Dir);
+         else
+            Root_Dir := dou_dir;
+         end if;
+
+         Prefix_Dir (S (Root_Dir), ".*" & File_Suffix );
+
       end Setup_Namespace_Mangling;
 
       procedure Setup_Types is

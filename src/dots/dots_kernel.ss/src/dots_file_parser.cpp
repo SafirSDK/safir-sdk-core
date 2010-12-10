@@ -24,7 +24,7 @@
 
 #include "dots_file_parser.h"
 #include <Safir/Dob/Typesystem/Internal/Id.h>
-#include "dots_basic_types.h"
+#include "dots_basic_types.h" 
 #include "dots_blob_layout.h"
 #include "dots_error_handler.h"
 #include "dots_xml_elements.h"
@@ -33,6 +33,7 @@
 #include "dots_property_parser.h"
 #include "dots_property_mapping_parser.h"
 #include "dots_enum_parser.h"
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>

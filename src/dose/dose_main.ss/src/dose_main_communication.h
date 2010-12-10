@@ -67,6 +67,10 @@ namespace Internal
         //this will block if necessary.
         void PoolDistributionCompleted();
 
+        // tell DoseCom that nodeId need a pool distribution. 
+        void ForcePoolDistribution(const int nodeId);
+
+
         //Check if type shall be distributed (returns true if system is standalone too)
         bool IsLocal(Dob::Typesystem::TypeId tid) const;
 

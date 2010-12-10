@@ -282,6 +282,73 @@ void OdbcPersistor::Remove(const Safir::Dob::EntityProxy & entityProxy)
 }
 
 //-------------------------------------------------------
+void OdbcPersistor::RemoveAll()
+{
+    DeleteAll(m_odbcConnection);
+}
+
+//-------------------------------------------------------
+void OdbcPersistor::DeleteAll(Safir::Databases::Odbc::Connection & connectionToUse)
+{
+    m_debug << "Deleting all" <<std::endl;
+    int retries = 0;
+    bool errorReported = false;
+    bool done = false;
+
+    while (!done)
+    {
+        try
+        {
+            if( !connectionToUse.IsConnected() )
+            {
+                ++retries;
+                connectionToUse.Connect(Safir::Dob::PersistenceParameters::OdbcStorageConnectString());
+            }
+
+            if (!m_deleteAllStatement.IsValid())
+            {
+                m_deleteAllStatement.Alloc(connectionToUse);
+                m_deleteAllStatement.Prepare(L"DELETE FROM PersistentEntity");
+                m_deleteAllStatement.SetStmtAttr( SQL_ATTR_QUERY_TIMEOUT, 15 );
+            }
+
+            try
+            {
+                m_deleteAllStatement.Execute();
+                done = true;
+                if (errorReported)
+                {
+                    Safir::SwReports::SendResourceReport
+                    (L"DATABASE_CONNECTION",true,
+                     L"Successfully connected to the database");
+                    errorReported = false;
+                    retries = 0;
+                }
+            }
+            catch(const Safir::Databases::Odbc::RetryException &)
+            {
+                m_debug << "Caught a RetryException in RemoveAll" << std::endl;
+                ACE_OS::sleep(RETRY_EXCEPTION_DELAY);
+            }
+        }
+        catch(const Safir::Databases::Odbc::ReconnectException &)
+        {
+            m_debug << "Caught a ReconnectException in RemoveAll" << std::endl;
+            if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
+            {
+                Safir::SwReports::SendResourceReport
+                    (L"DATABASE_CONNECTION",false,
+                     L"Failed to connect to the database, will keep trying");
+                errorReported = true;
+            }
+            Disconnect(connectionToUse);
+            Free(m_deleteAllStatement);
+            ACE_OS::sleep(RECONNECT_EXCEPTION_DELAY);
+        }
+    }
+}
+
+//-------------------------------------------------------
 void OdbcPersistor::RestoreAll()
 {
     int connectionAttempts = 0;

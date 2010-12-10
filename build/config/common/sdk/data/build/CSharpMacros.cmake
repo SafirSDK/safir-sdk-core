@@ -2,6 +2,8 @@
 # It defines the following macros:
 #
 # ADD_CS_LIBRARY (<target> <source> [ALL])
+# ADD_CS_MODULE (<target> <source> [ALL])
+# MERGE_CS_LIBRARY (<target> <source> [ALL])
 # ADD_CS_EXECUTABLE (<target> <source> [ALL])
 # ADD_CS_GUI_EXECUTABLE (<target> <source> [ALL]) 
 # INSTALL_GAC (<target>)
@@ -25,6 +27,7 @@
 # copyright (c) 2007 Arno Rehn arno@arnorehn.de
 # copyright (c) 2008 Helio castro helio@kde.org
 # copyright (c) 2009 Lars Hagstrom lars.hagstrom@saabgroup.com
+# copyright (c) 2010 Mikael Wennerberg mikael.wennerberg@saabgroup.com
 #
 # Redistribution and use is allowed according to the terms of the GPL license.
 
@@ -82,7 +85,7 @@ MACRO(ADD_CS_LIBRARY target source)
 	MAKE_PROPER_FILE_LIST("${source}")
 	FILE(RELATIVE_PATH relative_path ${CMAKE_BINARY_DIR} ${target_DLL})
 	
-	SET (response_file ${CS_LIBRARY_TARGET_DIR}/command_line.rsp)
+	SET (response_file ${CS_LIBRARY_TARGET_DIR}/command_line_${target}.rsp)
 	FILE(REMOVE ${response_file})
 	FOREACH(arg ${CS_FLAGS} -out:${target_DLL} -target:library ${proper_file_list})
 		FILE(APPEND ${response_file} "\"${arg}\" ")
@@ -97,6 +100,65 @@ MACRO(ADD_CS_LIBRARY target source)
 	SET(proper_file_list "")
 	SET(CS_FLAGS "")
 ENDMACRO(ADD_CS_LIBRARY)
+
+MACRO(ADD_CS_MODULE target source)
+	GET_CS_LIBRARY_TARGET_DIR()
+
+	#TODO: check versions to see if workaround is needed?
+	IF(CSHARP_IS_MONO)
+	    SET(CS_FLAGS ${CS_FLAGS} -define:FUNC_PTR_WORKAROUND)
+	ENDIF()
+	
+	IF(CUSTOM_BUILD_TYPE STREQUAL "Debug")
+	    SET(CS_FLAGS ${CS_FLAGS} -debug)
+	ENDIF()
+
+	SET(target_MODULE "${CS_LIBRARY_TARGET_DIR}/${target}.netmodule")
+	MAKE_PROPER_FILE_LIST("${source}")
+	FILE(RELATIVE_PATH relative_path ${CMAKE_BINARY_DIR} ${target_MODULE})
+	
+	SET (response_file ${CS_LIBRARY_TARGET_DIR}/command_line_${target}.rsp)
+	FILE(REMOVE ${response_file})
+	FOREACH(arg -out:${target_MODULE} ${CS_FLAGS} -target:module ${proper_file_list})
+		FILE(APPEND ${response_file} "\"${arg}\" ")
+	ENDFOREACH()
+	
+	ADD_CUSTOM_COMMAND (OUTPUT ${target_MODULE}
+		COMMAND ${CSHARP_COMPILER} @${response_file}
+		DEPENDS ${source}
+		COMMENT "Building ${relative_path}")
+	ADD_CUSTOM_TARGET (${target} ${ARGV2} DEPENDS ${target_MODULE})
+	SET(relative_path "")
+	SET(proper_file_list "")
+	SET(CS_FLAGS "")
+ENDMACRO(ADD_CS_MODULE)
+
+MACRO(MERGE_CS_LIBRARY target source)
+	GET_CS_LIBRARY_TARGET_DIR()
+
+	IF(CUSTOM_BUILD_TYPE STREQUAL "Debug")
+	    SET(CS_FLAGS ${CS_FLAGS} -debug)
+	ENDIF()
+
+	SET(target_DLL "${CS_LIBRARY_TARGET_DIR}/${target}.dll")
+	MAKE_PROPER_FILE_LIST("${source}")
+	FILE(RELATIVE_PATH relative_path ${CMAKE_BINARY_DIR} ${target_DLL})
+	
+	SET (response_file ${CS_LIBRARY_TARGET_DIR}/command_line_${target}.rsp)
+	FILE(REMOVE ${response_file})
+	FOREACH(arg ${CS_FLAGS} -out:${target_DLL} -target:library ${proper_file_list})
+		FILE(APPEND ${response_file} "\"${arg}\" ")
+	ENDFOREACH()
+	
+	ADD_CUSTOM_COMMAND (OUTPUT ${target_DLL}
+		COMMAND ${CSHARP_LINKER} @${response_file}
+		DEPENDS ${source}
+		COMMENT "Building ${relative_path}")
+	ADD_CUSTOM_TARGET (${target} ${ARGV2} DEPENDS ${target_DLL})
+	SET(relative_path "")
+	SET(proper_file_list "")
+	SET(CS_FLAGS "")
+ENDMACRO(MERGE_CS_LIBRARY)
 
 
 MACRO(ADD_CS_EXECUTABLE target source)

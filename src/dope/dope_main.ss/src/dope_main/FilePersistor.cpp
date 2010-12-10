@@ -73,13 +73,6 @@ void FilePersistor::RemoveFile(const boost::filesystem::path& path) const
 //-------------------------------------------------------
 const boost::filesystem::path GetStorageDirectory()
 {
-    //const char * const safir_runtime = getenv("SAFIR_RUNTIME");
-    //if (safir_runtime == NULL)
-    //{
-    //    throw Safir::Dob::Typesystem::SoftwareViolationException(L"Failed to read environment variable 'SAFIR_RUNTIME'",__WFILE__,__LINE__);
-    //}
-    //const std::string str = safir_runtime;
-
     try
     {
         boost::filesystem::path path;// = boost::filesystem::path(str,boost::filesystem::native);
@@ -239,6 +232,29 @@ FilePersistor::Remove(const Safir::Dob::EntityProxy & entityProxy)
     const boost::filesystem::path path = GetFilePath(boost::make_tuple(entityProxy.GetEntityId(),entityProxy.GetOwner(), std::wstring()));
 
     RemoveFile(path);
+}
+
+//-------------------------------------------------------
+void
+FilePersistor::RemoveAll()
+{
+    for (boost::filesystem::directory_iterator it (m_storagePath);
+        it != boost::filesystem::directory_iterator(); ++it)
+    {
+        try
+        {
+            boost::filesystem::remove(*it);
+        }
+        catch (const boost::filesystem::filesystem_error &)
+        {
+            Safir::SwReports::SendErrorReport
+                (L"Storage error",
+                L"FilePersistor::RemoveFile",
+                std::wstring(L"Could not remove ")
+                + Safir::Dob::Typesystem::Utilities::ToWstring((*it).string())
+                + L", maybe it is read-only!.");
+        }    
+    }
 }
 
 //-------------------------------------------------------

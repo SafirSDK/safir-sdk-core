@@ -1,8 +1,8 @@
-Welcome to Safir SDK Core 4.0.1.
+Welcome to the Safir SDK Core 4.1
 
 Safir SDK Core is released under the GPL v3 license, a copy of which can be found in COPYING.txt.
 
-Currently the SDK contains build and install instructions for Windows with Visual Studio 2005/2008 and Kubuntu/Ubuntu 8.10/9.04/9.10/10.04 with GCC.
+Currently the SDK contains build and install instructions for Windows with Visual Studio 2005/2008 and Kubuntu/Ubuntu 8.10/9.04/9.10 with GCC.
 It is most likely possible to adapt these instructions for other compiler and operating system combinations. The SDK currently supports the x86 and x86_64 platforms.
 
 Please read the INSTALL.Linux.txt document for linux build instructions, and INSTALL.Windows.txt for Windows instructions.

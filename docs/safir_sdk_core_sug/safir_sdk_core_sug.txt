@@ -2637,12 +2637,12 @@ _Safir.Dob.PersistenceParameters.FileStoragePath_::
         The path where files are stored if the file backend is chosen. Obviously dope_main needs write permissions here.
 _Safir.Dob.PersistenceParameters.OdbcStorageConnectString_::
         The connection string to use to connect to the database.
-
-The persistence service has support for hot-standby and redundancy.
-Configure the persistence storage to point out a shared network storage like a shared disk/NAS or a database/database cluster.
-Then you can start dope_main in 2 nodes. The dope_main that starts first become the active one, and the other one starts in a hot-standby mode.
-If the node running the active dope_main goes down, the hot-standby dope_main is activated and the persistence service will continue to run.
-
+_Safir.Dob.PersistenceParameters.StandaloneMode_::
+        StandaloneMode means that each dope_main that is started is saving persistent data in its own storage.
+        Only valid if several dope_main runs on different nodes in a redundant system.
+        [red]*This functionality should be used vid caution.*
+        If the dope_main starting as active is missing persistent data, all other persistent data storages will be cleared and persistent data will be lost!
+        I.e. the active dope_mains persistent data will override the other storages.
 
 There is more information about the persistence service in <<persistence_service>>.
 
@@ -2811,6 +2811,23 @@ This means that it is possible to run dope_bin2xml, edit the xml data, and then 
 This also allows for a solution to a common problem: When a dou file is changed (a member is added or removed or an array length is changed) any old stored binary persistent data is unusable (this is because the binaries are interpreted directly using the dou-files, e.g. by jumping straight in and getting some specific bytes out for a certain member). But loading stored data in xml format is much more "compatible" with respect to dou-file changes, so if you run dope_bin2xml, then change the dou-files and recompile dots_generated, and then start the system you are much more likely to have usable data in the persistent entities.
 
 This works with adding members, or changing array lengths, but not with removing or renaming members (unless they are _null_ in the persisted data, in which case they are not present in the xml). Of course if your persistent data is valuable, you can always edit the xml "by hand" to keep it. Just remember to do dope_bin2xml _before_ you change your Dob object definitions.
+
+.Redundancy
+The persistence service has support for hot-standby/redundancy.
+To enable hot-standby persistence configure the persistence storage to point out a shared network storage like a shared disk/NAS or a database/database cluster.
+Then you can start dope_main in 2 or more nodes. The dope_main that starts first become the active one, and the other ones starts in a hot-standby mode.
+If the node running the active dope_main goes down, one of the hot-standby dope_main is activated and the persistence service will continue to run.
+
+.Simple redundancy
+There is also a possibility to have a simple redundancy where each started dope_main is saving persistent data in its own storage.
+The storage can be as in normal case files or database and can be different on each node (i.e. one node can have file storage and another can have database storage).
+The dope_main that becomes the active one during system startup will read its persistent data and inject it to the system,
+the other backup dope_mains will synchronize their storage with the data in the dob. All dope_mains will then start saving all data in the system that is tagged for persistence.
+This functionality is enabled with the parameter StandaloneMode (see <<persistence_config>>).
+
+[red]*This functionality should be used vid caution.*
+If the dope_main starting as active is missing persistent data, all other persistent data storages will be cleared and persistent data will be lost!
+I.e. the active dope_mains persistent data will override the other storages.
 
 == Utilities
 

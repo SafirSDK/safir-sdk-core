@@ -136,9 +136,15 @@ Type:Watt64:Float64:"Safir::Dob::Typesystem::Si64::Watt":"Safir/Dob/Typesystem/V
 #else
 #define GENERATED_API __declspec(dllimport)
 #ifdef _DEBUG
-#pragma comment( lib, "dots_generated-cppd.lib" )
+
+@@TABLE@@
+@@IF@@ @_TABLE_LINE_@=1
+#pragma comment( lib, "dots_generated-@_NAMESPACEV_@-cppd.lib" )
 #else
-#pragma comment( lib, "dots_generated-cpp.lib" )
+#pragma comment( lib, "dots_generated-@_NAMESPACEV_@-cpp.lib" )
+@@END_IF@@
+@@END_TABLE@@
+
 #endif
 #endif
 #endif
@@ -288,9 +294,13 @@ namespace @_NAMESPACEV_@
 #else
 #define GENERATED_API __declspec(dllimport)
 #ifdef _DEBUG
-#pragma comment( lib, "dots_generated-cppd.lib" )
+@@TABLE@@
+@@IF@@ @_TABLE_LINE_@=1
+#pragma comment( lib, "dots_generated-@_NAMESPACEV_@-cppd.lib" )
 #else
-#pragma comment( lib, "dots_generated-cpp.lib" )
+#pragma comment( lib, "dots_generated-@_NAMESPACEV_@-cpp.lib" )
+@@END_IF@@
+@@END_TABLE@@
 #endif
 #endif
 #endif
@@ -525,9 +535,13 @@ namespace @_NAMESPACEV_@
 #else
 #define GENERATED_API __declspec(dllimport)
 #ifdef _DEBUG
-#pragma comment( lib, "dots_generated-cppd.lib" )
+@@TABLE@@
+@@IF@@ @_TABLE_LINE_@=1
+#pragma comment( lib, "dots_generated-@_NAMESPACEV_@-cppd.lib" )
 #else
-#pragma comment( lib, "dots_generated-cpp.lib" )
+#pragma comment( lib, "dots_generated-@_NAMESPACEV_@-cpp.lib" )
+@@END_IF@@
+@@END_TABLE@@
 #endif
 #endif
 #endif
@@ -657,9 +671,13 @@ namespace @_NAMESPACEV_@
 #else
 #define GENERATED_API __declspec(dllimport)
 #ifdef _DEBUG
-#pragma comment( lib, "dots_generated-cppd.lib" )
+@@TABLE@@
+@@IF@@ @_TABLE_LINE_@=1
+#pragma comment( lib, "dots_generated-@_NAMESPACEV_@-cppd.lib" )
 #else
-#pragma comment( lib, "dots_generated-cpp.lib" )
+#pragma comment( lib, "dots_generated-@_NAMESPACEV_@-cpp.lib" )
+@@END_IF@@
+@@END_TABLE@@
 #endif
 #endif
 #endif

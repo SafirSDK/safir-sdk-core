@@ -22,10 +22,22 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Typesystem/Defs.h>
-#include <boost/date_time/time_duration.hpp>
-#include <boost/date_time/gregorian/greg_date.hpp>
 #include <Safir/Time/TimeProvider.h>
 #include <Safir/Time/Internal/Interface.h>
+
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4127)
+#endif
+
+#include <boost/date_time/time_duration.hpp>
+#include <boost/date_time/gregorian/greg_date.hpp>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 using namespace boost::date_time;
 

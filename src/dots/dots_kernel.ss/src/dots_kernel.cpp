@@ -40,7 +40,19 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/exception.hpp>
+
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4127)
+#endif
+
 #include <boost/date_time/posix_time/posix_time.hpp>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 #include <ace/Thread_Mutex.h>
 #include <ace/Guard_T.h>

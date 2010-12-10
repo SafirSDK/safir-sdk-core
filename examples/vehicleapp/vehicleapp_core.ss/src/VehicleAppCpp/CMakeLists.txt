@@ -4,8 +4,9 @@ PROJECT (VehicleAppCpp)
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 FILE(GLOB sources *.cpp)
+FILE(GLOB headers *.h)
 
-ADD_EXECUTABLE(VehicleAppCpp ${sources})
+ADD_EXECUTABLE(VehicleAppCpp ${sources}  ${headers})
 
 TARGET_LINK_LIBRARIES(VehicleAppCpp ${COMMON_LIBRARIES} ${ACE_LIBRARY})
 

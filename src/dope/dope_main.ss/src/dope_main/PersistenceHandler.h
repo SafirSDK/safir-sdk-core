@@ -28,6 +28,7 @@
 
 #include <Safir/Dob/Connection.h>
 #include <Safir/Application/Tracer.h>
+#include <Safir/Utilities/AceDispatcher.h>
 
 /**
  * Abstract base class for all persistance backends.
@@ -44,7 +45,7 @@ public:
     virtual ~PersistenceHandler();
 
     void Start(bool restore);
-
+    void Stop();
 
     // From Safir::Dob::EntitySubscriber
     virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy);
@@ -59,11 +60,13 @@ public:
 protected:
 
 
-    void StartSubscriptions();
+    void StartSubscriptions(bool subscribeAll);
 
     void ReportPersistentDataReady();
 
-    Safir::Dob::SecondaryConnection m_dobConnection;
+//    Safir::Dob::SecondaryConnection m_dobConnection;
+    Safir::Dob::Connection  m_dobConnection;
+    Safir::Utilities::AceDispatcher m_dispatcher;
 
     const TypeIdSet & GetPersistentTypes() const {return *m_persistentTypes;}
 
@@ -87,6 +90,11 @@ private:
     virtual void Remove(const Safir::Dob::EntityProxy & entityProxy) = 0;
 
     /**
+     * Remove all objects from storage.
+     */
+    virtual void RemoveAll() = 0;
+
+    /**
      * Restore all objects from the storage.
      * Should also remove stuff that is no longer to be stored.
      */
@@ -103,5 +111,7 @@ private:
     boost::shared_ptr<TypeIdSet> m_persistentTypes;
 
     Safir::Application::Tracer m_debug;
+
+    bool m_started;
 };
 #endif

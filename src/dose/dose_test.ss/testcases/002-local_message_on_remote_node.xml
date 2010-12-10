@@ -8,7 +8,7 @@
     </member>
     <member>
       <name>Expectation</name>
-      <value>Consumer 0 does NOT recieve a local message</value>
+      <value>Consumer 0 does NOT recieve a local message in a multinode conf, for singlenode consumer 0 recieves the message</value>
     </member>
     <member>
       <name>TestCaseSetupActions</name>

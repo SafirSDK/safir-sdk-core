@@ -33,4 +33,4 @@ INSTALL(TARGETS douf_time_library
 INSTALL(FILES ../../data/douf_time_library.gpr
         DESTINATION ${SAFIR_SDK}/ada)
 
-INSTALL_DEBUG_INFO(dots_id)
+INSTALL_DEBUG_INFO(douf_time_library)

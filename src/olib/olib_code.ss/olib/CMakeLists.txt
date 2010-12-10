@@ -6,13 +6,20 @@ INCLUDE_DIRECTORIES(.)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
+if (UNIX)
+    FIND_PACKAGE(IODBC REQUIRED)
+    INCLUDE_DIRECTORIES(${IODBC_INCLUDE_DIRS})
+    SET(LIBS ${LIBS} ${IODBC_LIBRARIES})
+endif()
+
+
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(olib SHARED ${sources} ${headers})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(olib dots_generated-cpp iodbc)
+    TARGET_LINK_LIBRARIES(olib dots_generated-cpp ${LIBS})
 endif()
 
 ADD_DEFINITIONS(-DOLIB_EXPORTS)

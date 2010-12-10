@@ -413,6 +413,11 @@ namespace Internal
         lllout << "Pool distribution completed" << std::endl;
     }
 
+    void ExternNodeCommunication::ForcePoolDistribution(const int nodeId)
+    {
+        lllout << "ForcePoolDistribution to node " << nodeId << std::endl;
+        DoseCom_ForcePoolDistribution(nodeId);
+    }
 
 
     bool ExternNodeCommunication::IsLocal(Dob::Typesystem::TypeId tid) const

@@ -29,7 +29,7 @@ Consumer 0: OnMessage:
 ==========================================================================
 TESTCASE 2
 Description: Test of sending and subscribing of local messages
-Expectation: Consumer 0 does NOT recieve a local message
+Expectation: Consumer 0 does NOT recieve a local message in a multinode conf, for singlenode consumer 0 recieves the message
 --------- Setup -----------
 --------- Test  -----------
 Consumer 0: OnMessage:

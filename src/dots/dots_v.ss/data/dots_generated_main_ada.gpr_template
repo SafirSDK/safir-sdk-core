@@ -1,0 +1,8 @@
+${additional_final_dependecies}
+
+project dots_generated_ada is
+
+   for Source_Files use ();
+   for Source_Dirs use ();
+
+end dots_generated_ada;

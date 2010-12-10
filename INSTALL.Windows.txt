@@ -29,9 +29,9 @@ Boost
 ~~~~~
 The easiest way to install boost is to use the installer provided by BoostPro Computing: http://www.boostpro.com/products/free. Download the newest installer and run it.
  - In the "Select Default Variants" step, select "Visual C++ 8.0" (or "Visual C++ 9.0"), "Multithread Debug, DLL" and "Multithread, DLL". If you need more variants or compilers, check those as well.
- - In the "Choose Components" step you need to check the "Multithread Debug" and "Multithread" under the "VC8.0" or "VC9.0" item under each of "Boost DateTime", "Boost Filesystem", "Boost ProgramOptions", "Boost Regex" and "Boost System" (again, if you need other things as well, select them too).
+ - In the "Choose Components" step you need to check the "Multithread Debug","Multithread","Multithread Debug, DLL" and "Multithread, DLL" under the "VC8.0" or "VC9.0" item under each of "Boost DateTime", "Boost Filesystem", "Boost ProgramOptions", "Boost Regex" and "Boost System" (again, if you need other things as well, select them too).
 
-Add the lib directory of the boost installation (e.g. C:\Program Files\boost\boost_1_39\lib or similar) to your PATH.
+Add the lib directory of the boost installation (e.g. C:\Program Files\boost\boost_1_44\lib or similar) to your PATH.
 
 There are a bugs in all current versions of the Boost libraries that need to be patched for Safir SDK to work correctly. In the build/patches/boost directory there are a set of patches for some recent boost versions. Find the appropriate files and copy them over the corresponding files in your boost installation. (You can also use run "cmake . -G 'NMake Makefiles'", "nmake install" once you have installed cmake, which will install the correct patches automatically).
 
@@ -61,7 +61,7 @@ Qt
 ~~
 Installing Qt is sort of optional. If you don't install it you won't be able to build dobexplorer and one of the example applications. Be aware that building Qt takes a long time (~4h last time I did it). If you decide against installing Qt, you will have to remove the dobexplorer lines from the build/sdk_core_windows.txt file for the build script to complete correctly.
 
-Download the Qt source code from http://www.qtsoftware.com/downloads (direct link to 4.5.0: http://get.qtsoftware.com/qt/source/qt-win-opensource-src-4.5.0.zip), and unzip it to a directory of your choice (must not contain spaces). These instructions assume that you use "C:\Qt".
+Download the Qt source code from http://qt.nokia.com/downloads, and unzip it to a directory of your choice (must not contain spaces). These instructions assume that you use "C:\Qt".
 Create the environment variable QTDIR set it to C:\Qt
 Add %QTDIR%\bin and %QTDIR%\lib to your PATH.
 Open a Visual Studio command prompt and go to c:\qt. 
@@ -155,7 +155,7 @@ Try running start_core.bat (in C:\safir\runtime\bin) to see if everything is wor
 Building example applications
 -----------------------------
 The directory named "examples" contains some test applications. The simplest way to build these is to use the build script with a different configuration file (run after the build of the SDK as described above):
-    build/build_windows.py -f build/example_apps_windows.txt
+    build/build.py -f build/example_apps.txt
 When this is complete you should have a few new applications installed under %SAFIR_RUNTIME%/bin: VehicleAppCpp, VehicleAppCs, VehicleMmiCppQt, VehicleMmiCsWinForms and VehicleAppDb. 
 Note: There is also a build script configuration file dob_tests_windows.txt, which builds the Dob test suite.
 

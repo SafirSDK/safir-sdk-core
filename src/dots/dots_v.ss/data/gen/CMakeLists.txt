@@ -8,13 +8,12 @@ FILE(GLOB dod_files ${dod_directory} *.dod)
 
 if (REBUILD)
    message("Rebuilding all dou files...")
+   FILE(GLOB_RECURSE dou_files ${dots_generated-code_SOURCE_DIR}/../*.dou)
 
    ADD_CUSTOM_COMMAND(OUTPUT tags
        COMMAND dots_v ARGS -dod=${dod_directory} -xdir=${dots_generated-code_SOURCE_DIR}/.. ${dots_generated-code_SOURCE_DIR}/..
-       DEPENDS ${dod_files} ${dots_generated-code_SOURCE_DIR}/..
+       DEPENDS ${dod_files} ${dou_files}
        WORKING_DIRECTORY ..)
-
-
  
    ADD_CUSTOM_TARGET(generated_code ALL
                      DEPENDS tags)

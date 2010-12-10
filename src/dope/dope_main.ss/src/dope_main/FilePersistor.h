@@ -62,6 +62,8 @@ private:
 
     //implementation of pure virtual from Backend
     virtual void Remove(const Safir::Dob::EntityProxy & entityProxy);
+    //implementation of pure virtual from Backend
+    virtual void RemoveAll();
 
     boost::filesystem::path GetFilePath(const EntityIdAndHandlerId& entityAndHandler) const;
 

@@ -59,12 +59,13 @@ DopeApp::DopeApp():
     m_dispatcher(m_dobConnection),
     m_instanceId(Safir::Dob::ThisNodeParameters::NodeNumber()),
     m_persistenceStarted(false),
+    m_persistenceInitialized(false),
     m_debug(L"DopeApp")
 {
     //perform sanity check!
     if (!Safir::Dob::PersistenceParameters::SystemHasPersistence())
     {
-        //std::wcout << "DOPE was started even though Safir.Dob.PersistenceParameters.SystemHasPersistence is set to false. Please check your configuration"<<std::endl;
+        std::wcout << "DOPE was started even though Safir.Dob.PersistenceParameters.SystemHasPersistence is set to false. Please check your configuration"<<std::endl;
         Safir::SwReports::SendFatalErrorReport
             (L"Bad Configuration",L"DopeApp::DopeApp",
              L"DOPE was started even though Safir.Dob.PersistenceParameters.SystemHasPersistence is set to false. Please check your configuration");
@@ -79,9 +80,11 @@ DopeApp::DopeApp():
     }
     catch (Safir::Dob::NotOpenException e)
     {
+        std::wcout << "Failed to connect to DOB. Maybe DOPE is already started on this node." <<std::endl;
         Safir::SwReports::SendFatalErrorReport
             (L"Failed to connect to DOB.",L"DopeApp::DopeApp",
             L"Maybe DOPE is already started on this node.");
+        Safir::SwReports::Stop();
         exit(-1);
     }
 
@@ -115,12 +118,33 @@ void DopeApp::OnStopOrder()
 }
 
 //-------------------------------------------------------
-void DopeApp::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
-                                    const Safir::Dob::Typesystem::HandlerId& )
+void DopeApp::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId,
+                                    const Safir::Dob::Typesystem::HandlerId& handlerId)
 {
-    Safir::SwReports::SendErrorReport
-        (L"OnRevokedRegistration",L"DopeApp::DopeApp",
-        std::wstring(L"Revoked registration : ") + Safir::Dob::Typesystem::Operations::GetName(typeId) );
+    if (handlerId != m_handlerId)
+        return;   // DOPE_ENTITY_HANDLER, not used for this purpose. Handle only the "pending" registration.
+
+    m_debug << L"OnRevokedRegistration() " <<  Safir::Dob::Typesystem::Operations::GetName(typeId) +  L":" + handlerId.GetRawString() << std::endl;
+    //Safir::SwReports::SendErrorReport
+    //    (L"OnRevokedRegistration",L"DopeApp::DopeApp",
+    //     L"Revoked registration : " + Safir::Dob::Typesystem::Operations::GetName(typeId) +  L":" + handlerId.GetRawString());
+
+    std::wcout << L"Dope is now standby persistence." << std::endl;
+
+    // split-join
+    // some other dope has become the master
+    // stop all persistence and restart as pending dope.
+    // If standaloneMode the continue to save persistent data.
+    if (!Safir::Dob::PersistenceParameters::StandaloneMode())
+    {
+        m_persistenceHandler->Stop();
+    }
+
+    // Start pending registration and wait to be the active dope.
+    m_dobConnection.RegisterEntityHandlerPending(Safir::Dob::PersistentDataStatus::ClassTypeId, 
+        m_handlerId,
+        Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
+        this);
 }
 
 void DopeApp::OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
@@ -132,14 +156,14 @@ void DopeApp::OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId     t
         {
             std::wcout << L"Dope is starting as new active persistence."  << std::endl;
             StartUp(true);
-            std::wcout << L"Start completed."  << std::endl;
+            m_debug << L"Start completed."  << std::endl;
             m_persistenceStarted = true;
         } 
         else
         {
             std::wcout << L"Dope is taking over the persistence."  << std::endl;
             StartUp(false);
-            std::wcout << L"Take over completed."  << std::endl;
+            m_debug << L"Take over completed."  << std::endl;
         }
     } 
 }
@@ -173,43 +197,56 @@ void DopeApp::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
             std::wcout << L"Dope is started as standby persistence. Active persistence is running on node ";
             std::wcout << entityProxy.GetInstanceId().GetRawValue() << "." << std::endl;
             m_persistenceStarted = true;
+
+            if (Safir::Dob::PersistenceParameters::StandaloneMode())
+            {
+                // Start saving persistent data
+                Start(false);
+            }
         }
     }     
 }
 
 //-------------------------------------------------------
-
-void DopeApp::StartUp(bool restore)
+void DopeApp::Start(bool restore)
 {
-    //Safir::Dob::PersistentDataStatusPtr status = Safir::Dob::PersistentDataStatus::Create();
-    //status->State().SetVal( Safir::Dob::PersistentDataState::Init);
-    //m_dobConnection.SetAll(status, m_instanceId, m_handlerId);
-
-    switch (Safir::Dob::PersistenceParameters::Backend())
+    m_debug << "Start(" << restore << ")."<< std::endl;
+    if (!m_persistenceInitialized)
     {
-    case Safir::Dob::PersistenceBackend::File:
+        switch (Safir::Dob::PersistenceParameters::Backend())
         {
-            m_debug << "Using file persistence" << std::endl;
-            m_persistenceHandler.reset(new FilePersistor());
-        }
-        break;
+        case Safir::Dob::PersistenceBackend::File:
+            {
+                m_debug << "Using file persistence" << std::endl;
+                m_persistenceHandler.reset(new FilePersistor());
+            }
+            break;
 
-    case Safir::Dob::PersistenceBackend::Odbc:
-        {
-            m_debug << "Using database persistence" << std::endl;
+        case Safir::Dob::PersistenceBackend::Odbc:
+            {
+                m_debug << "Using database persistence" << std::endl;
 #ifndef NO_DATABASE_SUPPORT
-            m_persistenceHandler.reset(new OdbcPersistor());
+                m_persistenceHandler.reset(new OdbcPersistor());
 #endif
-        }
-        break;
+            }
+            break;
 
-    default:
-        throw Safir::Dob::Typesystem::SoftwareViolationException(L"Unknown backend!",__WFILE__,__LINE__);
+        default:
+            throw Safir::Dob::Typesystem::SoftwareViolationException(L"Unknown backend!",__WFILE__,__LINE__);
+        }
+        m_persistenceInitialized = true;
     }
 
     m_persistenceHandler->Start(restore);
+}
 
-    // waith for ok to connect on context 0
+
+//-------------------------------------------------------
+void DopeApp::StartUp(bool restore)
+{
+    Start(restore);
+
+    // wait for ok to connect on context 0
     ACE_Thread::spawn(&DopeApp::ConnectionThread,this);
 }
 

@@ -29,7 +29,17 @@
 #include <map>
 #include <set>
 #include <DoseStressTest/Ping.h>
+
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4127)
+#endif
+
 #include <boost/date_time/posix_time/posix_time.hpp>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 class Pinger :
     public Safir::Dob::EntityHandler,

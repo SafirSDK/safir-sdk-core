@@ -126,7 +126,7 @@ namespace Dob
     {
         if (!IsAttached())
         {
-            throw Dob::NotOpenException(L"This SecondaryConnection is not attached!",__WFILE__,__LINE__);
+            throw Dob::NotOpenException(L"This SecondaryConnection is not attached to an open primary connection!",__WFILE__,__LINE__);
         }
 
         return m_ctrl;

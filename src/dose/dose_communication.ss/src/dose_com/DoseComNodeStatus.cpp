@@ -337,6 +337,14 @@ int CNodeStatus::UpdateNode_Up(unsigned char DoseId,
         g_pNodeStatusTable[DoseId].NewTime  = DoseOs::Get_TickCount(); 
         g_pNodeStatusTable[DoseId].ToBeGivenToAppl     = 2;
         g_pNodeStatusTable[DoseId].ToBePoolDistributed = 2;
+
+        if(IpAddr_nw != g_pNodeStatusTable[DoseId].IpAddr_nw)
+        {
+            // If restarted with new address from DHCP
+            g_pNodeStatusTable[DoseId].IpAddr_nw  = IpAddr_nw; 
+            CConfig::Add_UnicastIpAddr(DoseId, IpAddr_nw);
+        }
+
     }
     // A new node
     else
@@ -464,6 +472,22 @@ int CNodeStatus::CheckTimedOutNodes(void)
                     g_TickPrev = TickNow;
                 }
             }
+            // 2010-11-17 - miwn: check if force pool distribution.
+            else if (g_pNodeStatusTable[jj].Status == NODESTATUS_UP && 
+                g_pNodeStatusTable[jj].ForcePoolDistribution &&
+                !g_pNodeStatusTable[jj].ToBePoolDistributed) 
+            {
+                g_pNodeStatusTable[jj].ToBePoolDistributed = 3; // 3 indicates force pool distribution
+                g_pNodeStatusTable[jj].ForcePoolDistribution = 0; // job done, clear flag
+
+                // activate pool distribution
+                g_pShm->PoolDistributionWillStartSoon = DoseOs::Get_TickCount();
+
+                if(g_pShm->PoolDistributionWillStartSoon == 0) // Must not be 0
+                    g_pShm->PoolDistributionWillStartSoon = 0xFFFFFFFF;
+
+                ChangeCount++;
+            }
         }
     }
 
@@ -512,6 +536,17 @@ int CNodeStatus::CheckTimedOutNodes(void)
     return(ChangeCount);
 }
 /*------------------- end CheckTimedOutNodes() ---------------*/
+
+/****************************************************************
+* Used by DoseComMain.cpp - DoseCom_ForcePoolDistribution
+*
+* Trigger a pooldistribution to DoseId
+*
+*****************************************************************/
+void CNodeStatus::ForcePoolDistribution(int DoseId)
+{
+    g_pNodeStatusTable[DoseId].ForcePoolDistribution = 1;
+}
 
 /****************************************************************
 * Used by DoseComMain.cpp - DoseCommunicationC_GetNodeChange

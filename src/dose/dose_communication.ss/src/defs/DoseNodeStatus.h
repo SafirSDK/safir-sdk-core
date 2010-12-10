@@ -58,7 +58,7 @@ typedef volatile struct
     volatile dcom_uchar8  ToBePoolDistributed; // Set by KeepAlive when a new node comes up
     volatile dcom_uchar8  HasReceivedPdComplete;  // Pool distribution received from this node
     volatile dcom_uchar8  HasReceivedPdStart;     // Pool distribution start received from this node
-    volatile dcom_uchar8  spare1;
+    volatile dcom_uchar8  ForcePoolDistribution;  // Force pool distribution to this node // miwn 2010-11-17
 
     volatile dcom_ushort16 RetryCount;     // # retry send to this node
 
@@ -155,9 +155,13 @@ public:
     static void Set_HasReceivedPdComplete(int DoseId);
 
     static void Set_HasReceivedPdStart(int DoseId);
+
+    static void ForcePoolDistribution(int DoseId);
+
 private:
     static void SetNodeDownWhenInvalidTimeStamp(dcom_uchar8 DoseId);
 
     static void UpdateNodeStatusBitMap(void);
+
 };
 /*----------------------------- end DoseNodeStatus.H -------*/

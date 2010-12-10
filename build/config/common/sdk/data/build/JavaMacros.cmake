@@ -28,6 +28,18 @@ MACRO(GET_JAR_TARGET_DIR)
 	ENDIF ()
 ENDMACRO()
 
+MACRO(GET_JAVA_TARGET_BIN_DIR)
+	IF (NOT JAR_TARGET_DIR_PREFIX)
+		SET(JAVA_TARGET_BIN_DIR "${JAR_TARGET_DIR}/bin")
+	ELSE ()
+		SET(JAVA_TARGET_BIN_DIR "${JAR_TARGET_DIR}/${JAR_TARGET_DIR_PREFIX}_bin")
+	ENDIF ()
+ENDMACRO()
+
+MACRO(SET_JAR_TARGET_DIR_PREFIX arg)
+      SET(JAR_TARGET_DIR_PREFIX ${arg})
+ENDMACRO()
+
 #Some stuff for setting up a java classpath
 if (UNIX)
   SET(classpath_separator ":")
@@ -49,6 +61,7 @@ ENDMACRO()
 
 MACRO(ADD_JAR target source)
 	GET_JAR_TARGET_DIR()
+	GET_JAVA_TARGET_BIN_DIR()
 	
 	IF(CUSTOM_BUILD_TYPE STREQUAL "Debug")
 	    SET(JAVA_FLAGS ${JAVA_FLAGS} -g)
@@ -57,14 +70,14 @@ MACRO(ADD_JAR target source)
 	SET(target_JAR "${JAR_TARGET_DIR}/${target}.jar")
 	FILE(RELATIVE_PATH relative_path ${CMAKE_BINARY_DIR} ${target_JAR})
 	
-	SET (response_file "${JAR_TARGET_DIR}/javac_command_line.rsp")
+	SET (response_file "${JAR_TARGET_DIR}/javac_${target}.rsp")
 	FILE(RELATIVE_PATH relative_response_file ${CMAKE_CURRENT_BINARY_DIR} ${response_file})
 	FILE(REMOVE ${response_file})
 	if(JAVA_CLASSPATH)
 		FILE(WRITE ${response_file} "-cp \"${JAVA_CLASSPATH}\" ")
 	endif()
-    FILE(APPEND ${response_file} "-encoding UTF-8")
-	FOREACH(arg ${JAVA_FLAGS} -d ${JAR_TARGET_DIR}/bin ${source})
+        FILE(APPEND ${response_file} "-encoding UTF-8")
+	FOREACH(arg ${JAVA_FLAGS} -d ${JAVA_TARGET_BIN_DIR} ${source})
 		FILE(APPEND ${response_file} "\"${arg}\" ")
 	ENDFOREACH()
 	
@@ -74,10 +87,10 @@ MACRO(ADD_JAR target source)
 		set (command_start cf)
 	endif()
 	
-	ADD_CUSTOM_COMMAND (OUTPUT ${target_JAR} ${JAR_TARGET_DIR}/bin
-		COMMAND ${CMAKE_COMMAND} -E make_directory ${JAR_TARGET_DIR}/bin
+	ADD_CUSTOM_COMMAND (OUTPUT ${target_JAR} ${JAVA_TARGET_BIN_DIR}
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${JAVA_TARGET_BIN_DIR}
 		COMMAND ${JAVA_COMPILE} @${relative_response_file} -J-Xms256m -J-Xmx256m 
-		COMMAND ${JAVA_ARCHIVE} ${command_start} ${target_JAR} -C "${JAR_TARGET_DIR}/bin"  .
+		COMMAND ${JAVA_ARCHIVE} ${command_start} ${target_JAR} -C ${JAVA_TARGET_BIN_DIR}  .
 		DEPENDS ${source} ${JAVA_MANIFEST}
 		COMMENT "Building ${relative_path}")
 	ADD_CUSTOM_TARGET (${target} ${ARGV2} DEPENDS ${target_JAR})
@@ -87,4 +100,54 @@ MACRO(ADD_JAR target source)
 	SET(JAVA_MANIFEST "")
 ENDMACRO()
 
+
+MACRO(CREATE_JAR target source)
+	GET_JAR_TARGET_DIR()
+	GET_JAVA_TARGET_BIN_DIR()
+	
+	SET(target_JAR "${JAR_TARGET_DIR}/${target}.jar")
+	FILE(RELATIVE_PATH relative_path ${CMAKE_BINARY_DIR} ${target_JAR})
+	file(MAKE_DIRECTORY ${JAVA_TARGET_BIN_DIR})
+
+	if (JAVA_MANIFEST)
+		set (command_start cmf ${JAVA_MANIFEST})
+	else()
+		set (command_start cf)
+	endif()
+
+	set (command_update uf)
+
+	SET (response_file "${JAR_TARGET_DIR}/javac_${target}.rsp")
+	FILE(RELATIVE_PATH relative_response_file ${CMAKE_CURRENT_BINARY_DIR} ${response_file})
+	FILE(REMOVE ${response_file})
+
+        list(APPEND tmp_list ${source})
+        list(GET tmp_list 0 FIRST_SOURCE)
+        list(REMOVE_AT tmp_list 0)
+
+	ADD_CUSTOM_COMMAND (OUTPUT ${target_JAR}
+		COMMAND ${JAVA_ARCHIVE} ${command_start} ${target_JAR} -C "${FIRST_SOURCE}" .
+		DEPENDS ${source} ${JAVA_MANIFEST}
+		COMMENT "Making jar ${relative_path}")
+	ADD_CUSTOM_TARGET (${target} ${ARGV2} DEPENDS ${target_JAR})
+
+        set(i 0)
+ 	FOREACH(arg ${tmp_list})
+            set(j ${i})
+            math(EXPR i "${i} + 1")
+	    ADD_CUSTOM_COMMAND (OUTPUT ${target_JAR}_${i}
+		    COMMAND ${JAVA_ARCHIVE} ${command_update} ${target_JAR} -C "${arg}" .
+		    DEPENDS ${source} ${arg}
+		    COMMENT "Updating jar ${relative_path}")
+	    ADD_CUSTOM_TARGET (${target}_${i} ${ARGV2} DEPENDS ${target_JAR}_${i})
+            add_dependencies(${target}_${i} ${target})
+            if(NOT j EQUAL 0)
+               add_dependencies(${target}_${i} ${target}_${j})
+            endif()
+	ENDFOREACH()   
+
+	SET(relative_path "")
+	SET(JAVA_FLAGS "")
+	SET(JAVA_MANIFEST "")
+ENDMACRO()
 

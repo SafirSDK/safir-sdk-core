@@ -6,7 +6,7 @@
     <members>
         <member>
             <summary>>Defines if this class should be visible in all contexts.</summary>
-            <name>ContextShared</name>s
+            <name>ContextShared</name>
             <type>Boolean</type>
         </member>
     </members>

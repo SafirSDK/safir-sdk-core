@@ -42,9 +42,9 @@ INSTALL(FILES
         data/CMakeLists.txt 
         data/Manifest.java.txt
         data/precompiled_header_for_cpp.h
-        data/Safir-java.namespace.txt
+        data/dots_generated_ada.gpr_template
         data/dots_generated_ada_library.gpr_template
-        data/dots_generated_ada.gpr
+        data/dots_generated_main_ada.gpr_template
         DESTINATION ${SAFIR_SDK}/dots/dots_generated)
 INSTALL(FILES
         data/gen/CMakeLists.txt

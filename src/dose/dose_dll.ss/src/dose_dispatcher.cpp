@@ -429,8 +429,8 @@ namespace Internal
             std::wostringstream moreDesc;
             moreDesc << "Exception while in Dob callback "
                      << CallbackId::ToString(m_callbackStack.top().m_callbackId)
-                     << ". The request being processed was:" << std::endl
-                     << Typesystem::Serialization::ToXml(request.GetBlob()) << std::endl;
+                     << ".The entity being processed was:" << std::endl
+                     << request.GetEntityId() << std::endl;
             Typesystem::LibraryExceptions::Instance().AppendDescription(moreDesc.str());
             Typesystem::LibraryExceptions::Instance().Throw();
         }

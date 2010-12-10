@@ -24,8 +24,20 @@
 #ifndef __DOUF_TIME_H
 #define __DOUF_TIME_H
 
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
+
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4127)
+#endif
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 #if defined _MSC_VER
 #  ifdef DOUF_TIME_CPP_EXPORTS

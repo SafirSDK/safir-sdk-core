@@ -44,19 +44,28 @@ class FatalError(Exception):pass
 def die(message):
     raise FatalError(message)
 
-def copy_dob_files(dir):
-    """Copy dou and dom files from the specified directory to the dots_generated directory"""
+def copy_dob_files(source_dir, target_dir):
+    """Copy dou and dom files from the source directory to the given subdirectory in the dots_genereted directory"""
     import os
     import re
     import shutil
-    if not os.path.isdir(SAFIR_SDK + "/dots/dots_generated"):
-        mkdir(SAFIR_SDK+ "/dots/dots_generated")
+    dots_generated_dir = os.path.join(SAFIR_SDK,"dots","dots_generated")
+    abs_target_dir = os.path.join(dots_generated_dir, target_dir)
+
+    log("Copying dob files from " + source_dir + " to " + abs_target_dir, True)
+    
+    if not os.path.isdir(dots_generated_dir):
+        mkdir(dots_generated_dir)
 
     pattern = re.compile("[a-zA-Z0-9\.\-]*\.do[um]$")
     pattern2 = re.compile("[a-zA-Z0-9\.]*-java\.namespace\.txt$")
-    for filename in os.listdir(dir):
+    for filename in os.listdir(source_dir):
         if pattern.match(filename) or pattern2.match(filename):
-            shutil.copy(dir + "/" + filename,SAFIR_SDK + "/dots/dots_generated/")
+            
+            if not os.path.isdir(abs_target_dir):
+                mkdir(abs_target_dir)
+                
+            shutil.copy2(os.path.join(source_dir, filename), abs_target_dir)
 
 def mkdir(newdir):
     """works the way a good mkdir should :)
@@ -386,7 +395,7 @@ class UnixGccBuilder(object):
 
     def dobmake(self):
         """run the dobmake command"""
-        process = subprocess.Popen((os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b", "--html-output"), #batch mode (no gui)
+        process = subprocess.Popen((os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b", "--html-output", "--rebuild"), #batch mode (no gui)
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
         result = process.communicate()
@@ -463,25 +472,25 @@ def main():
             continue
 
         split_line = line.split()
-        command = split_line[0]
-
-        if len(split_line) > 1:
-            directory = split_line[1]
-
-        configs = list()
-        if len(split_line) > 2:
-            configs.append(split_line[2])
-            
-        if len(split_line) > 3:
-            configs.append(split_line[3])
         
         if in_skip_list(line.strip()):
             log("- Skipping " + str(split_line) + ", matches skip-list",True)
             sys.stdout.flush()
             continue
-            
+                
+        command = split_line[0]
 
         if command == "build_dir":
+            if len(split_line) > 1:
+                directory = split_line[1]
+
+            configs = list()
+            if len(split_line) > 2:
+                configs.append(split_line[2])
+            
+            if len(split_line) > 3:
+                configs.append(split_line[3])
+                
             if not set(configs) <= known_configs:
                 die ("Unknown build kind '" + str(configs) + "' for " + directory)
             if len(configs) < 1:
@@ -489,8 +498,11 @@ def main():
             log("Building " + directory,True)
             build_dir(directory, configs,builder)
         elif command == "copy_dob_files":
-            log("Copying dob file from " + directory,True)
-            copy_dob_files(directory)  
+            if len(split_line) < 3:
+                die ("Need both a source and target directory")
+            if len(split_line) > 3:
+                die ("To many parameters for " + command)
+            copy_dob_files(os.path.normpath(split_line[1]), os.path.normpath(split_line[2]))  
         elif command == "dobmake":
             log("Running dobmake",True)
             dobmake(builder)

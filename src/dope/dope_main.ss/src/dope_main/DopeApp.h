@@ -88,6 +88,7 @@ private:
 
 
     void StartUp(bool restore);
+    void Start(bool restore);
 
     Safir::Dob::Connection  m_dobConnection;
     Safir::Utilities::AceDispatcher m_dispatcher;
@@ -106,6 +107,7 @@ private:
     virtual int handle_input(ACE_HANDLE);
 
     bool m_persistenceStarted; // Any dope has started successfully and loaded persistent data into the system.
+    bool m_persistenceInitialized; // Dope has initialized persistence.
 
     Safir::Application::BackdoorKeeper m_keeper;
 

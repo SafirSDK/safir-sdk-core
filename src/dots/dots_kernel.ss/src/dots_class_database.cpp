@@ -27,6 +27,7 @@
 #include "dots_basic_types.h"
 #include "dots_error_handler.h"
 #include "dots_enum_database.h"
+#include <ace/Guard_T.h>
 
 #include <iostream>
 

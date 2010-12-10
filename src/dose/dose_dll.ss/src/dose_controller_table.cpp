@@ -387,9 +387,8 @@ namespace Internal
 
         if (it == m_controllers.end())
         {
-            throw Safir::Dob::Typesystem::SoftwareViolationException
-                (std::wstring(L"Internal error! An unknown controllerId was used: ") +
-                 boost::lexical_cast<std::wstring>(ctrl),__WFILE__,__LINE__);
+            // Return a null pointer if not found
+            return ControllerConstPtr();
         }
 
         return it->second;

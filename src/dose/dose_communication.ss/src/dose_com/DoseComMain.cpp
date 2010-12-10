@@ -429,6 +429,15 @@ void DoseCom_PoolDistributed(int Priority, int DestinationId)
 }
 
 /************************************************************************
+*
+*************************************************************************/
+void DoseCom_ForcePoolDistribution(int RequestorDoseId)
+{
+    CNodeStatus::ForcePoolDistribution(RequestorDoseId);
+}
+
+
+/************************************************************************
 * If this is called too early, DoseIs is not valid.
 *************************************************************************/
 

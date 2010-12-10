@@ -1,6 +1,8 @@
 #Set SAFIR_RUNTIME and SAFIR_SDK variables to paths that cmake likes.
 FILE(TO_CMAKE_PATH "$ENV{SAFIR_SDK}" SAFIR_SDK)
 FILE(TO_CMAKE_PATH "$ENV{SAFIR_RUNTIME}" SAFIR_RUNTIME)
+file(TO_CMAKE_PATH "$ENV{SAFIR_USER}" SAFIR_USER)
+
 
 #Get some more env variables that may or may not exist (with a stupid way of doing it)
 if ("$ENV{BOOST_DIR}" STREQUAL "")
@@ -17,11 +19,17 @@ endif ()
 
 #add include path
 INCLUDE_DIRECTORIES(${SAFIR_SDK}/include)
+if (SAFIR_USER)
+   INCLUDE_DIRECTORIES(${SAFIR_USER}/sdk/include)
+endif()
 
 #if we're using gcc we need to set up some things
 if (CMAKE_COMPILER_IS_GNUCXX)
    #link directory for libraries (will this work with gcc under windows?)
    LINK_DIRECTORIES(${SAFIR_RUNTIME}/lib)
+   if (SAFIR_USER)
+      LINK_DIRECTORIES(${SAFIR_USER}/runtime/lib)
+   endif()
 
    #turn on more warnings
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
@@ -32,6 +40,9 @@ endif (CMAKE_COMPILER_IS_GNUCXX)
 
 if (MSVC)
    LINK_DIRECTORIES(${SAFIR_SDK}/lib)
+   if (SAFIR_USER)
+      LINK_DIRECTORIES(${SAFIR_USER}/sdk/lib)
+   endif()
    ADD_DEFINITIONS(-DNOMINMAX)
    ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
    ADD_DEFINITIONS(-D_UNICODE -DUNICODE)
@@ -103,15 +114,27 @@ endif()
 
 MACRO(INSTALL_DEBUG_INFO target)
   if(MSVC)
+
     GET_TARGET_PROPERTY(location ${target} LOCATION)
     STRING(REPLACE "$(OutDir)" Debug location ${location})
     STRING(REPLACE .dll ${CMAKE_DEBUG_POSTFIX}.pdb location ${location})
-    INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
+    
+    if (SAFIR_USER)
+      INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/bin CONFIGURATIONS Debug)
+    else()
+      INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
+    endif()
 
     GET_TARGET_PROPERTY(location ${target} LOCATION)
     STRING(REPLACE "$(OutDir)" RelWithDebInfo location ${location})
     STRING(REPLACE .dll ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
-    INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
+
+    if (SAFIR_USER)
+      INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/bin CONFIGURATIONS RelWithDebInfo)
+    else()
+      INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
+    endif()
+
   endif()
 ENDMACRO()
 

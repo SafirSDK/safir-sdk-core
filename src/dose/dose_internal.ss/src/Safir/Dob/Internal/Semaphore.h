@@ -183,7 +183,7 @@ namespace Internal
         ~Semaphore() {};
 
         void wait();
-        bool try_wait() {m_semaphore.try_wait();};
+        bool try_wait() {return m_semaphore.try_wait();};
         void post() {m_semaphore.post();};
 
     private:
