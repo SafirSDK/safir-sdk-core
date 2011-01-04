@@ -114,7 +114,8 @@ namespace Internal
         size_t m_size;
 
         typedef Containers<DistributionData>::list Requests;
-        typedef Containers<std::pair<DistributionData,DistributionData> >::list RequestsAndResponses;
+        typedef std::pair<DistributionData,DistributionData> RequestsAndResponsesPair;
+        typedef Containers<RequestsAndResponsesPair>::list RequestsAndResponses;
 
         void FinishDispatchRequests(Requests& toDispatch,
                                     Requests& dispatchedRequests,

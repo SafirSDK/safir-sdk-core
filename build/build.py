@@ -192,18 +192,31 @@ class VisualStudioBuilder(object):
     def __init__(self):
         VS80 = os.environ.get("VS80COMNTOOLS")
         VS90 = os.environ.get("VS90COMNTOOLS")
+        VS100 = os.environ.get("VS100COMNTOOLS")
+
+        VSCount = 0;
+
+        if VS80 is not None:
+            VSCount = VSCount + 1;
+        if VS90 is not None:
+            VSCount = VSCount + 1;
+        if VS100 is not None:
+            VSCount = VSCount + 1;
 
         self.studio = None
         self.generator = None
         
-        if VS80 is not None and VS90 is not None:
-            log("I found both VS 2005 and VS 2008, will need command line arg!")
+        if VSCount > 1:
+            log("I found both several Visual Studio installations, will need command line arg!")
         elif VS80 is not None:
             self.studio = VS80
             self.generator = "Visual Studio 8 2005"
         elif VS90 is not None:
             self.studio = VS90
             self.generator = "Visual Studio 9 2008"
+        elif VS100 is not None:
+            self.studio = VS100
+            self.generator = "Visual Studio 10"
         else:
             die("Could not find a supported compiler to use!")
 
@@ -219,16 +232,17 @@ class VisualStudioBuilder(object):
     def can_use():
         VS80 = os.environ.get("VS80COMNTOOLS")
         VS90 = os.environ.get("VS90COMNTOOLS")
-        return VS80 is not None or VS90 is not None
+        VS100 = os.environ.get("VS100COMNTOOLS")
+        return VS80 is not None or VS90 is not None or VS100 is not None
 
     def setup_command_line_options(self,parser):
         parser.add_option("--use-studio",action="store",type="string",dest="use_studio",
-                          help="The visual studio to use for building, can be '2005' or '2008'")
+                          help="The visual studio to use for building, can be '2005', '2008' or '2010'")
 
     def handle_command_line_options(self,options):
         if self.studio is None and options.use_studio is None:
             die("Please specify which visual studio you want to use for building.\n" +
-                "Use the --use-studio command line switch")
+                "Use the --use-studio command line switch, can be '2005', '2008' or '2010'")
         elif options.use_studio is not None:
             if options.use_studio == "2005":
                 self.studio = os.environ.get("VS80COMNTOOLS")
@@ -236,6 +250,9 @@ class VisualStudioBuilder(object):
             elif options.use_studio == "2008":
                 self.studio = os.environ.get("VS90COMNTOOLS")
                 self.generator = "Visual Studio 9 2008"
+            elif options.use_studio == "2010":
+                self.studio = os.environ.get("VS100COMNTOOLS")
+                self.generator = "Visual Studio 10"
             else:
                 die ("Unknown visual studio " + options.use_studio)
         

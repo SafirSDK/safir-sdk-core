@@ -145,6 +145,7 @@ PersistenceHandler::ShouldPersist(const Safir::Dob::Typesystem::TypeId typeId)
 {
     try
     {
+        // Check if override property
         bool hasProperty, isInherited;
         Safir::Dob::Typesystem::Operations::HasProperty(typeId, Safir::Dob::InjectionOverrideProperty::ClassTypeId, hasProperty, isInherited);
         if ( hasProperty && !isInherited)
@@ -154,7 +155,14 @@ PersistenceHandler::ShouldPersist(const Safir::Dob::Typesystem::TypeId typeId)
             {
                 return true;
             }
+            else
+            {
+                return false;
+            }
         }
+
+
+        // No override property check InjectionProperty
         if (Safir::Dob::Typesystem::Operations::HasProperty(typeId, Safir::Dob::InjectionProperty::ClassTypeId))
         { //normal persistence property
             Safir::Dob::Typesystem::ObjectPtr obj = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(typeId);
@@ -163,6 +171,7 @@ PersistenceHandler::ShouldPersist(const Safir::Dob::Typesystem::TypeId typeId)
                 return true;
             }
         }
+
         return false;
     }
     catch (const Safir::Dob::Typesystem::NullException &)

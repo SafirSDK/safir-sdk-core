@@ -177,7 +177,12 @@ namespace Internal
                 blob);
 
             //Move request and response to the handled requests list.
-            m_handledRequests.push_back(std::make_pair(**m_currentlyDispatchingRequest,response));
+
+            // workaround for VS2010            
+            //m_handledRequests.push_back(std::make_pair(**m_currentlyDispatchingRequest,response));
+            RequestsAndResponsesPair x1 =  std::make_pair(**m_currentlyDispatchingRequest,response);
+            m_handledRequests.push_back(x1);
+
             m_currentlyDispatchingRequest = NULL;
         }
         else
@@ -204,7 +209,12 @@ namespace Internal
             checker(*findIt,response);
 
             //Move request and response to the handled requests list.
-            m_handledRequests.push_back(std::make_pair(*findIt,response));
+
+            // workaround for VS2010            
+            //m_handledRequests.push_back(std::make_pair(*findIt,response));
+            RequestsAndResponsesPair x1 = std::make_pair(*findIt,response);
+            m_handledRequests.push_back(x1);
+
             m_dispatchedRequests.erase(findIt);
         }
         ++m_noAttachedResponses;

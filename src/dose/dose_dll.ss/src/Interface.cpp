@@ -941,6 +941,7 @@ void DoseC_GetNumberOfInstances(const long ctrl,
             }
             controller->EntityIteratorIncrement(iteratorId, end);
         }
+        controller->EntityIteratorDestroy(iteratorId);
 
         success = true;
     }

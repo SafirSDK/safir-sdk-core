@@ -34,13 +34,14 @@
   #pragma warning (push)
   #pragma warning (disable : 4512)
   #pragma warning (disable : 4127)
+  #pragma warning (disable : 4251)
   #pragma warning (disable : 4267)
 #endif
 
 #include <ace/Auto_Event.h>
 #include <ace/Thread.h>
 #include <ace/Synch.h>
-#include <ace/OS.h>
+#include "ace/Guard_T.h"
 
 //and enable the warnings again
 #if defined _MSC_VER

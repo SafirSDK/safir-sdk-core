@@ -587,10 +587,11 @@ package body @_NAMESPACE_@.@_CLASS_@ is
 
       procedure Set_Changed (Self : in out Container;
                              To   : in     Boolean) is
+         Class_Access : constant @_CLASS_@_Class_Access := Ref (Self.Obj_Ptr);
       begin
          Self.Is_Changed := To;
          if not Self.Is_Null then
-            Ref (Self.Obj_Ptr).Set_Changed (To);
+            Class_Access.Set_Changed (To);
          end if;
       end Set_Changed;
 

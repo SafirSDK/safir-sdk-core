@@ -370,14 +370,17 @@ class VisualStudioBuilder(object):
 
         VS80 = getenv_and_normalize("VS80COMNTOOLS")
         VS90 = getenv_and_normalize("VS90COMNTOOLS")
+        VS100 = getenv_and_normalize("VS100COMNTOOLS")
         
         if self.studio == VS80:
             self.generator = "Visual Studio 8 2005"
         elif self.studio == VS90:
             self.generator = "Visual Studio 9 2008"
+        elif self.studio == VS100:
+            self.generator = "Visual Studio 10"
         else:
             die("VSPATH (in dots_generated/dobmake.ini) is set to something I dont recognize\n" +
-                "It should be either the value of %VS80COMNTOOLS% or %VS90COMNTOOLS%")
+                "It should be either the value of %VS80COMNTOOLS%, %VS90COMNTOOLS% or %VS100COMNTOOLS%")
 
         #work out where to put temp files
         self.tmpdir = os.environ.get("TEMP")
@@ -403,7 +406,8 @@ class VisualStudioBuilder(object):
     def can_use():
         VS80 = os.environ.get("VS80COMNTOOLS")
         VS90 = os.environ.get("VS90COMNTOOLS")
-        return VS80 is not None or VS90 is not None
+        VS100 = os.environ.get("VS100COMNTOOLS")
+        return VS80 is not None or VS90 is not None or VS100 is not None
 
     def run_command(self, cmd, description, what, allow_fail = False):
         """Run a command"""

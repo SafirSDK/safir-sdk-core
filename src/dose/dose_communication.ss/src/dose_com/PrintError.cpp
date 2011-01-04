@@ -61,6 +61,7 @@ typedef unsigned long SOCKET;
 // 'U'  - send to UDP
 // 'N'  - no print
 // 'C'  - Print To Console
+// 'R'  - Print to RAM
 // 'S'  - stdout
 // else - stdout
 
@@ -72,6 +73,12 @@ static struct sockaddr_in g_SockName;
 static char g_IpAddr[20] = SERVER_IPADDR;  // might be modified by PrintSetMode()
 
 static char * Get_IpAddr() { return(g_IpAddr); }
+
+static size_t g_ramBufSize = 300000;
+static char* g_ramBuf = 0;
+static char* g_ramFirstFree;
+
+static unsigned int g_logSeq = 0;
 
 //static char g_ProgName[PROGRAM_NAME_LENGTH] = {0};  //Note: this aso offset in msg to server
 
@@ -265,6 +272,39 @@ static int PrintUdp( const char *pMsg0)
 }
 /*----------------- end PrintUdp() -----------------*/
 
+void PrintRam(const char* log)
+{
+    if (g_ramBuf == 0)
+    {
+        // Allocate ram
+        g_ramBuf = new char[g_ramBufSize];
+        memset (g_ramBuf, 0, g_ramBufSize);
+        g_ramBufSize -= 1; // always keep a null termination at the end
+        g_ramFirstFree = g_ramBuf;
+    }
+
+    size_t logLen = strlen(log);
+
+    if (logLen > g_ramBufSize)
+    {
+        printf("DoseCom log message to big for ram buffer!\n");
+    }
+
+    if (logLen > g_ramBufSize - (g_ramFirstFree - g_ramBuf))
+    {
+        // log doesn't fit in whats left of the buffer, start from the beginning.
+        g_ramFirstFree = g_ramBuf;
+    }
+
+    strncpy(g_ramFirstFree, log, logLen);
+    g_ramFirstFree += logLen;
+
+    if (g_ramFirstFree >= g_ramBuf + g_ramBufSize)
+    {
+        g_ramFirstFree = g_ramBuf; 
+    }
+}
+
 /**********************************************************
 * Args as printf
 ***********************************************************/
@@ -272,23 +312,32 @@ static int PrintUdp( const char *pMsg0)
 void PrintDbg( const char *format, ... )
 {
     va_list marker;
-    char    buffer[1024];
+    char    resultBuf[1500];
+    char    logBuf[1024];
+    char    seqNoBuf[240];
 
     va_start( marker, format );     /* Initialize variable arguments. */
 
-    _vsnprintf(buffer, sizeof(buffer), format, marker);
+    _vsnprintf(logBuf, sizeof(logBuf), format, marker);
 
     va_end( marker ); /* needed ? Reset variable arguments */
 
+    sprintf(seqNoBuf,"seq:%d", g_logSeq);
+    ++g_logSeq;
+
+    sprintf(resultBuf,"%s - %s", seqNoBuf, logBuf);
+
     if(g_OutPutMode == 'N') return;
 #ifdef _WIN32
-    if(g_OutPutMode == 'C')     PrintToConsole(buffer);
+    if(g_OutPutMode == 'C')     PrintToConsole(resultBuf);
     else
 #endif
-    if(g_OutPutMode == 'U')     PrintUdp(buffer);
+    if(g_OutPutMode == 'U')     PrintUdp(resultBuf);
+    else
+    if(g_OutPutMode == 'R')     PrintRam(resultBuf);
     else
     {
-        printf("%s", buffer); fflush(stdout);
+        printf("%s", resultBuf); fflush(stdout);
     }
 }
 
@@ -325,6 +374,8 @@ void PrintErr(int ErrorCode, const char *format, ... )
     else
 #endif
     if(g_OutPutMode == 'U') PrintUdp(Buf2);
+    else
+    if(g_OutPutMode == 'R') PrintRam(Buf2);
     else                    printf("%s", Buf2);
 }
 
@@ -339,12 +390,23 @@ void PrintErr(int ErrorCode, const char *format, ... )
 * else - stdout
 *
 ***********************************************************/
-void PrintSetMode(unsigned long mode, char *pIpAddr)  //dotted decimal or NULL
+void PrintSetMode(unsigned long mode,
+                  char *pIpAddr,        //dotted decimal or NULL
+                  size_t ramBufSize) 
 {
     printf("PrintSetMode(%lX,%s)\n",mode, pIpAddr);
 
     if(pIpAddr != NULL)
         strncpy(g_IpAddr, pIpAddr, sizeof(g_IpAddr));
     if(mode != 0) g_OutPutMode = mode;
+
+    g_ramBufSize = ramBufSize;
 }
+
+void FlushRamBuffer()
+{
+    printf("%s", g_ramBuf);
+    fflush(stdout);
+}
+
 /*------------------------- end PrintError.cpp ----------------------*/

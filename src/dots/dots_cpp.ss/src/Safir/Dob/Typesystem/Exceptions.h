@@ -55,6 +55,11 @@ namespace Typesystem
          * No exceptions except FundamentalException and Exception shall ever inherit from this class.
          * See Exception and FundamentalException for more information on how to define your exceptions.
          */
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable:4251)
+#endif
+
         class DOTS_API CommonExceptionBase:
             public std::exception
         {
@@ -168,6 +173,11 @@ namespace Typesystem
              */
             mutable std::string m_ConvertedMessage;
         };
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
     }
 
     /**

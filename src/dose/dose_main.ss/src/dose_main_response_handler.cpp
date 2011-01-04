@@ -116,7 +116,7 @@ namespace Internal
         else if (fromConnection.m_node == m_thisNode)
         {
             //Response to another node
-            lllout << "Sending the response to node " << fromConnection.m_node << std::endl;
+            lllout << "Sending the response to node " << toConnection.m_node << std::endl;
             return m_ecom->Send(response);
         }
 

@@ -221,6 +221,7 @@ volatile static struct
 #define MAX_AHEAD_NF    2   // value 2 --> 3 ahead for non-fragmented
 
 #define MASK_AHEAD      7   // used as: Index = FragmentNumber & MASK_AHEAD
+#define MAX_AHEAD       MASK_AHEAD + 1
 
 // Defines how many messages can be sent from a Queue before
 // letting next Queue send.
@@ -243,7 +244,7 @@ typedef volatile struct
     struct
     {
         volatile dcom_ulong64 DstBitMap64;       //wA
-        volatile dcom_ulong64 ExpAckBitMap64[8]; //wT Nodes that not has sent Ack
+        volatile dcom_ulong64 ExpAckBitMap64[MAX_AHEAD]; //wT Nodes that not has sent Ack
                                             //Fragm: Ix = (FrNum&7). NonFr: Ix = 0;
         char    * volatile pMsgBuff;        //wA
         volatile dcom_ulong32  UsrMsgLength;       //wA
@@ -270,10 +271,11 @@ typedef volatile struct
         volatile dcom_ushort16  NotAckedFragment;   // wT First not acked fragment.
                                     // Init to 0 for non-fragmented msg.
                                     // Init to 1 for fragmented msg
-                                    // Inc to (FragmentNum + 1) when all ack to
-                                    // FragmentNum has been received;
         volatile dcom_ushort16  SentFragment;       // Latest sent fragment. Inc when fragm is sent.
         volatile dcom_ushort16  LastFragment;       // Last fragment to be sent
+        volatile dcom_ushort16  AckAheadFragments[MAX_AHEAD];  // wT Temporary storage for received acks that have a higher
+                                                               // fragment number than NotAckedFragment (They exist due
+                                                               // to the sent ahead mechanism for fragments)
     } TxMsgArr[MAX_XMIT_QUEUE];     // 32 or 64
 
     volatile dcom_ulong64 CurrFragmentedMsgAckBitMap64;  // used for entire fragmented msg
@@ -650,6 +652,86 @@ static int CleanUp_After_Msg_Completed(int qIx)
 }
 /*----------------- end CleanUp_After_Msg_Completed() -------*/
 
+/**************************************************************************
+* Called from TxThread() when a fragment has been acked by all receiving nodes
+*
+* Return true if message has been completed (all fragments are received), otherwise false.
+****************************************************************************/
+static bool HandleCompletedFragment(dcom_ushort16 fragmentNum,
+                                    int           qIx,
+                                    int           txMsgArrIx, 
+                                    int           aheadIx)
+{
+    if(*pDbg>=3)
+    {
+        PrintDbg("#-  HandleCompletedFragment(qIx=%d) FragNum=%X IsXmit/XmitCompl=%X/%X"
+        " Fragm data: Sent/Last/notAck=%X/%X/%X\n",
+        qIx,
+        fragmentNum,
+        TxQ[qIx].TxMsgArr[txMsgArrIx].IsTransmitting,
+        TxQ[qIx].TxMsgArr[txMsgArrIx].TransmitComplete,
+        TxQ[qIx].TxMsgArr[txMsgArrIx].SentFragment,
+        TxQ[qIx].TxMsgArr[txMsgArrIx].LastFragment,
+        TxQ[qIx].TxMsgArr[txMsgArrIx].NotAckedFragment);
+    }
+
+    bool isMsgCompleted = false;
+
+    TxQ[qIx].RetryCount = 0;
+
+    dcom_ushort16 fragNumWithoutLastBit = fragmentNum & 0x7FFF;
+
+    if (fragNumWithoutLastBit > TxQ[qIx].TxMsgArr[txMsgArrIx].NotAckedFragment)
+    {
+        // Fragment acked "ahead". Just record this fact and continue.
+        TxQ[qIx].TxMsgArr[txMsgArrIx].AckAheadFragments[aheadIx] = fragNumWithoutLastBit;
+    }
+    else if (fragNumWithoutLastBit == TxQ[qIx].TxMsgArr[txMsgArrIx].NotAckedFragment)
+    {
+        // It's the expected next ack.
+
+        for (;;)
+        {
+            if(TxQ[qIx].TxMsgArr[txMsgArrIx].NotAckedFragment == TxQ[qIx].TxMsgArr[txMsgArrIx].LastFragment)
+            {
+                if(*pDbg>=2)
+                    PrintDbg("#-  TxThread[%d] LastFragm=%d TransmitComplete\n",
+                    qIx, TxQ[qIx].TxMsgArr[txMsgArrIx].LastFragment);
+
+                g_pShm->Statistics.TotTxCount++;
+                g_pTxStatistics[qIx].CountTxWithAckOk++;
+
+                isMsgCompleted = true;
+
+                CleanUp_After_Msg_Completed(qIx);
+                break;
+            }
+
+            // Next fragment.
+            ++TxQ[qIx].TxMsgArr[txMsgArrIx].NotAckedFragment;
+            // Check if the fragment has already been acked
+            bool alreadyAcked = false;
+            for (int i=0; i < MAX_AHEAD; ++i)
+            {
+                if (TxQ[qIx].TxMsgArr[txMsgArrIx].AckAheadFragments[i] == TxQ[qIx].TxMsgArr[txMsgArrIx].NotAckedFragment)
+                {
+                    // Fragment has already been acked
+                    TxQ[qIx].TxMsgArr[txMsgArrIx].AckAheadFragments[i] = 0;
+                    alreadyAcked = true;
+                    break;
+                }
+            }
+            if (!alreadyAcked)
+            {
+                break;
+            }
+        }
+    }
+
+    return isMsgCompleted;
+}
+/*----------------- end HandleCompletedFragment() -------*/
+
 /*******************************************************************
 * Called from TxThread() each time it has been waked up by an event.
 * Has the Ack_Thread placed any acks on the Ack_Queue[].
@@ -742,7 +824,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
 
                 bThisFragmentIsCompleted = 0;
 
-                // Defines bit in IsTransmitting and index in ExpAckBitMap64[]
+                // Defines bit in IsTransmitting and index in ExpAckBitMap64[] and AckAheadFragments
                 Ahead_Ix = FragmentNum & MASK_AHEAD;
                 FragmBit =  (dcom_uchar8)(1 << (FragmentNum & 7));
 
@@ -793,38 +875,25 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 //--------------------------
                 // Fragment is completed
                 //--------------------------
-                // This is the expected next ack
-
-                if(*pDbg>=3)
-                    PrintDbg("#-  Check_If_Any_Comp(%d) IsXmit/XmitCompl=%X/%X"
-                            " Fragm: Sent/Last/notAck=%X/%X/%X\n",
-                            qIx,
-                            TxQ[qIx].TxMsgArr[TxMsgArr_Ix].IsTransmitting,
-                            TxQ[qIx].TxMsgArr[TxMsgArr_Ix].TransmitComplete,
-                            TxQ[qIx].TxMsgArr[TxMsgArr_Ix].SentFragment,
-                            TxQ[qIx].TxMsgArr[TxMsgArr_Ix].LastFragment,
-                            TxQ[qIx].TxMsgArr[TxMsgArr_Ix].NotAckedFragment);
-
-                // If last fragment completed
-                if(FragmentNum >= TxQ[qIx].TxMsgArr[TxMsgArr_Ix].LastFragment)
+                dcom_ushort16 fragNumWithoutLastBit = FragmentNum & 0x7FFF;
+                if(fragNumWithoutLastBit > TxQ[qIx].TxMsgArr[TxMsgArr_Ix].SentFragment ||
+                   fragNumWithoutLastBit < TxQ[qIx].TxMsgArr[TxMsgArr_Ix].NotAckedFragment)
                 {
-                    if(*pDbg>=2)
-                        PrintDbg("#-  TxThread[%d] LastFragm=%d TransmitComplete\n",
-                        qIx, TxQ[qIx].TxMsgArr[TxMsgArr_Ix].LastFragment);
+                    if(*pDbg>1)
+                        PrintDbg("#-  ******Discarding Erroneous ACK with seqno=%d fragm=%X from DoseId=%d"
+                        " Fragm: Sent/Last/notAck=%X/%X/%X\n",
+                        SequenceNum,
+                        FragmentNum,
+                        DoseIdFrom,
+                        TxQ[qIx].TxMsgArr[TxMsgArr_Ix].SentFragment,
+                        TxQ[qIx].TxMsgArr[TxMsgArr_Ix].LastFragment,
+                        TxQ[qIx].TxMsgArr[TxMsgArr_Ix].NotAckedFragment);
 
-                    g_pShm->Statistics.TotTxCount++;
-                    g_pTxStatistics[qIx].CountTxWithAckOk++;
-
-                    CleanUp_After_Msg_Completed(qIx);
                     goto Continue_WithNext;
                 }
-                else
-                {
-                    TxQ[qIx].RetryCount = 0;  // ??? was in UPS nut not in my ver
-                    if(FragmentNum == TxQ[qIx].TxMsgArr[TxMsgArr_Ix].NotAckedFragment)
-                        TxQ[qIx].TxMsgArr[TxMsgArr_Ix].NotAckedFragment
-                                                            = (dcom_ushort16)(FragmentNum + 1);
-                }
+
+                HandleCompletedFragment(FragmentNum, qIx, TxMsgArr_Ix, Ahead_Ix);
+
                 goto Continue_WithNext;
             }   // end fragmented message
 
@@ -1627,6 +1696,7 @@ static THREAD_API TxThread(void *)
                         {
                             dcom_ushort16 FragNum = TxQ[qIx].TxMsgArr[UseToSendIx].NotAckedFragment;
                             dcom_ushort16 FragBit = (dcom_uchar8)(1<<(FragNum & 7));
+                            dcom_ulong32  Ahead_Ix = FragNum & MASK_AHEAD;
 
                             //PrintDbg("NYTT FragNum=%X\n", FragNum);
 
@@ -1634,16 +1704,12 @@ static THREAD_API TxThread(void *)
                             TxQ[qIx].TxMsgArr[UseToSendIx].TransmitComplete |= FragBit;
                             TxQ[qIx].TxMsgArr[UseToSendIx].IsTransmitting   &= ~FragBit;
 
-                            // If last fragment completed
-                            if(FragNum >= TxQ[qIx].TxMsgArr[UseToSendIx].LastFragment)
+                            // HandleCompletedFragment will call CleanUp_After_Msg_Completed if
+                            // all fragments have been received.
+                            bool msgCompleted = HandleCompletedFragment(FragNum, qIx, UseToSendIx, Ahead_Ix);
+
+                            if (msgCompleted)
                             {
-                                if(*pDbg>=2)
-                                    PrintDbg("#   TxThread[%d] LastFragm=%d TransmitComplete\n",
-                                        qIx, TxQ[qIx].TxMsgArr[UseToSendIx].LastFragment);
-
-                                g_pShm->Statistics.TotTxCount++;
-                                g_pTxStatistics[qIx].CountTxWithAckOk++;
-
                                 // See comment "If last fragment has been sent ...."  30 lines below".
                                 if(TxQ[qIx].GetIxToSend == TxQ[qIx].GetIxToAck)
                                 {
@@ -1652,8 +1718,6 @@ static THREAD_API TxThread(void *)
                                     else
                                         TxQ[qIx].GetIxToSend++;
                                 }
-
-                                CleanUp_After_Msg_Completed(qIx);  //,0
                             }
                             else
                             {
@@ -2094,6 +2158,8 @@ Begin_A_New_Msg:
                     TxQ[qIx].TxMsgArr[GetIxToSend].LastFragment = (dcom_ushort16)
                          (1 + (TxQ[qIx].TxMsgArr[GetIxToSend].UsrMsgLength - 1)
                                     / (FRAGMENT_SIZE - SIZEOF_UDP_MSG_HDR));
+
+                    for (int i=0;i<MAX_AHEAD;++i) TxQ[qIx].TxMsgArr[GetIxToSend].AckAheadFragments[i]=0;
 
                     if(*pDbg>=4)
                         PrintDbg("#   TxThread[%d] A new frag Msg:"

@@ -52,6 +52,7 @@ void PrintErr(int ErrorCode, const char *format, ... );
 * 'U'  - send to UDP
 * 'N'  - no print
 * 'C'  - Print To Console - not for Linux
+* 'R'  - print to RAM
 * 'S'  - stdout
 * else - stdout
 *
@@ -60,5 +61,7 @@ void PrintErr(int ErrorCode, const char *format, ... );
 * dotted decimal - send to this in UDP mode, default = SERVER_IPADDR
 *******************************************************************/
 void PrintSetMode(unsigned long mode, char *pIpAddr);
+
+void FlushRamBuffer();
 
 /*------------------------- end PrintError.H ----------------------*/

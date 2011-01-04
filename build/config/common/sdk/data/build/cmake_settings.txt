@@ -116,7 +116,13 @@ MACRO(INSTALL_DEBUG_INFO target)
   if(MSVC)
 
     GET_TARGET_PROPERTY(location ${target} LOCATION)
-    STRING(REPLACE "$(OutDir)" Debug location ${location})
+    # fix for vs2010
+    if (MSVC_VERSION EQUAL 1600)
+       STRING(REPLACE "$(Configuration)" Debug location ${location})
+    else()
+       STRING(REPLACE "$(OutDir)" Debug location ${location})
+    endif()
+
     STRING(REPLACE .dll ${CMAKE_DEBUG_POSTFIX}.pdb location ${location})
     
     if (SAFIR_USER)
@@ -126,7 +132,13 @@ MACRO(INSTALL_DEBUG_INFO target)
     endif()
 
     GET_TARGET_PROPERTY(location ${target} LOCATION)
-    STRING(REPLACE "$(OutDir)" RelWithDebInfo location ${location})
+    # fix for vs2010
+    if (MSVC_VERSION EQUAL 1600)
+       STRING(REPLACE "$(Configuration)" RelWithDebInfo location ${location})
+    else()
+       STRING(REPLACE "$(OutDir)" RelWithDebInfo location ${location})
+    endif()
+
     STRING(REPLACE .dll ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
 
     if (SAFIR_USER)
@@ -149,9 +161,16 @@ if (CMAKE_CONFIGURATION_TYPES AND CMAKE_BUILD_TYPE)
 	#MESSAGE("Both CMAKE_CONFIGURATION_TYPES and CMAKE_BUILD_TYPE are set! Using CMAKE_BUILD_TYPE as the CUSTOM_BUILD_TYPE")
     SET(CUSTOM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 elseif(CMAKE_CONFIGURATION_TYPES)
-	SET(CUSTOM_BUILD_TYPE "$(OutDir)")
+    # fix for vs2010
+    if (MSVC_VERSION EQUAL 1600)
+       SET(CUSTOM_BUILD_TYPE "$(Configuration)")
+    else()
+       SET(CUSTOM_BUILD_TYPE "$(OutDir)")
+    endif()
+	
 elseif(CMAKE_BUILD_TYPE)
     SET(CUSTOM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 else()
     SET(CUSTOM_BUILD_TYPE "Release")
 endif()
+
