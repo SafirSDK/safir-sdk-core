@@ -841,7 +841,7 @@ namespace Internal
             {
                 ACE_Guard<ACE_Mutex> lck(m_reportQueueLock);
                 m_reportCreator.SetConnectionInfoIfNotSet(m_reportQueue.back());
-                m_connection->Send(m_reportQueue.back(), Safir::Dob::Typesystem::ChannelId(), this);
+                m_connection->Send(m_reportQueue.front(), Safir::Dob::Typesystem::ChannelId(), this);
                 m_reportQueue.pop_front();
             }
         }

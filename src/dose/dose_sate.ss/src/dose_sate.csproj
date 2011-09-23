@@ -372,6 +372,7 @@
     <None Include="TYPEIDCALC.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
     <None Include="safirpublic.snk" />
   </ItemGroup>
   <ItemGroup>

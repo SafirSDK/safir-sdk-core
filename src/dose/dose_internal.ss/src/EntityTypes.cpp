@@ -103,9 +103,10 @@ namespace Internal
     }
 
     void EntityTypes::UnregisterAll(const ConnectionPtr&           connection,
-                                    const Dob::Typesystem::TypeId  typeId)
+                                    const Dob::Typesystem::TypeId  typeId,
+                                    const bool                     explicitUnregister)
     {
-        GetType(typeId).UnregisterAll(connection);
+        GetType(typeId).UnregisterAll(connection, explicitUnregister);
     }
 
     void EntityTypes::RemoteSetRegistrationState(const ConnectionPtr& connection,
@@ -114,13 +115,6 @@ namespace Internal
         m_registrationClock.UpdateCurrentTimestamp(registrationState.GetRegistrationTime());
 
         GetType(registrationState.GetTypeId()).RemoteSetRegistrationState(connection, registrationState);
-    }
-
-    void EntityTypes::RemoteSetUnregistrationState(const DistributionData& registrationState)
-    {
-        m_registrationClock.UpdateCurrentTimestamp(registrationState.GetRegistrationTime());
-
-        GetType(registrationState.GetTypeId()).RemoteSetUnregistrationState(registrationState);
     }
 
     bool EntityTypes::IsRegistered(const Dob::Typesystem::TypeId        typeId,
@@ -329,12 +323,6 @@ namespace Internal
         return GetType(entityId.GetTypeId()).IsCreated(entityId.GetInstanceId(), requestorContext);
     }
 
-    void EntityTypes::RemoteSetGhostEntityState(const DistributionData& entityState)
-    {
-        m_registrationClock.UpdateCurrentTimestamp(entityState.GetRegistrationTime());
-        GetType(entityState.GetTypeId()).RemoteSetGhostEntityState(entityState);
-    }
-
     void EntityTypes::RemoteSetInjectionEntityState(const DistributionData& entityState)
     {
         m_registrationClock.UpdateCurrentTimestamp(entityState.GetRegistrationTime());
@@ -421,6 +409,13 @@ namespace Internal
     const DistributionData EntityTypes::ReadEntity(const Dob::Typesystem::EntityId& entityId, const ContextId readerContext) const
     {
         return GetType(entityId.GetTypeId()).ReadEntity(entityId.GetInstanceId(), readerContext);
+    }
+
+    void EntityTypes::CleanGhosts(const Dob::Typesystem::TypeId      typeId,
+                                  const Dob::Typesystem::HandlerId&  handlerId,
+                                  const ContextId                    context)
+    {
+        GetType(typeId).CleanGhosts(handlerId, context);
     }
 
     EntityType& EntityTypes::GetType(const Typesystem::TypeId typeId)

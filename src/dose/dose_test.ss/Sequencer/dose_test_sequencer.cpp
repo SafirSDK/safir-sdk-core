@@ -27,6 +27,9 @@
 #include <Safir/Dob/NotOpenException.h>
 #include <Safir/Dob/AccessDeniedException.h>
 #include <Safir/Dob/NotFoundException.h>
+#include <Safir/Dob/DistributionChannel.h>
+#include <Safir/Dob/DistributionChannelParameters.h>
+#include <Safir/Dob/NodeParameters.h>
 #include <DoseTest/Partner.h>
 #include <DoseTest/PartnerResponseMessage.h>
 #include <DoseTest/RootEntity.h>
@@ -72,17 +75,31 @@ Sequencer::Sequencer(const int startTc,
                      const int stopTc,
                      const Languages & languages,
                      const bool noTimeout,
-                     const int contextId):
+                     const int contextId,
+                     const std::string& multicastNic):
     m_partnerState(languages),
     m_currentCaseNo(startTc),
+    m_actionSender(multicastNic),
     m_stopTc(stopTc),
     m_state(Created),
     m_lastCleanupTime(boost::posix_time::second_clock::universal_time()),
     m_languages(languages),
     m_noTimeout(noTimeout),
     m_isDumpRequested(false),
-    m_contextId(contextId)
+    m_contextId(contextId),
+    m_testConfig()
 {
+    // Find out if we are running in standalone or multinod configuration
+    Safir::Dob::DistributionChannelPtr systemChannel = Safir::Dob::DistributionChannelParameters::DistributionChannels(0);
+    if (systemChannel->MulticastAddress().Utf8String() == "127.0.0.1")
+    {
+        m_testConfig = DoseTest::TestConfigEnum::StandAlone;
+    }
+    else
+    {
+        m_testConfig = DoseTest::TestConfigEnum::Multinode;
+    }
+
     m_connection.Attach();
 }
 
@@ -141,13 +158,17 @@ void Sequencer::PrepareTestcaseSetup()
     {
         m_currentCase = TestCaseReader::Instance().GetTestCase(m_currentCaseNo);
 
-        if(m_currentCase == NULL)
-        {//no such testcase, try next one.
-            ++m_currentCaseNo;
-            if (m_currentCaseNo > m_stopTc)
-            {
-                return;
-            }
+        if (m_currentCase == NULL)
+        {
+            //no such testcase, try next one.
+            if (++m_currentCaseNo > m_stopTc) return;
+        }
+        else if (!m_currentCase->TestConfig().IsNull() && m_currentCase->TestConfig().GetVal() != m_testConfig)
+        {
+            std::wcout << std::endl
+                << "Skipping testcase " << m_currentCaseNo << " since it isn't applicable in "
+                << DoseTest::TestConfigEnum::ToString(m_testConfig) << " mode." << std::endl;
+            if (++m_currentCaseNo > m_stopTc) return;
         }
         else
         {
@@ -185,23 +206,16 @@ void Sequencer::PrepareTestcaseSetup()
     DoseTest::ActionPtr msg = DoseTest::Action::Create();
     msg->ActionKind().SetVal(DoseTest::ActionEnum::Print);
     msg->PrintString().SetVal(out.str());
-    m_connection.Send(msg,Safir::Dob::Typesystem::ChannelId(),this);
+    m_actionSender.Send(msg);
 }
 void Sequencer::PrepareTestcaseExecution()
 {
     DoseTest::ActionPtr msg = DoseTest::Action::Create();
     msg->ActionKind().SetVal(DoseTest::ActionEnum::Print);
     msg->PrintString().SetVal(L"--------- Test  -----------");
-    m_connection.Send(msg,Safir::Dob::Typesystem::ChannelId(),this);
+    m_actionSender.Send(msg);
     m_currentActionNo=-1;
 }
-
-void Sequencer::OnNotMessageOverflow()
-{
-    std::wcout << "On_Not_Message_Overflow"
-               << std::endl;
-}
-
 
 void Sequencer::ExecuteCurrentAction()
 {
@@ -227,7 +241,8 @@ void Sequencer::ExecuteCurrentAction()
             MaybeFillBinaryMember(m_currentAction->Object().GetPtr());
         }
 
-        m_connection.Send(m_currentAction,m_currentAction->Partner(),this);
+        m_actionSender.Send(m_currentAction);
+
 
         if (m_currentAction->ActionKind() == DoseTest::ActionEnum::CheckReferences ||
             m_currentAction->ActionKind() == DoseTest::ActionEnum::CloseAndCheckReferences ||

@@ -35,8 +35,10 @@ known_configs = set(["Release", "Debug", "MinSizeRel", "RelWithDebInfo"])
 
 #define some global variables
 verbose = False
-skip_list=None
+skip_list= None
 clean = False
+force_config = None
+force_extra_config = None
 
 
 class FatalError(Exception):pass
@@ -153,6 +155,10 @@ def parse_command_line(builder):
                       help="A space-separated list of regular expressions of lines in the command file to skip")
     parser.add_option("--clean", action="store_true",dest="clean",default=False,
                       help="Run 'clean' before building each subsystem.")
+    parser.add_option("--force-config", action="store",type="string",dest="force_config",
+                      help="Build for the given config irrespective of what the command file says about config")
+    parser.add_option("--force-extra-config", action="store",type="string",dest="force_extra_config",
+                      help="Build for the given extra config irrespective of what the command file says about extra_config")    
     parser.add_option("--verbose", "-v", action="store_true",dest="verbose",default=False,
                       help="Print more stuff about what is going on")
     builder.setup_command_line_options(parser)
@@ -178,6 +184,14 @@ def parse_command_line(builder):
     global command_file
     command_file = open(options.command_file,'r')
 
+    global force_config;
+    if (options.force_config != None):
+        force_config = options.force_config
+
+    global force_extra_config;
+    if (options.force_extra_config != None):
+        force_extra_config = options.force_extra_config        
+        
     builder.handle_command_line_options(options)
 
 def find_sln():
@@ -503,10 +517,16 @@ def main():
 
             configs = list()
             if len(split_line) > 2:
-                configs.append(split_line[2])
+                if (force_config != None):
+                    configs.append(force_config)
+                else:
+                    configs.append(split_line[2])
             
             if len(split_line) > 3:
-                configs.append(split_line[3])
+                if (force_extra_config != None):
+                    configs.append(force_extra_config)
+                else:    
+                    configs.append(split_line[3])
                 
             if not set(configs) <= known_configs:
                 die ("Unknown build kind '" + str(configs) + "' for " + directory)

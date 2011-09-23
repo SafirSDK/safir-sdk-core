@@ -705,7 +705,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.InjectableEntity, 987654)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">Some new info</value></member></members></object>
 
@@ -1211,7 +1210,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.InjectableEntity, 54321)
   deletedByOwner = false
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">Blabla</value></member></members></object>
 
@@ -1241,7 +1239,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.SynchronousPermanentEntity, 56789)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousPermanentEntity</name><members><member><name>Info</name><value xml:space="preserve">Blabla</value></member></members></object>
 
@@ -1275,7 +1272,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.SynchronousPermanentEntity, 56789)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousPermanentEntity</name><members><member><name>Info</name><value xml:space="preserve">qwerty</value></member></members></object>
 
@@ -1325,7 +1321,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.InjectableEntity, 565656)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">Some info</value></member><member><name>MoreInfo</name><value xml:space="preserve">Some more changed info</value></member></members></object>
 
@@ -1837,6 +1832,23 @@ Expectation: Partner 0 receives OnNewInjectedEntity. Partner 1 receives OnNewEnt
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
+TESTCASE 815
+Description: Test of overregistration of a handler for a synchronous volatile persistence type. The instance is deleted by the new registerer when injected.
+Expectation: Node 0 receives OnInitialInjectionsDone and OnRevokedRegistration. Node 1 receives OnNewEntity and OnDeletedEntity. Node 2 receives OnInjectedNewEntity and OnInitialInjectionsDone.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 123)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Kalle</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
 TESTCASE 830
 Description: Test of volatile persistence with two different handlers for the same type
 Expectation: Partner 0 receives OnNewInjectedEntity for instance 678678. Partner 1 receives OnNewInjectedEntity for instance 353535
@@ -2265,6 +2277,1042 @@ Description: Test that a backdoor keeper can be "restarted" when the main connec
 Expectation: Partner 0 shall receive command "test-command 1" and "test-command 3"
 --------- Setup -----------
 --------- Test  -----------
+==========================================================================
+TESTCASE 1200
+Description: Test that a split/join between a server and a client (no redundancy), where the server doesn't make any updates during the split, gives consistent caches when joined
+Expectation: Partner 2: Receives OnNewEntity for GlobalEntity inst 543 and SynchronousVolatileEntity inst 876. After the split, OnDeletedEntity (deletedByOwner=false) is received. After the join, OnNewEntity for the original entities is received. Partner 1: Receivies OnNewEntity for the same instances as partner 2.
+--------- Setup -----------
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.GlobalEntity, 543)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 543 created by partner 0</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 876)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 876 created by partner 0</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.SynchronousVolatileEntity, 876)
+  deletedByOwner = false
+  Owner          = DEFAULT_HANDLER
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 876 created by partner 0</value></member></members></object>
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.GlobalEntity, 543)
+  deletedByOwner = false
+  Owner          = DEFAULT_HANDLER
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 543 created by partner 0</value></member></members></object>
+
+--------- Test  -----------
+InhibitOutgoingTraffic set to 0
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 876)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 876 created by partner 0</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.GlobalEntity, 543)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 543 created by partner 0</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+==========================================================================
+TESTCASE 1201
+Description: Test that a split/join between a server and a client (no redundancy), where the server make updates during the split, gives consistent caches when joined
+Expectation: Partner 2: Receives OnNewEntity for GlobalEntity inst 543 and SynchronousVolatileEntity inst 876. After the split, OnDeletedEntity (deletedByOwner=false) is received. After the join, OnNewEntity with info members that indicates 'UPDATED' is received. Partner 1: Receivies OnNewEntity and OnUpdatedEntity.
+--------- Setup -----------
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.GlobalEntity, 543)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 543 created by partner 0</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 876)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 876 created by partner 0</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.SynchronousVolatileEntity, 876)
+  deletedByOwner = false
+  Owner          = DEFAULT_HANDLER
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 876 created by partner 0</value></member></members></object>
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.GlobalEntity, 543)
+  deletedByOwner = false
+  Owner          = DEFAULT_HANDLER
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 543 created by partner 0</value></member></members></object>
+
+--------- Test  -----------
+InhibitOutgoingTraffic set to 0
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 876)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 876 UPDATED by partner 0</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.GlobalEntity, 543)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 543 UPDATED by partner 0</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+==========================================================================
+TESTCASE 1202
+Description: Test that a split/join between a server and a client (no redundancy), where the server makes a "reregistration" during the split, gives consistent caches when joined.
+Expectation: Partner 2: Receives OnNewEntity for GlobalEntity inst 543 and SynchronousVolatileEntity inst 876. After the split, OnDeletedEntity (deletedByOwner=false) is received. After the join, OnNewEntity with info members that indicates 'SET IN NEW REGISTRATION' is received. Partner 1: Receivies subscription callbacks corresponding to partner 0 actions.
+--------- Setup -----------
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.GlobalEntity, 543)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 543 created by partner 0</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 876)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 876 created by partner 0</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.SynchronousVolatileEntity, 876)
+  deletedByOwner = false
+  Owner          = DEFAULT_HANDLER
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 876 created by partner 0</value></member></members></object>
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.GlobalEntity, 543)
+  deletedByOwner = false
+  Owner          = DEFAULT_HANDLER
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 543 created by partner 0</value></member></members></object>
+
+--------- Test  -----------
+InhibitOutgoingTraffic set to 0
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 876)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 876 SET IN NEW REGISTRATION by partner 0</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.GlobalEntity, 543)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 543 SET IN NEW REGISTRATION by partner 0</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+==========================================================================
+TESTCASE 1220
+Description: Test that a split/join for a redundant handler gives consistent caches when joined.
+Expectation: Caches in node 0 and node 1 are consistent and corrsponds to what has happened in one of the nodes.
+--------- Setup -----------
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 2)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 0</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 3)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 3 created by partner 0</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 4)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 4 created by partner 0</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 5)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 5 created by partner 0</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 6)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 6 created by partner 0</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = DEFAULT_HANDLER
+
+--------- Test  -----------
+InhibitOutgoingTraffic set to 0
+Consumer 0: Iterating over entities of type DoseTest.SynchronousVolatileEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1):
+     Owner     = DEFAULT_HANDLER
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = DEFAULT_HANDLER
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0</value></member></members></object>
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 2):
+     Owner     = DEFAULT_HANDLER
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = DEFAULT_HANDLER
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 0</value></member></members></object>
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 3):
+     Owner     = DEFAULT_HANDLER
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = DEFAULT_HANDLER
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 3 updated by partner 2</value></member></members></object>
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 4):
+     Owner     = DEFAULT_HANDLER
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = DEFAULT_HANDLER
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 4 third update by partner 2</value></member></members></object>
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 5):
+     Owner     = DEFAULT_HANDLER
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = DEFAULT_HANDLER
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 5 update by partner 2</value></member></members></object>
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 8):
+     Owner     = DEFAULT_HANDLER
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = DEFAULT_HANDLER
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 8 created by partner 2</value></member></members></object>
+
+Consumer 0: OnRevokedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 1231
+Description: Checks that a "newer" reg wins over an unreg.
+Expectation: Caches in node 0 and node 1 are consistent. Node 1 retains its ownership of HANDLER1 after the join.
+--------- Setup -----------
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 1</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -484169350354326213
+
+--------- Test  -----------
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 1</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -484169350354326213
+
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 1</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -484169350354326213
+
+InhibitOutgoingTraffic set to 0
+Consumer 0: OnRegistered:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: Iterating over entities of type DoseTest.SynchronousVolatileEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1):
+     Owner     = -484169350354326213
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = -484169350354326213
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 1</value></member></members></object>
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1)
+  Owner     = -484169350354326213
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -484169350354326213
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 1</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+==========================================================================
+TESTCASE 1232
+Description: Checks that a "newer" unreg wins over a reg.
+Expectation: Caches in node 0 and node 1 are consistent. No registrations are present. No real instances. Two ghost instances.
+--------- Setup -----------
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER2
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 2</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 2)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 2, Handler 2</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -8110135061984900363
+
+--------- Test  -----------
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER2
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 2</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 2)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 2, Handler 2</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -8110135061984900363
+
+InhibitOutgoingTraffic set to 0
+Consumer 0: Iterating over entities of type DoseTest.SynchronousVolatileEntity:
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1)
+  Owner     = -8110135061984900363
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -8110135061984900363
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 2</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.SynchronousVolatileEntity, 1)
+  deletedByOwner = false
+  Owner          = -8110135061984900363
+  OwnerStr  = -8110135061984900363
+  Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 2</value></member></members></object>
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 2)
+  Owner     = -8110135061984900363
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -8110135061984900363
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 2, Handler 2</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.SynchronousVolatileEntity, 2)
+  deletedByOwner = false
+  Owner          = -8110135061984900363
+  OwnerStr  = -8110135061984900363
+  Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 2, Handler 2</value></member></members></object>
+
+==========================================================================
+TESTCASE 1233
+Description: Checks that a "newer" reg wins over an older reg.
+Expectation: Caches in node 0 and node 1 are consistent. P2's registration and instance exist.
+--------- Setup -----------
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER2
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 2</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 2)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 2, Handler 2</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -8110135061984900363
+
+--------- Test  -----------
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER2
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 2</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 2)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 2, Handler 2</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -8110135061984900363
+
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER2
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 2</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 2)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 2, Handler 2</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -8110135061984900363
+
+InhibitOutgoingTraffic set to 0
+Consumer 0: OnRegistered:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER2
+
+Consumer 0: Iterating over entities of type DoseTest.SynchronousVolatileEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1):
+     Owner     = -8110135061984900363
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = -8110135061984900363
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 2</value></member></members></object>
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 2):
+     Owner     = -8110135061984900363
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = -8110135061984900363
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 2, Handler 2</value></member></members></object>
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1)
+  Owner     = -8110135061984900363
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -8110135061984900363
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 2</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 2)
+  Owner     = -8110135061984900363
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -8110135061984900363
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 2, Handler 2</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+==========================================================================
+TESTCASE 1234
+Description: Checks that different regs in disconnected nodes remain when connected.
+Expectation: Caches in node 0 and node 1 are consistent. Both P1's and P2's registrations and instances exist.
+--------- Setup -----------
+InhibitOutgoingTraffic set to 1
+--------- Test  -----------
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER_P2
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER_P2
+
+InhibitOutgoingTraffic set to 0
+Consumer 0: OnRegistered:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER_P2
+
+Consumer 0: OnRegistered:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER_P0
+
+Consumer 0: Iterating over entities of type DoseTest.SynchronousVolatileEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 75):
+     Owner     = 2050775405146319762
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = 2050775405146319762
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 75 created by partner 0, HANDLER_P0</value></member></members></object>
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 99):
+     Owner     = -1873809326200969542
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = -1873809326200969542
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 99 created by partner 2, HANDLER_P2</value></member></members></object>
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 75)
+  Owner     = 2050775405146319762
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = 2050775405146319762
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 75 created by partner 0, HANDLER_P0</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 99)
+  Owner     = -1873809326200969542
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -1873809326200969542
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 99 created by partner 2, HANDLER_P2</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+==========================================================================
+TESTCASE 1240
+Description: Test that a split/join, where P0 makes an unreg while disconnected, gives consistent caches when joined.
+Expectation: Caches in node 0 and node 1 are consistent (HANDLER1 is registered. Instance 1 with owner connection Server_1;0;partner_test_connection;2 exists)
+--------- Setup -----------
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 1</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -484169350354326213
+
+--------- Test  -----------
+InhibitOutgoingTraffic set to 0
+Consumer 0: OnRegistered:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: Iterating over entities of type DoseTest.SynchronousVolatileEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1):
+     Owner     = -484169350354326213
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = -484169350354326213
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 1</value></member></members></object>
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1)
+  Owner     = -484169350354326213
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -484169350354326213
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1 created by partner 0, Handler 1</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+==========================================================================
+TESTCASE 1241
+Description: Test that a split/join, where P2 makes an unreg while disconnected, gives consistent caches when joined.
+Expectation: Caches in node 0 and node 1 are consistent (No handler registrations and no real instances exist. One ghost instance exists)
+--------- Setup -----------
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1241)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1241 created by partner 0, Handler 1</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -484169350354326213
+
+--------- Test  -----------
+InhibitOutgoingTraffic set to 0
+Consumer 0: Iterating over entities of type DoseTest.SynchronousVolatileEntity:
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1241)
+  Owner     = -484169350354326213
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -484169350354326213
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1241 created by partner 0, Handler 1</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.SynchronousVolatileEntity, 1241)
+  deletedByOwner = false
+  Owner          = -484169350354326213
+  OwnerStr  = -484169350354326213
+  Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1241 created by partner 0, Handler 1</value></member></members></object>
+
+==========================================================================
+TESTCASE 1242
+Description: Test that a split/join, where P0 and P2 make an unreg while disconnected, gives consistent caches when joined.
+Expectation: Caches in node 0 and node 1 are consistent (No handler registrations and no real instances exist. One ghost instance exists)
+--------- Setup -----------
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1242)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1242 created by partner 0, Handler 1</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -484169350354326213
+
+--------- Test  -----------
+InhibitOutgoingTraffic set to 0
+Consumer 0: Iterating over entities of type DoseTest.SynchronousVolatileEntity:
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1242)
+  Owner     = -484169350354326213
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -484169350354326213
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1242 created by partner 0, Handler 1</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.SynchronousVolatileEntity, 1242)
+  deletedByOwner = false
+  Owner          = -484169350354326213
+  OwnerStr  = -484169350354326213
+  Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1242 created by partner 0, Handler 1</value></member></members></object>
+
+==========================================================================
+TESTCASE 1243
+Description: Test that a split/join, where P0 makes an unreg/reg/set while disconnected, gives consistent caches when joined.
+Expectation: Caches in node 0 and node 1 are consistent (HANDLER1 is registered. Instance 1243 exists with text "Instance 1243 created by partner 0, Handler 1")
+--------- Setup -----------
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1243)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1243 created by partner 0, Handler 1</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -484169350354326213
+
+--------- Test  -----------
+InhibitOutgoingTraffic set to 0
+Consumer 0: OnRegistered:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: Iterating over entities of type DoseTest.SynchronousVolatileEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1243):
+     Owner     = -484169350354326213
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = -484169350354326213
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1243 created by partner 0, Handler 1</value></member></members></object>
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1243)
+  Owner     = -484169350354326213
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -484169350354326213
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1243 created by partner 0, Handler 1</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+==========================================================================
+TESTCASE 1244
+Description: Test that a split/join, where P2 makes an unreg/reg/set while disconnected, gives consistent caches when joined.
+Expectation: Caches in node 0 and node 1 are consistent (HANDLER1 is registered. Instance 1244 exists with text "Instance 1244 updated by new registration")
+--------- Setup -----------
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1244)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1244 created by partner 0, Handler 1</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -484169350354326213
+
+--------- Test  -----------
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1244)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1244 created by partner 0, Handler 1</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -484169350354326213
+
+InhibitOutgoingTraffic set to 0
+Consumer 0: OnRegistered:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: Iterating over entities of type DoseTest.SynchronousVolatileEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1244):
+     Owner     = -484169350354326213
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = -484169350354326213
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1244 updated by new registration.</value></member></members></object>
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1244)
+  Owner     = -484169350354326213
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -484169350354326213
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1244 updated by new registration.</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+==========================================================================
+TESTCASE 1245
+Description: Test that a split/join, where P0 and P2 make an unreg/reg/set while disconnected, gives consistent caches when joined.
+Expectation: Caches in node 0 and node 1 are consistent (HANDLER1 is registered. Instance 1245 exists with text "P2: Instance 1245 updated by new registration.")
+--------- Setup -----------
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1245)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1245 created by partner 0, Handler 1</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -484169350354326213
+
+--------- Test  -----------
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1245)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1245 created by partner 0, Handler 1</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -484169350354326213
+
+InhibitOutgoingTraffic set to 0
+Consumer 0: OnRegistered:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: Iterating over entities of type DoseTest.SynchronousVolatileEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1245):
+     Owner     = -484169350354326213
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = -484169350354326213
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">P2: Instance 1245 updated by new registration.</value></member></members></object>
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1245)
+  Owner     = -484169350354326213
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -484169350354326213
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">P2: Instance 1245 updated by new registration.</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+==========================================================================
+TESTCASE 1246
+Description: Test that a split/join, where P0 makes a reg/set for a different handler while disconnected, gives consistent caches when joined.
+Expectation: Caches in node 0 and node 1 are consistent (HANDLER1 and HANDLER2 are registered. Instance 1246 exists with text "Instance 1246 created by partner 0, Handler 1". Instance 2 exists with text "Instance 2 created by partner 0, Handler 2")
+--------- Setup -----------
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1246)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1246 created by partner 0, Handler 1</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -484169350354326213
+
+--------- Test  -----------
+InhibitOutgoingTraffic set to 0
+Consumer 0: OnRegistered:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER2
+
+Consumer 0: OnRegistered:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: Iterating over entities of type DoseTest.SynchronousVolatileEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 2):
+     Owner     = -8110135061984900363
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = -8110135061984900363
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 0, Handler 2</value></member></members></object>
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1246):
+     Owner     = -484169350354326213
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = -484169350354326213
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1246 created by partner 0, Handler 1</value></member></members></object>
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 2)
+  Owner     = -8110135061984900363
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -8110135061984900363
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 0, Handler 2</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1246)
+  Owner     = -484169350354326213
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -484169350354326213
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1246 created by partner 0, Handler 1</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+==========================================================================
+TESTCASE 1247
+Description: Test that a split/join, where P2 makes a reg/set for a different handler while disconnected, gives consistent caches when joined.
+Expectation: Caches in node 0 and node 1 are consistent (HANDLER1 and HANDLER2 are registered. Instance 1247 exists with text "Instance 1247 created by partner 0, Handler 1". Instance 2 exists with text "Instance 2 created by partner 2, Handler 2")
+--------- Setup -----------
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1247)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1247 created by partner 0, Handler 1</value></member><member><name>MoreInfo</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = -484169350354326213
+
+--------- Test  -----------
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER2
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER2
+
+InhibitOutgoingTraffic set to 0
+Consumer 0: OnRegistered:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER2
+
+Consumer 0: OnRegistered:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = HANDLER1
+
+Consumer 0: Iterating over entities of type DoseTest.SynchronousVolatileEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 2):
+     Owner     = -8110135061984900363
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = -8110135061984900363
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 2, Handler 2</value></member></members></object>
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1247):
+     Owner     = -484169350354326213
+     OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+     OwnerStr  = -484169350354326213
+     Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1247 created by partner 0, Handler 1</value></member></members></object>
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 2)
+  Owner     = -8110135061984900363
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -8110135061984900363
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 2 created by partner 2, Handler 2</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 1247)
+  Owner     = -484169350354326213
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>1</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_1;0;partner_test_connection;2</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = -484169350354326213
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Instance 1247 created by partner 0, Handler 1</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
 ==========================================================================
 TESTCASE 9999
 Description: Empty Test case

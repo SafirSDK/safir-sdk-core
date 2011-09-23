@@ -39,7 +39,7 @@ pragma Warnings ("L"); -- turn off warnings for missing elaboration pragma
 
 package Executor is
 
-   procedure Run (Arg : in String);
+   procedure Run;
 
 private
 
@@ -48,13 +48,14 @@ private
    task MainLoop is
       entry Run (Arg : in String);
       entry Dispatch (Conn : in Connection);
+      entry Handle_Action (Action : in Dose_Test.Action.Smart_Pointer);
    end MainLoop;
 
    type Dispatcher is limited new
      Safir.Dob.Consumers.Dispatcher with
-   record
-      Conn :  Connection;
-   end record;
+      record
+         Conn :  Connection;
+      end record;
 
    overriding
    procedure On_Do_Dispatch
@@ -113,34 +114,36 @@ private
 
    overriding
    procedure On_Revoked_Registration
-    (Self       : in out Executor_Type;
-     Type_Id    : in Safir.Dob.Typesystem.Type_Id;
-     Handler_Id : in Safir.Dob.Typesystem.Handler_Id.Handler_Id_Type);
+     (Self       : in out Executor_Type;
+      Type_Id    : in Safir.Dob.Typesystem.Type_Id;
+      Handler_Id : in Safir.Dob.Typesystem.Handler_Id.Handler_Id_Type);
 
    overriding
    procedure On_Create_Request
-    (Self                 : in out Executor_Type;
-     Entity_Request_Proxy : in Safir.Dob.Entity_Request_Proxies.Entity_Request_Proxy;
-     Response_Sender      : in Safir.Dob.Response_Senders.Response_Sender);
+     (Self                 : in out Executor_Type;
+      Entity_Request_Proxy : in Safir.Dob.Entity_Request_Proxies.Entity_Request_Proxy;
+      Response_Sender      : in Safir.Dob.Response_Senders.Response_Sender);
 
    overriding
    procedure On_Update_Request
-    (Self                 : in out Executor_Type;
-     Entity_Request_Proxy : in Safir.Dob.Entity_Request_Proxies.Entity_Request_Proxy;
-     Response_Sender      : in Safir.Dob.Response_Senders.Response_Sender);
+     (Self                 : in out Executor_Type;
+      Entity_Request_Proxy : in Safir.Dob.Entity_Request_Proxies.Entity_Request_Proxy;
+      Response_Sender      : in Safir.Dob.Response_Senders.Response_Sender);
 
    overriding
    procedure On_Delete_Request
-    (Self                 : in out Executor_Type;
-     Entity_Request_Proxy : in Safir.Dob.Entity_Request_Proxies.Entity_Request_Proxy;
-     Response_Sender      : in Safir.Dob.Response_Senders.Response_Sender);
+     (Self                 : in out Executor_Type;
+      Entity_Request_Proxy : in Safir.Dob.Entity_Request_Proxies.Entity_Request_Proxy;
+      Response_Sender      : in Safir.Dob.Response_Senders.Response_Sender);
 
    overriding
    procedure On_Service_Request
-    (Self                  : in out Executor_Type;
-     Service_Request_Proxy : in Safir.Dob.Service_Request_Proxies.Service_Request_Proxy;
-     Response_Sender       : in Safir.Dob.Response_Senders.Response_Sender);
+     (Self                  : in out Executor_Type;
+      Service_Request_Proxy : in Safir.Dob.Service_Request_Proxies.Service_Request_Proxy;
+      Response_Sender       : in Safir.Dob.Response_Senders.Response_Sender);
 
+   procedure Handle_Action (Self : in out Executor_Type;
+                            Action : in Dose_Test.Action.Smart_Pointer);
 
    procedure Execute_Action
      (Self   : in out Executor_Type;

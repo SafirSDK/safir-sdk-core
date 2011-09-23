@@ -102,7 +102,7 @@ package body Dots.Parser is
    procedure Init;
    procedure Allow_Array_Type (Mode : in Element_Type_T);
    procedure Require_String_Length (On : in Boolean);
-   procedure Require_Value_Type (xsd : in Element_Type_T);
+   procedure Require_Value_Type (xsd_el : in Element_Type_T);
 
    ----------------------
    -- Allow_Array_Type --
@@ -118,10 +118,10 @@ package body Dots.Parser is
       end if;
 
       for J in Type_Arr (ctMember)'Range loop
-         if Type_Arr (ctMember) (J).Element_Type = Mode then
-            Type_Arr (ctMember) (J).Rule := Optional_Choice;
-         elsif Type_Arr (ctMember) (J).Element_Type = The_Other then
-            Type_Arr (ctMember) (J).Rule := Not_Allowed;
+         if Type_Arr (ctMember).all (J).Element_Type = Mode then
+            Type_Arr (ctMember).all (J).Rule := Optional_Choice;
+         elsif Type_Arr (ctMember).all (J).Element_Type = The_Other then
+            Type_Arr (ctMember).all (J).Rule := Not_Allowed;
          end if;
       end loop;
    end Allow_Array_Type;
@@ -944,13 +944,13 @@ package body Dots.Parser is
    procedure Require_String_Length (On : in Boolean) is
    begin
       for J in Type_Arr (ctMember)'Range loop
-         if Type_Arr (ctMember) (J).Element_Type = stStringLength then
+         if Type_Arr (ctMember).all (J).Element_Type = stStringLength then
             if On then
-               Type_Arr (ctMember) (J).Rule := Mandatory_Choice;
-               Type_Arr (ctMember) (J + 1).Rule := Mandatory_Choice;
+               Type_Arr (ctMember).all (J).Rule := Mandatory_Choice;
+               Type_Arr (ctMember).all (J + 1).Rule := Mandatory_Choice;
             else
-               Type_Arr (ctMember) (J).Rule := Not_Allowed;
-               Type_Arr (ctMember) (J + 1).Rule := Not_Allowed;
+               Type_Arr (ctMember).all (J).Rule := Not_Allowed;
+               Type_Arr (ctMember).all (J + 1).Rule := Not_Allowed;
             end if;
          end if;
       end loop;
@@ -960,14 +960,14 @@ package body Dots.Parser is
    -- Require_Value_Type --
    ------------------------
 
-   procedure Require_Value_Type (xsd : in Element_Type_T) is
-      pragma Unreferenced (xsd);
+   procedure Require_Value_Type (xsd_el : in Element_Type_T) is
+      pragma Unreferenced (xsd_el);
    begin
       --  TODO: Fix
       null;
---  Type_Arr (ctParameter) (Type_Arr (ctParameter)'Last).Element_Type := xsd;
+--  Type_Arr (ctParameter) (Type_Arr (ctParameter)'Last).Element_Type := xsd_el;
 --        Type_Arr (ctParameterArray)
---          (Type_Arr (ctParameterArray)'Last).Element_Type := xsd;
+--          (Type_Arr (ctParameterArray)'Last).Element_Type := xsd_el;
    end Require_Value_Type;
 
    ---------------------
@@ -1015,26 +1015,26 @@ package body Dots.Parser is
                           Dots.Parser.Type_Arr (Top).all);
 
       for J in Dots.Parser.Type_Arr (Top).all'Range loop
-         if Local_Name = S (Dots.Parser.Type_Arr (Top)(J).Name) then
+         if Local_Name = S (Dots.Parser.Type_Arr (Top).all (J).Name) then
             --  Check URI
             if Namespace_URI /= Namespace_Map
-              (Dots.Parser.Type_Arr (Top)(J).URI) then
+              (Dots.Parser.Type_Arr (Top).all (J).URI) then
                Dots.Parser.Error
                := V ("Element """& Local_Name & """ in type """ &
                      Element_Type_T'Image (Top) &
                      """ has URI """ &Namespace_URI& """, expected: """) &
                Namespace_Map
-                 (Dots.Parser.Type_Arr (Top)(J).URI) &
+                 (Dots.Parser.Type_Arr (Top).all (J).URI) &
                V ("""");
                raise Error_Found;
             end if;
 
             --  Mark as given
-            Dots.Parser.Type_Arr (Top)(J).Given := True;
+            Dots.Parser.Type_Arr (Top).all (J).Given := True;
             --  put_line ("Set: " & S (Dots.Parser.Type_Arr (Top)(J).Name));
 
             --  Push new Element
-            Push (Dots.Parser.Type_Arr (Top)(J).Element_Type);
+            Push (Dots.Parser.Type_Arr (Top).all (J).Element_Type);
 
             --  Mark subelements as not given
             if Dots.Parser.Type_Arr (Top) /= null then

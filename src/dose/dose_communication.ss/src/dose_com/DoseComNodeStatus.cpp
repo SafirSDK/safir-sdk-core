@@ -237,9 +237,10 @@ void CNodeStatus::UpdateNodeStatusBitMap(void)
 ******************************************************************************/
 void CNodeStatus::SetNodeDownWhenInvalidTimeStamp(dcom_uchar8 DoseId)
 {
-    if(*pDbg)
-        PrintDbg("*** A node with invalid TimeStamp. DoseId=%d\n", DoseId);
+    PrintErr(0, "*** A node with invalid TimeStamp. DoseId=%d", DoseId);
+    PrintErr(0, "*** Check for multiple nodes with the same DoseId on the network!", DoseId);
 
+    
     g_pNodeStatusTable[DoseId].Status = NODESTATUS_DOWN;
     CDoseComReceive::UpdateNodeUp((dcom_uchar8) DoseId);
     g_pNodeStatusTable[DoseId].ToBeGivenToAppl       = 2;
@@ -473,8 +474,7 @@ int CNodeStatus::CheckTimedOutNodes(void)
                 }
             }
             // 2010-11-17 - miwn: check if force pool distribution.
-            else if (g_pNodeStatusTable[jj].Status == NODESTATUS_UP && 
-                g_pNodeStatusTable[jj].ForcePoolDistribution &&
+            if (g_pNodeStatusTable[jj].ForcePoolDistribution &&
                 !g_pNodeStatusTable[jj].ToBePoolDistributed) 
             {
                 g_pNodeStatusTable[jj].ToBePoolDistributed = 3; // 3 indicates force pool distribution

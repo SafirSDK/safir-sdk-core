@@ -15,6 +15,7 @@
     <value>Open</value>
     <value>Close</value>
     <value>InhibitDispatch</value>
+    <value>InhibitOutgoingTraffic</value>
     <value>Print</value>
 
     <!-- **** Executor and Consumer Actions **** -->

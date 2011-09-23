@@ -60,7 +60,8 @@ DopeApp::DopeApp():
     m_instanceId(Safir::Dob::ThisNodeParameters::NodeNumber()),
     m_persistenceStarted(false),
     m_persistenceInitialized(false),
-    m_debug(L"DopeApp")
+    m_debug(L"DopeApp"),
+    m_connectionThreadRunning(false)
 {
     //perform sanity check!
     if (!Safir::Dob::PersistenceParameters::SystemHasPersistence())
@@ -246,8 +247,12 @@ void DopeApp::StartUp(bool restore)
 {
     Start(restore);
 
-    // wait for ok to connect on context 0
-    ACE_Thread::spawn(&DopeApp::ConnectionThread,this);
+    if (!m_connectionThreadRunning)
+    {
+        m_connectionThreadRunning = true;
+        // wait for ok to connect on context 0
+        ACE_Thread::spawn(&DopeApp::ConnectionThread,this);
+    }
 }
 
 //-------------------------------------------------------
@@ -292,15 +297,41 @@ ACE_THR_FUNC_RETURN DopeApp::ConnectionThread(void * _this)
     DummyDispatcher dispatcher;
     Safir::Dob::Connection tmpConnection;
 
-    tmpConnection.Open(L"DOPE_TMP",L"0",0,NULL,&dispatcher);
-    ACE_Reactor::instance()->notify(This,ACE_Event_Handler::READ_MASK);
+    try
+    {
+        tmpConnection.Open(L"DOPE_TMP",L"0",0,NULL,&dispatcher);
+        ACE_Reactor::instance()->notify(This,ACE_Event_Handler::READ_MASK);
+    }
+    catch (Safir::Dob::NotOpenException e)
+    {
+        Safir::SwReports::SendErrorReport
+            (L"NotOpenException",L"DopeApp::ConnectionThread",
+            L"Connection thread alredy running.");
+        Safir::SwReports::Stop();
+    }
+    catch (const std::exception & e)
+    {
+        Safir::SwReports::SendErrorReport(L"UnhandledException",
+            L"DopeApp::ConnectionThread",
+            Safir::Dob::Typesystem::Utilities::ToWstring(e.what()));
+        Safir::SwReports::Stop();
+    }
+    catch (...)
+    {
+        Safir::SwReports::SendErrorReport(L"UnhandledException",
+            L"DopeApp::ConnectionThread",
+            L"A ... exception occurred in DopeApp::ConnectionThread. "
+            L"Since it was not an exception derived from std::exception "
+            L"I can't provide any more information, sorry.");
+        Safir::SwReports::Stop();
+    }
 
     return NULL;
 }
 
 int DopeApp::handle_input(ACE_HANDLE)
 {
-    // use a different hander to overregister PersistentDataStatus to get the correct registration time.
+    // use a different handler to register PersistentDataStatus to get the correct registration time.
     Safir::Dob::Typesystem::HandlerId entityHandler(L"DOPE_ENTITY_HANDLER"); 
 
     m_dobConnection.RegisterEntityHandler(Safir::Dob::PersistentDataStatus::ClassTypeId, 
@@ -312,6 +343,7 @@ int DopeApp::handle_input(ACE_HANDLE)
     status->State().SetVal( Safir::Dob::PersistentDataState::Started);
     m_dobConnection.SetAll(status, m_instanceId, entityHandler);
 
+    m_connectionThreadRunning = false;
 
     return 0;
 }

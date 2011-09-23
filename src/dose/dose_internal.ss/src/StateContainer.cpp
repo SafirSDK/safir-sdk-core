@@ -576,36 +576,35 @@ namespace Internal
             }
 
             iterator.m_state = iterator.m_underlyingIterator->second.GetIncludeWeak();
-            if (iterator.m_state != NULL)
-            {
-                // lock state
-                boost::interprocess::scoped_lock<State::StateLock> lck(iterator.m_state->m_lock);
+        } // Container reader lock released here
 
-                if (iterator.m_state->IsReleased())
-                {
-                    iterator.m_state.reset();  // set to NULL
-                }
-            } // state lock released here
+        if (iterator.m_state != NULL)
+        {
+            // lock state
+            boost::interprocess::scoped_lock<State::StateLock> lck(iterator.m_state->m_lock);
 
-            if (iterator.m_state != NULL)
+            if (iterator.m_state->IsReleased())
             {
-                iterator.m_entity = iterator.m_state->GetRealState();
+                iterator.m_state.reset();  // set to NULL
             }
+        } // state lock released here
 
-            // if it is a released state IsCreated will return false, so we get into IncrementIterator below.
-
-            if (!iterator.m_entity.IsCreated())
-            {
-                end = !IncrementIteratorInternal(iterator,keepStates);
-                if (end)
-                {
-                    return Iterator();
-                }
-            }
-            return iterator;
+        if (iterator.m_state != NULL)
+        {
+            iterator.m_entity = iterator.m_state->GetRealState();
         }
 
-        //keepStates will be released here, after reader lock has been released
+        // if it is a released state IsCreated will return false, so we get into IncrementIterator below.
+
+        if (!iterator.m_entity.IsCreated())
+        {
+            end = !IncrementIterator(iterator);
+            if (end)
+            {
+                return Iterator();
+            }
+        }
+        return iterator;
     }
 
     bool
@@ -613,34 +612,26 @@ namespace Internal
     {
         std::vector<StateSharedPtr> keepStates;
 
-        {
-            // Get container reader lock
-            SharableStateContainerRwLock rlock(m_stateReaderWriterlock);
-
-            return IncrementIteratorInternal(iterator, keepStates);
-        }
-
-        //keepStates will be released here, after reader lock has been released
-    }
-
-    bool
-    StateContainer::IncrementIteratorInternal(Iterator& iterator,
-                                              std::vector<StateSharedPtr>& keepStates) const
-    {
         for(;;)
         {
             //keep a reference to the last state, so that it can be released when we do not
             //have a reader lock.
             keepStates.push_back(iterator.m_state);
 
-            ++iterator.m_underlyingIterator;
-            if (iterator.m_underlyingIterator == m_states.end())
             {
-                iterator = Iterator();
-                return false;
-            }
+                // Get container reader lock
+                SharableStateContainerRwLock rlock(m_stateReaderWriterlock);
 
-            iterator.m_state = iterator.m_underlyingIterator->second.GetIncludeWeak();
+                ++iterator.m_underlyingIterator;
+                if (iterator.m_underlyingIterator == m_states.end())
+                {
+                    iterator = Iterator();
+                    return false;
+                }
+
+                iterator.m_state = iterator.m_underlyingIterator->second.GetIncludeWeak();
+            } // Reader lock released here
+
             if (iterator.m_state != NULL)
             {
                 // lock state
@@ -664,7 +655,8 @@ namespace Internal
                 return true;
             }
         }
-    }
+
+    } //keepStates will be released here, after reader lock has been released
 
     const StateSharedPtr
     StateContainer::GetFirstExistingState(const bool includeReleasedStates, States::iterator& it) const

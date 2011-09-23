@@ -29,30 +29,30 @@ package body Dots.File_Map is
 
    function Img (A : VString) return String is
    begin
-      return S(A);
+      return S (A);
    end Img;
 
    use type VString;
 
-   package Dou_File_Map is new GNAT.Spitbol.Table(Value_Type => VString,
+   package Dou_File_Map is new GNAT.Spitbol.Table (Value_Type => VString,
                                                   Null_Value => GNAT.Spitbol.Nul,
                                                   Img => Img,
                                                   "=" => "=");
 
-   Dou_Table : Dou_File_Map.Table(5000);
+   Dou_Table : Dou_File_Map.Table (5000);
 
-   procedure Include(Key : in String; Value : in String) is
+   procedure Include (Key : in String; Value : in String) is
    begin
-      Dou_File_Map.Set(T     => Dou_Table,
+      Dou_File_Map.Set (T     => Dou_Table,
                        Name  => Key,
-                       Value => V(Value));
+                       Value => V (Value));
 
    end Include;
 
-   function Get_Value(Key : in String) return String is
-      Value : constant VString := Dou_File_Map.Get(T => Dou_Table, Name => Key);
+   function Get_Value (Key : in String) return String is
+      Value : constant VString := Dou_File_Map.Get (T => Dou_Table, Name => Key);
    begin
-      return S(Value);
+      return S (Value);
    end Get_Value;
 
 

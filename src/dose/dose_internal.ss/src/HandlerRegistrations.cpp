@@ -105,18 +105,17 @@ namespace Internal
     }
 
     void HandlerRegistrations::Unregister(const ConnectionPtr&                  connection,
-                                          const Dob::Typesystem::HandlerId&     handlerId,
-                                          const RegisterTime                    regTime)
+                                          const Dob::Typesystem::HandlerId&     handlerId)
     {
-            m_registrations.ForSpecificStateAdd(handlerId.GetRawValue(),
-                                                boost::bind(&HandlerRegistrations::UnregisterInternal,
-                                                            this,
-                                                            boost::cref(connection),
-                                                            boost::cref(handlerId),
-                                                            regTime,
-                                                            Safir::Dob::ThisNodeParameters::NodeNumber(),
-                                                            connection->Id().m_contextId,
-                                                            _2));
+        m_registrations.ForSpecificStateAdd(handlerId.GetRawValue(),
+                                            boost::bind(&HandlerRegistrations::UnregisterInternal,
+                                                        this,
+                                                        boost::cref(connection),
+                                                        boost::cref(handlerId),
+                                                        true,  // true => explicit unregistration
+                                                        Safir::Dob::ThisNodeParameters::NodeNumber(),
+                                                        connection->Id().m_contextId,
+                                                        _2));
     }
 
     void HandlerRegistrations::RegisterInternal(const StateSharedPtr&         statePtr,
@@ -134,7 +133,7 @@ namespace Internal
         registrationDone = false;
 
         // If this registration is on the revoked list we must act as if the application
-        // has an existing registration.
+        // is still the registerer
         RegistrationVector revoked = registerer.connection->GetRevokedRegistrations();
         for (RegistrationVector::iterator it = revoked.begin(); it != revoked.end(); ++it)
         {
@@ -155,103 +154,54 @@ namespace Internal
 
         }
 
-
         DistributionData currentRegState = statePtr->GetRealState();
+        ConnectionPtr currentRegisterer;
+        ConsumerId currentConsumer;
 
         if (!currentRegState.IsNoState())
         {
-            // There is an existing registration state
+            ENSURE(currentRegState.GetRegistrationTime() < regTime,
+                   << "Local registration using a timestamp that is less or equal compared to the timestamp for the current registration");  
+        }
 
-            if (regTime < currentRegState.GetRegistrationTime())
+        if (!currentRegState.IsNoState() && currentRegState.IsRegistered())
+        {
+            // There is an existing (older) registration
+
+            if (registerer.connection->Id() == statePtr->GetConnection()->Id() &&
+                registerer.consumer ==  statePtr->GetConsumer())
             {
-                // The existing registration state (reg or unreg) is newer. Skip this registration.
-
-                if (overrideRegistration)
-                {
-                    // We have an override registration that is rejected. This is a situation that must be
-                    // handled with special care.
-                    // Add this handler id to the revoked vector for the connection (even though the application
-                    // never managed to register the handler). This means that a revoke will be dispatched soon
-                    // after the return from this register call.
-                    registerer.connection->AddRevokedRegistration(m_typeId, handlerId, registerer.consumer);
-                    registerer.connection->SignalIn();
-
-                    registrationDone = true;
-                }
-
+                // It's the same connection and consumer making a registration for an already
+                // registered handler.
                 return;
             }
-            else if (currentRegState.GetRegistrationTime() < regTime)
+
+            if (!overrideRegistration)
             {
-                // The existing registration state (reg or unreg) is older.
-
-                if (currentRegState.IsRegistered())
-                {
-                    if (registerer.connection->Id() == statePtr->GetConnection()->Id() &&
-                        registerer.consumer ==  statePtr->GetConsumer())
-                    {
-                        // It's the same connection and consumer making a registration for an already
-                        // registered handler.
-                        return;
-                    }
-
-                    // There is an existing old reg
-                    if (!overrideRegistration)
-                    {
-                        return;
-                    }
-
-                    // We have an overregistration! Unregister the existing registerer.
-
-                    const ConnectionPtr currentRegisterer = statePtr->GetConnection();
-                    ConsumerId currentConsumer = statePtr->GetConsumer();
-
-                    currentRegisterer->RemoveRegistration(m_typeId, handlerId);
-
-                    if (currentRegisterer->IsLocal())
-                    {
-                        ENSURE(registerer.connection->Id() != currentRegisterer->Id(),
-                            << "Not allowed for a connection to register a handler that is already registered by the same connection!!!");
-
-                        // If the current handler is an injection handler some additional work must be done
-                        UnregisterInjectionHandler(currentRegisterer, handlerId);
-                    }
-
-
-                    if (m_entityContainerPtr != NULL)
-                    {
-                        // This is an unregistration for en entity type so delete (or set as ghost) all instances
-                        // owned by the current registerer.
-                        m_entityContainerPtr->ForEachState(boost::bind(&HandlerRegistrations::DeleteEntity,
-                                                                       this,
-                                                                       _2,
-                                                                       currentRegisterer,
-                                                                       handlerId,
-                                                                       _3),
-                                                           false);  // No need to include already released states
-                    }
-
-                    if (currentRegisterer->IsLocal())
-                    {
-                        currentRegisterer->AddRevokedRegistration(m_typeId, handlerId, currentConsumer);
-                        currentRegisterer->SignalIn();
-                    }
-                }
-            }
-            else
-            {
-                // The registration times are the same. This is the same registration that we have or
-                // it is a registration that has been unregistered
                 return;
             }
+
+            // We have an overregistration! Revoke the existing registerer.
+
+            currentRegisterer = statePtr->GetConnection();
+            currentConsumer = statePtr->GetConsumer();
+
+            if (currentRegisterer->IsLocal())
+            {
+                ENSURE(registerer.connection->Id() != currentRegisterer->Id(),
+                    << "Not allowed for a connection to register a handler that is already registered by the same connection!!!");
+            }
+
+            RevokeRegisterer(currentRegisterer, currentConsumer, handlerId, currentRegState.GetRegistrationTime());
         }
 
         // If we got this far we have one of the following situations:
         // - No previous registration state OR
         // - We have unregistered a previous registerer (overregistration) OR
-        // - The previous registration state is an old unreg
+        // - The previous registration state is an unregistration
         //
         // In all these cases we should execute the new registration
+
 
         statePtr->SetConnection(registerer.connection);
         statePtr->SetConsumer(registerer.consumer);
@@ -262,13 +212,19 @@ namespace Internal
                                      m_typeId,
                                      handlerId,
                                      instanceIdPolicy,
-                                     true,  // true => registered
+                                     DistributionData::Registered,
                                      regTime);
 
         statePtr->SetRealState(newRegState);
         statePtr->SetReleased(false);
 
-        // If the handler id happens to be on the revoked list (unlikely) it must be removed.
+        if (currentRegisterer != NULL && currentRegisterer->IsLocal())
+        {
+            // Kick the current registerer so that any revoke will be dispatched
+            currentRegisterer->SignalIn();
+        }
+
+        // If the handler id happens to be on the revoked list for the new registerer (unlikely) it must be removed.
         registerer.connection->RemoveRevokedRegistration(m_typeId, handlerId);
 
         registerer.connection->AddRegistration(m_typeId, handlerId, registerer.consumer);
@@ -283,145 +239,147 @@ namespace Internal
 
     void HandlerRegistrations::UnregisterInternal(const ConnectionPtr&              connection,
                                                   const Dob::Typesystem::HandlerId& handlerId,
-                                                  const RegisterTime                registerTime,
+                                                  const bool                        explicitUnregister,
                                                   const NodeNumber                  nodeNumber,
                                                   const ContextId                   contextId,
                                                   const StateSharedPtr&             statePtr)
     {
         DistributionData currentRegState = statePtr->GetRealState();
 
-        if (connection != NULL && connection->IsLocal())
+        if (connection == NULL ||
+            currentRegState.IsNoState() ||
+            !currentRegState.IsRegistered() ||
+            connection->Id() != statePtr->GetConnection()->Id())
         {
-            // A local connection that thinks it is the current registrerer. Is this so?
-            if (currentRegState.IsNoState() || !currentRegState.IsRegistered() ||
-                statePtr->GetConnection() == NULL || connection->Id() != statePtr->GetConnection()->Id())
-            {
-                return;
-            }
+            return;
         }
 
-        RegisterTime regTime = registerTime;
-
-        if (!currentRegState.IsNoState())
-        {
-            // There is an existing registration state
-
-            if (!(regTime != RegisterTime()))
-            {
-                // There is no supplied registration time so it must be an unregister by the local owner.
-                // In this case we fetch the time from the current registration state.
-                regTime = currentRegState.GetRegistrationTime();
-            }
-
-            if (regTime < currentRegState.GetRegistrationTime())
-            {
-                // The existing registration state (reg or unreg) is newer. Skip this unregistration.
-                return;
-            }
-            else if (currentRegState.IsRegistered())
-            {
-                // The existing registration state is a reg which is older or has the same timestamp
-                // as this unregistration
-
-                ConnectionPtr currentRegisterer = statePtr->GetConnection();
-
-                // If the handler is an injection handler some additional work must be done
-                UnregisterInjectionHandler(currentRegisterer, handlerId);
-
-                currentRegisterer->RemoveRegistration(m_typeId, handlerId);
-
-                if (m_entityContainerPtr != NULL)
-                {
-                    // This is an unregistration for en entity type so delete (or set as ghost) all instances
-                    // owned by the current registerer.
-                    m_entityContainerPtr->ForEachState(boost::bind(&HandlerRegistrations::DeleteEntity,
-                                                                   this,
-                                                                   _2,
-                                                                   currentRegisterer,
-                                                                   handlerId,
-                                                                   _3),
-                                                       false);  // no need to include released states
-                }
-            }
-        }
+        RevokeRegisterer(statePtr->GetConnection(),
+                         statePtr->GetConsumer(),
+                         handlerId,
+                         currentRegState.GetRegistrationTime());
 
         statePtr->SetConnection(NULL);
+
+        // Unregistration states are kept forever. This is necessary in order for the split/join
+        // functionality to work.
+        statePtr->SetReleased(false);
 
         DistributionData newRegState(registration_state_tag,
                                      ConnectionId(nodeNumber, contextId, -1),
                                      m_typeId,
                                      handlerId,
                                      InstanceIdPolicy::HandlerDecidesInstanceId, // Dummy for an unreg state
-                                     false,  // false => unregistered
-                                     regTime);
+                                     explicitUnregister ? DistributionData::Unregistered : DistributionData::ImplicitUnregistered,
+                                     currentRegState.GetRegistrationTime());
 
         statePtr->SetRealState(newRegState);
-
-        // This is an end state so it must be saved "a while".
-        // In the case that the unregistration is caused by a node down (and not a real unregistration)
-        // we don't put it in EndStates. This simplifies the split/join mechanism since we don't have to
-        // "decrement" a registration state.
-        if (connection == NULL || !connection->NodeIsDown())
-        {
-            EndStates::Instance().Add(statePtr);
-        }
-        
-        // Set the state to released which will cause a drop of the reference from the state container to this state.
-        statePtr->SetReleased(true);
     }
 
-    void HandlerRegistrations::UnregisterAll(const ConnectionPtr& connection)
+    void HandlerRegistrations::RemoteRegistrationStateInternal(const ConnectionPtr&    connection,
+                                                               const DistributionData& remoteRegistrationState,
+                                                               const StateSharedPtr&   statePtr)
+    {
+        DistributionData currentRegState = statePtr->GetRealState();
+
+        if (!NewRegStateIsAccepted(currentRegState, remoteRegistrationState))
+        {
+            return;
+        }
+
+        // We have an accepted registration state
+
+        ConnectionPtr currentRegisterer;
+        const Dob::Typesystem::HandlerId handlerId = remoteRegistrationState.GetHandlerId(); 
+
+        if (!currentRegState.IsNoState() && currentRegState.IsRegistered())
+        {
+            // There is an existing registration that must be revoked.
+
+            currentRegisterer = statePtr->GetConnection();
+            ConsumerId currentConsumer = statePtr->GetConsumer();
+
+            RevokeRegisterer(currentRegisterer,
+                             currentConsumer,
+                             handlerId,
+                             currentRegState.GetRegistrationTime());
+        }
+
+        if (remoteRegistrationState.IsRegistered())
+        {
+            statePtr->SetConnection(connection);
+            connection->AddRegistration(m_typeId,
+                                        handlerId,
+                                        ConsumerId(NULL, static_cast<short>(0))); // Dummy consumer for registration state from external node
+        }
+        else
+        {
+            statePtr->SetConnection(NULL);
+            const_cast<DistributionData&>(remoteRegistrationState).ResetSenderIdConnectionPart();
+        }
+
+        // All registration states are kept forever (even unregistration states) since this is necessary
+        // in order for the split/join functionality to work correctly.
+        statePtr->SetReleased(false);
+
+        statePtr->SetRealState(remoteRegistrationState);
+
+        if (currentRegisterer != NULL)
+        {
+            // Kick the current register so that a revoke is dispatched
+            currentRegisterer->SignalIn();
+        }
+    }
+
+    void HandlerRegistrations::UnregisterAll(const ConnectionPtr& connection,
+                                             const bool           explicitUnregister)
     {
         m_registrations.ForEachState(boost::bind(&HandlerRegistrations::UnregisterAllInternal,
                                                  this,
                                                  boost::cref(connection),
+                                                 explicitUnregister,
                                                  _2,
                                                  _3),
                                      false);  // no need to include already released states
     }
 
     void HandlerRegistrations::UnregisterAllInternal(const ConnectionPtr&           connection,
+                                                     const bool                     explicitUnregister,
                                                      const StateSharedPtr&          statePtr,
                                                      bool&                          exitDispatch)
     {
         exitDispatch = false;
 
-        if (connection != NULL && connection->Id() == statePtr->GetConnection()->Id() &&
-            !statePtr->GetRealState().IsNoState() && statePtr->GetRealState().IsRegistered())
+        DistributionData currentRegState = statePtr->GetRealState();
+
+        if (connection == NULL ||
+            currentRegState.IsNoState() ||
+            !currentRegState.IsRegistered() ||
+            connection->Id() != statePtr->GetConnection()->Id())
         {
-            UnregisterInternal(connection,
-                               statePtr->GetRealState().GetHandlerId(),
-                               RegisterTime(),
-                               statePtr->GetConnection()->Id().m_node,
-                               statePtr->GetConnection()->Id().m_contextId,
-                               statePtr);
+            return;
         }
+
+        
+        UnregisterInternal(connection,
+                           statePtr->GetRealState().GetHandlerId(),
+                           explicitUnregister,
+                           statePtr->GetConnection()->Id().m_node,
+                           statePtr->GetConnection()->Id().m_contextId,
+                           statePtr);
+
     }
 
     void HandlerRegistrations::RemoteSetRegistrationState(const ConnectionPtr& connection,
                                                           const DistributionData& registrationState)
     {
-        Register(connection,
-                 registrationState.GetHandlerId(),
-                 registrationState.GetInstanceIdPolicy(),
-                 false,     // isInjectionHandler dosn't matter for registrations received from an external node.
-                 registrationState.GetRegistrationTime(),
-                 true,     // override is always set to true for registrations received from an external node.
-                 ConsumerId(NULL, static_cast<short>(0))); // dummy consumer for external connection
-    }
-
-    void HandlerRegistrations::RemoteSetUnregistrationState(const DistributionData& registrationState)
-    {
         Dob::Typesystem::HandlerId handlerId = registrationState.GetHandlerId();
 
         m_registrations.ForSpecificStateAdd(handlerId.GetRawValue(),
-                                            boost::bind(&HandlerRegistrations::UnregisterInternal,
+                                            boost::bind(&HandlerRegistrations::RemoteRegistrationStateInternal,
                                                         this,
-                                                        ConnectionPtr(),
-                                                        boost::cref(handlerId),
-                                                        registrationState.GetRegistrationTime(),
-                                                        registrationState.GetSenderId().m_node,
-                                                        registrationState.GetSenderId().m_contextId,
+                                                        boost::cref(connection),
+                                                        boost::cref(registrationState),
                                                         _2));
     }
 
@@ -585,6 +543,51 @@ namespace Internal
         }
     }
 
+    void HandlerRegistrations::RevokeRegisterer(const ConnectionPtr&                  connection,
+                                                const ConsumerId&                     consumer,
+                                                const Dob::Typesystem::HandlerId&     handlerId,
+                                                const RegisterTime                    currentRegisterTime)
+    {
+        ENSURE(connection != NULL, << "HandlerRegistrations::RevokeRegisterer called with a NULL connection!");
+
+        if (connection->IsLocal())
+        {
+            RemoveRegistration(connection, handlerId);
+            ENSURE(consumer != ConsumerId(), << "RevokeRegisterer called with a \"NULL\" consumer!");
+            connection->AddRevokedRegistration(m_typeId, handlerId, consumer);
+        }
+
+        if (m_entityContainerPtr != NULL)
+        {
+            // This is an unregistration for en entity type so delete (or set as ghost) all instances
+            // owned by the current registerer.
+            m_entityContainerPtr->ForEachState(boost::bind(&HandlerRegistrations::RevokeEntity,
+                                               this,
+                                               _2,
+                                               connection,
+                                               handlerId,
+                                               currentRegisterTime,
+                                               _3),
+                                               false);  // No need to include already released states
+        }
+    }
+
+    void HandlerRegistrations::RevokeEntity(const StateSharedPtr&                statePtr,
+                                            const ConnectionPtr&                 connection,
+                                            const Dob::Typesystem::HandlerId&    handlerId,
+                                            const RegisterTime                   currentRegisterTime,
+                                            bool&                                exitDispatch)
+    {
+        if (statePtr->GetRealState().GetEntityStateKind() == DistributionData::Ghost)
+        {
+            UpdateGhost(statePtr, handlerId, currentRegisterTime, exitDispatch);
+        }
+        else
+        {
+            DeleteEntity(statePtr, connection, handlerId, exitDispatch);
+        }
+    }
+
     void HandlerRegistrations::DeleteEntity(const StateSharedPtr&                statePtr,
                                             const ConnectionPtr&                 connection,
                                             const Dob::Typesystem::HandlerId&    handlerId,
@@ -611,8 +614,7 @@ namespace Internal
             // The unregistration is not for this handler.
             return;
         }
-
-        
+     
         statePtr->SetConnection(NULL);
         statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0)));
 
@@ -670,6 +672,45 @@ namespace Internal
         EndStates::Instance().Add(statePtr);
     }
 
+    void HandlerRegistrations::UpdateGhost(const StateSharedPtr&                statePtr,
+                                           const Dob::Typesystem::HandlerId&    handlerId,
+                                           const RegisterTime                   currentRegisterTime,
+                                           bool&                                exitDispatch)
+    {
+        exitDispatch = false;
+
+        DistributionData realState = statePtr->GetRealState();
+
+        if (handlerId == Dob::Typesystem::HandlerId::ALL_HANDLERS ||
+            realState.GetHandlerId() != handlerId)
+        {
+            // Not for this handler.
+            return;
+        }
+
+        if (!(realState.GetRegistrationTime() < currentRegisterTime))
+        {
+            // We are only concerned with ghosts that are "older" that the currentRegisterTime.
+            return;
+        }
+     
+        DistributionData newRealState(no_state_tag);
+
+        newRealState = realState.GetEntityStateCopy(true);  // include blob
+
+        // Any ghosts that haven't been injected yet can be lost forever
+        // if there is an unregistration (forced or not). Since they have
+        // a registartion time that is older than the current reg/unreg time
+        // they will be deleted/discarded on all nodes. The solution is
+        // to update their registration time to the current reg/unreg time.
+        newRealState.SetRegistrationTime(currentRegisterTime);
+
+        // Set the state to NOT released so that the reference from the state container is kept.
+        statePtr->SetReleased(false);
+
+        statePtr->SetRealState(newRealState);
+    }
+
     void HandlerRegistrations::RegisterInjectionHandler(const ConnectionPtr&      connection,
                                                         const Dob::Typesystem::HandlerId&   handlerId,
                                                         const ConsumerId&                   consumer)
@@ -701,39 +742,54 @@ namespace Internal
         connection->AddInjectionHandler(m_typeId, handlerId, consumer);
     }
 
-    void HandlerRegistrations::UnregisterInjectionHandler(const ConnectionPtr&                connection,
-                                                          const Dob::Typesystem::HandlerId&   handlerId)
+    void HandlerRegistrations::RemoveRegistration(const ConnectionPtr& connection, 
+        const Dob::Typesystem::HandlerId& handlerId)
     {
-        if (!connection->IsLocal())
+        if (connection->IsLocal())
         {
-            return;
-        }
-
-        RegistrationVector injectionHandlers = connection->GetInjectionHandlers();
-
-        for (RegistrationVector::iterator it = injectionHandlers.begin(); it != injectionHandlers.end(); ++it)
-        {
-            if (it->typeId == m_typeId &&
-                (it->handlerId == handlerId || handlerId == Dob::Typesystem::HandlerId::ALL_HANDLERS))
+            RegistrationVector injectionHandlers = connection->GetInjectionHandlers();
+            for (RegistrationVector::iterator it = injectionHandlers.begin(); it != injectionHandlers.end(); ++it)
             {
-                SubscriptionId subscriptionId(ConnectionConsumerPair(connection, it->consumer),
-                                              InjectionSubscription,
-                                              it->handlerId.GetRawValue());
+                if (it->typeId == m_typeId &&
+                    (it->handlerId == handlerId || handlerId == Dob::Typesystem::HandlerId::ALL_HANDLERS))
+                {
+                    SubscriptionId subscriptionId(ConnectionConsumerPair(connection, it->consumer),
+                        InjectionSubscription,
+                        it->handlerId.GetRawValue());
 
-                m_entityContainerPtr->Unsubscribe(subscriptionId,
-                                                  0,
-                                                  true);          // true => all instances
-
-                connection->RemoveInjectionHandler(m_typeId, it->handlerId);
+                    m_entityContainerPtr->Unsubscribe(subscriptionId,
+                        0,
+                        true);          // true => all instances
+                }
             }
+
         }
 
-        // If the injection handler is unregistered (e.g. caused by an overregistration), the data that is used to determine
-        // when an OnInitialInjectionsDone should be sent, must be cleared
-        connection->RemoveInitialInjectionInstance(m_typeId,
-                                                   handlerId,
-                                                   Dob::Typesystem::InstanceId(),
-                                                   true);  //true => all instances
+        connection->RemoveRegistration(m_typeId, handlerId);
+    }
+
+    bool HandlerRegistrations::NewRegStateIsAccepted(const DistributionData& currentRegState,
+                                                     const DistributionData& newRegState)
+    {
+        if (currentRegState.IsNoState())
+        {
+            return true;
+        }
+        
+        const LamportTimestamp currentRegTime = currentRegState.GetRegistrationTime();
+        const LamportTimestamp newRegTime = newRegState.GetRegistrationTime();
+
+        if (newRegTime < currentRegTime)
+        {
+            return false;
+        }
+        else if (currentRegTime < newRegTime)
+        {
+            return true;
+        }
+
+        // The registration time is the same, compare the state kind
+        return newRegState.GetRegistrationStateKind() > currentRegState.GetRegistrationStateKind();
     }
 }
 }

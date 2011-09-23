@@ -83,14 +83,12 @@ namespace Internal
 
         // Unregisters all existing registrations for the given connection and type.
         void UnregisterAll(const ConnectionPtr&           connection,
-                           const Dob::Typesystem::TypeId  typeId);
+                           const Dob::Typesystem::TypeId  typeId,
+                           const bool                     explicitUnregister);
 
         /** New registration state from external node */
         void RemoteSetRegistrationState(const ConnectionPtr& connection,
                                         const DistributionData& registrationState);
-
-        /** Unregistration (an end state) from external node */
-        void RemoteSetUnregistrationState(const DistributionData& registrationState);
 
         bool IsRegistered(const Dob::Typesystem::TypeId     typeId,
                           const Dob::Typesystem::HandlerId& handlerId,
@@ -221,16 +219,13 @@ namespace Internal
          */
         /** @{ */
 
-        /** Set a ghost from external node. */
-        void RemoteSetGhostEntityState(const DistributionData& entityState);
-
         /** Set an injection from external node. */
         void RemoteSetInjectionEntityState(const DistributionData& entityState);
 
         /** Set a delete (an end state) from external node */
         void RemoteSetDeleteEntityState(const DistributionData&   entityState);
 
-        /** Set a state (that is not a ghost, injection or delete state) from external node. */
+        /** Set a state (that is not an injection or delete state) from external node. */
         RemoteSetResult RemoteSetRealEntityState(const ConnectionPtr&      connection,
                                                  const DistributionData&   entityState);
 
@@ -270,6 +265,18 @@ namespace Internal
         /** @{ */
 
         const DistributionData ReadEntity(const Dob::Typesystem::EntityId& entityId, const ContextId readerContext) const;
+
+        /** @} */
+
+        /**
+         * @name Clean ghosts
+         */
+        /** @{ */
+
+        // Keep only ghosts with the latest registration time
+        void CleanGhosts(const Dob::Typesystem::TypeId      typeId,
+                         const Dob::Typesystem::HandlerId&  handlerId,
+                         const ContextId                    context);
 
         /** @} */
 

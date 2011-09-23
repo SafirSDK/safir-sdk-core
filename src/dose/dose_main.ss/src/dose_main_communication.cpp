@@ -86,23 +86,23 @@ namespace Internal
             {
                 ACE_Guard<ACE_Thread_Mutex> lck(memMapLock);
 #if 0 //display all memory known by dose_com
-                lllerr << "DoseCom memory info: " << std::endl;
+                lllinfo << "DoseCom memory info: " << std::endl;
 
                 for (std::map<const void*,MemData>::iterator it = memMap.begin();
                      it != memMap.end(); ++it)
                 {
                     ++blocks;
                     totalMem += it->second.size;
-                    lllerr << "  " << it->second.size << " bytes allocated in " << it->second.where.c_str()
+                    lllinfo << "  " << it->second.size << " bytes allocated in " << it->second.where.c_str()
                            << ": " << std::hex <<it->first << std::dec << ", count = " << it->second.count << std::endl;
                 }
-                lllerr << " Total: " << std::dec << blocks << " blocks allocated, total size = " << totalMem/1000 << " Kbytes" << std::endl;
+                lllinfo << " Total: " << std::dec << blocks << " blocks allocated, total size = " << totalMem/1000 << " Kbytes" << std::endl;
 
                 blocks = 0;
                 totalMem = 0;
 
 #endif
-                lllerr << "Potential leaks: " << std::endl;
+                lllinfo << "Potential leaks: " << std::endl;
                 std::map<const void*,MemData> intersection;
                 std::set_intersection(memMap.begin(),memMap.end(),
                                       last.begin(),last.end(),
@@ -114,10 +114,10 @@ namespace Internal
                 {
                     ++blocks;
                     totalMem += it->second.size;
-                    lllerr << "  " << it->second.size << " bytes allocated in " << it->second.where.c_str()
+                    lllinfo << "  " << it->second.size << " bytes allocated in " << it->second.where.c_str()
                            << ": " << std::hex <<it->first << std::dec << ", count = " << it->second.count << std::endl;
                 }
-                lllerr << " Total: " << std::dec << blocks << " blocks allocated, total size = " << totalMem/1000 << " Kbytes" << std::endl;
+                lllinfo << " Total: " << std::dec << blocks << " blocks allocated, total size = " << totalMem/1000 << " Kbytes" << std::endl;
 #if 0
                 static int numTimesWithLeaks = 0;
                 if (blocks > 10)
@@ -136,7 +136,7 @@ namespace Internal
                 last = memMap;
             }
 
-            //lllerr << "DoseCom has references to " << std::dec << blocks << " blocks, total size = " << totalMem/1000 << " Kbytes" << std::endl;
+            //lllinfo << "DoseCom has references to " << std::dec << blocks << " blocks, total size = " << totalMem/1000 << " Kbytes" << std::endl;
 
 
         }
@@ -173,11 +173,11 @@ namespace Internal
                 const std::map<const void*, std::string>::const_iterator remIt = removedMem.find(mem);
                 if (remIt == removedMem.end())
                 {
-                    lllerr << "MemMapRemove called from " << where << " for unknown memory! " << std::hex<< (const void *)mem<< std::endl;
+                    lllinfo << "MemMapRemove called from " << where << " for unknown memory! " << std::hex<< (const void *)mem<< std::endl;
                 }
                 else
                 {
-                    lllerr << "MemMapRemove called from " << where << " for mem deallocated in " << remIt->second.c_str()
+                    lllinfo << "MemMapRemove called from " << where << " for mem deallocated in " << remIt->second.c_str()
                            << ". use_count = " << *((const boost::uint32_t *)(mem - 4)) << std::endl;
                 }
             }
@@ -187,7 +187,7 @@ namespace Internal
                 {
                     if (removedMem.size() > 1000000)
                     {
-                        lllerr << "Clearing removedMem, so we dont run out of memory" << std::endl;
+                        lllinfo << "Clearing removedMem, so we dont run out of memory" << std::endl;
                         removedMem.clear();
                     }
                     removedMem.insert(std::make_pair(it->first,where));
@@ -705,8 +705,8 @@ namespace Internal
 #ifdef LOG_HEADERS
                 lllout << L"Msg RECEIVED from external node (DC = " << fromChannel
                        << ", prio = " << currentChannel
-                       << ", isNative = " << isNative << ")" << std::endl
-                       << msg.Image() << std::endl << std::endl;
+                       << ", isNative = " << isNative << ")" << std::endl;
+                lllout <<  msg.Image() << std::endl;
 #endif
 
                 if (ShouldBeDiscarded(msg))

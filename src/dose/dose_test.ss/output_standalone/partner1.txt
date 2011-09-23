@@ -640,7 +640,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.InjectableEntity, 987654)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">Some new info</value></member></members></object>
 
@@ -1699,9 +1698,31 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.SynchronousVolatileEntity, 12345)
   deletedByOwner = false
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Blabla</value></member></members></object>
+
+==========================================================================
+TESTCASE 815
+Description: Test of overregistration of a handler for a synchronous volatile persistence type. The instance is deleted by the new registerer when injected.
+Expectation: Node 0 receives OnInitialInjectionsDone and OnRevokedRegistration. Node 1 receives OnNewEntity and OnDeletedEntity. Node 2 receives OnInjectedNewEntity and OnInitialInjectionsDone.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 123)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">StandAlone;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Kalle</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.SynchronousVolatileEntity, 123)
+  deletedByOwner = false
+  Owner          = DEFAULT_HANDLER
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Kalle</value></member></members></object>
 
 ==========================================================================
 TESTCASE 830

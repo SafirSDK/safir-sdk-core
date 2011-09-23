@@ -356,7 +356,6 @@ Consumer::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool 
          << "  EntityId       = " << entityProxy.GetEntityId() << std::endl
          << "  deletedByOwner = " << std::boolalpha << deletedByOwner << std::endl
          << "  Owner          = " << entityProxy.GetOwner() << std::endl
-         << "  OwnerConn = " << entityProxy.GetOwnerConnectionInfo() << std::endl
          << "  OwnerStr  = " << entityProxy.GetOwnerWithStringRepresentation() << std::endl
          << "  Previous  = " << prevXml << std::endl;
     lout << std::endl;

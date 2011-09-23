@@ -193,6 +193,11 @@ namespace Sate
         //Event handler for close all tabs context menu
         void OnCloseAllTabs(object sender, EventArgs e)
         {
+            foreach (TabPage tp in tabControl.TabPages)
+            {
+                tp.Dispose();
+            }
+
             tabControl.TabPages.Clear();
             fillPanel.Visible = false;
         }
@@ -236,7 +241,10 @@ namespace Sate
             int selectedIndex = tabControl.SelectedIndex;
             if (selectedIndex >= 0)
             {
+                TabPage tp = tabControl.TabPages[selectedIndex];
                 tabControl.TabPages.RemoveAt(selectedIndex);
+                tp.Dispose();
+
                 if ((tabControl.TabCount > 1) && (selectedIndex != 0))
                 {
 
@@ -249,7 +257,6 @@ namespace Sate
                         tabControl.SelectTab(tabControl.TabCount - 1);
                     }
                 }
-
             }
             if (tabControl.TabPages.Count == 0)
             {
@@ -306,7 +313,8 @@ namespace Sate
                     string msg = "Unable to display more windows in SATE! Try closing other tabs first! - Exception: " + e.Message;
                     OutputPanel.Instance.LogEvent(msg, true);
                     tp.Dispose();
-                    throw;
+                    MessageBox.Show("A new page can not be created until you close one first!\nSATE has run out of resources.");
+                    //throw;
                 }
             }
 
@@ -1336,6 +1344,7 @@ namespace Sate
             if (Settings.Sate.AutoUpdate)
             {
                 dose.SetChanges(entity, instanceId, entityInfo.getHandlerId());
+               
             }
 
             if (!Settings.Sate.NoResponse)
@@ -1348,6 +1357,7 @@ namespace Sate
                 OutputPanel.Instance.LogEvent("- ResponseSender discarded", true);
                 responseSender.Discard();
             }
+
         }
 
         #endregion
@@ -1420,7 +1430,7 @@ namespace Sate
             RegInfo regInfo = new RegInfo();
             regInfo.typeId = typeId;
             regInfo.handlerIdSer = new HandlerIdSerializeable(handlerId);
-            ExplorerPanel.Instance.Unregister(regInfo);
+            ExplorerPanel.Instance.RevokedRegistration(regInfo);
 
             // remove typeids
             requestorDecidesTypeIdList.Remove(typeId);
@@ -2277,7 +2287,7 @@ namespace Sate
             entityInfo.setHandlerId(entityProxy.OwnerWithStringRepresentation);
 
             OutputPanel.Instance.LogEvent("- Received deleted entity: '" + entityProxy.EntityId.ToString()
-               + "' for handler '" + entityProxy.OwnerWithStringRepresentation.ToString() + "'", true);
+               + "' for handler '" + entityProxy.OwnerWithStringRepresentation.ToString() + "' deletedByOwner=" + deletedByOwner, true);
             ExplorerPanel.Instance.DeleteObject(entityProxy.EntityId);
             //InboxPanel.Instance.AddResponse(entityInfo, "Deleted entity");
             InboxPanel.Instance.AddNonDisplayableResponse(entityProxy.EntityId.TypeId, "Deleted entity");

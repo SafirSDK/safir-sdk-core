@@ -67,17 +67,14 @@ namespace Internal
                       const ConsumerId&                     consumer);
 
         void Unregister(const ConnectionPtr&                connection,
-                        const Dob::Typesystem::HandlerId&   handlerId,
-                        const RegisterTime                  regTime);
+                        const Dob::Typesystem::HandlerId&   handlerId);
 
-        void UnregisterAll(const ConnectionPtr&     connection);
+        void UnregisterAll(const ConnectionPtr&     connection,
+                           const bool               explicitUnregister);
 
         /** New registration state from external node */
         void RemoteSetRegistrationState(const ConnectionPtr& connection,
                                         const DistributionData& registrationState);
-
-        /** Unregistration (an end state) from external node */
-        void RemoteSetUnregistrationState(const DistributionData& registrationState);
 
         bool IsRegistered(const Dob::Typesystem::HandlerId& handlerId) const;
 
@@ -160,18 +157,22 @@ namespace Internal
 
         void UnregisterInternal(const ConnectionPtr&                connection,
                                 const Dob::Typesystem::HandlerId&   handlerId,
-                                const RegisterTime                  regTime,
+                                const bool                          explicitUnregister,
                                 const NodeNumber                    nodeNumber,
                                 const ContextId                     contextId,
                                 const StateSharedPtr&               statePtr);
 
         void UnregisterAllInternal(const ConnectionPtr&             connection,
+                                   const bool                       explicitUnregister,
                                    const StateSharedPtr&            statePtr,
                                    bool&                            exitDispatch);
 
+        void RemoteRegistrationStateInternal(const ConnectionPtr&    connection,
+                                             const DistributionData& remoteRegistrationState,
+                                             const StateSharedPtr&   statePtr);
+
         void IsRegisteredInternal(const StateSharedPtr&         statePtr,
                                   bool&                         isRegistered) const;
-
 
         bool IsRegisteredInternal(const StateSharedPtr& statePtr) const;
 
@@ -180,17 +181,37 @@ namespace Internal
                                    InstanceIdPolicy::Enumeration&       instanceIdPolicy,
                                    RegisterTime&                        registrationTime) const;
 
+        void RevokeRegisterer(const ConnectionPtr&                  connection,
+                              const ConsumerId&                     consumer,
+                              const Dob::Typesystem::HandlerId&     handlerId,
+                              const RegisterTime                    currentRegisterTime);
+
+        void RevokeEntity(const StateSharedPtr&                statePtr,
+                          const ConnectionPtr&                 connection,
+                          const Dob::Typesystem::HandlerId&    handlerId,
+                          const RegisterTime                   currentRegisterTime,
+                          bool&                                exitDispatch);
+
         void DeleteEntity(const StateSharedPtr&                statePtr,
                           const ConnectionPtr&                 connection,
                           const Dob::Typesystem::HandlerId&    handlerId,
                           bool&                                exitDispatch);
 
+        void UpdateGhost(const StateSharedPtr&                statePtr,
+                         const Dob::Typesystem::HandlerId&    handlerId,
+                         const RegisterTime                   currentRegisterTime,
+                         bool&                                exitDispatch);
+
         void RegisterInjectionHandler(const ConnectionPtr&                connection,
                                       const Dob::Typesystem::HandlerId&   handlerId,
                                       const ConsumerId&                   consumer);
 
-        void UnregisterInjectionHandler(const ConnectionPtr&                connection,
-                                        const Dob::Typesystem::HandlerId&   handlerId);
+        void RemoveRegistration(const ConnectionPtr& connection, 
+                                const Dob::Typesystem::HandlerId& handlerId);
+
+        static bool NewRegStateIsAccepted(const DistributionData& currentRegState,
+                                          const DistributionData& newRegState);
+                                          
 
         friend void StatisticsCollector(HandlerRegistrations&, void*);
     };

@@ -52,7 +52,6 @@ namespace Internal
     class PendingRegistrationHandler;
     class PersistHandler;
     class ConnectionHandler;
-    class EndStatesHandler;
 
     class DummySubscriber:
         public RegistrationSubscriber,
@@ -128,7 +127,6 @@ namespace Internal
                   ExternNodeCommunication & ecom,
                   PendingRegistrationHandler & pendingHandler,
                   PersistHandler & persistHandler,
-                  EndStatesHandler& endStates,
                   ConnectionHandler & connectionHandler);
 
         void StartPoolDistribution();
@@ -185,7 +183,6 @@ namespace Internal
         BlockingHandlers* m_blockingHandler;
         PendingRegistrationHandler * m_pendingRegistrationHandler;
         PersistHandler * m_persistHandler;
-        EndStatesHandler* m_endStates;
         ConnectionHandler * m_connectionHandler;
 
         typedef std::vector<DistributionData> ConnectionMsgs;

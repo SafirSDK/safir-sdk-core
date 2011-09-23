@@ -24,7 +24,7 @@
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/Operations.h>
-#include <Safir/Dob/ProcessInfo.h>
+#include <Safir/Dob/ProcessInfo.h> 
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/interprocess/sync/upgradable_lock.hpp>
@@ -86,11 +86,12 @@ namespace Internal
         connect = false;
         connectionOut = false;
         Signals::Instance().WaitForConnectOrOut();
-        //get the events
-        if (m_connectSignal != 0)
+       //get the events
+        const boost::uint32_t oldconnectSignal = m_connectSignal.compare_exchange(0, 1);
+
+        if (oldconnectSignal != 0)
         {
             connect = true;
-            m_connectSignal = 0;
         }
 
         //we could loop through the connection signals, but currently we just assume that we might as well
@@ -154,7 +155,7 @@ namespace Internal
         m_connectSignal = 1;
         Signals::Instance().SignalConnectOrOut();
         //wait for response
-        m_connectResponseEvent.wait();
+         m_connectResponseEvent.wait();
 
         m_connectResponse.GetAndClear(connect_tag, result, connection);
 
@@ -223,9 +224,9 @@ namespace Internal
 
     void Connections::HandleConnect(ConnectionConsumer & connectionHandler)
     {
-        if (m_connectMessage.IsConnect())
+       if (m_connectMessage.IsConnect())
         {
-            lllout << "Handling a Connect" << std::endl;
+           lllout << "Handling a Connect" << std::endl;
 
             std::string connectionName;
             ContextId context;
@@ -583,6 +584,10 @@ namespace Internal
                 if(removeIt->first.m_node == node)
                 {
                     removeConnections.push_back(removeIt->second);
+                    if (removeIt->second->IsLocal())
+                    {
+                        RemoveFromSignalHandling(removeIt->second);
+                    }
                     m_connections.erase(removeIt);
                 }
             }
@@ -597,11 +602,6 @@ namespace Internal
             ConnectionPtr removeConnection = (*it);
 
             connectionFunc(removeConnection);
-
-            if (removeConnection->IsLocal())
-            {
-                RemoveFromSignalHandling(removeConnection);
-            }
 
             GetSharedMemory().destroy_ptr(removeConnection.get());
 

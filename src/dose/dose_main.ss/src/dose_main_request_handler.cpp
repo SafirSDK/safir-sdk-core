@@ -136,7 +136,6 @@ namespace Internal
         case DistributionData::Request_Service:
             {
                 // Service request
-
                 receiver = ServiceTypes::Instance().GetRegisterer(typeId, request.GetHandlerId(), context);
 
                 if (receiver.connection == NULL)

@@ -62,7 +62,7 @@ build_dir        src/douf/douf_time_library.ss/src/douf_time_library    Release
 #them contain a cpp dll, which must be built in two flavors.
 build_dir        src/douf/douf_time_mix.ss/cpp             Release   Debug
 build_dir        src/douf/douf_time_mix.ss/dotnet          Release
-#TODO: build_dir        src/douf/douf_time_mix.ss/ada             Release
+build_dir        src/douf/douf_time_mix.ss/ada             Release
 
 #this is really just one header file (a lot of stuff for just one file...),
 #so we dont build it in release, even though it "looks" like a cpp dll.

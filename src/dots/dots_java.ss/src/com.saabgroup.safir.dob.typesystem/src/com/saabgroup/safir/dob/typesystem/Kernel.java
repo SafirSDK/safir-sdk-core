@@ -75,6 +75,7 @@ final class Kernel {
     public static native boolean IsClass(long typeId);
     public static native boolean IsProperty(long typeId);
     public static native boolean IsEnumeration(long typeId);
+    public static native boolean IsException(long typeId);
     public static native long TypeIdFromName(String name);
     public static native String GetTypeName(long typeId);
     public static native int GetNumberOfEnumerationValues(long enumId);

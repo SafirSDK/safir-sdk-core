@@ -1793,3 +1793,65 @@ Testing: LibraryExceptions
 =====================================================
 Caught exception: DotsTest.TestException
 Caught native exception
+
+
+
+=====================================================
+Testing: IsProperty
+=====================================================
+DotsTest.MemberArraysProperty
+DotsTest.MemberTypesProperty
+Safir.Dob.DistributionChannelProperty
+Safir.Dob.PriorityProperty
+Capabilities.SpeedObjectProperty
+Safir.Dob.ContextSharedOverrideProperty
+Safir.Dob.PriorityOverrideProperty
+Safir.Dob.RequestTimeoutOverrideProperty
+Safir.Dob.DistributionChannelOverrideProperty
+Safir.Dob.ContextSharedProperty
+Safir.Dob.RequestTimeoutProperty
+Safir.Dob.InjectionOverrideProperty
+Safir.Dob.InjectionProperty
+
+
+
+=====================================================
+Testing: IsEnumeration
+=====================================================
+Safir.Dob.PersistentDataState
+Safir.Utilities.ForEach.ResponseType
+DoseTest.TestEnum
+DoseTest.CallbackEnum
+DoseTest.TestConfigEnum
+Safir.Dob.ConnectionQueueId
+Safir.Dob.NodeStatus
+Capabilities.Vehicles.VehicleCategoryCode
+DoseTest.ActionEnum
+Safir.Dob.InstanceIdPolicy
+Safir.Dob.PersistenceBackend
+Safir.Dob.CallbackId
+Safir.Dob.InjectionKind
+DotsTest.TestEnum
+
+
+
+=====================================================
+Testing: IsException
+=====================================================
+Safir.Dob.AccessDeniedException
+Safir.Dob.Typesystem.NullException
+Safir.Dob.Typesystem.IncompatibleTypesException
+Safir.Dob.Typesystem.ReadOnlyException
+Safir.Dob.NotOpenException
+Safir.Dob.Typesystem.IllegalValueException
+Safir.Databases.Odbc.RetryException
+Safir.Dob.Typesystem.SoftwareViolationException
+Safir.Dob.OverflowException
+DotsTest.TestException
+Safir.Databases.Odbc.IntegrityConstraintException
+Safir.Databases.Odbc.TimeoutException
+Safir.Dob.Typesystem.ConfigurationErrorException
+Safir.Dob.NotFoundException
+FundamentalException
+Exception
+Safir.Databases.Odbc.ReconnectException

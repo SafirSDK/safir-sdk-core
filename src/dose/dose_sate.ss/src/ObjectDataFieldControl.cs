@@ -63,6 +63,8 @@ namespace Sate
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.Container components = null;
+        private ToolTip m_toolTip = new ToolTip();
+
 
         protected abstract bool ValidInput(int index, bool setVal);
         public abstract void SetFieldValues();
@@ -166,15 +168,37 @@ namespace Sate
             }
         }
 
+        protected void ObjectDataFieldControl_MouseHover(object sender, EventArgs e)
+        {
+            int index = 0;
+            foreach (Control c in fieldValueControl)
+            {
+                if (c == sender)
+                {
+                    m_toolTip.SetToolTip(c, c.Text);
+                }
+                index++;
+            }
+        }
+
         protected void ObjectDataFieldControl_TextChanged(object sender, EventArgs e)
         {
             if (!ignoreEvent)
             {
                 ignoreEvent = true;
                 int i = ChangedValue(fieldValueControl, sender);
+
                 if (i >= 0)
                 {
                     isNullCheckBox[i].Checked = false;
+                    TextBox tb = this.fieldValueControl[i] as TextBox;
+                    
+                    if (tb != null)
+                    {
+                        //If it's a textbox then we do some extra stuff
+                        m_toolTip.Show(tb.Text, tb, tb.Left, tb.Top, 5000);
+                        TextBoxHandler(ref tb);
+                    }
 
                     if (!ValidInput(i, true))
                     {
@@ -188,16 +212,34 @@ namespace Sate
             }
         }
 
+        private void TextBoxHandler(ref TextBox tb)
+        {
+            if (tb.Text.Contains("\n"))
+            {
+                tb.ScrollBars = ScrollBars.Vertical;
+                tb.Height = 30;
+            }
+            else
+            {
+                tb.ScrollBars = ScrollBars.None;
+                tb.Height = 20;
+            }
+        }
+        
         protected virtual void CreateValueControls(int arraySize)
         {
             //Default control is TextBox
-            fieldValueControl=new System.Windows.Forms.TextBox[arraySize];
+            TextBox textBox;
+            fieldValueControl = new System.Windows.Forms.TextBox[arraySize];
 
             for (int i=0; i<arraySize; i++)
             {
-                fieldValueControl[i]=new TextBox();
+                textBox= new TextBox();
+                textBox.Multiline = true;
+                fieldValueControl[i] = textBox;
                 fieldValueControl[i].Font=dataFont;
                 fieldValueControl[i].TextChanged+=new EventHandler(ObjectDataFieldControl_TextChanged);
+                fieldValueControl[i].MouseHover += new EventHandler(ObjectDataFieldControl_MouseHover);
 
                 ToolStripMenuItem tsi=new ToolStripMenuItem();
                 tsi.Text="Is changed";
@@ -256,6 +298,9 @@ namespace Sate
         protected ObjectDataFieldControl(ObjectInfo objInfo, int member, string typeName, string fieldName, int arraySize)
         {
             Init(objInfo, member, typeName, fieldName, arraySize);
+            m_toolTip.InitialDelay = 10;
+            m_toolTip.AutoPopDelay = 5000;
+            m_toolTip.ReshowDelay = 10;
         }
 
         protected void Init(ObjectInfo objInfo, int member, string typeName, string fieldName, int arraySize)
@@ -359,6 +404,11 @@ namespace Sate
         {
             if( disposing )
             {
+                foreach (Control c in fieldValueControl)
+                {
+                    c.Dispose();
+                }
+                
                 if(components != null)
                 {
                     components.Dispose();
@@ -472,6 +522,7 @@ namespace Sate
                 ComboBox combo=new ComboBox();
                 combo.Font=dataFont;
                 combo.SelectedIndexChanged+=new EventHandler(ObjectDataFieldControl_TextChanged);
+                combo.MouseHover += new EventHandler(ObjectDataFieldControl_MouseHover);
                 combo.Items.AddRange(enumValueNames);
                 combo.SelectedIndex=0;
                 combo.DropDownStyle=ComboBoxStyle.DropDownList;

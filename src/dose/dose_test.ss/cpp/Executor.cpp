@@ -25,14 +25,19 @@
 #include "Executor.h"
 #include <iostream>
 
+#include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <DoseTest/Partner.h>
+#include <DoseTest/Parameters.h>
 #include <boost/bind.hpp>
 #include "Logger.h"
 #include <DoseTest/Dump.h>
 #include <DoseTest/DumpResult.h>
 #include <Safir/Dob/OverflowException.h>
 #include <ace/OS_NS_unistd.h>
+#include <ace/INET_Addr.h>
+#include <ace/OS_NS_sys_socket.h>
 
+#include "dosecom_stuff.h"
 
 #ifdef _MSC_VER
   #pragma warning(push)
@@ -50,6 +55,63 @@
 #undef GetMessage
 #endif
 
+ActionReader::ActionReader(const boost::function<void (DoseTest::ActionPtr)> & handleActionCallback,
+                           const std::string& multicastNic):
+
+    ACE_Event_Handler(ACE_Reactor::instance()),
+    m_handleActionCallback(handleActionCallback),
+    m_sock(ACE_SOCK_Dgram_Mcast::options(ACE_SOCK_Dgram_Mcast::DEFOPT_BINDADDR |
+                                         ACE_SOCK_Dgram_Mcast::OPT_NULLIFACE_ONE))
+{
+    // Port and address must correspond to what is used by the test sequencer
+    const unsigned int cPort = 31789;
+    const std::wstring cMulticastAddr = DoseTest::Parameters::TestMulticastAddress();
+
+    ACE_INET_Addr addr;
+    addr.set(cPort,
+             cMulticastAddr.c_str());
+
+    ACE_OS::socket_init();
+
+    std::wcout << "Joined socket to group for multicast reception. Multicast address " << cMulticastAddr << ", port " << cPort << "." << std::endl;
+
+    int res;
+    if (multicastNic.empty())
+    {
+        std::wcout << "NIC is not set ... will listen on default interface." << std::endl;
+        res = m_sock.join(addr);
+    }
+    else
+    {
+        std::wcout << "Used NIC: " << Safir::Dob::Typesystem::Utilities::ToWstring(multicastNic) << std::endl;
+        res = m_sock.join(addr, 1, multicastNic.c_str());
+    }
+    if (res == -1)
+    {
+        std::wcout << "Error joining multicast group!" << std::endl;
+    }
+
+    m_sock.enable(ACE_NONBLOCK);
+
+    reactor ()->register_handler (this, ACE_Event_Handler::READ_MASK); 
+}
+
+int ActionReader::handle_input(ACE_HANDLE)
+{
+    ACE_INET_Addr from;
+    const unsigned int cBufLen = 65000; 
+    char buf[cBufLen];
+
+    while (m_sock.recv(buf, cBufLen, from) != -1)
+    {
+        DoseTest::ActionPtr action =
+            boost::static_pointer_cast<DoseTest::Action>(Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(buf));
+
+        m_handleActionCallback(action);
+    }
+    return 0;
+}
+
 #ifdef _MSC_VER
   #pragma warning(push)
   #pragma warning(disable: 4355)
@@ -66,6 +128,7 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_dispatchTestConnection(true),
     m_testDispatcher(boost::bind(&Executor::DispatchTestConnection,this)),
     m_controlDispatcher(boost::bind(&Executor::DispatchControlConnection,this)),
+    m_actionReader(boost::bind(&Executor::HandleAction,this,_1), commandLine.size() > 2 ? commandLine.at(2): ""),
     m_callbackActions(Safir::Dob::CallbackId::Size()),
     m_defaultContext(0)
 {
@@ -74,6 +137,7 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     //subscribe to messages going to everyone and to me.
     m_controlConnection.SubscribeMessage(DoseTest::Action::ClassTypeId, Safir::Dob::Typesystem::ChannelId(m_instance),this);
     m_controlConnection.SubscribeMessage(DoseTest::Action::ClassTypeId, Safir::Dob::Typesystem::ChannelId(),this);
+
 }
 #ifdef _MSC_VER
   #pragma warning(pop)
@@ -85,6 +149,7 @@ void Executor::OnStopOrder()
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnStopOrder);
     m_isDone = true;
     ACE_Reactor::instance()->end_reactor_event_loop();
+    ACE_Reactor::instance()->close();
 }
 
 void Executor::OnMessage(const Safir::Dob::MessageProxy messageProxy)
@@ -92,6 +157,18 @@ void Executor::OnMessage(const Safir::Dob::MessageProxy messageProxy)
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnMessage);
 
     DoseTest::ActionPtr action = boost::static_pointer_cast<DoseTest::Action>(messageProxy.GetMessage());
+
+    HandleAction(action);
+}
+
+void Executor::HandleAction(DoseTest::ActionPtr action)
+
+{
+    if (!action->Partner().IsNull() && action->Partner().GetVal() != Safir::Dob::Typesystem::ChannelId(m_instance))
+    {
+        // Not meant for this partner
+        return;
+    }
 
     if (action->Consumer().IsNull())
     {//No consumer set, meant for the executor.
@@ -117,9 +194,8 @@ void Executor::OnMessage(const Safir::Dob::MessageProxy messageProxy)
             theConsumer.AddCallbackAction(action);
         }
     }
+
 }
-
-
 
 void
 Executor::ExecuteAction(DoseTest::ActionPtr action)
@@ -157,7 +233,10 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
             {
                 std::wcout << "Deactivating" << std::endl;
                 m_testConnection.Close();
+
+                m_controlConnection.Delete(m_partnerEntityId, Safir::Dob::Typesystem::HandlerId(m_instance));
                 m_controlConnection.UnregisterHandler(m_partnerEntityId.GetTypeId(),Safir::Dob::Typesystem::HandlerId(m_instance));
+
                 m_controlConnection.UnregisterHandler(DoseTest::Dump::ClassTypeId,Safir::Dob::Typesystem::HandlerId(m_instance));
                 m_isActive = false;
             }
@@ -228,6 +307,19 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
             }
         }
         break;
+
+    case DoseTest::ActionEnum::InhibitOutgoingTraffic:
+        {
+            if (m_isActive)
+            {
+                DOSE_SHARED_DATA_S * pShm = (DOSE_SHARED_DATA_S *) Get_NodeSharedData_Pointer();
+                
+                pShm->InhibitOutgoingTraffic = action->Inhibit().GetVal();
+                lout << "InhibitOutgoingTraffic set to " << pShm->InhibitOutgoingTraffic << std::endl;
+            }
+        }
+        break;
+
     case DoseTest::ActionEnum::Print:
         {
             if (m_isActive)

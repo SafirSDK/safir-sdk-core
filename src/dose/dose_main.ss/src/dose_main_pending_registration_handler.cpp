@@ -28,6 +28,7 @@
 #include <Safir/Dob/Internal/EntityTypes.h>
 
 #include <Safir/Dob/Internal/Connections.h>
+#include <Safir/Dob/Internal/NodeStatuses.h>
 #include <iomanip>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/ThisNodeParameters.h>
@@ -152,9 +153,9 @@ namespace Internal
 
         //check if we have the response from all nodes that are up
         PendingRegistrationInfo & reg = findIt->second;
-        const NodeHandler::NodeStatuses statuses = m_nodeHandler.GetNodeStatuses();
+        const NodeStatuses::Status statuses = NodeStatuses::Instance().GetNodeStatuses();
         bool gotAll = true;
-        for (NodeHandler::NodeStatuses::const_iterator it = statuses.begin();
+        for (NodeStatuses::Status::const_iterator it = statuses.begin();
              it != statuses.end();++it)
         {
             const int nodeId = static_cast<int>(std::distance(statuses.begin(),it));

@@ -67,7 +67,7 @@ namespace Internal
     private:
         virtual void HandleTimeout(const TimerInfoPtr & timer);
 
-        typedef std::map<Typesystem::InstanceId, DistributionData> Instances;
+        typedef std::vector<DistributionData> Instances;
 
         struct States
         {
@@ -128,11 +128,10 @@ namespace Internal
 
         void UnsetPerformingFlag(void *){m_isPerforming = false;}
 
-        //the timer is for checking that nothing "gets stuck" in this structure.
-        //we check every 5 minutes and if the size of the structure is unchanged
-        //we log an error.
-        //A little bit rudimentary, but it should catch the errors and it is _very_
-        //unlikely
+        //The timer is used to clean things that have "get stuck" in this structure.
+        //We check every 5 minutes and if the size of the structure is unchanged
+        //it is cleaned. The reason (besides programming errors) that things get stuck here
+        //is because of a node split.
         TimerId m_timerId;
         size_t m_lastSize;
     };

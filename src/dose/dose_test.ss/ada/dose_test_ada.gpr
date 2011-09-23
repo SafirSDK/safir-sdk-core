@@ -3,6 +3,7 @@ with "dots_generated_ada";
 with "dots_ada";
 with "dose_ada";
 with "swre_interface_ada";
+with "dose_test_util";
 
 project dose_test_ada is
 

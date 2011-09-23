@@ -2449,6 +2449,21 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
                                dcom_uchar8 PoolDistribution, dcom_uchar8 bUseAck,
                                int Priority, int Destination)
 {
+    // Check if we should simulate a stop in the outgoing traffic
+    if (g_pShm->InhibitOutgoingTraffic)
+    {
+
+        // if pooldistribution is complete, we need to clean up some stuff...
+        if(PoolDistribution == PD_ISCOMPLETE) 
+        {
+            g_pShm->PoolDistributionWillEndSoon  = 0;
+            g_pShm->PoolDistributionIsInProgress = 0;
+            g_pShm->BitMapBeingPoolDistributed64 = (dcom_ulong64)0; // just in case
+        }
+
+        return(ERR_DOSECOM_OK);
+    }
+
     dcom_ushort16  Next_PutIx;
     dcom_ushort16  NumUsed;
     int     Qix = Priority;
@@ -2851,4 +2866,5 @@ void CDoseComTransmit::Get_Info(char *pBuf)
         TxQ[2].MaxUsedQueueLength,TxQ[3].MaxUsedQueueLength);
 #endif
 }
+
 /*----------------- end DoseComTransmit.cpp ----------------------*/

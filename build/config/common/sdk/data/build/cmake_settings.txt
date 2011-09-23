@@ -3,6 +3,11 @@ FILE(TO_CMAKE_PATH "$ENV{SAFIR_SDK}" SAFIR_SDK)
 FILE(TO_CMAKE_PATH "$ENV{SAFIR_RUNTIME}" SAFIR_RUNTIME)
 file(TO_CMAKE_PATH "$ENV{SAFIR_USER}" SAFIR_USER)
 
+#Default build release
+if (NOT CMAKE_BUILD_TYPE)
+   set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 
 #Get some more env variables that may or may not exist (with a stupid way of doing it)
 if ("$ENV{BOOST_DIR}" STREQUAL "")
@@ -68,19 +73,21 @@ endif ()
 set (Boost_ADDITIONAL_VERSIONS "1.34.1" "1.37" "1.37.0" "1.38" "1.38.0" "1.39" "1.39.0" "1.40" "1.40.0" "1.41" "1.41.0" "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0")
 
 set(Boost_USE_MULTITHREADED ON)
-find_package(Boost)
 
+# Use boost from tower if it exists
+set(BOOST_ROOT ${SAFIR_SDK})
+find_package(Boost)
 if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
-    link_directories(${Boost_LIBRARY_DIRS})
+   include_directories(${Boost_INCLUDE_DIRS})
+   link_directories(${Boost_LIBRARY_DIRS})
 else()
-    set (BOOST_ROOT ${SAFIR_SDK})
-    find_package(Boost)
-    if(Boost_FOUND)
-        include_directories(${Boost_INCLUDE_DIRS})
-        link_directories(${Boost_LIBRARY_DIRS})
+   unset(BOOST_ROOT)
+   find_package(Boost)
+   if(Boost_FOUND)
+      include_directories(${Boost_INCLUDE_DIRS})
+      link_directories(${Boost_LIBRARY_DIRS})
     else()
-        message(FATAL_ERROR "Failed to find the boost installation!")
+        message(FATAL_ERROR "Failed to find a boost installation!")
     endif()
 endif()
 
@@ -151,8 +158,12 @@ MACRO(INSTALL_DEBUG_INFO target)
 ENDMACRO()
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SAFIR_SDK}/data/build/)
-SET(COMMON_CS_FLAGS "-warn:4")
 
+if (MSVC)
+    SET(COMMON_CS_FLAGS "-warn:4" "-platform:x86")
+else()
+    SET(COMMON_CS_FLAGS "-warn:4")
+endif(MSVC)
 
 
 #work out if we've got a configuration on the command line or if 

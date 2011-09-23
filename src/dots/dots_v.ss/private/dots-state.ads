@@ -26,6 +26,8 @@ with Templates_Parser;
 with GNAT.Spitbol; use GNAT.Spitbol;
 with Dots.String_Sets;
 
+pragma Elaborate_All (Templates_Parser);
+
 package Dots.State is
 
    Max_Outputs : constant := 100;

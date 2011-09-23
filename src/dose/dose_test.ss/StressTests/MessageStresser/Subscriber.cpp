@@ -33,7 +33,7 @@
 #endif
 
 Subscriber::Subscriber():
-    m_receivedWithAckStat(StatisticsCollection::Instance().AddHzCollector(L"Received With Ack")),
+m_receivedWithAckStat(StatisticsCollection::Instance().AddHzCollector(L"Received With Ack")),
     m_missedWithAckStat(StatisticsCollection::Instance().AddPercentageCollector(L"Missed", m_receivedWithAckStat)),
     m_receivedWithoutAckStat(StatisticsCollection::Instance().AddHzCollector(L"Received Without Ack")),
     m_missedWithoutAckStat(StatisticsCollection::Instance().AddPercentageCollector(L"Missed",m_receivedWithoutAckStat)),
@@ -46,10 +46,14 @@ Subscriber::Subscriber():
     m_lastSequenceNumberWithAckLarge(-1),
     m_lastSequenceNumberWithoutAckLarge(-1)
 {
+}
+
+void Subscriber::Start()
+{
     m_connection.Attach();
 
     m_connection.SubscribeMessage(DoseStressTest::RootMessage::ClassTypeId,
-                                  Safir::Dob::Typesystem::ChannelId(), this);
+        Safir::Dob::Typesystem::ChannelId(), this);
 }
 
 void Subscriber::OnMessage(Safir::Dob::MessageProxy messageProxy)

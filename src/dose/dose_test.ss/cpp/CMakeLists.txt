@@ -6,8 +6,9 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
+FILE(GLOB dose_com_sources ${SAFIR_SDK}/include/Safir/Dob/Internal/DoseComAux/*.cpp)
 
-ADD_EXECUTABLE(dose_test_cpp ${sources} ${headers})
+ADD_EXECUTABLE(dose_test_cpp ${sources} ${dose_com_sources} ${headers})
 
 TARGET_LINK_LIBRARIES(dose_test_cpp ${COMMON_LIBRARIES} ${ACE_LIBRARY})
 

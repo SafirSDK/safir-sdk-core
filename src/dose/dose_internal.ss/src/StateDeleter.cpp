@@ -34,8 +34,6 @@ namespace Internal
 {
     void StateDeleter::operator()(const pointer& p)
     {
-        lllout << "RUNNING STATE DELETER. Key: " <<  m_key << std::endl;
-
         // Remove the state entry ...
         StateContainer::RemoveState(m_this, m_key);
 

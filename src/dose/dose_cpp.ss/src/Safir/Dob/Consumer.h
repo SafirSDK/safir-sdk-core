@@ -182,11 +182,11 @@ namespace Dob
      * The following methods MAY be overridden:
      * =========================================
      *
-     * virtual void OnInjectedNewEntity(const Safir::Dob::EntityProxy entityProxy);
+     * virtual void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy);
      *
-     * virtual void OnInjectedUpdatedEntity(const Safir::Dob::EntityProxy entityProxy);
+     * virtual void OnInjectedUpdatedEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy);
      *
-     * virtual void OnInjectedDeletedEntity(const Safir::Dob::EntityProxy entityProxy);
+     * virtual void OnInjectedDeletedEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy);
      *
      * virtual void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId,
                                             const Safir::Dob::Typesystem::HandlerId&     handlerId);

@@ -108,11 +108,12 @@ namespace Internal
         }
         // Unregister all registered handlers
         //(making copy of the map allows Unregister to call back into connection without upsetting the iteration)
+        const bool explicitUnregister = !NodeIsDown();
         RegistrationsMap registrations;
         registrations.swap(m_registrations);
         std::for_each(registrations.begin(),
                       registrations.end(),
-                      boost::bind(&Connection::Unregister, this, _1));
+                      boost::bind(&Connection::Unregister, this, _1, explicitUnregister));
 
         // Remove all subscriptions
         for (TypesSetVector::iterator it = m_subscribedTypes.begin(); it < m_subscribedTypes.end(); ++it)
@@ -197,12 +198,15 @@ namespace Internal
     {
         TypeHandlerKey key = std::make_pair(typeId, handlerId);
         InitialInjectionValue instanceSet;
+        ScopedConnectionLock lck(m_lock);
         m_initialInjectionInstances.insert(std::make_pair(key, instanceSet));
     }
 
     std::vector<TypeHandlerPair> Connection::GetAndClearEmptyInitialInjections()
     {
         std::vector<TypeHandlerPair> result;
+
+        ScopedConnectionLock lck(m_lock);
 
         for (InitialInjectionInstances::iterator it = m_initialInjectionInstances.begin();
              it != m_initialInjectionInstances.end();) // Note the missing ++it.
@@ -228,6 +232,8 @@ namespace Internal
     {
         TypeHandlerKey key = std::make_pair(typeId, handlerId);
 
+        ScopedConnectionLock lck(m_lock);
+
         InitialInjectionInstances::iterator it = m_initialInjectionInstances.find(key);
 
         if (it != m_initialInjectionInstances.end())
@@ -246,12 +252,57 @@ namespace Internal
 
     bool Connection::RemoveInitialInjectionInstance(const Typesystem::TypeId              typeId,
                                                     const Dob::Typesystem::HandlerId&     handlerId,
-                                                    const Dob::Typesystem::InstanceId&    instanceId,
-                                                    const bool                            allInstances)
+                                                    const Dob::Typesystem::InstanceId&    instanceId)
     {
         if (m_initialInjectionInstances.empty())
         {
             return false;
+        }
+
+        TypeHandlerKey key = std::make_pair(typeId, handlerId);
+
+        ScopedConnectionLock lck(m_lock);
+
+        InitialInjectionInstances::iterator it = m_initialInjectionInstances.find(key);
+
+        if (it != m_initialInjectionInstances.end())
+        {
+            // The type/handler already exist.
+            it->second.erase(instanceId.GetRawValue());
+
+            if (it->second.empty())
+            {
+                // We just removed the last instance
+                m_initialInjectionInstances.erase(it);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool Connection::InitialInjectionInstanceExists(const Typesystem::TypeId              typeId,
+                                                    const Dob::Typesystem::HandlerId&     handlerId,
+                                                    const Dob::Typesystem::InstanceId&    instanceId)
+    {
+        TypeHandlerKey key = std::make_pair(typeId, handlerId);
+
+        ScopedConnectionLock lck(m_lock);
+
+        InitialInjectionInstances::iterator it = m_initialInjectionInstances.find(key);
+
+        if (it == m_initialInjectionInstances.end() || it->second.find(instanceId.GetRawValue()) == it->second.end())
+        {
+            return false;
+        }
+        return true;
+    }
+
+    void Connection::RemoveAllInitialInjectionInstances(const Typesystem::TypeId typeId,
+                                                        const Dob::Typesystem::HandlerId& handlerId)
+    {
+        if (m_initialInjectionInstances.empty())
+        {
+            return;
         }
 
         TypeHandlerKey key = std::make_pair(typeId, handlerId);
@@ -262,23 +313,9 @@ namespace Internal
         {
             // The type/handler already exist.
 
-            if (allInstances)
-            {
-                it->second.clear();
-            }
-            else
-            {
-                it->second.erase(instanceId.GetRawValue());
-            }
-
-            if (it->second.empty())
-            {
-                // We just removed the last instance
-                m_initialInjectionInstances.erase(it);
-                return true;
-            }
+            it->second.clear();
+            m_initialInjectionInstances.erase(it);
         }
-        return false;
     }
 
     void Connection::AddInjectionHandler(const Typesystem::TypeId              typeId,
@@ -293,9 +330,7 @@ namespace Internal
     void Connection::RemoveInjectionHandler(const Typesystem::TypeId              typeId,
                                             const Dob::Typesystem::HandlerId&     handlerId)
     {
-        ScopedConnectionLock lck(m_lock);
-
-        m_injectionHandlers.erase(std::make_pair(typeId, ShmHandlerId(handlerId)));
+         m_injectionHandlers.erase(std::make_pair(typeId, ShmHandlerId(handlerId)));
     }
 
     const ConsumerId Connection::GetInjectionHandlerConsumer(const Typesystem::TypeId              typeId,
@@ -304,8 +339,15 @@ namespace Internal
         ScopedConnectionLock lck(m_lock);
 
         RegistrationsMap::const_iterator it = m_injectionHandlers.find(std::make_pair(typeId, ShmHandlerId(handlerId)));
-        ENSURE(it != m_injectionHandlers.end(), << "Didn't find given type/handler");
-        return it->second;
+        //        ENSURE(it != m_injectionHandlers.end(), << "Didn't find given type/handler");
+        if (it != m_injectionHandlers.end())
+        {
+            return it->second;
+        }
+        else
+        {
+            return ConsumerId();
+        }
     }
 
     const RegistrationVector Connection::GetInjectionHandlers() const
@@ -329,6 +371,12 @@ namespace Internal
         ScopedConnectionLock lck(m_lock);
 
         m_registrations.erase(std::make_pair(typeId, ShmHandlerId(handlerId)));
+
+        if (m_isLocal)
+        {
+            RemoveInjectionHandler(typeId, handlerId);
+            RemoveAllInitialInjectionInstances(typeId, handlerId);
+        }
     }
 
     void Connection::AddRevokedRegistration(const Typesystem::TypeId              typeId,
@@ -413,17 +461,17 @@ namespace Internal
         }
     }
 
-    void Connection::Unregister(const std::pair<TypeHandlerKey, ConsumerId>& reg)
+    void Connection::Unregister(const std::pair<TypeHandlerKey, ConsumerId>& reg, const bool explicitUnregister)
     {
         const Typesystem::TypeId& typeId = reg.first.first;
 
         if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
         {
-            EntityTypes::Instance().UnregisterAll(this, typeId);
+            EntityTypes::Instance().UnregisterAll(this, typeId, explicitUnregister);
         }
         else if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Service::ClassTypeId))
         {
-            ServiceTypes::Instance().UnregisterAll(this, typeId);
+            ServiceTypes::Instance().UnregisterAll(this, typeId, explicitUnregister);
         }
         else
         {

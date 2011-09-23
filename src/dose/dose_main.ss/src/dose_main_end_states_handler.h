@@ -25,16 +25,6 @@
 #ifndef _dose_main_end_states_h
 #define _dose_main_end_states_h
 
-// #include <Safir/Dob/Internal/InternalFwd.h>
-// #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
-// #include <Safir/Dob/Connection.h>
-// #include <Safir/Dob/Internal/ConnectionId.h>
-// #include <ace/Event_Handler.h>
-// #include <map>
-// #include <deque>
-// #include <boost/function.hpp>
-// #include <ace/Reactor.h>
-// #include "dose_main_waiting_states.h"
 #include "dose_main_timers.h"
 #include <boost/noncopyable.hpp>
 namespace Safir
@@ -50,23 +40,9 @@ namespace Internal
     public:
         EndStatesHandler();
 
-        /** Add a connection endstate */
-        void AddDisconnect(const ConnectionId& connection);
-
-        bool IsDisconnected(const ConnectionId & connection) const
-        {return m_connections.find(connection) != m_connections.end();}
-
-        void ClearDisconnectsFromNode(const NodeNumber node);
     private:
         virtual void HandleTimeout(const TimerInfoPtr & timer);
 
-        //a table over connections that have disconnected. The second item in the pair
-        //is the timestamp when we got the disconnect.
-        typedef std::map<ConnectionId,Typesystem::Int64> ConnectionTable;
-
-        ConnectionTable m_connections;
-
-        Typesystem::Int64 m_lastTimestamp;
         TimerId m_timerId;
     };
 }

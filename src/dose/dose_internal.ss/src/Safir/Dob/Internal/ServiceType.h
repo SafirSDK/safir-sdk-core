@@ -66,15 +66,12 @@ namespace Internal
         void Unregister(const ConnectionPtr&                connection,
                         const Dob::Typesystem::HandlerId&   handlerId);
 
-        void UnregisterAll(const ConnectionPtr& connection);
+        void UnregisterAll(const ConnectionPtr& connection,
+                           const bool           explicitUnregister);
 
         /** New registration state from external node */
         void RemoteSetRegistrationState(const ConnectionPtr& connection,
                                         const DistributionData& registrationState);
-
-        /** Unregistration (an end state) from external node */
-        void RemoteSetUnregistrationState(const DistributionData& registrationState);
-
 
         bool IsRegistered(const Dob::Typesystem::HandlerId& handlerId, const ContextId context) const;
 

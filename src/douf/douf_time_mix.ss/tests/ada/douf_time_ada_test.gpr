@@ -8,19 +8,18 @@
 --
 --
 --=============================================================================
-
+with "safir_defaults";
 with "dose_ada.gpr";
 with "dots_ada.gpr";
-with "syst_default.gpr";
 with "../../ada/program/douf_time_ada_library.gpr";
 with "dots_generated_ada.gpr";
-with "win32ada.gpr";
+
 
 project douf_time_ada_test is
 
-  for Source_Dirs use (".");
-  for Object_Dir use syst_default'Object_Dir;
-  for Exec_Dir use syst_default'Exec_Dir;
+   for Source_Dirs use (".");
+   for Exec_Dir use "lib-obj";
+   for Object_Dir use "lib-obj";
 
   for Main use ("douf_time_test_program_receive.adb",
                 "douf_time_test_program_send.adb",
@@ -37,20 +36,17 @@ project douf_time_ada_test is
       when others =>
   end case;
 
-  package Builder is
-     for Default_Switches ("Ada") use
-       syst_default.Builder'Default_Switches ("Ada");
-  end Builder;
+   package Builder is
+      for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
+   end Builder;
 
-  package Compiler is
-     for Default_Switches ("Ada") use
-       syst_default.Compiler'Default_Switches ("Ada");
-  end Compiler;
+   package Compiler is
+      for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
+   end Compiler;
 
-  package Linker is
-     for Default_Switches ("Ada") use
-       syst_default.Linker'Default_Switches ("Ada");
-  end Linker;
+   package Linker is
+      for Default_Switches ("ada") use Safir_Defaults.Linker'Default_Switches ("Ada");
+   end Linker;
 
    package Pretty_Printer is
       for Default_Switches ("ada") use ("-nM");

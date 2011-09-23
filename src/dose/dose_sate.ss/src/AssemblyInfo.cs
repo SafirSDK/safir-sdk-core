@@ -36,7 +36,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Saab AB")]
 [assembly: AssemblyProduct("")]
-[assembly: AssemblyCopyright("Copyright Saab AB, 2006-2008")]
+[assembly: AssemblyCopyright("Copyright Saab AB, 2006-2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

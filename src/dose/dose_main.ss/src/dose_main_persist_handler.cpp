@@ -34,6 +34,7 @@
 #include <Safir/Dob/SuccessResponse.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
+#include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
@@ -119,8 +120,8 @@ namespace Safir
 
             m_waitingForResponsesFromNodes.clear();
 
-            const NodeHandler::NodeStatuses ns = m_nodeHandler->GetNodeStatuses();
-            for (NodeHandler::NodeStatuses::const_iterator it = ns.begin();
+            const NodeStatuses::Status ns = NodeStatuses::Instance().GetNodeStatuses();
+            for (NodeStatuses::Status::const_iterator it = ns.begin();
                 it != ns.end(); ++it)
             {
                 if (*it == NodeStatus::Started)

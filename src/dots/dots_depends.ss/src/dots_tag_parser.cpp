@@ -157,6 +157,30 @@ namespace DotsDepends
 
         const int buff_size = 128;
         char line[buff_size];
+        const char delimiter[] = ".\t\n";
+        char* token;
+
+        //find namspace token
+        while( fgets( line, buff_size, stream ) != NULL)
+        {
+            if (strncmp(Defs::NAMESPACE_STR, line, strlen(Defs::NAMESPACE_STR)) == 0)
+            {
+                break;
+            }
+        }
+
+        fgets( line, buff_size, stream );
+        if (line[0] == ' ')
+        {
+            token = strtok(line, delimiter);
+            while (*token == ' ') token++;  // trim
+            if (!NamespaceExists(token))
+            {
+                m_namespaces.push_back(token);            
+            }
+        }
+
+        
 
         // find dependency token
         while( fgets( line, buff_size, stream ) != NULL)
@@ -169,9 +193,7 @@ namespace DotsDepends
 
         // check dependencies
         bool found = false;
-        const char delimiter[] = ".\t\n";
         const char fileDelimiter[] = "-";
-        char* token;
         char baseName[256];
         strcpy(baseName, boost::filesystem::basename(filename).c_str());
         const char* const fileToken = strtok(baseName, fileDelimiter);;

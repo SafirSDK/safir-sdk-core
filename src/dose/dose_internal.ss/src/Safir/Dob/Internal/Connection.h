@@ -132,15 +132,16 @@ namespace Internal
         // Returns true if the instance has been deleted and there are no more instances for the given type.
         bool RemoveInitialInjectionInstance(const Typesystem::TypeId              typeId,
                                             const Dob::Typesystem::HandlerId&     handlerId,
-                                            const Dob::Typesystem::InstanceId&    instanceId,
-                                            const bool                            allInstances);
+                                            const Dob::Typesystem::InstanceId&    instanceId);
+
+        bool InitialInjectionInstanceExists(const Typesystem::TypeId              typeId,
+                                            const Dob::Typesystem::HandlerId&     handlerId,
+                                            const Dob::Typesystem::InstanceId&    instanceId);
 
         // Injection handler consumers
         void AddInjectionHandler(const Typesystem::TypeId              typeId,
                                  const Dob::Typesystem::HandlerId&     handlerId,
                                  const ConsumerId&                     consumer);
-        void RemoveInjectionHandler(const Typesystem::TypeId              typeId,
-                                    const Dob::Typesystem::HandlerId&     handlerId);
         const ConsumerId GetInjectionHandlerConsumer(const Typesystem::TypeId              typeId,
                                                      const Dob::Typesystem::HandlerId&     handlerId) const;
         // Get a copy of current injection handlers.
@@ -281,7 +282,14 @@ namespace Internal
 
         void Unsubscribe(const Typesystem::TypeId typeId);
 
-        void Unregister(const std::pair<TypeHandlerKey, ConsumerId>& reg);
+        void Unregister(const std::pair<TypeHandlerKey, ConsumerId>& reg, const bool explicitUnregister);
+
+        void RemoveInjectionHandler(const Typesystem::TypeId              typeId,
+            const Dob::Typesystem::HandlerId&     handlerId);
+
+        void RemoveAllInitialInjectionInstances(const Typesystem::TypeId              typeId,
+                                            const Dob::Typesystem::HandlerId&     handlerId);
+
 
         const RegistrationVector GetRegistrations(const RegistrationsMap& registrations) const;
 

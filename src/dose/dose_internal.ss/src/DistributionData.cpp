@@ -71,12 +71,13 @@ namespace Internal
 
         BOOST_STATIC_ASSERT(sizeof(InstanceIdPolicy::Enumeration) == 4);
 
+        BOOST_STATIC_ASSERT(sizeof(RegistrationStateKind) == 4);
 
 
         BOOST_STATIC_ASSERT(sizeof(RegistrationStateHeader) == sizeof(StateHeader)
                             + 4  //handlerStrSize
                             + 4  //m_instanceIdPolicy
-                            + 4  //m_registered + padding
+                            + 4  //m_kind
                             );
 
         BOOST_STATIC_ASSERT(sizeof(EntityStateKind) == 4);
@@ -360,7 +361,7 @@ namespace Internal
                                        const Typesystem::TypeId typeId,
                                        const Typesystem::HandlerId& handlerId,
                                        const InstanceIdPolicy::Enumeration instanceIdPolicy,
-                                       const bool registered,
+                                       const RegistrationStateKind kind,
                                        const LamportTimestamp& regTime)
     {
         const Typesystem::Int32 handlerStrSize = handlerId.Utf8StringLength();
@@ -378,7 +379,7 @@ namespace Internal
 
         RegistrationStateHeader& registrationStateHeader = GetRegistrationStateHeader();
 
-        registrationStateHeader.m_registered = registered;
+        registrationStateHeader.m_kind = kind;
         registrationStateHeader.m_instanceIdPolicy = instanceIdPolicy;
 
         registrationStateHeader.m_handlerStrSize = handlerStrSize;
@@ -1192,7 +1193,14 @@ namespace Internal
                 case InstanceIdPolicy::RequestorDecidesInstanceId: oStr << "RequestorDecidesInstanceId"; break;
                 }
                 oStr << std::endl
-                     << "\tIsRegistered: " << std::boolalpha << IsRegistered() << std::endl
+                     << "\tRegistrationStateKind: ";
+                switch (GetRegistrationStateKind())
+                {
+                case Registered: oStr << "Registered"; break;
+                case Unregistered: oStr << "Unregistered"; break;
+                case ImplicitUnregistered: oStr << "ImplicitUnregistered"; break;
+                }
+                oStr << std::endl
                      << "\tRegistrationTime: " << GetRegistrationTime() << std::endl;
             }
             break;

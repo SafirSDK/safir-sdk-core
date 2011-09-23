@@ -560,6 +560,46 @@ namespace Internal
             }
         }
 
+
+        // check for class duplicates.
+        bool duplicatesExist = false;
+        DobClasses theClasses = ParsingState::Instance().classParser.Result();
+        for (DobClasses::iterator iter = theClasses.begin(); iter < theClasses.end(); iter++)
+        {
+            int count = 0;
+            for (DobClasses::iterator iter2 = iter; iter2 < theClasses.end(); iter2++)
+            {
+                if (iter->m_typeId == iter2->m_typeId)
+                {
+                    if (count++ > 0)
+                    {
+                        lllerr << "Duplicate defined class found: " << iter->m_name.c_str() << std::endl; 
+                        duplicatesExist =  true;
+                    }
+                }
+            }
+        }
+
+        // check for properties duplicates.
+        DobProperties theProperties = ParsingState::Instance().propertyParser.Result();
+        for (DobProperties::iterator iter = theProperties.begin(); iter < theProperties.end(); iter++)
+        {
+            int count = 0;
+            for (DobProperties::iterator iter2 = iter; iter2 < theProperties.end(); iter2++)
+            {
+                if (iter->m_typeId == iter2->m_typeId)
+                {
+                    if (count++ > 0)
+                    {
+                        lllerr << "Duplicate defined property found: " << iter->m_name.c_str() << std::endl; 
+                        duplicatesExist =  true;
+                    }
+                }
+            }
+        }
+
+
+        if(duplicatesExist) return false;
         if (!FinalizeClasses()) return false;
         if (!FinalizeProperties()) return false;
 

@@ -43,7 +43,6 @@ namespace Internal
     class PendingRegistrationHandler;
     class NodeHandler;
     class PersistHandler;
-    class EndStatesHandler;
 
     class ConnectionHandler:
         private boost::noncopyable
@@ -57,8 +56,7 @@ namespace Internal
                   RequestHandler & requesthandler,
                   PendingRegistrationHandler & prh,
                   NodeHandler & nh,
-                  PersistHandler & persistHandler,
-                  EndStatesHandler& endStates);
+                  PersistHandler & persistHandler);
 
         void MaybeSignalConnectSemaphore();
 
@@ -77,7 +75,6 @@ namespace Internal
         PendingRegistrationHandler * m_pendingRegistrationHandler;
         NodeHandler * m_nodeHandler;
         PersistHandler * m_persistHandler;
-        EndStatesHandler* m_endStates;
 
         std::deque<DistributionData> m_unsent;
 

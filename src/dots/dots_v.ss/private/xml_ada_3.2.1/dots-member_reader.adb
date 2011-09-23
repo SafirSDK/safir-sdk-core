@@ -72,7 +72,7 @@ package body Dots.Member_Reader is
       Stack : constant String := To_String (Handler.Stack);
       File_Name : constant Unbounded_String :=
         To_Unbounded_String (Get_Public_Id (Handler.Locator));
-      Short_Name : constant String := GNAT.Directory_Operations.File_Name(To_String(File_Name));
+      Short_Name : constant String := GNAT.Directory_Operations.File_Name (To_String (File_Name));
    begin
       if Handler.Depth = 2 then
          if Local_Name = "name" then

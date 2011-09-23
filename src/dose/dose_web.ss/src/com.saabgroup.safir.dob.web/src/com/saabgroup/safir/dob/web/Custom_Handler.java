@@ -33,14 +33,24 @@ import java.io.OutputStream;
 
 class Custom_Handler implements HttpHandler {
 
+    Dots_Handler DotsHandler = new Dots_Handler();
+
     public String path() {
         return System.getenv("SAFIR_RUNTIME") + com.saabgroup.safir.dob.web.Parameters.getHtmlDir() + "/";
     }
 
+    @Override
     public void handle(HttpExchange exchange) throws IOException {
         // check the request method and process if it is a GET
         String requestMethod = exchange.getRequestMethod();
         if (requestMethod.equalsIgnoreCase("GET")) {
+
+
+            if (exchange.getRequestURI().getPath().endsWith("show")) {
+                DotsHandler.handle(exchange);
+                return;
+            }
+
 
             // Get response body
             OutputStream responseBody = exchange.getResponseBody();
@@ -48,7 +58,7 @@ class Custom_Handler implements HttpHandler {
             //* response is OK (200)
             exchange.sendResponseHeaders(200, 0);
             String reqPath = exchange.getRequestURI().getPath();
- 
+
             if (reqPath.endsWith("/")) {
                 reqPath = reqPath.concat("index.html");
             }

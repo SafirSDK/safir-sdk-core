@@ -792,7 +792,6 @@ package body Consumers is
       Logger.Put_Line (UWS ("  EntityId       = ") & Safir.Dob.Typesystem.Entity_Id.To_String (Entity_Proxy.Get_Entity_Id));
       Logger.Put_Line (UWS ("  deletedByOwner = ") & Boolean_Image (Deleted_By_Owner));
       Logger.Put_Line (UWS ("  Owner          = ") & Safir.Dob.Typesystem.Handler_Id.To_String (Entity_Proxy.Get_Owner));
-      Logger.Put_Line (UWS ("  OwnerConn = ") & Logger.To_String (Entity_Proxy.Get_Owner_Connection_Info));
       Logger.Put_Line (UWS ("  OwnerStr  = ") & Safir.Dob.Typesystem.Handler_Id.To_String (Entity_Proxy.Get_Owner_With_String_Representation));
       Logger.Put_Line (UWS ("  Previous  = ") & Prev_Xml);
 

@@ -25,7 +25,6 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Internal/Connections.h>
-#include <Safir/Utilities/Internal/PanicLogging.h>
 #include <boost/bind.hpp>
 
 
@@ -49,9 +48,13 @@ namespace Internal
 
     void WaitingStates::Add(const DistributionData & state)
     {
-        ENSURE(!m_isPerforming, << "Unexpected Add while we're performing a state! state = " << state.Image());
+        if (m_isPerforming)
+        {
+            // Ignore Adds while we're performing a state.
+            return;
+        }
+
         const ConnectionId senderId = state.GetSenderId();
-        ENSURE(senderId.m_id != -1, << "WaitingStates::Add: Cannot have states waiting for connection -1");
 
         const Key key(state.GetTypeId(),state.GetHandlerId(),state.GetRegistrationTime());
 
@@ -65,15 +68,21 @@ namespace Internal
         //make a ref to the state struct to make the code below easier to read.
         States& theStates = regIt->second;
 
-        //if we didn't have a connection id before
-        if (theStates.connectionId == ConnectionId())
+        if (state.GetType() == DistributionData::RegistrationState ||
+           (state.GetType() == DistributionData::EntityState && state.GetEntityStateKind() != DistributionData::Ghost))
         {
-            theStates.connectionId = senderId;
-        }
-        else
-        {
-            ENSURE(theStates.connectionId == senderId, << "WaitingStates::Add does not expect connection id's to change! old "
-                   << theStates.connectionId << ", new " << senderId << ". While processing state " << state.Image());
+            // Connection id handling only for non-ghosts
+            
+            if (theStates.connectionId == ConnectionId())
+            {
+                //if we didn't have a connection id before
+                theStates.connectionId = senderId;
+            }
+            else
+            {
+                ENSURE(theStates.connectionId == senderId, << "WaitingStates::Add does not expect connection id's to change! old "
+                    << theStates.connectionId << ", new " << senderId << ". While processing state " << state.Image());
+            }
         }
 
         switch (state.GetType())
@@ -87,36 +96,7 @@ namespace Internal
 
         case DistributionData::EntityState:
             {
-                Instances::iterator instanceIt = theStates.instances.find(state.GetInstanceId());
-                if (instanceIt == theStates.instances.end())
-                {//no such instance, insert it
-                    theStates.instances.insert(std::make_pair(state.GetInstanceId(),state));
-                }
-                else
-                {
-                    const DistributionData& lastState = instanceIt->second;
-
-                    //overwrite if newer.
-                    if (lastState.GetCreationTime() < state.GetCreationTime())
-                    {
-                        instanceIt->second = state;
-                    }
-                    else if (state.GetCreationTime() < lastState.GetCreationTime())
-                    {
-                        lllout << "WaitingStates::Add: Discarding state with old CreationTime" << std::endl;
-                    }
-                    else
-                    { //equal creation time
-                        if (lastState.GetVersion() < state.GetVersion())
-                        {
-                            instanceIt->second = state;
-                        }
-                        else
-                        {
-                            lllout << "WaitingStates::Add: Discarding state with old Version" << std::endl;
-                        }
-                    }
-                }
+                theStates.instances.push_back(state);
             }
             break;
 
@@ -217,7 +197,7 @@ namespace Internal
 
                     // ... and the instances.
                     std::for_each(theStates.instances.begin(), theStates.instances.end(),
-                                  boost::bind(processFunc,boost::bind(&Instances::value_type::second,_1)));
+                                  boost::bind(processFunc,_1));
                     m_waitingStateTable.erase(it++);
                 }
             }
@@ -248,12 +228,8 @@ namespace Internal
             //make a ref to the state struct to make the code below easier to read.
             States& theStates = findIt->second;
 
-            ENSURE(theStates.registrationState.IsNoState(),
-                   << "PerformStatesWaitingForRegistration expects the registrationState in a States to be a no_state! "
-                   << "While processing registrationState " << registrationState.Image());
-
             std::for_each(theStates.instances.begin(), theStates.instances.end(),
-                          boost::bind(processFunc,boost::bind(&Instances::value_type::second,_1)));
+                          boost::bind(processFunc,_1));
 
             m_waitingStateTable.erase(findIt);
         }
@@ -269,10 +245,11 @@ namespace Internal
         const size_t size = m_waitingStateTable.size();
         if (size != 0 && size == m_lastSize)
         {
+            m_waitingStateTable.clear();
+
             std::wostringstream ostr;
             ostr << "The number of items in the WaitingStates structure has not changed for 5 minutes!" << std::endl
-                 << "This indicates that there might be a bug in dose_main!" << std::endl
-                 << "Please contact your nearest dob developer, and give this error message" << std::endl
+                << "This is probably due to a lost connection to one or more nodes (node split/join)" << std::endl
                  << "Contents of the WaitingStates structure" << std::endl;
 
             for (WaitingStateTable::iterator it = m_waitingStateTable.begin();
@@ -286,8 +263,7 @@ namespace Internal
                      << ", #inst = " << it->second.instances.size() <<std::endl;
             }
 
-            Safir::Utilities::Internal::PanicLogging::Log(Safir::Dob::Typesystem::Utilities::ToUtf8(ostr.str()));
-            lllerr << ostr.str() << std::endl;
+            lllinfo << ostr.str() << std::endl;
         }
         else
         {

@@ -1,9 +1,12 @@
-Linux Building and Installing
------------------------------
+Ubuntu/Debian Linux Building and Installing
+-------------------------------------------
 
+For the time being we have not provided any prebuilt Safir packages for Ubuntu/Debian based systems so you have to built Safir yourself from source.
+ 
 *Prerequisites*
 
-First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core. The exact package names may vary with your distribution, but these are the names from Ubuntu/Kubuntu 9.10:
+First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core.
+The exact package names may vary with your distribution, but these are the names from Ubuntu/Kubuntu 9.10:
 
 libqt4-dev 
 mono-devel 
@@ -11,7 +14,7 @@ libmono-winforms2.0-cil
 libboost1.40-all-dev 
 libace-dev 
 libtemplates-parser-dev 
-libxmlada-dev 
+libxmlada-dev
 libiodbc2-dev 
 cmake 
 make
@@ -39,24 +42,15 @@ To install these from the command line "in one go" on Debian 5.0.3 (Lenny), run:
 
 These packages should cause quite a few extra packages to be installed (like the gnat Ada compiler and a lot more stuff), which is as it should be.
 
-The packages marked with a * contain some bugs that we need to patch. The directory "build/patches" contains these patches, and a CMake file that will automatically install the patches needed for your system. Go to the "build/patches" directory and do a "cmake ." followed by a "sudo make install" which will cause the files to be installed into the correct places.
+Boost version 1.37 or older needs some patches. Also there is a patch for xmlada. The directory "build/patches" contains these patches
+(along with some patches needed for the Windows platform). There is a CMake file that will automatically install the patches needed for your system.
+Go to the "build/patches" directory and do a "cmake ." followed by a "sudo make install" which will cause the files to be installed into the correct places.
 
-The patches installed are as follows (not all of the files are in all the patch directories):
-- file_lock.hpp, offset_ptr.hpp, os_file_functions.hpp, mapped_region.hpp, sp_counted_impl.hpp, win32_api.hpp contain bugfixes for boost (just compare them with the originals to see what we've done).
-- xmlada.gpr contain a fix to make the xmlada library to be possible to use by importing a gpr file (the one in ubuntu 8.10/9.04/9.10 doesn't work)
-
-*Hints for non-ubuntu users*
-(Instructions for other distributions will be added, but in the meantime here are some general hints)
-
-Some distributions may not contain all the above packages, in which case you will have to install them manually. For RedHat/Centos users I can recommend the EPEL package repository, which will supply at least some of the packages.
-
-For boost you need at least version 1.35 (with the patches in ubuntu_patches) or later (1.36 and 1.37 should only need the sp_counted_impl.hpp patch above, and 1.38 should need no fixes). Mono should work with anything later than 1.2.6. For ACE anything in the 5.6.x series should work (earlier versions work too, probably). You can use any JDK version later than 5.0.
-
-To compile the Ada components you need the Gnat Ada compiler, and the templates-parser and xmlada libraries. 
 
 *Building*
 
-First of all you should decide where you want the SDK installed. You have to specify two environment variables, SAFIR_RUNTIME and SAFIR_SDK. For example you can create a directory "safir" in your home directory, and set the variables to point to "~/safir/runtime" and "~/safir/sdk" respectively.
+First of all you should decide where you want the SDK installed. You have to specify two environment variables, SAFIR_RUNTIME and SAFIR_SDK.
+For example you can create a directory "safir" in your home directory, and set the variables to point to "~/safir/runtime" and "~/safir/sdk" respectively.
 
 There are also a few other variables that you need to set up. Here is an example from my .bashrc:
 
@@ -69,7 +63,8 @@ export ADA_PROJECT_PATH=$SAFIR_SDK/ada
 export JAVA_HOME=/usr/lib/jvm/java-6-openjdk/
 -------------
 
-The easiest way to build Safir SDK Core is to use the build script (a python script that just uses cmake and/or make to build the components and subsystems). To run the build script go to the directory that contains the build and src directories, and run 
+The easiest way to build Safir SDK Core is to use the build script (a python script that just uses cmake and/or make to build the components and subsystems).
+To run the build script go to the directory that contains the build and src directories, and run 
     build/build.py -f build/sdk_core.txt
 This will build the Safir SDK Core components in the correct order and install them into the location specified by SAFIR_SDK and SAFIR_RUNTIME.
 

@@ -1,0 +1,15 @@
+with "externally_built_library";
+
+project dose_test_util is
+
+   for Source_Dirs use ();
+
+   for library_dir use Externally_Built_Library'library_dir;
+
+   for library_name use "dose_test_util";
+
+   for Library_kind  use "dynamic";
+
+   for Externally_Built use "true";
+
+end dose_test_util;

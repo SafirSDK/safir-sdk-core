@@ -24,11 +24,11 @@
 
 package Dots.File_Map is
 
-   procedure Include(Key : in String; Value : in String);
+   procedure Include (Key : in String; Value : in String);
    --
    -- Add Key/Value pair to file map.
 
-   function Get_Value(Key : in String) return String;
+   function Get_Value (Key : in String) return String;
    --
    -- Get the value that corresponds to the given key from file map.
 

@@ -36,8 +36,10 @@
   #pragma warning (push)
   #pragma warning (disable : 4702)
   #pragma warning (disable : 4127)
+  #pragma warning (disable : 4267)
 #endif
 
+#include <ace/Thread.h>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>
 
@@ -88,31 +90,11 @@ namespace Internal
         }
 
         ProcessInfo proc(ACE_OS::getpid());
-        std::string filename = proc.GetProcessName() + ".txt";
+        std::string filename = proc.GetProcessName() + "-" + boost::lexical_cast<std::string>(ACE_OS::getpid()) + ".txt";
 
         try
         {
             boost::filesystem::path fullpath = path/filename;
-            if (boost::filesystem::is_regular(fullpath) && boost::filesystem::exists(fullpath))
-            {
-                boost::filesystem::remove(fullpath);
-            }
-            return fullpath;
-        }
-        catch (const boost::filesystem::filesystem_error &)
-        {
-            //try another name below.
-        }
-
-        filename = boost::lexical_cast<std::string>(ACE_OS::getpid()) + ".txt";
-
-        try
-        {
-            boost::filesystem::path fullpath = path/filename;
-            if (boost::filesystem::is_regular(fullpath) && boost::filesystem::exists(fullpath))
-            {
-                boost::filesystem::remove(fullpath);
-            }
             return fullpath;
         }
         catch (const boost::filesystem::filesystem_error &)
@@ -120,7 +102,8 @@ namespace Internal
             //failed to find useful name
             return std::string("strange-") + boost::lexical_cast<std::string>(rand());
         }
-    }
+
+     }
 
 
     //check for file %SAFIR_RUNTIME%\log\Dob-LowLevelLog\logging_on
@@ -135,75 +118,28 @@ namespace Internal
         return boost::filesystem::exists(filename);
     }
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4355)
-    //disable using this in constructor warning
-#endif
-
-    LowLevelLoggerStreamBuf::LowLevelLoggerStreamBuf():
-        std::basic_streambuf<wchar_t, std::char_traits<wchar_t> >(),
-        m_bDatePending(true),
-        m_pLoggingEnabled(NULL),
-        m_startupSynchronizer("LLUF_LLL_INITIALIZATION", this)
+    LowLevelLogger::LowLevelLogger(bool forceFlush)
+        : std::basic_ostream<wchar_t, std::char_traits<wchar_t> >(new LowLevelLoggerStreamBuf(forceFlush))
     {
-        const boost::filesystem::path filename = GetLogFilename();
-        if (filename.empty())
-        {
-            //logging will be disabled (pointer is NULL)
-            return;
-        }
-
-        try
-        {
-            //open the output file
-            m_OutputFile.open(filename,std::ios::out);
-            if (!m_OutputFile.good())
-            {
-                m_OutputFile.close();
-                return;
-            }
-        }
-        catch (const std::exception &)
-        {
-            m_OutputFile.close();
-            return;
-        }
-
-        m_startupSynchronizer.Start();
     }
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
-    void LowLevelLoggerStreamBuf::Create()
+    LowLevelLogger::~LowLevelLogger()
     {
-        boost::interprocess::shared_memory_object::remove("LLUF_LLL_SHM");
-        boost::interprocess::shared_memory_object shm(boost::interprocess::create_only,"LLUF_LLL_SHM", boost::interprocess::read_write);
-        shm.truncate(sizeof(bool));
-        boost::interprocess::mapped_region shmRegion(shm,boost::interprocess::read_write);
-        *static_cast<bool*>(shmRegion.get_address()) = IsLoggingOnByDefault();
+        delete rdbuf();
     }
 
-    void LowLevelLoggerStreamBuf::Use()
+    LowLevelLoggerStreamBuf::LowLevelLoggerStreamBuf(bool forceFlush)
+        : std::basic_streambuf<wchar_t, std::char_traits<wchar_t> >(),
+          m_bDatePending(true),
+          m_ostr(),
+          m_backend(LowLevelLoggerBackend::Instance()),
+          m_forceFlush(forceFlush)
+
     {
-        boost::interprocess::shared_memory_object shm(boost::interprocess::open_only,"LLUF_LLL_SHM", boost::interprocess::read_only);
-        m_shm.swap(shm);
-        boost::interprocess::mapped_region shmRegion(m_shm,boost::interprocess::read_only);
-        m_shmRegion.swap(shmRegion);
-        m_pLoggingEnabled = static_cast<bool*>(m_shmRegion.get_address());
     }
-
-    void LowLevelLoggerStreamBuf::Destroy()
-    {
-
-    }
-
 
     LowLevelLoggerStreamBuf::~LowLevelLoggerStreamBuf()
     {
-
     }
 
     LowLevelLoggerStreamBuf::_Tr::int_type
@@ -232,61 +168,233 @@ namespace Internal
             m_bDatePending = false;
         }
 
-        m_OutputFile.put(_Tr::to_char_type(c));
-        std::wcout.put(_Tr::to_char_type(c));
+        m_ostr.put(_Tr::to_char_type(c));
 
         if (_Tr::to_char_type(c) == '\n')
         {
             m_bDatePending = true;
-            m_OutputFile.flush();
-            std::wcout.flush();
+            m_ostr.flush();
+
+            if (m_backend.OutputThreadStarted())
+            {
+                m_backend.CopyToInternalBuffer(m_ostr);
+                if (m_forceFlush)
+                {
+                    m_backend.OutputInternalBuffer();
+                }
+            }
+            else
+            {
+               // In the lllerr case we can get here without logging being enabled. In this case the output thread isn't
+                // running so we make the output synchronous from here
+                m_backend.OutputFile() << m_ostr.str();
+                std::wcout << m_ostr.str();
+                m_backend.OutputFile().flush();
+                std::wcout.flush();
+            }
+
+            m_ostr.str(std::wstring());
         }
 
-        return _Tr::not_eof(c);;
+        return _Tr::not_eof(c);
     }
 
     void LowLevelLoggerStreamBuf::WriteDateTime()
     {
         std::string dateTime = boost::posix_time::to_simple_string(boost::posix_time::microsec_clock::universal_time());
-        m_OutputFile << "[" <<  dateTime.c_str() << "] ";
-        std::wcout   << "[" <<  dateTime.c_str() << "] ";
+        m_ostr << "[" <<  dateTime.c_str() << "] ";
     }
 
-
-
-    LowLevelLogger * volatile LowLevelLogger::m_pInstance = NULL;
-    ACE_Thread_Mutex LowLevelLogger::m_InstantiationLock;
-
+    LowLevelLoggerBackend * volatile LowLevelLoggerBackend::m_pInstance = NULL;
+    ACE_Thread_Mutex LowLevelLoggerBackend::m_InstantiationLock;
 
     //
     //Instance
     //
-    LowLevelLogger & LowLevelLogger::Instance()
+    LowLevelLoggerBackend & LowLevelLoggerBackend::Instance()
     {
         if (m_pInstance == NULL)
         {
             ACE_Guard<ACE_Thread_Mutex> lck(m_InstantiationLock);
             if (m_pInstance == NULL)
             {
-                m_pInstance = new LowLevelLogger();
+                m_pInstance = new LowLevelLoggerBackend();
             }
         }
         return *m_pInstance;
     }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4355)
+    //disable using this in constructor warning
+#endif
 
-    LowLevelLogger::LowLevelLogger():
-        std::basic_ostream<wchar_t, std::char_traits<wchar_t> >(new LowLevelLoggerStreamBuf())
+    LowLevelLoggerBackend::LowLevelLoggerBackend()
+        : m_os(),
+          m_outputBuf(),
+          m_pLoggingEnabled(NULL),
+          m_startupSynchronizer("LLUF_LLL_INITIALIZATION", this),
+          m_outputThreadStarted(false)
     {
+        const boost::filesystem::path filename = GetLogFilename();
+        if (filename.empty())
+        {
+            //logging will be disabled (pointer is NULL)
+            return;
+        }
 
+        try
+        {
+            //open the output file
+            m_OutputFile.open(filename,std::ios::out);
+            if (!m_OutputFile.good())
+            {
+                m_OutputFile.close();
+                return;
+            }
+        }
+        catch (const std::exception &)
+        {
+            m_OutputFile.close();
+            return;
+        }
+
+        const std::size_t BufferInitialSize = 4000;
+
+        m_os.reserve(BufferInitialSize);
+        m_outputBuf.reserve(BufferInitialSize);
+
+        m_startupSynchronizer.Start();
+
+        // start output thread
+        ACE_Thread::spawn(&LowLevelLoggerBackend::OutputThreadFunc, this);
+
+        m_outputThreadStarted = true;
     }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
     //
     // Destructor
     //
-    LowLevelLogger::~LowLevelLogger()
+    LowLevelLoggerBackend::~LowLevelLoggerBackend()
     {
+    }
 
+    void LowLevelLoggerBackend::Create()
+    {
+        boost::interprocess::shared_memory_object::remove("LLUF_LLL_SHM");
+        boost::interprocess::shared_memory_object shm(boost::interprocess::create_only,"LLUF_LLL_SHM", boost::interprocess::read_write);
+        shm.truncate(sizeof(bool));
+        boost::interprocess::mapped_region shmRegion(shm,boost::interprocess::read_write);
+        *static_cast<bool*>(shmRegion.get_address()) = IsLoggingOnByDefault();
+    }
+
+    void LowLevelLoggerBackend::Use()
+    {
+        boost::interprocess::shared_memory_object shm(boost::interprocess::open_only,"LLUF_LLL_SHM", boost::interprocess::read_only);
+        m_shm.swap(shm);
+        boost::interprocess::mapped_region shmRegion(m_shm,boost::interprocess::read_only);
+        m_shmRegion.swap(shmRegion);
+        m_pLoggingEnabled = static_cast<bool*>(m_shmRegion.get_address());
+    }
+
+    void LowLevelLoggerBackend::Destroy()
+    {
+    }
+
+    void LowLevelLoggerBackend::CopyToInternalBuffer(const std::wostringstream& ostr)
+    {
+        ACE_Guard<ACE_Thread_Mutex> lck(m_bufLock);
+
+        m_os << ostr.str();
+
+    }
+
+    void LowLevelLoggerBackend::OutputInternalBuffer()
+    {
+        ACE_Guard<ACE_Thread_Mutex> internalLck(m_internalBufLock);
+
+        {
+            ACE_Guard<ACE_Thread_Mutex> lck(m_bufLock);
+            // Swap the output buffer and the underlying log buffer.
+            m_os.swap_vector(m_outputBuf);
+        } // buffer lock released here
+
+        for (BufferT::const_iterator it = m_outputBuf.begin(); it != m_outputBuf.end(); ++it)
+        {
+            m_OutputFile.put(*it);
+            std::wcout.put(*it);
+        }
+        m_OutputFile.flush();
+        std::wcout.flush();
+
+        m_outputBuf.clear();
+    }
+
+    ACE_THR_FUNC_RETURN LowLevelLoggerBackend::OutputThreadFunc(void * _this)
+    {
+        LowLevelLoggerBackend* This = static_cast<LowLevelLoggerBackend*>(_this);
+
+        try
+        {
+            for (;;)
+            {
+                ACE_OS::sleep(10);
+
+                This->OutputInternalBuffer();
+            }
+        }
+        catch (const std::exception & exc)
+        {
+            std::wostringstream ostr;
+            ostr << "std::exception in LowLevelLoggerBackend::OutputWorker:" << std::endl
+                << exc.what();
+            std::wcout << ostr.str() << std::endl;
+            exit(-1);
+        }
+        catch (...)
+        {
+            std::wostringstream ostr;
+            ostr << "exception thrown in LowLevelLoggerBackend::OutputWorker!";
+            std::wcout << ostr.str() << std::endl;
+            exit(-1);
+        }
+
+#ifndef _MSC_VER
+        return NULL; //Keep compiler happy...
+#endif
+    }
+
+    void LowLevelLoggerBackend::OutputWorker()
+    {
+        try
+        {
+            for (;;)
+            {
+                ACE_OS::sleep(10);
+
+                OutputInternalBuffer();
+            }
+        }
+        catch (const std::exception & exc)
+        {
+            std::wostringstream ostr;
+            ostr << "std::exception in LowLevelLoggerBackend::OutputWorker:" << std::endl
+                << exc.what();
+            std::wcout << ostr.str() << std::endl;
+            exit(-1);
+        }
+        catch (...)
+        {
+            std::wostringstream ostr;
+            ostr << "exception thrown in LowLevelLoggerBackend::OutputWorker!";
+            std::wcout << ostr.str() << std::endl;
+            exit(-1);
+        }
     }
 
 }

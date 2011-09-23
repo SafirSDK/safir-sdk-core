@@ -26,26 +26,50 @@ with Logger;
 with Dose_Test.Action_Enum;
 with Dose_Test.Dump;
 with Dose_Test.Dump_Result;
+with Dose_Test.Parameters;
 with Safir.Dob.Entity_Proxies;
+with Safir.Dob.Typesystem;
 with Safir.Dob.Typesystem.Instance_Id;
 with Safir.Dob.Typesystem.Channel_Id;
-with Safir.Dob.Typesystem.Utilities;
+with Safir.Dob.Typesystem.Utilities; use Safir.Dob.Typesystem.Utilities;
 with Safir.Dob.Instance_Id_Policy;
 with Safir.Dob.Typesystem.Si_64;
 with Safir.Dob.Error_Response;
+with Safir.Dob.Typesystem.Object_Factory;
+with Unchecked_Conversion;
+with Interfaces.C;
 with Ada.Strings.Wide_Fixed;
-with Ada.Exceptions;
+with Ada.Strings.Wide_Unbounded;
+with Ada.Exceptions; use Ada.Exceptions;
+with GNAT.Sockets; use GNAT.Sockets;
+with GNAT.Command_Line;
 with Text_IO; use Text_IO;
 with Ada.Strings.Wide_Unbounded.Wide_Text_IO; use Ada.Strings.Wide_Unbounded.Wide_Text_IO;
+with Ada.Text_IO;
 
 pragma Warnings ("D"); -- turn off warnings for implicit dereference
 pragma Warnings ("L"); -- turn off warnings for missing elaboration pragma
 
 package body Executor is
 
-   procedure Run (Arg : in String) is
+   package C renames Interfaces.C;
+
+   procedure Inhibit_Outgoing_Traffic
+     (Inhibit   : in  C.char;
+      Success   : out C.char);
+   pragma Import (C, Inhibit_Outgoing_Traffic, "InhibitOutgoingTraffic");
+
+   procedure Inhibit_Outgoing_Traffic_Status (Is_Inhibited : out C.char);
+   pragma Import (C, Inhibit_Outgoing_Traffic_Status, "InhibitOutgoingTrafficStatus");
+
+   task Action_Reader is
+      entry Run (Multicast_Nic : in String);
+   end Action_Reader;
+
+   procedure Run is
    begin
-      MainLoop.Run (Arg);
+      MainLoop.Run (GNAT.Command_Line.Get_Argument); -- program instance
+      Action_Reader.Run (GNAT.Command_Line.Get_Argument);  -- NIC to be used for multicast reception
    end Run;
 
 
@@ -54,6 +78,73 @@ package body Executor is
    begin
       MainLoop.Dispatch (Self.Conn);
    end On_Do_Dispatch;
+
+   task body Action_Reader is
+      use Ada.Strings.Wide_Unbounded;
+      use Ada.Streams;
+      -- Port and address must correspond to what is used by the test sequencer
+      Port : constant Port_Type := 31789;
+      Multicast_Addr : constant Inet_Addr_Type := Inet_Addr (To_Utf_8 (Dose_Test.Parameters.Test_Multicast_Address));
+
+      Local_Addr : constant Sock_Addr_Type := (Family => Family_Inet, Addr => Any_Inet_Addr, Port => Port);
+
+      Socket : Socket_Type;
+
+      Item : Ada.Streams.Stream_Element_Array (1 .. 65000);
+      Last : Ada.Streams.Stream_Element_Offset;
+      type Stream_Element_Ptr is access all Ada.Streams.Stream_Element;
+      Buf_Ptr : constant Stream_Element_Ptr := Item (1)'Access;
+
+      function To_Char_Star is new Unchecked_Conversion (Stream_Element_Ptr, Safir.Dob.Typesystem.Char_Star);
+
+      Action : Dose_Test.Action.Smart_Pointer;
+
+   begin
+
+      accept Run (Multicast_Nic : in String) do
+
+         Create_Socket (Socket, Family_Inet, Socket_Datagram);
+
+         Set_Socket_Option
+           (Socket,
+            Socket_Level,
+            (Reuse_Address, True));
+
+         -- Needed to set the port
+         Bind_Socket (Socket, Local_Addr);
+
+         if Multicast_Nic'Length = 0 then
+            Set_Socket_Option
+              (Socket,
+               IP_Protocol_For_IP_Level,
+               (Add_Membership, Multicast_Addr, Any_Inet_Addr));
+
+            Put_Line ("NIC is not set ... listen on default interface.");
+
+         else
+            Set_Socket_Option
+              (Socket,
+               IP_Protocol_For_IP_Level,
+               (Add_Membership, Multicast_Addr, Inet_Addr (Multicast_Nic)));
+
+            Put_Line ("Used NIC: " & Multicast_Nic);
+         end if;
+
+      end Run;
+
+      loop
+         Receive_Socket (Socket, Item, Last);
+
+         Action := Dose_Test.Action.Smart_Pointer (Safir.Dob.Typesystem.Object_Factory.Create_Object
+                                                   (Blob => To_Char_Star (Buf_Ptr)));
+
+         MainLoop.Handle_Action (Action);
+      end loop;
+
+   exception when E : others =>
+         Ada.Text_IO.Put_Line
+           (Exception_Name (E) & ": " & Exception_Message (E));
+   end Action_Reader;
 
    task body MainLoop is
       The_Executor : aliased Executor_Type;
@@ -65,7 +156,6 @@ package body Executor is
       The_Executor.Control_Connection_Name := The_Executor.Identifier & "_control";
       The_Executor.Test_Connection_Name := Ada.Strings.Wide_Unbounded.
         To_Unbounded_Wide_String ("partner_test_connection");
-
 
       accept Run (Arg : in String) do
          The_Executor.Instance := Safir.Dob.Typesystem.Int_64'Value (Arg);
@@ -124,6 +214,11 @@ package body Executor is
                end case;
 
             or
+               accept Handle_Action (Action : in Dose_Test.Action.Smart_Pointer) do
+                  The_Executor.Handle_Action (Action);
+               end Handle_Action;
+
+            or
                delay 0.08;
 
             end select;
@@ -168,27 +263,7 @@ package body Executor is
                    (Safir.Dob.Message_Proxies.Get_Message (Message_Proxy));
    begin
       Self.Execute_Callback_Actions (Safir.Dob.Callback_Id.On_Message);
-
-      if Action.Ref.Consumer.Is_Null then
-         -- No consumer set, meant for the executor.
-         if Action.Ref.Action_Callback.Is_Null then
-            -- It is a normal action.
-            Self.Execute_Action (Action);
-         elsif Self.Is_Active then
-            Self.Add_Callback_Action (Action);
-         end if;
-      elsif Self.Is_Active then
-         declare
-            Consumer : constant Consumers.Consumer_Access :=
-                         Self.The_Consumers (Integer (Action.Ref.Consumer.Get_Val));
-         begin
-            if Action.Ref.Action_Callback.Is_Null then
-               Consumer.Execute_Action (Action);
-            else
-               Consumer.Add_Callback_Action (Action);
-            end if;
-         end;
-      end if;
+      Self.Handle_Action (Action);
    end On_Message;
 
    overriding
@@ -279,6 +354,38 @@ package body Executor is
       return False;
    end "=";
 
+   procedure Handle_Action (Self : in out Executor_Type;
+                            Action : in Dose_Test.Action.Smart_Pointer) is
+      use type Safir.Dob.Typesystem.Channel_Id.Channel_Id_Type;
+   begin
+
+      if not Action.Ref.Partner.Is_Null and then
+        Action.Ref.Partner.Get_Val /= Safir.Dob.Typesystem.Channel_Id.Create_Channel_Id (Self.Instance) then
+         return;
+      end  if;
+
+      if Action.Ref.Consumer.Is_Null then
+         -- No consumer set, meant for the executor.
+         if Action.Ref.Action_Callback.Is_Null then
+            -- It is a normal action.
+            Self.Execute_Action (Action);
+         elsif Self.Is_Active then
+            Self.Add_Callback_Action (Action);
+         end if;
+      elsif Self.Is_Active then
+         declare
+            Consumer : constant Consumers.Consumer_Access :=
+              Self.The_Consumers (Integer (Action.Ref.Consumer.Get_Val));
+         begin
+            if Action.Ref.Action_Callback.Is_Null then
+               Consumer.Execute_Action (Action);
+            else
+               Consumer.Add_Callback_Action (Action);
+            end if;
+         end;
+      end if;
+   end Handle_Action;
+
    procedure Execute_Action
      (Self   : in out Executor_Type;
       Action : in Dose_Test.Action.Smart_Pointer) is
@@ -325,12 +432,15 @@ package body Executor is
                Put_Line ("Deactivating");
 
                Self.Test_Connection.Close;
+               Self.Control_Connection.Delete
+                 (Self.Partner_Entity_Id,
+                  Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance));
                Self.Control_Connection.Unregister_Handler
                  (Safir.Dob.Typesystem.Entity_Id.Get_Type_Id (Self.Partner_Entity_Id),
                   Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance));
                Self.Control_Connection.Unregister_Handler
-                    (Dose_Test.Dump.Class_Type_Id,
-                     Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance));
+                 (Dose_Test.Dump.Class_Type_Id,
+                  Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance));
                Self.Is_Active := False;
             end if;
 
@@ -396,6 +506,19 @@ package body Executor is
             if Self.Is_Active then
                Self.Dispatch_Test_Connection := not Action.Ref.Inhibit.Get_Val;
                Logger.Put_Line ("InhibitDispatch set to " & Boolean'Wide_Image (Self.Dispatch_Test_Connection));
+            end if;
+
+         when Dose_Test.Action_Enum.Inhibit_Outgoing_Traffic =>
+            if Self.Is_Active then
+               declare
+                  Success : C.char;
+                  Inhibit : constant C.char := C.char'Val (Boolean'Pos (Action.Ref.Inhibit.Get_Val));
+                  Is_Inhibited : C.char;
+               begin
+                  Inhibit_Outgoing_Traffic (Inhibit, Success);
+                  Inhibit_Outgoing_Traffic_Status (Is_Inhibited);
+                  Logger.Put_Line ("InhibitOutgoingTraffic set to" & Integer'Wide_Image (C.char'Pos (Is_Inhibited)));
+               end;
             end if;
 
          when Dose_Test.Action_Enum.Print =>

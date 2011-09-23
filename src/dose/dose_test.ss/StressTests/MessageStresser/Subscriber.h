@@ -33,8 +33,7 @@ class Subscriber :
 {
 public:
     Subscriber();
-
-    //    void Start();
+    void Start();
 
 private:
     //Message Subscriber

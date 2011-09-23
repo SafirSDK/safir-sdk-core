@@ -25,7 +25,6 @@
 #include "dose_main_pool_handler.h"
 
 #include "dose_main_blocking_handler.h"
-#include "dose_main_end_states_handler.h"
 #include "dose_main_communication.h"
 #include "dose_main_connection_handler.h"
 #include "dose_main_pending_registration_handler.h"
@@ -58,7 +57,6 @@ namespace Internal
         m_blockingHandler(NULL),
         m_pendingRegistrationHandler(NULL),
         m_persistHandler(NULL),
-        m_endStates(NULL),
         m_connectionHandler(NULL),
         m_stateSubscriptionConnections(Safir::Dob::NodeParameters::NumberOfContexts()),
         m_pdThreadHandle(NULL)
@@ -107,14 +105,12 @@ namespace Internal
                            ExternNodeCommunication & ecom,
                            PendingRegistrationHandler & pendingHandler,
                            PersistHandler & persistHandler,
-                           EndStatesHandler& endStates,
                            ConnectionHandler & connectionHandler)
     {
         m_blockingHandler = &blockingHandler;
         m_ecom = &ecom;
         m_pendingRegistrationHandler = &pendingHandler;
         m_persistHandler = &persistHandler;
-        m_endStates = &endStates;
         m_connectionHandler = &connectionHandler;
 
         // dose_main must subscribe for states in all contexts
@@ -293,13 +289,6 @@ namespace Internal
             ENSURE(senderId.m_id != -1, << "Registration states are expected to have ConnectionId != -1! Reg for type "
                    << Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId()));
 
-            if (m_endStates->IsDisconnected(senderId))
-            {
-                //The state belongs to a recently disconnected connection, so we
-                //just discard it.
-                return;
-            }
-
             const ConnectionPtr connection = Connections::Instance().GetConnection(senderId, std::nothrow);
 
             if (connection == NULL)
@@ -327,15 +316,17 @@ namespace Internal
                    << Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId()));
 
             //unregistration states bypass all waitingstates handling and go straight
-            //into shared memory, and we keep a reference in endstates for a while
+            //into shared memory
             if (Typesystem::Operations::IsOfType(state.GetTypeId(),Safir::Dob::Service::ClassTypeId))
             {
-                ServiceTypes::Instance().RemoteSetUnregistrationState(state);
+                ServiceTypes::Instance().RemoteSetRegistrationState(ConnectionPtr(), state);
             }
             else
             {
-                EntityTypes::Instance().RemoteSetUnregistrationState(state);
+                EntityTypes::Instance().RemoteSetRegistrationState(ConnectionPtr(), state);
             }
+
+            PerformStatesWaitingForRegistration(state);
 
             m_pendingRegistrationHandler->CheckForPending(state.GetTypeId());
         }
@@ -351,7 +342,14 @@ namespace Internal
             {
                 ENSURE(state.GetSenderId().m_id == -1, << "Ghost states are expected to have ConnectionId == -1! Ghost for "
                        << state.GetEntityId());
-                EntityTypes::Instance().RemoteSetGhostEntityState(state);
+
+                const RemoteSetResult result = EntityTypes::Instance().RemoteSetRealEntityState(NULL, // Null connection for ghosts
+                                                                                                state);
+
+                if (result == RemoteSetNeedRegistration)
+                {
+                    m_waitingStates.Add(state);
+                }
             }
             break;
         case DistributionData::Injection:
@@ -369,13 +367,6 @@ namespace Internal
 
                     ENSURE(senderId.m_id != -1, << "Entity states are expected to have ConnectionId != -1! State for "
                            << state.GetEntityId());
-
-                    if (m_endStates->IsDisconnected(senderId))
-                    {
-                        //The state belongs to a recently disconnected connection, so we
-                        //just discard it.
-                        return;
-                    }
 
                     const ConnectionPtr connection = Connections::Instance().GetConnection(senderId, std::nothrow);
                     if (connection == NULL)
@@ -601,9 +592,8 @@ namespace Internal
 
             if (!state.IsNoState())
             {
-                //local states are to be sent to other nodes
-                //unregistrationstates (regardless of whether they are local or not) must
-                //  be sent, so that new nodes get the correct timestamps etc.
+                //Local states are to be sent to other nodes.
+                //Unregistration states (regardless of whether they are local or not) are always sent.
                 if (IsLocal(state) ||
                     !state.IsRegistered())
                 {
@@ -686,7 +676,6 @@ namespace Internal
     void PoolHandler::RemoveStatesWaitingForNode(const Typesystem::Int32 node)
     {
         m_waitingStates.NodeDown(node);
-        m_endStates->ClearDisconnectsFromNode(node);
     }
 }
 }

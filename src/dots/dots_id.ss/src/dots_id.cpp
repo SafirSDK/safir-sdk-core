@@ -27,6 +27,7 @@
 #include <boost/limits.hpp>
 #include <ctime>
 
+
 //disable warnings in boost and ace
 #if defined _MSC_VER
   #pragma warning (push)
@@ -35,6 +36,7 @@
   #pragma warning (disable : 4267)
 #endif
 
+#include <ace/OS_NS_unistd.h>
 #include <ace/Thread_Mutex.h>
 #include <ace/Guard_T.h>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
@@ -107,7 +109,8 @@ boost::int64_t __cdecl DotsId_GenerateRandom64()
             const boost::posix_time::ptime epoch(boost::gregorian::date(2008,1,1));
             const ptime now = microsec_clock::universal_time();
             const time_duration diff = now - epoch;
-            random_generator->seed(static_cast<boost::uint32_t>(diff.total_microseconds() % std::numeric_limits<boost::uint32_t>::max()));
+            const boost::uint32_t my_seed = (static_cast<boost::uint32_t>(diff.total_microseconds()) * ACE_OS::getpid()) % std::numeric_limits<boost::uint32_t>::max();
+            random_generator->seed(my_seed);
         }
     }
     static ACE_Thread_Mutex use_lock;

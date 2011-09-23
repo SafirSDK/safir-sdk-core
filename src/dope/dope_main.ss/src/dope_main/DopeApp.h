@@ -108,6 +108,7 @@ private:
 
     bool m_persistenceStarted; // Any dope has started successfully and loaded persistent data into the system.
     bool m_persistenceInitialized; // Dope has initialized persistence.
+    bool m_connectionThreadRunning;
 
     Safir::Application::BackdoorKeeper m_keeper;
 

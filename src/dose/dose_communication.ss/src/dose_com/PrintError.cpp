@@ -43,11 +43,14 @@
 #define _CRT_SECURE_NO_DEPRECATE
 #endif
 
+#include <string>
+#include <iostream>
+
 #define  IS_USING_SOCKETS
 #include "DosePlatform.h"
-
 #include <stdio.h>
 #include <stdarg.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include "PrintError.h"
 
 #ifdef _LINUX
@@ -62,10 +65,11 @@ typedef unsigned long SOCKET;
 // 'N'  - no print
 // 'C'  - Print To Console
 // 'R'  - Print to RAM
+// 'L'  - Print to LLL
 // 'S'  - stdout
 // else - stdout
 
-static unsigned long g_OutPutMode = 'U';  // might be modified by PrintSetMode()
+static unsigned long g_OutPutMode = 'L';  // might be modified by PrintSetMode()
 
 static SOCKET g_SockId = INVALID_SOCKET;
 static struct sockaddr_in g_SockName;
@@ -81,6 +85,69 @@ static char* g_ramFirstFree;
 static unsigned int g_logSeq = 0;
 
 //static char g_ProgName[PROGRAM_NAME_LENGTH] = {0};  //Note: this aso offset in msg to server
+
+/***************************************************************
+* Convert a UTF8-encoded std::string to std::wstring
+****************************************************************/
+static std::wstring ToWstring(const std::string & str)
+{
+    if (str.empty())
+    {
+        return std::wstring();
+    }
+
+    int left = 0;
+    wchar_t *pwszBuf = new wchar_t[str.length() + 1];
+    wchar_t *pwsz;
+    unsigned long pos;
+
+    pwsz = pwszBuf;
+
+    std::string::const_iterator it;
+    for( it = str.begin(); it != str.end(); ++it)
+    {
+        pos = (unsigned char) *it;
+        if ((left == 0) ^ ((pos & 0xC0) != 0x80)) // Continuation byte mismatch
+        {
+            left = 0;
+            *pwsz++ = L'#';
+        }
+
+        if (pos < 0x80) // 7-bit ASCII
+        {
+            *pwsz++ = (wchar_t) pos;
+        }
+        else if ((pos & 0xC0) == (0x80)) // Correct continuation
+        {
+            left--;
+            *pwsz = (*pwsz << 6) + (wchar_t) (pos & 0x3F);
+            if (left == 0)
+                pwsz++;
+        }
+        else if ((pos & 0xE0) == (0xC0)) // First of 2
+        {
+            *pwsz = (wchar_t) (pos & 0x1F);
+            left = 1;
+        }
+        else if ((pos & 0xF0) == (0xE0)) // First of 3
+        {
+            *pwsz = (wchar_t) (pos & 0x0F);
+            left = 2;
+        }
+        else // Only the BMP is supported.
+        {
+            left = 0;
+            *pwsz++ = L'#';
+        }
+
+    }
+
+    std::wstring wstr( pwszBuf, pwsz - pwszBuf );
+
+    delete [] pwszBuf;
+    return wstr;
+}
+/*--------------------- end ToWstring() ------------------------*/
 
 /***************************************************************
 * Convert error number to a text
@@ -210,7 +277,7 @@ static SOCKET Create_Socket(void)
     WSADATA  WSAData;
     if (WSAStartup(MAKEWORD(2,2) ,&WSAData ) != 0)
     {
-        printf("WSAStartup failed\n");
+        std::wcout << "WSAStartup failed" << std::endl;
         return(INVALID_SOCKET);
     }
 #endif
@@ -218,7 +285,7 @@ static SOCKET Create_Socket(void)
     SockId = socket(AF_INET,SOCK_DGRAM,0 );
     if (SockId == INVALID_SOCKET)
     {
-        printf("ERROR: Can't create socket.\n");
+        std::wcout << "ERROR: Can't create socket." << std::endl;
         return(INVALID_SOCKET);
     }
 
@@ -287,7 +354,7 @@ void PrintRam(const char* log)
 
     if (logLen > g_ramBufSize)
     {
-        printf("DoseCom log message to big for ram buffer!\n");
+        std::wcout << "DoseCom log message to big for ram buffer!" << std::endl;
     }
 
     if (logLen > g_ramBufSize - (g_ramFirstFree - g_ramBuf))
@@ -336,8 +403,11 @@ void PrintDbg( const char *format, ... )
     else
     if(g_OutPutMode == 'R')     PrintRam(resultBuf);
     else
+    if (g_OutPutMode == 'L')    lllinfo << ToWstring(resultBuf); 
+    else
     {
-        printf("%s", resultBuf); fflush(stdout);
+        std::wcout << ToWstring(resultBuf);
+        std::wcout.flush();
     }
 }
 
@@ -376,7 +446,13 @@ void PrintErr(int ErrorCode, const char *format, ... )
     if(g_OutPutMode == 'U') PrintUdp(Buf2);
     else
     if(g_OutPutMode == 'R') PrintRam(Buf2);
-    else                    printf("%s", Buf2);
+    else
+    if (g_OutPutMode == 'L')    lllinfo << ToWstring(Buf2);
+    else
+    {
+        std::wcout << ToWstring(Buf2);
+        std::wcout.flush();
+    }
 }
 
 /**********************************************************
@@ -390,11 +466,11 @@ void PrintErr(int ErrorCode, const char *format, ... )
 * else - stdout
 *
 ***********************************************************/
-void PrintSetMode(unsigned long mode,
+void PrintSetMode(wchar_t mode,
                   char *pIpAddr,        //dotted decimal or NULL
                   size_t ramBufSize) 
 {
-    printf("PrintSetMode(%lX,%s)\n",mode, pIpAddr);
+    std::wcout << "PrintSetMode(" << mode << "," << ToWstring(pIpAddr) << ")" << std::endl;
 
     if(pIpAddr != NULL)
         strncpy(g_IpAddr, pIpAddr, sizeof(g_IpAddr));
@@ -405,8 +481,7 @@ void PrintSetMode(unsigned long mode,
 
 void FlushRamBuffer()
 {
-    printf("%s", g_ramBuf);
-    fflush(stdout);
+    std::wcout << ToWstring(g_ramBuf) << std::flush;
 }
 
 /*------------------------- end PrintError.cpp ----------------------*/

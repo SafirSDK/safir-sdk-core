@@ -117,6 +117,8 @@ typedef struct
     // find out which nodes are  expected to send an Ack.
     //dcom_ulong32 BitMapDestChannelMembers[2][MAX_NUM_DEST_CHANNELS];
 
+    volatile dcom_uchar8 InhibitOutgoingTraffic;
+
     // Debug levels
     //    0 - no debug
     // >= 1 - Start up basic

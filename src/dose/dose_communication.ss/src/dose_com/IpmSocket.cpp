@@ -124,8 +124,11 @@ IPADDR CIpmSocket::Get_OwnIpAddress(IPADDR NetAddr_nw)
         IpAddr_nw[j1] = *(IPADDR *) pHostEnt->h_addr_list[j1];
 
         unsigned long dwTmp = IpAddr_nw[j1];
-        PrintDbg("%s IP=%s\n", pHostEnt->h_name,
-                        inet_ntoa( *(struct in_addr *)  &dwTmp));  //OK
+        if(*pDbg)
+        {
+            PrintDbg("%s IP=%s\n", pHostEnt->h_name,
+                     inet_ntoa( *(struct in_addr *)  &dwTmp));  //OK
+        }
     }
     NumNics = j1;
 

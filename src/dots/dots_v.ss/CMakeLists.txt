@@ -4,6 +4,17 @@ PROJECT (dots_v)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
+# XML ada version can be 3.2.1 or 4.2
+
+if ("$ENV{XML_ADA_VER}" STREQUAL "")
+    SET(XML_ADA_VER "3.2.1")
+else()
+    SET(XML_ADA_VER $ENV{XML_ADA_VER})
+endif()
+
+message("Using XmlAda version : " ${XML_ADA_VER}) 
+
+
 SET(gprmake_arguments -q -XBUILD=${CUSTOM_BUILD_TYPE} -XWarning_Level=Default)
 
 SET(build_directories 
@@ -15,7 +26,7 @@ SET(build_directories
 FILE(MAKE_DIRECTORY ${build_directories})
 
 ADD_CUSTOM_TARGET(dots_v ALL
-                  COMMAND gnatmake ${gprmake_arguments} -P dots_v-program.gpr 
+                  COMMAND gnatmake ${gprmake_arguments} -P dots_v-program.gpr -XXML_ADA_VER=${XML_ADA_VER}
                   WORKING_DIRECTORY program
                   COMMENT "Building dots_v using gprmake"
                   VERBATIM)

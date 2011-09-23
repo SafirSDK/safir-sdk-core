@@ -103,6 +103,16 @@ namespace Internal
         }
     }
 
+    Safir::Dob::Typesystem::Int64 TraceStreamBuffer::GetPrefixId() const 
+    {
+        if (m_prefixId == 0)
+        {
+            AddPrefix();
+        } 
+        
+        return m_prefixId;
+    }
+
     void
     TraceStreamBuffer::AddPrefix() const
     {

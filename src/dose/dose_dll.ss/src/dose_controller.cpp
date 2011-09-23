@@ -40,6 +40,7 @@
 #include <Safir/Dob/Internal/TimestampOperations.h>
 #include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Dob/Internal/ContextIdComposer.h>
+#include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Dob/Message.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/QueueParameters.h>
@@ -254,6 +255,7 @@ namespace Internal
                 EndStates::Initialize();
                 ServiceTypes::Initialize();
                 InjectionKindTable::Initialize();
+                NodeStatuses::Initialize();
                 EntityTypes::Initialize();
                 ContextSharedTable::Initialize();
             }
@@ -2012,7 +2014,7 @@ namespace Internal
         const StateKind lastKind = GetStateKind(lastState);
         const StateKind currKind = GetStateKind(currState);
 
-        if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LoggingEnabled())
+        if (Safir::Utilities::Internal::Internal::LowLevelLoggerBackend::Instance().LoggingEnabled())
         {
             Safir::Dob::Typesystem::EntityId eid;
             if (!lastState.IsNoState())
@@ -2044,25 +2046,11 @@ namespace Internal
         //Real --> Real
         if (lastKind == Real && currKind == Real && subscriptionOptions.includeUpdates)
         {
-            if (lastState.GetCreationTime() < currState.GetCreationTime())
+            if (lastState.GetCreationTime() != currState.GetCreationTime() ||
+                lastState.GetVersion() != currState.GetUndecrementedVersion())
             {
                 updated = true;
             }
-            else if (currState.GetCreationTime() < lastState.GetCreationTime())
-            {
-                ENSURE(false, << "Got unexpected CreationTimes (in Real --> Real) for entity "
-                    << lastState.GetEntityId() << ". last = "
-                    << lastState.GetCreationTime() << ", curr = "
-                    << currState.GetCreationTime());
-            }
-            else
-            { //equal creation time
-                if (lastState.GetVersion() < currState.GetUndecrementedVersion())
-                {
-                    updated = true;
-                }
-            }
-
             return;
         }
 
@@ -2105,23 +2093,10 @@ namespace Internal
         {
             if (subscriptionOptions.wantsLastState && subscriptionOptions.includeUpdates)
             {
-                if (lastState.GetCreationTime() < currState.GetCreationTime())
+                if (lastState.GetCreationTime() != currState.GetCreationTime() ||
+                    lastState.GetVersion().IsDiffGreaterThanOne(currState.GetUndecrementedVersion()))
                 {
                     updated = true;
-                }
-                else if (currState.GetCreationTime() < lastState.GetCreationTime())
-                {
-                    ENSURE(false, << "Got unexpected CreationTimes (in Real --> Ghost) for entity "
-                        << lastState.GetEntityId() << ". last = "
-                        << lastState.GetCreationTime() << ", curr = "
-                        << currState.GetCreationTime());
-                }
-                else
-                { //equal creation time
-                    if (lastState.GetVersion().IsDiffGreaterThanOne(currState.GetUndecrementedVersion()))
-                    {
-                        updated = true;
-                    }
                 }
             }
 
@@ -2135,25 +2110,13 @@ namespace Internal
         {
             if (subscriptionOptions.wantsLastState)
             {
-                if (lastState.GetCreationTime() < currState.GetCreationTime())
+                if (lastState.GetCreationTime() != currState.GetCreationTime())
                 {
                     created = true;
                     deleted = true;
                     deleteIsExplicit = false;
                 }
-                else if (currState.GetCreationTime() < lastState.GetCreationTime())
-                {
-                    ENSURE(false, << "Got unexpected CreationTimes (in Ghost --> Ghost) for entity "
-                        << lastState.GetEntityId() << ". last = "
-                        << lastState.GetCreationTime() << ", curr = "
-                        << currState.GetCreationTime());
-                }
-                else
-                {
-                    //Ghosts with equal creation times can be ignored.
-                }
             }
-
             return;
         }
 
@@ -2163,7 +2126,7 @@ namespace Internal
             if (subscriptionOptions.wantsGhostDelete)
             {
                 deleted = true;
-                deleteIsExplicit = true;
+                deleteIsExplicit = currState.IsExplicitlyDeleted();
             }
 
             return;
@@ -2399,6 +2362,47 @@ namespace Internal
 
         const bool isGhost = !realState.IsNoState() && realState.GetEntityStateKind() == DistributionData::Ghost;
 
+        if (isGhost)
+        {
+            if (subscription->GetState()->IsReleased())
+            {
+                // This ghost is "deleted" and should not be used.
+                return true; // Remove from queue and reset dirty flag
+            }
+
+            if (!subscription->GetSubscriptionId().connectionConsumer.connection->
+                InitialInjectionInstanceExists(realState.GetTypeId(),
+                                               realState.GetHandlerId(),
+                                               realState.GetInstanceId()))
+            {
+                // This ghost is not expected to be dispatched.
+                return true; // Remove from queue and reset dirty flag
+            }   
+
+            if (NodeStatuses::Instance().AnyNodeHasStatus(NodeStatus::Starting))
+            {
+                // We won't start to inject ghosts as long as there are one or more nodes that are
+                // in state 'Starting'. This minimize the risk that we will signal OnInitialInjectionsDone
+                // before all ghosts are received from remote nodes.
+                dontRemove = true;
+                return false;  // Don't remove from queue and don't reset dirty flag
+            }
+            else if (!NodeStatuses::Instance().AnyNodeHasStatus(NodeStatus::Failed))
+            {
+                // Ok, it seems that all nodes are either Started or Expected (has never been started).
+                // In this case we know that we have got the pools, and thus the ghosts, from all nodes so
+                // we can clean-up the ghosts and only save the ones from the newest registration.
+                EntityTypes::Instance().CleanGhosts(realState.GetTypeId(), stateHandlerId, GetContext());
+
+                // Check if the clean-up has "deleted" this ghost state 
+                if (subscription->GetState()->IsReleased())
+                {
+                    // This ghost is "deleted" and should not be used.
+                    return true; // Remove from queue and reset dirty flag
+                }
+            }
+        }
+
         if (!injectionStateChanged && !isGhost)
         {
             // We are only interested if there is a change of the injection state or if the real state is a ghost.
@@ -2453,8 +2457,6 @@ namespace Internal
         }
 
         // At this point a merge has been performed and/or we are handling a ghost.
-
-
 
         // Find out what callback to dispatch to application.
         enum DispatchAction
@@ -2703,8 +2705,7 @@ namespace Internal
     {
         bool removedLastInstance = m_connection->RemoveInitialInjectionInstance(typeId,
                                                                                 handlerId,
-                                                                                instanceId,
-                                                                                false); // false => not all instances
+                                                                                instanceId); 
         if (removedLastInstance)
         {
              m_dispatcher.InvokeOnInitialInjectionsDoneCb(consumer, typeId, handlerId);
@@ -2731,7 +2732,10 @@ namespace Internal
 
             const ConsumerId consumer = m_connection->GetInjectionHandlerConsumer(typeId, handlerId);
 
-            m_dispatcher.InvokeOnInitialInjectionsDoneCb(consumer, typeId, handlerId);
+            if (consumer != ConsumerId())
+            {
+                m_dispatcher.InvokeOnInitialInjectionsDoneCb(consumer, typeId, handlerId);
+            }
 
             it = emptyInitialInjections.erase(it);
 
@@ -2822,6 +2826,7 @@ namespace Internal
         for (RegistrationVector::iterator it = revoked.begin(); it != revoked.end(); ++it)
         {
             long nbrOfRef = 0;
+            long nbrOfRefAfter = 0;
 
             if (g_garbageCollected[it->consumer.lang])
             {
@@ -2837,7 +2842,19 @@ namespace Internal
                                                        it->typeId,
                                                        it->handlerId);
 
-            // For garbage collected languages the references related to the revoked registration must be dropped.
+            // Since the user can make dob calls that removes references in the OnRevokedRegistration
+            // callback, we must read the number of references after the callback and then remove
+            // exactly that number of references that should be removed.
+            nbrOfRefAfter = m_consumerReferences.GetHandlerRegistrationReferenceCounter(it->typeId,
+                                                                                        it->handlerId,
+                                                                                        it->consumer);
+
+            if (nbrOfRefAfter < nbrOfRef)
+            {
+                nbrOfRef = nbrOfRefAfter;
+            }
+
+           // For garbage collected languages the references related to the revoked registration must be dropped.
             if (nbrOfRef > 0)
             {
                 m_consumerReferences.DropHandlerRegistrationReferences(it->typeId,

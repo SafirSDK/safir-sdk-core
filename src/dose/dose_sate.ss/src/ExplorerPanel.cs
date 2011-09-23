@@ -503,6 +503,8 @@ namespace Sate
 
             this.treeViewNsHierarchy.EndUpdate();
             this.treeViewClassHierarchy.EndUpdate();
+            this.treeViewNsHierarchy.HideSelection = false;
+            this.treeViewClassHierarchy.HideSelection = false;
         }
 
         private void InsertNamespace(Type type)
@@ -1132,6 +1134,19 @@ namespace Sate
             }
         }
 
+        //--- Revoked Registration ---
+        public void RevokedRegistration(RegInfo regInfo)
+        {
+            String name = Safir.Dob.Typesystem.Operations.GetName(regInfo.typeId);
+
+            SetUnregistered(regInfo.typeId);
+            OutputPanel.Instance.LogEvent("- Revoked registration of handler '" + regInfo.handlerIdSer.HandlerId().ToString() + "'" + " for type " + name, true);
+
+            // remove from either of these
+            MainForm.Instance.requestorDecidesTypeIdList.Remove(regInfo.typeId);
+            MainForm.Instance.handlerDecidesTypeIdList.Remove(regInfo.typeId);
+        }
+
         //--- Unregister ---
         public void Unregister(RegInfo regInfo)
         {    
@@ -1500,16 +1515,24 @@ namespace Sate
         {
             DobUnit node = (DobUnit)GetSelectedNode();
             string fileName = Safir.Dob.Typesystem.Operations.GetName(node.TypeId) + ".dou";
-            string path = Environment.GetEnvironmentVariable(@"SAFIR_RUNTIME");
-            path += @"/data/text/dots/classes/" + fileName;
+            string path1 = Environment.GetEnvironmentVariable(@"SAFIR_RUNTIME") + @"/data/text/dots/classes/";
+            string path2 = Environment.GetEnvironmentVariable(@"SAFIR_USER") + @"/runtime/data/text/dots/classes/";
 
-            if (!System.IO.File.Exists(path))
+            String[] files = System.IO.Directory.GetFiles(path1, fileName, System.IO.SearchOption.AllDirectories);
+
+            if (files.Length == 0)
             {
-                MessageBox.Show("The dou-file could not be found, '" + path + "'", "File not found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                files = System.IO.Directory.GetFiles(path2, fileName, System.IO.SearchOption.AllDirectories);
+            }
+
+
+            if (files.Length == 0)
+            {
+                MessageBox.Show("The dou-file could not be found, '" + fileName + "'", "File not found", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            using (System.IO.TextReader reader = new System.IO.StreamReader(path))
+            using (System.IO.TextReader reader = new System.IO.StreamReader(files[0]))
             {
                 string content = reader.ReadToEnd();
                 reader.Close();

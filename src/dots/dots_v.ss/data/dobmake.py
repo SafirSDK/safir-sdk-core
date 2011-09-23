@@ -68,7 +68,7 @@ class DobmakeError(Exception):
 
 def die(msg):
     buildlog.writeError(msg + "\n")
-    raise DobmakeError(msg)
+    raise DobmakeError("\n" + msg)
 
 def chmod(path):
     flags = stat.S_IWRITE | stat.S_IREAD
@@ -348,7 +348,7 @@ class VisualStudioBuilder(object):
         if add_section:
             DIR = os.environ.get("VSINSTALLDIR")
             if DIR is None:
-                die("Could not work out which studio you are using, please write your own " + cfgpath)
+                die("Could not work out which studio you are using, make sure you run dobmake.py in a Visual Studio command prompt.")
             cfg.add_section("main")
             cfg.set("main","VSPATH",os.path.join(DIR,"Common7","Tools"))
             configfile = open(cfgpath,"wb")
@@ -360,14 +360,15 @@ class VisualStudioBuilder(object):
         self.studio = os.path.normcase(os.path.normpath(cfg.get("main","VSPATH")))
 
         if not os.path.isdir(self.studio) or not os.path.isfile(os.path.join(self.studio,"vsvars32.bat")):
-            die("Something seems to have happened to your dobmake.ini or Visual Studio installations!\n"+
-                "VSPATH (in dots_generated/dobmake.ini) does not seem to point to a valid path")
+            die("Something seems to have happened to your dobmake.ini or Visual Studio installations!"+
+                "\nVSPATH (in dots_generated/dobmake.ini) does not seem to point to a valid path." +
+                "\nTry to delete dots_generated/dobmake.ini and run dobmake.py in a Visual Studio command prompt.")
         def getenv_and_normalize(variable):
             env = os.environ.get(variable)
             if env is not None:
                 return os.path.normcase(os.path.normpath(env))
             return None
-
+        
         VS80 = getenv_and_normalize("VS80COMNTOOLS")
         VS90 = getenv_and_normalize("VS90COMNTOOLS")
         VS100 = getenv_and_normalize("VS100COMNTOOLS")
@@ -380,7 +381,8 @@ class VisualStudioBuilder(object):
             self.generator = "Visual Studio 10"
         else:
             die("VSPATH (in dots_generated/dobmake.ini) is set to something I dont recognize\n" +
-                "It should be either the value of %VS80COMNTOOLS%, %VS90COMNTOOLS% or %VS100COMNTOOLS%")
+                "It should be either the value of %VS80COMNTOOLS%, %VS90COMNTOOLS% or %VS100COMNTOOLS%" +
+                "\nTry to delete dots_generated/dobmake.ini and run dobmake.py in a Visual Studio command prompt.")
 
         #work out where to put temp files
         self.tmpdir = os.environ.get("TEMP")
@@ -467,8 +469,6 @@ class VisualStudioBuilder(object):
                               "-D NO_JAVA:string=TRUE " + 
                               "-D NO_DOTNET:string=TRUE " + 
                               "-D NO_ADA:string=TRUE " + 
-                              "-D NO_DOU_INSTALL:string=TRUE " + 
-                              "-D NO_GENERATE_CODE:string=TRUE " +
                               "-D REBUILD=" + Rebuild + " " +
                               "..",
                               "Configure", what)
@@ -492,18 +492,17 @@ class VisualStudioBuilder(object):
         what = "DOTNET JAVA ADA - dots_generated"
         buildlog.writeHeader("Building others using "+self.generator+"\n")
         olddir = os.getcwd();
+        mkdir("others")
         os.chdir("others")
         Rebuild = "FALSE"
         if buildType == "rebuild":
             Rebuild = "TRUE"
         try:
             self.run_command(("cmake -G \""+ self.generator + "\" "+
-                              "-D NO_GENERATE_CODE:string=TRUE " +
                               "-D NO_CXX:string=TRUE " +
                               "-D NO_DOTNET:string=FALSE " +
                               "-D NO_ADA:string=" + str(not build_ada) + " " + 
                               "-D NO_JAVA:string=" + str(not build_java) + " " + 
-                              "-D NO_DOU_INSTALL:string=TRUE "
                               "-D REBUILD=" + Rebuild + " " +
                               ".."),
                              "Configure", what)
@@ -518,27 +517,30 @@ class VisualStudioBuilder(object):
     def build_dots(self):
         what = "Process DOU files - dots_generated"
         buildlog.writeHeader("Building dots using "+self.generator+"\n")
-        mkdir("others")
         olddir = os.getcwd();
-        os.chdir("others")
+        os.chdir("gen")
         Rebuild = "FALSE"
         if buildType == "rebuild":
             Rebuild = "TRUE"
         try:
-            self.run_command(("cmake -G \""+ self.generator + "\" "+
-                              "-D NO_CXX:string=TRUE " +
-                              "-D NO_DOTNET:string=TRUE " +
-                              "-D NO_ADA:string=TRUE " +
-                              "-D NO_JAVA:string=TRUE " +
-                              "-D NO_DOU_INSTALL:string=FALSE "
-                              "-D NO_GENERATE_CODE:string=FALSE " +
-                              "-D REBUILD=" + Rebuild + " " +
-                              ".."),
-                             "Configure", what)
-            solution = self.find_sln()
+            # workaround for bug in CMake with VS2010
+            if self.generator == "Visual Studio 10": 
+                self.run_command(("cmake -G \""+ "NMake Makefiles" + "\" "+
+                                  "-D REBUILD=" + Rebuild + " " +
+                                  "."),
+                                 "Configure", what)
+                self.run_command("nmake install",
+                                 "Build and Install " + default_config, what)
+            else:
+                self.run_command(("cmake -G \""+ self.generator + "\" "+
+                                  "-D REBUILD=" + Rebuild + " " +
+                                  "."),
+                                 "Configure", what)
+                solution = self.find_sln()
+                
+                self.run_command("\"" + self.build_cmd + "\" " + solution + " /build " + default_config  +" /Project INSTALL",
+                                 "Build and Install " + default_config, what)
             
-            self.run_command("\"" + self.build_cmd + "\" " + solution + " /build " + default_config  +" /Project INSTALL",
-                             "Build and Install " + default_config, what)
 
             save_installed_files_manifest()
                         
@@ -597,23 +599,16 @@ class UnixGccBuilder(object):
 
     def build_dots(self):
         what = "Process DOU files - dots_generated"        
-        mkdir("build_1")
         olddir = os.getcwd()
-        os.chdir("build_1")
+        os.chdir("gen")
         Rebuild = "FALSE"
         if buildType == "rebuild":
             Rebuild = "TRUE"
         try:
             self.run_command(("cmake",
                               "-D", "CMAKE_BUILD_TYPE:string=" + default_config,
-                              "-D", "NO_CXX:string=TRUE",
-                              "-D", "NO_DOTNET:string=TRUE", 
-                              "-D", "NO_ADA:string=TRUE", 
-                              "-D", "NO_JAVA:string=TRUE",
-                              "-D", "NO_DOU_INSTALL:string=FALSE",
-                              "-D", "NO_GENERATE_CODE:string=FALSE",
                               "-D", "REBUILD=" + Rebuild,
-                              ".."),
+                              "."),
                              "Configure", what)
             
             self.run_command(("make","-j",str(self.num_jobs),"install"),
@@ -625,17 +620,15 @@ class UnixGccBuilder(object):
 
     def build_others(self):
         what = "dots_generated"        
-        mkdir("build_2")
+        mkdir("build")
         olddir = os.getcwd()
-        os.chdir("build_2")
+        os.chdir("build")
         Rebuild = "FALSE"
         if buildType == "rebuild":
             Rebuild = "TRUE"
         try:
             self.run_command(("cmake",
                               "-D", "CMAKE_BUILD_TYPE:string=" + default_config,
-                              "-D", "NO_DOU_INSTALL:string=TRUE",
-                              "-D", "NO_GENERATE_CODE:string=TRUE",
                               "-D", "NO_ADA:string="+ str(not build_ada), 
                               "-D", "NO_JAVA:string=" + str(not build_java),
                               "-D", "REBUILD=" + Rebuild,
@@ -660,8 +653,7 @@ class UnixGccBuilder(object):
     def clean(self):
         buildlog.write("Cleaning!\n")
                                          
-        remove("build_1")
-        remove("build_2")
+        remove("build")
         remove("cpp")
         remove("java")
         remove("ada")

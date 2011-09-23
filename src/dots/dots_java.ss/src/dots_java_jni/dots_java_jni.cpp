@@ -295,6 +295,17 @@ jboolean JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_IsEnumeration
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    IsException
+ * Signature: (J)Z
+ */
+jboolean JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_IsException
+  (JNIEnv *, jclass, jlong _typeId)
+{
+    return DotsC_IsException(_typeId);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    TypeIdFromName
  * Signature: (Ljava/lang/String;)J
  */

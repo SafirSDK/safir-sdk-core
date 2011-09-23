@@ -105,7 +105,7 @@ def find_dll(names):
                     return path
     print "could not find ", names
 
-def copy_dll(name, alternatives = None):
+def copy_dll(name, alternatives = None, Log_Error = True):
     for path in PATH:
         if not SAFIR_RUNTIME in path:
             fn = os.path.join(path,name)
@@ -114,10 +114,11 @@ def copy_dll(name, alternatives = None):
                 return True
     if alternatives is not None:
         for alt in alternatives:
-            res = copy_dll(alt)
+            res = copy_dll(alt, None, False)
             if res:
                 return True
-    print ("could not find "+ name)
+    if Log_Error:
+       print ("could not find "+ name)
     return False
 
 def copy_lib(name):
@@ -185,10 +186,17 @@ def main():
                               "boost_date_time-vc90-mt-1_40.dll",
                               "boost_date_time-vc90-mt-1_41.dll",
                               "boost_date_time-vc90-mt-1_42.dll",
-                              "boost_date_time-vc90-mt-1_44.dll"))
+                              "boost_date_time-vc90-mt-1_44.dll",
+                              "boost_date_time-vc100-mt-1_45.dll"))
         boost_dir = os.path.join(boost_dir,"..")
-    copy_libs_from_dir(os.path.join(boost_dir, "lib"))
-    copy_dlls_from_dir(os.path.join(boost_dir, "lib"))
+
+    # find lib dir    
+    boost_lib_dir = os.path.join(boost_dir, "lib");
+    if not os.path.isdir(boost_lib_dir):
+        boost_lib_dir = os.path.join(boost_dir, "stage", "lib");
+        
+    copy_libs_from_dir(boost_lib_dir)
+    copy_dlls_from_dir(boost_lib_dir)
     copy_header_dir(os.path.join(boost_dir, "boost"))
 
     #Copy ACE stuff
@@ -210,8 +218,8 @@ def main():
 
     #Copy the GNAT runtime, xmlada and templates_parser.
     copy_dll("libgcc_s.dll")
-    copy_dll("libgnat-6.2.dll",("libgnat-2009.dll",))
-    copy_dll("libgnarl-6.2.dll", ("libgnarl-2009.dll",))
+    copy_dll("libgnat-6.2.dll",("libgnat-2009.dll","libgnat-2010.dll"))
+    copy_dll("libgnarl-6.2.dll", ("libgnarl-2009.dll","libgnarl-2010.dll"))
     copy_dll("libxmlada_unicode.dll")
     copy_dll("libxmlada_input_sources.dll")
     copy_dll("libxmlada_sax.dll")

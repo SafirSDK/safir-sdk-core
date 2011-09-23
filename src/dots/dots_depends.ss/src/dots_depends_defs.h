@@ -35,6 +35,7 @@ namespace DotsDepends
         const char * const SDK_ENV               = "SAFIR_SDK";
         const char * const TAG_DIR               = "/dots/dots_generated/tags";
         const char * const DEPEND_STR            = "DEPENDENCYBASE:";
+        const char * const NAMESPACE_STR         = "NAMESPACEV";
         const char * const CPP_DEPEND_FILE       = "dll_imports.cpp";
         const char * const TXT_DEPEND_FILE       = "dll_imports.cpp_template";
         const char * const CMAKE_DEPEND_FILE     = "cmake_depend.txt";

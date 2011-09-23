@@ -24,24 +24,8 @@
 
 #include "dose_main_end_states_handler.h"
 
-// #include "dose_main_blocking_handler.h"
-// #include "dose_main_communication.h"
-// #include "dose_main_connection_handler.h"
-// #include "dose_main_pending_registration_handler.h"
-// #include "dose_main_persist_handler.h"
-// #include <Safir/Dob/Internal/Connections.h>
-// #include <Safir/Dob/ConnectionAspectMisc.h>
-// #include <Safir/Dob/ConnectionAspectInjector.h>
-// #include <Safir/Dob/Internal/EntityTypes.h>
-// #include <Safir/Dob/Internal/ServiceTypes.h>
-// #include <Safir/Dob/Internal/State.h>
-// #include <Safir/Dob/ThisNodeParameters.h>
-// #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Internal/EndStates.h>
-// #include <ace/Thread.h>
-// #include <boost/bind.hpp>
-
 
 namespace Safir
 {
@@ -49,8 +33,7 @@ namespace Dob
 {
 namespace Internal
 {
-    EndStatesHandler::EndStatesHandler():
-        m_lastTimestamp(0)
+    EndStatesHandler::EndStatesHandler()
     {
         m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(L"End States Timer", *this);
 
@@ -58,8 +41,6 @@ namespace Internal
         TimerHandler::Instance().Set(Discard,
                                      timerInfo,
                                      GetUtcTime() + 60.0); //time out in 60 seconds
-
-
     }
 
 
@@ -70,52 +51,7 @@ namespace Internal
                                      timer,
                                      GetUtcTime() + 60.0); //time out again in 60 seconds
 
-        for (ConnectionTable::iterator it = m_connections.begin();
-             it != m_connections.end(); )//iterator increment below
-        {
-            if (it->second < m_lastTimestamp)
-            {
-                m_connections.erase(it++);
-            }
-            else
-            {
-                ++it;
-            }
-        }
-
         Safir::Dob::Internal::EndStates::Instance().HandleTimeout();
-
-        ++m_lastTimestamp;
-    }
-
-
-    void EndStatesHandler::AddDisconnect(const ConnectionId & connection)
-    {
-        const std::pair<ConnectionTable::iterator,bool> insertResult =
-            m_connections.insert(std::make_pair(connection,m_lastTimestamp));
-
-        if (!insertResult.second)
-        {
-            lllerr << "Duplicate disconnect added to EndStatesHandler! Keeping the old one a little bit longer" << std::endl;
-            insertResult.first->second = m_lastTimestamp;
-        }
-    }
-
-    
-    void EndStatesHandler::ClearDisconnectsFromNode(const NodeNumber node)
-    {
-        for (ConnectionTable::iterator it = m_connections.begin();
-             it != m_connections.end(); )//iterator increment below
-        {
-            if (it->first.m_node == node)
-            {
-                m_connections.erase(it++);
-            }
-            else
-            {
-                ++it;
-            }
-        }
     }
 }
 }

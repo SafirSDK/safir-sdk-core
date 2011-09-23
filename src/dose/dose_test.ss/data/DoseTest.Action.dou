@@ -90,7 +90,7 @@
             <type>Boolean</type>
         </member>
         <member>
-            <summary>Used with InhibitPoolScan and InhibitDispatch</summary>
+            <summary>Used with InhibitPoolScan, InhibitDispatch and InhibitOutgoingTraffic</summary>
             <name>Inhibit</name>
             <type>Boolean</type>
         </member>

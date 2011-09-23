@@ -32,8 +32,12 @@
 #include <DoseStressTest/MessageWithoutAckLarge.h>
 
 Sender::Sender():
-    m_sendStat(StatisticsCollection::Instance().AddHzCollector(L"Send Message")),
+m_sendStat(StatisticsCollection::Instance().AddHzCollector(L"Send Message")),
     m_overflowStat(StatisticsCollection::Instance().AddPercentageCollector(L"Overflow", m_sendStat))
+{
+}
+
+void Sender::Start()
 {
     m_connection.Attach();
 
@@ -75,6 +79,7 @@ Sender::Sender():
     m_message->SequenceNumber().SetVal(-1);
 
     std::wcout << "Using a message of size " << m_message->CalculateBlobSize() << " bytes" << std::endl;
+
 }
 
 void Sender::SendSome()
@@ -97,5 +102,5 @@ void Sender::SendSome()
 
 void Sender::OnNotMessageOverflow()
 {
-
+    SendSome();
 }

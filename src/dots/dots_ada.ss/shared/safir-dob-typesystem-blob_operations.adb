@@ -486,6 +486,14 @@ package body Safir.Dob.Typesystem.Blob_Operations is
       L_Is_Changed : Boolean;
    begin
       Get (Blob, Member, Array_Index, L_Val, L_Is_Null, L_Is_Changed);
+      if L_Is_Null then
+         -- Must make this check because the Int_32 can have a
+         -- "garbage" value after the call to Get if we are facing
+         -- a null value, and it isn't sure that this garbage value
+         -- will fit in the enumeration subtype
+         L_Val := Safir.Dob.Typesystem.Enumeration_Value'First;
+      end if;
+
       Value.Init (L_Val, L_Is_Null, L_Is_Changed);
    end Get;
 

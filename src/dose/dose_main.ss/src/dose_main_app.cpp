@@ -31,6 +31,7 @@
 #include <Safir/Dob/Internal/EndStates.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Dob/Internal/ContextSharedTable.h>
+#include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
@@ -167,7 +168,7 @@ namespace Internal
             if (connect)
             {
                 This->m_connectEvent = 1;
-            }
+           }
             if (connectionOut)
             {
                 This->m_connectionOutEvent = 1;
@@ -208,6 +209,7 @@ namespace Internal
         int numEvents = 0;
 
         bool gotConnectEvent = false;
+        bool gotConnectOutEvent = false;
         //if we have a connect event we want to ensure that
         //we handle any outstanding disconnects ("died" flags in the
         //connections), so we fake a connectionOutEvent.
@@ -215,17 +217,23 @@ namespace Internal
         //use a local variable to avoid having a connector signal the connect
         //event after we've already passed the out event handling code, but before
         //we get to the connect event handling code.
-        if (m_connectEvent != 0)
+
+        const boost::uint32_t oldConnectEvent = m_connectEvent.compare_exchange(0, 1);
+        if (oldConnectEvent == 1)
         {
-            m_connectEvent = 0;
             m_connectionOutEvent = 1;
             gotConnectEvent = true;
         }
 
-        if (m_connectionOutEvent != 0)
+        const boost::uint32_t oldConnectOutEvent = m_connectionOutEvent.compare_exchange(0, 1);
+        if (oldConnectOutEvent == 1)
+        {
+            gotConnectOutEvent = true;
+        }
+
+        if (gotConnectOutEvent)
         {
             ++numEvents;
-            m_connectionOutEvent = 0;
             std::vector<ConnectionPtr> deadConnections;
             Connections::Instance().HandleConnectionOutEvents(boost::bind(&DoseApp::HandleConnectionOutEvent,this,_1,boost::ref(deadConnections)));
 
@@ -253,7 +261,7 @@ namespace Internal
             lllout << "Got NodeStatusChanged event" << std::endl;
             m_nodeHandler.HandleNodeStatusChanges();
 
-            const NodeHandler::NodeStatuses & nodeStatuses = m_nodeHandler.GetNodeStatuses();
+            const NodeStatuses::Status nodeStatuses = NodeStatuses::Instance().GetNodeStatuses();
             const bool atLeastOneNodeIsUp = std::count(nodeStatuses.begin(),nodeStatuses.end(),NodeStatus::Started) >= 1;
 
             //if there is at least one UP node we will have received persistence data from someone else
@@ -320,6 +328,7 @@ namespace Internal
             EndStates::Initialize();
             ServiceTypes::Initialize(/*iAmDoseMain = */ true);
             InjectionKindTable::Initialize();
+            NodeStatuses::Initialize();
             EntityTypes::Initialize(/*iAmDoseMain = */ true);
 
             ACE_Reactor::instance()->register_handler(this,ACE_Event_Handler::EXCEPT_MASK);
@@ -329,8 +338,7 @@ namespace Internal
                                      m_requestHandler,
                                      m_pendingRegistrationHandler,
                                      m_nodeHandler,
-                                     m_persistHandler,
-                                     m_endStates);
+                                     m_persistHandler);
 
             const bool otherNodesExistAtStartup =
                 m_ecom.Init(boost::bind(&DoseApp::HandleIncomingData, this, _1, _2),
@@ -356,7 +364,6 @@ namespace Internal
                                m_ecom,
                                m_pendingRegistrationHandler,
                                m_persistHandler,
-                               m_endStates,
                                m_connectionHandler);
 
 

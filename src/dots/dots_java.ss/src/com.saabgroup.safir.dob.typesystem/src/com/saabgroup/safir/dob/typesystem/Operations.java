@@ -136,6 +136,19 @@ public class Operations {
     }
 
     /**
+     * Check if a type represented by a type id is an exception.
+     *
+     * Using this function on a TypeId that does not exist at all in the system will give false as return value.
+     *
+     * @param typeId Type id to check.
+     * @return True if the type exists as an exception.
+     */
+    public static boolean isException(long typeId)
+    {
+        return Kernel.IsException(typeId);
+    }
+
+    /**
      * Calculates the type id for the given name.
      *
      * Note that this is a pure mathematical

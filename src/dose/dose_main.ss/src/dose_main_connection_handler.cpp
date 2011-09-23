@@ -30,10 +30,10 @@
 #include "dose_main_pool_handler.h"
 #include "dose_main_request_handler.h"
 #include "dose_main_persist_handler.h"
-#include "dose_main_end_states_handler.h"
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Dob/Internal/NodeStatuses.h>
 
 
 namespace Safir
@@ -50,7 +50,6 @@ namespace Internal
         m_pendingRegistrationHandler(NULL),
         m_nodeHandler(NULL),
         m_persistHandler(NULL),
-        m_endStates(NULL),
         m_connectSemHasBeenSignalled(false)
     {
 
@@ -67,8 +66,7 @@ namespace Internal
                                  RequestHandler & requestHandler,
                                  PendingRegistrationHandler & prh,
                                  NodeHandler & nh,
-                                 PersistHandler & persistHandler,
-                                 EndStatesHandler& endStates)
+                                 PersistHandler & persistHandler)
     {
         m_ecom = &ecom;
         m_processInfoHandler = &processInfoHandler;
@@ -76,7 +74,6 @@ namespace Internal
         m_pendingRegistrationHandler = &prh;
         m_nodeHandler = &nh;
         m_persistHandler = &persistHandler;
-        m_endStates = &endStates;
     }
 
     void ConnectionHandler::HandleConnect(const ConnectionPtr & connection)
@@ -179,10 +176,6 @@ namespace Internal
     {
         const ConnectionId id = disconnectMsg.GetSenderId();
 
-        //put the connection id in endstates so we can discard any states that
-        //the pool handler get "out of order".
-        m_endStates->AddDisconnect(id);
-
         const ConnectionPtr connection = Connections::Instance().GetConnection(id, std::nothrow);
         if (connection == NULL)
         {
@@ -209,12 +202,12 @@ namespace Internal
             return;
         }
 
-        const NodeHandler::NodeStatuses & nodeStatuses = m_nodeHandler->GetNodeStatuses();
+        const NodeStatuses::Status nodeStatuses = NodeStatuses::Instance().GetNodeStatuses();
 
         if (std::find(nodeStatuses.begin(), nodeStatuses.end(), NodeStatus::Starting) != nodeStatuses.end())
         {
             lllout << "  Can't let apps connect, Node "
-                         << static_cast<int>(std::distance(m_nodeHandler->GetNodeStatuses().begin(),
+                         << static_cast<int>(std::distance(nodeStatuses.begin(),
                                                            std::find(nodeStatuses.begin(), nodeStatuses.end(), NodeStatus::Starting)))
                          << " (and maybe others) are still Starting" << std::endl;
             return;

@@ -94,11 +94,11 @@ package body Dots.Utilities is
       for J in reverse Tmp'Range loop
          if Tmp (J) = '.' or Tmp (J) = Sep then
             return Apply_Style (Conf.Namespace_Style, Tmp (Tmp'First .. J)) &
-            Apply_Style (conf.Classname_Style, Tmp (J + 1 .. Tmp'Last));
+            Apply_Style (Conf.Classname_Style, Tmp (J + 1 .. Tmp'Last));
          end if;
       end loop;
 
-      return Apply_Style (conf.Classname_Style, Tmp);
+      return Apply_Style (Conf.Classname_Style, Tmp);
    end Apply_Prefixed_Class_Style;
 
    -----------------
@@ -144,22 +144,22 @@ package body Dots.Utilities is
       use type Dots.State.Underscore_Style;
 
       procedure Adjust_Token is
-         Token : String := To (Tok_Start .. Tok_End);
+         Token_Str : String := To (Tok_Start .. Tok_End);
       begin
          case Style.Choose_Case is
             when Dots.State.Upper =>
-               Token := Ada.Characters.Handling.To_Upper (Token);
+               Token_Str := Ada.Characters.Handling.To_Upper (Token_Str);
             when Dots.State.Lower =>
-               Token := Ada.Characters.Handling.To_Lower (Token);
+               Token_Str := Ada.Characters.Handling.To_Lower (Token_Str);
             when Dots.State.Camel =>
-               Token := Ada.Characters.Handling.To_Lower (Token);
-               Token (Token'First) :=
-                 Ada.Characters.Handling.To_Upper (Token (Token'First));
+               Token_Str := Ada.Characters.Handling.To_Lower (Token_Str);
+               Token_Str (Token_Str'First) :=
+                 Ada.Characters.Handling.To_Upper (Token_Str (Token_Str'First));
             when Dots.State.Keep =>
                null;
          end case;
-         Tmp (Cur + 1 .. Cur + Token'Length) := Token (Token'First .. Token'Last);
-         Cur := Cur + Token'Length;
+         Tmp (Cur + 1 .. Cur + Token_Str'Length) := Token_Str (Token_Str'First .. Token_Str'Last);
+         Cur := Cur + Token_Str'Length;
          Mode := Search;
          Pending_Separator := True;
       end Adjust_Token;
@@ -267,7 +267,7 @@ package body Dots.Utilities is
      (Style : Dots.State.Style;
       To    : VString) return VString is
    begin
-      return V (Apply_Style( Style, S (To)));
+      return V (Apply_Style (Style, S (To)));
    end Apply_Style;
 
    -----------------
@@ -295,27 +295,27 @@ package body Dots.Utilities is
       Sep_String : constant String := S (Conf.Filename_Separator);
       Separator : constant Character := Sep_String (Sep_String'First);
 
-      function Get_Filename (Namespace : in String) return String is
+      function Get_Filename (NS : in String) return String is
       begin
          if Conf.Parent_Filename /= "" then
-            return Namespace & Separator & S (Conf.Parent_Filename);
+            return NS & Separator & S (Conf.Parent_Filename);
          else
-            return Namespace & S (Conf.File_Suffix);
-            end if;
+            return NS & S (Conf.File_Suffix);
+         end if;
       end Get_Filename;
 
       procedure Create_Parent
-        (Namespace : in String;
-         Continue  : out Boolean);
+        (NS : in String;
+         Continue_Local  : out Boolean);
 
       procedure Create_Parent
-        (Namespace : in String;
-         Continue  : out Boolean) is
-         File_Name : String := Get_Filename (Namespace);
+        (NS : in String;
+         Continue_Local  : out Boolean) is
+         File_Name : String := Get_Filename (NS);
          Dot_Found : Boolean := False;
       begin
-         Continue := False;
-         if Namespace = "" then
+         Continue_Local := False;
+         if NS = "" then
             return;
          end if;
 
@@ -334,7 +334,7 @@ package body Dots.Utilities is
               S (Conf.Output_Directory) & File_Name);
             Translations : constant Templates_Parser.Translate_Table :=
               (1  => Templates_Parser.Assoc ("SECTION", "Parent"),
-               2  => Templates_Parser.Assoc ("NAMESPACE", Namespace));
+               2  => Templates_Parser.Assoc ("NAMESPACE", NS));
             Trans_Set    : constant Templates_Parser.Translate_Set :=
               Templates_Parser.To_Set (Translations);
             Result       : constant String :=
@@ -347,7 +347,7 @@ package body Dots.Utilities is
          begin
             if not GNAT.OS_Lib.Is_Regular_File (Full_Name) and then
             Result /= "" then
-               Continue := True;
+               Continue_Local := True;
                Ada.Text_IO.Create (F, Name => Full_Name);
                Ada.Text_IO.Put (F, Result);
                Ada.Text_IO.Close (F);
@@ -782,7 +782,7 @@ package body Dots.Utilities is
          return;
       end if;
 
-      Parse (Dots.File_Map.Get_Value(Name & ".dou"));
+      Parse (Dots.File_Map.Get_Value (Name & ".dou"));
 
    end Setup_Unit;
 
@@ -851,7 +851,7 @@ package body Dots.Utilities is
 --              Ada.Text_IO.Put_Line ("Namspace_Prefix_Set:");
 --              Put_Assos (Conf.Namspace_Prefix_Set);
 --           end;
-        end if;
+      end if;
 
       for Ix in reverse Value'Range loop
          if Value (Ix) = '.' or Ix = Value'Last then

@@ -47,7 +47,6 @@
 #include "IpmSocket.h"
 #include "DoseComStatistics.h"
 
-
 extern volatile int * volatile pDbg;
 
 //-----------------------------------------------------------
@@ -60,6 +59,8 @@ static  dcom_ushort16  g_MyDoseId = 123;
 static  bool    g_bStartUpIsCompleted = FALSE;
 
 static bool     g_bAutoConfigure;
+
+static DOSE_SHARED_DATA_S *g_pShm;
 
 static  Statistics::TX_STATISTICS_S *g_pTxStatistics;
 static  Statistics::RX_STATISTICS_S *g_pRxStatistics;
@@ -580,10 +581,13 @@ Check_Timeout:
         {
             dwPreviosSendTime = dwCurrentTime;
 
-            TxRxSock.SendTo2(CConfig::m_BaseIpMultiCastAddr_nw,
-                             CConfig::m_Dose_KeepAlivePort,
-                             (char *) &TxMsg, sizeof(DOSE_UDP_KEEPALIVE_MSG),
-                             NULL, 0);
+            if (!g_pShm->InhibitOutgoingTraffic) // Used to stop outgoing traffic for test purposes
+            {
+                TxRxSock.SendTo2(CConfig::m_BaseIpMultiCastAddr_nw,
+                    CConfig::m_Dose_KeepAlivePort,
+                    (char *) &TxMsg, sizeof(DOSE_UDP_KEEPALIVE_MSG),
+                    NULL, 0);
+            }
         }
 
         if((dwCurrentTime - dwPreviosCheckTime) > 1000)
@@ -625,6 +629,8 @@ int DOSE_KeepAlive_Init(dcom_uchar8 DoseId)
 
     g_pRxStatistics = Statistics::GetPtrToRxStatistics(0);
     g_pTxStatistics = Statistics::GetPtrToTxStatistics(0);
+
+    g_pShm = CNodeStatus::GetNodeSharedDataPointer();
 
     //--------------------------------------------
     // A valid DoseId (0-63) means use this DoseId

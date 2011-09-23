@@ -33,6 +33,8 @@
 #include "Consumer.h"
 #include <boost/function.hpp>
 
+#include <ace/SOCK_Dgram_Mcast.h>
+
 #ifdef _MSC_VER
   #pragma warning(push)
   #pragma warning(disable: 4267)
@@ -74,6 +76,24 @@ private:
     Safir::Dob::Internal::AtomicUint32 m_isNotified;
 };
 
+class ActionReader:
+    public ACE_Event_Handler,
+    private boost::noncopyable
+{
+public:
+    ActionReader(const boost::function<void (DoseTest::ActionPtr)> & handleActionCallback,
+                 const std::string& multicastNic);
+
+private:
+    virtual ACE_HANDLE get_handle() const {return m_sock.get_handle();}
+
+    virtual int handle_input(ACE_HANDLE);
+
+    const boost::function<void (DoseTest::ActionPtr)> m_handleActionCallback;
+
+    ACE_SOCK_Dgram_Mcast m_sock;
+};
+
 
 class Executor:
     public Safir::Dob::StopHandler,
@@ -111,6 +131,7 @@ private:
     virtual void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
                                   Safir::Dob::ResponseSenderPtr         responseSender);
 
+    void HandleAction(DoseTest::ActionPtr action);
 
     void ExecuteAction(DoseTest::ActionPtr action);
     void AddCallbackAction(DoseTest::ActionPtr action);
@@ -138,6 +159,8 @@ private:
 
     Dispatcher m_testDispatcher;
     Dispatcher m_controlDispatcher;
+
+    ActionReader m_actionReader;
 
     typedef std::vector<DoseTest::ActionPtr> Actions;
     typedef std::vector<Actions> CallbackActions;

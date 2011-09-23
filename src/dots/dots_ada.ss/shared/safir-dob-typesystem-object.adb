@@ -110,7 +110,7 @@ package body Safir.Dob.Typesystem.Object is
 
       function Is_Changed (Self : in Container_Proxy'Class) return Boolean is
       begin
-         return Self.Container_Ptr.Is_Changed;
+         return Is_Changed (Self.Container_Ptr.all);
       end Is_Changed;
 
       procedure Set_Changed (Self : in  Container_Proxy'Class;
@@ -124,7 +124,7 @@ package body Safir.Dob.Typesystem.Object is
          return Self.Container_Ptr.Is_Changed_Here;
       end Is_Changed_Here;
 
-      procedure Set_Changed_Here (Self    : in out Container_Proxy'Class;
+      procedure Set_Changed_Here (Self    : in Container_Proxy'Class;
                                   To      : in Boolean) is
       begin
          Self.Container_Ptr.Set_Changed_Here (To);

@@ -131,7 +131,7 @@ procedure Dots_V is
    begin
 
 --        Ada.Text_IO.Put_Line ("Handle_Dou_File : " & Item);
-      Process(Item);
+      Process (Item);
 
    end Handle_Dou_File;
 
@@ -142,7 +142,7 @@ procedure Dots_V is
       pragma Unreferenced (Index, Quit);
    begin
 
-      Dots.File_Map.Include(Key => GNAT.Directory_Operations.File_Name(Item),
+      Dots.File_Map.Include (Key => GNAT.Directory_Operations.File_Name (Item),
                             Value => Item);
 
    end Handle_Root_Dou_File;
@@ -236,9 +236,9 @@ procedure Dots_V is
          Root_Dir : VString := V ("");
 
          procedure Handle_Prefix_File
-            (Item  :        String;
-             Index :        Positive;
-             Quit  : in out Boolean);
+            (Item_1  :        String;
+             Index_1 :        Positive;
+             Quit_1  : in out Boolean);
 
          procedure Prefix_Dir is new GNAT.Directory_Operations.Iteration.Find
            (Handle_Prefix_File);
@@ -266,15 +266,15 @@ procedure Dots_V is
          end Get_Prefix_From;
 
          procedure Handle_Prefix_File
-            (Item  :        String;
-             Index :        Positive;
-             Quit  : in out Boolean) is
-            pragma Unreferenced (Index, Quit);
-            Ns_First : Integer := Item'First;
-            Ns_Last  : constant Integer := Item'Last - File_Suffix'Length;
+            (Item_1  :        String;
+             Index_1 :        Positive;
+             Quit_1  : in out Boolean) is
+            pragma Unreferenced (Index_1, Quit_1);
+            Ns_First : Integer := Item_1'First;
+            Ns_Last  : constant Integer := Item_1'Last - File_Suffix'Length;
          begin
-            for J in reverse Item'Range loop
-               if Item (J) = GNAT.Directory_Operations.Dir_Separator then
+            for J in reverse Item_1'Range loop
+               if Item_1 (J) = GNAT.Directory_Operations.Dir_Separator then
                   Ns_First := J + 1;
                   exit;
                end if;
@@ -283,8 +283,8 @@ procedure Dots_V is
             Templates_Parser.Insert
               (Dots.State.Outputs (Dots.State.Defined_Outputs).Namspace_Prefix_Set,
                Templates_Parser.Assoc
-                 (Item (Ns_First .. Ns_Last) & '.',
-                  Get_Prefix_From (Item) & Namespace_Separator));
+                 (Item_1 (Ns_First .. Ns_Last) & '.',
+                  Get_Prefix_From (Item_1) & Namespace_Separator));
             -- Ada.Text_IO.Put_Line("Prefix: " & Item (Ns_First .. Ns_Last) & " " & Get_Prefix_From (Item));
          end Handle_Prefix_File;
 
@@ -294,13 +294,13 @@ procedure Dots_V is
             return;
          end if;
 
-         if dou_dir = "" then
+         if Dou_Dir = "" then
             Root_Dir := V (GNAT.Directory_Operations.Get_Current_Dir);
          else
-            Root_Dir := dou_dir;
+            Root_Dir := Dou_Dir;
          end if;
 
-         Prefix_Dir (S (Root_Dir), ".*" & File_Suffix );
+         Prefix_Dir (S (Root_Dir), ".*" & File_Suffix);
 
       end Setup_Namespace_Mangling;
 
@@ -502,7 +502,7 @@ procedure Dots_V is
    procedure Process (F : in String) is
    begin
       declare
-         Dou_File : constant String := GNAT.Directory_Operations.File_Name(F);
+         Dou_File : constant String := GNAT.Directory_Operations.File_Name (F);
       begin
          Dots.State.Current_Unit := V (Dou_File (Dou_File'First .. Dou_File'Last - 4));
          Parse (S => F, Effort_Only => False, Err => Err);
@@ -522,7 +522,7 @@ begin
       begin
          case GNAT.Command_Line.Getopt
               ("dod= xdir= verbose info tokens output= help") is
-            when ASCII.Nul =>
+            when ASCII.NUL =>
                exit;
             when 'h' =>
                Help := True;
@@ -577,13 +577,13 @@ begin
       GNAT.OS_Lib.OS_Exit (2);
    end if;
 
-   if Dou_Dir = "" or Ada.Directories.Kind(S (Dou_Dir)) = Ada.Directories.Directory then
+   if Dou_Dir = "" or Ada.Directories.Kind (S (Dou_Dir)) = Ada.Directories.Directory then
       Dots.State.Dou_Dir := Dou_Dir;
       if Dou_Dir /= "" then
-         Dir_Root_Dou( S(Dou_Dir), ".*\.dou");
+         Dir_Root_Dou (S (Dou_Dir), ".*\.dou");
       end if;
    else
-      Ada.Text_IO.Put_Line (S(Dod_Dir) & " is not a valid directory.");
+      Ada.Text_IO.Put_Line (S (Dod_Dir) & " is not a valid directory.");
       GNAT.OS_Lib.OS_Exit (2);
    end if;
 
@@ -595,7 +595,7 @@ begin
       begin
          exit when F = "";
          if not Is_Unit (F) then
-            if Ada.Directories.Kind(F) = Ada.Directories.Directory then
+            if Ada.Directories.Kind (F) = Ada.Directories.Directory then
                -- Directory.
                Dir_Dou (F, ".*\.dou");
             else
@@ -607,7 +607,7 @@ begin
                Ada.Text_IO.Put_Line (F & " will be parsed");
             end if;
 
-            Process(F);
+            Process (F);
          end if;
       end;
    end loop;

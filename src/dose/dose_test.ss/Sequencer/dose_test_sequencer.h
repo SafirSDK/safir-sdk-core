@@ -29,6 +29,7 @@
 #include <string>
 #include <Safir/Dob/Connection.h>
 #include <DoseTest/Items/TestCase.h>
+#include <DoseTest/TestConfigEnum.h>
 #include <iostream>
 #include <fstream>
 #include <list>
@@ -36,6 +37,7 @@
 #include <map>
 #include "TestCaseReader.h"
 #include "InjectionTimestampHandler.h"
+#include "ActionSender.h"
 
 #if defined _MSC_VER
   #pragma warning (push)
@@ -48,7 +50,6 @@
 #endif
 
 class Sequencer :
-    public Safir::Dob::MessageSender,
     public Safir::Dob::Requestor,
     private boost::noncopyable
 {
@@ -57,7 +58,8 @@ public:
               const int stopTc,
               const Languages & languages,
               const bool noTimeout,
-              const int contextId);
+              const int contextId,
+              const std::string& multicastNic);
     ~Sequencer();
 
     void Tick();
@@ -72,8 +74,6 @@ public:
 
     bool DeactivateAll();
 private:
-    virtual void OnNotMessageOverflow();
-
     virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
     virtual void OnNotRequestOverflow() {}
 
@@ -97,7 +97,6 @@ private:
     void PrepareTestcaseExecution();
     void ExecuteCurrentAction();
 
-
     Safir::Dob::SecondaryConnection m_connection;
 
     PartnerState m_partnerState;
@@ -107,6 +106,8 @@ private:
 
     int                   m_currentActionNo;
     DoseTest::ActionPtr   m_currentAction;
+
+    ActionSender m_actionSender;
 
     const int m_stopTc;
 
@@ -125,6 +126,8 @@ private:
     InjectionTimestampHandler m_injectionTimestampHandler;
 
     int m_contextId;
+
+    DoseTest::TestConfigEnum::Enumeration m_testConfig;
 };
 
 char const * const StateNames []=

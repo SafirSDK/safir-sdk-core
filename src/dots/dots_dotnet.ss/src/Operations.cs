@@ -140,6 +140,19 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
+        /// Check if a type represented by a type id is an enumeration.
+        /// <para>
+        /// If the typeid does not exist at all in the system, false will be returned.
+        /// </para>
+        /// </summary>
+        /// <param name="typeId">Type id to check.</param>
+        /// <returns>True if the type exists as an enumeration.</returns>
+        public static bool IsException(System.Int64 typeId)
+        {
+            return Internal.InternalOperations.BoolOf(Kernel.DotsC_IsException(typeId));
+        }
+
+        /// <summary>
         /// Calculates the type id for the given name.
         /// <para>
         /// Note that this is a pure mathematical method and will always return the correct

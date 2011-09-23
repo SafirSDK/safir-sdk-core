@@ -22,7 +22,7 @@
 --
 -------------------------------------------------------------------------------
 with Ada.Calendar;
-with Safir.Dob.Typesystem.Si64;
+with Safir.Dob.Typesystem.Si_64;
 
 package Safir.Time.TimeProvider is
 
@@ -31,33 +31,33 @@ package Safir.Time.TimeProvider is
    -- Get current Utc time.
    -- Returns seconds and fraction since jan 1 1970 00:00
    ----------------------------------------------------------------------------
-   function GetUtcTime return Safir.Dob.Typesystem.Si64.Second;
+   function GetUtcTime return Safir.Dob.Typesystem.Si_64.Second;
 
    ----------------------------------------------------------------------------
    -- Converts Utc time to local time
    -- If UtcTime represents a year ouside Ada.Calendar.Year_Number range
    -- exception Time_Error is raised.
    ----------------------------------------------------------------------------
-   function ToLocalTime (UtcTime : in Safir.Dob.Typesystem.Si64.Second) return Ada.Calendar.Time;
+   function ToLocalTime (UtcTime : in Safir.Dob.Typesystem.Si_64.Second) return Ada.Calendar.Time;
 
    ----------------------------------------------------------------------------
    -- Converts local time to UTC time
    -- Returns seconds and fraction since jan 1 1970 00:00
    ----------------------------------------------------------------------------
-   function ToUtcTime (LocalTime : in Ada.Calendar.Time) return Safir.Dob.Typesystem.Si64.Second;
+   function ToUtcTime (LocalTime : in Ada.Calendar.Time) return Safir.Dob.Typesystem.Si_64.Second;
 
    ----------------------------------------------------------------------------
    -- Gets specified utc time in Calendar representation
    -- If UtcTime represents a year ouside Ada.Calendar.Year_Number range
    -- exception Time_Error is raised.
    ----------------------------------------------------------------------------
-   function CalendarTimeOf (UtcTime : in Safir.Dob.Typesystem.Si64.Second) return Ada.Calendar.Time;
+   function CalendarTimeOf (UtcTime : in Safir.Dob.Typesystem.Si_64.Second) return Ada.Calendar.Time;
 
    ----------------------------------------------------------------------------
    -- Convert specified UTC time to a Double
    -- Returns seconds and fraction since jan 1 1970 00:00
    ----------------------------------------------------------------------------
-   function DoubleOf (UtcTime : in Ada.Calendar.Time) return Safir.Dob.Typesystem.Si64.Second;
+   function DoubleOf (UtcTime : in Ada.Calendar.Time) return Safir.Dob.Typesystem.Si_64.Second;
 
 
 end Safir.Time.TimeProvider;

@@ -89,42 +89,32 @@ namespace Internal
 
         if (handlerId == Dob::Typesystem::HandlerId::ALL_HANDLERS)
         {
-            m_handlerRegistrations[context].UnregisterAll(connection);
+            m_handlerRegistrations[context].UnregisterAll(connection,
+                                                          true);     // true => explicit unregister
         }
         else
         {
-            m_handlerRegistrations[context].Unregister(connection, handlerId, RegisterTime());
+            m_handlerRegistrations[context].Unregister(connection, handlerId);
         }
     }
 
-    void ServiceType::UnregisterAll(const ConnectionPtr& connection)
+    void ServiceType::UnregisterAll(const ConnectionPtr& connection, const bool explicitUnregister)
     {
         const ContextId context = connection->Id().m_contextId;
 
         ScopedTypeLock lck(m_typeLocks[context]);
 
-        m_handlerRegistrations[context].UnregisterAll(connection);
+        m_handlerRegistrations[context].UnregisterAll(connection, explicitUnregister);
     }
 
     void ServiceType::RemoteSetRegistrationState(const ConnectionPtr& connection,
                                                  const DistributionData& registrationState)
     {
-        ENSURE(!connection->IsLocal(), << "EntityType::RemoteSetRegistrationState can only be used by remote connections!");
-
-        const ContextId context = connection->Id().m_contextId;
-
-        ScopedTypeLock lck(m_typeLocks[context]);
-
-        m_handlerRegistrations[context].RemoteSetRegistrationState(connection, registrationState);
-    }
-
-    void ServiceType::RemoteSetUnregistrationState(const DistributionData& registrationState)
-    {
         const ContextId context = registrationState.GetSenderId().m_contextId;
 
         ScopedTypeLock lck(m_typeLocks[context]);
 
-        m_handlerRegistrations[context].RemoteSetUnregistrationState(registrationState);
+        m_handlerRegistrations[context].RemoteSetRegistrationState(connection, registrationState);
     }
 
     bool ServiceType::IsRegistered(const Dob::Typesystem::HandlerId& handlerId, const ContextId context) const

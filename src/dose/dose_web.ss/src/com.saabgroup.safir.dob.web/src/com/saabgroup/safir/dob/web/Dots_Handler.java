@@ -37,6 +37,27 @@ import java.util.Collections;
 
 class Dots_Handler implements HttpHandler {
 
+    public File FindFile(String dirName, String fileName) {
+        File dir = new File(dirName);
+        File f = new File(dirName + File.separator + fileName);
+        if (f.exists()) {
+            return f;
+        }
+
+        String objects[] = dir.list();
+        for (int i = 0; i < objects.length; i++) {
+            File f1 = new File(dirName + File.separator + objects[i]);
+            if (f1.isDirectory()) {
+                File f2 = FindFile(f1.getAbsolutePath(), fileName);
+                if (f2 != null) {
+                    return f2;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
     public void handle(HttpExchange exchange) throws IOException {
         // check the request method and process if it is a GET
         String requestMethod = exchange.getRequestMethod();
@@ -52,7 +73,7 @@ class Dots_Handler implements HttpHandler {
                 //* response is OK (200)
                 exchange.sendResponseHeaders(200, 0);
 
-                File f = new File(System.getenv("SAFIR_RUNTIME") + "/data/text/dots/classes/" + exchange.getRequestURI().getQuery() + ".dou");
+                File f = FindFile(System.getenv("SAFIR_RUNTIME") + "/data/text/dots/classes/", exchange.getRequestURI().getQuery() + ".dou");
                 FileInputStream fs = new FileInputStream(f);
                 byte[] b = new byte[1024];
                 int i = fs.read(b);

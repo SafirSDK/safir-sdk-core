@@ -100,6 +100,17 @@ package Safir.Dob.Typesystem.Operations is
    function Is_Enumeration
      (Type_Id : Safir.Dob.Typesystem.Type_Id) return Boolean;
 
+   -- Check if a type represented by a type id is an exception.
+   --
+   -- Using this function on a typeid that does not exist at all in the system
+   -- will give false as return value.
+   --
+   -- Parameters: Type_Id - Type id to check.
+   -- Returns: True if the type exists as an exception.
+   --
+   function Is_Exception
+     (Type_Id : Safir.Dob.Typesystem.Type_Id) return Boolean;
+
    -- Calculates the type id for the given name.
    --
    -- Note that this is a pure mathematical function and will always return

@@ -36,6 +36,7 @@
 #endif
 
 #include "dll_imports.h"
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 
 #ifdef _MSC_VER
 

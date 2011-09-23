@@ -36,12 +36,11 @@ class Sender :
 public:
     Sender();
 
+    void Start();
     void SendSome();
 
 protected:
-    //void SendMessages(int startfrom);
-
-    void OnNotMessageOverflow();
+    virtual void OnNotMessageOverflow();
 
     Safir::Dob::SecondaryConnection m_connection;
 

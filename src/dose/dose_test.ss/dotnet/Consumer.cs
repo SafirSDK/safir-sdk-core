@@ -897,7 +897,6 @@ namespace dose_test_dotnet
                             + "  EntityId       = " + entityProxy.EntityId + "\n"
                             + "  deletedByOwner = " + deletedByOwner.ToString().ToLower() + "\n"
                             + "  Owner          = " + entityProxy.Owner + "\n"
-                            + "  OwnerConn = " + ConnInfoToXml(entityProxy.OwnerConnectionInfo) + "\n"
                             + "  OwnerStr  = " + entityProxy.OwnerWithStringRepresentation + "\n"
                             + "  Previous  = " + prevXml);
 

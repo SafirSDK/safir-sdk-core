@@ -72,16 +72,19 @@ namespace DotsDepends
         {
             if (strncmp(part1, line, strlen(part1)) == 0)
             {
+                WriteImports(cppStream, list, "                lllout << L\"loading dots_generated-", "-cppd.dll\" << std::endl;\n");
                 WriteImports(cppStream, list, "                LoadLibrary(L\"dots_generated-", "-cppd.dll\");\n");
             }
             else if (strncmp(part2, line, strlen(part2)) == 0)
             {
+                WriteImports(cppStream, list, "                lllout << L\"loading dots_generated-", "-cpp.dll\" << std::endl;\n");
                 WriteImports(cppStream, list, "                LoadLibrary(L\"dots_generated-", "-cpp.dll\");\n");
             }
             else if (strncmp(part3, line, strlen(part3)) == 0)
             {
+                WriteImports(cppStream, list, "                lllout << L\"loading ../lib/libdots_generated-", "-cpp.so\" << std::endl;\n");
                 WriteImports(cppStream, list, "                lib_handle = dlopen(\"../lib/libdots_generated-", "-cpp.so\", RTLD_LAZY);\n");
-            }
+           }
             else
             {
                 fwrite(line, sizeof( char ), strlen(line), cppStream);

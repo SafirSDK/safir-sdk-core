@@ -60,7 +60,7 @@ void PrintErr(int ErrorCode, const char *format, ... );
 * NULL  - ignore parameter
 * dotted decimal - send to this in UDP mode, default = SERVER_IPADDR
 *******************************************************************/
-void PrintSetMode(unsigned long mode, char *pIpAddr);
+void PrintSetMode(wchar_t mode, char *pIpAddr);
 
 void FlushRamBuffer();
 

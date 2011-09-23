@@ -7,7 +7,8 @@ Installing Prerequisites
 First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core. 
 Here is a summary of what you need, and below are instructions on where to get them and how to install them.
 
-Visual Studio 2005 SP1 or 2008 SP1 and GNAT 
+Visual Studio 2005 SP1 or Visual Studio 2008 SP1 or Visual Studio 2010.
+GNAT 
 MinGW and MSYS
 Boost (1.38 or later)
 ACE (>5.x)
@@ -22,18 +23,20 @@ graphviz
 
 Visual Studio and utils
 ~~~~~~~~~~~~~~~~~~~~~~~
-You are assumed to already have Visual Studio 2005 SP1 (aka 8.0) or 2008 SP1 (aka 9.0) installed, so we proceed immediately to the more interesting bits.
+You are assumed to already have Visual Studio 2005 SP1 (aka 8.0) or 2008 SP1 (aka 9.0)  or 2010 (aka 10.0) installed, so we proceed immediately to the more interesting bits.
 You are also assumed to have some unpacking tool installed that can handle .gz files, like winzip, 7-zip or winrar.
 
 Boost
 ~~~~~
-The easiest way to install boost is to use the installer provided by BoostPro Computing: http://www.boostpro.com/products/free. Download the newest installer and run it.
+The easiest way to install boost is to use the installer provided by BoostPro Computing: http://www.boostpro.com. Download the newest installer and run it.
  - In the "Select Default Variants" step, select "Visual C++ 8.0" (or "Visual C++ 9.0"), "Multithread Debug, DLL" and "Multithread, DLL". If you need more variants or compilers, check those as well.
  - In the "Choose Components" step you need to check the "Multithread Debug","Multithread","Multithread Debug, DLL" and "Multithread, DLL" under the "VC8.0" or "VC9.0" item under each of "Boost DateTime", "Boost Filesystem", "Boost ProgramOptions", "Boost Regex" and "Boost System" (again, if you need other things as well, select them too).
 
-Add the lib directory of the boost installation (e.g. C:\Program Files\boost\boost_1_44\lib or similar) to your PATH.
+Add the lib directory of the boost installation (e.g. C:\Program Files\boost\boost_1_45\lib or similar) to your PATH.
 
 There are a bugs in all current versions of the Boost libraries that need to be patched for Safir SDK to work correctly. In the build/patches/boost directory there are a set of patches for some recent boost versions. Find the appropriate files and copy them over the corresponding files in your boost installation. (You can also use run "cmake . -G 'NMake Makefiles'", "nmake install" once you have installed cmake, which will install the correct patches automatically).
+
+Boost 1.45 is known to work well with all Visual Studio versions. Unfortunately, for some unknown reason, BoostPro Computing doesn't provide a binary installer for 1.45 so you have to download it from boost.org and build it yourself. 
 
 ACE
 ~~~

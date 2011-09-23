@@ -161,7 +161,7 @@ package Safir.Dob.Typesystem.Object is
       --
       -- Parameters: Changed - The value to set the change flag to.
       --
-      procedure Set_Changed_Here (Self    : in out Container_Proxy'Class;
+      procedure Set_Changed_Here (Self    : in Container_Proxy'Class;
                                   To      : in Boolean);
 
       --------------------------------------------------------------------------

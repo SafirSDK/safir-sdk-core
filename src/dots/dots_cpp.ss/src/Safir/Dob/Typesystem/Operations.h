@@ -119,6 +119,18 @@ namespace Operations
     DOTS_API bool IsEnumeration(const Dob::Typesystem::TypeId typeId);
 
     /**
+     * Check if a type represented by a type id is an exception.
+     *
+     * Using this function on a typeid that does not exist at all in the system will give false as return value.
+     *
+     * @param typeId [in] - Type id to check.
+     * @return True if the type exists as an exception.
+     */
+    DOTS_API bool IsException(const Dob::Typesystem::TypeId typeId);
+
+    
+
+    /**
      * Calculates the type id for the given name.
      *
      * Note that this is a pure mathematical

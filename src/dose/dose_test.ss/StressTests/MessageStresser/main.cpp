@@ -34,7 +34,77 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/interprocess/exceptions.hpp>
 #include <iostream>
-#include "../common/SimpleDispatcher.h"
+#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/AceDispatcher.h>
+
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4267)
+#endif
+
+#include <ace/Reactor.h>
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
+
+
+class App: 
+    public Safir::Dob::StopHandler,
+    private boost::noncopyable
+{
+public:
+    App(std::wstring name):m_done(false), m_dispatcher(connection)
+    {
+        for(int instance = 0;;++instance)
+        {
+            try
+            {
+                connection.Open(name,
+                    boost::lexical_cast<std::wstring>(instance),
+                    0, // Context
+                    this,
+                    &m_dispatcher);
+                break;
+            }
+            catch(const Safir::Dob::NotOpenException &)
+            {
+
+            }
+        }
+
+        std::wcout << "Started as " << Safir::Dob::ConnectionAspectMisc(connection).GetConnectionName() << std::endl;
+
+        if(CommandLine::Instance().Sender()) //We are a sender
+        {       
+            m_sender.Start();
+            m_sender.SendSome();
+        }
+        else //no, a receiver
+        {
+            m_subscriber.Start();
+        }
+    }
+
+    void Run()
+    {
+        ACE_Reactor::instance()->run_event_loop();
+    }
+
+protected:
+ 
+    virtual void OnStopOrder()
+    {
+        m_done = true;
+    }
+
+    bool m_done;
+    Safir::Utilities::AceDispatcher m_dispatcher;
+    Safir::Dob::Connection connection;
+    Sender m_sender;
+    Subscriber m_subscriber;
+
+};
 
 int main(int argc, char* argv[])
 {
@@ -45,9 +115,6 @@ int main(int argc, char* argv[])
 
     try
     {
-        Safir::Dob::Connection connection;
-        SimpleDispatcher dispatcher(connection);
-
         std::wstring name = L"Message";
         if (CommandLine::Instance().Sender())
         {
@@ -59,55 +126,8 @@ int main(int argc, char* argv[])
         }
 
 
-        for(int instance = 0;;++instance)
-        {
-            try
-            {
-                connection.Open(name,
-                                boost::lexical_cast<std::wstring>(instance),
-                                0, // Context
-                                &dispatcher,
-                                &dispatcher);
-                break;
-            }
-            catch(const Safir::Dob::NotOpenException &)
-            {
-
-            }
-        }
-
-        std::wcout << "Started as " << Safir::Dob::ConnectionAspectMisc(connection).GetConnectionName() << std::endl;
-
-
-        bool done = false;
-
-        if(CommandLine::Instance().Sender()) //We are a sender
-        {
-            Sender sender;
-            while (!done)
-            {
-                sender.SendSome();
-
-                if(dispatcher.Wait(1000))
-                {
-                    connection.Dispatch();
-                }
-            }
-        }
-        else //no, a receiver
-        {
-            Subscriber subscriber;
-            while (!done)
-            {
-                const bool dispatch = dispatcher.Wait(1000);
-
-                if(dispatch)
-                {
-                    connection.Dispatch();
-                }
-            }
-        }
-
+        App app(name);
+        app.Run();
 
     }
     catch(const boost::interprocess::bad_alloc & e)
@@ -128,6 +148,8 @@ int main(int argc, char* argv[])
         std::cin.get();
     }
 
+    
+ 
     return 0;
 }
 

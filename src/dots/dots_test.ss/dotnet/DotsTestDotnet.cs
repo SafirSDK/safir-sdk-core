@@ -100,10 +100,52 @@ class DotsTestDotnet
             Test_Watt64();
             Test_TestException();
             Test_LibraryExceptions();
+            Test_IsProperty();
+            Test_IsEnumeration();
+            Test_IsException();
         }
         finally
         {
             Console.OutputEncoding = System.Text.Encoding.Default;
+        }
+    }
+
+    private static void Test_IsException()
+    {
+        Header("IsException");
+        long[] idArray = Safir.Dob.Typesystem.Operations.GetAllTypeIds();
+        foreach (long id in idArray)
+        {
+            if (Safir.Dob.Typesystem.Operations.IsException(id))
+            {
+                Console.WriteLine(Safir.Dob.Typesystem.Operations.GetName(id));
+            }
+        }
+    }
+
+    private static void Test_IsEnumeration()
+    {
+        Header("IsEnumeration");
+        long[] idArray = Safir.Dob.Typesystem.Operations.GetAllTypeIds();
+        foreach (long id in idArray)
+        {
+            if (Safir.Dob.Typesystem.Operations.IsEnumeration(id))
+            {
+                Console.WriteLine(Safir.Dob.Typesystem.Operations.GetName(id));
+            }
+        }
+    }
+
+    private static void Test_IsProperty()
+    {
+        Header("IsProperty");
+        long[] idArray = Safir.Dob.Typesystem.Operations.GetAllTypeIds();
+        foreach (long id in idArray)
+        {
+            if (Safir.Dob.Typesystem.Operations.IsProperty(id))
+            {
+                Console.WriteLine(Safir.Dob.Typesystem.Operations.GetName(id));
+            }
         }
     }
     /*
@@ -2311,6 +2353,17 @@ class DotsTestDotnet
         Null_Ok = Null_Ok &&
             MT1.TestClassMember.IsNull() && DotsTest.MemberTypesProperty.IsNullTestClassMember(MT2) &&
             MA1.TestClassMember[1].IsNull() && DotsTest.MemberArraysProperty.IsNullTestClassMember(MA2, 1);
+
+        // Make some tests concerning Set/GetChangedHere
+        MT1.TestClassMember.Obj = DotsTest.ParameterTypes.TestClassParameter;
+        MT1.TestClassMember.SetChanged(false);
+        MT1.TestClassMember.Obj.MyInt.Val = 3;
+        In_Req_Ok = In_Req_Ok && MT1.TestClassMember.IsChanged();
+        In_Req_Ok = In_Req_Ok && !MT1.TestClassMember.IsChangedHere();
+        MT1.TestClassMember.SetChanged(false);
+        MT1.TestClassMember.SetChangedHere(true);
+        In_Req_Ok = In_Req_Ok && MT1.TestClassMember.IsChangedHere();
+        In_Req_Ok = In_Req_Ok && !MT1.TestClassMember.Obj.MyInt.IsChanged();
 
         Console.WriteLine("Is_Null OK: " + Null_Ok.ToString().ToLower());
         Console.WriteLine("Is_Changed OK: " + In_Req_Ok.ToString().ToLower());

@@ -35,6 +35,11 @@ namespace Application
 namespace Internal
 {
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable:4251)
+#endif
+
     class SWRE_API TraceStreamBuffer :
         public std::basic_streambuf<wchar_t, std::char_traits<wchar_t> >
     {
@@ -43,7 +48,7 @@ namespace Internal
         explicit TraceStreamBuffer(const std::wstring & prefix);
         virtual ~TraceStreamBuffer();
 
-        Safir::Dob::Typesystem::Int64 GetPrefixId() const {if (m_prefixId == 0){AddPrefix();} return m_prefixId;}
+        Safir::Dob::Typesystem::Int64 GetPrefixId() const;
 
         void Flush();
     private:
@@ -58,6 +63,10 @@ namespace Internal
         mutable Safir::Dob::Typesystem::Int64 m_prefixId;
 
     };
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 }
 }

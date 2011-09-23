@@ -922,7 +922,6 @@ class Consumer implements
              + "  EntityId       = " + entityProxy.getEntityId() + "\n"
              + "  deletedByOwner = " + deletedByOwner + "\n"
              + "  Owner          = " + entityProxy.getOwner() + "\n"
-             + "  OwnerConn = " + connInfoToXml(entityProxy.getOwnerConnectionInfo()) + "\n"
              + "  OwnerStr  = " + entityProxy.getOwnerWithStringRepresentation() + "\n"
              + "  Previous  = " + com.saabgroup.safir.dob.typesystem.Serialization.toXml(entityProxy.getPrevious().getBlob()));
 
@@ -1392,7 +1391,6 @@ class Consumer implements
     private com.saabgroup.safir.dob.SecondaryConnection m_connection = new com.saabgroup.safir.dob.SecondaryConnection();
 
     private com.saabgroup.safir.application.BackdoorKeeper m_backdoorKeeper = new com.saabgroup.safir.application.BackdoorKeeper();
-    
     private final int m_consumerNumber;
     private final String m_connectionName;
     private final String m_connectionInstance;

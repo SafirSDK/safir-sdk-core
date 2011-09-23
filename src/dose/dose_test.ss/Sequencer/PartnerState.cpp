@@ -170,11 +170,6 @@ PartnerState::HandlePartnerChange(const DoseTest::PartnerPtr & partner, const in
             thePartner.SetReady(true);
             thePartner.m_incarnation = partner->Incarnation().GetVal();
         }
-        else
-        {
-            std::wcerr << "Partner " << instance << " incarnation number did not increase!" <<std::endl;
-        }
-
     }
 }
 
@@ -192,8 +187,13 @@ void PartnerState::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
 }
 
 void PartnerState::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
-                                   const bool                    /*deletedByOwner*/)
+                                   const bool                    deletedByOwner)
 {
+    if (!deletedByOwner)
+    {
+        return;
+    }
+
     const int instance = static_cast<int>(entityProxy.GetInstanceId().GetRawValue());
     m_partnerInfoTable[instance].SetReady(false);
     m_partnerInfoTable[instance].SetActive(false);

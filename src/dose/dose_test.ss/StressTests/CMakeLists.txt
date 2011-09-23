@@ -11,3 +11,5 @@ ADD_SUBDIRECTORY(RequestStresser)
 
 ADD_SUBDIRECTORY(MultiPingPong)
 
+ADD_SUBDIRECTORY(RequestPingPong)
+

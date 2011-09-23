@@ -69,6 +69,7 @@ with Dots_Test.Empty_Object;
 with Dots_Test.Test_Item;
 with Safir.Dob.Typesystem.Container_Instantiations;
 with Ada.Strings.Wide_Fixed;
+with Ada.Containers.Vectors;
 
 pragma Warnings ("D");  -- turn off warnings for implicit dereference
 pragma Warnings ("U");
@@ -3028,6 +3029,17 @@ procedure Dots_Test_Ada is
         Dots_Test.Member_Types_Property.Is_Null_Test_Class_Member (MT2_Smart_Ptr) and
         MA1_Ptr.Test_Class_Member.Element (1).Is_Null and
         Dots_Test.Member_Arrays_Property.Is_Null_Test_Class_Member (MA2_Smart_Ptr, 1);
+
+      -- Make some tests concerning Set/Get_Changed_Here
+      MT1_Ptr.Test_Class_Member.Set_Ptr (Dots_Test.Parameter_Types.Test_Class_Parameter);
+      MT1_Ptr.Test_Class_Member.Set_Changed (To => False);
+      MT1_Ptr.Test_Class_Member.Ref.My_Int.Set_Val (3);
+      In_Req_Ok := In_Req_Ok and MT1_Ptr.Test_Class_Member.Is_Changed;
+      In_Req_Ok := In_Req_Ok and not MT1_Ptr.Test_Class_Member.Is_Changed_Here;
+      MT1_Ptr.Test_Class_Member.Set_Changed (To => False);
+      MT1_Ptr.Test_Class_Member.Set_Changed_Here (To => True);
+      In_Req_Ok := In_Req_Ok and MT1_Ptr.Test_Class_Member.Is_Changed_Here;
+      In_Req_Ok := In_Req_Ok and not MT1_Ptr.Test_Class_Member.Ref.My_Int.Is_Changed;
 
       Print ("Is_Null OK: ", Null_Ok);
       Print ("Is_Changed OK: ", In_Req_Ok);
@@ -9236,6 +9248,60 @@ procedure Dots_Test_Ada is
 
    end Test_Library_Exceptions;
 
+   procedure Test_IsProperty is
+      V : Safir.Dob.Typesystem.Type_Id_Vectors.Vector;
+
+      procedure Check (Position : Safir.Dob.Typesystem.Type_Id_Vectors.Cursor) is
+         id : constant Safir.Dob.Typesystem.Type_Id := Safir.Dob.Typesystem.Type_Id_Vectors.Element (Position);
+      begin
+         if Safir.Dob.Typesystem.Operations.Is_Property (id) then
+            Print (Safir.Dob.Typesystem.Utilities.To_Utf_8 (Safir.Dob.Typesystem.Operations.Get_Name (id)));
+         end if;
+      end Check;
+
+   begin
+      Header ("IsProperty");
+      V := Safir.Dob.Typesystem.Operations.Get_All_Type_Ids;
+      V.Iterate (Check'Access);
+
+   end Test_IsProperty;
+
+   procedure Test_IsEnumeration is
+      V : Safir.Dob.Typesystem.Type_Id_Vectors.Vector;
+
+      procedure Check (Position : Safir.Dob.Typesystem.Type_Id_Vectors.Cursor) is
+         id : constant Safir.Dob.Typesystem.Type_Id := Safir.Dob.Typesystem.Type_Id_Vectors.Element (Position);
+      begin
+         if Safir.Dob.Typesystem.Operations.Is_Enumeration (id) then
+            Print (Safir.Dob.Typesystem.Utilities.To_Utf_8 (Safir.Dob.Typesystem.Operations.Get_Name (id)));
+         end if;
+      end Check;
+
+   begin
+      Header ("IsEnumeration");
+      V := Safir.Dob.Typesystem.Operations.Get_All_Type_Ids;
+      V.Iterate (Check'Access);
+
+   end Test_IsEnumeration;
+
+   procedure Test_IsException is
+      V : Safir.Dob.Typesystem.Type_Id_Vectors.Vector;
+
+      procedure Check (Position : Safir.Dob.Typesystem.Type_Id_Vectors.Cursor) is
+         id : constant Safir.Dob.Typesystem.Type_Id := Safir.Dob.Typesystem.Type_Id_Vectors.Element (Position);
+      begin
+         if Safir.Dob.Typesystem.Operations.Is_Exception (id) then
+            Print (Safir.Dob.Typesystem.Utilities.To_Utf_8 (Safir.Dob.Typesystem.Operations.Get_Name (id)));
+         end if;
+      end Check;
+
+   begin
+      Header ("IsException");
+      V := Safir.Dob.Typesystem.Operations.Get_All_Type_Ids;
+      V.Iterate (Check'Access);
+
+   end Test_IsException;
+
 
 begin
 
@@ -9323,6 +9389,11 @@ begin
 
    Test_Exception;
    Test_Library_Exceptions;
+
+   Test_IsProperty;
+   Test_IsEnumeration;
+   Test_IsException;
+
 
 exception
    when E : others =>

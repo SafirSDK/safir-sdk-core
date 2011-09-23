@@ -92,6 +92,12 @@ package body Safir.Dob.Typesystem.Operations is
       return C.char'Pos (Safir.Dob.Typesystem.Kernel.Is_Enumeration (Type_Id)) /= 0;
    end Is_Enumeration;
 
+   function Is_Exception
+     (Type_Id : Safir.Dob.Typesystem.Type_Id) return Boolean is
+   begin
+      return C.char'Pos (Safir.Dob.Typesystem.Kernel.Is_Exception (Type_Id)) /= 0;
+   end Is_Exception;
+
    function Get_Type_Id
      (Type_Name : Unbounded_Wide_String) return Safir.Dob.Typesystem.Type_Id is
    begin

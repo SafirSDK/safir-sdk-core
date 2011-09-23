@@ -247,6 +247,7 @@ struct CommandLineResults
     bool noTimeout;
     int testcaseNo;
     int context;
+    std::string multicastNic;
 };
 
 const CommandLineResults & HandleCommandLine(int argc, char* argv[])
@@ -267,7 +268,8 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
             ("first", po::value<int>(&results.first)->default_value(0), "first testcase")
             ("last", po::value<int>(&results.last)->default_value(9999), "last testcase")
             ("no-timeout", "Do not time out and exit if a partner does not respond for a long time")
-            ("context", po::value<int>(&results.context)->default_value(0), "default context for partner test connection (-1 for random)");
+            ("context", po::value<int>(&results.context)->default_value(0), "default context for partner test connection (-1 for random)")
+            ("multicast-nic",po::value<std::string>(&results.multicastNic),"Ip address for Network Interface Card to be used for sending test commands");
 
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -396,7 +398,7 @@ int main(int argc, char* argv[])
 
             std::wcout << std::endl;
 
-            Sequencer sequencer(commandLine.first, commandLine.last, languages, commandLine.noTimeout, context);
+            Sequencer sequencer(commandLine.first, commandLine.last, languages, commandLine.noTimeout, context, commandLine.multicastNic);
             while (!sequencer.IsFinished())
             {
                 ACE_Time_Value time(ACE_Time_Value(0,150000)); //150ms

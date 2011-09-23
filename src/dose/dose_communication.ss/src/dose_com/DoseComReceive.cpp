@@ -1068,7 +1068,8 @@ static THREAD_API RxThread(void *pChNum)
                 //------------------------------------------------------------
                 // This is not what we expected. The reason could be:
                 //
-                // 1) A 'We started after the sending node' start-up condition.
+                // 1) A 'We started after the sending node' start-up condition or
+                //    a 'We have detected that the sending node has gone down->up
                 //    SeqNumIsValid[SeqNumSet] is false.
                 //    This is the first message in this set of SequenceNumber,
                 //
@@ -1093,17 +1094,34 @@ static THREAD_API RxThread(void *pChNum)
                 // Case 1 - OK - first msg from this node on this channel
                 if(!g_RxQ[MyIx].RxNodeStatus[DoseId].SeqNumIsValid[SeqNumSet])
                 {
-                    // If first msg is a PD with not PD_FIRSTDATA bit set
+
+                    // If first msg is a PD with not PD_FIRSTDATA bit set,
+                    // 
                     // 'continue' will cause a lost ack and retransmit.
                     // Note that if no data (only PD_COMPLETE), this bit is set
 
-                    if (
-                            MsgHdr.IsPoolDistribution
-                        &&
-                            ((MsgHdr.IsPoolDistribution & PD_FIRSTDATA) == 0)
-                       )
+                    if (MsgHdr.IsPoolDistribution &&
+                       ((MsgHdr.IsPoolDistribution & PD_FIRSTDATA) == 0))
                     {
+                        // We are expecting the first message in a pool distribution but
+                        // are receiving a message "in the middle" of a pool distribution.
+                        // This can be the case when we have detected a loss in the communication
+                        // with the sender (and have therefor set SeqNumIsValid[SeqNumSet] to false).
+                        // However it could be the case that the sender hasn't detected any
+                        // communication failure and in this case the sender is expecting us to
+                        // send ACKs otherwise the sender will get stuck.
+                        // The solution from our side is to send an ACK but throw away the message. We
+                        // the rely on the timer that will cause a sending of a request for
+                        // pool distribution to the sender.
+
                         if(*pDbg) PrintDbg("Seems First PD data is lost\n");
+
+                        if(MsgHdr.bWantAck)
+                        {
+                            Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw,
+                                        MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
+                                        MsgHdr.FragmentNumber, MsgHdr.Info);
+                        }
                         continue;
                     }
 

@@ -106,43 +106,33 @@ namespace Internal
 
         if (handlerId == Dob::Typesystem::HandlerId::ALL_HANDLERS)
         {
-            m_handlerRegistrations[context].UnregisterAll(connection);
+            m_handlerRegistrations[context].UnregisterAll(connection,
+                                                          true);  // true => explicit unregister
         }
         else
         {
-            m_handlerRegistrations[context].Unregister(connection, handlerId, RegisterTime());
+            m_handlerRegistrations[context].Unregister(connection, handlerId);
         }
     }
 
-    void EntityType::UnregisterAll(const ConnectionPtr& connection)
+    void EntityType::UnregisterAll(const ConnectionPtr& connection, const bool explicitUnregister)
     {
         const ContextId context = connection->Id().m_contextId;
 
         ScopedTypeLock lck(m_typeLocks[context]);
 
-        m_handlerRegistrations[context].UnregisterAll(connection);
+        m_handlerRegistrations[context].UnregisterAll(connection, explicitUnregister);
     }
 
     void EntityType::RemoteSetRegistrationState(const ConnectionPtr& connection,
                                                 const DistributionData& registrationState)
     {
-        ENSURE(!connection->IsLocal(), << "EntityType::RemoteSetRegistrationState can only be used by remote connections!");
-
-        const ContextId context = connection->Id().m_contextId;
+        const ContextId context = registrationState.GetSenderId().m_contextId;
 
         ScopedTypeLock lck(m_typeLocks[context]);
 
         m_handlerRegistrations[context].RemoteSetRegistrationState(connection, registrationState);
 
-    }
-
-    void EntityType::RemoteSetUnregistrationState(const DistributionData& registrationState)
-    {
-        const ContextId context = registrationState.GetSenderId().m_contextId;
-
-        ScopedTypeLock lck(m_typeLocks[context]);
-
-        m_handlerRegistrations[context].RemoteSetUnregistrationState(registrationState);
     }
 
     bool EntityType::IsRegistered(const Dob::Typesystem::HandlerId& handlerId, const ContextId context) const
@@ -435,28 +425,6 @@ namespace Internal
                                                   false); // No need to include already released states
     }
 
-    void EntityType::RemoteSetGhostEntityState(const DistributionData& entityState)
-    {
-        const ContextId context = entityState.GetSenderId().m_contextId;
-
-        if (m_typeIsContextShared)
-        {
-            ENSURE(context == 0, << "EntityType::RemoteSetGhostEntityState. Received Entity " <<
-                                    Typesystem::Operations::GetName(m_typeId) <<
-                                    ", which is ContextShared, in context " << context);
-        }
-
-        ScopedTypeLock lck(m_typeLocks[context]);
-
-        m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
-
-        m_entityStates[context].ForSpecificStateAdd(entityState.GetInstanceId().GetRawValue(),
-                                                    boost::bind(&EntityType::RemoteSetGhostEntityStateInternal,
-                                                                this,
-                                                                boost::cref(entityState),
-                                                                _2));
-    }
-
     void EntityType::RemoteSetInjectionEntityState(const DistributionData& entityState)
     {
         
@@ -616,6 +584,80 @@ namespace Internal
 
         return realState;
 
+    }
+
+    void EntityType::GetMostRecentGhostRegTime(const StateSharedPtr&              statePtr,
+                                               const Dob::Typesystem::HandlerId&  handlerId,
+                                               RegisterTime&                      mostRecentRegisterTime) const
+    {
+        DistributionData realState = statePtr->GetRealState();
+
+        if (!IsGhost(statePtr))
+        {
+            // Not a ghost
+            return;
+        }
+
+        if (handlerId != realState.GetHandlerId())
+        {
+            // Ghost related to another handler
+            return;
+        }
+
+        if (mostRecentRegisterTime < realState.GetRegistrationTime())
+        {
+            mostRecentRegisterTime = realState.GetRegistrationTime();
+        }
+    }
+
+    void EntityType::RemoveGhost(const StateSharedPtr&              statePtr,
+                                 const Dob::Typesystem::HandlerId&  handlerId,
+                                 const RegisterTime&                mostRecentRegisterTime) const
+    {
+        DistributionData realState = statePtr->GetRealState();
+
+        if (!IsGhost(statePtr))
+        {
+            // Not a ghost
+            return;
+        }
+
+        if (handlerId != realState.GetHandlerId())
+        {
+            // Ghost related to another handler
+            return;
+        }
+
+        if (realState.GetRegistrationTime() < mostRecentRegisterTime)
+        {
+            statePtr->SetReleased(true);
+        }
+    }
+
+
+    void EntityType::CleanGhosts(const Dob::Typesystem::HandlerId&  handlerId,
+                                 const ContextId                    context)
+    {
+        ScopedTypeLock lck(m_typeLocks[context]);
+
+        RegisterTime mostRecentRegisterTime;
+
+        // Make a first pass to find the most recent registration time for a ghost.
+        m_entityStates[context].ForEachState(boost::bind(&EntityType::GetMostRecentGhostRegTime,
+                                                         this,
+                                                         _2,
+                                                         boost::cref(handlerId),
+                                                         boost::ref(mostRecentRegisterTime)),
+                                             false); // false => Do not include released states
+
+        // Make a second pass and remove (set the state to released) any ghost that is older
+        // than the most recent registration time for any ghost.
+        m_entityStates[context].ForEachState(boost::bind(&EntityType::RemoveGhost,
+                                                             this,
+                                                             _2,
+                                                             boost::cref(handlerId),
+                                                             boost::cref(mostRecentRegisterTime)),
+                                             false); // false => Do not include released states
     }
 
     const Dob::Typesystem::HandlerId EntityType::GetHandlerOfInstance(const Dob::Typesystem::InstanceId& instanceId,
@@ -1263,36 +1305,8 @@ namespace Internal
                           connection->Id().m_contextId,
                           handlerId,
                           instanceId,
-                          originalInjectionState);   // is used to get correct top timestamps
-    }
-
-    void EntityType::RemoteSetGhostEntityStateInternal(const DistributionData&  remoteEntity,
-                                                       const StateSharedPtr&    statePtr)
-    {
-        DistributionData localEntity = statePtr->GetRealState();
-
-        if (!localEntity.IsNoState() && !statePtr->IsReleased())
-        {
-            // There is an existing local entity. Check if the received remote entity is newer.
-            if (!RemoteEntityStateIsAccepted(remoteEntity, localEntity))
-            {
-                return;
-            }
-        }
-
-        //Check if we have an injection state that can be cleared
-        const DistributionData injectionState = statePtr->GetInjectionState();
-        if (!injectionState.IsNoState() && TimestampOperations::HaveChanges(remoteEntity, injectionState))
-        {
-            statePtr->SetInjectionState(DistributionData(no_state_tag));
-        }
-
-        statePtr->SetConnection(NULL);  // No connection since its a ghost state
-        statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0))); //dummy consumer
-
-        statePtr->SetRealState(remoteEntity);
-
-        statePtr->SetReleased(false);
+                          originalInjectionState,
+                          false);   // is used to get correct top timestamps
     }
 
     void EntityType::RemoteSetInjectionEntityStateInternal(const DistributionData&        remoteEntity,
@@ -1364,19 +1378,22 @@ namespace Internal
 
             if (remoteEntity.GetRegistrationTime() < localEntity.GetRegistrationTime())
             {
-                // The existing local entity state (created or deleted) belongs to a newer registration. Skip the remote delete
+                // The remote delete state belongs to an old registration state. Skip it!
                 return;
             }
             else if (localEntity.GetRegistrationTime() < remoteEntity.GetRegistrationTime())
             {
-                if (localEntity.IsCreated())
+                // The remote delete state belongs to a newer registration state. Skip it if
+                // the local entity is not a ghost.
+                if (localEntity.GetEntityStateKind() != DistributionData::Ghost)
                 {
-                    ENSURE(false, << "Receive a remote deleted entity state when there is an existig created entity belonging to an old registration (" << remoteEntity.GetEntityId() << ").");
+                    return;
                 }
             }
             else
             {
-                // The existing local entity state (created or deleted) has the same registration time as the remote entity state.
+                // The existing local entity state (created or deleted) has the same registration time
+                // as the remote entity state.
                 if (!RemoteEntityStateIsAccepted(remoteEntity, localEntity))
                 {
                     return;
@@ -1465,14 +1482,14 @@ namespace Internal
 
             if (remoteEntity.GetRegistrationTime() < localEntity.GetRegistrationTime())
             {
-                // The existing local entity state (created or deleted) belongs to a newer registration. Skip the remote entity
+                // The existing local entity state (created, deleted or ghost) belongs to a newer registration. Skip the remote entity
                 remoteSetResult = RemoteSetDiscarded;
                 return;
             }
             else if (localEntity.GetRegistrationTime() < remoteEntity.GetRegistrationTime())
             {
-                // The existing local entity state (created or deleted) belongs to an older registration wich means that
-                // we can accept this state. But do we have the corresponding registration?
+                // The existing local entity state (created, deleted or ghost) belongs to an older registration wich means that
+                // we can accept this state. But do we have the corresponding registration/unregistration?
 
                 if (localEntity.IsCreated())
                 {
@@ -1484,7 +1501,7 @@ namespace Internal
             }
             else
             {
-                // The existing local entity state (created or deleted) has the same registration time as the remote entity state.
+                // The existing local entity state (created, deleted or ghost) has the same registration time as the remote entity state.
 
                 // Compare entity creation time and version
                 if (!RemoteEntityStateIsAccepted(remoteEntity, localEntity))
@@ -1517,17 +1534,16 @@ namespace Internal
 
             if (regStatePtr == NULL ||
                 regStatePtr->GetRealState().IsNoState() ||
-                !regStatePtr->GetRealState().IsRegistered() ||
                 regStatePtr->GetRealState().GetRegistrationTime() < remoteEntity.GetRegistrationTime())
             {
-                // There is no active registration or it is an old one
+                // There is no registration state or it is an old one
                 remoteSetResult = RemoteSetNeedRegistration;
 
                 return;
             }
             else if (remoteEntity.GetRegistrationTime() < regStatePtr->GetRealState().GetRegistrationTime())
             {
-                // There is already a newer registration
+                // There is already a newer registration state
                 remoteSetResult = RemoteSetDiscarded;
 
                 return;
@@ -1636,7 +1652,9 @@ namespace Internal
                                        const ContextId                      context,
                                        const Dob::Typesystem::HandlerId&    handlerId,
                                        const Dob::Typesystem::InstanceId&   instanceId,
-                                       const DistributionData&              injectionState)
+                                       const DistributionData&              injectionState,
+                                       const bool                           explicitlyDeleted // = true
+                                       )
     {
         statePtr->SetReleased(true);
 
@@ -1668,7 +1686,7 @@ namespace Internal
                                             instanceId,
                                             m_clock.GetNewTimestamp(),      // creation time
                                             DistributionData::Real,
-                                            true,                          // true => explicitly deleted
+                                            explicitlyDeleted,
                                             false,                         // false => source is not permanent store
                                             NULL);                         // no blob
         }
@@ -1984,7 +2002,7 @@ namespace Internal
 
         DistributionData regState = regStatePtr->GetRealState();
 
-        if (regState.IsNoState() || !regState.IsRegistered())
+        if (regState.IsNoState() || !regStatePtr->GetRealState().IsRegistered())
         {
             return;
         }

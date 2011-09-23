@@ -97,9 +97,10 @@ namespace Internal
     }
 
     void ServiceTypes::UnregisterAll(const ConnectionPtr&           connection,
-                                     const Dob::Typesystem::TypeId  typeId)
+                                     const Dob::Typesystem::TypeId  typeId,
+                                     const bool                     explicitUnregister)
     {
-        GetType(typeId).UnregisterAll(connection);
+        GetType(typeId).UnregisterAll(connection, explicitUnregister);
     }
 
     void ServiceTypes::RemoteSetRegistrationState(const ConnectionPtr& connection,
@@ -109,13 +110,6 @@ namespace Internal
 
         GetType(registrationState.GetTypeId()).RemoteSetRegistrationState(connection,
                                                                           registrationState);
-    }
-
-    void ServiceTypes::RemoteSetUnregistrationState(const DistributionData& registrationState)
-    {
-        m_registrationClock.UpdateCurrentTimestamp(registrationState.GetRegistrationTime());
-
-        GetType(registrationState.GetTypeId()).RemoteSetUnregistrationState(registrationState);
     }
 
     bool ServiceTypes::IsRegistered(const Dob::Typesystem::TypeId typeId,

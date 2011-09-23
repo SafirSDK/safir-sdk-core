@@ -4,8 +4,9 @@ PROJECT (MessageStresser)
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 FILE(GLOB sources *.cpp ../common/*.cpp)
+FILE(GLOB headers *.h ../common/*.h)
 
-ADD_EXECUTABLE(MessageStresser ${sources})
+ADD_EXECUTABLE(MessageStresser ${sources} ${headers})
 
 TARGET_LINK_LIBRARIES(MessageStresser ${COMMON_LIBRARIES} ${ACE_LIBRARY})
 

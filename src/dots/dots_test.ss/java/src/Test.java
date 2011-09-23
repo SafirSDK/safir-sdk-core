@@ -97,6 +97,9 @@ public class Test {
 
         test_TestException();
         test_LibraryExceptions();
+        Test_IsProperty();
+        Test_IsEnumeration();
+        Test_IsException();
 
         MiscTests misc_tests = new MiscTests();
         misc_tests.test_Containers();
@@ -3033,6 +3036,18 @@ public class Test {
                 && MemberTypesProperty.isNullTestClassMember(MT2)
                 && MA1.testClassMember().get(1).isNull()
                 && MemberArraysProperty.isNullTestClassMember(MA2, 1);
+                
+                
+        // Make some tests concerning Set/GetChangedHere
+        MT1.testClassMember().setObj(ParameterTypes.getTestClassParameter());
+        MT1.testClassMember().setChanged(false);
+        MT1.testClassMember().getObj().myInt().setVal(3);
+        In_Req_Ok = In_Req_Ok && MT1.testClassMember().isChanged();
+        In_Req_Ok = In_Req_Ok && !MT1.testClassMember().isChangedHere();
+        MT1.testClassMember().setChanged(false);
+        MT1.testClassMember().setChangedHere(true);
+        In_Req_Ok = In_Req_Ok && MT1.testClassMember().isChangedHere();
+        In_Req_Ok = In_Req_Ok && !MT1.testClassMember().getObj().myInt().isChanged();
 
         System.out.println("Is_Null OK: " + Null_Ok);
         System.out.println("Is_Changed OK: " + In_Req_Ok);
@@ -10311,6 +10326,36 @@ public class Test {
             System.out.println("Caught native exception");
         }
         LibraryExceptions.getInstance();
+    }
+
+    private static void Test_IsProperty() {
+        Header("IsProperty");
+        long[] ids = Operations.getAllTypeIds();
+        for (int i = 0; i < ids.length; i++) {
+            if (Operations.isProperty(ids[i])) {
+                System.out.println(Operations.getName(ids[i]));
+            }
+        }
+    }
+
+    private static void Test_IsEnumeration() {
+        Header("IsEnumeration");
+        long[] ids = Operations.getAllTypeIds();
+        for (int i = 0; i < ids.length; i++) {
+            if (Operations.isEnumeration(ids[i])) {
+                System.out.println(Operations.getName(ids[i]));
+            }
+        }
+    }
+
+    private static void Test_IsException() {
+        Header("IsException");
+        long[] ids = Operations.getAllTypeIds();
+        for (int i = 0; i < ids.length; i++) {
+            if (Operations.isException(ids[i])) {
+                System.out.println(Operations.getName(ids[i]));
+            }
+        }
     }
 
     static class MiscTests {

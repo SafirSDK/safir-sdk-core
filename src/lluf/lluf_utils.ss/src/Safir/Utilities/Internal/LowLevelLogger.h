@@ -27,7 +27,9 @@
 
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/mapped_region.hpp>
+#include <boost/interprocess/streams/vectorstream.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/noncopyable.hpp>
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
 
@@ -36,6 +38,7 @@
 #include <Safir/Utilities/StartupSynchronizer.h>
 #include <ace/Thread_Mutex.h>
 
+#include <vector>
 
 /**
   * This is a utility for logging to file that is _only_ intended for
@@ -46,8 +49,10 @@
   * lllout << "hello world 1"<<std::endl;
   * lllout << 123 << std::endl;
   */
-#define lllout if (!Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LoggingEnabled()) ; else Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
-#define lllerr Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
+
+#define lllout if (!Safir::Utilities::Internal::Internal::LowLevelLoggerBackend::Instance().LoggingEnabled()) ; else *boost::scoped_ptr<Safir::Utilities::Internal::Internal::LowLevelLogger>(new Safir::Utilities::Internal::Internal::LowLevelLogger(false))
+#define lllinfo *boost::scoped_ptr<Safir::Utilities::Internal::Internal::LowLevelLogger>(new Safir::Utilities::Internal::Internal::LowLevelLogger(false))
+#define lllerr *boost::scoped_ptr<Safir::Utilities::Internal::Internal::LowLevelLogger>(new Safir::Utilities::Internal::Internal::LowLevelLogger(true))
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -64,55 +69,84 @@ namespace Internal
     //this is all the hidden magic implementation
     namespace Internal
     {
-        class LLUF_UTILS_API LowLevelLoggerStreamBuf :
-            public std::basic_streambuf<wchar_t, std::char_traits<wchar_t> >,
-            public Synchronized
+        class LLUF_UTILS_API LowLevelLogger :
+            public std::basic_ostream<wchar_t, std::char_traits<wchar_t> >
         {
-            typedef std::char_traits<wchar_t> _Tr;
-        protected:
-            virtual _Tr::int_type uflow();
-            virtual _Tr::int_type underflow();
-            virtual _Tr::int_type overflow(_Tr::int_type c = _Tr::eof());
         public:
-            LowLevelLoggerStreamBuf();
-            virtual ~LowLevelLoggerStreamBuf();
+            LowLevelLogger(bool forceFlush);
+            ~LowLevelLogger();
+        };
+
+        class LLUF_UTILS_API LowLevelLoggerBackend :
+            public Synchronized,
+            private boost::noncopyable
+        {
+        public:
+            static LowLevelLoggerBackend & Instance();
+
+            //inline bool LoggingEnabled() const {return static_cast<const LowLevelLoggerStreamBuf *>(rdbuf())->LoggingEnabled();}
             inline bool LoggingEnabled() const {return m_pLoggingEnabled != NULL && *m_pLoggingEnabled;}
+
+            void CopyToInternalBuffer(const std::wostringstream& ostr);
+            void OutputInternalBuffer();
+
+            inline bool OutputThreadStarted() const {return m_outputThreadStarted;}
+            inline boost::filesystem::wofstream& OutputFile() {return m_OutputFile;}
 
             //StartupSynchronizer stuff
             void Create();
             void Use();
             void Destroy();
-        protected:
-            void WriteDateTime();
 
-            bool m_bDatePending;
+        private:
+            LowLevelLoggerBackend();
+            ~LowLevelLoggerBackend();
+
+            static LowLevelLoggerBackend * volatile m_pInstance;
+
+            static ACE_Thread_Mutex m_InstantiationLock;
 
             boost::interprocess::shared_memory_object m_shm;
             boost::interprocess::mapped_region m_shmRegion;
             boost::filesystem::wofstream m_OutputFile;
+     
+            typedef std::vector<wchar_t> BufferT;
+            boost::interprocess::basic_vectorstream<BufferT> m_os;
+            BufferT m_outputBuf;
+
             bool * m_pLoggingEnabled;
 
             StartupSynchronizer m_startupSynchronizer;
+
+            static ACE_THR_FUNC_RETURN OutputThreadFunc(void* _this);
+            void OutputWorker();
+            ACE_Thread_Mutex m_bufLock;
+            ACE_Thread_Mutex m_internalBufLock;
+            bool m_outputThreadStarted;
         };
 
-        class LLUF_UTILS_API LowLevelLogger :
-            public std::basic_ostream<wchar_t, std::char_traits<wchar_t> >,
-            private boost::noncopyable
+        class LLUF_UTILS_API LowLevelLoggerStreamBuf :
+            public std::basic_streambuf<wchar_t, std::char_traits<wchar_t> >
         {
+            typedef std::char_traits<wchar_t> _Tr;
+
         public:
-            static LowLevelLogger & Instance();
+            LowLevelLoggerStreamBuf(bool forceFlush);
+            virtual ~LowLevelLoggerStreamBuf();
 
-            inline bool LoggingEnabled() const {return static_cast<const LowLevelLoggerStreamBuf *>(rdbuf())->LoggingEnabled();}
-        protected:
-            // Function:   Constructor
-            LowLevelLogger();
+        private:
+            virtual _Tr::int_type uflow();
+            virtual _Tr::int_type underflow();
+            virtual _Tr::int_type overflow(_Tr::int_type c = _Tr::eof());
 
-            // Function:  Destructor
-            ~LowLevelLogger();
+            void WriteDateTime();
 
-            static LowLevelLogger * volatile m_pInstance;
+            bool m_bDatePending;
 
-            static ACE_Thread_Mutex m_InstantiationLock;
+            std::wostringstream m_ostr;
+
+            LowLevelLoggerBackend & m_backend;
+            bool m_forceFlush;
         };
     }
 }

@@ -47,8 +47,6 @@ namespace Internal
     {
     public:
 
-        typedef std::vector<Dob::NodeStatus::Enumeration> NodeStatuses;
-
         NodeHandler();
         ~NodeHandler();
         void Init (ExternNodeCommunication & ecom,
@@ -57,9 +55,6 @@ namespace Internal
 
         //Get and handle node status changes from dosecom.
         void HandleNodeStatusChanges();
-
-        //Get the current status of a node. (Own node is indicated as down!!!)
-        const NodeStatuses& GetNodeStatuses() const {return m_nodeStatuses;}
 
     private:
 
@@ -78,7 +73,7 @@ namespace Internal
         void HandleDisconnect(const ConnectionPtr & connection, const NodeNumber node);
         void DeleteConnections(const NodeNumber node);
 
-        NodeStatuses m_nodeStatuses;
+        void KickConnection(const ConnectionPtr& connection);
 
         ExternNodeCommunication* m_ecom;
         RequestHandler * m_requestHandler;

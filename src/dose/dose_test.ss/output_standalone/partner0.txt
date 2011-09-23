@@ -1746,7 +1746,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.InjectableEntity, 12345)
   deletedByOwner = false
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">Blabla</value></member></members></object>
 
@@ -1771,7 +1770,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.InjectableEntity, 12345)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">Blabla</value></member></members></object>
 
@@ -2209,7 +2207,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.LocalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalEntity</name><members><member><name>Info</name><value xml:space="preserve">Four</value></member></members></object>
 
@@ -2243,7 +2240,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.GlobalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Four</value></member></members></object>
 
@@ -2267,7 +2263,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.LocalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalEntity</name><members><member><name>Info</name><value xml:space="preserve">Some Data</value></member></members></object>
 
@@ -2327,7 +2322,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.LocalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalEntity</name><members><member><name>Info</name><value xml:space="preserve">Updated information</value></member></members></object>
 
@@ -2361,7 +2355,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.LocalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalEntity</name><members><member><name>Info</name><value xml:space="preserve">Updated information</value></member></members></object>
 
@@ -2395,7 +2388,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.LocalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalEntity</name><members><member><name>Info</name><value xml:space="preserve">Updated information</value></member></members></object>
 
@@ -2481,7 +2473,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.LocalEntity, 12345)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalEntity</name><members><member><name>Info</name><value xml:space="preserve">Updated information</value></member></members></object>
 
@@ -2515,7 +2506,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.LocalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalEntity</name><members><member><name>Info</name><value xml:space="preserve">Updated information</value></member></members></object>
 
@@ -2549,7 +2539,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.LocalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.LocalEntity</name><members><member><name>Info</name><value xml:space="preserve">Updated information</value></member></members></object>
 
@@ -2599,7 +2588,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.GlobalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Updated information</value></member></members></object>
 
@@ -2633,7 +2621,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.GlobalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Updated information</value></member></members></object>
 
@@ -2667,7 +2654,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.GlobalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Updated information</value></member></members></object>
 
@@ -2753,7 +2739,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.GlobalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Updated information</value></member></members></object>
 
@@ -2787,7 +2772,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.GlobalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Updated information</value></member></members></object>
 
@@ -2821,7 +2805,6 @@ Consumer 2: OnDeletedEntity:
   EntityId       = (DoseTest.GlobalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.GlobalEntity</name><members><member><name>Info</name><value xml:space="preserve">Updated information</value></member></members></object>
 
@@ -2943,9 +2926,8 @@ Expectation: Partner 0/Consumer 0 receives one OnDeletedEntity. Partner 2/Consum
 --------- Test  -----------
 Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.InjectableEntity, 12345)
-  deletedByOwner = true
+  deletedByOwner = false
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">Blabla</value></member></members></object>
 
@@ -2986,7 +2968,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.InjectableEntity, 54321)
   deletedByOwner = false
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">MoreBlabla</value></member></members></object>
 
@@ -3010,7 +2991,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.SynchronousVolatileEntity, 54321)
   deletedByOwner = false
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Blabla</value></member></members></object>
 
@@ -3024,7 +3004,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.SynchronousPermanentEntity, 56789)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousPermanentEntity</name><members><member><name>Info</name><value xml:space="preserve">Blabla</value></member></members></object>
 
@@ -3048,7 +3027,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.SynchronousPermanentEntity, 56789)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousPermanentEntity</name><members><member><name>Info</name><value xml:space="preserve">qwerty</value></member></members></object>
 
@@ -3099,7 +3077,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.InjectableEntity, 565656)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">Some info</value></member><member><name>MoreInfo</name><value xml:space="preserve">Some more changed info</value></member></members></object>
 
@@ -3667,7 +3644,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.ComplexGlobalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.ComplexGlobalEntity</name><members><member><name>Int32Member</name><value>320</value></member><member><name>Int64Member</name><value>640</value></member><member><name>Float32Member</name><value>320</value></member><member><name>Float64Member</name><value>640</value></member><member><name>BooleanMember</name><value>false</value></member><member><name>EnumerationMember</name><value>DoseTest.TestEnum.MySecond</value></member><member><name>StringMember</name><value xml:space="preserve">Safir SDK </value></member><member><name>EntityIdMember</name><entityId><name>DoseTest.TestItem</name><instanceId>1</instanceId></entityId></member><member><name>TypeIdMember</name><value>Object</value></member><member><name>InstanceIdMember</name><value>AnotherInstance</value></member><member><name>ChannelIdMember</name><value>AnotherChannel</value></member><member><name>HandlerIdMember</name><value>AnotherHandler</value></member><member><name>ObjectMember</name><object><name>DoseTest.TestItem</name></object></member><member><name>BinaryMember</name><value>
 b25jZSBtb3JlLi4u
@@ -3922,7 +3898,6 @@ Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.ComplexGlobalEntity, 0)
   deletedByOwner = true
   Owner          = DEFAULT_HANDLER
-  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionId</name></member></members></object>
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.ComplexGlobalEntity</name><members><member><name>Int32Member</name><value>320</value></member><member><name>Int64Member</name><value>640</value></member><member><name>Float32Member</name><value>320</value></member><member><name>Float64Member</name><value>640</value></member><member><name>BooleanMember</name><value>false</value></member><member><name>EnumerationMember</name><value>DoseTest.TestEnum.MySecond</value></member><member><name>StringMember</name><value xml:space="preserve">Safir SDK </value></member><member><name>EntityIdMember</name><entityId><name>DoseTest.TestItem</name><instanceId>1</instanceId></entityId></member><member><name>TypeIdMember</name><value>Object</value></member><member><name>InstanceIdMember</name><value>AnotherInstance</value></member><member><name>ChannelIdMember</name><value>AnotherChannel</value></member><member><name>HandlerIdMember</name><value>AnotherHandler</value></member><member><name>ObjectMember</name><object><name>DoseTest.TestItem</name></object></member><member><name>BinaryMember</name><value>
 b25jZSBtb3JlLi4u
@@ -4361,6 +4336,20 @@ Consumer 0: OnInjectedNewEntity:
     MoreInfo
 
 Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
+TESTCASE 815
+Description: Test of overregistration of a handler for a synchronous volatile persistence type. The instance is deleted by the new registerer when injected.
+Expectation: Node 0 receives OnInitialInjectionsDone and OnRevokedRegistration. Node 1 receives OnNewEntity and OnDeletedEntity. Node 2 receives OnInjectedNewEntity and OnInitialInjectionsDone.
+--------- Setup -----------
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = DEFAULT_HANDLER
+
+--------- Test  -----------
+Consumer 0: OnRevokedRegistration:
   Type      = DoseTest.SynchronousVolatileEntity
   HandlerId = DEFAULT_HANDLER
 

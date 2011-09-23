@@ -1,7 +1,7 @@
 with "templates_parser";
 with "xmlada";
 with "dots_id";
-with "syst_default.gpr";
+with "safir_defaults.gpr";
 
 project dots_v is
 
@@ -10,16 +10,26 @@ project dots_v is
    type Warning_Levels is
       ("Default", "Elaboration", "Full");
 
-   for Source_Dirs use ("private");
+   type Xml_Ada_Version_Type is ("3.2.1", "4.2");
+   Xml_Ada_Version : Xml_Ada_Version_Type := External("XML_ADA_VER", "3.2.1"); 
+  
+   case Xml_Ada_Version is
+        when "3.2.1" =>
+             for Source_Dirs use ("private", "private/xml_ada_3.2.1");
+        when "4.2" =>
+             for Source_Dirs use ("private", "private/xml_ada_4.2");
+   end case;
+   
 
-   for Object_Dir use Syst_Default'Object_Dir;
-   for Exec_Dir use Syst_Default'Exec_Dir;
    Warning_Level : Warning_Levels := external ("Warning_Level");
-   BUILD : Build_Type := external ("BUILD");
+   Build : Build_Type := external ("BUILD");
+
+   for Object_Dir use "lib-obj/" & Build;
+   for Exec_Dir use ".";-- & Build;
    for Main use ("dots_v.adb");
 
    package Linker is
-      for Default_Switches ("ada") use Syst_Default.Linker'Default_Switches ("Ada");
+      for Default_Switches ("ada") use Safir_Defaults.Linker'Default_Switches ("Ada");
    end Linker;
 
    package Compiler is
@@ -27,30 +37,30 @@ project dots_v is
       case Warning_Level is
 
          when "Full" =>
-            for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada");
+            for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
 
          when "Elaboration" =>
-            for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada");
+            for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
 
          when "Default" =>
 
-            case BUILD is
+            case Build is
 
                when "normal" =>
                   for Default_Switches ("ada") use ("-gnatwcfijmpruv", "-gnatwe" ,"-gnaty3abcefhiklmnoprst", "-gnat05");
 
                when "gperf" =>
-                  for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada");
+                  for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
 
                when "gcov" =>
-                  for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada");
+                  for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
 
                when "Debug" =>
                   --for Default_Switches ("ada") use ("-gnatwcfijmpruv", "-gnatwe" ,"-gnaty3abcefhiklmnoprst", "-gnat05");
-                  for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada");
+                  for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
 
                when "Release" =>
-                  for Default_Switches ("ada") use Syst_Default.Compiler'Default_Switches ("Ada");
+                  for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
             end case;
       end case;
    end Compiler;
@@ -60,30 +70,30 @@ project dots_v is
       case Warning_Level is
 
          when "Full" =>
-            for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
+            for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
 
          when "Elaboration" =>
-            for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
+            for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
 
          when "Default" =>
 
             case BUILD is
 
                when "normal" =>
-                  for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
+                  for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
 
                when "gperf" =>
-                  for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
+                  for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
 
                when "gcov" =>
-                  for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
+                  for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
 
                when "Debug" =>
                   for Default_Switches ("ada") use ("-s", "-k", "-g", "-C");
-                  --for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
+                  --for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
 
                when "Release" =>
-                  for Default_Switches ("ada") use Syst_Default.Builder'Default_Switches ("Ada");
+                  for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
             end case;
       end case;
    end Builder;

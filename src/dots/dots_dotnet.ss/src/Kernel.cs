@@ -143,8 +143,12 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern byte DotsC_IsProperty(System.Int64 id);
 
         //IsEnumeration
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern byte DotsC_IsEnumeration(System.Int64 id);
+
+        //IsException
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern byte DotsC_IsException(System.Int64 id);
 
         //TypeIdFromName
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]

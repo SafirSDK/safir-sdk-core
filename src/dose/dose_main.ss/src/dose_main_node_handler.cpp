@@ -42,6 +42,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/bind.hpp>
 #include <Safir/Dob/Internal/DoseCom_Interface.h>
+#include <Safir/Dob/Internal/NodeStatuses.h>
 
 
 namespace Safir
@@ -76,8 +77,7 @@ namespace Internal
     }
 
     NodeHandler::NodeHandler()
-        : m_nodeStatuses(NUM_NODES,Dob::NodeStatus::Expected),
-          m_ecom(NULL),
+        : m_ecom(NULL),
           m_requestHandler(NULL),
           m_poolHandler(NULL)
     {
@@ -170,7 +170,7 @@ namespace Internal
                     lllerr << "NodeNew: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
 
                     ni->Status() = Dob::NodeStatus::Starting;
-                    m_nodeStatuses[id] = Dob::NodeStatus::Starting;
+                    NodeStatuses::Instance().SetNodeStatus(id, Dob::NodeStatus::Starting);
                 }
                 break;
             case NODESTATUS_UP:
@@ -178,7 +178,7 @@ namespace Internal
                     lllerr << "NodeUp: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
 
                     ni->Status() = Dob::NodeStatus::Started;
-                    m_nodeStatuses[id] = Dob::NodeStatus::Started;
+                    NodeStatuses::Instance().SetNodeStatus(id, Dob::NodeStatus::Started);
                 }
                 break;
             case NODESTATUS_DOWN:
@@ -186,7 +186,7 @@ namespace Internal
                     lllerr << "NodeDown: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
 
                     ni->Status() = Dob::NodeStatus::Failed;
-                    m_nodeStatuses[id] = Dob::NodeStatus::Failed;
+                    NodeStatuses::Instance().SetNodeStatus(id, Dob::NodeStatus::Failed);
 
                     DeleteConnections(id);
                     m_poolHandler->RemoveStatesWaitingForNode(static_cast<Typesystem::Int32>(id));
@@ -198,11 +198,15 @@ namespace Internal
 
             m_connection.SetAll(ni,Typesystem::InstanceId(id),Typesystem::HandlerId());
         }
+
+        // Kick all connections so they will do an dispatch. This covers the case when ghost injections
+        // have been delayed because one or more nodes are distributing their pools (node in state Starting)
+        Connections::Instance().ForEachConnectionPtr(boost::bind(&NodeHandler::KickConnection,this,_1));
     }
 
     void NodeHandler::HandleDisconnect(const ConnectionPtr & connection, const NodeNumber node)
     {
-        if (!connection->IsLocal() && m_nodeStatuses[node] == Dob::NodeStatus::Failed)
+        if (!connection->IsLocal() && NodeStatuses::Instance().GetNodeStatus(node) == Dob::NodeStatus::Failed)
         {
             connection->SetNodeDown();
         }
@@ -215,7 +219,10 @@ namespace Internal
         Connections::Instance().RemoveConnectionFromNode(node, boost::bind(&NodeHandler::HandleDisconnect,this,_1,node));
     }
 
-
+    void NodeHandler::KickConnection(const ConnectionPtr& connection)
+    {
+        connection->SignalIn();
+    }
 
     void NodeHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    /*typeId*/,
                                             const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)

@@ -65,6 +65,8 @@ namespace Internal
             }
         }
 
+        bool operator != (const VersionNumber & other) const {return m_counter != other.m_counter;}
+
         bool IsDiffGreaterThanOne(const VersionNumber & other) const
         {
             return ((other.m_counter - m_counter) % max()) > 1;

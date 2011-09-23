@@ -2647,6 +2647,17 @@ void Test_TestClass()
         MT1->TestClassMember().IsNull() && DotsTest::MemberTypesProperty::IsNullTestClassMember (MT2) &&
         MA1->TestClassMember()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullTestClassMember (MA2, 1);
 
+    // Makesome tests concerning Set/GetChangedHere
+    MT1->TestClassMember().SetPtr(DotsTest::ParameterTypes::TestClassParameter());
+    MT1->TestClassMember().SetChanged(false);
+    MT1->TestClassMember()->MyInt().SetVal(3);
+    In_Req_Ok = In_Req_Ok && MT1->TestClassMember().IsChanged();
+    In_Req_Ok = In_Req_Ok && !MT1->TestClassMember().IsChangedHere();
+    MT1->TestClassMember().SetChanged(false);
+    MT1->TestClassMember().SetChangedHere(true);
+    In_Req_Ok = In_Req_Ok && MT1->TestClassMember().IsChangedHere();
+    In_Req_Ok = In_Req_Ok && !MT1->TestClassMember()->MyInt().IsChanged();
+
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
 
@@ -8503,6 +8514,52 @@ void Test_LibraryExceptions()
 
 }
 
+void Test_IsProperty()
+{
+        Header(L"IsProperty");
+        Safir::Dob::Typesystem::TypeIdVector vect = Safir::Dob::Typesystem::Operations::GetAllTypeIds();
+        Safir::Dob::Typesystem::TypeIdVector::iterator iter = vect.begin();
+
+        while (iter != vect.end())
+        {
+            if (Safir::Dob::Typesystem::Operations::IsProperty(*iter))
+            {
+                std::wcout << Safir::Dob::Typesystem::Operations::GetName(*iter) << std::endl;
+            }
+            ++iter;
+        }   
+}
+void Test_IsEnumeration()
+{
+        Header(L"IsEnumeration");
+        Safir::Dob::Typesystem::TypeIdVector vect = Safir::Dob::Typesystem::Operations::GetAllTypeIds();
+        Safir::Dob::Typesystem::TypeIdVector::iterator iter = vect.begin();
+
+        while (iter != vect.end())
+        {
+            if (Safir::Dob::Typesystem::Operations::IsEnumeration(*iter))
+            {
+                std::wcout << Safir::Dob::Typesystem::Operations::GetName(*iter) << std::endl;
+            }
+            ++iter;
+        }   
+}
+void Test_IsException()
+{
+        Header(L"IsException");
+        Safir::Dob::Typesystem::TypeIdVector vect = Safir::Dob::Typesystem::Operations::GetAllTypeIds();
+        Safir::Dob::Typesystem::TypeIdVector::iterator iter = vect.begin();
+
+        while (iter != vect.end())
+        {
+            if (Safir::Dob::Typesystem::Operations::IsException(*iter))
+            {
+                std::wcout << Safir::Dob::Typesystem::Operations::GetName(*iter) << std::endl;
+            }
+            ++iter;
+        }   
+}
+
 int main(int /*argc*/, char* /*argv*/[])
 {
     std::wcout << std::boolalpha;
@@ -8577,6 +8634,9 @@ int main(int /*argc*/, char* /*argv*/[])
         Test_Watt64();
         Test_TestException();
         Test_LibraryExceptions();
+        Test_IsProperty();
+        Test_IsEnumeration();
+        Test_IsException();
 
     }
     catch (const Safir::Dob::Typesystem::FundamentalException & e)

@@ -99,6 +99,12 @@ namespace Operations
         return DotsC_IsEnumeration(typeId);
     }
 
+    bool
+    IsException(const TypeId typeId)
+    {
+        return DotsC_IsException(typeId);
+    }
+
     //Interpretation between type name and typeId
     TypeId
     GetTypeId(const std::wstring& typeName)

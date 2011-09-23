@@ -70,14 +70,12 @@ namespace Internal
 
         // Unregisters all existing registrations for the given connection and type.
         void UnregisterAll(const ConnectionPtr&           connection,
-                           const Dob::Typesystem::TypeId  typeId);
+                           const Dob::Typesystem::TypeId  typeId,
+                           const bool                     explicitUnregister);
 
         /** New registration state from external node */
         void RemoteSetRegistrationState(const ConnectionPtr& connection,
                                         const DistributionData& registrationState);
-
-        /** Unregistration (an end state) from external node */
-        void RemoteSetUnregistrationState(const DistributionData& registrationState);
 
         bool IsRegistered(const Dob::Typesystem::TypeId     typeId,
                           const Dob::Typesystem::HandlerId& handlerId,

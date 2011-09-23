@@ -21,18 +21,14 @@
 --  along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 --
 -------------------------------------------------------------------------------
-with GNAT.Command_Line;
 with Ada.Exceptions;
 with Executor;
 with Logger;
 with Safir.Dob.Typesystem.Utilities;
 
 procedure Dose_Test_Ada is
-
-   Arg : constant String := GNAT.Command_Line.Get_Argument;
-
 begin
-   Executor.Run (Arg);
+   Executor.Run;
 exception
    when E : others =>
       Logger.Put ("Caught some exception: ");

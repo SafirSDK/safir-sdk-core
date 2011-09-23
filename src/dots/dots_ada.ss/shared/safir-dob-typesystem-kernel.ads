@@ -190,6 +190,10 @@ package Safir.Dob.Typesystem.Kernel is
      (Type_Id : in  Safir.Dob.Typesystem.Type_Id) return C.char;
    pragma Import (C, Is_Enumeration, "DotsC_IsEnumeration");
 
+   function Is_Exception
+     (Type_Id : in  Safir.Dob.Typesystem.Type_Id) return C.char;
+   pragma Import (C, Is_Exception, "DotsC_IsException");
+
 --      // Function:    DotsC_IsException
 --      // Parameters:  typeId - id of exception type
 --      // Returns:     true if the type exists as an exception type

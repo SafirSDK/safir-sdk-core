@@ -146,6 +146,15 @@ namespace Internal
             Injection
         };
 
+        enum RegistrationStateKind
+        {
+            // The assigned enum values are important as they indicates the priority
+            // between registration states (with the same timestamp).
+            ImplicitUnregistered = 0,
+            Registered = 1,
+            Unregistered = 2
+        };
+
 
         /** @name Memory allocation/deallocation routines for external communication.*/
         /** @{ */
@@ -211,7 +220,7 @@ namespace Internal
                          const Typesystem::TypeId typeId,
                          const Typesystem::HandlerId& handlerId,
                          const InstanceIdPolicy::Enumeration instanceIdPolicy,
-                         const bool registered,
+                         const RegistrationStateKind kind,
                          const LamportTimestamp& regTime);
 
         //Create an EntityState
@@ -444,8 +453,9 @@ namespace Internal
         void SetInstanceIdPolicy(const InstanceIdPolicy::Enumeration instanceIdPolicy)
         {GetRegistrationStateHeader().m_instanceIdPolicy = instanceIdPolicy;}
 
-        bool IsRegistered() const {return GetRegistrationStateHeader().m_registered;}
-        void SetRegistered(const bool registered) {GetRegistrationStateHeader().m_registered = registered;}
+        RegistrationStateKind GetRegistrationStateKind() const {return GetRegistrationStateHeader().m_kind;}
+        void SetRegistrationStateKind(const RegistrationStateKind& kind) {GetRegistrationStateHeader().m_kind = kind;}
+        bool IsRegistered() const {return GetRegistrationStateHeader().m_kind == Registered;}
 
         // Makes a copy of a RegistrationState msg
         const DistributionData GetRegistrationStateCopy() const;
@@ -600,10 +610,7 @@ namespace Internal
             StateHeader                     m_stateHeader;
             Typesystem::Int32               m_handlerStrSize;
             InstanceIdPolicy::Enumeration   m_instanceIdPolicy;
-            bool                            m_registered;
-            bool                            m_padding1;
-            bool                            m_padding2;
-            bool                            m_padding3;
+            RegistrationStateKind           m_kind;
         };
 
         /* A few thoughts on the way to store timestamps in entity states:

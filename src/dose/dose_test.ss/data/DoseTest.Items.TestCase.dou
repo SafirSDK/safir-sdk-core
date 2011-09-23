@@ -27,10 +27,15 @@
             <type>DoseTest.Action</type>
         </member>
 
-
         <member>
             <name>AlwaysMarkAsFailed</name>
             <type>Boolean</type>
         </member>
+
+        <member>
+            <name>TestConfig</name>
+            <type>DoseTest.TestConfigEnum</type>
+        </member>
+
     </members>
 </class>

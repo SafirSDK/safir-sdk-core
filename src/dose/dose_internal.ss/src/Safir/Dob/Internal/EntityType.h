@@ -67,14 +67,12 @@ namespace Internal
         void Unregister(const ConnectionPtr&                connection,
                         const Dob::Typesystem::HandlerId&   handlerId);
 
-        void UnregisterAll(const ConnectionPtr& connection);
+        void UnregisterAll(const ConnectionPtr& connection,
+                           const bool           explicitUnregister);
 
         /** New registration state from external node */
         void RemoteSetRegistrationState(const ConnectionPtr& connection,
                                         const DistributionData& registrationState);
-
-        /** Unregistration (an end state) from external node */
-        void RemoteSetUnregistrationState(const DistributionData& registrationState);
 
         bool IsRegistered(const Dob::Typesystem::HandlerId& handlerId, const ContextId context) const;
 
@@ -173,16 +171,13 @@ namespace Internal
          */
         /** @{ */
 
-        /** Set a ghost from external node. */
-        void RemoteSetGhostEntityState(const DistributionData& entityState);
-
         /** Set an injection from external node. */
         void RemoteSetInjectionEntityState(const DistributionData& entityState);
 
         /** Set a delete (an end state) from external node */
         void RemoteSetDeleteEntityState(const DistributionData&   entityState);
 
-        /** Set a state (that is not a ghost, injection or delete state) from external node. */
+        /** Set a state (that is not an injection or delete state) from external node. */
         RemoteSetResult RemoteSetRealEntityState(const ConnectionPtr&      connection,
                                                  const DistributionData&   entityState);
 
@@ -214,6 +209,9 @@ namespace Internal
 
         const DistributionData ReadEntity(const Dob::Typesystem::InstanceId& instanceId,
                                           const ContextId readerContext) const;
+
+        void CleanGhosts(const Dob::Typesystem::HandlerId&  handlerId,
+                         const ContextId                    context);
 
         //throws NotFoundException if no such instance
         const Dob::Typesystem::HandlerId GetHandlerOfInstance(const Dob::Typesystem::InstanceId& instanceId,
@@ -314,9 +312,6 @@ namespace Internal
                                      const Dob::Typesystem::InstanceId&   instanceId,
                                      const DistributionData&              originalInjectionState);
 
-        void RemoteSetGhostEntityStateInternal(const DistributionData&  remoteEntity,
-                                               const StateSharedPtr&    statePtr);
-
         void RemoteSetInjectionEntityStateInternal(const DistributionData&        remoteEntity,
                                                    const StateSharedPtr&          statePtr);
 
@@ -340,7 +335,8 @@ namespace Internal
                                const ContextId                      context,
                                const Dob::Typesystem::HandlerId&    handlerId,
                                const Dob::Typesystem::InstanceId&   instanceId,
-                               const DistributionData&              injectionState);
+                               const DistributionData&              injectionState,
+                               const bool                           explicitlyDeleted = true);
 
         // A state always has an owner. (Checks any real or injected state for a handler id.)
         void GetOwner(const StateSharedPtr&       statePtr,
@@ -385,6 +381,15 @@ namespace Internal
                            const bool              considerChangeFlags) const;
 
         void KickRegisterer(const Dob::Typesystem::HandlerId& handlerId, const ContextId context) const;
+
+        void GetMostRecentGhostRegTime(const StateSharedPtr&              statePtr,
+                                       const Dob::Typesystem::HandlerId&  handlerId,
+                                       RegisterTime&                      mostRecentRegisterTime) const;
+
+        void RemoveGhost(const StateSharedPtr&              statePtr,
+                         const Dob::Typesystem::HandlerId&  handlerId,
+                         const RegisterTime&                mostRecentRegisterTime) const;
+
 
         friend void StatisticsCollector(EntityType&, void*);
     };
