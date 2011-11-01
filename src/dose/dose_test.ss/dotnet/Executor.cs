@@ -482,6 +482,15 @@ namespace dose_test_dotnet
 
         private void HandleAction(DoseTest.Action action)
         {
+            if (!action.SeqNbr.IsNull())
+            {
+                if (action.SeqNbr.Val != m_lastRecSeqNbr + 1)
+                {
+                    System.Console.WriteLine("Seems an action from the sequencer is lost!!"); 
+                }
+                m_lastRecSeqNbr = action.SeqNbr.Val;
+            }
+
             if (!action.Partner.IsNull() && action.Partner.Val != new Safir.Dob.Typesystem.ChannelId(m_instance))
             {
                 // Not meant for this partner
@@ -671,6 +680,7 @@ namespace dose_test_dotnet
         private bool m_isActive = false;
         private Consumer[] m_consumers;
         private int m_defaultContext = 0;
+        private int m_lastRecSeqNbr = 0;
 
         private Safir.Dob.Connection m_controlConnection = new Safir.Dob.Connection();
         private Safir.Dob.Connection m_testConnection = new Safir.Dob.Connection();

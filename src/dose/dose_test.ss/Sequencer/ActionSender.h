@@ -48,6 +48,8 @@ private:
     ACE_SOCK_Dgram_Mcast m_sock;
 
     Safir::Dob::SecondaryConnection m_connection;
+
+    Safir::Dob::Typesystem::Int32 m_seqNbr;
 };
 
 #endif

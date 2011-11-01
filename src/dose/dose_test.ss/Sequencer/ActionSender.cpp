@@ -31,6 +31,7 @@
 #include <iostream>
 
 ActionSender::ActionSender(const std::string& multicastNic)
+    : m_seqNbr(0)
 {
     m_connection.Attach();
 
@@ -80,6 +81,9 @@ ActionSender::~ActionSender()
 
 void ActionSender::Send(const DoseTest::ActionPtr& msg)
 {
+    ++m_seqNbr;
+    msg->SeqNbr().SetVal(m_seqNbr);
+
     Safir::Dob::Typesystem::BinarySerialization binary;
 
     Safir::Dob::Typesystem::Serialization::ToBinary(msg, binary);
@@ -92,6 +96,7 @@ void ActionSender::Send(const DoseTest::ActionPtr& msg)
     }
     else
     {
+
         if (m_sock.send(&binary[0], binary.size()) == -1)
         {
             std::wcout << "Error " <<  ACE_OS::last_error() << " when sending on multicast address" << std::endl;

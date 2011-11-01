@@ -1038,7 +1038,7 @@ public abstract class ConnectionBase
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
         }
 
-        return 0;
+        return requestId[0];
     }
 
 
