@@ -286,6 +286,22 @@ All these flags mean that there is a certain overhead to items, which in many ca
 
 This means that there are some limitations to what you should do to a Struct. Do not use IsChanged or IsNull on any struct members. Do not inherit from a user-defined struct (structs will not support inheritance). In the current Dob this will of course work, but once the optimisation is introduced your code will break.
 
+[[Arrays]]
+=== Arrays
+Members can also be declared as arrays of simple types or complex types (e.g. entities, items or arrays).
+
+There are two types of arrays - static and dynamic arrays.
+
+_Static_ _arrays_ must be declared with an array size (<<static_array_declaration>>). The generated code for these arrays will create a static array where all elements in the array exists at start, compare with C++ myArray[myArraySize].
+ Array length can be changed without regenerating the code. The iterator will iterate over all elements in the array, i.e. from 0 to arraySize.
+
+_Dynamic_ _arrays_ are declared without an array size (<<dynamic_array_declaration>>). The generated code for these arrays will create a dynamic array where the array is empty at start.
+It works as a sparse array, i.e. you can directly access any index in the array and it will always return a valid array element. If no value is set for the given index the array will return a null element of the type specified for the array.
+ The iterator will iterate over all existing elements in the array, e.g. if the array has elements at index 1, 2 and 598, the iterator iterates over these 3 elements.
+
+Static and dynamic arrays generate a slightly different interface, therefore thay are treated as different types. If you switch the definition between static and dynamic array you must regenerate the definitions and rebuild your code.
+
+
 [[parameters]]
 === Parameters 
 Apart from members a class can also contain constant parameters. These parameters are not compile-time constants, instead they are read from the dou-files by the Dob when it starts and applications can ask for the values by a simple function call. This means that all that is needed to change a parameter is to change its value in the dou file (under $(SAFIR_RUNTIME)/data/text/dots/classes/) and restarting the Dob and all the applications that use the Dob (note that running the code generation, as described in <<code-generation>>, will overwrite these changes).
@@ -485,12 +501,24 @@ Saab uses _Capabilities_ as the top-level namespace for reusable components buil
 
 Arrays are declared by adding the field arraySize to an element or constant as shown in the example below.
 
-.Array member declaration
+[[static_array_declaration]]
+.Static array member declaration
 [source,xml]
 ----------------------------
     <member>
         <name>Type</name>
         <arraySize>10</arraySize>
+        <type>Int32</type>
+    </member>
+----------------------------
+
+[[dynamic_array_declaration]]
+.Dynamic array member declaration
+[source,xml]
+----------------------------
+    <member>
+        <name>Type</name>
+        <arraySize>dynamic</arraySize>
         <type>Int32</type>
     </member>
 ----------------------------
@@ -506,7 +534,9 @@ For strings the maximum length in number of Unicode characters must be defined u
         <maxLength>10</maxLength>
     </member>
 ----------------------------
-The string lengths and array sizes can be specified with parameters as well. The tags used for this is arraySizeRef and maxLenghtRef, and the parameter name must be fully qualified (full namespace and class name).
+The string lengths and array sizes can be specified with parameters as well. The tags used for this is arraySizeRef and maxLenghtRef, and the parameter name must be fully qualified (full namespace and class name). 
+
+Note that it is not possibly to change array size from a numerical value to dynamic since it would be like changing the member type.
 
 .Parameters and members
 [source,xml]
@@ -3379,5 +3409,6 @@ SDK::
 
 Swre::
     A Safir SDK Core component that provides Software Reporting and Trace logging functionality.
+
 
 

@@ -55,6 +55,8 @@ build_dir        src/dose/dose_ada.ss                      Release
 build_dir        src/dose/dose_sate.ss/src                 Release
 build_dir        src/dose/dose_dobexplorer.ss/src          Release
 
+build_dir        src/dose/dose_monitor.ss/src              Release
+
 #DOUF
 build_dir        src/douf/douf_time_library.ss/src/douf_time_library    Release
 
