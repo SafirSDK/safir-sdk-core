@@ -80,8 +80,8 @@ private:
 
     struct ConnStat
     {
-        InQMap                          reqInQStat;
-        InQMap                          msgInQStat;
+        InQMap      reqInQStat;
+        InQMap      msgInQStat;                  
     };
 
     typedef std::map<Safir::Dob::Internal::ConnectionId, ConnStat> ConnStatMap;
@@ -103,7 +103,7 @@ private:
     };
 
     QStatSummary                m_qStatSummary;
-
+    
     typedef std::set<Safir::Dob::Internal::ConnectionId> ConnectionSet;
     
     static ACE_THR_FUNC_RETURN QCheckThread(void *);
@@ -115,11 +115,13 @@ private:
 
     void ProcessReqInQ(const ConnStatMap::iterator&                 connIt,
                        const Safir::Dob::Internal::ConsumerId&      consumer,
-                       Safir::Dob::Internal::RequestInQueue&        queue);
+                       Safir::Dob::Internal::RequestInQueue&        queue,
+                       bool&                                        queueIsStalled);
 
     void ProcessMsgInQ(const ConnStatMap::iterator&                 connIt,
                        const Safir::Dob::Internal::ConsumerId&      consumer,
-                       Safir::Dob::Internal::MessageQueue&          queue);
+                       Safir::Dob::Internal::MessageQueue&          queue,
+                       bool&                                        queueIsStalled);
 
     void ProcessConnection(const Safir::Dob::Internal::ConnectionPtr&   connection,
                            ConnectionSet&                               existingConnections);

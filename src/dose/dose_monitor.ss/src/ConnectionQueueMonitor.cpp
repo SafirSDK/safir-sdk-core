@@ -87,7 +87,8 @@ void ConnectionQueueMonitor::ProcessInQ(const InQMap::iterator&                 
 
 void ConnectionQueueMonitor::ProcessReqInQ(const ConnStatMap::iterator&                 connIt,
                                            const Safir::Dob::Internal::ConsumerId&      consumer,
-                                           Safir::Dob::Internal::RequestInQueue&        queue)
+                                           Safir::Dob::Internal::RequestInQueue&        queue,
+                                           bool&                                        queueIsStalled)
 {
     InQStat newReqInQStat;
 
@@ -111,6 +112,7 @@ void ConnectionQueueMonitor::ProcessReqInQ(const ConnStatMap::iterator&         
 
         if (qIsStalled)
         {
+            queueIsStalled = true;
             ++m_qStatSummary.noStalledReqInQueues;
         }
     }
@@ -123,7 +125,8 @@ void ConnectionQueueMonitor::ProcessReqInQ(const ConnStatMap::iterator&         
 
 void ConnectionQueueMonitor::ProcessMsgInQ(const ConnStatMap::iterator&                 connIt,
                                            const Safir::Dob::Internal::ConsumerId&      consumer,
-                                           Safir::Dob::Internal::MessageQueue&          queue)
+                                           Safir::Dob::Internal::MessageQueue&          queue,
+                                           bool&                                        queueIsStalled)
 {
     InQStat newMsgInQStat;
 
@@ -147,6 +150,7 @@ void ConnectionQueueMonitor::ProcessMsgInQ(const ConnStatMap::iterator&         
 
         if (qIsStalled)
         {
+            queueIsStalled = true;
             ++m_qStatSummary.noStalledMsgInQueues;
         }
     }
@@ -176,17 +180,31 @@ void ConnectionQueueMonitor::ProcessConnection(const Safir::Dob::Internal::Conne
         connIt = m_connStat.insert(std::make_pair(connection->Id(), ConnStat())).first; 
     }
 
+    bool atLeastOneReqInQIsStalled = false;
+    bool atLeastOneMsgInQIsStalled = false;
+
     connection->ForEachRequestInQueue(boost::bind(&ConnectionQueueMonitor::ProcessReqInQ,
                                                   this,
                                                   boost::cref(connIt),
                                                   _1,
-                                                  _2));
+                                                  _2,
+                                                  boost::ref(atLeastOneReqInQIsStalled)));
 
     connection->ForEachMessageInQueue(boost::bind(&ConnectionQueueMonitor::ProcessMsgInQ,
                                                   this,
                                                   boost::cref(connIt),
                                                   _1,
-                                                  _2));
+                                                  _2,
+                                                  boost::ref(atLeastOneMsgInQIsStalled)));
+
+    if (atLeastOneReqInQIsStalled)
+    {
+        lllerr << "Connection " << connection->NameWithCounter() << " seems to have at least one request in queue that is stalled!" << std::endl;
+    }
+    if (atLeastOneMsgInQIsStalled)
+    {
+        lllerr << "Connection " << connection->NameWithCounter() << " seems to have at least one message in queue that is stalled!" << std::endl;
+    }
 }
 
 void ConnectionQueueMonitor::UpdateQStatistics()
@@ -202,7 +220,7 @@ void ConnectionQueueMonitor::UpdateQStatistics()
                       _1,
                       boost::ref(currentConnections)));
 
-     // Remove connections that aren't present any more.
+    // Remove connections that aren't present any more.
     for (ConnStatMap::iterator it = m_connStat.begin();
          it != m_connStat.end();)  // Note increment below to get it all correct when erasing via iterator
     {
