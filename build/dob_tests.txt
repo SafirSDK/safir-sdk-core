@@ -1,6 +1,6 @@
 #COPY DOB FILES
-copy_dob_files   src/dots/dots_test.ss/data  definitions/safir_dob_tests
-copy_dob_files   src/dose/dose_test.ss/data  definitions/safir_dob_tests
+copy_dob_files   src/dots/dots_test.ss/data    definitions/safir_dob_tests
+copy_dob_files   src/dose/dose_test.ss/data    definitions/safir_dob_tests
 copy_dob_files   src/dose/dose_test.ss/config  definitions/safir_dob_tests/config
 
 dobmake
