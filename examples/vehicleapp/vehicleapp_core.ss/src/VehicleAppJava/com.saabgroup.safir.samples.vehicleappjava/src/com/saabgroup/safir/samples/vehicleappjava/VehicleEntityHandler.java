@@ -28,7 +28,7 @@ import com.saabgroup.safir.swreports.SwReport;
  * registration as a data owner and processes request
  * on that data.
  */
-public class EntityHandler implements com.saabgroup.safir.dob.EntityHandlerInjection {
+public class VehicleEntityHandler implements com.saabgroup.safir.dob.EntityHandlerInjection {
 
     // This class uses this secondary connection for Dob calls.
     private com.saabgroup.safir.dob.SecondaryConnection connection;
@@ -36,7 +36,7 @@ public class EntityHandler implements com.saabgroup.safir.dob.EntityHandlerInjec
     // Object counter.
     private int numberOfCreatedVehicles;
     
-    public EntityHandler() {
+    public VehicleEntityHandler() {
         connection = new com.saabgroup.safir.dob.SecondaryConnection();
         numberOfCreatedVehicles = 0;
     }

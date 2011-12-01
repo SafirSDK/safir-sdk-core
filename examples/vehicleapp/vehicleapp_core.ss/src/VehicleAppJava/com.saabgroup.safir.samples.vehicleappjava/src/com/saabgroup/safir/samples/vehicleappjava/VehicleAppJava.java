@@ -44,7 +44,7 @@ public class VehicleAppJava implements StopHandler {
     /**
      *  Object handlers.
      */
-    EntityHandler entityHandler;
+    VehicleEntityHandler entityHandler;
     VehicleServiceHandler serviceHandler;
     
     public VehicleAppJava() {
@@ -53,7 +53,7 @@ public class VehicleAppJava implements StopHandler {
         mainLoop = new MainLoop();
         dobDispatcher = new DobDispatcher(dobConnection, mainLoop); 
         
-        entityHandler = new EntityHandler();
+        entityHandler = new VehicleEntityHandler();
         serviceHandler = new VehicleServiceHandler();
     }
     
