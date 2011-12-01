@@ -60,7 +60,7 @@ public class VehicleAppJava implements StopHandler {
     /**
      * Start this application.
      */
-    public void Startup()
+    public void startup()
     {
         // Open DOB connection
         dobDispatcher.open("VehicleAppJava", "0", 0, this);
