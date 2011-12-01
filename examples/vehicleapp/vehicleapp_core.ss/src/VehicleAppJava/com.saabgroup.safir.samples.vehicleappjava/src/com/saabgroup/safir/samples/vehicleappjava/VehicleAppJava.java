@@ -45,7 +45,7 @@ public class VehicleAppJava implements StopHandler {
      *  Object handlers.
      */
     EntityHandler entityHandler;
-    ServiceHandler serviceHandler;
+    VehicleServiceHandler serviceHandler;
     
     public VehicleAppJava() {
 
@@ -54,7 +54,7 @@ public class VehicleAppJava implements StopHandler {
         dobDispatcher = new DobDispatcher(dobConnection, mainLoop); 
         
         entityHandler = new EntityHandler();
-        serviceHandler = new ServiceHandler();
+        serviceHandler = new VehicleServiceHandler();
     }
     
     /**
@@ -67,7 +67,7 @@ public class VehicleAppJava implements StopHandler {
         
         entityHandler.init();
         serviceHandler.init();
-        MessageSender.getInstance().init();
+        VehicleMessageSender.getInstance().init();
         
         // Start the one and only thread.
         mainLoop.start();

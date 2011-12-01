@@ -38,7 +38,7 @@ import com.saabgroup.safir.swreports.SwReport;
  * you would of course not use it in real project to calculate the
  * difference between to speed values.
  */
-public class ServiceHandler implements com.saabgroup.safir.dob.ServiceHandler {
+public class VehicleServiceHandler implements com.saabgroup.safir.dob.ServiceHandler {
 
     // This class uses this secondary connection for Dob calls.
     private SecondaryConnection connection;
@@ -46,7 +46,7 @@ public class ServiceHandler implements com.saabgroup.safir.dob.ServiceHandler {
     /**
      * Constructor.
      */
-    public ServiceHandler()
+    public VehicleServiceHandler()
     {
         connection = new SecondaryConnection();
     }

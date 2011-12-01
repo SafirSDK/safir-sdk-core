@@ -99,7 +99,7 @@ public class EntityHandler implements com.saabgroup.safir.dob.EntityHandlerInjec
         // Send notification message when the number of created vehicles 
         // has reached the limit.
         if(numberOfCreatedVehicles == capabilities.vehicles.VehicleParameters.getVehicleLimit()) {
-            MessageSender.getInstance().sendMaxNofVehicleMsg();
+            VehicleMessageSender.getInstance().sendMaxNofVehicleMsg();
         }
     }
 
@@ -158,7 +158,7 @@ public class EntityHandler implements com.saabgroup.safir.dob.EntityHandlerInjec
             // Send notification message when the number of created vehicles 
             // has reached the limit.
             if(numberOfCreatedVehicles == capabilities.vehicles.VehicleParameters.getVehicleLimit())
-                MessageSender.getInstance().sendMaxNofVehicleMsg();
+                VehicleMessageSender.getInstance().sendMaxNofVehicleMsg();
         }
         else
         {
