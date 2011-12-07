@@ -40,14 +40,15 @@ public:
    //thread entry
     void Thread();
 
+    //seconds before signaling error. Default value is 15 sec.
+    static int TimeThreshold;
+
 private:    
     boost::mutex m_mutex;
     boost::posix_time::ptime m_dispatchTimestamp;
     boost::posix_time::ptime m_requestTimestamp;
 
-    void CheckTimestamps(bool& dispatchOk, bool& requestOk);    
-    
-    static const int TIME_THRESHOLD = 15; //seconds before signaling error.
+    void CheckTimestamps(bool& dispatchOk, bool& requestOk);        
 };
 
 #endif

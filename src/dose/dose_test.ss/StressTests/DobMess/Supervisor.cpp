@@ -29,6 +29,8 @@
 #include <boost/thread.hpp>
 #include <boost/interprocess/detail/os_thread_functions.hpp>
 
+int Supervisor::TimeThreshold = 15; //default value is 15 seconds
+
 void threadStart(Supervisor* ptr)
 {   
     ptr->Thread();
@@ -74,12 +76,14 @@ void Supervisor::Thread()
                 requestErrorReported=false;
             }
             
-            Sleep(TIME_THRESHOLD*500); //wait half the TIME_THRESHOLD before next check.
+            Sleep(TimeThreshold*500); //wait half the TimeThreshold before next check.
         }
         else
         {      
 #ifdef WIN32
-            Beep(700, 300);    //Beep in computer speaker. Todo: implement for Linux       
+            Beep(700, 300);    //Beep in computer speaker. Todo: implement for Linux
+#else
+            printf("\a"); //will make a short beep
 #endif
             if (!dispatchErrorReported && !dispatchOk)
             {              
@@ -117,6 +121,6 @@ void Supervisor::CheckTimestamps(bool& dispatchOk, bool& requestOk)
     boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
     boost::posix_time::time_duration dispatchDur = now-m_dispatchTimestamp;   
     boost::posix_time::time_duration reqDur = now-m_requestTimestamp;   
-    dispatchOk=dispatchDur.total_seconds()<TIME_THRESHOLD;
-    requestOk=reqDur.total_seconds()<TIME_THRESHOLD;    
+    dispatchOk=dispatchDur.total_seconds()<TimeThreshold;
+    requestOk=reqDur.total_seconds()<TimeThreshold;    
 }
