@@ -131,6 +131,7 @@ MACRO(INSTALL_DEBUG_INFO target)
     endif()
 
     STRING(REPLACE .dll ${CMAKE_DEBUG_POSTFIX}.pdb location ${location})
+    STRING(REPLACE .exe .pdb location ${location})
     
     if (SAFIR_USER)
       INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/bin CONFIGURATIONS Debug)
