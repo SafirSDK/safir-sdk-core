@@ -337,8 +337,8 @@ namespace Internal
         }
 
         if (addState)
-        {
-            rlock.unlock();  // Must release sharable lock here because an exclusive lock will be acquired
+        {              
+            rlock.Unlock();  // Must release sharable lock here because an exclusive lock will be acquired
                              // by AddState.
 
             StateAndIter addRes = AddState(key);

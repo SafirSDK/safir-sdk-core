@@ -35,6 +35,7 @@
 #include <Safir/Dob/InstanceIdPolicy.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
 #include <Safir/Dob/Internal/ShmArray.h>
+#include <Safir/Dob/Internal/ScopedReportingLock.h>
 
 namespace Safir
 {
@@ -255,7 +256,7 @@ namespace Internal
         typedef ShmArray<TypeLock> TypeLockVector;
         TypeLockVector m_typeLocks;
 
-        typedef boost::interprocess::scoped_lock<TypeLock> ScopedTypeLock;
+        typedef Safir::Dob::Internal::ScopedReportingLock<TypeLock, 10> ScopedTypeLock;        
 
         void SetEntityInternal(const StateSharedPtr&                statePtr,
                                const ConnectionPtr&                 connection,
