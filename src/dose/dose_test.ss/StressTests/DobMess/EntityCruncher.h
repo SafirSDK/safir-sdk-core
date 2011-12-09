@@ -36,7 +36,7 @@ class EntityCruncher :  public Safir::Dob::EntityHandler,
                         public SimpleReactor                     
 {
 public:
-    EntityCruncher();
+    EntityCruncher(int maxNumEntities, bool createEnabled, bool deleteEnabled, bool verbose);
     ~EntityCruncher(void);
 
 private:
@@ -45,6 +45,10 @@ private:
     Safir::Dob::Typesystem::HandlerId m_handler;
     Supervisor m_supervisor;
     int m_numberOfEntities;
+    int m_maxNumberOfEntities; 
+    bool m_entityCreateEnabled;
+    bool m_entityDeleteEnabled;
+    bool m_verbose;
 
     //SimpleReactor
     virtual void DoDispatch();
@@ -69,10 +73,9 @@ private:
     virtual void OnNotRequestOverflow();
 
     void SendRequest(const Safir::Dob::EntityProxy& entityProxy);
-
-    static const int MaxNumberOfCreatedEntities = 500;  //when exceeded, remove all instances
-    static const int EntityShowerSize = 10;    //100 new entities in each shower
-    static const int EntityShowerInterval = 1000; //2 seconds between showers
+    
+    static const int EntityShowerSize = 10;    //10 new entities in each shower
+    static const int EntityShowerInterval = 1000; //1 seconds between showers
     static const int CreateEntityTimerId = 100;
     
 

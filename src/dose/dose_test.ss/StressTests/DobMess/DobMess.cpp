@@ -34,7 +34,11 @@ int main(int argc, char* argv[])
     po::options_description desc;
     desc.add_options()
     ("help,h", "produce help message")
-    ("error-time,e", po::value<int>(), "set time before start reporting error");
+    ("verbose,v", "verbose mode")
+    ("error-time,e", po::value<int>(), "set time before start reporting error")
+    ("num-ent,n", po::value<int>(), "set max number of entities at the same time. Default 500, -1=inf")
+    ("no-create,c", "never create entities, only subscribe and sen request to others")
+    ("no-delete,d", "never delete entities, when max num entites is reached no new entities will be created, instead the existing entities will be continously updated");
 
     po::variables_map vm;    
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -51,10 +55,15 @@ int main(int argc, char* argv[])
         Supervisor::TimeThreshold = vm["error-time"].as<int>();
     }
 
+    int numEnt = vm.count("num-ent")>0 ? numEnt=vm["num-ent"].as<int>() : 500; //default 500 entities
+    bool deleteEnabled = vm.count("no-delete")<=0;
+    bool createEnabled = vm.count("no-create")<=0;
+    bool verbose = vm.count("verbose")>0;
+
     //----------------------
     //Run program
     //----------------------
-    EntityCruncher ec;    
+    EntityCruncher ec(numEnt, createEnabled, deleteEnabled, verbose);    
     ec.RunReactor();
     return 0;
 }
