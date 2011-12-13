@@ -34,7 +34,6 @@
 #include <Safir/Dob/Internal/SubscriptionId.h>
 #include <Safir/Dob/Internal/SubscriptionOptions.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
-#include <Safir/Dob/Internal/ScopedReportingLock.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
@@ -147,9 +146,7 @@ namespace Internal
                                                   STATE_CONTAINER_META_SUB_LOCK_LEVEL,
                                                   TYPE_LOCK_LEVEL> MetaSubLock;
         mutable MetaSubLock m_metaSubLock;
-
-        typedef ScopedReportingLock<MetaSubLock, 10> ScopedMetaSubLock;
-        //typedef boost::interprocess::scoped_lock<MetaSubLock> ScopedMetaSubLock;
+        typedef boost::interprocess::scoped_lock<MetaSubLock> ScopedMetaSubLock;
 
         // Locking Policy:
         // This lock is used to protect the state container. It is a readerWriter lock which allows
@@ -165,14 +162,8 @@ namespace Internal
                                                   STATE_CONTAINER_RW_LOCK_LEVEL,
                                                   TYPE_LOCK_LEVEL> StateContainerRwLock;
         mutable StateContainerRwLock m_stateReaderWriterlock;
-
-                
-        typedef ScopedReportingLock<StateContainerRwLock, 10> ScopedStateContainerRwLock;
-        //typedef boost::interprocess::scoped_lock<StateContainerRwLock> ScopedStateContainerRwLock;
-
-        typedef SharableReportingLock<StateContainerRwLock, 10> SharableStateContainerRwLock;        
-        //typedef boost::interprocess::sharable_lock<StateContainerRwLock> SharableStateContainerRwLock;
-        
+        typedef boost::interprocess::scoped_lock<StateContainerRwLock> ScopedStateContainerRwLock;
+        typedef boost::interprocess::sharable_lock<StateContainerRwLock> SharableStateContainerRwLock;
 
         Dob::Typesystem::TypeId m_typeId;
 

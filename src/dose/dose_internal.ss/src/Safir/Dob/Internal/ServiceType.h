@@ -34,7 +34,6 @@
 #include <Safir/Dob/Internal/SubscriptionId.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
 #include <Safir/Dob/Internal/ShmArray.h>
-#include <Safir/Dob/Internal/ScopedReportingLock.h>
 
 #include <boost/interprocess/offset_ptr.hpp>
 
@@ -117,7 +116,7 @@ namespace Internal
         TypeLockVector m_typeLocks;
 
         //mutable TypeLock m_typeLock;
-        typedef Safir::Dob::Internal::ScopedReportingLock<TypeLock, 10> ScopedTypeLock;        
+        typedef boost::interprocess::scoped_lock<TypeLock> ScopedTypeLock;
     };
 }
 }

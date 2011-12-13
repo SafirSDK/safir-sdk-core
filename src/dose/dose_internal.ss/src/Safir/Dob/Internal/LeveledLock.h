@@ -139,22 +139,11 @@ namespace Internal
             m_lock.lock();
         }
 
-        inline bool timed_lock(const boost::posix_time::ptime &abs_time)
-        {           
-            LeveledLockBase<level, masterLevel>::AddLevel();
-            bool granted = m_lock.timed_lock(abs_time);
-            if (!granted)
-            {
-                LeveledLockBase<level, masterLevel>::RemoveLevel(); //done without lock, is this ok?         
-            }
-            return granted;          
-        }
-
         inline void unlock()
         {
             LeveledLockBase<level, masterLevel>::RemoveLevel();
             m_lock.unlock();
-        }        
+        }
 
     private:
         Lock m_lock;
@@ -176,17 +165,6 @@ namespace Internal
             m_lock.lock();
         }
 
-        inline bool timed_lock(const boost::posix_time::ptime &abs_time)
-        {           
-            LeveledLockBase<level, masterLevel>::AddLevel();
-            bool granted = m_lock.timed_lock(abs_time);
-            if (!granted)
-            {
-                LeveledLockBase<level, masterLevel>::RemoveLevel(); //done without lock, is this ok?         
-            }
-            return granted;          
-        }
-
         inline void unlock()
         {
             LeveledLockBase<level, masterLevel>::RemoveLevel();
@@ -199,17 +177,6 @@ namespace Internal
             m_lock.lock_upgradable();
         }
 
-        inline bool timed_lock_upgradable(const boost::posix_time::ptime &abs_time)
-        {
-            LeveledLockBase<level, masterLevel>::AddLevel();
-            bool granted = m_lock.timed_lock_upgradable(abs_time);
-            if (!granted)
-            {
-                LeveledLockBase<level, masterLevel>::RemoveLevel(); //done without lock, is this ok?         
-            }
-            return granted;   
-        }
-
         inline void unlock_upgradable()
         {
             LeveledLockBase<level, masterLevel>::RemoveLevel();
@@ -220,17 +187,6 @@ namespace Internal
         {
             LeveledLockBase<level, masterLevel>::AddLevel();
             m_lock.lock_sharable();
-        }
-
-        inline bool timed_lock_sharable(const boost::posix_time::ptime &abs_time)
-        {
-            LeveledLockBase<level, masterLevel>::AddLevel();
-            bool granted = m_lock.timed_lock_sharable(abs_time);
-            if (!granted)
-            {
-                LeveledLockBase<level, masterLevel>::RemoveLevel(); //done without lock, is this ok?         
-            }
-            return granted;   
         }
 
         inline void unlock_sharable()
