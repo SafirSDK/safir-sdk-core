@@ -26,6 +26,7 @@
 #define __DOSE_ATOMIC_H__
 
 #include <boost/interprocess/detail/atomic.hpp>
+#include <boost/noncopyable.hpp>
 
 namespace Safir
 {
