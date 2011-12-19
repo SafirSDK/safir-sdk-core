@@ -37,6 +37,7 @@
 #include "dose_main_response_handler.h"
 #include "dose_main_request_handler.h"
 #include "dose_main_end_states_handler.h"
+#include "dose_main_thread_monitor.h"
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Utilities/ProcessMonitor.h>
@@ -54,6 +55,7 @@ namespace Internal
         public ACE_Event_Handler,
         public Connections::ConnectionConsumer,
         public Safir::Dob::Dispatcher,
+        public TimeoutHandler,
         private boost::noncopyable
     {
     public:
@@ -83,7 +85,9 @@ namespace Internal
         AtomicUint32 m_connectionOutEvent;
         AtomicUint32 m_nodeStatusChangedEvent;
 
-        
+        //Timeout handler
+        virtual void HandleTimeout(const TimerInfoPtr& timer);
+
         static ACE_THR_FUNC_RETURN ConnectionThread(void *);
 
         void OnDoDispatch();
@@ -150,6 +154,10 @@ namespace Internal
 
         // For monitoring processes
         Safir::Utilities::ProcessMonitor m_processMonitor;
+
+        // For monitoring dose_main:s own threads
+        ThreadMonitor m_threadMonitor;
+        boost::thread::id m_mainThreadId;
 
         AtomicUint32 m_handle_exception_notified;
         AtomicUint32 m_handle_input_notified;

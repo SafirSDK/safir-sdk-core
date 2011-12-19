@@ -41,6 +41,12 @@
             <value>True</value>
         </parameter>
         <parameter>
+            <summary>Min time (seconds) before a apparently hanging dose_main thread causes a termination of the dose_main program.</summary>
+            <name>DoseMainThreadWatchdogTimeout</name>
+            <type>Int32</type>
+            <value>60</value>
+        </parameter>
+        <parameter>
             <summary>The number of contexts in the system. (The context numbering starts from 0.)</summary>
             <name>NumberOfContexts</name>
             <type>Int32</type>
