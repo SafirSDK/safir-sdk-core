@@ -21,7 +21,17 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4251 4275 4512)
+#endif
+
 #include <boost/program_options.hpp>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
 #include "EntityCruncher.h"
 
 

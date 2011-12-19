@@ -28,8 +28,20 @@
 #include <boost/noncopyable.hpp>
 #include <boost/thread.hpp>
 #include <boost/thread/condition_variable.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <map>
+
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4127)
+#endif
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 class SimpleReactor :   public Safir::Dob::Dispatcher,
                         private boost::noncopyable
