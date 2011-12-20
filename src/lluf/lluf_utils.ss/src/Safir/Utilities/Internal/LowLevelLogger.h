@@ -32,11 +32,11 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/noncopyable.hpp>
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
+#include <ace/Event_Handler.h>
 
-//#include <ace/Process_Mutex.h>
-//#include <ace/Process_Semaphore.h>
 #include <Safir/Utilities/StartupSynchronizer.h>
 #include <ace/Thread_Mutex.h>
+#include <ace/Reactor.h>
 
 #include <vector>
 
@@ -79,16 +79,18 @@ namespace Internal
 
         class LLUF_UTILS_API LowLevelLoggerBackend :
             public Synchronized,
+            public ACE_Event_Handler,
             private boost::noncopyable
         {
         public:
             static LowLevelLoggerBackend & Instance();
 
+            void FlushBuffer();
+
             //inline bool LoggingEnabled() const {return static_cast<const LowLevelLoggerStreamBuf *>(rdbuf())->LoggingEnabled();}
             inline bool LoggingEnabled() const {return m_pLoggingEnabled != NULL && *m_pLoggingEnabled;}
 
             void CopyToInternalBuffer(const std::wostringstream& ostr);
-            void OutputInternalBuffer();
 
             inline bool OutputThreadStarted() const {return m_outputThreadStarted;}
             inline boost::filesystem::wofstream& OutputFile() {return m_OutputFile;}
@@ -98,13 +100,25 @@ namespace Internal
             void Use();
             void Destroy();
 
+            // Overrides ACE_Event_Handler
+            int handle_exception (ACE_HANDLE);
+            int handle_timeout (const ACE_Time_Value &current_time, const void *act=0);
+
+            // thread loop
+            void StartThread();
+            void StopThread();
+            void Run();
+
         private:
             LowLevelLoggerBackend();
             ~LowLevelLoggerBackend();
 
+            void OutputInternalBuffer();
+
             static LowLevelLoggerBackend * volatile m_pInstance;
 
             static ACE_Thread_Mutex m_InstantiationLock;
+            ACE_Reactor m_reactor;
 
             boost::interprocess::shared_memory_object m_shm;
             boost::interprocess::mapped_region m_shmRegion;
@@ -119,9 +133,9 @@ namespace Internal
             StartupSynchronizer m_startupSynchronizer;
 
             static ACE_THR_FUNC_RETURN OutputThreadFunc(void* _this);
-            void OutputWorker();
             ACE_Thread_Mutex m_bufLock;
             ACE_Thread_Mutex m_internalBufLock;
+
             bool m_outputThreadStarted;
         };
 

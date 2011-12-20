@@ -39,7 +39,7 @@ namespace Internal
     void EnsureFailed (const std::wstring & str)
     {
         lllerr << "ENSURE failed: '"<< str << "'" << std::endl;
-        Safir::Utilities::Internal::Internal::LowLevelLoggerBackend::Instance().OutputInternalBuffer();
+        Safir::Utilities::Internal::Internal::LowLevelLoggerBackend::Instance().FlushBuffer();
         std::wcout << "Please contact your nearest DOB developer!" << std::endl;
 
         throw SoftwareViolationException(str, __WFILE__,__LINE__);

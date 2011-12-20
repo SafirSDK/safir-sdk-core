@@ -48,6 +48,8 @@
   #pragma warning (pop)
 #endif
 
+#define OUTPUT_LOG_TIMEOUT 10
+
 namespace Safir
 {
 namespace Utilities
@@ -180,16 +182,14 @@ namespace Internal
                 m_backend.CopyToInternalBuffer(m_ostr);
                 if (m_forceFlush)
                 {
-                    m_backend.OutputInternalBuffer();
+                    m_backend.FlushBuffer();
                 }
             }
             else
             {
                // In the lllerr case we can get here without logging being enabled. In this case the output thread isn't
                 // running so we make the output synchronous from here
-                m_backend.OutputFile() << m_ostr.str();
                 std::wcout << m_ostr.str();
-                m_backend.OutputFile().flush();
                 std::wcout.flush();
             }
 
@@ -240,6 +240,7 @@ namespace Internal
         const boost::filesystem::path filename = GetLogFilename();
         if (filename.empty())
         {
+            m_reactor.close();
             //logging will be disabled (pointer is NULL)
             return;
         }
@@ -268,7 +269,7 @@ namespace Internal
         m_startupSynchronizer.Start();
 
         // start output thread
-        ACE_Thread::spawn(&LowLevelLoggerBackend::OutputThreadFunc, this);
+        StartThread();
 
         m_outputThreadStarted = true;
     }
@@ -282,6 +283,7 @@ namespace Internal
     //
     LowLevelLoggerBackend::~LowLevelLoggerBackend()
     {
+        StopThread();
     }
 
     void LowLevelLoggerBackend::Create()
@@ -306,6 +308,14 @@ namespace Internal
     {
     }
 
+    void LowLevelLoggerBackend::FlushBuffer()
+    {
+        if (m_outputThreadStarted)
+        {
+            m_reactor.notify(this);
+        }
+    }
+
     void LowLevelLoggerBackend::CopyToInternalBuffer(const std::wostringstream& ostr)
     {
         ACE_Guard<ACE_Thread_Mutex> lck(m_bufLock);
@@ -314,14 +324,72 @@ namespace Internal
 
     }
 
+    void LowLevelLoggerBackend::StartThread()
+    {
+        if (m_outputThreadStarted)
+            return;
+
+        ACE_thread_t threadId;
+        ACE_hthread_t threadHandle;
+
+        const int result = ACE_Thread::spawn(&LowLevelLoggerBackend::OutputThreadFunc, 
+                                             this,
+                                             THR_NEW_LWP | THR_JOINABLE ,
+                                             &threadId,
+                                             &threadHandle);
+
+        m_outputThreadStarted = true;
+
+    }
+
+    void LowLevelLoggerBackend::StopThread()
+    {
+        if (m_outputThreadStarted)
+        {
+            m_reactor.end_reactor_event_loop();
+
+            m_outputThreadStarted = false;
+        }
+    }
+
+    void LowLevelLoggerBackend::Run()
+    {        
+        m_reactor.owner(ACE_Thread::self());
+        m_reactor.schedule_timer(this, NULL, ACE_Time_Value(OUTPUT_LOG_TIMEOUT,0));
+
+        m_reactor.run_reactor_event_loop();
+
+    }
+
+    int LowLevelLoggerBackend::handle_exception (ACE_HANDLE)
+    {
+        OutputInternalBuffer();
+        return 0;
+    }
+
+    int LowLevelLoggerBackend::handle_timeout (const ACE_Time_Value &current_time, const void *act)
+    {
+        m_reactor.schedule_timer(this, NULL, ACE_Time_Value(OUTPUT_LOG_TIMEOUT,0));
+        OutputInternalBuffer();
+        return 0;
+    }
+
+
     void LowLevelLoggerBackend::OutputInternalBuffer()
     {
+        if (!LoggingEnabled())
+            return;
+
         ACE_Guard<ACE_Thread_Mutex> internalLck(m_internalBufLock);
 
-        {
+        { 
             ACE_Guard<ACE_Thread_Mutex> lck(m_bufLock);
+            //std::string dateTime = boost::posix_time::to_simple_string(boost::posix_time::microsec_clock::universal_time());
+            //m_os << "FLUSH : " << dateTime.c_str() << std::endl;
+
             // Swap the output buffer and the underlying log buffer.
             m_os.swap_vector(m_outputBuf);
+
         } // buffer lock released here
 
         for (BufferT::const_iterator it = m_outputBuf.begin(); it != m_outputBuf.end(); ++it)
@@ -338,20 +406,14 @@ namespace Internal
     ACE_THR_FUNC_RETURN LowLevelLoggerBackend::OutputThreadFunc(void * _this)
     {
         LowLevelLoggerBackend* This = static_cast<LowLevelLoggerBackend*>(_this);
-
         try
         {
-            for (;;)
-            {
-                ACE_OS::sleep(10);
-
-                This->OutputInternalBuffer();
-            }
+            This->Run();
         }
         catch (const std::exception & exc)
         {
             std::wostringstream ostr;
-            ostr << "std::exception in LowLevelLoggerBackend::OutputWorker:" << std::endl
+            ostr << "std::exception in LowLevelLoggerBackend::OutputThreadFunc:" << std::endl
                 << exc.what();
             std::wcout << ostr.str() << std::endl;
             exit(-1);
@@ -359,42 +421,12 @@ namespace Internal
         catch (...)
         {
             std::wostringstream ostr;
-            ostr << "exception thrown in LowLevelLoggerBackend::OutputWorker!";
+            ostr << "exception thrown in LowLevelLoggerBackend::OutputThreadFunc!";
             std::wcout << ostr.str() << std::endl;
             exit(-1);
         }
 
-#ifndef _MSC_VER
-        return NULL; //Keep compiler happy...
-#endif
-    }
-
-    void LowLevelLoggerBackend::OutputWorker()
-    {
-        try
-        {
-            for (;;)
-            {
-                ACE_OS::sleep(10);
-
-                OutputInternalBuffer();
-            }
-        }
-        catch (const std::exception & exc)
-        {
-            std::wostringstream ostr;
-            ostr << "std::exception in LowLevelLoggerBackend::OutputWorker:" << std::endl
-                << exc.what();
-            std::wcout << ostr.str() << std::endl;
-            exit(-1);
-        }
-        catch (...)
-        {
-            std::wostringstream ostr;
-            ostr << "exception thrown in LowLevelLoggerBackend::OutputWorker!";
-            std::wcout << ostr.str() << std::endl;
-            exit(-1);
-        }
+        return NULL;
     }
 
 }
