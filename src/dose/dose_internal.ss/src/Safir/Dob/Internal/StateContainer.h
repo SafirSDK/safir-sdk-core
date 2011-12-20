@@ -108,7 +108,6 @@ namespace Internal
         // The subscriptions are not marked as dirty.
         void ForSpecificStateAdd(const Dob::Typesystem::Int64 key, const ForSpecificStateActionFunc& actionFunc);
 
-        typedef boost::interprocess::offset_ptr<StateContainer> ThisPtr;
         void RemoveState(const Dob::Typesystem::Int64 key);
 
         /** Note that this class CANNOT be stored in shared memory, since the iterator
