@@ -41,6 +41,12 @@
             <value>True</value>
         </parameter>
         <parameter>
+            <summary>Determines if the detection of an apparently hanging thread causes a termination of dose_main. Consider setting this parameter to false when running dose_main under a debugger</summary>
+            <name>WatchdogTimeoutTerminatesDoseMain</name>
+            <type>Boolean</type>
+            <value>True</value>
+        </parameter>
+        <parameter>
             <summary>Min time (seconds) before a apparently hanging dose_main thread causes a termination of the dose_main program.</summary>
             <name>DoseMainThreadWatchdogTimeout</name>
             <type>Int32</type>

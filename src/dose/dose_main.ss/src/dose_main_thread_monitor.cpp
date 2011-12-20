@@ -80,7 +80,7 @@ namespace Internal
     {
         for (;;)
         {
-            boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(5));
+            boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(7));
 
             const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
 
@@ -94,6 +94,7 @@ namespace Internal
                         // The counter has been kicked
                         it->second.lastTimeAlive = now;
                         it->second.lastCheckedCounterVal = it->second.counter;
+                        it->second.errorLogIsGenerated = false;
                     }
                     else
                     {
@@ -106,14 +107,26 @@ namespace Internal
                             std::ostringstream ostr;
                             ostr << it->second.threadName << " (tid " << it->first
                                  << ") seems to have been hanging for at least "
-                                 << boost::posix_time::to_simple_string(now - it->second.lastTimeAlive)
-                                 << " dose_main will be terminated!!" << std::endl;
-                            lllerr << ostr.str().c_str();
-                            Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+                                 << boost::posix_time::to_simple_string(now - it->second.lastTimeAlive) << '\n';
+                            if (Safir::Dob::NodeParameters::WatchdogTimeoutTerminatesDoseMain())
+                            {
+                                ostr << "Parameter WatchdogTimeoutTerminatesDoseMain is set to true"
+                                        " which means that dose_main will now be terminated!!" << std::endl;
+                                lllerr << ostr.str().c_str();
+                                Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
 
-                            boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(5));
+                                boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(5));
 
-                            exit(1); // Terminate dose_main!!!!
+                                exit(1); // Terminate dose_main!!!!
+                            }
+                            else if (!it->second.errorLogIsGenerated)
+                            {
+                                ostr << "Parameter WatchdogTimeoutTerminatesDoseMain is set to false"
+                                        " which means that dose_main will not be terminated!!" << std::endl;
+                                lllerr << ostr.str().c_str();
+                                Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+                                it->second.errorLogIsGenerated = true;
+                            }                           
                         }
                     }
                 }

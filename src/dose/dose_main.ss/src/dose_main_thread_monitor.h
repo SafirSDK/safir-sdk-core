@@ -67,12 +67,14 @@ namespace Internal
                         threadName(_threadName),
                         counter(0),
                         lastCheckedCounterVal(0),
-                        lastTimeAlive(boost::posix_time::second_clock::universal_time()) {};
+                        lastTimeAlive(boost::posix_time::second_clock::universal_time()),
+                        errorLogIsGenerated(false) {};
 
             std::string                 threadName;
             unsigned int                counter;
             unsigned int                lastCheckedCounterVal;
             boost::posix_time::ptime    lastTimeAlive;
+            bool                        errorLogIsGenerated;
         };
 
         typedef std::map<boost::thread::id, WatchdogInfo> WatchdogMap;
