@@ -292,16 +292,16 @@ namespace Internal
         }
     }
 
-    void StateContainer::RemoveState(ThisPtr _this, const Dob::Typesystem::Int64 key)
+    void StateContainer::RemoveState(const Dob::Typesystem::Int64 key)
     {
         // Get container writer lock
-        ScopedStateContainerRwLock wlock(_this->m_stateReaderWriterlock);
+        ScopedStateContainerRwLock wlock(m_stateReaderWriterlock);
 
-        States::iterator it = _this->m_states.find(key);
+        States::iterator it = m_states.find(key);
 
-        if (it != _this->m_states.end() && it->second.IsDowngraded())
+        if (it != m_states.end() && it->second.IsDowngraded())
         {
-            _this->m_states.erase(it);
+            m_states.erase(it);
         }
     }
 
@@ -562,8 +562,6 @@ namespace Internal
         end = false;
         Iterator iterator;
 
-        std::vector<StateSharedPtr> keepStates;
-
         {
             // Get container reader lock
             SharableStateContainerRwLock rlock(m_stateReaderWriterlock);
@@ -583,27 +581,17 @@ namespace Internal
             // lock state
             boost::interprocess::scoped_lock<State::StateLock> lck(iterator.m_state->m_lock);
 
-            if (iterator.m_state->IsReleased())
+            if (!iterator.m_state->IsReleased())
             {
-                iterator.m_state.reset();  // set to NULL
+                iterator.m_entity = iterator.m_state->GetRealState();
+                if (iterator.m_entity.IsCreated())
+                {
+                    return iterator;
+                }
             }
         } // state lock released here
 
-        if (iterator.m_state != NULL)
-        {
-            iterator.m_entity = iterator.m_state->GetRealState();
-        }
-
-        // if it is a released state IsCreated will return false, so we get into IncrementIterator below.
-
-        if (!iterator.m_entity.IsCreated())
-        {
-            end = !IncrementIterator(iterator);
-            if (end)
-            {
-                return Iterator();
-            }
-        }
+        end = !IncrementIterator(iterator);
         return iterator;
     }
 
@@ -637,23 +625,15 @@ namespace Internal
                 // lock state
                 boost::interprocess::scoped_lock<State::StateLock> lck(iterator.m_state->m_lock);
 
-                if (iterator.m_state->IsReleased())
+                if (!iterator.m_state->IsReleased())
                 {
-                    iterator.m_state.reset();  // set to NULL
+                    iterator.m_entity = iterator.m_state->GetRealState();
+                    if (iterator.m_entity.IsCreated())
+                    {
+                        return true;
+                    }
                 }
             } // state lock released here
-
-            if (iterator.m_state == NULL)
-            {
-                continue;
-            }
-
-            iterator.m_entity = iterator.m_state->GetRealState();
-
-            if (iterator.m_entity.IsCreated())
-            {
-                return true;
-            }
         }
 
     } //keepStates will be released here, after reader lock has been released

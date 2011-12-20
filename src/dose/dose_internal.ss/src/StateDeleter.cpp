@@ -35,7 +35,7 @@ namespace Internal
     void StateDeleter::operator()(const pointer& p)
     {
         // Remove the state entry ...
-        StateContainer::RemoveState(m_this, m_key);
+        m_this->RemoveState(m_key);
 
         // ... and then delete the state itself.
         SharedMemoryObject::my_deleter<State>::operator()(p);
