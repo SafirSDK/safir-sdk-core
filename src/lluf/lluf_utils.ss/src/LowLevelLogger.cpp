@@ -377,9 +377,6 @@ namespace Internal
 
     void LowLevelLoggerBackend::OutputInternalBuffer()
     {
-        if (!LoggingEnabled())
-            return;
-
         ACE_Guard<ACE_Thread_Mutex> internalLck(m_internalBufLock);
 
         { 
@@ -392,15 +389,18 @@ namespace Internal
 
         } // buffer lock released here
 
-        for (BufferT::const_iterator it = m_outputBuf.begin(); it != m_outputBuf.end(); ++it)
+        if (m_outputBuf.size() > 0)
         {
-            m_OutputFile.put(*it);
-            std::wcout.put(*it);
-        }
-        m_OutputFile.flush();
-        std::wcout.flush();
+            for (BufferT::const_iterator it = m_outputBuf.begin(); it != m_outputBuf.end(); ++it)
+            {
+                m_OutputFile.put(*it);
+                std::wcout.put(*it);
+            }
+            m_OutputFile.flush();
+            std::wcout.flush();
 
-        m_outputBuf.clear();
+            m_outputBuf.clear();
+        }
     }
 
     ACE_THR_FUNC_RETURN LowLevelLoggerBackend::OutputThreadFunc(void * _this)
