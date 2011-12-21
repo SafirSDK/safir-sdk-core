@@ -33,7 +33,7 @@ namespace Dob
 namespace Internal
 {
     State::State()
-        : m_released(true)
+        : m_released(1)
     {
     }
 
@@ -210,16 +210,6 @@ namespace Internal
         KickSubscribers(false);
     }
 
-    bool State::IsReleased() const
-    {
-        return m_released;
-    }
-
-    void State::SetReleased(bool released)
-    {
-        m_released = released;
-    }
-
     void State::ReleaseSubscribers()
     {
         for (Subscriptions::iterator subIt = m_subscriptions.begin();
@@ -229,8 +219,7 @@ namespace Internal
             subIt->second.Downgrade();  // Make the pointer to the subscription weak.
         }
     }
-
-
+    
     void State::KickSubscribers(const bool hasBeenDeleted)
     {
         for (Subscriptions::iterator subIt = m_subscriptions.begin();
