@@ -49,6 +49,7 @@
 #endif
 
 #define OUTPUT_LOG_TIMEOUT 10
+#define MAX_BUFFER_SIZE 1000000
 
 namespace Safir
 {
@@ -265,7 +266,6 @@ namespace Internal
 
         m_os.reserve(BufferInitialSize);
         m_outputBuf.reserve(BufferInitialSize);
-
         m_startupSynchronizer.Start();
 
         // start output thread
@@ -320,8 +320,13 @@ namespace Internal
     {
         ACE_Guard<ACE_Thread_Mutex> lck(m_bufLock);
 
+        if (m_os.vector().size() > MAX_BUFFER_SIZE)
+        {
+            std::size_t buffSize = m_os.vector().size();
+            m_os.clear();
+            m_os << "RESET buffer - " << buffSize << " is bigger than max SIZE = " << MAX_BUFFER_SIZE << std::endl;
+        }
         m_os << ostr.str();
-
     }
 
     void LowLevelLoggerBackend::StartThread()
@@ -383,6 +388,7 @@ namespace Internal
             ACE_Guard<ACE_Thread_Mutex> lck(m_bufLock);
             //std::string dateTime = boost::posix_time::to_simple_string(boost::posix_time::microsec_clock::universal_time());
             //m_os << "FLUSH : " << dateTime.c_str() << std::endl;
+            //m_os<< "SIZE : " << m_os.vector().size() << std::endl;
 
             // Swap the output buffer and the underlying log buffer.
             m_os.swap_vector(m_outputBuf);

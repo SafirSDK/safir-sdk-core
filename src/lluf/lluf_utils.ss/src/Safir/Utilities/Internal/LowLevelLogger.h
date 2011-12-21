@@ -87,7 +87,6 @@ namespace Internal
 
             void FlushBuffer();
 
-            //inline bool LoggingEnabled() const {return static_cast<const LowLevelLoggerStreamBuf *>(rdbuf())->LoggingEnabled();}
             inline bool LoggingEnabled() const {return m_pLoggingEnabled != NULL && *m_pLoggingEnabled;}
 
             void CopyToInternalBuffer(const std::wostringstream& ostr);
