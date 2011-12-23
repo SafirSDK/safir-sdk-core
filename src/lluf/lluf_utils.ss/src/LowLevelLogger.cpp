@@ -337,11 +337,11 @@ namespace Internal
         ACE_thread_t threadId;
         ACE_hthread_t threadHandle;
 
-        const int result = ACE_Thread::spawn(&LowLevelLoggerBackend::OutputThreadFunc, 
-                                             this,
-                                             THR_NEW_LWP | THR_JOINABLE ,
-                                             &threadId,
-                                             &threadHandle);
+        ACE_Thread::spawn(&LowLevelLoggerBackend::OutputThreadFunc, 
+                          this,
+                          THR_NEW_LWP | THR_JOINABLE ,
+                          &threadId,
+                          &threadHandle);
 
         m_outputThreadStarted = true;
 
@@ -372,7 +372,7 @@ namespace Internal
         return 0;
     }
 
-    int LowLevelLoggerBackend::handle_timeout (const ACE_Time_Value &current_time, const void *act)
+    int LowLevelLoggerBackend::handle_timeout (const ACE_Time_Value&, const void*)
     {
         m_reactor.schedule_timer(this, NULL, ACE_Time_Value(OUTPUT_LOG_TIMEOUT,0));
         OutputInternalBuffer();
