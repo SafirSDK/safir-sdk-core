@@ -267,11 +267,8 @@ namespace Internal
                                              const ForSpecificStateActionFunc& actionFunc)
     {
         // Try to get an existing state or create a new one.
-        StateAndIter stateRes = GetState(key);
-
-        // Get a better names
-        StateSharedPtr& statePtr = stateRes.first;
-        States::iterator& it = stateRes.second;
+        States::iterator it;
+        StateSharedPtr statePtr = GetState(key, it);
 
         // Lock state while in callback
         boost::interprocess::scoped_lock<State::StateLock> lck(statePtr->m_lock);
@@ -305,15 +302,13 @@ namespace Internal
         }
     }
 
-    StateContainer::StateAndIter
-    StateContainer::GetState(const Dob::Typesystem::Int64 key)
+    StateSharedPtr StateContainer::GetState(const Dob::Typesystem::Int64 key, States::iterator& it)
     {
         // Get container reader lock
         SharableStateContainerRwLock rlock(m_stateReaderWriterlock);
 
         StateSharedPtr statePtr;
-
-        States::iterator it = m_states.find(key);
+        it = m_states.find(key);
 
         bool addState = false;
         if (it != m_states.end())
@@ -341,28 +336,24 @@ namespace Internal
             rlock.unlock();  // Must release sharable lock here because an exclusive lock will be acquired
                              // by AddState.
 
-            StateAndIter addRes = AddState(key);
-            statePtr = addRes.first;
-            it = addRes.second;
+            statePtr = AddState(key, it);
         }
 
-        return std::make_pair(statePtr, it);
+        return statePtr;
     }
 
-    StateContainer::StateAndIter
-    StateContainer::AddState(const Dob::Typesystem::Int64 key)
+    StateSharedPtr StateContainer::AddState(const Dob::Typesystem::Int64 key, States::iterator& it)
     {
         // Get writer lock
         ScopedStateContainerRwLock wlock(m_stateReaderWriterlock);
 
-        States::iterator it = m_states.find(key);
-
+        it = m_states.find(key);
         StateSharedPtr statePtr;
 
         if (it != m_states.end())
         {
             // State found
-            statePtr = it->second.Get();
+            statePtr = it->second.GetIncludeWeak();
 
             if (statePtr == NULL)
             {
@@ -405,7 +396,7 @@ namespace Internal
                                   key,
                                   boost::cref(statePtr)));
 
-        return std::make_pair(statePtr, it);
+        return statePtr;
     }
 
     void StateContainer::UnsubscribeInternal(const MetaSubscriptions::iterator&             subIt,
