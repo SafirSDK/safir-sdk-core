@@ -289,7 +289,7 @@ namespace Internal
         }
     }
 
-    void StateContainer::RemoveState(const Dob::Typesystem::Int64 key)
+    void StateContainer::RemoveState(const Dob::Typesystem::Int64 key, const StateDeleter::pointer& pSharedMemoryObject)
     {
         // Get container writer lock
         ScopedStateContainerRwLock wlock(m_stateReaderWriterlock);
@@ -298,7 +298,13 @@ namespace Internal
 
         if (it != m_states.end() && it->second.IsDowngraded())
         {
-            m_states.erase(it);
+            // New objects are created "released" and "Downgraded" for a short 
+            // while therefore we must compare pointers as well
+            StateSharedPtr pState = it->second.GetIncludeWeak();
+            if((pState == 0) || (pState.get() == pSharedMemoryObject))
+            {
+                m_states.erase(it);
+            }
         }
     }
 
@@ -353,7 +359,7 @@ namespace Internal
         if (it != m_states.end())
         {
             // State found
-            statePtr = it->second.GetIncludeWeak();
+            statePtr = it->second.Get();
 
             if (statePtr == NULL)
             {

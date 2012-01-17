@@ -108,7 +108,7 @@ namespace Internal
         // The subscriptions are not marked as dirty.
         void ForSpecificStateAdd(const Dob::Typesystem::Int64 key, const ForSpecificStateActionFunc& actionFunc);
 
-        void RemoveState(const Dob::Typesystem::Int64 key);
+        void RemoveState(const Dob::Typesystem::Int64 key, const StateDeleter::pointer& pSharedMemoryObject);
 
         /** Note that this class CANNOT be stored in shared memory, since the iterator
             member is different size in debug and release builds (on msvc++) */
