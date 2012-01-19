@@ -53,7 +53,8 @@ namespace Internal
     typedef std::pair<Dob::Typesystem::TypeId, Dob::Typesystem::HandlerId> TypeHandlerPair;
 
     class DOSE_INTERNAL_API Connection:
-        public SharedMemoryObject
+        public SharedMemoryObject,
+        public SharedMemoryObject::Utilities<Connection>::enable_shared_from_this
     {
     public:
         Connection(const std::string & name,
@@ -74,6 +75,11 @@ namespace Internal
         const int Pid() const {return m_pid;}
 
         bool IsLocal() const;
+
+        /* 
+         * Unregister all registered handlers and remove all subscriptions
+         */
+        void Cleanup();
 
         bool operator<(const Connection & other) const {return Id() < other.Id();}
 

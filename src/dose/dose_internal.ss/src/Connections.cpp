@@ -172,7 +172,7 @@ namespace Internal
     {
         lllout << "Handling a Connect for one of dose_mains own connections. name = " << connectionName.c_str() << std::endl;
 
-        connection = NULL;
+        connection.reset();
         result = Success;
         boost::interprocess::upgradable_lock<ConnectionsTableLock> rlock(m_connectionTablesLock);
 
@@ -200,16 +200,16 @@ namespace Internal
 
             //upgrade the mutex
             boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
-            connection = GetSharedMemory().construct<Connection>
+            connection = ConnectionPtr(GetSharedMemory().construct<Connection>
                 (boost::interprocess::anonymous_instance)
-                (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), contextId, pid);
+                (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), contextId, pid));
 
             const bool success = m_connections.insert
-                (std::make_pair(connection->Id(),ConnectionPtr(connection))).second;
+                (std::make_pair(connection->Id(), connection)).second;
 
             ENSURE(success, << "ConnectDoseMain: Failed to insert connection in map! name = " << connectionName.c_str());
 
-            AddToSignalHandling(connection.get());
+            AddToSignalHandling(connection);
 
             //We don't call the connect handler, since we assume that dose_main is able to
             //do the bookkeeping for its own connection by itself.
@@ -261,15 +261,15 @@ namespace Internal
                 }
                 else
                 {
-                    Connection * connection = NULL;
+                    ConnectionPtr connection;
                     {
                         //upgrade the mutex
                         boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
 
-                        connection = GetSharedMemory().construct<Connection>(boost::interprocess::anonymous_instance)
-                            (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), context, pid);
+                        connection = ConnectionPtr(GetSharedMemory().construct<Connection>(boost::interprocess::anonymous_instance)
+                            (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), context, pid));
 
-                        const bool success = m_connections.insert(std::make_pair(connection->Id(),ConnectionPtr(connection))).second;
+                        const bool success = m_connections.insert(std::make_pair(connection->Id(), connection)).second;
 
                         ENSURE(success, << "HandleConnect: Failed to insert connection in map! name = " << connectionName.c_str());
 
@@ -319,10 +319,10 @@ namespace Internal
         boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
 
         //remote connections have pid = -1
-        Connection * connection = GetSharedMemory().construct<Connection>(boost::interprocess::anonymous_instance)
-            (connectionName, counter, id.m_node, context, -1);
+        ConnectionPtr connection(GetSharedMemory().construct<Connection>(boost::interprocess::anonymous_instance)
+            (connectionName, counter, id.m_node, context, -1));
 
-        const bool success = m_connections.insert(std::make_pair(connection->Id(),ConnectionPtr(connection))).second;
+        const bool success = m_connections.insert(std::make_pair(connection->Id(), connection)).second;
 
         ENSURE(success, << "AddConnection: Failed to insert connection in map! name = " << connectionName.c_str());
     }
@@ -338,10 +338,8 @@ namespace Internal
                 RemoveFromSignalHandling(connection);
             }
             m_connections.erase(connection->Id());
-
         }
-
-        GetSharedMemory().destroy_ptr(connection.get());
+        connection->Cleanup();
 
         ExitHandler::Instance().RemoveConnection(connection);
     }
@@ -377,7 +375,7 @@ namespace Internal
         }
     }
 
-    void Connections::AddToSignalHandling(Connection * const connection)
+    void Connections::AddToSignalHandling(const ConnectionPtr& connection)
     {
         //find a free slot
         Containers<ConnectionId>::vector::iterator findIt = std::find(m_connectionOutIds.begin(),m_connectionOutIds.end(),ConnectionId());
@@ -392,7 +390,7 @@ namespace Internal
     }
 
 
-    void Connections::RemoveFromSignalHandling(const ConnectionPtr connection)
+    void Connections::RemoveFromSignalHandling(const ConnectionPtr& connection)
     {
         Containers<ConnectionId>::vector::iterator findIt =
             std::find(m_connectionOutIds.begin(),
@@ -513,7 +511,7 @@ namespace Internal
         }
         else
         {
-            return NULL;
+            return ConnectionPtr();
         }
     }
 
@@ -530,7 +528,7 @@ namespace Internal
             }
         }
         ENSURE(false, << "Failed to find connection by name! connectionName = " << connectionName.c_str());
-        return NULL; //Keep compiler happy
+        return ConnectionPtr(); //Keep compiler happy
     }
 
     void
@@ -603,7 +601,7 @@ namespace Internal
 
             connectionFunc(removeConnection);
 
-            GetSharedMemory().destroy_ptr(removeConnection.get());
+            removeConnection->Cleanup();
 
             ExitHandler::Instance().RemoveConnection(removeConnection);
         }

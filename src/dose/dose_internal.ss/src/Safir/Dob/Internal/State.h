@@ -26,6 +26,7 @@
 
 #include <Safir/Dob/Internal/InternalExportDefs.h>
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
+#include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/SubscriptionId.h>
 #include <Safir/Dob/Internal/StateHolder.h>
 #include <Safir/Dob/Internal/StateDeleter.h>

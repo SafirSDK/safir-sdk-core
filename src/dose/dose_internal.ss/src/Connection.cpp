@@ -106,6 +106,39 @@ namespace Internal
         {
             Signals::Instance().Remove(Id());
         }
+    }
+
+    RequestInQueuePtr Connection::AddRequestInQueue(const ConsumerId& consumer)
+    {
+        if (!IsLocal())
+        {
+            return RequestInQueuePtr();  // null pointer
+        }
+
+        return m_requestInQueues->AddQueue
+            (m_requestInQueues,
+             consumer,
+             QueueCapacity(ConnectionQueueId::RequestInQueue));
+    }
+
+    void Connection::ForEachRequestInQueue(const RequestInQueueContainer::QueueFunc& queueFunc) const
+    {
+        m_requestInQueues->ForEach(queueFunc);
+    }
+
+    void Connection::ForSpecificRequestInQueue(const ConsumerId& consumer, const RequestInQueueContainer::QueueFunc& queueFunc) const
+    {
+        m_requestInQueues->ForSpecific(consumer, queueFunc);
+    }
+
+
+    bool Connection::IsLocal() const
+    {
+        return m_isLocal;
+    }
+
+    void Connection::Cleanup()
+    {
         // Unregister all registered handlers
         //(making copy of the map allows Unregister to call back into connection without upsetting the iteration)
         const bool explicitUnregister = !NodeIsDown();
@@ -136,35 +169,6 @@ namespace Internal
         //TODO: The above is only useful when we've implemented zombie connections.
 
         //TODO: check that all other vectors/queues are empty as they should be!
-    }
-
-    RequestInQueuePtr Connection::AddRequestInQueue(const ConsumerId& consumer)
-    {
-        if (!IsLocal())
-        {
-            return RequestInQueuePtr();  // null pointer
-        }
-
-        return m_requestInQueues->AddQueue
-            (m_requestInQueues,
-             consumer,
-             QueueCapacity(ConnectionQueueId::RequestInQueue));
-    }
-
-    void Connection::ForEachRequestInQueue(const RequestInQueueContainer::QueueFunc& queueFunc) const
-    {
-        m_requestInQueues->ForEach(queueFunc);
-    }
-
-    void Connection::ForSpecificRequestInQueue(const ConsumerId& consumer, const RequestInQueueContainer::QueueFunc& queueFunc) const
-    {
-        m_requestInQueues->ForSpecific(consumer, queueFunc);
-    }
-
-
-    bool Connection::IsLocal() const
-    {
-        return m_isLocal;
     }
 
     MessageQueuePtr Connection::AddMessageInQueue(const ConsumerId& consumer)
@@ -443,17 +447,17 @@ namespace Internal
         if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
         {
             lllout << "Unsubscribing all entity handler registrations and entity subscriptions for type "<< typeId << std::endl;
-            EntityTypes::Instance().UnsubscribeAll(this, typeId);
+            EntityTypes::Instance().UnsubscribeAll(shared_from_this(), typeId);
         }
         else if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Service::ClassTypeId))
         {
             lllout << "Unsubscribing all service handler registrations for type "<< typeId << std::endl;
-            ServiceTypes::Instance().UnsubscribeRegistrationAll(this, typeId);
+            ServiceTypes::Instance().UnsubscribeRegistrationAll(shared_from_this(), typeId);
         }
         else if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Message::ClassTypeId))
         {
             lllout << "Unsubscribing all Messages of type "<< typeId << std::endl;
-            MessageTypes::Instance().UnsubscribeAll(this, typeId);
+            MessageTypes::Instance().UnsubscribeAll(shared_from_this(), typeId);
         }
         else
         {
@@ -467,11 +471,11 @@ namespace Internal
 
         if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
         {
-            EntityTypes::Instance().UnregisterAll(this, typeId, explicitUnregister);
+            EntityTypes::Instance().UnregisterAll(shared_from_this(), typeId, explicitUnregister);
         }
         else if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Service::ClassTypeId))
         {
-            ServiceTypes::Instance().UnregisterAll(this, typeId, explicitUnregister);
+            ServiceTypes::Instance().UnregisterAll(shared_from_this(), typeId, explicitUnregister);
         }
         else
         {

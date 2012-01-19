@@ -259,7 +259,7 @@ namespace Internal
                          handlerId,
                          currentRegState.GetRegistrationTime());
 
-        statePtr->SetConnection(NULL);
+        statePtr->SetConnection(ConnectionPtr());
 
         // Unregistration states are kept forever. This is necessary in order for the split/join
         // functionality to work.
@@ -314,7 +314,7 @@ namespace Internal
         }
         else
         {
-            statePtr->SetConnection(NULL);
+            statePtr->SetConnection(ConnectionPtr());
             const_cast<DistributionData&>(remoteRegistrationState).ResetSenderIdConnectionPart();
         }
 
@@ -538,7 +538,7 @@ namespace Internal
         }
         else
         {
-            registerer.connection = NULL;
+            registerer.connection.reset();
             registerer.consumer = ConsumerId(NULL,0L);
         }
     }
@@ -615,7 +615,7 @@ namespace Internal
             return;
         }
      
-        statePtr->SetConnection(NULL);
+        statePtr->SetConnection(ConnectionPtr());
         statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0)));
 
         DistributionData newRealState(no_state_tag);

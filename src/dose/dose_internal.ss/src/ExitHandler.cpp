@@ -85,7 +85,7 @@ namespace Internal
         {
             lllout << "ExitHandler::DoCleanup for connection " << it->first->NameWithCounter() << " id = " << it->first->Id() << std::endl;
             ENSURE(!it->second.empty(), << "Found an empty cleanupFunc!");
-            it->second(it->first.get());
+            it->second(it->first.get().get());
         }
         m_connections.clear();
     }

@@ -128,7 +128,7 @@ namespace Internal
 
             const std::wstring connectionName = ConnectionAspectMisc(m_stateSubscriptionConnections[context].m_connection).GetConnectionName();
             m_stateSubscriptionConnections[context].m_connectionPtr =
-                Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName)).get();
+                Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName));
         }
     }
 
@@ -254,7 +254,7 @@ namespace Internal
                 pdConnection.Open(L"dose_main_pd",L"pool_distribution", context,NULL, &dispatcher);
                 StartSubscriptions(pdConnection, dummySubscriber,true,false);
                 const std::wstring connectionName = ConnectionAspectMisc(pdConnection).GetConnectionName();
-                ConnectionPtr connection = Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName)).get();
+                ConnectionPtr connection = Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName));
 
                 connection->GetDirtySubscriptionQueue().Dispatch(boost::bind(&PoolHandler::PDDispatchSubscription,this,_1,_2,_3));
             }
@@ -353,7 +353,7 @@ namespace Internal
                 ENSURE(state.GetSenderId().m_id == -1, << "Ghost states are expected to have ConnectionId == -1! Ghost for "
                        << state.GetEntityId());
 
-                const RemoteSetResult result = EntityTypes::Instance().RemoteSetRealEntityState(NULL, // Null connection for ghosts
+                const RemoteSetResult result = EntityTypes::Instance().RemoteSetRealEntityState(ConnectionPtr(), // Null connection for ghosts
                                                                                                 state);
 
                 if (result == RemoteSetNeedRegistration)

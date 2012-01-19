@@ -417,7 +417,7 @@ namespace Internal
         //AWI:? Can be removed?
         //m_contextId = 0;
         
-        m_connection = NULL;
+        m_connection.reset();
 
         // Drop any reference corresponding to a saved consumer (will be saved for
         // garbage colleted languages only).
@@ -1506,6 +1506,10 @@ namespace Internal
     //---------------------------------------
     void Controller::Dispatch()
     {
+        // Save a connection reference which makes the object stay in shared 
+        // memory even if the connection is closed
+        ConnectionPtr pCurrentConnection = m_connection;
+
         //get rid of any old dispatch threads.
         if (!m_dispatchThreadAttic.empty())
         {
@@ -1564,7 +1568,7 @@ namespace Internal
         // a user with waiting requests that it is worth trying to send them.
         if (m_requestQueueInOverflowState)
         {
-            if(!m_connection->GetRequestOutQueue().full())
+            if(!pCurrentConnection->GetRequestOutQueue().full())
             {
                 m_requestQueueInOverflowState = false;
                 m_dispatcher.DispatchNotRequestOverflows();
@@ -1578,7 +1582,7 @@ namespace Internal
         // this could be a good place to notify the user anyway.
         if (m_messageQueueInOverflowState)
         {
-            if(!m_connection->GetMessageOutQueue().full())
+            if(!pCurrentConnection->GetMessageOutQueue().full())
             {
                 m_messageQueueInOverflowState = false;
                 m_dispatcher.DispatchNotMessageOverflows();
@@ -1618,13 +1622,13 @@ namespace Internal
         }
 
         //Stop order
-        if (m_connection->StopOrderPending() && !m_exitDispatch)
+        if (pCurrentConnection->StopOrderPending() && !m_exitDispatch)
         {
             m_dispatcher.DispatchStopOrder();
 
-            if (m_connection != NULL)
+            if (pCurrentConnection != NULL)
             {
-                m_connection->SetStopOrderHandled();
+                pCurrentConnection->SetStopOrderHandled();
             }
         }
     }
@@ -1822,7 +1826,7 @@ namespace Internal
     void Controller::DispatchRequestInQueue(const ConsumerId& consumer, RequestInQueue & queue)
     {
         queue.DispatchRequests(boost::bind(&Controller::DispatchRequest,this,boost::cref(consumer),_1,_2,_3),
-                               boost::bind(&Connection::SignalOut,m_connection));
+                               boost::bind(&Connection::SignalOut,m_connection.get().get()));
     }
 
 

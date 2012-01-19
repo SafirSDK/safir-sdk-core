@@ -201,7 +201,7 @@ namespace Internal
             Safir::Dob::Connection m_connection;
 
             //This is the Internal representation of the m_stateSubscriptionConnection.
-            Safir::Dob::Internal::Connection* m_connectionPtr;
+            Safir::Dob::Internal::ConnectionPtr m_connectionPtr;
         };
 
         //Safir::Dob::Utilities::Array<SubcriptionConnection> m_stateSubscriptionConnections;

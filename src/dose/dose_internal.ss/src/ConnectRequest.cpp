@@ -94,7 +94,7 @@ namespace Internal
         m_result = Undefined;
 
         connection = m_connection;
-        m_connection = NULL;
+        m_connection.reset();
 
         m_kind = NotSet;
     }
