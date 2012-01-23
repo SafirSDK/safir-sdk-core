@@ -96,8 +96,8 @@ namespace
         STATIC_ASSERT(sizeof(dcom_uchar8) == 1);
         STATIC_ASSERT(sizeof(dcom_ulong32) == 4);
 
-        STATIC_ASSERT(sizeof(DOSE_UDP_MSG_HDR) == 32);
-        STATIC_ASSERT(sizeof(DOSE_UDP_ACK_MSG) == 16);
+        STATIC_ASSERT(sizeof(DOSE_UDP_MSG_HDR) == 36);
+        STATIC_ASSERT(sizeof(DOSE_UDP_ACK_MSG) == 20);
         STATIC_ASSERT(sizeof(DOSE_UDP_KEEPALIVE_MSG) == 12);
         STATIC_ASSERT(sizeof(DOSE_UDP_GETINFO_MSG) == 12);
     }
@@ -165,6 +165,7 @@ static struct
         dcom_uchar8   spare;
         volatile dcom_ushort16  FragmentNumber;
         volatile dcom_uchar8   SeqNumIsValid[MAX_NUM_DEST_CHANNELS+2]; // cleared when node comes up (restarts)
+        volatile dcom_ulong32 SessionId[MAX_NUM_DEST_CHANNELS+2];
     } RxNodeStatus[NODESTATUS_TABLE_SIZE];  // one for each node
 } g_RxQ[MAX_NUM_PRIO_CHANNELS] = {{0}};
 
@@ -202,7 +203,7 @@ void CDoseComReceive::UpdateNodeUp(dcom_uchar8 DoseId)
 *************************************************************************/
 
 static int Send_AckMsg( CIpmSocket *pTxSock, DOSE_UDP_ACK_MSG *pTxAckMsg,
-                       int MyIx, dcom_ulong32 IpAddrFrom_nw,
+                       int MyIx, dcom_ulong32 IpAddrFrom_nw, dcom_ulong32 SessionId,
                        dcom_ushort16 SequenceNumber, dcom_uchar8 TxMsgArray_Ix,
                         dcom_ushort16 FragmentNumber, dcom_ushort16 Info)
 {
@@ -210,6 +211,7 @@ static int Send_AckMsg( CIpmSocket *pTxSock, DOSE_UDP_ACK_MSG *pTxAckMsg,
 
     pTxAckMsg->FragmentNumber = FragmentNumber;
     pTxAckMsg->SequenceNumber = SequenceNumber;
+    pTxAckMsg->SessionId      = SessionId;
     pTxAckMsg->TxMsgArray_Ix  = TxMsgArray_Ix;
     pTxAckMsg->Info           = Info;
 
@@ -270,6 +272,7 @@ static THREAD_API RxThread(void *pChNum)
     char                bMsgIsCompleted;
     dcom_uchar8               DoseId;
     dcom_ushort16              LatestSequenceNumber = 0;
+    dcom_ulong32        CurrentSessionId = 0;
     char                RxData[RXDATA_SIZE];
     char                IsUsedForReception;
 
@@ -542,6 +545,65 @@ static THREAD_API RxThread(void *pChNum)
         LatestSequenceNumber
                 = g_RxQ[MyIx].RxNodeStatus[DoseId].SeqNumber[SeqNumSet];
 
+        //=================================================================================
+        // Check that SessionId is valid
+        //-------------------------------
+        // A new session is started if msg contains the first pool distribution data.
+        // SeqNumber must alos be 0 when PD starts.
+        // If a new session starts, i.e seqNo=0 and PD_FIRSTDATA, then the sessionId in the
+        // message must contain a new sessionId to be valid and newSessionId>currentSessionId.
+        // If currentSessionId==0, this is the first received message and currentSessionId is
+        // initialized with the received value even if its not a pool distribution message.
+        // When a new session is started we set getIndex=putIndex in the receiveQueue, which means
+        // there are no missing messages we are expecting. The sender shall also ignore NACK:s on
+        // messages from old sessions.
+        //=================================================================================
+        CurrentSessionId = g_RxQ[MyIx].RxNodeStatus[DoseId].SessionId[SeqNumSet];
+        bool startsNewSession = (MsgHdr.SequenceNumber == 0) && (MsgHdr.IsPoolDistribution & PD_FIRSTDATA) && (MsgHdr.FragmentNumber < 2);
+
+        if (startsNewSession || CurrentSessionId==0) 
+        {
+            if(*pDbg>=2) 
+            {
+                PrintDbg("   Rx[%d] - start new session. Current: %d, New: %d\n", MyIx, CurrentSessionId, MsgHdr.SessionId);
+            }
+            
+            if (CurrentSessionId<MsgHdr.SessionId)
+            {
+                //This is only valid if a new session starts with this message. Set new Current SessionId
+                CurrentSessionId = MsgHdr.SessionId;                
+                g_RxQ[MyIx].RxNodeStatus[DoseId].SessionId[SeqNumSet] = MsgHdr.SessionId; //New sessionId, beginning of new PD
+
+                //Skip all old messages. We dont want them and the sender will not expect any ack either.
+                g_RxQ[MyIx].Get_Ix = g_RxQ[MyIx].Put_Ix;                
+            }
+            else
+            {
+                //this has invalid SessionId, probably a duplicate. Just Ack and continue.
+                if(*pDbg>=2) 
+                {
+                    PrintDbg("   Rx[%d] - Old or duplicated start session. Ack and ignore. current=%d, recv=%d\n", MyIx, CurrentSessionId, MsgHdr.SessionId);
+                }
+                              
+                Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw, MsgHdr.SessionId,
+                       MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
+                       MsgHdr.FragmentNumber, MsgHdr.Info);
+
+                continue;
+            }
+        }              
+        else if (CurrentSessionId!=MsgHdr.SessionId) //not a new session, then we expect SessionId==CurrentSessionId
+        {            
+            if(*pDbg>=2)
+            {
+                PrintDbg("   Rx[%d] - SessionId missmatch, current=%d, recv=%d\n", MyIx, CurrentSessionId, MsgHdr.SessionId);
+            }
+
+            continue;
+        }  
+        //else: Normal OK msg           
+        //------------ End check SessionId --------------------
+
 #define zzzFORCE_ERROR_LOST_FRAGMENT
 // Testresult:
 // Sender has sent 3 + 4 + 5(last) and gets timeout and retransmits 3+4+5 (OK)
@@ -630,14 +692,14 @@ static THREAD_API RxThread(void *pChNum)
             &&
             (MsgHdr.FragmentNumber < 2) // non-fragm or first fragm
           )
-        {
+        {            
             if(*pDbg)
                 if(LatestSequenceNumber != 65535)
                     PrintDbg("Clear SequenceNumber. LatestSequenceNumber=%d\n",
                                 LatestSequenceNumber);
 
             LatestSequenceNumber // set so next = 0
-                    = g_RxQ[MyIx].RxNodeStatus[DoseId].SeqNumber[SeqNumSet] = 65535;
+                    = g_RxQ[MyIx].RxNodeStatus[DoseId].SeqNumber[SeqNumSet] = 65535;            
 
             //if(*pDbg)
             //  PrintDbg("Clear SeqNumIsValid. LatestSequenceNumber=%d\n", LatestSequenceNumber);
@@ -710,7 +772,7 @@ static THREAD_API RxThread(void *pChNum)
                             if(MsgHdr.bWantAck)
                             {
                                 Send_AckMsg(&TxSock, &TxAckMsg,
-                                   MyIx, MsgHdr.IpAddrFrom_nw,
+                                    MyIx, MsgHdr.IpAddrFrom_nw, MsgHdr.SessionId,
                                    MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
                                    MsgHdr.FragmentNumber, (dcom_ushort16)(0x100 | MsgHdr.Info));
                             }
@@ -822,7 +884,7 @@ static THREAD_API RxThread(void *pChNum)
                         if(MsgHdr.bWantAck)
                         {
                             Send_AckMsg(&TxSock, &TxAckMsg,
-                               MyIx, MsgHdr.IpAddrFrom_nw,
+                                MyIx, MsgHdr.IpAddrFrom_nw, MsgHdr.SessionId,
                                MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
                                MsgHdr.FragmentNumber, (dcom_ushort16)(0x200 | MsgHdr.Info));
                         }
@@ -848,7 +910,7 @@ static THREAD_API RxThread(void *pChNum)
                             TxAckMsg.MsgType = MSG_TYPE_NACK;
 
                             Send_AckMsg(&TxSock, &TxAckMsg,
-                                    MyIx, MsgHdr.IpAddrFrom_nw,
+                                    MyIx, MsgHdr.IpAddrFrom_nw, MsgHdr.SessionId,
                                     MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
                                     MsgHdr_FragmentNumber,   // the number in the msg
                                     (dcom_ushort16)(1 + CurrFragmentNumber)); // expected this
@@ -947,7 +1009,7 @@ static THREAD_API RxThread(void *pChNum)
                 if (pReadBuf == NULL) // no more free buffers
                 {
                     if(MsgHdr.bWantAck)
-                        Send_AckMsg(&TxSock, &TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw,
+                        Send_AckMsg(&TxSock, &TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw, MsgHdr.SessionId,
                                MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,1,
                                (dcom_ushort16)(0x8000 | MsgHdr.Info));
 
@@ -1041,7 +1103,7 @@ static THREAD_API RxThread(void *pChNum)
                 g_pShm->NodeStatusTable[DoseId].RxCount++;
             }
             if(MsgHdr.bWantAck)
-                Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw,
+                Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw, MsgHdr.SessionId,
                        MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
                        MsgHdr.FragmentNumber, MsgHdr.Info);
 
@@ -1118,7 +1180,7 @@ static THREAD_API RxThread(void *pChNum)
 
                         if(MsgHdr.bWantAck)
                         {
-                            Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw,
+                            Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw, MsgHdr.SessionId,
                                         MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
                                         MsgHdr.FragmentNumber, MsgHdr.Info);
                         }
@@ -1175,7 +1237,7 @@ static THREAD_API RxThread(void *pChNum)
                     }
 
                     if(MsgHdr.bWantAck)
-                        Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw,
+                        Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw, MsgHdr.SessionId,
                                MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
                                  MsgHdr.FragmentNumber, (dcom_ushort16)(0x100 | MsgHdr.Info));
                     continue;
@@ -1197,7 +1259,7 @@ static THREAD_API RxThread(void *pChNum)
                     {
                         TxAckMsg.MsgType = MSG_TYPE_NACK;
 
-                        Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw,
+                        Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw, MsgHdr.SessionId,
                                MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
                                  MsgHdr.FragmentNumber,
                                  (dcom_ushort16)(1 + LatestSequenceNumber)); //expected this
@@ -1276,7 +1338,7 @@ A_Valid_Msg_Is_Received:
                 pRxStatistics->CountRxOtherErr++;
 
                 if(MsgHdr.bWantAck)
-                    Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw,
+                    Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw, MsgHdr.SessionId,
                            MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix, 0,
                            (dcom_ushort16)(0x8000 | MsgHdr.Info));
                 continue;
@@ -1291,7 +1353,7 @@ A_Valid_Msg_Is_Received:
                         MyIx, MsgHdr.Size);
 
             if(MsgHdr.bWantAck)
-                Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw,
+                Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw, MsgHdr.SessionId,
                        MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
                        MsgHdr.FragmentNumber, MsgHdr.Info);
 
