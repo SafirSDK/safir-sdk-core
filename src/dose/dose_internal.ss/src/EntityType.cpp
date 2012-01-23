@@ -1367,8 +1367,8 @@ namespace Internal
 
     void EntityType::RemoteSetDeleteEntityStateInternal(const DistributionData&         remoteEntity,
                                                         const StateSharedPtr&           statePtr)
-    {
-        bool needToCheckRegistrationState = true;
+    {        
+        bool needToCheckRegistrationState = true;        
 
         DistributionData localEntity = statePtr->GetRealState();
 
@@ -1473,6 +1473,10 @@ namespace Internal
         remoteSetResult = RemoteSetAccepted;
 
         bool needToCheckRegistrationState = true;
+        if (remoteEntity.GetEntityStateKind()==DistributionData::Ghost)
+        {
+            needToCheckRegistrationState = false; //Ghosts dont need a registration to be set.
+        }
 
         DistributionData localEntity = statePtr->GetRealState();
 
@@ -1530,7 +1534,7 @@ namespace Internal
                                                                            true); // true => include released states
 
             // Get  a better name
-            const StateSharedPtr& regStatePtr = lockedRegStateResult.first;
+            const StateSharedPtr& regStatePtr = lockedRegStateResult.first;            
 
             if (regStatePtr == NULL ||
                 regStatePtr->GetRealState().IsNoState() ||
