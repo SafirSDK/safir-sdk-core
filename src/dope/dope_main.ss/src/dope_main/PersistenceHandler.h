@@ -60,7 +60,7 @@ public:
 protected:
 
 
-    void StartSubscriptions(bool subscribeAll);
+    void StartSubscriptions();
 
     void ReportPersistentDataReady();
 
