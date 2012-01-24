@@ -760,7 +760,7 @@ static bool HandleCompletedFragment(dcom_ushort16 fragmentNum,
 
 static dcom_ulong32 Check_Pending_Ack_Queue(void)
 {
-    dcom_ulong32   SessionId = 0; //Just to keep some compilers happy
+    dcom_ulong32   SessionId;
     dcom_ulong32   SequenceNum;
     dcom_uchar8   DoseIdFrom;
     dcom_uchar8   qIx;
@@ -780,6 +780,9 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
         // Is allways 0 for not fragmented
         FragmentNum = g_Ack_Queue[g_Ack_Get_ix].FragmentNumber;        
 
+        dcom_ulong32 currentSessionId = 0;  // Must be defined and initialized before the goto below
+                                            // to keep all compilers happy
+
         if(qIx >= NUM_TX_QUEUES)
         {
             PrintErr(0,"ACK Got invalid TxQueueNumber\n");
@@ -787,7 +790,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
         }
         
         //Check that session id is correct
-        dcom_ulong32 currentSessionId = TxQ[qIx].TxCurrentSessionId[TxQ[qIx].TxMsgArr[TxMsgArr_Ix].DestinationId];
+        currentSessionId = TxQ[qIx].TxCurrentSessionId[TxQ[qIx].TxMsgArr[TxMsgArr_Ix].DestinationId];
         if (SessionId!=currentSessionId) 
         {
             PrintErr(0,"   Tx[] - Got ack/nack with wrong SessionId, will be ignored. expected: %d, got: %d\n", qIx, currentSessionId, SessionId);
