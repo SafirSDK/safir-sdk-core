@@ -760,7 +760,7 @@ static bool HandleCompletedFragment(dcom_ushort16 fragmentNum,
 
 static dcom_ulong32 Check_Pending_Ack_Queue(void)
 {
-    dcom_ulong32   SessionId;
+    dcom_ulong32   SessionId = 0; //Just to keep some compilers happy
     dcom_ulong32   SequenceNum;
     dcom_uchar8   DoseIdFrom;
     dcom_uchar8   qIx;
