@@ -57,6 +57,8 @@ namespace Internal
 
         void Dispatch(const DispatchFunc& dispatchFunc);
 
+        void MakeEmpty(void);
+
     private:
         //Locking Policy:
         //This class uses a non-recursive lock, since there should be no

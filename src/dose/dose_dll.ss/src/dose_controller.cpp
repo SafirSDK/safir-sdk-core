@@ -1506,10 +1506,6 @@ namespace Internal
     //---------------------------------------
     void Controller::Dispatch()
     {
-        // Save a connection reference which makes the object stay in shared 
-        // memory even if the connection is closed
-        ConnectionPtr pCurrentConnection = m_connection;
-
         //get rid of any old dispatch threads.
         if (!m_dispatchThreadAttic.empty())
         {
@@ -1568,7 +1564,7 @@ namespace Internal
         // a user with waiting requests that it is worth trying to send them.
         if (m_requestQueueInOverflowState)
         {
-            if(!pCurrentConnection->GetRequestOutQueue().full())
+            if(!m_connection->GetRequestOutQueue().full())
             {
                 m_requestQueueInOverflowState = false;
                 m_dispatcher.DispatchNotRequestOverflows();
@@ -1582,7 +1578,7 @@ namespace Internal
         // this could be a good place to notify the user anyway.
         if (m_messageQueueInOverflowState)
         {
-            if(!pCurrentConnection->GetMessageOutQueue().full())
+            if(!m_connection->GetMessageOutQueue().full())
             {
                 m_messageQueueInOverflowState = false;
                 m_dispatcher.DispatchNotMessageOverflows();
@@ -1622,13 +1618,13 @@ namespace Internal
         }
 
         //Stop order
-        if (pCurrentConnection->StopOrderPending() && !m_exitDispatch)
+        if (m_connection->StopOrderPending() && !m_exitDispatch)
         {
             m_dispatcher.DispatchStopOrder();
 
-            if (pCurrentConnection != NULL)
+            if (m_connection != NULL)
             {
-                pCurrentConnection->SetStopOrderHandled();
+                m_connection->SetStopOrderHandled();
             }
         }
     }
