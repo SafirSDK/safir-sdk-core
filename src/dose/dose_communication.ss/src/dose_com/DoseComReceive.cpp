@@ -568,7 +568,7 @@ static THREAD_API RxThread(void *pChNum)
                 PrintDbg("   Rx[%d] - start new session. Current: %d, New: %d\n", MyIx, CurrentSessionId, MsgHdr.SessionId);
             }
             
-            if (CurrentSessionId<MsgHdr.SessionId)
+            if (CurrentSessionId!=MsgHdr.SessionId)
             {
                 //This is only valid if a new session starts with this message. Set new Current SessionId
                 CurrentSessionId = MsgHdr.SessionId;                
