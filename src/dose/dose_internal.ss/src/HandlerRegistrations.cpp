@@ -193,7 +193,7 @@ namespace Internal
             }
 
             //Local register is overregistrering existing, forced revoke.
-            RevokeRegisterer(registerer.connection, currentRegisterer, currentConsumer, handlerId, currentRegState.GetRegistrationTime());
+            RevokeRegisterer(false, currentRegisterer, currentConsumer, handlerId, currentRegState.GetRegistrationTime());
         }
 
         // If we got this far we have one of the following situations:
@@ -253,12 +253,10 @@ namespace Internal
             connection->Id() != statePtr->GetConnection()->Id())
         {
             return;
-        }
-
-        ConnectionPtr nullNewHandler(static_cast<Connection*>(NULL));
+        }        
         
         //Unregistration, not a forced revoke
-        RevokeRegisterer( nullNewHandler,
+        RevokeRegisterer( false,
                           statePtr->GetConnection(),
                          statePtr->GetConsumer(),
                          handlerId,
@@ -284,7 +282,14 @@ namespace Internal
     void HandlerRegistrations::RemoteRegistrationStateInternal(const ConnectionPtr&    connection,
                                                                const DistributionData& remoteRegistrationState,
                                                                const StateSharedPtr&   statePtr)
-    {
+    {   
+        if (remoteRegistrationState.GetTypeId()==-7745997667701511814LL)
+        {            
+            bool hasOwner = connection!=NULL;
+            std::cout<<"RemoteStateIsReg: "<<std::boolalpha<<remoteRegistrationState.IsRegistered()<<", hasNewOwner: "<<hasOwner<<std::endl;
+        }
+        
+
         DistributionData currentRegState = statePtr->GetRealState();
 
         if (!NewRegStateIsAccepted(currentRegState, remoteRegistrationState))
@@ -295,23 +300,42 @@ namespace Internal
         // We have an accepted registration state
 
         ConnectionPtr currentRegisterer;
-        const Dob::Typesystem::HandlerId handlerId = remoteRegistrationState.GetHandlerId(); 
+        const Dob::Typesystem::HandlerId handlerId = remoteRegistrationState.GetHandlerId();
+        bool isRemoteRegistration = remoteRegistrationState.IsRegistered();
 
         if (!currentRegState.IsNoState() && currentRegState.IsRegistered())
         {
             // There is an existing registration that must be revoked.            
             currentRegisterer = statePtr->GetConnection();
-            ConsumerId currentConsumer = statePtr->GetConsumer();
+            ConsumerId currentConsumer = statePtr->GetConsumer();          
+            
+            if (isRemoteRegistration)
+            {
+                //Remote register is overregistrering existing, forced revoke
+                bool forcedByRemote = connection!=NULL && !connection->IsLocal();
+                RevokeRegisterer(forcedByRemote,
+                                 currentRegisterer,
+                                 currentConsumer,
+                                 handlerId,
+                                 currentRegState.GetRegistrationTime());
+            }
+            else //Remote unregistration
+            {
+                //this is a special case when we have a registered local owner but receives a 
+                //unregistration from another node. This case can occur if another node overregisters
+                //and then unregister immediately. Then its possible that we never got the register message
+                //There must have been a newer registration on another node that we havent got, and now that
+                //handler is unregistering again.
+                RevokeRegisterer(true,
+                                 currentRegisterer,
+                                 currentConsumer,
+                                 handlerId,
+                                 currentRegState.GetRegistrationTime());
 
-            //Remote register is overregistrering existing, forced revoke
-            RevokeRegisterer(connection,
-                             currentRegisterer,
-                             currentConsumer,
-                             handlerId,
-                             currentRegState.GetRegistrationTime());
+            }
         }
         
-        if (remoteRegistrationState.IsRegistered())
+        if (isRemoteRegistration)
         {            
             statePtr->SetConnection(connection);
             connection->AddRegistration(m_typeId,
@@ -378,7 +402,7 @@ namespace Internal
 
     void HandlerRegistrations::RemoteSetRegistrationState(const ConnectionPtr& connection,
                                                           const DistributionData& registrationState)
-    {        
+    {             
         Dob::Typesystem::HandlerId handlerId = registrationState.GetHandlerId();
 
         m_registrations.ForSpecificStateAdd(handlerId.GetRawValue(),
@@ -549,7 +573,7 @@ namespace Internal
         }
     } 
 
-    void HandlerRegistrations::RevokeRegisterer(const ConnectionPtr&                  newHandlerConnection,
+    void HandlerRegistrations::RevokeRegisterer(const bool                            forcedByRemoteHandler,
                                                 const ConnectionPtr&                  connection,
                                                 const ConsumerId&                     consumer,
                                                 const Dob::Typesystem::HandlerId&     handlerId,
@@ -571,12 +595,10 @@ namespace Internal
 
             //If there is already a new handler and that handler resides on another node we simply delete the entities here.
             //The entities have been ghosted (if persistent) on the node where the new handler exists, and will be injected there.
-            //If we keep ghosts here, we get strange behaviour after a split/join where old ghosted entities are injected again and the.            
-            bool hasNewOwner = newHandlerConnection!=NULL; //&& !newHandlerConnection->IsLocal();            
-
+            //If we keep ghosts here, we get strange behaviour after a split/join where old ghosted entities are injected again and the.                        
             m_entityContainerPtr->ForEachState(boost::bind(&HandlerRegistrations::RevokeEntity,
                                                this,
-                                               newHandlerConnection,
+                                               forcedByRemoteHandler,
                                                _2,
                                                connection,
                                                handlerId,
@@ -586,18 +608,18 @@ namespace Internal
         }
     }
 
-    void HandlerRegistrations::RevokeEntity(const ConnectionPtr&                 newHandlerConnection,
+    void HandlerRegistrations::RevokeEntity(const bool                           forcedByRemoteHandler,
                                             const StateSharedPtr&                statePtr,
                                             const ConnectionPtr&                 connection,
                                             const Dob::Typesystem::HandlerId&    handlerId,
                                             const RegisterTime                   currentRegisterTime,                                            
                                             bool&                                exitDispatch)
     {            
-        if (newHandlerConnection!=NULL && !newHandlerConnection->IsLocal())
+        if (forcedByRemoteHandler)
         {
             //Forced Revoke by handler that resides on another node
             //In that case we rely on that the other node already have the entities that is gonna be taken over.
-            ForcedRevokeEntityByRemoteHandler(newHandlerConnection, statePtr, connection, handlerId, currentRegisterTime, exitDispatch);                           
+            ForcedRevokeEntityByRemoteHandler(statePtr, connection, handlerId, currentRegisterTime, exitDispatch);                           
         }
         else
         {             
@@ -613,7 +635,7 @@ namespace Internal
         }
     }
 
-    void HandlerRegistrations::ForcedRevokeEntityByRemoteHandler(const ConnectionPtr&                 newHandlerConnection,
+    void HandlerRegistrations::ForcedRevokeEntityByRemoteHandler(
                                                   const StateSharedPtr&                statePtr,
                                                   const ConnectionPtr&                 connection,
                                                   const Dob::Typesystem::HandlerId&    handlerId,
@@ -647,8 +669,7 @@ namespace Internal
         statePtr->SetConnection(nullConnection);
         statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0)));
 
-        DistributionData newRealState=realState.GetEntityStateCopy(false);
-        newRealState = realState.GetEntityStateCopy(false);
+        DistributionData newRealState = realState.GetEntityStateCopy(false);        
         statePtr->SetReleased(true);
         newRealState.ResetSenderIdConnectionPart();
         newRealState.SetExplicitlyDeleted(true); //TODO: this is to make dope delete the entity, but we should figure a better way.
@@ -658,7 +679,7 @@ namespace Internal
         // when the connection (and therefore the queue container) is destructed.
         statePtr->ResetOwnerRequestInQueue();
 
-        statePtr->SetRealState(newRealState);
+        statePtr->SetRealState(newRealState);      
 
         // This is an end state so it must be saved "a while".
         EndStates::Instance().Add(statePtr);
