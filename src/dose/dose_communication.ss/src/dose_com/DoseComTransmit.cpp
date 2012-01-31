@@ -780,9 +780,6 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
         // Is allways 0 for not fragmented
         FragmentNum = g_Ack_Queue[g_Ack_Get_ix].FragmentNumber;        
 
-        dcom_ulong32 currentSessionId = 0;  // Must be defined and initialized before the goto below
-                                            // to keep all compilers happy
-
         if(qIx >= NUM_TX_QUEUES)
         {
             PrintErr(0,"ACK Got invalid TxQueueNumber\n");
@@ -790,9 +787,10 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
         }
         
         //Check that session id is correct
-        currentSessionId = TxQ[qIx].TxCurrentSessionId[TxQ[qIx].TxMsgArr[TxMsgArr_Ix].DestinationId];
+        dcom_ulong32 currentSessionId = TxQ[qIx].TxCurrentSessionId[TxQ[qIx].TxMsgArr[TxMsgArr_Ix].DestinationId];
         if (SessionId!=currentSessionId) 
         {
+            printf("   Tx[] - Got ack/nack with wrong SessionId, will be ignored. expected: %d, got: %d\n", qIx, currentSessionId, SessionId);
             PrintErr(0,"   Tx[] - Got ack/nack with wrong SessionId, will be ignored. expected: %d, got: %d\n", qIx, currentSessionId, SessionId);
             goto Continue_WithNext;
         }
@@ -2104,7 +2102,7 @@ Begin_A_New_Msg:
 
                     if(TxQ[qIx].TxMsgArr[GetIxToSend].IsPoolDistr & PD_FIRSTDATA)
                     {
-                        TxQ[qIx].TxCurrentSessionId[Destination_Id] = DoseOs::Get_TickCount(); //Generate new session id.
+                        ++TxQ[qIx].TxCurrentSessionId[Destination_Id]; //Set new session id.
                         TxQ[qIx].TxSequenceNumber[Destination_Id] = 0; //reset sequence number counter.
                     }
 
@@ -2835,8 +2833,8 @@ int CDoseComTransmit::Xmit_Init(dcom_ushort16 DoseId)
 
     memset((void*)TxQ, 0, sizeof(DOSE_TXQUEUE_S) * NUM_TX_QUEUES);
 
-    //init sessionId
-    dcom_ulong32 initSession = DoseOs::Get_TickCount();
+    //init sessionId    
+    dcom_ulong32 initSession = static_cast<dcom_ulong32>(time(NULL));
     for (int i=0; i<NUM_TX_QUEUES; ++i)
     {
         for (int j=0; j<64+MAX_NUM_DEST_CHANNELS; ++j)

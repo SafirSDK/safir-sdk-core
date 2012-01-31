@@ -460,7 +460,7 @@ static THREAD_API RxThread(void *pChNum)
         //---------------------------------------
         // Got a message.
         // Check if it is valid
-        //---------------------------------------
+        //---------------------------------------      
         DoseId = MsgHdr.DoseIdFrom;
 
         if(*pDbg>=3)
@@ -559,49 +559,32 @@ static THREAD_API RxThread(void *pChNum)
         // messages from old sessions.
         //=================================================================================
         CurrentSessionId = g_RxQ[MyIx].RxNodeStatus[DoseId].SessionId[SeqNumSet];
-        bool startsNewSession = (MsgHdr.SequenceNumber == 0) && (MsgHdr.IsPoolDistribution & PD_FIRSTDATA) && (MsgHdr.FragmentNumber < 2);
-
-        if (startsNewSession || CurrentSessionId==0) 
+        bool startsNewPoolDistribution = (MsgHdr.SequenceNumber == 0) && (MsgHdr.IsPoolDistribution & PD_FIRSTDATA) && (MsgHdr.FragmentNumber < 2);
+        if (startsNewPoolDistribution && CurrentSessionId>=MsgHdr.SessionId)
         {
+            //this has invalid SessionId, probably a duplicate. Just Ack and continue.
             if(*pDbg>=2) 
             {
-                PrintDbg("   Rx[%d] - start new session. Current: %d, New: %d\n", MyIx, CurrentSessionId, MsgHdr.SessionId);
+                PrintDbg("   Rx[%d] - Old or duplicated start session. Ack and ignore. current=%d, recv=%d\n", MyIx, CurrentSessionId, MsgHdr.SessionId);
             }
-            
-            if (CurrentSessionId!=MsgHdr.SessionId)
-            {
-                //This is only valid if a new session starts with this message. Set new Current SessionId
-                CurrentSessionId = MsgHdr.SessionId;                
-                g_RxQ[MyIx].RxNodeStatus[DoseId].SessionId[SeqNumSet] = MsgHdr.SessionId; //New sessionId, beginning of new PD
-
-                //Skip all old messages. We dont want them and the sender will not expect any ack either.
-                g_RxQ[MyIx].Get_Ix = g_RxQ[MyIx].Put_Ix;                
-            }
-            else
-            {
-                //this has invalid SessionId, probably a duplicate. Just Ack and continue.
-                if(*pDbg>=2) 
-                {
-                    PrintDbg("   Rx[%d] - Old or duplicated start session. Ack and ignore. current=%d, recv=%d\n", MyIx, CurrentSessionId, MsgHdr.SessionId);
-                }
+            printf("   Rx[%d] - Old or duplicated start session. Ack and ignore. current=%d, recv=%d\n", MyIx, CurrentSessionId, MsgHdr.SessionId);
                               
-                Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw, MsgHdr.SessionId,
-                       MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
-                       MsgHdr.FragmentNumber, MsgHdr.Info);
-
-                continue;
-            }
-        }              
-        else if (CurrentSessionId!=MsgHdr.SessionId) //not a new session, then we expect SessionId==CurrentSessionId
-        {            
-            if(*pDbg>=2)
-            {
-                PrintDbg("   Rx[%d] - SessionId missmatch, current=%d, recv=%d\n", MyIx, CurrentSessionId, MsgHdr.SessionId);
-            }
+            Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw, MsgHdr.SessionId,
+                    MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
+                    MsgHdr.FragmentNumber, MsgHdr.Info);
 
             continue;
-        }  
-        //else: Normal OK msg           
+        }
+        
+        if (CurrentSessionId<MsgHdr.SessionId)
+        {
+            //This occurs when a new session has started
+            CurrentSessionId = MsgHdr.SessionId;                
+            g_RxQ[MyIx].RxNodeStatus[DoseId].SessionId[SeqNumSet] = MsgHdr.SessionId; //New sessionId
+
+            //Skip all old messages. We dont want them and the sender will not expect any ack either.
+            g_RxQ[MyIx].Get_Ix = g_RxQ[MyIx].Put_Ix;
+        }       
         //------------ End check SessionId --------------------
 
 #define zzzFORCE_ERROR_LOST_FRAGMENT
