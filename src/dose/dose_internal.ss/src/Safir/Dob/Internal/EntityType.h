@@ -60,7 +60,7 @@ namespace Internal
                       const Dob::Typesystem::HandlerId&     handlerId,
                       const InstanceIdPolicy::Enumeration   instanceIdPolicy,
                       const bool                            isInjectionHandler,
-                      const RegisterTime                    regTime,
+                      LamportClock&                         regClock,
                       const bool                            overrideRegistration,
                       const ConsumerId&                     consumer);
 

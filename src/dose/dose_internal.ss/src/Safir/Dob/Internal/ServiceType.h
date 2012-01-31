@@ -59,7 +59,7 @@ namespace Internal
 
         bool Register(const ConnectionPtr&                  connection,
                       const Dob::Typesystem::HandlerId&     handlerId,
-                      const RegisterTime                    regTime,
+                      LamportClock&                         regClock,
                       const bool                            overrideRegistration,
                       const ConsumerId&                     consumer);
 
