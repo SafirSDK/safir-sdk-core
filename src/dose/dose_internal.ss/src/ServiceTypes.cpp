@@ -83,7 +83,7 @@ namespace Internal
     {
         return GetType(typeId).Register(connection,
                                         handlerId,
-                                        m_registrationClock.GetNewTimestamp(),
+                                        m_registrationClock,
                                         overrideRegistration,
                                         consumer);
     }

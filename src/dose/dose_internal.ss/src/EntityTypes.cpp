@@ -89,7 +89,7 @@ namespace Internal
                                         handlerId,
                                         instanceIdPolicy,
                                         isInjectionHandler,
-                                        m_registrationClock.GetNewTimestamp(),
+                                        m_registrationClock,
                                         overrideRegistration,
                                         consumer);
     }

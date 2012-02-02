@@ -247,6 +247,7 @@ void CNodeStatus::SetNodeDownWhenInvalidTimeStamp(dcom_uchar8 DoseId)
     g_pNodeStatusTable[DoseId].ToBePoolDistributed   = 0;
     g_pNodeStatusTable[DoseId].HasReceivedPdComplete = 0;
     g_pNodeStatusTable[DoseId].HasReceivedPdStart = 0;
+    g_pNodeStatusTable[DoseId].ForcePoolDistribution = 0;
 
     UpdateNodeStatusBitMap();
     WakeUp_NodeChange();
@@ -446,6 +447,7 @@ int CNodeStatus::CheckTimedOutNodes(void)
                 g_pNodeStatusTable[jj].ToBePoolDistributed   = 0;
                 g_pNodeStatusTable[jj].HasReceivedPdComplete = 0;
                 g_pNodeStatusTable[jj].HasReceivedPdStart = 0;
+                g_pNodeStatusTable[jj].ForcePoolDistribution = 0;
                 ChangeCount++;
             }
             // 2010-06-14 - miwn: added check of timeout if stuck in status new and no pd start have been received.
