@@ -1,4 +1,4 @@
-Welcome to the snapshot of Safir SDK Core trunk.
+Welcome to SDK Core 4.3.5-test2.
 
 Safir SDK Core is released under the GPL v3 license, a copy of which can be found in COPYING.txt.
 
