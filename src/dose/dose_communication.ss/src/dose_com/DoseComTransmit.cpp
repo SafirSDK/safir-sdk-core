@@ -1953,6 +1953,22 @@ static THREAD_API TxThread(void *)
                         continue;   // with next Queue
                     }
 
+                    // Added by JOOT 2012-02-06. Dont use send ahead before we have safely transmitted the first few messages
+                    // in the seqNum serie.
+                    // By doing this we avoid the problems that occurs when seqNo 0 is reordered and
+                    // arrive after seqNo 1, 2, etc. Sending seq 0,1,2 will always be delivered in that order since we
+                    // wait for all Ack's before sending next.
+                    // There is still possible failure if seqNo 0 i duplicated, and delayed (if thats a realistic case)
+                    // For example this case will end up in failure: 
+                    //    If sending seq 0, 1, 2 and they arrive as 0, 1, 0, 2. Receiver will now
+                    //    start Nack'ing 1 since it restarted when the duplicated 0 arrived.
+                    if(TxQ[qIx].TxMsgArr[TxQ[qIx].GetIxToAck].SequenceNumber<MAX_AHEAD_NF+1)
+                    {
+                        qIx++;
+                        WaitTimeOut = WAITTIME_WAITING_FOR_ACK;
+                        continue;   // with next Queue
+                    }
+
                     // Do not send a new msg ahead when there are to may pending acks
                     if(TxQ[qIx].GetIxToSend >= TxQ[qIx].GetIxToAck)
                         ahead = TxQ[qIx].GetIxToSend - TxQ[qIx].GetIxToAck;
