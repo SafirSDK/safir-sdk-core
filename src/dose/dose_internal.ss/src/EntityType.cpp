@@ -1475,9 +1475,9 @@ namespace Internal
         remoteSetResult = RemoteSetAccepted;
 
         bool needToCheckRegistrationState = true;
-        if (remoteEntity.GetEntityStateKind()==DistributionData::Ghost)
+        if (remoteEntity.GetEntityStateKind()==DistributionData::Ghost && remoteEntity.SourceIsPermanentStore())
         {
-            needToCheckRegistrationState = false; //Ghosts dont need a registration to be set.
+            needToCheckRegistrationState = false; //Ghosts from DOPE dont need a registration to be set.
         }
 
         DistributionData localEntity = statePtr->GetRealState();
