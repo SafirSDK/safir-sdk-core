@@ -10,10 +10,16 @@ import commands
 import time
 import Tkinter
 
+# Some values that shold be treated as constants
+DEVICE_PATH = "/proc/net/dev"                   #here we find existing network adapters
+BRIDGE_NAME = "br0"                             #name of the one and only network bridge
+BRIDGE_FILTER_PATH = "/proc/sys/net/bridge"    #filters that we reset at start
+
+
 # Get a list of all normal network adapters
 def get_network_adapters():
     result = []
-    device_file = open("/proc/net/dev")
+    device_file = open(DEVICE_PATH)
     for line in device_file:
         tokens=line.split(None, 1)
         if tokens[0].startswith("eth"):
@@ -83,7 +89,7 @@ def bridge_exists():
     device_file = open("/proc/net/dev")
     for line in device_file:
         tokens=line.split(None, 1)
-        if tokens[0].startswith("br0"):
+        if tokens[0].startswith(BRIDGE_NAME):
             return True
     return False
     
@@ -91,20 +97,21 @@ def bridge_exists():
 def create_bridge(ifs):
     if bridge_exists():
         print("Bridge is already created!")
-        return
-    
-    subprocess.call(["brctl", "addbr", "br0"])
+        return    
+    subprocess.call(["brctl", "addbr", BRIDGE_NAME])
     for i in ifs:
         subprocess.call(["ifconfig", i, "0.0.0.0"])
-        subprocess.call(["brctl", "addif", "br0", i])
-    set_adapter_enabled("br0", True)
-    commands.getoutput("for f in /proc/sys/net/bridge/bridge-*; do echo 0 > $f; done")
+        subprocess.call(["brctl", "addif", BRIDGE_NAME, i])
+    set_adapter_enabled(BRIDGE_NAME, True)    
+    #commands.getoutput is deprecated, replace with something better
+    reset_command = "for f in "+BRIDGE_FILTER_PATH+"/bridge-*; do echo 0 > $f; done"
+    commands.getoutput(reset_command)
 
 # Delete the bridge
 def delete_bridge():
     if bridge_exists():
-        set_adapter_enabled("br0", False)
-        subprocess.call(["brctl", "delbr", "br0"])
+        set_adapter_enabled(BRIDGE_NAME, False)
+        subprocess.call(["brctl", "delbr", BRIDGE_NAME])
 
 #-------------------------------------------
 # Gui class, creates all gui components
@@ -114,15 +121,16 @@ class Gui:
         self.root = Tkinter.Tk()        
         self.root.title("Network Emulator")
         
+        # Variables to be bound to widget values
         self.adapter = Tkinter.StringVar(self.root)
         self.delay = Tkinter.IntVar(self.root)
         self.loss=Tkinter.IntVar(self.root)
         self.corruption=Tkinter.IntVar(self.root)
         self.duplication=Tkinter.IntVar(self.root)
         self.reorder=Tkinter.IntVar(self.root)
-
         self.bridgeCreated=Tkinter.IntVar(self.root)
-        self.adapter_status = {}
+        
+        self.adapter_status = {} #dictionary intended to store key=adapter name, value=tuple(upDownCheckboxValue, statusLabelText)
                 
         ifs=get_network_adapters() #get a list of all netword adapters
         add_netem(ifs) #add all to netem so we dont have to bother about if to use 'add' or 'change' later
@@ -166,10 +174,10 @@ class Gui:
                             text="Bridge adapters", 
                             variable=self.bridgeCreated, 
                             command=self.on_create_bridge).grid(row=0, column=0, sticky=Tkinter.W)
-        self.adapter_status["br0"]=(Tkinter.IntVar(self.root), Tkinter.StringVar(self.root))
+        self.adapter_status[BRIDGE_NAME]=(Tkinter.IntVar(self.root), Tkinter.StringVar(self.root))
         Tkinter.Checkbutton(status_group, 
                             text="bridge up", 
-                            variable=self.adapter_status["br0"][0], 
+                            variable=self.adapter_status[BRIDGE_NAME][0], 
                             command=self.on_adapter_onoff).grid(row=0, column=1, sticky=Tkinter.W)        
         Tkinter.Frame(status_group, height=10).grid(row=1, columnspan=2)
 
