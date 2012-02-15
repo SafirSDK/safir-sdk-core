@@ -10,7 +10,9 @@ FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(dose_main ${sources} ${headers})
-TARGET_LINK_LIBRARIES(dose_main ${ACE_LIBRARY})
+
+FIND_PACKAGE(Boost COMPONENTS thread)
+TARGET_LINK_LIBRARIES(dose_main ${ACE_LIBRARY} ${Boost_LIBRARIES})
 
 if (MSVC)
     TARGET_LINK_LIBRARIES(dose_main 
