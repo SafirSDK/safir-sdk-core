@@ -143,13 +143,11 @@ namespace Internal
     void PoolHandler::StartPoolDistribution()
     {
         lllout << "Starting pool distribution thread" << std::endl;
-        //if (m_pdThreadHandle != 0)
-        //{
-        //    lllerr << "PoolHandler: The pool distribution thread is already running, request ignored." << std::endl;
-        //    return;
-        //}
-        ENSURE(m_pdThreadHandle == 0, << "It appears that there are multiple pool distribution threads running! m_pdThreadHandle = 0x"
-                                      <<std::hex<< (void*)m_pdThreadHandle<<std::dec);
+        if (m_pdThreadHandle != 0)
+        {
+            lllerr << "PoolHandler: The pool distribution thread is already running, request ignored." << std::endl;
+            return;
+        }
         ACE_Thread::spawn(&PoolHandler::PoolDistributionThreadFunc,this,THR_NEW_LWP|THR_JOINABLE,NULL,&m_pdThreadHandle);
     }
 
