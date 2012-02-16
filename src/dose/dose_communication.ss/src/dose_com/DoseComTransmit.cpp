@@ -348,8 +348,8 @@ static THREAD_API Ack_Thread(void *)
 
     for(;;)
     {
-        //if(*pDbg>=5)
-        //  PrintDbg("+++ Ack_Thread(). Call RxSock.RecvFrom2()\n");
+        if(*pDbg>=5)
+            PrintDbg("+++ Ack_Thread(). Call RxSock.RecvFrom2()\n");
 
         // Check if g_Ack_Queue[] is full. If so do not receive more until
         // there is more space.
@@ -358,7 +358,15 @@ static THREAD_API Ack_Thread(void *)
                 ( (g_Ack_Get_ix - g_Ack_Put_ix) == 1)
                 ||
                 ( (g_Ack_Get_ix == 0) && (g_Ack_Put_ix == (MAX_ACK_QUEUE-1)) )
-                ) DoseOs::Sleep(30);
+
+              )
+        {
+            if(*pDbg>=5)
+            {
+                PrintDbg("+++ Ack_Thread(). g_Ack_Queue[] is full, sleeping 30 ms. Ackix=%u Putix=%u\n");
+            }
+            DoseOs::Sleep(30);
+        }
 
         result = RxSock.RecvFrom2((char *) &UdpMsg, sizeof(UdpMsg), NULL,0);
 
@@ -369,9 +377,13 @@ static THREAD_API Ack_Thread(void *)
             DoseOs::Sleep(1000); continue;
         }
 
-        //if(*pDbg>=5) PrintDbg("+++ Ack_Thread() got a msg\n");
+        if(*pDbg>=5) PrintDbg("+++ Ack_Thread() got a msg\n");
 
-        if( UdpMsg.Magic != DOSE_MSG_MAGIC) continue; //got junk
+        if( UdpMsg.Magic != DOSE_MSG_MAGIC)
+        {
+            PrintDbg("+++ Ack_Thread() got a junk\n");
+            continue; //got junk
+        }
 
         if((UdpMsg.MsgType == MSG_TYPE_ACK) || (UdpMsg.MsgType == MSG_TYPE_NACK))
         {
@@ -762,7 +774,10 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
     dcom_ulong32   dwResult = 0;
     dcom_ushort16  FragmentNum;
 
-    //PrintDbg("Check_Pending_Ack_Queue() P/gS = %d/%d\n",g_Ack_Put_ix,g_Ack_Get_ix);
+    if(*pDbg>5)
+    {
+        PrintDbg("Check_Pending_Ack_Queue() P/gS = %d/%d\n",g_Ack_Put_ix,g_Ack_Get_ix);
+    }
 
     while(g_Ack_Get_ix != g_Ack_Put_ix)
     {
@@ -779,11 +794,14 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
             goto Continue_WithNext;
         }
 
-        //PrintDbg("#-  Got Ack SeqNum=%d DoseId=%d qIx=%d TxMsgArrIx=%d FragmNum=%X"
-        //    " EXP=%X.%08X\n",
-        //    SequenceNum, DoseIdFrom, qIx, TxMsgArr_Ix, FragmentNum,
-        //    (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32),
-        //    (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF));
+        if(*pDbg>5)
+        {
+        PrintDbg("#-  Got Ack SeqNum=%d DoseId=%d qIx=%d TxMsgArrIx=%d FragmNum=%X"
+            " EXP=%X.%08X\n",
+            SequenceNum, DoseIdFrom, qIx, TxMsgArr_Ix, FragmentNum,
+            (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32),
+            (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF));
+        }
 
         if(g_Ack_Queue[g_Ack_Get_ix].MsgType == MSG_TYPE_ACK) // the other is _NACK
         {
@@ -1038,11 +1056,11 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                             SequenceNum,DoseIdFrom,
                             TxQ[qIx].TxMsgArr[TxMsgArr_Ix].IsTransmitting);
                 }
-                //if(*pDbg>3)
-                //PrintDbg("#-  Ack from %d SeqNum=%d. New Expected=%IX.%08X\n",
-                //  DoseIdFrom, SequenceNum,
-                //  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32));
-                //  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF);
+                if(*pDbg>3)
+                PrintDbg("#-  Ack from %d SeqNum=%d. New Expected=%IX.%08X\n",
+                  DoseIdFrom, SequenceNum,
+                  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32));
+                  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF);
             }
             else
             {
