@@ -332,7 +332,7 @@ static THREAD_API Ack_Thread(void *)
                         0,      //:m_IpMultiCastAddr_nw,
                         0,      // Rx only, no ttl
                         CConfig::m_Dose_Port_Ack,
-                        0,      // Opt_so_rcvbuf_size,
+                        65536,  // Opt_so_rcvbuf_size, AIWI: Increased this to the same value as used for the receiver thread.
                         0);     // Opt_So_Rcvbuf_Timeout,
 
     if(result == -1)
