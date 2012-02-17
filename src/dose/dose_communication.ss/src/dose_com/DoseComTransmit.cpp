@@ -97,11 +97,11 @@ extern volatile int * volatile pDbg;
 //
 // See Handle_Timeout() for more details.
 //--------------------------------------------------------------------------
-#define GIVEUP_AFTER_RETRIES   // Enabl/Disable Giveup function via this
+#define zzzGIVEUP_AFTER_RETRIES   // Enabl/Disable Giveup function via this
 #ifdef GIVEUP_AFTER_RETRIES
 
-#define MAX_XMIT_RETRIES    30
-#define GIVEUP_TIMEOUT      30000  // ms
+#define MAX_XMIT_RETRIES    5
+#define GIVEUP_TIMEOUT      5000  // ms
 
 #endif
 
@@ -1388,7 +1388,7 @@ static int Handle_Timeout(int qIx)
 #ifdef GIVEUP_AFTER_RETRIES
     if  (
             (TxQ[qIx].RetryCount > MAX_XMIT_RETRIES)
-         && ((DoseOs::Get_TickCount() - TxQ[qIx].StartSendTime) > GIVEUP_TIMEOUT)
+         && ((GetTimeTick() - TxQ[qIx].StartSendTime) > GIVEUP_TIMEOUT)
         )
         return('G');
 #endif
@@ -1808,30 +1808,17 @@ static THREAD_API TxThread(void *)
                         continue; // process next msg in this Queue
                     }
 
-                    else if (result == 'G')
-                    {
-                        // This is the case where the target still sends KeepAlive messages,
-                        // but for some reason we don't receive Ack from it. This can be caused by:
-                        // 1. The target doesn't receive messages from this node.
-                        // 2. The target doesn't send an Ack.
-                        // 3. The Ack isn't delivered to this node.
-                        // 4. There is some error in this node preventing dose_com from receiving the Ack.
-
-                        // This situation is particulary serious when in a pool distribution since this node
-                        // will not be able to distribute the pool, thereby preventing the system from starting.
-
-                        // In the future we probably need to implenet some kind of algorithm that exclude missbehaving
-                        // nodes from the rest, but this needs to be further investigated.
-
-                        // Tests has shown that case 4 above sometimes manifest itself, so for now we take the somewhat brutal
-                        // approach and terminate dose_main. The nice way of doing this would be to send some status to dose_main
-                        // but for the moment it is performed by an exit right here!!
-                        
-                        PrintDbg("Unable to get Ack messages from one or more nodes. This can have many causes but in case it is"
-                                 " caused by this node we now terminates dose_com!!!\n");
-                        exit(1); //!!!!!!!
-                    }
-
+                    //else
+                    // This is the case where the target still sends KeepAlive messages,
+                    // but does not send an Ack.
+                    // If we drop this message, we will get the same result next time
+                    // and things will be very slow.
+                    // If we set a flag, the node is down, how shall we recover from
+                    // that state.
+                    // To be implemented ???? (when I know how to)
+                    // if(result == 'G') // Has given up
+                    //
+                    //  ;  we can go on with next msg
                 }  // end Timeout
             } // end IsTransmitting
 
