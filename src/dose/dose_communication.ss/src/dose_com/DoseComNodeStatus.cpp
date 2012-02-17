@@ -548,6 +548,7 @@ int CNodeStatus::CheckTimedOutNodes(void)
 void CNodeStatus::ForcePoolDistribution(int DoseId)
 {
     g_pNodeStatusTable[DoseId].ForcePoolDistribution = 1;
+    CDoseComReceive::UpdateNodeUp((dcom_uchar8) DoseId);
 }
 
 /****************************************************************
