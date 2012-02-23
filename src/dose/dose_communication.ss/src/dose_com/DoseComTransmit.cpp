@@ -217,8 +217,13 @@ volatile static struct
 
 #define NUM_TX_QUEUES   MAX_NUM_PRIO_CHANNELS
 #define MAX_XMIT_QUEUE  24
-#define MAX_AHEAD_F     3   //
-#define MAX_AHEAD_NF    2   // value 2 --> 3 ahead for non-fragmented
+
+// AWI: We have serious problems with the stability of dose_com. Since the design and
+// code is far to complicated to be able to maintain and find bugs in it, we have taken
+// the decision to turn of the send-ahead functionality in an attempt to make it more
+// stable.
+#define MAX_AHEAD_F     0   // No send ahead for fragmented messages!
+#define MAX_AHEAD_NF    0   // No send ahead for non-fragmented messages!
 
 #define MASK_AHEAD      7   // used as: Index = FragmentNumber & MASK_AHEAD
 #define MAX_AHEAD       MASK_AHEAD + 1
