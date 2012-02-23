@@ -439,18 +439,16 @@ static THREAD_API Ack_Thread(void *)
 // Section TxThread() routines
 //#############################################
 /**************************************************************************
-* Called from TxThread() when:
+* Called from TxThread() when there are no targets to a message in
+* TxQ[qIx].TxMsgArr[TxMsgArrIx]
 *
-* 1) There are no targets to a message in TxQ[qIx].TxMsgArr[TxMsgArrIx]
+* The message will be ignored (GetIxToSend updated) only when TxQ[qIx].GetIxToAck
+* also can be updated. This is the case if TxMsgArrIx == TxQ[qIx].GetIxToAck.
 *
-* It is similar to CleanUp_After_Msg_Completed(). The main difference is
-* that TxQ[qIx].GetIxToAck shall not be increased.
+* Returns true if the message has been ignored.
 *
-* Normally 'NoTarget' messages are discarded by CDoseComTransmit::Xmit_Msg()
-* This handles the case where targets disappears on the fly.
-* It happens almost never.
 ****************************************************************************/
-static int CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
+static bool CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
 {
     if(*pDbg>=3)
     {
@@ -470,7 +468,7 @@ static int CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
             PrintDbg("#   CleanUp_After_Msg_Ignored(%d) ArrIx!=TxQ[qIx].GetIxToAck. Skipping cleanup!\n", qIx);
         }
 
-        return 0;
+        return false;  // *** Return ***
     }
 
     if((TxQ[qIx].GetIxToAck + 1) >= MAX_XMIT_QUEUE)
@@ -544,7 +542,7 @@ static int CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
     PrintDbg("#   CleanUp done P/Gs/Ga=%d/%d/%d\n",
             TxQ[qIx].PutIx,TxQ[qIx].GetIxToSend,TxQ[qIx].GetIxToAck);
 
-    return(0);
+    return true;
 }
 /*----------------- end CleanUp_After_Msg_Ignored() -------*/
 
@@ -2171,11 +2169,18 @@ Begin_A_New_Msg:
 
                     g_pTxStatistics[qIx].CountTxNoTargets++;
 
-                    //nytt 071007
-                    CleanUp_After_Msg_Ignored(qIx, GetIxToSend);
+                    
+                    bool msgIgnored = CleanUp_After_Msg_Ignored(qIx, GetIxToSend);
 
-                    // nytt bort bThereMightBeMore = TRUE;
-                    continue; // go in with next item in this Queue
+                    if (msgIgnored)
+                    {
+                        continue; // continue with next item in this Queue
+                    }
+                    else
+                    {
+                        ++qIx;
+                        continue;   // continue with next Queue
+                    }
                 } // end No targets
 
                 //-------------------------------------------
