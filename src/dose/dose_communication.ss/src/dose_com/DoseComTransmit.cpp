@@ -453,9 +453,34 @@ static THREAD_API Ack_Thread(void *)
 static int CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
 {
     if(*pDbg>=3)
-    PrintDbg("#   CleanUp_After_Msg_Ignored(%d) P/Gs/Ga=%d/%d/%d ArrIx=%d SeqN=%u\n",
-            qIx, TxQ[qIx].PutIx, TxQ[qIx].GetIxToSend, TxQ[qIx].GetIxToAck,
-            TxMsgArrIx, TxQ[qIx].TxMsgArr[TxMsgArrIx].SequenceNumber );
+    {
+        PrintDbg("#   CleanUp_After_Msg_Ignored(%d) P/Gs/Ga=%d/%d/%d ArrIx=%d SeqN=%u\n",
+                 qIx, TxQ[qIx].PutIx, TxQ[qIx].GetIxToSend, TxQ[qIx].GetIxToAck,
+                 TxMsgArrIx, TxQ[qIx].TxMsgArr[TxMsgArrIx].SequenceNumber );
+    }
+
+    // We execute CleanUp_After_Msg_Ignored only if we know that both GetIxToAck and GetIxToSend
+    // can be updated, which is the case if they points to the same index. This is to prevent
+    // GetIxToSend to be increased in a way that makes the diff GetIxToSend - GetIxToAck greater than
+    // the size of the sliding windows which will cause a stop in the outgoing communication.
+    if (TxMsgArrIx != TxQ[qIx].GetIxToAck)
+    {
+        if (*pDbg>=3)
+        {
+            PrintDbg("#   CleanUp_After_Msg_Ignored(%d) ArrIx!=TxQ[qIx].GetIxToAck. Skipping cleanup!\n", qIx);
+        }
+
+        return 0;
+    }
+
+    if((TxQ[qIx].GetIxToAck + 1) >= MAX_XMIT_QUEUE)
+    {
+        TxQ[qIx].GetIxToAck = 0;
+    }
+    else
+    {
+        TxQ[qIx].GetIxToAck++;
+    }
 
     TxQ[qIx].RetryCount = 0;  // is this needed
 
@@ -471,26 +496,7 @@ static int CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
         TxQ[qIx].TxMsgArr[TxMsgArrIx].ShallFreeBuffer = 0;
     }
 
-    //-------------------------------------------------
-    // If this was the message that should be acked
-    // ( = this all messages before this has been acked),
-    // the GetIxToAck shall be increased.
-    // If not, mark it as completed.
-    //-------------------------------------------------
-    if(TxMsgArrIx == TxQ[qIx].GetIxToAck)
-    {
-         if((TxQ[qIx].GetIxToAck + 1) >= MAX_XMIT_QUEUE)
-              TxQ[qIx].GetIxToAck = 0;
-         else
-              TxQ[qIx].GetIxToAck++;
-    }
-    else
-    {
-        TxQ[qIx].TxMsgArr[TxMsgArrIx].TransmitComplete = (dcom_uchar8) 0xFF;
-    }
-
     // Increase GetIxToSend
-
     if((TxQ[qIx].GetIxToSend + 1) >= MAX_XMIT_QUEUE)
          TxQ[qIx].GetIxToSend = 0;
     else

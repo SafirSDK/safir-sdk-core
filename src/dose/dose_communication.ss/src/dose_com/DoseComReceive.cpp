@@ -503,7 +503,7 @@ static THREAD_API RxThread(void *pChNum)
 
             if(MsgHdr.DestinationId<64) SeqNumSet = 0;
             else                        SeqNumSet = MsgHdr.DestinationId - 64+2;
-            //if(*pDbg>=2)
+            if(*pDbg>=2)
             PrintDbg("*   RxThread[%d] Rx msg Not for me. BitMap= %X.%08X\n",
                     MyIx, MsgHdr.DoseIdBitMap[1], MsgHdr.DoseIdBitMap[0]);
             pRxStatistics->CountRxInvalidMsg++;
