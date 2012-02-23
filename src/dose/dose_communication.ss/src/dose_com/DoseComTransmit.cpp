@@ -222,8 +222,8 @@ volatile static struct
 // code is far to complicated to be able to maintain and find bugs in it, we have taken
 // the decision to turn of the send-ahead functionality in an attempt to make it more
 // stable.
-#define MAX_AHEAD_F     0   // No send ahead for fragmented messages!
-#define MAX_AHEAD_NF    0   // No send ahead for non-fragmented messages!
+#define MAX_AHEAD_F     1   // No send ahead for fragmented messages!
+#define MAX_AHEAD_NF    1   // No send ahead for non-fragmented messages!
 
 #define MASK_AHEAD      7   // used as: Index = FragmentNumber & MASK_AHEAD
 #define MAX_AHEAD       MASK_AHEAD + 1
