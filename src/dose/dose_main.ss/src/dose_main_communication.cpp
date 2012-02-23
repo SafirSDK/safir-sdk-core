@@ -450,18 +450,30 @@ namespace Internal
         if (dataType == DistributionData::Action_Connect ||
             dataType == DistributionData::Action_Disconnect ||
             dataType == DistributionData::Action_HavePersistenceDataRequest ||
-            dataType == DistributionData::Action_HavePersistenceDataResponse ||
-            dataType == DistributionData::Action_RequestPoolDistribution)
+            dataType == DistributionData::Action_HavePersistenceDataResponse)
         {
+            m_QualityOfServiceData.GetQualityOfServiceInfoForInternalDistribution(distributionChannel,
+                                                                                  priority,
+                                                                                  isAcked);          
+        }
+        else if (dataType == DistributionData::Action_RequestPoolDistribution)
+        {
+            // Request PD shall only be sent unicast to one node and on an unacked channel to avoid
+            // that it isn't stopped by a full dose_com transmit queue.
+
+            //this call is to get the internal priority channel. If its not acked, we should use that one
+            //else we have to find the closest un-acked priority channel.
             m_QualityOfServiceData.GetQualityOfServiceInfoForInternalDistribution(distributionChannel,
                                                                                   priority,
                                                                                   isAcked);
 
-            // Request PD shall only be sent unicast to one node.
-            if (dataType == DistributionData::Action_RequestPoolDistribution)
+            distributionChannel = data.GetPDRequestReceiverId().m_node;
+
+            if (isAcked)
             {
-                distributionChannel = data.GetPDRequestReceiverId().m_node;
-            }
+                isAcked = false;
+                priority = m_QualityOfServiceData.GetClosestPriority(priority, isAcked);
+            }            
         }
         else
         {
@@ -480,11 +492,11 @@ namespace Internal
                 dataType == DistributionData::RegistrationState ||
                 (dataType == DistributionData::EntityState &&
                 (!data.IsCreated() || data.GetEntityStateKind() == DistributionData::Injection)))
-            {
+            {                
                 if (!isAcked)
                 {
-                    priority = m_QualityOfServiceData.GetClosestAckedPriority(priority);
                     isAcked = true;
+                    priority = m_QualityOfServiceData.GetClosestPriority(priority, isAcked);                    
                 }
 
                 //use a singlecast distribution channel if possible

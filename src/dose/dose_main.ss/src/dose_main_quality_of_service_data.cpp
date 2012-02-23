@@ -623,11 +623,12 @@ namespace Internal
     }
 
     int
-    QualityOfServiceData::GetClosestAckedPriority(const int priority) const
+    QualityOfServiceData::GetClosestPriority(const int     priority,
+                                             const bool    acked) const
     {
         for (int i = priority - 1; i >= 0; --i)
         {
-            if (m_AckedPriorities[i])
+            if (acked == m_AckedPriorities[i])
             {
                 return i;
             }
@@ -635,12 +636,12 @@ namespace Internal
 
         for (int i = priority + 1; i < NUM_PRIORITY_CHANNELS; ++i)
         {
-            if (m_AckedPriorities[i])
+            if (acked == m_AckedPriorities[i])
             {
                 return i;
             }
         }
-        ENSURE(false, << "Failed to GetClosestAckedPriority, probably a programming error by STLRHA");
+        ENSURE(false, << "Failed to GetClosestPriority, probably a programming error by STLRHA or AIWI");
         return -1;
     }
 
