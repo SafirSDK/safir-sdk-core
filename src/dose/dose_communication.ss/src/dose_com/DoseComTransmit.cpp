@@ -217,16 +217,8 @@ volatile static struct
 
 #define NUM_TX_QUEUES   MAX_NUM_PRIO_CHANNELS
 #define MAX_XMIT_QUEUE  24
-
-// AWI: We have serious problems with the stability of dose_com. Since the design and
-// code is far to complicated to be able to maintain and find bugs in it, we have taken
-// the decision to turn of the send-ahead functionality in an attempt to make it more
-// stable.
-// I'm tired of dose_com, its non object oriented style, extremly long procedures,
-// gotos, assembly coding style, and most important its numerous comments "?????, what should we do here"
-// In swedish: Gör om, gör rätt!!
-#define MAX_AHEAD_F     1   // For some unknown reason, ahead for fragmented messages can't be set to 0
-#define MAX_AHEAD_NF    0   // No send ahead for non-fragmented messages!
+#define MAX_AHEAD_F     3   //
+#define MAX_AHEAD_NF    2   // value 2 --> 3 ahead for non-fragmented
 
 #define MASK_AHEAD      7   // used as: Index = FragmentNumber & MASK_AHEAD
 #define MAX_AHEAD       MASK_AHEAD + 1
@@ -446,6 +438,124 @@ static THREAD_API Ack_Thread(void *)
 //#############################################
 // Section TxThread() routines
 //#############################################
+
+//Calculate current number of sent items, i.e used sliding window.
+int CalculateCurrentSendAhead(int qIx)
+{
+    if (TxQ[qIx].GetIxToSend>=TxQ[qIx].GetIxToAck)
+    {
+        return TxQ[qIx].GetIxToSend-TxQ[qIx].GetIxToAck;
+    }
+    else
+    {
+        //This handles the wrap-around-case when IxToAck > IxToSend
+        return MAX_XMIT_QUEUE -TxQ[qIx].GetIxToAck + TxQ[qIx].GetIxToSend;
+    }    
+}
+
+void SetIndexToSend(int qIx, dcom_ushort16 toIndex)
+{
+    if(*pDbg>=3)
+    {
+        PrintDbg("#   SetIndexToSend(%d) P/S/A=%d/%d/%d, toIndex=%d\n",
+                     qIx, TxQ[qIx].PutIx, TxQ[qIx].GetIxToSend, TxQ[qIx].GetIxToAck, toIndex);
+    }
+
+    int prevIxToSend = TxQ[qIx].GetIxToSend;
+    TxQ[qIx].GetIxToSend = toIndex;
+
+    //Calculate current number of sent items, i.e used sliding window
+    int currentNumberOfSent = CalculateCurrentSendAhead(qIx);
+    
+    //Check if we are allowed to send one more message
+    if (currentNumberOfSent>MAX_AHEAD_NF+1) //We are allowed to have 1+MAX_AHEAD_NF out at the same time
+    {        
+        //This should never happen. If we get here we want to send more messages when we already reached the maximum allowed sendAhead.
+        PrintDbg("SetIndexToSend(%d) called with non-valid value. P/S/A=%d/%d/%d, toIndex=%d\n",
+                 qIx, TxQ[qIx].PutIx, prevIxToSend, TxQ[qIx].GetIxToAck, toIndex);
+        /*while(true)
+        {
+            DoseOs::Sleep(1000);
+        }*/
+    }
+}
+
+//Increase index to send and check that we not exceeds the sliding window.
+void IncreaseIndexToSend(int qIx)
+{
+    if(*pDbg>=3)
+    {
+        PrintDbg("#   IncreaseIndexToSend(%d) P/S/A=%d/%d/%d\n",
+                     qIx, TxQ[qIx].PutIx, TxQ[qIx].GetIxToSend, TxQ[qIx].GetIxToAck);
+    }
+
+    //Increase the sendIndex, handle wrap-around
+    if((TxQ[qIx].GetIxToSend + 1) >= MAX_XMIT_QUEUE)
+    {
+        TxQ[qIx].GetIxToSend = 0;
+    }
+    else
+    {
+            TxQ[qIx].GetIxToSend++;
+    }
+
+    //Calculate current number of sent items, i.e used sliding window
+    int currentNumberOfSent = CalculateCurrentSendAhead(qIx);
+    
+    if (currentNumberOfSent>MAX_AHEAD_NF+1) //We are allowed to have 1+MAX_AHEAD_NF out at the same time
+    {
+        //This should never happen. If we get here we want to send more messages when we already reached the maximum allowed sendAhead.
+        PrintDbg("IncreaseIndexToSend(%d) called when not allowed. P/S/A=%d/%d/%d\n",
+                 qIx, TxQ[qIx].PutIx, TxQ[qIx].GetIxToSend, TxQ[qIx].GetIxToAck);
+        /*while(true)
+        {
+            DoseOs::Sleep(1000);
+        }*/
+    }
+}
+
+//Increase index to ack and check that we do not exceed the sliding window or move ixToAck before ixToSend.
+void IncreaseIndexToAck(int qIx)
+{
+    if(*pDbg>=3)
+    {
+        PrintDbg("#   IncreaseIndexToAck(%d) P/S/A=%d/%d/%d\n",
+                     qIx, TxQ[qIx].PutIx, TxQ[qIx].GetIxToSend, TxQ[qIx].GetIxToAck);
+    }
+
+    if (TxQ[qIx].GetIxToSend==TxQ[qIx].GetIxToAck)
+    {
+        //Not allowed to step IxToAck ahead of IxToSend
+        PrintDbg("IncreaseIndexToAck(%d) called when not allowed. P/S/A=%d/%d/%d\n",
+                 qIx, TxQ[qIx].PutIx, TxQ[qIx].GetIxToSend, TxQ[qIx].GetIxToAck);
+        /*while(true)
+        {
+            DoseOs::Sleep(1000);
+        }*/
+    }
+
+    if((TxQ[qIx].GetIxToAck + 1) >= MAX_XMIT_QUEUE)
+    {
+        TxQ[qIx].GetIxToAck = 0;
+    }
+    else
+    {
+        TxQ[qIx].GetIxToAck++;
+    }
+
+    int currentNumberOfSent = CalculateCurrentSendAhead(qIx);
+    if (currentNumberOfSent>MAX_AHEAD_NF+1)
+    {
+        //This should never happen. If we get here the IncreaseIndexToAck increased the current used sliding window.
+        PrintDbg("IncreaseIndexToAck(%d) increased the ahead gap to exceed the limit. P/S/A=%d/%d/%d\n",
+                    qIx, TxQ[qIx].PutIx, TxQ[qIx].GetIxToSend, TxQ[qIx].GetIxToAck);
+        /*while(true)
+        {
+            DoseOs::Sleep(1000);
+        }*/
+    }
+}
+
 /**************************************************************************
 * Called from TxThread() when there are no targets to a message in
 * TxQ[qIx].TxMsgArr[TxMsgArrIx]
@@ -479,14 +589,8 @@ static bool CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
         return false;  // *** Return ***
     }
 
-    if((TxQ[qIx].GetIxToAck + 1) >= MAX_XMIT_QUEUE)
-    {
-        TxQ[qIx].GetIxToAck = 0;
-    }
-    else
-    {
-        TxQ[qIx].GetIxToAck++;
-    }
+    IncreaseIndexToSend(qIx);
+    IncreaseIndexToAck(qIx);
 
     TxQ[qIx].RetryCount = 0;  // is this needed
 
@@ -501,13 +605,6 @@ static bool CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
 
         TxQ[qIx].TxMsgArr[TxMsgArrIx].ShallFreeBuffer = 0;
     }
-
-    // Increase GetIxToSend
-    if((TxQ[qIx].GetIxToSend + 1) >= MAX_XMIT_QUEUE)
-         TxQ[qIx].GetIxToSend = 0;
-    else
-         TxQ[qIx].GetIxToSend++;
-
 
     //----------------------------------------------------
     // Check if this is a PD_COMPLETE msg. If so clean up.
@@ -601,10 +698,7 @@ static int CleanUp_After_Msg_Completed(int qIx)
 
     if(TxQ[qIx].GetIxToAck != TxQ[qIx].GetIxToSend)
     {
-        if((TxQ[qIx].GetIxToAck + 1) >= MAX_XMIT_QUEUE)
-            TxQ[qIx].GetIxToAck = 0;
-        else
-            TxQ[qIx].GetIxToAck++;
+        IncreaseIndexToAck(qIx);
     }
 
     if(*pDbg>3) PrintDbg("# * GetIxToAck --> %d (GetIxToSend=%d)\n",
@@ -1149,6 +1243,23 @@ Continue_WithNext:
         if((g_Ack_Get_ix + 1) >= MAX_ACK_QUEUE) g_Ack_Get_ix = 0;
         else g_Ack_Get_ix++;
     } // end while(g_Ack_Get_ix != g_Ack_Put_ix)
+
+
+    //Make a check if the GetIxToAck is a message that already is completed. In that case call CleanUp_After_Msg_Completed.
+    //A state like that should never occur and when it does it is due to bugs in dose_com.
+    for (int q=0; q<NUM_TX_QUEUES; ++q)
+    {
+        int ackIx=TxQ[q].GetIxToAck;
+        if (ackIx!=TxQ[q].GetIxToSend &&
+            TxQ[q].TxMsgArr[ackIx].IsTransmitting==0 &&
+            TxQ[q].TxMsgArr[ackIx].IsRetransmitting==0 &&
+            TxQ[q].TxMsgArr[ackIx].TransmitComplete>0)
+        {
+            PrintDbg("Check_Pending_Ack_Queue found deadlock state in TxQ[%d] P/S/A=%d/%d/%d. IsTransmitting=%d, IsRetransmitting=%d, TransmitComplete=%d. Calling CleanUp_After_Msg_Completed to recover from this state.\n",
+                 q, TxQ[q].PutIx, TxQ[q].GetIxToSend, TxQ[q].GetIxToAck, TxQ[q].TxMsgArr[ackIx].IsTransmitting, TxQ[q].TxMsgArr[ackIx].IsRetransmitting, TxQ[q].TxMsgArr[ackIx].TransmitComplete);
+            CleanUp_After_Msg_Completed(q);
+        }
+    }
 
     return(dwResult);
 }
@@ -1743,10 +1854,7 @@ static THREAD_API TxThread(void *)
                                 // See comment "If last fragment has been sent ...."  30 lines below".
                                 if(TxQ[qIx].GetIxToSend == TxQ[qIx].GetIxToAck)
                                 {
-                                    if((TxQ[qIx].GetIxToSend + 1) >= MAX_XMIT_QUEUE)
-                                        TxQ[qIx].GetIxToSend = 0;
-                                    else
-                                        TxQ[qIx].GetIxToSend++;
+                                    IncreaseIndexToSend(qIx);
                                 }
                             }
                             else
@@ -1780,10 +1888,7 @@ static THREAD_API TxThread(void *)
 
                                     if(TxQ[qIx].GetIxToSend == TxQ[qIx].GetIxToAck)
                                     {
-                                        if((TxQ[qIx].GetIxToSend + 1) >= MAX_XMIT_QUEUE)
-                                            TxQ[qIx].GetIxToSend = 0;
-                                        else
-                                            TxQ[qIx].GetIxToSend++;
+                                        IncreaseIndexToSend(qIx);
                                     }
 
 
@@ -1804,10 +1909,7 @@ static THREAD_API TxThread(void *)
                         if (  (TxQ[qIx].TxMsgArr[UseToSendIx].bIsFragmented & 0x8000)
                            && (TxQ[qIx].GetIxToSend == TxQ[qIx].GetIxToAck))
                         {
-                            if((TxQ[qIx].GetIxToSend + 1) >= MAX_XMIT_QUEUE)
-                                TxQ[qIx].GetIxToSend = 0;
-                            else
-                                TxQ[qIx].GetIxToSend++;
+                            IncreaseIndexToSend(qIx);
 
                             g_pTxStatistics[qIx].CountTxGiveUp++;
 
@@ -2037,6 +2139,14 @@ static THREAD_API TxThread(void *)
                 qIx++;
                 continue;
             }
+            else if (CalculateCurrentSendAhead(qIx)>MAX_AHEAD_NF)
+            {
+                PrintDbg(" Discard Begin_A_New_Msg TxQ[%d] P/S/A=%d/%d/%d\n",
+                     qIx, TxQ[qIx].PutIx, TxQ[qIx].GetIxToSend, TxQ[qIx].GetIxToAck);
+                qIx++;
+                continue;
+            }
+
             goto Begin_A_New_Msg;
 
             //------------------------------------------------------
@@ -2302,8 +2412,8 @@ Send_The_Message:
                 DoseOs::Sleep(1000);
 
                 // set next GetIxToSend
-                if((UseToSendIx + 1) >= MAX_XMIT_QUEUE) TxQ[qIx].GetIxToSend=0;
-                else TxQ[qIx].GetIxToSend = (dcom_ushort16) (UseToSendIx + 1);
+                if((UseToSendIx + 1) >= MAX_XMIT_QUEUE) SetIndexToSend(qIx, 0);
+                else SetIndexToSend(qIx, (dcom_ushort16) (UseToSendIx + 1));
 
                 if(*pDbg>3)
                     PrintDbg("#2* GetIxToSend --> %d\n", TxQ[qIx].GetIxToSend);
@@ -2385,9 +2495,9 @@ Send_The_Message:
                         if(TxQ[qIx].GetIxToSend != TxQ[qIx].PutIx)
                         {
                             if((UseToSendIx + 1) >= MAX_XMIT_QUEUE)
-                                TxQ[qIx].GetIxToSend = 0;
+                                SetIndexToSend(qIx, 0);                                
                             else
-                                TxQ[qIx].GetIxToSend = (dcom_ushort16) (UseToSendIx + 1);
+                                SetIndexToSend(qIx, (dcom_ushort16) (UseToSendIx + 1));                                                          
 
                             if(*pDbg>3)
                                 PrintDbg("#3* GetIxToSend --> %d\n",TxQ[qIx].GetIxToSend);
@@ -2405,9 +2515,9 @@ Send_The_Message:
                         if(TxQ[qIx].GetIxToSend != TxQ[qIx].PutIx)
                         {
                             if((UseToSendIx + 1) >= MAX_XMIT_QUEUE)
-                                TxQ[qIx].GetIxToSend = 0;
+                                SetIndexToSend(qIx, 0);                                
                             else
-                                TxQ[qIx].GetIxToSend = (dcom_ushort16) (UseToSendIx + 1);
+                                SetIndexToSend(qIx, (dcom_ushort16) (UseToSendIx + 1));                           
 
                             if(*pDbg>3)
                                 PrintDbg("8* GetIxToSend --> %d\n",TxQ[qIx].GetIxToSend);
@@ -2425,9 +2535,9 @@ Send_The_Message:
                             if(TxQ[qIx].GetIxToSend != TxQ[qIx].PutIx)
                             {
                                 if((UseToSendIx + 1) >= MAX_XMIT_QUEUE)
-                                    TxQ[qIx].GetIxToSend = 0;
+                                    SetIndexToSend(qIx, 0);                                
                                 else
-                                    TxQ[qIx].GetIxToSend = (dcom_ushort16) (UseToSendIx + 1);
+                                    SetIndexToSend(qIx, (dcom_ushort16) (UseToSendIx + 1));
 
                                 if(*pDbg>3)
                                     PrintDbg("#9* GetIxToSend --> %d\n",TxQ[qIx].GetIxToSend);
