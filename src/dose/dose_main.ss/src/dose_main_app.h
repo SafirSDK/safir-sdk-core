@@ -38,6 +38,7 @@
 #include "dose_main_request_handler.h"
 #include "dose_main_end_states_handler.h"
 #include "dose_main_thread_monitor.h"
+#include "dose_main_lock_monitor.h"
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Utilities/ProcessMonitor.h>
@@ -154,6 +155,9 @@ namespace Internal
 
         // For monitoring processes
         Safir::Utilities::ProcessMonitor m_processMonitor;
+
+        // For monitoring abandoned shared memory locks
+        LockMonitor m_lockMonitor;
 
         // For monitoring dose_main:s own threads
         ThreadMonitor m_threadMonitor;

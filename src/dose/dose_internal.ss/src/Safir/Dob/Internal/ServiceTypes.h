@@ -124,6 +124,12 @@ namespace Internal
                                                   PendingRegistrationVector & prv,
                                                   bool & needKick);
 
+        // This method tries to acquire and release the container lock for the handler registration container
+        // in all contexts.
+        bool CanAcquireContainerWriterLock(const Typesystem::TypeId             typeId,
+                                           const ContextId                      contextId,
+                                           const boost::posix_time::seconds&    lockTimeout);
+
         //Debug and statistics
         void DumpRegistrationSubscriptions() const;
         void DumpRegisteredHandlers() const;

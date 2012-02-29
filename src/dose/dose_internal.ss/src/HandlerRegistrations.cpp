@@ -882,6 +882,11 @@ namespace Internal
         // The registration time is the same, compare the state kind
         return newRegState.GetRegistrationStateKind() > currentRegState.GetRegistrationStateKind();
     }
+
+    bool HandlerRegistrations::CanAcquireContainerWriterLock(const boost::posix_time::seconds& lockTimeout) const
+    {
+        return m_registrations.CanAcquireContainerWriterLock(lockTimeout);
+    }
 }
 }
 }

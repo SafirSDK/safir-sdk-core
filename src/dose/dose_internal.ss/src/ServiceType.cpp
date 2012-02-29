@@ -195,6 +195,21 @@ namespace Internal
         return m_handlerRegistrations[context].HasSubscription(connection,
                                                                consumer);
     }
+
+    bool ServiceType::CanAcquireContainerWriterLock(const ContextId                   contextId,
+                                                    const boost::posix_time::seconds& lockTimeout)
+    {
+        ScopedTypeLock lck(m_typeLocks[contextId],
+                           boost::posix_time::second_clock::universal_time() + lockTimeout);
+
+        if (!lck)
+        {
+            // Can't acquire the type level lock.
+            return false;  // *** RETURN ***
+        }
+
+        return m_handlerRegistrations[contextId].CanAcquireContainerWriterLock(lockTimeout);
+    }
 }
 }
 }

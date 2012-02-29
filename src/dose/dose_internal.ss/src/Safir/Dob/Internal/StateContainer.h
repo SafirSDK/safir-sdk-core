@@ -134,6 +134,11 @@ namespace Internal
         const Iterator CreateStateIterator(bool& end) const;
         bool IncrementIterator(Iterator& iterator) const;
 
+        // This method just  tries to acquire the container lock as a writer.
+        // It can be used when testing for locked locks left by applications
+        // not terminating in a proper way. 
+        bool CanAcquireContainerWriterLock(const boost::posix_time::seconds& lockTimeout);
+
     private:
 
         // Locking Policy:

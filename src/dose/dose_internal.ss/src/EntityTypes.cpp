@@ -514,6 +514,12 @@ namespace Internal
         return true;
     }
 
+    bool EntityTypes::CanAcquireContainerWriterLock(const Typesystem::TypeId             typeId,
+                                                    const ContextId                      contextId,
+                                                    const boost::posix_time::seconds&    lockTimeout)
+    {
+        return GetType(typeId).CanAcquireContainerWriterLock(contextId, lockTimeout);
+    }
 }
 }
 }

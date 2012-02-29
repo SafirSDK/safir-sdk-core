@@ -145,6 +145,16 @@ namespace Internal
             m_lock.unlock();
         }
 
+        inline bool timed_lock(const boost::posix_time::ptime& abs_time)
+        {
+            bool locked = m_lock.timed_lock(abs_time);
+            if (locked)
+            {
+                LeveledLockBase<level, masterLevel>::AddLevel();
+            }
+            return locked;
+        }
+
     private:
         Lock m_lock;
     };
@@ -199,6 +209,16 @@ namespace Internal
         {
             // Need no level check for lock promotion.
             m_lock.unlock_upgradable_and_lock();
+        }
+
+        inline bool timed_lock(const boost::posix_time::ptime& abs_time)
+        {
+            bool locked = m_lock.timed_lock(abs_time);
+            if (locked)
+            {
+                LeveledLockBase<level, masterLevel>::AddLevel();
+            }
+            return locked;
         }
 
     private:

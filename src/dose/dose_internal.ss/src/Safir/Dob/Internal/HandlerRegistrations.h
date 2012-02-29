@@ -127,6 +127,9 @@ namespace Internal
 
         /** @} */
 
+        // This method just  tries to acquire the container lock as a writer.
+        bool CanAcquireContainerWriterLock(const boost::posix_time::seconds& lockTimeout) const;
+
     private:
 
         Typesystem::TypeId m_typeId;
