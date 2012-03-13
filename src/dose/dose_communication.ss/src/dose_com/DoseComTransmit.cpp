@@ -1194,12 +1194,54 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
             //================================================================
             if(FragmentNum != 0) // if a fragmented msg
             {
-                if(!TxQ[qIx].TxMsgArr[TxMsgArr_Ix].IsRetransmitting)
+                // Check if this node considers the nacked fragment to have been
+                // sent but not acked
+
+                bool expectedFragmentNbrIsWithinWindow = false;
+                dcom_ushort16 ixToAck = TxQ[qIx].GetIxToAck;
+                while (ixToAck != TxQ[qIx].GetIxToSend)
                 {
-                    TxQ[qIx].StartSendTime = DoseOs::Get_TickCount() - 500; //force timeout
-                    if(*pDbg>2)
-                        PrintDbg("Force Timeout. FragmentNum=%X\n", FragmentNum);
+                    if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].SequenceNumber)
+                    {
+                        // The sequence number is within the sliding window. Now check if the expected fragment is
+                        // within the sliding window at fragment level.
+                        dcom_ushort16 expectedFragment = g_Ack_Queue[g_Ack_Get_ix].Info;
+
+                        if (expectedFragment >= TxQ[qIx].TxMsgArr[ixToAck].NotAckedFragment &&
+                            expectedFragment <= TxQ[qIx].TxMsgArr[ixToAck].SentFragment)
+                        {                        
+                            expectedFragmentNbrIsWithinWindow = true;     
+                        }
+                        break;
+                    }
+                    if((ixToAck + 1) >= MAX_XMIT_QUEUE)
+                    {
+                        ixToAck = 0;
+                    }
+                    else
+                    {
+                        ++ixToAck;
+                    }
                 }
+
+                if (expectedFragmentNbrIsWithinWindow)
+                {
+                    if(!TxQ[qIx].TxMsgArr[TxMsgArr_Ix].IsRetransmitting)
+                    {
+                        TxQ[qIx].StartSendTime = DoseOs::Get_TickCount() - 500; //force timeout
+                        if(*pDbg>2)
+                            PrintDbg("Force Timeout. FragmentNum=%X\n", FragmentNum);
+                    }
+                }
+                else
+                {
+                    // We got a NACK for a fragment but the fragment that are expected by the receiver is not within our
+                    // fragment sliding window.
+                    // To get the system in a consistent state there is not much we can do but to start all over with
+                    // a pool distribution to the node that is sending the nack.
+                    CNodeStatus::ForcePoolDistribution(DoseIdFrom);                    
+                }
+
                 goto Continue_WithNext;
             }
             //===============================================================
@@ -1218,11 +1260,43 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 PrintDbg("#-  IS IMPLEMENTED Got an Nack Seq=%d Info=%d\n",
                         SequenceNum, g_Ack_Queue[g_Ack_Get_ix].Info );
 
-                if(!TxQ[qIx].TxMsgArr[TxMsgArr_Ix].IsRetransmitting)
+                // Check if this node considers the nacked message to have been
+                // sent but not acked
+
+                bool expectedSeqNbrIsWithinWindow = false;
+                dcom_ushort16 ixToAck = TxQ[qIx].GetIxToAck;
+                while (ixToAck != TxQ[qIx].GetIxToSend)
                 {
-                    TxQ[qIx].StartSendTime = DoseOs::Get_TickCount() - 500; //force timeout
-                    if(*pDbg>1)
-                        PrintDbg("Force Timeout. FragmentNum=%X\n", FragmentNum);
+                    if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].Info)
+                    {
+                        expectedSeqNbrIsWithinWindow = true;
+                        break;
+                    }
+                    if((ixToAck + 1) >= MAX_XMIT_QUEUE)
+                    {
+                        ixToAck = 0;
+                    }
+                    else
+                    {
+                        ++ixToAck;
+                    }
+                }
+
+                if (expectedSeqNbrIsWithinWindow)
+                {
+                    if(!TxQ[qIx].TxMsgArr[TxMsgArr_Ix].IsRetransmitting)
+                    {
+                        TxQ[qIx].StartSendTime = DoseOs::Get_TickCount() - 500; //force timeout
+                        if(*pDbg>1)
+                            PrintDbg("Force Timeout. FragmentNum=%X\n", FragmentNum);
+                    }
+                }
+                else
+                {
+                    // We got a NACK but the message that are expected by the receiver is not within our sliding window.
+                    // To get the system in a consistent state there is not much we can do but to start all over with
+                    // a pool distribution to the node that is sending the nack.
+                    CNodeStatus::ForcePoolDistribution(DoseIdFrom);                    
                 }
 
                 goto Continue_WithNext;
