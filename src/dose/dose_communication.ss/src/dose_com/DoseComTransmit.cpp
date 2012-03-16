@@ -1241,6 +1241,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                     // traffic from this node. This makes the other nodes to mark the sequence number from this node as invalid.
                     // I KNOW, THIS IS REAL UGLY!!!! We have tried to track down the bug without success. Our failure is, at least partly,
                     // caused by the bad design and the complexity of dose_com. Hopefully we can throw it out soon ...
+                    PrintErr(0, "TxThread[%d] Got a NACK with an expected fragment that is already acked!\n");
                     g_pShm->InhibitOutgoingTraffic = true;
                     DoseOs::Sleep(4000);
                     g_pShm->InhibitOutgoingTraffic = false;
@@ -1303,6 +1304,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                     // traffic from this node. This makes the other nodes to mark the sequence number from this node as invalid.
                     // I KNOW, THIS IS REAL UGLY!!!! We have tried to track down the bug without success. Our failure is, at least partly,
                     // caused by the bad design and the complexity of dose_com. Hopefully we can throw it out soon ...
+                    PrintErr(0, "TxThread[%d] Got a NACK with an expected message that is already acked!\n");
                     g_pShm->InhibitOutgoingTraffic = true;
                     DoseOs::Sleep(4000);
                     g_pShm->InhibitOutgoingTraffic = false;                
