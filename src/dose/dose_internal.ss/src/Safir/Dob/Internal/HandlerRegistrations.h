@@ -184,30 +184,20 @@ namespace Internal
                                    InstanceIdPolicy::Enumeration&       instanceIdPolicy,
                                    RegisterTime&                        registrationTime) const;
 
-        void RevokeRegisterer(const bool                            forcedByRemoteHandler,
-                              const ConnectionPtr&                  connection,
+        void RevokeRegisterer(const ConnectionPtr&                  connection,
                               const ConsumerId&                     consumer,
                               const Dob::Typesystem::HandlerId&     handlerId,
                               const RegisterTime                    currentRegisterTime);
 
-        void RevokeEntity(const bool                           forcedByRemoteHandler,
-                          const StateSharedPtr&                statePtr,
+        void RevokeEntity(const StateSharedPtr&                statePtr,
                           const ConnectionPtr&                 connection,
                           const Dob::Typesystem::HandlerId&    handlerId,
-                          const RegisterTime                   currentRegisterTime,                          
-                          bool&                                exitDispatch); 
-
-        void ForcedRevokeEntityByRemoteHandler(
-                          const StateSharedPtr&                statePtr,
-                          const ConnectionPtr&                 connection,
-                          const Dob::Typesystem::HandlerId&    handlerId,
-                          const RegisterTime                   currentRegisterTime,                          
+                          const RegisterTime                   currentRegisterTime,
                           bool&                                exitDispatch);
-        
+
         void DeleteEntity(const StateSharedPtr&                statePtr,
                           const ConnectionPtr&                 connection,
                           const Dob::Typesystem::HandlerId&    handlerId,
-                          const bool                           newOwnerExists,
                           bool&                                exitDispatch);
 
         void UpdateGhost(const StateSharedPtr&                statePtr,
@@ -220,7 +210,7 @@ namespace Internal
                                       const ConsumerId&                   consumer);
 
         void RemoveRegistration(const ConnectionPtr& connection, 
-                                const Dob::Typesystem::HandlerId& handlerId);        
+                                const Dob::Typesystem::HandlerId& handlerId);
 
         static bool NewRegStateIsAccepted(const DistributionData& currentRegState,
                                           const DistributionData& newRegState);
@@ -232,4 +222,5 @@ namespace Internal
 }
 }
 #endif
+
 

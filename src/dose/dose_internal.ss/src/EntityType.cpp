@@ -77,18 +77,25 @@ namespace Internal
             throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);         
         }
 
-        ScopedTypeLock lck(m_typeLocks[context]);
+        bool result = true;
+        {
+            ScopedTypeLock lck(m_typeLocks[context]);
 
-        // Important to update the registration clock with the lock taken
-        RegisterTime regTime = regClock.GetNewTimestamp();
+            // Important to update the registration clock with the lock taken
+            RegisterTime regTime = regClock.GetNewTimestamp();
 
-        return m_handlerRegistrations[context].Register(connection,
-                                                        handlerId,
-                                                        instanceIdPolicy,
-                                                        isInjectionHandler,
-                                                        regTime,
-                                                        overrideRegistration,
-                                                        consumer);
+            result = m_handlerRegistrations[context].Register(connection,
+                                                            handlerId,
+                                                            instanceIdPolicy,
+                                                            isInjectionHandler,
+                                                            regTime,
+                                                            overrideRegistration,
+                                                            consumer);
+        }
+
+        CleanGhosts(handlerId, context);
+
+        return result;
     }
 
     void EntityType::Unregister(const ConnectionPtr&                connection,
@@ -101,40 +108,48 @@ namespace Internal
             std::wostringstream ostr;
             ostr << "Entity " << Typesystem::Operations::GetName(m_typeId) <<
                     ", which is ContextShared, can only be unregistered from context 0.";
-            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);         
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        ScopedTypeLock lck(m_typeLocks[context]);
+        {
+            ScopedTypeLock lck(m_typeLocks[context]);
 
-        if (handlerId == Dob::Typesystem::HandlerId::ALL_HANDLERS)
-        {
-            m_handlerRegistrations[context].UnregisterAll(connection,
-                                                          true);  // true => explicit unregister
+            if (handlerId == Dob::Typesystem::HandlerId::ALL_HANDLERS)
+            {
+                m_handlerRegistrations[context].UnregisterAll(connection,
+                                                              true);  // true => explicit unregister            
+            }
+            else
+            {
+                m_handlerRegistrations[context].Unregister(connection, handlerId);
+            }
         }
-        else
-        {
-            m_handlerRegistrations[context].Unregister(connection, handlerId);
-        }
+
+        CleanGhosts(handlerId, context);
     }
 
     void EntityType::UnregisterAll(const ConnectionPtr& connection, const bool explicitUnregister)
     {
         const ContextId context = connection->Id().m_contextId;
 
-        ScopedTypeLock lck(m_typeLocks[context]);
+        {
+            ScopedTypeLock lck(m_typeLocks[context]);
+            m_handlerRegistrations[context].UnregisterAll(connection, explicitUnregister);
+        }
 
-        m_handlerRegistrations[context].UnregisterAll(connection, explicitUnregister);
+        CleanGhosts(Dob::Typesystem::HandlerId::ALL_HANDLERS, context);
     }
 
     void EntityType::RemoteSetRegistrationState(const ConnectionPtr& connection,
                                                 const DistributionData& registrationState)
     {
         const ContextId context = registrationState.GetSenderId().m_contextId;
+        {
+            ScopedTypeLock lck(m_typeLocks[context]);
+            m_handlerRegistrations[context].RemoteSetRegistrationState(connection, registrationState);
+        }
 
-        ScopedTypeLock lck(m_typeLocks[context]);
-
-        m_handlerRegistrations[context].RemoteSetRegistrationState(connection, registrationState);
-
+        CleanGhosts(registrationState.GetHandlerId(), context);
     }
 
     bool EntityType::IsRegistered(const Dob::Typesystem::HandlerId& handlerId, const ContextId context) const
@@ -461,15 +476,23 @@ namespace Internal
                                     ", which is ContextShared, in context " << context);
         }
 
-        ScopedTypeLock lck(m_typeLocks[context]);
+        {
+            ScopedTypeLock lck(m_typeLocks[context]);
 
-        m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
+            m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
 
-        m_entityStates[context].ForSpecificStateAdd(entityState.GetInstanceId().GetRawValue(),
-                                                    boost::bind(&EntityType::RemoteSetDeleteEntityStateInternal,
-                                                                this,
-                                                                boost::cref(entityState),
-                                                                _2));
+            m_entityStates[context].ForSpecificStateAdd(entityState.GetInstanceId().GetRawValue(),
+                                                        boost::bind(&EntityType::RemoteSetDeleteEntityStateInternal,
+                                                                    this,
+                                                                    boost::cref(entityState),
+                                                                    _2));
+        }
+
+        bool isGhost = !entityState.IsNoState() && entityState.GetEntityStateKind()==DistributionData::Ghost;
+        if (isGhost)
+        {
+            CleanGhosts(entityState.GetHandlerId(), context);
+        }
     }
 
     RemoteSetResult EntityType::RemoteSetRealEntityState(const ConnectionPtr&      connection,
@@ -484,19 +507,26 @@ namespace Internal
                                     ", which is ContextShared, in context " << context);
         }
 
-        ScopedTypeLock lck(m_typeLocks[context]);
-
-        m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
-
         RemoteSetResult result;
+        {
+            ScopedTypeLock lck(m_typeLocks[context]);
 
-        m_entityStates[context].ForSpecificStateAdd(entityState.GetInstanceId().GetRawValue(),
-                                                    boost::bind(&EntityType::RemoteSetRealEntityStateInternal,
-                                                                this,
-                                                                boost::cref(connection),
-                                                                boost::cref(entityState),
-                                                                _2,
-                                                                boost::ref(result)));
+            m_clock.UpdateCurrentTimestamp(entityState.GetCreationTime());
+
+            m_entityStates[context].ForSpecificStateAdd(entityState.GetInstanceId().GetRawValue(),
+                                                        boost::bind(&EntityType::RemoteSetRealEntityStateInternal,
+                                                                    this,
+                                                                    boost::cref(connection),
+                                                                    boost::cref(entityState),
+                                                                    _2,
+                                                                    boost::ref(result)));
+        }
+
+        bool isGhost = !entityState.IsNoState() && entityState.GetEntityStateKind()==DistributionData::Ghost;
+        if (isGhost)
+        {
+            CleanGhosts(entityState.GetHandlerId(), context);
+        }
 
         return result;
     }
@@ -632,34 +662,69 @@ namespace Internal
 
         if (realState.GetRegistrationTime() < mostRecentRegisterTime)
         {
-            statePtr->SetReleased(true);
+            statePtr->SetReleased(true); 
+            DistributionData newRealState(no_state_tag);
+            newRealState = realState.GetEntityStateCopy(false); //we dont want the blob, since this is a delete.
+
+            //This is a ghost and has no owner. So probably it would be more correct to set explicitly deleted to false. 
+            //But this is a quick-fix to make DOPE react and delete this entity permanently without bigger changes.
+            newRealState.SetExplicitlyDeleted(true);
+
+            statePtr->SetRealState(newRealState);
         }
     }
 
+    void EntityType::FindAllHandlers(const ContextId context, const StateSharedPtr& statePtr, HandlerSet& handlers) const
+    {
+        bool gotIt=false;
+        Dob::Typesystem::HandlerId handler;
+
+        GetHandlerOfInstanceInternal(statePtr, handler, true, gotIt);
+        if (gotIt)
+        {
+            handlers.insert(handler);
+        }
+    }
 
     void EntityType::CleanGhosts(const Dob::Typesystem::HandlerId&  handlerId,
                                  const ContextId                    context)
     {
         ScopedTypeLock lck(m_typeLocks[context]);
 
-        RegisterTime mostRecentRegisterTime;
+        HandlerSet handlers;
+        if (handlerId==Safir::Dob::Typesystem::HandlerId::ALL_HANDLERS)
+        {
+            //We want to clean old ghost for all handlers. First find out which handlers exist.
+            m_entityStates[context].ForEachState(boost::bind(&EntityType::FindAllHandlers, this, context, _2, boost::ref(handlers)), false);
+        }
+        else
+        {
+            //Clean ghost for a specific handler only.
+            handlers.insert(handlerId);
+        }
 
-        // Make a first pass to find the most recent registration time for a ghost.
-        m_entityStates[context].ForEachState(boost::bind(&EntityType::GetMostRecentGhostRegTime,
-                                                         this,
-                                                         _2,
-                                                         boost::cref(handlerId),
-                                                         boost::ref(mostRecentRegisterTime)),
-                                             false); // false => Do not include released states
+        //Go through all handlers, one by one, and clean old ghosts.
+        for (HandlerSet::const_iterator it = handlers.begin(); it!=handlers.end(); ++it)
+        {               
+            RegisterTime mostRecentRegisterTime;
 
-        // Make a second pass and remove (set the state to released) any ghost that is older
-        // than the most recent registration time for any ghost.
-        m_entityStates[context].ForEachState(boost::bind(&EntityType::RemoveGhost,
+            // Make a first pass to find the most recent registration time for a ghost.
+            m_entityStates[context].ForEachState(boost::bind(&EntityType::GetMostRecentGhostRegTime,
                                                              this,
                                                              _2,
                                                              boost::cref(handlerId),
-                                                             boost::cref(mostRecentRegisterTime)),
-                                             false); // false => Do not include released states
+                                                             boost::ref(mostRecentRegisterTime)),
+                                                 false); // false => Do not include released states
+
+            // Make a second pass and remove (set the state to released) any ghost that is older
+            // than the most recent registration time for any ghost.
+            m_entityStates[context].ForEachState(boost::bind(&EntityType::RemoveGhost,
+                                                                 this,
+                                                                 _2,
+                                                                 boost::cref(handlerId),
+                                                                 boost::cref(mostRecentRegisterTime)),
+                                                 false); // false => Do not include released states
+        }
     }
 
     const Dob::Typesystem::HandlerId EntityType::GetHandlerOfInstance(const Dob::Typesystem::InstanceId& instanceId,
@@ -677,6 +742,7 @@ namespace Internal
                                                              this,
                                                              _2,
                                                              boost::ref(handlerId),
+                                                             false,
                                                              boost::ref(gotIt)),
                                                  true); // true => include released states
 
@@ -1473,9 +1539,11 @@ namespace Internal
                                                       RemoteSetResult&               remoteSetResult)
     {
         remoteSetResult = RemoteSetAccepted;
-
         bool needToCheckRegistrationState = true;
-        if (remoteEntity.GetEntityStateKind()==DistributionData::Ghost && remoteEntity.SourceIsPermanentStore())
+
+        if (!remoteEntity.IsNoState() &&
+            remoteEntity.GetEntityStateKind()==DistributionData::Ghost &&
+            remoteEntity.SourceIsPermanentStore())
         {
             needToCheckRegistrationState = false; //Ghosts from DOPE dont need a registration to be set.
         }
@@ -1882,14 +1950,27 @@ namespace Internal
 
     void EntityType::GetHandlerOfInstanceInternal(const StateSharedPtr& statePtr,
                                                   Dob::Typesystem::HandlerId& handlerId,
+                                                  bool includeGhosts,
                                                   bool& gotIt) const
     {
         gotIt = true;
         DistributionData realState = statePtr->GetRealState();
 
+        if (realState.IsNoState())
+        {
+            gotIt = false;
+            return;
+        }
+
+        bool correctStateKind = (realState.GetEntityStateKind() == DistributionData::Real);
+        if (!correctStateKind && includeGhosts)
+        {
+            correctStateKind = (realState.GetEntityStateKind() == DistributionData::Ghost);
+        }
+
         if (statePtr->IsReleased() ||
             !realState.HasBlob() ||
-            realState.GetEntityStateKind() != DistributionData::Real)
+            !correctStateKind)
         {
             gotIt = false;
             return;

@@ -223,6 +223,9 @@ namespace Internal
                      const Dob::Typesystem::HandlerId&  handlerId,
                      const ConnectionConsumerPair&      registerer) const;
 
+        typedef std::set<Dob::Typesystem::HandlerId> HandlerSet;
+        void FindAllHandlers(const ContextId context, const StateSharedPtr& statePtr, HandlerSet& handlers) const;
+
         const StateContainer::Iterator CreateEntityIterator(const ContextId context, bool& end) const
         {return m_entityStates[context].CreateStateIterator(end);}
 
@@ -367,6 +370,7 @@ namespace Internal
 
         void GetHandlerOfInstanceInternal(const StateSharedPtr&       statePtr,
                                           Dob::Typesystem::HandlerId& handlerId,
+                                          bool includeGhosts,
                                           bool& gotIt) const;
 
         void IsCreatedInternal(const StateSharedPtr& statePtr, bool& isCreated) const;
