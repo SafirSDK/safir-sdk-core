@@ -1977,16 +1977,16 @@ namespace Internal
                 return None;
             }
 
-            if (state.GetEntityStateKind() == DistributionData::Ghost)
-            {
-                //It is not possible for a ghost to not have a blob!
-                ENSURE (state.HasBlob(), << "A Ghost state must always have a blob! entity = " << state.GetEntityId());
-                return Ghost;
-            }
-
             if (!state.HasBlob())
             {
+                //A ghost without blob is actually a delete ghost, probably initiated by CleanGhosts
+                //and state None is the correct one even in that case.
                 return None;
+            }
+
+            if (state.GetEntityStateKind() == DistributionData::Ghost)
+            {
+                return Ghost;
             }
 
             return Real;
@@ -2328,89 +2328,12 @@ namespace Internal
                             (boost::bind(&Controller::DispatchSubscription, this, _1, _2, _3));
     }
 
-    bool Controller::ProcessInjectionSubscription(const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
+    Controller::InjectionData Controller::CreateInjectionData(const SubscriptionPtr& subscription)
     {
-        exitDispatch = false;
-        dontRemove = false;
-
+        DistributionData dispatchedInjection = DistributionData(no_state_tag);
         DistributionData realState = subscription->GetCurrentRealState();
         DistributionData injectionState = subscription->GetCurrentInjectionState();
-
-        // Check if this is an injection that is meant for the handler that has setup this subscription
-        Dob::Typesystem::HandlerId stateHandlerId;
-        if (realState.IsNoState() && injectionState.IsNoState())
-        {
-            // No real state and no injection state
-            return true; // Remove from queue and reset dirty flag
-        }
-        else if (!realState.IsNoState())
-        {
-            stateHandlerId = realState.GetHandlerId();
-        }
-        else
-        {
-            stateHandlerId = injectionState.GetHandlerId();
-        }
-
-        if (stateHandlerId != Dob::Typesystem::HandlerId(subscription->GetSubscriptionId().id))
-        {
-            // The state is not for this handler
-            return true;    // Remove from queue and reset dirty flag
-        }
-
-        bool injectionStateChanged = injectionState != subscription->GetLastInjectionState();
-
         const bool isGhost = !realState.IsNoState() && realState.GetEntityStateKind() == DistributionData::Ghost;
-
-        if (isGhost)
-        {
-            if (subscription->GetState()->IsReleased())
-            {
-                // This ghost is "deleted" and should not be used.
-                return true; // Remove from queue and reset dirty flag
-            }
-
-            if (!subscription->GetSubscriptionId().connectionConsumer.connection->
-                InitialInjectionInstanceExists(realState.GetTypeId(),
-                                               realState.GetHandlerId(),
-                                               realState.GetInstanceId()))
-            {
-                // This ghost is not expected to be dispatched.
-                return true; // Remove from queue and reset dirty flag
-            }   
-
-            if (NodeStatuses::Instance().AnyNodeHasStatus(NodeStatus::Starting))
-            {
-                // We won't start to inject ghosts as long as there are one or more nodes that are
-                // in state 'Starting'. This minimize the risk that we will signal OnInitialInjectionsDone
-                // before all ghosts are received from remote nodes.
-                dontRemove = true;
-                return false;  // Don't remove from queue and don't reset dirty flag
-            }
-            else if (!NodeStatuses::Instance().AnyNodeHasStatus(NodeStatus::Failed))
-            {
-                // Ok, it seems that all nodes are either Started or Expected (has never been started).
-                // In this case we know that we have got the pools, and thus the ghosts, from all nodes so
-                // we can clean-up the ghosts and only save the ones from the newest registration.
-                EntityTypes::Instance().CleanGhosts(realState.GetTypeId(), stateHandlerId, GetContext());
-
-                // Check if the clean-up has "deleted" this ghost state 
-                if (subscription->GetState()->IsReleased())
-                {
-                    // This ghost is "deleted" and should not be used.
-                    return true; // Remove from queue and reset dirty flag
-                }
-            }
-        }
-
-        if (!injectionStateChanged && !isGhost)
-        {
-            // We are only interested if there is a change of the injection state or if the real state is a ghost.
-            return true; // Remove from queue and reset dirty flag
-        }
-
-        DistributionData dispatchedInjection = DistributionData(no_state_tag);
-
 
         if (!realState.IsNoState() && !injectionState.IsNoState())
         {
@@ -2432,8 +2355,7 @@ namespace Internal
             // If a merge was not performed, then we are interested only if the real state is a ghost
             if (!mergeResult.second && !isGhost)
             {
-                subscription->SetLastInjectionState(injectionState);
-                return true; // Remove from queue and reset dirty flag
+                return std::make_pair<InjectionDispatchAction, DistributionData>(NoAction, DistributionData(no_state_tag));
             }
             dispatchedInjection = mergeResult.first;
 
@@ -2451,23 +2373,13 @@ namespace Internal
             if (!isGhost)
             {
                 // Then we are interested only if the real state is a ghost
-                subscription->SetLastInjectionState(injectionState);
-                return true; // Remove from queue and reset dirty flag
+                return std::make_pair<InjectionDispatchAction, DistributionData>(NoAction, DistributionData(no_state_tag));
             }
         }
 
         // At this point a merge has been performed and/or we are handling a ghost.
 
-        // Find out what callback to dispatch to application.
-        enum DispatchAction
-        {
-            NoAction,
-            NewCallback,
-            UpdateCallback,
-            DeleteCallback
-        };
-
-        DispatchAction dispatchAction = NoAction;
+        InjectionDispatchAction dispatchAction = NoAction;
 
         if (realState.IsNoState() || !realState.HasBlob() || isGhost)
         {
@@ -2512,52 +2424,43 @@ namespace Internal
             dispatchedInjection.SetExplicitlyDeleted(true);
         }
 
+        return std::make_pair<InjectionDispatchAction, DistributionData>(dispatchAction, dispatchedInjection);
+    }
+
+    bool Controller::DispatchInjection(const InjectionData& injection, const SubscriptionPtr& subscription, bool& confirmInjection)
+    {
+        const InjectionDispatchAction& action = injection.first;
+        const DistributionData& injectedEntity = injection.second;
+        
         const ConsumerId consumer = subscription->GetSubscriptionId().connectionConsumer.consumer;
-        const Typesystem::TypeId typeId = dispatchedInjection.GetTypeId();
-        const Typesystem::InstanceId instanceId = dispatchedInjection.GetInstanceId();
-        const Typesystem::EntityId entityId(typeId, instanceId);
+        DistributionData realState = subscription->GetCurrentRealState();
+        DistributionData injectionState = subscription->GetCurrentInjectionState();
 
-        if (dispatchAction == NoAction)
-        {
-            // Nothing to dispatch to app, but the state must be updated anyway.
-            // This is the case when we have a "newer" delete-inject for a non existing instance.
-            EntityTypes::Instance().AcceptInjection(connection,
-                                                    dispatchedInjection,
-                                                    injectionState);
+        bool dontRemove = false;
 
-            // ... and we also have to mark this delet-inject instance as "handled" even though it will not
-            // be dispatched to the app.
-            InitialInjectionHandled(Dob::Typesystem::HandlerId(subscription->GetSubscriptionId().id),
-                                    consumer,
-                                    typeId,
-                                    instanceId);
-
-            subscription->SetLastInjectionState(injectionState);
-            return true; // Remove from queue and reset dirty flag
-        }
-
-        // Ok, it's time to make a callback to the app
-
-        // Initialize some member variables that can be altered by the application in the callback (we will check them
-        // when the callback returns).
         m_postpone = false;
         m_postponeCurrent = false;
         m_incompleteInjection = false;
         m_setInjectedEntity = false;
         m_deleteInjectedEntity = false;
-        m_dispatchedInjection = dispatchedInjection;
+        m_dispatchedInjection = injection.second;
         m_originalInjectionState = injectionState;
 
-        bool confirmInjection = true;
-
-        switch (dispatchAction)
+        switch (action)
         {
+        case NoAction:
+            {
+                confirmInjection = !injection.second.IsNoState();
+                dontRemove=false; // Remove from queue and reset dirty flag
+            }
+            break;
+
         case NewCallback:
             {
                 // We are going to dispatch an OnInjectedNewEntity
 
                 if (m_postponedTypes.IsPostponed(consumer,
-                                                 typeId,
+                                                 injectedEntity.GetTypeId(),
                                                  CallbackId::OnInjectedNewEntity))
                 {
                     dontRemove = true;
@@ -2566,7 +2469,7 @@ namespace Internal
                 else
                 {
                     // Make the callback to the app
-                    m_dispatcher.InvokeOnInjectedNewEntityCb(consumer, dispatchedInjection);
+                    m_dispatcher.InvokeOnInjectedNewEntityCb(consumer, injectedEntity);
 
                     // Check that the app hasn't invoked multiple actions
                     CheckAppInjectionAction(m_postpone, m_incompleteInjection, m_setInjectedEntity, m_deleteInjectedEntity);
@@ -2574,7 +2477,7 @@ namespace Internal
                     if (m_postpone)
                     {
                         m_postponedTypes.Postpone(consumer,
-                                                  typeId,
+                                                  injectedEntity.GetTypeId(),
                                                   CallbackId::OnInjectedNewEntity);
                         if (m_postponeCurrent)
                         {
@@ -2591,7 +2494,7 @@ namespace Internal
                 // We are going to dispatch an OnInjectedUpdatedEntity
 
                 if (m_postponedTypes.IsPostponed(consumer,
-                                                 typeId,
+                                                 injectedEntity.GetTypeId(),
                                                  CallbackId::OnInjectedUpdatedEntity))
                 {
                     dontRemove = true;
@@ -2600,7 +2503,7 @@ namespace Internal
                 else
                 {
                     // Make the callback to the app
-                    m_dispatcher.InvokeOnInjectedUpdatedEntityCb(consumer, dispatchedInjection, realState);
+                    m_dispatcher.InvokeOnInjectedUpdatedEntityCb(consumer, injectedEntity, realState);
 
                     // Check that the app hasn't invoked multiple actions
                     CheckAppInjectionAction(m_postpone, m_incompleteInjection, m_setInjectedEntity, m_deleteInjectedEntity);
@@ -2608,7 +2511,7 @@ namespace Internal
                     if (m_postpone)
                     {
                         m_postponedTypes.Postpone(consumer,
-                                                  typeId,
+                                                  injectedEntity.GetTypeId(),
                                                   CallbackId::OnInjectedUpdatedEntity);
                         if (m_postponeCurrent)
                         {
@@ -2625,7 +2528,7 @@ namespace Internal
                 // We are going to dispatch an OnInjectedDeletedEntity
 
                 if (m_postponedTypes.IsPostponed(consumer,
-                                                 typeId,
+                                                 injectedEntity.GetTypeId(),
                                                  CallbackId::OnInjectedDeletedEntity))
                 {
                     dontRemove = true;
@@ -2634,7 +2537,7 @@ namespace Internal
                 else
                 {
                     // Make the callback to the app
-                    m_dispatcher.InvokeOnInjectedDeletedEntityCb(consumer, dispatchedInjection, realState);
+                    m_dispatcher.InvokeOnInjectedDeletedEntityCb(consumer, injectedEntity, realState);
 
                     // Check that the app hasn't invoked multiple actions
                     CheckAppInjectionAction(m_postpone, m_incompleteInjection, m_setInjectedEntity, m_deleteInjectedEntity);
@@ -2642,7 +2545,7 @@ namespace Internal
                      if (m_postpone)
                      {
                          m_postponedTypes.Postpone(consumer,
-                                                   typeId,
+                                                   injectedEntity.GetTypeId(),
                                                    CallbackId::OnInjectedDeletedEntity);
                          if (m_postponeCurrent)
                          {
@@ -2656,6 +2559,121 @@ namespace Internal
 
         default:
             ENSURE(false, << "Unexpected dispatchAction!");
+        }
+
+        return dontRemove;
+    }
+
+    
+
+    bool Controller::ProcessInjectionSubscription(const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
+    {
+        exitDispatch = false;
+        dontRemove = false;
+
+        DistributionData realState = subscription->GetCurrentRealState();
+        DistributionData injectionState = subscription->GetCurrentInjectionState();
+
+        // Check if this is an injection that is meant for the handler that has setup this subscription
+        Dob::Typesystem::HandlerId stateHandlerId;
+        Typesystem::EntityId entityId;
+        if (realState.IsNoState() && injectionState.IsNoState())
+        {
+            // No real state and no injection state
+            return true; // Remove from queue and reset dirty flag
+        }
+        else if (!realState.IsNoState())
+        {
+            entityId = realState.GetEntityId();
+            stateHandlerId = realState.GetHandlerId();
+        }
+        else
+        {
+            entityId = injectionState.GetEntityId();
+            stateHandlerId = injectionState.GetHandlerId();
+        }
+
+        if (stateHandlerId != Dob::Typesystem::HandlerId(subscription->GetSubscriptionId().id))
+        {
+            // The state is not for this handler
+            return true;    // Remove from queue and reset dirty flag
+        }
+
+        bool injectionStateChanged = injectionState != subscription->GetLastInjectionState();
+
+        const bool isGhost = !realState.IsNoState() && realState.GetEntityStateKind() == DistributionData::Ghost;
+
+        if (isGhost)
+        {
+            if (subscription->GetState()->IsReleased())
+            {
+                // This ghost is "deleted" and should not be used.
+                InitialInjectionHandled(Dob::Typesystem::HandlerId(subscription->GetSubscriptionId().id),
+                                    subscription->GetSubscriptionId().connectionConsumer.consumer,
+                                    entityId.GetTypeId(),
+                                    entityId.GetInstanceId());
+                return true; // Remove from queue and reset dirty flag
+            }
+
+            if (!subscription->GetSubscriptionId().connectionConsumer.connection->
+                InitialInjectionInstanceExists(realState.GetTypeId(),
+                                               realState.GetHandlerId(),
+                                               realState.GetInstanceId()))
+            {
+                // This ghost is not expected to be dispatched.
+                InitialInjectionHandled(Dob::Typesystem::HandlerId(subscription->GetSubscriptionId().id),
+                                    subscription->GetSubscriptionId().connectionConsumer.consumer,
+                                    entityId.GetTypeId(),
+                                    entityId.GetInstanceId());
+                return true; // Remove from queue and reset dirty flag
+            }
+
+            if (NodeStatuses::Instance().AnyNodeHasStatus(NodeStatus::Starting))
+            {
+                // We won't start to inject ghosts as long as there are one or more nodes that are
+                // in state 'Starting'. This minimize the risk that we will signal OnInitialInjectionsDone
+                // before all ghosts are received from remote nodes.
+                dontRemove = true;
+                return false;  // Don't remove from queue and don't reset dirty flag
+            }
+            else if (!NodeStatuses::Instance().AnyNodeHasStatus(NodeStatus::Failed))
+            {
+                // Ok, it seems that all nodes are either Started or Expected (has never been started).
+                // In this case we know that we have got the pools, and thus the ghosts, from all nodes so
+                // we can clean-up the ghosts and only save the ones from the newest registration.
+                EntityTypes::Instance().CleanGhosts(realState.GetTypeId(), stateHandlerId, GetContext());
+
+                // Check if the clean-up has "deleted" this ghost state 
+                if (subscription->GetState()->IsReleased())
+                {
+                    // This ghost is "deleted" and should not be used.
+                    InitialInjectionHandled(Dob::Typesystem::HandlerId(subscription->GetSubscriptionId().id),
+                                    subscription->GetSubscriptionId().connectionConsumer.consumer,
+                                    entityId.GetTypeId(),
+                                    entityId.GetInstanceId());
+                    return true; // Remove from queue and reset dirty flag
+                }
+            }
+        }
+
+        if (!injectionStateChanged && !isGhost)
+        {
+            // We are only interested if there is a change of the injection state or if the real state is a ghost.
+            return true; // Remove from queue and reset dirty flag
+        }
+
+        bool confirmInjection = true;
+        InjectionData injection =  CreateInjectionData(subscription);
+        dontRemove = DispatchInjection(injection, subscription, confirmInjection);
+
+        const InjectionDispatchAction& dispatchAction = injection.first; //Get a better name
+        DistributionData& dispatchedInjection = injection.second; //Get a better name
+        
+        const ConsumerId consumer = subscription->GetSubscriptionId().connectionConsumer.consumer;
+        const Safir::Dob::Internal::ConnectionPtr connection = subscription->GetSubscriptionId().connectionConsumer.connection;
+        if (!dispatchedInjection.IsNoState())
+        {
+            entityId = dispatchedInjection.GetEntityId();
         }
 
         if (m_incompleteInjection)
@@ -2673,15 +2691,17 @@ namespace Internal
             EntityTypes::Instance().AcceptInjection(connection, dispatchedInjection, injectionState);
         }
 
-
-        if (dispatchAction == NewCallback && (confirmInjection || m_setInjectedEntity || m_deleteInjectedEntity))
+        if (
+            (dispatchAction == NoAction) ||
+            (dispatchAction == NewCallback && (confirmInjection || m_setInjectedEntity || m_deleteInjectedEntity))
+           )
         {
             // A new instance has been accepted or rejected by the app, check if an OninitialInjectionDone
             // should be sent for this type
             InitialInjectionHandled(Dob::Typesystem::HandlerId(subscription->GetSubscriptionId().id),
                                     consumer,
-                                    typeId,
-                                    instanceId);
+                                    entityId.GetTypeId(),
+                                    entityId.GetInstanceId());
         }
 
         exitDispatch = m_exitDispatch;

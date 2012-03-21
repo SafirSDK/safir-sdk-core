@@ -440,6 +440,19 @@ namespace Internal
                                      const bool setInjectedEntity,
                                      const bool deleteInjectedEntity) const;
 
+        enum InjectionDispatchAction
+        {
+            NoAction,
+            NewCallback,
+            UpdateCallback,
+            DeleteCallback
+        };
+
+        typedef std::pair<InjectionDispatchAction, DistributionData> InjectionData;
+
+        InjectionData CreateInjectionData(const SubscriptionPtr& subscription);
+        bool DispatchInjection(const InjectionData& injection, const SubscriptionPtr& subscription, bool& confirmInjection);
+
         //---------------------------------
         // Revoked registrations
         //---------------------------------
