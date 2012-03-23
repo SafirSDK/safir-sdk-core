@@ -620,7 +620,7 @@ namespace Internal
             // The unregistration is not for this handler.
             return;
         }
-     
+
         statePtr->SetConnection(ConnectionPtr());
         statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0)));
 

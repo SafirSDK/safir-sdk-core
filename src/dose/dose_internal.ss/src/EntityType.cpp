@@ -465,7 +465,7 @@ namespace Internal
                                                                 _2));
     }
 
-    void EntityType::RemoteSetDeleteEntityState(const DistributionData&   entityState)
+    RemoteSetResult EntityType::RemoteSetDeleteEntityState(const DistributionData&   entityState)
     {
         const ContextId context = entityState.GetSenderId().m_contextId;
 
@@ -476,6 +476,7 @@ namespace Internal
                                     ", which is ContextShared, in context " << context);
         }
 
+        RemoteSetResult result = RemoteSetAccepted;
         {
             ScopedTypeLock lck(m_typeLocks[context]);
 
@@ -485,7 +486,8 @@ namespace Internal
                                                         boost::bind(&EntityType::RemoteSetDeleteEntityStateInternal,
                                                                     this,
                                                                     boost::cref(entityState),
-                                                                    _2));
+                                                                    _2,
+                                                                    boost::ref(result)));
         }
 
         bool isGhost = !entityState.IsNoState() && entityState.GetEntityStateKind()==DistributionData::Ghost;
@@ -493,6 +495,8 @@ namespace Internal
         {
             CleanGhosts(entityState.GetHandlerId(), context);
         }
+
+        return result;
     }
 
     RemoteSetResult EntityType::RemoteSetRealEntityState(const ConnectionPtr&      connection,
@@ -1434,8 +1438,11 @@ namespace Internal
     }
 
     void EntityType::RemoteSetDeleteEntityStateInternal(const DistributionData&         remoteEntity,
-                                                        const StateSharedPtr&           statePtr)
-    {        
+                                                        const StateSharedPtr&           statePtr,
+                                                        RemoteSetResult& result)
+    {     
+        result = RemoteSetAccepted;
+
         bool needToCheckRegistrationState = true;        
 
         DistributionData localEntity = statePtr->GetRealState();
@@ -1447,6 +1454,7 @@ namespace Internal
             if (remoteEntity.GetRegistrationTime() < localEntity.GetRegistrationTime())
             {
                 // The remote delete state belongs to an old registration state. Skip it!
+                result = RemoteSetDiscarded;
                 return;
             }
             else if (localEntity.GetRegistrationTime() < remoteEntity.GetRegistrationTime())
@@ -1455,8 +1463,11 @@ namespace Internal
                 // the local entity is not a ghost.
                 if (localEntity.GetEntityStateKind() != DistributionData::Ghost)
                 {
+                    result = RemoteSetNeedRegistration;
                     return;
                 }
+                
+                //if localEntity is a ghost, then just delete it the normal way.
             }
             else
             {
@@ -1464,6 +1475,7 @@ namespace Internal
                 // as the remote entity state.
                 if (!RemoteEntityStateIsAccepted(remoteEntity, localEntity))
                 {
+                    result = RemoteSetDiscarded;
                     return;
                 }
 
@@ -1499,6 +1511,7 @@ namespace Internal
             else if (remoteEntity.GetRegistrationTime() < regStatePtr->GetRealState().GetRegistrationTime())
             {
                 // There is already a newer registration. Discard the remote state.
+                result = RemoteSetDiscarded;
                 return;
             }
         }
@@ -1612,14 +1625,12 @@ namespace Internal
             {
                 // There is no registration state or it is an old one
                 remoteSetResult = RemoteSetNeedRegistration;
-
                 return;
             }
             else if (remoteEntity.GetRegistrationTime() < regStatePtr->GetRealState().GetRegistrationTime())
             {
                 // There is already a newer registration state
                 remoteSetResult = RemoteSetDiscarded;
-
                 return;
             }
         }

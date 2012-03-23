@@ -175,7 +175,7 @@ namespace Internal
         void RemoteSetInjectionEntityState(const DistributionData& entityState);
 
         /** Set a delete (an end state) from external node */
-        void RemoteSetDeleteEntityState(const DistributionData&   entityState);
+        RemoteSetResult RemoteSetDeleteEntityState(const DistributionData&   entityState);
 
         /** Set a state (that is not an injection or delete state) from external node. */
         RemoteSetResult RemoteSetRealEntityState(const ConnectionPtr&      connection,
@@ -322,7 +322,8 @@ namespace Internal
                                                    const StateSharedPtr&          statePtr);
 
         void RemoteSetDeleteEntityStateInternal(const DistributionData&     remoteEntity,
-                                                const StateSharedPtr&       statePtr);
+                                                const StateSharedPtr&       statePtr,
+                                                RemoteSetResult& result);
 
         void RemoteSetRealEntityStateInternal(const ConnectionPtr&           connection,
                                               const DistributionData&        remoteEntity,
