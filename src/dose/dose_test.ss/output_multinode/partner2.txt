@@ -3314,6 +3314,26 @@ Consumer 0: OnNewEntity:
     MoreInfo
 
 ==========================================================================
+TESTCASE 1250
+Description: Test that a split/join between two nodes, where node 0 contains an old ghost and node one has an existing handler while joining the nodes. Partner 0 Register a handler. Partner 2 register a pending handler. Partner 2 subscribes. Disconnect nodes. Partner 0 creates an instances and then unregisters. Connect nodes again.
+Expectation: After join: No entities and no ghosts shall exist on any node.
+--------- Setup -----------
+InhibitOutgoingTraffic set to 1
+Consumer 0: OnCompletedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = DEFAULT_HANDLER
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = DEFAULT_HANDLER
+
+--------- Test  -----------
+InhibitOutgoingTraffic set to 0
+Consumer 0: OnRevokedRegistration:
+  Type      = DoseTest.SynchronousVolatileEntity
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
 TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing
