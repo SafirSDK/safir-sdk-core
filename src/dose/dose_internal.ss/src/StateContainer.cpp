@@ -322,7 +322,7 @@ namespace Internal
             // State found
             std::pair<StateSharedPtr, bool> UpgradeStatePtr = it->second.UpgradeAndGet();
             statePtr = UpgradeStatePtr.first;
-            if((statePtr == NULL) || UpgradeStatePtr.second)
+            if (statePtr == NULL || statePtr->IsReleased() || UpgradeStatePtr.second)
             {
                 // The state pointer is NULL (this can happen if the found pointer is a weak pointer that is NULL
                 // but it hasn't yet been removed from the container) OR the state is released. In both cases
@@ -392,20 +392,17 @@ namespace Internal
             statePtr = newStateSharedPtr;
         }
 
-        // Release m_states writer lock
-        wlock.unlock();
-
         // Lock the meta subscriptions
         ScopedMetaSubLock metaSubLock(m_metaSubLock);
 
-        // Lock State
-        boost::interprocess::scoped_lock<State::StateLock> stateLock(statePtr->m_lock);
-                        
         // Check each meta subscription and create subscriptions accordingly
         for(MetaSubscriptions::const_iterator metaIt = m_metaSubscriptions.begin(); metaIt != m_metaSubscriptions.end(); ++metaIt)
         {
             if (metaIt->second.IsSubscribed(key))
             {
+                // Lock State
+                boost::interprocess::scoped_lock<State::StateLock> stateLock(statePtr->m_lock);
+                        
                 statePtr->AddSubscription(metaIt->first,
                                           false,                // don't mark as dirty
                                           false,
