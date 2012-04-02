@@ -2797,6 +2797,29 @@ Consumer 0: OnNewEntity:
     MoreInfo
 
 ==========================================================================
+TESTCASE 1250
+Description: Test that a split/join between two nodes, where node 0 contains an old ghost and node one has an existing handler while joining the nodes. Partner 0 Register a handler. Partner 2 register a pending handler. Partner 2 subscribes. Disconnect nodes. Partner 0 creates an instances and then unregisters. Connect nodes again.
+Expectation: After join: No entities and no ghosts shall exist on any node.
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnNewEntity:
+  EntityId  = (DoseTest.SynchronousVolatileEntity, 123)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <object xmlns="urn:safir-dots-unit"><name>Safir.Dob.ConnectionInfo</name><members><member><name>NodeNumber</name><value>0</value></member><member><name>ConnectionName</name><value xml:space="preserve">Server_0;0;partner_test_connection;0</value></member><member><name>ConnectionId</name></member></members></object>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Kalle</value></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+
+Consumer 0: OnDeletedEntity:
+  EntityId       = (DoseTest.SynchronousVolatileEntity, 123)
+  deletedByOwner = false
+  Owner          = DEFAULT_HANDLER
+  OwnerStr  = DEFAULT_HANDLER
+  Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Kalle</value></member></members></object>
+
+==========================================================================
 TESTCASE 9999
 Description: Empty Test case
 Expectation: Nothing
