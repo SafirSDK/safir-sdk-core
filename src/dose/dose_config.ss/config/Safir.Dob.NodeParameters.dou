@@ -59,6 +59,16 @@
             <value>1</value>
         </parameter>
         <parameter>
+            <summary>Specifies for every context wether or not it is a local context. The array length must correspond to the NumberOfContexts parameter above.</summary>
+            <name>LocalContexts</name>
+            <type>Boolean</type>
+            <arrayElements>
+                <arrayElement>
+                    <value>False</value> <!-- context 0 is not allowed to be local (must be False) -->
+                </arrayElement>
+            </arrayElements>
+        </parameter>
+        <parameter>
             <summary>The number of nodes in the system. Must correspond to the Nodes parameter below.</summary>
             <name>NumberOfNodes</name>
             <type>Int32</type>

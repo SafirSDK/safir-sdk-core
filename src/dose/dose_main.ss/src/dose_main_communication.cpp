@@ -244,6 +244,24 @@ namespace Internal
 
     const Typesystem::Int32 NumberOfNodes = Safir::Dob::NodeParameters::NumberOfNodes();
 
+    static void CheckParameters()
+    {
+        if (Safir::Dob::NodeParameters::NumberOfContexts() < 1)
+        {
+            lllerr << "The parameter Safir.Dob.NodeParameters.NumberOfContexts must be > 0" << std::endl
+                   << "Please correct this and try again!" << std::endl;
+            exit(-1);            
+        }
+        else if (Safir::Dob::NodeParameters::LocalContextsArraySize() != Safir::Dob::NodeParameters::NumberOfContexts())
+        {
+            lllerr << "The parameter Safir.Dob.NodeParameters.NumberOfContexts" << std::endl
+                   << "does not correspond to the size of the parameter array" << std::endl
+                   << "Safir.Dob.NodeParameters.LocalContexts." << std::endl
+                   << "Please correct this and try again!" << std::endl;
+            exit(-1);
+        }
+    }
+
     ExternNodeCommunication::ExternNodeCommunication():
         m_thisNode(Safir::Dob::ThisNodeParameters::NodeNumber()),
         m_queueIsFull(new AtomicUint32 [NUM_PRIORITY_CHANNELS]),
@@ -254,6 +272,7 @@ namespace Internal
         m_queueNotFullEvent(0),
         m_startPoolDistributionEvent(0)
     {
+        CheckParameters();
 
         for (int i = 0; i< NUM_PRIORITY_CHANNELS; ++i)
         {
@@ -345,8 +364,9 @@ namespace Internal
                 bool dummyBool;
                 m_QualityOfServiceData.GetQualityOfServiceInfo(msg.GetTypeId(),
                                                                distributionChannel,dummyInt,dummyBool);
-                //if the distribution channel is "local", dont send the object
-                if (m_QualityOfServiceData.IsLocal(distributionChannel))
+                //Don't send the object if the distribution channel is "local", or if it belongs to a "local" context.
+                if (m_QualityOfServiceData.IsLocal(distributionChannel) ||
+                    Safir::Dob::NodeParameters::LocalContexts(msg.GetSenderId().m_contextId) == true)
                 {
                     return;
                 }
@@ -554,8 +574,9 @@ namespace Internal
             }
         }
 
-        //if the distribution channel is "local", dont send the object
-        if (m_QualityOfServiceData.IsLocal(distributionChannel))
+        //Don't send the object if the distribution channel is "local", or if it belongs to a "local" context.
+        if (m_QualityOfServiceData.IsLocal(distributionChannel) ||
+            Safir::Dob::NodeParameters::LocalContexts(data.GetSenderId().m_contextId) == true)
         {
             return true;
         }
