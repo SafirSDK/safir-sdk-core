@@ -401,7 +401,7 @@ int main(int argc, char* argv[])
             Sequencer sequencer(commandLine.first, commandLine.last, languages, commandLine.noTimeout, context, commandLine.multicastNic);
             while (!sequencer.IsFinished())
             {
-                ACE_Time_Value time(ACE_Time_Value(0,150000)); //150ms
+                ACE_Time_Value time(ACE_Time_Value(0,250000)); //250ms
                 ACE_Reactor::instance()->run_reactor_event_loop(time);
                 sequencer.Tick();
             }
