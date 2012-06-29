@@ -55,7 +55,7 @@ namespace Parser
         virtual bool Match(const std::string& name, ParseState& state) const = 0;
         virtual const std::string& Name() const = 0;
         virtual void Parse(boost::property_tree::ptree& pt, ParseState& state) = 0;
-        virtual void Reset() = 0;
+        virtual void Reset(ParseState& state) = 0;
         virtual const ElementParserBase * const Parent() const {return m_parent;}
         virtual std::string Path() const
         {
@@ -80,7 +80,7 @@ namespace Parser
     //but can be expanded to allow any number of choices.
     //See the macros defined below the class.
     //------------------------------------------------------------
-    template <class A, class B>
+    template <class A, class B, class Occurrence>
     class Choice : public ElementParserBase
     {
     public:
@@ -143,19 +143,31 @@ namespace Parser
             m_parser->Parse(pt, state); //Will crash if called before a successfull call to Match. By design.
         }
 
-        virtual void Reset()
+        virtual void Reset(ParseState& state)
         {
+            if (m_parser)
+            {
+                m_parser->Reset(state);
+            }
+            else if (!m_occurrences)
+            {
+                std::ostringstream ss;
+                ss<<"Expecting one of following elements: "<<ElementName();
+                throw ParseError("Wrong number of occurrences", ss.str(), state.CurrentPath);
+            }
             m_parser.reset(); //m_parser set to 0, and is now ready to match any of A and B again.
+            m_occurrences.Reset();
         }
 
     private:
+        Occurrence m_occurrences;
         mutable ElementParserBasePtr m_parser; //This is instatiated during first call to Match.
     };
     //Macros for choice between more than two alternatives. Expand further if needed.
-    #define ELEMENT_CHOICE_2(A,B) Choice<A, B>
-    #define ELEMENT_CHOICE_3(A,B,C) Choice<A, ELEMENT_CHOICE_2(B, C) >
-    #define ELEMENT_CHOICE_4(A,B,C,D) Choice<A, ELEMENT_CHOICE_3(B,C,D) >
-    #define ELEMENT_CHOICE_5(A,B,C,D) Choice<A, ELEMENT_CHOICE_4(B,C,D,E) >
+    #define ELEMENT_CHOICE_2(A,B,Occurrence) Choice<A, B, Occurrence >
+    #define ELEMENT_CHOICE_3(A,B,C,Occurrence) Choice<A, ELEMENT_CHOICE_2(B, C, Occurrence), Occurrence >
+    #define ELEMENT_CHOICE_4(A,B,C,D,Occurrence) Choice<A, ELEMENT_CHOICE_3(B,C,D,Occurrence), Occurrence >
+    #define ELEMENT_CHOICE_5(A,B,C,D,E,Occurrence) Choice<A, ELEMENT_CHOICE_4(B,C,D,E,Occurrence), Occurrence >
 
     //------------------------------------------------------------
     //Helper element class that allows an element to be ignored
@@ -171,8 +183,19 @@ namespace Parser
         virtual bool Match(const std::string& name, ParseState&) const {return MatchElementName(name);}
         virtual const std::string& Name() const {return ElementName();}
         virtual void Parse(boost::property_tree::ptree&, ParseState&) {}
-        virtual void Reset() {}
+        virtual void Reset(ParseState&) {}
     };
+    
+    class IgnoreAny : public ElementParserBase
+    {
+    public: 
+        explicit IgnoreAny() {}
+        explicit IgnoreAny(const ElementParserBase* parent) : ElementParserBase(parent) {}        
+        virtual bool Match(const std::string&, ParseState&) const {return true;}
+        virtual const std::string& Name() const {static std::string dummy=""; return dummy;}
+        virtual void Parse(boost::property_tree::ptree&, ParseState&) {}
+        virtual void Reset(ParseState&) {}
+    };    
 
     //---------------------------------------------------------------------------------
     //Generic element class representing an element and contains all its subelements.
@@ -185,12 +208,12 @@ namespace Parser
     {
     public:
 
-        explicit Element() : ElementParserBase(), m_subElements(), m_occurrences(), m_parseAlgorithm()
+        explicit Element() : m_used(false), ElementParserBase(), m_subElements(), m_occurrences(), m_parseAlgorithm()
         {
             InitSubElements< boost::mpl::size<SubElem>::type::value - 1 >();
         }
 
-        explicit Element(const ElementParserBase* parent) : ElementParserBase(parent), m_subElements(), m_occurrences()
+        explicit Element(const ElementParserBase* parent) : m_used(false), ElementParserBase(parent), m_subElements(), m_occurrences()
         {
             InitSubElements< boost::mpl::size<SubElem>::type::value - 1 >();
         }
@@ -215,16 +238,27 @@ namespace Parser
             return MatchElementName(name);
         }
 
-        virtual void Reset()
+        virtual void Reset(ParseState& state)
         {
+            if (m_used)
+            {
+                std::for_each(m_subElements.begin(), m_subElements.end(), boost::bind(&ElementParserBase::Reset, _1, boost::ref(state)));
+            }
+            CheckOccurrence(state);
+            m_used=false;
             m_occurrences.Reset();
-            std::for_each(m_subElements.begin(), m_subElements.end(), boost::bind(&ElementParserBase::Reset, _1));
         }
 
         virtual void Parse(boost::property_tree::ptree& pt, ParseState& state)
         {
+            if (m_used)
+            {
+                std::for_each(m_subElements.begin(), m_subElements.end(), boost::bind(&ElementParserBase::Reset, _1, boost::ref(state)));
+            }
+            m_used=true;
+            ++m_occurrences;
             CheckOccurrence(state);
-
+            
             //Handle element data.
             m_parseAlgorithm(pt, state);
 
@@ -255,20 +289,28 @@ namespace Parser
         }
        
     private:
+        bool m_used;
         ElementParserBaseVector m_subElements;
         Occurrence m_occurrences;
         Algorithm m_parseAlgorithm;
 
         void CheckOccurrence(ParseState& state)
-        {
-            ++m_occurrences;
+        {            
             if (!m_occurrences)
             {
                 std::ostringstream ss;
-                ss<<"Element '"<<Name()<<"' only allowed to occur between "<<m_occurrences.MinOccurrences<<" and "<<m_occurrences.MaxOccurrences<<" times at location "<<Parent()->Path();
+#pragma warning(disable:4127) //Get rid of warning that this if-expression is constant (comparing two constants)
+                if (m_occurrences.MinOccurrences==m_occurrences.MaxOccurrences)
+                {
+                    ss<<"Element '"<<Name()<<"' must occur exactly "<<m_occurrences.MinOccurrences<<" time(s) at location "<<Parent()->Path()<<". Number of occurrences="<<m_occurrences();
+                }
+                else
+                {
+                    ss<<"Element '"<<Name()<<"' only allowed to occur between "<<m_occurrences.MinOccurrences<<" and "<<m_occurrences.MaxOccurrences<<" times at location "<<Parent()->Path()<<". Number of occurrences="<<m_occurrences();
+                }
+#pragma warning(default:4996)
                 throw ParseError("Wrong number of occurrences", ss.str(), state.CurrentPath);
-            }
-            std::for_each(m_subElements.begin(), m_subElements.end(), boost::bind(&ElementParserBase::Reset, _1));
+            }            
         }
 
         template <int N> void InitSubElements()

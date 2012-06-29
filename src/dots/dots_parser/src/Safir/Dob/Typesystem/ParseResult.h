@@ -48,7 +48,7 @@ namespace Parser
         std::string Summary;
         std::string Name;
         std::string TypeName;
-        bool IsArray;       
+        bool IsArray;
 
         //Values will contain the parameter value as a string.
         //- If type is 'String' the value can be grabbed as is.
@@ -62,7 +62,7 @@ namespace Parser
 
         ParameterDefinition() : IsArray(false) {}
     };
-    typedef std::vector<ParameterDefinition> ParameterDefinitions;    
+    typedef std::vector<ParameterDefinition> ParameterDefinitions;
 
     /**
      * Definition of a class member.
@@ -73,7 +73,7 @@ namespace Parser
         std::string Name;
         std::string TypeName;
         bool IsArray;
-        int ArraySize; //If IsArray an ArraySize<0 its an dynamic array.
+        int ArraySize; //If IsArray and ArraySize<0 its an dynamic array.
         int MaxLength; //Max string length. Only applicable if TypeName is 'String'.
 
         ClassMemberDefinition() : IsArray(false), ArraySize(0), MaxLength(0) {}
@@ -88,6 +88,9 @@ namespace Parser
         std::string Summary;
         std::string Name;
         std::string TypeName;
+        bool IsArray;
+
+        PropertyMemberDefinition() : IsArray(false) {}
     };
     typedef std::vector<PropertyMemberDefinition> PropertyMemberDefinitions;
 
@@ -104,6 +107,22 @@ namespace Parser
         MemberValueVector MemberValues;
     };
     typedef std::vector<CreateRoutineDefinition> CreateRoutineDefinitions;
+
+    /**
+     * Definition of a mapping between a property member and a value, parameter value,
+     * class member, or null.
+     */
+    typedef std::pair<std::string, int> MemberReference; //pair <Member, Index>
+    typedef std::vector<MemberReference> MemberReferenceVector;
+    struct MappedMemberDefinition
+    {
+        enum MappingKind {NullMapping, ValueMapping, MemberMapping};
+        std::string Name;
+        MappingKind Kind;
+        std::string Value;
+        MemberReferenceVector MemberReferences; //pair<MemberName, index>
+    };
+    typedef std::vector<MappedMemberDefinition> MappedMemberDefinitions;
 
     //-------------------------------------------------
     // Top level units
@@ -168,6 +187,7 @@ namespace Parser
         std::string FileName;
         std::string ClassName;
         std::string PropertyName;
+        MappedMemberDefinitions MappedMembers;
     };
     typedef std::vector<PropertyMappingDefinition> PropertyMappingDefinitions;
 

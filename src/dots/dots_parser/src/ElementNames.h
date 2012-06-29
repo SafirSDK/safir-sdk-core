@@ -54,10 +54,8 @@ namespace Parser
             MemberType,
             ArraySize,
             ArraySizeRef,
-            ArraySizeRefName,
             MaxLength,
-            MaxLengthRef,
-            MaxLengthRefName,
+            MaxLengthRef,            
 
             CreateRoutine,
             CreateRoutineSummary,
@@ -74,10 +72,12 @@ namespace Parser
             ParameterName,
             ParameterType,
             ParameterValue,
+            ParameterValueRef,            
             ParameterArrayElement,
             ParameterArrayElements,
-            Object,
-            EntityId,
+            ParameterArrayIndex,
+            ParameterObject,
+            ParameterEntityId,
             InstanceIdRef,
             InstanceId,
             
@@ -105,6 +105,7 @@ namespace Parser
             PropertyMemberSummary,
             PropertyMemberName,
             PropertyMemberType,
+            PropertyMemberIsArray,
 
             //--- PropertyMapping ---
             PropertyMapping,
@@ -116,15 +117,20 @@ namespace Parser
             MapPropertyMember,
             MapValue,
             MapValueRef,
-            MapValueRefName,
+            MapEntityId,
+            MapObject,
             ClassMemberReference,
-            MapClassMember,
+            ClassMemberReferenceName,
+            ClassMemberReferenceIndex,
 
-            Index,
+            ReferenceName,
+            ReferenceIndex,
+
+            /*Index,
             IndexRef,
-            IndexRefName,
+            IndexRefName,*/
 
-            /*Array,
+            /*
             Changed,
             TypeId,
             Error,*/
@@ -165,8 +171,13 @@ namespace Parser
             m_map[CreateRoutineName]="name";
             m_map[ParameterType]="type";
             m_map[ParameterValue]="value";
+            m_map[ParameterValueRef]="valueRef";            
             m_map[ParameterArrayElement]="arrayElement";
             m_map[ParameterArrayElements]="arrayElements";
+            m_map[ParameterObject]="object";
+            m_map[ParameterEntityId]="entityId";
+            m_map[ParameterArrayIndex]="index";
+
             m_map[ArraySize]="arraySize";
             m_map[BaseClass]="baseClass";
             m_map[ExceptionBase]="baseClass";
@@ -183,7 +194,6 @@ namespace Parser
             m_map[PropertyMember]="member";
             m_map[Enumeration]="enumeration";
             m_map[Exception]="exception";
-            m_map[Index]="index";
             m_map[MaxLength]="maxLength";
             m_map[Member]="member";
             m_map[ClassMembers]="members";
@@ -196,8 +206,9 @@ namespace Parser
             m_map[PropertyMemberSummary]="summary";
             m_map[PropertyMemberName]="name";
             m_map[PropertyMemberType]="type";
-            m_map[PropertyMembers] = "members";
-            
+            m_map[PropertyMembers]="members";
+            m_map[PropertyMemberIsArray]="array";
+
             m_map[PropertyMapping]="propertyMapping";
             m_map[PropertyMappingSummary]="summary";
             m_map[MappedProperty]="property";
@@ -207,19 +218,22 @@ namespace Parser
             m_map[MapPropertyMember]="propertyMember";
             m_map[MapValue]="value"; //dom
             m_map[MapValueRef]="valueRef"; //dom
-            m_map[MapValueRefName]="name"; //dom
             m_map[ClassMemberReference]="classMemberReference"; //dom
-            m_map[MapClassMember]="classMember";
+            m_map[ClassMemberReferenceName]="classMember";
+            m_map[ClassMemberReferenceIndex]="index";
+            m_map[MapEntityId]="entityId";
+            m_map[MapObject]="object";
 
             m_map[ArraySizeRef]="arraySizeRef"; //member array 
-            m_map[ArraySizeRefName]="name";   //member arraySizeRef
             m_map[MaxLengthRef]="maxLengthRef"; //member maxLength
-            m_map[MaxLengthRefName]="name";   //memeber maxLengthRef
             m_map[InstanceIdRef]="instanceIdRef"; //??????
-            m_map[IndexRef]="indexRef"; //???????? troligen dom mot värde i array
             
-            m_map[Object]="object";
-            m_map[EntityId]="entityId";
+            m_map[ReferenceName]="name";
+            m_map[ReferenceIndex]="index";
+
+            //m_map[Index]="index";
+            //m_map[IndexRef]="indexRef"; //???????? troligen dom mot värde i array
+                        
             m_map[InstanceId]="instanceId"; //<entityId><name/><instanceId/>..
 
             /*m_map[TypeId]="typeId";

@@ -71,16 +71,15 @@ namespace Parser
 #endif
                  try
                  {
+                     state.CurrentPath=path;
                      boost::property_tree::ptree pt;
                      boost::property_tree::read_xml(path, pt, boost::property_tree::xml_parser::trim_whitespace);
-                     
-                     state.CurrentPath=path;
-
                      DobUnitParser parser;
                      boost::property_tree::ptree::iterator ptIt=pt.begin();
                      if (parser.Match(ptIt->first, state))
                      {
                          parser.Parse(ptIt->second, state);
+                         parser.Reset(state);
                      }
                      
                  }
@@ -206,9 +205,11 @@ namespace Parser
         std::cout<<"Summary: "<<p.Summary<<std::endl;
         for (PropertyMemberDefinitions::const_iterator it = p.Members.begin(); it!=p.Members.end(); ++it)
         {
-            std::cout<<"      Member:  "<<it->Name<<std::endl;
-            std::cout<<"      Type:    "<<it->TypeName<<std::endl;
-            std::cout<<"      Summary: "<<it->Summary<<std::endl;
+            std::cout<<"  - Member:  "<<it->Name<<std::endl;
+            std::cout<<"    Type:    "<<it->TypeName<<std::endl;
+            std::cout<<"    Summary: "<<it->Summary<<std::endl;
+            if (it->IsArray)
+                std::cout<<"    IsArray: true"<<std::endl;
         }
     }
 
@@ -220,6 +221,29 @@ namespace Parser
         std::cout<<"PropertyName:    "<<p.PropertyName<<std::endl;
         std::cout<<"File:    "<<p.FileName<<std::endl;
         std::cout<<"Summary: "<<p.Summary<<std::endl;
+        for (MappedMemberDefinitions::const_iterator it=p.MappedMembers.begin(); it!=p.MappedMembers.end(); ++it)
+        {
+            std::cout<<"  - PropertyMember:  "<<it->Name<<std::endl;            
+            if (it->Kind==MappedMemberDefinition::ValueMapping)
+            {
+                std::cout<<"    MappingKind:     ValueMapping"<<std::endl;
+                std::cout<<"    Value:           "<<it->Value<<std::endl;
+            }
+            else if (it->Kind==MappedMemberDefinition::MemberMapping)
+            {
+                std::cout<<"    MappingKind:     MemberMapping"<<std::endl;
+                std::cout<<"    MemberRef:       ";
+                for (MemberReferenceVector::const_iterator memIt=it->MemberReferences.begin(); memIt!=it->MemberReferences.end(); ++memIt)
+                {
+                    std::cout<<"->"<<memIt->first<<"["<<memIt->second<<"]";
+                }
+                std::cout<<std::endl;
+            }
+            else
+            {
+                std::cout<<"    MappingKind:     NullMapping"<<std::endl;
+            }
+        }
     }
 }
 }

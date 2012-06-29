@@ -21,10 +21,14 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_PARSER_OCCURRENCE_RULES_H__
-#define __DOTS_PARSER_OCCURRENCE_RULES_H__
+#ifndef __DOTS_PARSER_BASIC_TYPES_H__
+#define __DOTS_PARSER_BASIC_TYPES_H__
 
-#include <limits>
+#include <string>
+#include <map>
+#include <boost/noncopyable.hpp>
+#include <boost/function.hpp>
+#include <Safir/Dob/Typesystem/ParseResult.h>
 
 namespace Safir
 {
@@ -32,29 +36,26 @@ namespace Dob
 {
 namespace Typesystem
 {
-    template <int Min, int Max>
-    struct Occurrences
+namespace Parser
+{
+    class TypeChecker : public boost::noncopyable
     {
-        static const int MinOccurrences = Min;
-        static const int MaxOccurrences = Max;
-
-        Occurrences() : m_val(0) {}
-        bool Valid() const {return m_val>=MinOccurrences && m_val<=MaxOccurrences;}
-        void Reset() {m_val=0;}        
-        void operator++() {++m_val;}
-        bool operator!() {return !Valid();}
-        int operator()() {return m_val;}
+    public:
+        static const TypeChecker& Instance();
+        bool IsType(const std::string& typeName, const ParseResult& res) const;
+        bool CanParseValue(const std::string& typeName, const std::string value, const ParseResult& res) const;
 
     private:
-        int m_val;
+        TypeChecker(void);
+        typedef boost::function<bool(const std::string&, const ParseResult& res)> ValueCheckerFunction;
+        typedef std::map<std::string, ValueCheckerFunction> BasicTypeMap;
+        BasicTypeMap m_basicTypes;
     };
-
-    typedef Occurrences<1, 1> One;
-    typedef Occurrences<0, 1> OptionalOne;
-    typedef Occurrences<1, INT_MAX> AtLeastOne;
-    typedef Occurrences<0, INT_MAX> OptionalMany;
 }
 }
 }
+} //end namespace Safir::Dob::Typesystem
 
 #endif
+
+
