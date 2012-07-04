@@ -23,11 +23,9 @@
 ******************************************************************************/
 
 #include "dots_exception_keeper.h"
-#include <ace/Guard_T.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <sstream>
 #include <iostream>
-
 
 namespace Safir
 {
@@ -37,24 +35,18 @@ namespace Typesystem
 {
 namespace Internal
 {
-    ExceptionKeeper * volatile ExceptionKeeper::m_instance = NULL;
-    ACE_Thread_Mutex ExceptionKeeper::m_instantiationLock;// = ACE_Thread_Mutex();
+    boost::once_flag ExceptionKeeper::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
-    //
-    //Instance
-    //
+    ExceptionKeeper & ExceptionKeeper::SingletonHelper::Instance()
+    {
+        static ExceptionKeeper instance;
+        return instance;
+    }
+
     ExceptionKeeper & ExceptionKeeper::Instance()
     {
-        if (m_instance == NULL)
-        {
-            ACE_Guard<ACE_Thread_Mutex> lck(m_instantiationLock);
-
-            if (m_instance == NULL)
-            {
-                m_instance = new ExceptionKeeper();
-            }
-        }
-        return *m_instance;
+        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        return SingletonHelper::Instance();
     }
 
     ExceptionKeeper::ExceptionKeeper()
@@ -71,8 +63,8 @@ namespace Internal
     ExceptionKeeper::ExceptionData &
     ExceptionKeeper::GetDataForCurrentThread() const
     {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
-        const ACE_thread_t threadId = ACE_Thread::self();
+        boost::lock_guard<boost::mutex> lck(m_lock);
+        const boost::thread::id threadId = boost::this_thread::get_id();
         ThreadExceptionTable::iterator it = m_threadExceptionTable.find(threadId);
         if (it == m_threadExceptionTable.end()) //not found
         {
@@ -86,7 +78,7 @@ namespace Internal
     {
         ExceptionData & exc = GetDataForCurrentThread();
 
-        lllout << "ExceptionKeeper::Set: id = " << exceptionId << " description = " << description.c_str() <<std::endl;
+        lllog(2) << "ExceptionKeeper::Set: id = " << exceptionId << " description = " << description.c_str() <<std::endl;
         if (exc.isSet)
         {
             std::wostringstream ostr;
@@ -97,8 +89,7 @@ namespace Internal
                 << "Please contact your nearest DOB developer if you have no idea what this means, otherwise contact the"
                 << " developer of the library you suspect has the error"<<std::endl;
 
-            lllout << ostr.str();
-            std::wcout << ostr.str();
+            lllerr << ostr.str();
         }
         exc.exceptionId = exceptionId;
         exc.description = description;
@@ -108,7 +99,7 @@ namespace Internal
     void
     ExceptionKeeper::AppendDescription(const std::string & moreDescription)
     {
-        lllout << "ExceptionKeeper::AppendDescription: moreDescription = " << moreDescription.c_str() << std::endl;
+        lllog(2) << "ExceptionKeeper::AppendDescription: moreDescription = " << moreDescription.c_str() << std::endl;
         ExceptionData & exc = GetDataForCurrentThread();
         if (!exc.isSet)
         {
@@ -117,8 +108,7 @@ namespace Internal
             ostr << "This means that there is something wrong with the exception handling of a library you are using"<< std::endl
                 << "Please contact your nearest DOB developer if you have no idea what this means, otherwise contact the"
                 << " developer of the library you suspect has the error"<<std::endl;
-            lllout << ostr.str();
-            std::wcout << ostr.str();
+            lllerr << ostr.str();
         }
         exc.description.append("\n-------------- More Description -------------\n");
         exc.description.append(moreDescription);
@@ -136,14 +126,14 @@ namespace Internal
         ExceptionData & exc = GetDataForCurrentThread();
         if (!exc.isSet)
         {
-            lllout << "ExceptionKeeper::GetAndClear: when no exception is set!"<<std::endl;
+            lllerr << "ExceptionKeeper::GetAndClear: when no exception is set!"<<std::endl;
             return false;
         }
         else
         {
             exceptionId = exc.exceptionId ;
             description = exc.description;
-            lllout << "ExceptionKeeper::GetAndClear: id = " << exceptionId << " description = " << description.c_str() <<std::endl;
+            lllog(2) << "ExceptionKeeper::GetAndClear: id = " << exceptionId << " description = " << description.c_str() <<std::endl;
 
             exc.isSet = false;
             return true;
@@ -156,15 +146,14 @@ namespace Internal
         ExceptionData & exc = GetDataForCurrentThread();
         if (!exc.isSet)
         {
-            lllout << "ExceptionKeeper::Peek: when no exception is set!"<<std::endl;
+            lllerr << "ExceptionKeeper::Peek: when no exception is set!"<<std::endl;
 
             std::wostringstream ostr;
             ostr << "ExceptionKeeper::Peek: Called even though there is no exception set!!!)" <<std::endl;
             ostr << "This means that there is something wrong with the exception handling of a library you are using"<< std::endl
                 << "Please contact your nearest DOB developer if you have no idea what this means, otherwise contact the"
                 << " developer of the library you suspect has the error"<<std::endl;
-            lllout << ostr.str();
-            std::wcout << ostr.str();
+            lllerr << ostr.str();
             exceptionId = 0;
             description.clear();
         }
@@ -172,7 +161,7 @@ namespace Internal
         {
             exceptionId = exc.exceptionId ;
             description = exc.description;
-            lllout << "ExceptionKeeper::Peek: id = " << exceptionId << " description = " << description.c_str() <<std::endl;
+            lllog(2) << "ExceptionKeeper::Peek: id = " << exceptionId << " description = " << description.c_str() <<std::endl;
         }
     }
 
@@ -187,11 +176,11 @@ namespace Internal
             ostr << "This means that there is something wrong with the exception handling of a library you are using"<< std::endl
                 << "Please contact your nearest DOB developer if you have no idea what this means, otherwise contact the"
                 << " developer of the library you suspect has the error"<<std::endl;
-            lllout << ostr.str();
-            std::wcout << ostr.str();
+            lllerr << ostr.str();
         }
         else
         {
+            lllog(2) << "ExceptionKeeper::Clear: called." << std::endl;
             exc.isSet = false;
         }
     }

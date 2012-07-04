@@ -32,29 +32,20 @@
 #include <Safir/Dob/ErrorResponse.h>
 #include "Consumer.h"
 #include <boost/function.hpp>
-
-#include <ace/SOCK_Dgram_Mcast.h>
-
-#ifdef _MSC_VER
-  #pragma warning(push)
-  #pragma warning(disable: 4267)
-#endif
-
-#include <ace/Reactor.h>
-
-#ifdef _MSC_VER
-  #pragma warning(pop)
-#endif
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
 
 class Dispatcher:
-    public ACE_Event_Handler,
     public Safir::Dob::Dispatcher,
     private boost::noncopyable
 {
 public:
-    Dispatcher(const boost::function<void(void)> & dispatchCallback):
-        m_dispatchCallback(dispatchCallback),
-        m_isNotified(0){}
+    Dispatcher(const boost::function<void(void)> & dispatchCallback,
+               boost::asio::io_service & ioService)
+        : m_dispatchCallback(dispatchCallback)
+        , m_isNotified(0)
+        , m_ioService(ioService)
+    {}
 
 private:
     virtual void OnDoDispatch()
@@ -62,36 +53,36 @@ private:
         if (m_isNotified == 0)
         {
             m_isNotified = 1;
-            ACE_Reactor::instance()->notify(this);
+            m_ioService.post(boost::bind(&Dispatcher::Dispatch,this));
         }
     }
-    virtual int handle_exception(ACE_HANDLE)
+    virtual void Dispatch()
     {
         m_isNotified = 0;
         m_dispatchCallback();
-        return 0;
     }
 
     const boost::function<void(void)> m_dispatchCallback;
     Safir::Dob::Internal::AtomicUint32 m_isNotified;
+    boost::asio::io_service & m_ioService;
 };
 
 class ActionReader:
-    public ACE_Event_Handler,
     private boost::noncopyable
 {
 public:
     ActionReader(const boost::function<void (DoseTest::ActionPtr)> & handleActionCallback,
-                 const std::string& multicastNic);
+                 const std::string& listenAddressStr,
+                 boost::asio::io_service& ioService);
 
 private:
-    virtual ACE_HANDLE get_handle() const {return m_sock.get_handle();}
-
-    virtual int handle_input(ACE_HANDLE);
+    void HandleData(const boost::system::error_code& error,
+                    const size_t bytes_recvd);
+    boost::asio::ip::udp::socket m_socket;
+    boost::asio::ip::udp::endpoint m_senderEndpoint;
+    Safir::Dob::Typesystem::BinarySerialization m_buffer;
 
     const boost::function<void (DoseTest::ActionPtr)> m_handleActionCallback;
-
-    ACE_SOCK_Dgram_Mcast m_sock;
 };
 
 
@@ -145,6 +136,8 @@ private:
     const std::wstring m_instanceString;
     const std::wstring m_controlConnectionName;
     const std::wstring m_testConnectionName;
+
+    boost::asio::io_service m_ioService;
 
     const Safir::Dob::Typesystem::EntityId m_partnerEntityId;
 

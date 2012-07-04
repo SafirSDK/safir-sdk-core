@@ -1,17 +1,12 @@
-cmake_minimum_required(VERSION 2.6)
-PROJECT (EntityReceptionVerifier)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
-
 FILE(GLOB sources *.cpp ../common/*.cpp)
+FILE(GLOB headers *.h ../common/*.h)
 
-ADD_EXECUTABLE(EntityReceptionVerifier ${sources})
+ADD_EXECUTABLE(EntityReceptionVerifier ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(EntityReceptionVerifier ${COMMON_LIBRARIES} ${ACE_LIBRARY})
+TARGET_LINK_LIBRARIES(EntityReceptionVerifier ${COMMON_LIBRARIES})
 
 if (NOT MSVC)
-    FIND_PACKAGE(Boost COMPONENTS program_options)
-    TARGET_LINK_LIBRARIES(EntityReceptionVerifier dose_cpp ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(EntityReceptionVerifier dose_cpp dots_generated-DoseStressTest-cpp dots_generated-Safir-cpp dots_cpp lluf_utils ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS EntityReceptionVerifier

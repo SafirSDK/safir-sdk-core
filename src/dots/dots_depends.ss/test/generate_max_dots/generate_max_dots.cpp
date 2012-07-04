@@ -28,7 +28,7 @@
 
 #include <boost/filesystem.hpp>
 #include <iostream>
-#include <string.h>
+#include <cstring>
 
 int main(int argc, char* argv[])
 {

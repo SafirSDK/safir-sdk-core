@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (generate_max_dots)
+project(generate_max_dots CXX)
 
 INCLUDE_DIRECTORIES(.)
 
@@ -12,7 +12,10 @@ FILE(GLOB sources *.cpp)
 ADD_EXECUTABLE(generate_max_dots ${sources} ${headers})
 
 FIND_PACKAGE(Boost COMPONENTS filesystem )
-TARGET_LINK_LIBRARIES(generate_max_dots ${Boost_LIBRARIES})
+
+if (NOT MSVC)
+  TARGET_LINK_LIBRARIES(generate_max_dots ${Boost_LIBRARIES})
+endif()
 
 INSTALL(TARGETS generate_max_dots
         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin

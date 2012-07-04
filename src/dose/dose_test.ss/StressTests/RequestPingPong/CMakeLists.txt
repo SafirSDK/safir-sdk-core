@@ -1,18 +1,12 @@
-cmake_minimum_required(VERSION 2.4)
-
-PROJECT (RequestPingPong)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
-
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(RequestPingPong ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(RequestPingPong ${COMMON_LIBRARIES} ${ACE_LIBRARY})
+TARGET_LINK_LIBRARIES(RequestPingPong ${COMMON_LIBRARIES})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(RequestPingPong dots_generated-cpp dose_cpp swre_interface_cpp)
+    TARGET_LINK_LIBRARIES(RequestPingPong dose_cpp dots_generated-DoseTest-cpp dots_generated-Safir-cpp dots_cpp lluf_utils ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS RequestPingPong

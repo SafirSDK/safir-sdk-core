@@ -27,7 +27,7 @@ with Interfaces.C.Strings;
 with Safir.Dob.Typesystem.Kernel;
 with Safir.Dob.Typesystem.Utilities; use Safir.Dob.Typesystem.Utilities;
 with Safir.Dob.Typesystem.Object;
-with Safir.Dob.Typesystem.Object_Factory;
+with Safir.Dob.Typesystem.Object.Factory;
 with Safir.Dob.Typesystem.Internal_Defs;
 
 pragma Warnings ("D");  -- turn off warnings for implicit dereference
@@ -864,7 +864,7 @@ package body Safir.Dob.Typesystem.Blob_Operations is
       else
          declare
             Smart_Ptr : aliased Safir.Dob.Typesystem.Object.Smart_Pointer'Class :=
-                          Safir.Dob.Typesystem.Object_Factory.Create_Object (Child_Blob);
+                          Safir.Dob.Typesystem.Object.Factory.Create_Object (Child_Blob);
          begin
             Value.Set_Object_Pointer (Smart_Ptr'Access);
          end;

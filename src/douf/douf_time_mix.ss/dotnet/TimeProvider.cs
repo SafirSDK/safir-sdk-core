@@ -34,9 +34,9 @@ namespace Safir.Time
     {
 
         [DllImport("douf_time_library.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "DoufTimeC_GetUtcTime")]
-        internal static extern void GetUtcTime(ref double utcTime);
+        internal static extern void GetUtcTime(out double utcTime);
         [DllImport("douf_time_library.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "DoufTimeC_GetLocalTimeOffset")]
-        internal static extern void GetLocalTimeOffset(ref Int32 offset);
+        internal static extern void GetLocalTimeOffset(out Int32 offset);
 
         private static System.DateTime _1_JAN_1970 = new DateTime( 1970, 1, 1 );
 
@@ -47,8 +47,8 @@ namespace Safir.Time
         public static double GetUtcTime()
         {
             // Get current Utc time
-            double utcTime = 0.0;
-            GetUtcTime(ref utcTime);
+            double utcTime;
+            GetUtcTime(out utcTime);
 
             return utcTime; 
         }
@@ -75,8 +75,8 @@ namespace Safir.Time
         /// <returns>The seconds and fraction since jan 1 1970 00:00</returns>
         public static double ToUtcTime( System.DateTime localTime )
         {
-            int offset = 0;
-            GetLocalTimeOffset(ref offset);
+            int offset;
+            GetLocalTimeOffset(out offset);
 
             // Convert time to seconds since 01-Jan-1970
             System.TimeSpan timeDiff = localTime - _1_JAN_1970;
@@ -108,8 +108,8 @@ namespace Safir.Time
         /// <returns>Local time</returns>
         public static System.DateTime ToLocalTime( double utcTime )
         {
-            int offset = 0;
-            GetLocalTimeOffset(ref offset);
+            int offset;
+            GetLocalTimeOffset(out offset);
 
             // Convert seconds to localtime
             double localTime = utcTime + offset;

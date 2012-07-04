@@ -39,6 +39,12 @@ namespace Odbc
 class Environment;
 class Statement;
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4275)
+#pragma warning(disable: 4251)
+#endif
+
 /** The Connection class models a connection made to the database engine.
     An application should have one connection object per connection and in
     ODBC one connection can only process one statement at the time. All
@@ -234,6 +240,10 @@ private:
 
     friend class Safir::Databases::Odbc::Statement;
 };
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 inline
 void Connection::UseAutoTransactions()

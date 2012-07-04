@@ -27,11 +27,10 @@
 #include <Safir/Dob/ProcessInfo.h> 
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/ProcessInfo.h>
 #include <boost/interprocess/sync/upgradable_lock.hpp>
 #include <boost/interprocess/sync/sharable_lock.hpp>
 #include "Signals.h"
-#include "ExitHandler.h"
-#include <ace/OS_NS_unistd.h>
 
 #include <vector>
 
@@ -45,14 +44,19 @@ namespace Internal
         Safir::Dob::ProcessInfo::MaxNumberOfInstances() *
         Safir::Dob::ProcessInfo::ConnectionNamesArraySize();
 
-    Connections & Connections::Instance()
+    boost::once_flag Connections::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+
+    Connections & Connections::SingletonHelper::Instance()
     {
-        //find_or_construct has good synchronization guarantees,
-        //so we dont need extra locking here.
-        static Connections * instance = GetSharedMemory().find_or_construct<Connections>("CONNECTIONS")(private_constructor_t());
+        static Connections* instance = GetSharedMemory().find_or_construct<Connections>("CONNECTIONS")(private_constructor_t());
         return *instance;
     }
 
+    Connections & Connections::Instance()
+    {
+        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        return SingletonHelper::Instance();
+    }
 
     Connections::Connections(private_constructor_t):
         m_connectionOutIds(MAX_NUM_CONNECTIONS), //default constructed (-1,-1)
@@ -148,7 +152,7 @@ namespace Internal
 
         ScopedConnectLock lck(m_connectLock);
 
-        const pid_t pid = ACE_OS::getpid();
+        const pid_t pid = Safir::Utilities::ProcessInfo::GetPid();
 
         m_connectMessage.Set(connect_tag, connectionName, contextId, pid);
 
@@ -196,7 +200,7 @@ namespace Internal
         }
         else
         {
-            const pid_t pid = ACE_OS::getpid();
+            const pid_t pid = Safir::Utilities::ProcessInfo::GetPid();
 
             //upgrade the mutex
             boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
@@ -230,7 +234,7 @@ namespace Internal
 
             std::string connectionName;
             ContextId context;
-            int pid;
+            pid_t pid;
 
             m_connectMessage.GetAndClear(connect_tag, connectionName, context, pid);
 
@@ -275,9 +279,6 @@ namespace Internal
 
                         AddToSignalHandling(connection);
                     }
-
-                    ExitHandler::Instance().AddFunction(connection, &Connection::Died);
-                    ExitHandler::Instance().AddFunction(connection, &Connection::SendStopOrder);
 
                     //call the connect handler
                     connectionHandler.HandleConnect(connection);
@@ -342,8 +343,6 @@ namespace Internal
         }
 
         GetSharedMemory().destroy_ptr(connection.get());
-
-        ExitHandler::Instance().RemoveConnection(connection);
     }
 
 
@@ -534,7 +533,7 @@ namespace Internal
     }
 
     void
-    Connections::GetConnections(const pid_t  pid, std::vector<ConnectionPtr>& connections) const
+    Connections::GetConnections(const pid_t pid, std::vector<ConnectionPtr>& connections) const
     {
         boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
 
@@ -604,8 +603,6 @@ namespace Internal
             connectionFunc(removeConnection);
 
             GetSharedMemory().destroy_ptr(removeConnection.get());
-
-            ExitHandler::Instance().RemoveConnection(removeConnection);
         }
     }
 
@@ -641,6 +638,11 @@ namespace Internal
         {
             connectionFunc(it->second);
         }
+    }
+
+    void Connections::GenerateSpuriousConnectOrOutSignal() const
+    {
+        Signals::Instance().SignalConnectOrOut();
     }
 }
 }

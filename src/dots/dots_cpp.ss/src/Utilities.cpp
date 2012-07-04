@@ -208,8 +208,8 @@ namespace Utilities
                                 //If the type is changing we write a warning
                                 if (!intoContainerOB.IsNull())
                                 {
-                                    std::cerr << "Warning (Contact a DOB developer if you do not understand it):" <<std::endl;
-                                    std::cerr << "The type of a member has changed without the change flag being set in 'from'." << std::endl;
+                                    std::wcerr << "Warning (Contact a DOB developer if you do not understand it):" <<std::endl;
+                                    std::wcerr << "The type of a member has changed without the change flag being set in 'from'." << std::endl;
 
                                     lllout << "MergeChanges Warning: TypeId of member has changed without the change flag being set in 'from'!" <<std::endl;
                                 }

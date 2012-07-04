@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (swre_logger)
+project(swre_logger CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
@@ -9,10 +9,11 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(swre_logger ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(swre_logger ${ACE_LIBRARY})
+FIND_PACKAGE(Boost COMPONENTS regex filesystem system date_time)
+TARGET_LINK_LIBRARIES(swre_logger ${Boost_LIBRARIES})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(swre_logger dose_cpp douf_time_cpp)
+    TARGET_LINK_LIBRARIES(swre_logger dots_cpp dots_generated-Safir-cpp dots_generated-cpp dose_cpp douf_time_cpp)
 endif()
 
 INSTALL(TARGETS swre_logger

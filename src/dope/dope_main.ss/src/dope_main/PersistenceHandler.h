@@ -28,18 +28,21 @@
 
 #include <Safir/Dob/Connection.h>
 #include <Safir/Application/Tracer.h>
-#include <Safir/Utilities/AceDispatcher.h>
+#include <Safir/Utilities/AsioDispatcher.h>
+#include <boost/asio.hpp>
+#include <boost/noncopyable.hpp>
 
 /**
  * Abstract base class for all persistance backends.
  */
 class PersistenceHandler :
     public Safir::Dob::EntitySubscriber,
-    public Safir::Dob::Requestor
+    public Safir::Dob::Requestor,
+    private boost::noncopyable
 {
 public:
     /** Constructor */
-    PersistenceHandler();
+    explicit PersistenceHandler(boost::asio::io_service& ioService);
 
     /** Destructor */
     virtual ~PersistenceHandler();
@@ -58,24 +61,16 @@ public:
     void OnNotRequestOverflow();
 
 protected:
-
-
-    void StartSubscriptions(bool subscribeAll);
+    void StartSubscriptions(const bool subscribeAll);
 
     void ReportPersistentDataReady();
 
-//    Safir::Dob::SecondaryConnection m_dobConnection;
+    Safir::Utilities::AsioDispatcher m_dispatcher;
     Safir::Dob::Connection  m_dobConnection;
-    Safir::Utilities::AceDispatcher m_dispatcher;
 
     const TypeIdSet & GetPersistentTypes() const {return *m_persistentTypes;}
 
 private:
-    //disable copying
-    PersistenceHandler(const PersistenceHandler& cs);
-    PersistenceHandler & operator =(const PersistenceHandler & cs);
-
-
     /**
      * Persist an object. ObjectId of the object should be used as key.
      */

@@ -42,6 +42,7 @@
 #include <Safir/Dob/Typesystem/Parameters.h>
 #include <Safir/Dob/Typesystem/Members.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
+#include <boost/algorithm/string/predicate.hpp>
 
 
 std::wstring utf8_to_wstr( const std::string& str )
@@ -8524,7 +8525,11 @@ void Test_IsProperty()
         {
             if (Safir::Dob::Typesystem::Operations::IsProperty(*iter))
             {
-                std::wcout << Safir::Dob::Typesystem::Operations::GetName(*iter) << std::endl;
+                //only care about the ones that are ours
+                if (boost::starts_with(Safir::Dob::Typesystem::Operations::GetName(*iter),"DotsTest"))
+                {
+                    std::wcout << Safir::Dob::Typesystem::Operations::GetName(*iter) << std::endl;
+                }
             }
             ++iter;
         }   
@@ -8539,7 +8544,11 @@ void Test_IsEnumeration()
         {
             if (Safir::Dob::Typesystem::Operations::IsEnumeration(*iter))
             {
-                std::wcout << Safir::Dob::Typesystem::Operations::GetName(*iter) << std::endl;
+                //only care about the ones that are ours
+                if (boost::starts_with(Safir::Dob::Typesystem::Operations::GetName(*iter),"DotsTest"))
+                {
+                    std::wcout << Safir::Dob::Typesystem::Operations::GetName(*iter) << std::endl;
+                }
             }
             ++iter;
         }   
@@ -8554,7 +8563,11 @@ void Test_IsException()
         {
             if (Safir::Dob::Typesystem::Operations::IsException(*iter))
             {
-                std::wcout << Safir::Dob::Typesystem::Operations::GetName(*iter) << std::endl;
+                //only care about the ones that are ours.
+                if (boost::starts_with(Safir::Dob::Typesystem::Operations::GetName(*iter),"DotsTest"))
+                {
+                    std::wcout << Safir::Dob::Typesystem::Operations::GetName(*iter) << std::endl;
+                }
             }
             ++iter;
         }   

@@ -25,11 +25,16 @@
 #ifndef __DOTS_OBJECT_FACTORY_H__
 #define __DOTS_OBJECT_FACTORY_H__
 
+#include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/once.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 
-
+#ifdef _MSC_VER
+#pragma warning(push) 
+#pragma warning(disable: 4275)
+#endif
 
 namespace Safir
 {
@@ -51,6 +56,7 @@ namespace Typesystem
      * call the Create routine of the class itself directly).
      */
     class DOTS_API ObjectFactory
+        : private boost::noncopyable
     {
     public:
         /**
@@ -91,8 +97,7 @@ namespace Typesystem
          * @param typeId [in] - The TypeId of the object that should be created using createFunction.
          * @param createFunction [in] - The function to call to create the object.
          */
-        bool RegisterClass(const TypeId typeId, CreateObjectCallback createFunction)
-        {return m_CallbackMap.insert(CallbackMap::value_type(typeId,createFunction)).second;}
+        bool RegisterClass(const TypeId typeId, CreateObjectCallback createFunction);
 
         /** @} */
 
@@ -124,10 +129,6 @@ namespace Typesystem
         ObjectFactory();
         ~ObjectFactory();
 
-        //disable copying by defining but not implementing copy construction and assignment
-        ObjectFactory (const ObjectFactory &);
-        const ObjectFactory & operator = (const ObjectFactory &);
-
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4251) // warning C4251: 'Safir::Dob::Typesystem::ObjectFactory::m_CallbackMap' : class 'stdext::hash_map<_Kty,_Ty>' needs to have dll-interface to be used by clients of class 'Safir::Dob::Typesystem::ObjectFactory'
@@ -140,12 +141,28 @@ namespace Typesystem
 #pragma warning (pop)
 #endif
 
-        //the single instance
-        static ObjectFactory * volatile m_pInstance;
+        /**
+         * This class is here to ensure that only the Instance method can get at the 
+         * instance, so as to be sure that boost call_once is used correctly.
+         * Also makes it easier to grep for singletons in the code, if all 
+         * singletons use the same construction and helper-name.
+         */
+        struct SingletonHelper
+        {
+        private:
+            friend ObjectFactory& ObjectFactory::Instance();
+
+            static ObjectFactory& Instance();
+            static boost::once_flag m_onceFlag;
+        };
     };
 }
 }
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif
 

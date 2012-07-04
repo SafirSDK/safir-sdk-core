@@ -89,6 +89,7 @@ package body Safir.Dob.Secondary_Connections is
       end if;
 
       Self.Controller_Id := New_ControllerId;
+
    end Attach;
 
    procedure Detach
@@ -113,7 +114,7 @@ package body Safir.Dob.Secondary_Connections is
          Safir.Dob.Typesystem.Library_Exceptions.Throw;
       end if;
 
-      return C.char'Pos (Success) /= 0;
+      return C.char'Pos (Is_Connected) /= 0;
    end Is_Attached;
 
    function Get_Controller_Id (Self : in Secondary_Connection)

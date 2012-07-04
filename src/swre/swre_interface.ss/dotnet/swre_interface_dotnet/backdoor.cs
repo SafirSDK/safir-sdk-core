@@ -111,6 +111,8 @@ namespace Safir.Application
 
             Stop();
 
+            m_backdoor = backdoor;
+
             if (connectionNameCommonPart.Length == 0 && connectionNameInstancePart.Length == 0)
             {
                 m_connection.Attach();
@@ -119,8 +121,6 @@ namespace Safir.Application
             {
                 m_connection.Attach(connectionNameCommonPart, connectionNameInstancePart);
             }
-
-            m_backdoor = backdoor;
 
             m_connection.SubscribeMessage(m_piCmdTypeId, m_piCmdChannelId, this);
             m_started = true;

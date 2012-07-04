@@ -27,7 +27,7 @@ with Ada.Exceptions;
 with System.Address_To_Access_Conversions;
 with Safir.Dob.Typesystem.Container_Instantiations; use Safir.Dob.Typesystem.Container_Instantiations;
 with Safir.Dob.Typesystem.Kernel;
-with Safir.Dob.Typesystem.Object_Factory;
+with Safir.Dob.Typesystem.Object.Factory;
 
 pragma Warnings ("D");  -- turn off warnings for implicit dereference
 
@@ -144,7 +144,7 @@ package body Safir.Dob.Typesystem.Object is
                             Self.Obj_Ptr.Ref;
             -- Create a smart pointer with the correct tag.
             Smart_Ptr : Safir.Dob.Typesystem.Object.Smart_Pointer'Class :=
-                    Safir.Dob.Typesystem.Object_Factory.Create_Smart_Ptr
+                    Safir.Dob.Typesystem.Object.Factory.Create_Smart_Ptr
                               (Raw_Obj_Ptr.Get_Type_Id);
          begin
             Internal_Initialize_From_Existing (Smart_Ptr, Self.Obj_Ptr);

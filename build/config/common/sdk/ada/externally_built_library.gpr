@@ -1,15 +1,15 @@
-project externally_built_library is
+project Externally_Built_Library is
 
    type OS_Type is ("Windows_NT", "Linux");
-   OS : OS_Type := external ("OS", "Linux");
+   OS : OS_Type := External ("OS", "Linux");
 
    for Source_Dirs use ();
 
    case OS is
       when "Linux" =>
-          for Library_dir use external ("SAFIR_RUNTIME") & "/lib";
+          for Library_Dir use External ("SAFIR_RUNTIME") & "/lib";
       when "Windows_NT" =>
-          for Library_dir use external ("SAFIR_RUNTIME") & "/bin";
+          for Library_Dir use External ("SAFIR_RUNTIME") & "/bin";
     end case;
 
-end externally_built_library;
+end Externally_Built_Library;

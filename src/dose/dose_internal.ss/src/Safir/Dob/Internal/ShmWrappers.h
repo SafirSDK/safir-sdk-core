@@ -44,6 +44,13 @@ namespace Internal
 
         const Typesystem::HandlerId GetHandlerId() const {return Typesystem::HandlerId(m_handlerId,m_handlerIdStr.c_str());}
 
+        ShmHandlerId& operator=(const ShmHandlerId& other)
+        {
+            m_handlerId = other.m_handlerId;
+            m_handlerIdStr = other.m_handlerIdStr;
+            return *this;
+        }
+
         /**
          * Equality operator.
          *

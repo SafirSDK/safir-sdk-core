@@ -25,20 +25,11 @@
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Dob/Typesystem/BlobOperations.h>
-
-//disable warnings in ace
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4267)
-#endif
-
-#include <ace/Guard_T.h>
-#include <ace/Recursive_Thread_Mutex.h>
-
-//and enable the warnings again
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
+#include <Safir/Dob/Typesystem/Operations.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <boost/thread/mutex.hpp>
+#include <boost/bind.hpp>
+#include <sstream>
 
 namespace Safir
 {
@@ -46,22 +37,18 @@ namespace Dob
 {
 namespace Typesystem
 {
-    ObjectFactory * volatile ObjectFactory::m_pInstance = NULL;
+    boost::once_flag ObjectFactory::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
-    ObjectFactory &
-    ObjectFactory::Instance()
+    ObjectFactory & ObjectFactory::SingletonHelper::Instance()
     {
-        if (!m_pInstance)
-        {
-            static ACE_Recursive_Thread_Mutex creationLock;
+        static ObjectFactory instance;
+        return instance;
+    }
 
-            ACE_Guard<ACE_Recursive_Thread_Mutex> lck(creationLock);
-            if (!m_pInstance)
-            {
-                m_pInstance = new ObjectFactory();
-            }
-        }
-        return *m_pInstance;
+    ObjectFactory & ObjectFactory::Instance()
+    {
+        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        return SingletonHelper::Instance();
     }
 
     ObjectFactory::ObjectFactory()
@@ -86,10 +73,21 @@ namespace Typesystem
         CallbackMap::const_iterator it = m_CallbackMap.find(typeId);
         if (it == m_CallbackMap.end())
         {
-            throw IllegalValueException(L"There is no such type registered in the ObjectFactory",__WFILE__,__LINE__);
+            std::wostringstream ostr;
+            ostr << "There is no such type registered in the ObjectFactory: ";
+            if (Operations::Exists(typeId))
+            {
+                ostr << Operations::GetName(typeId);
+            }
+            else 
+            {
+                ostr << typeId;
+            }
+            throw IllegalValueException(ostr.str(),__WFILE__,__LINE__);
         }
+
         //invoke the function
-        return (it->second(blob));
+        return it->second(blob);
     }
 
     ObjectPtr
@@ -98,10 +96,28 @@ namespace Typesystem
         CallbackMap::const_iterator it = m_CallbackMap.find(typeId);
         if (it == m_CallbackMap.end())
         {
-            throw IllegalValueException(L"There is no such type registered in the ObjectFactory",__WFILE__,__LINE__);
+            std::wostringstream ostr;
+            ostr << "There is no such type registered in the ObjectFactory: ";
+            if (Operations::Exists(typeId))
+            {
+                ostr << Operations::GetName(typeId);
+            }
+            else 
+            {
+                ostr << typeId;
+            }
+            throw IllegalValueException(ostr.str(),__WFILE__,__LINE__);
         }
+
         //invoke the function
-        return (it->second(NULL));
+        return it->second(NULL);
+    }
+
+    bool 
+    ObjectFactory::RegisterClass(const TypeId typeId, CreateObjectCallback createFunction)
+    {
+        lllout << "Adding type " << Operations::GetName(typeId) << " to ObjectFactory" << std::endl;
+        return m_CallbackMap.insert(CallbackMap::value_type(typeId,createFunction)).second;
     }
 }
 }

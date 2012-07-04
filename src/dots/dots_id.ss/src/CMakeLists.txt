@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (dots_id)
+project(dots_id C CXX)
 
 INCLUDE_DIRECTORIES(.)
 
@@ -12,8 +12,13 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 ADD_LIBRARY(dots_id SHARED dots_id.cpp md5.c md5.h Safir/Dob/Typesystem/Internal/Id.h)
 
-FIND_PACKAGE(Boost COMPONENTS filesystem date_time)
-TARGET_LINK_LIBRARIES(dots_id ${ACE_LIBRARY} ${Boost_LIBRARIES} ${COMMON_LIBRARIES})
+FIND_PACKAGE(Boost COMPONENTS filesystem date_time thread)
+
+TARGET_LINK_LIBRARIES(dots_id ${COMMON_LIBRARIES})
+
+if (NOT MSVC)
+  TARGET_LINK_LIBRARIES(dots_id lluf_utils ${Boost_LIBRARIES})
+endif()
 
 ADD_DEFINITIONS(-DDOTS_ID_EXPORTS)
 

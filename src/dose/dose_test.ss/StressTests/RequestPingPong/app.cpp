@@ -24,14 +24,13 @@
 
 #include "app.h"
 #include <iostream>
-#include <ace/OS_NS_unistd.h>
 
-App::App(const std::vector<std::string> & commandLine): m_dispatch(m_Connection)
+App::App(const std::vector<std::string> & commandLine): m_dispatch(m_Connection,m_ioService)
 {
     if (commandLine.size() < 3)
     {
         PrintHelp();
-        exit(-1);
+        exit(1);
     }
  
     wchar_t t[8];
@@ -51,7 +50,7 @@ App::App(const std::vector<std::string> & commandLine): m_dispatch(m_Connection)
     else
     {
         PrintHelp();
-        exit(-1);
+        exit(1);
     }
 
 }
@@ -63,12 +62,13 @@ void App::PrintHelp()
 
 void App::OnStopOrder()
 {
-    ACE_Reactor::instance()->end_reactor_event_loop();
+    m_ioService.stop();
 }
 
 
 
 void App::Run()
 {
-    ACE_Reactor::instance()->run_reactor_event_loop();
+    boost::asio::io_service::work keepRunning(m_ioService);
+    m_ioService.run();
 }

@@ -25,6 +25,7 @@ with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 package Safir.Dob.Typesystem.Utilities is
+   pragma Preelaborate (Safir.Dob.Typesystem.Utilities);
 
    function From_Utf_8 (Utf_8 : in String) return Unbounded_Wide_String;
 

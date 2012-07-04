@@ -39,6 +39,7 @@
 #include <boost/filesystem/convenience.hpp>
 
 #include <iostream>
+#include <cstdio>
 
 namespace Safir
 {
@@ -89,7 +90,8 @@ namespace Internal
         void Destroy()
         {
             xmlFileName = "";
-            classParser = ClassParser();
+            ClassParser tmp; //we need to do the ClassParser in two steps (declare first and assign second)
+            classParser = tmp; //due to some problem with move semantics and boost>=1.48
             propertyParser = PropertyParser();
             mappingParser = PropertyMappingParser();
             enumParser = EnumParser();

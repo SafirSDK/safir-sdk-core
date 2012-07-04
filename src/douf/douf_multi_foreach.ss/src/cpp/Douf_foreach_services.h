@@ -26,20 +26,16 @@
 
 #include "Douf_foreach_data.h"
 
-#include <Safir/Dob/Consumer.h>
-#include <Safir/Dob/Connection.h>
-#include <Safir/Dob/ConnectionAspectMisc.h>
-#include <Safir/Dob/ResponseSender.h> 
-#include <Safir/Dob/ErrorListResponse.h>
-#include <Safir/Application/Tracer.h>
-
-
 #include <Safir/Application/Backdoor.h>
 #include <Safir/Application/BackdoorKeeper.h>
-
+#include <Safir/Application/Tracer.h>
+#include <Safir/Dob/Connection.h>
+#include <Safir/Dob/ConnectionAspectMisc.h>
+#include <Safir/Dob/Consumer.h>
+#include <Safir/Dob/ErrorListResponse.h>
+#include <Safir/Dob/ResponseSender.h> 
 #include <Safir/Utilities/ForEach/ResponseType.h>
-
-#include <ace/Event_Handler.h>
+#include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
 #include <list>
 #include <map>
@@ -62,17 +58,16 @@ namespace Safir
             class Services :
                 // Allows this class to register as a service provider.
                 public Safir::Dob::ServiceHandler,
-                public Safir::Dob::Requestor,
+                public Safir::Dob::Requestor
 #if NOT_YET
-                public Safir::Application::Backdoor,
+                public Safir::Application::Backdoor
 #endif
-                public ACE_Event_Handler
             {
             public:
 
                 /** Constructor
                 */
-                Services();
+                explicit Services(boost::asio::io_service& ioService);
 
                 /** Destructor
                 */
@@ -98,11 +93,12 @@ namespace Safir
                 // Overrides Safir::Application::Backdoor, for more information see baseclass
                 void HandleCommand(const std::vector<std::wstring>& cmdTokens);
                 std::wstring GetHelpText(); 
-
-                //Overrides ACE_Event_Handler, for more information see baseclass
-                virtual int handle_timeout(const ACE_Time_Value & currentTime, const void * act);
-
+                
             private:
+                void SendQueuedRequests();
+
+                boost::asio::io_service& m_ioService;
+
                 // This class uses this secondary connection for DOB calls.
                 Safir::Dob::SecondaryConnection m_connection;
                 

@@ -71,6 +71,9 @@ namespace Internal
                           const Size dataLength,
                           AllocationHelper & allocHelper);
 
+        MemberDescription(const MemberDescription& other);
+        MemberDescription& operator=(const MemberDescription& other);
+
         ~MemberDescription();
 
         const char* Name() const {return m_name.c_str();}

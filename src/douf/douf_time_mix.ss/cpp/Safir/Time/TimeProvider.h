@@ -44,10 +44,10 @@
 #    define DOUF_TIME_CPP_API __declspec(dllexport)
 #  else
 #    define DOUF_TIME_CPP_API __declspec(dllimport)
-#    ifdef _DEBUG
-#      pragma comment( lib, "douf_time_cppd.lib" )
-#    else
+#    ifdef NDEBUG
 #      pragma comment( lib, "douf_time_cpp.lib" )
+#    else
+#      pragma comment( lib, "douf_time_cppd.lib" )
 #    endif
 #  endif
 #elif defined __GNUC__

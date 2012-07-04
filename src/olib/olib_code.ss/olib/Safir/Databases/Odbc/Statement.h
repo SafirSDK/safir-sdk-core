@@ -46,6 +46,11 @@ namespace Odbc
 {
     class Connection;
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4275)
+#endif
+
 /** The Statement class models a statement made to the database engine
     and one statement object should be made for each statement or query
     to the database. All statements needs to be Allocated and Deallocated
@@ -321,6 +326,10 @@ private:
 
     friend class Safir::Databases::Odbc::Connection;
 };
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 inline
 SQLHDBC Statement::Handle() const

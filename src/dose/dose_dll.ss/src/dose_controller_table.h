@@ -28,21 +28,20 @@
 #include <map>
 #include <vector>
 #include <string>
-
+#include <boost/thread/mutex.hpp>
+#include <boost/shared_ptr.hpp>
 
 #ifdef _MSC_VER
   #pragma warning(push)
-  #pragma warning(disable: 4267)
+  #pragma warning(disable: 4244)
 #endif
 
-#include <ace/Thread_Mutex.h>
-#include <ace/Thread.h>
+#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
   #pragma warning(pop)
 #endif
 
-#include <boost/shared_ptr.hpp>
 
 namespace Safir
 {
@@ -104,9 +103,24 @@ namespace Internal
         explicit ControllerTable(const ControllerTable &);
         ControllerTable & operator=(const ControllerTable &);
 
+        /**
+         * This class is here to ensure that only the Instance method can get at the 
+         * instance, so as to be sure that boost call_once is used correctly.
+         * Also makes it easier to grep for singletons in the code, if all 
+         * singletons use the same construction and helper-name.
+         */
+        struct SingletonHelper
+        {
+        private:
+            friend ControllerTable& ControllerTable::Instance();
+
+            static ControllerTable& Instance();
+            static boost::once_flag m_onceFlag;
+        };
+
         ControllerConstPtr GetControllerInternal(const long ctrl) const;
 
-        mutable ACE_Thread_Mutex m_lock;
+        mutable boost::mutex m_lock;
 
         typedef std::map<long, ControllerPtr> ControllerMap;
         ControllerMap m_controllers;
@@ -119,16 +133,11 @@ namespace Internal
         };
 
         typedef std::vector<ControllerInfo> ControllerInfoList;
-        typedef std::map<ACE_thread_t, ControllerInfoList > ThreadControllersTable;
+        typedef std::map<boost::thread::id, ControllerInfoList > ThreadControllersTable;
 
         ThreadControllersTable m_threadControllersTable;
 
         const bool m_threadWarningsEnabled;
-
-        //Singleton stuff
-        static ControllerTable * volatile m_instance;
-
-        static ACE_Thread_Mutex m_instantiationLock;
     };
 
 }

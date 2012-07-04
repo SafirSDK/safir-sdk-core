@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT(dob_schema_validator)
+PROJECT(dob_schema_validator NONE)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 

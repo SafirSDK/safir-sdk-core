@@ -1,4 +1,4 @@
-PROJECT (dose_com_monitor_java)
+PROJECT (dose_com_monitor_java Java)
 
 FILE(GLOB java_files *.java)
 FILE(REMOVE_RECURSE bin)

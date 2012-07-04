@@ -8,8 +8,6 @@ INCLUDE(JavaMacros)
 
 file(GLOB_RECURSE sources src/*.java)
 
-SET(JAVA_FLAGS "-Xlint")
-
 ADD_JAR(dots_java "${sources}" ALL)
 
 INSTALL(FILES dots_java.jar

@@ -1,4 +1,4 @@
-PROJECT (dose_com_jni)
+project(dose_com_jni CXX Java)
 
 INCLUDE_DIRECTORIES($ENV{JAVA_HOME}/include $ENV{JAVA_HOME}/include/linux)
 

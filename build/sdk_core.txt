@@ -1,22 +1,31 @@
-#command          directory                                 config    extra_config
+#command          directory                                config    extra_config
 #extra_config is only built on windows.
 #config is normally Release, but on windows we sometimes want the 
 #debug configuration to be built too (e.g. for dlls that exists in two "flavors")
 
 #CONFIG
-build_dir         build/config                              Release
+build_dir        build/config                              Release
+
+#check that patches have been applied
+build_dir        build/patch_check                         Release
 
 #LLUF
-build_dir        src/lluf/lluf_utils.ss/src                 Release   Debug
-build_dir        src/lluf/lluf_logger_control.ss/src        Release
+build_dir        src/lluf/lluf_utils.ss/src                Release   Debug
+build_dir        src/lluf/lluf_logger_control.ss/src       Release
 #TODO: lluf ada stuff
+
+#run the lluf unit tests
+run_test_suite   src/lluf/lluf_utils.ss/tests              lluf_tests
+
 
 #DOTS
 build_dir        src/dots/dots_id.ss/src                   Release
+run_test_suite   src/dots/dots_id.ss/tests                 dots_id_tests
 build_dir        src/dots/dots_kernel.ss/src               Release
 build_dir        src/dots/dots_configuration_check.ss/src  Release
 build_dir        src/dots/dots_schema_validator.ss         Release
 build_dir        src/dots/dots_cpp.ss/src                  Release   Debug
+run_test_suite   src/dots/dots_cpp.ss/tests/constants_test dots_cpp_constants_test
 build_dir        src/dots/dots_dotnet.ss/src               Release
 build_dir        src/dots/dots_ada.ss                      Release
 build_dir        src/dots/dots_java.ss/src                 Release
@@ -43,10 +52,12 @@ copy_dob_files   src/dope/dope_main.ss/config              definitions/safir_cor
 dobmake
 
 build_dir        src/dose/dose_internal.ss/src             Release   Debug
+run_test_suite   src/dose/dose_internal.ss/tests           dose_internal_tests
 build_dir        src/dose/dose_dll.ss/src                  Release
 build_dir        src/dose/dose_cpp.ss/src                  Release   Debug
 build_dir        src/dose/dose_communication.ss/src        Release   Debug
 build_dir        src/dose/dose_main.ss/src                 Release
+run_test_suite   src/dose/dose_main.ss/tests               dose_main_tests
 build_dir        src/dose/dose_dotnet.ss/src               Release
 build_dir        src/dose/dose_java.ss/src                 Release
 build_dir        src/dose/dose_ada.ss                      Release
@@ -56,15 +67,16 @@ build_dir        src/dose/dose_sate.ss/src                 Release
 build_dir        src/dose/dose_dobexplorer.ss/src          Release
 
 #DOUF
-build_dir        src/douf/douf_time_library.ss/src/douf_time_library    Release
+build_dir        src/douf/douf_time_library.ss/src         Release
 
 #we need to build the douf_time subdirectories separately, since one of 
 #them contain a cpp dll, which must be built in two flavors.
 build_dir        src/douf/douf_time_mix.ss/cpp             Release   Debug
 build_dir        src/douf/douf_time_mix.ss/dotnet          Release
 build_dir        src/douf/douf_time_mix.ss/ada             Release
+run_test_suite   src/douf/douf_time_mix.ss/tests           douf_time_tests
 
-#this is really just one header file (a lot of stuff for just one file...),
+#this is really just some header files (a lot of stuff for just one file...),
 #so we dont build it in release, even though it "looks" like a cpp dll.
 build_dir        src/douf/douf_utilities_mix.ss/src        Release
 
@@ -78,5 +90,10 @@ build_dir        src/swre/swre_backdoor.ss/src             Release
 build_dir        src/douf/douf_multi_foreach.ss/src/cpp    Release
 build_dir        src/olib/olib_code.ss/olib                Release   Debug
 build_dir        src/dope/dope_main.ss/src                 Release
+
+run_test_suite   src/swre/swre_test.ss                     swre_test
+
+#Run static header checks to ensure only "good" headers have been included
+run_test_suite   src/tests/header_check                    header_check
 
 build_dir        docs/doxygen                              Release

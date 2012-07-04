@@ -1,17 +1,19 @@
 with "externally_built_library";
+with "dots_kernel";
+with "dots_id";
 
-project dots_ada is
+project Dots_Ada is
 
-    for Source_Dirs use (external ("SAFIR_SDK") & "/ada/dots_ada/interface");
+    for Source_Dirs use (External ("SAFIR_SDK") & "/ada/dots_ada/interface");
 
-    for library_dir use Externally_Built_Library'library_dir;
+    for Library_Dir use Externally_Built_Library'Library_Dir;
 
     for Library_Name use "dots_ada";
 
-    for Library_ALI_Dir use external ("SAFIR_SDK") & "/ada/dots_ada/ali";
+    for Library_ALI_Dir use External ("SAFIR_SDK") & "/ada/dots_ada/ali";
 
     for Library_Kind use "dynamic";
 
     for Externally_Built use "true";
 
-end dots_ada;
+end Dots_Ada;

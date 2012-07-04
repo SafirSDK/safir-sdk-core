@@ -58,7 +58,7 @@ namespace Internal
 
         //returns Success if it is possible to add a new connection to the given process,
         //otherwise an error code.
-        ConnectResult CanAddConnectionFromProcess(const int pid) const;
+        ConnectResult CanAddConnectionFromProcess(const pid_t pid) const;
 
     private:
         virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    typeId,

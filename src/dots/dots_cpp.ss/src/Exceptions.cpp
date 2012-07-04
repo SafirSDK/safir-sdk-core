@@ -27,11 +27,6 @@
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <sstream>
 
-//Get rid of stupid define from windows.h
-#ifdef GetMessage
-#undef GetMessage
-#endif
-
 namespace Safir
 {
 namespace Dob

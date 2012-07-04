@@ -22,7 +22,6 @@
 *
 ******************************************************************************/
 
-#include "timer.h"
 #include <iostream>
 #include <DotsTest/MemberTypes.h>
 

@@ -1,28 +1,29 @@
 with "templates_parser";
 with "xmlada";
 with "dots_id";
-with "safir_defaults.gpr";
+with "safir_defaults";
 
-project dots_v is
+project Dots_V is
 
    type Build_Type is
       ("Release", "Debug", "gcov", "gperf", "normal");
    type Warning_Levels is
       ("Default", "Elaboration", "Full");
 
-   type Xml_Ada_Version_Type is ("3.2.1", "4.2");
-   Xml_Ada_Version : Xml_Ada_Version_Type := External("XML_ADA_VER", "3.2.1"); 
+   type Xml_Ada_Version_Type is ("3", "4");
+   Xml_Ada_Version : Xml_Ada_Version_Type := External("XML_ADA_VER", "3"); 
   
+  --TODO: rename the private directories to reflect major version number only
    case Xml_Ada_Version is
-        when "3.2.1" =>
+        when "3" =>
              for Source_Dirs use ("private", "private/xml_ada_3.2.1");
-        when "4.2" =>
+        when "4" =>
              for Source_Dirs use ("private", "private/xml_ada_4.2");
    end case;
    
 
-   Warning_Level : Warning_Levels := external ("Warning_Level");
-   Build : Build_Type := external ("BUILD");
+   Warning_Level : Warning_Levels := External ("Warning_Level");
+   Build : Build_Type := External ("BUILD");
 
    for Object_Dir use "lib-obj/" & Build;
    for Exec_Dir use ".";-- & Build;
@@ -98,5 +99,5 @@ project dots_v is
       end case;
    end Builder;
 
-end dots_v;
+end Dots_V;
 

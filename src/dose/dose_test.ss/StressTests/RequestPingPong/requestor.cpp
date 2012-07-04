@@ -75,7 +75,7 @@ void Requestor::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
             }
             catch (Safir::Dob::OverflowException)
             {
-                m_Id = Safir::Dob::Typesystem::EntityId::EntityId();
+                m_Id = Safir::Dob::Typesystem::EntityId();
             }
         }
 
@@ -106,7 +106,7 @@ void Requestor::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
         }
         catch (Safir::Dob::OverflowException)
         {
-            m_Id = Safir::Dob::Typesystem::EntityId::EntityId();
+            m_Id = Safir::Dob::Typesystem::EntityId();
         }
 
     }
@@ -115,7 +115,7 @@ void Requestor::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 
 void Requestor::OnNotRequestOverflow()
 {
-    if (m_Id != Safir::Dob::Typesystem::EntityId::EntityId())
+    if (m_Id != Safir::Dob::Typesystem::EntityId())
     {
         m_Connection.DeleteRequest(m_Id, this);
     }

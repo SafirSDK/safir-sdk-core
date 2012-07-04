@@ -21,10 +21,9 @@
 --  along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 --
 -------------------------------------------------------------------------------
---with Interfaces.C.Pointers;
---with Interfaces.C.Strings;
 
 package Safir.Dob.Typesystem.Internal_Defs is
+   pragma Preelaborate (Safir.Dob.Typesystem.Internal_Defs);
 
    type DotsC_Property_Mapping_Kind is (Mapped_To_Null,
                                         Mapped_To_Member,

@@ -28,14 +28,15 @@
 #include <Safir/Dob/Consumer.h>
 #include <Safir/Dob/SecondaryConnection.h>
 #include <DoseTest/Action.h>
-#include <ace/SOCK_Dgram_Mcast.h>
+#include <boost/asio.hpp>
 
 class ActionSender :
     public Safir::Dob::MessageSender
 {
 public:
 
-    explicit ActionSender(const std::string& multicastNic);
+    ActionSender(const std::string& multicastNic,
+                 boost::asio::io_service& ioService);
     ~ActionSender();
 
     void Send(const DoseTest::ActionPtr& msg);
@@ -44,10 +45,11 @@ private:
 
     virtual void OnNotMessageOverflow();
 
-    ACE_INET_Addr m_addr;
-    ACE_SOCK_Dgram_Mcast m_sock;
+    boost::asio::io_service& m_ioService;
+    boost::asio::ip::udp::socket m_socket;
 
     Safir::Dob::SecondaryConnection m_connection;
+    const bool m_standalone;
 };
 
 #endif

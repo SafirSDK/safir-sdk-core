@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-PROJECT (VehicleAppDb)
+project(VehicleAppDb CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
@@ -13,10 +13,10 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(VehicleAppDb ${sources})
 
-TARGET_LINK_LIBRARIES(VehicleAppDb ${COMMON_LIBRARIES} ${ACE_LIBRARY})
+TARGET_LINK_LIBRARIES(VehicleAppDb ${COMMON_LIBRARIES} ${ACE_LIBRARY} ${LIBS})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(VehicleAppDb dose_cpp swre_interface_cpp olib)
+    TARGET_LINK_LIBRARIES(VehicleAppDb olib swre_interface_cpp dose_cpp dots_generated-Capabilities-cpp dots_generated-Safir-cpp dots_cpp lluf_utils)
 endif()
 
 INSTALL(TARGETS VehicleAppDb

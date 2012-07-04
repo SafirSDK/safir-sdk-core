@@ -31,13 +31,12 @@
 #include <Safir/Dob/PersistenceParameters.h>
 #include <Safir/SwReports/SwReport.h>
 #include <Safir/Databases/Odbc/Exception.h>
-#include <ace/Time_Value.h>
-#include <ace/OS_NS_unistd.h>
 #include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/ConnectionAspectInjector.h>
+#include <boost/thread.hpp>
 
-const ACE_Time_Value RECONNECT_EXCEPTION_DELAY(0,100000);
-const ACE_Time_Value RETRY_EXCEPTION_DELAY(0,10000);
+const boost::posix_time::time_duration RECONNECT_EXCEPTION_DELAY = boost::posix_time::milliseconds(100);
+const boost::posix_time::time_duration RETRY_EXCEPTION_DELAY = boost::posix_time::milliseconds(10);
 
 const int REPORT_AFTER_RECONNECTS = 100;
 
@@ -93,7 +92,7 @@ void Alloc(T & thing)
                      L"Failed to Alloc something");
                 errorReported = true;
             }
-            ACE_OS::sleep(RECONNECT_EXCEPTION_DELAY);
+            boost::this_thread::sleep(RECONNECT_EXCEPTION_DELAY);
         }
     }
 }
@@ -129,7 +128,7 @@ void Alloc(T & thing, U & arg)
                      L"Failed to Alloc something");
                 errorReported = true;
             }
-            ACE_OS::sleep(RECONNECT_EXCEPTION_DELAY);
+            boost::this_thread::sleep(RECONNECT_EXCEPTION_DELAY);
         }
     }
 }
@@ -137,7 +136,8 @@ void Alloc(T & thing, U & arg)
 
 
 //-------------------------------------------------------
-OdbcPersistor::OdbcPersistor():
+OdbcPersistor::OdbcPersistor(boost::asio::io_service& ioService) :
+    PersistenceHandler(ioService),
     m_odbcConnection(),
     m_environment(),
     m_storeBinaryDataParam(Safir::Dob::PersistenceParameters::XmlDataColumnSize()),
@@ -253,7 +253,7 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
             catch(const Safir::Databases::Odbc::RetryException &)
             {
                 m_debug << "Caught a RetryException in Store" << std::endl;
-                ACE_OS::sleep(RETRY_EXCEPTION_DELAY);
+                boost::this_thread::sleep(RETRY_EXCEPTION_DELAY);
             }
         }
         catch(const Safir::Databases::Odbc::ReconnectException &)
@@ -268,7 +268,7 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
             }
             Disconnect(m_odbcConnection);
             Free(m_storeStatement);
-            ACE_OS::sleep(RECONNECT_EXCEPTION_DELAY);
+            boost::this_thread::sleep(RECONNECT_EXCEPTION_DELAY);
         }
     }
 }
@@ -328,7 +328,7 @@ void OdbcPersistor::DeleteAll(Safir::Databases::Odbc::Connection & connectionToU
             catch(const Safir::Databases::Odbc::RetryException &)
             {
                 m_debug << "Caught a RetryException in RemoveAll" << std::endl;
-                ACE_OS::sleep(RETRY_EXCEPTION_DELAY);
+                boost::this_thread::sleep(RETRY_EXCEPTION_DELAY);
             }
         }
         catch(const Safir::Databases::Odbc::ReconnectException &)
@@ -343,7 +343,7 @@ void OdbcPersistor::DeleteAll(Safir::Databases::Odbc::Connection & connectionToU
             }
             Disconnect(connectionToUse);
             Free(m_deleteAllStatement);
-            ACE_OS::sleep(RECONNECT_EXCEPTION_DELAY);
+            boost::this_thread::sleep(RECONNECT_EXCEPTION_DELAY);
         }
     }
 }
@@ -396,7 +396,7 @@ void OdbcPersistor::RestoreAll()
                 catch(const Safir::Databases::Odbc::RetryException &)
                 {
                     m_debug << "Caught a RetryException in GetAll" << std::endl;
-                    ACE_OS::sleep(RETRY_EXCEPTION_DELAY);
+                    boost::this_thread::sleep(RETRY_EXCEPTION_DELAY);
                 }
             }
 
@@ -499,7 +499,7 @@ void OdbcPersistor::RestoreAll()
                 catch(const Safir::Databases::Odbc::RetryException &)
                 {
                     m_debug << "Caught a RetryException in Fetch" << std::endl;
-                    ACE_OS::sleep(RETRY_EXCEPTION_DELAY);
+                    boost::this_thread::sleep(RETRY_EXCEPTION_DELAY);
                 }
             }
         }
@@ -517,7 +517,7 @@ void OdbcPersistor::RestoreAll()
             Disconnect(m_odbcConnection);
             Free(getAllStatement);
 
-            ACE_OS::sleep(RECONNECT_EXCEPTION_DELAY);
+            boost::this_thread::sleep(RECONNECT_EXCEPTION_DELAY);
         }
     }
 
@@ -599,7 +599,7 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId & entityId)
             catch(const Safir::Databases::Odbc::RetryException &)
             {
                 m_debug << "Caught a RetryException in Insert" << std::endl;
-                ACE_OS::sleep(RETRY_EXCEPTION_DELAY);
+                boost::this_thread::sleep(RETRY_EXCEPTION_DELAY);
             }
 
         }
@@ -615,7 +615,7 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId & entityId)
             }
             Disconnect(m_odbcConnection);
             Free(m_insertStatement);
-            ACE_OS::sleep(RECONNECT_EXCEPTION_DELAY);
+            boost::this_thread::sleep(RECONNECT_EXCEPTION_DELAY);
         }
 
     }
@@ -677,7 +677,7 @@ OdbcPersistor::Delete(Safir::Databases::Odbc::Connection & connectionToUse,
             catch(const Safir::Databases::Odbc::RetryException &)
             {
                 m_debug << "Caught a RetryException in Delete" << std::endl;
-                ACE_OS::sleep(RETRY_EXCEPTION_DELAY);
+                boost::this_thread::sleep(RETRY_EXCEPTION_DELAY);
             }
         }
         catch(const Safir::Databases::Odbc::ReconnectException &)
@@ -692,7 +692,7 @@ OdbcPersistor::Delete(Safir::Databases::Odbc::Connection & connectionToUse,
             }
             Disconnect(connectionToUse);
             Free(m_deleteStatement);
-            ACE_OS::sleep(RECONNECT_EXCEPTION_DELAY);
+            boost::this_thread::sleep(RECONNECT_EXCEPTION_DELAY);
         }
     }
 }

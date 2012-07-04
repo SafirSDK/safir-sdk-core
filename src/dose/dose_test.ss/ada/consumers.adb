@@ -681,7 +681,7 @@ package body Consumers is
       Entity_Proxy             : in Safir.Dob.Entity_Proxies.Entity_Proxy) is
 
       Entity : constant Safir.Dob.Entity.Smart_Pointer'Class :=
-                           Safir.Dob.Entity.Smart_Pointer'Class (Entity_Proxy.Get_Entity_With_Change_Info);
+         Entity_Proxy.Get_Entity_With_Change_Info;
       Entity_Ptr : constant Safir.Dob.Entity.Entity_Class_Access := Entity.Ref;
       Xml : Unbounded_Wide_String;
       I : Safir.Dob.Typesystem.Int_32;
@@ -721,12 +721,12 @@ package body Consumers is
       Entity_Proxy             : in Safir.Dob.Entity_Proxies.Entity_Proxy) is
 
       Entity : constant Safir.Dob.Entity.Smart_Pointer'Class :=
-                           Safir.Dob.Entity.Smart_Pointer'Class (Entity_Proxy.Get_Entity_With_Change_Info);
+         Entity_Proxy.Get_Entity_With_Change_Info;
       Entity_Ptr : constant Safir.Dob.Entity.Entity_Class_Access := Entity.Ref;
       Xml : Unbounded_Wide_String;
 
       Prev_Entity : constant Safir.Dob.Entity.Smart_Pointer'Class :=
-                      Safir.Dob.Entity.Smart_Pointer'Class (Entity_Proxy.Get_Previous.Get_Entity_With_Change_Info);
+         Entity_Proxy.Get_Previous.Get_Entity_With_Change_Info;
       Prev_Xml : Unbounded_Wide_String;
 
       I : Safir.Dob.Typesystem.Int_32;
@@ -774,7 +774,7 @@ package body Consumers is
       Deleted_By_Owner         : in Boolean) is
 
       Prev_Entity : constant Safir.Dob.Entity.Smart_Pointer'Class :=
-                      Safir.Dob.Entity.Smart_Pointer'Class (Entity_Proxy.Get_Previous.Get_Entity);
+         Entity_Proxy.Get_Previous.Get_Entity;
       Prev_Xml : Unbounded_Wide_String;
    begin
 
@@ -804,7 +804,7 @@ package body Consumers is
       Injected_Entity_Proxy : in Safir.Dob.Injected_Entity_Proxies.Injected_Entity_Proxy) is
 
       Entity : constant Safir.Dob.Entity.Smart_Pointer'Class :=
-                           Safir.Dob.Entity.Smart_Pointer'Class (Injected_Entity_Proxy.Get_Injection);
+         Injected_Entity_Proxy.Get_Injection;
       Entity_Ptr : constant Safir.Dob.Entity.Entity_Class_Access := Entity.Ref;
       Xml : Unbounded_Wide_String;
       I : Safir.Dob.Typesystem.Int_32;
@@ -837,7 +837,7 @@ package body Consumers is
       Injected_Entity_Proxy : in Safir.Dob.Injected_Entity_Proxies.Injected_Entity_Proxy) is
 
       Entity : constant Safir.Dob.Entity.Smart_Pointer'Class :=
-                           Safir.Dob.Entity.Smart_Pointer'Class (Injected_Entity_Proxy.Get_Injection);
+         Injected_Entity_Proxy.Get_Injection;
       Entity_Ptr : constant Safir.Dob.Entity.Entity_Class_Access := Entity.Ref;
       Injection_Xml : Unbounded_Wide_String;
       Current_Xml : Unbounded_Wide_String;
@@ -928,7 +928,7 @@ package body Consumers is
       begin
          declare
             Req : constant Safir.Dob.Typesystem.Object.Smart_Pointer'Class :=
-                    Safir.Dob.Typesystem.Object.Smart_Pointer'Class (Response_Proxy.Get_Request);
+               Response_Proxy.Get_Request;
          begin
             if Need_Binary_Check (Req) then
                Logger.Put_Line (Check_Binary_Member (Req, Response_Proxy.Get_Request_Blob));

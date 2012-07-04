@@ -58,8 +58,10 @@ namespace Utilities
         m_impl = new ProcessMonitorLinux(callback);
 #endif
 
-        if (m_impl)
+        if (m_impl) 
+        {
             m_impl->StartThread();
+        }
     }
     
 
@@ -67,7 +69,9 @@ namespace Utilities
     ProcessMonitor::StartMonitorPid(const pid_t pid)
     {
         if (m_impl)
+        {
             m_impl->StartMonitorPid(pid);
+        }
     }
     
     
@@ -75,7 +79,9 @@ namespace Utilities
     ProcessMonitor::StopMonitorPid(const pid_t pid)
     {
         if (m_impl)
+        {
             m_impl->StopMonitorPid(pid);
+        }
     }
 }
 }

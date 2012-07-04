@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(swre_java_jni Java)
+project(swre_java_jni CXX Java)
 find_package(Java REQUIRED)
 find_package(JNI REQUIRED)
 string (REPLACE "javac" "javah" JAVAH ${JAVA_COMPILE})
@@ -28,8 +28,6 @@ ADD_CUSTOM_TARGET(javah ALL
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(swre_java_jni SHARED ${sources})
-
-TARGET_LINK_LIBRARIES(swre_java_jni ${ACE_LIBRARY})
 
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(swre_java_jni swre_library)

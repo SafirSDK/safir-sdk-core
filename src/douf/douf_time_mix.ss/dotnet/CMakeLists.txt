@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT(douf_time_dotnet)
+PROJECT(douf_time_dotnet NONE)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 find_package(CSharp REQUIRED)

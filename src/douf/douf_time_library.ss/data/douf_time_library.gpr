@@ -1,16 +1,15 @@
 with "externally_built_library";
 
-project douf_time_library is
+project Douf_Time_Library is
 
    for Source_Dirs use ();
 
-   for library_dir use Externally_Built_Library'library_dir;
+   for Library_Dir use Externally_Built_Library'Library_Dir;
 
-   for Library_name use "douf_time_library";
+   for Library_Name use "douf_time_library";
 
-   for Library_kind  use "dynamic";
+   for Library_Kind use "dynamic";
 
    for Externally_Built use "true";
 
-
-end douf_time_library;
+end Douf_Time_Library;

@@ -144,7 +144,7 @@ package body Safir.Dob.Callbacks is
       Safir.Dob.Consumers.Entity_Subscriber'Class (Consumer.all).On_Updated_Entity
         (Safir.Dob.Entity_Proxies.Create (Entity_Proxy_Impl_Ptr));
 
-         Success := C.char'Val (Boolean'Pos (True));
+      Success := C.char'Val (Boolean'Pos (True));
    exception
       when E : others =>
          Safir.Dob.Typesystem.Library_Exceptions.Set (E);
@@ -179,7 +179,7 @@ package body Safir.Dob.Callbacks is
         (Safir.Dob.Entity_Proxies.Create (Entity_Proxy_Impl_Ptr),
          Boolean'Val (C.char'Pos (Explicitly_Deleted)));
 
-         Success := C.char'Val (Boolean'Pos (True));
+      Success := C.char'Val (Boolean'Pos (True));
    exception
       when E : others =>
          Safir.Dob.Typesystem.Library_Exceptions.Set (E);

@@ -1,9 +1,9 @@
-PROJECT (ProcessInfo_test)
-INCLUDE_DIRECTORIES($ENV{SAFIR_SDK}/include)
-LINK_DIRECTORIES($ENV{SAFIR_RUNTIME}/lib)
 FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(ProcessInfo_test ${sources})
-TARGET_LINK_LIBRARIES (ProcessInfo_test ACE lluf_utils)
+
+IF (NOT MSVC)
+  TARGET_LINK_LIBRARIES (ProcessInfo_test lluf_utils ${Boost_LIBRARIES})
+ENDIF()
 
 ADD_TEST(ProcessInfo ProcessInfo_test)

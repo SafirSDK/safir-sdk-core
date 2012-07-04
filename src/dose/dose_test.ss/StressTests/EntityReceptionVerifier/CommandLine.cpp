@@ -39,7 +39,7 @@ bool CommandLine::Parse(int argc, char* argv[])
 {
     namespace po = boost::program_options;
     // Declare the supported options.
-    std::cout << std::boolalpha;
+    std::wcout << std::boolalpha;
     try
     {
         po::options_description general("General options");
@@ -77,7 +77,7 @@ bool CommandLine::Parse(int argc, char* argv[])
         m_numInstances = m_variablesMap["num-instances"].as<int>();
         if (m_variablesMap.count("help"))
         {
-            std::cout << all << std::endl;
+            std::wcout << all << std::endl;
             return false;
         }
 

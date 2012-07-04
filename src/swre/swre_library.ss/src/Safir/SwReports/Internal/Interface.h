@@ -85,6 +85,7 @@ extern "C"
      */
     /** @{ */
 
+#if 0 //not implemented
     /**
      * Add characters to trace buffer.
      *
@@ -95,6 +96,7 @@ extern "C"
      */
     SWRE_LIBRARY_API void SwreC_TraceAppendString(const char * const str,
                                                   bool & success);
+#endif
 
     /**
      * Add characters to trace buffer.
@@ -109,7 +111,7 @@ extern "C"
       SwreC_TraceAppendStringPrefix(const DotsC_Int64 prefixId,
                                     const char * const str,
                                     bool & success);
-
+#if 0 //not implemented
     /**
      * Add character to trace buffer.
      *
@@ -120,6 +122,7 @@ extern "C"
      */
     SWRE_LIBRARY_API void SwreC_TraceAppendChar(const char ch,
                                                 bool & success);
+#endif
 
     /**
      * Add character to trace buffer.

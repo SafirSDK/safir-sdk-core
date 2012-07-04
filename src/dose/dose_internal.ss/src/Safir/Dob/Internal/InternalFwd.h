@@ -80,7 +80,22 @@ namespace Internal
     >
     StateSharedPtr;
 
-    typedef std::pair<StateSharedPtr, SharedLock> LockedStateResult;
+    struct LockedStateResult
+    {
+        StateSharedPtr first;
+        SharedLock second;
+        LockedStateResult() : first(), second() {}
+        LockedStateResult(const StateSharedPtr& f, const SharedLock& s) :
+            first(f), second(s) {}
+        LockedStateResult(const LockedStateResult& other):
+            first(other.first), second(other.second) {}
+        LockedStateResult& operator=(const LockedStateResult& other)
+        {
+            first = other.first;
+            second = other.second;
+            return *this;
+        }
+    };
 
     class RequestInQueue;
     class RequestOutQueue;

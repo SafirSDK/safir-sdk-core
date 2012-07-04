@@ -58,21 +58,7 @@ namespace Internal
     class MemberMapping
     {
     public:
-#if 0
-        /*
-         *  MappingKind | cmr  | parameter  |
-         * -------------+------+------------+-
-         *  NullMapping |  -   |    -       |
-         * -------------+------+------------+-
-         *  ClassMember |  M   |    -       |
-         * -------------+------+------------+-
-         *  Parameter   |  -   |    M       |
-         * -------------+------+------------+-
-         */
-        MemberMapping(const DotsC_PropertyMappingKind kind,
-                      const ClassMemberReferencePtr & cmr,
-                      const ParameterDescriptionConstPtr & parameter);
-#endif
+
         //create a MappedToNull mapping
         MemberMapping();
 
@@ -81,6 +67,10 @@ namespace Internal
 
         //create a MappedToParameter mapping
         MemberMapping(const ParameterDescription & parameter, AllocationHelper & allocHelper);
+
+        MemberMapping(const MemberMapping& other);
+        MemberMapping& operator=(const MemberMapping& other);
+
 
         DotsC_PropertyMappingKind GetMappingKind() const {return m_mappingKind;}
 
@@ -93,10 +83,6 @@ namespace Internal
         DotsC_PropertyMappingKind m_mappingKind;
         AllocationHelper::SmartPointers<ClassMemberReference>::shared_ptr m_classMemberReference;
         AllocationHelper::SmartPointers<ParameterDescription>::shared_ptr m_parameter;
-        /*
-        static MemberMapping CreateNullMapping();
-        static MemberMapping CreateClassMemberReferenceMapping(int noReferenceElements);
-        static MemberMapping CreateParameterMapping(const ParameterDescription & pd);*/
     };
 
 
@@ -109,6 +95,9 @@ namespace Internal
         PropertyMappingDescription(const Size noMembers, //used to reserve space in shmem
                                    const PropertyDescriptionConstPtr & property,
                                    AllocationHelper & allocHelper);
+
+        PropertyMappingDescription(const PropertyMappingDescription& other);
+        PropertyMappingDescription& operator=(const PropertyMappingDescription& other);
 
         ~PropertyMappingDescription();
 

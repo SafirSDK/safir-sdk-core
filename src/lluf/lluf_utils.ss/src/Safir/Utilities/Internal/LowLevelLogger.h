@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2012 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagström / lars@foldspace.nu
 *
 *******************************************************************************
 *
@@ -21,44 +21,30 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __LLUF_LOW_LEVEL_LOGGER_H__
-#define __LLUF_LOW_LEVEL_LOGGER_H__
-#include <fstream>
+#ifndef __LLUF_LOW_LEVEL_LOGGER_NEW_H__
+#define __LLUF_LOW_LEVEL_LOGGER_NEW_H__
 
-#include <boost/interprocess/shared_memory_object.hpp>
-#include <boost/interprocess/mapped_region.hpp>
-#include <boost/interprocess/streams/vectorstream.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/noncopyable.hpp>
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
-
-//#include <ace/Process_Mutex.h>
-//#include <ace/Process_Semaphore.h>
-#include <Safir/Utilities/StartupSynchronizer.h>
-#include <ace/Thread_Mutex.h>
-
-#include <vector>
+#include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/thread/once.hpp>
+#include <ostream>
 
 /**
   * This is a utility for logging to file that is _only_ intended for
   * use by low level parts of the Safir system. All other applications should
   * Use some other mechanism for logging.
   *
-  * just use lllout like you would any ostream
-  * lllout << "hello world 1"<<std::endl;
-  * lllout << 123 << std::endl;
+  * Just use lllog like you would any ostream
+  *   lllog(1) << "hello world 1"<<std::endl;
+  *   lllog(5) << 123 << std::endl;
+  * The argument to lllog itself is the logging level, where high means verbose.
+  * Level is a value between 1 and 9 (no checks are made for this, but any other
+  * values may cause unexpected behavior).
   */
-
-#define lllout if (!Safir::Utilities::Internal::Internal::LowLevelLoggerBackend::Instance().LoggingEnabled()) ; else *boost::scoped_ptr<Safir::Utilities::Internal::Internal::LowLevelLogger>(new Safir::Utilities::Internal::Internal::LowLevelLogger(false))
-#define lllinfo *boost::scoped_ptr<Safir::Utilities::Internal::Internal::LowLevelLogger>(new Safir::Utilities::Internal::Internal::LowLevelLogger(false))
-#define lllerr *boost::scoped_ptr<Safir::Utilities::Internal::Internal::LowLevelLogger>(new Safir::Utilities::Internal::Internal::LowLevelLogger(true))
-
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4251) // warning C4251: 'Safir::Dob::Typesystem::LibraryExceptions::m_CallbackMap' : class 'stdext::hash_map<_Kty,_Ty>' needs to have dll-interface to be used by clients of class 'Safir::Dob::Typesystem::LibraryExceptions'
-#pragma warning (disable: 4275) // warning C4275: non dll-interface class 'boost::noncopyable_::noncopyable' used as base for dll-interface class 'Safir::Dob::Typesystem::LibraryExceptions'
-#endif
+#define lllog(level) if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() < level) ; else Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
+#define lllout lllog(7)
+#define lllerr Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
 
 namespace Safir
 {
@@ -69,93 +55,64 @@ namespace Internal
     //this is all the hidden magic implementation
     namespace Internal
     {
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4275)
+#pragma warning(disable: 4251)
+#endif
         class LLUF_UTILS_API LowLevelLogger :
-            public std::basic_ostream<wchar_t, std::char_traits<wchar_t> >
-        {
-        public:
-            LowLevelLogger(bool forceFlush);
-            ~LowLevelLogger();
-        };
-
-        class LLUF_UTILS_API LowLevelLoggerBackend :
-            public Synchronized,
+            public std::wostream,
             private boost::noncopyable
         {
         public:
-            static LowLevelLoggerBackend & Instance();
-
-            //inline bool LoggingEnabled() const {return static_cast<const LowLevelLoggerStreamBuf *>(rdbuf())->LoggingEnabled();}
-            inline bool LoggingEnabled() const {return m_pLoggingEnabled != NULL && *m_pLoggingEnabled;}
-
-            void CopyToInternalBuffer(const std::wostringstream& ostr);
-            void OutputInternalBuffer();
-
-            inline bool OutputThreadStarted() const {return m_outputThreadStarted;}
-            inline boost::filesystem::wofstream& OutputFile() {return m_OutputFile;}
-
-            //StartupSynchronizer stuff
-            void Create();
-            void Use();
-            void Destroy();
-
+            static LowLevelLogger & Instance();
+            
+            inline int LogLevel() const 
+            {
+                if (m_pLogLevel == NULL) 
+                {
+                    return 0;
+                }
+                else
+                {
+                    return *m_pLogLevel;
+                }
+            }
         private:
-            LowLevelLoggerBackend();
-            ~LowLevelLoggerBackend();
+            /** Constructor*/
+            explicit LowLevelLogger();
 
-            static LowLevelLoggerBackend * volatile m_pInstance;
+            /** Destructor */
+            ~LowLevelLogger();
 
-            static ACE_Thread_Mutex m_InstantiationLock;
+            /**
+             * This class is here to ensure that only the Instance method can get at the 
+             * instance, so as to be sure that boost call_once is used correctly.
+             * Also makes it easier to grep for singletons in the code, if all 
+             * singletons use the same construction and helper-name.
+             */
+            struct SingletonHelper
+            {
+            private:
+                friend LowLevelLogger& LowLevelLogger::Instance();
+                
+                static LowLevelLogger& Instance();
+                static boost::once_flag m_onceFlag;
+            };
 
-            boost::interprocess::shared_memory_object m_shm;
-            boost::interprocess::mapped_region m_shmRegion;
-            boost::filesystem::wofstream m_OutputFile;
-     
-            typedef std::vector<wchar_t> BufferT;
-            boost::interprocess::basic_vectorstream<BufferT> m_os;
-            BufferT m_outputBuf;
+        class Impl;
+        class LoggingImpl;
+        class FallbackImpl;
+        boost::shared_ptr<Impl> m_impl;
 
-            bool * m_pLoggingEnabled;
-
-            StartupSynchronizer m_startupSynchronizer;
-
-            static ACE_THR_FUNC_RETURN OutputThreadFunc(void* _this);
-            void OutputWorker();
-            ACE_Thread_Mutex m_bufLock;
-            ACE_Thread_Mutex m_internalBufLock;
-            bool m_outputThreadStarted;
+        const int* m_pLogLevel;            
         };
-
-        class LLUF_UTILS_API LowLevelLoggerStreamBuf :
-            public std::basic_streambuf<wchar_t, std::char_traits<wchar_t> >
-        {
-            typedef std::char_traits<wchar_t> _Tr;
-
-        public:
-            LowLevelLoggerStreamBuf(bool forceFlush);
-            virtual ~LowLevelLoggerStreamBuf();
-
-        private:
-            virtual _Tr::int_type uflow();
-            virtual _Tr::int_type underflow();
-            virtual _Tr::int_type overflow(_Tr::int_type c = _Tr::eof());
-
-            void WriteDateTime();
-
-            bool m_bDatePending;
-
-            std::wostringstream m_ostr;
-
-            LowLevelLoggerBackend & m_backend;
-            bool m_forceFlush;
-        };
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
     }
 }
 }
 }
 
-#ifdef _MSC_VER
-#pragma warning (pop)
 #endif
-
-#endif
-

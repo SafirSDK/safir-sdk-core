@@ -23,10 +23,31 @@
 ******************************************************************************/
 
 #include "dose_main_app.h"
-
-int main(int /*argc*/, char* /*argv*/[])
+#include <Safir/Utilities/Internal/PanicLogging.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
+int main()
 {
-    Safir::Dob::Internal::DoseApp theApp;
-    return theApp.Run();
+    try 
+    {
+        Safir::Dob::Internal::DoseApp theApp;
+        theApp.Run();
+        return 0;
+    }
+    catch (const std::exception & exc)
+    {
+        std::ostringstream ostr;
+        ostr << "dose_main: Caught 'std::exception' exception: "
+             << "  '" << exc.what() << "'." << std::endl;
+        lllerr << ostr.str().c_str();
+        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+    }
+    catch (...)
+    {
+        std::ostringstream ostr;
+        ostr << "dose_main: Caught '...' exception." <<std::endl;
+        lllerr << ostr.str().c_str();
+        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+    }
+    return 1;
 }
 

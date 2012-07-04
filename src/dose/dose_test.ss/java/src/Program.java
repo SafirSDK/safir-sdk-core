@@ -32,7 +32,11 @@ public class Program
     {
         System.out.println("Starting");
         Executor app = new Executor(args);
-        app.run();
+        try {
+            app.run();
+        }
+        catch (InterruptedException exc) {
+        }
 
         Logger.instance().println("Exiting");
         //        System.exit(0);

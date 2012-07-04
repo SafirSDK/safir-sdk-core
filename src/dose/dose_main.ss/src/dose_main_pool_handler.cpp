@@ -40,9 +40,8 @@
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <ace/Thread.h>
+#include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <boost/bind.hpp>
-#include <ace/OS_NS_unistd.h>
 
 namespace Safir
 {
@@ -52,20 +51,47 @@ namespace Internal
 {
     const Dob::Typesystem::Int32 g_thisNode = Safir::Dob::ThisNodeParameters::NodeNumber();
 
-    PoolHandler::PoolHandler():
+    class PoolHandler::ExceptionInfo
+    {
+    public:
+        ExceptionInfo(const Dob::Typesystem::TypeId typeId,
+                      const std::string& description)
+            : m_typeId(typeId)
+            , m_description(description)
+        {
+                
+        }
+            
+        void Rethrow() const
+        {
+            Dob::Typesystem::LibraryExceptions::Instance().Throw(m_typeId, m_description);
+        }
+    private:
+        const Dob::Typesystem::TypeId m_typeId;
+        const std::string m_description;
+    };
+
+    PoolHandler::PoolHandler(boost::asio::io_service & ioService):
         m_ecom(NULL),
         m_blockingHandler(NULL),
         m_pendingRegistrationHandler(NULL),
         m_persistHandler(NULL),
         m_connectionHandler(NULL),
         m_stateSubscriptionConnections(Safir::Dob::NodeParameters::NumberOfContexts()),
-        m_pdThreadHandle(NULL)
+        m_pdThread(),
+        m_ioService(ioService)
     {
-        m_stateDispatcher.reset(new StateDispatcher(boost::bind(&PoolHandler::DistributeStates,this)));
+        m_stateDispatcher.reset(new StateDispatcher(boost::bind(&PoolHandler::DistributeStates,this),ioService));
     }
 
     PoolHandler::~PoolHandler()
     {
+        if (m_pdThread != boost::thread())
+        {
+            m_pdThread.interrupt();
+            m_pdThread.join();
+            m_pdThread = boost::thread();
+        }
     }
 
     void StartSubscriptions(const Safir::Dob::Connection & connection,
@@ -129,25 +155,12 @@ namespace Internal
         }
     }
 
-
-
-    ACE_THR_FUNC_RETURN PoolHandler::PoolDistributionThreadFunc(void * _this)
-    {
-        static_cast<PoolHandler *>(_this)->PoolDistributionWorker();
-        return NULL;
-    }
-
     void PoolHandler::StartPoolDistribution()
     {
         lllout << "Starting pool distribution thread" << std::endl;
-        //if (m_pdThreadHandle != 0)
-        //{
-        //    lllerr << "PoolHandler: The pool distribution thread is already running, request ignored." << std::endl;
-        //    return;
-        //}
-        ENSURE(m_pdThreadHandle == 0, << "It appears that there are multiple pool distribution threads running! m_pdThreadHandle = 0x"
-                                      <<std::hex<< (void*)m_pdThreadHandle<<std::dec);
-        ACE_Thread::spawn(&PoolHandler::PoolDistributionThreadFunc,this,THR_NEW_LWP|THR_JOINABLE,NULL,&m_pdThreadHandle);
+        ENSURE(m_pdThread == boost::thread(), << "There is already a pd thread running! m_pdThread id = "
+                                              << m_pdThread.get_id());
+        m_pdThread = boost::thread(boost::bind(&PoolHandler::PoolDistributionWorker,this));
     }
 
     void PoolHandler::RequestPoolDistribution(const int nodeId)
@@ -200,24 +213,27 @@ namespace Internal
         }
     }
 
-
+ 
     void PoolHandler::PoolDistributionWorker()
     {
-        lllout << "Pool distribution thread started" << std::endl;
-
-        // Wait until persistent data is ready.
-        if (!m_persistHandler->IsPersistentDataReady())
-        {
-            lllout << "Pool distribution thread is waiting for persistence data from DOPE" << std::endl;
-            while (!m_persistHandler->IsPersistentDataReady())
-            {
-                ACE_OS::sleep(ACE_Time_Value(0,10000)); //10ms
-            }
-            lllout << "Pool distribution thread thinks DOPE is done." << std::endl;
-        }
-
+        boost::shared_ptr<ExceptionInfo> exceptionInfo;
+        
         try
         {
+            lllout << "Pool distribution thread started" << std::endl;
+            
+            // Wait until persistent data is ready.
+            if (!m_persistHandler->IsPersistentDataReady())
+            {
+                lllout << "Pool distribution thread is waiting for persistence data from DOPE" << std::endl;
+                while (!m_persistHandler->IsPersistentDataReady())
+                {
+                    boost::this_thread::sleep(boost::posix_time::milliseconds(10)); //sleep is interruption point
+                }
+                lllout << "Pool distribution thread thinks DOPE is done." << std::endl;
+            }
+
+
             lllout << "Distributing connections" << std::endl;
             // get connections
             ConnectionMsgsToSend.clear();
@@ -226,6 +242,7 @@ namespace Internal
             ConnectionMsgs::const_iterator msgIter;
             for ( msgIter = ConnectionMsgsToSend.begin( ) ; msgIter != ConnectionMsgsToSend.end( ) ; msgIter++ )
             {
+                boost::this_thread::interruption_point();
                 m_ecom->SendPoolDistributionData(*msgIter);
             }
             ConnectionMsgsToSend.clear();
@@ -237,6 +254,7 @@ namespace Internal
             // Distribute all contexts
             for (ContextId context = 0; context < Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
             {
+                boost::this_thread::interruption_point();
                 Safir::Dob::Connection pdConnection;
 
                 //Note the connection name, we do NOT want to get special treatment for being
@@ -255,29 +273,38 @@ namespace Internal
 
             m_ecom->PoolDistributionCompleted();
         }
-        catch (const std::exception & exc)
+        catch (const boost::thread_interrupted&)
         {
-            std::wostringstream ostr;
-            ostr << "dose_main std::exception in PoolHandler::PoolDistributionWorker:" << std::endl
-                 << exc.what();
-
-            std::wcout << ostr.str() << std::endl;
-            lllout << ostr.str() << std::endl;
-            exit(-1);
+            //do nothing but exit the thread.
+            return;
+        }
+        catch (const Dob::Typesystem::Internal::CommonExceptionBase& e)
+        {
+            exceptionInfo.reset
+                (new ExceptionInfo(e.GetTypeId(),
+                                   Dob::Typesystem::Utilities::ToUtf8(e.GetExceptionInfo())));
+        }
+        catch (const std::exception & e)
+        {
+            exceptionInfo.reset(new ExceptionInfo(0,
+                                                  e.what()));
         }
         catch (...)
         {
-            std::wostringstream ostr;
-            ostr << "dose_main ... in PoolHandler::PoolDistributionWorker!";
-
-            std::wcout << ostr.str() << std::endl;
-            lllout << ostr.str() << std::endl;
-            exit(-1);
+            exceptionInfo.reset(new ExceptionInfo(0,
+                                                  "Unknown exception (caught as ...)"));
         }
+
+        if (exceptionInfo != NULL)
+        {
+            lllerr << "An exception was caught inside PoolHandler::PoolDistributionWorker!\n"
+                   << "The exception will be rethrown in the main thread" << std::endl;
+        }
+
         lllout << "Signalling pool distribution completed"<< std::endl;
 
         //No need for m_isNotified flag guard, since this happens very seldom.
-        ACE_Reactor::instance()->notify(this);
+        m_ioService.post(boost::bind(&PoolHandler::PDCompletedHandler,this,exceptionInfo));
     }
 
     void PoolHandler::HandleRegistrationStateFromDoseCom(const DistributionData& state, const bool isAckedData)
@@ -425,17 +452,18 @@ namespace Internal
         }
     }
 
-    int PoolHandler::handle_exception(ACE_HANDLE)
+    void PoolHandler::PDCompletedHandler(const boost::shared_ptr<ExceptionInfo>& exceptionInfo)
     {
         lllout << "Pool distribution is completed"<< std::endl;
-        ACE_THR_FUNC_RETURN exitStatus;
-        const int ret = ACE_Thread::join(m_pdThreadHandle,&exitStatus);
-        ENSURE(exitStatus == NULL, << "Pool distribution thread exited with an unexpected status! code = " << exitStatus);
-        ENSURE(ret == 0, << "PoolHandler::handle_exception: Failed to join PoolDistribution thread! return value = " << ret);
-        m_pdThreadHandle = 0;
+        m_pdThread.join();
+        m_pdThread = boost::thread();
 
+        if (exceptionInfo != NULL)
+        {
+            lllerr << "An exception occurred in pool distribution, rethrowing." << std::endl;
+            exceptionInfo->Rethrow();
+        }
         m_connectionHandler->MaybeSignalConnectSemaphore();
-        return 0;
     }
 
 
@@ -631,6 +659,8 @@ namespace Internal
 
     void PoolHandler::PDDispatchSubscription(const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
     {
+        boost::this_thread::interruption_point();
+
         exitDispatch = false;
         dontRemove = false;
 

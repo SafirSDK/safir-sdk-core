@@ -29,26 +29,9 @@
 #include "ProcessMonitorImpl.h"
 #include <Safir/Utilities/ProcessMonitor.h>
 
-//disable warnings in ace
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4512)
-  #pragma warning (disable : 4127)
-  #pragma warning (disable : 4251)
-  #pragma warning (disable : 4267)
-#endif
-
-#include <ace/Auto_Event.h>
-#include <ace/Thread.h>
-#include <ace/Synch.h>
-#include "ace/Guard_T.h"
-
-//and enable the warnings again
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
-
+#include <windows.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
 
 #include <map>
 #include <vector>
@@ -58,13 +41,6 @@ namespace Safir
 {
 namespace Utilities
 {
-    enum ThreadState
-    {
-        NotStarted,  
-        Running,     
-        Stopped, 
-    };
-
     class ProcessMonitorWin32Thread
     {
     public:
@@ -79,18 +55,11 @@ namespace Utilities
 
         void GetTerminatedPids(std::vector<pid_t>& pids);
 
-        void Run(); // Thread loop
     private:
-        static ACE_THR_FUNC_RETURN ThreadFun(void* param);
+        void Run(); // Thread loop        
 
-        
-        // Thread stuff
-        ACE_Auto_Event m_startEvent;
-        ACE_Auto_Event m_stopEvent;
-        
-        volatile bool m_stop;
-        
-        ThreadState m_threadState;
+        boost::thread m_thread;
+        bool m_stop;
         
         // Supervised pids
         typedef std::map<pid_t, HANDLE, std::less<pid_t> > PidMap;
@@ -98,7 +67,7 @@ namespace Utilities
         
         std::vector<pid_t> m_deadPids;
         
-        ACE_Thread_Mutex m_mutex;
+        boost::mutex m_mutex;
         
         HANDLE m_prevThreadEvent;
 
@@ -118,27 +87,20 @@ namespace Utilities
         
         void StartMonitorPid(const pid_t pid);
         void StopMonitorPid(const pid_t pid);
-
-        void Run(); // Thread loop
     private:
-        static ACE_THR_FUNC_RETURN ThreadFun(void* param);
+        void Run(); // Thread loop
 
         // Client callback
         ProcessMonitor::OnTerminateCb m_callback;
-        
-        // Thread stuff
-        ACE_Auto_Event m_startEvent;
-        ACE_Auto_Event m_stopEvent;
-        
-        volatile bool m_stop;
-        
-        ThreadState m_threadState;
+
+        boost::thread m_thread;
+        bool m_stop;
         
         // Supervised pids
         typedef std::set<pid_t> PidSet;
         PidSet m_pids;
         
-        ACE_Thread_Mutex m_mutex;
+        boost::mutex m_mutex;
         
         HANDLE m_signalEvent;
 

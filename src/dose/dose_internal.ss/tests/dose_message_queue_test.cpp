@@ -25,15 +25,15 @@
 #include <iostream>
 #include <Safir/Dob/Internal/Connections.h>
 #include <boost/lexical_cast.hpp>
-#include <ace/OS_NS_unistd.h>
-#include <ace/Signal.h>
-#include <ace/Thread.h>
+#include <boost/thread.hpp>
 #include <Safir/Dob/Message.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 
 using namespace Safir::Dob::Internal;
 
-unsigned long dispatched = 0;
+const int NUM_MSG = 1000;
+
+long dispatched = 0;
 
 void Dispatch(const DistributionData &, bool & exitDispatch, bool & dontRemove)
 {
@@ -44,41 +44,50 @@ void Dispatch(const DistributionData &, bool & exitDispatch, bool & dontRemove)
 
 MessageQueue queue(10);
 
-volatile unsigned long sent = 0;
-ACE_THR_FUNC_RETURN Sender(void *)
+volatile long sent = 0;
+void Sender()
 {
     Safir::Dob::MessagePtr m = Safir::Dob::Message::Create();
     Safir::Dob::Typesystem::BinarySerialization ser;
     Safir::Dob::Typesystem::Serialization::ToBinary(m,ser);
 
-    DistributionData d(message_tag,ConnectionId(100,100),Safir::Dob::Typesystem::ChannelId(),&ser[0]);
+    DistributionData d(message_tag,ConnectionId(100,0,100),Safir::Dob::Typesystem::ChannelId(),&ser[0]);
 
     for (;;)
     {
-        ++sent;
-        if (sent == 10000000)
+        if (sent == NUM_MSG)
         {
-            std::wcout << "10000000 sent" << std::endl;
-            ++sent;
-            return 0;
+            std::wcout << NUM_MSG << " sent" << std::endl;
+            return;
         }
 
-        queue.push(d);
+        const bool res = queue.push(d);
+
+        if (res)
+        {
+            ++sent;
+        }
+        else
+        {
+            boost::this_thread::yield();
+        }
     }
 }
 
-int main()
+int main(int, char**)
 {
-    ACE_Thread::spawn(Sender);
+    boost::thread t(Sender);
     for(;;)
     {
         queue.Dispatch(Dispatch,NULL);
-        if (sent == 10000001)
+        if (sent == NUM_MSG && dispatched == NUM_MSG)
         {
             std::wcout << "Dispatched " << dispatched << std::endl;
-            return 0;
+            break;
         }
     }
+    t.join();
+    
     return 0;
 }
 

@@ -24,7 +24,6 @@
 with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Safir.Dob.Typesystem.Utilities;
-pragma Elaborate_All (Safir.Dob.Typesystem.Utilities);
 pragma Warnings ("H");  -- turn off warnings for hiding variable
 
 -- Package containing a type that represents the identity of a handler.

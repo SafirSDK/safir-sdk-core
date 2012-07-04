@@ -119,12 +119,19 @@ namespace Internal
             /** Construct an "end" iterator.*/
             Iterator():m_entity(no_state_tag) {}
 
+            Iterator& operator=(const Iterator& other) {
+                m_state = other.m_state;
+                m_stateReferenceHolder = other.m_stateReferenceHolder;
+                m_underlyingIterator = other.m_underlyingIterator;
+                m_entity = other.m_entity;
+                return *this;
+            }
+
             void Dereference(const char*& entityBlob, const char*& entityState) const;
             bool operator== (const Iterator& other) const
             {return m_entity==other.m_entity;}
         private:
             friend class StateContainer;
-            //Iterator(const StateSharedPtr& state, /*const States::iterator& underlyingIterator, */const DistributionData& entity);
 
             StateSharedPtr m_state;
             mutable boost::shared_ptr<const char> m_stateReferenceHolder;

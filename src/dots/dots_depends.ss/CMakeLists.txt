@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (dots_depends)
-
-add_subdirectory(src)
+project(dots_depends CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+
+add_subdirectory(src)
 
 INSTALL(FILES 
         data/dll_imports.h

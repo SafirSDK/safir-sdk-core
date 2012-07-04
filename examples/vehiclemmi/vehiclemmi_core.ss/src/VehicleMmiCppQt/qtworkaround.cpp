@@ -61,6 +61,11 @@ namespace VehicleMmiCppQt
         return wstrString;
     }
 
+//disable "conditional expression is constant" for the sizeof checks below.
+#ifdef _MSC_VER
+# pragma warning (push)
+# pragma warning (disable: 4127)
+#endif
 
     int QtWorkaround::QStringToWCharArray(const QString& rcqstrString, wchar_t *pArray)
     {
@@ -104,6 +109,10 @@ namespace VehicleMmiCppQt
             return QString::fromUcs4((uint *)pcString, nSize);
         }
     }
+
+#ifdef _MSC_VER
+# pragma warning (pop)
+#endif
 
 } // namespace VehicleMmiCppQt
 

@@ -28,10 +28,6 @@
 #include <DoseStressTest/MessageWithAckLarge.h>
 #include <DoseStressTest/MessageWithoutAckLarge.h>
 
-#ifdef GetMessage
-#undef GetMessage
-#endif
-
 Subscriber::Subscriber():
 m_receivedWithAckStat(StatisticsCollection::Instance().AddHzCollector(L"Received With Ack")),
     m_missedWithAckStat(StatisticsCollection::Instance().AddPercentageCollector(L"Missed", m_receivedWithAckStat)),

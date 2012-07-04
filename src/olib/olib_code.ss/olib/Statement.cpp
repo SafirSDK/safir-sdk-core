@@ -28,7 +28,7 @@
 #include <Safir/Databases/Odbc/TimeoutException.h>
 #include <Safir/Databases/Odbc/ReconnectException.h>
 #include <Safir/SwReports/SwReport.h>
-
+#include "StringConversion.h"
 namespace Safir
 {
 
@@ -201,7 +201,7 @@ void Statement::Prepare(const std::wstring & wszSqlCommand)
     // const_cast is used because StatementText is declared as input in the ODBC
     // specification and should be a const wchar_t *.
     ret = ::SQLPrepareW(m_hStatement,
-                        const_cast<wchar_t *>(wszSqlCommand.c_str()),
+                        const_cast<SQLWCHAR *>(&ToSqlWchars(wszSqlCommand)[0]),
                         SQL_NTS );
     if (!SQL_SUCCEEDED(ret))
     {
@@ -217,9 +217,9 @@ void Statement::ExecDirect(const std::wstring & wszSqlCommand)
         throw Safir::Dob::Typesystem::SoftwareViolationException(L"Using an invalid statement",__WFILE__,__LINE__);
 
     // const_cast is used because StatementText is declared as input in the ODBC
-    // specification and should be a const wchar_t *.
+    // specification and should be a const SQLWCHAR *.
     ret = ::SQLExecDirectW( m_hStatement,
-                            const_cast<wchar_t *>(wszSqlCommand.c_str()),
+                            const_cast<SQLWCHAR *>(&ToSqlWchars(wszSqlCommand)[0]),
                             SQL_NTS );
     if (!SQL_SUCCEEDED(ret))
     {
@@ -316,8 +316,8 @@ bool Statement::GetDiagRec(short sRecNumber,
                            std::wstring & MessageText,
                            bool & bDataRead) const
 {
-    wchar_t wszSqlState[6];
-    wchar_t wszMessageText[SQL_MAX_MESSAGE_LENGTH];
+    SQLWCHAR wszSqlState[6];
+    SQLWCHAR wszMessageText[SQL_MAX_MESSAGE_LENGTH];
 
     SQLINTEGER tmpNativeError;
     SQLRETURN ret;
@@ -331,8 +331,8 @@ bool Statement::GetDiagRec(short sRecNumber,
                             0 );
     NativeError = static_cast<boost::int32_t>(tmpNativeError);
     bDataRead = ((ret == SQL_SUCCESS) ||(ret == SQL_SUCCESS_WITH_INFO));
-    SqlState = wszSqlState;
-    MessageText = wszMessageText;
+    SqlState = ToWstring(wszSqlState);
+    MessageText = ToWstring(wszMessageText);
     return ((ret != SQL_NO_DATA) && (ret != SQL_INVALID_HANDLE) && (ret != SQL_ERROR));
 }
 
@@ -349,9 +349,9 @@ void Statement::ThrowException(SQLSMALLINT HandleType,
                                const Safir::Dob::Typesystem::Int64 lineNumber,
                                SQLRETURN original_returncode) const
 {
-    wchar_t wszSqlState[6];
+    SQLWCHAR wszSqlState[6];
     SQLINTEGER lpNativeErrorPtr;
-    wchar_t wszMessageText[512];
+    SQLWCHAR wszMessageText[512];
     SQLRETURN ret;
 
     ret = ::SQLGetDiagRecW( HandleType,
@@ -362,126 +362,126 @@ void Statement::ThrowException(SQLSMALLINT HandleType,
                             wszMessageText,
                             256,
                             0 );
-    if (wcscmp(wszSqlState, L"01S07") == 0) // Fractional truncation
+    if (ToWstring(wszSqlState) == L"01S07") // Fractional truncation
     {
         if (original_returncode == SQL_ERROR)   // Only report if its an SQL_ERROR
         {
-            std::wstring string = wszSqlState;
+            std::wstring string = ToWstring(wszSqlState);
             string += L":";
-            string += wszMessageText;
+            string += ToWstring(wszMessageText);
             throw Safir::Dob::Typesystem::SoftwareViolationException(string.c_str(), fileName,lineNumber);
         }
     }
-    else if (wcscmp(wszSqlState, L"23000") == 0)        // Integrity constraint violation
+    else if (ToWstring(wszSqlState) == L"23000")        // Integrity constraint violation
     {
-        std::wstring string = wszSqlState;
+        std::wstring string = ToWstring(wszSqlState);
         string += L":";
-        string += wszMessageText;
+        string += ToWstring(wszMessageText);
         throw IntegrityConstraintException(string.c_str(),fileName,lineNumber);
     }
-    else if ((wcscmp(wszSqlState, L"07002") == 0) ||
-             (wcscmp(wszSqlState, L"07006") == 0) ||
-             (wcscmp(wszSqlState, L"07009") == 0) ||
-             (wcscmp(wszSqlState, L"07S01") == 0) ||
-             (wcscmp(wszSqlState, L"21S01") == 0) ||    // Insert value list does not match column list
-             (wcscmp(wszSqlState, L"21S02") == 0) ||
-             (wcscmp(wszSqlState, L"22001") == 0) ||    // truncation of non null string or binary data.
-             (wcscmp(wszSqlState, L"22002") == 0) ||
-             (wcscmp(wszSqlState, L"22007") == 0) ||
-             (wcscmp(wszSqlState, L"22008") == 0) ||
-             (wcscmp(wszSqlState, L"22012") == 0) ||
-             (wcscmp(wszSqlState, L"22018") == 0) ||
-             (wcscmp(wszSqlState, L"22019") == 0) ||
-             (wcscmp(wszSqlState, L"22025") == 0) ||
-             (wcscmp(wszSqlState, L"24000") == 0) ||
-             (wcscmp(wszSqlState, L"34000") == 0) ||
-             (wcscmp(wszSqlState, L"3D000") == 0) ||
-             (wcscmp(wszSqlState, L"3F000") == 0) ||
-             (wcscmp(wszSqlState, L"42000") == 0) ||
-             (wcscmp(wszSqlState, L"42S01") == 0) ||
-             (wcscmp(wszSqlState, L"42S02") == 0) ||
-             (wcscmp(wszSqlState, L"42S22") == 0) ||
-             (wcscmp(wszSqlState, L"HY003") == 0) ||
-             (wcscmp(wszSqlState, L"HY009") == 0) ||
-             (wcscmp(wszSqlState, L"HY010") == 0) ||    // Function sequence error
-             (wcscmp(wszSqlState, L"HY104") == 0) ||
-             (wcscmp(wszSqlState, L"HY105") == 0) ||
-             (wcscmp(wszSqlState, L"HYC00") == 0) ||
-             (wcscmp(wszSqlState, L"IM001") == 0) ||
-             (wcscmp(wszSqlState, L"01001") == 0) ||
-             (wcscmp(wszSqlState, L"01006") == 0) ||
-             (wcscmp(wszSqlState, L"01007") == 0) ||
-             (wcscmp(wszSqlState, L"01S00") == 0) ||
-             (wcscmp(wszSqlState, L"01S06") == 0) ||    // Used in ExtendedFetch or FetchScroll.
-             (wcscmp(wszSqlState, L"01S09") == 0))
+    else if ((ToWstring(wszSqlState) == L"07002") ||
+             (ToWstring(wszSqlState) == L"07006") ||
+             (ToWstring(wszSqlState) == L"07009") ||
+             (ToWstring(wszSqlState) == L"07S01") ||
+             (ToWstring(wszSqlState) == L"21S01") ||    // Insert value list does not match column list
+             (ToWstring(wszSqlState) == L"21S02") ||
+             (ToWstring(wszSqlState) == L"22001") ||    // truncation of non null string or binary data.
+             (ToWstring(wszSqlState) == L"22002") ||
+             (ToWstring(wszSqlState) == L"22007") ||
+             (ToWstring(wszSqlState) == L"22008") ||
+             (ToWstring(wszSqlState) == L"22012") ||
+             (ToWstring(wszSqlState) == L"22018") ||
+             (ToWstring(wszSqlState) == L"22019") ||
+             (ToWstring(wszSqlState) == L"22025") ||
+             (ToWstring(wszSqlState) == L"24000") ||
+             (ToWstring(wszSqlState) == L"34000") ||
+             (ToWstring(wszSqlState) == L"3D000") ||
+             (ToWstring(wszSqlState) == L"3F000") ||
+             (ToWstring(wszSqlState) == L"42000") ||
+             (ToWstring(wszSqlState) == L"42S01") ||
+             (ToWstring(wszSqlState) == L"42S02") ||
+             (ToWstring(wszSqlState) == L"42S22") ||
+             (ToWstring(wszSqlState) == L"HY003") ||
+             (ToWstring(wszSqlState) == L"HY009") ||
+             (ToWstring(wszSqlState) == L"HY010") ||    // Function sequence error
+             (ToWstring(wszSqlState) == L"HY104") ||
+             (ToWstring(wszSqlState) == L"HY105") ||
+             (ToWstring(wszSqlState) == L"HYC00") ||
+             (ToWstring(wszSqlState) == L"IM001") ||
+             (ToWstring(wszSqlState) == L"01001") ||
+             (ToWstring(wszSqlState) == L"01006") ||
+             (ToWstring(wszSqlState) == L"01007") ||
+             (ToWstring(wszSqlState) == L"01S00") ||
+             (ToWstring(wszSqlState) == L"01S06") ||    // Used in ExtendedFetch or FetchScroll.
+             (ToWstring(wszSqlState) == L"01S09"))
     {
-        std::wstring string = wszSqlState;
+        std::wstring string = ToWstring(wszSqlState);
         string += L":";
-        string += wszMessageText;
+        string += ToWstring(wszMessageText);
         throw Safir::Dob::Typesystem::SoftwareViolationException(string.c_str(), fileName,lineNumber);
     }
-    else if ((wcscmp(wszSqlState, L"HYT00") == 0) ||    // Statement timeout
-             (wcscmp(wszSqlState, L"HYT01") == 0))      // Connection timeout
+    else if ((ToWstring(wszSqlState) == L"HYT00") ||    // Statement timeout
+             (ToWstring(wszSqlState) == L"HYT01"))      // Connection timeout
     {
-        std::wstring string = wszSqlState;
+        std::wstring string = ToWstring(wszSqlState);
         string += L":";
-        string += wszMessageText;
+        string += ToWstring(wszMessageText);
         throw TimeoutException(string.c_str(),fileName,lineNumber);
     }
-    else if ((wcscmp(wszSqlState, L"08S01") == 0) ||    // Communication link failure
-             (wcscmp(wszSqlState, L"HY000") == 0))      // General error
+    else if ((ToWstring(wszSqlState) == L"08S01") ||    // Communication link failure
+             (ToWstring(wszSqlState) == L"HY000"))      // General error
     {
-        std::wstring string = wszSqlState;
+        std::wstring string = ToWstring(wszSqlState);
         string += L":";
-        string += wszMessageText;
+        string += ToWstring(wszMessageText);
         throw ReconnectException(string.c_str(),fileName,lineNumber);
     }
-    else if ((wcscmp(wszSqlState, L"40001") == 0) ||    // Serialization failure. Transaction rollback.
-             (wcscmp(wszSqlState, L"HY001") == 0) ||    // Memory allocation error
-             (wcscmp(wszSqlState, L"HY013") == 0))      // Memory management error
+    else if ((ToWstring(wszSqlState) == L"40001") ||    // Serialization failure. Transaction rollback.
+             (ToWstring(wszSqlState) == L"HY001") ||    // Memory allocation error
+             (ToWstring(wszSqlState) == L"HY013"))      // Memory management error
     {
-        std::wstring string = wszSqlState;
+        std::wstring string = ToWstring(wszSqlState);
         string += L":";
-        string += wszMessageText;
+        string += ToWstring(wszMessageText);
         throw RetryException(string.c_str(),fileName,lineNumber);
     }
-    else if (wcscmp(wszSqlState, L"01000") == 0)
+    else if (ToWstring(wszSqlState) == L"01000")
     {
         // This is a warning from the rdbms driver and its not specified as an error.
         Safir::SwReports::SendProgramInfoReport(std::wstring(L"Non Odbc Error caught:: ") +
-                                                std::wstring(wszMessageText) );
+                                                ToWstring(wszMessageText) );
     }
-    else if (wcscmp(wszSqlState, L"01004") == 0)
+    else if (ToWstring(wszSqlState) == L"01004")
     {
         // This is a warning from the rdbms driver and its not specified as an error.
         Safir::SwReports::SendProgramInfoReport(L"String data, right truncated");
     }
-    else if (wcscmp(wszSqlState, L"01002") == 0)
+    else if (ToWstring(wszSqlState) == L"01002")
     {
         Safir::SwReports::SendProgramInfoReport(L"Cursor operation conflict");
     }
-    else if (wcscmp(wszSqlState, L"01003") == 0)
+    else if (ToWstring(wszSqlState) == L"01003")
     {
         Safir::SwReports::SendProgramInfoReport(L"NULL value eliminated in set function");
     }
-    else if (wcscmp(wszSqlState, L"01S01") == 0)
+    else if (ToWstring(wszSqlState) == L"01S01")
     {
         Safir::SwReports::SendProgramInfoReport(L"Error in row");
     }
-    else if (wcscmp(wszSqlState, L"01S02") == 0)
+    else if (ToWstring(wszSqlState) == L"01S02")
     {
         Safir::SwReports::SendProgramInfoReport(
             L"Statement attribute not supported. A similiar attribute used instead");
     }
-    else if (wcscmp(wszSqlState, L"01S08") == 0)
+    else if (ToWstring(wszSqlState) == L"01S08")
     {
         Safir::SwReports::SendProgramInfoReport(L"Error saving file dsn.");
     }
     else
     {
-        std::wstring string = wszSqlState;
+        std::wstring string = ToWstring(wszSqlState);
         string += L":";
-        string += wszMessageText;
+        string += ToWstring(wszMessageText);
         throw ReconnectException(string.c_str(),fileName,lineNumber);
     }
 }

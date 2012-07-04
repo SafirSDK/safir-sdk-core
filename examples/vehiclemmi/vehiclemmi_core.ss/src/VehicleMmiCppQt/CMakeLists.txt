@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-PROJECT (VehicleMmiCppQt)
+project(VehicleMmiCppQt CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
@@ -24,7 +24,7 @@ ADD_EXECUTABLE(VehicleMmiCppQt WIN32 ${sources} ${ui_headers} ${moc_sources} ${h
 TARGET_LINK_LIBRARIES(VehicleMmiCppQt ${QT_LIBRARIES} ${ACE_LIBRARY})
 
 IF (NOT MSVC)
-   TARGET_LINK_LIBRARIES(VehicleMmiCppQt dose_cpp swre_interface_cpp)
+   TARGET_LINK_LIBRARIES(VehicleMmiCppQt swre_interface_cpp dose_cpp dots_generated-Capabilities-cpp dots_generated-Safir-cpp dots_cpp lluf_utils)
 ENDIF ()
 
 INSTALL(TARGETS VehicleMmiCppQt

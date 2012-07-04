@@ -35,6 +35,12 @@ namespace Databases
 {
 namespace Odbc
 {
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4275)
+#endif
+
 /** The Environment class models the necessary setup each application neeeds
     in order to access the database. Only one Environment is necessary in a
     application and all environments needs to be Allocated and Deallocated
@@ -148,6 +154,10 @@ private:
                                     const std::wstring & fileName,
                                     const Safir::Dob::Typesystem::Int64 lineNumber) const;
 };
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 inline
 bool Environment::IsValid() const

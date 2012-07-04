@@ -27,7 +27,6 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <iostream>
-#include <ace/Guard_T.h>
 #include <boost/bind.hpp>
 
 #ifdef _MSC_VER
@@ -50,23 +49,19 @@ namespace Internal
     const std::string Prefix = "dose";
     const char * ConnectOrOutSignalName = "DOSE_CONN_OR_OUT";
 
-    Signals * volatile Signals::m_instance = NULL;
-    ACE_Thread_Mutex Signals::m_instantiationLock;// = ACE_Thread_Mutex();
 
+    boost::once_flag Signals::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+
+    Signals & Signals::SingletonHelper::Instance()
+    {
+        static Signals instance;
+        return instance;
+    }
 
     Signals & Signals::Instance()
     {
-        if (m_instance == NULL)
-        {
-            ACE_Guard<ACE_Thread_Mutex> lck(m_instantiationLock);
-
-            if (m_instance == NULL)
-            {
-                m_instance = new Signals();
-            }
-        }
-        return *m_instance;
-
+        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        return SingletonHelper::Instance();
     }
 
     Signals::Signals():
@@ -75,6 +70,10 @@ namespace Internal
 
     }
 
+    Signals::~Signals()
+    {
+
+    }
 
     void Signals::SignalIn(const ConnectionId & connection)
     {
@@ -90,21 +89,30 @@ namespace Internal
                << "It is not possible to signal or wait for a connection on other node!!! connId = " << connection);
 #endif
         {
-            ACE_Read_Guard<SignalsLock> guard(m_lock);
+            boost::shared_lock<SignalsLock> guard(m_lock);
 
             Semaphores::iterator findIt = m_semaphores.find(connection.m_id);
             if (findIt != m_semaphores.end())
             {
                 return findIt->second;
             }
-
-            if (-1 != m_lock.tryacquire_write_upgrade())
-            {
-                return AddSemaphore(connection);
-            }
         }
-        //tryacqure failed, so we have to wait for the write lock
-        ACE_Write_Guard<SignalsLock> guard(m_lock);
+        
+        //Did not find the semaphore, we need to get write access.
+
+        //first get an upgrade lock, which is only a read lock, but stops new
+        //readers from getting in, so we will never be starved.
+        boost::upgrade_lock<SignalsLock> readGuard(m_lock);
+            
+        //someone else may have gotten in and added the semaphore, so we check.
+        Semaphores::iterator findIt = m_semaphores.find(connection.m_id);
+        if (findIt != m_semaphores.end())
+        {
+            return findIt->second;
+        }
+
+        //ok, now we upgrade and add.
+        boost::upgrade_to_unique_lock<SignalsLock> writeGuard(readGuard);
         return AddSemaphore(connection);
     }
 

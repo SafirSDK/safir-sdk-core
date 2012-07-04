@@ -43,7 +43,7 @@ public:
     /**
      * Constructor
      */
-    FilePersistor();
+    explicit FilePersistor(boost::asio::io_service& ioService);
 
     /**
      * Destructor

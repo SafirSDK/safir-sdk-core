@@ -27,7 +27,6 @@
 #include "dots_basic_types.h"
 #include "dots_error_handler.h"
 #include "dots_enum_database.h"
-#include <ace/Guard_T.h>
 
 #include <iostream>
 
@@ -90,7 +89,7 @@ namespace Internal
         // typeIds in a vector. Note that this vector is local to each app so the mutex will only
         // affect the threads within the app. 
 
-        ACE_Guard<ACE_Thread_Mutex> lck(m_mutex);
+        boost::lock_guard<boost::mutex> lck(m_mutex);
 
         // If it happens that someone calls FindClass with a type id that is the same as we
         // use to indicate an unused slot (unlikely), we skip the cache part.  

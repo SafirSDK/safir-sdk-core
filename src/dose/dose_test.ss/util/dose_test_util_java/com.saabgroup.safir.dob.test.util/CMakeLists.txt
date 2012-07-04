@@ -8,8 +8,6 @@ INCLUDE(JavaMacros)
 
 file(GLOB_RECURSE sources src/*.java)
 
-SET(JAVA_FLAGS "-Xlint")
-
 ADD_JAR(dose_test_util_java "${sources}" ALL)
 
 INSTALL(FILES dose_test_util_java.jar

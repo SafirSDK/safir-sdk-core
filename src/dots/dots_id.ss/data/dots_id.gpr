@@ -1,15 +1,15 @@
 with "externally_built_library";
 
-project dots_id is
+project Dots_Id is
 
    for Source_Dirs use ();
 
-   for library_dir use Externally_Built_Library'library_dir;
+   for Library_Dir use Externally_Built_Library'Library_Dir;
    
-   for library_name use "dots_id";
+   for Library_Name use "dots_id";
 
-   for Library_kind  use "dynamic";
+   for Library_Kind  use "dynamic";
 
    for Externally_Built use "true";
 
-end dots_id;
+end Dots_Id;

@@ -32,11 +32,6 @@
 #include <Safir/Dob/Typesystem/HandlerId.h>
 #include <Safir/Dob/Typesystem/Object.h>
 
-//Get rid of stupid define from WinGDI.h
-#ifdef GetObject
-#undef GetObject
-#endif
-
 namespace Safir
 {
 namespace Dob

@@ -1,0 +1,52 @@
+/******************************************************************************
+*
+* Copyright Saab Systems AB, 2012 (http://www.safirsdk.com)
+*
+* Created by: Lars Hagström / lars@foldspace.nu
+*
+*******************************************************************************
+*
+* This file is part of Safir SDK Core.
+*
+* Safir SDK Core is free software: you can redistribute it and/or modify
+* it under the terms of version 3 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* Safir SDK Core is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+*
+******************************************************************************/
+
+#if defined _MSC_VER
+#  define EXPORT __declspec(dllexport)
+#  define STANDARD_CALLING_CONVENTION __cdecl
+#  define ANOTHER_CALLING_CONVENTION __stdcall
+#elif defined __GNUC__
+#  define EXPORT
+#  if defined (__i386)
+#    define STANDARD_CALLING_CONVENTION __attribute__((cdecl))
+#    define ANOTHER_CALLING_CONVENTION __attribute__((stdcall))
+#  else
+#    define STANDARD_CALLING_CONVENTION __attribute__((sysv_abi))
+#    define ANOTHER_CALLING_CONVENTION __attribute__((ms_abi))
+#  endif
+#endif
+
+extern "C"
+{
+    EXPORT double STANDARD_CALLING_CONVENTION TestFunction(int a, long b, float c, double d)
+    {
+        return a + b + c + d;
+    }
+
+    EXPORT double ANOTHER_CALLING_CONVENTION TestFunction2(short a, int b, long c, float d, double e)
+    {
+        return a + b + c + d + e;
+    }
+
+}

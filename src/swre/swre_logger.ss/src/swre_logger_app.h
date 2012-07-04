@@ -25,7 +25,7 @@
 #define __SWRE_LOGGER_APP_H
 
 #include <Safir/Dob/Connection.h>
-#include <Safir/Utilities/AceDispatcher.h>
+#include <Safir/Utilities/AsioDispatcher.h>
 #include <iostream>
 
 #include "swre_report_handler.h"
@@ -47,18 +47,15 @@ namespace Swre
         int Run(const std::vector<std::string> & args);
     private:
 
-        /*        // Implementation of application interface methods
-        virtual void Startup();
-        virtual void CloseDown();        */
-
         virtual void OnStopOrder();
 
         bool ParseCommandLine(const std::vector<std::string> & args);
         void Usage();
 
+        boost::asio::io_service m_ioService;
         ReportHandler m_reportHandler;
-        Safir::Dob::Connection m_Connection;
-        Safir::Utilities::AceDispatcher   m_dispatchEvent;
+        Safir::Dob::Connection m_connection;
+        Safir::Utilities::AsioDispatcher   m_dispatcher;
 
     };
 

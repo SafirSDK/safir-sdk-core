@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <Safir/Dob/Internal/RequestInQueue.h>
 
+#include <Safir/Dob/Internal/StateDeleter.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>

@@ -89,39 +89,29 @@ StatisticsCollection & StatisticsCollection::Instance()
 
 StatisticsCollection::StatisticsCollection()
 {
-
-    ACE_Thread::spawn(PrinterThreadFun,this);
+    m_thread = boost::thread(boost::bind(&StatisticsCollection::PrintThread,this));
 }
 
 StatisticsCollection::~StatisticsCollection()
 {
-
+    m_thread.interrupt();
+    m_thread.join();
 }
-
-//we need to convince vc80 that the return 0 is harmless, and vc90 and gcc require it.
-#ifdef _MSC_VER
-  #pragma warning(push)
-  #pragma warning(disable: 4702)
-  #pragma warning(disable: 4716)
-#endif
-
-ACE_THR_FUNC_RETURN StatisticsCollection::PrinterThreadFun(void* param)
-{
-    static_cast<StatisticsCollection*>(param)->PrintThread();
-    return 0;
-}
-
-#ifdef _MSC_VER
-  #pragma warning(pop)
-#endif
 
 void StatisticsCollection::PrintThread()
 {
-    for(;;)
+    try
     {
-        ACE_OS::sleep(10);
-        PrintStatistics();
-        Reset();
+        for(;;)
+        {
+            boost::this_thread::sleep(boost::posix_time::seconds(10));
+            PrintStatistics();
+            Reset();
+        }
+    }
+    catch (boost::thread_interrupted&)
+    {
+
     }
 }
 
@@ -172,7 +162,7 @@ void StatisticsCollection::PrintStatistics() const
             std::wcout << std::endl;
         }
     }
-
+    
     for (LatencyCollectorTable::const_iterator it = m_latencyCollectorTable.begin();
          it != m_latencyCollectorTable.end(); ++it)
     {

@@ -27,6 +27,7 @@ with Safir.Dob.Entity_Proxies;
 with Safir.Dob.Smart_Pointers;
 pragma Elaborate_All (Safir.Dob.Smart_Pointers);
 with Safir.Dob.Defs;
+with Interfaces.C;
 
 package Safir.Dob.Entity_Iterators is
 
@@ -49,6 +50,7 @@ package Safir.Dob.Entity_Iterators is
 private
 
    use type Safir.Dob.Typesystem.Int_32;
+   use type Interfaces.C.long;
 
    type Entity_Proxy_Access is access all Safir.Dob.Entity_Proxies.Entity_Proxy;
 

@@ -26,17 +26,12 @@
 
 #include <Safir/Dob/Consumer.h>
 
-#include <ace/config.h>
-#include <ace/Event_Handler.h>
-#include <ace/Reactor.h>
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <ace/SOCK_Dgram.h>
-
-#ifdef GetMessage
-#undef GetMessage
-#endif
+#include <boost/noncopyable.hpp>
+#include <boost/asio.hpp>
+#include <boost/scoped_ptr.hpp>
 
 namespace Safir
 {
@@ -45,7 +40,7 @@ namespace Swre
 
 class ReportHandler : 
     public Safir::Dob::MessageSubscriber,
-    public ACE_Event_Handler
+    private boost::noncopyable
 {
 
 public:
@@ -62,7 +57,7 @@ public:
         File
     };
 
-    ReportHandler();
+    explicit ReportHandler(boost::asio::io_service& ioService);
     ~ReportHandler();
 
     // Method     : Start
@@ -104,18 +99,13 @@ public:
 
 private:
 
-    // No copying or assignment for this class
-    ReportHandler(const ReportHandler& rhs);
-    ReportHandler& operator=(const ReportHandler& rhs);
-
     // Implementation of MessageSubscriber interface
     virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy);
 
-    // Implemntation of ACE_Event_Handler interface
-    int handle_timeout(const ACE_Time_Value & /*currentTime*/, const void * /*act*/);
+    void HandleTimeout(const boost::system::error_code & error);
 
-    ACE_HANDLE get_handle() const {return m_socket.get_handle();}
-    int handle_input(ACE_HANDLE);
+    void HandleUdpData(const boost::system::error_code& error,
+                       const size_t bytes_recvd);
 
     bool CheckLogFile();
 
@@ -127,11 +117,14 @@ private:
     boost::filesystem::path      m_oldLogFilePath;
     boost::uintmax_t              m_maxFileSize;
 
-    boost::posix_time::milliseconds m_checkFileSizeTime;
+    const boost::posix_time::time_duration m_checkFileSizeTime;
 
-    Safir::Dob::SecondaryConnection m_Connection;
-    ACE_SOCK_Dgram m_socket;
-
+    Safir::Dob::SecondaryConnection m_connection;
+    boost::asio::io_service& m_ioService;
+    boost::asio::ip::udp::socket m_socket;
+    std::vector<char> m_udpReceiveBuffer;
+    boost::asio::ip::udp::endpoint m_senderEndpoint;
+    boost::scoped_ptr<boost::asio::deadline_timer> m_timer;
 };
 }
 }

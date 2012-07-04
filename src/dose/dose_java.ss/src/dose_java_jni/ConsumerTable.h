@@ -28,19 +28,8 @@
 #include <boost/cstdint.hpp>
 #include <jni.h>
 #include <vector>
-
-#ifdef _MSC_VER
-  #pragma warning(push)
-  #pragma warning(disable: 4267)
-#endif
-
-#include <ace/Thread_Mutex.h>
-#include <ace/Thread.h>
-
-#ifdef _MSC_VER
-  #pragma warning(pop)
-#endif
-
+#include <boost/thread/once.hpp>
+#include <boost/thread/mutex.hpp>
 
 class ConsumerTable :
     private boost::noncopyable
@@ -58,7 +47,7 @@ private:
     ConsumerTable();
     ~ConsumerTable();
 
-    ACE_Thread_Mutex m_lock;
+    boost::mutex m_lock;
 
     struct Entry
     {
@@ -75,10 +64,20 @@ private:
 
     Table m_table;
 
-    //Singleton stuff
-    static ConsumerTable * volatile m_instance;
-
-    static ACE_Thread_Mutex m_instantiationLock;
+    /**
+     * This class is here to ensure that only the Instance method can get at the 
+     * instance, so as to be sure that boost call_once is used correctly.
+     * Also makes it easier to grep for singletons in the code, if all 
+     * singletons use the same construction and helper-name.
+     */
+    struct SingletonHelper
+    {
+    private:
+        friend ConsumerTable& ConsumerTable::Instance();
+        
+        static ConsumerTable& Instance();
+        static boost::once_flag m_onceFlag;
+    };
 
 };
 

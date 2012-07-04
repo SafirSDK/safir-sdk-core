@@ -32,7 +32,6 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/PanicLogging.h>
 #include <Safir/Dob/ThisNodeParameters.h>
-#include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Dob/ErrorListResponse.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <sstream>

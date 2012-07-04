@@ -25,7 +25,17 @@
 #ifndef __ENTITYTABLEHANDLER_H
 #define __ENTITYTABLEHANDLER_H
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127)
+#endif
+
 #include <QTableWidget>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Consumer.h>
 #include <Safir/Dob/Connection.h>

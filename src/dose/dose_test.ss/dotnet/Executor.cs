@@ -62,34 +62,41 @@ namespace dose_test_dotnet
             m_controlConnection.SubscribeMessage(DoseTest.Action.ClassTypeId, new Safir.Dob.Typesystem.ChannelId(m_instance), this);
             m_controlConnection.SubscribeMessage(DoseTest.Action.ClassTypeId, new Safir.Dob.Typesystem.ChannelId(), this);
 
-            //set up multicast socket for reception of action commands from the sequencer
-            m_pfnCallBack = new AsyncCallback(OnDataReceived);
-            m_sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            m_sock.SetSocketOption(SocketOptionLevel.Socket,
-                                   SocketOptionName.ReuseAddress, 1);
-            const int port = 31789;
-            IPEndPoint iep = new IPEndPoint(IPAddress.Any, port);
-            m_sock.Bind(iep);
-
-            IPAddress multicastAddress = IPAddress.Parse(DoseTest.Parameters.TestMulticastAddress);
-
-            System.Console.WriteLine("Joined socket to group for multicast reception. Multicast address " + multicastAddress + ", port " + port + "."); 
-            if (args.Length > 1)
+            if (Safir.Dob.DistributionChannelParameters.DistributionChannels(0).MulticastAddress.Val == "127.0.0.1")
             {
-                System.Console.WriteLine("Used NIC: " + args[1]);
-                m_sock.SetSocketOption(SocketOptionLevel.IP, 
-                                       SocketOptionName.AddMembership,
-                                       new MulticastOption(multicastAddress, IPAddress.Parse(args[1])));
+                System.Console.WriteLine("System appears to be Standalone, not listening for multicasted test actions");
             }
             else
             {
-                System.Console.WriteLine("NIC is not set ... will listen on default interface.");
-                m_sock.SetSocketOption(SocketOptionLevel.IP,
-                                       SocketOptionName.AddMembership,
-                                       new MulticastOption(multicastAddress));
+                //set up multicast socket for reception of action commands from the sequencer
+                m_pfnCallBack = new AsyncCallback(OnDataReceived);
+                m_sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                m_sock.SetSocketOption(SocketOptionLevel.Socket,
+                                       SocketOptionName.ReuseAddress, 1);
+                const int port = 31789;
+                IPEndPoint iep = new IPEndPoint(IPAddress.Any, port);
+                m_sock.Bind(iep);
+                
+                IPAddress multicastAddress = IPAddress.Parse(DoseTest.Parameters.TestMulticastAddress);
+                
+                System.Console.WriteLine("Joined socket to group for multicast reception. Multicast address " + multicastAddress + ", port " + port + "."); 
+                if (args.Length > 1)
+                {
+                    System.Console.WriteLine("Used NIC: " + args[1]);
+                    m_sock.SetSocketOption(SocketOptionLevel.IP, 
+                                           SocketOptionName.AddMembership,
+                                           new MulticastOption(multicastAddress, IPAddress.Parse(args[1])));
+                }
+                else
+                {
+                    System.Console.WriteLine("NIC is not set ... will listen on default interface.");
+                    m_sock.SetSocketOption(SocketOptionLevel.IP,
+                                           SocketOptionName.AddMembership,
+                                           new MulticastOption(multicastAddress));
+                }
+                
+                m_sock.BeginReceive(m_buf, 0, m_buf.Length, SocketFlags.None, m_pfnCallBack, null);
             }
-
-            m_sock.BeginReceive(m_buf, 0, m_buf.Length, SocketFlags.None, m_pfnCallBack, null);
         }
 
         public void Run()
@@ -179,6 +186,15 @@ namespace dose_test_dotnet
                         break;
                 }
             }
+
+            if(m_sock != null)
+            {
+                m_sock.Close();
+            }
+
+            //we apparently have to close the connection to not leave a dispatch thread running in the bg.
+            m_testConnection.Close();
+            m_controlConnection.Close();
         }
 
         const string DOSE_TEST_UTIL = "dose_test_util.dll";
@@ -192,24 +208,31 @@ namespace dose_test_dotnet
 
         private void OnDataReceived(IAsyncResult asyn)
         {
-            m_sock.EndReceive(asyn);
-
-            GCHandle pinnedBuf = GCHandle.Alloc(m_buf, GCHandleType.Pinned);
-            System.IntPtr p = Marshal.UnsafeAddrOfPinnedArrayElement(m_buf, 0);
-
-            DoseTest.Action action = (DoseTest.Action)Safir.Dob.Typesystem.ObjectFactory.Instance.CreateObject(p);
-
-            pinnedBuf.Free();
-
-            m_actionLock.WaitOne();
-
-            m_actionList.Add(action);
-
-            m_actionLock.ReleaseMutex();
-
-            m_dataReceivedEvent.Set();  //signal main thread
-
-            m_sock.BeginReceive(m_buf, 0, m_buf.Length, SocketFlags.None, m_pfnCallBack, null);
+            try
+            {
+                m_sock.EndReceive(asyn);
+                
+                GCHandle pinnedBuf = GCHandle.Alloc(m_buf, GCHandleType.Pinned);
+                System.IntPtr p = Marshal.UnsafeAddrOfPinnedArrayElement(m_buf, 0);
+                
+                DoseTest.Action action = (DoseTest.Action)Safir.Dob.Typesystem.ObjectFactory.Instance.CreateObject(p);
+                
+                pinnedBuf.Free();
+                
+                m_actionLock.WaitOne();
+                
+                m_actionList.Add(action);
+                
+                m_actionLock.ReleaseMutex();
+                
+                m_dataReceivedEvent.Set();  //signal main thread
+                
+                m_sock.BeginReceive(m_buf, 0, m_buf.Length, SocketFlags.None, m_pfnCallBack, null);
+            }
+            catch (ObjectDisposedException)
+            {
+                //socket has been closed, we're exiting
+            }
         }
 
         private void ExecuteAction(DoseTest.Action action)

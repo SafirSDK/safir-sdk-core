@@ -14,8 +14,12 @@ project Swre_Interface_Ada_Library is
    for Library_Name use "swre_interface_ada";
    for Library_Kind use "dynamic";
 
-   package Compiler is
-      for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
-   end Compiler;
+   package Builder is
+      for Default_Switches ("Ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
+   end Builder;
 
+   package Compiler is
+      for Default_Switches ("Ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
+   end Compiler;
+   
 end Swre_Interface_Ada_Library;

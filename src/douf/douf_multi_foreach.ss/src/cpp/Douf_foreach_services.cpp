@@ -49,40 +49,19 @@
 
 #include <Safir/Dob/Typesystem/Members.h>
 
-
-ACE_Time_Value to_ace_time(const boost::posix_time::time_duration & duration)
-{
-    if (boost::posix_time::time_duration::num_fractional_digits() == 6)
-    {
-        return ACE_Time_Value(static_cast<suseconds_t>(duration.seconds()),
-            static_cast<suseconds_t>(duration.fractional_seconds()));
-    }
-    else
-    {
-        return ACE_Time_Value(static_cast<suseconds_t>(duration.seconds()),
-            static_cast<suseconds_t>(duration.fractional_seconds() 
-            * pow(1.0,  boost::posix_time::time_duration::num_fractional_digits() -6)));
-    }
-}
-
-// Constants
-const ACE_Time_Value IMMEDIATELY = to_ace_time(boost::posix_time::milliseconds(0));
-
-
 namespace Safir
 {
     namespace Utilities
     {
         namespace ForEach
         {
-            Services::Services() :
-            ACE_Event_Handler(ACE_Reactor::instance()),
+        Services::Services(boost::asio::io_service& ioService) :
+            m_ioService(ioService),
             m_debug(L"Services")
         {
             //m_debug.Enable(true);
             // Send something to the tracer to open the connection.
-            // This line will hopefully not be needed in the future.
-            m_debug << " "<<std::endl;
+            m_debug << " " << std::endl;
         }
 
         Services::~Services() 
@@ -91,7 +70,6 @@ namespace Safir
             // Stop backdoor keeper
             m_backdoorKeeper.Stop();
 #endif
-            reactor()->cancel_timer(this);
         }
 
         void Services::Init(const std::wstring& connectionNameCommonPart,
@@ -119,15 +97,7 @@ namespace Safir
 
             m_debug << "Force overflow is: " << m_backdoorOverflow << std::endl;
         }
-/*
-        void Services::OnRegistrationStatus(
-            const Safir::Dob::Typesystem::ObjectId&,
-            const Safir::Dob::RegistrationStatus::Enumeration)
-        {
-            m_debug << "**** Services::OnRegistrationStatus() ****"<<std::endl;
-            // In this case we don't want to use the registration status for anything.
-        }
-*/
+
          void Services::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    /*typeId*/,
                                     const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
          {
@@ -547,10 +517,9 @@ namespace Safir
              {
                  m_debug << "without adding anything to the queue" << std::endl;
              }
-             // set timer
-             reactor()->schedule_timer(this,
-                 NULL,
-                 IMMEDIATELY);
+             
+             //make us send the requests once we've completed dispatching.
+             m_ioService.post(boost::bind(&Services::SendQueuedRequests,this));
          }
 
 
@@ -837,20 +806,8 @@ namespace Safir
                 ScheduleNextRequest(data, true);
             }
 
-
-            //
-            //
-            // ********    OVERRIDES     ACE_Event_Handler         ************
-            //
-            //
-
-            // Function:    handle_timeout
-            // Parameters:  const ACE_Time_Value & currentTime 
-            //              const void * act
-            // Returns:     -
-            // Comments:    See ACE_Event_Handler
-            //
-            int Services::handle_timeout(const ACE_Time_Value & /*currentTime*/, const void * /*act*/)
+            
+            void Services::SendQueuedRequests()
             {
                 m_debug << "**** Received timeout event ****" << std::endl;
 
@@ -882,10 +839,6 @@ namespace Safir
                     and add a timer without something in sendQueue. This branch will be selected and we will have more than one outstanding
                     request */
                 }
-
-                return 0; //means success
-
-                //If more than one timer is used in the same class the "act" parameter can be used for user data
             }
 
 

@@ -25,20 +25,7 @@
 #define __PROCESS_MONITOR_H__
 
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
-
-//disable warnings in ace
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4267 4127)
-#endif
-
-#include <ace/OS_NS_unistd.h>
-
-//and enable the warnings again
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
-
+#include <Safir/Utilities/ProcessInfo.h>
 #include <boost/function.hpp>
 
 
@@ -51,7 +38,7 @@ namespace Utilities
     class LLUF_UTILS_API ProcessMonitor 
     {
     public:
-        typedef boost::function<void(const pid_t & pid)> OnTerminateCb;
+        typedef boost::function<void(const pid_t pid)> OnTerminateCb;
 
         ProcessMonitor();
         ~ProcessMonitor();

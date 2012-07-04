@@ -147,7 +147,7 @@ namespace Internal
                 std::wcout << "  " << it->m_name.c_str() << " with baseClass " << it->m_baseClass.c_str() << std::endl;
             }
 
-            exit(-10010);
+            exit(22);
         }
     }
 }

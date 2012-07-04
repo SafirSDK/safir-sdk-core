@@ -33,6 +33,7 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Dob/Typesystem/Operations.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <iostream>
 #include <boost/shared_ptr.hpp>
 
@@ -183,6 +184,7 @@ namespace Internal
         {
             bool success;
             CheckLocks();
+            lllog(3) << "Calling stop order callback" << std::endl;
             m_onStopOrderCb(m_connectionOwner.consumer,
                             success);
             if (!success)

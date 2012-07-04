@@ -30,8 +30,7 @@
 #include <map>
 #include <Safir/SwReports/Internal/Report.h>
 #include <Safir/Dob/Connection.h>
-#include <ace/Recursive_Thread_Mutex.h>
-
+#include <boost/thread/mutex.hpp>
 
 namespace Safir
 {
@@ -106,7 +105,7 @@ namespace Internal
         typedef std::map <std::wstring, SeqNbrs> SequenceNumberMap;
 
         SequenceNumberMap m_sequenceNumbers;
-        ACE_Recursive_Thread_Mutex m_sequenceNumbersLock;
+        boost::mutex m_sequenceNumbersLock;
     };
 
 

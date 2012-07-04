@@ -40,8 +40,8 @@ int main()
     {
         const boost::int64_t num = DotsId_GenerateRandom64();
 
-        std::wcout.fill('0');
-        std::wcout << "0x" << std::setw(16) << std::hex << num << std::endl;
+        //std::wcout.fill('0');
+        //std::wcout << "0x" << std::setw(16) << std::hex << num << std::endl;
         result &=
             num != 0 &&
             num != 100000 &&
@@ -51,7 +51,7 @@ int main()
     }
 
     //all bits must have been set at least once!
-    result &= (ored == 0xffffffffffffffffLL);
+    result &= (ored == (boost::int64_t)0xffffffffffffffffLL);
     std::wcout << "Bits that were set at least once in all the random numbers: 0x" << std::setw(16) << std::hex << ored << std::endl;
 
     if (result)

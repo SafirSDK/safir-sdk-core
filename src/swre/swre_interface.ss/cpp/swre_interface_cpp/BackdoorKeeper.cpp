@@ -33,7 +33,7 @@
 
 
 const Safir::Dob::Typesystem::TypeId PI_CMD_TYPE_ID = Safir::Application::BackdoorCommand::ClassTypeId;
-const Safir::Dob::Typesystem::ChannelId PI_CMD_CHANNEL_ID = Safir::Dob::Typesystem::ChannelId::ChannelId();
+const Safir::Dob::Typesystem::ChannelId PI_CMD_CHANNEL_ID = Safir::Dob::Typesystem::ChannelId();
 
 
 namespace Safir

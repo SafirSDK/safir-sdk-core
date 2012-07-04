@@ -26,24 +26,18 @@
 
 #ifdef __GNUC__
 
-#include <ace/Auto_Event.h>
-#include <ace/Event_Handler.h>
-#include <ace/Reactor.h>
-#include <ace/Thread.h>
-#include <ace/Mutex.h>
-
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include "ProcessMonitorImpl.h"
 #include "Safir/Utilities/ProcessMonitor.h"
-
-#include <sys/types.h>
-#include <sys/inotify.h>
-
+#include <boost/asio.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
 #include <list>
 #include <map>
 #include <set>
 #include <string>
+#include <sys/inotify.h>
+#include <sys/types.h>
 
 namespace Safir
 {
@@ -57,17 +51,18 @@ namespace Utilities
 
     class ProcessMonitorLinux 
         : public ProcessMonitorImpl
-        , public ACE_Event_Handler
     {
     public:
         ProcessMonitorLinux(const ProcessMonitor::OnTerminateCb& callback);
         ~ProcessMonitorLinux();
 
-        // Overrides ACE_Event_Handler
-        int handle_input (ACE_HANDLE fd);
-        int handle_exception (ACE_HANDLE fd=ACE_INVALID_HANDLE);
-        int handle_timeout (const ACE_Time_Value &current_time, const void *act=0);
-        
+        //StartMonitorPid and StopMonitorPid induces the io_service to call this
+        //to change the monitored pids on the io_service thread.
+        void ChangeMonitoredPids();
+
+        void HandleInotifyEvent (const boost::system::error_code ec);
+        void HandleTimeout();
+
         void StartThread();
         void StopThread();
         
@@ -78,36 +73,28 @@ namespace Utilities
         void Run(); // Thread loop
     private:
 
-        static ACE_THR_FUNC_RETURN ThreadFun(void* param);
-
         // Client callback
         ProcessMonitor::OnTerminateCb m_callback;
 
-        // The reactor and the FD which it supervise
-        ACE_Reactor m_reactor;
-        int m_fd;
+        //The io_service we use to listen to inotify events and to schedule timers
+        boost::asio::io_service m_ioService;
+
+        //asio object that wraps the inotify file descriptor
+        boost::asio::posix::stream_descriptor m_inotifyStream;
+
+        //Timer used for polling a process after we have received an inotify event
+        // on its /proc/xxxx directory
+        boost::shared_ptr<boost::asio::deadline_timer> m_timer;
         
         // Buffer for incoming events
         unsigned char m_buf[INOTIFY_BUFLEN];  
 
-        // Thread stuff
-        ACE_Auto_Event m_startEvent;
-        ACE_Auto_Event m_stopEvent;
-
-        
-        enum ThreadState
-        {
-            NotStarted,  
-            Running,     
-            Stopped, 
-        };
-
-        ThreadState m_threadState;
+        boost::thread m_thread;
 
         // Queue of pids to add / remove
         std::list<pid_t> m_startWatchPids;
         std::list<pid_t> m_stopWatchPids;
-        ACE_Thread_Mutex m_mutex;
+        boost::mutex m_mutex;
         
         typedef std::list<pid_t> PidList;
         class WdInfo
@@ -117,9 +104,9 @@ namespace Utilities
             std::string m_binPath;
         };
         
-        typedef std::map<pid_t /*pid*/           , int /*wd*/, std::less<pid_t> > PidMap;
-        typedef std::map<int   /*wd*/            , WdInfo    , std::less<int> >   WdMap;
-        typedef std::map<std::string /*bin path*/, int /*wd*/, std::less<std::string> > BinPathMap;
+        typedef std::map<pid_t       /*pid*/           , int /*wd*/, std::less<pid_t> > PidMap;
+        typedef std::map<int         /*wd*/            , WdInfo    , std::less<int> >   WdMap;
+        typedef std::map<std::string /*bin path*/      , int /*wd*/, std::less<std::string> > BinPathMap;
         
         PidMap m_pidMap;
         WdMap  m_wdMap;

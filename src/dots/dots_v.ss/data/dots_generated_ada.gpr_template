@@ -1,4 +1,6 @@
 with "externally_built_library";
+with "dots_ada";
+
 ${additional_final_dependecies}
 
 project dots_generated_${library_name}_ada is

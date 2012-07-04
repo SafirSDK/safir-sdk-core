@@ -25,18 +25,19 @@
 
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Connection.h>
-#include <Safir/Time/AceTimeConverter.h>
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/exception.hpp>
+#include <boost/bind.hpp>
 
 #include "swre_report_handler.h"
 #include "swre_report_filter.h"
 #include "swre_text_serializer.h"
-#include "swre_timers.h"
-#include <ace/OS_NS_sys_socket.h>
 
-
+//TODO get rid of these!
+#ifdef GetMessage
+#undef GetMessage
+#endif
 
 namespace fs = boost::filesystem;
 
@@ -47,30 +48,41 @@ namespace Swre
 {
 
     //-----------------------------------------------------------------------------
-    ReportHandler::ReportHandler():
-        ACE_Event_Handler(ACE_Reactor::instance()),
+    ReportHandler::ReportHandler(boost::asio::io_service& ioService):
         m_outDest(StdOut),
         m_outFormat(SimpleText),
         m_logFile(),
         m_logFilePath(),
         m_oldLogFilePath(),
         m_maxFileSize(500000000), // bytes
-        m_checkFileSizeTime(60000) // milliseconds
+        m_checkFileSizeTime(boost::posix_time::milliseconds(60000)),
+        m_ioService(ioService),
+        m_socket(ioService),
+        m_udpReceiveBuffer(65000,0)
     {
-        ACE_OS::socket_init();
-        if (0 != m_socket.open(ACE_INET_Addr((unsigned short)31221)))
+        try
         {
-            std::wcout << "Failed to open socket for listening to panic logs! (udp port 31221)" << std::endl;
+            const boost::asio::ip::udp::endpoint endpoint(boost::asio::ip::udp::v4(), 31221);
+            m_socket.open(endpoint.protocol());
+            m_socket.bind(endpoint);
+            m_socket.async_receive_from
+                (boost::asio::buffer(m_udpReceiveBuffer), m_senderEndpoint,
+                 boost::bind(&ReportHandler::HandleUdpData, this,
+                             boost::asio::placeholders::error,
+                             boost::asio::placeholders::bytes_transferred));
         }
-        reactor()->register_handler(this, ACE_Event_Handler::READ_MASK);
+        catch (const boost::exception&)
+        {
+            std::wcerr << "Failed to open socket for listening to panic logs! (udp port 31221)" << std::endl;
+            //TODO: make it retry opening socket
+            //TODO: forward received panic logs to normal logging.
+        }
     }
 
     //-----------------------------------------------------------------------------
     ReportHandler::~ReportHandler()
     {
-        reactor()->cancel_timer(this);
-        reactor()->remove_handler(this,ACE_Event_Handler::READ_MASK);
-        m_socket.close();
+
     }
 
     //-----------------------------------------------------------------------------
@@ -94,7 +106,7 @@ namespace Swre
         }
         catch (boost::filesystem::filesystem_error& e)
         {
-            std::cerr << e.what() << std::endl;
+            std::wcerr << e.what() << std::endl;
             return false;
         }
 
@@ -120,8 +132,8 @@ namespace Swre
         {
             // Start subscription of sw reports base class which means that we will
             // receive all reports
-            m_Connection.Attach();
-            m_Connection.SubscribeMessage(Safir::SwReports::Internal::Report::ClassTypeId, Safir::Dob::Typesystem::ChannelId(), this);
+            m_connection.Attach();
+            m_connection.SubscribeMessage(Safir::SwReports::Internal::Report::ClassTypeId, Safir::Dob::Typesystem::ChannelId(), this);
 
             if (m_outDest == File)
             {
@@ -137,21 +149,19 @@ namespace Swre
 
                 if (!m_logFile)
                 {
-                    std::cerr << "Fatal error: Can't open " <<  m_logFilePath.native_file_string() << std::endl;
+                    std::wcerr << "Fatal error: Can't open " <<  m_logFilePath.native_file_string().c_str() << std::endl;
                     return false;
                 }
 
                 // Start supervision of log file size
-                reactor()->schedule_timer(this,
-                                          NULL,
-                                          Safir::Time::AceTimeConverter::ToAceTime(m_checkFileSizeTime),
-                                          Safir::Time::AceTimeConverter::ToAceTime(m_checkFileSizeTime));
+                m_timer.reset(new boost::asio::deadline_timer(m_ioService,m_checkFileSizeTime));
+                m_timer->async_wait(boost::bind(&ReportHandler::HandleTimeout,this,_1));
             }
             return true;
         }
-        catch (fs::filesystem_error& e)
+        catch (const fs::filesystem_error& e)
         {
-            std::cerr << "Fatal error: " << e.what() <<  std::endl;
+            std::wcerr << "Fatal error: " << e.what() <<  std::endl;
             return false;
         }
     }
@@ -159,9 +169,6 @@ namespace Swre
     //-----------------------------------------------------------------------------
     void ReportHandler::Stop()
     {
-        reactor()->cancel_timer(this);
-        reactor()->remove_handler(this,ACE_Event_Handler::READ_MASK);
-        m_socket.close();
         m_logFile.close();
     }
 
@@ -225,75 +232,73 @@ namespace Swre
     }
 
     //-----------------------------------------------------------------------------
-    int ReportHandler::handle_input(ACE_HANDLE)
+    void ReportHandler::HandleUdpData(const boost::system::error_code& error,
+                                      const size_t bytes_recvd)
     {
-        iovec receivedData = {0,0};
-        ACE_INET_Addr addr;
-        const ssize_t size = m_socket.recv(&receivedData, addr);
-        if (size <= 0)
+        if (error)
         {
-            return 0;
+            std::wcout << "Error in receiving UDP data!\n" <<error << std::endl;
+        }
+
+        //set up to receive more data
+        m_socket.async_receive_from
+            (boost::asio::buffer(m_udpReceiveBuffer), m_senderEndpoint,
+             boost::bind(&ReportHandler::HandleUdpData, this,
+                         boost::asio::placeholders::error,
+                         boost::asio::placeholders::bytes_transferred));
+
+        if (bytes_recvd <= 0)
+        {
+            return;
         }
 
         //TODO: xml formatting is not implemented!
 
         std::wstring convertedReport;
-        try
-        {
-            convertedReport = Safir::Dob::Typesystem::Utilities::ToWstring
-                (std::string(static_cast<const char*>(receivedData.iov_base),static_cast<const char*>(receivedData.iov_base) + receivedData.iov_len));
-        }
-        catch (...)
-        {
-            delete [] static_cast<char*>(receivedData.iov_base);
-        }
+        
+        convertedReport = Safir::Dob::Typesystem::Utilities::ToWstring
+            (std::string(m_udpReceiveBuffer.begin(),m_udpReceiveBuffer.begin() + bytes_recvd));
 
         switch (m_outDest)
         {
         case StdOut:
             {
-                std::wcout << "UDP log from " << addr.get_host_addr() << ":" << std::endl;
+                std::wcout << "UDP log from " << m_senderEndpoint.address().to_string().c_str() << ":" <<std::endl;
                 std::wcout << convertedReport << std::flush;
             }
             break;
 
         case File:
             {
-                m_logFile << "UDP log from " << addr.get_host_addr() << ":" << std::endl;
+                m_logFile << "UDP log from " << m_senderEndpoint.address().to_string().c_str() << ":" << std::endl;
                 m_logFile << convertedReport << std::flush;
             }
             break;
         }
-        return 0;
     }
 
 
-    //
-    //
-    // ********    OVERRIDES       ACE_Event_Handler         ************
-    //
-    //
-
-    // Function:    handle_timeout
-    // Parameters:  const ACE_Time_Value & currentTime
-    //              const void * act
-    // Returns:     -
-    // Comments:    See ACE_Event_Handler
-    //
-    int ReportHandler::handle_timeout(const ACE_Time_Value & /*currentTime*/, const void * /*act*/)
+    //-----------------------------------------------------------------------------
+    void ReportHandler::HandleTimeout(const boost::system::error_code & error)
     {
-        if (!CheckLogFile())
+        if (!error)
         {
-            std::cerr << "Opening new " << m_logFilePath.native_file_string() << " ..." << std::endl;
-
-            m_logFile.open(m_logFilePath, std::ios_base::app);
-
-            if (!m_logFile)
+            if (!CheckLogFile())
             {
-                std::cerr << "Fatal error: Can't open " <<  m_logFilePath.native_file_string() << std::endl;
+                std::wcerr << "Opening new " << m_logFilePath.native_file_string().c_str() << " ..." << std::endl;
+                
+                m_logFile.open(m_logFilePath, std::ios_base::app);
+                
+                if (!m_logFile)
+                {
+                    std::wcerr << "Fatal error: Can't open " <<  m_logFilePath.native_file_string().c_str() << std::endl;
+                }
             }
         }
-        return 0; //means success
+
+        //set timer again
+        m_timer.reset(new boost::asio::deadline_timer(m_ioService,m_checkFileSizeTime));
+        m_timer->async_wait(boost::bind(&ReportHandler::HandleTimeout,this,_1));
     }
 
 
@@ -306,7 +311,7 @@ namespace Swre
         {
             if (fs::file_size(m_logFilePath) >= m_maxFileSize)
             {
-                std::cerr << "Size of " << m_logFilePath.native_file_string() << " >= "
+                std::wcerr << "Size of " << m_logFilePath.native_file_string().c_str() << " >= "
                           << m_maxFileSize << " bytes. Closing the file ..." << std::endl;
 
                 if (m_logFile.is_open())
@@ -316,12 +321,12 @@ namespace Swre
 
                 if (fs::exists(m_oldLogFilePath))
                 {
-                    std::cerr << "Deleting " << m_oldLogFilePath.native_file_string() << " ..." << std::endl;
+                    std::wcerr << "Deleting " << m_oldLogFilePath.native_file_string().c_str() << " ..." << std::endl;
                     fs::remove(m_oldLogFilePath);
                 }
 
-                std::cerr << "Renaming " << m_logFilePath.native_file_string() << " to "
-                          << m_oldLogFilePath.native_file_string() << " ..." << std::endl;
+                std::wcerr << "Renaming " << m_logFilePath.native_file_string().c_str() << " to "
+                          << m_oldLogFilePath.native_file_string().c_str() << " ..." << std::endl;
 
                 fs::rename(m_logFilePath, m_oldLogFilePath);
 

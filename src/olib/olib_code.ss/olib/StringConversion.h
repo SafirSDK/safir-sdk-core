@@ -1,0 +1,71 @@
+/******************************************************************************
+*
+* Copyright Saab Systems AB, 2012 (http://www.safirsdk.com)
+*
+* Created by: Lars Hagström / lars@foldspace.nu
+*
+*******************************************************************************
+*
+* This file is part of Safir SDK Core.
+*
+* Safir SDK Core is free software: you can redistribute it and/or modify
+* it under the terms of version 3 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* Safir SDK Core is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+*
+******************************************************************************/
+#include <sstream>
+
+#ifndef __OLIB_STRING_CONVERSION_H__
+#define __OLIB_STRING_CONVERSION_H__
+
+namespace 
+{
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+#  define NO_WCHAR_CONVERSION
+#elif defined(ODBC_IS_IODBC)
+#  define NO_WCHAR_CONVERSION
+#elif defined (ODBC_IS_UNIXODBC)
+    //conversion needed
+#else
+#error "Can't work out if conversion is needed"
+#endif
+
+const std::wstring ToWstring(const SQLWCHAR* str)
+{
+#ifdef NO_WCHAR_CONVERSION
+    return std::wstring(str);
+#else
+    std::wostringstream ostr;
+    ostr << str;
+    return ostr.str();
+#endif
+}
+
+const std::vector<SQLWCHAR> ToSqlWchars(const std::wstring& str)
+{
+    return std::vector<SQLWCHAR>(str.begin(),str.end());
+}
+
+    //not meant to be called, ever.
+void size_checks()
+{
+#ifdef NO_WCHAR_CONVERSION 
+    BOOST_STATIC_ASSERT(sizeof(SQLWCHAR) == sizeof(wchar_t));
+#else
+    BOOST_STATIC_ASSERT(sizeof(SQLWCHAR) == 2);
+    BOOST_STATIC_ASSERT(sizeof(wchar_t) == 4);
+#endif
+}
+
+}
+
+#endif
+

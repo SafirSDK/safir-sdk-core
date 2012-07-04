@@ -27,7 +27,6 @@
 #include <iostream>
 #include <DoseTest/Action.h>
 #include <Safir/Dob/OverflowException.h>
-#include <ace/OS_NS_unistd.h>
 
 
 PartnerState::PartnerState(const Languages & languages):

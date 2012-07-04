@@ -25,7 +25,7 @@ with Ada.Exceptions;
 with Safir.Dob.Typesystem.Blob_Operations;
 with Safir.Dob.Typesystem.Operations;
 with Safir.Dob.Success_Response;
-with Safir.Dob.Typesystem.Object_Factory;
+with Safir.Dob.Typesystem.Object.Factory;
 with Safir.Dob.Interf;
 with Safir.Dob.Typesystem.Library_Exceptions;
 with Safir.Dob.Blob_References;
@@ -72,7 +72,7 @@ package body Safir.Dob.Response_Proxy_Impls is
                           return Safir.Dob.Response.Smart_Pointer'Class is
    begin
       return Safir.Dob.Response.Smart_Pointer'Class
-        (Safir.Dob.Typesystem.Object_Factory.Create_Object (Self.Response_Blob));
+        (Safir.Dob.Typesystem.Object.Factory.Create_Object (Self.Response_Blob));
    end Get_Response;
 
    function Get_Response_Sender_Connection_Info (Self : in Response_Proxy_Impl) return
@@ -94,7 +94,7 @@ package body Safir.Dob.Response_Proxy_Impls is
 
       begin
          Connection_Info := Safir.Dob.Connection_Info.Smart_Pointer
-           (Safir.Dob.Typesystem.Object_Factory.Create_Object (Blob));
+           (Safir.Dob.Typesystem.Object.Factory.Create_Object (Blob));
          Blob_Deleter (Blob);
          return Connection_Info;
       exception
@@ -154,7 +154,7 @@ package body Safir.Dob.Response_Proxy_Impls is
          Throw (Safir.Dob.Typesystem.Software_Violation_Exception'Identity,
                 "Cannot get Request on ResponseProxies for DeleteRequests");
       end if;
-      return Safir.Dob.Typesystem.Object_Factory.Create_Object (Self.Request_Blob);
+      return Safir.Dob.Typesystem.Object.Factory.Create_Object (Self.Request_Blob);
    end Get_Request;
 
    function Get_Request_Blob (Self : in Response_Proxy_Impl)

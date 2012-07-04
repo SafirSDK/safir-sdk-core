@@ -57,9 +57,15 @@ namespace Internal
         /** Constructor */
         ConnectRequest();
 
-        void Set(connect_tag_t, const std::string& connectionName, const ContextId contextId, const int pid);
+        void Set(connect_tag_t, 
+                 const std::string& connectionName, 
+                 const ContextId contextId, 
+                 const pid_t pid);
 
-        void GetAndClear(connect_tag_t, std::string& connectionName, ContextId& contextId, int& pid);
+        void GetAndClear(connect_tag_t, 
+                         std::string& connectionName, 
+                         ContextId& contextId, 
+                         pid_t& pid);
 
         bool IsConnect() const;
 
@@ -68,7 +74,7 @@ namespace Internal
         Kind m_kind;
         ShmString m_connectionName;
         long m_contextId;
-        int m_pid;
+        pid_t m_pid;
         ConnectionPtr m_connection;
     };
 

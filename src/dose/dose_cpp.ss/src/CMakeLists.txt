@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (dose_cpp)
+project(dose_cpp CXX)
 
 INCLUDE_DIRECTORIES(.)
 

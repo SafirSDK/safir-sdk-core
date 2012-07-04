@@ -28,6 +28,17 @@
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <string>
 #include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
+
+//Get hold of pid_t
+
+#if defined(linux) || defined(__linux) || defined(__linux__)
+#  include <sys/types.h>
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+   typedef int pid_t;
+#else
+#  error You need to get hold of pid_t for this platform
+#endif
 
 #ifdef _MSC_VER
 #pragma warning(push) 
@@ -42,22 +53,31 @@ namespace Utilities
         private boost::noncopyable //we probably do not want this to be copyable if it is to be extended in the future.
     {
     public:
-        ProcessInfo(const int pid);
+        /** Create a ProcessInfo object for a specific process. */
+        ProcessInfo(const pid_t pid);
+
+        /** Destructor. */
         ~ProcessInfo();
+
+        /** Returns the pid of the current process. */
+        static pid_t GetPid();
 
         /** This method will probably return argv[0] of the process.
          * At the very least it will return the pid as a string.
          * Be sure not to use this as a unique identifier for processes.
+         * For java processes it attempts to find the name of the running jar,
+         * and for mono processes it attempts to find the name of the running exe.
+         * No guarantees at all!
          */
-        const std::string GetProcessName();
+        const std::string GetProcessName() const;
 
         /** This method will probably return the command line used to start 
-         * the program.
+         * the current process.
          * At the very least it will return the pid as a string.
          */
-        const std::string GetProcessDescription();
+        static const std::string GetProcessDescription();
     private:
-        const int m_pid;
+        const pid_t m_pid;
     };
 
 }

@@ -28,6 +28,7 @@ pragma Warnings ("H");  -- turn off warnings for hiding variable
 
 -- Package containing a type that represents the identity of an instance.
 package Safir.Dob.Typesystem.Instance_Id is
+   pragma Preelaborate (Safir.Dob.Typesystem.Instance_Id);
 
    type Instance_Id_Type is private;
 

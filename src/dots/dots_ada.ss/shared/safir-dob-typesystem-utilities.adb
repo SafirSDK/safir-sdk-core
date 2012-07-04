@@ -22,8 +22,6 @@
 --
 -------------------------------------------------------------------------------
 
-with Ada.Exceptions;
-with Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Interfaces.C.Strings;
 with Safir.Dob.Typesystem.Kernel;
@@ -95,10 +93,6 @@ package body Safir.Dob.Typesystem.Utilities is
       end loop;
 
       return To_Unbounded_Wide_String (Tmp (1 .. Last));
-   exception
-      when E : others =>
-         Ada.Text_IO.Put_Line ("Exception (" & Utf_8 & "): " & Ada.Exceptions.Exception_Information (E));
-      raise;
    end From_Utf_8;
 
    --------------

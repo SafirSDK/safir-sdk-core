@@ -34,6 +34,7 @@ with Safir.Dob.Typesystem.Container_Base; use Safir.Dob.Typesystem.Container_Bas
 -- but should use the SetVal and GetVal methods defined in the derived classes.
 --
 package Safir.Dob.Typesystem.Enumeration_Container_Base is
+   pragma Preelaborate (Safir.Dob.Typesystem.Enumeration_Container_Base);
 
    type Enumeration_Container_Base_Type is interface and Container_Base_Type;
 

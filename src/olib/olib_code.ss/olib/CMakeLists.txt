@@ -1,15 +1,24 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (olib)
+project(olib CXX)
 
 INCLUDE_DIRECTORIES(.)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 if (UNIX)
-    FIND_PACKAGE(IODBC REQUIRED)
-    INCLUDE_DIRECTORIES(${IODBC_INCLUDE_DIRS})
-    SET(LIBS ${LIBS} ${IODBC_LIBRARIES})
+    FIND_PACKAGE(IODBC)
+    if (IODBC_FOUND)
+      INCLUDE_DIRECTORIES(${IODBC_INCLUDE_DIRS})
+      SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
+      ADD_DEFINITIONS(-DODBC_IS_IODBC)
+    else()
+      message("iODBC not found, trying UnixODBC")
+      FIND_PACKAGE(UnixODBC REQUIRED)
+      INCLUDE_DIRECTORIES(${UnixODBC_INCLUDE_DIRS})
+      SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
+      ADD_DEFINITIONS(-DODBC_IS_UNIXODBC)
+    endif()
 endif()
 
 
@@ -19,7 +28,7 @@ FILE(GLOB sources *.cpp)
 ADD_LIBRARY(olib SHARED ${sources} ${headers})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(olib dots_generated-cpp ${LIBS})
+    TARGET_LINK_LIBRARIES(olib dots_generated-cpp swre_interface_cpp ${ODBC_LIBRARIES})
 endif()
 
 ADD_DEFINITIONS(-DOLIB_EXPORTS)

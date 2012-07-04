@@ -28,8 +28,37 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <ace/Time_Value.h>
-#include <ace/Reactor.h>
+
+#ifdef _MSC_VER
+
+#  pragma comment (lib, "winmm.lib")
+#  pragma warning (push)
+#  pragma warning (disable: 4201)
+#  include <MMSystem.h>
+#  pragma warning (pop)
+
+namespace
+{
+    // Windows stuff to enable better timer resolution on windows plattforms.
+    void enableWindowsMultimediaTimers()
+    {
+        // Set best possible timer resolution on windows
+        
+        TIMECAPS    tc;
+        UINT        wTimerRes;
+        const UINT  wantedResolution = 1;  // ms
+
+        if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) != TIMERR_NOERROR)
+        {
+            throw Safir::Dob::Typesystem::SoftwareViolationException(L"Dose_Main: Failed to obtain timer resolution!", __WFILE__, __LINE__);
+        }
+
+        wTimerRes = static_cast<UINT>(std::min(std::max(tc.wPeriodMin, wantedResolution), tc.wPeriodMax));
+        timeBeginPeriod(wTimerRes);
+    }
+}
+#endif
+
 
 namespace Safir
 {
@@ -37,6 +66,9 @@ namespace Dob
 {
 namespace Internal
 {
+    //static member initialization
+    TimerHandler* TimerHandler::m_instance = NULL;
+
     static const boost::posix_time::ptime epoch(boost::gregorian::date(1970,1,1));
     static const double fraction_multiplicator = pow(10.0,-boost::posix_time::time_duration::num_fractional_digits());
 
@@ -87,9 +119,12 @@ namespace Internal
     // Timers
     //--------------------
 
-    TimerHandler::TimerHandler()
+    TimerHandler::TimerHandler(boost::asio::io_service & ioService):
+        m_ioService(ioService)
     {
-
+#ifdef _MSC_VER
+        enableWindowsMultimediaTimers();
+#endif
     }
 
     TimerHandler::~TimerHandler()
@@ -97,10 +132,17 @@ namespace Internal
 
     }
 
+
+    void TimerHandler::Instantiate(boost::asio::io_service & ioService)
+    {
+        ENSURE(m_instance == NULL, << L"Instantiate() was called twice!");
+        m_instance = new TimerHandler(ioService);
+    }
+
     TimerHandler & TimerHandler::Instance()
     {
-        static TimerHandler theInstance;
-        return theInstance;
+        ENSURE(m_instance != NULL, << L"Instance() was called before Instantiate()");
+        return *m_instance;
     }
 
 
@@ -164,7 +206,8 @@ namespace Internal
                             break;
                         }
                     }
-                    assert(removedSomething);
+
+                    ENSURE(removedSomething, << L"removedSomething was not set to true correctly in TimerHandler::Set");
 
                     //add new timer
                     findIt->second = when;
@@ -211,7 +254,9 @@ namespace Internal
                     break;
                 }
             }
-            assert(removedSomething);
+
+            ENSURE(removedSomething, << L"removedSomething was not set to true correctly in TimerHandler::Remove");
+
             ScheduleTimer();
         }
     }
@@ -244,7 +289,9 @@ namespace Internal
                     break;
                 }
             }
-            assert(removedSomething);
+            
+            ENSURE(removedSomething, << L"removedSomething was not set to true correctly in TimerHandler::Remove");
+
             ScheduleTimer();
         }
     }
@@ -274,7 +321,8 @@ namespace Internal
                         break;
                     }
                 }
-                assert(removedSomething);
+                
+                ENSURE(removedSomething, << L"removedSomething was not set to true correctly in TimerHandler::Remove");
 
                 if (it == m_timerTable.begin())
                 {
@@ -311,11 +359,13 @@ namespace Internal
     }
 
     //returns the time to the next timeout in milliseconds
-    const ACE_Time_Value TimerHandler::NextTimeout() const
+    const boost::posix_time::time_duration TimerHandler::NextTimeout() const
     {
+        using namespace boost::posix_time;
+
         if(m_timerQueue.empty())
         {
-            return ACE_Time_Value(100000); //one hundred thousand seconds...
+            return seconds(100000); //one hundred thousand seconds...
         }
         else
         {
@@ -323,13 +373,11 @@ namespace Internal
 
             if (delay < 0.0)
             {
-                return ACE_Time_Value::zero;
+                return seconds(0);
             }
             else
             {
-                double intpart;
-                const double frac = modf(delay,&intpart);
-                return ACE_Time_Value(static_cast<time_t>(intpart),static_cast<suseconds_t>(frac*1000000));
+                return microseconds(static_cast<boost::int64_t>(delay*1e6));
             }
 
         }
@@ -337,12 +385,24 @@ namespace Internal
 
     void TimerHandler::ScheduleTimer()
     {
-        ACE_Reactor::instance()->cancel_timer(this);
-        ACE_Reactor::instance()->schedule_timer(this,0,NextTimeout());
+        if (m_deadlineTimer != NULL)
+        {
+            m_deadlineTimer->cancel();
+        }
+        m_deadlineTimer.reset(new boost::asio::deadline_timer(m_ioService,NextTimeout()));
+        m_deadlineTimer->async_wait(boost::bind(&TimerHandler::HandleTimeout,this,_1));
     }
 
-    int TimerHandler::handle_timeout(const ACE_Time_Value&, const void*)
+    void TimerHandler::HandleTimeout(const boost::system::error_code & error)
     {
+        //check if timer was cancelled (happens in ScheduleTimer) and don't recurse...
+        if (error == boost::asio::error::operation_aborted)
+        {
+            return;
+        }
+
+        ENSURE(!error, << "TimerHandler got an error from boost asio! " << error);
+
         if (!m_timerQueue.empty())
         {
             const double now = GetUtcTime();
@@ -363,25 +423,7 @@ namespace Internal
             }
         }
         ScheduleTimer();
-        return 0;
     }
-
-    /*
-    //--------------------
-    // TimerInfo
-    //--------------------
-    long TimerInfo::m_lastTimerId = 0;
-    TimerInfo::TimerInfo():
-        m_timerId(++m_lastTimerId)
-    {
-        //std::wcout << "Created timer with id = " << m_timerId <<std::endl;
-    }
-
-    TimerInfo::~TimerInfo()
-    {
-
-    }
-*/
 }
 }
 }

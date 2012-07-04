@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOB_UTILITIES_DISPATCHER_H__
-#define __DOB_UTILITIES_DISPATCHER_H__
+#ifndef __DOB_UTILITIES_ACE_DISPATCHER_H__
+#define __DOB_UTILITIES_ACE_DISPATCHER_H__
 
 #include <ace/Reactor.h>
 #include <boost/noncopyable.hpp>
@@ -94,11 +94,11 @@ namespace Utilities
         }
 
 
-        const Safir::Dob::Connection&   m_connection;
-        Safir::Dob::Internal::AtomicUint32                    m_isNotified;
+        const Safir::Dob::Connection&      m_connection;
+        Safir::Dob::Internal::AtomicUint32 m_isNotified;
 };
 
 } // namespace Utilities
 } // namespace Safir
 
-#endif // __DOB_UTILITIES_DISPATCHER_H__
+#endif // __DOB_UTILITIES_ACE_DISPATCHER_H__

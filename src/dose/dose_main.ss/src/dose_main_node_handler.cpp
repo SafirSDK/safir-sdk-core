@@ -55,11 +55,10 @@ namespace Internal
     {
         if (Safir::Dob::NodeParameters::NodesArraySize() != Safir::Dob::NodeParameters::NumberOfNodes())
         {
-            lllerr << "The parameter Safir.Dob.NodeParameters.NumberOfNodes" << std::endl
-                   << "does not correspond to the size of the parameter array" << std::endl
-                   << "Safir.Dob.NodeParameters.Nodes." << std::endl
-                   << "Please correct this and try again!" << std::endl;
-            exit(-1);
+            throw Dob::Typesystem::ConfigurationErrorException(L"The parameter Safir.Dob.NodeParameters.NumberOfNodes\n"
+                                                               L"does not correspond to the size of the parameter array\n"
+                                                               L"Safir.Dob.NodeParameters.Nodes.\n"
+                                                               L"Please correct this and try again!", __WFILE__, __LINE__);
         }
         std::set<std::wstring> names;
         for (int i = 0; i < Safir::Dob::NodeParameters::NumberOfNodes(); ++i)
@@ -67,11 +66,12 @@ namespace Internal
             const bool inserted = names.insert(Safir::Dob::NodeParameters::Nodes(i)->NodeName()).second;
             if (!inserted)
             {
-                lllerr << "The node names in Safir.Dob.NodeParameters.Nodes must be unique!" << std::endl
-                       << "It appears that there is more than one '"
-                       << Safir::Dob::NodeParameters::Nodes(i)->NodeName().GetVal() << "'" << std::endl
-                   << "Please correct this and try again!" << std::endl;
-                exit(-1);
+                std::wostringstream ostr;
+                ostr << "The node names in Safir.Dob.NodeParameters.Nodes must be unique!" << std::endl
+                     << "It appears that there is more than one '"
+                     << Safir::Dob::NodeParameters::Nodes(i)->NodeName().GetVal() << "'" << std::endl
+                     << "Please correct this and try again!" << std::endl;
+                throw Dob::Typesystem::ConfigurationErrorException(ostr.str(),__WFILE__, __LINE__);
             }
         }
     }

@@ -23,7 +23,6 @@
 -------------------------------------------------------------------------------
 with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 with Safir.Dob.Typesystem.Value_Container;
-pragma Elaborate_All (Safir.Dob.Typesystem.Value_Container);
 with Safir.Dob.Typesystem.Entity_Id; use Safir.Dob.Typesystem.Entity_Id;
 pragma Elaborate_All (Safir.Dob.Typesystem.Entity_Id);
 with Safir.Dob.Typesystem.Instance_Id; use Safir.Dob.Typesystem.Instance_Id;

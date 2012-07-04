@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2012 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagström / lars@foldspace.nu
 *
 *******************************************************************************
 *
@@ -22,31 +22,303 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/LowLevelLoggerControl.h>
 #include <Safir/Utilities/ProcessInfo.h>
-#include <time.h>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable:4512)
+#pragma warning (disable:4127)
+#endif
+
+#include <boost/bind.hpp>
 #include <boost/filesystem/exception.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/stream_buffer.hpp>
+#include <boost/iostreams/tee.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/thread/mutex.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
+#include <iomanip>
 #include <iostream>
-#include <ace/Guard_T.h>
-#include <ace/OS_NS_unistd.h>
 
-//disable warnings in boost
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4702)
-  #pragma warning (disable : 4127)
-  #pragma warning (disable : 4267)
-#endif
+namespace //anonymous namespace for internal functions
+{
+    typedef boost::shared_ptr<const Safir::Utilities::Internal::LowLevelLoggerControl> ControlPtr;
 
-#include <ace/Thread.h>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/date_time/posix_time/time_formatters.hpp>
+    //also creates directories and removes files that are in the way
+    const boost::filesystem::path GetLogFilename()
+    {
+        const boost::filesystem::path path = Safir::Utilities::Internal::LowLevelLoggerControl::GetLogDirectory();
 
-//and enable the warnings again
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
+        try
+        {
+            boost::filesystem::create_directory(path);
+        }
+        catch (const boost::filesystem::filesystem_error)
+        {
+            throw std::logic_error("Failed to create log directory");
+        }
+
+        const pid_t pid = Safir::Utilities::ProcessInfo::GetPid();
+        const Safir::Utilities::ProcessInfo proc(pid);
+        const std::string filename = proc.GetProcessName() + "-" + boost::lexical_cast<std::string>(pid) + ".txt";
+
+        try
+        {
+            const boost::filesystem::path fullpath = path/filename;
+            if (boost::filesystem::is_regular(fullpath) && boost::filesystem::exists(fullpath))
+            {
+                boost::filesystem::remove(fullpath);
+            }
+            return fullpath;
+        }
+        catch (const boost::filesystem::filesystem_error &)
+        {
+            //failed to find useful name
+            return std::string("strange-") + boost::lexical_cast<std::string>(rand());
+        }
+    }
+
+    class DateOutputFilter
+    {
+    public:
+        typedef wchar_t char_type;
+        struct category :
+            boost::iostreams::output_filter_tag,
+            boost::iostreams::multichar_tag,            
+            boost::iostreams::flushable_tag {};
+
+        explicit DateOutputFilter(const ControlPtr& control)
+            : m_datePending(true)
+            , m_fractionalDigits(boost::posix_time::time_duration::num_fractional_digits())
+            , m_ostr(new std::wostringstream())
+            , m_ostrLock(new boost::mutex())
+            , m_control(control)
+        {
+        
+        }
+
+        template <typename Sink>
+        std::streamsize write( Sink& dest, const wchar_t* s, const std::streamsize n)
+        {
+            const wchar_t* start = s;
+            std::streamsize i = 0;
+            const wchar_t* const end = s+n;
+
+            while (start + i != end)
+            {
+                if (start[i] == '\n')
+                {
+                    if (m_datePending && (m_control == NULL || m_control->UseTimestamps()))
+                    {
+                        const std::wstring timestring = TimeString();
+                        boost::iostreams::write(dest,timestring.c_str(),timestring.size());
+                        m_datePending = false;
+                    }
+                    boost::iostreams::write(dest,start,i+1);
+                    start += i + 1;
+                    i = 0;
+                    m_datePending = true;
+                }
+                else
+                {
+                    ++i;
+                }
+            }
+
+            if (end - start > 0)
+            {
+                if (m_datePending && (m_control == NULL || m_control->UseTimestamps()))
+                {
+                    const std::wstring timestring = TimeString();
+                    boost::iostreams::write(dest,timestring.c_str(),timestring.size());
+                    m_datePending = false;
+                }
+                boost::iostreams::write(dest,start,end-start);
+            }
+                    
+
+            return n;
+        }
+        
+        template <typename Sink>
+        bool flush(Sink& s) const 
+        {
+            return boost::iostreams::flush(s);
+        }
+
+        /** This copy constructor does actually not copy anything at all,
+         * All it does is create new internal structures to avoid
+         * allocation in TimeString.
+         */
+        DateOutputFilter(const DateOutputFilter& other)
+            : m_datePending(true)
+            , m_fractionalDigits(other.m_fractionalDigits)
+            , m_ostr(new std::wostringstream())
+            , m_ostrLock(new boost::mutex())
+            , m_control(other.m_control)
+        {
+
+        }
+
+    private:
+        const DateOutputFilter& operator=(const DateOutputFilter& other); //no assignment op.
+        
+        /** 
+         * This is an optimized version of to_simple_string(time_duration) from posix_time.
+         * It is here just to reduce the amount of time spent in serializing the time strings
+         * in the logger.
+         * The ch argument is appended to the string, so that the caller only has to do 
+         * a call to write, rather than a write followed by a put.
+         * The wostringstream is a member with a lock rather than a local variable since
+         * that is actually faster (tested on linux with gcc). 
+         */
+        const std::wstring TimeString()
+        {
+            using namespace boost::posix_time;
+            using namespace boost;
+            const time_duration td = microsec_clock::universal_time().time_of_day();
+
+            boost::lock_guard<boost::mutex> lck(*m_ostrLock);
+            m_ostr->str(L"");
+
+            *m_ostr << L"[" << std::setfill(fill_char) << std::setw(2)
+                    << date_time::absolute_value(td.hours()) << L":";
+            *m_ostr << std::setw(2)
+                    << date_time::absolute_value(td.minutes()) << L":";
+            *m_ostr << std::setw(2)
+                    << date_time::absolute_value(td.seconds());
+
+            const time_duration::fractional_seconds_type frac_sec =
+                date_time::absolute_value(td.fractional_seconds());
+
+            *m_ostr << L"." << std::setw(m_fractionalDigits)
+                  << frac_sec;
+            *m_ostr << L"] ";
+            return m_ostr->str();
+        }
+
+
+        bool m_datePending;
+
+        static const wchar_t fill_char = '0';
+        const unsigned short m_fractionalDigits;
+
+        boost::shared_ptr<std::wostringstream> m_ostr;
+        boost::shared_ptr<boost::mutex> m_ostrLock;
+        
+        const ControlPtr m_control;
+    };
+
+    /* Just adding wcout to filtering_streambuf seems to stop
+     * flushing from working correctly, so we do this instead.*/
+    class FlushingWcoutSink
+    {
+    public:
+        typedef wchar_t      char_type;
+        struct category :
+            boost::iostreams::sink_tag,
+            boost::iostreams::flushable_tag {};
+
+        std::streamsize write(const wchar_t* s, const std::streamsize n) const
+        {
+            std::wcout.write(s,n);
+            return n;
+        }
+
+        bool flush() const 
+        {
+            return boost::iostreams::flush(std::wcout);
+        }
+    };
+
+    /**/
+    class FilteringStreambuf:
+        public boost::iostreams::filtering_wostreambuf
+    {
+    public:
+        explicit FilteringStreambuf()
+            : m_control()
+        {
+
+        }
+
+        void SetControl(const ControlPtr& control)
+        {
+            m_control = control;
+        }
+
+        int sync()
+        {
+            //            std::wcerr << "Got sync call" << std::endl;
+            if (m_control == NULL || !m_control->IgnoreFlush())
+            {
+                return boost::iostreams::filtering_wostreambuf::sync();
+            }
+            else
+            {
+                return 0;
+            }
+        }
+    private:
+        ControlPtr m_control;
+    };
+
+    class TeeDevice
+        : public boost::iostreams::tee_device<boost::iostreams::wfile_sink, std::wostream>
+    {
+        typedef boost::iostreams::tee_device<boost::iostreams::wfile_sink, std::wostream> Base;
+    public:
+        explicit TeeDevice(boost::iostreams::wfile_sink& fileSink)
+            : Base(fileSink,std::wcout)
+            , m_fileSink(fileSink)
+        {
+        }
+
+        std::streamsize write(const wchar_t* s, std::streamsize n)
+        {
+            if (m_control == NULL ||
+                (m_control->LogToStdout() && m_control->LogToFile()))
+            {
+                return Base::write(s,n);
+            }
+            else if (m_control->LogToStdout())
+            {
+                return boost::iostreams::write(std::wcout,s,n);
+            }
+            else if (m_control->LogToFile())
+            {
+                return boost::iostreams::write(m_fileSink,s,n);
+            }
+            else
+            {
+                return n;
+            }
+        }
+
+        void SetControl(const ControlPtr& control)
+        {
+            m_control = control;
+        }
+
+    private:
+        const TeeDevice& operator=(const TeeDevice&); //no assignment
+
+        boost::iostreams::wfile_sink& m_fileSink;
+        ControlPtr m_control;
+    };
+    
+}
+
 
 namespace Safir
 {
@@ -56,348 +328,112 @@ namespace Internal
 {
 namespace Internal
 {
-    boost::filesystem::path GetLogDirectory()
+    class LowLevelLogger::Impl
     {
-        const char * ENV_NAME = "SAFIR_RUNTIME";
-        char * env = getenv(ENV_NAME);
-        if (env == NULL)
-        {
-            return "";
-        }
-        boost::filesystem::path filename(env,boost::filesystem::native);
 
-        filename /= "log";
-        filename /= "Dob-LowLevelLog";
-        return filename;
+    };
+
+
+    class LowLevelLogger::LoggingImpl
+        : public LowLevelLogger::Impl
+    {
+    public:
+        explicit LoggingImpl(LowLevelLogger& lll)
+            : m_fileSink(GetLogFilename().string())
+            , m_tee(m_fileSink)
+        {
+            if (!m_fileSink.is_open())
+            {
+                //Failed to open file, just return and leave the 
+                //logging enabled pointer set to null.
+                return;
+            }
+
+            m_control.reset(new LowLevelLoggerControl(false,false));
+
+            m_buffer.SetControl(m_control);
+            m_tee.SetControl(m_control);
+            DateOutputFilter filter(m_control);
+            m_buffer.push(filter);
+            m_buffer.push(m_tee);
+            lll.rdbuf(&m_buffer);
+            
+            lll.m_pLogLevel = m_control->GetLogLevelPointer();
+        }
+
+    private:
+        boost::shared_ptr<LowLevelLoggerControl> m_control;
+        boost::iostreams::wfile_sink m_fileSink;
+        TeeDevice m_tee;
+        FilteringStreambuf m_buffer;
+    };
+
+    /** Fallback is used when we're not able to log to file, so that
+     *  lllerr will still be able to work correctly. */
+    class LowLevelLogger::FallbackImpl
+        : public LowLevelLogger::Impl
+    {
+    public:
+        explicit FallbackImpl(LowLevelLogger& lll)
+        {
+            DateOutputFilter filter = DateOutputFilter(boost::shared_ptr<LowLevelLoggerControl>());
+            m_buffer.push(filter);
+            m_buffer.push(m_wcout);
+            lll.rdbuf(&m_buffer);
+        }
+    private:
+        FlushingWcoutSink m_wcout;
+        boost::iostreams::filtering_wostreambuf m_buffer;
+    };
+
+
+    boost::once_flag LowLevelLogger::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+
+    LowLevelLogger & LowLevelLogger::SingletonHelper::Instance()
+    {
+        static LowLevelLogger instance;
+        return instance;
     }
 
-    //also creates directories and removes files that are in the way
-    boost::filesystem::path GetLogFilename()
+    LowLevelLogger & LowLevelLogger::Instance()
     {
-        boost::filesystem::path path = GetLogDirectory();
-        if (path.empty())
-        {
-            return "";
-        }
+        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        return SingletonHelper::Instance();
+    }
+
+
+    LowLevelLogger::LowLevelLogger()
+        : std::wostream(NULL)
+        , m_pLogLevel(NULL)
+    {
+        //wcout on windows has no buffering turned on at all! Give it some buffering!
+#ifdef _MSC_VER
+        std::wcout.rdbuf()->pubsetbuf(NULL,8196);
+#endif
+        
+        //this will allow wcout to coexist with cout and with printf/wprintf
+        //which Ada io is based upon.
+        std::ios_base::sync_with_stdio(false);
 
         try
         {
-            boost::filesystem::create_directory(path);
+            m_impl.reset(new LoggingImpl(*this));
         }
-        catch (const boost::filesystem::filesystem_error &)
+        catch (const std::exception&)
         {
-            return "";
+            m_impl.reset(new FallbackImpl(*this));
+            //set it to null, just to be extra sure. Should not be needed...
+            m_pLogLevel = NULL;
         }
-
-        ProcessInfo proc(ACE_OS::getpid());
-        std::string filename = proc.GetProcessName() + "-" + boost::lexical_cast<std::string>(ACE_OS::getpid()) + ".txt";
-
-        try
-        {
-            boost::filesystem::path fullpath = path/filename;
-            return fullpath;
-        }
-        catch (const boost::filesystem::filesystem_error &)
-        {
-            //failed to find useful name
-            return std::string("strange-") + boost::lexical_cast<std::string>(rand());
-        }
-
-     }
-
-
-    //check for file %SAFIR_RUNTIME%\log\Dob-LowLevelLog\logging_on
-    bool IsLoggingOnByDefault()
-    {
-        boost::filesystem::path filename = GetLogDirectory();
-        if (filename.empty())
-        {
-            return false;
-        }
-        filename /= "logging_on";
-        return boost::filesystem::exists(filename);
-    }
-
-    LowLevelLogger::LowLevelLogger(bool forceFlush)
-        : std::basic_ostream<wchar_t, std::char_traits<wchar_t> >(new LowLevelLoggerStreamBuf(forceFlush))
-    {
     }
 
     LowLevelLogger::~LowLevelLogger()
     {
-        delete rdbuf();
-    }
-
-    LowLevelLoggerStreamBuf::LowLevelLoggerStreamBuf(bool forceFlush)
-        : std::basic_streambuf<wchar_t, std::char_traits<wchar_t> >(),
-          m_bDatePending(true),
-          m_ostr(),
-          m_backend(LowLevelLoggerBackend::Instance()),
-          m_forceFlush(forceFlush)
-
-    {
-    }
-
-    LowLevelLoggerStreamBuf::~LowLevelLoggerStreamBuf()
-    {
-    }
-
-    LowLevelLoggerStreamBuf::_Tr::int_type
-    LowLevelLoggerStreamBuf::uflow()
-    {
-        return _Tr::eof();
-    }
-
-    LowLevelLoggerStreamBuf::_Tr::int_type
-    LowLevelLoggerStreamBuf::underflow()
-    {
-        return _Tr::eof();
-    }
-
-    LowLevelLoggerStreamBuf::_Tr::int_type
-    LowLevelLoggerStreamBuf::overflow(_Tr::int_type c)
-    {
-        if (c ==_Tr::eof())
-        {
-            return _Tr::not_eof(c);
-        }
-
-        if (m_bDatePending)
-        {
-            WriteDateTime();
-            m_bDatePending = false;
-        }
-
-        m_ostr.put(_Tr::to_char_type(c));
-
-        if (_Tr::to_char_type(c) == '\n')
-        {
-            m_bDatePending = true;
-            m_ostr.flush();
-
-            if (m_backend.OutputThreadStarted())
-            {
-                m_backend.CopyToInternalBuffer(m_ostr);
-                if (m_forceFlush)
-                {
-                    m_backend.OutputInternalBuffer();
-                }
-            }
-            else
-            {
-               // In the lllerr case we can get here without logging being enabled. In this case the output thread isn't
-                // running so we make the output synchronous from here
-                m_backend.OutputFile() << m_ostr.str();
-                std::wcout << m_ostr.str();
-                m_backend.OutputFile().flush();
-                std::wcout.flush();
-            }
-
-            m_ostr.str(std::wstring());
-        }
-
-        return _Tr::not_eof(c);
-    }
-
-    void LowLevelLoggerStreamBuf::WriteDateTime()
-    {
-        std::string dateTime = boost::posix_time::to_simple_string(boost::posix_time::microsec_clock::universal_time());
-        m_ostr << "[" <<  dateTime.c_str() << "] ";
-    }
-
-    LowLevelLoggerBackend * volatile LowLevelLoggerBackend::m_pInstance = NULL;
-    ACE_Thread_Mutex LowLevelLoggerBackend::m_InstantiationLock;
-
-    //
-    //Instance
-    //
-    LowLevelLoggerBackend & LowLevelLoggerBackend::Instance()
-    {
-        if (m_pInstance == NULL)
-        {
-            ACE_Guard<ACE_Thread_Mutex> lck(m_InstantiationLock);
-            if (m_pInstance == NULL)
-            {
-                m_pInstance = new LowLevelLoggerBackend();
-            }
-        }
-        return *m_pInstance;
-    }
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4355)
-    //disable using this in constructor warning
-#endif
-
-    LowLevelLoggerBackend::LowLevelLoggerBackend()
-        : m_os(),
-          m_outputBuf(),
-          m_pLoggingEnabled(NULL),
-          m_startupSynchronizer("LLUF_LLL_INITIALIZATION", this),
-          m_outputThreadStarted(false)
-    {
-        const boost::filesystem::path filename = GetLogFilename();
-        if (filename.empty())
-        {
-            //logging will be disabled (pointer is NULL)
-            return;
-        }
-
-        try
-        {
-            //open the output file
-            m_OutputFile.open(filename,std::ios::out);
-            if (!m_OutputFile.good())
-            {
-                m_OutputFile.close();
-                return;
-            }
-        }
-        catch (const std::exception &)
-        {
-            m_OutputFile.close();
-            return;
-        }
-
-        const std::size_t BufferInitialSize = 4000;
-
-        m_os.reserve(BufferInitialSize);
-        m_outputBuf.reserve(BufferInitialSize);
-
-        m_startupSynchronizer.Start();
-
-        // start output thread
-        ACE_Thread::spawn(&LowLevelLoggerBackend::OutputThreadFunc, this);
-
-        m_outputThreadStarted = true;
-    }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
-    //
-    // Destructor
-    //
-    LowLevelLoggerBackend::~LowLevelLoggerBackend()
-    {
-    }
-
-    void LowLevelLoggerBackend::Create()
-    {
-        boost::interprocess::shared_memory_object::remove("LLUF_LLL_SHM");
-        boost::interprocess::shared_memory_object shm(boost::interprocess::create_only,"LLUF_LLL_SHM", boost::interprocess::read_write);
-        shm.truncate(sizeof(bool));
-        boost::interprocess::mapped_region shmRegion(shm,boost::interprocess::read_write);
-        *static_cast<bool*>(shmRegion.get_address()) = IsLoggingOnByDefault();
-    }
-
-    void LowLevelLoggerBackend::Use()
-    {
-        boost::interprocess::shared_memory_object shm(boost::interprocess::open_only,"LLUF_LLL_SHM", boost::interprocess::read_only);
-        m_shm.swap(shm);
-        boost::interprocess::mapped_region shmRegion(m_shm,boost::interprocess::read_only);
-        m_shmRegion.swap(shmRegion);
-        m_pLoggingEnabled = static_cast<bool*>(m_shmRegion.get_address());
-    }
-
-    void LowLevelLoggerBackend::Destroy()
-    {
-    }
-
-    void LowLevelLoggerBackend::CopyToInternalBuffer(const std::wostringstream& ostr)
-    {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_bufLock);
-
-        m_os << ostr.str();
 
     }
-
-    void LowLevelLoggerBackend::OutputInternalBuffer()
-    {
-        ACE_Guard<ACE_Thread_Mutex> internalLck(m_internalBufLock);
-
-        {
-            ACE_Guard<ACE_Thread_Mutex> lck(m_bufLock);
-            // Swap the output buffer and the underlying log buffer.
-            m_os.swap_vector(m_outputBuf);
-        } // buffer lock released here
-
-        for (BufferT::const_iterator it = m_outputBuf.begin(); it != m_outputBuf.end(); ++it)
-        {
-            m_OutputFile.put(*it);
-            std::wcout.put(*it);
-        }
-        m_OutputFile.flush();
-        std::wcout.flush();
-
-        m_outputBuf.clear();
-    }
-
-    ACE_THR_FUNC_RETURN LowLevelLoggerBackend::OutputThreadFunc(void * _this)
-    {
-        LowLevelLoggerBackend* This = static_cast<LowLevelLoggerBackend*>(_this);
-
-        try
-        {
-            for (;;)
-            {
-                ACE_OS::sleep(10);
-
-                This->OutputInternalBuffer();
-            }
-        }
-        catch (const std::exception & exc)
-        {
-            std::wostringstream ostr;
-            ostr << "std::exception in LowLevelLoggerBackend::OutputWorker:" << std::endl
-                << exc.what();
-            std::wcout << ostr.str() << std::endl;
-            exit(-1);
-        }
-        catch (...)
-        {
-            std::wostringstream ostr;
-            ostr << "exception thrown in LowLevelLoggerBackend::OutputWorker!";
-            std::wcout << ostr.str() << std::endl;
-            exit(-1);
-        }
-
-#ifndef _MSC_VER
-        return NULL; //Keep compiler happy...
-#endif
-    }
-
-    void LowLevelLoggerBackend::OutputWorker()
-    {
-        try
-        {
-            for (;;)
-            {
-                ACE_OS::sleep(10);
-
-                OutputInternalBuffer();
-            }
-        }
-        catch (const std::exception & exc)
-        {
-            std::wostringstream ostr;
-            ostr << "std::exception in LowLevelLoggerBackend::OutputWorker:" << std::endl
-                << exc.what();
-            std::wcout << ostr.str() << std::endl;
-            exit(-1);
-        }
-        catch (...)
-        {
-            std::wostringstream ostr;
-            ostr << "exception thrown in LowLevelLoggerBackend::OutputWorker!";
-            std::wcout << ostr.str() << std::endl;
-            exit(-1);
-        }
-    }
-
 }
 }
 }
 }
+
+

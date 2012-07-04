@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-PROJECT (SplitJoinStresser)
+project(SplitJoinStresser CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
@@ -8,10 +8,11 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(SplitJoinStresser ${sources} ${headers})
 
+FIND_PACKAGE(Boost COMPONENTS program_options)
+
 TARGET_LINK_LIBRARIES(SplitJoinStresser ${COMMON_LIBRARIES} ${ACE_LIBRARY})
 
 if (NOT MSVC)
-    FIND_PACKAGE(Boost COMPONENTS program_options)
     TARGET_LINK_LIBRARIES(SplitJoinStresser dose_cpp ${Boost_LIBRARIES})
 endif()
 

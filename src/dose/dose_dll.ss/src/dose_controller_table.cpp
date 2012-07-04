@@ -31,7 +31,6 @@
 #include <iostream>
 #include <string>
 #include "dose_controller.h"
-#include <ace/Guard_T.h>
 
 #ifdef _MSC_VER
   #pragma warning(push)
@@ -50,26 +49,18 @@ namespace Dob
 {
 namespace Internal
 {
+    boost::once_flag ControllerTable::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
-    ControllerTable * volatile ControllerTable::m_instance = NULL;
+    ControllerTable & ControllerTable::SingletonHelper::Instance()
+    {
+        static ControllerTable instance;
+        return instance;
+    }
 
-    ACE_Thread_Mutex ControllerTable::m_instantiationLock;
-
-    //
-    //Instance
-    //
     ControllerTable & ControllerTable::Instance()
     {
-        if (m_instance == NULL)
-        {
-            ACE_Guard<ACE_Thread_Mutex> lck(m_instantiationLock);
-
-            if (m_instance == NULL)
-            {
-                m_instance = new ControllerTable();
-            }
-        }
-        return *m_instance;
+        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        return SingletonHelper::Instance();
     }
 
     ControllerTable::ControllerTable():
@@ -85,7 +76,7 @@ namespace Internal
 
     long ControllerTable::AddController(ControllerPtr controller)
     {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
+        boost::lock_guard<boost::mutex> lck(m_lock);
 
         long ctrl = -1;
 
@@ -107,7 +98,7 @@ namespace Internal
 
     void ControllerTable::RemoveController(const long ctrl)
     {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
+        boost::lock_guard<boost::mutex> lck(m_lock);
 
         ControllerMap::iterator it = m_controllers.find(ctrl);
 
@@ -128,9 +119,9 @@ namespace Internal
             return;
         }
 
-        ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
+        boost::lock_guard<boost::mutex> lck(m_lock);
 
-        ThreadControllersTable::const_iterator findIt = m_threadControllersTable.find(ACE_Thread::self());
+        ThreadControllersTable::const_iterator findIt = m_threadControllersTable.find(boost::this_thread::get_id());
         if (findIt != m_threadControllersTable.end())
         {
             for (ControllerInfoList::const_iterator it = findIt->second.begin();
@@ -173,7 +164,7 @@ namespace Internal
                 if (ctrl == it2->m_ctrl)
                 {
                     ostr << "The thread id that you called from was "
-                         << ACE_Thread::self()
+                         << boost::this_thread::get_id()
                          << " but DOSE expected you to call it from "
                          << it->first
                          <<std::endl;
@@ -202,14 +193,14 @@ namespace Internal
 
     ControllerConstPtr ControllerTable::GetController(const long ctrl) const
     {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
+        boost::lock_guard<boost::mutex> lck(m_lock);
 
         return GetControllerInternal(ctrl);
     }
 
     ControllerPtr ControllerTable::GetControllerByName(const std::string & name)
     {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
+        boost::lock_guard<boost::mutex> lck(m_lock);
 
         for (ControllerMap::iterator it=m_controllers.begin();
              it != m_controllers.end(); ++it)
@@ -236,9 +227,9 @@ namespace Internal
 
     void ControllerTable::SetThread(const long ctrl)
     {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
+        boost::lock_guard<boost::mutex> lck(m_lock);
 
-        const ACE_thread_t tid = ACE_Thread::self();
+        const boost::thread::id tid = boost::this_thread::get_id();
         ThreadControllersTable::iterator findIt = m_threadControllersTable.find(tid);
         if (findIt == m_threadControllersTable.end())  //need to insert the thread id into the map
         {
@@ -254,8 +245,8 @@ namespace Internal
     long
     ControllerTable::GetFirstControllerInThread() const
     {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
-        ThreadControllersTable::const_iterator findIt = m_threadControllersTable.find(ACE_Thread::self());
+        boost::lock_guard<boost::mutex> lck(m_lock);
+        ThreadControllersTable::const_iterator findIt = m_threadControllersTable.find(boost::this_thread::get_id());
         if (findIt == m_threadControllersTable.end() || findIt->second.empty())
         {
             throw Safir::Dob::NotOpenException(L"Failed to find unnamed connection in this thread",__WFILE__,__LINE__);
@@ -270,9 +261,9 @@ namespace Internal
     ControllerTable::GetNamedControllerInThread(const std::string & connectionNameCommonPart,
                                                 const std::string & connectionNameInstancePart) const
     {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
+        boost::lock_guard<boost::mutex> lck(m_lock);
 
-        ThreadControllersTable::const_iterator findIt = m_threadControllersTable.find(ACE_Thread::self());
+        ThreadControllersTable::const_iterator findIt = m_threadControllersTable.find(boost::this_thread::get_id());
         if (findIt != m_threadControllersTable.end()) //if it was not found we will go into the bit below
         {
             for (ControllerInfoList::const_iterator it = findIt->second.begin();
@@ -294,9 +285,9 @@ namespace Internal
     void
     ControllerTable::UnsetThread(const long ctrl, const bool checkThread)
     {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
+        boost::lock_guard<boost::mutex> lck(m_lock);
 
-        ThreadControllersTable::iterator findIt = m_threadControllersTable.find(ACE_Thread::self());
+        ThreadControllersTable::iterator findIt = m_threadControllersTable.find(boost::this_thread::get_id());
         if (findIt != m_threadControllersTable.end())
         {
             for (ControllerInfoList::iterator it = findIt->second.begin();
@@ -344,7 +335,7 @@ namespace Internal
                     if (ctrl == it2->m_ctrl)
                     {
                         ostr << "The thread id that you called from was "
-                             << ACE_Thread::self()
+                             << boost::this_thread::get_id()
                              << " but DOSE expected you to call it from "
                              << it->first
                              <<std::endl;

@@ -33,30 +33,6 @@
 #include <boost/bind.hpp>
 #include <string.h>
 
-
-//Added this as a workaround for #695
-//It causes (on linux only) ACE_Service_Config::close() to be called
-//if the ACE_Service_Config singleton is NOT opened (yes, that's
-//right, we close it if it is closed!)
-#if defined(linux) || defined(__linux) || defined(__linux__)
-
-#include <ace/Service_Config.h>
-
-namespace
-{
-    bool initialize()
-    {
-        if (!ACE_Service_Config::instance()->is_opened())
-        {
-            ACE_Service_Config::close();
-        }
-        return true;
-    }
-
-    static bool inited = initialize();
-}
-#endif
-
 //use this to set the first element of an array
 //will assert on arraylength == 1
 void SetJArray(JNIEnv * env, jbooleanArray array, const bool toValue)
@@ -1196,7 +1172,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetHashedIdMemberInP
                                           _index,
                                           beginningOfUnused);
     SetJArray(env,_beginningOfUnused,beginningOfUnused - blob);
-    assert(*(beginningOfUnused - 1) == 0); //check that we got null terminated correctly
+    assert(_stringLength == 0 || *(beginningOfUnused - 1) == 0); //check that we got null terminated correctly
 }
 
 /*
@@ -1222,7 +1198,8 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetEntityIdMemberInP
                                           _index,
                                           beginningOfUnused);
     SetJArray(env,_beginningOfUnused,beginningOfUnused - blob);
-    assert(*(beginningOfUnused - 1) == 0); //check that we got null terminated correctly
+    
+    assert(_stringLength == 0 || *(beginningOfUnused - 1) == 0); //check that we got null terminated correctly
 }
 
 /*

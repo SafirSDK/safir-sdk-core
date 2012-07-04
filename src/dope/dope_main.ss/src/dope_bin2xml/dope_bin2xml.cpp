@@ -74,16 +74,18 @@ void ParseCommandLine(int argc, char * argv[])
 
     if (vm.count("help"))
     {
-        std::cout << "Converts persistent data in binary format to XML\n\n"
+        std::ostringstream ostr;
+        ostr << options;
+        std::wcout << "Converts persistent data in binary format to XML\n\n"
                      "If no option is given the choice between db or files\n"
                      "is determined by Safir.Dob.PersistenceParameters.Backend.\n\n"
-                  << options << "\n";
+                   << ostr.str().c_str() << std::endl;
         exit(1);
     }
 
     if (vm.count("db") && vm.count("files"))
     {
-        std::cerr << "You can only convert db or files, not both at the same time" << std::endl;
+        std::wcerr << "You can only convert db or files, not both at the same time" << std::endl;
         exit(1);
     }
     else if (vm.count("db"))
@@ -354,6 +356,7 @@ int main(int argc, char * argv[])
     catch (const std::exception & exc)
     {
         std::wcout << "Caught exception: " << exc.what() << std::endl;
+        return 1;
     }
     return 0;
 }

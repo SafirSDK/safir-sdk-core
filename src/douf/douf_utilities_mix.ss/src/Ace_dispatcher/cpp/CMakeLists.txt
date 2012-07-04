@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (douf_utilities)
+project(douf_utilities NONE)
 
 INCLUDE_DIRECTORIES(.)
 

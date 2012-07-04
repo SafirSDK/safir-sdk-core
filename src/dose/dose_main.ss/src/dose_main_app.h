@@ -37,12 +37,24 @@
 #include "dose_main_response_handler.h"
 #include "dose_main_request_handler.h"
 #include "dose_main_end_states_handler.h"
+#include "dose_main_connection_killer.h"
+#include "dose_main_signal_handler.h"
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Utilities/ProcessMonitor.h>
-#include <ace/Event_Handler.h>
+#include <boost/asio.hpp>
 
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244)
+#endif
 
+#include <boost/thread.hpp>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 namespace Safir
 {
@@ -51,7 +63,6 @@ namespace Dob
 namespace Internal
 {
     class DoseApp:
-        public ACE_Event_Handler,
         public Connections::ConnectionConsumer,
         public Safir::Dob::Dispatcher,
         private boost::noncopyable
@@ -64,27 +75,20 @@ namespace Internal
         /**
          * Start the main loop of dose_main
          */
-        int Run();
-
-        /** Handle atexit call.
-        *
-        * Called on atexit from the runtime. Indicates that dose_main is exiting.
-        * Will send stop orders to all connections.
-        */
-        //       void HandleAtExit();
+        void Run();
 
     private:
         //Handler for dispatching own connection
-        virtual int handle_input(ACE_HANDLE);
+        void DispatchOwnConnection();
 
         //Handler for all other events in dose_main
-        virtual int handle_exception(ACE_HANDLE);
+        void HandleEvents();
         AtomicUint32 m_connectEvent;
         AtomicUint32 m_connectionOutEvent;
         AtomicUint32 m_nodeStatusChangedEvent;
 
         
-        static ACE_THR_FUNC_RETURN ConnectionThread(void *);
+        void ConnectionThread();
 
         void OnDoDispatch();
 
@@ -94,7 +98,7 @@ namespace Internal
         
         void HandleDisconnect(const ConnectionPtr & connection);
 
-        bool AllocateStatic();
+        void AllocateStatic();
 
         void HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections);
 
@@ -115,7 +119,11 @@ namespace Internal
                                       int & recursionLevel);
 
 
-        static ACE_THR_FUNC_RETURN MemoryMonitorThread(void *);
+        static void MemoryMonitorThread();
+
+        boost::asio::io_service m_ioService;
+        SignalHandler m_signalHandler;
+        const bool m_timerHandlerInitiated;
 
         EndStatesHandler m_endStates;
 
@@ -151,9 +159,16 @@ namespace Internal
         // For monitoring processes
         Safir::Utilities::ProcessMonitor m_processMonitor;
 
-        AtomicUint32 m_handle_exception_notified;
-        AtomicUint32 m_handle_input_notified;
+        AtomicUint32 m_HandleEvents_notified;
+        AtomicUint32 m_DispatchOwnConnection_notified;
 
+        boost::thread m_connectionThread;
+        boost::thread m_memoryMonitorThread;
+
+        //this class should be declared last, so that when the app 
+        //is destroyed all connections will be marked as dead and stop
+        //orders sent before any more destruction is done.
+        ConnectionKiller m_connectionKiller;
     };
 
 }

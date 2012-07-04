@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-PROJECT (dose_memory_stats)
+project(dose_memory_stats CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
@@ -7,10 +7,12 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(dose_memory_stats ${sources})
 
-TARGET_LINK_LIBRARIES(dose_memory_stats ${COMMON_LIBRARIES} ${ACE_LIBRARY})
+FIND_PACKAGE(Boost COMPONENTS system thread)
+
+TARGET_LINK_LIBRARIES(dose_memory_stats ${COMMON_LIBRARIES})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(dose_memory_stats dose_internal dots_cpp)
+    TARGET_LINK_LIBRARIES(dose_memory_stats dose_internal dots_cpp ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS dose_memory_stats

@@ -24,8 +24,8 @@
 
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Dob/Typesystem/Defs.h>
+#include <boost/thread.hpp>
 #include <iostream>
-#include <ace/OS_NS_unistd.h>
 
 using namespace Safir::Dob::Internal;
 using namespace Safir::Dob::Typesystem;
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
         {
             break;
         }
-        ACE_OS::sleep(3);
+        boost::this_thread::sleep(boost::posix_time::seconds(3));
     }
 
     return 0;

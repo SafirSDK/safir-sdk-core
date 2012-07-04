@@ -1,15 +1,16 @@
 with "externally_built_library";
+with "dose_ada";
 
-project swre_library is
+project Swre_Library is
 
    for Source_Dirs use ();
 
-   for library_dir use Externally_Built_Library'library_dir;
+   for Library_Dir use Externally_Built_Library'Library_Dir;
 
-   for library_name use "swre_library";
+   for Library_Name use "swre_library";
 
-   for Library_kind  use "dynamic";
+   for Library_Kind  use "dynamic";
 
    for Externally_Built use "true";
 
-end swre_library;
+end Swre_Library;

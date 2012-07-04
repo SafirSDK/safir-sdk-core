@@ -21,7 +21,7 @@
 --  along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 --
 -------------------------------------------------------------------------------
-with Safir.Dob.Typesystem.Object_Factory;
+with Safir.Dob.Typesystem.Object.Factory;
 with Safir.Dob.Typesystem.Blob_Operations;
 with Safir.Dob.Interf;
 with Safir.Dob.Blob_References;
@@ -55,7 +55,7 @@ package body Safir.Dob.Message_Proxy_Impls is
                          return Safir.Dob.Message.Smart_Pointer'Class is
    begin
       return Safir.Dob.Message.Smart_Pointer'Class
-        (Safir.Dob.Typesystem.Object_Factory.Create_Object (Self.Message_Blob));
+        (Safir.Dob.Typesystem.Object.Factory.Create_Object (Self.Message_Blob));
    end Get_Message;
 
    function Get_Sender_Connection_Info (Self : in Message_Proxy_Impl) return
@@ -77,7 +77,7 @@ package body Safir.Dob.Message_Proxy_Impls is
 
       begin
          Connection_Info := Safir.Dob.Connection_Info.Smart_Pointer
-           (Safir.Dob.Typesystem.Object_Factory.Create_Object (Blob));
+           (Safir.Dob.Typesystem.Object.Factory.Create_Object (Blob));
          Blob_Deleter (Blob);
          return Connection_Info;
       exception

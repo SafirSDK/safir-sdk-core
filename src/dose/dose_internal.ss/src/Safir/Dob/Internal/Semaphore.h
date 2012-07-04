@@ -27,17 +27,11 @@
 
 #if defined (_WIN32)
 
-#ifdef _MSC_VER
-  #pragma warning(push)
-  #pragma warning(disable: 4267)
-#endif
-
-#  define DOSE_USE_ACE_PROCESS_SEMAPHORE_FOR_SIGNALS
-#  include <ace/Process_Semaphore.h>
-
-#ifdef _MSC_VER
-  #pragma warning(pop)
-#endif
+#  define DOSE_SEMAPHORE_WIN32
+//We take the boost.interprocess approach and define/import what we need from windows.h
+//instead of including it and letting it taint the world with its define and other
+//nastyness
+// So there are a bunch of definitions below.
 
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 
@@ -78,8 +72,8 @@ namespace Internal
         void post();
 
     private:
-#ifdef DOSE_USE_ACE_PROCESS_SEMAPHORE_FOR_SIGNALS
-        ACE_Process_Semaphore m_semaphore;
+#ifdef DOSE_SEMAPHORE_WIN32
+        void* m_semaphoreHandle;
 #else
         boost::interprocess::named_semaphore m_semaphore;
         const std::string m_name;
@@ -87,17 +81,38 @@ namespace Internal
     };
 
 
-#ifdef DOSE_USE_ACE_PROCESS_SEMAPHORE_FOR_SIGNALS
+#ifdef DOSE_SEMAPHORE_WIN32
+
+    namespace Win32 
+    {
+        extern "C" __declspec(dllimport) void * __stdcall CreateSemaphoreA(void*, long, long, const char *);
+        extern "C" __declspec(dllimport) int __stdcall ReleaseSemaphore(void *, long, long *);
+        extern "C" __declspec(dllimport) unsigned long __stdcall WaitForSingleObject(void *, unsigned long);
+        extern "C" __declspec(dllimport) int __stdcall CloseHandle(void*);
+        extern "C" __declspec(dllimport) unsigned long __stdcall GetLastError();
+
+        static const unsigned long infinite_time        = 0xFFFFFFFF;
+        static const unsigned long wait_object_0        = 0;
+        static const unsigned long wait_timeout         = 258L;
+    }
 
     inline NamedSemaphore::NamedSemaphore(const std::string& name):
-        m_semaphore(0, name.c_str())
+        m_semaphoreHandle(NULL)
     {
-
+        m_semaphoreHandle = Win32::CreateSemaphoreA(NULL,0,0x7fffffff,name.c_str());
+        if (m_semaphoreHandle == NULL) 
+        {
+            throw boost::interprocess::interprocess_exception(Win32::GetLastError());
+        }
     }
 
     inline NamedSemaphore::~NamedSemaphore()
     {
-
+        if (m_semaphoreHandle != NULL) 
+        {
+            Win32::CloseHandle(m_semaphoreHandle);
+            m_semaphoreHandle = NULL;
+        }
     }
 
     inline void NamedSemaphore::remove()
@@ -107,17 +122,37 @@ namespace Internal
 
     inline void NamedSemaphore::wait()
     {
-        m_semaphore.acquire();
+        const long res = Win32::WaitForSingleObject(m_semaphoreHandle, Win32::infinite_time);
+        if (res != Win32::wait_object_0)
+        {
+            throw boost::interprocess::interprocess_exception(Win32::GetLastError());
+        }
     }
 
     inline bool NamedSemaphore::try_wait()
     {
-        return 0 == m_semaphore.tryacquire();
+        const unsigned long res = Win32::WaitForSingleObject(m_semaphoreHandle, 0);
+        if (res == Win32::wait_object_0)
+        {
+            return true;
+        }
+        else if (res == Win32::wait_timeout)
+        {
+            return false;
+        }
+        else
+        {
+            throw boost::interprocess::interprocess_exception(Win32::GetLastError());
+        }
     }
 
     inline void NamedSemaphore::post()
     {
-        m_semaphore.release();
+        const int res = Win32::ReleaseSemaphore(m_semaphoreHandle,1,NULL);
+        if (!res) 
+        {
+            throw boost::interprocess::interprocess_exception(Win32::GetLastError());
+        }
     }
 
 #else
@@ -193,6 +228,7 @@ namespace Internal
 
     inline void Semaphore::wait()
     {
+#if defined(linux) || defined(__linux) || defined(__linux__)
         // On Linux, even in the absence of signal handlers, certain blocking interfaces
         // can fail with the error EINTR. This includes sem_wait wich is what
         // boost::interprocess::interprocess_semaphore will use. I (STAWI) don't know why this
@@ -214,7 +250,10 @@ namespace Internal
 
             }
         }  
-    }
+#else
+        m_semaphore.wait();
+#endif
+     }
 }
 }
 }

@@ -26,8 +26,8 @@
 
 #include <iostream>
 #include <vector>
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 
 #include "dots_depends_defs.h"
 #include "dots_tag_parser.h"
@@ -169,7 +169,11 @@ namespace DotsDepends
             }
         }
 
-        fgets( line, buff_size, stream );
+        if (!fgets( line, buff_size, stream ))
+        {
+            std::wcout << "Parse error: " << filename.string().c_str() << std::endl;
+            return;            
+        }
         if (line[0] == ' ')
         {
             token = strtok(line, delimiter);

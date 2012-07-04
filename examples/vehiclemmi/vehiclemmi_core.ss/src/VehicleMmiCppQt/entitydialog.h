@@ -26,7 +26,18 @@
 
 #include "ui_entitydialog.h"
 #include "entitytablehandler.h"
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127)
+#endif
+
 #include <QDialog>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <Safir/Dob/Connection.h>
 
 namespace VehicleMmiCppQt

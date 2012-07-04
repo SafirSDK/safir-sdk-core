@@ -156,7 +156,7 @@ namespace Internal
         /**
          * Get all connections from a pid.
          */
-        void GetConnections(const pid_t  pid, std::vector<ConnectionPtr>& connections) const;
+        void GetConnections(const pid_t pid, std::vector<ConnectionPtr>& connections) const;
 
         /**
          * Get the name of a connection.
@@ -193,6 +193,11 @@ namespace Internal
         // A reader lock will be taken during the callback.
         void ForSpecificConnection(const ConnectionId& connectionId,
                                    const boost::function<void(const ConnectionPtr & connection)> & connectionFunc) const;
+
+        //send the ConnectOrOut signal without setting any of the event flags.
+        //This is ONLY useful for dose_main when it wants to stop the thread that
+        //listens to this event.
+        void GenerateSpuriousConnectOrOutSignal() const;
 
     private:
         void AddToSignalHandling(Connection * const connection);
@@ -249,6 +254,21 @@ namespace Internal
 
         bool m_connectMinusOneSemSignalled;
         bool m_connectSemSignalled;
+
+        /**
+         * This class is here to ensure that only the Instance method can get at the 
+         * instance, so as to be sure that boost call_once is used correctly.
+         * Also makes it easier to grep for singletons in the code, if all 
+         * singletons use the same construction and helper-name.
+         */
+        struct SingletonHelper
+        {
+        private:
+            friend Connections& Connections::Instance();
+
+            static Connections& Instance();
+            static boost::once_flag m_onceFlag;
+        };
     };
 }
 }

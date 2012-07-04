@@ -60,7 +60,7 @@ namespace Internal
                    const Typesystem::Int32 counter,
                    const NodeNumber node,
                    const ContextId contextId,
-                   const int pid);
+                   const pid_t pid);
 
         ~Connection();
 
@@ -71,7 +71,7 @@ namespace Internal
         Typesystem::Int32 Counter() const {return m_counter;}
 
         const ConnectionId & Id() const {return m_id;}
-        const int Pid() const {return m_pid;}
+        const pid_t Pid() const {return m_pid;}
 
         bool IsLocal() const;
 
@@ -216,7 +216,7 @@ namespace Internal
         ShmString m_nameWithCounter;
         const Typesystem::Int32 m_counter;
         ConnectionId m_id;
-        const int m_pid;
+        const pid_t m_pid;
 
         //a vector with ConnectionQueueId as index.
         typedef Containers<size_t>::vector QueueCapacities;

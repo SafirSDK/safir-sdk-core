@@ -26,6 +26,7 @@
 -- Dob Typesystem Containers.
 --
 package Safir.Dob.Typesystem.Container_Base is
+   pragma Preelaborate (Safir.Dob.Typesystem.Container_Base);
 
    type Container_Base_Type is interface;
 

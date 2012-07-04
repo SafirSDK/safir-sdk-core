@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (lluf_utils)
+PROJECT (lluf_utils CXX)
 
 INCLUDE_DIRECTORIES(.)
 
@@ -11,9 +11,16 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(lluf_utils SHARED ${sources} ${headers})
 
-FIND_PACKAGE(Boost COMPONENTS filesystem date_time)
+if (Boost_VERSION LESS 105100) #less than 1.41 then we need program options
+  FIND_PACKAGE(Boost COMPONENTS filesystem date_time system thread program_options)
+else()
+  FIND_PACKAGE(Boost COMPONENTS filesystem date_time system thread)
+endif()
+TARGET_LINK_LIBRARIES(lluf_utils ${COMMON_LIBRARIES})
 
-TARGET_LINK_LIBRARIES(lluf_utils ${ACE_LIBRARY} ${Boost_LIBRARIES} ${COMMON_LIBRARIES})
+if (NOT MSVC)
+  TARGET_LINK_LIBRARIES(lluf_utils ${Boost_LIBRARIES} dl)
+endif()
 
 ADD_DEFINITIONS(-DLLUF_UTILS_EXPORTS)
 

@@ -25,16 +25,16 @@
 #ifndef __LIBRARY_H__
 #define __LIBRARY_H__
 
-#include <boost/noncopyable.hpp>
-#include <Safir/Dob/Typesystem/Defs.h>
-#include <Safir/Dob/Connection.h>
 #include "ReportCreator.h"
-#include <list>
+#include <Safir/Dob/Connection.h>
+#include <Safir/Dob/Typesystem/Defs.h>
+#include <Safir/Dob/Internal/Atomic.h>
+#include <boost/asio.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/static_assert.hpp>
-#include <ace/Mutex.h>
-#include <ace/Auto_Event.h>
-#include <ace/Recursive_Thread_Mutex.h>
-#include <ace/Reactor.h>
+#include <boost/scoped_ptr.hpp>
+#include <boost/thread.hpp>
+#include <list>
 #include <queue>
 
 namespace Safir
@@ -45,7 +45,6 @@ namespace Internal
 {
 
     class Library:
-        public ACE_Event_Handler,
         public Safir::Dob::MessageSubscriber,
         public Safir::Dob::MessageSender,
         private boost::noncopyable
@@ -75,8 +74,6 @@ namespace Internal
         void TraceSync();
         void TraceFlush();
 
-        bool TrySend(ReportPtr report);
-
         void SendFatalErrorReport(const std::wstring & errorCode,
                                   const std::wstring & location,
                                   const std::wstring & text);
@@ -97,10 +94,13 @@ namespace Internal
         void SendProgramInfoReport(const std::wstring & text);
     private:
         Library();
-        ~Library() {}
+        ~Library();
 
         static void AtExitFunc();
         static void SignalFunc(const int signal);
+        
+        //install signal and atexit functions
+        void Install();
   
         //This is called when the thread is exiting (NOT atexit)
         void HandleExit();
@@ -108,17 +108,11 @@ namespace Internal
         void GetEnv();
 
         void StartThread();
-        static ACE_THR_FUNC_RETURN ThreadFunc(void * param);
         void Run();
 
-        //READ_MASK means Flush
-        virtual int handle_input (ACE_HANDLE);
-
-        //WRITE_MASK means send queued reports!
-        virtual int handle_output(ACE_HANDLE);
-
-        //Time to flush the buffer
-        virtual int handle_timeout(const ACE_Time_Value & current_time, const void * act);
+        void HandleTimeout(const boost::system::error_code& error, 
+                           const boost::shared_ptr<boost::asio::deadline_timer>& theTimer);
+        void SendQueuedReports();
 
         void StartBackdoor();
         virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy);
@@ -145,51 +139,80 @@ namespace Internal
 
         void SendReports(); //only callable from the internal thread
 
+        bool TrySend(ReportPtr report);
+        class TryMessageSender:
+            public Safir::Dob::MessageSender
+        {
+            virtual void OnNotMessageOverflow(){};
+        };
+        TryMessageSender m_tryMessageSender;
+        
         typedef std::list<PrefixState> Prefixes;
         typedef std::vector<std::wstring> Arguments;
 
         std::wstring m_programName;
         Arguments m_arguments;
 
-        ACE_Reactor m_reactor;
+        boost::asio::io_service m_ioService;
 
         //contains all the prefixes. Pointers into this structure are returned as handles
         //the language bindings. NEVER remove anything from this list!
         Prefixes m_prefixes;
-        ACE_Recursive_Thread_Mutex m_prefixSearchLock; //lock for anyone that loops through the prefixes or adds elements to it.
+        boost::recursive_mutex m_prefixSearchLock; //lock for anyone that loops through the prefixes or adds elements to it.
 
         //a secondary connection for the backdoor handling. This will be attached to
         // the own thread connection.
         Safir::Dob::SecondaryConnection m_backdoorConnection;
         volatile bool m_isBackdoorStarted;
 
-
         //trace buffer and the associated lock
-        ACE_Thread_Mutex m_traceBufferLock;
+        boost::mutex m_traceBufferLock;
         std::wstring m_traceBuffer;
         bool m_prefixPending;
 
         //reports stuff
         ReportCreator m_reportCreator;
-        ACE_Mutex m_reportQueueLock;
+        boost::mutex m_reportQueueLock;
         std::deque<ReportPtr> m_reportQueue;
 
         //thread stuff
-        ACE_Mutex m_threadStartingLock; //make sure that only one thread starts the logger thread...
-        enum ThreadStatus {NotStarted, Started, Stopped};
-        ThreadStatus m_threadStatus;
-
-        ACE_thread_t m_threadId;
-        ACE_hthread_t m_threadHandle;
+        boost::mutex m_threadStartingLock; //make sure that only one thread starts the logger thread...
         boost::shared_ptr<Safir::Dob::Connection> m_connection;
-        ACE_Auto_Event m_threadStartingEvent;
 
-        volatile int m_writeNotified;
-        volatile int m_readNotified;
+        boost::thread m_thread;
+        boost::thread::id m_threadId;
 
-        //Singleton stuff
-        static ACE_Mutex m_instantiationLock;
-        static Library * volatile m_instance;
+        Safir::Dob::Internal::AtomicUint32 m_sendReportsPending;
+        Safir::Dob::Internal::AtomicUint32 m_flushPending;
+
+        /**
+         * This class is here to ensure that only the Instance method can get at the 
+         * instance, so as to be sure that boost call_once is used correctly.
+         * Also makes it easier to grep for singletons in the code, if all 
+         * singletons use the same construction and helper-name.
+         */
+        struct SingletonHelper
+        {
+        private:
+            friend Library& Library::Instance();
+
+            static void Instantiate();
+            static boost::scoped_ptr<Library> m_instance;
+            static boost::once_flag m_onceFlag;
+        };
+
+        //vs2008 mistakenly gives a warning about not allowing friends to be inline. But that is spurious in this case.        
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4396)
+#endif
+        //lets boost::checked_delete access the destructor
+        friend void boost::checked_delete<>(Library*x);
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
     };
 
 }

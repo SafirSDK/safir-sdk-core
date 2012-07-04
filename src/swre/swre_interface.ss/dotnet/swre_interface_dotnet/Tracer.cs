@@ -38,13 +38,15 @@ namespace Safir.Application
         public Tracer(string prefix)
             : base(new TraceStream(prefix),new System.Text.UTF8Encoding(false)) //Omit BOM
         {
-            AutoFlush = true;
             byte success;
             Library.SwreC_SetProgramName(System.Diagnostics.Process.GetCurrentProcess().ProcessName, out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
                 Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
             }
+
+            //set autoflush last or things will get strange
+            AutoFlush = true;
         }
      
         /// <summary>
@@ -599,9 +601,9 @@ namespace Safir.Application
         public override void Write(byte[] buffer, int offset, int count)
         {
             byte success;
-            byte[] str = new byte[count];
+            byte[] str = new byte[count + 1];
             Array.Copy(buffer, offset, str, 0, count);
-            //buffer.CopyTo(str, offset);
+            str[count] = 0; //add null termination
             Library.SwreC_TraceAppendStringPrefix(m_prefixId, str, out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (dose_internal)
+project(dose_internal CXX)
 
 INCLUDE_DIRECTORIES(.)
 
@@ -11,13 +11,12 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dose_internal SHARED ${sources} ${headers})
 
-FIND_PACKAGE(Boost COMPONENTS regex)
-TARGET_LINK_LIBRARIES(dose_internal ${ACE_LIBRARY} ${Boost_LIBRARIES})
-
 ADD_DEFINITIONS(-DDOSE_INT_EXPORTS)
 
+FIND_PACKAGE(Boost COMPONENTS regex)
+
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dose_internal dots_kernel dots_generated-cpp dots_cpp)
+  TARGET_LINK_LIBRARIES(dose_internal dots_generated-Safir-cpp dots_generated-cpp dots_cpp dots_kernel ${Boost_LIBRARIES})
 endif()
 
 INSTALL(DIRECTORY Safir 

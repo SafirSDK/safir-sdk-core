@@ -35,6 +35,7 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 -- meant for blob serialization to use.
 --
 package Safir.Dob.Typesystem.String_Container is
+   pragma Preelaborate (Safir.Dob.Typesystem.String_Container);
 
    type Container is new Container_Base_Type with private;
 

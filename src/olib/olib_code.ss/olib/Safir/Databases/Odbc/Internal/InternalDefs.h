@@ -30,24 +30,27 @@
   #else
     #define OLIB_API __declspec(dllimport)
 
-    #ifdef _DEBUG
-      #pragma comment (lib, "olibd.lib")
-    #else
+    #ifdef NDEBUG
       #pragma comment (lib, "olib.lib")
-    #endif //_DEBUG
+    #else
+      #pragma comment (lib, "olibd.lib")
+    #endif //NDEBUG
   #endif // OLIB_EXPORTS
 #else
   #define OLIB_API
 #endif // _MSC_VER
 
-#include <ace/config.h>             // Needs windows.h
+#if defined _MSC_VER
+    #ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+    #endif
+    #include <windows.h>             // sql.h etc need windows.h
+    #pragma comment(lib, "odbc32.lib")
+#endif // _MSC_VER
 
 #include <sqltypes.h>
 #include <sql.h>
 #include <sqlext.h>
 
-#if defined _MSC_VER
-    #pragma comment(lib, "odbc32.lib")
-#endif // _MSC_VER
 
 #endif // Safir_Databases_Odbc_Internal_Internal_Defs_h

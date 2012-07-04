@@ -43,14 +43,6 @@
 #include <map>
 #include "Postponer.h"
 
-#ifdef SendMessage
-#undef SendMessage
-#endif
-
-#ifdef DispatchMessage
-#undef DispatchMessage
-#endif
-
 namespace Safir
 {
 namespace Dob

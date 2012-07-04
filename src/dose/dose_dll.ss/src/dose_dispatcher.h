@@ -40,10 +40,6 @@
 
 #include "dose_dll_defs.h"
 
-#ifdef DispatchMessage
-#undef DispatchMessage
-#endif
-
 namespace Safir
 {
 namespace Dob

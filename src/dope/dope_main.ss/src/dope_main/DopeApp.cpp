@@ -31,6 +31,7 @@
 #include <Safir/Dob/NotOpenException.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/PersistentDataStatus.h>
+#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -39,7 +40,6 @@
 #endif
 
 #include <boost/lexical_cast.hpp>
-#include <ace/Thread.h>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -56,12 +56,11 @@ const Safir::Dob::Typesystem::Int32 PERSISTANCE_CONTEXT = -1000000;
 
 //-------------------------------------------------------
 DopeApp::DopeApp():
-    m_dispatcher(m_dobConnection),
+    m_dispatcher(m_dobConnection, m_ioService),
     m_instanceId(Safir::Dob::ThisNodeParameters::NodeNumber()),
     m_persistenceStarted(false),
     m_persistenceInitialized(false),
-    m_debug(L"DopeApp"),
-    m_connectionThreadRunning(false)
+    m_debug(L"DopeApp")
 {
     //perform sanity check!
     if (!Safir::Dob::PersistenceParameters::SystemHasPersistence())
@@ -71,7 +70,7 @@ DopeApp::DopeApp():
             (L"Bad Configuration",L"DopeApp::DopeApp",
              L"DOPE was started even though Safir.Dob.PersistenceParameters.SystemHasPersistence is set to false. Please check your configuration");
         Safir::SwReports::Stop();
-        exit(-1);
+        exit(1);
     }
 
     try
@@ -86,7 +85,7 @@ DopeApp::DopeApp():
             (L"Failed to connect to DOB.",L"DopeApp::DopeApp",
             L"Maybe DOPE is already started on this node.");
         Safir::SwReports::Stop();
-        exit(-1);
+        exit(1);
     }
 
     m_keeper.Start(*this);
@@ -115,7 +114,7 @@ DopeApp::~DopeApp()
 void DopeApp::OnStopOrder()
 {
     m_debug << "Got Stop order, will terminate"<< std::endl;
-    ACE_Reactor::instance()->end_reactor_event_loop();
+    m_ioService.stop();
 }
 
 //-------------------------------------------------------
@@ -219,7 +218,7 @@ void DopeApp::Start(bool restore)
         case Safir::Dob::PersistenceBackend::File:
             {
                 m_debug << "Using file persistence" << std::endl;
-                m_persistenceHandler.reset(new FilePersistor());
+                m_persistenceHandler.reset(new FilePersistor(m_ioService));
             }
             break;
 
@@ -227,7 +226,7 @@ void DopeApp::Start(bool restore)
             {
                 m_debug << "Using database persistence" << std::endl;
 #ifndef NO_DATABASE_SUPPORT
-                m_persistenceHandler.reset(new OdbcPersistor());
+                m_persistenceHandler.reset(new OdbcPersistor(m_ioService));
 #endif
             }
             break;
@@ -247,11 +246,10 @@ void DopeApp::StartUp(bool restore)
 {
     Start(restore);
 
-    if (!m_connectionThreadRunning)
+    if (m_thread != boost::thread())
     {
-        m_connectionThreadRunning = true;
         // wait for ok to connect on context 0
-        ACE_Thread::spawn(&DopeApp::ConnectionThread,this);
+        m_thread = boost::thread(boost::bind(&DopeApp::ConnectionThread, this));
     }
 }
 
@@ -276,7 +274,8 @@ DopeApp::GetHelpText()
 void
 DopeApp::Run()
 {
-    ACE_Reactor::instance()->run_reactor_event_loop();
+    boost::asio::io_service::work keepRunning(m_ioService);
+    m_ioService.run();
 }
 //-------------------------------------------------------
 /*
@@ -291,16 +290,15 @@ class DummyDispatcher:
 /*
  Just wait for ok to connect on context 0
 */
-ACE_THR_FUNC_RETURN DopeApp::ConnectionThread(void * _this)
+void DopeApp::ConnectionThread()
 {
-    DopeApp * This = static_cast<DopeApp *>(_this);
     DummyDispatcher dispatcher;
     Safir::Dob::Connection tmpConnection;
 
     try
     {
         tmpConnection.Open(L"DOPE_TMP",L"0",0,NULL,&dispatcher);
-        ACE_Reactor::instance()->notify(This,ACE_Event_Handler::READ_MASK);
+        m_ioService.post(boost::bind(&DopeApp::SignalOkToConnect,this));
     }
     catch (Safir::Dob::NotOpenException e)
     {
@@ -325,11 +323,9 @@ ACE_THR_FUNC_RETURN DopeApp::ConnectionThread(void * _this)
             L"I can't provide any more information, sorry.");
         Safir::SwReports::Stop();
     }
-
-    return NULL;
 }
 
-int DopeApp::handle_input(ACE_HANDLE)
+void DopeApp::SignalOkToConnect()
 {
     // use a different handler to register PersistentDataStatus to get the correct registration time.
     Safir::Dob::Typesystem::HandlerId entityHandler(L"DOPE_ENTITY_HANDLER"); 
@@ -343,7 +339,6 @@ int DopeApp::handle_input(ACE_HANDLE)
     status->State().SetVal( Safir::Dob::PersistentDataState::Started);
     m_dobConnection.SetAll(status, m_instanceId, entityHandler);
 
-    m_connectionThreadRunning = false;
-
-    return 0;
+    m_thread.join();
+    m_thread = boost::thread();
 }

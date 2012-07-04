@@ -22,25 +22,21 @@
 *
 ******************************************************************************/
 #include "ConsumerTable.h"
-#include <ace/Guard_T.h>
 #include <iostream>
+#include <boost/bind.hpp>
 
-ConsumerTable * volatile ConsumerTable::m_instance = NULL;
+boost::once_flag ConsumerTable::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
-ACE_Thread_Mutex ConsumerTable::m_instantiationLock;
+ConsumerTable & ConsumerTable::SingletonHelper::Instance()
+{
+    static ConsumerTable instance;
+    return instance;
+}
 
 ConsumerTable & ConsumerTable::Instance()
 {
-    if (m_instance == NULL)
-    {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_instantiationLock);
-
-        if (m_instance == NULL)
-        {
-            m_instance = new ConsumerTable();
-        }
-    }
-    return *m_instance;
+    boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+    return SingletonHelper::Instance();
 }
 
 ConsumerTable::ConsumerTable()
@@ -56,7 +52,7 @@ ConsumerTable::~ConsumerTable()
 
 jobject ConsumerTable::AddReference(JNIEnv * env, const jobject consumer)
 {
-    ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
+    boost::lock_guard<boost::mutex> lck(m_lock);
     for (Table::iterator it = m_table.begin();
          it != m_table.end(); ++it)
     {
@@ -77,7 +73,7 @@ jobject ConsumerTable::AddReference(JNIEnv * env, const jobject consumer)
 
 jobject ConsumerTable::GetReference(JNIEnv * env, const jobject consumer)
 {
-    ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
+    boost::lock_guard<boost::mutex> lck(m_lock);
     for (Table::iterator it = m_table.begin();
          it != m_table.end(); ++it)
     {
@@ -99,7 +95,7 @@ void ConsumerTable::DropReference(JNIEnv * env, const jobject doseConsumer, int 
     //i.e. MessageSenders and Requestors, and they would have been put on "fairly recently"
     //when we're removing them.
 
-    ACE_Guard<ACE_Thread_Mutex> lck(m_lock);
+    boost::lock_guard<boost::mutex> lck(m_lock);
     for (Table::reverse_iterator it = m_table.rbegin();
          it != m_table.rend(); ++it)
     {

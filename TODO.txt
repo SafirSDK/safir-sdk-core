@@ -1,0 +1,20 @@
+Investigate swre_logger crash in stop_orders_at_exit #297
+
+remove ace from stresstests
+       testa errorreporter
+exempelapparna bör kunna köra Boost.Asio också!
+skriv klart byggskriptet (output options)
+write ada douf test
+complete swre tests
+
+merge sdk 4.3.9
+
+
+write olib test?!
+write dope db test
+
+fixa OLIB UnixODBC på ngt sätt! StringConversion.h är helt kokobäng och kopierar i onödan i 2b - 2b fallet.
+dots_cpp array container proxies!?
+
+make dose_com possible to stop nicely
+använd wide-interfacen för att undvika MAX_PATH problem på windows

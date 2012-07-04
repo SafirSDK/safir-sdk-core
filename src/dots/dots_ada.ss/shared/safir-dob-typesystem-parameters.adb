@@ -26,7 +26,7 @@ with Ada.Unchecked_Conversion;
 with Interfaces.C.Strings;
 --  with Safir.Dob.Typesystem.Operations; use Safir.Dob.Typesystem.Operations;
 with Safir.Dob.Typesystem.Utilities; use Safir.Dob.Typesystem.Utilities;
-with Safir.Dob.Typesystem.Object_Factory;
+with Safir.Dob.Typesystem.Object.Factory;
 with Safir.Dob.Typesystem.Kernel;
 
 pragma Warnings ("D");  -- turn off warnings for implicit dereference
@@ -122,8 +122,7 @@ package body Safir.Dob.Typesystem.Parameters is
      (Type_Id   : in Safir.Dob.Typesystem.Type_Id;
       Parameter : Safir.Dob.Typesystem.Parameter_Index) return Safir.Dob.Typesystem.Int_32 is
    begin
-      return Safir.Dob.Typesystem.Int_32
-        (Safir.Dob.Typesystem.Kernel.Get_Parameter_Array_Size (Type_Id, Parameter));
+      return Safir.Dob.Typesystem.Kernel.Get_Parameter_Array_Size (Type_Id, Parameter);
    end Get_Array_Size;
 
    -----------------
@@ -347,7 +346,7 @@ package body Safir.Dob.Typesystem.Parameters is
 
       declare
          Object_Ptr : constant Safir.Dob.Typesystem.Object.Smart_Pointer'Class :=
-                        Safir.Dob.Typesystem.Object_Factory.Create_Object (L_Value);
+                        Safir.Dob.Typesystem.Object.Factory.Create_Object (L_Value);
       begin
          Object_Ptr.Ref.Set_Changed (False);
          return Object_Ptr;

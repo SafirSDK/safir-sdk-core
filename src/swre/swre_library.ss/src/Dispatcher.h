@@ -24,46 +24,61 @@
 #ifndef __SWRE_DISPATCHER_H__
 #define __SWRE_DISPATCHER_H__
 
-#include <ace/Reactor.h>
 #include <Safir/Dob/Connection.h>
-#include <iostream>
+#include <Safir/Dob/Internal/Atomic.h>
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+#include <boost/noncopyable.hpp>
 
-class Dispatcher:
-    public Safir::Dob::Dispatcher,
-    public ACE_Event_Handler
+/**
+ * This is a copy of the AsioDispatcher from douf, which we can't use since
+ * douf depends on us, rather than the other way around.
+ */
+class Dispatcher
+    : public Safir::Dob::Dispatcher
+    , private boost::noncopyable
 {
 public:
-    Dispatcher(ACE_Reactor & reactor,
-               Safir::Dob::Connection & connection):
-        ACE_Event_Handler(&reactor),
-        m_connection(&connection),
-        m_isNotified(0)
-    {
-    }
+    /**
+     * Constructor.
+     *
+     * @param [in] connection - The dob connection.
+     * @param [in] ioService  - The ioService that runs the main loop
+     */
+    Dispatcher(const Safir::Dob::Connection & connection,
+                   boost::asio::io_service& ioService)
+        : m_connection(connection)
+        , m_ioService(ioService)
+        , m_isNotified(0) {}
 
-    virtual ~Dispatcher()
-    {
+private:
 
-    }
-
-    virtual int handle_input (ACE_HANDLE)
+    /**
+     * Perform dispatch on the connection.
+     */
+    void Dispatch()
     {
         m_isNotified = 0;
-        m_connection->Dispatch();
-        return 0; //means success
+        m_connection.Dispatch();
     }
 
+    /**
+     * OnDoDispatch notifies the dob connection thread that it's time to perform a dispatch.
+     * Overrides Safir::Dob::Dispatcher.
+     */
     virtual void OnDoDispatch()
     {
         if (m_isNotified == 0)
         {
             m_isNotified = 1;
-            reactor()->notify(this,ACE_Event_Handler::READ_MASK);
+            m_ioService.post(boost::bind(&Dispatcher::Dispatch,this));
         }
     }
-private:
-    Safir::Dob::Connection * m_connection;
-    volatile int m_isNotified;
+
+
+    const Safir::Dob::Connection&      m_connection;
+    boost::asio::io_service&           m_ioService;
+    Safir::Dob::Internal::AtomicUint32 m_isNotified;
 };
 
 #endif

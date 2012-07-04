@@ -60,6 +60,7 @@ void SwreC_Stop()
     }
 }
 
+#if 0
 void SwreC_TraceAppendString(const char * const /*str*/,
                              bool & /*success*/)
 {
@@ -72,6 +73,7 @@ void SwreC_TraceAppendString(const char * const /*str*/,
     }
     CATCH_LIBRARY_EXCEPTIONS*/
 }
+#endif
 
 void 
 SwreC_TraceAppendStringPrefix(const Safir::Dob::Typesystem::Int64 prefixId,
@@ -87,6 +89,7 @@ SwreC_TraceAppendStringPrefix(const Safir::Dob::Typesystem::Int64 prefixId,
     CATCH_LIBRARY_EXCEPTIONS
 }
 
+#if 0
 void SwreC_TraceAppendChar(const char /*ch*/,
                            bool & /*success*/)
 {/*
@@ -98,6 +101,7 @@ void SwreC_TraceAppendChar(const char /*ch*/,
  }
  CATCH_LIBRARY_EXCEPTIONS*/
 }
+#endif
 
 void 
 SwreC_TraceAppendCharPrefix(const Safir::Dob::Typesystem::Int64 prefixId,

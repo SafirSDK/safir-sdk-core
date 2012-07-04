@@ -26,16 +26,14 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/interprocess/sync/named_semaphore.hpp>
-#include <ace/Guard_T.h>
-#include <stdio.h>
+#include <cstdio>
 #include <iostream>
 namespace Safir
 {
 namespace Utilities
 {
-    StartupSynchronizer::StartupSynchronizer(const std::string& uniqeName,
-                                             Synchronized* const syncronized):
-        m_synchronized(syncronized),
+    StartupSynchronizer::StartupSynchronizer(const std::string& uniqeName):
+        m_synchronized(NULL),
         m_name(uniqeName),
         m_started(false)
     {
@@ -49,7 +47,7 @@ namespace Utilities
 
     void StartupSynchronizer::Stop()
     {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_threadLock);
+        boost::lock_guard<boost::mutex> lck(m_threadLock);
         if (m_started)
         {
             const bool gotLock = m_fileLock->try_lock();
@@ -128,14 +126,14 @@ namespace Utilities
         return filename;
     }
 
-    void StartupSynchronizer::Start()
+    void StartupSynchronizer::Start(Synchronized* const synchronized)
     {
-
-        ACE_Guard<ACE_Thread_Mutex> lck(m_threadLock);
+        boost::lock_guard<boost::mutex> lck(m_threadLock);
         if (m_started)
         {
             return;
         }
+        m_synchronized = synchronized;
 
         const boost::filesystem::path lockfile = GetLockFile(m_name);
         //        std::wcerr << "Using '" << lockfile.string().c_str() << "' as lockfile" << std::endl;
@@ -180,6 +178,7 @@ namespace Utilities
             std::ostringstream ostr;
             ostr << "It appears that Create failed in some other process for '" << m_name << "'." << std::endl;
             ostr << "The exception I got was " << exc.what() << std::endl;
+            std::wcerr << ostr.str().c_str() << std::flush;
             throw StartupSynchronizerException(ostr.str());
         }
 

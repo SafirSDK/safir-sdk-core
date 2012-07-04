@@ -29,10 +29,10 @@
 #define GENERATED_API __declspec(dllexport)
 #else
 #define GENERATED_API __declspec(dllimport)
-#ifdef _DEBUG
-#pragma comment( lib, "dots_generated-cppd.lib" )
-#else
+#ifdef NDEBUG
 #pragma comment( lib, "dots_generated-cpp.lib" )
+#else
+#pragma comment( lib, "dots_generated-cppd.lib" )
 #endif
 #endif
 #endif
@@ -40,34 +40,38 @@
 #define GENERATED_API
 #endif
 
+#include <boost/thread/once.hpp>
+
 namespace Safir
 {
-    namespace Dob
+namespace Dob
+{
+namespace Typesystem
+{
+    class GENERATED_API Dll_Imports
     {
-        namespace Typesystem
-        {
-            class GENERATED_API Dll_Imports
-            {
-
-            public:
-                static bool Init();
-
-            private:
-                Dll_Imports();
-                ~Dll_Imports();
-
-                void LoadAllDlls();
-
-                //disable copying by defining but not implementing copy construction and assignment
-                Dll_Imports (const Dll_Imports &);
-                const Dll_Imports & operator = (const Dll_Imports &);
-
-                //the single instance
-                static Dll_Imports * volatile m_pInstance;
-
-            };
-        }
-    }
+        
+    public:
+        static bool Init();
+        
+    private:
+        Dll_Imports();
+        ~Dll_Imports();
+        
+        void LoadAllDlls();
+        
+        //disable copying by defining but not implementing copy construction and assignment
+        Dll_Imports (const Dll_Imports &);
+        const Dll_Imports & operator = (const Dll_Imports &);
+        
+        static void Create();
+        
+        //the single instance
+        static Dll_Imports * volatile m_pInstance;
+        static boost::once_flag m_onceFlag;
+    };
+}
+}
 }
 
 #endif

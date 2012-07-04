@@ -42,8 +42,8 @@
 const Safir::Dob::Typesystem::Int32 PERSISTANCE_CONTEXT = -1000000;
 
 //-------------------------------------------------------
-PersistenceHandler::PersistenceHandler():
-    m_dispatcher(m_dobConnection),
+PersistenceHandler::PersistenceHandler(boost::asio::io_service& ioService):
+    m_dispatcher(m_dobConnection,ioService),
     m_debug(L"PersistenceHandler"),
     m_started(false)
 {
@@ -91,7 +91,7 @@ void PersistenceHandler::Start(bool restore)
         Safir::SwReports::SendFatalErrorReport
             (L"Failed to connect to DOB.",L"PersistenceHandler::Start",
             L"Maybe DOPE is already started on this node.");
-        exit(-1);
+        exit(1);
     }
 
     if (restore)
@@ -185,7 +185,7 @@ PersistenceHandler::ShouldPersist(const Safir::Dob::Typesystem::TypeId typeId)
 
 //-------------------------------------------------------
 void
-PersistenceHandler::StartSubscriptions(bool subscribeAll)
+PersistenceHandler::StartSubscriptions(const bool subscribeAll)
 {
     Safir::Dob::ConnectionAspectInjector inject(m_dobConnection);
 
@@ -263,8 +263,7 @@ PersistenceHandler::ReportPersistentDataReady()
     m_debug << "Sending PersistentDataReady request" << std::endl;
     Safir::Dob::PersistentDataReadyPtr request = Safir::Dob::PersistentDataReady::Create();
 
-    Safir::Dob::RequestId reqId;
-    reqId = m_dobConnection.ServiceRequest(request,Safir::Dob::Typesystem::HandlerId(), this);
+    m_dobConnection.ServiceRequest(request,Safir::Dob::Typesystem::HandlerId(), this);
 
     //Not handling OverflowException since there is only one request sent from DOPE.
 }

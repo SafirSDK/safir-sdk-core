@@ -3,18 +3,24 @@ with "dots_ada";
 with "dots_generated_ada";
 with "douf_time_library";
 
-project douf_time_ada_library is
+project Douf_Time_Ada_Library is
 
-  For Object_Dir use "obj";
-  For Exec_Dir use ".";
-  For Source_Dirs use ("../shared");
-  For Library_Dir use "lib";
-  For Library_Src_Dir use "interface";
-  For Library_Ali_Dir use "ali";
-  For Library_Name use "douf_time_ada";
-  For Library_Kind use "dynamic";
-  For Library_Interface use ("safir.time.timeprovider");
+  for Object_Dir use "obj";
+  for Exec_Dir use ".";
+  for Source_Dirs use ("../shared");
+  for Library_Dir use "lib";
+  for Library_Src_Dir use "interface";
+  for Library_Ali_Dir use "ali";
+  for Library_Name use "douf_time_ada";
+  for Library_Kind use "dynamic";
+  for Library_Interface use ("safir.time.timeprovider");
 
-  package Compiler renames safir_defaults.Compiler;
-
-end douf_time_ada_library;
+  package Builder is
+     for Default_Switches ("Ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
+  end Builder;
+  
+  package Compiler is
+     for Default_Switches ("Ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
+  end Compiler;
+  
+end Douf_Time_Ada_Library;

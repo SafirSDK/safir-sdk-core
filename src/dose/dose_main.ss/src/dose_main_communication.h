@@ -29,10 +29,9 @@
 #include <Safir/Dob/Internal/DistributionData.h>
 #include <Safir/Dob/Internal/DoseCom_Interface_Classes.h>
 #include <boost/scoped_array.hpp>
-#include <deque>
-#include <queue>
-#include <ace/Thread_Mutex.h>
-#include <ace/Event_Handler.h>
+#include <boost/thread/mutex.hpp>
+#include <boost/asio.hpp>
+
 namespace Safir
 {
 namespace Dob
@@ -41,7 +40,6 @@ namespace Internal
 {
 
     class ExternNodeCommunication:
-        public ACE_Event_Handler,
         public DoseComNotificationHandler,
         private boost::noncopyable
     {
@@ -52,7 +50,7 @@ namespace Internal
         typedef boost::function<void(void)> StartPoolDistributionCallback;
         typedef boost::function<void(const int nodeId)> RequestPoolDistributionCallback;
 
-        ExternNodeCommunication();
+        explicit ExternNodeCommunication(boost::asio::io_service & ioService);
 
         bool Init (const IncomingDataCallback & dataCb,
                    const QueueNotFullCallback & queueNotFullCb,
@@ -88,7 +86,7 @@ namespace Internal
 
         bool ShouldBeDiscarded(const DistributionData & msg);
 
-        virtual int handle_exception(ACE_HANDLE);
+        void HandleEvents();
         void HandleIncomingData(const int startFromPriority);
 
         virtual void NotifyIncomingData(const int priorityChannel);
@@ -107,7 +105,7 @@ namespace Internal
         QualityOfServiceData m_QualityOfServiceData;
 
         boost::scoped_array<AtomicUint32> m_queueIsFull;
-        ACE_Thread_Mutex m_queueIsFullLock;
+        boost::mutex m_queueIsFullLock;
 
         AtomicUint32 m_okToSignalPDComplete;
         AtomicUint32 m_isNotified;
@@ -120,6 +118,8 @@ namespace Internal
         boost::scoped_array<AtomicUint32> m_requestPDEvents; // Request pooldistribution from these nodes.
         AtomicUint32 m_queueNotFullEvent;
         AtomicUint32 m_startPoolDistributionEvent;
+
+        boost::asio::io_service& m_ioService;
     };
 }
 }

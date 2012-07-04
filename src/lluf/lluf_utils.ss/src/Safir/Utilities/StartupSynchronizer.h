@@ -26,7 +26,7 @@
 
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
 
-//disable warnings in boost and ace
+//disable warnings in boost
 #if defined _MSC_VER
   #pragma warning (push)
   #pragma warning (disable : 4267)
@@ -38,7 +38,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/interprocess/sync/file_lock.hpp>
-#include <ace/Thread_Mutex.h>
+#include <boost/thread/mutex.hpp>
 
 //and enable the warnings again
 #if defined _MSC_VER
@@ -62,6 +62,10 @@ namespace Utilities
 
         virtual void Create() = 0;
         virtual void Use() = 0;
+
+        //Note that a call to Destroy is not guaranteed, only a best effort is made to call
+        //this. The last instance could be killed by a signal anyway, so there is no
+        //point in making this a strong guarantee.
         virtual void Destroy() = 0;
     };
 
@@ -87,21 +91,20 @@ namespace Utilities
     public:
         typedef boost::function<void(void)> Callback;
 
-        StartupSynchronizer(const std::string& uniqeName,
-                            Synchronized* const syncronized);
+        explicit StartupSynchronizer(const std::string& uniqueName);
 
-        void Start();
+        void Start(Synchronized* const synchronized);
 
         void Stop();
 
         ~StartupSynchronizer();
     private:
-        Synchronized* const m_synchronized;
+        Synchronized* m_synchronized;
         const std::string m_name;
         bool m_started;
         boost::filesystem::path m_lockfile;
         boost::shared_ptr<boost::interprocess::file_lock> m_fileLock;
-        ACE_Thread_Mutex m_threadLock; //file_locks do not guarantee thread locking, so we need this.
+        boost::mutex m_threadLock; //file_locks do not guarantee thread locking, so we need this.
     };
 
 }

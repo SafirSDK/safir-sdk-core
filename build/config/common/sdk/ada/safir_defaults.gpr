@@ -1,14 +1,20 @@
 --  ===========================================================================
---  ==              Copyright (C) SAAB 2009
+--  ==              Copyright (C) SAAB 2009 - 2012
 --  ===========================================================================
 --
+--  This file is part of Safir SDK Core.
 --
+--  Safir SDK Core is free software: you can redistribute it and/or modify
+--  it under the terms of version 3 of the GNU General Public License as
+--  published by the Free Software Foundation.
 --
+--  Safir SDK Core is distributed in the hope that it will be useful,
+--  but WITHOUT ANY WARRANTY; without even the implied warranty of
+--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+--  GNU General Public License for more details.
 --
---
---
---
---
+--  You should have received a copy of the GNU General Public License
+--  along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 --
 -- ============================================================================
 project Safir_Defaults is
@@ -43,7 +49,7 @@ project Safir_Defaults is
          "-k", -- Keep going after compilation errors
          "-s", -- Recompile if compiler switches have changed
          "-g", -- Enable Debug information
-         "-j" &  External ("NUMBER_OF_PROCESSORS", "1"));
+         "-j" &  External ("NUMBER_OF_PROCESSORS", "2"));
       case Build is
          when "Debug" =>
             for Global_Configuration_Pragmas use "configuration_pragmas.gnat";
@@ -57,7 +63,7 @@ project Safir_Defaults is
    -- ========================================================================
    package Compiler is
       for Default_Switches ("Ada") use
-        ("-gnatf",                 -- Full source path in brief error messages
+        ("-gnatef",                -- Full source path in brief error messages
          "-gnatq",                 -- Don't quit, try semantics, even if parse errors
          "-gnatQ",                 -- Don't quit, write ali/tree file even if compile errors
          "-gnat05",                -- Full Ada05
@@ -137,7 +143,7 @@ project Safir_Defaults is
    -- ========================================================================
    package Binder is
       for Default_Switches ("Ada") use
-        ("-E" -- Include Stack traceback in Exception message.
+         ("-E" -- Include Stack traceback in Exception message.
          );
    end Binder;
 

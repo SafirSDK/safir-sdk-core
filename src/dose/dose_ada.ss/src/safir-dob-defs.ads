@@ -23,6 +23,7 @@
 -------------------------------------------------------------------------------
 
 with Safir.Dob.Typesystem; use Safir.Dob.Typesystem;
+with Interfaces.C;
 
 package Safir.Dob.Defs is
 
@@ -30,6 +31,6 @@ package Safir.Dob.Defs is
    subtype Response_Id is Safir.Dob.Typesystem.Int_32;
    subtype Node_Id is Safir.Dob.Typesystem.Int_32;
    subtype Connection_Id is Safir.Dob.Typesystem.Int_64;
-   subtype Controller_Id is Safir.Dob.Typesystem.Int_32;
+   subtype Controller_Id is Interfaces.C.long;
 
 end Safir.Dob.Defs;

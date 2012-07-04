@@ -23,6 +23,7 @@
 ******************************************************************************/
 
 #include <Safir/Dob/Internal/DistributionData.h>
+#include <Safir/Dob/Internal/StateDeleter.h>
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Dob/Message.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
@@ -39,15 +40,19 @@ public:
     void DumpMemoryUsage()
     {
         Int64 free = GetSharedMemory().get_free_memory();
+        m_delta = m_lastFree - free;
         std::wcout << "Size / Free = " << GetSharedMemory().get_size() << " / " << free << std::endl;
-        std::wcout << "Allocated delta = " << free - m_lastFree << std::endl;
+        std::wcout << "Allocated delta = " << m_delta << std::endl;
         m_lastFree = free;
     }
+    
+    Int64 lastDelta() const {return m_delta;}
 private:
     Int64 m_lastFree;
+    Int64 m_delta;
 };
 
-int main()
+int main(int, char**)
 {
     ShmStatistics stats;
     stats.DumpMemoryUsage();
@@ -56,8 +61,7 @@ int main()
         Safir::Dob::Typesystem::BinarySerialization ser;
         Safir::Dob::Typesystem::Serialization::ToBinary(m,ser);
 
-        DistributionData d(message_tag,ConnectionId(100,100),Safir::Dob::Typesystem::ChannelId(),&ser[0]);
-
+        DistributionData d(message_tag,ConnectionId(100,0,100),Safir::Dob::Typesystem::ChannelId(),&ser[0]);
         std::wcout << d.Image() << std::endl;
         {
             DistributionData d2 (d);
@@ -66,8 +70,7 @@ int main()
         }
         std::wcout << d.Image() << std::endl;
 
-
-        DistributionData d3(message_tag,ConnectionId(666,666),Safir::Dob::Typesystem::ChannelId(),&ser[0]);
+        DistributionData d3(message_tag,ConnectionId(666,0,666),Safir::Dob::Typesystem::ChannelId(),&ser[0]);
         d3 = d;
         std::wcout << d.Image() << std::endl;
         std::wcout << d3.Image() << std::endl;
@@ -84,15 +87,21 @@ int main()
         std::wcout << d3.Image() << std::endl;
 
         {
-            DistributionData d4(message_tag,ConnectionId(3445,34455),Safir::Dob::Typesystem::ChannelId(),&ser[0]);
+            DistributionData d4(message_tag,ConnectionId(3445,0,34455),Safir::Dob::Typesystem::ChannelId(),&ser[0]);
             DistributionData d5 = d4;
             extRef = d4.GetReference();
             DistributionData d6 = d5;
         }
 
         DistributionData::DropReference(extRef);
+        DistributionData::DropReference(extAlloc);
     }
     stats.DumpMemoryUsage();
+    if (stats.lastDelta() != 0)
+    {
+        std::wcout << "Memory allocation delta was not 0!" << std::endl;
+        return 1;
+    }
     return 0;
 }
 

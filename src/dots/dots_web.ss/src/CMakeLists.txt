@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (dots_web_src)
+project(dots_web_src CXX)
 
 INCLUDE_DIRECTORIES(.)
 
@@ -12,7 +12,9 @@ FILE(GLOB sources *.cpp)
 ADD_EXECUTABLE(dots_web ${sources} ${headers})
 
 FIND_PACKAGE(Boost COMPONENTS filesystem system)
-TARGET_LINK_LIBRARIES(dots_web ${Boost_LIBRARIES})
+if (NOT MSVC)
+  TARGET_LINK_LIBRARIES(dots_web ${Boost_LIBRARIES})
+endif()
 
 INSTALL(TARGETS dots_web
         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (dose_main)
+project(dose_main CXX)
 
 INCLUDE_DIRECTORIES(.)
 
@@ -10,13 +10,22 @@ FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(dose_main ${sources} ${headers})
-TARGET_LINK_LIBRARIES(dose_main ${ACE_LIBRARY})
+FIND_PACKAGE(Boost COMPONENTS regex thread system)
 
 if (MSVC)
     TARGET_LINK_LIBRARIES(dose_main 
-                          debug dose_com${CMAKE_DEBUG_POSTFIX} optimized dose_com)
+                          debug dose_com${CMAKE_DEBUG_POSTFIX} 
+                          optimized dose_com)
 else() #NOT MSVC
-    TARGET_LINK_LIBRARIES(dose_main dose_cpp dose_com)
+  TARGET_LINK_LIBRARIES(dose_main 
+    dose_cpp
+    dose_internal 
+    dose_com 
+    dots_generated-Safir-cpp
+    dots_generated-cpp
+    dots_cpp
+    lluf_utils
+    ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS dose_main
