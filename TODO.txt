@@ -1,3 +1,5 @@
+Kolla efter svn:keywords i hook-scripten!
+
 Investigate swre_logger crash in stop_orders_at_exit #297
 
 remove ace from stresstests
@@ -18,3 +20,4 @@ dots_cpp array container proxies!?
 
 make dose_com possible to stop nicely
 använd wide-interfacen för att undvika MAX_PATH problem på windows
+
