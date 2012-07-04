@@ -1,4 +1,5 @@
 Kolla efter svn:keywords i hook-scripten!
+GAH!
 
 Investigate swre_logger crash in stop_orders_at_exit #297
 
