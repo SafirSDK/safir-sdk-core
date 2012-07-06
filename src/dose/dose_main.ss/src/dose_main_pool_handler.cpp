@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagstrï¿½m / stlrha
 *
 *******************************************************************************
 *
@@ -77,6 +77,7 @@ namespace Internal
         m_pendingRegistrationHandler(NULL),
         m_persistHandler(NULL),
         m_connectionHandler(NULL),
+        m_threadMonitor(NULL),
         m_stateSubscriptionConnections(Safir::Dob::NodeParameters::NumberOfContexts()),
         m_pdThread(),
         m_ioService(ioService)
@@ -131,13 +132,15 @@ namespace Internal
                            ExternNodeCommunication & ecom,
                            PendingRegistrationHandler & pendingHandler,
                            PersistHandler & persistHandler,
-                           ConnectionHandler & connectionHandler)
+                           ConnectionHandler & connectionHandler,
+                           ThreadMonitor & threadMonitor)
     {
         m_blockingHandler = &blockingHandler;
         m_ecom = &ecom;
         m_pendingRegistrationHandler = &pendingHandler;
         m_persistHandler = &persistHandler;
         m_connectionHandler = &connectionHandler;
+        m_threadMonitor = &threadMonitor;
 
         // dose_main must subscribe for states in all contexts
         for (ContextId context = 0; context < Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
@@ -151,7 +154,7 @@ namespace Internal
 
             const std::wstring connectionName = ConnectionAspectMisc(m_stateSubscriptionConnections[context].m_connection).GetConnectionName();
             m_stateSubscriptionConnections[context].m_connectionPtr =
-                Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName)).get();
+                Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName));
         }
     }
 
@@ -222,6 +225,9 @@ namespace Internal
         {
             lllout << "Pool distribution thread started" << std::endl;
             
+        m_poolDistributionThreadId = boost::this_thread::get_id();
+        m_threadMonitor->StartWatchdog(m_poolDistributionThreadId, "pool distribution thread");
+
             // Wait until persistent data is ready.
             if (!m_persistHandler->IsPersistentDataReady())
             {
@@ -229,6 +235,8 @@ namespace Internal
                 while (!m_persistHandler->IsPersistentDataReady())
                 {
                     boost::this_thread::sleep(boost::posix_time::milliseconds(10)); //sleep is interruption point
+                
+                m_threadMonitor->KickWatchdog(m_poolDistributionThreadId);
                 }
                 lllout << "Pool distribution thread thinks DOPE is done." << std::endl;
             }
@@ -243,7 +251,7 @@ namespace Internal
             for ( msgIter = ConnectionMsgsToSend.begin( ) ; msgIter != ConnectionMsgsToSend.end( ) ; msgIter++ )
             {
                 boost::this_thread::interruption_point();
-                m_ecom->SendPoolDistributionData(*msgIter);
+                m_ecom->SendPoolDistributionData(*msgIter, *m_threadMonitor, m_poolDistributionThreadId);
             }
             ConnectionMsgsToSend.clear();
             lllout << "Setting up connection in each context for pool distribution" << std::endl;
@@ -264,14 +272,14 @@ namespace Internal
                 pdConnection.Open(L"dose_main_pd",L"pool_distribution", context,NULL, &dispatcher);
                 StartSubscriptions(pdConnection, dummySubscriber,true,false);
                 const std::wstring connectionName = ConnectionAspectMisc(pdConnection).GetConnectionName();
-                ConnectionPtr connection = Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName)).get();
+                ConnectionPtr connection = Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName));
 
                 connection->GetDirtySubscriptionQueue().Dispatch(boost::bind(&PoolHandler::PDDispatchSubscription,this,_1,_2,_3));
             }
 
             lllout << "Pool distribution completed (calling ecom::PoolDistributionCompleted" << std::endl;
 
-            m_ecom->PoolDistributionCompleted();
+            m_ecom->PoolDistributionCompleted(*m_threadMonitor, m_poolDistributionThreadId);
         }
         catch (const boost::thread_interrupted&)
         {
@@ -305,6 +313,8 @@ namespace Internal
 
         //No need for m_isNotified flag guard, since this happens very seldom.
         m_ioService.post(boost::bind(&PoolHandler::PDCompletedHandler,this,exceptionInfo));
+
+        m_threadMonitor->StopWatchdog(m_poolDistributionThreadId);
     }
 
     void PoolHandler::HandleRegistrationStateFromDoseCom(const DistributionData& state, const bool isAckedData)
@@ -370,7 +380,7 @@ namespace Internal
                 ENSURE(state.GetSenderId().m_id == -1, << "Ghost states are expected to have ConnectionId == -1! Ghost for "
                        << state.GetEntityId());
 
-                const RemoteSetResult result = EntityTypes::Instance().RemoteSetRealEntityState(NULL, // Null connection for ghosts
+                const RemoteSetResult result = EntityTypes::Instance().RemoteSetRealEntityState(ConnectionPtr(), // Null connection for ghosts
                                                                                                 state);
 
                 if (result == RemoteSetNeedRegistration)
@@ -540,8 +550,7 @@ namespace Internal
         return complete;
     }
 
-    bool PDProcessEntityState(ExternNodeCommunication * ecom,
-                              const SubscriptionPtr & subscription)
+    bool PoolHandler::PDProcessEntityState(const SubscriptionPtr & subscription)
     {
         // All nodes send ghost and injection data on PD!
         // Do not send updates
@@ -560,7 +569,7 @@ namespace Internal
                     currentState.GetEntityStateKind() == DistributionData::Ghost ||
                     !currentState.HasBlob())
                 {
-                    ecom->SendPoolDistributionData(currentState);
+                    m_ecom->SendPoolDistributionData(currentState, *m_threadMonitor, m_poolDistributionThreadId);
                 }
             }
             subscription->SetLastRealState(currentState);
@@ -573,7 +582,7 @@ namespace Internal
 
             if (!currentState.IsNoState())
             {
-                ecom->SendPoolDistributionData(currentState);
+                m_ecom->SendPoolDistributionData(currentState, *m_threadMonitor, m_poolDistributionThreadId);
                 subscription->SetLastInjectionState(currentState);
             }
         }
@@ -610,8 +619,7 @@ namespace Internal
         return success;
     }
 
-    bool PDProcessRegistrationState(ExternNodeCommunication * ecom,
-                                    const SubscriptionPtr & subscription)
+    bool PoolHandler::PDProcessRegistrationState(const SubscriptionPtr & subscription)
     {
         if (subscription->GetLastRealState().IsNoState())
         {
@@ -625,7 +633,7 @@ namespace Internal
                 if (IsLocal(state) ||
                     !state.IsRegistered())
                 {
-                    ecom->SendPoolDistributionData(state);
+                    m_ecom->SendPoolDistributionData(state, *m_threadMonitor, m_poolDistributionThreadId);
                 }
             }
             subscription->SetLastRealState(state); //update this so we only dispatch this state once (see "if" above)
@@ -669,15 +677,15 @@ namespace Internal
         if (!realState.IsNoState() && realState.GetType() == DistributionData::RegistrationState)
         {
             // Registration state
-            subscription->DirtyFlag().Process(boost::bind(PDProcessRegistrationState,
-                                                          m_ecom,
+            subscription->DirtyFlag().Process(boost::bind(&PoolHandler::PDProcessRegistrationState,
+                                                          this,
                                                           boost::cref(subscription)));
         }
         else
         {
             // Entity state
-            subscription->DirtyFlag().Process(boost::bind(PDProcessEntityState,
-                                                          m_ecom,
+            subscription->DirtyFlag().Process(boost::bind(&PoolHandler::PDProcessEntityState,
+                                                          this,
                                                           boost::cref(subscription)));
         }
     }

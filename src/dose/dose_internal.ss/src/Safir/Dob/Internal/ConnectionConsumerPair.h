@@ -51,6 +51,8 @@ namespace Internal
         bool operator<(const ConnectionConsumerPair& other) const;
 
         bool operator==(const ConnectionConsumerPair& other) const;
+
+        ConnectionConsumerPair& operator=(const ConnectionConsumerPair& other);
     };
 
 }

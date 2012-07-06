@@ -26,6 +26,7 @@
 
 #include <Safir/Dob/Internal/InternalExportDefs.h>
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
+#include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/SubscriptionId.h>
 #include <Safir/Dob/Internal/StateHolder.h>
 #include <Safir/Dob/Internal/StateDeleter.h>
@@ -33,6 +34,7 @@
 #include <Safir/Dob/Internal/ConsumerQueueContainer.h>
 #include <Safir/Dob/Internal/SubscriptionOptions.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
+#include <Safir/Dob/Internal/Atomic.h>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 
 namespace Safir
@@ -82,8 +84,8 @@ namespace Internal
         DistributionData GetInjectionState() const;
         void SetInjectionState(const DistributionData& newInjectionState);
 
-        bool IsReleased() const;
-        void SetReleased(bool released);
+        bool IsReleased() const { return m_released != 0; }
+        void SetReleased(bool released) { m_released = released ? 1 : 0; }
 
         // Make all subscription pointers held by this state weak.
         void ReleaseSubscribers();
@@ -113,7 +115,7 @@ namespace Internal
         StateHolder                             m_realState;
         StateHolder                             m_injectionState;
 
-        bool m_released;
+        AtomicUint32 m_released;
 
         typedef PairContainers<SubscriptionId, UpgradeableSubscriptionPtr>::map Subscriptions;
 

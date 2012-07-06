@@ -28,13 +28,13 @@ import com.saabgroup.safir.dob.SecondaryConnection;
  * The reason is that it is used from several classes in this
  * application.
  */
-public class MessageSender implements com.saabgroup.safir.dob.MessageSender {
+public class VehicleMessageSender implements com.saabgroup.safir.dob.MessageSender {
 
      // This class uses this secondary connection for Dob calls.
     private SecondaryConnection connection;
     
     // Private constructor prevents instantiation from other classes
-    private MessageSender() { 
+    private VehicleMessageSender() { 
         connection = new SecondaryConnection();
     }
 
@@ -43,10 +43,10 @@ public class MessageSender implements com.saabgroup.safir.dob.MessageSender {
     * or the first access to SingletonHolder.instance, not before.
     */
     private static class SingletonHolder { 
-        public static final MessageSender instance = new MessageSender();
+        public static final VehicleMessageSender instance = new VehicleMessageSender();
     }
 
-    public static MessageSender getInstance() {
+    public static VehicleMessageSender getInstance() {
         return SingletonHolder.instance;
     }
     

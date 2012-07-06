@@ -41,9 +41,9 @@ namespace Internal
     class DistributionData;
 
     class Connection;
-    typedef boost::interprocess::offset_ptr<Connection> ConnectionPtr;
-    typedef boost::interprocess::offset_ptr<const Connection> ConnectionConstPtr;
-
+    typedef SharedMemoryObject::SmartPointers<Connection>::shared_ptr ConnectionPtr;
+    typedef SharedMemoryObject::SmartPointers<const Connection>::shared_ptr ConnectionConstPtr;
+    
     class Instance;
     typedef boost::interprocess::offset_ptr<Instance> InstancePtr;
 

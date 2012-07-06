@@ -96,8 +96,8 @@ ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK -DBOOST_FILESYSTEM_VERSION=2)
 #Boost 1.39 and vc80 don't play nicely together. 
 #we get multiply defined symbols. As a workaround we allow this.
 if (MSVC80 AND Boost_LIB_VERSION STREQUAL "1_39")
-	SET(CMAKE_EXE_LINKER_FLAGS /FORCE:MULTIPLE)
-	SET(CMAKE_SHARED_LINKER_FLAGS /FORCE:MULTIPLE)
+    SET(CMAKE_EXE_LINKER_FLAGS /FORCE:MULTIPLE)
+    SET(CMAKE_SHARED_LINKER_FLAGS /FORCE:MULTIPLE)
 endif()
 
 #Set up boost for any test code (i.e. CheckCXXSourceCompiles stuff)
@@ -135,6 +135,7 @@ MACRO(INSTALL_DEBUG_INFO target)
     endif()
 
     STRING(REPLACE .dll ${CMAKE_DEBUG_POSTFIX}.pdb location ${location})
+    STRING(REPLACE .exe .pdb location ${location})
     
     if (SAFIR_USER)
       INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/bin CONFIGURATIONS Debug)
@@ -173,7 +174,7 @@ endif(MSVC)
 #work out if we've got a configuration on the command line or if 
 #we're running in an IDE.
 if (CMAKE_CONFIGURATION_TYPES AND CMAKE_BUILD_TYPE)
-	#MESSAGE("Both CMAKE_CONFIGURATION_TYPES and CMAKE_BUILD_TYPE are set! Using CMAKE_BUILD_TYPE as the CUSTOM_BUILD_TYPE")
+    #MESSAGE("Both CMAKE_CONFIGURATION_TYPES and CMAKE_BUILD_TYPE are set! Using CMAKE_BUILD_TYPE as the CUSTOM_BUILD_TYPE")
     SET(CUSTOM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 elseif(CMAKE_CONFIGURATION_TYPES)
     # fix for vs2010
@@ -182,7 +183,7 @@ elseif(CMAKE_CONFIGURATION_TYPES)
     else()
        SET(CUSTOM_BUILD_TYPE "$(OutDir)")
     endif()
-	
+    
 elseif(CMAKE_BUILD_TYPE)
     SET(CUSTOM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 else()

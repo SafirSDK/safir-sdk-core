@@ -26,6 +26,7 @@
 #define _dose_main_communication_h
 
 #include "dose_main_quality_of_service_data.h"
+#include "dose_main_thread_monitor.h"
 #include <Safir/Dob/Internal/DistributionData.h>
 #include <Safir/Dob/Internal/DoseCom_Interface_Classes.h>
 #include <boost/scoped_array.hpp>
@@ -61,9 +62,9 @@ namespace Internal
         bool Send(const DistributionData & msg);
 
         //this will block if there is overflow
-        void SendPoolDistributionData(const DistributionData & msg);
+        void SendPoolDistributionData(const DistributionData & msg, ThreadMonitor& threadMonitor, const boost::thread::id& threadId);
         //this will block if necessary.
-        void PoolDistributionCompleted();
+        void PoolDistributionCompleted(ThreadMonitor& threadMonitor, const boost::thread::id& threadId);
 
         // tell DoseCom that nodeId need a pool distribution. 
         void ForcePoolDistribution(const int nodeId);

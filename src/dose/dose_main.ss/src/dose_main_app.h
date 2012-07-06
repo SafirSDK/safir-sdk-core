@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagstrï¿½m / stlrha
 *
 *******************************************************************************
 *
@@ -37,6 +37,7 @@
 #include "dose_main_response_handler.h"
 #include "dose_main_request_handler.h"
 #include "dose_main_end_states_handler.h"
+#include "dose_main_thread_monitor.h"
 #include "dose_main_connection_killer.h"
 #include "dose_main_signal_handler.h"
 #include <Safir/Dob/Connection.h>
@@ -65,6 +66,7 @@ namespace Internal
     class DoseApp:
         public Connections::ConnectionConsumer,
         public Safir::Dob::Dispatcher,
+        public TimeoutHandler,
         private boost::noncopyable
     {
     public:
@@ -87,7 +89,9 @@ namespace Internal
         AtomicUint32 m_connectionOutEvent;
         AtomicUint32 m_nodeStatusChangedEvent;
 
-        
+        //Timeout handler
+        virtual void HandleTimeout(const TimerInfoPtr& timer);
+
         void ConnectionThread();
 
         void OnDoDispatch();
@@ -158,6 +162,10 @@ namespace Internal
 
         // For monitoring processes
         Safir::Utilities::ProcessMonitor m_processMonitor;
+
+        // For monitoring dose_main:s own threads
+        ThreadMonitor m_threadMonitor;
+        boost::thread::id m_mainThreadId;
 
         AtomicUint32 m_HandleEvents_notified;
         AtomicUint32 m_DispatchOwnConnection_notified;

@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagstrï¿½m / stlrha
 *
 *******************************************************************************
 *
@@ -111,6 +111,16 @@ namespace Internal
     void DoseApp::Run()
     {
         AllocateStatic();
+
+        // Start monitoring of this thread (that is, the main thread)
+        m_mainThreadId = boost::this_thread::get_id();
+        m_threadMonitor.StartWatchdog(m_mainThreadId, "dose_main main thread");
+
+        // Schedule a timer so that the main thread will kick the watchdog.
+        TimerInfoPtr timerInfo(new EmptyTimerInfo(TimerHandler::Instance().RegisterTimeoutHandler(L"dose_main watchdog timer", *this)));
+        TimerHandler::Instance().Set(Discard,
+                                     timerInfo,
+                                     GetUtcTime() + 5.0);
 
         // enter main loop
 #ifndef NDEBUG
@@ -258,6 +268,14 @@ namespace Internal
         //        std::wcout << "End handle_input (" << numEvents <<" events)" << std::endl;
     }
 
+    void DoseApp::HandleTimeout(const TimerInfoPtr& timer)
+    {
+        m_threadMonitor.KickWatchdog(m_mainThreadId);
+
+        TimerHandler::Instance().Set(Discard,
+                                     timer,
+                                     GetUtcTime() + 5.0);
+    }
 
     ConnectResult DoseApp::CanAddConnection(const std::string & connectionName, const pid_t pid, const long /*context*/)
     {
@@ -334,7 +352,8 @@ namespace Internal
                            m_ecom,
                            m_pendingRegistrationHandler,
                            m_persistHandler,
-                           m_connectionHandler);
+                           m_connectionHandler,
+                           m_threadMonitor);
         
         
         m_processInfoHandler.Init(m_ecom,m_processMonitor);

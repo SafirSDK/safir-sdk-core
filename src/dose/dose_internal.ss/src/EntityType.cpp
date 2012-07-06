@@ -1186,7 +1186,7 @@ namespace Internal
                 // state could be released
                 statePtr->SetReleased(true);
 
-                statePtr->SetConnection(NULL);  // No connection since its a delete state
+                statePtr->SetConnection(ConnectionPtr());  // No connection since its a delete state
                 statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0))); //dummy consumer
 
                 // The released end state must be saved "a while".
@@ -1457,7 +1457,7 @@ namespace Internal
         }
 
         // If we got this far everything is ok. Set the remote delete state.
-        statePtr->SetConnection(NULL);  // No connection since its a delete state
+        statePtr->SetConnection(ConnectionPtr());  // No connection since its a delete state
         statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0))); //dummy consumer
         statePtr->SetRealState(remoteEntity);
 
@@ -1726,7 +1726,7 @@ namespace Internal
         }
 
         // No owner for a delete state.
-        statePtr->SetConnection(NULL);
+        statePtr->SetConnection(ConnectionPtr());
         statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0)));
 
         // Release pointer to request in queue.

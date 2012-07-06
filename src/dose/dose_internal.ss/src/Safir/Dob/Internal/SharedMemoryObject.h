@@ -202,7 +202,6 @@ namespace Internal
             underlying_deleter m_deleter;
         };
 
-        /* enable shared from this does not appear to work...
         template<class T>
         struct Utilities
         {
@@ -214,7 +213,7 @@ namespace Internal
             >
             enable_shared_from_this;
         };
-*/
+
         //
         // Typedefs
         //

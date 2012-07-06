@@ -28,7 +28,7 @@ import com.saabgroup.safir.swreports.SwReport;
  * registration as a data owner and processes request
  * on that data.
  */
-public class EntityHandler implements com.saabgroup.safir.dob.EntityHandlerInjection {
+public class VehicleEntityHandler implements com.saabgroup.safir.dob.EntityHandlerInjection {
 
     // This class uses this secondary connection for Dob calls.
     private com.saabgroup.safir.dob.SecondaryConnection connection;
@@ -36,7 +36,7 @@ public class EntityHandler implements com.saabgroup.safir.dob.EntityHandlerInjec
     // Object counter.
     private int numberOfCreatedVehicles;
     
-    public EntityHandler() {
+    public VehicleEntityHandler() {
         connection = new com.saabgroup.safir.dob.SecondaryConnection();
         numberOfCreatedVehicles = 0;
     }
@@ -99,7 +99,7 @@ public class EntityHandler implements com.saabgroup.safir.dob.EntityHandlerInjec
         // Send notification message when the number of created vehicles 
         // has reached the limit.
         if(numberOfCreatedVehicles == capabilities.vehicles.VehicleParameters.getVehicleLimit()) {
-            MessageSender.getInstance().sendMaxNofVehicleMsg();
+            VehicleMessageSender.getInstance().sendMaxNofVehicleMsg();
         }
     }
 
@@ -158,7 +158,7 @@ public class EntityHandler implements com.saabgroup.safir.dob.EntityHandlerInjec
             // Send notification message when the number of created vehicles 
             // has reached the limit.
             if(numberOfCreatedVehicles == capabilities.vehicles.VehicleParameters.getVehicleLimit())
-                MessageSender.getInstance().sendMaxNofVehicleMsg();
+                VehicleMessageSender.getInstance().sendMaxNofVehicleMsg();
         }
         else
         {

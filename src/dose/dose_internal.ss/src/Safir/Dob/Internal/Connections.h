@@ -200,8 +200,8 @@ namespace Internal
         void GenerateSpuriousConnectOrOutSignal() const;
 
     private:
-        void AddToSignalHandling(Connection * const connection);
-        void RemoveFromSignalHandling(const ConnectionPtr connection);
+        void AddToSignalHandling(const ConnectionPtr& connection);
+        void RemoveFromSignalHandling(const ConnectionPtr& connection);
 
 
         void ConnectDoseMain(const std::string & connectionName,

@@ -108,8 +108,7 @@ namespace Internal
         // The subscriptions are not marked as dirty.
         void ForSpecificStateAdd(const Dob::Typesystem::Int64 key, const ForSpecificStateActionFunc& actionFunc);
 
-        typedef boost::interprocess::offset_ptr<StateContainer> ThisPtr;
-        static void RemoveState(ThisPtr _this, const Dob::Typesystem::Int64 key);
+        void RemoveState(const Dob::Typesystem::Int64 key, const StateDeleter::pointer& pSharedMemoryObject);
 
         /** Note that this class CANNOT be stored in shared memory, since the iterator
             member is different size in debug and release builds (on msvc++) */
@@ -180,13 +179,21 @@ namespace Internal
 
         MetaSubscriptions m_metaSubscriptions;
 
-        typedef std::pair<StateSharedPtr, States::iterator> StateAndIter;
+        /*
+         * Get a state as a reader
+         *
+         * @Note that the iterator returned from these methods is valid only as long as the returned
+         * StateSharedPtr is kept.
+         */
+        StateSharedPtr GetState(const Dob::Typesystem::Int64 key, States::iterator& it);
 
-        // Get a state as a reader
-        StateAndIter GetState(const Dob::Typesystem::Int64 key);
-
-        // Add a state as a writer
-        StateAndIter AddState(const Dob::Typesystem::Int64 key);
+        /*
+         * Add a state as a writer
+         *
+         * @Note that the iterator returned from these methods is valid only as long as the returned
+         * StateSharedPtr is kept.
+         */
+        StateSharedPtr AddState(const Dob::Typesystem::Int64 key, States::iterator& it);
 
         void UnsubscribeInternal(const MetaSubscriptions::iterator&             subIt,
                                  const Dob::Typesystem::Int64                   key,

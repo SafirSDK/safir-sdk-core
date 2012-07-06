@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagstrï¿½m / stlrha
 *
 *******************************************************************************
 *
@@ -174,7 +174,7 @@ namespace Internal
     }
 
     //this will block if there is overflow
-    void ExternNodeCommunication::SendPoolDistributionData(const DistributionData & msg)
+    void ExternNodeCommunication::SendPoolDistributionData(const DistributionData & msg, ThreadMonitor& threadMonitor, const boost::thread::id& threadId)
     {
         assert (!m_QualityOfServiceData.IsStandalone());
 
@@ -183,6 +183,7 @@ namespace Internal
         while (!success)
         {
             boost::this_thread::interruption_point();
+            threadMonitor.KickWatchdog(threadId);
 
             const DistributionData::Type type = msg.GetType();
 
@@ -243,12 +244,13 @@ namespace Internal
     }
 
 
-    void ExternNodeCommunication::PoolDistributionCompleted()
+    void ExternNodeCommunication::PoolDistributionCompleted(ThreadMonitor& threadMonitor, const boost::thread::id& threadId)
     {
         lllout << "Waiting for m_okToSignalPDComplete to be set to true. Current value = " << m_okToSignalPDComplete.value() << std::endl;
         //there is logic in dose_main_app.cpp that will tell us when/if it is okay to finish pd.
         while (m_okToSignalPDComplete == 0)
         {
+            threadMonitor.KickWatchdog(threadId);
             lllout << "Waiting for m_okToSignalPDComplete to be set to true. Current value = " << m_okToSignalPDComplete.value() << std::endl;
             boost::this_thread::sleep(boost::posix_time::milliseconds(20));
         }

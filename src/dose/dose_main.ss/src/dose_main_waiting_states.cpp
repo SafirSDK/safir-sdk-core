@@ -244,8 +244,6 @@ namespace Internal
         const size_t size = m_waitingStateTable.size();
         if (size != 0 && size == m_lastSize)
         {
-            m_waitingStateTable.clear();
-
             std::wostringstream ostr;
             ostr << "The number of items in the WaitingStates structure has not changed for 5 minutes!" << std::endl
                 << "This is probably due to a lost connection to one or more nodes (node split/join)" << std::endl
@@ -263,6 +261,9 @@ namespace Internal
             }
 
             lllerr << ostr.str() << std::endl;
+
+            // Remove all entries
+            m_waitingStateTable.clear();
         }
         else
         {

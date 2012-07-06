@@ -27,6 +27,7 @@
 
 #include <boost/version.hpp>
 #include <boost/interprocess/detail/atomic.hpp>
+#include <boost/noncopyable.hpp>
 
 namespace Safir
 {

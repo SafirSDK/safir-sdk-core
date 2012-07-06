@@ -37,6 +37,7 @@
 #include <boost/thread.hpp>
 #include <boost/function.hpp>
 #include "dose_main_waiting_states.h"
+#include "dose_main_thread_monitor.h"
 
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 
@@ -127,7 +128,8 @@ namespace Internal
                   ExternNodeCommunication & ecom,
                   PendingRegistrationHandler & pendingHandler,
                   PersistHandler & persistHandler,
-                  ConnectionHandler & connectionHandler);
+                  ConnectionHandler & connectionHandler,
+                  ThreadMonitor & threadMonitor);
 
         void StartPoolDistribution();
 
@@ -177,6 +179,9 @@ namespace Internal
 
         void DispatchInjectedEntityId(const Typesystem::EntityId & entityId, bool & remove);
 
+        bool PDProcessRegistrationState(const SubscriptionPtr & subscription);
+        bool PDProcessEntityState(const SubscriptionPtr & subscription);
+
         void PDConnection(const Connection & connection);
         void PDDispatchSubscription(const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove);
 
@@ -185,6 +190,9 @@ namespace Internal
         PendingRegistrationHandler * m_pendingRegistrationHandler;
         PersistHandler * m_persistHandler;
         ConnectionHandler * m_connectionHandler;
+        ThreadMonitor * m_threadMonitor;
+
+        boost::thread::id m_poolDistributionThreadId;
 
         typedef std::vector<DistributionData> ConnectionMsgs;
         ConnectionMsgs ConnectionMsgsToSend;
@@ -194,7 +202,7 @@ namespace Internal
             Safir::Dob::Connection m_connection;
 
             //This is the Internal representation of the m_stateSubscriptionConnection.
-            Safir::Dob::Internal::Connection* m_connectionPtr;
+            Safir::Dob::Internal::ConnectionPtr m_connectionPtr;
         };
 
         //Safir::Dob::Utilities::Array<SubcriptionConnection> m_stateSubscriptionConnections;
