@@ -101,6 +101,7 @@ namespace Internal
 
         Typesystem::Int32 NumberOfPushes() const {return m_noPushed;}
         Typesystem::Int32 NumberOfOverflows() const {return m_noOverflows;}
+        Typesystem::Int32 NumberOfDispatchedMsg() const {return m_noDispatchedMsg;}
 
         bool SimulateFull() const {return m_simulateFull != 0;}
         void SimulateFull(const bool simulateFull) {m_simulateFull = simulateFull?1:0;}
@@ -129,6 +130,7 @@ namespace Internal
 
         Typesystem::Int32 m_noPushed;
         Typesystem::Int32 m_noOverflows;
+        Typesystem::Int32 m_noDispatchedMsg;
         AtomicUint32 m_simulateFull;
 
         friend void StatisticsCollector(MessageQueue&, void*);

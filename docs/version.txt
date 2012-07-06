@@ -1,3 +1,0 @@
-safir_sdk_core_src-4.3
-Saab Subversion repository URL: https://safir.corp.saab.se/svn/safir/systems/sdk_core/tags/sdk_core/4.3/
-Saab Subversion repository revision: 178211 178211 178211 178211 178211 178211 178211 178211 178211 178211 178431

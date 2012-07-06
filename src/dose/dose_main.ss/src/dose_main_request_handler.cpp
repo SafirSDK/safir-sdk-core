@@ -471,11 +471,12 @@ namespace Internal
             (receiver.consumer,
             boost::bind(PushRequest, boost::cref(request),_2,boost::ref(success)));
 
-        if (success)
-        {
-            receiver.connection->SignalIn();
-        }
-        else
+        // Always kick the receiver. Theoretically a kick shouldn't be necessary when there
+        // is an overflow, but since there have been reports of applications not dispatching
+        // their in-queues we make this "extra" kick.
+        receiver.connection->SignalIn();
+
+        if (!success)
         {
             lllout << "Overflow in a RequestInQueue. " << receiver.connection->NameWithCounter()
                 << " " << receiver.connection->Id() << std::endl;

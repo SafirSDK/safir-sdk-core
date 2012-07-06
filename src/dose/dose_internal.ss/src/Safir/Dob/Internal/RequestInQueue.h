@@ -79,6 +79,12 @@ namespace Internal
             return m_capacity;
         }
 
+        Typesystem::Int32 NumberOfDispatchedReq() const
+        {
+            ScopedRequestInQueueLock lck(m_lock);
+            return m_noDispatchedRequests;
+        }
+
         bool SimulateFull() const {return m_simulateFull != 0;}
         void SimulateFull(const bool simulateFull) {m_simulateFull = simulateFull?1:0;}
     private:

@@ -40,6 +40,7 @@ namespace Internal
         m_size(0),
         m_noPushed(0),
         m_noOverflows(0),
+        m_noDispatchedMsg(0),
         m_simulateFull(false)
     {
 
@@ -72,6 +73,8 @@ namespace Internal
         {
             isNoLongerFull = true;
         }
+
+        m_noDispatchedMsg += static_cast<Typesystem::Int32>(numDispatched);
 
         m_size -= numDispatched;
 

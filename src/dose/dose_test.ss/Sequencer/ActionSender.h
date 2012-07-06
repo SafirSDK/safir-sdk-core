@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2011 (http://www.safirsdk.com)
 *
-* Created by: Anders Widén/ stawi
+* Created by: Anders Widï¿½n/ stawi
 *
 *******************************************************************************
 *
@@ -50,6 +50,7 @@ private:
 
     Safir::Dob::SecondaryConnection m_connection;
     const bool m_standalone;
+    Safir::Dob::Typesystem::Int32 m_seqNbr;
 };
 
 #endif

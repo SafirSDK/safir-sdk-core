@@ -464,7 +464,7 @@ namespace Internal
             }
             else
             {
-                lllerr << "Discarding received SHM_MSG containing " <<
+                lllout << "Discarding received SHM_MSG containing " <<
                     Safir::Dob::Typesystem::Operations::GetName(data.GetTypeId()) << " since it is local or this node is not in its distribution channel" << std::endl;
                 return true;
             }

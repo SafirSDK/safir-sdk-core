@@ -144,7 +144,8 @@ Executor::Executor(const std::vector<std::string> & commandLine):
                    commandLine.size() > 2 ? commandLine.at(2): "0.0.0.0",
                    m_ioService),
     m_callbackActions(Safir::Dob::CallbackId::Size()),
-    m_defaultContext(0)
+    m_defaultContext(0),
+    m_lastRecSeqNbr(0)
 {
     m_controlConnection.Open(m_controlConnectionName, m_instanceString, 0, this, &m_controlDispatcher);
 
@@ -177,6 +178,15 @@ void Executor::OnMessage(const Safir::Dob::MessageProxy messageProxy)
 void Executor::HandleAction(DoseTest::ActionPtr action)
 
 {
+    if (!action->SeqNbr().IsNull())
+    {
+        if (action->SeqNbr().GetVal() != m_lastRecSeqNbr + 1)
+        {
+            std::wcout << "Seems an action from the sequencer is lost!!" << std::endl; 
+        }
+        m_lastRecSeqNbr = action->SeqNbr().GetVal();
+    }
+
     if (!action->Partner().IsNull() && action->Partner().GetVal() != Safir::Dob::Typesystem::ChannelId(m_instance))
     {
         // Not meant for this partner

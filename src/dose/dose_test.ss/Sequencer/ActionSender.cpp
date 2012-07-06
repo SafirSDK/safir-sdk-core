@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2011 (http://www.safirsdk.com)
 *
-* Created by: Anders Widén / stawi
+* Created by: Anders Widï¿½n / stawi
 *
 *******************************************************************************
 *
@@ -32,7 +32,8 @@
 
 ActionSender::ActionSender(const std::string& multicastNic,
                            boost::asio::io_service& ioService)
-    : m_ioService(ioService)
+    : m_seqNbr(0)
+    , m_ioService(ioService)
     , m_socket(ioService)
     , m_standalone(Safir::Dob::DistributionChannelParameters::DistributionChannels(0)->MulticastAddress() 
                    == L"127.0.0.1")
@@ -87,6 +88,9 @@ ActionSender::~ActionSender()
 
 void ActionSender::Send(const DoseTest::ActionPtr& msg)
 {
+    ++m_seqNbr;
+    msg->SeqNbr().SetVal(m_seqNbr);
+
     if (m_standalone)
     {
         m_connection.Send(msg, msg->Partner().IsNull() ? Safir::Dob::Typesystem::ChannelId() : msg->Partner(), this);

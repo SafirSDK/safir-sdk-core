@@ -160,6 +160,8 @@ private:
     std::vector<std::vector<DoseTest::ActionPtr> > m_callbackActions;
 
     int m_defaultContext;
+
+    Safir::Dob::Typesystem::Int32 m_lastRecSeqNbr;
 };
 
 typedef boost::shared_ptr<Executor> ExecutorPtr;
