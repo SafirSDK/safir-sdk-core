@@ -1,3 +1,4 @@
+reenable dose_monitor in build
 Kolla efter svn:keywords i hook-scripten!
 
 Investigate swre_logger crash in stop_orders_at_exit #297
