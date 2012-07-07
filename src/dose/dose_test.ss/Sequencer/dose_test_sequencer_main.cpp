@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagstrï¿½m / stlrha
 *
 *******************************************************************************
 *
@@ -410,8 +410,8 @@ int main(int argc, char* argv[])
                                 ioService);
             while (!sequencer.IsFinished())
             {
-                //stop after 150ms
-                boost::asio::deadline_timer timer(ioService,boost::posix_time::milliseconds(150));
+                //stop after 250ms
+                boost::asio::deadline_timer timer(ioService,boost::posix_time::milliseconds(250));
                 timer.async_wait(boost::bind(&boost::asio::io_service::stop, boost::ref(ioService)));
                 
                 ioService.run();
