@@ -696,6 +696,21 @@ namespace Internal
             return it->second.Get();
         }
     }
+
+    bool StateContainer::CanAcquireContainerWriterLock(const boost::posix_time::seconds& lockTimeout)
+    {
+        // Get writer lock
+        ScopedStateContainerRwLock wlock(m_stateReaderWriterlock,
+                                         boost::posix_time::second_clock::universal_time() + lockTimeout);
+        if (wlock)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 }
 }
 }

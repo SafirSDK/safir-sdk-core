@@ -100,6 +100,8 @@ namespace Internal
 
         /** @} */
 
+        bool CanAcquireContainerWriterLock(const ContextId                   contextId,
+                                           const boost::posix_time::seconds& lockTimeout);
 
     private:
         Typesystem::TypeId m_typeId;

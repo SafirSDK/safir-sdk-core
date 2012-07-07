@@ -108,9 +108,9 @@ namespace Internal
                             ostr << it->second.threadName << " (tid " << it->first
                                  << ") seems to have been hanging for at least "
                                  << boost::posix_time::to_simple_string(now - it->second.lastTimeAlive) << '\n';
-                            if (Safir::Dob::NodeParameters::WatchdogTimeoutTerminatesDoseMain())
+                            if (Safir::Dob::NodeParameters::TerminateDoseMainWhenUnrecoverableError())
                             {
-                                ostr << "Parameter WatchdogTimeoutTerminatesDoseMain is set to true"
+                                ostr << "Parameter TerminateDoseMainWhenUnrecoverableError is set to true"
                                         " which means that dose_main will now be terminated!!" << std::endl;
                                 lllerr << ostr.str().c_str();
                                 Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
@@ -121,7 +121,7 @@ namespace Internal
                             }
                             else if (!it->second.errorLogIsGenerated)
                             {
-                                ostr << "Parameter WatchdogTimeoutTerminatesDoseMain is set to false"
+                                ostr << "Parameter TerminateDoseMainWhenUnrecoverableError is set to false"
                                         " which means that dose_main will not be terminated!!" << std::endl;
                                 lllerr << ostr.str().c_str();
                                 Safir::Utilities::Internal::PanicLogging::Log(ostr.str());

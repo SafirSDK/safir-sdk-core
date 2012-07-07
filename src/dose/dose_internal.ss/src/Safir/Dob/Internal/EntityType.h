@@ -229,6 +229,9 @@ namespace Internal
         bool IncrementIterator(StateContainer::Iterator& iterator, const ContextId context) const
         {return m_entityStates[context].IncrementIterator(iterator);}
 
+        bool CanAcquireContainerWriterLock(const ContextId                   contextId,
+                                           const boost::posix_time::seconds& lockTimeout);
+
     private:
         Typesystem::TypeId            m_typeId;
         bool                          m_typeIsContextShared;

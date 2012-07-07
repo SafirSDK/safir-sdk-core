@@ -2020,6 +2020,33 @@ namespace Internal
             connection->SignalIn();
         }
     }
+
+    bool EntityType::CanAcquireContainerWriterLock(const ContextId                   contextId,
+                                                   const boost::posix_time::seconds& lockTimeout)
+    {
+        bool okToAcquireLock = true;
+
+        ScopedTypeLock lck(m_typeLocks[contextId],
+                           boost::posix_time::second_clock::universal_time() + lockTimeout);
+
+        if (!lck)
+        {
+            // Can't acquire the type level lock.
+            return false;  // *** RETURN ***
+        }
+
+        if (!m_handlerRegistrations[contextId].CanAcquireContainerWriterLock(lockTimeout))
+        {
+            okToAcquireLock = false;
+        }
+
+        if (!m_entityStates[contextId].CanAcquireContainerWriterLock(lockTimeout))
+        {
+            okToAcquireLock = false;
+        }
+
+        return okToAcquireLock;
+    }
 }
 }
 }
