@@ -77,7 +77,8 @@ namespace Internal
                                                         int & priority,                   //out
                                                         bool & isAcked) const;            //out
 
-        int GetClosestAckedPriority(const int priority) const;
+        int GetClosestPriority(const int    priority,
+                               const bool   acked) const;
 
         inline bool IsLocal(const int distributionChannel) const
         {return distributionChannel == LOCAL_DISTRIBUTION_CHANNEL;}
