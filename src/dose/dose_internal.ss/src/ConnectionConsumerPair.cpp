@@ -55,6 +55,7 @@ namespace Internal
     {
         connection = other.connection;
         consumer = other.consumer;
+        return *this;
     }
 }
 }
