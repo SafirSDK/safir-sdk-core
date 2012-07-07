@@ -435,7 +435,11 @@ namespace Internal
                     ENSURE(state.GetSenderId().m_id == -1, << "Delete states are expected to have ConnectionId == -1! Delete for "
                            << state.GetEntityId());
 
-                    EntityTypes::Instance().RemoteSetDeleteEntityState(state);
+                    RemoteSetResult result = EntityTypes::Instance().RemoteSetDeleteEntityState(state);
+                    if (result == RemoteSetNeedRegistration)
+                    {
+                        m_waitingStates.Add(state);
+                    }
                 }
             }
             break;
@@ -448,6 +452,7 @@ namespace Internal
         {
         case DistributionData::RegistrationState:
             {
+
                 HandleRegistrationStateFromDoseCom(state,isAckedData);
             }
             break;

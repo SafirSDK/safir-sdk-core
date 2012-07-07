@@ -175,7 +175,7 @@ namespace Internal
         void RemoteSetInjectionEntityState(const DistributionData& entityState);
 
         /** Set a delete (an end state) from external node */
-        void RemoteSetDeleteEntityState(const DistributionData&   entityState);
+        RemoteSetResult RemoteSetDeleteEntityState(const DistributionData&   entityState);
 
         /** Set a state (that is not an injection or delete state) from external node. */
         RemoteSetResult RemoteSetRealEntityState(const ConnectionPtr&      connection,
@@ -222,6 +222,9 @@ namespace Internal
         bool IsOwner(const Dob::Typesystem::InstanceId& instanceId,
                      const Dob::Typesystem::HandlerId&  handlerId,
                      const ConnectionConsumerPair&      registerer) const;
+
+        typedef std::set<Dob::Typesystem::HandlerId> HandlerSet;
+        void FindAllHandlers(const ContextId context, const StateSharedPtr& statePtr, HandlerSet& handlers) const;
 
         const StateContainer::Iterator CreateEntityIterator(const ContextId context, bool& end) const
         {return m_entityStates[context].CreateStateIterator(end);}
@@ -319,7 +322,8 @@ namespace Internal
                                                    const StateSharedPtr&          statePtr);
 
         void RemoteSetDeleteEntityStateInternal(const DistributionData&     remoteEntity,
-                                                const StateSharedPtr&       statePtr);
+                                                const StateSharedPtr&       statePtr,
+                                                RemoteSetResult& result);
 
         void RemoteSetRealEntityStateInternal(const ConnectionPtr&           connection,
                                               const DistributionData&        remoteEntity,
@@ -367,6 +371,7 @@ namespace Internal
 
         void GetHandlerOfInstanceInternal(const StateSharedPtr&       statePtr,
                                           Dob::Typesystem::HandlerId& handlerId,
+                                          bool includeGhosts,
                                           bool& gotIt) const;
 
         void IsCreatedInternal(const StateSharedPtr& statePtr, bool& isCreated) const;

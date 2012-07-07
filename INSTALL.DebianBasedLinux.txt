@@ -6,15 +6,17 @@ For the time being we have not provided any prebuilt Safir packages for Ubuntu/D
 *Prerequisites*
 
 First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core.
-The exact package names may vary with your distribution, but these are the names from Ubuntu/Kubuntu 9.10:
+
+
+The exact package names may vary with your distribution, but these are the names from Ubuntu/Kubuntu 11.10:
 
 libqt4-dev 
 mono-devel 
-libmono-winforms2.0-cil 
-libboost1.40-all-dev 
+mono-gmcs
+libboost-all-dev 
 libace-dev 
-libtemplates-parser-dev 
-libxmlada-dev
+libtemplates-parser11.5-dev 
+libxmlada3.2-dev
 libiodbc2-dev 
 cmake 
 make
@@ -38,7 +40,7 @@ Almost all Boost versions need some patches. Also there is a patch for xmlada. T
 Go to the "build/patches" directory and do a "cmake ." followed by a "sudo make install" which will cause the files to be installed into the correct places.
 
 
-*Building*
+*Building*e
 
 First of all you should decide where you want the SDK installed. You have to specify two environment variables, SAFIR_RUNTIME and SAFIR_SDK.
 For example you can create a directory "safir" in your home directory, and set the variables to point to "~/safir/runtime" and "~/safir/sdk" respectively.
