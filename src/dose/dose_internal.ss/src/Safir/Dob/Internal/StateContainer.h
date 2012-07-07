@@ -204,11 +204,6 @@ namespace Internal
                                  const Dob::Typesystem::Int64                   key,
                                  const bool                                     allKeys);
 
-        void NewStateAddSubscription(const std::pair<SubscriptionId, MetaSubscription>& sub,
-                                     const Dob::Typesystem::Int64                       key,
-                                     const StateSharedPtr&                              statePtr);
-
-
         void AddSubscription(const StateSharedPtr&               statePtr,
                              const SubscriptionId&               subscriptionId,
                              const bool                          restartSubscription,

@@ -124,7 +124,7 @@ namespace Internal
                 m_handlerRegistrations[context].Unregister(connection, handlerId);
             }
         }
-
+        
         CleanGhosts(handlerId, context);
     }
 
@@ -144,12 +144,21 @@ namespace Internal
                                                 const DistributionData& registrationState)
     {
         const ContextId context = registrationState.GetSenderId().m_contextId;
+        const Safir::Dob::Typesystem::HandlerId handlerId = registrationState.GetHandlerId();
         {
             ScopedTypeLock lck(m_typeLocks[context]);
-            m_handlerRegistrations[context].RemoteSetRegistrationState(connection, registrationState);
-        }
 
-        CleanGhosts(registrationState.GetHandlerId(), context);
+            RegisterTime regTime = registrationState.GetRegistrationTime();                        
+            m_entityStates[context].ForEachState(boost::bind(&EntityType::RemoveGhost,
+                                                                 this,
+                                                                 _2,
+                                                                 boost::cref(handlerId),
+                                                                 boost::cref(regTime)),
+                                                                false); // false => Do not include released states
+
+            m_handlerRegistrations[context].RemoteSetRegistrationState(connection, registrationState);                        
+        }
+        CleanGhosts(handlerId, context);
     }
 
     bool EntityType::IsRegistered(const Dob::Typesystem::HandlerId& handlerId, const ContextId context) const
@@ -644,7 +653,7 @@ namespace Internal
         {
             mostRecentRegisterTime = realState.GetRegistrationTime();
         }
-    }
+    }   
 
     void EntityType::RemoveGhost(const StateSharedPtr&              statePtr,
                                  const Dob::Typesystem::HandlerId&  handlerId,
@@ -692,7 +701,7 @@ namespace Internal
 
     void EntityType::CleanGhosts(const Dob::Typesystem::HandlerId&  handlerId,
                                  const ContextId                    context)
-    {
+    {       
         ScopedTypeLock lck(m_typeLocks[context]);
 
         HandlerSet handlers;
