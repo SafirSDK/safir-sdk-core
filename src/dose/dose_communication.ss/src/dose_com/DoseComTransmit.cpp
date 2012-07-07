@@ -171,7 +171,6 @@ volatile static struct
     volatile dcom_uchar8  DoseIdFrom;
     volatile dcom_uchar8  TxQueueNumber;  // = PriorityChannel
     volatile dcom_uchar8  MsgType;
-    volatile dcom_ulong32  SessionId; //Every new pool distribution start a new session. Tick_count is used as session id.
 } g_Ack_Queue[MAX_ACK_QUEUE] = {{0}};
 
 //=====================================================================
@@ -239,7 +238,7 @@ typedef volatile struct
     volatile dcom_ushort16 GetIxToAck;     // See comment above
     volatile dcom_ushort16 GetIxToSend;            // See comment above
 
-    volatile dcom_ushort16 MaxUsedQueueLength;        
+    volatile dcom_ushort16 MaxUsedQueueLength;
 
     // wA/wT tells us if Application/TxThread writes the data
     struct
@@ -268,7 +267,6 @@ typedef volatile struct
                                     //        Bit 15 set until entire msg is completed.
 
         volatile dcom_ushort16  SequenceNumber;     // wT To this IpM_Addr (to cmp with Acks)
-        volatile dcom_ulong32  SessionId;           //compare with acks to avoid mixing up messages between PD.
 
         volatile dcom_ushort16  NotAckedFragment;   // wT First not acked fragment.
                                     // Init to 0 for non-fragmented msg.
@@ -283,8 +281,6 @@ typedef volatile struct
     volatile dcom_ulong64 CurrFragmentedMsgAckBitMap64;  // used for entire fragmented msg
     volatile dcom_ulong32   StartSendTime;
     volatile dcom_ushort16  TxSequenceNumber[64+MAX_NUM_DEST_CHANNELS]; //wT
-    volatile dcom_ulong32  TxCurrentSessionId[64+MAX_NUM_DEST_CHANNELS]; //The session id currently in use.
-
 #ifdef USE_RESTART_SEQNUM
     volatile dcom_uchar8   TxSeqNumIsRestarted[64+MAX_NUM_DEST_CHANNELS];  //wT
 #endif
@@ -336,7 +332,7 @@ static THREAD_API Ack_Thread(void *)
                         0,      //:m_IpMultiCastAddr_nw,
                         0,      // Rx only, no ttl
                         CConfig::m_Dose_Port_Ack,
-                        0,      // Opt_so_rcvbuf_size,
+                        65536,  // Opt_so_rcvbuf_size, AIWI: Increased this to the same value as used for the receiver thread.
                         0);     // Opt_So_Rcvbuf_Timeout,
 
     if(result == -1)
@@ -352,8 +348,8 @@ static THREAD_API Ack_Thread(void *)
 
     for(;;)
     {
-        //if(*pDbg>=5)
-        //  PrintDbg("+++ Ack_Thread(). Call RxSock.RecvFrom2()\n");
+        if(*pDbg>=5)
+            PrintDbg("+++ Ack_Thread(). Call RxSock.RecvFrom2()\n");
 
         // Check if g_Ack_Queue[] is full. If so do not receive more until
         // there is more space.
@@ -362,7 +358,15 @@ static THREAD_API Ack_Thread(void *)
                 ( (g_Ack_Get_ix - g_Ack_Put_ix) == 1)
                 ||
                 ( (g_Ack_Get_ix == 0) && (g_Ack_Put_ix == (MAX_ACK_QUEUE-1)) )
-                ) DoseOs::Sleep(30);
+
+              )
+        {
+            if(*pDbg>=5)
+            {
+                PrintDbg("+++ Ack_Thread(). g_Ack_Queue[] is full, sleeping 30 ms. Ackix=%u Putix=%u\n");
+            }
+            DoseOs::Sleep(30);
+        }
 
         result = RxSock.RecvFrom2((char *) &UdpMsg, sizeof(UdpMsg), NULL,0);
 
@@ -373,12 +377,16 @@ static THREAD_API Ack_Thread(void *)
             DoseOs::Sleep(1000); continue;
         }
 
-        //if(*pDbg>=5) PrintDbg("+++ Ack_Thread() got a msg\n");
+        if(*pDbg>=5) PrintDbg("+++ Ack_Thread() got a msg\n");
 
-        if( UdpMsg.Magic != DOSE_MSG_MAGIC) continue; //got junk
+        if( UdpMsg.Magic != DOSE_MSG_MAGIC)
+        {
+            PrintDbg("+++ Ack_Thread() got a junk\n");
+            continue; //got junk
+        }
 
         if((UdpMsg.MsgType == MSG_TYPE_ACK) || (UdpMsg.MsgType == MSG_TYPE_NACK))
-        {            
+        {
             if(*pDbg>=5)
             PrintDbg("+++ AckThread() MsgTyp=%s DoseId=%d "
                     "Seq=%d FrNum=%X qIx=%u Put=%u\n",
@@ -389,7 +397,6 @@ static THREAD_API Ack_Thread(void *)
             // Got an ack, put on the Queue, Wakeup
             g_Ack_Queue[g_Ack_Put_ix].MsgType        = UdpMsg.MsgType;
             g_Ack_Queue[g_Ack_Put_ix].SequenceNumber = UdpMsg.SequenceNumber;
-            g_Ack_Queue[g_Ack_Put_ix].SessionId      = UdpMsg.SessionId;
             g_Ack_Queue[g_Ack_Put_ix].TxMsgArray_Ix  = UdpMsg.TxMsgArray_Ix;
             g_Ack_Queue[g_Ack_Put_ix].IpAddrFrom_nw  = UdpMsg.IpAddrFrom_nw;
             g_Ack_Queue[g_Ack_Put_ix].DoseIdFrom     = UdpMsg.DoseIdFrom;
@@ -760,7 +767,6 @@ static bool HandleCompletedFragment(dcom_ushort16 fragmentNum,
 
 static dcom_ulong32 Check_Pending_Ack_Queue(void)
 {
-    dcom_ulong32   SessionId;
     dcom_ulong32   SequenceNum;
     dcom_uchar8   DoseIdFrom;
     dcom_uchar8   qIx;
@@ -768,41 +774,37 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
     dcom_ulong32   dwResult = 0;
     dcom_ushort16  FragmentNum;
 
-    //PrintDbg("Check_Pending_Ack_Queue() P/gS = %d/%d\n",g_Ack_Put_ix,g_Ack_Get_ix);
+    if(*pDbg>5)
+    {
+        PrintDbg("Check_Pending_Ack_Queue() P/gS = %d/%d\n",g_Ack_Put_ix,g_Ack_Get_ix);
+    }
 
     while(g_Ack_Get_ix != g_Ack_Put_ix)
     {
-        SessionId   = g_Ack_Queue[g_Ack_Get_ix].SessionId;
         SequenceNum = g_Ack_Queue[g_Ack_Get_ix].SequenceNumber;
         DoseIdFrom  = g_Ack_Queue[g_Ack_Get_ix].DoseIdFrom;
         qIx         = g_Ack_Queue[g_Ack_Get_ix].TxQueueNumber;
         TxMsgArr_Ix = g_Ack_Queue[g_Ack_Get_ix].TxMsgArray_Ix;
         // Is allways 0 for not fragmented
-        FragmentNum = g_Ack_Queue[g_Ack_Get_ix].FragmentNumber;        
+        FragmentNum = g_Ack_Queue[g_Ack_Get_ix].FragmentNumber;
 
         if(qIx >= NUM_TX_QUEUES)
         {
             PrintErr(0,"ACK Got invalid TxQueueNumber\n");
             goto Continue_WithNext;
         }
-        
-        //Check that session id is correct
-        if (SessionId!=TxQ[qIx].TxCurrentSessionId[TxQ[qIx].TxMsgArr[TxMsgArr_Ix].DestinationId]) 
+
+        if(*pDbg>5)
         {
-            const dcom_ulong32 currentSessionId = TxQ[qIx].TxCurrentSessionId[TxQ[qIx].TxMsgArr[TxMsgArr_Ix].DestinationId];
-            printf("   Tx[] - Got ack/nack with wrong SessionId, will be ignored. expected: %d, got: %d\n", qIx, currentSessionId, SessionId);
-            PrintErr(0,"   Tx[] - Got ack/nack with wrong SessionId, will be ignored. expected: %d, got: %d\n", qIx, currentSessionId, SessionId);
-            goto Continue_WithNext;
+        PrintDbg("#-  Got Ack SeqNum=%d DoseId=%d qIx=%d TxMsgArrIx=%d FragmNum=%X"
+            " EXP=%X.%08X\n",
+            SequenceNum, DoseIdFrom, qIx, TxMsgArr_Ix, FragmentNum,
+            (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32),
+            (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF));
         }
 
-        //PrintDbg("#-  Got Ack SeqNum=%d DoseId=%d qIx=%d TxMsgArrIx=%d FragmNum=%X"
-        //    " EXP=%X.%08X\n",
-        //    SequenceNum, DoseIdFrom, qIx, TxMsgArr_Ix, FragmentNum,
-        //    (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32),
-        //    (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF));
-
         if(g_Ack_Queue[g_Ack_Get_ix].MsgType == MSG_TYPE_ACK) // the other is _NACK
-        {     
+        {
             //================================================================
             // Ack to a fragmented message
             // - SequenceNumber are the same for all fragments
@@ -1054,11 +1056,11 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                             SequenceNum,DoseIdFrom,
                             TxQ[qIx].TxMsgArr[TxMsgArr_Ix].IsTransmitting);
                 }
-                //if(*pDbg>3)
-                //PrintDbg("#-  Ack from %d SeqNum=%d. New Expected=%IX.%08X\n",
-                //  DoseIdFrom, SequenceNum,
-                //  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32));
-                //  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF);
+                if(*pDbg>3)
+                PrintDbg("#-  Ack from %d SeqNum=%d. New Expected=%IX.%08X\n",
+                  DoseIdFrom, SequenceNum,
+                  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32));
+                  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF);
             }
             else
             {
@@ -1071,7 +1073,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
         } // end ACK
         else
         if(g_Ack_Queue[g_Ack_Get_ix].MsgType == MSG_TYPE_NACK)
-        {           
+        {
             //===============================================================
             // NAck to a fragmented message
             //
@@ -1241,8 +1243,6 @@ int Build_Tx_Message(int qIx, int GetIx, int DestinationId,
     pTxMsgHdr->IsPoolDistribution = TxQ[qIx].TxMsgArr[GetIx].IsPoolDistr;
 
     pTxMsgHdr->SequenceNumber = TxQ[qIx].TxMsgArr[GetIx].SequenceNumber;
-
-    pTxMsgHdr->SessionId = TxQ[qIx].TxMsgArr[GetIx].SessionId;
 
     // When a PD_COMPLETE msg is built, TxSeqNumIsRestarted is set and SequenceNumber=0.
     // This is because only some nodes has received the PD (and updated SeqNum)
@@ -1971,6 +1971,22 @@ static THREAD_API TxThread(void *)
                         continue;   // with next Queue
                     }
 
+                    // Added by JOOT 2012-02-06. Dont use send ahead before we have safely transmitted the first few messages
+                    // in the seqNum serie.
+                    // By doing this we avoid the problems that occurs when seqNo 0 is reordered and
+                    // arrive after seqNo 1, 2, etc. Sending seq 0,1,2 will always be delivered in that order since we
+                    // wait for all Ack's before sending next.
+                    // There is still possible failure if seqNo 0 i duplicated, and delayed (if thats a realistic case)
+                    // For example this case will end up in failure: 
+                    //    If sending seq 0, 1, 2 and they arrive as 0, 1, 0, 2. Receiver will now
+                    //    start Nack'ing 1 since it restarted when the duplicated 0 arrived.
+                    if(TxQ[qIx].TxMsgArr[TxQ[qIx].GetIxToAck].SequenceNumber<MAX_AHEAD_NF+1)
+                    {
+                        qIx++;
+                        WaitTimeOut = WAITTIME_WAITING_FOR_ACK;
+                        continue;   // with next Queue
+                    }
+
                     // Do not send a new msg ahead when there are to may pending acks
                     if(TxQ[qIx].GetIxToSend >= TxQ[qIx].GetIxToAck)
                         ahead = TxQ[qIx].GetIxToSend - TxQ[qIx].GetIxToAck;
@@ -2093,7 +2109,7 @@ Begin_A_New_Msg:
                     Ahead_Ix = 0;
 
                 // A PoolDistribution allways starts with Sequencenumber = 0
-                // A PoolDistribution also shall contain a new sessionId where newSessionId>oldSessionId.
+
                 if(TxQ[qIx].TxMsgArr[GetIxToSend].IsPoolDistr) // PoolDistribution
                 {
                     TxQ[qIx].TxMsgArr[GetIxToSend].ExpAckBitMap64[Ahead_Ix]
@@ -2101,10 +2117,7 @@ Begin_A_New_Msg:
                         & (g_pShm->BitMapNodesNew64 | g_pShm->BitMapNodesUp64);
 
                     if(TxQ[qIx].TxMsgArr[GetIxToSend].IsPoolDistr & PD_FIRSTDATA)
-                    {
-                        ++TxQ[qIx].TxCurrentSessionId[Destination_Id]; //Set new session id.
-                        TxQ[qIx].TxSequenceNumber[Destination_Id] = 0; //reset sequence number counter.
-                    }
+                        TxQ[qIx].TxSequenceNumber[Destination_Id] = 0;
 
                     //PrintDbg("BitMapBeingPoolDistributed64 = %X.%08X\n",
                     //   (dcom_ulong32)(g_pShm->BitMapBeingPoolDistributed64>>32),
@@ -2215,9 +2228,6 @@ Begin_A_New_Msg:
 
                 if(!TxQ[qIx].TxMsgArr[GetIxToSend].IsRetransmitting)
                 {
-                    TxQ[qIx].TxMsgArr[GetIxToSend].SessionId 
-                        = TxQ[qIx].TxCurrentSessionId[Destination_Id];
-
                     TxQ[qIx].TxMsgArr[GetIxToSend].SequenceNumber // get next to expect
                                     = TxQ[qIx].TxSequenceNumber[Destination_Id]++;
 
@@ -2832,16 +2842,6 @@ int CDoseComTransmit::Xmit_Init(dcom_ushort16 DoseId)
     if(*pDbg) PrintDbg("Xmit_Init()\n");
 
     memset((void*)TxQ, 0, sizeof(DOSE_TXQUEUE_S) * NUM_TX_QUEUES);
-
-    //init sessionId    
-    dcom_ulong32 initSession = static_cast<dcom_ulong32>(time(NULL));
-    for (int i=0; i<NUM_TX_QUEUES; ++i)
-    {
-        for (int j=0; j<64+MAX_NUM_DEST_CHANNELS; ++j)
-        {
-            TxQ[i].TxCurrentSessionId[j]=initSession;
-        }      
-    }
 
     g_pTxStatistics = Statistics::GetPtrToTxStatistics(0);
 

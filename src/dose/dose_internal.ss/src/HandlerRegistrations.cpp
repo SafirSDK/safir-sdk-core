@@ -282,14 +282,7 @@ namespace Internal
     void HandlerRegistrations::RemoteRegistrationStateInternal(const ConnectionPtr&    connection,
                                                                const DistributionData& remoteRegistrationState,
                                                                const StateSharedPtr&   statePtr)
-    {   
-        if (remoteRegistrationState.GetTypeId()==-7745997667701511814LL)
-        {            
-            bool hasOwner = connection!=NULL;
-            std::cout<<"RemoteStateIsReg: "<<std::boolalpha<<remoteRegistrationState.IsRegistered()<<", hasNewOwner: "<<hasOwner<<std::endl;
-        }
-        
-
+    {                   
         DistributionData currentRegState = statePtr->GetRealState();
 
         if (!NewRegStateIsAccepted(currentRegState, remoteRegistrationState))
