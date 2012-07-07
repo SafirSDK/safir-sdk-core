@@ -109,7 +109,7 @@ void PersistenceHandler::Start(bool restore)
                 e.GetExceptionInfo(),__WFILE__,__LINE__);
         }
 
-        StartSubscriptions(false);
+        StartSubscriptions();
         ReportPersistentDataReady();
     }
     else
@@ -119,11 +119,11 @@ void PersistenceHandler::Start(bool restore)
         {
             // If standalone mode then clear all and then subscribe for all
             RemoveAll();
-            StartSubscriptions(true);
+            StartSubscriptions();
         }
         else
         {
-            StartSubscriptions(false);
+            StartSubscriptions();
         }
     }
 
@@ -185,7 +185,7 @@ PersistenceHandler::ShouldPersist(const Safir::Dob::Typesystem::TypeId typeId)
 
 //-------------------------------------------------------
 void
-PersistenceHandler::StartSubscriptions(const bool subscribeAll)
+PersistenceHandler::StartSubscriptions()
 {
     Safir::Dob::ConnectionAspectInjector inject(m_dobConnection);
 
@@ -204,7 +204,7 @@ PersistenceHandler::StartSubscriptions(const bool subscribeAll)
                                false,            // bool                         restartSubscription
                                true,             // bool                         wantsGhostDelete
                                true,             // bool                         wantsLastState
-                               !subscribeAll,    // bool                         doesntWantSourceIsPermanentStore
+                               false,            // bool                         doesntWantSourceIsPermanentStore
                                false,            // bool                         wantsAllStateChanges
                                false,            // bool                         timestampChangeInfo
                                this );           // Dob::EntitySubscriber* const entitySubscriber
@@ -215,14 +215,14 @@ PersistenceHandler::StartSubscriptions(const bool subscribeAll)
 //-------------------------------------------------------
 void 
 PersistenceHandler::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
-{
+{    
     HandleEntity(entityProxy, false);
 }
 
 //-------------------------------------------------------
 void
 PersistenceHandler::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
-{
+{    
     HandleEntity(entityProxy, true);
 }
 
@@ -230,7 +230,7 @@ PersistenceHandler::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
 void 
 PersistenceHandler::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, 
                                     const bool                    deletedByOwner)
-{
+{    
     // only remove if removed by owner... Otherwise it is probably because the system shut down or the application died
     if( !deletedByOwner )
     {

@@ -98,6 +98,13 @@ namespace Internal
             }
         }
     }
+
+    void SubscriptionQueue::MakeEmpty(void) 
+    { 
+        ScopedSubscriptionQueueLock lck(m_lock);
+        m_queue.clear(); 
+    }
+
 }
 }
 }

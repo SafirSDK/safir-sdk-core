@@ -83,6 +83,7 @@ typedef struct
                              // from each node. This defines which
     dcom_uchar8   bWantAck;        //
     dcom_uchar8   DestinationId;   // a
+    dcom_ulong32   SessionId;    //JOOT  
 
 } DOSE_UDP_MSG_HDR;
 
@@ -110,6 +111,8 @@ typedef struct
                             //                =
                             // NACK: expected FragmentNumber
                             // or expected SequenceNumber
+
+    dcom_ulong32   SessionId;   //JOOT   
 } DOSE_UDP_ACK_MSG;  // size = 16
 
 

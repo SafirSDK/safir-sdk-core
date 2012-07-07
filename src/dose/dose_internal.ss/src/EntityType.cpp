@@ -36,7 +36,6 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 
-
 #include <boost/bind.hpp>
 
 namespace Safir
@@ -64,7 +63,7 @@ namespace Internal
                               const Dob::Typesystem::HandlerId&     handlerId,
                               const InstanceIdPolicy::Enumeration   instanceIdPolicy,
                               const bool                            isInjectionHandler,
-                              const RegisterTime                    regTime,
+                              LamportClock&                         regClock,
                               const bool                            overrideRegistration,
                               const ConsumerId&                     consumer)
     {
@@ -79,6 +78,9 @@ namespace Internal
         }
 
         ScopedTypeLock lck(m_typeLocks[context]);
+
+        // Important to update the registration clock with the lock taken
+        RegisterTime regTime = regClock.GetNewTimestamp();
 
         return m_handlerRegistrations[context].Register(connection,
                                                         handlerId,
@@ -1367,8 +1369,8 @@ namespace Internal
 
     void EntityType::RemoteSetDeleteEntityStateInternal(const DistributionData&         remoteEntity,
                                                         const StateSharedPtr&           statePtr)
-    {
-        bool needToCheckRegistrationState = true;
+    {        
+        bool needToCheckRegistrationState = true;        
 
         DistributionData localEntity = statePtr->GetRealState();
 
@@ -1473,6 +1475,10 @@ namespace Internal
         remoteSetResult = RemoteSetAccepted;
 
         bool needToCheckRegistrationState = true;
+        if (remoteEntity.GetEntityStateKind()==DistributionData::Ghost)
+        {
+            needToCheckRegistrationState = false; //Ghosts dont need a registration to be set.
+        }
 
         DistributionData localEntity = statePtr->GetRealState();
 
@@ -1530,7 +1536,7 @@ namespace Internal
                                                                            true); // true => include released states
 
             // Get  a better name
-            const StateSharedPtr& regStatePtr = lockedRegStateResult.first;
+            const StateSharedPtr& regStatePtr = lockedRegStateResult.first;            
 
             if (regStatePtr == NULL ||
                 regStatePtr->GetRealState().IsNoState() ||

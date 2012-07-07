@@ -170,6 +170,7 @@ namespace Internal
         //TODO: The above is only useful when we've implemented zombie connections.
 
         //TODO: check that all other vectors/queues are empty as they should be!
+        m_dirtySubscriptions.MakeEmpty();
     }
 
     MessageQueuePtr Connection::AddMessageInQueue(const ConsumerId& consumer)

@@ -61,8 +61,8 @@ public:
     void OnNotRequestOverflow();
 
 protected:
-    void StartSubscriptions(const bool subscribeAll);
 
+    void StartSubscriptions();
     void ReportPersistentDataReady();
 
     Safir::Utilities::AsioDispatcher m_dispatcher;
