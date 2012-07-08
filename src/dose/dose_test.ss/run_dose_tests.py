@@ -152,10 +152,13 @@ class Parameters:
             os.path.join(self.test_parameters_path, "multinode",
                          "Safir.Dob.DistributionChannelParameters.dou")
 
+        self.test_standalone_NodeParameters_path = \
+            os.path.join(self.test_parameters_path, "standalone",
+                         "Safir.Dob.NodeParameters.dou")
+
         self.test_multinode_NodeParameters_path = \
             os.path.join(self.test_parameters_path, "multinode",
                          "Safir.Dob.NodeParameters.dou")
-
 
         self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
 
@@ -189,14 +192,7 @@ def UpdateConfig(parameters):
 
     # Update NodeParameters
     if parameters.standalone:
-        dom = xml.dom.minidom.parse(parameters.NodeParameters_path)
-        for param in dom.getElementsByTagName("parameter"):
-            name = getText(param.getElementsByTagName("name")[0].childNodes)
-            value = param.getElementsByTagName("value")[0]
-            if name == "NumberOfContexts":
-                value.childNodes[0].data = "2"
-        with open(parameters.NodeParameters_path,"w") as file:
-            file.write(dom.toxml())
+        shutil.copy2(parameters.test_standalone_NodeParameters_path, parameters.parameters_path)
     else:
         shutil.copy2(parameters.test_multinode_NodeParameters_path, parameters.parameters_path)
 
