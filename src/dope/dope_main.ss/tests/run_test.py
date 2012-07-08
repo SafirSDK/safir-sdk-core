@@ -29,6 +29,13 @@ import subprocess, os, time, sys, shutil, glob
 sys.path.append("../../../swre/swre_test.ss/testutil")
 from testenv import TestEnv, TestEnvStopper
 
+def remove(filename):
+    for i in range (10):
+        try:
+            os.remove(filename)
+            break
+        except:
+            time.sleep(0.1)
 
 def rmdir(directory):
     if os.path.exists(directory):
@@ -101,7 +108,7 @@ if len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.xml"))) != 110:
 
 #remove bin files to check that dope can load xml
 for f in glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin")):
-    os.remove(f)
+    remove(f)
 
 print "Check that dope can load xml"
 
@@ -141,7 +148,7 @@ with TestEnvStopper(env):
     #remove all bin files (that have been loaded by dope by now), so 
     #that we can wait for all entities to be written again
     for f in glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin")):
-        os.remove(f)
+        remove(f)
 
     env.launchProcess("entity_owner", (owner_path,"update")).wait()
 
