@@ -68,7 +68,10 @@ class TestEnv:
                 print " dose_main seems to be ready"
                 break
             if self.dose_main.poll() is not None:
-                raise Exception(" dose_main appears to have failed to start")
+                raise Exception(" dose_main appears to have failed to start!\n" +
+                                "----- Output so far ----\n" + 
+                                self.Output("dose_main") +
+                                "\n---------------------")
         
     def launchProcess(self, name, cmd):
         print "Launching", name
