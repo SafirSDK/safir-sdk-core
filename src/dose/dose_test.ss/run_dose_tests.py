@@ -35,6 +35,24 @@ def rmdir(directory):
             time.sleep(0.2)
             shutil.rmtree(directory)
 
+def mkdir(newdir):
+    """works the way a good mkdir should :)
+        - already exists, silently complete
+        - regular file in the way, raise an exception
+        - parent directory(ies) does not exist, make them as well
+    """
+    if os.path.isdir(newdir):
+        pass
+    elif os.path.isfile(newdir):
+        raise OSError("a file with the same name as the desired " \
+                      "dir, '%s', already exists." % newdir)
+    else:
+        head, tail = os.path.split(newdir)
+        if head and not os.path.isdir(head):
+            mkdir(head)
+        if tail:
+            os.mkdir(newdir)
+
 class Parameters:
     def __init__(self):
         from optparse import OptionParser
@@ -607,6 +625,10 @@ class JenkinsController:
 
 
 def main():
+    rmdir("dose_test_output")
+    mkdir("dose_test_output")
+    os.chdir("dose_test_output")
+
     parameters = Parameters()
 
     if parameters.autostart_jenkins_slave:
