@@ -124,9 +124,9 @@ def num_cpus():
             return int(os.popen2("sysctl -n hw.ncpu")[1].read())
     # Windows:
     if os.environ.has_key("NUMBER_OF_PROCESSORS"):
-            ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
-            if ncpus > 0:
-                return ncpus
+        ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
+        if ncpus > 0:
+            return ncpus
     return 1 # Default
 
 def physical_memory():
@@ -619,7 +619,8 @@ class UnixGccBuilder(object):
                 self.num_jobs = max(1,memory / 400)
         except:
             self.num_jobs = 2
-
+        #ada builds (with gnatmake) will look at environment to determine parallellism
+        os.environ["NUMBER_OF_PROCESSORS"] = str(self.num_jobs)
 
     @staticmethod
     def can_use():
