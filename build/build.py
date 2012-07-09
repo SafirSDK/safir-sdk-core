@@ -24,7 +24,7 @@
 #
 ###############################################################################
 
-import os, glob, sys, subprocess, threading, xml.dom.minidom
+import os, glob, sys, subprocess, threading, xml.dom.minidom, re
 
 #Load some environment variables that are needed throughout as globals
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
@@ -129,7 +129,13 @@ def num_cpus():
                 return ncpus
     return 1 # Default
 
-
+def physical_memory():
+    if not sys.platform.startswith("linux"):
+        die ("physical_memory() is only implemented on linux")
+    with open("/proc/meminfo") as file:
+        meminfo = file.read()
+    match = re.search(r"MemTotal:\s*([0-9]*) kB", meminfo)
+    return int(match.group(1))/1024
 
 class Logger(object):
     LogLevel = set(["None", "Brief", "Verbose", "Full"])
@@ -604,12 +610,16 @@ class UnixGccBuilder(object):
     def __init__(self):
         #We need to limit ourselves a little bit in how
         #many parallel jobs we perform. Each job may use
-        #up to 400Mb of memory. Maybe we should try 
-        #to work out how much memory there is as well?
-        if num_cpus() > 1:
-            self.num_jobs = 3
-        else:
+        #up to 400Mb of memory.
+        try:
+            memory = physical_memory()
+            self.num_jobs = num_cpus() + 1
+        
+            if memory / self.num_jobs < 400:
+                self.num_jobs = max(1,memory / 400)
+        except:
             self.num_jobs = 2
+
 
     @staticmethod
     def can_use():

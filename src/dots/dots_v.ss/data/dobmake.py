@@ -24,7 +24,7 @@
 #
 ###############################################################################
 
-import os, glob, subprocess, threading, sys, stat, shutil
+import os, glob, subprocess, threading, sys, stat, shutil, re
 
 def num_cpus():
     """Detects the number of CPUs on a system. Cribbed from pp."""
@@ -43,6 +43,7 @@ def num_cpus():
             if ncpus > 0:
                 return ncpus
     return 1 # Default
+
 
 def mkdir(newdir):
     """works the way a good mkdir should :)
@@ -69,6 +70,15 @@ class DobmakeError(Exception):
 def die(msg):
     buildlog.writeError(msg + "\n")
     raise DobmakeError("\n" + msg)
+
+def physical_memory():
+    if not sys.platform.startswith("linux"):
+        die ("physical_memory() is only implemented on linux")
+    with open("/proc/meminfo") as file:
+        meminfo = file.read()
+    match = re.search(r"MemTotal:\s*([0-9]*) kB", meminfo)
+    return int(match.group(1))/1024
+
 
 def chmod(path):
     flags = stat.S_IWRITE | stat.S_IREAD
@@ -584,7 +594,17 @@ class VisualStudioBuilder(object):
 
 class UnixGccBuilder(object):
     def __init__(self):
-        self.num_jobs = num_cpus() + 1
+        #We need to limit ourselves a little bit in how
+        #many parallel jobs we perform. Each job may use
+        #up to 400Mb of memory.
+        try:
+            memory = physical_memory()
+            self.num_jobs = num_cpus() + 1
+        
+            if memory / self.num_jobs < 400:
+                self.num_jobs = max(1,memory / 400)
+        except:
+            self.num_jobs = 2
 
     @staticmethod
     def can_use():
