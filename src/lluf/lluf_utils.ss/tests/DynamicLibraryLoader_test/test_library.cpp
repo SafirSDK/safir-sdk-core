@@ -24,17 +24,27 @@
 
 #if defined _MSC_VER
 #  define EXPORT __declspec(dllexport)
-#  define STANDARD_CALLING_CONVENTION __cdecl
-#  define ANOTHER_CALLING_CONVENTION __stdcall
+#  if defined (_M_IX86)
+#    define STANDARD_CALLING_CONVENTION __cdecl
+#    define ANOTHER_CALLING_CONVENTION __stdcall
+#  endif
 #elif defined __GNUC__
 #  define EXPORT
 #  if defined (__i386)
 #    define STANDARD_CALLING_CONVENTION __attribute__((cdecl))
 #    define ANOTHER_CALLING_CONVENTION __attribute__((stdcall))
-#  else
+#  elif defined (__x86_64)
 #    define STANDARD_CALLING_CONVENTION __attribute__((sysv_abi))
 #    define ANOTHER_CALLING_CONVENTION __attribute__((ms_abi))
+#  elif defined (__arm__)
+     // Can't get any calling conventions to work for arm. __attribute__((pcs("aapcs"))) doesnt work..
+#    define STANDARD_CALLING_CONVENTION
+#    define ANOTHER_CALLING_CONVENTION
 #  endif
+#endif
+
+#if !defined (STANDARD_CALLING_CONVENTION) || !defined (ANOTHER_CALLING_CONVENTION)
+#  error You need to define some calling conventions for this architecture
 #endif
 
 extern "C"
