@@ -41,7 +41,7 @@ package body Safir.Dob.Typesystem.Blob_Operations is
 
    function To_Int_8 is new Ada.Unchecked_Conversion (C.char, Safir.Dob.Typesystem.Int_8);
    function To_Char is new Ada.Unchecked_Conversion (Safir.Dob.Typesystem.Int_8, C.char);
-   function To_Int_Ptr is new Ada.Unchecked_Conversion (Char_Ptrs.Pointer, Int_Ptrs.Pointer);
+--   function To_Int_Ptr is new Ada.Unchecked_Conversion (Char_Ptrs.Pointer, Int_Ptrs.Pointer);
 
    function Get_Type_Id (Blob   : in Safir.Dob.Typesystem.Blob_T)
                          return Safir.Dob.Typesystem.Type_Id is
@@ -889,7 +889,14 @@ package body Safir.Dob.Typesystem.Blob_Operations is
             Array_Index,
             C.char'Val (Boolean'Pos (Value.Is_Changed)),
             Beginning_Of_Unused);
-         To_Int_Ptr (Binary_Start).all := Binary_Size;
+         declare
+            use Int_Ptrs;
+            Tmp : Int_Ptrs.Pointer := null;
+         begin
+            Tmp := Tmp + Interfaces.C.ptrdiff_t (Integer (Binary_Start - null));
+            Tmp.all := Binary_Size;
+         end;
+--         To_Int_Ptr (Binary_Start).all := Binary_Size;
          if Binary_Size > 0 then
             Binary_Start := Binary_Start + 4;  -- Adjust for the initial length Int
             for I in Value.Get_Val.First_Index .. Value.Get_Val.Last_Index loop
