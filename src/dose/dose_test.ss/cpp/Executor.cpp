@@ -180,9 +180,10 @@ void Executor::HandleAction(DoseTest::ActionPtr action)
 {
     if (!action->SeqNbr().IsNull())
     {
-        if (action->SeqNbr().GetVal() != m_lastRecSeqNbr + 1)
+        if (action->SeqNbr() != m_lastRecSeqNbr + 1)
         {
-            std::wcout << "Seems an action from the sequencer is lost!!" << std::endl; 
+            std::wcout << "Seems an action from the sequencer is lost! Expected " 
+                       << m_lastRecSeqNbr << " but got " << action->SeqNbr() << std::endl; 
         }
         m_lastRecSeqNbr = action->SeqNbr().GetVal();
     }
