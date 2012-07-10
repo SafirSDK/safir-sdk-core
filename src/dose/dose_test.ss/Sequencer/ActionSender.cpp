@@ -32,11 +32,12 @@
 
 ActionSender::ActionSender(const std::string& multicastNic,
                            boost::asio::io_service& ioService)
-    : m_seqNbr(0)
-    , m_ioService(ioService)
+    : m_ioService(ioService)
     , m_socket(ioService)
     , m_standalone(Safir::Dob::DistributionChannelParameters::DistributionChannels(0)->MulticastAddress() 
                    == L"127.0.0.1")
+    , m_seqNbr(0)
+
 {
     m_connection.Attach();
 
@@ -93,7 +94,8 @@ void ActionSender::Send(const DoseTest::ActionPtr& msg)
 
     if (m_standalone)
     {
-        m_connection.Send(msg, msg->Partner().IsNull() ? Safir::Dob::Typesystem::ChannelId() : msg->Partner(), this);
+        //        m_connection.Send(msg, msg->Partner().IsNull() ? Safir::Dob::Typesystem::ChannelId() : msg->Partner(), this);
+        m_connection.Send(msg, Safir::Dob::Typesystem::ChannelId(), this);
     }
     else
     {
