@@ -1,4 +1,8 @@
-reenable dose_monitor in build
+Escape xml in dose_test diffs
+make everything build without ACE!
+     douf-tests
+     example apps
+
 Kolla efter svn:keywords i hook-scripten!
 
 Investigate swre_logger crash in stop_orders_at_exit #297
