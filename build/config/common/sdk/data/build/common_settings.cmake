@@ -9,13 +9,9 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 
-#Get some more env variables that may or may not exist (with a stupid way of doing it)
+#Get some more env variables that may or may not exist
 if (NOT "$ENV{BOOST_DIR}" STREQUAL "")
    FILE(TO_CMAKE_PATH "$ENV{BOOST_DIR}" BOOST_DIR)
-endif ()
-
-if (NOT $ENV{ACE_ROOT} STREQUAL "")
-   FILE(TO_CMAKE_PATH $ENV{ACE_ROOT} ACE_ROOT)
 endif ()
 
 #add include path
@@ -103,21 +99,6 @@ endif()
 #Set up boost for any test code (i.e. CheckCXXSourceCompiles stuff)
 set(CMAKE_REQUIRED_INCLUDES ${Boost_INCLUDE_DIRS})
 set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_DYN_LINK -DBOOST_FILESYSTEM_VERSION=2)
-
-#Work out what ACE lib is called
-if (UNIX)
-  set (ACE_LIBRARY "ACE")
-elseif (MSVC)
-  set (ACE_LIBRARY debug ACEd optimized ACE)
-endif ()
-
-if(ACE_ROOT)
-    #Add ace to linker path
-    LINK_DIRECTORIES(${ACE_ROOT}/lib)
-
-    #And add ace to include path
-    INCLUDE_DIRECTORIES(${ACE_ROOT})
-endif()
 
 if (MSVC AND NOT NO_LIBRARY_POSTFIXES)
   SET(CMAKE_DEBUG_POSTFIX "d")
