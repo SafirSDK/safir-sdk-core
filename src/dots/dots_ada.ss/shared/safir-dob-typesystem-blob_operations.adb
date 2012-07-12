@@ -41,17 +41,7 @@ package body Safir.Dob.Typesystem.Blob_Operations is
 
    function To_Int_8 is new Ada.Unchecked_Conversion (C.char, Safir.Dob.Typesystem.Int_8);
    function To_Char is new Ada.Unchecked_Conversion (Safir.Dob.Typesystem.Int_8, C.char);
-
-   -- Convert a char pointer to an int pointer using pointer arithmetic.
-   -- This is used instead of an Unchecked_Conversion, since that gives
-   -- warnings about alignment on ARM arch.
-   function To_Int_Ptr (Ptr : in Char_Ptrs.Pointer)
-      return Int_Ptrs.Pointer is
-      use Int_Ptrs;
-   begin
-      return null + Interfaces.C.ptrdiff_t (Integer (Ptr - null));
-
-   end To_Int_Ptr;
+   function To_Int_Ptr is new Ada.Unchecked_Conversion (Char_Ptrs.Pointer, Int_Ptrs.Pointer);
 
    function Get_Type_Id (Blob   : in Safir.Dob.Typesystem.Blob_T)
                          return Safir.Dob.Typesystem.Type_Id is
