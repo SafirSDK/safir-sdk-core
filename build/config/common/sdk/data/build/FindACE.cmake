@@ -12,42 +12,56 @@
 
 set( ACE_FOUND 0 )
 
-if ( UNIX )
-  FIND_PATH( ACE_INCLUDE_DIRECTORIES
+FIND_PATH( ACE_INCLUDE_DIRECTORIES
+  NAMES
+    ace/ACE.h
+  PATHS
+    /usr/include
+    /usr/include/ace
+    /usr/local/include
+    /usr/local/include/ace
+    $ENV{ACE_ROOT}
+    $ENV{ACE_ROOT}/include
+    $ENV{SAFIR_SDK}/include
+DOC
+  "Specify include-directories that might contain ace.h here."
+)
+FIND_LIBRARY( ACE_LIBRARY 
+  NAMES
+    ace ACE
+  PATHS
+    /usr/lib
+    /usr/lib/ace
+    /usr/local/lib
+    /usr/local/lib/ace
+    /usr/local/ace/lib
+    $ENV{SAFIR_SDK}/lib
+    $ENV{ACE_ROOT}/lib
+    $ENV{ACE_ROOT}
+  DOC "Specify library-locations that might contain the ACE library here."
+)
+if (MSVC)
+  FIND_LIBRARY( ACE_DEBUG_LIBRARY 
     NAMES
-      ace/ACE.h
+      ACEd
     PATHS
-      /usr/include
-      /usr/include/ace
-      /usr/local/include
-      /usr/local/include/ace
-      $ENV{ACE_ROOT}
-      $ENV{ACE_ROOT}/include
-      ${CMAKE_SOURCE_DIR}/externals/ace
-  DOC
-    "Specify include-directories that might contain ace.h here."
-  )
-  FIND_LIBRARY( ACE_LIBRARY 
-    NAMES
-      ace ACE
-    PATHS
-      /usr/lib
-      /usr/lib/ace
-      /usr/local/lib
-      /usr/local/lib/ace
-      /usr/local/ace/lib
       $ENV{ACE_ROOT}/lib
       $ENV{ACE_ROOT}
-    DOC "Specify library-locations that might contain the ACE library here."
+      $ENV{SAFIR_SDK}/lib
+    DOC "Specify library-locations that might contain the ACE debug library here."
   )
+endif()
 
-  if ( ACE_LIBRARY )
-    if ( ACE_INCLUDE_DIRECTORIES )
-      set( ACE_FOUND 1 )
-      message( STATUS "Found ACE library: ${ACE_LIBRARY}")
-      message( STATUS "Found ACE headers: ${ACE_INCLUDE_DIRECTORIES}")
-    endif ()
+if ( ACE_LIBRARY )
+  if ( ACE_INCLUDE_DIRECTORIES )
+    set( ACE_FOUND 1 )
+    message( STATUS "Found ACE library: ${ACE_LIBRARY}")
+    message( STATUS "Found ACE headers: ${ACE_INCLUDE_DIRECTORIES}")
+    if (ACE_DEBUG_LIBRARY)
+      set(ACE_LIBRARY debug ${ACE_DEBUG_LIBRARY} optimized ${ACE_LIBRARY})
+    endif()
   endif ()
+endif ()
 
-  mark_as_advanced( ACE_FOUND ACE_LIBRARY ACE_INCLUDE_DIRECTORIES )
-endif (UNIX)
+mark_as_advanced( ACE_FOUND ACE_LIBRARY ACE_INCLUDE_DIRECTORIES )
+message("ACE_LIBRARY is ${ACE_LIBRARY}")
