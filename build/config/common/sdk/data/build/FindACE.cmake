@@ -64,4 +64,3 @@ if ( ACE_LIBRARY )
 endif ()
 
 mark_as_advanced( ACE_FOUND ACE_LIBRARY ACE_INCLUDE_DIRECTORIES )
-message("ACE_LIBRARY is ${ACE_LIBRARY}")
