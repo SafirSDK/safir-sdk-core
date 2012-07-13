@@ -25,6 +25,7 @@
 ###############################################################################
 
 import sys, subprocess, os, shutil, difflib, time, xml.dom.minidom, glob, re, traceback, stat, signal
+from xml.sax.saxutils import escape
 
 def rmdir(directory):
     if os.path.exists(directory):
@@ -290,11 +291,11 @@ class Results:
         if not res:
             output += "(A line with a '-' in front means that it is <b>missing</b>, and one with a '+' in front means that it has been added, compared to the expected result.)\n\n"
             if len(diff0) != 0:
-                output += "Partner 0 diff:\n" + "".join(diff0) + "\n\n"
+                output += "Partner 0 diff:\n" + escape("".join(diff0)) + "\n\n"
             if len(diff1) != 0:
-                output += "Partner 1 diff:\n" + "".join(diff1) + "\n\n"
+                output += "Partner 1 diff:\n" + escape("".join(diff1)) + "\n\n"
             if len(diff2) != 0:
-                output += "Partner 2 diff:\n" + "".join(diff2) + "\n\n"
+                output += "Partner 2 diff:\n" + escape("".join(diff2)) + "\n\n"
             
         self.write_test_result(res, tcname, output)
         return res
