@@ -500,7 +500,9 @@ class VisualStudioBuilder(object):
         with open(batpath,"w") as bat:
             bat.write("@echo off\n" +
                       "call \"" + os.path.join(self.studio,"vsvars32.bat") + "\"\n" +
-                      "\"" + os.path.join(SAFIR_RUNTIME,"bin","dobmake.py") + "\" -b --rebuild") #batch mode (no gui)
+                      "\"" + os.path.join(SAFIR_RUNTIME,"bin","dobmake.py") + "\" -b") #batch mode (no gui)
+            if clean:
+                bat.write(" --rebuild")
             if force_config == "Debug" and force_extra_config == "None":
                 bat.write (" --no-cpp-release --default-config Debug")
             bat.write("\n")
@@ -673,7 +675,9 @@ class UnixGccBuilder(object):
 
     def dobmake(self):
         """run the dobmake command"""
-        cmd = (os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b", "--rebuild") #batch mode (no gui)
+        cmd = (os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b") #batch mode (no gui)
+        if clean:
+            cmd += ("--rebuild",)
         if force_config == "Debug" and force_extra_config == "None":
             cmd += ("--no-cpp-release","--default-config","Debug")
         process = subprocess.Popen(cmd,
