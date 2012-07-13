@@ -40,5 +40,10 @@ if (ACE_FOUND)
   INSTALL_DEBUG_INFO(VehicleMmiCppQt)
 else()
   MESSAGE(STATUS "ACE library was not found, not building VehicleMmiCppQt")
+
+  #dummy install to get an install target in the makefiles
+  INSTALL (FILES
+    DESTINATION dummy)
+
 endif()
 

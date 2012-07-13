@@ -29,5 +29,10 @@ if (ACE_FOUND)
   INSTALL_DEBUG_INFO(SplitJoinStresser)
 else()
   MESSAGE(STATUS "ACE library was not found, not building SplitJoinStresser")
+
+  #dummy install to get an install target in the makefiles
+  INSTALL (FILES
+    DESTINATION dummy)
+
 endif()
 

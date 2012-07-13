@@ -32,5 +32,10 @@ if (ACE_FOUND)
   INSTALL_DEBUG_INFO(VehicleAppDb)
 else()
   MESSAGE(STATUS "ACE library was not found, not building VehicleAppDb")
+
+  #dummy install to get an install target in the makefiles
+  INSTALL (FILES
+    DESTINATION dummy)
+
 endif()
 
