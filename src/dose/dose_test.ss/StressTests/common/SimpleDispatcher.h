@@ -89,7 +89,7 @@ public:
         const boost::posix_time::milliseconds delay(milliseconds);
 
         boost::unique_lock<boost::mutex> lock(m_mutex);
-        const int res = m_condition.timed_wait(lock,delay,boost::bind(&SimpleDispatcher::DispatchPending,this));
+        const bool res = m_condition.timed_wait(lock,delay,boost::bind(&SimpleDispatcher::DispatchPending,this));
         m_dispatch = false;
         return res;
     }
