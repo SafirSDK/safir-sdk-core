@@ -40,6 +40,9 @@ namespace Dob
 {
 namespace Internal
 {
+    using boost::move; //we need to get hold of the boost move, in case we're
+    //using boost >= 1.49. This way our code is backwards compatible.
+
     static const int MAX_NUM_CONNECTIONS =
         Safir::Dob::ProcessInfo::MaxNumberOfInstances() *
         Safir::Dob::ProcessInfo::ConnectionNamesArraySize();
@@ -203,7 +206,7 @@ namespace Internal
             const pid_t pid = Safir::Utilities::ProcessInfo::GetPid();
 
             //upgrade the mutex
-            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::move(rlock));
+            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
             connection = ConnectionPtr(GetSharedMemory().construct<Connection>
                 (boost::interprocess::anonymous_instance)
                 (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), contextId, pid));
@@ -268,7 +271,7 @@ namespace Internal
                     ConnectionPtr connection;
                     {
                         //upgrade the mutex
-                        boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::move(rlock));
+                        boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
 
                         connection = ConnectionPtr(GetSharedMemory().construct<Connection>(boost::interprocess::anonymous_instance)
                             (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), context, pid));
@@ -317,7 +320,7 @@ namespace Internal
 
 
         //upgrade the mutex
-        boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::move(rlock));
+        boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
 
         //remote connections have pid = -1
         ConnectionPtr connection(GetSharedMemory().construct<Connection>(boost::interprocess::anonymous_instance)
