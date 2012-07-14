@@ -874,6 +874,14 @@ def main():
 #actual code starts here
 logger = Logger()
 
+#reduce process priority (currently only done on unix platforms)
+if hasattr(os,"nice"):
+    try:
+        if os.nice(0) == 0:
+            result = os.nice(10)
+    except Exception, e:
+        logger.log("Failed to set process niceness: " + str(e))
+
 try:
     main()
 except FatalError, e:
