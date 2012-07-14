@@ -53,7 +53,10 @@ namespace
 // const_cast is used because string inputs are declared as input in the ODBC
 // specification and should be a const wchar_t *.
 #ifdef NO_WCHAR_CONVERSION
-#    define ToSqlWchars const_cast<SQLWCHAR*>
+    SQLWCHAR* ToSqlWchars(const std::wstring& str)
+    {
+        return const_cast<SQLWCHAR*>(str.c_str());
+    }
 #else
     class ToSqlWchars
     {
