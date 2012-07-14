@@ -1,28 +1,26 @@
-Escape xml in dose_test diffs
-make everything build without ACE!
-     douf-tests
-     example apps
 
 Kolla efter svn:keywords i hook-scripten!
 
-Investigate swre_logger crash in stop_orders_at_exit #297
-
-remove ace from stresstests
-       testa errorreporter
-exempelapparna bör kunna köra Boost.Asio också!
 skriv klart byggskriptet (output options)
-write ada douf test
-complete swre tests
-
-merge sdk 4.3.9
 
 
-write olib test?!
-write dope db test
+LATER
+-----
 
-fixa OLIB UnixODBC på ngt sätt! StringConversion.h är helt kokobäng och kopierar i onödan i 2b - 2b fallet.
 dots_cpp array container proxies!?
 
 make dose_com possible to stop nicely
 använd wide-interfacen för att undvika MAX_PATH problem på windows
 
+write olib test, both against unixodbc and iodbc on linux
+write dope db test
+
+write ada douf test
+complete swre tests
+
+remove ace from stresstests
+       testa errorreporter
+exempelapparna bör kunna köra Boost.Asio också!
+
+Gör så att dobmake kan köra utan rebuild
+använd "jom" för att få parallella builds på windows utan allt hackandet...
