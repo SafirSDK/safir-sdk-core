@@ -38,33 +38,60 @@ namespace
 #error "Can't work out if conversion is needed"
 #endif
 
-const std::wstring ToWstring(const SQLWCHAR* str)
-{
+
+    inline const std::wstring ToWstring(const SQLWCHAR* str)
+    {
 #ifdef NO_WCHAR_CONVERSION
-    return std::wstring(str);
+        return std::wstring(str);
 #else
-    std::wostringstream ostr;
-    ostr << str;
-    return ostr.str();
+        std::wostringstream ostr;
+        ostr << str;
+        return ostr.str();
 #endif
 }
 
-const std::vector<SQLWCHAR> ToSqlWchars(const std::wstring& str)
-{
-    return std::vector<SQLWCHAR>(str.begin(),str.end());
-}
+// const_cast is used because string inputs are declared as input in the ODBC
+// specification and should be a const wchar_t *.
+#ifdef NO_WCHAR_CONVERSION
+#    define ToSqlWchars const_cast<SQLWCHAR*>
+#else
+    class ToSqlWchars
+    {
+    public:
+        explicit ToSqlWchars(const std::wstring& str)
+            : m_chars(str.begin(),str.end())
+        {}
+        
+        operator SQLWCHAR*()
+        {
+            return &m_chars[0];
+        }
+    private:
+        std::vector<SQLWCHAR> m_chars;
+    };
+#endif
+
+    inline bool Equal(const SQLWCHAR* left, const wchar_t* right)
+    {
+#ifdef NO_WCHAR_CONVERSION
+        return wcscmp(left,right) == 0;
+#else
+        return wcscmp(ToWstring(left).c_str(),right) == 0;
+#endif
+    }
+
 
     //not meant to be called, ever.
-void size_checks()
-{
+    void size_checks()
+    {
 #ifdef NO_WCHAR_CONVERSION 
-    BOOST_STATIC_ASSERT(sizeof(SQLWCHAR) == sizeof(wchar_t));
+        BOOST_STATIC_ASSERT(sizeof(SQLWCHAR) == sizeof(wchar_t));
 #else
-    BOOST_STATIC_ASSERT(sizeof(SQLWCHAR) == 2);
-    BOOST_STATIC_ASSERT(sizeof(wchar_t) == 4);
+        BOOST_STATIC_ASSERT(sizeof(SQLWCHAR) == 2);
+        BOOST_STATIC_ASSERT(sizeof(wchar_t) == 4);
 #endif
-}
-
+    }
+    
 }
 
 #endif
