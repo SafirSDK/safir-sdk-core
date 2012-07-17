@@ -21,6 +21,9 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#include <boost/noncopyable.hpp>
+#include <boost/asio/detail/fenced_block.hpp>
+
 #include <boost/shared_ptr.hpp>
 
 
@@ -29,7 +32,7 @@ int main()
     boost::shared_ptr<int> foo;
     foo.reset(new int);
     *foo = 10;
-
+    boost::asio::detail::fenced_block f(boost::asio::detail::fenced_block::full);
     return 0;
 }
 
