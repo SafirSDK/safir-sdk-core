@@ -22,17 +22,19 @@
 *
 ******************************************************************************/
 #include <boost/noncopyable.hpp>
-#include <boost/asio/detail/fenced_block.hpp>
+#include <boost/asio.hpp>
 
 #include <boost/shared_ptr.hpp>
-
+#include "config.h"
 
 int main()
 {
     boost::shared_ptr<int> foo;
     foo.reset(new int);
     *foo = 10;
+#if defined(CMAKE_HAVE_FENCED_BLOCK_HPP)
     boost::asio::detail::fenced_block f(boost::asio::detail::fenced_block::full);
+#endif
     return 0;
 }
 

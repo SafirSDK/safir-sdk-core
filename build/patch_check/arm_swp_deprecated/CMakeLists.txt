@@ -1,4 +1,4 @@
-include(CheckCXXSourceCompiles)
+include(CheckCXXSourceRuns)
 
 #we make the assembler generate errors instead of warnings
 #for gcc. Other compilers are not supported by this check, currently.
@@ -7,7 +7,21 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} -Wa,--fatal-warnings)
 endif()
 
-CHECK_CXX_SOURCE_COMPILES("#include \"${CMAKE_CURRENT_SOURCE_DIR}/test.cpp\"" arm_swp_deprecated)
+FIND_PACKAGE(Boost COMPONENTS system)
+
+if (NOT MSVC)
+  set(CMAKE_REQUIRED_LIBRARIES ${Boost_LIBRARIES} pthread)
+endif()
+
+find_path(HAVE_FENCED_BLOCK_HPP boost/asio/detail/fenced_block.hpp)
+
+if (HAVE_FENCED_BLOCK_HPP)
+  file(WRITE config.h "#define CMAKE_HAVE_FENCED_BLOCK_HPP\n")
+else()
+  file(WRITE config.h "\n")
+endif()
+
+CHECK_CXX_SOURCE_RUNS("#include \"${CMAKE_CURRENT_SOURCE_DIR}/test.cpp\"" arm_swp_deprecated)
 
 if(NOT arm_swp_deprecated)
 message (FATAL_ERROR 
