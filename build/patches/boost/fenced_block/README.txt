@@ -5,10 +5,10 @@ Affected platforms:
 ARMv6 and up
 
 References:
-https://svn.boost.org/trac/boost/ticket/5331
+TODO
 
 Fixed in:
-1.50
+TODO
 
 Applies to:
-All versions prior to 1.50
+TODO

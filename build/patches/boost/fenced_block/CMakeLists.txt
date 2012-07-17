@@ -1,0 +1,7 @@
+if (#Boost_VERSION LESS 105000 AND #1.50 TODO
+    CMAKE_SYSTEM_PROCESSOR MATCHES "^arm" OR
+    CMAKE_SYSTEM_PROCESSOR MATCHES "^armv7")
+  INSTALL(FILES ${Boost_LIB_VERSION}/fenced_block.hpp
+    DESTINATION ${Boost_INCLUDE_DIRS}/boost/asio/detail)
+endif()
+
