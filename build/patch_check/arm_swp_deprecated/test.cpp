@@ -25,6 +25,7 @@
 #include <boost/asio.hpp>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/version.hpp>
 #include "config.h"
 
 int main()
@@ -33,7 +34,11 @@ int main()
     foo.reset(new int);
     *foo = 10;
 #if defined(CMAKE_HAVE_FENCED_BLOCK_HPP)
+#if ((BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) >= 48)
     boost::asio::detail::fenced_block f(boost::asio::detail::fenced_block::full);
+#else
+    boost::asio::detail::fenced_block f();
+#endif
 #endif
     return 0;
 }
