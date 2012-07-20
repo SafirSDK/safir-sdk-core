@@ -216,7 +216,7 @@ def parse_command_line(builder):
 
     if options.jenkins:
         options.verbose += 1
-    if options.verbose => 2:
+    if options.verbose >= 2:
         os.environ["VERBOSE"] = "1"
 
     global logger
