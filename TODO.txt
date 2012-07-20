@@ -1,7 +1,6 @@
+testa patch_check för arm
 
 Kolla efter svn:keywords i hook-scripten!
-
-skriv klart byggskriptet (output options)
 
 
 LATER
