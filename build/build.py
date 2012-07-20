@@ -141,7 +141,8 @@ def physical_memory():
 
 
 class Logger(object):
-    LogLevel = set(["Brief", "Verbose"])
+    LogLevel = ("Brief", "Verbose")
+    Tags = set(["header","brief","normal","command","output"])
 
     def __init__(self,level):
         #make stdout unbuffered
@@ -150,10 +151,10 @@ class Logger(object):
             die("Bad log level")
         self.__logLevel = level
 
-    def log(self, data, tag):
+    def log(self, data, tag = "normal"):
         if data is None: return
         
-        if tag not in ("header","brief","normal","command","output"):
+        if tag not in Logger.Tags:
             die("unknown logging tag")
 
         if self.__logLevel == "Brief":
@@ -359,13 +360,14 @@ class VisualStudioBuilder(object):
         #java path gets set by jenkins
 
         #set up K: drive:
+        logger.log("Setting up K: drive using subst.exe","header")
         bindir = os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
         if not os.path.isdir(bindir):
             mkdir(bindir)
         ret = subprocess.call(("subst","/d", "k:"))
-        logger.log("'subst /d k:' exited with return code" + str(ret))
+        logger.log("'subst /d k:' exited with return code" + str(ret),"command")
         subprocess.call(("subst","k:",bindir))
-        logger.log("'subst k:", bindir + "' exited with return code" + str(ret))
+        logger.log("'subst k:", bindir + "' exited with return code" + str(ret),"output")
 
     def build(self, directory, configs, install):
         if self.__can_use_studio_build(directory):
