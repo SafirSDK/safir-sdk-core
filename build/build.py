@@ -25,6 +25,8 @@
 ###############################################################################
 
 import os, glob, sys, subprocess, threading, xml.dom.minidom, re
+from Queue import Queue, Empty
+from xml.sax.saxutils import escape
 
 #Load some environment variables that are needed throughout as globals
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
@@ -52,7 +54,7 @@ def copy_dob_files(source_dir, target_dir):
     dots_generated_dir = os.path.join(SAFIR_SDK,"dots","dots_generated")
     abs_target_dir = os.path.join(dots_generated_dir, target_dir)
 
-    logger.log("Copying dob files from " + source_dir + " to " + abs_target_dir)
+    logger.log("Copying dob files from " + source_dir + " to " + abs_target_dir,"output")
     
     if not os.path.isdir(dots_generated_dir):
         mkdir(dots_generated_dir)
@@ -137,153 +139,48 @@ def physical_memory():
     match = re.search(r"MemTotal:\s*([0-9]*) kB", meminfo)
     return int(match.group(1))/1024
 
-class Logger(object):
-    LogLevel = set(["None", "Brief", "Verbose", "Full"])
-    LogType = set(["Plain", "HTML"])
 
-    def __init__(self):
+class Logger(object):
+    LogLevel = set(["Brief", "Verbose"])
+
+    def __init__(self,level):
         #make stdout unbuffered
         sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-
-        self.logdata = list()
-        self.lock = threading.Lock()
-        self.lastTag = None
-        self.stdoutLog = ("Brief", "Plain")
-        self.fileLog = ("Full", "HTML")
-        self.file = None
-
-    def close(self):
-        pass
-
-    def set_stdoutLog(self, log):
-        if log[0] not in Logger.LogLevel:
+        if level not in Logger.LogLevel:
             die("Bad log level")
-        if log[1] not in Logger.LogType:
-            die("Bad log type")
-        self.stdoutLog = log
+        self.__logLevel = level
 
-    def set_fileLog(self, log):
-        if log[0] not in Logger.LogLevel:
-            die("Bad log level")
-        if log[1] not in Logger.LogType:
-            die("Bad log type")
-        self.fileLog = log
-
-    def __emitStartTag(self, stream, tag):
-        if tag == "header":
-            stream.write("<h3>\n")
-        if tag == "title":
-            stream.write("<title>\n")
-        if tag == "command":
-            stream.write("<pre style=\"color: green\">\n")
-        if tag == "pre":
-            stream.write("<pre>\n")
-        if tag == "error":
-            stream.write("<font color=\"red\">\n")
-        
-
-    def __emitEndTag(self, stream, tag):
-        if tag == "header":
-            stream.write("</h3>\n")
-        if tag == "title":
-            stream.write("</title>\n")
-        if tag == "command":
-            stream.write("</pre>\n")
-        if tag == "pre":
-            stream.write("</pre>\n")
-        if tag == "error":
-            stream.write("</font>\n")
-
-    def __openLogFile(self):
-        try:
-            os.remove("buildlog.html")
-        except OSError:
-            pass
-        try:
-            os.remove("buildlog.txt")
-        except OSError:
-            pass
-
-        if self.fileLog[1] == "HTML":
-            logpath = "buildlog.html"
-        else:
-            logpath = "buildlog.txt"
-
-        self.logfile = open(logpath,'w', 0)
-#        buildlog.write("<html><title>Build Log</title><body>")
-
-    def log(self, data, tag = "normal"):
+    def log(self, data, tag):
         if data is None: return
         
-        if tag not in ("header","normal","command","output"):
+        if tag not in ("header","brief","normal","command","output"):
             die("unknown logging tag")
-        
-        if tag == "header":
-            sys.stdout.write("\n==== " + data + " ====\n")
-        elif tag == "command":
-            sys.stdout.write("+ " + data + "\n")
-        else:
-            sys.stdout.write(data + "\n")
 
- 
-    def __write(self, data, tag = "normal", level = 0):
-        if data is None: return
-
-        if self.file is None:
-            self.__openLogFile()
-
-        if tag != self.lastTag:
-            self.__emitEndTag(self.lastTag)                
-            self.__emitStartTag(sys.stdout, tag)
-            self.lastTag = tag
-        sys.stdout.write(data)
-
-    def writeHeader(self, data):
-        self.__write(data,"header")
-
-    def writeTitle(self, data):
-        self.__write(data,"title")
-
-    def writeCommand(self, data):
-        self.__write(data,"command")
-
-    def writeError(self,data):
-        self.__write(data,"error")
-
-    class __PollThread(threading.Thread):
-        def __init__(self, process, logger):
-            threading.Thread.__init__(self)
-            self.process = process
-            self.logger = logger
-
-        def run(self):
-            while True:
-                data = self.process.stdout.readline().rstrip()
-                if self.process.poll() is not None:
-                    return
-                if len(data) == 0:
-                    continue
-                self.logger.log(data, "output")
-
+        if self.__logLevel == "Brief":
+            if tag == "header" or tag == "normal":
+                sys.stdout.write(data + "\n")
+            if tag == "brief":
+                sys.stdout.write(data + "\n")
+        elif self.__logLevel == "Verbose":
+            if tag == "header":
+                sys.stdout.write("\n==== " + data + " ====\n")
+            elif tag == "command":
+                sys.stdout.write("+ " + data + "\n")
+            else:
+                sys.stdout.write(data + "\n")
 
     def logOutput(self, process):
-        thread = Logger.__PollThread(process,self)
-        thread.start()
-        thread.join()
+        for line in iter(process.stdout.readline,b''):
+            self.log(line.rstrip("\n"),"output")
         process.wait()
         if process.returncode != 0:
             self.log("Failure, return code is " + str(process.returncode))
-        self.log("")
-
-    def close(self):
-        pass
+        self.log("","output")
 
 def check_environment():
     global SAFIR_RUNTIME
     global SAFIR_SDK
 
-    print "Platform =", sys.platform
-    
     if SAFIR_RUNTIME == None or SAFIR_SDK == None:
         die("You need to have both SAFIR_RUNTIME and SAFIR_SDK set");
 
@@ -291,11 +188,7 @@ def check_environment():
     SAFIR_RUNTIME = os.path.normpath(SAFIR_RUNTIME)
     SAFIR_SDK = os.path.normpath(SAFIR_SDK)
 
-    print "Using SAFIR_RUNTIME =", SAFIR_RUNTIME
-    print "Using SAFIR_SDK =", SAFIR_SDK
     #TODO check cmake?! and other needed stuff
-
-
 
 
 def parse_command_line(builder):
@@ -314,15 +207,20 @@ def parse_command_line(builder):
     parser.add_option("--jenkins", action="store_true",dest="jenkins",default=False,
                       help="Set up and use environment variables for a Jenkins automated build.\n" + 
                       "Currently sets up SAFIR_RUNTIME, SAFIR_SDK, PATH, LD_LIBRARY_PATH and ADA_PROJECT_PATH \n" +
-                      "when needed, and honours the 'Config' matrix axis")
-    parser.add_option("--verbose", "-v", action="store_true",dest="verbose",default=False,
-                      help="Print more stuff about what is going on")
-    parser.add_option("--full", action="store_true",dest="full_log",default=False,
-                      help="Print everything to stdout, and no log to file.")
-
+                      "when needed, and honours the 'Config' matrix axis. Also implies --verbose.")
+    parser.add_option("--verbose", "-v", action="count",dest="verbose",default=0,
+                      help="Print more stuff about what is going on. Use twice to get very verbose output.")
 
     builder.setup_command_line_options(parser)
     (options,args) = parser.parse_args()
+
+    if options.jenkins:
+        options.verbose += 1
+    if options.verbose => 2:
+        os.environ["VERBOSE"] = "1"
+
+    global logger
+    logger = Logger("Brief" if options.verbose == 0 else "Verbose")
 
     global skip_list;
     if (options.skip_list == None):
@@ -332,14 +230,6 @@ def parse_command_line(builder):
         
     global clean
     clean = options.clean
-
-#    if options.verbose:
-#        logger.set_stdoutLog(("Verbose","Plain"))
-
-#    if options.full_log:
-#        logger.set_stdoutLog(("Full","Plain"))
-#        logger.set_fileLog(("None","HTML"))
-
 
     if options.command_file is None:
         die("You need to specify the command file to use")
@@ -370,9 +260,9 @@ def parse_command_line(builder):
             if force_config is not None or force_extra_config is not None:
                 die("Cannot combine force_config or force_extra_config with $Config!")
             if config == "Release":
-                print "Using Config 'Release', building as specified in the command file."
+                logger.log("Using Config 'Release', building as specified in the command file.")
             elif config == "DebugOnly":
-                print "Using Config 'DebugOnly', ignoring command file configs, and building everything in Debug only."
+                logger.log("Using Config 'DebugOnly', ignoring command file configs, and building everything in Debug only.")
                 force_config = "Debug"
                 force_extra_config = "None"
             else:
@@ -473,9 +363,9 @@ class VisualStudioBuilder(object):
         if not os.path.isdir(bindir):
             mkdir(bindir)
         ret = subprocess.call(("subst","/d", "k:"))
-        print "'subst /d k:' exited with return code", ret
+        logger.log("'subst /d k:' exited with return code" + str(ret))
         subprocess.call(("subst","k:",bindir))
-        print "'subst k:", bindir + "' exited with return code", ret
+        logger.log("'subst k:", bindir + "' exited with return code" + str(ret))
 
     def build(self, directory, configs, install):
         if self.__can_use_studio_build(directory):
@@ -507,9 +397,7 @@ class VisualStudioBuilder(object):
         process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         
         logger.logOutput(process)
-        #result = process.communicate()
-        #buildlog.write(result[0].replace("\r\n","\n"))
-        #logger.log(result[0].replace("\r\n","\n"))
+
         if process.returncode != 0:
             die("Failed to run dobmake")
 
@@ -557,6 +445,7 @@ class VisualStudioBuilder(object):
         solution = find_sln()
         
         for config in configs:
+            logger.log(" - in config " + config, "brief")
             self.__run_command("cmake --build . --config " + config + ("--clean-first" if clean else ""),
                                "Build " + config, directory)
 
@@ -568,7 +457,8 @@ class VisualStudioBuilder(object):
 
     def __nmake_build(self,directory,configs,install):
         """build a directory using nmake"""
-        for config in configs:                
+        for config in configs:
+            logger.log(" - in config " + config, "brief")
             self.__run_command("cmake -D CMAKE_BUILD_TYPE:string=" + config + " " +
                                "-G \"NMake Makefiles\" .",
                                "Configure " + config, directory)
@@ -589,20 +479,15 @@ class VisualStudioBuilder(object):
                   "call \"" + os.path.join(self.studio,"vsvars32.bat") + "\"\n" +
                   cmd)
         bat.close()
-        #buildlog.write("<h4>" + description + " '" + what + "'</h4><pre style=\"color: green\">" + cmd + "</pre>\n")
+
         logger.log(description + " " + what + ": '" + cmd + "'", "command")
         process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         logger.logOutput(process)
-        #result = process.communicate()
-        #buildlog.write("<pre>")
-        #buildlog.write(result[0].replace("\r\n","\n"))
-        #logger.log(result[0].replace("\r\n","\n"))
-        #buildlog.write("</pre>")
+
         if process.returncode != 0:
             if not allow_fail:
                 die("Failed to run '" + cmd + "' for " + what)
             else:
-                #buildlog.write("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing\n")
                 logger.log("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing\n")
 
 
@@ -619,7 +504,8 @@ class UnixGccBuilder(object):
                 self.num_jobs = max(1,memory / 400)
         except:
             self.num_jobs = 2
-        #ada builds (with gnatmake) will look at environment to determine parallellism
+        #ada builds (with gnatmake) will look at environment variable that is
+        #defined on windows to determine parallellism. Define it on linux too.
         os.environ["NUMBER_OF_PROCESSORS"] = str(self.num_jobs)
 
     @staticmethod
@@ -648,6 +534,7 @@ class UnixGccBuilder(object):
     def build(self, directory, configs, install):
         """build a directory using make"""
         config = configs[0]
+        logger.log(" - in config " + config, "brief")
         self.__run_command(("cmake",
                             "-D", "CMAKE_BUILD_TYPE:string=" + config,
                             "."),
@@ -755,14 +642,7 @@ def translate_results_to_junit(suite_name):
                         junitfile.write("/>\n")
                     else:
                         """failure"""
-                        output = getText(meas.getElementsByTagName("Value")[0].childNodes)
-                        #replace characters that can't be in xml. in a rather inefficient way...
-                        output = output.\
-                            replace('&',"&amp;").\
-                            replace('<',"&lt;").\
-                            replace('>',"&gt;").\
-                            replace('"',"&quot;").\
-                            replace('\'',"&apos;")
+                        output = escape(getText(meas.getElementsByTagName("Value")[0].childNodes))
                         junitfile.write(">\n    <error message=\"" + exitCode + "(" + exitValue +  ")\">" + 
                                         output +
                                         "\n</error>\n  </testcase>\n")
@@ -866,13 +746,8 @@ def main():
         sys.stderr.flush()
 
     os.chdir(olddir)
-    
-    logger.log("Result", "header")
-    logger.log("Build completed successfully!")
 
-
-#actual code starts here
-logger = Logger()
+#### actual code starts here ####
 
 #reduce process priority (currently only done on unix platforms)
 if hasattr(os,"nice"):
@@ -884,11 +759,11 @@ if hasattr(os,"nice"):
 
 try:
     main()
+    logger.log("Result", "header")
+    logger.log("Build completed successfully!")
 except FatalError, e:
     logger.log("Result", "header")
     logger.log("Build script failed: " + str(e))
-    logger.close()
     sys.exit(1)
 
-logger.close()
 sys.exit(0)
