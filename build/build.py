@@ -172,7 +172,7 @@ class Logger(object):
 
     def logOutput(self, process):
         for line in iter(process.stdout.readline,b''):
-            self.log(line.rstrip("\n"),"output")
+            self.log(line.rstrip("\n\r"),"output")
         process.wait()
         if process.returncode != 0:
             self.log("Failure, return code is " + str(process.returncode))
