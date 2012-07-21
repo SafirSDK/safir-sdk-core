@@ -171,12 +171,16 @@ class Logger(object):
                 sys.stdout.write(data + "\n")
 
     def logOutput(self, process):
+        output = list()
         for line in iter(process.stdout.readline,b''):
-            self.log(line.rstrip("\n\r"),"output")
+            line = line.rstrip("\n\r")
+            self.log(line,"output")
+            output += (line,)
         process.wait()
         if process.returncode != 0:
             self.log("Failure, return code is " + str(process.returncode))
         self.log("","output")
+        return "\n".join(output)
 
 def check_environment():
     global SAFIR_RUNTIME
@@ -271,16 +275,36 @@ def parse_command_line(builder):
         
     builder.handle_command_line_options(options)
 
+
 def find_sln():
     sln_files = glob.glob("*.sln")
     if (len(sln_files) != 1):
         die("There is not exactly one sln file in " + os.getcwd() +
             ", either cmake failed to generate one or there is another one coming from somewhere else!")
     return sln_files[0]
-    
-            
-class VisualStudioBuilder(object):
+
+class BuilderBase(object):
     def __init__(self):
+        self.total_tests = 0
+        self.failed_tests = 0
+
+    def interpret_test_output(self,output):
+        match = re.search(r"tests passed, ([0-9]+) tests failed out of ([0-9]+)",output)
+        if len(match.groups()) != 2:
+            logger.log("Failed to parse test output!")
+            return
+        failed = int(match.group(1))
+        tests = int(match.group(2))
+        self.total_tests += tests
+        self.failed_tests += failed
+        if self.failed_tests == 0:
+            logger.log(" - All tests succeeded.","brief")
+        else:
+            logger.log("!! " + str(failed) + " tests failed out of " + str(tests) + ".","brief")
+            
+class VisualStudioBuilder(BuilderBase):
+    def __init__(self):
+        super(UnixGccBuilder, self).__init__()
         VS80 = os.environ.get("VS80COMNTOOLS")
         VS90 = os.environ.get("VS90COMNTOOLS")
         VS100 = os.environ.get("VS100COMNTOOLS")
@@ -381,8 +405,9 @@ class VisualStudioBuilder(object):
             dummyfile = open("DartConfiguration.tcl","w")
             dummyfile.close()
 
-        self.__run_command(("ctest -T Test --output-on-failure"),
-                           "Test", directory, allow_fail = True)
+        output = self.__run_command(("ctest -T Test --output-on-failure"),
+                                    "Test", directory, allow_fail = True)
+        self.interpret_test_output(output)
             
 
     def dobmake(self):
@@ -484,17 +509,18 @@ class VisualStudioBuilder(object):
 
         logger.log(description + " " + what + ": '" + cmd + "'", "command")
         process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        logger.logOutput(process)
+        output = logger.logOutput(process)
 
         if process.returncode != 0:
             if not allow_fail:
                 die("Failed to run '" + cmd + "' for " + what)
             else:
                 logger.log("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing\n")
+        return output
 
-
-class UnixGccBuilder(object):
+class UnixGccBuilder(BuilderBase):
     def __init__(self):
+        super(UnixGccBuilder, self).__init__()
         #We need to limit ourselves a little bit in how
         #many parallel jobs we perform. Each job may use
         #up to 400Mb of memory.
@@ -556,9 +582,10 @@ class UnixGccBuilder(object):
             dummyfile = open("DartConfiguration.tcl","w")
             dummyfile.close()
 
-        self.__run_command(("ctest",
-                            "-T", "Test", "--output-on-failure"),
-                           "Test", directory, allow_fail = True)
+        output = self.__run_command(("ctest",
+                                     "-T", "Test", "--output-on-failure"),
+                                    "Test", directory, allow_fail = True)
+        self.interpret_test_output(output)
 
     def dobmake(self):
         """run the dobmake command"""
@@ -576,13 +603,14 @@ class UnixGccBuilder(object):
         """Run a command"""
         logger.log(description + " " + what + ": '" + " ".join(cmd) + "'", "command")
         process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        logger.logOutput(process)
+        output = logger.logOutput(process)
         if process.returncode != 0:
             if not allow_fail:
                 die("Failed to run '" + " ".join(cmd) + "' for " + what)
             else:
                 logger.log("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing")
 
+        return output
 
 def in_skip_list(line):
     "Check the argument against all regexps in the skip-list"
@@ -677,8 +705,6 @@ def main():
     parse_command_line(builder)
     check_environment()
 
-    global buildlog
-    
     olddir = os.getcwd();
 
     split_line = None
@@ -749,6 +775,8 @@ def main():
 
     os.chdir(olddir)
 
+    return (builder.total_tests, builder.failed_tests)
+
 #### actual code starts here ####
 
 #reduce process priority (currently only done on unix platforms)
@@ -760,9 +788,13 @@ if hasattr(os,"nice"):
         logger.log("Failed to set process niceness: " + str(e))
 
 try:
-    main()
+    (tests, failed) = main()
     logger.log("Result", "header")
     logger.log("Build completed successfully!")
+    if failed == 0:
+        logger.log("All tests ran successfully!")
+    else:
+        logger.log(str(failed) + " tests failed out of " + str(tests) + ".","brief")
 except FatalError, e:
     logger.log("Result", "header")
     logger.log("Build script failed: " + str(e))
