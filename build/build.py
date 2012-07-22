@@ -304,7 +304,7 @@ class BuilderBase(object):
             
 class VisualStudioBuilder(BuilderBase):
     def __init__(self):
-        super(UnixGccBuilder, self).__init__()
+        super(VisualStudioBuilder, self).__init__()
         VS80 = os.environ.get("VS80COMNTOOLS")
         VS90 = os.environ.get("VS90COMNTOOLS")
         VS100 = os.environ.get("VS100COMNTOOLS")
