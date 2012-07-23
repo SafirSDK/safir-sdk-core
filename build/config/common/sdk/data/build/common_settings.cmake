@@ -66,7 +66,7 @@ endif ()
 
 #Add some more boost library versions that we want to be able to use,
 # just to try to be "future safe"
-set (Boost_ADDITIONAL_VERSIONS "1.34.1" "1.37" "1.37.0" "1.38" "1.38.0" "1.39" "1.39.0" "1.40" "1.40.0" "1.41" "1.41.0" "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0")
+set (Boost_ADDITIONAL_VERSIONS "1.40" "1.40.0" "1.41" "1.41.0" "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0" "1.52" "1.52.0")
 
 set(Boost_USE_MULTITHREADED ON)
 
@@ -87,18 +87,13 @@ else()
     endif()
 endif()
 
-ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK -DBOOST_FILESYSTEM_VERSION=2)
-
-#Boost 1.39 and vc80 don't play nicely together. 
-#we get multiply defined symbols. As a workaround we allow this.
-if (MSVC80 AND Boost_LIB_VERSION STREQUAL "1_39")
-    SET(CMAKE_EXE_LINKER_FLAGS /FORCE:MULTIPLE)
-    SET(CMAKE_SHARED_LINKER_FLAGS /FORCE:MULTIPLE)
-endif()
+ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
+ADD_DEFINITIONS(-DBOOST_FILESYSTEM_VERSION=2)
+ADD_DEFINITIONS(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 
 #Set up boost for any test code (i.e. CheckCXXSourceCompiles stuff)
 set(CMAKE_REQUIRED_INCLUDES ${Boost_INCLUDE_DIRS})
-set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_DYN_LINK -DBOOST_FILESYSTEM_VERSION=2)
+set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_DYN_LINK -DBOOST_FILESYSTEM_VERSION=2 -DBOOST_FILESYSTEM_NO_DEPRECATED)
 
 if (MSVC AND NOT NO_LIBRARY_POSTFIXES)
   SET(CMAKE_DEBUG_POSTFIX "d")

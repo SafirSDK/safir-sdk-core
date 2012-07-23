@@ -47,7 +47,7 @@ bool CheckLogdir()
     {
         return false;
     }
-    const boost::filesystem::path dir = boost::filesystem::path(env,boost::filesystem::native) / "log";
+    const boost::filesystem::path dir = boost::filesystem::path(env) / "log";
     
     return boost::filesystem::exists(dir) && boost::filesystem::is_directory(dir);
 }

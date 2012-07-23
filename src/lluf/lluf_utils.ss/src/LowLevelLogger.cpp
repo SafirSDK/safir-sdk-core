@@ -75,7 +75,7 @@ namespace //anonymous namespace for internal functions
         try
         {
             const boost::filesystem::path fullpath = path/filename;
-            if (boost::filesystem::is_regular(fullpath) && boost::filesystem::exists(fullpath))
+            if (boost::filesystem::is_regular_file(fullpath) && boost::filesystem::exists(fullpath))
             {
                 boost::filesystem::remove(fullpath);
             }

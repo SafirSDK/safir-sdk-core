@@ -52,7 +52,7 @@ namespace //anonymous namespace for internal functions
         {
             throw std::logic_error("SAFIR_RUNTIME environment variable is not set");
         }
-        boost::filesystem::path filename(env,boost::filesystem::native);
+        boost::filesystem::path filename(env);
 
         filename /= "log";
         filename /= "Dob-LowLevelLog";

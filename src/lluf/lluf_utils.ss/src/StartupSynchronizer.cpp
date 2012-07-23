@@ -75,7 +75,7 @@ namespace Utilities
         {
             throw StartupSynchronizerException("Environment variable SAFIR_RUNTIME does not appear to be set");
         }
-        path dir(env,native);
+        path dir(env);
 
         dir /= "data/text/lluf/";
         if (!exists(dir))
@@ -107,7 +107,7 @@ namespace Utilities
 
         if (exists(filename))
         {
-            if (!is_regular(filename))
+            if (!is_regular_file(filename))
             {
                 std::ostringstream ostr;
                 ostr << "The lockfile does not appear to be a reglar file. filename = '" << filename.string() << "'" << std::endl;

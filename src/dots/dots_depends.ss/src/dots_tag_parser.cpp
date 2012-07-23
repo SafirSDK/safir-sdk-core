@@ -47,12 +47,13 @@ namespace DotsDepends
 
     int DotsTagParser::ResolveDependencies()
     {
-        for (boost::filesystem::directory_iterator path = boost::filesystem::directory_iterator(m_fileDirectory);
-            path != boost::filesystem::directory_iterator(); ++path)
+        for (boost::filesystem::directory_iterator dir = boost::filesystem::directory_iterator(m_fileDirectory);
+            dir != boost::filesystem::directory_iterator(); ++dir)
         {
-            const std::string extension = boost::filesystem::extension(*path);
+            const boost::filesystem::path path = dir->path();
+            const std::string extension = path.extension();
 
-            if ( boost::filesystem::is_directory(*path) )
+            if ( boost::filesystem::is_directory(path) )
             {
                 continue;
             }
@@ -61,12 +62,12 @@ namespace DotsDepends
             {
                 if (m_verbose)
                 {
-                    std::wcout << "Skipped file: " << (*path).string().c_str() << std::endl;
+                    std::wcout << "Skipped file: " << path.string().c_str() << std::endl;
                 }
                 continue;
             }            
 
-            CheckFile(*path);
+            CheckFile(path);
 
         }
 
@@ -199,7 +200,7 @@ namespace DotsDepends
         bool found = false;
         const char fileDelimiter[] = "-";
         char baseName[256];
-        strcpy(baseName, boost::filesystem::basename(filename).c_str());
+        strcpy(baseName, filename.stem().c_str());
         const char* const fileToken = strtok(baseName, fileDelimiter);;
 
         while( fgets( line, buff_size, stream ) != NULL)
