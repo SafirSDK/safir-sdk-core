@@ -158,12 +158,12 @@ class Logger(object):
             die("unknown logging tag")
 
         if self.__logLevel == "Brief":
-            if tag == "header" or tag == "normal":
-                sys.stdout.write(data + "\n")
-            if tag == "brief":
+            if tag == "header" or tag == "normal" or tag == "brief":
                 sys.stdout.write(data + "\n")
         elif self.__logLevel == "Verbose":
-            if tag == "header":
+            if tag == "brief":
+                pass
+            elif tag == "header":
                 sys.stdout.write("\n==== " + data + " ====\n")
             elif tag == "command":
                 sys.stdout.write("+ " + data + "\n")
