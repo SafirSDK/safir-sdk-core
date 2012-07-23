@@ -508,7 +508,7 @@ namespace Internal
              dir != boost::filesystem::directory_iterator(); ++dir)
         {
             const boost::filesystem::path path = dir->path();
-            const std::string extension = path.extension();
+            const boost::filesystem::path extension = path.extension();
 
             if ( boost::filesystem::is_directory(path) )
             {
@@ -541,7 +541,7 @@ namespace Internal
              dir != boost::filesystem::directory_iterator(); ++dir)
         {
             const boost::filesystem::path path = dir->path();
-            const std::string extension = path.extension();
+            const boost::filesystem::path extension = path.extension();
 
             if ( boost::filesystem::is_directory(path) )
             {
@@ -618,7 +618,7 @@ namespace Internal
              dir != boost::filesystem::directory_iterator(); ++dir)
         {
             const boost::filesystem::path path = dir->path();
-            const std::string extension = path.extension();
+            const boost::filesystem::path extension = path.extension();
 
             if ( boost::filesystem::is_directory(path) )
             {
@@ -652,7 +652,7 @@ namespace Internal
              dir != boost::filesystem::directory_iterator(); ++dir)
         {
             const boost::filesystem::path path = dir->path();
-            const std::string extension = path.extension();
+            const boost::filesystem::path extension = path.extension();
 
             if ( boost::filesystem::is_directory(path) )
             {

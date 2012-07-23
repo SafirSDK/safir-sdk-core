@@ -87,13 +87,19 @@ else()
     endif()
 endif()
 
+#use dynamic linking with boost
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
-ADD_DEFINITIONS(-DBOOST_FILESYSTEM_VERSION=2)
+
+#Request version 3 of boost.filesystem, note that we might not get it, since
+#we support versions of boost that only contain version 2
+ADD_DEFINITIONS(-DBOOST_FILESYSTEM_VERSION=3)
+
+#disable all deprecated functionality in boost.filesystem.
 ADD_DEFINITIONS(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 
 #Set up boost for any test code (i.e. CheckCXXSourceCompiles stuff)
 set(CMAKE_REQUIRED_INCLUDES ${Boost_INCLUDE_DIRS})
-set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_DYN_LINK -DBOOST_FILESYSTEM_VERSION=2 -DBOOST_FILESYSTEM_NO_DEPRECATED)
+set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_DYN_LINK -DBOOST_FILESYSTEM_VERSION=3 -DBOOST_FILESYSTEM_NO_DEPRECATED)
 
 if (MSVC AND NOT NO_LIBRARY_POSTFIXES)
   SET(CMAKE_DEBUG_POSTFIX "d")

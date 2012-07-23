@@ -116,35 +116,35 @@ namespace Utilities
             return boost::lexical_cast<std::string>(m_pid);
         }
 
-        const std::string firstLeaf = boost::filesystem::path(cmdline[0]).filename();
+        const boost::filesystem::path filename = boost::filesystem::path(cmdline[0]).filename();
         
         //try to find the name of the jar file
-        if (firstLeaf == "java" || firstLeaf == "java.exe")
+        if (filename == "java" || filename == "java.exe")
         {
             for (std::vector<std::string>::const_iterator it = cmdline.begin();
                  it != cmdline.end(); ++it)
             {
                 if (*it == "-jar" && it+1 != cmdline.end())
                 {
-                    return boost::filesystem::path(*(it+1)).filename();
+                    return boost::filesystem::path(*(it+1)).filename().c_str();
                 }
             }
         }
 
         //try to find the assembly name when running under mono
-        if (firstLeaf == "mono" || firstLeaf == "mono.exe" || firstLeaf == "cli" || firstLeaf == "cli.exe")
+        if (filename == "mono" || filename == "mono.exe" || filename == "cli" || filename == "cli.exe")
         {
             for (std::vector<std::string>::const_iterator it = cmdline.begin();
                  it != cmdline.end(); ++it)
             {
                 if (boost::algorithm::ends_with(*it,".exe") || boost::algorithm::ends_with(*it,".csexe"))
                 {
-                    return boost::filesystem::path(*it).filename();
+                    return boost::filesystem::path(*it).filename().c_str();
                 }
             }
         }
 
-        return boost::filesystem::path(*cmdline.begin()).filename();
+        return boost::filesystem::path(*cmdline.begin()).filename().c_str();
 
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         HANDLE hProcess = ::OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,

@@ -56,7 +56,7 @@ namespace Internal
         DobPropertyMappings & Result() {return m_PropertyMappings;}
         void ProcessDOM();
 
-        void SetFileName(const boost::filesystem::path & filename) {m_currentFileName = filename.filename();}
+        void SetFileName(const boost::filesystem::path & filename) {m_currentFileName = filename.filename().c_str();}
     private:
 
         bool ValidElement(const std::string & element);

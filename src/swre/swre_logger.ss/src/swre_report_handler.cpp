@@ -99,7 +99,7 @@ namespace Swre
             m_logFilePath = fs::path(logFile);
 
             std::string oldFileName = "old_";
-            oldFileName.append(m_logFilePath.filename());
+            oldFileName.append(m_logFilePath.filename().c_str());
 
             m_oldLogFilePath = m_logFilePath.parent_path() / oldFileName;
 
@@ -149,7 +149,7 @@ namespace Swre
 
                 if (!m_logFile)
                 {
-                    std::wcerr << "Fatal error: Can't open " <<  m_logFilePath.file_string().c_str() << std::endl;
+                    std::wcerr << "Fatal error: Can't open " <<  m_logFilePath.string().c_str() << std::endl;
                     return false;
                 }
 
@@ -285,13 +285,13 @@ namespace Swre
         {
             if (!CheckLogFile())
             {
-                std::wcerr << "Opening new " << m_logFilePath.file_string().c_str() << " ..." << std::endl;
+                std::wcerr << "Opening new " << m_logFilePath.string().c_str() << " ..." << std::endl;
                 
                 m_logFile.open(m_logFilePath, std::ios_base::app);
                 
                 if (!m_logFile)
                 {
-                    std::wcerr << "Fatal error: Can't open " <<  m_logFilePath.file_string().c_str() << std::endl;
+                    std::wcerr << "Fatal error: Can't open " <<  m_logFilePath.string().c_str() << std::endl;
                 }
             }
         }
@@ -311,7 +311,7 @@ namespace Swre
         {
             if (fs::file_size(m_logFilePath) >= m_maxFileSize)
             {
-                std::wcerr << "Size of " << m_logFilePath.file_string().c_str() << " >= "
+                std::wcerr << "Size of " << m_logFilePath.string().c_str() << " >= "
                           << m_maxFileSize << " bytes. Closing the file ..." << std::endl;
 
                 if (m_logFile.is_open())
@@ -321,12 +321,12 @@ namespace Swre
 
                 if (fs::exists(m_oldLogFilePath))
                 {
-                    std::wcerr << "Deleting " << m_oldLogFilePath.file_string().c_str() << " ..." << std::endl;
+                    std::wcerr << "Deleting " << m_oldLogFilePath.string().c_str() << " ..." << std::endl;
                     fs::remove(m_oldLogFilePath);
                 }
 
-                std::wcerr << "Renaming " << m_logFilePath.file_string().c_str() << " to "
-                          << m_oldLogFilePath.file_string().c_str() << " ..." << std::endl;
+                std::wcerr << "Renaming " << m_logFilePath.string().c_str() << " to "
+                          << m_oldLogFilePath.string().c_str() << " ..." << std::endl;
 
                 fs::rename(m_logFilePath, m_oldLogFilePath);
 
