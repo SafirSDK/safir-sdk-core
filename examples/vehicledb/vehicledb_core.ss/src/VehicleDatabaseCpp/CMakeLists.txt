@@ -25,7 +25,7 @@ if (ACE_FOUND)
   
   ADD_EXECUTABLE(VehicleAppDb ${sources})
   
-  TARGET_LINK_LIBRARIES(VehicleAppDb ${COMMON_LIBRARIES} ${ACE_LIBRARY} ${LIBS})
+  TARGET_LINK_LIBRARIES(VehicleAppDb ${COMMON_LIBRARIES} ${ACE_LIBRARY} ${ODBC_LIBRARIES})
   
   if (NOT MSVC)
     TARGET_LINK_LIBRARIES(VehicleAppDb olib swre_interface_cpp dose_cpp dots_generated-Capabilities-cpp dots_generated-Safir-cpp dots_cpp lluf_utils)
