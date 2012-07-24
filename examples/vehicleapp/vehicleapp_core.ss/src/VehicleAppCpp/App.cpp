@@ -25,9 +25,7 @@
 #include "App.h"
 #include "MessageSender.h"
 
-#ifdef NO_ACE
-
-#else
+#ifndef NO_ACE
 #  include <ace/Event_Handler.h>
 #endif
 
@@ -53,6 +51,10 @@ namespace VehicleAppCpp
         MessageSender::Instance().Init();
 
 #ifdef NO_ACE
+        // Start the asio io-service loop in order to receive DOB callbacks
+        // for example OnCreateRequest in EntityOwner.
+        // We also need to define some dummy work in order for the io_service
+        // to keep running until we tell it to stop.
         boost::asio::io_service::work keepRunning(m_ioService);
         m_ioService.run();
 #else

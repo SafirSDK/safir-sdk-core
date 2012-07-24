@@ -16,7 +16,7 @@ if (ACE_FOUND)
   TARGET_LINK_LIBRARIES(VehicleAppCpp ${ACE_LIBRARY})
 else()
   ADD_DEFINITIONS(-DNO_ACE)
-  FIND_PACKAGE(Boost COMPONENTS filesystem system thread)
+  FIND_PACKAGE(Boost COMPONENTS system)
   TARGET_LINK_LIBRARIES(VehicleAppCpp ${Boost_LIBRARIES})
 endif()
   
