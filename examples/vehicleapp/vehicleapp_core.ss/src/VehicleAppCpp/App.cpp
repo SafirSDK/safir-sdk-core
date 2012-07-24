@@ -24,11 +24,21 @@
 
 #include "App.h"
 #include "MessageSender.h"
-#include <ace/Event_Handler.h>
+
+#ifdef NO_ACE
+
+#else
+#  include <ace/Event_Handler.h>
+#endif
 
 namespace VehicleAppCpp
 {
-    App::App() : m_dispatch(m_connection)
+    App::App()
+#ifdef NO_ACE
+        : m_dispatch(m_connection,m_ioService)
+#else
+        : m_dispatch(m_connection)
+#endif
     {
     }
 
@@ -42,15 +52,23 @@ namespace VehicleAppCpp
         //StopRemoveInExercise
         MessageSender::Instance().Init();
 
+#ifdef NO_ACE
+        boost::asio::io_service::work keepRunning(m_ioService);
+        m_ioService.run();
+#else
         // Start Ace event loop in order to receive DOB callbacks
         // for example OnCreateRequest in EntityOwner.
         ACE_Reactor::instance()->run_reactor_event_loop();
-
+#endif
         return 0;
     }
 
     void App::OnStopOrder()
     {
+#ifdef NO_ACE
+        m_ioService.stop();
+#else
         ACE_Reactor::instance()->end_event_loop();
+#endif
     }
 }
