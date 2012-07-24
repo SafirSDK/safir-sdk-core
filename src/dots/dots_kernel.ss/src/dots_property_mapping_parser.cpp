@@ -192,7 +192,7 @@ namespace Internal
             {
                 //TODO: generate error
                 std::wcout << "Filename is BAD!" << std::endl;
-                std::wcout << m_currentFileName.c_str()
+                std::wcout << m_currentFileName.string().c_str()
                            << ":0: Unexpected filename. Expected this file to be named '"
                            << generatedFileName.c_str()
                            << "'." << std::endl;
