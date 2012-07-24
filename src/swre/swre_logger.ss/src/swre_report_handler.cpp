@@ -99,7 +99,8 @@ namespace Swre
             m_logFilePath = fs::path(logFile);
 
             std::string oldFileName = "old_";
-            oldFileName.append(m_logFilePath.filename().c_str());
+            oldFileName.append(m_logFilePath.filename().c_str()); //use c_str() to support both fs v2 and v3
+
 
             m_oldLogFilePath = m_logFilePath.parent_path() / oldFileName;
 

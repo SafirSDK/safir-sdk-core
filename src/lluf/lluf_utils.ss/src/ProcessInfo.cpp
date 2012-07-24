@@ -127,6 +127,7 @@ namespace Utilities
                 if (*it == "-jar" && it+1 != cmdline.end())
                 {
                     return boost::filesystem::path(*(it+1)).filename().c_str();
+                    //use c_str() to support both fs v2 and v3
                 }
             }
         }
@@ -140,11 +141,13 @@ namespace Utilities
                 if (boost::algorithm::ends_with(*it,".exe") || boost::algorithm::ends_with(*it,".csexe"))
                 {
                     return boost::filesystem::path(*it).filename().c_str();
+                    //use c_str() to support both fs v2 and v3
                 }
             }
         }
 
         return boost::filesystem::path(*cmdline.begin()).filename().c_str();
+        //use c_str() to support both fs v2 and v3
 
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         HANDLE hProcess = ::OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
