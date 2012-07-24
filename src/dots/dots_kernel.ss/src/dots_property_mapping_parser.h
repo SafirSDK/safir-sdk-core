@@ -56,8 +56,7 @@ namespace Internal
         DobPropertyMappings & Result() {return m_PropertyMappings;}
         void ProcessDOM();
 
-        //a rather roundabout way of setting the string, but we do it to support boost.filesystem v2 and v3
-        void SetFileName(const boost::filesystem::path & filename) {m_currentFileName = std::string(filename.filename().c_str());}
+        void SetFileName(const boost::filesystem::path & filename) {m_currentFileName = filename.filename();}
     private:
 
         bool ValidElement(const std::string & element);
@@ -68,7 +67,7 @@ namespace Internal
         DobPropertyMappings m_PropertyMappings;
 
         SimpleDOM::Element * m_CurrentElement;
-        std::string m_currentFileName;
+        boost::filesystem::path m_currentFileName;
 
     };
 }
