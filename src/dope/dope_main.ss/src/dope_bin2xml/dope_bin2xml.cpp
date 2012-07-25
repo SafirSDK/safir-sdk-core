@@ -243,7 +243,13 @@ Filename2EntityIdAndHandlerId(const boost::filesystem::path & filename)
             (L"Filename2EntityAndHandler: Could not decompose filename : " +
             Safir::Dob::Typesystem::Utilities::ToWstring(filename.string()),__WFILE__,__LINE__);
     }
-    const std::string leaf = filename.filename().c_str(); //use c_str() to support both fs v2 and v3
+
+#if defined (BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+    const std::string leaf = filename.filename().string();
+#else
+    const std::string leaf = filename.filename();
+#endif
+
     size_t separatorIndex = leaf.find('@');
     if (separatorIndex == std::string::npos)
     {

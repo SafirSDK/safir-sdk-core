@@ -74,7 +74,12 @@ TestCaseReader::TestCaseReader(const boost::filesystem::path & testCaseDir)
             continue;
         }
 
-        const std::string filename = path.filename().c_str(); //use c_str() to support both fs v2 and v3
+#if defined (BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+        const std::string filename = path.filename().string();
+#else
+        const std::string filename = path.filename();
+#endif
+
         boost::smatch matchResults;
 
         if (boost::regex_match(filename,matchResults,expr))
