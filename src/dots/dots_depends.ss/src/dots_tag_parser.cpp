@@ -200,10 +200,10 @@ namespace DotsDepends
         bool found = false;
         const char fileDelimiter[] = "-";
         char baseName[256];
-#if (BOOST_FILESYSTEM_VERSION == 2)
-        strcpy(baseName, filename.stem().c_str());
-#else
+#if defined (BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
         strcpy(baseName, filename.stem().string().c_str());
+#else
+        strcpy(baseName, filename.stem().c_str());
 #endif
         const char* const fileToken = strtok(baseName, fileDelimiter);;
 
