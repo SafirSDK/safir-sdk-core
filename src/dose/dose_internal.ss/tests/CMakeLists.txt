@@ -27,4 +27,4 @@ ADD_TEST(LamportClocks lamport_clock_test)
 
 set_tests_properties(Semaphore PROPERTIES TIMEOUT 60)
 set_tests_properties(MessageQueue PROPERTIES TIMEOUT 360)
-set_tests_properties(LamportClocks PROPERTIES TIMEOUT 1200)
+set_tests_properties(LamportClocks PROPERTIES TIMEOUT 2400)
