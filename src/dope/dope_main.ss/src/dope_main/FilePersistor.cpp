@@ -30,6 +30,7 @@
 #include <boost/filesystem/exception.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <Safir/Utilities/Internal/BoostFilesystemWrapper.h>
 #include <boost/integer_traits.hpp>
 
 #ifdef _MSC_VER
@@ -112,7 +113,7 @@ Filename2EntityIdAndHandlerId(const boost::filesystem::path & filename)
             (L"Filename2EntityAndHandler: Could not decompose filename : " +
             Safir::Dob::Typesystem::Utilities::ToWstring(filename.string()),__WFILE__,__LINE__);
     }
-    const std::string leaf = filename.leaf();
+    const std::string leaf = Safir::Utilities::Internal::GetFilenameFromPath(filename);
     size_t separatorIndex = leaf.find('@');
     if (separatorIndex == std::string::npos)
     {
@@ -251,7 +252,7 @@ FilePersistor::RemoveAll()
                 (L"Storage error",
                 L"FilePersistor::RemoveFile",
                 std::wstring(L"Could not remove ")
-                + Safir::Dob::Typesystem::Utilities::ToWstring((*it).string())
+                + Safir::Dob::Typesystem::Utilities::ToWstring(Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(it))
                 + L", maybe it is read-only!.");
         }    
     }
@@ -373,7 +374,8 @@ FilePersistor::RestoreAll()
             if (findIt == GetPersistentTypes().end())
             { //not persistent any more, remove it
 
-                m_debug << "File " << it->string().c_str() << " is not persistent in this configuration, removing" << std::endl;
+                m_debug << "File " << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(it).c_str()
+                        << " is not persistent in this configuration, removing" << std::endl;
 
                 Safir::SwReports::SendErrorReport
                         (L"Storage error",
@@ -393,14 +395,16 @@ FilePersistor::RestoreAll()
                 {
                     if (!boost::filesystem::exists(boost::filesystem::change_extension(*it,".bin")))
                     {
-                        m_debug << "This XML file is not an overlay, it is 'alone': " << it->string().c_str() << std::endl;
+                        m_debug << "This XML file is not an overlay, it is 'alone': "
+                                << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(it).c_str() << std::endl;
                         entity = RestoreXml(*it);
                         store = true;
                     }
                 }
                 else if (boost::filesystem::exists(boost::filesystem::change_extension(*it,".xml")))
                 {
-                    m_debug << "There exists an overlay for " << it->string().c_str() << std::endl;
+                    m_debug << "There exists an overlay for "
+                            << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(it).c_str() << std::endl;
                     entity = RestoreXml(boost::filesystem::change_extension(*it,".xml"));
                     store = true;
                 }
@@ -433,7 +437,7 @@ FilePersistor::RestoreAll()
                         (L"Storage error",
                         L"FilePersistor::RestoreAll",
                         std::wstring(L"Could not restore file ")
-                        + Safir::Dob::Typesystem::Utilities::ToWstring(it->string())
+                        + Safir::Dob::Typesystem::Utilities::ToWstring(Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(it))
                         + L" removing it.");
             RemoveFile(*it);
         }
@@ -443,7 +447,7 @@ FilePersistor::RestoreAll()
                 (L"Storage error",
                 L"FilePersistor::RestoreAll",
                 std::wstring(L"Could not operate on file ")
-                + Safir::Dob::Typesystem::Utilities::ToWstring(it->string())
+                + Safir::Dob::Typesystem::Utilities::ToWstring(Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(it))
                 + L". This is the exception from boost::filesystem: "
                 + Safir::Dob::Typesystem::Utilities::ToWstring(e.what()));
         }

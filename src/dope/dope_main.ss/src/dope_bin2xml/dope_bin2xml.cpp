@@ -39,6 +39,7 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/exception.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <Safir/Utilities/Internal/BoostFilesystemWrapper.h>
 
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
@@ -241,7 +242,7 @@ Filename2EntityIdAndHandlerId(const boost::filesystem::path & filename)
             (L"Filename2EntityAndHandler: Could not decompose filename : " +
             Safir::Dob::Typesystem::Utilities::ToWstring(filename.string()),__WFILE__,__LINE__);
     }
-    const std::string leaf = filename.leaf();
+    const std::string leaf = Safir::Utilities::Internal::GetFilenameFromPath(filename);
     size_t separatorIndex = leaf.find('@');
     if (separatorIndex == std::string::npos)
     {

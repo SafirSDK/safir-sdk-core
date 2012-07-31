@@ -37,6 +37,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
+#include <Safir/Utilities/Internal/BoostFilesystemWrapper.h>
+
 
 #include <iostream>
 
@@ -520,7 +522,7 @@ namespace Internal
                 continue;
             }
 
-            lllout << "ParseDouFiles: Parsing file " << path->string().c_str() << std::endl;
+            lllout << "ParseDouFiles: Parsing file " << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(path).c_str() << std::endl;
 
             if (!ParseFile(*path))
             {
@@ -552,7 +554,7 @@ namespace Internal
                 continue;
             }
 
-            lllout << "ParseDouFiles: Parsing file " << path->string().c_str() << std::endl;
+            lllout << "ParseDouFiles: Parsing file " << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(path).c_str() << std::endl;
 
             if (!ParseFile(*path))
             {
@@ -628,7 +630,7 @@ namespace Internal
                 continue;
             }
 
-            lllout << "ParseDomFiles: Parsing file " << path->string().c_str() << std::endl;
+            lllout << "ParseDomFiles: Parsing file " << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(path).c_str() << std::endl;
 
             ParsingState::Instance().mappingParser.SetFileName(*path);
             if (!ParseFile(*path))
@@ -661,7 +663,7 @@ namespace Internal
                 continue;
             }
 
-            lllout << "ParseDomFiles: Parsing file " << path->string().c_str() << std::endl;
+            lllout << "ParseDomFiles: Parsing file " << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(path).c_str() << std::endl;
 
             ParsingState::Instance().mappingParser.SetFileName(*path);
             if (!ParseFile(*path))
@@ -1460,9 +1462,9 @@ namespace Internal
             ParsingState::Instance().classParser.Result()[i].m_initialSize = SizeOfClass(ParsingState::Instance().classParser.Result()[i].m_baseClassIndex);
             ParsingState::Instance().classParser.Result()[i].m_thisClassSize = 0;
             ParsingState::Instance().classParser.Result()[i].m_noInheritedMembers = ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_noInheritedMembers+
-                ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_members.size();
+                static_cast<unsigned int>(ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_members.size());
             ParsingState::Instance().classParser.Result()[i].m_noInheritedParameters = ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_noInheritedParameters+
-                ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_parameters.size();
+                static_cast<unsigned int>(ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_parameters.size());
         }
         else //only Safir.Dots.Object goes here
         {

@@ -28,6 +28,8 @@
 #include "dots_xml_parser_base.h"
 #include "dots_temporary_descriptions.h"
 #include <boost/filesystem.hpp>
+#include <Safir/Utilities/Internal/BoostFilesystemWrapper.h>
+
 namespace Safir
 {
 namespace Dob
@@ -56,7 +58,7 @@ namespace Internal
         DobPropertyMappings & Result() {return m_PropertyMappings;}
         void ProcessDOM();
 
-        void SetFileName(const boost::filesystem::path & filename) {m_currentFileName = filename.leaf();}
+        void SetFileName(const boost::filesystem::path & filename) {m_currentFileName = Safir::Utilities::Internal::GetFilenameFromPath(filename);}
     private:
 
         bool ValidElement(const std::string & element);

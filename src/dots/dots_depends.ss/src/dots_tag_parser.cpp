@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
+#include <Safir/Utilities/Internal/BoostFilesystemWrapper.h>
 
 #include <iostream>
 #include <vector>
@@ -61,7 +62,7 @@ namespace DotsDepends
             {
                 if (m_verbose)
                 {
-                    std::wcout << "Skipped file: " << (*path).string().c_str() << std::endl;
+                    std::wcout << "Skipped file: " << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(path).c_str() << std::endl;
                 }
                 continue;
             }            

@@ -29,6 +29,7 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/exception.hpp>
+#include <Safir/Utilities/Internal/BoostFilesystemWrapper.h>
 
 #include "swre_report_handler.h"
 #include "swre_report_filter.h"
@@ -87,7 +88,7 @@ namespace Swre
             m_logFilePath = fs::path(logFile, fs::native);
 
             std::string oldFileName = "old_";
-            oldFileName.append(m_logFilePath.leaf());
+            oldFileName.append(Safir::Utilities::Internal::GetFilenameFromPath(m_logFilePath));
 
             m_oldLogFilePath = m_logFilePath.branch_path() / oldFileName;
 
@@ -137,7 +138,7 @@ namespace Swre
 
                 if (!m_logFile)
                 {
-                    std::cerr << "Fatal error: Can't open " <<  m_logFilePath.native_file_string() << std::endl;
+                    std::cerr << "Fatal error: Can't open " <<  Safir::Utilities::Internal::GetFilenameFromPath(m_logFilePath) << std::endl;
                     return false;
                 }
 
@@ -284,13 +285,13 @@ namespace Swre
     {
         if (!CheckLogFile())
         {
-            std::cerr << "Opening new " << m_logFilePath.native_file_string() << " ..." << std::endl;
+            std::cerr << "Opening new " << Safir::Utilities::Internal::GetFilenameFromPath(m_logFilePath) << " ..." << std::endl;
 
             m_logFile.open(m_logFilePath, std::ios_base::app);
 
             if (!m_logFile)
             {
-                std::cerr << "Fatal error: Can't open " <<  m_logFilePath.native_file_string() << std::endl;
+                std::cerr << "Fatal error: Can't open " <<  Safir::Utilities::Internal::GetFilenameFromPath(m_logFilePath) << std::endl;
             }
         }
         return 0; //means success
@@ -306,7 +307,7 @@ namespace Swre
         {
             if (fs::file_size(m_logFilePath) >= m_maxFileSize)
             {
-                std::cerr << "Size of " << m_logFilePath.native_file_string() << " >= "
+                std::cerr << "Size of " << Safir::Utilities::Internal::GetFilenameFromPath(m_logFilePath) << " >= "
                           << m_maxFileSize << " bytes. Closing the file ..." << std::endl;
 
                 if (m_logFile.is_open())
@@ -316,12 +317,12 @@ namespace Swre
 
                 if (fs::exists(m_oldLogFilePath))
                 {
-                    std::cerr << "Deleting " << m_oldLogFilePath.native_file_string() << " ..." << std::endl;
+                    std::cerr << "Deleting " << Safir::Utilities::Internal::GetFilenameFromPath(m_oldLogFilePath) << " ..." << std::endl;
                     fs::remove(m_oldLogFilePath);
                 }
 
-                std::cerr << "Renaming " << m_logFilePath.native_file_string() << " to "
-                          << m_oldLogFilePath.native_file_string() << " ..." << std::endl;
+                std::cerr << "Renaming " << Safir::Utilities::Internal::GetFilenameFromPath(m_logFilePath) << " to "
+                          << Safir::Utilities::Internal::GetFilenameFromPath(m_oldLogFilePath) << " ..." << std::endl;
 
                 fs::rename(m_logFilePath, m_oldLogFilePath);
 
