@@ -45,11 +45,11 @@ class Column : private boost::noncopyable
 {
 public:
     Column();
-    Column(unsigned int nSize);
+    Column(SQLLEN nSize);
     virtual ~Column();
 
     bool IsRetrievedSizeAvailable();
-    unsigned long GetRetrievedSize();
+    SQLLEN GetRetrievedSize();
 
     void SetValue(const Type & value);
     void SetNull();
@@ -60,13 +60,13 @@ public:
 
 protected:
     Type m_value;
-    long m_lpLengthOrInd;
-    unsigned int m_nSize;   // in bytes
+    SQLLEN m_lpLengthOrInd;
+    SQLLEN m_nSize;   // in bytes
 
     static const short m_csValueType = sValueType;
     virtual void * GetValuePtr();
-    long * GetLengthOrIndPtr();
-    unsigned int GetSize();
+    SQLLEN * GetLengthOrIndPtr();
+    SQLLEN GetSize();
 
     friend class Safir::Databases::Odbc::Statement;
 };
@@ -81,7 +81,7 @@ inline Column<sValueType, Type>::Column() : m_lpLengthOrInd(SQL_NULL_DATA), m_nS
 }
 
 template<short sValueType, class Type>
-inline Column<sValueType, Type>::Column(unsigned int nSize)
+inline Column<sValueType, Type>::Column(SQLLEN nSize)
     : m_lpLengthOrInd(SQL_NULL_DATA),
       m_nSize(nSize)
 
@@ -94,7 +94,7 @@ inline Column<sValueType, Type>::~Column()
 }
 
 template<short sValueType, class Type>
-inline unsigned int Column<sValueType, Type>::GetSize()
+inline SQLLEN Column<sValueType, Type>::GetSize()
 {
     return m_nSize;
 }
@@ -106,7 +106,7 @@ inline void * Column<sValueType, Type>::GetValuePtr()
 }
 
 template<short sValueType, class Type>
-inline long * Column<sValueType, Type>::GetLengthOrIndPtr()
+inline SQLLEN * Column<sValueType, Type>::GetLengthOrIndPtr()
 {
     return &m_lpLengthOrInd;
 }
@@ -149,7 +149,7 @@ bool Column<sValueType, Type>::IsRetrievedSizeAvailable()
 }
 
 template<short sValueType, class Type>
-unsigned long Column<sValueType, Type>::GetRetrievedSize()
+SQLLEN Column<sValueType, Type>::GetRetrievedSize()
 {
     return m_lpLengthOrInd;
 }

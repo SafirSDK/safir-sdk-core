@@ -56,7 +56,7 @@ public:
 
     /** @brief Constructor for complex types with a unknown size at compile time.
     */
-    Parameter(unsigned int nSize);
+    Parameter(SQLLEN nSize);
 
     /** @brief Destructor
     */
@@ -76,7 +76,7 @@ public:
     *
     * @return True if size is available.
     */
-    unsigned long GetRetrievedSize();
+    SQLLEN GetRetrievedSize();
 
     /** @brief Sets the value for a parameter.
     *
@@ -118,8 +118,8 @@ public:
 
 protected:
     Type m_value;
-    long m_lpLengthOrInd;
-    unsigned int m_nSize;
+    SQLLEN m_lpLengthOrInd;
+    SQLLEN m_nSize;
     short m_nDecimal;
 
     static const short m_csCType = sCType;
@@ -128,10 +128,10 @@ protected:
 
     virtual unsigned long GetColumnSize();
     virtual void * GetValuePtr();
-    long GetLengthOrInd();
-    long * GetLengthOrIndPtr();
-    void SetLengthOrInd(long lValue);
-    unsigned long GetSize();
+    SQLLEN GetLengthOrInd();
+    SQLLEN * GetLengthOrIndPtr();
+    void SetLengthOrInd(SQLLEN lValue);
+    SQLLEN GetSize();
     short GetDecimal();
 
     friend class Safir::Databases::Odbc::Statement;
@@ -184,7 +184,7 @@ inline Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::Paramete
 }
 
 template<short sCType, short sSqlType, class Type, short sInputOutputType, unsigned long lColumnSize>
-inline Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::Parameter(unsigned int nSize)
+inline Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::Parameter(SQLLEN nSize)
     : m_lpLengthOrInd( SQL_NULL_DATA ), m_nSize(nSize)
 {
 }
@@ -201,7 +201,7 @@ unsigned long Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::G
 }
 
 template<short sCType, short sSqlType, class Type, short sInputOutputType, unsigned long lColumnSize>
-inline unsigned long Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::GetSize()
+inline SQLLEN Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::GetSize()
 {
     return m_nSize;
 }
@@ -213,19 +213,19 @@ inline void * Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::G
 }
 
 template<short sCType, short sSqlType, class Type, short sInputOutputType, unsigned long lColumnSize>
-inline long  Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::GetLengthOrInd()
+inline SQLLEN  Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::GetLengthOrInd()
 {
     return m_lpLengthOrInd;
 }
 
 template<short sCType, short sSqlType, class Type, short sInputOutputType, unsigned long lColumnSize>
-inline long * Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::GetLengthOrIndPtr()
+inline SQLLEN * Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::GetLengthOrIndPtr()
 {
     return &m_lpLengthOrInd;
 }
 
 template<short sCType, short sSqlType, class Type, short sInputOutputType, unsigned long lColumnSize>
-inline void Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::SetLengthOrInd(long lValue)
+inline void Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::SetLengthOrInd(SQLLEN lValue)
 {
     m_lpLengthOrInd = lValue;
 }
@@ -274,7 +274,7 @@ inline bool Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::IsR
 }
 
 template<short sCType, short sSqlType, class Type, short sInputOutputType, unsigned long lColumnSize>
-inline unsigned long Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::GetRetrievedSize()
+inline SQLLEN Parameter<sCType, sSqlType, Type, sInputOutputType,lColumnSize>::GetRetrievedSize()
 {
     return m_lpLengthOrInd;
 }
