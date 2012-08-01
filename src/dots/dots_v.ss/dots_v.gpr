@@ -1,6 +1,5 @@
 with "templates_parser";
 with "xmlada";
-with "dots_id";
 with "safir_defaults.gpr";
 
 project dots_v is
