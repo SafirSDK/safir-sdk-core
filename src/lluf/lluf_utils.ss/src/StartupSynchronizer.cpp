@@ -26,9 +26,22 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/interprocess/sync/named_semaphore.hpp>
-#include <ace/Guard_T.h>
 #include <stdio.h>
 #include <iostream>
+
+//disable warnings in boost and ace
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244)
+#endif
+
+#include <ace/Guard_T.h>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
 namespace Safir
 {
 namespace Utilities

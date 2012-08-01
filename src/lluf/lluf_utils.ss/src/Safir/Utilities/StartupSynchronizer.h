@@ -24,15 +24,15 @@
 #ifndef __LLUF_STARTUP_SYNCHRONIZER_H__
 #define __LLUF_STARTUP_SYNCHRONIZER_H__
 
-#include <Safir/Utilities/Internal/UtilsExportDefs.h>
-
 //disable warnings in boost and ace
 #if defined _MSC_VER
   #pragma warning (push)
   #pragma warning (disable : 4267)
   #pragma warning (disable : 4512)
+  #pragma warning (disable : 4244)
 #endif
 
+#include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 #include <boost/filesystem/path.hpp>

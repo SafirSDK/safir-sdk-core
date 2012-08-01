@@ -25,6 +25,7 @@
 #define _lluf_utils_export_defs_h
 
 #if defined _MSC_VER
+    #pragma warning (disable: 4251 4275)
     #ifdef LLUF_UTILS_EXPORTS
         #define LLUF_UTILS_API __declspec(dllexport)
     #else

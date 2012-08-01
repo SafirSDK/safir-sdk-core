@@ -32,12 +32,23 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/noncopyable.hpp>
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
-#include <ace/Event_Handler.h>
 
 #include <Safir/Utilities/StartupSynchronizer.h>
+
+//disable warnings in ace
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244 4127)
+#endif
+
+#include <ace/Event_Handler.h>
 #include <ace/Thread_Mutex.h>
 #include <ace/Reactor.h>
 
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 #include <vector>
 
 /**
