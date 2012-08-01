@@ -36,6 +36,7 @@
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/containers/map.hpp>
 #include <boost/interprocess/smart_ptr/shared_ptr.hpp>
+#include <boost/interprocess/offset_ptr.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -150,14 +151,15 @@ namespace Internal
     const boost::interprocess::offset_ptr<T>
     ParameterOffsetCast(const ParameterOffset & offset)
     {
-        return boost::interprocess::static_pointer_cast<T>(boost::interprocess::static_pointer_cast<void>(offset));
+        return boost::interprocess::static_pointer_cast<T,  std::ptrdiff_t, std::size_t, boost::interprocess::offset_type_alignment>
+                (boost::interprocess::static_pointer_cast<void, std::ptrdiff_t, std::size_t, boost::interprocess::offset_type_alignment>(offset));
     }
 
     template <class T>
     const boost::interprocess::offset_ptr<const T>
     ParameterOffsetCast(const ParameterOffsetConst & offset)
     {
-        return ParameterOffsetCast<T>(boost::interprocess::const_pointer_cast<char>(offset));
+        return ParameterOffsetCast<T>(boost::interprocess::const_pointer_cast<char, std::ptrdiff_t, std::size_t, boost::interprocess::offset_type_alignment>(offset));
     }
 
 
