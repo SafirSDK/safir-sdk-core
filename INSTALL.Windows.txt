@@ -7,33 +7,84 @@ Installing Prerequisites
 First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core. 
 Here is a summary of what you need, and below are instructions on where to get them and how to install them.
 
-Visual Studio 2005 SP1 or 2008 SP1 and GNAT 
+Visual Studio 2005 SP1, 2008 SP1 or 2010
+GNAT
+Templates-Parser
+XMLAda
 MinGW and MSYS
 Boost (1.38 or later)
 ACE (>5.x)
 Qt (>=4.4)
 CMake (>=2.6)
-Templates-Parser
-XMLAda
-expat
+Expat
+Java Platform (JDK) 
 Python (>= 2.4)
 doxygen
 graphviz
 
+64 bit builds
+~~~~~~~~~~~~~
+If your application is 64 bit you must build Safir SDK Core for 64 bit wich also means that some of the prerequisite packages must be built for 64 bit.
+Unfortunately the support for pre-build binaries isn't as good as for the 32 bit versions which means that in many cases you have to build the packages from source.
+For most packages below there are build/install instructions for both 32 and 64 bit.
+
+
+GNAT
+An Ada compiler capable of generating 64 bit is necessary only if you wan't to build a 64 bit Ada application.
+Even if you are not concerned with Ada at all you still need an Ada compilator to build the offline tool (dots_v.exe) that is used to generate
+all language interfaces, however, in this case it is sufficient with the 32 bit version.
+The easiest way of getting an open source Ada compiler is to use the GNAT GPL package provided by AdaCore (Unfortunately, it doesn't support 64 bit).
+
+Templates-Parser
+See GNAT.
+
+XMLAda
+See GNAT.
+
+Boost
+64 bit build is mandatory.
+
+ACE
+64 bit build is mandatory.
+
+Qt
+64 bit build is needed if you want to run the dobexplorer tool.
+
+Expat
+64 bit build is mandatory.
+
+Java Platform JDK
+64 bit build is needed if you intend to build 64 bit Java applications.
+
+For the moment the Safir SDK Core build system (build.py and CMake files) has no support for 64 bit Ada and Java. 
+
+
 Visual Studio and utils
 ~~~~~~~~~~~~~~~~~~~~~~~
-You are assumed to already have Visual Studio 2005 SP1 (aka 8.0) or 2008 SP1 (aka 9.0) installed, so we proceed immediately to the more interesting bits.
+You are assumed to already have Visual Studio 2005 SP1 (aka 8.0), 2008 SP1 (aka 9.0) or 2010 (aka 10.0) installed, so we proceed immediately to the more interesting bits.
 You are also assumed to have some unpacking tool installed that can handle .gz files, like winzip, 7-zip or winrar.
 
 Boost
 ~~~~~
-The easiest way to install boost is to use the installer provided by BoostPro Computing: http://www.boostpro.com/products/free. Download the newest installer and run it.
+32 bit:
+For 32 bit installations the easiest way to install boost is to use the installer provided by BoostPro Computing: http://www.boostpro.com/downloads. Download the newest installer and run it.
  - In the "Select Default Variants" step, select "Visual C++ 8.0" (or "Visual C++ 9.0"), "Multithread Debug, DLL" and "Multithread, DLL". If you need more variants or compilers, check those as well.
- - In the "Choose Components" step you need to check the "Multithread Debug","Multithread","Multithread Debug, DLL" and "Multithread, DLL" under the "VC8.0" or "VC9.0" item under each of "Boost DateTime", "Boost Filesystem", "Boost ProgramOptions", "Boost Regex" and "Boost System" (again, if you need other things as well, select them too).
+ - In the "Choose Components" step you need to check the "Multithread Debug","Multithread","Multithread Debug, DLL" and "Multithread, DLL" under the "VC8.0" or "VC9.0" item under each of "Boost DateTime", "Boost Filesystem", "Boost ProgramOptions", "Boost Regex", "Boost System" and "Boost Thread" (again, if you need other things as well, select them too).
 
-Add the lib directory of the boost installation (e.g. C:\Program Files\boost\boost_1_44\lib or similar) to your PATH.
+64 bit:
+If you are setting up a build for the x64 arcitecture you must build the separately-compiled boost libraries yourself:
+1. Go to the boost root directory.
+2. Run the command 'bootstrap' (this will build and install bjam). Depending on where you have put the boost root you might need start the command prompt as Administrator.
+3. Run the command 'bjam --build-dir=C:\tmp\boost-build --with-date_time --with-filesystem --with-program_options --with-regex --with-system --with-thread threading=multi toolset=msvc-10.0 address-model=64 variant=release variant=debug link=shared runtime-link=shared stage
+(The directory given for --build-dir can be any temporary directory)
+4. Create a directory 'lib' in the boost root.
+5. Copy all files from {boost root}\stage\lib to this new directory.
 
-There are a bugs in all current versions of the Boost libraries that need to be patched for Safir SDK to work correctly. In the build/patches/boost directory there are a set of patches for some recent boost versions. Find the appropriate files and copy them over the corresponding files in your boost installation. (You can also use run "cmake . -G 'NMake Makefiles'", "nmake install" once you have installed cmake, which will install the correct patches automatically).
+Add the lib directory of the boost installation (e.g. C:\Program Files\boost\boost_1_49\lib or similar) to your PATH.
+
+If you are using boost version 1.48 or lower there are some boost bugs that need to be patched for Safir SDK to work correctly. The easisest way to install
+the patches that is needed for your version is to use the CMake file in the build/patches/boost directory, run "cmake . -G 'NMake Makefiles'", "nmake install"
+once you have installed cmake, which will install the correct patches automatically.
 
 ACE
 ~~~
@@ -53,20 +104,37 @@ Create the file C:\ACE_wrappers\ace\config.h and put the following lines into it
 #define ACE_OS_INCLUDE_OS_ERRNO_H
 #endif
 
-For Visual Studio builds I tend to only build the ACE project in the C:\ACE_wrappers\ace\ACE_vc8.sln (or ACE_vc9.sln) solution in Debug and Release, but you may want to build more stuff if you need it.
+For Visual Studio builds I tend to only build the ACE project in the C:\ACE_wrappers\ace\ACE_vc8.sln (or ACE_vc9.sln) solution in Debug and Release.
+If you are setting up a build for the x64 architecture select the x64 platform for each project. 
 
 Copy the files ACE.dll and ACEd.dll to somewhere on your path, or add C:\ACE_wrappers\lib to your PATH
 
 Qt
 ~~
-Installing Qt is sort of optional. If you don't install it you won't be able to build dobexplorer and one of the example applications. Be aware that building Qt takes a long time (~4h last time I did it). If you decide against installing Qt, you will have to remove the dobexplorer lines from the build/sdk_core_windows.txt file for the build script to complete correctly.
+Installing Qt is sort of optional. If you don't install it you won't be able to build dobexplorer and one of the example applications. Be aware that building Qt takes a long time (2 hours 40 minutes on my Windows 7, 64bits). If you decide against installing Qt, you will have to remove the dobexplorer lines from the build/sdk_core.txt file for the build script to complete correctly.
 
-Download the Qt source code from http://qt.nokia.com/downloads, and unzip it to a directory of your choice (must not contain spaces). These instructions assume that you use "C:\Qt".
-Create the environment variable QTDIR set it to C:\Qt
-Add %QTDIR%\bin and %QTDIR%\lib to your PATH.
-Open a Visual Studio command prompt and go to c:\qt. 
- - Run "configure" (I've had some trouble with the qmake.exe that is built by configure, so I had to copy that to C:\Qt\bin and re-run "configure")
- - Run "nmake" (this step takes a very long time to complete, we're building the whole Qt framework from source!)
+32 bit:
+Instructions for building with VS2010. This should be able to adapt to VS2005/2008 by starting the appropriate command prompt at step 8.
+
+1. Install Perl if you are going to compile Qt >= 4.8.0
+2. Download the Qt source code from http://qt.nokia.com/downloads, and unzip it.
+3. Copy contents of the folder qt-everywhere-opensource-src-4.8.1 (asuming you have downloaded version 4.8.1) to the directory where you intend to install Qt (must not contain spaces). In our case this is C:\Qt\4.8.1.
+4. Set up environmental variables
+   QTDIR=C:\Qt\4.7.1
+   QMAKESPEC=win32-msvc2010
+5. Update PATH variable to include %QTDIR%\bin
+6. Download the latest version of jom. (Jom is nmake replacement for Qt compilation on multi-core CPU. Its parameter -j N allows to setup number of parallel processes for compilation. Number of physical CPU cores is a good choice for N.)
+7. Extract jom files to C:\Qt\jom folder
+8. Start Visual Studio 2010 Command Prompt:
+9. Start > Programs > Microsoft Visual Studio 2010 > Visual Studio Tools > Visual Studio Command Prompt.
+10.Run following commands in it:
+   >cd c:\Qt\4.7.1
+   >configure -debug-and-release -opensource -platform win32-msvc2010
+   >..\jom\jom.exe -j N (Where N is number of CPU cores you want to utilize for Qt compilation.)
+
+64 bit:
+Follow the 32 bit instruction but select the appropriate 64 bit compiler tool chain in step 8.
+ 
 
 MinGW and MSYS
 ~~~~~~~~~~~~~~
@@ -86,8 +154,23 @@ In the "Install Options" step, check the "Add CMake to the system PATH for all u
 
 Expat
 ~~~~~
+The latest release is 2.1.0.
+
+32 bit:
 Go to http://expat.sourceforge.net/ and download and install the binary installer for windows.
-Add C:\Program Files\Expat 2.0.1\Bin to your PATH (or put the DLLs in some dir that is in your PATH).
+
+64 bit:
+1. Download and unpack http://sourceforge.net/projects/expat/files/expat/2.1.0/expat-2.1.0.tar.gz to a directory of your choise (This directory is just used as build
+   directory)
+2. Add a subdirectory 'build' (For example: C:\tmp\expat-2.1.0\build)
+3. Open a command window for the 64 bit tool-chain as Administrator. Start -> All Programs -> Microsoft Visual Studio 2010 -> Visual Studio Tools -> Visual Studio x64 Win64 Command Prompt (2010)
+   (To be able to install files under "Program Files" you might have to open the command window as Administrator)
+4. cd into c:\tmp\expat-2.1.0\build
+5. Run cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
+6  Run nmake install
+
+For both 32 and 64 bit builds:
+Add C:\Program Files\expat\bin and C:\Program Files\expat\lib to your PATH.
 
 GNAT and Ada libraries
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -124,8 +207,8 @@ Add C:\Python26 to your PATH.
 Doxygen and Graphviz
 ~~~~~~~~~~~~~~~~~~~~
 These tools are used to build the interface documentation from the C++ source code. 
-Go to http://www.doxygen.org/ and download and install the windows installer (direct link: http://ftp.stack.nl/pub/users/dimitri/doxygen-1.6.1-setup.exe).
-Go to http://www.graphviz.org/ and download and install the windows installer (direct link: http://www.graphviz.org/pub/graphviz/stable/windows/graphviz-2.24.msi).
+Go to http://www.doxygen.org/ and download and install the windows installer 
+Go to http://www.graphviz.org/ and download and install the windows installer
 
 It appears that Graphviz installs its own version of libexpat.dll which conflicts with the one we installed above (part of Expat). You have to make sure that the libexpat.dll that we installed above is before the graphviz one in your PATH. 
 (If you don't do this you will get an error message about "The ordinal 63 could not be located in the dynamic link library libexpat.dll" when you build Safir SDK Core.)
@@ -140,12 +223,21 @@ First of all you should decide where you want the SDK installed. You have to spe
 Add %SAFIR_RUNTIME%\bin to your PATH.
 Add an environment variable ADA_PROJECT_PATH containing %SAFIR_SDK%\ada
 
-#The building of C# applications require one more thing, the creation of a K: drive that points to %SAFIR_RUNTIME%\bin. The reason for this is that Visual Studio does not support the use of environment variables for locating dependent assemblies, and since we don't add the assemblies to the GAC we have to provide some other way of locating them. So create the folder "C:\safir\runtime\bin" (assuming that is where you put your tower), and open a command prompt and run "subst k: %SAFIR_RUNTIME%\bin". (This creates a K: drive that is mapped to C:\safir\runtime\bin. The mapping will disappear when you restart your computer, so if you want it to be persistent put that command in a .bat file and place it in your Startup folder.)
+The building of C# applications require one more thing, the creation of a K: drive that points to %SAFIR_RUNTIME%\bin. The reason for this is that Visual Studio does not support the use of environment variables for locating dependent assemblies, and since we don't add the assemblies to the GAC we have to provide some other way of locating them. So create the folder "C:\safir\runtime\bin" (assuming that is where you put your tower), and open a command prompt and run "subst k: %SAFIR_RUNTIME%\bin". (This creates a K: drive that is mapped to C:\safir\runtime\bin. The mapping will disappear when you restart your computer, so if you want it to be persistent put that command in a .bat file and place it in your Startup folder.)
 
-Now open a Visual Studio 2005 command prompt and go to the directory that contains the build and src directories, and run 
-    build\build.py -f build\sdk_core.txt
 
-This will build the Safir SDK Core components in the correct order and install them into the location specified by SAFIR_SDK and SAFIR_RUNTIME.
+Now open a command prompt that corresponds to your configuration (32 or 64 bit).
+Go to the directory that contains the build and src directories.
+
+For example, to build 32 bit Safir SDK Core with support for all languages:
+    build\build.py -f build\sdk_core.txt --target x86 --ada-support --java-support
+
+To build 64 bit Safir SDK Core without support for Ada and Java:
+    build\build.py -f build\sdk_core.txt --target x64
+
+Type build/build.py --help to get a complete list of all command line switches.
+
+The build.py command will build the Safir SDK Core components in the correct order and install them into the location specified by SAFIR_SDK and SAFIR_RUNTIME.
 
 With a bit of luck you should now have a working Safir SDK Core installed on your computer.
 

@@ -17,7 +17,7 @@ FILE(GLOB sources *.cpp)
 FILE(GLOB headers [!ui_]*.h)
 FILE(GLOB dose_com_sources ${SAFIR_SDK}/include/Safir/Dob/Internal/DoseComAux/*.cpp)
 
-QT4_WRAP_CPP(moc_sources ${headers})
+QT4_WRAP_CPP(moc_sources ${headers} OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
 
 #The generated files end up in the binary dir, so we have to add that
 #to the include path (in case the bin path is not the same as the source path)

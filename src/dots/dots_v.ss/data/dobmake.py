@@ -26,6 +26,9 @@
 
 import os, glob, subprocess, threading, sys, stat, shutil
 
+def is_64_bit():
+    return sys.maxsize > 2**32
+
 def num_cpus():
     """Detects the number of CPUs on a system. Cribbed from pp."""
     # Linux, Unix and MacOS:
@@ -256,6 +259,7 @@ build_cpp_release = True
 build_cpp_debug = True
 no_gui = False
 html = False
+target_architecture = None
 
 def parse_command_line():
     from optparse import OptionParser
@@ -265,7 +269,9 @@ def parse_command_line():
     parser.add_option("--rebuild", action="store_true",dest="rebuild",default=False,
                       help="Remove all old build files and installed files before starting the build")
     parser.add_option("--uninstall", action="store_true",dest="uninstall",default=False,
-                      help="Remove all installed files")    
+                      help="Remove all installed files")
+    parser.add_option("--target",action="store",type="string",dest="target_architecture",default="x86",
+                          help="Target architecture, x86 or x64")
     parser.add_option("--no-ada", action="store_true",dest="no_ada",default=False,
                       help="Dont attempt to build Ada code")
     parser.add_option("--no-java", action="store_true",dest="no_java",default=False,
@@ -296,6 +302,22 @@ def parse_command_line():
     
     if options.rebuild:
         buildType="rebuild"
+
+    if options.target_architecture == "x64":
+        if not is_64_bit():
+            die("Target x64 can't be set since this is not a 64 bit OS")
+    elif options.target_architecture != "x86":
+        die("Unknown target architecture " + options.target_architecture)
+    global target_architecture
+    target_architecture = options.target_architecture
+
+    global vcvarsall_arg
+    if target_architecture == "x86":
+        vcvarsall_arg = "x86"
+    elif target_architecture == "x64":
+        vcvarsall_arg = "x86_amd64"
+    else:
+        die("Unknown target architecture " + target_architecture)
 
     global build_java
     global build_ada
@@ -359,7 +381,9 @@ class VisualStudioBuilder(object):
         
         self.studio = os.path.normcase(os.path.normpath(cfg.get("main","VSPATH")))
 
-        if not os.path.isdir(self.studio) or not os.path.isfile(os.path.join(self.studio,"vsvars32.bat")):
+        self.studio_install_dir = os.path.join(self.studio,"..", "..")
+
+        if not os.path.isdir(self.studio) or not os.path.isfile(os.path.join(self.studio_install_dir,"VC","vcvarsall.bat")):
             die("Something seems to have happened to your dobmake.ini or Visual Studio installations!"+
                 "\nVSPATH (in dots_generated/dobmake.ini) does not seem to point to a valid path." +
                 "\nTry to delete dots_generated/dobmake.ini and run dobmake.py in a Visual Studio command prompt.")
@@ -374,11 +398,26 @@ class VisualStudioBuilder(object):
         VS100 = getenv_and_normalize("VS100COMNTOOLS")
         
         if self.studio == VS80:
-            self.generator = "Visual Studio 8 2005"
+            if target_architecture == "x86":
+                self.generator = "Visual Studio 8 2005"
+            elif target_architecture == "x64":
+                self.generator = "Visual Studio 8 2005 Win64"
+            else:
+                die("Target architecture " + target_architecture + " is not supported for Visual Studio 8 2005 !")  
         elif self.studio == VS90:
-            self.generator = "Visual Studio 9 2008"
+            if target_architecture == "x86":
+                self.generator = "Visual Studio 9 2008"
+            elif target_architecture == "x64":
+                self.generator = "Visual Studio 9 2008 Win64"
+            else:
+                die("Target architecture " + target_architecture + " is not supported for Visual Studio 9 2008 !")
         elif self.studio == VS100:
-            self.generator = "Visual Studio 10"
+            if target_architecture == "x86":
+                self.generator = "Visual Studio 10"
+            elif target_architecture == "x64":
+                self.generator = "Visual Studio 10 Win64"
+            else:
+                die("Target architecture " + target_architecture + " is not supported for Visual Studio 10 !")
         else:
             die("VSPATH (in dots_generated/dobmake.ini) is set to something I dont recognize\n" +
                 "It should be either the value of %VS80COMNTOOLS%, %VS90COMNTOOLS% or %VS100COMNTOOLS%" +
@@ -403,6 +442,14 @@ class VisualStudioBuilder(object):
             self.build_cmd = devenvpath
         else:
             die("I couldn't find either vcexpress.exe or devenv.com, so I dont know how to build stuff!")
+
+        #work out what compiler tools to use
+        if target_architecture == "x86":
+            self.vcvarsall_arg = "x86"
+        elif target_architecture == "x64":
+            self.vcvarsall_arg = "amd64"
+        else:
+            die("Unknown target architecture " + target_architecture)
             
     @staticmethod
     def can_use():
@@ -412,11 +459,11 @@ class VisualStudioBuilder(object):
         return VS80 is not None or VS90 is not None or VS100 is not None
 
     def run_command(self, cmd, description, what, allow_fail = False):
-        """Run a command"""
+        """Run a command"""            
         batpath = os.path.join(self.tmpdir,"build.bat")
         bat = open(batpath,"w")
         bat.write("@echo off\n" +
-                  "call \"" + os.path.join(self.studio,"vsvars32.bat") + "\"\n" +
+                  "call \"" + os.path.join(self.studio_install_dir,"VC","vcvarsall.bat") +  "\" " + self.vcvarsall_arg + "\n" +
                   cmd)
         bat.close()
         buildlog.writeHeader(description + " '" + what + "'\n")
@@ -502,7 +549,8 @@ class VisualStudioBuilder(object):
                               "-D NO_CXX:string=TRUE " +
                               "-D NO_DOTNET:string=FALSE " +
                               "-D NO_ADA:string=" + str(not build_ada) + " " + 
-                              "-D NO_JAVA:string=" + str(not build_java) + " " + 
+                              "-D NO_JAVA:string=" + str(not build_java) + " " +
+                              "-D SAFIR_BUILD_TARGET_ARCHITECTURE:string=" + target_architecture + " " +
                               "-D REBUILD=" + Rebuild + " " +
                               ".."),
                              "Configure", what)
@@ -524,7 +572,7 @@ class VisualStudioBuilder(object):
             Rebuild = "TRUE"
         try:
             # workaround for bug in CMake with VS2010
-            if self.generator == "Visual Studio 10": 
+            if self.generator.startswith("Visual Studio 10"): 
                 self.run_command(("cmake -G \""+ "NMake Makefiles" + "\" "+
                                   "-D REBUILD=" + Rebuild + " " +
                                   "."),

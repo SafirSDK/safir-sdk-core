@@ -25,7 +25,7 @@ endif()
 if (WIN32)
     find_path(EXPAT_HEADER NAMES expat.h
               PATHS ENV PATH
-              PATH_SUFFIXES ../Source/lib)
+              PATH_SUFFIXES ../Source/lib ../include)
     if (NOT EXPAT_HEADER)
         message(FATAL_ERROR "Couldn't find expat.h")
     endif()

@@ -39,12 +39,17 @@ skip_list= None
 clean = False
 force_config = None
 force_extra_config = None
-
+target_architecture = None
+ada_support = False
+java_support = False
 
 class FatalError(Exception):pass
 
 def die(message):
     raise FatalError(message)
+
+def is_64_bit():
+    return sys.maxsize > 2**32
 
 def copy_dob_files(source_dir, target_dir):
     """Copy dou and dom files from the source directory to the given subdirectory in the dots_genereted directory"""
@@ -151,6 +156,12 @@ def parse_command_line(builder):
     parser = OptionParser()
     parser.add_option("--command-file", "-f",action="store",type="string",dest="command_file",
                       help="The command to execute")
+    parser.add_option("--target",action="store",type="string",dest="target_architecture",default="x86",
+                          help="Target architecture, x86 or x64")
+    parser.add_option("--no-ada-support", action="store_false",dest="ada_support",default=True,
+                      help="Disable Ada support")
+    parser.add_option("--no-java-support", action="store_false",dest="java_support",default=True,
+                      help="Disable Java support")
     parser.add_option("--skip-list",action="store",type="string",dest="skip_list",
                       help="A space-separated list of regular expressions of lines in the command file to skip")
     parser.add_option("--clean", action="store_true",dest="clean",default=False,
@@ -164,6 +175,24 @@ def parse_command_line(builder):
     builder.setup_command_line_options(parser)
     (options,args) = parser.parse_args()
 
+    if options.target_architecture == "x64":
+        if not is_64_bit():
+            die("Target x64 can't be set since this is not a 64 bit OS")
+        if options.ada_support:
+            die("64 bit Ada build is currently not supported")
+        if options.java_support:
+            die("64 bit Java build is currently not supported")            
+    elif options.target_architecture != "x86":
+        die("Unknown target architecture " + options.target_architecture)
+    global target_architecture
+    target_architecture = options.target_architecture
+
+    global ada_support
+    ada_support = options.ada_support
+    global java_support
+    java_support = options.java_support
+    
+    
     global skip_list;
     if (options.skip_list == None):
         skip_list = list();
@@ -219,20 +248,37 @@ class VisualStudioBuilder(object):
 
         self.studio = None
         self.generator = None
+        self.studio_install_dir = None
+        self.vcvarsall_arg = None
         
         if VSCount > 1:
-            log("I found both several Visual Studio installations, will need command line arg!")
+            log("I found several Visual Studio installations, will need command line arg!")
         elif VS80 is not None:
             self.studio = VS80
-            self.generator = "Visual Studio 8 2005"
+            if target_architecture == "x86":
+                self.generator = "Visual Studio 8 2005"
+            elif target_architecture == "x64":
+                self.generator = "Visual Studio 8 2005 Win64"
+            else:
+                die("Target architecture " + target_architecture + " is not supported for Visual Studio 8 2005 !")                
         elif VS90 is not None:
             self.studio = VS90
-            self.generator = "Visual Studio 9 2008"
+            if target_architecture == "x86":
+                self.generator = "Visual Studio 9 2008"
+            elif target_architecture == "x64":
+                self.generator = "Visual Studio 9 2008 Win64"
+            else:
+                die("Target architecture " + target_architecture + " is not supported for Visual Studio 9 2008 !")        
         elif VS100 is not None:
             self.studio = VS100
-            self.generator = "Visual Studio 10"
+            if target_architecture == "x86":
+                self.generator = "Visual Studio 10"
+            elif target_architecture == "x64":
+                self.generator = "Visual Studio 10 Win64"
+            else:
+                die("Target architecture " + target_architecture + " is not supported for Visual Studio 10 !")
         else:
-            die("Could not find a supported compiler to use!")
+            die("Could not find a supported compiler to use!")        
 
         self.tmpdir = os.environ.get("TEMP")
         if self.tmpdir is None:
@@ -240,7 +286,7 @@ class VisualStudioBuilder(object):
             if self.tmpdir is None:
                 die("Failed to find a temp directory!")
         if not os.path.isdir(self.tmpdir):
-            die("I can't seem to use the temp directory " + self.tmpdir)
+            die("I can't seem to use the temp directory " + self.tmpdir)        
 
     @staticmethod
     def can_use():
@@ -260,16 +306,40 @@ class VisualStudioBuilder(object):
         elif options.use_studio is not None:
             if options.use_studio == "2005":
                 self.studio = os.environ.get("VS80COMNTOOLS")
-                self.generator = "Visual Studio 8 2005"
+                if target_architecture == "x86":
+                    self.generator = "Visual Studio 8 2005"
+                elif target_architecture == "x64":
+                    self.generator = "Visual Studio 8 2005 Win64"
+                else:
+                    die("Target architecture " + target_architecture + " is not supported for Visual Studio 8 2005 !")  
             elif options.use_studio == "2008":
                 self.studio = os.environ.get("VS90COMNTOOLS")
-                self.generator = "Visual Studio 9 2008"
+                if target_architecture == "x86":
+                    self.generator = "Visual Studio 9 2008"
+                elif target_architecture == "x64":
+                    self.generator = "Visual Studio 9 2008 Win64"
+                else:
+                    die("Target architecture " + target_architecture + " is not supported for Visual Studio 9 2008 !")  
             elif options.use_studio == "2010":
                 self.studio = os.environ.get("VS100COMNTOOLS")
-                self.generator = "Visual Studio 10"
+                if target_architecture == "x86":
+                    self.generator = "Visual Studio 10"
+                elif target_architecture == "x64":
+                    self.generator = "Visual Studio 10 Win64"
+                else:
+                    die("Target architecture " + target_architecture + " is not supported for Visual Studio 10 !")  
             else:
                 die ("Unknown visual studio " + options.use_studio)
-        
+
+        self.studio_install_dir = os.path.join(self.studio,"..", "..")
+
+        #work out what compiler tools to use
+        if target_architecture == "x86":
+            self.vcvarsall_arg = "x86"
+        elif target_architecture == "x64":
+            self.vcvarsall_arg = "amd64"
+        else:
+            die("Unknown target architecture " + target_architecture)    
 
     def build(self, directory, configs):
         log(" - in config(s): " + str(list(configs)),True)
@@ -280,11 +350,18 @@ class VisualStudioBuilder(object):
             
     def dobmake(self):
         """run the dobmake command"""
+        ada = ""
+        if not ada_support:
+            ada = " --no-ada "
+        java = ""
+        if  not java_support:
+            java = " --no-java "
+            
         batpath = os.path.join(self.tmpdir,"build2.bat")
         bat = open(batpath,"w")
         bat.write("@echo off\n" +
-                  "call \"" + os.path.join(self.studio,"vsvars32.bat") + "\"\n" +
-                  "\"" + os.path.join(SAFIR_RUNTIME,"bin","dobmake.py") + "\" -b --html-output --rebuild\n") #batch mode (no gui)
+                  "call \"" + os.path.join(self.studio_install_dir,"VC","vcvarsall.bat") +  "\" "  + self.vcvarsall_arg + "\n" +
+                  "\"" + os.path.join(SAFIR_RUNTIME,"bin","dobmake.py") + "\" -b --html-output --rebuild" + ada + java + " --target " + target_architecture + "\n") #batch mode (no gui)
         bat.close()
         process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         result = process.communicate()
@@ -353,7 +430,10 @@ class VisualStudioBuilder(object):
         """build a directory using nmake"""
         for config in configs:                
             self.__run_command("cmake -D CMAKE_BUILD_TYPE:string=" + config + " " +
+                               "-D SAFIR_ADA_SUPPORT:boolean=" + str(ada_support) + " " +
+                               "-D SAFIR_JAVA_SUPPORT:boolean=" + str(java_support) + " " +
                                "-D SAFIR_BUILD_SYSTEM_VERSION:string=2 " +
+                               "-D SAFIR_BUILD_TARGET_ARCHITECTURE:string=" + target_architecture + " " +
                                "-G \"NMake Makefiles\" .",
                                "Configure " + config, directory)
             if clean:
@@ -369,7 +449,7 @@ class VisualStudioBuilder(object):
         batpath = os.path.join(self.tmpdir,"build.bat")
         bat = open(batpath,"w")
         bat.write("@echo off\n" +
-                  "call \"" + os.path.join(self.studio,"vsvars32.bat") + "\"\n" +
+                  "call \"" + os.path.join(self.studio_install_dir,"VC","vcvarsall.bat") +  "\" " + self.vcvarsall_arg + "\n" +
                   cmd)
         bat.close()
         buildlog.write("<h4>" + description + " '" + what + "'</h4><pre style=\"color: green\">" + cmd + "</pre>\n")
@@ -413,6 +493,8 @@ class UnixGccBuilder(object):
         log(" - in config: " + config, True)
         self.__run_command(("cmake",
                             "-D", "CMAKE_BUILD_TYPE:string=" + config,
+                            "-D SAFIR_ADA_SUPPORT:boolean=" + str(ada_support) + " " +
+                            "-D SAFIR_JAVA_SUPPORT:boolean=" + str(java_support) + " " +
                             "-D", "SAFIR_BUILD_SYSTEM_VERSION:string=2",
                             "."),
                            "Configure " + config, directory)
@@ -426,7 +508,14 @@ class UnixGccBuilder(object):
 
     def dobmake(self):
         """run the dobmake command"""
-        process = subprocess.Popen((os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b", "--html-output", "--rebuild"), #batch mode (no gui)
+        ada = ""
+        if not ada_support:
+            ada = " --no-ada "
+        java = ""
+        if not java_support:
+            java = " --no-java "
+            
+        process = subprocess.Popen((os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b", "--html-output", "--rebuild", ada, java), #batch mode (no gui)
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
         result = process.communicate()

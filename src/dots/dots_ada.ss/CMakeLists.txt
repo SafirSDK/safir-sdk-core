@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 2.6)
 
+if (NOT SAFIR_ADA_SUPPORT)
+     ADD_CUSTOM_TARGET(empty_target ALL
+                       COMMENT "SAFIR_ADA_SUPPORT set to false, dots_ada will not be built.")
+     INSTALL(CODE "MESSAGE(\"SAFIR_ADA_SUPPORT set to false, dots_ada will not be installed.\")")
+     return()
+endif (NOT SAFIR_ADA_SUPPORT)
+   
 PROJECT (dots_ada)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
@@ -12,7 +19,8 @@ SET(build_directories
 
 FILE(MAKE_DIRECTORY ${build_directories})
 
-SET(gnatmake_arguments -q -XBUILD=${CUSTOM_BUILD_TYPE})
+SET(gnatmake_arguments -q -XBUILD=${CUSTOM_BUILD_TYPE})  
+
 ADD_CUSTOM_TARGET(dots_ada ALL
                   COMMAND gnatmake ${gnatmake_arguments} -P dots_ada_library.gpr 
                   WORKING_DIRECTORY program
