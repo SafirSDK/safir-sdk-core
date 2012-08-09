@@ -151,15 +151,23 @@ namespace Internal
     const boost::interprocess::offset_ptr<T>
     ParameterOffsetCast(const ParameterOffset & offset)
     {
+#if (BOOST_VERSION / 100000 >= 1 &&  BOOST_VERSION / 100 % 1000 >= 48)
         return boost::interprocess::static_pointer_cast<T,  std::ptrdiff_t, std::size_t, boost::interprocess::offset_type_alignment>
                 (boost::interprocess::static_pointer_cast<void, std::ptrdiff_t, std::size_t, boost::interprocess::offset_type_alignment>(offset));
+#else
+        return boost::interprocess::static_pointer_cast<T>(boost::interprocess::static_pointer_cast<void>(offset));
+#endif
     }
 
     template <class T>
     const boost::interprocess::offset_ptr<const T>
     ParameterOffsetCast(const ParameterOffsetConst & offset)
     {
+#if (BOOST_VERSION / 100000 >= 1 &&  BOOST_VERSION / 100 % 1000 >= 48)
         return ParameterOffsetCast<T>(boost::interprocess::const_pointer_cast<char, std::ptrdiff_t, std::size_t, boost::interprocess::offset_type_alignment>(offset));
+#else
+        return ParameterOffsetCast<T>(boost::interprocess::const_pointer_cast<char>(offset));
+#endif
     }
 
 
