@@ -7,6 +7,7 @@ LATER
 -----
 
 dots_cpp array container proxies!?
+         would require rewrite of ArrayContainer
 
 make dose_com possible to stop nicely
 använd wide-interfacen för att undvika MAX_PATH problem på windows
