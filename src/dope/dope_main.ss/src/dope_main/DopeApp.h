@@ -30,8 +30,18 @@
 #include <Safir/Dob/ResponseSender.h>
 #include "PersistenceHandler.h"
 #include <Safir/Application/Tracer.h>
-#include <ace/Reactor.h>
 #include <Safir/Utilities/AceDispatcher.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4127 4251)
+#endif
+
+#include <ace/Reactor.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 class DopeApp :
     public Safir::Dob::StopHandler,

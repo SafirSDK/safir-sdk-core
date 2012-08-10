@@ -27,7 +27,17 @@
 #include <iostream>
 #include <DoseTest/Action.h>
 #include <Safir/Dob/OverflowException.h>
+
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4702 4244)
+#endif
+
 #include <ace/OS_NS_unistd.h>
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
 
 
 PartnerState::PartnerState(const Languages & languages):

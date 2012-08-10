@@ -29,16 +29,16 @@
 
 #if _MSC_VER
 #pragma warning(push)
-#pragma warning (disable: 4702)
+#pragma warning (disable: 4127 4702 4512 4800 4267)
 #endif
+#include <ace/Process.h>
+#include <ace/SOCK_Dgram_Bcast.h>
 #include <boost/lexical_cast.hpp>
 #if _MSC_VER
 #pragma warning(pop)
 #endif
 
 #include <ace/Thread.h>
-#include <ace/Process.h>
-#include <ace/SOCK_Dgram_Bcast.h>
 #include <ace/OS_NS_sys_socket.h>
 #include <ace/Signal.h>
 #include "Dispatcher.h"

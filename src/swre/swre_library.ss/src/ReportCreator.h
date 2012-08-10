@@ -30,7 +30,18 @@
 #include <map>
 #include <Safir/SwReports/Internal/Report.h>
 #include <Safir/Dob/Connection.h>
+
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244)
+#endif
+
 #include <ace/Recursive_Thread_Mutex.h>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 
 namespace Safir

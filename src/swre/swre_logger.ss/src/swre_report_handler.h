@@ -27,12 +27,22 @@
 #include <Safir/Dob/Consumer.h>
 
 #include <ace/config.h>
-#include <ace/Event_Handler.h>
-#include <ace/Reactor.h>
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127 4244)
+#endif
+
+#include <ace/Event_Handler.h>
+#include <ace/Reactor.h>
 #include <ace/SOCK_Dgram.h>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #ifdef GetMessage
 #undef GetMessage

@@ -1167,7 +1167,7 @@ namespace Internal
             throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        return m_connection->QueueCapacity(queue);
+        return static_cast<Typesystem::Int32>(m_connection->QueueCapacity(queue));
     }
 
     Typesystem::Int32

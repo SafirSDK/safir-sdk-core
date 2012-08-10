@@ -29,7 +29,7 @@
 
 #ifdef _MSC_VER
   #pragma warning(push)
-  #pragma warning(disable: 4267)
+  #pragma warning(disable: 4267 4244)
 #endif
 
 #  define DOSE_USE_ACE_PROCESS_SEMAPHORE_FOR_SIGNALS

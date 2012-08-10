@@ -26,7 +26,17 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <DoseTest/Parameters.h>
+
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable: 4244)
+#endif
+
 #include <ace/OS_NS_sys_socket.h>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 #include <iostream>
 

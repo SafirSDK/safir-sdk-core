@@ -27,17 +27,17 @@
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning (disable: 4702)
+#pragma warning (disable: 4702 4512)
 #endif
 
 #include <boost/lexical_cast.hpp>
+#include <boost/program_options.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 
 #include <Safir/Application/BackdoorCommand.h>
-#include <boost/program_options.hpp>
 #include <iostream>
 
 std::string gProgramName;

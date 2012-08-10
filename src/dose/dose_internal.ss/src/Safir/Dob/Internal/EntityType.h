@@ -223,9 +223,6 @@ namespace Internal
                      const Dob::Typesystem::HandlerId&  handlerId,
                      const ConnectionConsumerPair&      registerer) const;
 
-        typedef std::set<Dob::Typesystem::HandlerId> HandlerSet;
-        void FindAllHandlers(const ContextId context, const StateSharedPtr& statePtr, HandlerSet& handlers) const;
-
         const StateContainer::Iterator CreateEntityIterator(const ContextId context, bool& end) const
         {return m_entityStates[context].CreateStateIterator(end);}
 
@@ -398,6 +395,8 @@ namespace Internal
                          const Dob::Typesystem::HandlerId&  handlerId,
                          const RegisterTime&                mostRecentRegisterTime) const;
 
+        typedef std::set<Dob::Typesystem::HandlerId> HandlerSet;
+        void FindAllHandlers(const StateSharedPtr& statePtr, HandlerSet& handlers) const;
 
         friend void StatisticsCollector(EntityType&, void*);
     };

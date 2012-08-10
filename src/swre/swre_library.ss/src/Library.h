@@ -34,8 +34,18 @@
 #include <ace/Mutex.h>
 #include <ace/Auto_Event.h>
 #include <ace/Recursive_Thread_Mutex.h>
-#include <ace/Reactor.h>
 #include <queue>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4127 4251)
+#endif
+
+#include <ace/Reactor.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {

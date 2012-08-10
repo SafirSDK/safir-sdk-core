@@ -30,6 +30,7 @@
   #pragma warning (disable : 4267)
   #pragma warning (disable : 4512)
   #pragma warning (disable : 4244)
+  #pragma warning (disable : 4805)
 #endif
 
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>

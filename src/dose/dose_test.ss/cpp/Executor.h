@@ -33,13 +33,12 @@
 #include "Consumer.h"
 #include <boost/function.hpp>
 
-#include <ace/SOCK_Dgram_Mcast.h>
-
 #ifdef _MSC_VER
   #pragma warning(push)
-  #pragma warning(disable: 4267)
+  #pragma warning(disable: 4127 4244 4267)
 #endif
 
+#include <ace/SOCK_Dgram_Mcast.h>
 #include <ace/Reactor.h>
 
 #ifdef _MSC_VER

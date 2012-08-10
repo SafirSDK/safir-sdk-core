@@ -16,6 +16,11 @@ FILE(GLOB sources *.cpp)
 FILE(GLOB headers [!ui_]*.h)
 FILE(GLOB resources *.qrc)
 
+IF (MSVC)
+   # Suppress some warnings
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4127 -wd4512")
+ENDIF ()
+
 QT4_ADD_RESOURCES(rcc_sources ${resources})
 QT4_WRAP_CPP(moc_sources categoryinfodialog.h entitydialog.h entitymw.h entitytablehandler.h messagedialog.h servicedialog.h)
 

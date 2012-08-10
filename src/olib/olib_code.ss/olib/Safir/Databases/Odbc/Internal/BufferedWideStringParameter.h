@@ -122,7 +122,7 @@ inline void BufferedWideStringParameter<sSqlType,sInputOutputType>::SetValue(con
 template<short sSqlType, short sInputOutputType>
 inline unsigned long BufferedWideStringParameter<sSqlType,sInputOutputType>::GetColumnSize()
 {
-    return InstantiatedParameter::m_nSize - sizeof(wchar_t); // Do not count end-of-string char in column size
+    return static_cast<unsigned long>(InstantiatedParameter::m_nSize - sizeof(wchar_t)); // Do not count end-of-string char in column size
 }
 
 } // End namespace Internal

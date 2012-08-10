@@ -318,7 +318,7 @@ unsigned long DoseOs::CreateThread(unsigned long& tid,
 {
 #ifdef _WIN32
 
-    tid = _beginthreadex(NULL,0,thread_function, param,0,NULL);
+    tid = static_cast<unsigned long>(_beginthreadex(NULL,0,thread_function, param,0,NULL));
 
     if (tid != 0x0L)
         return 0; // Ok

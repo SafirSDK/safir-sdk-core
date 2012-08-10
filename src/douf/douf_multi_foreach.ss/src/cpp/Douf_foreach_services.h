@@ -39,11 +39,21 @@
 
 #include <Safir/Utilities/ForEach/ResponseType.h>
 
-#include <ace/Event_Handler.h>
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
 #include <list>
 #include <map>
 #include <vector>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4244) // To get rid of warning that says that the template needs to have a DLL-interface
+#endif
+
+#include <ace/Event_Handler.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 
 namespace Safir

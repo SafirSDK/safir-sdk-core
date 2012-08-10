@@ -3039,7 +3039,7 @@ void CDoseComTransmit::Set_PoolDistributionIsCompleted(int Priority,
     // this is a flag to CleanUp_After_Msg_Completed()
     g_pShm->PoolDistributionWillEndSoon = 1;
 
-    Xmit_Msg(pMsg, strlen(pMsg), PD_ISCOMPLETE, 1, Priority, DestinationId);
+    Xmit_Msg(pMsg, static_cast<dcom_ulong32>(strlen(pMsg)), PD_ISCOMPLETE, 1, Priority, DestinationId);
 }
 
 /***************************************************

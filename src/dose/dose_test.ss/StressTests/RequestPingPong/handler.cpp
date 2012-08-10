@@ -48,7 +48,7 @@ void Handler::Start()
     lllerr << "Handler started" <<std::endl;
 }
 
-void Handler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId& handlerId)
+void Handler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId /*typeId*/, const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
 {
     lllerr << "Handler::OnRevokedRegistration" <<std::endl;
 
@@ -59,13 +59,12 @@ void Handler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId,
 }
 
 
-void Handler::OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId& handlerId)
+void Handler::OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId /*typeId*/, const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
 {
     lllerr << "Handler::OnCompletedRegistration" <<std::endl;
 }
 
-void Handler::OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId,
-    const Safir::Dob::Typesystem::HandlerId& handlerId)
+void Handler::OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId /*typeId*/, const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
 {
     lllerr << "Handler::OnInitialInjectionsDone" <<std::endl;
 }

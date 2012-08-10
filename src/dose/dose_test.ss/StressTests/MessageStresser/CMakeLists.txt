@@ -6,6 +6,11 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 FILE(GLOB sources *.cpp ../common/*.cpp)
 FILE(GLOB headers *.h ../common/*.h)
 
+if (MSVC)
+   # Suppress some warnings
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4244")
+endif()
+
 ADD_EXECUTABLE(MessageStresser ${sources} ${headers})
 
 TARGET_LINK_LIBRARIES(MessageStresser ${COMMON_LIBRARIES} ${ACE_LIBRARY})

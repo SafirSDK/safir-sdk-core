@@ -35,11 +35,22 @@
 #include <deque>
 #include <boost/array.hpp>
 #include <boost/function.hpp>
-#include <ace/Reactor.h>
 #include "dose_main_waiting_states.h"
 #include "dose_main_thread_monitor.h"
 
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4127)
+#endif
+
+#include <ace/Reactor.h>
+
+//and enable the warnings again
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 namespace Safir
 {

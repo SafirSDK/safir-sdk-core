@@ -48,14 +48,12 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <ace/OS_NS_unistd.h>
-
 
 #ifdef _MSC_VER
   #pragma warning(push)
-  #pragma warning(disable: 4702)
+  #pragma warning(disable: 4702 4244)
 #endif
-
+#include <ace/OS_NS_sys_socket.h>
 #include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER

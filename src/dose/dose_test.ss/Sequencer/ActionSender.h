@@ -28,7 +28,17 @@
 #include <Safir/Dob/Consumer.h>
 #include <Safir/Dob/SecondaryConnection.h>
 #include <DoseTest/Action.h>
+
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4244)
+#endif
+
 #include <ace/SOCK_Dgram_Mcast.h>
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
 
 class ActionSender :
     public Safir::Dob::MessageSender

@@ -49,13 +49,13 @@
 #include "Logger.h"
 #include <cctype>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
-#include <ace/OS_NS_unistd.h>
 
 #if defined _MSC_VER
   #pragma warning (push)
   #pragma warning (disable: 4244)
 #endif
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <ace/OS_NS_unistd.h>
 #if defined _MSC_VER
   #pragma warning (pop)
 #endif

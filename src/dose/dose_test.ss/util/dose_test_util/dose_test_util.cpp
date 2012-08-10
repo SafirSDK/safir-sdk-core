@@ -26,8 +26,17 @@
 #include "dose_com_utils.h"
 #include <Safir/Dob/Typesystem/Utilities.h>
 
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable: 4244)
+#endif
+
 #include <ace/SOCK_Dgram_Mcast.h>
 #include <ace/OS_NS_sys_socket.h>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 ACE_SOCK_Dgram_Mcast g_sock;
 
@@ -102,7 +111,7 @@ void ReceiveMulticastPacket(char* buf,
                             int bufLen)
 {
     ACE_INET_Addr from;
-    int res = g_sock.recv(buf, bufLen, from);
+    size_t res = g_sock.recv(buf, bufLen, from);
 
     if (res == -1)
     {

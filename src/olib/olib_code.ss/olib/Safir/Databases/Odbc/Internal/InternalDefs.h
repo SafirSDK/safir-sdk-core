@@ -25,6 +25,7 @@
 #define Safir_Databases_Odbc_Internal_Internal_Defs_h
 
 #if defined _MSC_VER
+  #pragma warning (disable: 4251 4275)
   #ifdef OLIB_EXPORTS
     #define OLIB_API __declspec(dllexport)
   #else

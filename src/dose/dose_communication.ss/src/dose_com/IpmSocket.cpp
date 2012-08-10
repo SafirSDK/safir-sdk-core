@@ -284,7 +284,7 @@ long CIpmSocket::CreateIpMulticastSocket(int             bForReceive,
     if( Sock_id == INVALID_SOCKET )
     {
         PrintErr(DoseOs::Get_LastError(),"socket() failed");
-        return(INVALID_SOCKET); // = -1
+        return -1;
     }
 
     //--------------------------------------
@@ -302,7 +302,7 @@ long CIpmSocket::CreateIpMulticastSocket(int             bForReceive,
             (void) closesocket (Sock_id);
             PrintErr((int)DoseOs::Get_LastError(),"bind to (%d) failed",
                         Port);
-            return(INVALID_SOCKET);
+            return -1;
         }
     }
 
@@ -394,7 +394,7 @@ if(IpMulticastAddr_nw != 1)
                     "Can't setsockopt(IP_ADD_MEMBERSHIP) Ipm/IF %s / %s E=%d", buf,
                     inet_ntoa(*(struct in_addr *) &mreq.imr_interface.s_addr), ErrCode);
 
-            return(INVALID_SOCKET);
+            return -1;
         }
 }
         // This prevents loopback to this receivesocket even
@@ -431,7 +431,7 @@ if(IpMulticastAddr_nw != 1)
         {
             PrintErr((int)DoseOs::Get_LastError(),
                     "Error at setsockopt(IP_MULTICAST_TTL)");
-            return(INVALID_SOCKET);
+            return -1;
         }
 
         //???? if not called, the default is used ???????
@@ -445,13 +445,13 @@ if(IpMulticastAddr_nw != 1)
         {
             PrintErr((int)DoseOs::Get_LastError(),
                     "Error at setsockopt(IP_MULTICAST_IF)");
-            return(INVALID_SOCKET);
+            return -1;
         }
     }
 
     m_SockId = Sock_id;
 
-    return(Sock_id);
+    return(long)(Sock_id);
 }
 /*------------- end CreateIpMulticastSocket() -------------------*/
 
