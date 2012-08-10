@@ -101,7 +101,7 @@ def remove(path):
             os.remove(path)
             return
         except Exception, e:
-            die ("Failed to remove file " + path + ". Got exception " + e)
+            die ("Failed to remove file " + path + ". Got exception " + str(e))
             
     for name in os.listdir(path):
         if os.path.isdir(os.path.join(path,name)):
@@ -110,12 +110,12 @@ def remove(path):
             try:
                 os.remove(os.path.join(path,name))
             except Exception, e:
-                die ("Failed to remove file " + os.path.join(path,name) + ". Got exception " + e)
+                die ("Failed to remove file " + os.path.join(path,name) + ". Got exception " + str(e))
 
     try:
         os.rmdir(path)
     except Exception, e:
-        die ("Failed to remove directory " + path + ". Got exception " + e)
+        die ("Failed to remove directory " + path + ". Got exception " + str(e))
 
 
 def num_cpus():
