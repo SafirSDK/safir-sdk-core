@@ -5,6 +5,7 @@ Kolla efter svn:keywords i hook-scripten!
 
 LATER
 -----
+Make dose_test use oob for all action sending, with wait for completion of the action before sequencer sends out next action.
 
 dots_cpp array container proxies!?
          would require rewrite of ArrayContainer
