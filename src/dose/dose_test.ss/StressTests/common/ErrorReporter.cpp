@@ -35,7 +35,7 @@ void ErrorReporter::Log(const std::string& text)
         ostr << "== DOSE STRESSTEST LOG ========================================================" << std::endl
              << "This is an error message from one of the dose stress test programs. These logs " << std::endl
              << "are sent using UDP broadcast. If you didnt expect this message it probably" << std::endl
-             << "that someone is running dose stresstests on your LAN, or on a LAN close by." << std::endl
+             << "means that someone is running dose stresstests on your LAN." << std::endl
              << "Pid = " << pid << std::endl
              << "Process Name = " << proc.GetProcessName() << std::endl
              << "Process Description = " << Safir::Utilities::ProcessInfo::GetProcessDescription() << std::endl
