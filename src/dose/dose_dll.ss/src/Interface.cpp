@@ -34,6 +34,7 @@
 #include <Safir/Dob/Internal/TimestampOperations.h>
 #include <Safir/Dob/ConnectionInfo.h>
 
+#include "crash_handler.h"
 #include "dose_controller.h"
 #include "dose_controller_table.h"
 using namespace Safir::Dob::Internal;
@@ -45,6 +46,7 @@ using namespace Safir::Dob;
 void DoseC_Constructor(long & ctrl,
                        bool & success)
 {
+    Crash_Handler::Instance();
     success = false;
     try
     {
