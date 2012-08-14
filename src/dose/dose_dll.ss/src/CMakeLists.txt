@@ -18,8 +18,10 @@ TARGET_LINK_LIBRARIES(dose_dll ${ACE_LIBRARY} )
 
 ADD_DEFINITIONS(-DDOSE_EXPORTS)
 
+INCLUDE_DIRECTORIES( ${SAFIR_SDK}/include/Safir/Utilities/Breakpad)
+
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dose_dll dots_generated-cpp dose_internal)
+  TARGET_LINK_LIBRARIES(dose_dll dots_generated-cpp dose_internal breakpad)
 endif()
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
