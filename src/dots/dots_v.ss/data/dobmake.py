@@ -23,8 +23,26 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+from __future__ import print_function
+import os, glob, subprocess, threading, sys, stat, shutil, time, traceback
+from optparse import OptionParser
 
-import os, glob, subprocess, threading, sys, stat, shutil
+try:
+    # 3.x name
+    from configparser import SafeConfigParser
+except ImportError:
+    # 2.x name
+    from ConfigParser import SafeConfigParser
+
+
+try:
+    # 3.x name
+    import tkinter
+    import tkinter.font as tkfont
+except ImportError:
+    # 2.x name
+    import Tkinter as tkinter
+    import tkFont as tkfont
 
 def is_64_bit():
     return sys.maxsize > 2**32
@@ -33,7 +51,7 @@ def num_cpus():
     """Detects the number of CPUs on a system. Cribbed from pp."""
     # Linux, Unix and MacOS:
     if hasattr(os, "sysconf"):
-        if os.sysconf_names.has_key("SC_NPROCESSORS_ONLN"):
+        if "SC_NPROCESSORS_ONLN" in os.sysconf_names:
             # Linux & Unix:
             ncpus = os.sysconf("SC_NPROCESSORS_ONLN")
             if isinstance(ncpus, int) and ncpus > 0:
@@ -41,7 +59,7 @@ def num_cpus():
         else: # OSX:
             return int(os.popen2("sysctl -n hw.ncpu")[1].read())
     # Windows:
-    if os.environ.has_key("NUMBER_OF_PROCESSORS"):
+    if "NUMBER_OF_PROCESSORS" in os.environ:
             ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
             if ncpus > 0:
                 return ncpus
@@ -90,7 +108,7 @@ def remove(path):
             chmod(path)
             os.remove(path)
             return
-        except Exception, e:
+        except Exception as e:
             die ("Failed to remove file " + path + ". Got exception " + str(e))
             
     for name in os.listdir(path):
@@ -100,19 +118,19 @@ def remove(path):
         else:
             try:
                 os.remove(os.path.join(path,name))
-            except Exception, e:
+            except Exception as e:
                 die ("Failed to remove file " + os.path.join(path,name) + ". Got exception " + str(e))
 
     try:
         chmod(path)
         os.rmdir(path)
 
-    except Exception, e:
+    except Exception as e:
         die ("Failed to remove directory " + path + ". Got exception " + str(e))
 
 def save_installed_files_manifest():
-    installed_files = open(os.path.join(SAFIR_SDK,"dots","dots_generated","installed_files.txt"), 'a')
-    manifest = open('install_manifest.txt', 'r')
+    installed_files = open(os.path.join(SAFIR_SDK,"dots","dots_generated","installed_files.txt"), "a")
+    manifest = open("install_manifest.txt", "r")
 
     shutil.copyfileobj(manifest, installed_files)
     
@@ -207,7 +225,6 @@ class Logger(object):
         self.write(data,"title")
 
     def writeCommand(self, data):
-        import time
         if not no_gui:
             self.write(time.strftime("%H:%M:%S", time.localtime()) + "\n","command")
         self.write(data,"command")
@@ -226,9 +243,8 @@ class Logger(object):
             newlines = 0
             while True:
                 data = self.process.stdout.readline()
-                if len(data) == 0: # and self.process.returncode is not None:
+                if data is None or len(data) == 0: # and self.process.returncode is not None:
                     return
-                data = data.replace("\r\n","\n")
                 self.logger.write(data,"pre")
 
 
@@ -248,7 +264,7 @@ class Logger(object):
         return data
 
     def close(self):
-        print "logger.close"
+        print("logger.close")
 
 
 buildType = "build"
@@ -262,7 +278,6 @@ html = False
 target_architecture = None
 
 def parse_command_line():
-    from optparse import OptionParser
     parser = OptionParser()
     parser.add_option("--clean", action="store_true",dest="clean",default=False,
                       help="Remove all intermediary build files")
@@ -285,10 +300,10 @@ def parse_command_line():
     (options,args) = parser.parse_args()
 
     if options.clean and options.rebuild:
-        print "Specifying both --clean and --rebuild is redundant, ignoring --clean"
+        print("Specifying both --clean and --rebuild is redundant, ignoring --clean")
 
     if options.uninstall and options.rebuild:
-        print "Specifying both --uninstall and --rebuild is redundant, ignoring --uninstall"         
+        print("Specifying both --uninstall and --rebuild is redundant, ignoring --uninstall")         
 
     global buildType
 
@@ -342,7 +357,7 @@ def parse_command_line():
 def run_dots_depends():
     buildlog.writeHeader("Checking dependencies in dou files\n")
     buildlog.writeCommand("Running dots_depends...\n")
-    process = subprocess.Popen("dots_depends",stdout=subprocess.PIPE, stderr=subprocess.STDOUT)    
+    process = subprocess.Popen("dots_depends",stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
     buildlog.logOutput(process)
     if process.returncode != 0:
         die("dots_depends failed!")
@@ -351,14 +366,13 @@ def run_dots_depends():
 
 class VisualStudioBuilder(object):
     def __init__(self):
-        from ConfigParser import ConfigParser
-        cfg = ConfigParser()
+        cfg = SafeConfigParser()
         
         cfgpath = get_config_file()
 
         add_section = False
         if not os.path.exists(cfgpath):
-            print "Could not find " + cfgpath + ", trying to create one"
+            print("Could not find " + cfgpath + ", trying to create one")
             add_section = True
         else:
             cfg.read(cfgpath)
@@ -468,7 +482,7 @@ class VisualStudioBuilder(object):
         bat.close()
         buildlog.writeHeader(description + " '" + what + "'\n")
         buildlog.writeCommand(cmd + "\n")
-        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
         
         buildlog.logOutput(process)
 
@@ -480,11 +494,10 @@ class VisualStudioBuilder(object):
 
     def run_command2(self, cmd, description, what, allow_fail = False):
         """Run a command"""
-        import subprocess
         
         buildlog.writeHeader(description + " '" + what + "'\n")
         buildlog.writeCommand(cmd + "\n")
-        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
 
         buildlog.logOutput(process)
 
@@ -608,7 +621,7 @@ class VisualStudioBuilder(object):
         remove("dll_imports.cpp")
 
         # empty file, must exist
-        tmp_file = open('cmake_depend.txt', 'w')
+        tmp_file = open("cmake_depend.txt", "w")
         tmp_file.close()
         
         for name in os.listdir("gen"):
@@ -637,7 +650,7 @@ class UnixGccBuilder(object):
         """Run a command"""
         buildlog.writeHeader(description + " '" + what + "'\n")
         buildlog.writeCommand(" ".join(cmd) + "\n")
-        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         buildlog.logOutput(process)
         if process.returncode != 0:
             if not allow_fail:
@@ -710,7 +723,7 @@ class UnixGccBuilder(object):
         remove("dll_imports.cpp")
 
         # empty file, must exist
-        tmp_file = open('cmake_depend.txt', 'w')
+        tmp_file = open("cmake_depend.txt", "w")
         tmp_file.close()
 
         for name in os.listdir("gen"):
@@ -718,7 +731,7 @@ class UnixGccBuilder(object):
                 remove(os.path.join("gen",name))
 
 def run_dots_configuration_check():
-    process = subprocess.Popen("dots_configuration_check",stdout=subprocess.PIPE, stderr=subprocess.STDOUT)    
+    process = subprocess.Popen("dots_configuration_check",stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
     buildlog.logOutput(process)
     if process.returncode != 0:
         die("dots_configuration_check failed! There is something wrong with your dou and dom files")
@@ -734,33 +747,31 @@ def check_config_dots_generated():
     
     # Set a "special" environment variable for the sub-process. The env variable determines where dots_kernel should
     # load dou/dom files from
-    os.putenv('SAFIR_DOTS_CLASSES_DIR', os.path.join(SAFIR_SDK,"dots","dots_generated"))
+    os.putenv("SAFIR_DOTS_CLASSES_DIR", os.path.join(SAFIR_SDK,"dots","dots_generated"))
 
     run_dots_configuration_check()
         
 def load_gui():
-    import Tkinter, tkMessageBox, tkFont, time
-    from ConfigParser import RawConfigParser
     global MainDialog
     
-    class MainDialog(Tkinter.Frame):
+    class MainDialog(tkinter.Frame):
         def __init__(self,parent, builder):
-            Tkinter.Frame.__init__(self,parent)
+            tkinter.Frame.__init__(self,parent)
             self.cfgpath = None
             self.cfg = None
             self.parent = parent
             self.builder = builder
-            self.grid(row=0,column=0,sticky=Tkinter.W + Tkinter.E + Tkinter.N + Tkinter.S)
+            self.grid(row=0,column=0,sticky=tkinter.W + tkinter.E + tkinter.N + tkinter.S)
 
             self.parent.grid_rowconfigure(0, weight=1)
             self.parent.grid_columnconfigure(0, weight=1)
 
-            self.buildType=Tkinter.StringVar()
+            self.buildType=tkinter.StringVar()
             self.buildType.set(buildType)
-            self.buildAda = Tkinter.IntVar()
-            self.buildJava = Tkinter.IntVar()
-            self.buildReleaseCpp = Tkinter.IntVar()
-            self.buildDebugCpp = Tkinter.IntVar()
+            self.buildAda = tkinter.IntVar()
+            self.buildJava = tkinter.IntVar()
+            self.buildReleaseCpp = tkinter.IntVar()
+            self.buildDebugCpp = tkinter.IntVar()
             self.getGuiConfiguration()
             self.createWidgets()
             self.cppDebugBoxChanged()
@@ -772,34 +783,31 @@ def load_gui():
 
 
         def writeGuiConfiguration(self):
-            configfile = open(self.cfgpath,"wb")
-            try:
+            with open(self.cfgpath,"w") as configfile:
                 self.cfg.write(configfile)
-            finally:
-                configfile.close()
                 
         def getGuiConfiguration(self):
             self.cfgpath = get_config_file()
-            self.cfg = RawConfigParser()
+            self.cfg = SafeConfigParser()
 
             add_section = False
             if not os.path.exists(self.cfgpath):
                 add_section = True
             else:
                 self.cfg.read(self.cfgpath)
-                if not self.cfg.has_section('gui-settings'):
+                if not self.cfg.has_section("gui-settings"):
                     add_section = True
             if add_section:
-                self.cfg.add_section('gui-settings')
-                self.cfg.set('gui-settings', 'build_ada', 1)
-                self.cfg.set('gui-settings', 'build_java', 1)
-                self.cfg.set('gui-settings', 'build_release_cpp', 1)
-                self.cfg.set('gui-settings', 'build_debug_cpp', 1)
+                self.cfg.add_section("gui-settings")
+                self.cfg.set("gui-settings", "build_ada", "1")
+                self.cfg.set("gui-settings", "build_java", "1")
+                self.cfg.set("gui-settings", "build_release_cpp", "1")
+                self.cfg.set("gui-settings", "build_debug_cpp", "1")
                 
-            self.buildAda.set(self.cfg.getint('gui-settings', 'build_ada'))
-            self.buildJava.set(self.cfg.getint('gui-settings', 'build_java'))
-            self.buildReleaseCpp.set(self.cfg.getint('gui-settings', 'build_release_cpp'))
-            self.buildDebugCpp.set(self.cfg.getint('gui-settings', 'build_debug_cpp'))
+            self.buildAda.set(self.cfg.getint("gui-settings", "build_ada"))
+            self.buildJava.set(self.cfg.getint("gui-settings", "build_java"))
+            self.buildReleaseCpp.set(self.cfg.getint("gui-settings", "build_release_cpp"))
+            self.buildDebugCpp.set(self.cfg.getint("gui-settings", "build_debug_cpp"))
             
             self.writeGuiConfiguration()           
         
@@ -808,121 +816,121 @@ def load_gui():
             self.grid_rowconfigure(5, weight=1)
             self.grid_columnconfigure(4, weight=1)
 
-            Tkinter.Label(self, 
-                          text='Build directory:').grid(row=0,column=0,sticky=Tkinter.W + Tkinter.N)
+            tkinter.Label(self, 
+                          text="Build directory:").grid(row=0,column=0,sticky=tkinter.W + tkinter.N)
 
-            Tkinter.Label(self, 
+            tkinter.Label(self, 
                           text=os.path.join(SAFIR_SDK,"dots","dots_generated"), 
-                          relief=Tkinter.SUNKEN).grid(row=0,column=1,columnspan=5,sticky=Tkinter.W + Tkinter.N)
+                          relief=tkinter.SUNKEN).grid(row=0,column=1,columnspan=5,sticky=tkinter.W + tkinter.N)
 
 
-            Tkinter.Label(self, 
-                          text='Task:').grid(row=1,column=0,sticky=Tkinter.W + Tkinter.N)
+            tkinter.Label(self, 
+                          text="Task:").grid(row=1,column=0,sticky=tkinter.W + tkinter.N)
 
-            Tkinter.Radiobutton(self,
+            tkinter.Radiobutton(self,
                                 text="Build",
                                 variable=self.buildType,
                                 value="build",
-                                command=self.buildTypeChanged).grid(row=1,column=1, sticky=Tkinter.W + Tkinter.N)
+                                command=self.buildTypeChanged).grid(row=1,column=1, sticky=tkinter.W + tkinter.N)
 
-            Tkinter.Radiobutton(self,
+            tkinter.Radiobutton(self,
                                 text="Rebuild",
                                 variable=self.buildType,
                                 value="rebuild",
-                                command=self.buildTypeChanged).grid(row=1,column=2, sticky=Tkinter.W + Tkinter.N)
+                                command=self.buildTypeChanged).grid(row=1,column=2, sticky=tkinter.W + tkinter.N)
 
-            Tkinter.Radiobutton(self,
+            tkinter.Radiobutton(self,
                                 text="Clean",
                                 variable=self.buildType,
                                 value="clean",
-                                command=self.buildTypeChanged).grid(row=1,column=3, sticky=Tkinter.W + Tkinter.N)
-            Tkinter.Label(self, 
-                          text='Languages:').grid(row=2,column=0,sticky=Tkinter.W + Tkinter.N)
+                                command=self.buildTypeChanged).grid(row=1,column=3, sticky=tkinter.W + tkinter.N)
+            tkinter.Label(self, 
+                          text="Languages:").grid(row=2,column=0,sticky=tkinter.W + tkinter.N)
             
-            cppBox = Tkinter.Checkbutton(self,
+            cppBox = tkinter.Checkbutton(self,
                                          text="C++",
                                          state="disabled")
-            cppBox.grid(row=2,column=1,sticky=Tkinter.W + Tkinter.N)
+            cppBox.grid(row=2,column=1,sticky=tkinter.W + tkinter.N)
             cppBox.select()
             
-            csBox = Tkinter.Checkbutton(self,
+            csBox = tkinter.Checkbutton(self,
                                         text="C#",
                                         state="disabled")
-            csBox.grid(row=2,column=2,sticky=Tkinter.W + Tkinter.N)
+            csBox.grid(row=2,column=2,sticky=tkinter.W + tkinter.N)
             csBox.select()
             
             
-            self.adaBox = Tkinter.Checkbutton(self,
+            self.adaBox = tkinter.Checkbutton(self,
                                               text="Ada",
                                               variable = self.buildAda,
                                               command=self.adaBoxChanged)
-            self.adaBox.grid(row=2,column=3,sticky=Tkinter.W + Tkinter.N)
+            self.adaBox.grid(row=2,column=3,sticky=tkinter.W + tkinter.N)
             
-            self.javaBox = Tkinter.Checkbutton(self,
+            self.javaBox = tkinter.Checkbutton(self,
                                                text="Java",
                                                variable = self.buildJava,
                                                command=self.javaBoxChanged)
-            self.javaBox.grid(row=2,column=4,sticky=Tkinter.W + Tkinter.N)
+            self.javaBox.grid(row=2,column=4,sticky=tkinter.W + tkinter.N)
             
-            Tkinter.Label(self,
-                          text='C++ build type:').grid(row=3,column=0,sticky=Tkinter.W + Tkinter.N)
+            tkinter.Label(self,
+                          text="C++ build type:").grid(row=3,column=0,sticky=tkinter.W + tkinter.N)
 
-            cppReleaseBuildBox = Tkinter.Checkbutton(self,
+            cppReleaseBuildBox = tkinter.Checkbutton(self,
                                                      text="Release",
                                                      state="disabled")
-            cppReleaseBuildBox.grid(row=3,column=1,sticky=Tkinter.W + Tkinter.N)
+            cppReleaseBuildBox.grid(row=3,column=1,sticky=tkinter.W + tkinter.N)
             cppReleaseBuildBox.select()
             
 
-            self.cppDebugBuildBox = Tkinter.Checkbutton(self,
+            self.cppDebugBuildBox = tkinter.Checkbutton(self,
                                                         text="Debug",
                                                         variable = self.buildDebugCpp,
                                                         command=self.cppDebugBoxChanged)
-            self.cppDebugBuildBox.grid(row=3,column=2,sticky=Tkinter.W + Tkinter.N)             
+            self.cppDebugBuildBox.grid(row=3,column=2,sticky=tkinter.W + tkinter.N)             
             
-            Tkinter.Label(self, text='Build output').grid(row=4,column=0,sticky=Tkinter.W + Tkinter.N)
+            tkinter.Label(self, text="Build output").grid(row=4,column=0,sticky=tkinter.W + tkinter.N)
           
-            scrollbar = Tkinter.Scrollbar(self)            
-            self.output = Tkinter.Text(self, yscrollcommand=scrollbar.set)
+            scrollbar = tkinter.Scrollbar(self)            
+            self.output = tkinter.Text(self, yscrollcommand=scrollbar.set)
             
-            scrollbar.grid(row=5,column=10,columnspan=1,sticky=Tkinter.W + Tkinter.E + Tkinter.N + Tkinter.S)
+            scrollbar.grid(row=5,column=10,columnspan=1,sticky=tkinter.W + tkinter.E + tkinter.N + tkinter.S)
 
             scrollbar.config(command=self.output.yview)
             self.output.config(yscrollcommand=scrollbar.set)
 
-            self.output.grid(row=5,column=0,columnspan=10,sticky=Tkinter.W + Tkinter.E + Tkinter.N + Tkinter.S)
+            self.output.grid(row=5,column=0,columnspan=10,sticky=tkinter.W + tkinter.E + tkinter.N + tkinter.S)
             self.output.tag_config("pre",foreground="black")
-            self.output.tag_config("title",font = tkFont.Font(family="Times",size=-24,weight="bold"))
+            self.output.tag_config("title",font = tkfont.Font(family="Times",size=-24,weight="bold"))
             self.output.tag_config("command",foreground="blue", underline=True)
             self.output.tag_config("error",foreground="red")
-            self.output.tag_config("header",font = tkFont.Font(family="Times",size=-18))
+            self.output.tag_config("header",font = tkfont.Font(family="Times",size=-18))
             
-            self.runButton = Tkinter.Button(self, text="Run", command=self.run)
-            self.runButton.grid(row=6,column=4,sticky=Tkinter.E )
-            Tkinter.Button(self, text="Clear",command=self.clear).grid(row=6,column=5,pady=10,padx=10,sticky=Tkinter.E)
-            self.cancelButton = Tkinter.Button(self, text="Quit",command=self.quit)
-            self.cancelButton.grid(row=6,column=6,sticky=Tkinter.E)
+            self.runButton = tkinter.Button(self, text="Run", command=self.run)
+            self.runButton.grid(row=6,column=4,sticky=tkinter.E )
+            tkinter.Button(self, text="Clear",command=self.clear).grid(row=6,column=5,pady=10,padx=10,sticky=tkinter.E)
+            self.cancelButton = tkinter.Button(self, text="Quit",command=self.quit)
+            self.cancelButton.grid(row=6,column=6,sticky=tkinter.E)
 
 
         def clear(self):
-            self.output.delete(1.0,Tkinter.END)
+            self.output.delete(1.0,tkinter.END)
 
         def adaBoxChanged(self):
             global build_ada
             build_ada = (self.buildAda.get() == 1)
-            self.cfg.set('gui-settings', 'build_ada', self.buildAda.get())
+            self.cfg.set("gui-settings", "build_ada", str(self.buildAda.get()))
             self.writeGuiConfiguration()
 
         def javaBoxChanged(self):
             global build_java
             build_java = (self.buildJava.get() == 1)
-            self.cfg.set('gui-settings', 'build_java', self.buildAda.get())
+            self.cfg.set("gui-settings", "build_java", str(self.buildAda.get()))
             self.writeGuiConfiguration()           
             
         def cppDebugBoxChanged(self):
             global build_cpp_debug
             build_cpp_debug = (self.buildDebugCpp.get() == 1)
-            self.cfg.set('gui-settings', 'build_debug_cpp', self.buildDebugCpp.get())
+            self.cfg.set("gui-settings", "build_debug_cpp", str(self.buildDebugCpp.get()))
             self.writeGuiConfiguration()
 
         def buildTypeChanged(self):
@@ -944,8 +952,8 @@ def load_gui():
             self.after(100,self.updateLog)
             delta = buildlog.getDelta()
             for chunk in delta:
-                self.output.insert(Tkinter.END,chunk[0],chunk[1])
-                self.output.see(Tkinter.END)
+                self.output.insert(tkinter.END,chunk[0],chunk[1])
+                self.output.see(tkinter.END)
 
         def run(self):
             self.runButton.config(state="disabled")
@@ -972,7 +980,7 @@ def load_gui():
 
                 if self.commandThread.result != None:
                     if self.commandThread.traceback is not None:
-                        print self.commandThread.traceback
+                        print(self.commandThread.traceback)
                     self.runButton.config(state="normal")
                     self.cancelButton.config(state="normal")
                     self.commandList = list()
@@ -999,9 +1007,8 @@ def load_gui():
             def run(self):
                 try:
                     self.result = self.command()
-                except Exception, e:
+                except Exception as e:
                     self.result = e
-                    import traceback
                     self.traceback = traceback.format_exc()
 
 def main():
@@ -1010,10 +1017,9 @@ def main():
     SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
     SAFIR_SDK = os.environ.get("SAFIR_SDK")
     if SAFIR_RUNTIME == None or SAFIR_SDK == None:
-        print "You need to have both SAFIR_RUNTIME and SAFIR_SDK set"
+        print("You need to have both SAFIR_RUNTIME and SAFIR_SDK set")
         sys.exit(1)
     
-    import time
     start_time = time.time()
     parse_command_line()
 
@@ -1026,7 +1032,7 @@ def main():
     elif UnixGccBuilder.can_use():
         builder = UnixGccBuilder()
     else:
-        print "Failed to work out what builder to use!"
+        print("Failed to work out what builder to use!")
         return 1
 
     olddir = os.getcwd();
@@ -1034,7 +1040,7 @@ def main():
     os.chdir(dir)
 
     if no_gui:
-        print "Running in batch mode"
+        print("Running in batch mode")
         
         if buildType == "clean" or buildType == "clean_and_uninstall" or buildType == "rebuild":
             builder.clean()
@@ -1047,12 +1053,11 @@ def main():
             builder.build()
             check_config()
         
-        print "Success! (dobmake took " + str(time.time() - start_time) + " seconds)"
+        print("Success! (dobmake took " + str(time.time() - start_time) + " seconds)")
 
     else:
-        import Tkinter, tkMessageBox, tkFont
         load_gui()
-        application = Tkinter.Tk()
+        application = tkinter.Tk()
         dlg = MainDialog(application,builder)
         application.title("Dobmake")
         application.mainloop()

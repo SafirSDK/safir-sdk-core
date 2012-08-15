@@ -23,8 +23,9 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import os, glob, sys, subprocess
+
 
 #Load some environment variables that are needed throughout as globals
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
@@ -100,7 +101,7 @@ def remove(path):
         try:
             os.remove(path)
             return
-        except Exception, e:
+        except Exception as e:
             die ("Failed to remove file " + path + ". Got exception " + str(e))
             
     for name in os.listdir(path):
@@ -109,12 +110,12 @@ def remove(path):
         else:
             try:
                 os.remove(os.path.join(path,name))
-            except Exception, e:
+            except Exception as e:
                 die ("Failed to remove file " + os.path.join(path,name) + ". Got exception " + str(e))
 
     try:
         os.rmdir(path)
-    except Exception, e:
+    except Exception as e:
         die ("Failed to remove directory " + path + ". Got exception " + str(e))
 
 
@@ -122,7 +123,7 @@ def num_cpus():
     """Detects the number of CPUs on a system. Cribbed from pp."""
     # Linux, Unix and MacOS:
     if hasattr(os, "sysconf"):
-        if os.sysconf_names.has_key("SC_NPROCESSORS_ONLN"):
+        if "SC_NPROCESSORS_ONLN" in os.sysconf_names:
             # Linux & Unix:
             ncpus = os.sysconf("SC_NPROCESSORS_ONLN")
             if isinstance(ncpus, int) and ncpus > 0:
@@ -130,7 +131,7 @@ def num_cpus():
         else: # OSX:
             return int(os.popen2("sysctl -n hw.ncpu")[1].read())
     # Windows:
-    if os.environ.has_key("NUMBER_OF_PROCESSORS"):
+    if "NUMBER_OF_PROCESSORS" in os.environ:
             ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
             if ncpus > 0:
                 return ncpus
@@ -139,7 +140,7 @@ def num_cpus():
 
 def log(message,ignore_verbose = False):
     if verbose or ignore_verbose:
-        print message
+        print(message)
         sys.stdout.flush()
 
 
@@ -365,9 +366,9 @@ class VisualStudioBuilder(object):
                   "call \"" + os.path.join(self.studio_install_dir,"VC","vcvarsall.bat") +  "\" "  + self.vcvarsall_arg + "\n" +
                   "\"" + os.path.join(SAFIR_RUNTIME,"bin","dobmake.py") + "\" -b --html-output --rebuild" + ada + java + " --target " + target_architecture + "\n") #batch mode (no gui)
         bat.close()
-        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         result = process.communicate()
-        buildlog.write(result[0].replace("\r\n","\n"))
+        buildlog.write(result[0])
         if process.returncode != 0:
             die("Failed to run dobmake")
 
@@ -455,10 +456,10 @@ class VisualStudioBuilder(object):
                   cmd)
         bat.close()
         buildlog.write("<h4>" + description + " '" + what + "'</h4><pre style=\"color: green\">" + cmd + "</pre>\n")
-        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         result = process.communicate()
         buildlog.write("<pre>")
-        buildlog.write(result[0].replace("\r\n","\n"))
+        buildlog.write(result[0])
         buildlog.write("</pre>")
         if process.returncode != 0:
             if not allow_fail:
@@ -519,7 +520,8 @@ class UnixGccBuilder(object):
             
         process = subprocess.Popen((os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b", "--html-output", "--rebuild", ada, java), #batch mode (no gui)
                                    stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT)
+                                   stderr=subprocess.STDOUT,
+                                   universal_newlines=True)
         result = process.communicate()
         buildlog.write(result[0])
         if process.returncode != 0:
@@ -528,7 +530,7 @@ class UnixGccBuilder(object):
     def __run_command(self, cmd, description, what, allow_fail = False):
         """Run a command"""
         buildlog.write("<h4>" + description + " '" + what + "'</h4><pre style=\"color: green\">" + " ".join(cmd) + "</pre>\n")
-        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         result = process.communicate()
         buildlog.write("<pre>")
         buildlog.write(result[0])
@@ -659,7 +661,7 @@ buildlog.write("<html><title>Build Log</title><body>")
 
 try:
     main()
-except FatalError, e:
+except FatalError as e:
     log("Build script failed: " + str(e),True)
     sys.exit(1)
 
