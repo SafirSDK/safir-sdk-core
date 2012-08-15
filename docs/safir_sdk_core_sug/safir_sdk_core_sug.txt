@@ -2890,6 +2890,17 @@ Under the namespace +Safir.Time+ there are a few classes that provide functional
 
 The time library also has support for loading an external library at runtime which could provide a higher accuracy time. The full Safir SDK provides such a library, which provides a much higher accuracy multi-node synchronised clock than NTP can provide on both GNU/Linux or Windows based systems. For more information on this, contact Saab AB (contact information at http://www.safirsdk.com[]).
 
+
+=== Crash Reporting
+Safir SDK Core includes a crash reporting library, google-breakpad, provided by Google (http://code.google.com/p/google-breakpad/[]). The crash reporting library is responsible for monitoring the application for crashes (exceptions) and handling them by generating dumps. The dump files contain information, such as, general system information, call stack for each thread and list of loaded modules. The dump file together with symbolic debugging information can be used to identify where in the software the crash occurred.  
+
+When building Safir SDK Core with the provided build-script the crash reporting library is built and linked to Safir SDK Core. In addition, under Windows debugging symbol files (PDB- files) are generated during the build in a separate folder ($(SAFIR_RUNTIME)/dump/Symbols). For Linux debug information can be enabled by adding the compiler flag -g.  
+
+Once Safir SDK Core is built with google-breakpad each crash will generate a dump file (.dmp) located in $(SAFIR_RUNTIME)/dump/report. In Windows opening the .dmp file with Visual Studio and running a debug with the binary and symbol files will produce a stack trace of the program at the time of the crash. In Linux, a software like StackWalker can be used to analyze the .dmp files.  
+
+The crash reporter is initiated in dose_dll.dll. If you are designing your own application the crash reporter will be initiated when dose_dll is loaded. The crash reporter will handle an exception by writing a dump file and then resend the exception. This makes it possible for you to have your own exception handler or letting the OS take care of the error.  
+
+
 == Tips and Tricks
 This section discusses some good design strategies for applications
 
