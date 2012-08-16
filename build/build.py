@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import os, glob, sys, subprocess
+import os, glob, sys, subprocess, platform
 
 
 #Load some environment variables that are needed throughout as globals
@@ -50,7 +50,17 @@ def die(message):
     raise FatalError(message)
 
 def is_64_bit():
-    return sys.maxsize > 2**32
+    #Detecting this is a lot more complex than it should be.
+    #See http://stackoverflow.com/questions/2764356/python-get-windows-os-version-and-architecture
+    #and http://bytes.com/topic/python/answers/509764-detecting-64bit-vs-32bit-linux
+    #This will work reasonably well on our supported systems:
+    if sys.platform.startswith("linux"):
+        return platform.architecture()[0] == "64bit"
+    else:
+        PROCESSOR_ARCHITECTURE = os.environ.get("PROCESSOR_ARCHITECTURE")
+        PROCESSOR_ARCHITEW6432 = os.environ.get("PROCESSOR_ARCHITEW6432")
+        return PROCESSOR_ARCHITECTURE == "AMD64" or PROCESSOR_ARCHITEW6432 == "AMD64"
+        
 
 def copy_dob_files(source_dir, target_dir):
     """Copy dou and dom files from the source directory to the given subdirectory in the dots_genereted directory"""
@@ -158,7 +168,7 @@ def parse_command_line(builder):
     parser.add_option("--command-file", "-f",action="store",type="string",dest="command_file",
                       help="The command to execute")
     parser.add_option("--target",action="store",type="string",dest="target_architecture",default="x86",
-                          help="Target architecture, x86 or x64")
+                          help="Target architecture, x86 or x86-64")
     parser.add_option("--no-ada-support", action="store_false",dest="ada_support",default=True,
                       help="Disable Ada support")
     parser.add_option("--no-java-support", action="store_false",dest="java_support",default=True,
@@ -176,9 +186,9 @@ def parse_command_line(builder):
     builder.setup_command_line_options(parser)
     (options,args) = parser.parse_args()
 
-    if options.target_architecture == "x64":
+    if options.target_architecture == "x86-64":
         if not is_64_bit():
-            die("Target x64 can't be set since this is not a 64 bit OS")
+            die("Target x86-64 can't be set since this is not a 64 bit OS")
         if options.ada_support:
             die("64 bit Ada build is currently not supported")
         if options.java_support:
@@ -267,7 +277,7 @@ class VisualStudioBuilder(object):
             self.studio = VS80
             if target_architecture == "x86":
                 self.generator = "Visual Studio 8 2005"
-            elif target_architecture == "x64":
+            elif target_architecture == "x86-64":
                 self.generator = "Visual Studio 8 2005 Win64"
             else:
                 die("Target architecture " + target_architecture + " is not supported for Visual Studio 8 2005 !")                
@@ -275,7 +285,7 @@ class VisualStudioBuilder(object):
             self.studio = VS90
             if target_architecture == "x86":
                 self.generator = "Visual Studio 9 2008"
-            elif target_architecture == "x64":
+            elif target_architecture == "x86-64":
                 self.generator = "Visual Studio 9 2008 Win64"
             else:
                 die("Target architecture " + target_architecture + " is not supported for Visual Studio 9 2008 !")        
@@ -283,7 +293,7 @@ class VisualStudioBuilder(object):
             self.studio = VS100
             if target_architecture == "x86":
                 self.generator = "Visual Studio 10"
-            elif target_architecture == "x64":
+            elif target_architecture == "x86-64":
                 self.generator = "Visual Studio 10 Win64"
             else:
                 die("Target architecture " + target_architecture + " is not supported for Visual Studio 10 !")
@@ -311,7 +321,7 @@ class VisualStudioBuilder(object):
                 self.studio = os.environ.get("VS80COMNTOOLS")
                 if target_architecture == "x86":
                     self.generator = "Visual Studio 8 2005"
-                elif target_architecture == "x64":
+                elif target_architecture == "x86-64":
                     self.generator = "Visual Studio 8 2005 Win64"
                 else:
                     die("Target architecture " + target_architecture + " is not supported for Visual Studio 8 2005 !")  
@@ -319,7 +329,7 @@ class VisualStudioBuilder(object):
                 self.studio = os.environ.get("VS90COMNTOOLS")
                 if target_architecture == "x86":
                     self.generator = "Visual Studio 9 2008"
-                elif target_architecture == "x64":
+                elif target_architecture == "x86-64":
                     self.generator = "Visual Studio 9 2008 Win64"
                 else:
                     die("Target architecture " + target_architecture + " is not supported for Visual Studio 9 2008 !")  
@@ -327,7 +337,7 @@ class VisualStudioBuilder(object):
                 self.studio = os.environ.get("VS100COMNTOOLS")
                 if target_architecture == "x86":
                     self.generator = "Visual Studio 10"
-                elif target_architecture == "x64":
+                elif target_architecture == "x86-64":
                     self.generator = "Visual Studio 10 Win64"
                 else:
                     die("Target architecture " + target_architecture + " is not supported for Visual Studio 10 !")  
@@ -339,7 +349,7 @@ class VisualStudioBuilder(object):
         #work out what compiler tools to use
         if target_architecture == "x86":
             self.vcvarsall_arg = "x86"
-        elif target_architecture == "x64":
+        elif target_architecture == "x86-64":
             self.vcvarsall_arg = "amd64"
         else:
             die("Unknown target architecture " + target_architecture)    
@@ -481,8 +491,7 @@ class UnixGccBuilder(object):
 
     @staticmethod
     def can_use():
-        import sys
-        return sys.platform == "linux2"
+        return sys.platform.startswith("linux")
 
     def setup_command_line_options(self,parser):
         pass
@@ -656,7 +665,7 @@ try:
     os.remove(logpath)
 except OSError:
     pass
-buildlog = open(logpath,'w', 0)
+buildlog = open(logpath,'w')
 buildlog.write("<html><title>Build Log</title><body>")
 
 try:
