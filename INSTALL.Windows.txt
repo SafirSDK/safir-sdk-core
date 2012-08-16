@@ -79,6 +79,7 @@ If you are setting up a build for the x64 arcitecture you must build the separat
 (The directory given for --build-dir can be any temporary directory)
 4. Create a directory 'lib' in the boost root.
 5. Copy all files from {boost root}\stage\lib to this new directory.
+6.  
 
 Add the lib directory of the boost installation (e.g. C:\Program Files\boost\boost_1_49\lib or similar) to your PATH.
 
@@ -230,10 +231,10 @@ Now open a command prompt that corresponds to your configuration (32 or 64 bit).
 Go to the directory that contains the build and src directories.
 
 For example, to build 32 bit Safir SDK Core with support for all languages:
-    build\build.py -f build\sdk_core.txt --target x86 --ada-support --java-support
+    build\build.py -f build\sdk_core.txt --target x86
 
 To build 64 bit Safir SDK Core without support for Ada and Java:
-    build\build.py -f build\sdk_core.txt --target x64
+    build\build.py -f build\sdk_core.txt --target x86-64 --no-ada-support --no-java-support
 
 Type build/build.py --help to get a complete list of all command line switches.
 
