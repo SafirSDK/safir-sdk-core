@@ -79,9 +79,10 @@ If you are setting up a build for the x64 arcitecture you must build the separat
 (The directory given for --build-dir can be any temporary directory)
 4. Create a directory 'lib' in the boost root.
 5. Copy all files from {boost root}\stage\lib to this new directory.
-6.  
+ 
 
-Add the lib directory of the boost installation (e.g. C:\Program Files\boost\boost_1_49\lib or similar) to your PATH.
+Add the lib directory of the boost installation (e.g. C:\Program Files\boost\boost_1_49\lib or similar) to your PATH. You might also need to set the environment
+variable BOOST_DIR to the top directory of your boost installation (e.g. C:\Program Files\boost\boost_1_49) in order for CMake to find it.
 
 If you are using boost version 1.48 or lower there are some boost bugs that need to be patched for Safir SDK to work correctly. The easisest way to install
 the patches that is needed for your version is to use the CMake file in the build/patches/boost directory, run "cmake . -G 'NMake Makefiles'", "nmake install"
