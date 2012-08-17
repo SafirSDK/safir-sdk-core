@@ -199,13 +199,6 @@ ENDMACRO()
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SAFIR_SDK}/data/build/)
 
-if (MSVC)
-    SET(COMMON_CS_FLAGS "-warn:4" "-platform:${SAFIR_BUILD_TARGET_ARCHITECTURE}")
-else()
-    SET(COMMON_CS_FLAGS "-warn:4")
-endif(MSVC)
-
-
 #work out if we've got a configuration on the command line or if 
 #we're running in an IDE.
 if (CMAKE_CONFIGURATION_TYPES AND CMAKE_BUILD_TYPE)

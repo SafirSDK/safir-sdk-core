@@ -446,7 +446,6 @@ class VisualStudioBuilder(object):
                                "-D SAFIR_ADA_SUPPORT:boolean=" + str(ada_support) + " " +
                                "-D SAFIR_JAVA_SUPPORT:boolean=" + str(java_support) + " " +
                                "-D SAFIR_BUILD_SYSTEM_VERSION:string=2 " +
-                               "-D SAFIR_BUILD_TARGET_ARCHITECTURE:string=" + target_architecture + " " +
                                "-G \"NMake Makefiles\" .",
                                "Configure " + config, directory)
             if clean:

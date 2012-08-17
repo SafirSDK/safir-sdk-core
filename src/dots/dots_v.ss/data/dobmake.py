@@ -45,7 +45,16 @@ except ImportError:
     import tkFont as tkfont
 
 def is_64_bit():
-    return sys.maxsize > 2**32
+    #Detecting this is a lot more complex than it should be.
+    #See http://stackoverflow.com/questions/2764356/python-get-windows-os-version-and-architecture
+    #and http://bytes.com/topic/python/answers/509764-detecting-64bit-vs-32bit-linux
+    #This will work reasonably well on our supported systems:
+    if sys.platform.startswith("linux"):
+        return platform.architecture()[0] == "64bit"
+    else:
+        PROCESSOR_ARCHITECTURE = os.environ.get("PROCESSOR_ARCHITECTURE")
+        PROCESSOR_ARCHITEW6432 = os.environ.get("PROCESSOR_ARCHITEW6432")
+        return PROCESSOR_ARCHITECTURE == "AMD64" or PROCESSOR_ARCHITEW6432 == "AMD64"
 
 def num_cpus():
     """Detects the number of CPUs on a system. Cribbed from pp."""
@@ -286,7 +295,7 @@ def parse_command_line():
     parser.add_option("--uninstall", action="store_true",dest="uninstall",default=False,
                       help="Remove all installed files")
     parser.add_option("--target",action="store",type="string",dest="target_architecture",default="x86",
-                          help="Target architecture, x86 or x64")
+                          help="Target architecture, x86 or x86-64")
     parser.add_option("--no-ada", action="store_true",dest="no_ada",default=False,
                       help="Dont attempt to build Ada code")
     parser.add_option("--no-java", action="store_true",dest="no_java",default=False,
@@ -318,9 +327,9 @@ def parse_command_line():
     if options.rebuild:
         buildType="rebuild"
 
-    if options.target_architecture == "x64":
+    if options.target_architecture == "x86-64":
         if not is_64_bit():
-            die("Target x64 can't be set since this is not a 64 bit OS")
+            die("Target x86-64 can't be set since this is not a 64 bit OS")
     elif options.target_architecture != "x86":
         die("Unknown target architecture " + options.target_architecture)
     global target_architecture
@@ -329,7 +338,7 @@ def parse_command_line():
     global vcvarsall_arg
     if target_architecture == "x86":
         vcvarsall_arg = "x86"
-    elif target_architecture == "x64":
+    elif target_architecture == "x86-64":
         vcvarsall_arg = "x86_amd64"
     else:
         die("Unknown target architecture " + target_architecture)
@@ -414,21 +423,21 @@ class VisualStudioBuilder(object):
         if self.studio == VS80:
             if target_architecture == "x86":
                 self.generator = "Visual Studio 8 2005"
-            elif target_architecture == "x64":
+            elif target_architecture == "x86-64":
                 self.generator = "Visual Studio 8 2005 Win64"
             else:
                 die("Target architecture " + target_architecture + " is not supported for Visual Studio 8 2005 !")  
         elif self.studio == VS90:
             if target_architecture == "x86":
                 self.generator = "Visual Studio 9 2008"
-            elif target_architecture == "x64":
+            elif target_architecture == "x86-64":
                 self.generator = "Visual Studio 9 2008 Win64"
             else:
                 die("Target architecture " + target_architecture + " is not supported for Visual Studio 9 2008 !")
         elif self.studio == VS100:
             if target_architecture == "x86":
                 self.generator = "Visual Studio 10"
-            elif target_architecture == "x64":
+            elif target_architecture == "x86-64":
                 self.generator = "Visual Studio 10 Win64"
             else:
                 die("Target architecture " + target_architecture + " is not supported for Visual Studio 10 !")
@@ -460,7 +469,7 @@ class VisualStudioBuilder(object):
         #work out what compiler tools to use
         if target_architecture == "x86":
             self.vcvarsall_arg = "x86"
-        elif target_architecture == "x64":
+        elif target_architecture == "x86-64":
             self.vcvarsall_arg = "amd64"
         else:
             die("Unknown target architecture " + target_architecture)
