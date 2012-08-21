@@ -396,11 +396,8 @@ class VisualStudioBuilder(object):
                 die("Could not work out which studio you are using, make sure you run dobmake.py in a Visual Studio command prompt.")
             cfg.add_section("main")
             cfg.set("main","VSPATH",os.path.join(DIR,"Common7","Tools"))
-            configfile = open(cfgpath,"wb")
-            try:
-                cfg.write(configfile)
-            finally:
-                configfile.close()             
+            with open(cfgpath,"w") as configfile:
+                cfg.write(configfile)           
         
         self.studio = os.path.normcase(os.path.normpath(cfg.get("main","VSPATH")))
 
