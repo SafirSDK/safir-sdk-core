@@ -113,7 +113,7 @@ namespace Internal
         {
             if (name == it->Name())
             {
-                return NumberOfInheritedMembers() + std::distance(m_members.begin(),it);
+                return static_cast<MemberIndex>(NumberOfInheritedMembers() + std::distance(m_members.begin(),it));
             }
         }
 
@@ -167,7 +167,7 @@ namespace Internal
         {
             if (name == it->Name())
             {
-                return NumberOfInheritedParameters() + std::distance(m_parameters.begin(),it);
+                return static_cast<ParameterIndex>(NumberOfInheritedParameters() + std::distance(m_parameters.begin(),it));
             }
         }
 

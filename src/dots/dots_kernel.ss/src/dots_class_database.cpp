@@ -276,9 +276,9 @@ namespace Internal
                                                           tmpClass.m_thisClassSize,
                                                           tmpClass.m_noInheritedMembers,
                                                           tmpClass.m_noInheritedParameters,
-                                                          tmpClass.m_noInheritedMembers+tmpClass.m_members.size(),
+                                                          static_cast<Size>(tmpClass.m_noInheritedMembers+tmpClass.m_members.size()),
                                                           static_cast<Size>(tmpClass.m_desc.size()),
-                                                          tmpClass.m_noInheritedParameters+tmpClass.m_parameters.size(),
+                                                          static_cast<Size>(tmpClass.m_noInheritedParameters+tmpClass.m_parameters.size()),
                                                           static_cast<Size>(tmpClass.m_propertyMappings.size()),
                                                           allocHelper)));
 

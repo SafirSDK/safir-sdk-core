@@ -30,6 +30,8 @@
 #include <Safir/Utilities/ProcessInfo.h>
 #include <boost/interprocess/sync/upgradable_lock.hpp>
 #include <boost/interprocess/sync/sharable_lock.hpp>
+#include <boost/interprocess/detail/move.hpp>
+
 #include "Signals.h"
 
 #include <vector>
@@ -206,7 +208,7 @@ namespace Internal
             const pid_t pid = Safir::Utilities::ProcessInfo::GetPid();
 
             //upgrade the mutex
-            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
+            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::interprocess::move(rlock));
             connection = ConnectionPtr(GetSharedMemory().construct<Connection>
                 (boost::interprocess::anonymous_instance)
                 (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), contextId, pid));
@@ -271,7 +273,7 @@ namespace Internal
                     ConnectionPtr connection;
                     {
                         //upgrade the mutex
-                        boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
+                        boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::interprocess::move(rlock));
 
                         connection = ConnectionPtr(GetSharedMemory().construct<Connection>(boost::interprocess::anonymous_instance)
                             (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), context, pid));
@@ -320,7 +322,7 @@ namespace Internal
 
 
         //upgrade the mutex
-        boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
+        boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::interprocess::move(rlock));
 
         //remote connections have pid = -1
         ConnectionPtr connection(GetSharedMemory().construct<Connection>(boost::interprocess::anonymous_instance)
