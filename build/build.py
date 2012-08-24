@@ -380,7 +380,6 @@ class VisualStudioBuilder(BuilderBase):
         os.environ["PATH"] = os.environ.get("PATH") + ";" + os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
         ADA_PROJECT_PATH = (os.environ.get("ADA_PROJECT_PATH") + ";") if os.environ.get("ADA_PROJECT_PATH") else ""
         os.environ["ADA_PROJECT_PATH"] = ADA_PROJECT_PATH + os.path.join(os.environ.get("SAFIR_SDK"),"ada")
-        os.environ["XML_ADA_VER"] = "4.2"
         #java path gets set by jenkins
 
         #set up K: drive:
