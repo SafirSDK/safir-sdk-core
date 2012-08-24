@@ -85,7 +85,7 @@ DOSE_SHARED_DATA_S * Get_NodeSharedData_Pointer(void)
 **********************************************/
 void IpAddr_ToString(unsigned long IpAddr_nw, char *StrIpAddr)
 {
-    int pos = 0;
+    size_t pos = 0;
 
     for(int jj = 0 ; jj< 4 ; jj++)
     {
@@ -98,7 +98,7 @@ void IpAddr_ToString(unsigned long IpAddr_nw, char *StrIpAddr)
 
 int Get_Status_Info(DOSE_SHARED_DATA_S *pShm, char *buff)
 {
-    int     pos;
+    size_t     pos;
     unsigned long   WillStartSoon;
     char    MyIpAddrBuff[48];
     char    IpMcAddrBuff[48];
@@ -166,5 +166,5 @@ int Get_Status_Info(DOSE_SHARED_DATA_S *pShm, char *buff)
             pShm->Statistics.ReceiveQueueFullCount,
             pShm->Statistics.TransmitQueueFullCount);
 
-    return(strlen(buff));
+    return(static_cast<int>(strlen(buff)));
 }

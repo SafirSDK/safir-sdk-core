@@ -571,7 +571,7 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
              it != m_@_MEMBER_@Member.end(); ++it)
         {
-            Safir::Dob::Typesystem::BlobOperations::Get(*it,blob,@_LOWER:MEMBER_@MemberIndex,std::distance(m_@_MEMBER_@Member.begin(),it));
+            Safir::Dob::Typesystem::BlobOperations::Get(*it,blob,@_LOWER:MEMBER_@MemberIndex,static_cast<Safir::Dob::Typesystem::ArrayIndex>(std::distance(m_@_MEMBER_@Member.begin(),it)));
         }
 @@ELSE@@
         Safir::Dob::Typesystem::BlobOperations::Get(m_@_MEMBER_@Member, blob, @_LOWER:MEMBER_@MemberIndex, 0);
@@ -603,7 +603,7 @@ namespace @_NAMESPACEV_@
         {
             if (!it->IsNull())
             {
-                size += (it->GetVal().size()+4);
+                size += (static_cast<Safir::Dob::Typesystem::Int32>(it->GetVal().size())+4);
             }
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
@@ -638,7 +638,7 @@ namespace @_NAMESPACEV_@
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Binary)
         if (!m_@_MEMBER_@Member.IsNull())
         {
-            size += (m_@_MEMBER_@Member.GetVal().size()+4);
+            size += (static_cast<Safir::Dob::Typesystem::Int32>(m_@_MEMBER_@Member.GetVal().size())+4);
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
         if (!m_@_MEMBER_@Member.IsNull() && !m_@_MEMBER_@Member.GetVal().GetRawString().empty())
@@ -691,9 +691,9 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Object) or (@_UNIFORM_MEMBERTYPE_@ = Binary) or (@_UNIFORM_MEMBERTYPE_@ = InstanceId) or (@_UNIFORM_MEMBERTYPE_@ = EntityId) or (@_UNIFORM_MEMBERTYPE_@ = ChannelId) or (@_UNIFORM_MEMBERTYPE_@ = HandlerId)
             Safir::Dob::Typesystem::BlobOperations::Set(*it, blob, beginningOfUnused, @_LOWER:MEMBER_@MemberIndex,
-                                                        std::distance(m_@_MEMBER_@Member.begin(),it));
+                                                        static_cast<Safir::Dob::Typesystem::ArrayIndex>(std::distance(m_@_MEMBER_@Member.begin(),it)));
 @@ELSE@@
-            Safir::Dob::Typesystem::BlobOperations::Set(*it,blob,@_LOWER:MEMBER_@MemberIndex,std::distance(m_@_MEMBER_@Member.begin(),it));
+            Safir::Dob::Typesystem::BlobOperations::Set(*it,blob,@_LOWER:MEMBER_@MemberIndex,static_cast<Safir::Dob::Typesystem::ArrayIndex>(std::distance(m_@_MEMBER_@Member.begin(),it)));
 @@END_IF@@
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = String)

@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Stefan Lindström / stsyli
+* Created by: Stefan Lindstrï¿½m / stsyli
 *
 *******************************************************************************
 *

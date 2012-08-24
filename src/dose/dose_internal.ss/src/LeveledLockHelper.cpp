@@ -143,7 +143,7 @@ namespace Internal
         }
         else
         {
-            return mapIt->second.size();
+            return static_cast<int>(mapIt->second.size());
         }
     }
 }

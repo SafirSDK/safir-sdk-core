@@ -138,6 +138,6 @@ private:
     static IPADDR Get_InterfaceForThisIpMulticastAddr(unsigned long IpmAddr_nw);
     static void Init_Sockets(void);
 
-    unsigned long m_SockId;
+    SOCKET m_SockId;
     static IPADDR m_My_IpAddr_nw;
 };

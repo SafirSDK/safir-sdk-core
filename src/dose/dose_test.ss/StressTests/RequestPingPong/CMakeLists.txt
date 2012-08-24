@@ -1,6 +1,11 @@
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 
+if (MSVC)
+   # Suppress some warnings
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4244")
+endif()
+
 ADD_EXECUTABLE(RequestPingPong ${sources} ${headers})
 
 TARGET_LINK_LIBRARIES(RequestPingPong ${COMMON_LIBRARIES})

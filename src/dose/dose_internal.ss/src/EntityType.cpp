@@ -687,7 +687,7 @@ namespace Internal
         }
     }
 
-    void EntityType::FindAllHandlers(const ContextId context, const StateSharedPtr& statePtr, HandlerSet& handlers) const
+    void EntityType::FindAllHandlers(const StateSharedPtr& statePtr, HandlerSet& handlers) const
     {
         bool gotIt=false;
         Dob::Typesystem::HandlerId handler;
@@ -708,7 +708,7 @@ namespace Internal
         if (handlerId==Safir::Dob::Typesystem::HandlerId::ALL_HANDLERS)
         {
             //We want to clean old ghost for all handlers. First find out which handlers exist.
-            m_entityStates[context].ForEachState(boost::bind(&EntityType::FindAllHandlers, this, context, _2, boost::ref(handlers)), false);
+            m_entityStates[context].ForEachState(boost::bind(&EntityType::FindAllHandlers, this, _2, boost::ref(handlers)), false);
         }
         else
         {

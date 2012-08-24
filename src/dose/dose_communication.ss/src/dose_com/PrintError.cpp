@@ -164,7 +164,7 @@ static char *Get_Err_Text(int err_code, char *pBuff, int maxSize)
 #ifdef _WIN32
     int     result;
     char    *pTxt = NULL;
-    int len = strlen(pBuff);
+    int     len = static_cast<int>(strlen(pBuff));
 
     result = FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM, NULL, err_code,
                             MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
@@ -249,7 +249,7 @@ static void PrintToConsole( const char *pTxt)
     static HANDLE hConsoleOutput = INVALID_HANDLE_VALUE;
 
 
-    Length = strlen(pTxt);
+    Length = static_cast<int>(strlen(pTxt));
 
     if(hConsoleOutput == INVALID_HANDLE_VALUE)
     {
@@ -332,8 +332,8 @@ static int PrintUdp( const char *pMsg0)
 #endif
 
 //#ifdef _LINUX
-    sendto(g_SockId, pMsg0, strlen(pMsg0),0,
-        (struct sockaddr *) &g_SockName, sizeof(g_SockName));
+    sendto(g_SockId, pMsg0, static_cast<int>(strlen(pMsg0)),0,
+        (struct sockaddr *) &g_SockName, static_cast<int>(sizeof(g_SockName)));
 //#endif
     return(0);
 }

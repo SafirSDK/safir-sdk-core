@@ -337,7 +337,7 @@ unsigned long CConfig::Get_BaseIpMulticastAddress(void)
 void CConfig::Get_Info(int, // Mode,
                        char *pBuff)
 {
-    int pos;
+    size_t pos;
 
 
     sprintf(pBuff,

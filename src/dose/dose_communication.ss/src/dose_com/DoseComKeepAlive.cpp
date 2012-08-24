@@ -78,7 +78,7 @@ static void Handle_GetInfoRequest(CIpmSocket *pTxRxSock,
                                   DOSE_UDP_GETINFO_MSG *pRxMsg)
 {
     int     jj;
-    int     pos = 0;
+    size_t  pos = 0;
     int     result;
     dcom_ulong32 IpMulticastAddr_nw;
     dcom_ulong32 IpAddr_nw;
@@ -392,7 +392,7 @@ static void Handle_GetInfoRequest(CIpmSocket *pTxRxSock,
 
     result = pTxRxSock->SendTo2(pRxMsg->IpAddrFrom_nw,
                                 htons(pRxMsg->RespPort_nw),
-                                buff, strlen(buff), NULL, 0);
+                                buff, static_cast<unsigned long>(strlen(buff)), NULL, 0);
 }
 /*------------- end Handle_GetInfoRequest() -----------------*/
 

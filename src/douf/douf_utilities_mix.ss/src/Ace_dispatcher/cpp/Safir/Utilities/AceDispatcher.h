@@ -24,10 +24,20 @@
 #ifndef __DOB_UTILITIES_ACE_DISPATCHER_H__
 #define __DOB_UTILITIES_ACE_DISPATCHER_H__
 
-#include <ace/Reactor.h>
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/Atomic.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4127 4244 4251)
+#endif
+
+#include <ace/Reactor.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {
