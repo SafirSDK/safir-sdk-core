@@ -24,10 +24,13 @@
 
 with Ada.Exceptions;
 with Ada.Text_IO;
-with Interfaces.C;
+--with Interfaces.C;
 
 --  with GNAT.Directory_Operations;
 with GNAT.Spitbol; use GNAT.Spitbol;
+with GNAT.MD5;
+with Ada.Unchecked_Conversion;
+
 with Templates_Parser;
 
 with Dots.String_Sets;
@@ -845,20 +848,56 @@ package body Dots.Xmlreaders.Unit is
    function TypeIdOf (NS, Name : in String;
                       Enums : in Templates_Parser.Vector_Tag) return VString is
 
-      use Interfaces.C;
-
       type Long_Long  is range -(2 ** 63) .. +(2 ** 63) - 1;
 
-      function Internal_GetTypeId (Type_Name : in String) return Long_Long;
+      -- AIWI: For the moment we have not figured out how to easily set up an
+      -- environment for building 64 bit Ada binaries using open source tools. For users
+      -- not concerned with Ada this shouldn't matter but the problem is that
+      -- dots_v itself always needs to be built. Since dots_v is only a tool that will
+      -- not be linked with any user code we can build it in 32 bit. However,
+      -- there is a slight problem with this approach since dots_v has a dependency
+      -- to dots_id, and dots_id will be 64 bit. The short term solution is to get rid
+      -- of the dependency to dots_id and to implement an own 64 bit hash generation in
+      -- dots_v that mimics the behaviour of the counterpart in dots_id. To reduce
+      -- redundant implementations it is strongly recommended to move back to using
+      -- dots_id when Ada 64 bit binaries is supported.
 
-      function Internal_GetTypeId (Type_Name : in String)
-                                         return Long_Long is
+      function Internal_GetTypeId (Type_Name : in String) return Long_Long is
+         type Octet is mod 2**8;
+         for Octet'Size use 8;
+         type Md5_Octet_Array_T is array (1 .. 8) of Octet;
 
-         function Internal (Type_Name_C : in char_array) return Long_Long;
-         pragma Import (C, Internal, "DotsId_Generate64");
+         function Convert is new Ada.Unchecked_Conversion
+           (Source => Md5_Octet_Array_T,
+            Target => Long_Long);
+
+         Md5_Octet_Array : Md5_Octet_Array_T;
+
+         Md5 : constant String := GNAT.MD5.Digest (Type_Name);
+         Md5_Index : Integer := Md5'First;
+
       begin
-         return Internal (To_C (Type_Name));
+         for I in Md5_Octet_Array'Range loop
+            Md5_Octet_Array (I) := Octet'Value ("16#" & Md5 (Md5_Index .. Md5_Index + 1) & '#');
+            Md5_Index := Md5_Index + 2;
+         end loop;
+
+         return Convert (Md5_Octet_Array);
       end Internal_GetTypeId;
+
+
+      -- Original code:
+      --      use Interfaces.C;
+      --        function Internal_GetTypeId (Type_Name : in String) return Long_Long;
+      --
+      --        function Internal_GetTypeId (Type_Name : in String)
+      --                                           return Long_Long is
+      --
+      --           function Internal (Type_Name_C : in char_array) return Long_Long;
+      --           pragma Import (C, Internal, "DotsId_Generate64");
+      --        begin
+      --           return Internal (To_C (Type_Name));
+      --        end Internal_GetTypeId;
 
       Tmp : String := NS;
       Last : Integer := Tmp'Last;
