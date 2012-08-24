@@ -101,7 +101,7 @@ def remove(path):
             os.remove(path)
             return
         except Exception, e:
-            die ("Failed to remove file " + path + ". Got exception " + e)
+            die ("Failed to remove file " + path + ". Got exception " + str(e))
             
     for name in os.listdir(path):
         if os.path.isdir(os.path.join(path,name)):
@@ -110,12 +110,12 @@ def remove(path):
             try:
                 os.remove(os.path.join(path,name))
             except Exception, e:
-                die ("Failed to remove file " + os.path.join(path,name) + ". Got exception " + e)
+                die ("Failed to remove file " + os.path.join(path,name) + ". Got exception " + str(e))
 
     try:
         os.rmdir(path)
     except Exception, e:
-        die ("Failed to remove directory " + path + ". Got exception " + e)
+        die ("Failed to remove directory " + path + ". Got exception " + str(e))
 
 
 def num_cpus():
@@ -332,7 +332,16 @@ class BuilderBase(object):
             logger.log("!! " + str(failed) + " tests failed out of " + str(tests) + ".","brief")
             
 class VisualStudioBuilder(BuilderBase):
-    def __init__(self):
+    def __init__(self):    
+        self.tmpdir = os.environ.get("TEMP")
+        if self.tmpdir is None:
+            self.tmpdir = os.environ.get("TMP")
+            if self.tmpdir is None:
+                die("Failed to find a temp directory!")
+        if not os.path.isdir(self.tmpdir):
+            die("I can't seem to use the temp directory " + self.tmpdir)        
+
+    def set_studio_version(self):
         super(VisualStudioBuilder, self).__init__()
         VS80 = os.environ.get("VS80COMNTOOLS")
         VS90 = os.environ.get("VS90COMNTOOLS")
@@ -379,16 +388,8 @@ class VisualStudioBuilder(BuilderBase):
             else:
                 die("Target architecture " + target_architecture + " is not supported for Visual Studio 10 !")
         else:
-            die("Could not find a supported compiler to use!")        
-
-        self.tmpdir = os.environ.get("TEMP")
-        if self.tmpdir is None:
-            self.tmpdir = os.environ.get("TMP")
-            if self.tmpdir is None:
-                die("Failed to find a temp directory!")
-        if not os.path.isdir(self.tmpdir):
-            die("I can't seem to use the temp directory " + self.tmpdir)        
-
+            die("Could not find a supported compiler to use!")
+            
     @staticmethod
     def can_use():
         VS80 = os.environ.get("VS80COMNTOOLS")
@@ -401,6 +402,7 @@ class VisualStudioBuilder(BuilderBase):
                           help="The visual studio to use for building, can be '2005', '2008' or '2010'")
 
     def handle_command_line_options(self,options):
+        self.set_studio_version()
         if self.studio is None and options.use_studio is None:
             die("Please specify which visual studio you want to use for building.\n" +
                 "Use the --use-studio command line switch, can be '2005', '2008' or '2010'")
