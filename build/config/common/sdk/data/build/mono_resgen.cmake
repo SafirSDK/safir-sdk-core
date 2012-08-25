@@ -17,11 +17,15 @@ execute_process(
   ERROR_VARIABLE output)
 
 if (NOT result EQUAL 0)
-  if (${output} MATCHES "Shutting down finalizer thread timed out." OR
-      ${output} MATCHES "Real-time signal 1" OR
-      ${output} MATCHES "Got a SIGSEGV while executing native code. This usually indicates")
-    message ("Mono resgen failed with a spurious error message. Will try to rerun the command, hoping that it will succeed this time.")
-    
+  message ("Mono resgen failed. This sometimes happens spuriously, so I will try to rerun the command twice more, hoping that it will succeed this time.")    
+  execute_process(
+    COMMAND ${RESGEN_EXECUTABLE} ${resx_file} ${resource_file}
+    RESULT_VARIABLE result
+    OUTPUT_VARIABLE output
+    ERROR_VARIABLE output)
+  
+  if (NOT result EQUAL 0)
+    message ("Mono resgen failed again; one last attempt:")
     execute_process(
       COMMAND ${RESGEN_EXECUTABLE} ${resx_file} ${resource_file}
       RESULT_VARIABLE result
@@ -29,12 +33,10 @@ if (NOT result EQUAL 0)
       ERROR_VARIABLE output)
     
     if (NOT result EQUAL 0)
+      message ("Mono resgen failed again, this time it is probably a real error:")
       message(FATAL_ERROR "${output}")
     endif()
-  else()
-    message(FATAL_ERROR "${output}")
   endif()
-
 endif()
 
 #success!
