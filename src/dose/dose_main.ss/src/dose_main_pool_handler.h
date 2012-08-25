@@ -41,18 +41,6 @@
 
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4127)
-#endif
-
-#include <ace/Reactor.h>
-
-//and enable the warnings again
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
-
 namespace Safir
 {
 namespace Dob
