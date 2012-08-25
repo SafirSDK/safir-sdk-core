@@ -656,8 +656,8 @@ class UnixGccBuilder(BuilderBase):
         logger.log(" - in config " + config, "brief")
         self.__run_command(("cmake",
                             "-D", "CMAKE_BUILD_TYPE:string=" + config,
-                            "-D SAFIR_ADA_SUPPORT:boolean=" + str(ada_support),
-                            "-D SAFIR_JAVA_SUPPORT:boolean=" + str(java_support),
+                            "-D", "SAFIR_ADA_SUPPORT:boolean=" + str(ada_support),
+                            "-D", "SAFIR_JAVA_SUPPORT:boolean=" + str(java_support),
                             "."),
                            "Configure for " + config + " build", directory)
         if clean:
