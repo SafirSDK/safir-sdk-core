@@ -23,8 +23,9 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+from __future__ import print_function
+import os, glob, sys, subprocess, platform, threading, xml.dom.minidom, re
 
-import os, glob, sys, subprocess, threading, xml.dom.minidom, re
 from Queue import Queue, Empty
 from xml.sax.saxutils import escape
 
@@ -49,7 +50,17 @@ def die(message):
     raise FatalError(message)
 
 def is_64_bit():
-    return sys.maxsize > 2**32
+    #Detecting this is a lot more complex than it should be.
+    #See http://stackoverflow.com/questions/2764356/python-get-windows-os-version-and-architecture
+    #and http://bytes.com/topic/python/answers/509764-detecting-64bit-vs-32bit-linux
+    #This will work reasonably well on our supported systems:
+    if sys.platform.startswith("linux"):
+        return platform.architecture()[0] == "64bit"
+    else:
+        PROCESSOR_ARCHITECTURE = os.environ.get("PROCESSOR_ARCHITECTURE")
+        PROCESSOR_ARCHITEW6432 = os.environ.get("PROCESSOR_ARCHITEW6432")
+        return PROCESSOR_ARCHITECTURE == "AMD64" or PROCESSOR_ARCHITEW6432 == "AMD64"
+        
 
 def copy_dob_files(source_dir, target_dir):
     """Copy dou and dom files from the source directory to the given subdirectory in the dots_generated directory"""
@@ -100,7 +111,7 @@ def remove(path):
         try:
             os.remove(path)
             return
-        except Exception, e:
+        except Exception as e:
             die ("Failed to remove file " + path + ". Got exception " + str(e))
             
     for name in os.listdir(path):
@@ -109,12 +120,12 @@ def remove(path):
         else:
             try:
                 os.remove(os.path.join(path,name))
-            except Exception, e:
+            except Exception as e:
                 die ("Failed to remove file " + os.path.join(path,name) + ". Got exception " + str(e))
 
     try:
         os.rmdir(path)
-    except Exception, e:
+    except Exception as e:
         die ("Failed to remove directory " + path + ". Got exception " + str(e))
 
 
@@ -122,7 +133,7 @@ def num_cpus():
     """Detects the number of CPUs on a system. Cribbed from pp."""
     # Linux, Unix and MacOS:
     if hasattr(os, "sysconf"):
-        if os.sysconf_names.has_key("SC_NPROCESSORS_ONLN"):
+        if "SC_NPROCESSORS_ONLN" in os.sysconf_names:
             # Linux & Unix:
             ncpus = os.sysconf("SC_NPROCESSORS_ONLN")
             if isinstance(ncpus, int) and ncpus > 0:
@@ -130,7 +141,7 @@ def num_cpus():
         else: # OSX:
             return int(os.popen2("sysctl -n hw.ncpu")[1].read())
     # Windows:
-    if os.environ.has_key("NUMBER_OF_PROCESSORS"):
+    if "NUMBER_OF_PROCESSORS" in os.environ:
         ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
         if ncpus > 0:
             return ncpus
@@ -207,7 +218,7 @@ def parse_command_line(builder):
     parser.add_option("--command-file", "-f",action="store",type="string",dest="command_file",
                       help="The command to execute")
     parser.add_option("--target",action="store",type="string",dest="target_architecture",default="x86",
-                          help="Target architecture, x86 or x64")
+                          help="Target architecture, x86 or x86-64")
     parser.add_option("--no-ada-support", action="store_false",dest="ada_support",default=True,
                       help="Disable Ada support")
     parser.add_option("--no-java-support", action="store_false",dest="java_support",default=True,
@@ -238,9 +249,9 @@ def parse_command_line(builder):
     global logger
     logger = Logger("Brief" if options.verbose == 0 else "Verbose")
 
-    if options.target_architecture == "x64":
+    if options.target_architecture == "x86-64":
         if not is_64_bit():
-            die("Target x64 can't be set since this is not a 64 bit OS")
+            die("Target x86-64 can't be set since this is not a 64 bit OS")
         if options.ada_support:
             die("64 bit Ada build is currently not supported")
         if options.java_support:
@@ -367,7 +378,7 @@ class VisualStudioBuilder(BuilderBase):
             self.studio = VS80
             if target_architecture == "x86":
                 self.generator = "Visual Studio 8 2005"
-            elif target_architecture == "x64":
+            elif target_architecture == "x86-64":
                 self.generator = "Visual Studio 8 2005 Win64"
             else:
                 die("Target architecture " + target_architecture + " is not supported for Visual Studio 8 2005 !")                
@@ -375,7 +386,7 @@ class VisualStudioBuilder(BuilderBase):
             self.studio = VS90
             if target_architecture == "x86":
                 self.generator = "Visual Studio 9 2008"
-            elif target_architecture == "x64":
+            elif target_architecture == "x86-64":
                 self.generator = "Visual Studio 9 2008 Win64"
             else:
                 die("Target architecture " + target_architecture + " is not supported for Visual Studio 9 2008 !")        
@@ -383,7 +394,7 @@ class VisualStudioBuilder(BuilderBase):
             self.studio = VS100
             if target_architecture == "x86":
                 self.generator = "Visual Studio 10"
-            elif target_architecture == "x64":
+            elif target_architecture == "x86-64":
                 self.generator = "Visual Studio 10 Win64"
             else:
                 die("Target architecture " + target_architecture + " is not supported for Visual Studio 10 !")
@@ -411,7 +422,7 @@ class VisualStudioBuilder(BuilderBase):
                 self.studio = os.environ.get("VS80COMNTOOLS")
                 if target_architecture == "x86":
                     self.generator = "Visual Studio 8 2005"
-                elif target_architecture == "x64":
+                elif target_architecture == "x86-64":
                     self.generator = "Visual Studio 8 2005 Win64"
                 else:
                     die("Target architecture " + target_architecture + " is not supported for Visual Studio 8 2005 !")  
@@ -419,7 +430,7 @@ class VisualStudioBuilder(BuilderBase):
                 self.studio = os.environ.get("VS90COMNTOOLS")
                 if target_architecture == "x86":
                     self.generator = "Visual Studio 9 2008"
-                elif target_architecture == "x64":
+                elif target_architecture == "x86-64":
                     self.generator = "Visual Studio 9 2008 Win64"
                 else:
                     die("Target architecture " + target_architecture + " is not supported for Visual Studio 9 2008 !")  
@@ -427,7 +438,7 @@ class VisualStudioBuilder(BuilderBase):
                 self.studio = os.environ.get("VS100COMNTOOLS")
                 if target_architecture == "x86":
                     self.generator = "Visual Studio 10"
-                elif target_architecture == "x64":
+                elif target_architecture == "x86-64":
                     self.generator = "Visual Studio 10 Win64"
                 else:
                     die("Target architecture " + target_architecture + " is not supported for Visual Studio 10 !")  
@@ -439,7 +450,7 @@ class VisualStudioBuilder(BuilderBase):
         #work out what compiler tools to use
         if target_architecture == "x86":
             self.vcvarsall_arg = "x86"
-        elif target_architecture == "x64":
+        elif target_architecture == "x86-64":
             self.vcvarsall_arg = "amd64"
         else:
             die("Unknown target architecture " + target_architecture)    
@@ -500,7 +511,7 @@ class VisualStudioBuilder(BuilderBase):
             if force_config == "Debug" and force_extra_config == "None":
                 bat.write (" --no-cpp-release --default-config Debug")
             bat.write("\n")
-        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         
         logger.logOutput(process)
 
@@ -568,7 +579,6 @@ class VisualStudioBuilder(BuilderBase):
             self.__run_command("cmake -D CMAKE_BUILD_TYPE:string=" + config + " " +
                                "-D SAFIR_ADA_SUPPORT:boolean=" + str(ada_support) + " " +
                                "-D SAFIR_JAVA_SUPPORT:boolean=" + str(java_support) + " " +
-                               "-D SAFIR_BUILD_TARGET_ARCHITECTURE:string=" + target_architecture + " " +
                                "-G \"NMake Makefiles\" .",
                                "Configure " + config, directory)
             if clean:
@@ -590,7 +600,7 @@ class VisualStudioBuilder(BuilderBase):
         bat.close()
 
         logger.log(description + " " + what + ": '" + cmd + "'", "command")
-        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         output = logger.logOutput(process)
 
         if process.returncode != 0:
@@ -620,7 +630,6 @@ class UnixGccBuilder(BuilderBase):
 
     @staticmethod
     def can_use():
-        import sys
         return sys.platform.startswith("linux")
 
     def setup_command_line_options(self,parser):
@@ -683,7 +692,8 @@ class UnixGccBuilder(BuilderBase):
         
         process = subprocess.Popen(cmd,
                                    stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT)
+                                   stderr=subprocess.STDOUT,
+                                   universal_newlines=True)
         logger.logOutput(process)
         if process.returncode != 0:
             die("Failed to run dobmake")
@@ -691,7 +701,7 @@ class UnixGccBuilder(BuilderBase):
     def __run_command(self, cmd, description, what, allow_fail = False):
         """Run a command"""
         logger.log(description + " " + what + ": '" + " ".join(cmd) + "'", "command")
-        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         output = logger.logOutput(process)
         if process.returncode != 0:
             if not allow_fail:
@@ -884,7 +894,7 @@ try:
         logger.log("All tests ran successfully!")
     else:
         logger.log(str(failed) + " tests failed out of " + str(tests) + ".","brief")
-except FatalError, e:
+except FatalError as e:
     logger.log("Result", "header")
     logger.log("Build script failed: " + str(e))
     sys.exit(1)
