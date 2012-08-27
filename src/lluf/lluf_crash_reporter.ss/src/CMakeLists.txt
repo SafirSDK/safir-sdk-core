@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 project(lluf_crash_reporter C CXX)
+
+#this library has C++ interface that *should* work in both debug and release
+#so we don't want the "d" suffix on debug builds on windows
+#Must be set before including cmake_settings.txt
+SET(NO_LIBRARY_POSTFIXES 1) 
+
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 INCLUDE_DIRECTORIES(./) #Google breakpad source dir
