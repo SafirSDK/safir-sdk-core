@@ -35,6 +35,7 @@
 #include <Safir/Dob/ConnectionInfo.h>
 #include <boost/current_function.hpp>
 
+#include "crash_handler.h"
 #include "dose_controller.h"
 #include "dose_controller_table.h"
 using namespace Safir::Dob::Internal;
@@ -47,6 +48,7 @@ void DoseC_Constructor(long & ctrl,
                        bool & success)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
+    CrashHandler::Instance();
     success = false;
     try
     {

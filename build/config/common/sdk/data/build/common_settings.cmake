@@ -20,6 +20,23 @@ if (SAFIR_USER)
    INCLUDE_DIRECTORIES(${SAFIR_USER}/sdk/include)
 endif()
 
+#Export symbol files for post-mortem debugging. Set the appropriate flags
+set(EXPORT_SYMBOLS true)
+
+if (EXPORT_SYMBOLS)
+    if(MSVC)
+        set(CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS_RELEASE} /Zi")  #Set C, C++ and linker flags for release
+        set(CMAKE_C_FLAGS_RELEASE    "${CMAKE_C_FLAGS_RELEASE} /Zi")  
+        set(CMAKE_EXE_LINKER_FLAGS_RELEASE  "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG  /OPT:REF")
+        set(CMAKE_SHARED_LINKER_FLAGS_RELEASE  "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG  /OPT:REF")
+    else()
+        #set(CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS_RELEASE} -g")  #Set C, C++ and linker flags for release
+        #set(CMAKE_C_FLAGS_RELEASE    "${CMAKE_C_FLAGS_RELEASE} -g")  
+        #set(CMAKE_EXE_LINKER_FLAGS_RELEASE  "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -g")
+        #set(CMAKE_SHARED_LINKER_FLAGS_RELEASE  "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -g")
+    endif(MSVC)
+endif(EXPORT_SYMBOLS)
+
 #if we're using gcc we need to set up some things
 if (UNIX)
    #link directory for libraries (will this work with gcc under windows?)
@@ -143,6 +160,25 @@ MACRO(INSTALL_DEBUG_INFO target)
     else()
       INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
     endif()
+
+    if (EXPORT_SYMBOLS)
+      GET_TARGET_PROPERTY(location ${target} LOCATION)
+      #fix for vs2010
+      if (MSVC_VERSION EQUAL 1600)
+        STRING(REPLACE "$(Configuration)" Release location ${location})
+      else()
+        STRING(REPLACE "$(OutDir)" Release location ${location})
+      endif()
+      
+      STRING(REPLACE .dll ${CMAKE_RELEASE_POSTFIX}.pdb location ${location})
+      STRING(REPLACE .exe ${CMAKE_RELEASE_POSTFIX}.pdb location ${location})
+      
+      if (SAFIR_USER)
+        INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/dump/Symbols CONFIGURATIONS Release)
+      else()
+        INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/dump/Symbols CONFIGURATIONS Release)
+      endif()
+    endif(EXPORT_SYMBOLS)
 
   endif()
 ENDMACRO()
