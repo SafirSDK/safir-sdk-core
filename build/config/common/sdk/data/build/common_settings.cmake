@@ -68,7 +68,8 @@ if (MSVC)
    ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
 
    #use multiprocessing 
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+   #LAHA turned off to see if that removes the vs2010 internal compiler errors we're seeing.
+   #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 
    #increase warning level
    # Use the highest warning level for visual studio.
