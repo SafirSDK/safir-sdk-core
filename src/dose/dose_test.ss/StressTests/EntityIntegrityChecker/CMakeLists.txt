@@ -1,8 +1,3 @@
-if (MSVC)
-   # Suppress some warnings
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4244")
-endif()
-
 FILE(GLOB sources *.cpp ../common/*.cpp)
 FILE(GLOB headers *.h ../common/*.h)
 
