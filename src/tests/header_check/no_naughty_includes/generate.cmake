@@ -11,6 +11,7 @@ set(EXCLUDE_LIST
   AutoLink\\.h #ok, needs a define, but manually checked to not include windows.h
   ^ace/ #dont check third party library
   ^boost/ #dont check third party library
+  /Breakpad/
   AceTimeConverter\\.h #these are kind of meant to 
   AceDispatcher\\.h    # include ace, which includes windows.h...
   AsioDispatcher\\.h   #includes asio.hpp, which appears to include windows.h
