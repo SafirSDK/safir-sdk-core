@@ -26,29 +26,14 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/interprocess/sync/named_semaphore.hpp>
-#include <stdio.h>
+#include <cstdio>
 #include <iostream>
-
-//disable warnings in boost and ace
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4244)
-#endif
-
-#include <ace/Guard_T.h>
-
-//and enable the warnings again
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
-
 namespace Safir
 {
 namespace Utilities
 {
-    StartupSynchronizer::StartupSynchronizer(const std::string& uniqeName,
-                                             Synchronized* const syncronized):
-        m_synchronized(syncronized),
+    StartupSynchronizer::StartupSynchronizer(const std::string& uniqeName):
+        m_synchronized(NULL),
         m_name(uniqeName),
         m_started(false)
     {
@@ -62,7 +47,7 @@ namespace Utilities
 
     void StartupSynchronizer::Stop()
     {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_threadLock);
+        boost::lock_guard<boost::mutex> lck(m_threadLock);
         if (m_started)
         {
             const bool gotLock = m_fileLock->try_lock();
@@ -90,7 +75,7 @@ namespace Utilities
         {
             throw StartupSynchronizerException("Environment variable SAFIR_RUNTIME does not appear to be set");
         }
-        path dir(env,native);
+        path dir(env);
 
         dir /= "data/text/lluf/";
         if (!exists(dir))
@@ -122,7 +107,7 @@ namespace Utilities
 
         if (exists(filename))
         {
-            if (!is_regular(filename))
+            if (!is_regular_file(filename))
             {
                 std::ostringstream ostr;
                 ostr << "The lockfile does not appear to be a reglar file. filename = '" << filename.string() << "'" << std::endl;
@@ -141,14 +126,14 @@ namespace Utilities
         return filename;
     }
 
-    void StartupSynchronizer::Start()
+    void StartupSynchronizer::Start(Synchronized* const synchronized)
     {
-
-        ACE_Guard<ACE_Thread_Mutex> lck(m_threadLock);
+        boost::lock_guard<boost::mutex> lck(m_threadLock);
         if (m_started)
         {
             return;
         }
+        m_synchronized = synchronized;
 
         const boost::filesystem::path lockfile = GetLockFile(m_name);
         //        std::wcerr << "Using '" << lockfile.string().c_str() << "' as lockfile" << std::endl;
@@ -193,6 +178,7 @@ namespace Utilities
             std::ostringstream ostr;
             ostr << "It appears that Create failed in some other process for '" << m_name << "'." << std::endl;
             ostr << "The exception I got was " << exc.what() << std::endl;
+            std::wcerr << ostr.str().c_str() << std::flush;
             throw StartupSynchronizerException(ostr.str());
         }
 

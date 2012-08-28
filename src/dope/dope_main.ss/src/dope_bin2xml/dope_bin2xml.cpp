@@ -39,7 +39,6 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/exception.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <Safir/Utilities/Internal/BoostFilesystemWrapper.h>
 
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
@@ -75,16 +74,18 @@ void ParseCommandLine(int argc, char * argv[])
 
     if (vm.count("help"))
     {
-        std::cout << "Converts persistent data in binary format to XML\n\n"
+        std::ostringstream ostr;
+        ostr << options;
+        std::wcout << "Converts persistent data in binary format to XML\n\n"
                      "If no option is given the choice between db or files\n"
                      "is determined by Safir.Dob.PersistenceParameters.Backend.\n\n"
-                  << options << "\n";
+                   << ostr.str().c_str() << std::endl;
         exit(1);
     }
 
     if (vm.count("db") && vm.count("files"))
     {
-        std::cerr << "You can only convert db or files, not both at the same time" << std::endl;
+        std::wcerr << "You can only convert db or files, not both at the same time" << std::endl;
         exit(1);
     }
     else if (vm.count("db"))
@@ -205,7 +206,7 @@ boost::filesystem::path GetStorageDirectory()
 {
     try
     {
-        boost::filesystem::path path = boost::filesystem::path(Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Dob::PersistenceParameters::FileStoragePath()),boost::filesystem::native);
+        boost::filesystem::path path = boost::filesystem::path(Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Dob::PersistenceParameters::FileStoragePath()));
 
         if (boost::filesystem::exists(path))
         {
@@ -236,13 +237,19 @@ typedef std::pair<Safir::Dob::Typesystem::EntityId, Safir::Dob::Typesystem::Hand
 const EntityIdAndHandlerId
 Filename2EntityIdAndHandlerId(const boost::filesystem::path & filename)
 {
-    if (!filename.has_leaf())
+    if (!filename.has_filename())
     {
         throw Safir::Dob::Typesystem::IllegalValueException
             (L"Filename2EntityAndHandler: Could not decompose filename : " +
             Safir::Dob::Typesystem::Utilities::ToWstring(filename.string()),__WFILE__,__LINE__);
     }
-    const std::string leaf = Safir::Utilities::Internal::GetFilenameFromPath(filename);
+
+#if defined (BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+    const std::string leaf = filename.filename().string();
+#else
+    const std::string leaf = filename.filename();
+#endif
+
     size_t separatorIndex = leaf.find('@');
     if (separatorIndex == std::string::npos)
     {
@@ -303,11 +310,12 @@ void ConvertFiles()
     for (boost::filesystem::directory_iterator it (storagePath);
          it != boost::filesystem::directory_iterator(); ++it)
     {
+        const boost::filesystem::path path = it->path();
         const EntityIdAndHandlerId id = Filename2EntityIdAndHandlerId(*it);
 
-        if (boost::filesystem::extension(*it) == ".bin")
+        if (path.extension() == ".bin")
         {
-            const size_t fileSize = static_cast<size_t>(boost::filesystem::file_size(*it));
+            const size_t fileSize = static_cast<size_t>(boost::filesystem::file_size(path));
             if (fileSize == 0)
             {
                 continue;
@@ -315,7 +323,7 @@ void ConvertFiles()
             bin.resize(fileSize);
 
             size_t numBytesRead = 0;
-            boost::filesystem::ifstream file(*it, std::ios::in | std::ios::binary);
+            boost::filesystem::ifstream file(path, std::ios::in | std::ios::binary);
             while (file.good())
             {
                 file.read(&bin[0] + numBytesRead,4096);
@@ -332,7 +340,9 @@ void ConvertFiles()
             const Safir::Dob::Typesystem::ObjectPtr object = Safir::Dob::Typesystem::Serialization::ToObject(bin);
 
             const std::wstring xml = Safir::Dob::Typesystem::Serialization::ToXml(object);
-            boost::filesystem::wofstream xmlFile(boost::filesystem::change_extension(*it,".xml"));
+            boost::filesystem::path xmlFileName(path);
+            xmlFileName.replace_extension(".xml");
+            boost::filesystem::wofstream xmlFile(xmlFileName);
             xmlFile << xml;
         }
     }
@@ -355,6 +365,7 @@ int main(int argc, char * argv[])
     catch (const std::exception & exc)
     {
         std::wcout << "Caught exception: " << exc.what() << std::endl;
+        return 1;
     }
     return 0;
 }

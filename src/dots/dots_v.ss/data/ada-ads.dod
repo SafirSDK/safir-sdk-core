@@ -310,7 +310,6 @@ with Ada.Finalization;
 with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 pragma Warnings (Off, Ada.Strings.Wide_Unbounded);
 with Safir.Dob.Typesystem.Members;
-pragma Elaborate_All (Safir.Dob.Typesystem.Members);
 pragma Warnings (Off, Safir.Dob.Typesystem.Members);
 with Safir.Dob.Typesystem.Object;
 with Safir.Dob.Typesystem.Object_Container_Base;
@@ -332,7 +331,6 @@ pragma Warnings (Off, Safir.Dob.Typesystem.@_REPLACE_ALL(:/):DEPENDENCY_@);
 @@ELSIF@@ @_DEPENDENCY_@ = String
 @@IF@@ @_MEMBER'Length_@>0
 with Safir.Dob.Typesystem.String_Container; use Safir.Dob.Typesystem.String_Container;
-pragma Warnings (Off, Safir.Dob.Typesystem.String_Container);
 @@END_IF@@
 @@ELSIF@@ @_DEPENDENCY_@ = Binary
 with Safir.Dob.Typesystem.Binary_Container; use Safir.Dob.Typesystem.Binary_Container;

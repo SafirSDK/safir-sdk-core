@@ -26,7 +26,7 @@
 #define __DOTS_LIBRARY_EXCEPTIONS_H__
 
 #include <boost/noncopyable.hpp>
-//#include <boost/shared_ptr.hpp>
+#include <boost/thread/once.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 
@@ -234,6 +234,18 @@ namespace Typesystem
 
         /** @} */
 
+        /**
+         * Throw a specific exception.
+         *
+         * This function takes no notice of currently set exceptions. Rather
+         * it throws the specified exception with the specified description string.
+         *
+         * @param exceptionId [in] - The TypeId of the exception to throw.
+         * @param description [in] - String with more information about what happened.
+         *                           This is expected to be ascii if exceptionId == 0,
+         *                           and utf8 if exceptionId != 0.
+         */
+        void Throw(const TypeId exceptionId, const std::string& description) const;
 
     private:
         LibraryExceptions();
@@ -245,8 +257,20 @@ namespace Typesystem
         typedef unordered_map<TypeId, ThrowExceptionCallback> CallbackMap;
         CallbackMap m_CallbackMap;
 
-        //the single instance
-        static LibraryExceptions * volatile m_pInstance;
+        /**
+         * This class is here to ensure that only the Instance method can get at the 
+         * instance, so as to be sure that boost call_once is used correctly.
+         * Also makes it easier to grep for singletons in the code, if all 
+         * singletons use the same construction and helper-name.
+         */
+        struct SingletonHelper
+        {
+        private:
+            friend LibraryExceptions& LibraryExceptions::Instance();
+
+            static LibraryExceptions& Instance();
+            static boost::once_flag m_onceFlag;
+        };
     };
 }
 }

@@ -215,7 +215,7 @@ bool HTTPUpload::ReadResponse(HINTERNET request, wstring *response) {
   BOOL return_code;
 
   while (((return_code = InternetQueryDataAvailable(request, &bytes_available,
-	  0, 0)) != 0) && bytes_available > 0) {
+      0, 0)) != 0) && bytes_available > 0) {
 
     vector<char> response_buffer(bytes_available);
     DWORD size_read;

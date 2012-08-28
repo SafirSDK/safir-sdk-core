@@ -32,6 +32,7 @@ pragma Warnings ("H");  -- turn off warnings for hiding variable
 -- get TypeIds of members etc.
 --
 package Safir.Dob.Typesystem.Members is
+   pragma Preelaborate (Safir.Dob.Typesystem.Members);
 
    -- Get the number of members for a class or property.
    --

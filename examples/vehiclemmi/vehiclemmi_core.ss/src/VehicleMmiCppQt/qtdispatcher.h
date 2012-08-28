@@ -25,8 +25,18 @@
 #ifndef _QT_QTDISPATCHER_H
 #define _QT_QTDISPATCHER_H
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127)
+#endif
+
 #include <QtCore/QObject>
 #include <QtCore/QEvent>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <Safir/Dob/Connection.h>
 
 namespace VehicleMmiCppQt

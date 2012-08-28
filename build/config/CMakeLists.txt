@@ -1,4 +1,4 @@
-project(build_files)
+project(build_files NONE)
 
 cmake_minimum_required(VERSION 2.4)
 
@@ -7,6 +7,15 @@ FILE(TO_CMAKE_PATH $ENV{SAFIR_RUNTIME} SAFIR_RUNTIME)
 
 SET(runtime_dirs "common/runtime")
 SET(sdk_dirs "common/sdk")
+
+#We need to make sure that syst_default.gpr directories exist
+#since they need to be installed for ada stuff to build.
+#This is needed for version control systems that don't handle
+#empty directories.
+FILE(MAKE_DIRECTORY 
+     "${sdk_dirs}/ada/lib-obj/Release"
+     "${sdk_dirs}/ada/lib-obj/Debug")
+
 
 IF (WIN32)
   SET(runtime_dirs ${runtime_dirs} windows/runtime)

@@ -1,12 +1,9 @@
-cmake_minimum_required(VERSION 2.4)
-
-PROJECT (dose_test_util)
+project(dose_test_util CXX)
 
 #this library has a C interface, so we don't want the "d" suffix on debug builds on windows
-#Must be set before including cmake_settings.txt
-SET(NO_LIBRARY_POSTFIXES 1) 
+# NO_LIBRARY_POSTFIXES 1 is set in the top level CMakeLists.txt file
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE_DIRECTORIES(.)
 
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
@@ -16,16 +13,12 @@ ADD_DEFINITIONS(-DDOSE_EXPORTS)
 
 ADD_LIBRARY(dose_test_util SHARED ${sources} ${dose_com_sources} ${headers})
 
-TARGET_LINK_LIBRARIES(dose_test_util ${COMMON_LIBRARIES} ${ACE_LIBRARY})
+TARGET_LINK_LIBRARIES(dose_test_util ${COMMON_LIBRARIES})
 
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(dose_test_util)
-endif()
-
-
-INSTALL(FILES dose_test_util.h              
-        DESTINATION ${SAFIR_SDK}/include/Safir/Dob/Internal/DoseTest/)
-
+INSTALL(DIRECTORY Safir 
+  DESTINATION ${SAFIR_SDK}/include
+  PATTERN ".svn" EXCLUDE
+  PATTERN "*~" EXCLUDE)
 
 INSTALL(TARGETS dose_test_util
         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin

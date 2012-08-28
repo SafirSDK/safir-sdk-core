@@ -24,10 +24,10 @@
 
 with Ada.Containers.Vectors;
 with Interfaces.C;
---with Interfaces.C.Strings;
 with Interfaces.C.Pointers;
 
 package Safir.Dob.Typesystem is
+   pragma Preelaborate (Safir.Dob.Typesystem);
 
    Configuration_Error_Exception : exception;
    Illegal_Value_Exception       : exception;

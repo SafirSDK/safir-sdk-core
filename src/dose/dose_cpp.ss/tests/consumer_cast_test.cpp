@@ -30,7 +30,7 @@
 using namespace Safir::Dob;
 using namespace Safir::Dob::Internal;
 
-#pragma warning (disable: 4100)
+//#pragma warning (disable: 4100)
 class Consumer :
     public StopHandler,
     public Dispatcher,
@@ -43,8 +43,8 @@ class Consumer :
     public MessageSender,
     public RegistrationSubscriber,
     public MessageSubscriber,
-    public EntitySubscriber,
-#endif
+    public EntitySubscriber
+    //#endif
 {
 public:
     virtual void OnStopOrder() {}
@@ -89,46 +89,84 @@ public:
 };
 
 
-void CheckAddr(const std::wstring & desc, void * first, void * second)
+namespace Safir 
 {
-    std::wstring cmp = L" == ";
-    if (first != second)
+namespace Dob
+{
+namespace Internal
+{
+    class Callbacks 
     {
-        std::wcout << "FAILED : ";
-        cmp = L" != ";
-    }
-    else
-    {
-        std::wcout << "SUCCESS: ";
-    }
-    std::wcout << desc << std::hex << " (0x" << first << cmp << "0x" << second << ")" << std::endl;
+    public:
+        Callbacks(): m_success(true) {}
+
+        int Result()
+        {
+            if (m_success)
+            {
+                return 0;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+
+        void Test()
+        {
+            Consumer cons;
+            Consumer * c = &cons;
+            void * v = static_cast<Internal::ConsumerBase*>(c);
+            
+            CheckAddr(L"StopHandler",static_cast<StopHandler*>(c),ConsumerBase::ToStopHandler(v));
+            CheckAddr(L"Dispatcher",static_cast<Dispatcher*>(c),ConsumerBase::ToDispatcher(v));
+            CheckAddr(L"EntityHandler",static_cast<EntityHandler*>(c),ConsumerBase::ToEntityHandler(v));
+            CheckAddr(L"EntityHandlerInjection",static_cast<EntityHandlerInjection*>(c),ConsumerBase::ToEntityHandlerInjection(v));
+            CheckAddr(L"EntityHandlerPending",static_cast<EntityHandlerPending*>(c),ConsumerBase::ToEntityHandlerPending(v));
+            CheckAddr(L"ServiceHandler",static_cast<ServiceHandler*>(c),ConsumerBase::ToServiceHandler(v));
+            CheckAddr(L"ServiceHandlerPending",static_cast<ServiceHandlerPending*>(c),ConsumerBase::ToServiceHandlerPending(v));
+            CheckAddr(L"Requestor",static_cast<Requestor*>(c),ConsumerBase::ToRequestor(v));
+            CheckAddr(L"MessageSender",static_cast<MessageSender*>(c),ConsumerBase::ToMessageSender(v));
+            CheckAddr(L"RegistrationSubscriber",static_cast<RegistrationSubscriber*>(c),ConsumerBase::ToRegistrationSubscriber(v));
+            CheckAddr(L"MessageSubscriber",static_cast<MessageSubscriber*>(c),ConsumerBase::ToMessageSubscriber(v));
+            CheckAddr(L"EntitySubscriber",static_cast<EntitySubscriber*>(c),ConsumerBase::ToEntitySubscriber(v));
+            
+            CheckAddr(L"RevokedRegistrationBase",static_cast<RevokedRegistrationBase*>(c),ConsumerBase::ToRevokedRegistrationBase(v));
+            CheckAddr(L"CompletedRegistrationBase",static_cast<CompletedRegistrationBase*>(c),ConsumerBase::ToCompletedRegistrationBase(v));
+            CheckAddr(L"EntityRequestBase",static_cast<EntityRequestBase*>(c),ConsumerBase::ToEntityRequestBase(v));
+            CheckAddr(L"EntityInjectionBase",static_cast<EntityInjectionBase*>(c),ConsumerBase::ToEntityInjectionBase(v));
+            CheckAddr(L"ServiceRequestBase",static_cast<ServiceRequestBase*>(c),ConsumerBase::ToServiceRequestBase(v));
+        }
+
+    private:
+        bool m_success;
+
+        void CheckAddr(const std::wstring & desc, void * first, void * second)
+        {
+            std::wstring cmp = L" == ";
+            if (first != second)
+            {
+                m_success = false;
+                std::wcout << "FAILED : ";
+                cmp = L" != ";
+            }
+            else
+            {
+                std::wcout << "SUCCESS: ";
+            }
+            std::wcout << desc << std::hex << " (0x" << first << cmp << "0x" << second << ")" << std::endl;
+        }
+
+    };
 }
+}
+}   
+
 
 int main(int, char**)
 {
-    Consumer cons;
-    Consumer * c = &cons;
-    void * v = static_cast<Internal::ConsumerBase*>(c);
-
-    CheckAddr(L"StopHandler",static_cast<StopHandler*>(c),ConsumerBase::ToStopHandler(v));
-    CheckAddr(L"Dispatcher",static_cast<Dispatcher*>(c),ConsumerBase::ToDispatcher(v));
-    CheckAddr(L"EntityHandler",static_cast<EntityHandler*>(c),ConsumerBase::ToEntityHandler(v));
-    CheckAddr(L"EntityHandlerInjection",static_cast<EntityHandlerInjection*>(c),ConsumerBase::ToEntityHandlerInjection(v));
-    CheckAddr(L"EntityHandlerPending",static_cast<EntityHandlerPending*>(c),ConsumerBase::ToEntityHandlerPending(v));
-    CheckAddr(L"ServiceHandler",static_cast<ServiceHandler*>(c),ConsumerBase::ToServiceHandler(v));
-    CheckAddr(L"ServiceHandlerPending",static_cast<ServiceHandlerPending*>(c),ConsumerBase::ToServiceHandlerPending(v));
-    CheckAddr(L"Requestor",static_cast<Requestor*>(c),ConsumerBase::ToRequestor(v));
-    CheckAddr(L"MessageSender",static_cast<MessageSender*>(c),ConsumerBase::ToMessageSender(v));
-    CheckAddr(L"RegistrationSubscriber",static_cast<RegistrationSubscriber*>(c),ConsumerBase::ToRegistrationSubscriber(v));
-    CheckAddr(L"MessageSubscriber",static_cast<MessageSubscriber*>(c),ConsumerBase::ToMessageSubscriber(v));
-    CheckAddr(L"EntitySubscriber",static_cast<EntitySubscriber*>(c),ConsumerBase::ToEntitySubscriber(v));
-
-    CheckAddr(L"RevokedRegistrationBase",static_cast<RevokedRegistrationBase*>(c),ConsumerBase::ToRevokedRegistrationBase(v));
-    CheckAddr(L"CompletedRegistrationBase",static_cast<CompletedRegistrationBase*>(c),ConsumerBase::ToCompletedRegistrationBase(v));
-    CheckAddr(L"EntityRequestBase",static_cast<EntityRequestBase*>(c),ConsumerBase::ToEntityRequestBase(v));
-    CheckAddr(L"EntityInjectionBase",static_cast<EntityInjectionBase*>(c),ConsumerBase::ToEntityInjectionBase(v));
-    CheckAddr(L"ServiceRequestBase",static_cast<ServiceRequestBase*>(c),ConsumerBase::ToServiceRequestBase(v));
-
-
-    return 0;
+    Safir::Dob::Internal::Callbacks tester;
+    tester.Test();
+    
+    return tester.Result();
 }

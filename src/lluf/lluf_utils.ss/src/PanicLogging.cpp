@@ -23,17 +23,13 @@
 ******************************************************************************/
 #include <Safir/Utilities/Internal/PanicLogging.h>
 
-//disable warnings in ace
+//disable warnings in boost
 #if defined _MSC_VER
   #pragma warning (push)
-  #pragma warning (disable : 4267 4244)
+  //TODO: which do we need to disable for asio?
 #endif
 
-#include <ace/Thread.h>
-#include <ace/Process.h>
-#include <ace/SOCK_Dgram.h>
-#include <ace/OS_NS_sys_socket.h>
-#include <ace/OS_NS_unistd.h>
+#include <boost/asio.hpp>
 
 //and enable the warnings again
 #if defined _MSC_VER
@@ -42,6 +38,7 @@
 
 #include <Safir/Utilities/ProcessInfo.h>
 #include <sstream>
+
 namespace Safir
 {
 namespace Utilities
@@ -52,24 +49,32 @@ namespace Internal
     {
         try
         {
-            ACE_OS::socket_init();
-            ACE_INET_Addr addr;
-            addr.set(31221,ACE_LOCALHOST);
-            ACE_SOCK_Dgram sock;
-            sock.open(ACE_Addr::sap_any,addr.get_type());
+            //prepare message
             std::ostringstream ostr;
-            const pid_t pid = ACE_OS::getpid();
+            const pid_t pid = ProcessInfo::GetPid();
             ProcessInfo proc(pid);
             ostr << "== PANIC LOG! =================================================================" << std::endl
                  << "Pid = " << pid << std::endl
                  << "Process Name = " << proc.GetProcessName() << std::endl
-                 << "Process Description = " << proc.GetProcessDescription() << std::endl
+                 << "Process Description = " << Safir::Utilities::ProcessInfo::GetProcessDescription() << std::endl
                  << "Error Message:" << std::endl
                  << text
                  << std::endl
                  << "===============================================================================" << std::endl;
-            sock.send(ostr.str().c_str(),ostr.str().size(),addr);
-            sock.close();
+
+            //Set up address
+            const boost::asio::ip::address addr = 
+              boost::asio::ip::address::from_string("127.0.0.1");
+            const unsigned short port = 31221;
+            const boost::asio::ip::udp::endpoint endpoint(addr, port);
+
+            //Create socket and send            
+            boost::asio::io_service service;
+            boost::asio::ip::udp::socket sock(service, 
+                                              boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0));
+            sock.send_to(boost::asio::buffer(ostr.str().c_str(),
+                                             ostr.str().size()),
+                         endpoint);
         }
         catch (...)
         {

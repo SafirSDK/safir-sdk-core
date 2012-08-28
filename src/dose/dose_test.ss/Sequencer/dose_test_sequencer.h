@@ -59,7 +59,8 @@ public:
               const Languages & languages,
               const bool noTimeout,
               const int contextId,
-              const std::string& multicastNic);
+              const std::string& multicastNic,
+              boost::asio::io_service& ioService);
     ~Sequencer();
 
     void Tick();

@@ -33,20 +33,11 @@
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/interprocess/exceptions.hpp>
+#include <boost/asio.hpp>
 #include <iostream>
 #include <Safir/Dob/Internal/Atomic.h>
-#include <Safir/Utilities/AceDispatcher.h>
+#include <Safir/Utilities/AsioDispatcher.h>
 
-#ifdef _MSC_VER
-  #pragma warning(push)
-  #pragma warning(disable: 4267)
-#endif
-
-#include <ace/Reactor.h>
-
-#ifdef _MSC_VER
-  #pragma warning(pop)
-#endif
 
 
 class App: 
@@ -54,7 +45,7 @@ class App:
     private boost::noncopyable
 {
 public:
-    App(std::wstring name):m_done(false), m_dispatcher(connection)
+    explicit App(std::wstring name): m_dispatcher(connection,m_ioService)
     {
         for(int instance = 0;;++instance)
         {
@@ -88,18 +79,19 @@ public:
 
     void Run()
     {
-        ACE_Reactor::instance()->run_event_loop();
+        boost::asio::io_service::work keepRunning(m_ioService);
+        m_ioService.run();
     }
 
 protected:
  
     virtual void OnStopOrder()
     {
-        m_done = true;
+        m_ioService.stop();
     }
 
-    bool m_done;
-    Safir::Utilities::AceDispatcher m_dispatcher;
+    boost::asio::io_service m_ioService;
+    Safir::Utilities::AsioDispatcher m_dispatcher;
     Safir::Dob::Connection connection;
     Sender m_sender;
     Subscriber m_subscriber;

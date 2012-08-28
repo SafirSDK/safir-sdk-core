@@ -260,6 +260,22 @@ procedure Dots_Test_Ada is
 --        Print (Label, Safir.Dob.Typesystem.Serialization.ToXml (Val));
 --     end Print;
 --
+
+   function Begins_With (S : in String;
+                         Beginning : in String) return Boolean is
+      Length : constant Integer := Beginning'Length;
+   begin
+      return S'Length > Length
+        and then S (S'First .. S'First + Length - 1) = Beginning;
+   end Begins_With;
+
+   function Begins_With (S : in Ada.Strings.Wide_Unbounded.Unbounded_Wide_String;
+                         Beginning : in String) return Boolean is
+
+   begin
+      return Begins_With (Safir.Dob.Typesystem.Utilities.To_Utf_8 (S), Beginning);
+   end Begins_With;
+
    procedure Test_Has_Property is
    begin
       Header ("Has Property");
@@ -9255,7 +9271,10 @@ procedure Dots_Test_Ada is
          id : constant Safir.Dob.Typesystem.Type_Id := Safir.Dob.Typesystem.Type_Id_Vectors.Element (Position);
       begin
          if Safir.Dob.Typesystem.Operations.Is_Property (id) then
-            Print (Safir.Dob.Typesystem.Utilities.To_Utf_8 (Safir.Dob.Typesystem.Operations.Get_Name (id)));
+            -- only care about the ones that are ours
+            if Begins_With (Safir.Dob.Typesystem.Operations.Get_Name (id), "DotsTest") then
+               Print (Safir.Dob.Typesystem.Utilities.To_Utf_8 (Safir.Dob.Typesystem.Operations.Get_Name (id)));
+            end if;
          end if;
       end Check;
 
@@ -9273,7 +9292,10 @@ procedure Dots_Test_Ada is
          id : constant Safir.Dob.Typesystem.Type_Id := Safir.Dob.Typesystem.Type_Id_Vectors.Element (Position);
       begin
          if Safir.Dob.Typesystem.Operations.Is_Enumeration (id) then
-            Print (Safir.Dob.Typesystem.Utilities.To_Utf_8 (Safir.Dob.Typesystem.Operations.Get_Name (id)));
+            -- only care about the ones that are ours
+            if Begins_With (Safir.Dob.Typesystem.Operations.Get_Name (id), "DotsTest") then
+               Print (Safir.Dob.Typesystem.Utilities.To_Utf_8 (Safir.Dob.Typesystem.Operations.Get_Name (id)));
+            end if;
          end if;
       end Check;
 
@@ -9291,7 +9313,10 @@ procedure Dots_Test_Ada is
          id : constant Safir.Dob.Typesystem.Type_Id := Safir.Dob.Typesystem.Type_Id_Vectors.Element (Position);
       begin
          if Safir.Dob.Typesystem.Operations.Is_Exception (id) then
-            Print (Safir.Dob.Typesystem.Utilities.To_Utf_8 (Safir.Dob.Typesystem.Operations.Get_Name (id)));
+            -- only care about the ones that are ours
+            if Begins_With (Safir.Dob.Typesystem.Operations.Get_Name (id), "DotsTest") then
+               Print (Safir.Dob.Typesystem.Utilities.To_Utf_8 (Safir.Dob.Typesystem.Operations.Get_Name (id)));
+            end if;
          end if;
       end Check;
 

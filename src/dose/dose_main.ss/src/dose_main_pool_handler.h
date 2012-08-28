@@ -30,27 +30,16 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/ConnectionId.h>
 #include <Safir/Utilities/Array.h>
-#include <ace/Event_Handler.h>
 #include <map>
 #include <deque>
 #include <boost/array.hpp>
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
 #include <boost/function.hpp>
 #include "dose_main_waiting_states.h"
 #include "dose_main_thread_monitor.h"
 
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4127)
-#endif
-
-#include <ace/Reactor.h>
-
-//and enable the warnings again
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
 
 namespace Safir
 {
@@ -91,21 +80,21 @@ namespace Internal
 
     class StateDispatcher:
         public Safir::Dob::Dispatcher,
-        public ACE_Event_Handler,
         private boost::noncopyable
     {
     public:
-        StateDispatcher(const boost::function <void(void)> & dispatchFunc):
-            ACE_Event_Handler(ACE_Reactor::instance()),
+        StateDispatcher(const boost::function <void(void)> & dispatchFunc,
+                        boost::asio::io_service & ioService):
             m_dispatchFunc(dispatchFunc),
-            m_isNotified(0){}
+            m_isNotified(0),
+            m_ioService(ioService)
+        {}
 
     private:
-        virtual int handle_exception(ACE_HANDLE)
+        void Dispatch()
         {
             m_isNotified = 0;
             m_dispatchFunc();
-            return 0;
         }
 
         virtual void OnDoDispatch()
@@ -113,12 +102,13 @@ namespace Internal
             if (m_isNotified == 0)
             {
                 m_isNotified = 1;
-                reactor()->notify(this);
+                m_ioService.post(boost::bind(&StateDispatcher::Dispatch,this));
             }
         }
 
         const boost::function <void(void)>  m_dispatchFunc;
         AtomicUint32                        m_isNotified;
+        boost::asio::io_service &           m_ioService;
     };
 
     class DummyDispatcher:
@@ -128,11 +118,10 @@ namespace Internal
     };
 
 
-    class PoolHandler:
-        public ACE_Event_Handler
+    class PoolHandler
     {
     public:
-        PoolHandler();
+        explicit PoolHandler(boost::asio::io_service & ioService);
         virtual ~PoolHandler();
 
         void Init(BlockingHandlers & blockingHandler,
@@ -170,6 +159,8 @@ namespace Internal
 
         void RemoveStatesWaitingForNode(const Typesystem::Int32 node);
     private:
+        class ExceptionInfo;
+
         void PerformStatesWaitingForConnection(const ConnectionId & connId);
 
         //when a new registration arrives a list of waiting states need to be checked
@@ -180,9 +171,8 @@ namespace Internal
         void HandleEntityStateFromDoseCom(const DistributionData& state, const bool isAckedData);
 
         //handle pool distribution complete
-        virtual int handle_exception(ACE_HANDLE);
+        void PDCompletedHandler(const boost::shared_ptr<ExceptionInfo>& exceptionInfo);
 
-        static ACE_THR_FUNC_RETURN PoolDistributionThreadFunc(void * _this);
         void PoolDistributionWorker();
 
         void DispatchSubscription(const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove);
@@ -222,9 +212,10 @@ namespace Internal
         boost::shared_ptr<StateDispatcher> m_stateDispatcher;
         DummySubscriber m_dummySubscriber;
 
-        ACE_hthread_t m_pdThreadHandle;
+        boost::thread m_pdThread;
 
         WaitingStates m_waitingStates;
+        boost::asio::io_service & m_ioService;
     };
 }
 }

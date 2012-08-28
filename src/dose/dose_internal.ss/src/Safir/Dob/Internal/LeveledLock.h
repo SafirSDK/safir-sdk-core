@@ -27,7 +27,7 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Internal/LeveledLockHelper.h>
 #include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
-#include <ace/RW_Thread_Mutex.h>
+#include <boost/thread/shared_mutex.hpp>
 
 namespace Safir
 {
@@ -226,41 +226,64 @@ namespace Internal
     };
 
     /**
-     * A template specialization for ACE_RW_Thread_Mutex.
+     * A template specialization for boost::shared_mutex
      * (This type requires some additional operations.)
      */
     template<unsigned short level, unsigned short masterLevel>
-    class LeveledLock<ACE_RW_Thread_Mutex, level, masterLevel>
+    class LeveledLock<boost::shared_mutex, level, masterLevel>
         : LeveledLockBase<level, masterLevel>
     {
     public:
-
-        inline int acquire_read()
+        inline void lock()
         {
             LeveledLockBase<level, masterLevel>::AddLevel();
-            return m_lock.acquire_read();
+            m_lock.lock();
         }
 
-        inline int acquire_write()
-        {
-            LeveledLockBase<level, masterLevel>::AddLevel();
-            return m_lock.acquire_write();
-        }
-
-        inline int release()
+        inline void unlock()
         {
             LeveledLockBase<level, masterLevel>::RemoveLevel();
-            return m_lock.release();
+            m_lock.unlock();
         }
 
-        inline int tryacquire_write_upgrade()
+        inline void lock_upgrade()
+        {
+            LeveledLockBase<level, masterLevel>::AddLevel();
+            m_lock.lock_upgrade();
+        }
+
+        inline void unlock_upgrade()
+        {
+            LeveledLockBase<level, masterLevel>::RemoveLevel();
+            m_lock.unlock_upgrade();
+        }
+        
+        inline void lock_shared()
+        {
+            LeveledLockBase<level, masterLevel>::AddLevel();
+            m_lock.lock_shared();
+        }
+
+        inline void unlock_shared()
+        {
+            LeveledLockBase<level, masterLevel>::RemoveLevel();
+            m_lock.unlock_shared();
+        }
+        
+        inline void unlock_and_lock_upgrade()
+        {
+            // Need no level check for lock demotion.
+            m_lock.unlock_and_lock_upgrade();
+        }
+
+        inline void unlock_upgrade_and_lock()
         {
             // Need no level check for lock promotion.
-            return m_lock.tryacquire_write_upgrade();
+            m_lock.unlock_upgrade_and_lock();
         }
-
+        
     private:
-        ACE_RW_Thread_Mutex m_lock;
+        boost::shared_mutex m_lock;        
     };
 }
 }

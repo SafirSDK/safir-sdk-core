@@ -20,58 +20,39 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#include <boost/thread/once.hpp>
 
-//Singleton class crash_handler that is responsible for initiating the crash_handler thread. 
+//fwd declaration
+namespace google_breakpad 
+{
+    class ExceptionHandler;
+};
 
-//#pragma once
-#ifdef _MSC_VER
-  #pragma warning(push)
-  #pragma warning(disable: 4267)
-#endif
-
-#include <ace/Thread_Mutex.h>
-#include <ace/Thread.h>
-
-#ifdef _MSC_VER
-  #pragma warning(pop)
-#endif
-
-#if defined _MSC_VER
-    #include <Safir\Utilities\Breakpad\exception_handler.h>
-#elif defined __GNUC__
-    #include <Safir/Utilities/Breakpad/exception_handler.h>
-#endif
-
-//Callback functions for writing core dump
-//Returning false will leave the crash as unhandled
-#if defined _MSC_VER
-static bool callback(const wchar_t *dump_path, const wchar_t *id,
-                        void *context, EXCEPTION_POINTERS *exinfo,
-                        MDRawAssertionInfo *assertion,
-                        bool succeeded) {
-    return false;
-}
-#elif defined __GNUC__
-static bool callback(const char* dump_path,
-                            const char* id,
-                            void* context,
-                            bool succeeded){   
-    return false;
-}
-#endif
-
-//Singleton class responsible for initiating the crash handler thread. 
-class Crash_Handler
+/** Singleton class responsible for initiating the crash handler thread. */
+class CrashHandler
 {
 public:
-    static void Instance();
+    static CrashHandler& Instance();
 private:
-    Crash_Handler();
-    ~Crash_Handler();
-    
-    //Singleton stuff
-    static google_breakpad::ExceptionHandler * volatile m_handler;
-    static ACE_Thread_Mutex m_instantiationLock;
+    CrashHandler();
+    ~CrashHandler();
+
+    google_breakpad::ExceptionHandler * m_handler;
+
+    /**
+     * This class is here to ensure that only the Instance method can get at the 
+     * instance, so as to be sure that boost call_once is used correctly.
+     * Also makes it easier to grep for singletons in the code, if all 
+     * singletons use the same construction and helper-name.
+     */
+    struct SingletonHelper
+    {
+    private:
+        friend CrashHandler& CrashHandler::Instance();
+        
+        static CrashHandler& Instance();
+        static boost::once_flag m_onceFlag;
+    };
 };
 
  

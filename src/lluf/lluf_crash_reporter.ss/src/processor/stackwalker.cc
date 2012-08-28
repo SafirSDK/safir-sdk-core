@@ -193,8 +193,8 @@ Stackwalker* Stackwalker::StackwalkerForCPU(
         fp_register = MD_CONTEXT_ARM_REG_IOS_FP;
       cpu_stackwalker = new StackwalkerARM(system_info,
                                            context->GetContextARM(),
-					   fp_register, memory, modules,
-					   supplier, resolver);
+                       fp_register, memory, modules,
+                       supplier, resolver);
       break;
   }
 

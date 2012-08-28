@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-PROJECT (SignalTest)
+project(SignalTest CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
@@ -8,10 +8,11 @@ FILE(GLOB headers *.h ../common/*.h)
 
 ADD_EXECUTABLE(SignalTest ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(SignalTest ${COMMON_LIBRARIES} ${ACE_LIBRARY})
+FIND_PACKAGE(Boost COMPONENTS program_options)
+
+TARGET_LINK_LIBRARIES(SignalTest ${COMMON_LIBRARIES})
 
 if (NOT MSVC)
-    FIND_PACKAGE(Boost COMPONENTS program_options)
     TARGET_LINK_LIBRARIES(SignalTest dose_internal ${Boost_LIBRARIES})
 endif()
 

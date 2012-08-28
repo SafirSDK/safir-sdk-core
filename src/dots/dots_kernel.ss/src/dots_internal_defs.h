@@ -28,23 +28,11 @@
 #include <sstream>
 
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <iostream>
-
-//Make a hash_map available even though their locations are different
-//call it unordered_map, as it will be called in tr1
-#if defined _MSC_VER
-    #include <hash_map>
-    #define unordered_map stdext::hash_map
-#elif defined __GNUC__
-    #include <tr1/unordered_map>
-    using std::tr1::unordered_map;
-#else
-#error We need a definition of unordered_map
-#endif
-
+#include <Safir/Utilities/Internal/UnorderedMap.h>
 #include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <iostream>
 #include <vector>
-
+#include <cstring>
 //disable warnings in boost
 #if defined _MSC_VER
   #pragma warning (push)
@@ -257,7 +245,7 @@ namespace Internal
     static inline void EnsureFailed (const std::string & str)
     {
         lllerr << "ENSURE failed: '"<< str.c_str() << "'" << std::endl;
-        Safir::Utilities::Internal::Internal::LowLevelLoggerBackend::Instance().FlushBuffer();
+        //TODO: Safir::Utilities::Internal::Internal::LowLevelLoggerBackend::Instance().OutputInternalBuffer();
         std::wcout << "Please contact your nearest DOB developer!" << std::endl;
 
         throw InternalException(str, __FILE__,__LINE__);

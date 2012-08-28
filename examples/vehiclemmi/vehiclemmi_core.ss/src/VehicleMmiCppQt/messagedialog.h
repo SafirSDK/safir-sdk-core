@@ -25,7 +25,17 @@
 #ifndef __MESSAGEDIALOG_H
 #define __MESSAGEDIALOG_H
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127)
+#endif
+
 #include <QDialog>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include "ui_messagedialog.h"
 #include <Safir/Dob/Connection.h>
 

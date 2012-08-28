@@ -26,11 +26,12 @@ using System;
 using System.Xml;
 using System.Xml.Schema;
 using System.IO;
+
 namespace Dots
 {
     class Validator
     {
-        static private XmlSchemaCollection schemas;
+        static private XmlSchemaSet schemas;
         static private string currentFile;
         /// <summary>
         /// The main entry point for the application.
@@ -45,17 +46,22 @@ namespace Dots
                 return 1;
             }
             
-            string schemaPath = Environment.GetEnvironmentVariable("SAFIR_RUNTIME") + 
-                @"\data\text\dots\config\dots_unit.xsd";
+            string schemaPath = Environment.GetEnvironmentVariable("SAFIR_RUNTIME") + Path.DirectorySeparatorChar +
+                "data" + Path.DirectorySeparatorChar + 
+                "text" + Path.DirectorySeparatorChar + 
+                "dots" + Path.DirectorySeparatorChar +
+                "config" + Path.DirectorySeparatorChar +
+                "dots_unit.xsd";
+
             System.Console.WriteLine("Verifying dou, dom and xml files using xml schema " + schemaPath);
-            schemas = new XmlSchemaCollection();
+            schemas = new XmlSchemaSet();
             try
             {
                 schemas.Add("urn:safir-dots-unit", schemaPath);
             }
             catch(Exception e)
             {
-                System.Console.WriteLine("Could not read schema file %SAFIR_RUNTIME%\\data\\text\\dots\\config\\dots_unit.xsd. Make sure it is there and that it is a valid schema file");
+                System.Console.WriteLine("Could not read schema file " + schemaPath + ".\nMake sure it is there and that it is a valid schema file");
                 System.Console.WriteLine("Exception message: " + e.Message);
                 return 1;
             }
@@ -111,15 +117,19 @@ namespace Dots
         public static void Validate(string filename)
         {
             currentFile = filename;
-            XmlValidatingReader reader = new XmlValidatingReader(new XmlTextReader(new StreamReader(filename)));
-            reader.Schemas.Add(schemas);
-            //System.Console.Write("Validating " + filename + ": ");
-            reader.ValidationEventHandler += new ValidationEventHandler(reader_ValidationEventHandler);
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.ValidationType = ValidationType.Schema;
+            settings.Schemas = schemas;
+            settings.ValidationEventHandler += new ValidationEventHandler (reader_ValidationEventHandler);
+
+            // Create the XmlReader object.
+            XmlReader reader = XmlReader.Create(filename, settings);
+            
+            // Parse the file. 
             while (reader.Read())
             {
-                //System.Console.Write(".");
+
             }
-            //System.Console.WriteLine("done.");
         }
 
         public static void reader_ValidationEventHandler(object sender, ValidationEventArgs e)

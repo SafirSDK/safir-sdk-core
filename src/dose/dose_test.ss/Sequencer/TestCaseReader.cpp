@@ -27,7 +27,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <Safir/Utilities/Internal/BoostFilesystemWrapper.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <iostream>
@@ -65,16 +64,22 @@ TestCaseReader & TestCaseReader::Instance()
 TestCaseReader::TestCaseReader(const boost::filesystem::path & testCaseDir)
 {
     const boost::regex expr("(\\d{3,4})-(.*)\\.xml");
-    for (boost::filesystem::directory_iterator path = boost::filesystem::directory_iterator(testCaseDir);
-         path != boost::filesystem::directory_iterator(); ++path)
+    for (boost::filesystem::directory_iterator it = boost::filesystem::directory_iterator(testCaseDir);
+         it != boost::filesystem::directory_iterator(); ++it)
     {
+        const boost::filesystem::path path = it->path();
         //ignore files that don't end in ".xml"
-        if (boost::filesystem::extension(*path) != ".xml")
+        if (path.extension() != ".xml")
         {
             continue;
         }
 
-        const std::string filename = Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(path);
+#if defined (BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+        const std::string filename = path.filename().string();
+#else
+        const std::string filename = path.filename();
+#endif
+
         boost::smatch matchResults;
 
         if (boost::regex_match(filename,matchResults,expr))
@@ -94,7 +99,7 @@ TestCaseReader::TestCaseReader(const boost::filesystem::path & testCaseDir)
             }
 
             std::ostringstream xml;
-            xml << boost::filesystem::ifstream(*path).rdbuf();
+            xml << boost::filesystem::ifstream(path).rdbuf();
             //std::wcout << "Read xml (" << xml.str().size() << " bytes) '" << xml.str().c_str() << "'" << std::endl;
             try
             {
@@ -103,8 +108,7 @@ TestCaseReader::TestCaseReader(const boost::filesystem::path & testCaseDir)
             }
             catch (const std::exception & exc)
             {
-                std::wcerr << "Failed to read file '" << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(path).c_str()
-                           << "' due to exception with message" << std::endl
+                std::wcerr << "Failed to read file '" << path.string().c_str() << "' due to exception with message" << std::endl
                            <<exc.what() << std::endl;
                 exit(2);
             }
@@ -112,7 +116,7 @@ TestCaseReader::TestCaseReader(const boost::filesystem::path & testCaseDir)
         else
         {
             std::wcerr << "File '"
-                       << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(path).c_str()
+                       << path.filename().c_str()
                        << "' did not match the pattern for test case files: '"
                        << expr.str().c_str()
                        << "'"  << std::endl;

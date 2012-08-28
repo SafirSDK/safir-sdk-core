@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagstrï¿½m / stlrha
 *
 *******************************************************************************
 *
@@ -48,12 +48,14 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/thread.hpp>
+
 
 #ifdef _MSC_VER
   #pragma warning(push)
-  #pragma warning(disable: 4702 4244)
+  #pragma warning(disable: 4702)
 #endif
-#include <ace/OS_NS_sys_socket.h>
+
 #include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
@@ -74,10 +76,11 @@ Sequencer::Sequencer(const int startTc,
                      const Languages & languages,
                      const bool noTimeout,
                      const int contextId,
-                     const std::string& multicastNic):
+                     const std::string& multicastNic,
+                     boost::asio::io_service& ioService):
     m_partnerState(languages),
     m_currentCaseNo(startTc),
-    m_actionSender(multicastNic),
+    m_actionSender(multicastNic,ioService),
     m_stopTc(stopTc),
     m_state(Created),
     m_lastCleanupTime(boost::posix_time::second_clock::universal_time()),
@@ -224,12 +227,9 @@ void Sequencer::ExecuteCurrentAction()
     }
     if (m_currentAction->Partner().IsNull() && m_currentAction->ActionKind() == DoseTest::ActionEnum::Sleep)
     {
-        std::wcout << "Sleeping " << m_currentAction->SleepDuration().GetVal() << " seconds"<<std::endl;
-        const double decimals = m_currentAction->SleepDuration() - static_cast<unsigned int>(m_currentAction->SleepDuration());
-
-        const ACE_Time_Value time(static_cast<unsigned int>(m_currentAction->SleepDuration()),
-                                  static_cast<unsigned int>(decimals * 1000000));
-        ACE_OS::sleep(time);
+        std::wcout << "Sleeping " << m_currentAction->SleepDuration() << " seconds"<<std::endl;
+        boost::this_thread::sleep(boost::posix_time::microseconds
+                                  (static_cast<boost::int64_t>(m_currentAction->SleepDuration() * 1e6)));
     }
     else
     {
@@ -252,8 +252,7 @@ void Sequencer::ExecuteCurrentAction()
             const unsigned int sleepDuration = 1;
             std::wcout << "Sleeping " << sleepDuration << " seconds" << std::endl;
 
-            const ACE_Time_Value time(sleepDuration);
-            ACE_OS::sleep(time);
+            boost::this_thread::sleep(boost::posix_time::seconds(sleepDuration));
         }
     }
 }
@@ -281,7 +280,7 @@ void Sequencer::Tick()
                        <<        m_languages.at(2).c_str() << ")"
                        << std::endl
                        << "Exiting." << std::endl;
-            exit(-1);
+            exit(1);
         }
     }
 
@@ -403,7 +402,7 @@ void Sequencer::Tick()
         break;
     case CleaningUpTestcase:
         {
-            ACE_OS::sleep(ACE_Time_Value(0,300000));
+            boost::this_thread::sleep(boost::posix_time::milliseconds(300));
             std::wcout << "Test completed" <<std::endl;
             SetState(ResetPartners);
             m_currentCaseNo++;

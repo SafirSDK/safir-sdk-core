@@ -52,13 +52,12 @@ namespace ForEach
     }
 
     ForEachApp::ForEachApp()
-        : m_context(Safir::Dob::NodeParameters::NumberOfContexts())
-        //: m_dispatcher(m_connection),
-        //m_debug(L"ForEachApp")
     {
-        // Send something to the tracer to open the connection.
-        // This line will hopefully not be needed in the future.
-        //m_debug << " "<<std::endl;
+        const Safir::Dob::Typesystem::Int32 numContexts = Safir::Dob::NodeParameters::NumberOfContexts();
+        for (int context = 0; context < numContexts; ++context)
+        {
+            m_context.push_back(boost::shared_ptr<ContextData>(new ContextData(m_ioService)));
+        }
     }
 
     int ForEachApp::Run()
@@ -69,17 +68,16 @@ namespace ForEach
             int inst = 0;
             std::wstring connectionName(L"ForEach-context");
             connectionName += boost::lexical_cast<std::wstring>(context);
-
             for (;;)
             {
                 try
                 {
                     // Open the DOB connection.
-                    m_context[context].m_connection.Open(connectionName,
-                                            boost::lexical_cast<std::wstring>(inst),
-                                            ComposeMinusOneContext(context),
-                                            this,
-                                            &m_context[context].m_dispatcher);
+                    m_context[context]->m_connection.Open(connectionName,
+                                                          boost::lexical_cast<std::wstring>(inst),
+                                                          ComposeMinusOneContext(context),
+                                                          this,
+                                                          &m_context[context]->m_dispatcher);
                     break;
                 }
                 catch (const Safir::Dob::NotOpenException&)
@@ -87,20 +85,19 @@ namespace ForEach
                     ++inst;
                 }
             }
-
             // Send something to the tracer to open the connection.
-            // This line will hopefully not be needed in the future.
-            m_context[context].m_debug << " " << std::endl;
+            m_context[context]->m_debug << "Starting ForEach in context " << context << std::endl;
 
             // Call the init method on startup.
             // Register as a service provider.
-            m_context[context].m_service.Init(connectionName,
-                                              boost::lexical_cast<std::wstring>(inst));
+            m_context[context]->m_service.Init(connectionName,
+                                               boost::lexical_cast<std::wstring>(inst));
         }
 
-        ACE_Reactor::instance()->run_reactor_event_loop();
+        boost::asio::io_service::work keepRunning(m_ioService);
+        m_ioService.run();
 
-         // Stop swre before exiting
+        // Stop swre before exiting
         Safir::SwReports::Stop();
 
         return 0;
@@ -109,7 +106,7 @@ namespace ForEach
 
     void ForEachApp::OnStopOrder()
     {
-        ACE_Reactor::end_event_loop();
+        m_ioService.stop();
     } 
 }
 }

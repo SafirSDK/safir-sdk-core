@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (dots_depends_test)
+project(dots_depends_test CXX)
 
 add_subdirectory(generate_max_dots)
 

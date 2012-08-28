@@ -24,12 +24,9 @@
 
 #include "dots_repository.h"
 #include "dots_file_parser.h"
-#include "dots_param.h"
 #include "dots_error_handler.h"
 #include "dots_allocation_helper.h"
 #include <iostream>
-#include <ace/Guard_T.h>
-#include <ace/OS_NS_unistd.h>
 #include <boost/bind.hpp>
 
 namespace Safir
@@ -43,29 +40,22 @@ namespace Internal
     static const char* DOTS_SHMEM_NAME    = "DOB_TYPESYSTEM_DATA";
 
     //static instance initialization
-    Repository * volatile Repository::m_instance = NULL;
+    Repository * Repository::m_instance = NULL;
 
     Repository & Repository::Instance()
     {
-        if (m_instance == NULL)
-        {
-            static ACE_Thread_Mutex mtx;
-            ACE_Guard<ACE_Thread_Mutex> lck(mtx);
-            if (m_instance == NULL)
-            {
-                Init();
-            }
-        }
+        ENSURE(m_instance != NULL, << "Instance called before Initialize!");        
         return *m_instance;
     }
 
-    void Repository::Init()
+    void Repository::Initialize()
     {
+        ENSURE(m_instance == NULL, << "Initialize called more than once!");        
         m_instance = new Repository();
 
         try
         {
-            m_instance->m_startupSynchronizer.Start();
+            m_instance->m_startupSynchronizer.Start(m_instance);
             return;
         }
         catch (const boost::interprocess::bad_alloc&)
@@ -81,24 +71,14 @@ namespace Internal
         {
             lllerr << "Loading of dots_kernel failed with ... exception." << std::endl;
         }
-        exit(0);
+        exit(1);
     }
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4355)
-    //disable using this in constructor warning
-#endif
-
     Repository::Repository():
-        m_startupSynchronizer("DOTS_INITIALIZATION",this)
+        m_startupSynchronizer("DOTS_INITIALIZATION")
     {
 
     }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
     Repository::~Repository()
     {
@@ -161,7 +141,7 @@ namespace Internal
         if (!fp.ParseFiles())
         {
             std::wcout << "Failed to parse files. Errors should be indicated above." << std::endl;
-            exit(-1);
+            exit(1);
         }
 
         boost::interprocess::shared_memory_object::remove(DOTS_SHMEM_NAME);
@@ -270,17 +250,12 @@ namespace Internal
 
                 case Temporary::ParameterMapping:
                     {
-                        bool hasAnonymousParameterMappings = false;
                         bool hasRealParameterMappings = false;
                         for (size_t valueIndex=0; valueIndex<memMapIt->m_parameter.m_values.size(); valueIndex++)
                         {
                             if (memMapIt->m_parameter.m_values[valueIndex].m_valueFromParameter)
                             {
                                 hasRealParameterMappings=true;
-                            }
-                            else
-                            {
-                                hasAnonymousParameterMappings=true;
                             }
                         }
 
@@ -292,7 +267,7 @@ namespace Internal
                                                 propMapIt->m_filename,
                                                 memMapIt->m_parameter.m_values[0].m_lineNumber,
                                                 "dots_repository");
-                            exit(-1);
+                            exit(1);
                         }
 
                         ParameterDescription pd(memMapIt->m_parameter.m_name,

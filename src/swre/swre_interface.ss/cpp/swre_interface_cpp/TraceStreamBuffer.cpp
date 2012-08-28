@@ -44,8 +44,6 @@ namespace Internal
     TraceStreamBuffer::~TraceStreamBuffer()
     {
         Flush();
-        //TODO: is there a way to flush on destruction?! That doesnt fail on Ctrl-C?
-        //atexit flush?
     }
 
     //-------------------------------------------------------

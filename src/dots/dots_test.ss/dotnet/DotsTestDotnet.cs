@@ -118,7 +118,11 @@ class DotsTestDotnet
         {
             if (Safir.Dob.Typesystem.Operations.IsException(id))
             {
-                Console.WriteLine(Safir.Dob.Typesystem.Operations.GetName(id));
+                //only care about the ones that are ours
+                if (Safir.Dob.Typesystem.Operations.GetName(id).StartsWith("DotsTest"))
+                {
+                    Console.WriteLine(Safir.Dob.Typesystem.Operations.GetName(id));
+                }
             }
         }
     }
@@ -131,7 +135,11 @@ class DotsTestDotnet
         {
             if (Safir.Dob.Typesystem.Operations.IsEnumeration(id))
             {
-                Console.WriteLine(Safir.Dob.Typesystem.Operations.GetName(id));
+                //only care about the ones that are ours
+                if (Safir.Dob.Typesystem.Operations.GetName(id).StartsWith("DotsTest"))
+                {
+                    Console.WriteLine(Safir.Dob.Typesystem.Operations.GetName(id));
+                }
             }
         }
     }
@@ -144,16 +152,14 @@ class DotsTestDotnet
         {
             if (Safir.Dob.Typesystem.Operations.IsProperty(id))
             {
-                Console.WriteLine(Safir.Dob.Typesystem.Operations.GetName(id));
+                //only care about the ones that are ours
+                if (Safir.Dob.Typesystem.Operations.GetName(id).StartsWith("DotsTest"))
+                {
+                    Console.WriteLine(Safir.Dob.Typesystem.Operations.GetName(id));
+                }
             }
         }
     }
-    /*
-    private static string ToString(Safir.Dob.Typesystem.EntityId oid)
-    {
-        return "(" + Safir.Dob.Typesystem.Operations.GetName(oid.TypeId) + ", " +
-            oid.Instance + ")";
-    }*/
 
     private static void Header(String label)
     {

@@ -30,26 +30,17 @@
 #include <Safir/Dob/ResponseSender.h>
 #include "PersistenceHandler.h"
 #include <Safir/Application/Tracer.h>
-#include <Safir/Utilities/AceDispatcher.h>
-
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4127 4251)
-#endif
-
-#include <ace/Reactor.h>
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+#include <boost/thread.hpp>
+#include <Safir/Utilities/AsioDispatcher.h>
 
 class DopeApp :
     public Safir::Dob::StopHandler,
     public Safir::Dob::EntityHandlerPending,
     public Safir::Dob::EntityHandler,
     public Safir::Dob::EntitySubscriber,
-    public Safir::Application::Backdoor,
-    public ACE_Event_Handler
+    public Safir::Application::Backdoor
 {
 public:
     /**
@@ -100,8 +91,8 @@ private:
     void StartUp(bool restore);
     void Start(bool restore);
 
-    Safir::Dob::Connection  m_dobConnection;
-    Safir::Utilities::AceDispatcher m_dispatcher;
+    Safir::Utilities::AsioDispatcher m_dispatcher;
+    Safir::Dob::Connection m_dobConnection;
     Safir::Dob::Typesystem::HandlerId m_handlerId;
     Safir::Dob::Typesystem::InstanceId m_instanceId;
 
@@ -112,13 +103,15 @@ private:
     The connection thread is waiting to it is ok to connect on context 0.
     Then we can register entityhander and create our entity.
     */
-    static ACE_THR_FUNC_RETURN ConnectionThread(void *);
+    void ConnectionThread();
     //Handler when ok to connect for applications.
-    virtual int handle_input(ACE_HANDLE);
+    void SignalOkToConnect();
+    
+    boost::asio::io_service m_ioService;
+    boost::thread m_thread;
 
     bool m_persistenceStarted; // Any dope has started successfully and loaded persistent data into the system.
     bool m_persistenceInitialized; // Dope has initialized persistence.
-    bool m_connectionThreadRunning;
 
     Safir::Application::BackdoorKeeper m_keeper;
 

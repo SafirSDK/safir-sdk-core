@@ -27,8 +27,8 @@
 
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
-#include <ace/OS_NS_unistd.h>
-#include <ace/Thread.h>
+#include <Safir/Utilities/ProcessInfo.h>
+#include <boost/thread.hpp>
 
 namespace Safir
 {
@@ -70,7 +70,7 @@ namespace Internal
 
     private:
 
-        typedef std::pair<pid_t, ACE_thread_t> Key;
+        typedef std::pair<pid_t, boost::thread::id> Key;
         typedef PairContainers<Key, Containers<unsigned short>::multiset>::map LevelMap;
         mutable LevelMap m_levelMap;
 

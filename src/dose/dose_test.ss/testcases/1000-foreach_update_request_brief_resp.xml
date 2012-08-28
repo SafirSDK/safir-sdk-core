@@ -359,6 +359,23 @@
             </members>
           </object>
         </arrayElement>
+
+        <!--sleep a little while to let everything get through-->
+        <arrayElement>
+          <object>
+            <name>DoseTest.Action</name> 
+            <members>
+              <member>
+                <name>ActionKind</name>
+                <value>DoseTest.ActionEnum.Sleep</value>
+              </member>
+              <member>
+                <name>SleepDuration</name>
+                <value>1</value>
+              </member>              
+            </members>
+          </object>
+        </arrayElement>
       </arrayElements>
     </member>
   </members>

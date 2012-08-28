@@ -34,7 +34,6 @@ namespace Safir
 {
 namespace Utilities
 {
-    
     //======================================================================
     //
     // ProcessMonitorWin32Thread
@@ -47,7 +46,6 @@ namespace Utilities
     
     ProcessMonitorWin32Thread::ProcessMonitorWin32Thread(const HANDLE& event)
         : m_stop(false)
-        , m_threadState(NotStarted)
         , m_prevThreadEvent(event)
     {
         m_signalEvent = CreateEvent(NULL,false,false,NULL);
@@ -62,27 +60,14 @@ namespace Utilities
     void
     ProcessMonitorWin32Thread::StartThread()
     {
-        lllout << "ProcessMonitorWin32Thread::StartThread() - called... tid: " << ACE_Thread::self() << std::endl;
-        
-        if (m_threadState != NotStarted)
-            return;
-        
-        ACE_thread_t threadId;
-        ACE_hthread_t threadHandle;
+        lllout << "ProcessMonitorWin32Thread::StartThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
 
-        const int result = ACE_Thread::spawn(ThreadFun,
-                                             this,
-                                             THR_NEW_LWP | THR_JOINABLE ,
-                                             &threadId,
-                                             &threadHandle);
-        if (result != 0)
+        if (m_thread != boost::thread())
         {
-            lllerr << "ProcessMonitorWin32Thread::StartThread() - problem creating thread." << std::endl;
             return;
         }
         
-        m_startEvent.wait();
-        m_threadState = Running;
+        m_thread = boost::thread(boost::bind(&ProcessMonitorWin32Thread::Run,this));
 
         lllout << "ProcessMonitorWin32Thread::StartThread() - done..." << std::endl;
     }
@@ -91,18 +76,17 @@ namespace Utilities
     void
     ProcessMonitorWin32Thread::StopThread()
     {
-        lllout << "ProcessMonitorWin32Thread::StopThread() - called... tid: " << ACE_Thread::self() << std::endl;
+        lllout << "ProcessMonitorWin32Thread::StopThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
 
-        if (m_threadState == Running)
+        if (m_thread != boost::thread())
         {
             m_stop = true;
-
             SetEvent(m_signalEvent);
 
-            m_stopEvent.wait();
-            m_threadState = Stopped;
+            m_thread.join();
+            m_thread = boost::thread();
 
-            if (m_nextThread)
+            if(m_nextThread)
             {
                 m_nextThread->StopThread();
             }
@@ -111,13 +95,12 @@ namespace Utilities
         lllout << "ProcessMonitorWin32Thread::StopThread() - done..." << std::endl;
     }
 
-        
     void
     ProcessMonitorWin32Thread::StartMonitorPid(const pid_t pid)
     {
-        lllout << "ProcessMonitorWin32Thread::StartMonitorPid() - called... tid: " << ACE_Thread::self() 
+        lllout << "ProcessMonitorWin32Thread::StartMonitorPid() - called... tid: " << boost::this_thread::get_id() 
                << ". pid: " << std::endl;
-        ACE_Guard<ACE_Thread_Mutex> lck(m_mutex);
+        boost::lock_guard<boost::mutex> lck(m_mutex);
         
 
         if (m_pids.size() < MAX_PID_PER_THREAD)
@@ -144,14 +127,14 @@ namespace Utilities
             if (m_nextThread == NULL)
             {
                 lllout << "ProcessMonitorWin32Thread::StartMonitorPid() - creating new ProcessMonitorWin32Thread. tid: " 
-                       << ACE_Thread::self() << std::endl;
+                       << boost::this_thread::get_id() << std::endl;
                 
                 m_nextThread.reset(new ProcessMonitorWin32Thread(m_signalEvent));
                 m_nextThread->StartThread();
             }
 
             lllout << "ProcessMonitorWin32Thread::StartMonitorPid() - Sending to next thread. tid: " 
-                   << ACE_Thread::self() 
+                   << boost::this_thread::get_id() 
                    << ". pid: " << pid << std::endl;
 
             m_nextThread->StartMonitorPid(pid);
@@ -161,9 +144,9 @@ namespace Utilities
     void
     ProcessMonitorWin32Thread::StopMonitorPid(const pid_t pid)
     {
-        lllout << "ProcessMonitorWin32Thread::StopMonitorPid() - called... tid: " << ACE_Thread::self() 
+        lllout << "ProcessMonitorWin32Thread::StopMonitorPid() - called... tid: " << boost::this_thread::get_id() 
                << ". pid: " << pid << std::endl;
-        ACE_Guard<ACE_Thread_Mutex> lck(m_mutex);
+        boost::lock_guard<boost::mutex> lck(m_mutex);
 
         PidMap::iterator it = m_pids.find(pid);
         
@@ -184,28 +167,20 @@ namespace Utilities
     void 
     ProcessMonitorWin32Thread::GetTerminatedPids(std::vector<pid_t>& pids)
     {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_mutex);
+        boost::lock_guard<boost::mutex> lck(m_mutex);
 
-        std::copy(m_deadPids.begin(),
-                  m_deadPids.end(),
-                  std::back_inserter(pids));
+        std::swap(m_deadPids,pids);
         
         lllout << "ProcessMonitorWin32Thread::GetTerminatedPids() - m_deadPids.size(): " << m_deadPids.size() 
                << ". pids.size(): " << pids.size() 
-               << ". tid: " << ACE_Thread::self() << std::endl;
-
-        m_deadPids.clear();
+               << ". tid: " << boost::this_thread::get_id() << std::endl;
     }
-
 
     void ProcessMonitorWin32Thread::Run()
     {
-        lllout << "ProcessMonitorWin32Thread::Run() - called...  tid: " << ACE_Thread::self() << std::endl;
+        lllout << "ProcessMonitorWin32Thread::Run() - called...  tid: " << boost::this_thread::get_id() << std::endl;
         
-        m_startEvent.signal();
-
         HANDLE  hEvents[MAX_EVENTS]; // array of handles for enabled events
-        
 
         while(!m_stop)
         {
@@ -216,7 +191,7 @@ namespace Utilities
 
             {
                 // Setup hEvents with all pid events....
-                ACE_Guard<ACE_Thread_Mutex> lck(m_mutex);
+                boost::lock_guard<boost::mutex> lck(m_mutex);
 
                 for(PidMap::iterator it = m_pids.begin();
                     it != m_pids.end();
@@ -228,7 +203,7 @@ namespace Utilities
                     pids.push_back((*it).first);
                     
                     lllout << "ProcessMonitorWin32Thread::Run() - adding pid: " << (*it).first 
-                           << ". tid: " << ACE_Thread::self() 
+                           << ". tid: " << boost::this_thread::get_id() 
                            << std::endl;
                 }
             }
@@ -237,7 +212,7 @@ namespace Utilities
 
             lllout << "ProcessMonitorWin32Thread::Run() - dwRet: " << dwRet 
                    << ". nrOfPids: " << nrOfPids
-                   << ". tid: " << ACE_Thread::self() 
+                   << ". tid: " << boost::this_thread::get_id() 
                    << std::endl;
 
             if (dwRet == WAIT_FAILED)
@@ -264,13 +239,13 @@ namespace Utilities
             }
             else if (dwRet > 0)
             {
-                pid_t pid  = pids[dwRet - 1];
+                const pid_t pid  = pids[dwRet - 1];
                 
                 lllout << "ProcessMonitorWin32Thread::Run() - died: " << pid 
-                       << ". tid: " << ACE_Thread::self() 
+                       << ". tid: " << boost::this_thread::get_id() 
                        << std::endl;
 
-                ACE_Guard<ACE_Thread_Mutex> lck(m_mutex);
+                boost::lock_guard<boost::mutex> lck(m_mutex);
 
                 m_deadPids.push_back(pid);
                 
@@ -294,7 +269,7 @@ namespace Utilities
                 }
 
                 lllout << "ProcessMonitorWin32Thread::Run() - m_deadPids.size(): " << m_deadPids.size() 
-                       << ". tid: " << ACE_Thread::self() 
+                       << ". tid: " << boost::this_thread::get_id() 
                        << std::endl;
                 
                 if (m_deadPids.size() > 0)
@@ -305,24 +280,8 @@ namespace Utilities
         }
         
 
-        lllout << "ProcessMonitorWin32Thread::Run() - about to stop...  tid: " << ACE_Thread::self() << std::endl;
-
-        m_threadState = Stopped;
-        m_stopEvent.signal();
+        lllout << "ProcessMonitorWin32Thread::Run() - about to stop...  tid: " << boost::this_thread::get_id() << std::endl;
     }
-
-
-    //
-    // Private 
-    //
-
-    //initiates the dispatch thread
-    ACE_THR_FUNC_RETURN ProcessMonitorWin32Thread::ThreadFun(void* param)
-    {
-        static_cast<ProcessMonitorWin32Thread*>(param)->Run();
-        return 0;
-    }
-
 
     
     //======================================================================
@@ -334,7 +293,6 @@ namespace Utilities
     ProcessMonitorWin32::ProcessMonitorWin32(const ProcessMonitor::OnTerminateCb& callback)
         : m_callback(callback)
         , m_stop(false)
-        , m_threadState(NotStarted)
     {
         m_signalEvent = CreateEvent(NULL,false,false,NULL);
     }
@@ -347,27 +305,14 @@ namespace Utilities
     void
     ProcessMonitorWin32::StartThread()
     {
-        lllout << "ProcessMonitorWin32::StartThread() - called... tid: " << ACE_Thread::self() << std::endl;
-        
-        if (m_threadState != NotStarted)
-            return;
-        
-        ACE_thread_t threadId;
-        ACE_hthread_t threadHandle;
+        lllout << "ProcessMonitorWin32::StartThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
 
-        const int result = ACE_Thread::spawn(ThreadFun,
-                                             this,
-                                             THR_NEW_LWP | THR_JOINABLE ,
-                                             &threadId,
-                                             &threadHandle);
-        if (result != 0)
+        if (m_thread != boost::thread())
         {
-            lllerr << "ProcessMonitorWin32::StartThread() - problem creating thread." << std::endl;
             return;
         }
         
-        m_startEvent.wait();
-        m_threadState = Running;
+        m_thread = boost::thread(boost::bind(&ProcessMonitorWin32::Run,this));
 
         lllout << "ProcessMonitorWin32::StartThread() - done..." << std::endl;
     }
@@ -375,19 +320,16 @@ namespace Utilities
     void
     ProcessMonitorWin32::StopThread()
     {
-        lllout << "ProcessMonitorWin32::StopThread() - called... tid: " << ACE_Thread::self() << std::endl;
+        lllout << "ProcessMonitorWin32::StopThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
 
-        if (m_threadState == Running)
+        if (m_thread != boost::thread())
         {
             m_stop = true;
-
             SetEvent(m_signalEvent);
 
-            m_stopEvent.wait();
-            m_threadState = Stopped;
+            m_thread.join();
+            m_thread = boost::thread();
 
-
-            // Stop child.
             if(m_nextThread)
             {
                 m_nextThread->StopThread();
@@ -398,13 +340,12 @@ namespace Utilities
     }
     
         
-        
     void
     ProcessMonitorWin32::StartMonitorPid(const pid_t pid)
     {
-        lllout << "ProcessMonitorWin32::StartMonitorPid() - called... tid: " << ACE_Thread::self() 
+        lllout << "ProcessMonitorWin32::StartMonitorPid() - called... tid: " << boost::this_thread::get_id() 
                << ". pid: " << std::endl;
-        ACE_Guard<ACE_Thread_Mutex> lck(m_mutex);
+        boost::lock_guard<boost::mutex> lck(m_mutex);
         
         PidSet::iterator it = m_pids.find(pid);
         
@@ -422,13 +363,14 @@ namespace Utilities
             m_nextThread->StartMonitorPid(pid);
         }
     }
-    
+
+
     void
     ProcessMonitorWin32::StopMonitorPid(const pid_t pid)
     {
-        lllout << "ProcessMonitorWin32::StopMonitorPid() - called... tid: " << ACE_Thread::self() 
+        lllout << "ProcessMonitorWin32::StopMonitorPid() - called... tid: " << boost::this_thread::get_id() 
                << ". pid: " << pid << std::endl;
-        ACE_Guard<ACE_Thread_Mutex> lck(m_mutex);
+        boost::lock_guard<boost::mutex> lck(m_mutex);
 
         PidSet::iterator it = m_pids.find(pid);
         
@@ -442,13 +384,10 @@ namespace Utilities
 
     void ProcessMonitorWin32::Run()
     {
-        lllout << "ProcessMonitorWin32::Run() - called...  tid: " << ACE_Thread::self() << std::endl;
+        lllout << "ProcessMonitorWin32::Run() - called...  tid: " << boost::this_thread::get_id() << std::endl;
         
-        m_startEvent.signal();
-
         HANDLE  hEvents[MAX_EVENTS]; // array of handles for enabled events
         
-
         while(!m_stop)
         {
             hEvents[0] = m_signalEvent;
@@ -470,7 +409,7 @@ namespace Utilities
                     it != deadPids.end();
                     ++it)
                 {
-                    ACE_Guard<ACE_Thread_Mutex> lck(m_mutex);
+                    boost::lock_guard<boost::mutex> lck(m_mutex);
                     m_pids.erase((*it));
 
                     lllout << "ProcessMonitorWin32::Run() - died: " << (*it) << std::endl;
@@ -479,21 +418,7 @@ namespace Utilities
             }
         }
         
-        lllout << "ProcessMonitorWin32::Run() - about to stop...  tid: " << ACE_Thread::self() << std::endl;
-
-        m_threadState = Stopped;
-        m_stopEvent.signal();
-    }
-
-    //
-    // Private 
-    //
-
-    //initiates the dispatch thread
-    ACE_THR_FUNC_RETURN ProcessMonitorWin32::ThreadFun(void* param)
-    {
-        static_cast<ProcessMonitorWin32*>(param)->Run();
-        return 0;
+        lllout << "ProcessMonitorWin32::Run() - about to stop...  tid: " << boost::this_thread::get_id() << std::endl;
     }
 }
 }

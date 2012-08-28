@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagstrï¿½m / stlrha
 *
 *******************************************************************************
 *
@@ -26,6 +26,7 @@
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Consumer.h>
+#include <boost/thread.hpp>
 #include "TestCaseReader.h"
 #include "dose_test_sequencer.h"
 
@@ -36,16 +37,14 @@
 
 #include <boost/program_options.hpp>
 #include <boost/lexical_cast.hpp>
-#include <ace/Thread.h>
 #include <boost/random.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
 
 #if defined _MSC_VER
   #pragma warning (pop)
 #endif
-
-#include <ace/Reactor.h>
-#include <ace/OS_NS_unistd.h>
 
 namespace po = boost::program_options;
 
@@ -62,16 +61,20 @@ class StopHandler : public Safir::Dob::StopHandler
 
 class Dispatcher:
     public Safir::Dob::Dispatcher,
-    public ACE_Event_Handler,
     private boost::noncopyable
 {
 public:
-    explicit Dispatcher(Safir::Dob::Connection & connection):m_connection(connection) {}
+    Dispatcher(Safir::Dob::Connection & connection,
+               boost::asio::io_service & ioService)
+        : m_connection(connection)
+        , m_ioService(ioService)
+    {}
 private:
-    virtual void OnDoDispatch() {ACE_Reactor::instance()->notify(this);}
-    virtual int handle_exception(ACE_HANDLE){m_connection.Dispatch(); return 0;}
+    virtual void OnDoDispatch() {m_ioService.post(boost::bind(&Dispatcher::Dispatch,this));}
+    void Dispatch(){m_connection.Dispatch();}
 
     Safir::Dob::Connection & m_connection;
+    boost::asio::io_service & m_ioService;
 };
 
 
@@ -334,7 +337,7 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
     {
         std::wcout << "Got exception while parsing command line: "<< std::endl
             <<e.what() <<std::endl;
-        exit(-1);
+        exit(1);
     }
 
 }
@@ -353,10 +356,13 @@ int main(int argc, char* argv[])
         const std::wstring nameCommonPart = L"Sequencer";
         const std::wstring nameInstancePart = L"";
 
+        boost::asio::io_service ioService;
+        boost::asio::io_service::work keepRunning(ioService);
+    
         StopHandler stopHandler;
 
         Safir::Dob::Connection connection;
-        Dispatcher dispatcher(connection);
+        Dispatcher dispatcher(connection,ioService);
         std::wcout << nameCommonPart.c_str() <<  nameInstancePart.c_str() << ": Started" <<std::endl;
 
         connection.Open(nameCommonPart,
@@ -364,9 +370,6 @@ int main(int argc, char* argv[])
                         0, // Context
                         &stopHandler,
                         &dispatcher);
-
-        //take ownership of the reactor:
-        ACE_Reactor::instance()->owner(ACE_Thread::self());
 
         for (int i = 0; i < commandLine.repeats; ++i)
         {
@@ -398,26 +401,45 @@ int main(int argc, char* argv[])
 
             std::wcout << std::endl;
 
-            Sequencer sequencer(commandLine.first, commandLine.last, languages, commandLine.noTimeout, context, commandLine.multicastNic);
+            Sequencer sequencer(commandLine.first, 
+                                commandLine.last, 
+                                languages, 
+                                commandLine.noTimeout, 
+                                context, 
+                                commandLine.multicastNic, 
+                                ioService);
             while (!sequencer.IsFinished())
             {
-                ACE_Time_Value time(ACE_Time_Value(0,250000)); //250ms
-                ACE_Reactor::instance()->run_reactor_event_loop(time);
+                //stop after 250ms
+                boost::asio::deadline_timer timer(ioService,boost::posix_time::milliseconds(250));
+                timer.async_wait(boost::bind(&boost::asio::io_service::stop, boost::ref(ioService)));
+                
+                ioService.run();
+                ioService.reset();
+
                 sequencer.Tick();
             }
-            ACE_OS::sleep(1);
+            boost::this_thread::sleep(boost::posix_time::seconds(1));
             sequencer.GetTestResults(i);
             while (!sequencer.GotTestResults())
             {
-                ACE_Time_Value time(ACE_Time_Value(0,100000)); //100ms
-                ACE_Reactor::instance()->run_reactor_event_loop(time);
+                //stop after 100ms
+                boost::asio::deadline_timer timer(ioService,boost::posix_time::milliseconds(100));
+                timer.async_wait(boost::bind(&boost::asio::io_service::stop, boost::ref(ioService)));
+                
+                ioService.run();
+                ioService.reset();
             }
 
 
             while (!sequencer.DeactivateAll())
             {
-                ACE_Time_Value time(ACE_Time_Value(0,100000)); //100ms
-                ACE_Reactor::instance()->run_reactor_event_loop(time);
+                //stop after 100ms
+                boost::asio::deadline_timer timer(ioService,boost::posix_time::milliseconds(100));
+                timer.async_wait(boost::bind(&boost::asio::io_service::stop, boost::ref(ioService)));
+
+                ioService.run();
+                ioService.reset();
             }
 
 

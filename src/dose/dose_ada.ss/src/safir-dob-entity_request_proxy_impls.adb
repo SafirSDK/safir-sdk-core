@@ -25,7 +25,7 @@ with Safir.Dob.Typesystem.Blob_Operations;
 with Safir.Dob.Interf;
 with Interfaces.C;
 with Safir.Dob.Typesystem.Library_Exceptions;
-with Safir.Dob.Typesystem.Object_Factory;
+with Safir.Dob.Typesystem.Object.Factory;
 with Safir.Dob.Blob_References;
 
 package body Safir.Dob.Entity_Request_Proxy_Impls is
@@ -92,7 +92,7 @@ package body Safir.Dob.Entity_Request_Proxy_Impls is
    begin
       pragma Assert (Self.Request_Blob /= null, "Not possible to Get_Request on DeleteRequests!");
       return Safir.Dob.Entity.Smart_Pointer'Class
-        (Safir.Dob.Typesystem.Object_Factory.Create_Object (Self.Request_Blob));
+        (Safir.Dob.Typesystem.Object.Factory.Create_Object (Self.Request_Blob));
    end Get_Request;
 
    function Get_Sender_Connection_Info (Self : in Entity_Request_Proxy_Impl) return
@@ -114,7 +114,7 @@ package body Safir.Dob.Entity_Request_Proxy_Impls is
 
       begin
          Connection_Info := Safir.Dob.Connection_Info.Smart_Pointer
-           (Safir.Dob.Typesystem.Object_Factory.Create_Object (Blob));
+           (Safir.Dob.Typesystem.Object.Factory.Create_Object (Blob));
          Blob_Deleter (Blob);
          return Connection_Info;
       exception

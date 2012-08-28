@@ -25,6 +25,7 @@ limited with Safir.Dob.Typesystem.Object;
 with Safir.Dob.Typesystem.Container_Base;
 
 package Safir.Dob.Typesystem.Object_Container_Base is
+   pragma Preelaborate (Safir.Dob.Typesystem.Object_Container_Base);
 
    -- Base class for all object containers.
    --

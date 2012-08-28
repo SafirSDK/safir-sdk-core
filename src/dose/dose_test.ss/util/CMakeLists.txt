@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 2.6)
+
 ADD_SUBDIRECTORY(dose_memory_stats)
 ADD_SUBDIRECTORY(dose_com_control)
 ADD_SUBDIRECTORY(dose_test_util)

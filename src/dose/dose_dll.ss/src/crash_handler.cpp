@@ -23,49 +23,79 @@
 
 #include "crash_handler.h"
 #include <Safir/Dob/Typesystem/Utilities.h>
-#include <ace/Guard_T.h>
+#include <Safir/Utilities/Breakpad/exception_handler.h>
+#include <boost/bind.hpp>
 
- 
-google_breakpad::ExceptionHandler * volatile Crash_Handler::m_handler=NULL;
-ACE_Thread_Mutex Crash_Handler::m_instantiationLock;
-
-void Crash_Handler::Instance()
+namespace
 {
-    if (m_handler == NULL)
-    {
-        ACE_Guard<ACE_Thread_Mutex> lck(m_instantiationLock);
-        if (m_handler == NULL)
-        {
+    //Callback functions for writing core dump
+    //Returning false will leave the crash as unhandled
 #if defined _MSC_VER
-            char * env = getenv("SAFIR_RUNTIME");
-            std::wstring dump_path;
-            if (env != NULL)
-            {
-                dump_path = Safir::Dob::Typesystem::Utilities::ToWstring(strcat(env,"/dump/reports"));
-                 
-            }
-            else
-                dump_path=L".";
- 
-            m_handler=new google_breakpad::ExceptionHandler( dump_path,
-                                                        NULL,
-                                                        callback,
-                                                        NULL,
-                                                        google_breakpad::ExceptionHandler::HANDLER_ALL);
+    static bool callback(const wchar_t *dumpPath, 
+                         const wchar_t *id,
+                         void *context, 
+                         EXCEPTION_POINTERS *exinfo,
+                         MDRawAssertionInfo *assertion,
+                         bool succeeded) 
+    {
+        return false;
+    }
 #elif defined __GNUC__
-           char *dump_path=getenv("SAFIR_RUNTIME");
-           if(dump_path==NULL)
-               dump_path=".";
-           m_handler=new google_breakpad::ExceptionHandler(strcat(dump_path,"/dump/reports"), NULL, callback, NULL, true);
+    static bool callback(const char* dumpPath,
+                         const char* id,
+                         void* context,
+                         bool succeeded)
+    {
+        return false;
+    }
 #endif
-        }
+
+
+    const std::string GetDumpPath()
+    {
+        const char * const env = getenv("SAFIR_RUNTIME");
+        return std::string(env) + "/dump/reports";
     }
 }
 
-Crash_Handler::Crash_Handler(void)
+boost::once_flag CrashHandler::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+
+CrashHandler & CrashHandler::SingletonHelper::Instance()
 {
+    static CrashHandler instance;
+    return instance;
 }
 
-Crash_Handler::~Crash_Handler(void)
+CrashHandler & CrashHandler::Instance()
+{
+    boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+    return SingletonHelper::Instance();
+}
+
+
+CrashHandler::CrashHandler()
+{
+#if defined _MSC_VER
+    const std::wstring dumpPath = Safir::Dob::Typesystem::Utilities::ToWstring(GetDumpPath());
+    m_handler = new google_breakpad::ExceptionHandler(dumpPath,
+                                                      NULL,
+                                                      callback,
+                                                      NULL,
+                                                      google_breakpad::ExceptionHandler::HANDLER_ALL);
+#elif defined __GNUC__
+    const std::string dumpPath = GetDumpPath();
+    m_handler=new google_breakpad::ExceptionHandler(dumpPath, 
+                                                    NULL, 
+                                                    callback, 
+                                                    NULL, 
+                                                    true);
+#else
+    #error No google breakpad for this platform!
+#endif
+}
+
+
+CrashHandler::~CrashHandler()
 {    
+    //TODO: how to stop!
 }

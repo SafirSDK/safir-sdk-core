@@ -1,4 +1,4 @@
-PROJECT (dose_com_sniffer)
+project(dose_com_sniffer CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 

@@ -1,20 +1,30 @@
-PROJECT (dose_internal_test)
+cmake_minimum_required(VERSION 2.6)
+
+project(dose_internal_test CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
-ADD_EXECUTABLE(dose_connector_test dose_connector_test.cpp)
-ADD_EXECUTABLE(dose_connectee_test dose_connectee_test.cpp)
+FIND_PACKAGE(Boost COMPONENTS system thread)
+
 ADD_EXECUTABLE(distribution_data_test distribution_data_test.cpp)
 ADD_EXECUTABLE(lamport_clock_test lamport_clock_test.cpp)
 ADD_EXECUTABLE(dose_message_queue_test dose_message_queue_test.cpp)
+ADD_EXECUTABLE(dose_sem_wrapper_test semaphore_test.cpp)
 
-TARGET_LINK_LIBRARIES(dose_connector_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
-TARGET_LINK_LIBRARIES(dose_connectee_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
-TARGET_LINK_LIBRARIES(distribution_data_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
-TARGET_LINK_LIBRARIES(lamport_clock_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
-TARGET_LINK_LIBRARIES(dose_message_queue_test dose_internal dots_generated-cpp dots_cpp)
 
-INSTALL(TARGETS dose_connectee_test dose_connector_test distribution_data_test lamport_clock_test dose_message_queue_test
-        RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION $ENV{SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION $ENV{SAFIR_SDK}/lib)
+if (NOT MSVC)
+  TARGET_LINK_LIBRARIES(distribution_data_test dose_internal dots_generated-Safir-cpp dots_cpp dots_id ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(lamport_clock_test dose_internal ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(dose_message_queue_test dose_internal dots_generated-Safir-cpp dots_generated-cpp dots_cpp ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(dose_sem_wrapper_test ${COMMON_LIBRARIES})
+endif()
+
+ENABLE_TESTING()
+ADD_TEST(Semaphore dose_sem_wrapper_test)
+ADD_TEST(MessageQueue dose_message_queue_test)
+ADD_TEST(DistributionData distribution_data_test)
+ADD_TEST(LamportClocks lamport_clock_test)
+
+set_tests_properties(Semaphore PROPERTIES TIMEOUT 60)
+set_tests_properties(MessageQueue PROPERTIES TIMEOUT 360)
+set_tests_properties(LamportClocks PROPERTIES TIMEOUT 2400)

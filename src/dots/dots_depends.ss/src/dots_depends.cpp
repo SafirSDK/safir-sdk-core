@@ -27,7 +27,7 @@
 #endif
 
 #include <iostream>
-#include <string.h>
+#include <cstring>
 #include "dots_tag_parser.h"
 
 int main(int argc, char* argv[])
@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    boost::filesystem::path filename(env,boost::filesystem::native);
+    boost::filesystem::path filename(env);
 
     filename /= DotsDepends::Defs::TAG_DIR;
     if (!(boost::filesystem::exists(filename) && boost::filesystem::is_directory(filename)))

@@ -23,6 +23,7 @@
 ******************************************************************************/
 
 #include <Safir/Dob/Internal/DistributionData.h>
+#include <Safir/Dob/Internal/StateDeleter.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/BlobOperations.h>
@@ -34,9 +35,8 @@
 
 #ifdef REGISTER_TIMES
   #include <boost/random/ranlux.hpp>
+  #include <boost/thread/mutex.hpp>
   #include <ctime>
-  #include <ace/Thread_Mutex.h>
-  #include <ace/Guard_T.h>
 #endif
 
 namespace Safir
@@ -140,16 +140,17 @@ namespace Internal
         static boost::ranlux64_3 * random_generator = NULL;
         if (random_generator == NULL)
         {
-            static ACE_Thread_Mutex instantiation_lock;
-            ACE_Guard<ACE_Thread_Mutex> lck(instantiation_lock);
+            == Replace this instantiation with boost::once stuff!
+            static boost::mutex instantiation_lock;
+            boost::lock_guard<boost::mutex> lck(instantiation_lock);
             if (random_generator == NULL)
             {
                 random_generator = new boost::ranlux64_3();
                 random_generator->seed(static_cast<boost::uint32_t>(time(NULL)));
             }
         }
-        static ACE_Thread_Mutex use_lock;
-        ACE_Guard<ACE_Thread_Mutex> lck(use_lock);
+        static boost::mutex use_lock;
+        boost::lock_guard<boost::mutex> lck(use_lock);
 
         return static_cast<Typesystem::Int32>(0x00000000ffffffffLL & (*random_generator)());
     }

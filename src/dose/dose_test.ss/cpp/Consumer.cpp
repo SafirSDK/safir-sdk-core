@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagstrï¿½m / stlrha
 *
 *******************************************************************************
 *
@@ -55,21 +55,12 @@
   #pragma warning (disable: 4244)
 #endif
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <ace/OS_NS_unistd.h>
+#include <boost/thread.hpp>
 #if defined _MSC_VER
   #pragma warning (pop)
 #endif
 
 static const double fraction_multiplicator = pow(10.0,-boost::posix_time::time_duration::num_fractional_digits());
-
-//Get rid of stupid windows.h defines.
-#ifdef GetMessage
-#undef GetMessage
-#endif
-
-#ifdef SendMessage
-#undef SendMessage
-#endif
 
 const std::wstring PREFIX = L"Consumer ";
 
@@ -1269,7 +1260,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                 //sleep a very short while, to let dose_main empty
                 //the message out queue. This hopefully reduces the tc 003
                 //output differences
-                ACE_OS::sleep(ACE_Time_Value(0,1000));
+                boost::this_thread::sleep(boost::posix_time::milliseconds(1));
                 repeat = false;
             }
         }

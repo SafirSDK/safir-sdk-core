@@ -75,12 +75,13 @@ namespace Internal
                            const Typesystem::Int32 counter,
                            const NodeNumber node,
                            const ContextId contextId,
-                           const int pid):
+                           const pid_t pid):
         m_nameWithoutCounter(name.begin(),name.end()),
         m_counter(counter),
         m_id(),
         m_pid(pid),
         m_queueCapacities(GetQueueCapacities(name)),
+        m_outSignal(NULL),
         m_subscribedTypes(NumberOfSubscriptionTypes),
         m_messageInQueues(GetSharedMemory().construct<MessageQueueContainer>(boost::interprocess::anonymous_instance)()),
         m_messageOutQueue(QueueCapacity(ConnectionQueueId::MessageOutQueue)),
@@ -422,8 +423,11 @@ namespace Internal
 
     void Connection::SignalOut() const
     {
-        *m_outSignal = 1;
-        Signals::Instance().SignalConnectOrOut();
+        if (m_outSignal != NULL)
+        {
+            *m_outSignal = 1;
+            Signals::Instance().SignalConnectOrOut();
+        }
     }
 
     void Connection::SignalIn() const

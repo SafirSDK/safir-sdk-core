@@ -403,11 +403,10 @@ void PrintDbg( const char *format, ... )
     else
     if(g_OutPutMode == 'R')     PrintRam(resultBuf);
     else
-    if (g_OutPutMode == 'L')    lllinfo << ToWstring(resultBuf); 
+    if (g_OutPutMode == 'L')    lllog(1) << ToWstring(resultBuf) << std::flush; 
     else
     {
-        std::wcout << ToWstring(resultBuf);
-        std::wcout.flush();
+        std::wcout << ToWstring(resultBuf) << std::flush;
     }
 }
 
@@ -447,11 +446,10 @@ void PrintErr(int ErrorCode, const char *format, ... )
     else
     if(g_OutPutMode == 'R') PrintRam(Buf2);
     else
-    if (g_OutPutMode == 'L')    lllinfo << ToWstring(Buf2);
+    if (g_OutPutMode == 'L') lllerr << ToWstring(Buf2) << std::flush;
     else
     {
-        std::wcout << ToWstring(Buf2);
-        std::wcout.flush();
+        std::wcout << ToWstring(Buf2) << std::flush;
     }
 }
 

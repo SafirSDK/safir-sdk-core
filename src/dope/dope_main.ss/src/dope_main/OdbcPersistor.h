@@ -47,7 +47,7 @@ public:
     /**
      * Constructor
      */
-    OdbcPersistor();
+    explicit OdbcPersistor(boost::asio::io_service& ioService);
 
     /**
      * Destructor

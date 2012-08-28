@@ -24,7 +24,7 @@
 with Safir.Dob.Typesystem.Blob_Operations;
 with Interfaces.C;
 with Safir.Dob.Typesystem.Library_Exceptions;
-with Safir.Dob.Typesystem.Object_Factory;
+with Safir.Dob.Typesystem.Object.Factory;
 with Safir.Dob.Interf;
 
 package body Safir.Dob.Injected_Entity_Proxy_Impls is
@@ -96,7 +96,7 @@ package body Safir.Dob.Injected_Entity_Proxy_Impls is
       pragma Assert (Self.Injection_Blob /= null, "Not possible to do Get_Injection on InjectDeletes!");
 
       return Safir.Dob.Entity.Smart_Pointer'Class
-        (Safir.Dob.Typesystem.Object_Factory.Create_Object (Self.Injection_Blob));
+        (Safir.Dob.Typesystem.Object.Factory.Create_Object (Self.Injection_Blob));
 
    end Get_Injection;
 
@@ -115,7 +115,7 @@ package body Safir.Dob.Injected_Entity_Proxy_Impls is
       pragma Assert (Self.Current_Blob /= null, "Not possible to do Get_Current on InjectNews!");
 
       return Safir.Dob.Entity.Smart_Pointer'Class
-        (Safir.Dob.Typesystem.Object_Factory.Create_Object (Self.Current_Blob));
+        (Safir.Dob.Typesystem.Object.Factory.Create_Object (Self.Current_Blob));
 
    end Get_Current;
 

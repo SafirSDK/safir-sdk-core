@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (dots_web)
+project(dots_web CXX)
 
 add_subdirectory(src)
 

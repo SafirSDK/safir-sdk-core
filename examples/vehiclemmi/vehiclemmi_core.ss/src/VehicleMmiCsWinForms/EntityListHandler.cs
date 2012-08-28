@@ -72,11 +72,15 @@ namespace VehicleMmiCsWinForms
         /// </summary>
         private CategoryInfoDialog m_CategoryInfoDlg;
 
+        // Need to disable "... is assigned but its value is never used" warning,
+        // since the dialog does its work "on its own" once it has been instantiated.
+#pragma warning disable 414
         /// <summary>
         /// Dialog to present vehicle message 
         /// </summary>
         private MessageDialog m_MessageDialog;
-               
+#pragma warning restore 414
+
         /// <summary>
         /// Reference to frame status strip to show errors for operator
         /// </summary>

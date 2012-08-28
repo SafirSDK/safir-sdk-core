@@ -22,19 +22,30 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <ace/Thread.h>
+
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244)
+#endif
+
+#include <boost/thread.hpp>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 #include <iostream>
 int main()
-{ //run this and use doblog on and doblog off to test it.
-    while (true)
+{
+    for(int i = 0; i < 10000000; ++i)
     {
-        lllout << "hello world 1"<<std::endl;
-        lllout << 123 << std::endl;
-        ACE_OS::sleep(1);
+        lllog(5) << "Hello, World!"<<std::endl;
+        lllog(9) << "Goodbye cruel world!"<<std::endl;
+        lllerr << 1234567890 << std::endl;
+        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
     }
 
     return 0;
-
-} // main
+}
 

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT(douf_time_dotnet)
+PROJECT(douf_time_dotnet NONE)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 find_package(CSharp REQUIRED)
@@ -9,11 +9,11 @@ INCLUDE(CSharpMacros)
 FILE(GLOB sources *.cs)
 
 SET(CS_FLAGS ${COMMON_CS_FLAGS} "-keyfile:${SAFIR_SDK}/data/build/safirkey.snk"
-								"-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dll,${SAFIR_RUNTIME}/bin/Safir.Dob.dll,${SAFIR_RUNTIME}/bin/dots_generated-dotnet.dll")
+                                "-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dll,${SAFIR_RUNTIME}/bin/Safir.Dob.dll,${SAFIR_RUNTIME}/bin/dots_generated-dotnet.dll")
 
 ADD_CS_LIBRARY(Safir.Time "${sources}" ALL)
 
 INSTALL(FILES ${target_DLL}
-		DESTINATION ${SAFIR_RUNTIME}/bin)
+        DESTINATION ${SAFIR_RUNTIME}/bin)
 
 INSTALL_CS_DEBUG_INFO()

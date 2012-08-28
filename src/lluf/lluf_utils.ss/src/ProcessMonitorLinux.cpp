@@ -23,8 +23,6 @@
 ******************************************************************************/
 #ifdef __GNUC__
 
-#include <ace/Thread.h>
-
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
 
@@ -34,6 +32,8 @@
 
 #include <sys/inotify.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <signal.h>
 
 #include <sstream>
 
@@ -41,63 +41,6 @@ namespace Safir
 {
 namespace Utilities
 {
-
-    const std::wstring ToWstring(const std::string & str)
-    {
-        int left = 0;
-        wchar_t *pwszBuf = new wchar_t[str.length() + 1];
-        wchar_t *pwsz;
-        unsigned long pos;
-
-        pwsz = pwszBuf;
-
-        std::string::const_iterator it;
-        for( it = str.begin(); it != str.end(); ++it)
-        {
-            pos = (unsigned char) *it;
-            if ((left == 0) ^ ((pos & 0xC0) != 0x80)) // Continuation byte mismatch
-            {
-                left = 0;
-                *pwsz++ = L'#';
-            }
-
-            if (pos < 0x80) // 7-bit ASCII
-            {
-                *pwsz++ = (wchar_t) pos;
-            }
-            else if ((pos & 0xC0) == (0x80)) // Correct continuation
-            {
-                left--;
-                *pwsz = (*pwsz << 6) + (wchar_t) (pos & 0x3F);
-                if (left == 0)
-                    pwsz++;
-            }
-            else if ((pos & 0xE0) == (0xC0)) // First of 2
-            {
-                *pwsz = (wchar_t) (pos & 0x1F);
-                left = 1;
-            }
-            else if ((pos & 0xF0) == (0xE0)) // First of 3
-            {
-                *pwsz = (wchar_t) (pos & 0x0F);
-                left = 2;
-            }
-            else // Only the BMP is supported.
-            {
-                left = 0;
-                *pwsz++ = L'#';
-            }
-
-        }
-
-        std::wstring wstr( pwszBuf, pwsz - pwszBuf );
-
-        delete [] pwszBuf;
-        return wstr;
-    }
-
-
-
     bool GetPathForPid(const pid_t pid, std::string& path)
     {
         std::ostringstream os;
@@ -117,7 +60,7 @@ namespace Utilities
             {
                 buf[len] = 0;
             
-                lllout << "GetPathForPid() - buf: " << ToWstring(buf) << std::endl;
+                lllout << "GetPathForPid() - buf: " << buf << std::endl;
 
                 path = std::string(buf);
                 return true;
@@ -131,22 +74,26 @@ namespace Utilities
     
     ProcessMonitorLinux::ProcessMonitorLinux(const ProcessMonitor::OnTerminateCb& callback)
         : m_callback(callback)
-        , m_threadState(NotStarted)
+        , m_ioService()
+        , m_inotifyStream(m_ioService)
         , m_timerStarted(false)
     {
         lllout << "ProcessMonitorLinux::ProcessMonitorLinux() - called..." << std::endl;
-
     }
     
     ProcessMonitorLinux::~ProcessMonitorLinux() {}
 
-
-    int
-    ProcessMonitorLinux::handle_input (ACE_HANDLE fd)
+    void ProcessMonitorLinux::HandleInotifyEvent(const boost::system::error_code ec)
     {
-        lllout << "ProcessMonitorLinux::handle_input() - called..." << std::endl;
+        lllout << "ProcessMonitorLinux::HandleInotifyEvent() - called..." << std::endl;
         
-        ssize_t len = read(fd, m_buf, INOTIFY_BUFLEN);
+        if (ec) 
+        {
+            lllerr << "ProcessMonitorLinux::HandleInotifyEvent() - Error from boost::asio " << ec << std::endl;
+            return;
+        }
+
+        const ssize_t len = read(m_inotifyStream.native(), m_buf, INOTIFY_BUFLEN);
         
         ssize_t i = 0;
         while (i < len) 
@@ -154,7 +101,7 @@ namespace Utilities
             struct inotify_event* pEvt = (struct inotify_event*) &m_buf[i];
             
             
-            lllout << "ProcessMonitorLinux::handle_input() - wd: " << pEvt->wd 
+            lllout << "ProcessMonitorLinux::HandleInotifyEvent() - wd: " << pEvt->wd 
                    << ". mask: " << pEvt->mask << std::endl;
             
             if (pEvt->mask == IN_CLOSE_NOWRITE)
@@ -172,22 +119,23 @@ namespace Utilities
             
             if (!m_timerStarted)
             {
-                m_reactor.schedule_timer(this, NULL, ACE_Time_Value(0));
+                m_timer.reset(new boost::asio::deadline_timer(m_ioService,boost::posix_time::seconds(0)));
+                m_timer->async_wait(boost::bind(&ProcessMonitorLinux::HandleTimeout,this));
                 m_timerStarted = true;
             }
         }
         
-        lllout << "ProcessMonitorLinux::handle_input() - done...  " << std::endl;
-        return 0;
+        m_inotifyStream.async_read_some(boost::asio::null_buffers(), boost::bind(&ProcessMonitorLinux::HandleInotifyEvent,this,_1));
+
+        lllout << "ProcessMonitorLinux::HandleInotifyEvent() - done...  " << std::endl;
     }
 
-    int
-    ProcessMonitorLinux::handle_exception (ACE_HANDLE /*fd*/)
+    void ProcessMonitorLinux::ChangeMonitoredPids()
     {
-        lllout << "ProcessMonitorLinux::handle_exception() - called... " << std::endl;
+        lllout << "ProcessMonitorLinux::ChangeMonitoredPids() - called... " << std::endl;
 
         //  Add lock
-        ACE_Guard<ACE_Thread_Mutex> lck(m_mutex);
+        boost::lock_guard<boost::mutex> lck(m_mutex);
 
         // Handle added pids.
         for(std::list<pid_t>::iterator it = m_startWatchPids.begin();
@@ -208,7 +156,7 @@ namespace Utilities
                     
                     int wd = (*binIt).second;
 
-                    lllout << "ProcessMonitorLinux::handle_exception() - found wd: " << wd << std::endl;
+                    lllout << "ProcessMonitorLinux::ChangeMonitoredPids() - found wd: " << wd << std::endl;
                     
                     WdMap::iterator wdIt = m_wdMap.find(wd);
                     
@@ -218,10 +166,10 @@ namespace Utilities
                 }
                 else
                 {
-                    int wd = inotify_add_watch(m_fd, path.c_str(), IN_CLOSE_NOWRITE);
+                    int wd = inotify_add_watch(m_inotifyStream.native(), path.c_str(), IN_CLOSE_NOWRITE);
             
-                    lllout << "ProcessMonitorLinux::handle_exception - inotify_add_watch(). fd: " << m_fd 
-                           << ". path: " << ToWstring(path)
+                    lllout << "ProcessMonitorLinux::ChangeMonitoredPids - inotify_add_watch(). fd: " << m_inotifyStream.native() 
+                           << ". path: " << path.c_str()
                            << ". wd: " << wd << std::endl;
 
                     if (wd != - 1)
@@ -237,15 +185,15 @@ namespace Utilities
                     }
                     else
                     {
-                        lllerr << "ProcessMonitorLinux::handle_exception() - problem calling inotify_add_watch(). path: " 
-                               << ToWstring(path)
+                        lllerr << "ProcessMonitorLinux::ChangeMonitoredPids() - problem calling inotify_add_watch(). path: " 
+                               << path.c_str()
                                << ". errno: " << errno << std::endl;
                     }
                 }
             }
             else
             {
-                lllerr << "ProcessMonitorLinux::handle_exception() - problem finding bin path for pid: " << pid << std::endl;
+                lllerr << "ProcessMonitorLinux::ChangeMonitoredPids() - problem finding bin path for pid: " << pid << std::endl;
             }
         }
 
@@ -273,15 +221,15 @@ namespace Utilities
                     // No pids left for this wd. Remove it and remove inotify watch.
                     if((*wdIt).second.m_pidList.empty())
                     {
-                        int result = inotify_rm_watch(m_fd, (*wdIt).first);
+                        int result = inotify_rm_watch(m_inotifyStream.native(), (*wdIt).first);
                     
-                        lllout << "ProcessMonitorLinux::handle_exception - inotify_rm_watch(). fd: " << m_fd 
+                        lllout << "ProcessMonitorLinux::ChangeMonitoredPids - inotify_rm_watch(). fd: " << m_inotifyStream.native() 
                                << ". wd: " << (*wdIt).first 
                                << ". result: " << result << std::endl;
 
                         if (result == -1)
                         {
-                            lllerr << "ProcessMonitorLinux::handle_exception - problem with inotify_rm_watch() wd: " 
+                            lllerr << "ProcessMonitorLinux::ChangeMonitoredPids - problem with inotify_rm_watch() wd: " 
                                    << (*wdIt).first << ". errno: " << errno << std::endl;
                         }
                     
@@ -299,13 +247,9 @@ namespace Utilities
         }       
         
         m_stopWatchPids.clear();
-        
-
-        return 0;
     }
-    
-    int
-    ProcessMonitorLinux::handle_timeout (const ACE_Time_Value& /*current_time*/, const void */*act*/)
+
+    void ProcessMonitorLinux::HandleTimeout()
     {
         WdSet removeWd;
         
@@ -328,7 +272,7 @@ namespace Utilities
                     {
                         // Process dosn't exist anymore.
                         
-                        lllout << "ProcessMonitorLinux::handle_timeout() - Dont exists pid: " << (*plIt) << std::endl;
+                        lllout << "ProcessMonitorLinux::HandleTimeout() - Dont exists pid: " << (*plIt) << std::endl;
                         deadPids.push_back((*plIt));
                     }
                 }
@@ -350,15 +294,15 @@ namespace Utilities
                 // No pids left for this wd. Remove it and remove inotify watch.
                 if((*wdIt).second.m_pidList.empty())
                 {
-                    int result = inotify_rm_watch(m_fd, (*wdIt).first);
+                    int result = inotify_rm_watch(m_inotifyStream.native(), (*wdIt).first);
                     
-                    lllout << "ProcessMonitorLinux::handle_timeout - inotify_rm_watch(). fd: " << m_fd 
+                    lllout << "ProcessMonitorLinux::HandleTimeout - inotify_rm_watch(). fd: " << m_inotifyStream.native() 
                            << ". wd: " << (*wdIt).first 
                            << ". result: " << result << std::endl;
                     
                     if (result == -1)
                     {
-                        lllerr << "ProcessMonitorLinux::handle_timeout - problem with inotify_rm_watch() wd: " << (*wdIt).first 
+                        lllerr << "ProcessMonitorLinux::HandleTimeout - problem with inotify_rm_watch() wd: " << (*wdIt).first 
                                << ". errno: " << errno << std::endl;
                     }
 
@@ -386,7 +330,7 @@ namespace Utilities
         // Check if we passed the 'until' time.
         if (m_checkUntil < boost::posix_time::microsec_clock::universal_time())
         {
-            lllout << "ProcessMonitorLinux::handle_timeout() - m_checkUntil passed: " << m_checkUntil << std::endl;
+            lllout << "ProcessMonitorLinux::HandleTimeout() - m_checkUntil passed: " << m_checkUntil << std::endl;
             m_wdQueue.clear();
         }
 
@@ -394,42 +338,27 @@ namespace Utilities
         // Check if there is more to handle 
         if (m_wdQueue.size() > 0)
         {
-            m_reactor.schedule_timer(this, NULL, ACE_Time_Value(0,10000));
+            m_timer.reset(new boost::asio::deadline_timer(m_ioService,boost::posix_time::milliseconds(10)));
+            m_timer->async_wait(boost::bind(&ProcessMonitorLinux::HandleTimeout,this));
         }
         else
         {
             m_timerStarted = false;
         }
-
-        return 0;
     }
-    
 
     
     void
     ProcessMonitorLinux::StartThread()
     {
-        lllout << "ProcessMonitorLinux::StartThread() - called... tid: " << ACE_Thread::self() << std::endl;
+        lllout << "ProcessMonitorLinux::StartThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
         
-        if (m_threadState != NotStarted)
-            return;
-        
-        ACE_thread_t threadId;
-        ACE_hthread_t threadHandle;
-
-        const int result = ACE_Thread::spawn(ThreadFun,
-                                             this,
-                                             THR_NEW_LWP | THR_JOINABLE ,
-                                             &threadId,
-                                             &threadHandle);
-        if (result != 0)
+        if (m_thread != boost::thread())
         {
-            lllerr << "ProcessMonitorLinux::StartThread() - problem creating thread." << std::endl;
             return;
         }
         
-        m_startEvent.wait();
-        m_threadState = Running;
+        m_thread = boost::thread(boost::bind(&ProcessMonitorLinux::Run,this));
 
         lllout << "ProcessMonitorLinux::StartThread() - done..." << std::endl;
     }
@@ -438,14 +367,14 @@ namespace Utilities
     void
     ProcessMonitorLinux::StopThread()
     {
-        lllout << "ProcessMonitorLinux::StopThread() - called... tid: " << ACE_Thread::self() << std::endl;
+        lllout << "ProcessMonitorLinux::StopThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
 
-        if (m_threadState == Running)
+        if (m_thread != boost::thread())
         {
-            m_reactor.end_reactor_event_loop();
+            m_ioService.stop();
 
-            m_stopEvent.wait();
-            m_threadState = Stopped;
+            m_thread.join();
+            m_thread = boost::thread();
         }
 
         lllout << "ProcessMonitorLinux::StopThread() - done..." << std::endl;
@@ -459,11 +388,11 @@ namespace Utilities
         lllout << "ProcessMonitorLinux::StartMonitorPid() - pid: " << pid << std::endl;
         
         // Add lock
-        ACE_Guard<ACE_Thread_Mutex> lck(m_mutex);
+        boost::lock_guard<boost::mutex> lck(m_mutex);
         
         m_startWatchPids.push_back(pid);
 
-        m_reactor.notify(this);
+        m_ioService.post(boost::bind(&ProcessMonitorLinux::ChangeMonitoredPids,this));
     }
     
     void
@@ -472,52 +401,45 @@ namespace Utilities
         lllout << "ProcessMonitorLinux::StopMonitorPid() - pid: " << pid << std::endl;
         
         // Add lock
-        ACE_Guard<ACE_Thread_Mutex> lck(m_mutex);
+        boost::lock_guard<boost::mutex> lck(m_mutex);
         
         m_stopWatchPids.push_back(pid);
 
-        m_reactor.notify(this);
+        m_ioService.post(boost::bind(&ProcessMonitorLinux::ChangeMonitoredPids,this));
     }
 
-
+    
     void ProcessMonitorLinux::Run()
     {
-        lllout << "ProcessMonitorLinux::Run() - called...  tid: " << ACE_Thread::self() << std::endl;
-        
-        m_startEvent.signal();
+        lllout << "ProcessMonitorLinux::Run() - called...  tid: " << boost::this_thread::get_id() << std::endl;
+        const int fd = inotify_init();
 
-        m_fd = inotify_init();
-
-        if (m_fd == -1) 
+        if (fd == -1) 
         {
             lllerr << "ProcessMonitorLinux::Run() - Problem with inotify_init()...." << std::endl;
             
-            m_threadState = Stopped;
-            m_stopEvent.signal();
-
             return;
         }
 
-        lllout << "ProcessMonitorLinux::Run() - m_fd: " << m_fd << std::endl;
+        lllout << "ProcessMonitorLinux::Run() - fd: " << fd << std::endl;
 
-        m_reactor.owner(ACE_Thread::self());
+        m_inotifyStream.assign(fd);
+        m_inotifyStream.async_read_some(boost::asio::null_buffers(), boost::bind(&ProcessMonitorLinux::HandleInotifyEvent,this,_1));
+        lllout << "ProcessMonitorLinux::Run() - about to start io_service loop... " << std::endl;
 
-        m_reactor.register_handler(m_fd, this,ACE_Event_Handler::READ_MASK);
+        //The fact that HandleInotifyEvent will reschedule an async_read_some means that the
+        //io_service has work to do, and hence run() will not exit
+        m_ioService.run();
 
-        lllout << "ProcessMonitorLinux::Run() - about to call reactor... " << std::endl;
-
-        m_reactor.run_reactor_event_loop();
-
-        lllout << "ProcessMonitorLinux::Run() - reactor event-loop done... " << std::endl;
-        
+        lllout << "ProcessMonitorLinux::Run() - io_service loop done... " << std::endl;
         
         for(WdMap::iterator it = m_wdMap.begin();
             it != m_wdMap.end();
             ++it)
         {
-            int result = inotify_rm_watch(m_fd, (*it).first);
-                    
-            lllout << "ProcessMonitorLinux::Run() - inotify_rm_watch(). fd: " << m_fd 
+            const int result = inotify_rm_watch(m_inotifyStream.native(), (*it).first);
+
+            lllout << "ProcessMonitorLinux::Run() - inotify_rm_watch(). fd: " << m_inotifyStream.native()
                    << ". wd: " << (*it).first 
                    << ". result: " << result << std::endl;
                     
@@ -527,28 +449,7 @@ namespace Utilities
                        << ". errno: " << errno << std::endl;
             }
         }
-        
-
-        m_threadState = Stopped;
-        m_stopEvent.signal();
     }
-    
-    
-
-    //
-    // Private 
-    //
-
-    //initiates the dispatch thread
-    ACE_THR_FUNC_RETURN ProcessMonitorLinux::ThreadFun(void* param)
-    {
-        static_cast<ProcessMonitorLinux*>(param)->Run();
-        return 0;
-    }
-
-
-
-
 }
 }
 

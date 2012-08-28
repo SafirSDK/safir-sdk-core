@@ -29,10 +29,10 @@
         #define SWRE_API __declspec(dllexport)
     #else
         #define SWRE_API __declspec(dllimport)
-        #ifdef _DEBUG
-            #pragma comment( lib, "swre_interface_cppd.lib" )
-        #else
+        #ifdef NDEBUG
             #pragma comment( lib, "swre_interface_cpp.lib" )
+        #else
+            #pragma comment( lib, "swre_interface_cppd.lib" )
        #endif
     #endif
 #elif defined __GNUC__

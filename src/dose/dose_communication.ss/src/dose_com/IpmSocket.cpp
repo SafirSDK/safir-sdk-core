@@ -199,8 +199,8 @@ IPADDR CIpmSocket::Get_OwnIpAddress(IPADDR NetAddr_nw)
         if (ioctl(sockfd, SIOCGIFFLAGS, ifr))
             continue;  // failed to get flags, skip it
 
-        IpAddr_nw = *(unsigned long *)
-                        &ifr->ifr_addr.sa_data[sizeof sa.sin_port];
+        IpAddr_nw = *reinterpret_cast<unsigned long *>
+            (ifr->ifr_addr.sa_data + sizeof sa.sin_port);
 
         XorValue = htonl(IpAddr_nw) ^ NetAddr;
         //PrintDbg("N=%X X=%X < %X I=%X %X\n",
@@ -652,6 +652,12 @@ int CIpmSocket::AreThereAnyPendingRxMessages(void)
 #ifdef _LINUX
     result = ioctl(m_SockId, FIONREAD, &param);
 #endif
+    if (result < 0)
+    {
+        PrintDbg("Cannot get ioctl FIONREAD.\n");
+        exit(EXIT_FAILURE);
+    }
+
     return(param); // 0 if nothing to read
 }
 

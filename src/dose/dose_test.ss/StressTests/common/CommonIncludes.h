@@ -41,18 +41,19 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/lexical_cast.hpp>
-#include <ace/Auto_Event.h>
-#include <ace/Time_Value.h>
-
-#include <ace/Thread.h>
-#include <ace/Process.h>
-#include <ace/SOCK_Dgram_Bcast.h>
-#include <ace/OS_NS_sys_socket.h>
-#include <ace/OS_NS_unistd.h>
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
   #pragma warning(pop)
 #endif
+
+static inline std::wostream& operator<<(std::wostream& out, const boost::program_options::options_description& opt)
+{
+    std::ostringstream ostr;
+    ostr << opt;
+    return out << ostr.str().c_str();
+}
 
 
 

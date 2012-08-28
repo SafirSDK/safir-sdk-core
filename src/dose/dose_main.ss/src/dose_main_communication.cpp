@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagstrï¿½m / stlrha
 *
 *******************************************************************************
 *
@@ -37,12 +37,10 @@
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <ace/Guard_T.h>
 #include <boost/bind.hpp>
+#include <boost/thread.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <ace/Reactor.h>
-#include <ace/Thread.h>
-#include <ace/OS_NS_unistd.h>
+#include <deque>
 
 //uncomment this to get all headers logged to lllout
 //#define LOG_HEADERS
@@ -60,152 +58,6 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(dcom_ulong64) == 8);
     }
 
-#if 0 //DEBUG DoseCom memory handling
-    struct MemData
-    {
-        MemData(const size_t s, const std::string& w): size(s), where(w), count(1) {}
-        size_t size;
-        std::string where;
-        int count;
-    };
-
-    std::map<const void*,MemData> memMap;
-    std::map<const void*,std::string> removedMem;
-    ACE_Thread_Mutex memMapLock;
-
-    ACE_THR_FUNC_RETURN dcom_memory_monitor(void *)
-    {
-        std::map<const void*, MemData> last;
-        for(;;)
-        {
-            ACE_OS::sleep(30);
-
-            size_t totalMem = 0;
-            size_t blocks = 0;
-
-            {
-                ACE_Guard<ACE_Thread_Mutex> lck(memMapLock);
-#if 0 //display all memory known by dose_com
-                lllinfo << "DoseCom memory info: " << std::endl;
-
-                for (std::map<const void*,MemData>::iterator it = memMap.begin();
-                     it != memMap.end(); ++it)
-                {
-                    ++blocks;
-                    totalMem += it->second.size;
-                    lllinfo << "  " << it->second.size << " bytes allocated in " << it->second.where.c_str()
-                           << ": " << std::hex <<it->first << std::dec << ", count = " << it->second.count << std::endl;
-                }
-                lllinfo << " Total: " << std::dec << blocks << " blocks allocated, total size = " << totalMem/1000 << " Kbytes" << std::endl;
-
-                blocks = 0;
-                totalMem = 0;
-
-#endif
-                lllinfo << "Potential leaks: " << std::endl;
-                std::map<const void*,MemData> intersection;
-                std::set_intersection(memMap.begin(),memMap.end(),
-                                      last.begin(),last.end(),
-                                      std::inserter(intersection,intersection.begin()),
-                                      memMap.value_comp());
-
-                for (std::map<const void*,MemData>::iterator it = intersection.begin();
-                     it != intersection.end(); ++it)
-                {
-                    ++blocks;
-                    totalMem += it->second.size;
-                    lllinfo << "  " << it->second.size << " bytes allocated in " << it->second.where.c_str()
-                           << ": " << std::hex <<it->first << std::dec << ", count = " << it->second.count << std::endl;
-                }
-                lllinfo << " Total: " << std::dec << blocks << " blocks allocated, total size = " << totalMem/1000 << " Kbytes" << std::endl;
-#if 0
-                static int numTimesWithLeaks = 0;
-                if (blocks > 10)
-                {
-                    ++numTimesWithLeaks;
-                    if (numTimesWithLeaks > 3)
-                    {
-                        exit(0);
-                    }
-                }
-                else
-                {
-                    numTimesWithLeaks = 0;
-                }
-#endif
-                last = memMap;
-            }
-
-            //lllinfo << "DoseCom has references to " << std::dec << blocks << " blocks, total size = " << totalMem/1000 << " Kbytes" << std::endl;
-
-
-        }
-#ifndef _MSC_VER
-        return 0;
-#endif
-    }
-
-    void StartMemoryMonitor()
-    {
-        ACE_Thread::spawn(dcom_memory_monitor,NULL);
-    }
-
-    void MemMapAdd(const char * const mem, const size_t size, const char * const where)
-    {
-        ACE_Guard<ACE_Thread_Mutex> lck(memMapLock);
-        const std::pair<std::map<const void*, MemData>::iterator, bool> result =
-            memMap.insert(std::make_pair(mem,MemData(size,where)));
-
-        if (!result.second)
-        {
-            ++result.first->second.count;
-        }
-    }
-
-    void MemMapRemove(const char * const mem, const char * const where)
-    {
-        if (mem != NULL)
-        {
-            ACE_Guard<ACE_Thread_Mutex> lck(memMapLock);
-            std::map<const void*,MemData>::iterator it = memMap.find(mem);
-            if (it == memMap.end())
-            {
-                const std::map<const void*, std::string>::const_iterator remIt = removedMem.find(mem);
-                if (remIt == removedMem.end())
-                {
-                    lllinfo << "MemMapRemove called from " << where << " for unknown memory! " << std::hex<< (const void *)mem<< std::endl;
-                }
-                else
-                {
-                    lllinfo << "MemMapRemove called from " << where << " for mem deallocated in " << remIt->second.c_str()
-                           << ". use_count = " << *((const boost::uint32_t *)(mem - 4)) << std::endl;
-                }
-            }
-            else
-            {
-                if (it->second.count == 1)
-                {
-                    if (removedMem.size() > 1000000)
-                    {
-                        lllinfo << "Clearing removedMem, so we dont run out of memory" << std::endl;
-                        removedMem.clear();
-                    }
-                    removedMem.insert(std::make_pair(it->first,where));
-                    memMap.erase(it);
-                }
-                else
-                {
-                    --it->second.count;
-                }
-            }
-        }
-    }
-#else
-    void MemMapAdd(const char * const, const size_t, const char * const) {}
-    void MemMapRemove(const char * const, const char * const) {}
-    void StartMemoryMonitor() {}
-#endif
-
     class MyAllocator:
         public DoseComAllocator
     {
@@ -214,7 +66,6 @@ namespace Internal
         virtual char * Allocate(const size_t size)
         {
             char * mem = DistributionData::NewData(size);
-            MemMapAdd(mem,size, "Allocate");
             return mem;
         }
 
@@ -224,7 +75,6 @@ namespace Internal
         {
             if (data != NULL)
             {
-                MemMapRemove(data,"Deallocate");
                 DistributionData::DropReference(data);
             }
         }
@@ -262,7 +112,7 @@ namespace Internal
         }
     }
 
-    ExternNodeCommunication::ExternNodeCommunication():
+    ExternNodeCommunication::ExternNodeCommunication(boost::asio::io_service & ioService):
         m_thisNode(Safir::Dob::ThisNodeParameters::NodeNumber()),
         m_queueIsFull(new AtomicUint32 [NUM_PRIORITY_CHANNELS]),
         m_okToSignalPDComplete(0),
@@ -270,7 +120,8 @@ namespace Internal
         m_incomingDataEvents(new AtomicUint32 [NUM_PRIORITY_CHANNELS]),
         m_requestPDEvents(new AtomicUint32 [NumberOfNodes]),
         m_queueNotFullEvent(0),
-        m_startPoolDistributionEvent(0)
+        m_startPoolDistributionEvent(0),
+        m_ioService(ioService)
     {
         CheckParameters();
 
@@ -337,7 +188,6 @@ namespace Internal
 
         m_QualityOfServiceData.
             GetQualityOfServiceInfoForPoolDistribution(m_pdChannel,m_pdPriority, m_pdIsAcked);
-        StartMemoryMonitor();
 
         return result == ERR_DOSECOM_OTHER_EXISTS; //return true if there are other nodes in the system
     }
@@ -351,6 +201,7 @@ namespace Internal
 
         while (!success)
         {
+            boost::this_thread::interruption_point();
             threadMonitor.KickWatchdog(threadId);
 
             const DistributionData::Type type = msg.GetType();
@@ -374,17 +225,15 @@ namespace Internal
 
             if (m_queueIsFull[m_pdPriority] != 0)
             {
-                ACE_OS::sleep(ACE_Time_Value(0,1000)); //1 millisecond
+                boost::this_thread::sleep(boost::posix_time::milliseconds(1));
                 continue;
             }
 
             const char * extRef = msg.GetReference();
 
-            MemMapAdd(extRef,msg.Size(), "SendPoolDistributionData");
-
             //must lock the m_queueIsFullLock so that the notfull event doesnt trigger before
             //we've set the m_queueIsFull variable.
-            ACE_Guard<ACE_Thread_Mutex> lck(m_queueIsFullLock);
+            boost::lock_guard<boost::mutex> lck(m_queueIsFullLock);
             const int errCode = DoseCom_Send(extRef,
                                              static_cast<unsigned long>(msg.Size()),
                                              true,
@@ -402,8 +251,6 @@ namespace Internal
             }
             else if (errCode==ERR_DOSECOM_OVERFLOW)
             {
-                MemMapRemove(extRef,"SendPoolDistributionData");
-
                 // lllout << "Overflow in Pooldistribution send to DoseCom" << std::endl;
                 DistributionData::DropReference(extRef);
 
@@ -425,12 +272,12 @@ namespace Internal
         {
             threadMonitor.KickWatchdog(threadId);
             lllout << "Waiting for m_okToSignalPDComplete to be set to true. Current value = " << m_okToSignalPDComplete.value() << std::endl;
-            ACE_OS::sleep(ACE_Time_Value(0,20000)); //20 milliseconds
+            boost::this_thread::sleep(boost::posix_time::milliseconds(20));
         }
         lllout << "m_okToSignalPDComplete is true!" << std::endl;
 
         // m_queueIsFullLock used to prevent dose_com_send to interfere with this message.
-        ACE_Guard<ACE_Thread_Mutex> lck(m_queueIsFullLock);
+        boost::lock_guard<boost::mutex> lck(m_queueIsFullLock);
         DoseCom_PoolDistributed(m_pdPriority,m_pdChannel);
 
         lllout << "Pool distribution completed" << std::endl;
@@ -592,11 +439,9 @@ namespace Internal
 
         const char * extRef = data.GetReference();
 
-        MemMapAdd(extRef,data.Size(), "Send");
-
         //must lock the m_queueIsFullLock so that the notfull callback doesnt trigger before
         //we've set the m_queueIsFull variable.
-        ACE_Guard<ACE_Thread_Mutex> lck(m_queueIsFullLock);
+        boost::lock_guard<boost::mutex> lck(m_queueIsFullLock);
 
         const int errCode=DoseCom_Send(extRef,
                                        static_cast<unsigned long>(data.Size()),
@@ -617,7 +462,6 @@ namespace Internal
 
         case ERR_DOSECOM_OVERFLOW:
 
-            MemMapRemove(extRef,"Send");
             // lllout << "Overflow in send to DoseCom" << std::endl;
             DistributionData::DropReference(extRef);
 
@@ -662,7 +506,7 @@ namespace Internal
         }
     }
 
-    int ExternNodeCommunication::handle_exception(ACE_HANDLE)
+    void ExternNodeCommunication::HandleEvents()
     {
         m_isNotified = 0;
         if (m_queueNotFullEvent != 0)
@@ -695,7 +539,6 @@ namespace Internal
             m_startPoolDistributionEvent = 0;
             m_startPoolDistributionCb();
         }
-        return 0;
     }
 
     int GetChannelNo(const unsigned long channelBitMap)
@@ -732,7 +575,6 @@ namespace Internal
             if (errCode==ERR_DOSECOM_OK)
             {
                 ENSURE (fromChannel != 0, << "DoseCom_Read unexpectedly gave 0 value for fromChannel when reading message!");
-                MemMapRemove(data,"HandleIncomingData");
 
                 DistributionData msg(new_data_tag,data);
 
@@ -766,12 +608,7 @@ namespace Internal
                     if (m_isNotified == 0)
                     {
                         m_isNotified = 1;
-                        //we need to do the timeout kind of notify, since we otherwise
-                        //might get to wait on ourselves (this is a notify from within the reactor)
-                        ACE_Time_Value delay (0);
-                        const int res = ACE_Reactor::instance()->notify(this, ACE_Event_Handler::EXCEPT_MASK,&delay);
-                        ENSURE(res == 0, << "GAAAH! We failed to notify ourselves! This means that some other"
-                                         << "part of dose_main has not filtered its notifies correctly!");
+                        m_ioService.post(boost::bind(&ExternNodeCommunication::HandleEvents,this));
                     }
                     break;
                 }
@@ -827,7 +664,7 @@ namespace Internal
         if (m_isNotified == 0)
         {
             m_isNotified = 1;
-            ACE_Reactor::instance()->notify(this);
+            m_ioService.post(boost::bind(&ExternNodeCommunication::HandleEvents,this));
         }
     }
 
@@ -837,14 +674,14 @@ namespace Internal
         // lllout << "ExternNodeCommunication::NotifyQueueNotFull() - priorityChannel: " << priorityChannel << std::endl;
 
         {
-            ACE_Guard<ACE_Thread_Mutex> lck(m_queueIsFullLock);
+            boost::lock_guard<boost::mutex> lck(m_queueIsFullLock);
             m_queueIsFull[priorityChannel] = 0;
         }
         m_queueNotFullEvent = 1;
         if (m_isNotified == 0)
         {
             m_isNotified = 1;
-            ACE_Reactor::instance()->notify(this);
+            m_ioService.post(boost::bind(&ExternNodeCommunication::HandleEvents,this));
         }
     }
 
@@ -861,7 +698,7 @@ namespace Internal
         if (m_isNotified == 0)
         {
             m_isNotified = 1;
-            ACE_Reactor::instance()->notify(this);
+            m_ioService.post(boost::bind(&ExternNodeCommunication::HandleEvents,this));
         }
     }
 
@@ -873,7 +710,7 @@ namespace Internal
         if (m_isNotified == 0)
         {
             m_isNotified = 1;
-            ACE_Reactor::instance()->notify(this);
+            m_ioService.post(boost::bind(&ExternNodeCommunication::HandleEvents,this));
         }
     }
 

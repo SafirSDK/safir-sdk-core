@@ -55,52 +55,18 @@ namespace Internal
 
     }
 
-
-    /*
-    MemberMapping MemberMapping::CreateNullMapping()
+    PropertyMappingDescription::PropertyMappingDescription(const PropertyMappingDescription& other):
+        m_property(other.m_property),
+        m_mappings(other.m_mappings)
     {
-        MemberMapping map;
-        map.m_mappingKind = MappedToNull;
-        return map;
     }
 
-    MemberMapping MemberMapping::CreateClassMemberReferenceMapping(int noReferenceElements)
+    PropertyMappingDescription& PropertyMappingDescription::operator=(const PropertyMappingDescription& other)
     {
-        MemberMapping map;
-        //        map.m_propertyMember = propertyMember;
-        map.m_mappingKind = MappedToMember;
-        map.m_classMemberReference = ClassMemberReference(&Safir::Dob::Typesystem::Internal::Repository::m_pool,noReferenceElements,noReferenceElements);
-        return map;
+        m_property = other.m_property;
+        m_mappings = other.m_mappings;
+        return *this;
     }
-
-    MemberMapping MemberMapping::CreateParameterMapping(const ParameterDescription & pd)
-    {
-        MemberMapping map;
-        map.m_mappingKind = MappedToParameter;
-        map.m_parameter = &pd;
-        return map;
-        }*/
-    /*
-    MemberMapping::MemberMapping(const DotsC_PropertyMappingKind kind,
-                                 const ClassMemberReferencePtr & cmr,
-                                 const ParameterDescriptionConstPtr & parameter):
-        m_mappingKind(kind),
-        m_classMemberReference(cmr),
-        m_parameter(parameter)
-    {
-        switch (kind)
-        {
-        case MappedToNull:
-            ENSURE(cmr == NULL && parameter == NULL, << "MemberMapping constructor: MappedToNull must have NULL cmr and parameter");
-            break;
-        case MappedToMember:
-            ENSURE(cmr != NULL && parameter == NULL, << "MemberMapping constructor: MappedToMember must have non-NULL cmr and NULL parameter");
-            break;
-        case MappedToParameter:
-            ENSURE(cmr == NULL && parameter != NULL, << "MemberMapping constructor: MappedToParameter must have NULL cmr and non-NULL parameter");
-            break;
-        }
-        }*/
 
     MemberMapping::MemberMapping():
         m_mappingKind(MappedToNull),
@@ -121,6 +87,22 @@ namespace Internal
              *allocHelper.GetShmem());
         m_classMemberReference->reserve(depth);
     }
+
+    MemberMapping::MemberMapping(const MemberMapping& other):
+        m_mappingKind(other.m_mappingKind),
+        m_classMemberReference(other.m_classMemberReference),
+        m_parameter(other.m_parameter)
+    {
+    }
+
+    MemberMapping& MemberMapping::operator=(const MemberMapping& other)
+    {
+        m_mappingKind = other.m_mappingKind;
+        m_classMemberReference = other.m_classMemberReference;
+        m_parameter = other.m_parameter;
+        return *this;
+    }
+
 
 
     MemberMapping::MemberMapping(const ParameterDescription & parameter,

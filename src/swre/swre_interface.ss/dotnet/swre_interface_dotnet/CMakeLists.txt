@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT(swre_interface_dotnet)
+PROJECT(swre_interface_dotnet NONE)
 
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
@@ -11,7 +11,7 @@ INCLUDE(CSharpMacros)
 FILE(GLOB sources *.cs)
 
 SET(CS_FLAGS ${COMMON_CS_FLAGS} "-keyfile:${SAFIR_SDK}/data/build/safirkey.snk"
-								"-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dll,${SAFIR_RUNTIME}/bin/Safir.Dob.dll,${SAFIR_RUNTIME}/bin/dots_generated-dotnet.dll")
+                                "-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dll,${SAFIR_RUNTIME}/bin/Safir.Dob.dll,${SAFIR_RUNTIME}/bin/dots_generated-dotnet.dll")
 
 ADD_CS_LIBRARY(Safir.SwReports "${sources}" ALL)
 

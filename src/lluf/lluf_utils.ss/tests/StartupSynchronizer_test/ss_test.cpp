@@ -22,38 +22,72 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/StartupSynchronizer.h>
-#include <ace/OS_NS_unistd.h>
+#include <boost/noncopyable.hpp>
+#include <iostream>
 
-class Synchronized:
-    public Safir::Utilities::Synchronized
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244)
+#endif
+
+#include <boost/thread.hpp>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
+
+class Synchronized 
+    : public Safir::Utilities::Synchronized
+    , private boost::noncopyable
 {
+public:
+    enum State { None = 0, Created = 1, Used = 2};
+    
+    Synchronized(int & state)
+      : m_state(state)
+    {
+
+    }
+private:
+    int & m_state;
+
     virtual void Create()
     {
         std::wcout << "-- Create" << std::endl;
-        ACE_OS::sleep(5);
+        boost::this_thread::sleep(boost::posix_time::seconds(1));
         std::wcout << "-- Create complete" << std::endl;
+        m_state |= Created;
     }
     virtual void Use()
     {
         std::wcout << "-- Use" << std::endl;
-        ACE_OS::sleep(5);
+        boost::this_thread::sleep(boost::posix_time::seconds(1));
         std::wcout << "-- Use complete" << std::endl;
+        m_state |= Used;
     }
 
     virtual void Destroy()
     {
+        //we don't check that destroy has happened, since it is not guaranteed
         std::wcout << "-- Destroy" << std::endl;
-        ACE_OS::sleep(5);
+        boost::this_thread::sleep(boost::posix_time::seconds(1));
         std::wcout << "-- Destroy complete" << std::endl;
     }
 };
 
 int main()
 {
-    Synchronized synched;
+    int state = 0;
 
-    Safir::Utilities::StartupSynchronizer ss("StartupSynchronizer_test",&synched);
-    ss.Start();
+    {
+        Synchronized synched(state);
+
+        Safir::Utilities::StartupSynchronizer ss("StartupSynchronizer_test");
+        ss.Start(&synched);
+    }
+    return state;
 }
 
 

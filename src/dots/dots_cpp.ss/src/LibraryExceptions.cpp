@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 * 
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagstrï¿½m / stlrha
 *
 *******************************************************************************
 *
@@ -26,23 +26,10 @@
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
-
-//disable warnings in ace
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4267 4244)
-#endif
-
-#include <ace/Guard_T.h>
-#include <ace/Recursive_Thread_Mutex.h>
-
-//and enable the warnings again
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
-
 #include <sstream>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <boost/thread/mutex.hpp>
+#include <boost/bind.hpp>
 
 namespace Safir
 {
@@ -50,22 +37,20 @@ namespace Dob
 {
 namespace Typesystem
 {
-    LibraryExceptions * volatile LibraryExceptions::m_pInstance = NULL;
+    boost::once_flag LibraryExceptions::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
     // -----------------------------------------------------------
-    LibraryExceptions &
-    LibraryExceptions::Instance()
+    LibraryExceptions & LibraryExceptions::SingletonHelper::Instance()
     {
-        if (!m_pInstance)
-        {
-            static ACE_Recursive_Thread_Mutex instantiationLock;
-            ACE_Guard<ACE_Recursive_Thread_Mutex> lck(instantiationLock);
-            if (!m_pInstance)
-            {
-                m_pInstance = new LibraryExceptions();
-            }
-        }
-        return *m_pInstance;
+        static LibraryExceptions instance;
+        return instance;
+    }
+
+    // -----------------------------------------------------------
+    LibraryExceptions & LibraryExceptions::Instance()
+    {
+        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        return SingletonHelper::Instance();
     }
 
     // -----------------------------------------------------------
@@ -176,29 +161,9 @@ namespace Typesystem
         DotsC_GetAndClearException(exceptionId,description,deleter,wasSet);
         if (wasSet)
         {
-            if (exceptionId == 0)
-            {
-                std::string desc = description;
-                deleter(description);
-                throw UnknownException(desc.c_str());
-            }
-            else
-            {
-                std::wstring desc = Utilities::ToWstring(description);
-                deleter(description);
-                CallbackMap::const_iterator it = m_CallbackMap.find(exceptionId);
-                if (it == m_CallbackMap.end())
-                {
-                    std::wostringstream ostr;
-                    ostr << "LibraryExceptions::Throw was called when an exception that was not registered in the exception-factory was set in dots_kernel." << std::endl
-                         << "exceptionId = " << exceptionId << ", description = '" << desc << "'." << std::endl
-                         << "Please report this to your nearest DOB developer!";
-                    lllout << ostr.str() << std::endl;
-                    throw SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
-                }
-                //invoke the function
-                it->second(desc);
-            }
+            const std::string desc(description);
+            deleter(description);
+            Throw(exceptionId,desc);
         }
         else
         {
@@ -206,6 +171,30 @@ namespace Typesystem
         }
     }
 
+    // -----------------------------------------------------------
+    void LibraryExceptions::Throw(const TypeId exceptionId, const std::string& desc) const
+    {
+        if (exceptionId == 0)
+        {
+            throw UnknownException(desc);
+        }
+        else
+        {
+            const std::wstring description = Utilities::ToWstring(desc);
+            CallbackMap::const_iterator it = m_CallbackMap.find(exceptionId);
+            if (it == m_CallbackMap.end())
+            {
+                std::wostringstream ostr;
+                ostr << "LibraryExceptions::Throw was called with an exception that was not registered in the exception-factory!" << std::endl
+                     << "exceptionId = " << exceptionId << ", description = '" << description << "'." << std::endl
+                     << "Please report this to your nearest DOB developer!";
+                lllout << ostr.str() << std::endl;
+                throw SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+            }
+            //invoke the function
+            it->second(description);
+        }
+    }
 
 }
 }

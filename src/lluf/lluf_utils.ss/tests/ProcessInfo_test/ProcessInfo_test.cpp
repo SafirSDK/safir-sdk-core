@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2012 (http://www.safirsdk.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -23,12 +23,11 @@
 ******************************************************************************/
 #include <Safir/Utilities/ProcessInfo.h>
 #include <iostream>
-#include <ace/OS_NS_unistd.h>
 
 int main()
 {
-    Safir::Utilities::ProcessInfo pi(ACE_OS::getpid());
-    if (pi.GetProcessName() == "ProcessInfo_test")
+    Safir::Utilities::ProcessInfo pi(Safir::Utilities::ProcessInfo::GetPid());
+    if (pi.GetProcessName() == "ProcessInfo_test" || pi.GetProcessName() == "ProcessInfo_test.exe")
     {
         return 0;
     }
@@ -36,7 +35,7 @@ int main()
     {
         std::wcout << "Not ok! GetProcessName returned '"
                    << pi.GetProcessName().c_str() << "'" << std::endl;
-        return -1;
+        return 1;
     }
 }
 

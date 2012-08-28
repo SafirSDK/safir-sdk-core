@@ -27,7 +27,19 @@
 
 #include "entitymw.h"
 #include "qtdispatcher.h"
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127)
+#pragma warning (disable: 4257)
+#endif
+
 #include <QtGui/QApplication>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <Safir/Dob/Connection.h>
 
 namespace VehicleMmiCppQt

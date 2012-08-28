@@ -28,13 +28,26 @@
 
 using namespace Safir::Dob::Internal;
 
-int main()
+int main(int, char**)
 {
     LamportClock clock;
 
-    for (int i = 0; i < 10; ++i)
     {
-        std::wcout << "GetNewTimestamp: " << clock.GetNewTimestamp() << std::endl;
+        LamportTimestamp last = clock.GetNewTimestamp();
+        for (int i = 0; i < 10; ++i)
+        {
+            const LamportTimestamp next = clock.GetNewTimestamp();
+            if (!(last < next)) 
+            {
+                std::wcout << "operator < failed for " << last << " < " << next << std::endl;
+                return 1;
+            }
+            if (!(last != next)) 
+            {
+                std::wcout << "operator != failed for " << last << " != " << next << std::endl;
+                return 1;
+            }
+        }
     }
 
     const LamportTimestamp a = clock.GetNewTimestamp();
@@ -65,21 +78,64 @@ int main()
     std::wcout << "d = " << d << std::endl;
 
     std::wcout << std::boolalpha;
-    std::wcout << "a < b (expect true): " << (a < b) << std::endl;
-    std::wcout << "b < a (expect false): " << (b < a) << std::endl;
+    if (!(a < b))
+    {
+        std::wcout << "a < b (expect true): " << (a < b) << std::endl;
+        return 1;
+    }
 
-    std::wcout << "a < c (expect false): " << (a < c) << std::endl;
-    std::wcout << "c < a (expect true): " << (c < a) << std::endl;
+    if (b < a) 
+    {
+        std::wcout << "b < a (expect false): " << (b < a) << std::endl;
+        return 1;
+    }
 
-    std::wcout << "b < c (expect true): " << (b < c) << std::endl;
-    std::wcout << "c < b (expect false): " << (c < b) << std::endl;
+    if (a < c)
+    {
+        std::wcout << "a < c (expect false): " << (a < c) << std::endl;
+        return 1;
+    }
+    
+    if (!(c < a))
+    {
+        std::wcout << "c < a (expect true): " << (c < a) << std::endl;
+        return 1;
+    }
 
-    std::wcout << "a < d (expect true): " << (a < d) << std::endl;
-    std::wcout << "d < a (expect false): " << (d < a) << std::endl;
+    if (!(b < c))
+    {
+        std::wcout << "b < c (expect true): " << (b < c) << std::endl;
+        return 1;
+    }
+    if (c < b)
+    {
+        std::wcout << "c < b (expect false): " << (c < b) << std::endl;
+        return 1;
+    }
 
-    std::wcout << "c < d (expect true): " << (c < d) << std::endl;
-    std::wcout << "d < c (expect false): " << (d < c) << std::endl;
+    if (!(a < d))
+    {
+        std::wcout << "a < d (expect true): " << (a < d) << std::endl;
+        return 1;
+    }
+    if (d < a)
+    {
+        std::wcout << "d < a (expect false): " << (d < a) << std::endl;
+        return 1;
+    }
 
+    if (!(c < d))
+    {
+        std::wcout << "c < d (expect true): " << (c < d) << std::endl;
+        return 1;
+    }
+    if (d < c)
+    {
+        std::wcout << "d < c (expect false): " << (d < c) << std::endl;
+        return 1;
+    }
+
+    std::wcout << "success" << std::endl;
     return 0;
 }
 

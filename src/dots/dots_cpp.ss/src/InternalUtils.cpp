@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
 * 
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagstrï¿½m / stlrha
 *
 *******************************************************************************
 *
@@ -39,7 +39,7 @@ namespace Internal
     void EnsureFailed (const std::wstring & str)
     {
         lllerr << "ENSURE failed: '"<< str << "'" << std::endl;
-        Safir::Utilities::Internal::Internal::LowLevelLoggerBackend::Instance().FlushBuffer();
+        //TODO Safir::Utilities::Internal::Internal::LowLevelLoggerBackend::Instance().OutputInternalBuffer();
         std::wcout << "Please contact your nearest DOB developer!" << std::endl;
 
         throw SoftwareViolationException(str, __WFILE__,__LINE__);

@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 * 
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagstrï¿½m / stlrha
 *
 *******************************************************************************
 *
@@ -169,8 +169,6 @@ namespace Internal
         return ParameterOffsetCast<T>(boost::interprocess::const_pointer_cast<char>(offset));
 #endif
     }
-
-
 }
 }
 }

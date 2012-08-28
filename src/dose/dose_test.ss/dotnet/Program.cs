@@ -26,7 +26,7 @@ namespace dose_test_dotnet
 {
     class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
 
             System.Console.WriteLine("Starting");
@@ -42,6 +42,7 @@ namespace dose_test_dotnet
             }
 
             System.Console.WriteLine("Exiting");
+            return 0;
         }
     }
 }

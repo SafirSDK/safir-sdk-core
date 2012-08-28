@@ -59,6 +59,7 @@
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
@@ -76,12 +77,6 @@
 #endif
 
 #include <iostream>
-
-#include <ace/OS_NS_unistd.h>
-
-#ifdef DispatchMessage
-#undef DispatchMessage
-#endif
 
 using namespace std;
 
@@ -276,7 +271,7 @@ namespace Internal
                 std::wostringstream ostr;
                 ostr << "Failed to open connection! This process has too many connections, "
                      << "please increase the size of the ConnectionNames array in class Safir.Dob.ProcessInfo. " << std::endl
-                     << "While opening Process pid = " << ACE_OS::getpid() << ", ConnectionName = " << m_connectionName.c_str();
+                     << "While opening Process pid = " << Safir::Utilities::ProcessInfo::GetPid() << ", ConnectionName = " << m_connectionName.c_str();
                 throw Safir::Dob::NotOpenException(ostr.str(), __WFILE__,__LINE__);
             }
             break;
@@ -286,7 +281,7 @@ namespace Internal
                 m_isConnected = false;
                 std::wostringstream ostr;
                 ostr << "Failed to open connection! The connection name '" << m_connectionName.c_str()
-                     << "' is already in use. While opening connection from process with pid = " << ACE_OS::getpid();
+                     << "' is already in use. While opening connection from process with pid = " << Safir::Utilities::ProcessInfo::GetPid();
                 throw Safir::Dob::NotOpenException(ostr.str(), __WFILE__,__LINE__);
             }
             break;
@@ -297,10 +292,10 @@ namespace Internal
         }
 
 
-        ENSURE(m_dispatchThread == NULL, << "DispatchThread was non-NULL when  was called!");
-        m_dispatchThread.reset(new DispatchThread(m_connection->Id(), dispatcher, onDispatchCb));
+        ENSURE(m_dispatchThread == NULL, << "DispatchThread was non-NULL when Connect was called!");
+        m_dispatchThread.reset(new DispatchThread(m_connection->Id(), m_connectionName, dispatcher, onDispatchCb));
 
-        m_dispatchThread->StartNewThread();
+        m_dispatchThread->Start();
 
         lllout << " complete for " << m_connectionName.c_str() << std::endl;
     }
@@ -1620,6 +1615,7 @@ namespace Internal
         //Stop order
         if (m_connection->StopOrderPending() && !m_exitDispatch)
         {
+            lllog(3) << "Dispatching stop order" << std::endl;
             m_dispatcher.DispatchStopOrder();
 
             if (m_connection != NULL)
@@ -2014,7 +2010,7 @@ namespace Internal
         const StateKind lastKind = GetStateKind(lastState);
         const StateKind currKind = GetStateKind(currState);
 
-        if (Safir::Utilities::Internal::Internal::LowLevelLoggerBackend::Instance().LoggingEnabled())
+        if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 9)
         {
             Safir::Dob::Typesystem::EntityId eid;
             if (!lastState.IsNoState())

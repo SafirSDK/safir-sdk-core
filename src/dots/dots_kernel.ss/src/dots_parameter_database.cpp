@@ -416,7 +416,8 @@ namespace Internal
                 const DobParameter::ParameterValue & theValue = val.m_values[ix];
                 if (theValue.m_valueFromParameter)
                 {
-                    std::cerr << "Cannot add index " << ix <<" of parameter " << val.m_name << " (m_valueFromParameter is true!). This is probably a DOB bug..."<< std::endl;
+                    std::wcerr << "Cannot add index " << ix <<" of parameter " << val.m_name.c_str()
+                               << " (m_valueFromParameter is true!). This is probably a DOB bug..."<< std::endl;
                     continue;
                     //references are not resolved here
                 }
@@ -490,7 +491,7 @@ namespace Internal
                             val.m_file,
                             val.m_values[valueIndex].m_lineNumber,
                             "dots_parameter_database");
-        exit(-1);
+        exit(1);
     }
 }
 }

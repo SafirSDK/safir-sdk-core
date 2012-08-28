@@ -83,8 +83,6 @@ namespace Time
     //---------------------------------------------------------------------------
     boost::posix_time::ptime TimeProvider::ToPtime(const Safir::Dob::Typesystem::Si64::Second utcTime)
     {
-        boost::posix_time::ptime t = _1_JAN_1970; // Set time to 1970-Jan-01 (UTC start)
-
         Dob::Typesystem::Int64 sec;
         Dob::Typesystem::Float64 fraction;
 

@@ -24,6 +24,9 @@
 #ifndef __DOSE_INTERNAL_SCOPE_EXIT_H__
 #define __DOSE_INTERNAL_SCOPE_EXIT_H__
 
+#include <boost/function.hpp>
+#include <boost/noncopyable.hpp>
+
 namespace Safir
 {
 namespace Dob

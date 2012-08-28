@@ -8,7 +8,7 @@ if (NOT SAFIR_ADA_SUPPORT)
 endif (NOT SAFIR_ADA_SUPPORT)
 
 
-PROJECT (douf_time_ada)
+PROJECT (douf_time_ada NONE)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 

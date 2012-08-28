@@ -29,6 +29,7 @@ with Safir.Dob.Typesystem.Container_Base; use Safir.Dob.Typesystem.Container_Bas
 -- The operations that modify the value update the null flag and the change flag.
 --
 package Safir.Dob.Typesystem.Binary_Container is
+   pragma Preelaborate (Safir.Dob.Typesystem.Binary_Container);
 
    type Container is new Container_Base_Type with private;
 

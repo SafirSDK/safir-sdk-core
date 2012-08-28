@@ -33,7 +33,6 @@
 #include <Safir/Time/TimeProvider.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>
-#include <ace/Guard_T.h>
 
 namespace Safir
 {
@@ -68,7 +67,7 @@ namespace Internal
                                                Safir::Dob::Typesystem::Int32 & connectionSeqNbr,
                                                Safir::Dob::Typesystem::Int32 & reportTypeSeqNbr)
     {
-        ACE_Guard<ACE_Recursive_Thread_Mutex> lck(m_sequenceNumbersLock);
+        boost::lock_guard<boost::mutex> lck(m_sequenceNumbersLock);
 
         SequenceNumberMap::iterator it = m_sequenceNumbers.find(connectionName);
         if (it != m_sequenceNumbers.end())

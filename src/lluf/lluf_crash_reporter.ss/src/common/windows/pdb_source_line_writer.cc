@@ -109,7 +109,7 @@ bool PDBSourceLineWriter::Open(const wstring &file, FileFormat format) {
           fprintf(stderr, "loadDataForPdb and loadDataFromExe failed for %ws\n", file.c_str());
           return false;
         }
-	code_file_ = file;
+    code_file_ = file;
       }
       break;
     default:
@@ -530,8 +530,8 @@ bool PDBSourceLineWriter::PrintPEInfo() {
   }
 
   fprintf(output_, "INFO CODE_ID %ws %ws\n",
-	  info.code_identifier.c_str(),
-	  info.code_file.c_str());
+      info.code_identifier.c_str(),
+      info.code_file.c_str());
   return true;
 }
 
@@ -588,12 +588,12 @@ bool PDBSourceLineWriter::FindPEFile() {
     for (int i = 0; i < sizeof(extensions) / sizeof(extensions[0]); i++) {
       size_t dot_pos = file.find_last_of(L".");
       if (dot_pos != wstring::npos) {
-	file.replace(dot_pos + 1, wstring::npos, extensions[i]);
-	// Check if this file exists.
-	if (GetFileAttributesW(file.c_str()) != INVALID_FILE_ATTRIBUTES) {
-	  code_file_ = file;
-	  return true;
-	}
+    file.replace(dot_pos + 1, wstring::npos, extensions[i]);
+    // Check if this file exists.
+    if (GetFileAttributesW(file.c_str()) != INVALID_FILE_ATTRIBUTES) {
+      code_file_ = file;
+      return true;
+    }
       }
     }
   }
@@ -956,8 +956,8 @@ bool PDBSourceLineWriter::GetPEInfo(PEModuleInfo *info) {
   }
   wchar_t code_identifier[32];
   swprintf(code_identifier,
-	   sizeof(code_identifier) / sizeof(code_identifier[0]),
-	   L"%08X%X", TimeDateStamp, SizeOfImage);
+       sizeof(code_identifier) / sizeof(code_identifier[0]),
+       L"%08X%X", TimeDateStamp, SizeOfImage);
   info->code_identifier = code_identifier;
 
   return true;

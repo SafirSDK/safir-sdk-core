@@ -28,7 +28,7 @@
 #include <Safir/Databases/Odbc/ReconnectException.h>
 #include <Safir/Databases/Odbc/TimeoutException.h>
 #include <Safir/SwReports/SwReport.h>
-
+#include "StringConversion.h"
 
 namespace Safir
 {
@@ -63,9 +63,9 @@ void Connection::Alloc(const Environment & environment)
     }
     if (ret == SQL_SUCCESS_WITH_INFO) // Can only be 01000 - non odbc error.
     {
-        wchar_t wszSqlState[6];
+        SQLWCHAR wszSqlState[6];
         SQLINTEGER lpNativeErrorPtr;
-        wchar_t wszMessageText[256];
+        SQLWCHAR wszMessageText[256];
         SQLRETURN ret;
 
         ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
@@ -76,9 +76,10 @@ void Connection::Alloc(const Environment & environment)
                                 wszMessageText,
                                 256,
                                 NULL);
+
         Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
                                             L"Safir::Databases::Odbc::Connection::Alloc()",
-                                            wszMessageText );
+                                            ToWstring(wszMessageText));
     }
 }
 
@@ -95,9 +96,9 @@ void Connection::Free()
     ret = ::SQLFreeHandle(SQL_HANDLE_DBC, m_hConnection);
     if (!SQL_SUCCEEDED(ret))
     {
-        wchar_t wszSqlState[6];
+        SQLWCHAR wszSqlState[6];
         SQLINTEGER lpNativeErrorPtr;
-        wchar_t wszMessageText[512];
+        SQLWCHAR wszMessageText[512];
         SQLRETURN ret;
 
         ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
@@ -108,30 +109,30 @@ void Connection::Free()
                                 wszMessageText,
                                 512,
                                 NULL);
-        if (wcscmp(wszSqlState, L"HY010") == 0) // Function sequence error
+        if (Equal(wszSqlState, L"HY010")) // Function sequence error
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Freeing an connected connection",__WFILE__,__LINE__);
         }
-        else if (wcscmp(wszSqlState, L"HY017") == 0)    // Stmt already freed.
+        else if (Equal(wszSqlState, L"HY017"))    // Stmt already freed.
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Freeing an invalid connection",__WFILE__,__LINE__);
         }
-        else if (wcscmp(wszSqlState, L"IM001") == 0)    // Driver not implemented this function
+        else if (Equal(wszSqlState, L"IM001"))    // Driver not implemented this function
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Driver not implemented this function",__WFILE__,__LINE__);
         }
-        else if ((wcscmp(wszSqlState, L"HY013") == 0) ||
-                 (wcscmp(wszSqlState, L"HY001") == 0))
+        else if (Equal(wszSqlState, L"HY013") ||
+                 Equal(wszSqlState, L"HY001"))
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Memory management error",__WFILE__,__LINE__);
         }
-        else if (wcscmp(wszSqlState, L"HY000") == 0)    // General error
+        else if (Equal(wszSqlState, L"HY000"))    // General error
         {
-            Safir::SwReports::SendProgramInfoReport(wszMessageText);
+            Safir::SwReports::SendProgramInfoReport(ToWstring(wszMessageText));
         }
-        else if (wcscmp(wszSqlState, L"HYT01") == 0)    // Connection timeout expired.
+        else if (Equal(wszSqlState, L"HYT01"))    // Connection timeout expired.
         {
-            Safir::SwReports::SendProgramInfoReport(wszMessageText);
+            Safir::SwReports::SendProgramInfoReport(ToWstring(wszMessageText));
         }
     }
 
@@ -157,9 +158,9 @@ void Connection::SetConnectAttr(long lAttribute, long lValue)
     }
     if (ret == SQL_SUCCESS_WITH_INFO) // Can only be 01000 or 01S02
     {
-        wchar_t wszSqlState[6];
+        SQLWCHAR wszSqlState[6];
         SQLINTEGER lpNativeErrorPtr;
-        wchar_t wszMessageText[256];
+        SQLWCHAR wszMessageText[256];
         SQLRETURN ret;
 
         ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
@@ -170,13 +171,13 @@ void Connection::SetConnectAttr(long lAttribute, long lValue)
                                 wszMessageText,
                                 256,
                                 NULL);
-        if (wcscmp(wszSqlState, L"01000") == 0)
+        if (Equal(wszSqlState, L"01000"))
         {
             Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
                                                 L"Safir::Databases::Odbc::Connection::SetConnectAttr()",
-                                                wszMessageText );
+                                                ToWstring(wszMessageText));
         }
-        if (wcscmp(wszSqlState, L"01S02") == 0)
+        if (Equal(wszSqlState, L"01S02"))
         {
             Safir::SwReports::SendProgramInfoReport(L"Connection attribute not supported. A similiar attribute used instead");
         }
@@ -190,11 +191,9 @@ void Connection::SetConnectAttr(long lAttribute, const std::wstring & wszValue)
     if (!IsValid())
         throw Safir::Dob::Typesystem::SoftwareViolationException(L"Using an invalid connection",__WFILE__,__LINE__);
 
-    // const_cast is used because Value is declared as input in the ODBC
-    // specification and should be a const wchar_t *.
     ret = ::SQLSetConnectAttr(  m_hConnection,
                                 lAttribute,
-                                const_cast<wchar_t *>(wszValue.c_str()),
+                                ToSqlWchars(wszValue),
                                 SQL_NTS );
     if (!SQL_SUCCEEDED(ret))
     {
@@ -202,9 +201,9 @@ void Connection::SetConnectAttr(long lAttribute, const std::wstring & wszValue)
     }
     if (ret == SQL_SUCCESS_WITH_INFO) // Can only be 01000 or 01S02
     {
-        wchar_t wszSqlState[6];
+        SQLWCHAR wszSqlState[6];
         SQLINTEGER lpNativeErrorPtr;
-        wchar_t wszMessageText[256];
+        SQLWCHAR wszMessageText[256];
         SQLRETURN ret;
 
         ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
@@ -215,13 +214,13 @@ void Connection::SetConnectAttr(long lAttribute, const std::wstring & wszValue)
                                 wszMessageText,
                                 256,
                                 NULL);
-        if (wcscmp(wszSqlState, L"01000") == 0)
+        if (Equal(wszSqlState, L"01000"))
         {
             Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
                                                 L"Safir::Databases::Odbc::Connection::SetConnectAttr()",
-                                                wszMessageText );
+                                                ToWstring(wszMessageText));
         }
-        if (wcscmp(wszSqlState, L"01S02") == 0)
+        if (Equal(wszSqlState, L"01S02"))
         {
             Safir::SwReports::SendProgramInfoReport(L"Connection attribute not supported. A similiar attribute used instead");
         }
@@ -246,9 +245,9 @@ void Connection::GetConnectAttr(long lAttribute, long & lValue) const
     }
     if (ret == SQL_SUCCESS_WITH_INFO)
     {
-        wchar_t wszSqlState[6];
+        SQLWCHAR wszSqlState[6];
         SQLINTEGER lpNativeErrorPtr;
-        wchar_t wszMessageText[256];
+        SQLWCHAR wszMessageText[256];
         SQLRETURN ret;
 
         ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
@@ -259,15 +258,15 @@ void Connection::GetConnectAttr(long lAttribute, long & lValue) const
                                 wszMessageText,
                                 256,
                                 NULL);
-        if (wcscmp(wszSqlState, L"01000") == 0)
+        if (Equal(wszSqlState,L"01000"))
         {
             Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
                                                 L"Safir::Databases::Odbc::Connection::GetConnectAttr()",
-                                                wszMessageText );
+                                                ToWstring(wszMessageText));
         }
-        if (wcscmp(wszSqlState, L"01004") == 0)
+        if (Equal(wszSqlState, L"01004"))
         {
-            throw Safir::Dob::Typesystem::SoftwareViolationException(wszMessageText, __WFILE__,__LINE__);
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ToWstring(wszMessageText), __WFILE__,__LINE__);
         }
     }
 }
@@ -290,9 +289,9 @@ void Connection::GetConnectAttr(long lAttribute, wchar_t * wszValue, unsigned lo
     }
     if (ret == SQL_SUCCESS_WITH_INFO)
     {
-        wchar_t wszSqlState[6];
+        SQLWCHAR wszSqlState[6];
         SQLINTEGER lpNativeErrorPtr;
-        wchar_t wszMessageText[256];
+        SQLWCHAR wszMessageText[256];
         SQLRETURN ret;
 
         ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
@@ -303,15 +302,15 @@ void Connection::GetConnectAttr(long lAttribute, wchar_t * wszValue, unsigned lo
                                 wszMessageText,
                                 256,
                                 NULL);
-        if (wcscmp(wszSqlState, L"01000") == 0)
+        if (Equal(wszSqlState, L"01000"))
         {
             Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
                                                 L"Safir::Databases::Odbc::Connection::GetConnectAttr()",
-                                                wszMessageText );
+                                                ToWstring(wszMessageText));
         }
-        if (wcscmp(wszSqlState, L"01004") == 0)
+        if (Equal(wszSqlState, L"01004"))
         {
-            throw Safir::Dob::Typesystem::SoftwareViolationException(wszMessageText, __WFILE__,__LINE__);
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ToWstring(wszMessageText), __WFILE__,__LINE__);
         }
     }
 }
@@ -325,11 +324,10 @@ void Connection::Connect(const std::wstring & wszConnectionString)
 
     if (IsConnected())
         throw Safir::Dob::Typesystem::SoftwareViolationException(L"Already connected",__WFILE__,__LINE__);    
-    // InConnectionString is declared as input in the ODBC specification and
-    // should be a const wchar_t *.
+
     ret = ::SQLDriverConnectW(  m_hConnection,          // ConnectionHandle
                                 NULL,                   // WindowHandle
-                                const_cast<wchar_t *>(wszConnectionString.c_str()), // InConnectionString
+                                ToSqlWchars(wszConnectionString), // InConnectionString
                                 SQL_NTS,                // StringLength1
                                 NULL,                   // OutConnectionString
                                 0,                      // BufferLength
@@ -341,9 +339,9 @@ void Connection::Connect(const std::wstring & wszConnectionString)
     }
     if (ret == SQL_SUCCESS_WITH_INFO)
     {
-        wchar_t wszSqlState[6];
+        SQLWCHAR wszSqlState[6];
         SQLINTEGER lpNativeErrorPtr;
-        wchar_t wszMessageText[256];
+        SQLWCHAR wszMessageText[256];
         SQLRETURN ret;
 
         ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
@@ -354,23 +352,23 @@ void Connection::Connect(const std::wstring & wszConnectionString)
                                 wszMessageText,
                                 256,
                                 NULL);
-        if ((wcscmp(wszSqlState, L"01004") == 0) ||
-            (wcscmp(wszSqlState, L"01S00") == 0) ||
-            (wcscmp(wszSqlState, L"01S09") == 0))
+        if (Equal(wszSqlState, L"01004") ||
+            Equal(wszSqlState, L"01S00") ||
+            Equal(wszSqlState, L"01S09"))
         {
-            throw Safir::Dob::Typesystem::SoftwareViolationException(wszMessageText, __WFILE__,__LINE__);
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ToWstring(wszMessageText), __WFILE__,__LINE__);
         }
-        else if (wcscmp(wszSqlState, L"01000") == 0)
+        else if (Equal(wszSqlState, L"01000"))
         {
             Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
                                                 L"Safir::Databases::Odbc::Connection::Connect()",
-                                                wszMessageText );
+                                                ToWstring(wszMessageText));
         }
-        else if (wcscmp(wszSqlState, L"01S02") == 0)
+        else if (Equal(wszSqlState, L"01S02"))
         {
             Safir::SwReports::SendProgramInfoReport(L"Connection attribute not supported. A similiar attribute used instead");
         }
-        else if (wcscmp(wszSqlState, L"01S08") == 0)
+        else if (Equal(wszSqlState, L"01S08"))
         {
             Safir::SwReports::SendProgramInfoReport(L"Error saving file dsn.");
         }
@@ -402,9 +400,9 @@ void Connection::Connect(char * cszConnectionString)
     }
     if (ret == SQL_SUCCESS_WITH_INFO)
     {
-        wchar_t wszSqlState[6];
+        SQLWCHAR wszSqlState[6];
         SQLINTEGER lpNativeErrorPtr;
-        wchar_t wszMessageText[256];
+        SQLWCHAR wszMessageText[256];
         SQLRETURN ret;
 
         ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
@@ -415,23 +413,23 @@ void Connection::Connect(char * cszConnectionString)
                                 wszMessageText,
                                 256,
                                 NULL);
-        if ((wcscmp(wszSqlState, L"01004") == 0) ||
-            (wcscmp(wszSqlState, L"01S00") == 0) ||
-            (wcscmp(wszSqlState, L"01S09") == 0))
+        if (Equal(wszSqlState, L"01004") ||
+            Equal(wszSqlState, L"01S00") ||
+            Equal(wszSqlState, L"01S09"))
         {
-            throw Safir::Dob::Typesystem::SoftwareViolationException(wszMessageText, __WFILE__,__LINE__);
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ToWstring(wszMessageText), __WFILE__,__LINE__);
         }
-        else if (wcscmp(wszSqlState, L"01000") == 0)
+        else if (Equal(wszSqlState, L"01000"))
         {
             Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
                                                 L"Safir::Databases::Odbc::Connection::Connect()",
-                                                wszMessageText );
+                                                ToWstring(wszMessageText));
         }
-        else if (wcscmp(wszSqlState, L"01S02") == 0)
+        else if (Equal(wszSqlState, L"01S02"))
         {
             Safir::SwReports::SendProgramInfoReport(L"Connection attribute not supported. A similiar attribute used instead");
         }
-        else if (wcscmp(wszSqlState, L"01S08") == 0)
+        else if (Equal(wszSqlState, L"01S08"))
         {
             Safir::SwReports::SendProgramInfoReport(L"Error saving file dsn.");
         }
@@ -465,9 +463,9 @@ void Connection::Disconnect()
     ret = ::SQLDisconnect( m_hConnection );
     if (!SQL_SUCCEEDED(ret))
     {
-        wchar_t wszSqlState[6];
+        SQLWCHAR wszSqlState[6];
         SQLINTEGER lpNativeErrorPtr;
-        wchar_t wszMessageText[512];
+        SQLWCHAR wszMessageText[512];
         SQLRETURN ret;
 
         ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
@@ -478,41 +476,41 @@ void Connection::Disconnect()
                                 wszMessageText,
                                 512,
                                 NULL);
-        if (wcscmp(wszSqlState, L"HY010") == 0) // Function sequence error
+        if (Equal(wszSqlState, L"HY010")) // Function sequence error
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Query in progress",__WFILE__,__LINE__);
         }
-        else if (wcscmp(wszSqlState, L"08003") == 0)    // Connection does not exist.
+        else if (Equal(wszSqlState, L"08003"))    // Connection does not exist.
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Using an invalid connection",__WFILE__,__LINE__);
         }
-        else if (wcscmp(wszSqlState, L"25000") == 0)    // Transaction in progress
+        else if (Equal(wszSqlState, L"25000"))    // Transaction in progress
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Transaction in progress",__WFILE__,__LINE__);
         }
-        else if ((wcscmp(wszSqlState, L"HY013") == 0) ||
-                 (wcscmp(wszSqlState, L"HY001") == 0))
+        else if (Equal(wszSqlState, L"HY013") ||
+                 Equal(wszSqlState, L"HY001"))
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Memory management error",__WFILE__,__LINE__);
         }
-        else if (wcscmp(wszSqlState, L"HY000") == 0)   // General error
+        else if (Equal(wszSqlState, L"HY000"))   // General error
         {
-            throw Safir::Dob::Typesystem::SoftwareViolationException(wszMessageText,__WFILE__,__LINE__);
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ToWstring(wszMessageText),__WFILE__,__LINE__);
         }
-        else if (wcscmp(wszSqlState, L"IM001") == 0)    // Driver not implemented function
+        else if (Equal(wszSqlState, L"IM001"))    // Driver not implemented function
         {
-            Safir::SwReports::SendProgramInfoReport(wszMessageText);
+            Safir::SwReports::SendProgramInfoReport(ToWstring(wszMessageText));
         }
-        else if (wcscmp(wszSqlState, L"HYT01") == 0)      // Connection timeout
+        else if (Equal(wszSqlState, L"HYT01"))      // Connection timeout
         {
-            throw Safir::Databases::Odbc::TimeoutException(wszMessageText, __WFILE__,__LINE__);
+            throw Safir::Databases::Odbc::TimeoutException(ToWstring(wszMessageText), __WFILE__,__LINE__);
         }
     }
     else if (ret == SQL_SUCCESS_WITH_INFO) // Can only be 01000 or 01S02
     {
-        wchar_t wszSqlState[6];
+        SQLWCHAR wszSqlState[6];
         SQLINTEGER lpNativeErrorPtr;
-        wchar_t wszMessageText[256];
+        SQLWCHAR wszMessageText[256];
         SQLRETURN ret;
 
         ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
@@ -523,13 +521,13 @@ void Connection::Disconnect()
                                 wszMessageText,
                                 256,
                                 NULL);
-        if (wcscmp(wszSqlState, L"01000") == 0)
+        if (Equal(wszSqlState, L"01000"))
         {
             Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
                                                 L"Safir::Databases::Odbc::Connection::Disconnect()",
-                                                wszMessageText );
+                                                ToWstring(wszMessageText));
         }
-        if (wcscmp(wszSqlState, L"01S02") == 0)
+        if (Equal(wszSqlState, L"01S02"))
         {
             Safir::SwReports::SendProgramInfoReport(L"An error occurred during the disconnect. However, the disconnect succeeded.");
         }
@@ -550,8 +548,8 @@ bool Connection::GetDiagRec(short sRecNumber,
                            std::wstring & MessageText,
                            bool & bDataRead) const
 {
-    wchar_t wszSqlState[6];
-    wchar_t wszMessageText[SQL_MAX_MESSAGE_LENGTH];
+    SQLWCHAR wszSqlState[6];
+    SQLWCHAR wszMessageText[SQL_MAX_MESSAGE_LENGTH];
 
     SQLINTEGER tmpNativeError;
     SQLRETURN ret;
@@ -565,8 +563,8 @@ bool Connection::GetDiagRec(short sRecNumber,
                             NULL);
     NativeError = static_cast<boost::int32_t>(tmpNativeError);
     bDataRead = ((ret == SQL_SUCCESS) ||(ret == SQL_SUCCESS_WITH_INFO));
-    SqlState = wszSqlState;
-    MessageText = wszMessageText;
+    SqlState = ToWstring(wszSqlState);
+    MessageText = ToWstring(wszMessageText);
     return ((ret != SQL_NO_DATA) && (ret != SQL_INVALID_HANDLE) && (ret != SQL_ERROR));
 }
 
@@ -587,9 +585,9 @@ void Connection::EndTran(short sCompletionType)
     }
     if (ret == SQL_SUCCESS_WITH_INFO) // Can only be 01000 - non odbc error.
     {
-        wchar_t wszSqlState[6];
+        SQLWCHAR wszSqlState[6];
         SQLINTEGER lpNativeErrorPtr;
-        wchar_t wszMessageText[256];
+        SQLWCHAR wszMessageText[256];
         SQLRETURN ret;
 
         ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
@@ -602,7 +600,7 @@ void Connection::EndTran(short sCompletionType)
                                 NULL);
         Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
                                             L"Safir::Databases::Odbc::Connection::EndTran()",
-                                            wszMessageText );
+                                            ToWstring(wszMessageText));
     }
 }
 
@@ -617,9 +615,9 @@ void Connection::ThrowReconnectException(SQLSMALLINT HandleType,
                                          const std::wstring & fileName,
                                          const Safir::Dob::Typesystem::Int64 lineNumber) const
 {
-    wchar_t wszSqlState[6];
+    SQLWCHAR wszSqlState[6];
     SQLINTEGER lpNativeErrorPtr;
-    wchar_t wszMessageText[512];
+    SQLWCHAR wszMessageText[512];
     SQLRETURN ret;
 
     ret = ::SQLGetDiagRecW( HandleType,
@@ -630,9 +628,9 @@ void Connection::ThrowReconnectException(SQLSMALLINT HandleType,
                             wszMessageText,
                             256,
                             NULL);
-    std::wstring string = wszSqlState;
+    std::wstring string = ToWstring(wszSqlState);
     string += L":";
-    string += wszMessageText;
+    string += ToWstring(wszMessageText);
 
     
     throw ReconnectException(string.c_str(),fileName,lineNumber);

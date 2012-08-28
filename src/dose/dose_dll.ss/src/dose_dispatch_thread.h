@@ -29,11 +29,19 @@
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/ConsumerId.h>
 
-#include <ace/Thread.h>
-#include <ace/Thread_Semaphore.h>
-#include <ace/Auto_Event.h>
 #include <boost/noncopyable.hpp>
 #include <boost/enable_shared_from_this.hpp>
+
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244)
+#endif
+
+#include <boost/thread.hpp>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
 
 namespace Safir
 {
@@ -51,6 +59,7 @@ namespace Internal
     {
     public:
         DispatchThread(const ConnectionId & id,
+                       const std::string& connectionName,
                        const ConsumerId & consumer,
                        OnDispatchCb * const onDispatchCb);
 
@@ -66,47 +75,25 @@ namespace Internal
         bool Stop(const bool waitAWhile);
 
         /**
-         * If you're starting a new dispatch thread (i.e. C#, Ada, or C++)
-         * Blocks until new thread is started.
+         * Start the dispatch thread.
          */
-        void StartNewThread();
-
-        /**
-         * If you're starting the dispatcher loop inside an existing
-         *  thread (i.e. Java), use the StartInThisThread method.
-         */
-        void StartInThisThread();
+        void Start();
 
     private:
-        static ACE_THR_FUNC_RETURN ThreadFun(void* param);
-
-        void Run(); //dispatch loop
+        void Run(const boost::shared_ptr<DispatchThread>& dummy); //dispatch loop
 
         OnDispatchCb * const m_onDispatchCallback;
+
         const ConsumerId m_consumer;
 
-        ConnectionId m_id;
+        const ConnectionId m_id;
+        const std::string m_connectionName;
 
-        ACE_thread_t m_threadId; //for debug output, remember the thread id.
-        ACE_hthread_t m_threadHandle;
-
-        ACE_Auto_Event m_startEvent;
-        ACE_Auto_Event m_stopEvent;
+        boost::thread m_thread;
 
         AtomicUint32 m_stop;
 
-        enum ThreadState
-        {
-            NotStarted,  //the thread has not been started yet
-            RunningInNewThread, //The thread has been started using StartNewThread
-            RunningInExistingThread, //The thread has been started using StartInThisThread
-            Stopped, //the thread has been stopped, and all resources cleaned up (i.e. the thread is joined)
-        };
-
-        ThreadState m_threadState;
-
         bool m_stopSignalled;
-
     };
 }
 }

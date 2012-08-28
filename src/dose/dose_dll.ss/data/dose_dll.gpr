@@ -1,15 +1,15 @@
 with "externally_built_library";
 
-project dose_dll is
+project Dose_Dll is
 
    for Source_Dirs use ();
 
-   for library_dir use Externally_Built_Library'library_dir;
+   for Library_Dir use Externally_Built_Library'Library_Dir;
 
-   for library_name use "dose_dll";
+   for Library_Name use "dose_dll";
 
-   for Library_kind  use "dynamic";
+   for Library_Kind  use "dynamic";
 
    for Externally_Built use "true";
 
-end dose_dll;
+end Dose_Dll;

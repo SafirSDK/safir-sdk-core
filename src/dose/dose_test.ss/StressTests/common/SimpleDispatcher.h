@@ -44,8 +44,9 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/lexical_cast.hpp>
-#include <ace/Auto_Event.h>
-#include <ace/Time_Value.h>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/condition.hpp>
+#include <boost/bind.hpp>
 
 #ifdef _MSC_VER
   #pragma warning(pop)
@@ -59,11 +60,24 @@ class SimpleDispatcher:
     private boost::noncopyable
 {
 public:
-    explicit SimpleDispatcher(Safir::Dob::Connection & connection):m_connection(connection) {}
+    explicit SimpleDispatcher(Safir::Dob::Connection & connection)
+        : m_connection(connection)
+        , m_dispatch(false)
+    {
+    
+    }
 
     virtual void OnStopOrder() {exit(0);}
-    virtual void OnDoDispatch() {m_event.signal();}
-
+    virtual void OnDoDispatch() 
+    {
+        {
+            boost::lock_guard<boost::mutex> lock(m_mutex);
+            m_dispatch=true;
+        }
+        m_condition.notify_one();
+    }
+    
+    
     //return true if dispatch is due
     bool Wait(const long milliseconds)
     {
@@ -72,24 +86,21 @@ public:
             return false;
         }
 
-        const std::ldiv_t divResult = std::ldiv(milliseconds,1000L);
-        const ACE_Time_Value delay(divResult.quot,divResult.rem*1000);
+        const boost::posix_time::milliseconds delay(milliseconds);
 
-        const int res = m_event.wait(&delay,0);
-
-        if(res == 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        boost::unique_lock<boost::mutex> lock(m_mutex);
+        const bool res = m_condition.timed_wait(lock,delay,boost::bind(&SimpleDispatcher::DispatchPending,this));
+        m_dispatch = false;
+        return res;
     }
 
 private:
-    ACE_Auto_Event m_event;
+    bool DispatchPending() const {return m_dispatch;}
+
     Safir::Dob::Connection & m_connection;
+    bool m_dispatch;
+    boost::mutex m_mutex;
+    boost::condition m_condition;
 };
 
 #endif

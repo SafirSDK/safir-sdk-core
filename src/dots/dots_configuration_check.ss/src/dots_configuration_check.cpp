@@ -40,12 +40,12 @@ int main(int /*argc*/, char* /*argv*/[])
     {
 
         std::wcout << "Failed with exception description: " << exc.what() << std::endl;
-        return -1;
+        return 1;
     }
     catch (...)
     {
         std::wcout << "Failed with ... exception." << std::endl;
-        return -2;
+        return 1;
     }
 
     std::wcout<<"Success!"<<std::endl;

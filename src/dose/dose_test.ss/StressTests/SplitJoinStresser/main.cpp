@@ -72,7 +72,7 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
     {
         std::wcout << "Got exception while parsing command line: "<< std::endl
             <<e.what() <<std::endl;
-        exit(-1);
+        exit(1);
     }
 
 }

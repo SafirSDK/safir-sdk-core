@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(dots_java_jni Java)
+project(dots_java_jni CXX Java)
 find_package(Java REQUIRED)
 find_package(JNI REQUIRED)
 string (REPLACE "javac" "javah" JAVAH ${JAVA_COMPILE})

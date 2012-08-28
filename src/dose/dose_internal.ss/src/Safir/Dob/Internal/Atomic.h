@@ -37,18 +37,19 @@ namespace Internal
 {
     namespace Atomics 
     {
-#if BOOST_VERSION / 100000 <= 1 && BOOST_VERSION / 100 % 1000 < 48
-        using boost::interprocess::detail::atomic_inc32;
-        using boost::interprocess::detail::atomic_dec32;
-        using boost::interprocess::detail::atomic_read32;
-        using boost::interprocess::detail::atomic_write32;
-        using boost::interprocess::detail::atomic_cas32;
-#else
+        //the namespace changed name in 1.48
+#if ((BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) > 47)
         using boost::interprocess::ipcdetail::atomic_inc32;
         using boost::interprocess::ipcdetail::atomic_dec32;
         using boost::interprocess::ipcdetail::atomic_read32;
         using boost::interprocess::ipcdetail::atomic_write32;
         using boost::interprocess::ipcdetail::atomic_cas32;
+#else
+        using boost::interprocess::detail::atomic_inc32;
+        using boost::interprocess::detail::atomic_dec32;
+        using boost::interprocess::detail::atomic_read32;
+        using boost::interprocess::detail::atomic_write32;
+        using boost::interprocess::detail::atomic_cas32;
 #endif
     }
 

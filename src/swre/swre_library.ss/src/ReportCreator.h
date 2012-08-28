@@ -30,19 +30,7 @@
 #include <map>
 #include <Safir/SwReports/Internal/Report.h>
 #include <Safir/Dob/Connection.h>
-
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4244)
-#endif
-
-#include <ace/Recursive_Thread_Mutex.h>
-
-//and enable the warnings again
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
-
+#include <boost/thread/mutex.hpp>
 
 namespace Safir
 {
@@ -117,7 +105,7 @@ namespace Internal
         typedef std::map <std::wstring, SeqNbrs> SequenceNumberMap;
 
         SequenceNumberMap m_sequenceNumbers;
-        ACE_Recursive_Thread_Mutex m_sequenceNumbersLock;
+        boost::mutex m_sequenceNumbersLock;
     };
 
 

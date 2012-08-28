@@ -51,6 +51,24 @@ namespace Internal
     {
     }
 
+
+    ParameterDescription::ParameterDescription(const ParameterDescription& other):
+        m_name(other.m_name),
+        m_memberType(other.m_memberType),
+        m_arrayLength(other.m_arrayLength),
+        m_offset(other.m_offset)
+    {
+    }
+
+    ParameterDescription& ParameterDescription::operator=(const ParameterDescription& other) {
+        m_name = other.m_name;
+        m_memberType = other.m_memberType;
+        m_arrayLength = other.m_arrayLength;
+        m_offset = other.m_offset;
+        return *this;
+    }
+
+
     const ParameterDescription::BinaryParameterValue
     ParameterDescription::BinaryValue(const ArrayIndex index) const
     {

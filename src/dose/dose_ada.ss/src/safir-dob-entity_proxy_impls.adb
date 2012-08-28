@@ -26,7 +26,7 @@ with Safir.Dob.Typesystem.Blob_Operations;
 with Safir.Dob.Interf;
 with Safir.Dob.Typesystem.Library_Exceptions;
 with Safir.Dob.Typesystem.Utilities; use Safir.Dob.Typesystem.Utilities;
-with Safir.Dob.Typesystem.Object_Factory;
+with Safir.Dob.Typesystem.Object.Factory;
 with Safir.Dob.Previous_Entity_Proxy_Impls;
 with Safir.Dob.Previous_Entity_Proxy_Impl_Pointers;
 with Interfaces.C;
@@ -125,7 +125,7 @@ package body Safir.Dob.Entity_Proxy_Impls is
       end if;
 
       return Safir.Dob.Entity.Smart_Pointer'Class
-        (Safir.Dob.Typesystem.Object_Factory.Create_Object (Self.Current_Blob));
+        (Safir.Dob.Typesystem.Object.Factory.Create_Object (Self.Current_Blob));
 
    end Get_Entity;
 
@@ -157,7 +157,7 @@ package body Safir.Dob.Entity_Proxy_Impls is
       end if;
 
       return Safir.Dob.Entity.Smart_Pointer'Class
-        (Safir.Dob.Typesystem.Object_Factory.Create_Object (Self.Current_Blob_With_Change_Info.Get_Ptr));
+        (Safir.Dob.Typesystem.Object.Factory.Create_Object (Self.Current_Blob_With_Change_Info.Get_Ptr));
 
    end Get_Entity_With_Change_Info;
 
@@ -192,7 +192,7 @@ package body Safir.Dob.Entity_Proxy_Impls is
 
       begin
          Connection_Info := Safir.Dob.Connection_Info.Smart_Pointer
-           (Safir.Dob.Typesystem.Object_Factory.Create_Object (Blob));
+           (Safir.Dob.Typesystem.Object.Factory.Create_Object (Blob));
          Blob_Deleter (Blob);
          return Connection_Info;
       exception

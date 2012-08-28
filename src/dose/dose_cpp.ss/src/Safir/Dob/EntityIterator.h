@@ -35,11 +35,6 @@ namespace Safir
 {
 namespace Dob
 {
-//#ifdef _MSC_VER
-//#pragma warning(push)
-//#pragma warning(disable: 4275)
-//#endif
-
     /**
      * A STL conformant forward iterator used to traverse entity instances.
      */
@@ -98,10 +93,6 @@ namespace Dob
 
         mutable boost::shared_ptr<EntityProxy> m_dereferenced;
     };
-//#ifdef _MSC_VER
-//#pragma warning(pop)
-//#endif
-
 }
 }
 

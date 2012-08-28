@@ -1,19 +1,25 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (dots_v)
+PROJECT (dots_v NONE)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
-# XML ada version can be 3.2.1 or 4.2
-
-if ("$ENV{XML_ADA_VER}" STREQUAL "")
-    SET(XML_ADA_VER "3.2.1")
+execute_process(COMMAND xmlada-config -v
+  OUTPUT_VARIABLE output)
+if ("${output}" STREQUAL "")
+  message("Failed to execute xmlada-config, using environment variable XML_ADA_VER to determine xmlada version")
+  if ("$ENV{XML_ADA_VER}" STREQUAL "")
+    message(FATAL_ERROR "Environment variable XML_ADA_VER is not set. Please set it to '3' or '4', depending on what version you have installed")
+  endif()
+  set(XML_ADA_VER $ENV{XML_ADA_VER})
 else()
-    SET(XML_ADA_VER $ENV{XML_ADA_VER})
+  string(REPLACE "XmlAda " "" XML_ADA_VER ${output})
+  string(STRIP ${XML_ADA_VER} XML_ADA_VER)
 endif()
 
-message("Using XmlAda version : " ${XML_ADA_VER}) 
+string(SUBSTRING ${XML_ADA_VER} 0 1 XML_ADA_VER)
 
+#message("Using XmlAda version : '${XML_ADA_VER}'") 
 
 SET(gprmake_arguments -q -XBUILD=${CUSTOM_BUILD_TYPE} -XWarning_Level=Default)
 

@@ -22,12 +22,16 @@
 --
 -------------------------------------------------------------------------------
 with Ada.Exceptions;
+with Ada.Command_Line;
 with Executor;
 with Logger;
 with Safir.Dob.Typesystem.Utilities;
 
 procedure Dose_Test_Ada is
 begin
+   -- Set up exit status to be something bad, in case we exit ungracefully
+   Ada.Command_Line.Set_Exit_Status (1);
+
    Executor.Run;
 exception
    when E : others =>

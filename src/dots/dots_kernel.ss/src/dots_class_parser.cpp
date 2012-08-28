@@ -155,7 +155,7 @@ namespace Internal
             std::string desc = "Could not expand the environment variable '";
             desc += var +"'";
             ErrorHandler::Error("Environment variable expansion error", desc, "dots_class_parser");
-            exit(0);
+            exit(1);
         }
         const std::string res=str.substr(0, start) + env + str.substr(stop+1, str.size()-stop-1);
         return ExpandEnvironmentVariables(res); //search for next environment variable

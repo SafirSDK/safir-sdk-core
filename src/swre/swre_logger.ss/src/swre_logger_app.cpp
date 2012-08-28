@@ -54,32 +54,26 @@ namespace Swre
     using namespace Safir::Dob::Typesystem;
 
 //-----------------------------------------------------------------------------
-LoggerApp::LoggerApp() : m_dispatchEvent(m_Connection)
+LoggerApp::LoggerApp() 
+    : m_reportHandler(m_ioService)
+    , m_dispatcher(m_connection, m_ioService)
 {
-    ;
+
 };
 
 //-----------------------------------------------------------------------------
 LoggerApp::~LoggerApp()
 {
-    m_Connection.Close();
+    m_connection.Close();
 };
 
 //-----------------------------------------------------------------------------
 void LoggerApp::OnStopOrder()
 {
+    m_ioService.stop();
     m_reportHandler.Stop();
-    ACE_Reactor::end_event_loop();
 };
 
-//-----------------------------------------------------------------------------
-/*void LoggerApp::OnEvent(const osin::EventId& id)
-{
-   if (id == m_dispatchEvent.IdOf())
-   {
-      m_Connection.Dispatch();
-   }
-} */
 
 //-----------------------------------------------------------------------------
 int LoggerApp::Run(const std::vector<std::string> & args)
@@ -90,7 +84,11 @@ int LoggerApp::Run(const std::vector<std::string> & args)
     {
         try
         {
-            m_Connection.Open (L"SwreLogger", boost::lexical_cast<std::wstring>(++inst), SWRE_LOGGER_CONTEXT, this, &m_dispatchEvent);
+            m_connection.Open (L"SwreLogger", 
+                               boost::lexical_cast<std::wstring>(++inst), 
+                               SWRE_LOGGER_CONTEXT, 
+                               this, 
+                               &m_dispatcher);
             break;
         }
         catch (const Safir::Dob::NotOpenException&)
@@ -104,7 +102,9 @@ int LoggerApp::Run(const std::vector<std::string> & args)
         return -1;
     }
 
-    ACE_Reactor::instance()->run_reactor_event_loop();
+    boost::asio::io_service::work keepRunning(m_ioService);
+    m_ioService.run();
+
     return 0;
 }
 
@@ -135,7 +135,7 @@ bool LoggerApp::ParseCommandLine(const std::vector<std::string> & arg)
         }
         else if (it->compare("-xml") == 0)
         {
-            std::cerr << "Error: -xml option not supported (yet)" << std::endl;
+            std::wcerr << "Error: -xml option not supported (yet)" << std::endl;
             return false;
         }
         else if (it->compare("-stdout") == 0)
@@ -148,13 +148,13 @@ bool LoggerApp::ParseCommandLine(const std::vector<std::string> & arg)
 
             if (++it == arg.end())
             {
-                std::cerr << "Error: option -file, no log file given" << std::endl;
+                std::wcerr << "Error: option -file, no log file given" << std::endl;
                 return false;
             }
 
             if (!m_reportHandler.SetOutputFile(*it))
             {
-                std::cerr << "Error: Invalid file path" << std::endl;
+                std::wcerr << "Error: Invalid file path" << std::endl;
                 return false;
             }
         }
@@ -162,7 +162,7 @@ bool LoggerApp::ParseCommandLine(const std::vector<std::string> & arg)
         {
             if (++it == arg.end())
             {
-                std::cerr << "Error: option -filesize, no log file size given" << std::endl;
+                std::wcerr << "Error: option -filesize, no log file size given" << std::endl;
                 return false;
             }
 
@@ -171,7 +171,7 @@ bool LoggerApp::ParseCommandLine(const std::vector<std::string> & arg)
             fileSize = boost::lexical_cast<unsigned long>(*it);
             if (errno == ERANGE || fileSize == 0)
             {
-                std::cerr << "Error: option -filesize, invalid file size" << std::endl;
+                std::wcerr << "Error: option -filesize, invalid file size" << std::endl;
                 return false;
             }
 
@@ -206,13 +206,13 @@ bool LoggerApp::ParseCommandLine(const std::vector<std::string> & arg)
         {
             if (++it == arg.end())
             {
-                std::cerr << "Error: option -excludeapp, no regular expression given" << std::endl;
+                std::wcerr << "Error: option -excludeapp, no regular expression given" << std::endl;
                 return false;
             }
 
             if (!ReportFilter::Inst().SetConnectionNameRegEx(Safir::Dob::Typesystem::Utilities::ToWstring(*it), false))
             {
-                std::cerr <<
+                std::wcerr <<
                     "Error: option -excludeapp, illegal regular expression given" << std::endl;
                 return false;
             }
@@ -221,12 +221,12 @@ bool LoggerApp::ParseCommandLine(const std::vector<std::string> & arg)
         {
             if (++it == arg.end())
             {
-                std::cerr << "Error: option -includeapp, no regular expression given" << std::endl;
+                std::wcerr << "Error: option -includeapp, no regular expression given" << std::endl;
                 return false;
             }
             if (!ReportFilter::Inst().SetConnectionNameRegEx(Safir::Dob::Typesystem::Utilities::ToWstring(*it), true))
             {
-                std::cerr <<
+                std::wcerr <<
                     "Error: option -includeapp, illegal regular expression given" << std::endl;
                 return false;
             }
@@ -235,12 +235,12 @@ bool LoggerApp::ParseCommandLine(const std::vector<std::string> & arg)
         {
             if (++it == arg.end())
             {
-                std::cerr << "Error: option -excludenode, no regular expression given" << std::endl;
+                std::wcerr << "Error: option -excludenode, no regular expression given" << std::endl;
                 return false;
             }
             if (!ReportFilter::Inst().SetNodeNameRegEx(Safir::Dob::Typesystem::Utilities::ToWstring(*it), false))
             {
-                std::cerr <<
+                std::wcerr <<
                     "Error: option -excludenode, illegal regular expression given" << std::endl;
                 return false;
             }
@@ -249,12 +249,12 @@ bool LoggerApp::ParseCommandLine(const std::vector<std::string> & arg)
         {
             if (++it == arg.end())
             {
-                std::cerr << "Error: option -includenode, no regular expression given" << std::endl;
+                std::wcerr << "Error: option -includenode, no regular expression given" << std::endl;
                 return false;
             }
             if (!ReportFilter::Inst().SetNodeNameRegEx(Safir::Dob::Typesystem::Utilities::ToWstring(*it), true))
             {
-                std::cerr <<
+                std::wcerr <<
                     "Error: option -includenode, illegal regular expression given" << std::endl;
                 return false;
             }
@@ -302,7 +302,7 @@ void LoggerApp::Usage()
                << " -excludeapp\t: Exclude applications (connections) that match reg expression\n"
                << " -includeapp\t: Include only applications that match reg expression\n"
                << " -excludenode\t: Exclude nodes that match reg expression\n"
-               << " -includenode\t: Include only nodes that match the reg expression\n\n";
+               << " -includenode\t: Include only nodes that match the reg expression\n" << std::endl;
 }
 }
 }

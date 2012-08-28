@@ -203,7 +203,7 @@ int main(int argc, char **argv)
 
             default:
                 printf("Invalid '-' command\n");
-                return(-1); // exit(-1);
+                return(1); // exit(1);
         } // end switch
     } // end while
 

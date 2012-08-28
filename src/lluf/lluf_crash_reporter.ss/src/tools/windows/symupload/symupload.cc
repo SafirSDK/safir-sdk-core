@@ -208,7 +208,7 @@ int wmain(int argc, wchar_t *argv[]) {
 
   bool success = HTTPUpload::SendRequest(url, parameters,
                                          symbol_file, L"symbol_file",
-										 timeout == -1 ? NULL : &timeout,
+                                         timeout == -1 ? NULL : &timeout,
                                          NULL, NULL);
   _wunlink(symbol_file.c_str());
 

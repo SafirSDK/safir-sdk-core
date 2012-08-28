@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (douf_foreach)
+project(douf_foreach CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
@@ -9,10 +9,9 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(foreach ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(foreach ${ACE_LIBRARY})
-
+FIND_PACKAGE(Boost COMPONENTS system)
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(foreach swre_interface_cpp dose_cpp)
+    TARGET_LINK_LIBRARIES(foreach dots_cpp dots_generated-Safir-cpp dots_generated-cpp dose_cpp swre_interface_cpp ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS foreach

@@ -1,22 +1,25 @@
-PROJECT (dose_main_test)
+cmake_minimum_required(VERSION 2.6)
+
+project(dose_main_test CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
-ADD_EXECUTABLE(dose_connector_test dose_connector_test.cpp)
-ADD_EXECUTABLE(dose_message_sender_test dose_message_sender_test.cpp)
-ADD_EXECUTABLE(dose_message_subscriber_test dose_message_subscriber_test.cpp)
-ADD_EXECUTABLE(dose_entity_owner_test dose_entity_owner_test.cpp)
-ADD_EXECUTABLE(dose_entity_subscriber_test dose_entity_subscriber_test.cpp)
-ADD_EXECUTABLE(dose_process_info_subscriber_test dose_process_info_subscriber_test.cpp)
+ADD_EXECUTABLE(timer_test timer_test.cpp ../src/dose_main_timers.h ../src/dose_main_timers.cpp)
 
-TARGET_LINK_LIBRARIES(dose_connector_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
-TARGET_LINK_LIBRARIES(dose_message_sender_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
-TARGET_LINK_LIBRARIES(dose_message_subscriber_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
-TARGET_LINK_LIBRARIES(dose_entity_owner_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
-TARGET_LINK_LIBRARIES(dose_entity_subscriber_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
-TARGET_LINK_LIBRARIES(dose_process_info_subscriber_test dose_internal dots_id dots_kernel dots_generated-cpp dots_cpp expat boost_crypto boost_filesystem boost_date_time lluf_utils)
+FIND_PACKAGE(Boost COMPONENTS system)
 
-INSTALL(TARGETS dose_connector_test dose_message_sender_test dose_message_subscriber_test dose_entity_owner_test dose_entity_subscriber_test dose_process_info_subscriber_test
-        RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION $ENV{SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION $ENV{SAFIR_SDK}/lib)
+if (NOT MSVC)
+  TARGET_LINK_LIBRARIES(timer_test 
+    dots_cpp
+    ${Boost_LIBRARIES})
+endif()
+
+ENABLE_TESTING()
+
+FIND_PACKAGE(PythonInterp)
+
+ADD_TEST(TryStart_dose_main  ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/try_start_dose_main.py)
+set_tests_properties(TryStart_dose_main PROPERTIES TIMEOUT 120)
+
+ADD_TEST(dose_main_timers timer_test)
+#set_tests_properties(dose_main_timers PROPERTIES TIMEOUT 60)

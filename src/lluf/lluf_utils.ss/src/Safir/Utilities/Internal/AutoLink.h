@@ -37,10 +37,10 @@
 
 #if defined (_MSC_VER) 
 
-#  ifdef _DEBUG
-#    define SAFIR_BUILD_TYPE "d"
-#  else
+#  ifdef NDEBUG
 #    define SAFIR_BUILD_TYPE
+#  else
+#    define SAFIR_BUILD_TYPE "d"
 #  endif
 
 #  pragma comment(lib, SAFIR_LIBRARY_NAME SAFIR_BUILD_TYPE ".lib")

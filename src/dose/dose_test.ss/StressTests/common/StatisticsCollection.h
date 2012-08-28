@@ -36,8 +36,7 @@
 #endif
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <ace/OS_NS_unistd.h>
-#include <ace/Thread.h>
+#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
   #pragma warning(pop)
@@ -45,10 +44,9 @@
 
 double GetUtcTime();
 
+//TODO: Make all these thread safe!
 
 class StatisticsCollection;
-
-
 
 
 class LatencyCollector:
@@ -61,8 +59,6 @@ public:
     }
     void End()
     {
-#undef min
-#undef max
         Safir::Dob::Typesystem::Si64::Second elapsed = GetUtcTime() - m_beginTime;
         m_totalDelay += elapsed;
         m_maxDelay = std::max(m_maxDelay,elapsed);
@@ -93,7 +89,6 @@ private:
 
     long m_count;
 };
-
 
 class HzCollector:
     private boost::noncopyable
@@ -146,7 +141,6 @@ public:
     void PrintStatistics() const;
     void Reset();
 private:
-    static ACE_THR_FUNC_RETURN PrinterThreadFun(void* param);
     void PrintThread();
 
     StatisticsCollection();
@@ -159,6 +153,8 @@ private:
 
     typedef std::map<std::wstring, LatencyCollector *> LatencyCollectorTable;
     LatencyCollectorTable m_latencyCollectorTable;
+
+    boost::thread m_thread;
 };
 
 #endif

@@ -25,12 +25,18 @@
 #ifndef __APP_H
 #define __APP_H
 
-#ifndef ACE_HAS_WINSOCK2
-#define ACE_HAS_WINSOCK2 0
+// The cmake configuration allows us to compile this application with or without ACE
+// If ace is not found we use Boost.Asio instead.
+#ifdef NO_ACE
+#  include <Safir/Utilities/AsioDispatcher.h>
+#else
+#  include <Safir/Utilities/AceDispatcher.h>
+#  ifndef ACE_HAS_WINSOCK2
+#    define ACE_HAS_WINSOCK2 0
+#  endif
 #endif
 
 #include <Safir/Dob/Connection.h>
-#include <Safir/Utilities/AceDispatcher.h>
 
 namespace VehicleDatabaseCpp
 {
@@ -89,11 +95,16 @@ namespace VehicleDatabaseCpp
         // the process wide reactor in the singleton class ACE_Reactor.
         // The event loop is started in the Run method.
         //
-        // The AceDispatcher class makes a thread switch from the calling 
+        // The Dispatcher class makes a thread switch from the calling 
         // Dob thread to this applications main thread. It performs a dispatch
         // on the Dob connection that will result in callbacks to all overidden 
-        // Dob interface methods.
+        // Dob interface methods, for example OnCreateRequest call in EntityOwner.
+#ifdef NO_ACE
+        boost::asio::io_service m_ioService;
+        Safir::Utilities::AsioDispatcher   m_dispatch;
+#else
         Safir::Utilities::AceDispatcher   m_dispatch;
+#endif
         
     };
 

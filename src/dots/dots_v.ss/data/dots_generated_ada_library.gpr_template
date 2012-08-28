@@ -1,5 +1,5 @@
-with "safir_defaults.gpr";
-with "dots_ada.gpr";
+with "safir_defaults";
+with "dots_ada";
 ${additional_dependecies}
 
 -- This is a stand-alone library (because there is a Library_Interface attribute). This means that all generated packages in
@@ -12,22 +12,22 @@ ${additional_dependecies}
 project Dots_Generated_${library_name}_Ada_Library is
 
    for Source_Dirs use (".");
-   for Source_Files use (${source_files});
+   for source_files use (${source_files});
    for Object_Dir use "${library_name}/obj";
    for Library_Dir use "${library_name}/lib";
    for Library_ALI_Dir use "${library_name}/ali";
    for Library_Src_Dir use "${library_name}/interface";
-   for Library_Name use "dots_generated_${library_name}_ada";
+   for library_name use "dots_generated_${library_name}_ada";
    for Library_Interface use (${interface_units});
    for Library_Kind use "dynamic";
 
-   package Compiler is
-      for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
-   end Compiler;
-
    package Builder is
-      for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
+      for Default_Switches ("Ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
    end Builder;
+
+   package Compiler is
+      for Default_Switches ("Ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
+   end Compiler;
 
 end Dots_Generated_${library_name}_Ada_Library;
 

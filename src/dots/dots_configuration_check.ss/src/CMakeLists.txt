@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (dots_configuration_check)
+project(dots_configuration_check CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
@@ -8,7 +8,9 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(dots_configuration_check ${sources})
 
-TARGET_LINK_LIBRARIES(dots_configuration_check dots_kernel)
+if (NOT MSVC)
+  TARGET_LINK_LIBRARIES(dots_configuration_check dots_kernel)
+endif()
 
 INSTALL(TARGETS dots_configuration_check
         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin

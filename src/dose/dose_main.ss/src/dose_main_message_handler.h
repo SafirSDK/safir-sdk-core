@@ -28,10 +28,6 @@
 #include "dose_main_communication.h"
 #include "dose_main_blocking_handler.h"
 
-#ifdef DispatchMessage
-#undef DispatchMessage
-#endif
-
 namespace Safir
 {
 namespace Dob

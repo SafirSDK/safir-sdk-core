@@ -129,11 +129,8 @@ Type:Watt64:Float_64:"Safir.Dob.Typesystem.Si_64.Watt":""
 with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 @@END_IF@@
 with Safir.Dob.Typesystem.Members;
-pragma Elaborate_All (Safir.Dob.Typesystem.members);
-pragma Warnings (Off, Safir.Dob.Typesystem.Members);
 with Safir.Dob.Typesystem.Operations;
 with Safir.Dob.Typesystem.Properties;
-pragma Warnings (Off, Safir.Dob.Typesystem.Properties);
 pragma Warnings ("D");  -- turn off warnings for implicit dereference
 
 package body @_NAMESPACE_@.@_CLASS_@ is
@@ -385,8 +382,8 @@ pragma Elaborate_All (Safir.Dob.Typesystem.Parameters);
 pragma Warnings (Off, Safir.Dob.Typesystem.Parameters);
 with Safir.Dob.Typesystem.Blob_Operations;
 pragma Elaborate_All (Safir.Dob.Typesystem.Blob_Operations);
-with Safir.Dob.Typesystem.Object_Factory;
-pragma Elaborate_All (Safir.Dob.Typesystem.Object_Factory);
+with Safir.Dob.Typesystem.Object.Factory;
+pragma Elaborate_All (Safir.Dob.Typesystem.Object.Factory);
 @@IF@@ @_MATCH(.*:Entity_Id:.*):DEPENDENCY_@
 @@IF@@ not((@_PARAMETER'Length_@>0_@ or @_CREATEROUTINE'Length_@>0 )and not @_MEMBER'Length_@>0)
 with Safir.Dob.Typesystem.Entity_Id;
@@ -394,13 +391,11 @@ pragma Warnings (Off, Safir.Dob.Typesystem.Entity_Id);
 @@END_IF@@
 @@IF@@ not @_MATCH(.*:Instance_Id:.*):DEPENDENCY_@
 with Safir.Dob.Typesystem.Instance_Id;
-pragma Warnings (Off, Safir.Dob.Typesystem.Instance_Id);
 @@END_IF@@
 @@END_IF@@
 @@IF@@ @_MATCH(.*:Instance_Id:.*):DEPENDENCY_@
 @@IF@@ not((@_PARAMETER'Length_@>0_@ or @_CREATEROUTINE'Length_@>0 )and not @_MEMBER'Length_@>0)
 with Safir.Dob.Typesystem.Instance_Id;
-pragma Warnings (Off, Safir.Dob.Typesystem.Instance_Id);
 @@END_IF@@
 @@END_IF@@
 @@IF@@ @_MATCH(.*:Channel_Id:.*):DEPENDENCY_@
@@ -412,7 +407,6 @@ pragma Warnings (Off, Safir.Dob.Typesystem.Channel_Id);
 @@IF@@ @_MATCH(.*:Handler_Id:.*):DEPENDENCY_@
 @@IF@@ not((@_PARAMETER'Length_@>0_@ or @_CREATEROUTINE'Length_@>0 )and not @_MEMBER'Length_@>0)
 with Safir.Dob.Typesystem.Handler_Id;
-pragma Warnings (Off, Safir.Dob.Typesystem.Handler_Id);
 @@END_IF@@
 @@END_IF@@
 with System.Address_To_Access_Conversions;
@@ -517,7 +511,7 @@ package body @_NAMESPACE_@.@_CLASS_@ is
 
       function Is_Changed (Self : in Container_Proxy'Class) return Boolean is
       begin
-         return Is_Changed(Self.Container_Ptr.all);
+         return Is_Changed (Self.Container_Ptr.all);
       end Is_Changed;
 
       procedure Set_Changed (Self : in  Container_Proxy'Class;
@@ -551,7 +545,7 @@ package body @_NAMESPACE_@.@_CLASS_@ is
                             Self.Obj_Ptr.Ref;
             -- Create a smart pointer with the correct tag.
             Smart_Ptr : Smart_Pointer'Class :=
-                    Smart_Pointer'Class (Safir.Dob.Typesystem.Object_Factory.Create_Smart_Ptr
+                    Smart_Pointer'Class (Safir.Dob.Typesystem.Object.Factory.Create_Smart_Ptr
                               (Raw_Obj_Ptr.Get_Type_Id));
          begin
             Safir.Dob.Typesystem.Object.Internal_Initialize_From_Existing (Smart_Ptr, Self.Obj_Ptr);
@@ -1323,7 +1317,7 @@ package body @_NAMESPACE_@.@_CLASS_@ is
       return Object_Smart_Ptr;
    end Create_Object;
 
-   Create_Obj_Callback_Function : constant Safir.Dob.Typesystem.Object_Factory.Create_Object_Callback := Create_Object'Access;
+   Create_Obj_Callback_Function : constant Safir.Dob.Typesystem.Object.Factory.Create_Object_Callback := Create_Object'Access;
 
    function Create_Smart_Ptr return Safir.Dob.Typesystem.Object.Smart_Pointer'Class is
       P : Smart_Pointer;
@@ -1331,7 +1325,7 @@ package body @_NAMESPACE_@.@_CLASS_@ is
       return P;
    end Create_Smart_Ptr;
 
-   Create_Smart_Ptr_Callback_Function : constant Safir.Dob.Typesystem.Object_Factory.Create_Smart_Ptr_Callback := Create_Smart_Ptr'Access;
+   Create_Smart_Ptr_Callback_Function : constant Safir.Dob.Typesystem.Object.Factory.Create_Smart_Ptr_Callback := Create_Smart_Ptr'Access;
    
 begin
 @@TABLE@@
@@ -1341,7 +1335,7 @@ begin
 @@END_TABLE@@
    Initial_Size := Safir.Dob.Typesystem.Blob_Operations.Get_Initial_Size (Class_Type_Id);
 
-   Safir.Dob.Typesystem.Object_Factory.Register_Type (Class_Type_Id, Create_Obj_Callback_Function, Create_Smart_Ptr_Callback_Function);
+   Safir.Dob.Typesystem.Object.Factory.Register_Type (Class_Type_Id, Create_Obj_Callback_Function, Create_Smart_Ptr_Callback_Function);
 
 end @_NAMESPACE_@.@_CLASS_@;
 @@ELSIF@@ @_UNITTYPE_@=enumeration

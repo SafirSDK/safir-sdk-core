@@ -33,6 +33,7 @@
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Dob/Internal/TimestampOperations.h>
 #include <Safir/Dob/ConnectionInfo.h>
+#include <boost/current_function.hpp>
 
 #include "crash_handler.h"
 #include "dose_controller.h"
@@ -46,7 +47,8 @@ using namespace Safir::Dob;
 void DoseC_Constructor(long & ctrl,
                        bool & success)
 {
-    Crash_Handler::Instance();
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
+    //CrashHandler::Instance();
     success = false;
     try
     {
@@ -59,6 +61,7 @@ void DoseC_Constructor(long & ctrl,
 
 void DoseC_Destructor(const long ctrl)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     try
     {
         ControllerTable::Instance().RemoveController(ctrl);
@@ -78,6 +81,7 @@ void DoseC_Destructor(const long ctrl)
 
 void DoseC_IsConnected(const long ctrl, bool & isConnected, bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -123,6 +127,7 @@ void DoseC_Connect(const long ctrl,
                    OnDropReferenceCb* onDropReferenceCb,
                    bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -193,6 +198,7 @@ void DoseC_ConnectSecondary(const char* connectionNameCommonPart,
                             long & newCtrlId,
                             bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -241,6 +247,7 @@ void DoseC_ConnectSecondary(const char* connectionNameCommonPart,
 
 void DoseC_Disconnect(const long ctrl, const bool checkThread, bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -258,6 +265,7 @@ void DoseC_Disconnect(const long ctrl, const bool checkThread, bool & success)
 
 void DoseC_GetConnectionName(const long ctrl, const char* &name, bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -270,6 +278,7 @@ void DoseC_GetConnectionName(const long ctrl, const char* &name, bool & success)
 
 void DoseC_GetConnectionNameCommonPart(const long ctrl, const char* &name, bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -283,6 +292,7 @@ void DoseC_GetConnectionNameCommonPart(const long ctrl, const char* &name, bool 
 
 void DoseC_GetConnectionNameInstancePart(const long ctrl, const char* &name, bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -303,6 +313,7 @@ void DoseC_RegisterServiceHandler(const long ctrl,
                                   void* const consumer,
                                   bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -330,6 +341,7 @@ void DoseC_RegisterEntityHandler(const long ctrl,
                                  void* const consumer,
                                  bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -355,6 +367,7 @@ void DoseC_UnregisterHandler(const long ctrl,
                              const char* const handlerIdStr,
                              bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -378,6 +391,7 @@ void DoseC_SubscribeMessage(const long ctrl,
                             void* const consumer,
                             bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -402,6 +416,7 @@ void DoseC_UnsubscribeMessage(const long ctrl,
                               void* const consumer,
                               bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -429,6 +444,7 @@ void DoseC_SubscribeEntity(const long ctrl,
                            void* const consumer,
                            bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -465,6 +481,7 @@ void DoseC_InjectorSubscribeEntity(const long ctrl,
                                    void* const consumer,
                                    bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -496,6 +513,7 @@ void DoseC_UnsubscribeEntity(const long ctrl,
                              void* const consumer,
                              bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -521,6 +539,7 @@ void DoseC_SubscribeRegistration(const long ctrl,
                                  void* const consumer,
                                  bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -547,6 +566,7 @@ void DoseC_UnsubscribeRegistration(const long ctrl,
                                    void* const consumer,
                                    bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -569,6 +589,7 @@ void DoseC_UnsubscribeRegistration(const long ctrl,
 void DoseC_Dispatch(const long ctrl,
                     bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -582,6 +603,7 @@ void DoseC_Dispatch(const long ctrl,
 void DoseC_ExitDispatch(const long ctrl,
                         bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -596,6 +618,7 @@ void DoseC_GetCurrentCallbackId(const long ctrl,
                                 DotsC_Int32& callbackId,
                                 bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -619,6 +642,7 @@ void DoseC_SendMessage(const long ctrl,
                        void* const consumer,
                        bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -643,6 +667,7 @@ void DoseC_SendResponse(const long ctrl,
                         const Safir::Dob::Typesystem::Int32 responseId,
                         bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -667,6 +692,7 @@ void DoseC_ServiceRequest(const long ctrl,
                           Safir::Dob::RequestId& reqId,
                           bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -695,6 +721,7 @@ void DoseC_CreateRequest(const long ctrl,
                          Safir::Dob::RequestId& reqId,
                          bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -721,6 +748,7 @@ void DoseC_UpdateRequest(const long ctrl,
                          Safir::Dob::RequestId& reqId,
                          bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -745,6 +773,7 @@ void DoseC_DeleteRequest(const long ctrl,
                          Safir::Dob::RequestId& reqId,
                          bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -773,6 +802,7 @@ void DoseC_SetEntity(const long ctrl,
                      const bool initialInjection,
                      bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -797,6 +827,7 @@ void DoseC_DeleteEntity(const long ctrl,
                         const char* const handlerIdStr,
                         bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -820,6 +851,7 @@ void DoseC_InjectEntity(const long ctrl,
                         const Safir::Dob::Typesystem::Int64 timestamp,
                         bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -843,6 +875,7 @@ void DoseC_InjectDeletedEntity(const long ctrl,
                                const Safir::Dob::Typesystem::Int64 timestamp,
                                bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -866,6 +899,7 @@ void DoseC_ReadEntity(const long ctrl,
                       const char*& currentState,
                       bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -888,6 +922,7 @@ void DoseC_IsCreated(const long ctrl,
                      bool& isCreated,
                      bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -908,6 +943,7 @@ void DoseC_GetNumberOfInstances(const long ctrl,
                                 Safir::Dob::Typesystem::Int64& numberOfInstances,
                                 bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -956,6 +992,7 @@ void DoseC_GetInstanceIdPolicy(const long ctrl,
                                Safir::Dob::Typesystem::EnumerationValue& instanceIdPolicy,
                                bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -973,6 +1010,7 @@ void DoseC_Postpone(const long ctrl,
                     const bool redispatchCurrent,
                     bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -986,6 +1024,7 @@ void DoseC_Postpone(const long ctrl,
 void DoseC_ResumePostponed(const long ctrl,
                            bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -999,6 +1038,7 @@ void DoseC_ResumePostponed(const long ctrl,
 void DoseC_IncompleteInjectionState(const long ctrl,
                                     bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1013,6 +1053,7 @@ void DoseC_GetChannelId(const char * const state,
                         Safir::Dob::Typesystem::Int64 & channelId,
                         bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1027,6 +1068,7 @@ void DoseC_GetTypeId(const char* const state,
                      Safir::Dob::Typesystem::Int64& typeId,
                      bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1041,6 +1083,7 @@ void DoseC_GetInstanceId(const char* const state,
                          Safir::Dob::Typesystem::Int64& instanceId,
                          bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1055,6 +1098,7 @@ void DoseC_GetHandlerId(const char* const state,
                         Safir::Dob::Typesystem::Int64& handlerId,
                         bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1070,6 +1114,7 @@ void DoseC_GetConnectionInfo(const char* const state,
                              DoseC_BlobDeleter & deleter,
                              bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1102,6 +1147,7 @@ void DoseC_GetTopTimestamp(const char* const state,
                            Safir::Dob::Typesystem::Int64& timestamp,
                            bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1117,6 +1163,7 @@ void DoseC_GetMemberTimestamp(const char* const state,
                               Safir::Dob::Typesystem::Int64& timestamp,
                               bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1143,6 +1190,7 @@ void DoseC_GetQueueCapacity(const long ctrl,
                             Safir::Dob::Typesystem::Int32 & queueCapacity,
                             bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1159,6 +1207,7 @@ void DoseC_GetQueueSize(const long ctrl,
                         Safir::Dob::Typesystem::Int32 & queueSize,
                         bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1178,6 +1227,7 @@ void DoseC_Diff(const char* const previousState,
                 DoseC_BlobDeleter & deleter,
                 bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     diffBlob = NULL;
     deleter = Safir::Dob::Typesystem::Internal::Delete;
@@ -1236,11 +1286,13 @@ void DoseC_Diff(const char* const previousState,
 
 void DoseC_AddReference(const char* const state)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     DistributionData::AddReference(state);
 }
 
 void DoseC_DropReference(const char* const state)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     DistributionData::DropReference(state);
 }
 
@@ -1252,6 +1304,7 @@ void DoseC_EntityIteratorCreate(const long ctrl,
                                 bool& end,
                                 bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1266,6 +1319,7 @@ void DoseC_EntityIteratorCreate(const long ctrl,
 void DoseC_EntityIteratorDestroy(const long ctrl,
                                  const Safir::Dob::Typesystem::Int32 iteratorId)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     try
     {
         ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
@@ -1283,6 +1337,7 @@ void DoseC_EntityIteratorCopy(const long ctrl,
                               Safir::Dob::Typesystem::Int32& iteratorIdCopy,
                               bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1299,6 +1354,7 @@ void DoseC_EntityIteratorIncrement(const long ctrl,
                                    bool& end,
                                    bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1316,6 +1372,7 @@ void DoseC_EntityIteratorDereference(const long ctrl,
                                      const char *& entityState,
                                      bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1334,6 +1391,7 @@ void DoseC_EntityIteratorEqual(const long ctrl,
                                bool& equal,
                                bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1349,6 +1407,7 @@ void DoseC_GetContext(const long ctrl,
                       DotsC_Int32& context,
                       bool& success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
@@ -1387,6 +1446,7 @@ void DoseC_SimulateOverflows(const long ctrl,
                              const bool outQueues,
                              bool & success)
 {
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {

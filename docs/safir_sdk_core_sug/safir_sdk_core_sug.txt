@@ -237,7 +237,7 @@ The SI unit types are all based on Float32 or Float64 respectively:
 .Types for SI units.
 [width="60%", cols="50%,50%",options="header",frame="topbot",grid="none"]
 |=========================================================================
-|4 byte type	                 |8 byte type
+|4 byte type                     |8 byte type
 
 |Ampere32                        |Ampere64
 |CubicMeter32                    |CubicMeter64

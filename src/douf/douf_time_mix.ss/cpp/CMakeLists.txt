@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (douf_time_cpp)
+project(douf_time_cpp CXX)
 
 INCLUDE_DIRECTORIES(.)
 
@@ -10,8 +10,6 @@ FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(douf_time_cpp SHARED ${sources} ${headers})
-
-TARGET_LINK_LIBRARIES(douf_time_cpp ${ACE_LIBRARY})
 
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(douf_time_cpp douf_time_library dots_generated-cpp)

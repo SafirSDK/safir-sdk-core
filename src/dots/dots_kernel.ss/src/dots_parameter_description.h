@@ -51,6 +51,10 @@ namespace Internal
                              const ParameterOffsetConst & offset,
                              AllocationHelper & allocHelper);
 
+        ParameterDescription(const ParameterDescription& other);
+        ParameterDescription& operator=(const ParameterDescription& other);
+
+
         ~ParameterDescription();
 
 
@@ -119,7 +123,7 @@ namespace Internal
         case ChannelIdMemberType:
         case HandlerIdMemberType:
             {
-                const ParameterOffsetConst dataLocation = 
+                const ParameterOffsetConst dataLocation =
                     *ParameterOffsetCast<const ParameterOffsetConst>(m_offset + index * sizeof(ParameterOffset));
                 val = *ParameterOffsetCast<T>(dataLocation);
                 strVal = dataLocation.get() + sizeof(T);

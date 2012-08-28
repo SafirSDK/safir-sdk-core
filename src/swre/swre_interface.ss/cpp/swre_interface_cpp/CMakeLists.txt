@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (swre_interface_cpp)
+project(swre_interface_cpp CXX)
 
 INCLUDE_DIRECTORIES(.)
 
@@ -10,8 +10,6 @@ FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(swre_interface_cpp SHARED ${sources} ${headers})
-
-TARGET_LINK_LIBRARIES(swre_interface_cpp ${ACE_LIBRARY})
 
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(swre_interface_cpp dose_cpp swre_library douf_time_cpp)

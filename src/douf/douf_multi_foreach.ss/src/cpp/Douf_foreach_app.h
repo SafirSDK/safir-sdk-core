@@ -27,8 +27,8 @@
 
 #include <Safir/Dob/Connection.h>
 #include <Safir/Application/Tracer.h>
-#include <Safir/Utilities/AceDispatcher.h>
-#include <Safir/Utilities/Array.h>
+#include <Safir/Utilities/AsioDispatcher.h>
+#include <vector>
 
 #include "Douf_foreach_services.h"
 
@@ -63,11 +63,14 @@ namespace ForEach
 
         struct ContextData
         {
-            ContextData() : m_dispatcher(m_connection), m_debug(L"ForEachApp") {}
+            explicit ContextData(boost::asio::io_service& ioService) 
+                : m_dispatcher(m_connection, ioService)
+                , m_service(ioService)
+                , m_debug(L"ForEachApp") {}
 
             Safir::Dob::Connection m_connection;
 
-            Safir::Utilities::AceDispatcher m_dispatcher;
+            Safir::Utilities::AsioDispatcher m_dispatcher;
 
             Safir::Utilities::ForEach::Services m_service;
 
@@ -81,10 +84,11 @@ namespace ForEach
 
         };
 
-        typedef Safir::Utilities::Array<ContextData> ContextVector;
+        boost::asio::io_service m_ioService;
+
+        typedef std::vector<boost::shared_ptr<ContextData> > ContextVector;
 
         ContextVector m_context;
-
     };
 }
 }

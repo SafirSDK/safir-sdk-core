@@ -30,6 +30,10 @@
 #include "dots_base64_conversions.h"
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 
+//we need windows.h for the IsBadReadPtr call
+#if defined _MSC_VER
+#include <windows.h>
+#endif
 //#define LOG_CALLSTACK
 
 namespace Safir

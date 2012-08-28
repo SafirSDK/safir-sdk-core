@@ -28,14 +28,14 @@
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 #include <map>
-//disable warnings in boost and ace
+//disable warnings in boost
 #if defined _MSC_VER
   #pragma warning (push)
-  #pragma warning (disable : 4267 4244)
+  #pragma warning (disable : 4267)
 #endif
 
-#include <ace/Thread.h>
-#include <ace/Thread_Mutex.h>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread.hpp>
 
 //and enable the warnings again
 #if defined _MSC_VER
@@ -89,16 +89,26 @@ namespace Internal
 
         ExceptionData & GetDataForCurrentThread() const;
 
-        typedef std::map<ACE_thread_t, ExceptionData> ThreadExceptionTable;
+        typedef std::map<boost::thread::id, ExceptionData> ThreadExceptionTable;
 
         mutable ThreadExceptionTable m_threadExceptionTable;
 
-        mutable ACE_Thread_Mutex m_lock;
+        mutable boost::mutex m_lock;
 
-        //Singleton stuff
-        static ExceptionKeeper * volatile m_instance;
+        /**
+         * This class is here to ensure that only the Instance method can get at the 
+         * instance, so as to be sure that boost call_once is used correctly.
+         * Also makes it easier to grep for singletons in the code, if all 
+         * singletons use the same construction and helper-name.
+         */
+        struct SingletonHelper
+        {
+        private:
+            friend ExceptionKeeper& ExceptionKeeper::Instance();
 
-        static ACE_Thread_Mutex m_instantiationLock;
+            static ExceptionKeeper& Instance();
+            static boost::once_flag m_onceFlag;
+        };
     };
 }
 }

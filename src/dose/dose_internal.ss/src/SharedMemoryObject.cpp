@@ -24,11 +24,8 @@
 
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-
 #include <Safir/Dob/NodeParameters.h>
-#include <ace/Process_Mutex.h>
-#include <ace/Guard_T.h>
-#include <ace/Process_Semaphore.h>
+#include <boost/bind.hpp>
 
 namespace Safir
 {
@@ -45,62 +42,25 @@ namespace Internal
 
     static const char * SHARED_MEMORY_NAME = "DOSE_SHARED_MEMORY";
 
+    boost::once_flag SharedMemoryObject::SharedMemoryHolder::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
-    SharedMemoryObject::SharedMemoryHolder * volatile SharedMemoryObject::SharedMemoryHolder::m_instance = NULL;
-    ACE_Recursive_Thread_Mutex SharedMemoryObject::SharedMemoryHolder::m_instantiationLock;
+    SharedMemoryObject::SharedMemoryHolder & SharedMemoryObject::SharedMemoryHolder::SingletonHelper::Instance()
+    {
+        static SharedMemoryHolder instance;
+        return instance;
+    }
 
     SharedMemoryObject::SharedMemoryHolder & SharedMemoryObject::SharedMemoryHolder::Instance()
     {
-        if (m_instance == NULL)
-        {
-            ACE_Guard<ACE_Recursive_Thread_Mutex> lck(m_instantiationLock);
-            if (m_instance == NULL)
-            {
-                m_instance = new SharedMemoryObject::SharedMemoryHolder();
-                m_instance->m_startupSynchronizer.Start();
-            }
-        }
-        return *m_instance;
+        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        return SingletonHelper::Instance();
     }
-
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4355)
-    //disable using this in constructor warning, since we're not using the startupsynchronizer until later this is safe.
-#endif
 
     SharedMemoryObject::SharedMemoryHolder::SharedMemoryHolder():
-        m_startupSynchronizer("DOSE_INITIALIZATION", this)
+        m_startupSynchronizer("DOSE_INITIALIZATION")
     {
-        /*
-        static ACE_Process_Mutex mutex("CREATE_DOSE_SHARED_MEMORY_MTX");
-        static ACE_Process_Semaphore sem(0,"CREATE_DOSE_SHARED_MEMORY_SEM",0,1);
-
-        if (mutex.tryacquire() == 0)
-        {
-            lllout << "Creating dose shared memory" << std::endl;
-            boost::interprocess::shared_memory_object::remove(SHARED_MEMORY_NAME);
-            m_shmem.reset(new boost::interprocess::managed_shared_memory
-                          (boost::interprocess::create_only,
-                           SHARED_MEMORY_NAME,
-                           Safir::Dob::NodeParameters::SharedMemorySize() * 1024 * 1024));
-
-            sem.release();
-        }
-        else
-        {
-            ACE_Guard<ACE_Process_Semaphore> lck(sem);
-            lllout << "Opening dose shared memory" << std::endl;
-            m_shmem.reset(new boost::interprocess::managed_shared_memory
-                          (boost::interprocess::open_only,
-                           SHARED_MEMORY_NAME));
-                           }*/
+        m_startupSynchronizer.Start(this);
     }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
     void SharedMemoryObject::SharedMemoryHolder::Create()
     {
@@ -131,34 +91,6 @@ namespace Internal
     {
 
     }
-
-    /*
-    SharedMemoryObject::SharedMemoryObject()
-    {
-
-    }
-
-
-    SharedMemoryObject::~SharedMemoryObject()
-    {
-
-    }
-    */
-    /*
-    SharedMemory & SharedMemoryObject::GetSharedMemory()
-    {
-        if (m_sharedMemory != NULL)
-        {
-            Safir::Utilities::ScopedLock<ACE_Recursive_Thread_Mutex> lck(m_sharedMemoryInstantiationLock);
-            if (m_sharedMemory != NULL)
-            {
-                m_sharedMemory = new SharedMemory();
-            }
-        }
-        return *m_sharedMemory;
-    }
-    */
-
 }
 }
 }

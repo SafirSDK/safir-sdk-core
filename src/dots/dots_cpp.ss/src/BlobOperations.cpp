@@ -28,7 +28,7 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
-#include <string.h>
+#include <cstring>
 
 namespace Safir
 {

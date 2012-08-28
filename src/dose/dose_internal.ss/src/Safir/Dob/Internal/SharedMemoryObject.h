@@ -27,7 +27,7 @@
 
 #include <Safir/Dob/Internal/InternalExportDefs.h>
 #include <Safir/Utilities/StartupSynchronizer.h>
-#include <ace/Recursive_Thread_Mutex.h>
+#include <boost/thread/mutex.hpp>
 
 
 
@@ -41,6 +41,10 @@
 #pragma warning (disable:4189)
 #endif
 
+void intrusive_ptr_add_ref(const char * p);
+void intrusive_ptr_release(const char * p);
+
+
 #include <boost/interprocess/containers/map.hpp>
 #include <boost/interprocess/containers/set.hpp>
 #include <boost/interprocess/containers/string.hpp>
@@ -53,6 +57,7 @@
 #include <boost/interprocess/smart_ptr/weak_ptr.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/once.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -100,10 +105,20 @@ namespace Internal
 
             boost::shared_ptr<boost::interprocess::managed_shared_memory> m_shmem;
 
-            /** The instance of the singelton*/
-            static SharedMemoryHolder * volatile m_instance;
-            /** Instantiation lock for the singleton instance.*/
-            static ACE_Recursive_Thread_Mutex m_instantiationLock;
+            /**
+             * This class is here to ensure that only the Instance method can get at the 
+             * instance, so as to be sure that boost call_once is used correctly.
+             * Also makes it easier to grep for singletons in the code, if all 
+             * singletons use the same construction and helper-name.
+             */
+            struct SingletonHelper
+            {
+            private:
+                friend SharedMemoryHolder& SharedMemoryHolder::Instance();
+                
+                static SharedMemoryHolder& Instance();
+                static boost::once_flag m_onceFlag;
+            };
 
             Safir::Utilities::StartupSynchronizer m_startupSynchronizer;
         };

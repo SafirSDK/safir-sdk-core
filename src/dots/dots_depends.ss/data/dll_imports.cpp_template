@@ -21,38 +21,10 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-//disable warnings in ace
-#if defined _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4267 4244)
-#endif
-
-#include <ace/Guard_T.h>
-#include <ace/Recursive_Thread_Mutex.h>
-
-//and enable the warnings again
-#if defined _MSC_VER
-#pragma warning (pop)
-#endif
 
 #include "dll_imports.h"
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-
-#ifdef _MSC_VER
-
-#include <windows.h>
-
-#ifdef RegisterClass
-#undef RegisterClass
-#endif
-
-#ifdef GetObject
-#undef GetObject
-#endif
-
-#else
-#include <dlfcn.h>
-#endif
+#include <Safir/Utilities/DynamicLibraryLoader.h>
 
 namespace Safir
 {
@@ -60,23 +32,58 @@ namespace Safir
     {
         namespace Typesystem
         {
-            Dll_Imports * volatile Dll_Imports::m_pInstance = 0;
 
+            namespace 
+            {
+                void LoadDll(const std::string& name, bool global = false)
+                {
+                    lllout << "Loading " << name.c_str() << std::endl;
+                    Safir::Utilities::DynamicLibraryLoader lib;
+#if defined (_MSC_VER) && !defined(NDEBUG)
+                    lib.Load(name + "d", false, global);
+#else
+                    lib.Load(name, false, global);
+#endif
+                }
+
+            }
+
+
+            Dll_Imports * volatile Dll_Imports::m_pInstance = 0;
+            boost::once_flag Dll_Imports::m_onceFlag = BOOST_ONCE_INIT;
+
+            void Dll_Imports::Create()
+            {
+                m_pInstance = new Dll_Imports();
+
+                //On some linux systems (e.g. Ubuntu 11.10) the loading
+                //of the dlls will fail when we're running a dotnet or java
+                //program, so if that happens we recursively load ourselves in 
+                //global mode, and try again. This seems to work fine...
+                try
+                {
+                    m_pInstance->LoadAllDlls();
+                }
+                catch (const std::logic_error&)
+                {
+                    lllout << "LoadAllDlls failed, will try again after loading dots_generated-cpp in global mode" << std::endl;
+                    LoadDll("dots_generated-cpp", true);
+                    m_pInstance->LoadAllDlls();                                    
+                }
+            }
+            
             bool Dll_Imports::Init()
             {
-                if (!m_pInstance)
+                //TODO: this whole initialization business is terribly buggy!
+                //But I had to replace the mutex with a call_once, to at least not make
+                //matters worse...
+                //Basically the instantiation is not thread-safe at all!
+                //and the LoadAllDlls routine will recursively call Init()!
+                if (m_pInstance == NULL)
                 {
-                    static ACE_Recursive_Thread_Mutex creationLock;
-
-                    ACE_Guard<ACE_Recursive_Thread_Mutex> lck(creationLock);
-                    if (!m_pInstance)
-                    {
-                        m_pInstance = new Dll_Imports();
-                        m_pInstance->LoadAllDlls();
-                        return true;
-                    }
+                    boost::call_once(m_onceFlag,Dll_Imports::Create);
                 }
-                return false;
+                return true;
             }
 
             Dll_Imports::Dll_Imports()
@@ -91,16 +98,7 @@ namespace Safir
 
             void Dll_Imports::LoadAllDlls()
             {
-#ifdef _MSC_VER
-#ifdef _DEBUG
-@LoadLibraryD
-#else
-@LoadLibrary
-#endif
-#else
-                void *lib_handle;
-@dlopen
-#endif
+@LoadDll
             }
 
 

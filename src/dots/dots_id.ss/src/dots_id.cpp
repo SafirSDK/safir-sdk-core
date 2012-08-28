@@ -23,12 +23,15 @@
 ******************************************************************************/
 
 #include <Safir/Dob/Typesystem/Internal/Id.h>
+#include <Safir/Utilities/ProcessInfo.h>
 #include "md5.h"
 #include <boost/limits.hpp>
+#include <boost/thread/once.hpp>
+#include <boost/bind.hpp>
 #include <ctime>
+#include <string.h>
 
-
-//disable warnings in boost and ace
+//disable warnings in boost
 #if defined _MSC_VER
   #pragma warning (push)
   #pragma warning (disable : 4244)
@@ -36,13 +39,9 @@
   #pragma warning (disable : 4267)
 #endif
 
-#include <ace/OS_NS_unistd.h>
-#include <ace/Thread_Mutex.h>
-#include <ace/Guard_T.h>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/random/ranlux.hpp>
-
-
+#include <boost/thread/mutex.hpp>
 
 //and enable the warnings again
 #if defined _MSC_VER
@@ -55,9 +54,16 @@ boost::int64_t __cdecl DotsId_Generate64(const char* str)
     md5_state_s md5;
     md5_init(&md5);
     md5_append(&md5,reinterpret_cast<const unsigned char*>(str),static_cast<int>(strlen(str)));
-    md5_byte_t digest [16];
-    md5_finish(&md5,digest);
-    return *reinterpret_cast<const boost::int64_t*>(digest);
+    union  {
+      md5_byte_t digest [16];
+      struct {
+        boost::int64_t first64bits;
+        boost::int64_t second64bits;
+      } ints;
+    } digest_converter;
+
+    md5_finish(&md5,digest_converter.digest);
+    return digest_converter.ints.first64bits;
 }
 
 
@@ -92,32 +98,71 @@ boost::ranlux64_4 CreateGenerator()
 }
 
 
+class RandomGenerator:
+    private boost::noncopyable
+{
+public:
+    static RandomGenerator& Instance()
+    {
+        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        return SingletonHelper::Instance();
+    }
+
+    boost::int64_t Generate()
+    {
+        boost::lock_guard<boost::mutex> lck(m_lock);
+        
+        conglomerate num;
+        num.parts.p1 = static_cast<boost::int32_t>(0x00000000ffffffffLL & (m_randomGenerator)());
+        num.parts.p2 = static_cast<boost::int32_t>(0x00000000ffffffffLL & (m_randomGenerator)());
+        return num.i64;
+    }
+
+private:
+    RandomGenerator()
+    {
+        using namespace boost::posix_time;
+        const ptime epoch(boost::gregorian::date(2008,1,1));
+        const ptime now = microsec_clock::universal_time();
+        const time_duration diff = now - epoch;
+        const boost::uint32_t my_seed = 
+            (static_cast<boost::uint32_t>(diff.total_microseconds()) * Safir::Utilities::ProcessInfo::GetPid()) 
+            % std::numeric_limits<boost::uint32_t>::max();
+        m_randomGenerator.seed(my_seed);
+    }
+
+    ~RandomGenerator()
+    {
+
+    }
+
+    boost::ranlux64_4 m_randomGenerator;
+    boost::mutex m_lock;
+    /**
+     * This class is here to ensure that only the Instance method can get at the 
+     * instance, so as to be sure that boost call_once is used correctly.
+     * Also makes it easier to grep for singletons in the code, if all 
+     * singletons use the same construction and helper-name.
+     */
+    struct SingletonHelper
+    {
+    private:
+        friend RandomGenerator& RandomGenerator::Instance();
+        
+        static RandomGenerator& Instance()
+        {
+            static RandomGenerator instance;
+            return instance;
+        }
+        static boost::once_flag m_onceFlag;
+    };
+
+};
+
+boost::once_flag RandomGenerator::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
 
 boost::int64_t __cdecl DotsId_GenerateRandom64()
 {
-    static boost::ranlux64_4 * random_generator = NULL;
-    if (random_generator == NULL)
-    {
-        static ACE_Thread_Mutex instantiation_lock;
-        ACE_Guard<ACE_Thread_Mutex> lck(instantiation_lock);
-        if (random_generator == NULL)
-        {
-            random_generator = new boost::ranlux64_4();
-
-            using namespace boost::posix_time;
-            const boost::posix_time::ptime epoch(boost::gregorian::date(2008,1,1));
-            const ptime now = microsec_clock::universal_time();
-            const time_duration diff = now - epoch;
-            const boost::uint32_t my_seed = (static_cast<boost::uint32_t>(diff.total_microseconds()) * ACE_OS::getpid()) % std::numeric_limits<boost::uint32_t>::max();
-            random_generator->seed(my_seed);
-        }
-    }
-    static ACE_Thread_Mutex use_lock;
-    ACE_Guard<ACE_Thread_Mutex> lck(use_lock);
-
-    conglomerate num;
-    num.parts.p1 = static_cast<boost::int32_t>(0x00000000ffffffffLL & (*random_generator)());
-    num.parts.p2 = static_cast<boost::int32_t>(0x00000000ffffffffLL & (*random_generator)());
-    return num.i64;
+    return RandomGenerator::Instance().Generate();
 }

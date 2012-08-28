@@ -21,19 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-//#include <Safir/Dob/Internal/Connections.h>
-//#include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
-//#include <Safir/Dob/Typesystem/Operations.h>
-//#include <Safir/Dob/ProcessInfo.h>
-//#include <Safir/Dob/ThisNodeParameters.h>
-//#include <Safir/Utilities/Internal/LowLevelLogger.h>
-//#include <boost/interprocess/sync/upgradable_lock.hpp>
-//#include <boost/interprocess/sync/sharable_lock.hpp>
-//#include "Signals.h"
-//#include "ExitHandler.h"
-//#include <ace/OS_NS_unistd.h>
-
 #include <Safir/Dob/Internal/LeveledLockHelper.h>
+#include <Safir/Utilities/ProcessInfo.h>
 
 namespace Safir
 {
@@ -67,7 +56,7 @@ namespace Internal
     {
         boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_levelMapLock);
 
-        Key key = std::make_pair(ACE_OS::getpid(), ACE_Thread::self());
+        Key key = std::make_pair(Safir::Utilities::ProcessInfo::GetPid(), boost::this_thread::get_id());
 
         LevelMap::const_iterator findIt = m_levelMap.find(key);
 
@@ -93,7 +82,7 @@ namespace Internal
     {
         boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_levelMapLock);
 
-        Key key = std::make_pair(ACE_OS::getpid(), ACE_Thread::self());
+        Key key = std::make_pair(Safir::Utilities::ProcessInfo::GetPid(), boost::this_thread::get_id());
 
         LevelMap::iterator findIt = m_levelMap.find(key);
 
@@ -114,7 +103,7 @@ namespace Internal
     {
         boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_levelMapLock);
 
-        Key key = std::make_pair(ACE_OS::getpid(), ACE_Thread::self());
+        Key key = std::make_pair(Safir::Utilities::ProcessInfo::GetPid(), boost::this_thread::get_id());
 
         LevelMap::iterator findIt = m_levelMap.find(key);
 
@@ -128,7 +117,7 @@ namespace Internal
     {
         boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_levelMapLock);
 
-        Key key = std::make_pair(ACE_OS::getpid(), ACE_Thread::self());
+        Key key = std::make_pair(Safir::Utilities::ProcessInfo::GetPid(), boost::this_thread::get_id());
 
         LevelMap::iterator mapIt = m_levelMap.find(key);
 
@@ -144,7 +133,7 @@ namespace Internal
     {
         boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lck(m_levelMapLock);
 
-        Key key = std::make_pair(ACE_OS::getpid(), ACE_Thread::self());
+        Key key = std::make_pair(Safir::Utilities::ProcessInfo::GetPid(), boost::this_thread::get_id());
 
         LevelMap::iterator mapIt = m_levelMap.find(key);
 

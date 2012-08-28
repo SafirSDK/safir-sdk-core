@@ -1,17 +1,18 @@
 with "externally_built_library";
+with "swre_library";
 
-project swre_interface_ada is
+project Swre_Interface_Ada is
 
-    for Source_Dirs use (external ("SAFIR_SDK") & "/ada/swre_interface_ada/interface");
+    for Source_Dirs use (External ("SAFIR_SDK") & "/ada/swre_interface_ada/interface");
 
-    for library_dir use Externally_Built_Library'library_dir;
+    for Library_Dir use Externally_Built_Library'Library_Dir;
 
-    for library_name use "swre_interface_ada";
+    for Library_Name use "swre_interface_ada";
 
-    for Library_ALI_Dir use external ("SAFIR_SDK") & "/ada/swre_interface_ada/ali/";
+    for Library_ALI_Dir use External ("SAFIR_SDK") & "/ada/swre_interface_ada/ali/";
 
     for Library_Kind use "dynamic";
 
     for Externally_Built use "true";
 
-end swre_interface_ada;
+end Swre_Interface_Ada;

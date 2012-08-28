@@ -23,12 +23,11 @@
 ******************************************************************************/
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
-#include <Safir/Utilities/Internal/BoostFilesystemWrapper.h>
 
 #include <iostream>
 #include <vector>
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 
 #include "dots_depends_defs.h"
 #include "dots_tag_parser.h"
@@ -48,12 +47,13 @@ namespace DotsDepends
 
     int DotsTagParser::ResolveDependencies()
     {
-        for (boost::filesystem::directory_iterator path = boost::filesystem::directory_iterator(m_fileDirectory);
-            path != boost::filesystem::directory_iterator(); ++path)
+        for (boost::filesystem::directory_iterator dir = boost::filesystem::directory_iterator(m_fileDirectory);
+            dir != boost::filesystem::directory_iterator(); ++dir)
         {
-            const std::string extension = boost::filesystem::extension(*path);
+            const boost::filesystem::path path = dir->path();
+            const boost::filesystem::path extension = path.extension();
 
-            if ( boost::filesystem::is_directory(*path) )
+            if ( boost::filesystem::is_directory(path) )
             {
                 continue;
             }
@@ -62,12 +62,12 @@ namespace DotsDepends
             {
                 if (m_verbose)
                 {
-                    std::wcout << "Skipped file: " << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(path).c_str() << std::endl;
+                    std::wcout << "Skipped file: " << path.string().c_str() << std::endl;
                 }
                 continue;
             }            
 
-            CheckFile(*path);
+            CheckFile(path);
 
         }
 
@@ -170,7 +170,11 @@ namespace DotsDepends
             }
         }
 
-        fgets( line, buff_size, stream );
+        if (!fgets( line, buff_size, stream ))
+        {
+            std::wcout << "Parse error: " << filename.string().c_str() << std::endl;
+            return;            
+        }
         if (line[0] == ' ')
         {
             token = strtok(line, delimiter);
@@ -196,7 +200,11 @@ namespace DotsDepends
         bool found = false;
         const char fileDelimiter[] = "-";
         char baseName[256];
-        strcpy(baseName, boost::filesystem::basename(filename).c_str());
+#if defined (BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+        strcpy(baseName, filename.stem().string().c_str());
+#else
+        strcpy(baseName, filename.stem().c_str());
+#endif
         const char* const fileToken = strtok(baseName, fileDelimiter);;
 
         while( fgets( line, buff_size, stream ) != NULL)

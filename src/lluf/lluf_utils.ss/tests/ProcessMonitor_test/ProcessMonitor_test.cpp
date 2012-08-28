@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2011 (http://www.safirsdk.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -21,58 +21,60 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <ace/OS_NS_unistd.h>
-#include <boost/lexical_cast.hpp>
-
 #include <Safir/Utilities/ProcessMonitor.h>
-#include <Safir/Utilities/Internal/LowLevelLogger.h>
-
+#include <boost/lexical_cast.hpp>
 #include <iostream>
+#include <vector>
+#include <set>
 
-void callback(const pid_t& pid)
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244)
+#endif
+
+#include <boost/thread.hpp>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
+//we assume that the callback occurs from the same thread every time, so no need to lock.
+std::set<pid_t> pids;
+
+void callback(const pid_t pid)
 {
-    lllout  << "callback() - ### running ### pid: " << pid << std::endl;
-
+    std::wcout << "Process with pid " << pid << " exited." << std::endl;
+    pids.erase(pid);
+    if(pids.empty()) 
+    {
+        exit(0);
+    }
 }
 
 
 int main(int argc, char** argv)
 {
-    lllout  << "main() - running..." << std::endl;
+    { //scope for the temporary variables
+        const std::vector<std::string> pidStrings(argv + 1, argv + argc);
+        
+        for(std::vector<std::string>::const_iterator it = pidStrings.begin();
+            it != pidStrings.end(); ++it) 
+        {
+            pids.insert(boost::lexical_cast<pid_t>(*it));
+        }
+    }
     
     Safir::Utilities::ProcessMonitor monitor;
 
-    lllout  << "main() - about to init..." << std::endl;
-
     monitor.Init(callback);
 
-    lllout  << "main() - about to loop..." << std::endl;
-
-    for(int i = 1; i < argc; ++i)
+    for(std::set<pid_t>::iterator it = pids.begin(); it != pids.end(); ++it)
     {
-        monitor.StartMonitorPid(boost::lexical_cast<pid_t>(argv[i]));
-
-        lllout  << "main() - about to sleep..." << std::endl;
-        ACE_OS::sleep(1);
-    }
-    
-
-    for(int i = 0; i < 10; ++i)
-    {
-        lllout  << "Sleeping..." << std::endl;
-        ACE_OS::sleep(5);
+        monitor.StartMonitorPid(*it);
     }
 
-
-    for(int i = 1; i < argc; ++i)
-    {
-        monitor.StopMonitorPid(boost::lexical_cast<pid_t>(argv[i]));
-        
-        lllout  << "main() - about to sleep..." << std::endl;
-        ACE_OS::sleep(1);
-    }
-
-    lllout  << "Stopping..." << std::endl;
+    boost::this_thread::sleep(boost::posix_time::seconds(3));
 
     return 0;
 }

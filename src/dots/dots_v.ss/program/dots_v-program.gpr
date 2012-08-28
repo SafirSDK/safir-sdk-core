@@ -1,21 +1,21 @@
-with "../dots_v.gpr";
+with "../dots_v";
 
-project dots_v.program is
+project Dots_V.Program is
 
    for Source_Dirs use (".");
-   for Object_Dir use dots_v'Object_Dir;
-   for Exec_Dir use dots_v'Exec_Dir;
+   for Object_Dir use Dots_V'Object_Dir;
+   for Exec_Dir use Dots_V'Exec_Dir;
    type Warning_Levels is
       ("Default", "Elaboration", "Full");
-   Warning_Level : Warning_Levels := external ("Warning_Level");
+   Warning_Level : Warning_Levels := External ("Warning_Level");
    type Build_Type is
       ("Release", "Debug", "gcov", "gperf", "normal");
-   Build : Build_Type := external ("BUILD");
+   Build : Build_Type := External ("BUILD");
 
    for Main use ("dots_v.adb");
 
    package Linker is
-      for Default_Switches ("ada") use dots_v.Linker'Default_Switches ("Ada");
+      for Default_Switches ("ada") use Dots_V.Linker'Default_Switches ("Ada");
 
       case Build is
 
@@ -32,36 +32,36 @@ project dots_v.program is
       case Warning_Level is
 
          when "Full" =>
-            for Default_Switches ("ada") use dots_v.Compiler'Default_Switches ("Ada");
+            for Default_Switches ("ada") use Dots_V.Compiler'Default_Switches ("Ada");
 
          when "Elaboration" =>
-            for Default_Switches ("ada") use dots_v.Compiler'Default_Switches ("Ada");
+            for Default_Switches ("ada") use Dots_V.Compiler'Default_Switches ("Ada");
 
          when "Default" =>
 
             case Build is
 
                when "normal" =>
-                  for Default_Switches ("ada") use dots_v.Compiler'Default_Switches ("Ada");
+                  for Default_Switches ("ada") use Dots_V.Compiler'Default_Switches ("Ada");
 
                when "gperf" =>
-                  for Default_Switches ("ada") use dots_v.Compiler'Default_Switches ("Ada");
+                  for Default_Switches ("ada") use Dots_V.Compiler'Default_Switches ("Ada");
 
                when "gcov" =>
-                  for Default_Switches ("ada") use dots_v.Compiler'Default_Switches ("Ada");
+                  for Default_Switches ("ada") use Dots_V.Compiler'Default_Switches ("Ada");
 
                when "Debug" =>
                   --for Default_Switches ("ada") use ("-gnatwcefijmpruv", "-gnatyabcefhiklmnoprst");
-                  for Default_Switches ("ada") use dots_v.Compiler'Default_Switches ("Ada");
+                  for Default_Switches ("ada") use Dots_V.Compiler'Default_Switches ("Ada");
 
                when "Release" =>
-                  for Default_Switches ("ada") use dots_v.Compiler'Default_Switches ("Ada");
+                  for Default_Switches ("ada") use Dots_V.Compiler'Default_Switches ("Ada");
             end case;
       end case;
    end Compiler;
 
    package Builder is
-      for Default_Switches ("ada") use dots_v.Builder'Default_Switches ("Ada");
+      for Default_Switches ("ada") use Dots_V.Builder'Default_Switches ("Ada");
 
       --  for Executable ("dots_v.adb") use "dots_vlopp";
 
@@ -78,5 +78,5 @@ project dots_v.program is
       for Default_Switches ("gnade") use ("-DDBSOURCE=GNADE", "-DDBUSER=GNADE", "-DDBPASSWD=GNADE");
    end Ide;
 
-end dots_v.program;
+end Dots_V.Program;
 

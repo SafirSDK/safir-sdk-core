@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagstrï¿½m / stlrha
 *
 *******************************************************************************
 *
@@ -23,6 +23,7 @@
 ******************************************************************************/
 
 #include "dose_main_app.h"
+#include "dose_main_timers.h"
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
 #include <Safir/Dob/Internal/MessageTypes.h>
@@ -36,30 +37,10 @@
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/PanicLogging.h>
-#include <ace/Reactor.h>
 #include <boost/bind.hpp>
 #include <iostream>
-#include "dose_main_timers.h"
 
-#ifdef _MSC_VER
-  #pragma warning(push)
-  #pragma warning(disable: 4267)
-#endif
 
-#include <ace/Thread.h>
-
-#ifdef _MSC_VER
-  #pragma warning(pop)
-#endif
-
-// Windows stuff to enable better timer resolution on windows plattforms.
-#ifdef _MSC_VER
-#pragma comment (lib, "winmm.lib")
-#pragma warning (push)
-#pragma warning (disable: 4201)
-#include <Mmsystem.h>
-#pragma warning (pop)
-#endif
 
 namespace Safir
 {
@@ -68,62 +49,68 @@ namespace Dob
 namespace Internal
 {
 
-    void SetDiedIfPidEquals(const ConnectionPtr& connection, const pid_t pid)
+    namespace //anonymous namespace
     {
-        if (connection->Pid() == pid)
+        bool initiateTimerHandler(boost::asio::io_service& ioService)
         {
-            connection->Died();
+            TimerHandler::Instantiate(ioService);
+            return true;
+        }
+
+        void SetDiedIfPidEquals(const ConnectionPtr& connection, const pid_t pid)
+        {
+            if (connection->Pid() == pid)
+            {
+                connection->Died();
+            }
+        }
+        
+        void ProcessExited(const pid_t& pid)
+        {
+            Connections::Instance().ForEachConnectionPtr(boost::bind(SetDiedIfPidEquals,_1,pid));
         }
     }
 
-    void ProcessExited(const pid_t& pid)
-    {
-        Connections::Instance().ForEachConnectionPtr(boost::bind(SetDiedIfPidEquals,_1,pid));
-    }
-
-
     DoseApp::DoseApp():
-        ACE_Event_Handler(ACE_Reactor::instance()),
         m_connectEvent(0),
         m_connectionOutEvent(0),
         m_nodeStatusChangedEvent(0),
+        m_signalHandler(m_ioService),
+        m_timerHandlerInitiated(initiateTimerHandler(m_ioService)),
+        m_poolHandler(m_ioService),
         m_pendingRegistrationHandler(m_ecom, m_nodeHandler),
-        m_handle_exception_notified(0),
-        m_handle_input_notified(0)
+        m_ecom(m_ioService),
+        m_HandleEvents_notified(0),
+        m_DispatchOwnConnection_notified(0)
     {
         m_processMonitor.Init(ProcessExited);
     }
 
     DoseApp::~DoseApp()
     {
+        if (m_memoryMonitorThread != boost::thread())
+        {
+            m_memoryMonitorThread.interrupt();
+            m_memoryMonitorThread.join();
+            m_memoryMonitorThread = boost::thread();
+        }
+
+        if (m_connectionThread != boost::thread())
+        {
+            //set the interrupt state so that when we generate the spurious signal
+            //the thread will be interrupted at the interruption_point.
+            m_connectionThread.interrupt();
+            Connections::Instance().GenerateSpuriousConnectOrOutSignal();
+            m_connectionThread.join();
+            m_connectionThread = boost::thread();
+        }
 
     }
 
 
-    int DoseApp::Run()
+    void DoseApp::Run()
     {
-#ifdef _MSC_VER
-        // Set best possible timer resolution on windows
-
-        TIMECAPS    tc;
-        UINT        wTimerRes;
-        const UINT  wantedResolution = 1;  // ms
-
-        if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) != TIMERR_NOERROR)
-        {
-            lllerr << "Dose_Main: Failed to obtain timer resolution!\n";
-            return -1;
-        }
-
-        wTimerRes = static_cast<UINT>(std::min(std::max(tc.wPeriodMin, wantedResolution), tc.wPeriodMax));
-        timeBeginPeriod(wTimerRes);
-#endif
-
-        if(!AllocateStatic())
-        {
-            lllerr<<"Dose_Main: Failed to allocate static resources!\n";
-            return -1;
-        }
+        AllocateStatic();
 
         // Start monitoring of this thread (that is, the main thread)
         m_mainThreadId = boost::this_thread::get_id();
@@ -137,85 +124,73 @@ namespace Internal
 
         // enter main loop
 #ifndef NDEBUG
-        std::wcout<<"dose_main running (debug)...\n";
+        std::wcout<<"dose_main running (debug)..." << std::endl;
 #else
-        std::wcout<<"dose_main running (release)...\n";
+        std::wcout<<"dose_main running (release)..." << std::endl;
 #endif
 
-        try
-        {
-            ACE_Reactor::instance()->run_reactor_event_loop();
-        }
-        catch (const std::exception & exc)
-        {
-            std::ostringstream ostr;
-            ostr << "DoseApp::Run: Caught 'std::exception' exception: "
-                 << "  '" << exc.what() << "'." << std::endl;
-            lllerr << ostr.str().c_str();
-            Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
-        }
-        catch (...)
-        {
-            std::ostringstream ostr;
-            ostr << "DoseApp::Run: Caught '...' exception." <<std::endl;
-            lllerr << ostr.str().c_str();
-            Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
-        }
-        exit(-1);
+        //we want the io service to keep running for ever.
+        boost::asio::io_service::work keepRunning(m_ioService);
+        
+        m_ioService.run();
     }
 
 
-
-    ACE_THR_FUNC_RETURN DoseApp::ConnectionThread(void * _this)
+    void DoseApp::ConnectionThread()
     {
-        DoseApp * This = static_cast<DoseApp *>(_this);
-        for (;;)
+        try
         {
-            bool connect, connectionOut;
-            Connections::Instance().WaitForDoseMainSignal(connect, connectionOut);
-            //Note that we cannot just do This->m_connectionOut = connectionOut, since that might clear flags that
-            //have not been handled yet.
-            if (connect)
+            for (;;)
             {
-                This->m_connectEvent = 1;
-           }
-            if (connectionOut)
-            {
-                This->m_connectionOutEvent = 1;
-            }
+                bool connect, connectionOut;
+                Connections::Instance().WaitForDoseMainSignal(connect, connectionOut);
 
-            if (This->m_handle_exception_notified == 0)
-            {
-                This->m_handle_exception_notified = 1;
-                ACE_Reactor::instance()->notify(This);
+                boost::this_thread::interruption_point();
+
+                //Note that we cannot just do this->m_connectionOut = connectionOut, since that might clear flags that
+                //have not been handled yet.
+                if (connect)
+                {
+                    m_connectEvent = 1;
+                }
+                if (connectionOut)
+                {
+                    m_connectionOutEvent = 1;
+                }
+                
+                if (m_HandleEvents_notified == 0)
+                {
+                    m_HandleEvents_notified = 1;
+                    m_ioService.post(boost::bind(&DoseApp::HandleEvents,this));
+                }
             }
         }
-#ifndef _MSC_VER
-        return NULL; //Keep compiler happy...
-#endif
+        catch (const boost::thread_interrupted&)
+        {
+            //do nothing, just exit
+        }
     }
 
     void DoseApp::OnDoDispatch()
     {
-        if (m_handle_input_notified == 0)
+        if (m_DispatchOwnConnection_notified == 0)
         {
-            m_handle_input_notified = 1;
-            ACE_Reactor::instance()->notify(this,ACE_Event_Handler::READ_MASK);
+            m_DispatchOwnConnection_notified = 1;
+            m_ioService.post(boost::bind(&DoseApp::DispatchOwnConnection,this));
         }
     }
 
-    int DoseApp::handle_input(ACE_HANDLE)
+    void DoseApp::DispatchOwnConnection()
     {
         //dispatch own connection!
-        m_handle_input_notified = 0;
+        m_DispatchOwnConnection_notified = 0;
         m_ownConnection.Dispatch();
-        return 0;
     }
 
 
-    int DoseApp::handle_exception(ACE_HANDLE)
+    void DoseApp::HandleEvents()
     {
-        m_handle_exception_notified = 0;
+        m_HandleEvents_notified = 0;
         int numEvents = 0;
 
         bool gotConnectEvent = false;
@@ -291,7 +266,6 @@ namespace Internal
         }
 
         //        std::wcout << "End handle_input (" << numEvents <<" events)" << std::endl;
-        return 0;
     }
 
     void DoseApp::HandleTimeout(const TimerInfoPtr& timer)
@@ -337,79 +311,60 @@ namespace Internal
     }
 
 
-    bool DoseApp::AllocateStatic()
+    void DoseApp::AllocateStatic()
     {
-        try
-        {
-            ContextSharedTable::Initialize();
-            MessageTypes::Initialize(/*iAmDoseMain = */ true);
-            EndStates::Initialize();
-            ServiceTypes::Initialize(/*iAmDoseMain = */ true);
-            InjectionKindTable::Initialize();
-            NodeStatuses::Initialize();
-            EntityTypes::Initialize(/*iAmDoseMain = */ true);
-
-            ACE_Reactor::instance()->register_handler(this,ACE_Event_Handler::EXCEPT_MASK);
-
-            m_connectionHandler.Init(m_ecom,
-                                     m_processInfoHandler,
-                                     m_requestHandler,
-                                     m_pendingRegistrationHandler,
-                                     m_nodeHandler,
-                                     m_persistHandler);
-
-            const bool otherNodesExistAtStartup =
-                m_ecom.Init(boost::bind(&DoseApp::HandleIncomingData, this, _1, _2),
-                            boost::bind(&DoseApp::QueueNotFull, this),
-                            boost::bind(&DoseApp::NodeStatusChangedNotifier, this),
-                            boost::bind(&DoseApp::StartPoolDistribution,this),
-                            boost::bind(&DoseApp::RequestPoolDistribution,this, _1));
-
-            //we notify so that even if there were no new nodes we trigger
-            //the call to MaybeSignal...() to start letting applications connect.
-            //this also takes care of the case where we're running Standalone without
-            //persistence.
-            NodeStatusChangedNotifier();
-
-            m_messageHandler.Init(m_blockingHandler,m_ecom);
-
-            m_responseHandler.Init(m_blockingHandler, m_ecom);
-            m_requestHandler.Init(m_blockingHandler, m_ecom, m_responseHandler);
-
-            m_ownConnection.Open(L"dose_main",L"own",0,NULL,this);
-
-            m_poolHandler.Init(m_blockingHandler,
-                               m_ecom,
-                               m_pendingRegistrationHandler,
-                               m_persistHandler,
-                               m_connectionHandler,
-                               m_threadMonitor);
-
-
-            m_processInfoHandler.Init(m_ecom,m_processMonitor);
-
-            m_nodeHandler.Init (m_ecom, m_requestHandler, m_poolHandler);
-
-            ACE_Thread::spawn(&DoseApp::ConnectionThread,this);
-
-            m_persistHandler.Init(m_ecom,m_connectionHandler,m_nodeHandler,otherNodesExistAtStartup);
-
-            ACE_Thread::spawn(&DoseApp::MemoryMonitorThread,NULL);
-
-        }
-        catch (const std::exception & exc)
-        {
-            lllerr << "Caught 'std::exception' exception: "
-                     << "  '" << exc.what() << "'." << std::endl;
-            return false;
-        }
-        catch (...)
-        {
-            lllerr<<"Caught '...' exception." <<std::endl;
-            return false;
-        }
-
-        return true;
+        ContextSharedTable::Initialize();
+        MessageTypes::Initialize(/*iAmDoseMain = */ true);
+        EndStates::Initialize();
+        ServiceTypes::Initialize(/*iAmDoseMain = */ true);
+        InjectionKindTable::Initialize();
+        NodeStatuses::Initialize();
+        EntityTypes::Initialize(/*iAmDoseMain = */ true);
+        
+        m_connectionHandler.Init(m_ecom,
+                                 m_processInfoHandler,
+                                 m_requestHandler,
+                                 m_pendingRegistrationHandler,
+                                 m_nodeHandler,
+                                 m_persistHandler);
+        
+        const bool otherNodesExistAtStartup =
+            m_ecom.Init(boost::bind(&DoseApp::HandleIncomingData, this, _1, _2),
+                        boost::bind(&DoseApp::QueueNotFull, this),
+                        boost::bind(&DoseApp::NodeStatusChangedNotifier, this),
+                        boost::bind(&DoseApp::StartPoolDistribution,this),
+                        boost::bind(&DoseApp::RequestPoolDistribution,this, _1));
+        
+        //we notify so that even if there were no new nodes we trigger
+        //the call to MaybeSignal...() to start letting applications connect.
+        //this also takes care of the case where we're running Standalone without
+        //persistence.
+        NodeStatusChangedNotifier();
+        
+        m_messageHandler.Init(m_blockingHandler,m_ecom);
+        
+        m_responseHandler.Init(m_blockingHandler, m_ecom);
+        m_requestHandler.Init(m_blockingHandler, m_ecom, m_responseHandler);
+        
+        m_ownConnection.Open(L"dose_main",L"own",0,NULL,this);
+        
+        m_poolHandler.Init(m_blockingHandler,
+                           m_ecom,
+                           m_pendingRegistrationHandler,
+                           m_persistHandler,
+                           m_connectionHandler,
+                           m_threadMonitor);
+        
+        
+        m_processInfoHandler.Init(m_ecom,m_processMonitor);
+        
+        m_nodeHandler.Init (m_ecom, m_requestHandler, m_poolHandler);
+        
+        m_connectionThread = boost::thread(boost::bind(&DoseApp::ConnectionThread,this));
+        
+        m_persistHandler.Init(m_ecom,m_connectionHandler,m_nodeHandler,otherNodesExistAtStartup);
+        
+        m_memoryMonitorThread = boost::thread(&DoseApp::MemoryMonitorThread);
     }
 
     void DoseApp::HandleConnect(const ConnectionPtr & connection)
@@ -638,10 +593,10 @@ namespace Internal
     void DoseApp::NodeStatusChangedNotifier()
     {
         m_nodeStatusChangedEvent = true;
-        if (m_handle_exception_notified == 0)
+        if (m_HandleEvents_notified == 0)
         {
-            m_handle_exception_notified = 1;
-            ACE_Reactor::instance()->notify(this);
+            m_HandleEvents_notified = 1;
+            m_ioService.post(boost::bind(&DoseApp::HandleEvents,this));
         }
     }
 
@@ -723,17 +678,21 @@ namespace Internal
         const double m_warningPercent;
     };
 
-    ACE_THR_FUNC_RETURN DoseApp::MemoryMonitorThread(void *)
+    void DoseApp::MemoryMonitorThread()
     {
-        MemoryMonitor monitor;
-        for (;;)
+        try 
         {
-            ACE_OS::sleep(5);
-            monitor.Check();
+            MemoryMonitor monitor;
+            for (;;)
+            {
+                boost::this_thread::sleep(boost::posix_time::seconds(5));
+                monitor.Check();
+            }
         }
-#ifndef _MSC_VER
-        return NULL; //Keep compiler happy...
-#endif
+        catch (const boost::thread_interrupted&)
+        {
+            //do nothing, just exit
+        }
     }
 
 }

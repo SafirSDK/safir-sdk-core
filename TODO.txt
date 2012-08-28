@@ -1,0 +1,25 @@
+testa patch_check för arm
+
+
+LATER
+-----
+Make dose_test use oob (pure tcp or udp) for all action sending, with wait for completion of the action before sequencer sends out next action.
+
+dots_cpp array container proxies!?
+         would require rewrite of ArrayContainer
+
+make dose_com possible to stop nicely
+använd wide-interfacen för att undvika MAX_PATH problem på windows
+  behövs det med boost fs 3?
+
+write olib test, both against unixodbc and iodbc on linux
+write dope db test
+
+write ada douf test
+complete swre tests
+
+remove ace from stresstests
+       testa errorreporter
+
+Gör så att dobmake kan köra utan rebuild
+använd "jom" http://qt-project.org/wiki/jom för att få parallella builds på windows utan allt hackandet...

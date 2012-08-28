@@ -29,7 +29,7 @@ with Safir.Dob.Typesystem.Container_Instantiations; use Safir.Dob.Typesystem.Con
 with Safir.Dob.Typesystem.Enumeration_Container_Base;
 with Safir.Dob.Typesystem.String_Container;
 with Safir.Dob.Typesystem.Binary_Container;
-with Safir.Dob.Typesystem.Object_Factory;
+with Safir.Dob.Typesystem.Object.Factory;
 with Safir.Dob.Typesystem.Kernel;
 with Safir.Dob.Typesystem.Utilities; use Safir.Dob.Typesystem.Utilities;
 with Interfaces.C.Strings;
@@ -1351,7 +1351,7 @@ package body Safir.Dob.Typesystem.Properties is
               (Obj.Ref.Get_Type_Id, Property_Id, Member, Index, Blob);
             declare
                Ptr : constant Safir.Dob.Typesystem.Object.Smart_Pointer'Class :=
-                       Safir.Dob.Typesystem.Object_Factory.Create_Object (Blob);
+                       Safir.Dob.Typesystem.Object.Factory.Create_Object (Blob);
             begin
                -- A blob created from a parameter will have the change flags set
                -- so we must reset them.

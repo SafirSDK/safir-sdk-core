@@ -26,6 +26,7 @@
 
 #include <ace/Time_Value.h>
 #include <Safir/Dob/Typesystem/Defs.h>
+#include <Safir/Time/TimeProvider.h>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -40,21 +41,6 @@
   #pragma warning (pop)
 #endif
 
-#if defined _MSC_VER
-#  ifdef DOUF_TIME_CPP_EXPORTS
-#    define DOUF_TIME_CPP_API __declspec(dllexport)
-#  else
-#    define DOUF_TIME_CPP_API __declspec(dllimport)
-#    ifdef _DEBUG
-#      pragma comment( lib, "douf_time_cppd.lib" )
-#    else
-#      pragma comment( lib, "douf_time_cpp.lib" )
-#    endif
-#  endif
-#elif defined __GNUC__
-#  define DOUF_TIME_CPP_API
-#endif
-
 namespace Safir
 {
 namespace Time
@@ -63,7 +49,7 @@ namespace Time
     /**
      * The AceTimeConverter class provides functions to convert to/from ACE time.
      */
-    class DOUF_TIME_CPP_API AceTimeConverter
+    class AceTimeConverter
     {
     public:
 
@@ -108,6 +94,43 @@ namespace Time
         static boost::posix_time::ptime ToPtime(const ACE_Time_Value & utcTime);
 
     };
+
+    ACE_Time_Value AceTimeConverter::ToAceTime(const boost::posix_time::time_duration & duration)
+    {
+        if (boost::posix_time::time_duration::num_fractional_digits() == 6)
+        {
+            return ACE_Time_Value(static_cast<time_t>(duration.total_seconds()),
+                                  static_cast<suseconds_t>(duration.fractional_seconds()));
+        }
+        else
+        {
+            return ACE_Time_Value(static_cast<time_t>(duration.total_seconds()),
+                                  static_cast<suseconds_t>(duration.fractional_seconds()
+                                  * pow(1.0,  boost::posix_time::time_duration::num_fractional_digits() -6)));
+        }
+    }
+
+    ACE_Time_Value AceTimeConverter::ToAceTime(const Safir::Dob::Typesystem::Si64::Second time)
+    {
+        return ACE_Time_Value(static_cast<suseconds_t>(time),
+            static_cast<suseconds_t>((time - Safir::Dob::Typesystem::Int64(time)) * pow (10.0,6)));
+    }
+
+    ACE_Time_Value AceTimeConverter::ToAceTime(const boost::posix_time::ptime & time)
+    {
+        return ToAceTime(TimeProvider::ToDouble(time));
+    }
+
+    Safir::Dob::Typesystem::Si64::Second AceTimeConverter::ToDouble(const ACE_Time_Value & time)
+    {
+        return time.sec() + (time.usec() / pow (10.0,6));
+    }
+
+    boost::posix_time::ptime AceTimeConverter::ToPtime(const ACE_Time_Value & time)
+    {
+        return TimeProvider::ToPtime(ToDouble(time));
+    }
+
 
 }; // namespace Time
 }; // namespace Safir

@@ -30,7 +30,6 @@
 #include <boost/filesystem/exception.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <Safir/Utilities/Internal/BoostFilesystemWrapper.h>
 #include <boost/integer_traits.hpp>
 
 #ifdef _MSC_VER
@@ -48,6 +47,14 @@
 #include <string>
 #include <Safir/Dob/ConnectionAspectInjector.h>
 
+namespace 
+{
+    const boost::filesystem::path replace_extension(boost::filesystem::path path,const std::string& ext)
+    {
+        return path.replace_extension(ext);
+    }
+
+}
 //-------------------------------------------------------
 void FilePersistor::RemoveFile(const boost::filesystem::path& path) const
 {
@@ -107,13 +114,19 @@ const boost::filesystem::path GetStorageDirectory()
 const FilePersistor::EntityIdAndHandlerId
 Filename2EntityIdAndHandlerId(const boost::filesystem::path & filename)
 {
-    if (!filename.has_leaf())
+    if (!filename.has_filename())
     {
         throw Safir::Dob::Typesystem::IllegalValueException
             (L"Filename2EntityAndHandler: Could not decompose filename : " +
             Safir::Dob::Typesystem::Utilities::ToWstring(filename.string()),__WFILE__,__LINE__);
     }
-    const std::string leaf = Safir::Utilities::Internal::GetFilenameFromPath(filename);
+
+#if defined (BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+    const std::string leaf = filename.filename().string();
+#else
+    const std::string leaf = filename.filename();
+#endif
+
     size_t separatorIndex = leaf.find('@');
     if (separatorIndex == std::string::npos)
     {
@@ -175,7 +188,8 @@ FilePersistor::GetFilePath(const FilePersistor::EntityIdAndHandlerId& entityAndH
 
 
 //-------------------------------------------------------
-FilePersistor::FilePersistor() :
+FilePersistor::FilePersistor(boost::asio::io_service& ioService) :
+    PersistenceHandler(ioService),
     m_storagePath(GetStorageDirectory()),
     m_isAllocated(false),
     m_debug(L"FilePersistor")
@@ -242,9 +256,10 @@ FilePersistor::RemoveAll()
     for (boost::filesystem::directory_iterator it (m_storagePath);
         it != boost::filesystem::directory_iterator(); ++it)
     {
+        const boost::filesystem::path path = it->path();
         try
         {
-            boost::filesystem::remove(*it);
+            boost::filesystem::remove(path);
         }
         catch (const boost::filesystem::filesystem_error &)
         {
@@ -252,7 +267,7 @@ FilePersistor::RemoveAll()
                 (L"Storage error",
                 L"FilePersistor::RemoveFile",
                 std::wstring(L"Could not remove ")
-                + Safir::Dob::Typesystem::Utilities::ToWstring(Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(it))
+                + Safir::Dob::Typesystem::Utilities::ToWstring((path).string())
                 + L", maybe it is read-only!.");
         }    
     }
@@ -347,7 +362,7 @@ FilePersistor::RestoreXml(const boost::filesystem::path & path) const
         
         RemoveFile(path);
 
-        RemoveFile(boost::filesystem::change_extension(path,".bin")); 
+        RemoveFile(replace_extension(path,".bin")); 
     }
 
     return entityPtr;
@@ -361,7 +376,8 @@ FilePersistor::RestoreAll()
     for (boost::filesystem::directory_iterator it (m_storagePath);
         it != boost::filesystem::directory_iterator(); ++it)
     {
-        if (!boost::filesystem::exists(*it))
+        const boost::filesystem::path path = it->path();
+        if (!boost::filesystem::exists(path))
         {
             // The file has been removed in an earlier step
             continue;
@@ -369,13 +385,12 @@ FilePersistor::RestoreAll()
 
         try
         {
-            const EntityIdAndHandlerId tuple = Filename2EntityIdAndHandlerId(*it);
+            const EntityIdAndHandlerId tuple = Filename2EntityIdAndHandlerId(path);
             TypeIdSet::const_iterator findIt = GetPersistentTypes().find(tuple.get<0>().GetTypeId());
             if (findIt == GetPersistentTypes().end())
             { //not persistent any more, remove it
 
-                m_debug << "File " << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(it).c_str()
-                        << " is not persistent in this configuration, removing" << std::endl;
+                m_debug << "File " << path.string().c_str() << " is not persistent in this configuration, removing" << std::endl;
 
                 Safir::SwReports::SendErrorReport
                         (L"Storage error",
@@ -383,34 +398,32 @@ FilePersistor::RestoreAll()
                          L"Type " + tuple.get<2>()
                          + L" is not persistent in this configuration, removing the corresponding xml and bin files"); 
                 
-                RemoveFile(boost::filesystem::change_extension(*it,".xml"));
-                RemoveFile(boost::filesystem::change_extension(*it,".bin"));
+                RemoveFile(replace_extension(path,".xml"));
+                RemoveFile(replace_extension(path,".bin"));
             }
             else
             {
                 Safir::Dob::ConnectionAspectInjector injector(m_dobConnection);
                 Safir::Dob::EntityPtr entity;
                 bool store = false;
-                if (boost::filesystem::extension(*it) == ".xml")
+                if (path.extension() == ".xml")
                 {
-                    if (!boost::filesystem::exists(boost::filesystem::change_extension(*it,".bin")))
+                    if (!boost::filesystem::exists(replace_extension(path,".bin")))
                     {
-                        m_debug << "This XML file is not an overlay, it is 'alone': "
-                                << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(it).c_str() << std::endl;
-                        entity = RestoreXml(*it);
+                        m_debug << "This XML file is not an overlay, it is 'alone': " << path.string().c_str() << std::endl;
+                        entity = RestoreXml(path);
                         store = true;
                     }
                 }
-                else if (boost::filesystem::exists(boost::filesystem::change_extension(*it,".xml")))
+                else if (boost::filesystem::exists(replace_extension(path,".xml")))
                 {
-                    m_debug << "There exists an overlay for "
-                            << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(it).c_str() << std::endl;
-                    entity = RestoreXml(boost::filesystem::change_extension(*it,".xml"));
+                    m_debug << "There exists an overlay for " << path.string().c_str() << std::endl;
+                    entity = RestoreXml(replace_extension(path,".xml"));
                     store = true;
                 }
                 else
                 {
-                    entity = RestoreBinary(*it);
+                    entity = RestoreBinary(path);
                 }
 
                 if (entity == NULL)
@@ -437,9 +450,9 @@ FilePersistor::RestoreAll()
                         (L"Storage error",
                         L"FilePersistor::RestoreAll",
                         std::wstring(L"Could not restore file ")
-                        + Safir::Dob::Typesystem::Utilities::ToWstring(Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(it))
+                        + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
                         + L" removing it.");
-            RemoveFile(*it);
+            RemoveFile(path);
         }
         catch (const boost::filesystem::filesystem_error & e)
         {
@@ -447,7 +460,7 @@ FilePersistor::RestoreAll()
                 (L"Storage error",
                 L"FilePersistor::RestoreAll",
                 std::wstring(L"Could not operate on file ")
-                + Safir::Dob::Typesystem::Utilities::ToWstring(Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(it))
+                + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
                 + L". This is the exception from boost::filesystem: "
                 + Safir::Dob::Typesystem::Utilities::ToWstring(e.what()));
         }

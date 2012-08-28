@@ -256,11 +256,11 @@ namespace Internal
         if (statePtr == NULL)
         {
             // Return null pointer without a locked lock.
-            return std::make_pair(statePtr, SharedLock());
+            return LockedStateResult(statePtr, SharedLock());
         }
 
         // Return pointer and the associated lock.
-        return std::make_pair(statePtr, SharedLock(statePtr->m_lock));
+        return LockedStateResult(statePtr, SharedLock(statePtr->m_lock));
     }
 
     void StateContainer::ForSpecificStateAdd(const Dob::Typesystem::Int64 key,

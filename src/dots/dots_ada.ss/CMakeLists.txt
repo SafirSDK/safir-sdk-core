@@ -7,7 +7,7 @@ if (NOT SAFIR_ADA_SUPPORT)
      return()
 endif (NOT SAFIR_ADA_SUPPORT)
    
-PROJECT (dots_ada)
+PROJECT (dots_ada NONE)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 

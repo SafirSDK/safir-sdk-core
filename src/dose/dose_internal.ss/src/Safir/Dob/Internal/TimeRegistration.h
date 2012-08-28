@@ -35,7 +35,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/lexical_cast.hpp>
-#include <ace/OS_NS_unistd.h>
+#include <Safir/Utilities/ProcessInfo.h>
 
 
 #if defined _WIN32
@@ -112,7 +112,7 @@ namespace Internal
             filename /= "log";
             filename /= "Dob-TimeRegistration";
             boost::filesystem::create_directory(filename);
-            filename /= boost::lexical_cast<std::string>(ACE_OS::getpid()) + "_" + name + ".csv";
+            filename /= boost::lexical_cast<std::string>(Safir::Utilities::ProcessInfo::GetPid()) + "_" + name + ".csv";
 
             return filename;
         }

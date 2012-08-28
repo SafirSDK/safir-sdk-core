@@ -53,6 +53,9 @@ namespace Internal
     public:
 
         static Repository & Instance();
+        //initilisation of the databases
+        //If shmem is not created this will create and initialize the memory, otherwise it will just open it.
+        static void Initialize();
 
         static const ParameterDatabase &  Parameters()  {return *Instance().m_parameterDb;}
         static const EnumDatabase &       Enums()       {return *Instance().m_enumDb;}
@@ -61,9 +64,6 @@ namespace Internal
         static const ExceptionDatabase &  Exceptions()  {return *Instance().m_exceptionDb;}
 
     private:
-        //initilisation of the databases
-        //If shmem is not created this will create and initialize the memory, otherwise it will just open it.
-        static void Init();
 
 
         //StartupSynchronizer stuff
@@ -84,8 +84,7 @@ namespace Internal
         boost::scoped_ptr<PropertyDatabase> m_propertyDb;
         boost::scoped_ptr<ExceptionDatabase> m_exceptionDb;
 
-
-        static Repository * volatile m_instance;
+        static Repository * m_instance;
 
         //Functions for inserting stuff.
         //other insertion functions are in the respective database classes, but these were

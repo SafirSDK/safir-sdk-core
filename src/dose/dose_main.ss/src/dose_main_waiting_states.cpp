@@ -237,7 +237,6 @@ namespace Internal
 
     void WaitingStates::HandleTimeout(const TimerInfoPtr& timer)
     {
-        //TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
         TimerHandler::Instance().Set(Discard,
                                      timer,
                                      GetUtcTime() + 5*60.0); //time out again in 60 seconds
@@ -261,7 +260,7 @@ namespace Internal
                      << ", #inst = " << it->second.instances.size() <<std::endl;
             }
 
-            lllinfo << ostr.str() << std::endl;
+            lllerr << ostr.str() << std::endl;
 
             // Remove all entries
             m_waitingStateTable.clear();

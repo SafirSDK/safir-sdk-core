@@ -37,6 +37,7 @@ generic
    type Contained_Type is private;
    Initial_Value : Contained_Type;
 package Safir.Dob.Typesystem.Value_Container is
+   pragma Preelaborate (Safir.Dob.Typesystem.Value_Container);
 
    ------------------
    -- Value Container

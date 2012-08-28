@@ -27,7 +27,7 @@
 #include "requestor.h"
 #include "handler.h"
 
-#include <Safir/Utilities/AceDispatcher.h>
+#include <Safir/Utilities/AsioDispatcher.h>
 
 class App:
     public Safir::Dob::StopHandler,
@@ -42,11 +42,9 @@ private:
     virtual void OnStopOrder();
     void PrintHelp();
 
+    boost::asio::io_service m_ioService;
     Safir::Dob::Connection m_Connection;
-    Safir::Utilities::AceDispatcher   m_dispatch;
+    Safir::Utilities::AsioDispatcher   m_dispatch;
     Requestor m_requestor;
     Handler m_handler;
-
-
-//    Safir::Dob::Internal::AtomicUint32 m_isNotified;
 };

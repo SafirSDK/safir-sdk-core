@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import os, glob, subprocess, threading, sys, stat, shutil, time, traceback
+import os, glob, subprocess, threading, sys, stat, shutil, time, traceback, re
 from optparse import OptionParser
 
 try:
@@ -74,6 +74,7 @@ def num_cpus():
                 return ncpus
     return 1 # Default
 
+
 def mkdir(newdir):
     """works the way a good mkdir should :)
         - already exists, silently complete
@@ -99,6 +100,15 @@ class DobmakeError(Exception):
 def die(msg):
     buildlog.writeError(msg + "\n")
     raise DobmakeError("\n" + msg)
+
+def physical_memory():
+    if not sys.platform.startswith("linux"):
+        die ("physical_memory() is only implemented on linux")
+    with open("/proc/meminfo") as file:
+        meminfo = file.read()
+    match = re.search(r"MemTotal:\s*([0-9]*) kB", meminfo)
+    return int(match.group(1))/1024
+
 
 def chmod(path):
     flags = stat.S_IWRITE | stat.S_IREAD
@@ -302,6 +312,10 @@ def parse_command_line():
                       help="Dont attempt to build Java code")
     parser.add_option("--no-cpp-debug", action="store_true",dest="no_cpp_debug",default=False,
                       help="Dont attempt to build cpp debug code")      
+    parser.add_option("--no-cpp-release", action="store_true",dest="no_cpp_release",default=False,
+                      help="Dont attempt to build cpp release code")      
+    parser.add_option("--default-config", action="store",type="string",dest="default_config",default="Release",
+                      help="Configuration for the other languages. Release is default.")
     parser.add_option("--no-gui", "--batch", "-b", action="store_true",dest="stdoutlog",default=False,
                       help="Run in batch (non-gui) mode")
     parser.add_option("--html-output", action="store_true",dest="html",default=False,
@@ -326,6 +340,9 @@ def parse_command_line():
     
     if options.rebuild:
         buildType="rebuild"
+
+    global default_config
+    default_config = options.default_config
 
     if options.target_architecture == "x86-64":
         if not is_64_bit():
@@ -352,9 +369,12 @@ def parse_command_line():
         build_java = False
 
     global build_cpp_debug
+    global build_cpp_release
 
     if options.no_cpp_debug:
         build_cpp_debug = False
+    if options.no_cpp_release:
+        build_cpp_release = False
 
     global no_gui
     no_gui = options.stdoutlog
@@ -366,7 +386,10 @@ def parse_command_line():
 def run_dots_depends():
     buildlog.writeHeader("Checking dependencies in dou files\n")
     buildlog.writeCommand("Running dots_depends...\n")
-    process = subprocess.Popen("dots_depends",stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
+    process = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","dots_depends"),
+                               stdout=subprocess.PIPE, 
+                               stderr=subprocess.STDOUT,
+                               universal_newlines=True)    
     buildlog.logOutput(process)
     if process.returncode != 0:
         die("dots_depends failed!")
@@ -451,18 +474,7 @@ class VisualStudioBuilder(object):
                 die("Failed to find a temp directory!")
         if not os.path.isdir(self.tmpdir):
             die("I can't seem to use the temp directory " + self.tmpdir)
-
-        #work out whether to use devenv.com or vcexpress.exe to build
-        basepath = os.path.join(self.studio,"..","IDE")
-        vcexpresspath = os.path.join(basepath,"vcexpress.exe")
-        devenvpath = os.path.join(basepath,"devenv.com")
-        if os.path.exists(vcexpresspath):
-            self.build_cmd = vcexpresspath
-        elif  os.path.exists(devenvpath):
-            self.build_cmd = devenvpath
-        else:
-            die("I couldn't find either vcexpress.exe or devenv.com, so I dont know how to build stuff!")
-
+            
         #work out what compiler tools to use
         if target_architecture == "x86":
             self.vcvarsall_arg = "x86"
@@ -547,8 +559,10 @@ class VisualStudioBuilder(object):
             if build_cpp_release:
                 cppconfig += ["Release"]
             for config in cppconfig:
-                self.run_command("\"" + self.build_cmd + "\" " + solution + " /build " + config +" /Project INSTALL",
-                                 "Build and Install CPP " + config,what)
+                self.run_command("cmake --build . --config " + config,
+                                 "Build CPP " + config,what)
+                self.run_command("cmake --build . --config " + config +" --target Install",
+                                 "Install CPP " + config,what)
                 save_installed_files_manifest()
             
         finally:
@@ -564,19 +578,21 @@ class VisualStudioBuilder(object):
         if buildType == "rebuild":
             Rebuild = "TRUE"
         try:
-            self.run_command(("cmake -G \""+ self.generator + "\" "+
-                              "-D NO_CXX:string=TRUE " +
-                              "-D NO_DOTNET:string=FALSE " +
-                              "-D NO_ADA:string=" + str(not build_ada) + " " + 
-                              "-D NO_JAVA:string=" + str(not build_java) + " " +
+            self.run_command("cmake -G \""+ "NMake Makefiles" + "\" "+
+                             "-D NO_CXX:string=TRUE " +
+                             "-D NO_DOTNET:string=FALSE " +
+                             "-D NO_ADA:string=" + str(not build_ada) + " " + 
+                             "-D NO_JAVA:string=" + str(not build_java) + " " + 
                               "-D SAFIR_BUILD_TARGET_ARCHITECTURE:string=" + target_architecture + " " +
-                              "-D REBUILD=" + Rebuild + " " +
-                              ".."),
+                             "-D REBUILD=" + Rebuild + " " +
+                             "..",
                              "Configure", what)
-            solution = self.find_sln()
+
+            self.run_command("cmake --build . --config " + default_config,
+                             "Build " + default_config, what)
             
-            self.run_command("\"" + self.build_cmd + "\" " + solution + " /build " + default_config  +" /Project INSTALL",
-                             "Build and Install " + default_config, what)
+            self.run_command("cmake --build . --config " + default_config  +" --target Install",
+                             "Install " + default_config, what)
             save_installed_files_manifest()
         finally:
             os.chdir(olddir)
@@ -596,8 +612,6 @@ class VisualStudioBuilder(object):
                                   "-D REBUILD=" + Rebuild + " " +
                                   "."),
                                  "Configure", what)
-                self.run_command("nmake install",
-                                 "Build and Install " + default_config, what)
             else:
                 self.run_command(("cmake -G \""+ self.generator + "\" "+
                                   "-D REBUILD=" + Rebuild + " " +
@@ -605,8 +619,11 @@ class VisualStudioBuilder(object):
                                  "Configure", what)
                 solution = self.find_sln()
                 
-                self.run_command("\"" + self.build_cmd + "\" " + solution + " /build " + default_config  +" /Project INSTALL",
-                                 "Build and Install " + default_config, what)
+            self.run_command("cmake --build . --config " + default_config,
+                             "Build " + default_config, what)
+
+            self.run_command("cmake --build . --config " + default_config  +" --target Install",
+                             "Install " + default_config, what)
             
 
             save_installed_files_manifest()
@@ -645,11 +662,23 @@ class VisualStudioBuilder(object):
 
 class UnixGccBuilder(object):
     def __init__(self):
-        self.num_jobs = num_cpus() + 1
+        #We need to limit ourselves a little bit in how
+        #many parallel jobs we perform. Each job may use
+        #up to 400Mb of memory.
+        try:
+            memory = physical_memory()
+            self.num_jobs = num_cpus() + 1
+        
+            if memory / self.num_jobs < 400:
+                self.num_jobs = max(1,memory / 400)
+        except:
+            self.num_jobs = 2
+        #ada builds (with gnatmake) will look at environment to determine parallellism
+        os.environ["NUMBER_OF_PROCESSORS"] = str(self.num_jobs)
 
     @staticmethod
     def can_use():
-        return sys.platform == "linux2"
+        return sys.platform.startswith("linux2")
     
 
     def run_command(self, cmd, description, what, allow_fail = False):
@@ -678,8 +707,10 @@ class UnixGccBuilder(object):
                               "."),
                              "Configure", what)
             
+            self.run_command(("make","-j",str(self.num_jobs)),
+                             "Build " + default_config, what)
             self.run_command(("make","-j",str(self.num_jobs),"install"),
-                             "Build and Install " + default_config, what)
+                             "Install " + default_config, what)
 
             save_installed_files_manifest()
         finally:
@@ -704,8 +735,10 @@ class UnixGccBuilder(object):
             
             os.putenv("MONO_PATH", SAFIR_RUNTIME + "/bin")
 
+            self.run_command(("make","-j",str(self.num_jobs)),
+                             "Build " + default_config, what)
             self.run_command(("make","-j",str(self.num_jobs),"install"),
-                             "Build and Install " + default_config, what)
+                             "Install " + default_config, what)
 
             save_installed_files_manifest()
             
@@ -737,7 +770,7 @@ class UnixGccBuilder(object):
                 remove(os.path.join("gen",name))
 
 def run_dots_configuration_check():
-    process = subprocess.Popen("dots_configuration_check",stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+    process = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","dots_configuration_check"),stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)    
     buildlog.logOutput(process)
     if process.returncode != 0:
         die("dots_configuration_check failed! There is something wrong with your dou and dom files")
@@ -1018,6 +1051,9 @@ def load_gui():
                     self.traceback = traceback.format_exc()
 
 def main():
+    #make stdout unbuffered
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+
     global SAFIR_RUNTIME
     global SAFIR_SDK
     SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
@@ -1059,8 +1095,8 @@ def main():
             builder.build()
             check_config()
         
-        print("Success! (dobmake took " + str(time.time() - start_time) + " seconds)")
 
+        print ("Success! (dobmake took " + time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time)) + ")")
     else:
         load_gui()
         application = tkinter.Tk()

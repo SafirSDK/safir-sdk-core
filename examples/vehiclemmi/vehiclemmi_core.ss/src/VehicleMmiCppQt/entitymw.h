@@ -31,7 +31,18 @@
 #include "messagedialog.h"
 #include "categoryinfodialog.h"
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127)
+#endif
+
 #include <QtGui/QMainWindow>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
+
 #include "ui_entitymw.h"
 
 namespace VehicleMmiCppQt

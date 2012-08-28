@@ -78,7 +78,7 @@ namespace Internal
 
 
     ConnectResult
-    ProcessInfoHandler::CanAddConnectionFromProcess(const int pid) const
+    ProcessInfoHandler::CanAddConnectionFromProcess(const pid_t pid) const
     {
         const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,Typesystem::InstanceId(pid));
 
@@ -164,7 +164,7 @@ namespace Internal
 
     void ProcessInfoHandler::AddOwnConnection()
     {
-        const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,Typesystem::InstanceId(ACE_OS::getpid()));
+        const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,Typesystem::InstanceId(Safir::Utilities::ProcessInfo::GetPid()));
         try
         {
             ProcessInfoPtr processInfo = ProcessInfo::Create();
@@ -172,7 +172,7 @@ namespace Internal
                    << "Failed to create ProcessInfo object for dose_main! entityId = " << eid);
 
             processInfo->Name().SetVal(L"dose_main");
-            processInfo->Pid().SetVal(ACE_OS::getpid());
+            processInfo->Pid().SetVal(Safir::Utilities::ProcessInfo::GetPid());
             processInfo->ConnectionNames()[0].SetVal(ConnectionAspectMisc(m_connection).GetConnectionName());
 
             m_connection.SetAll(processInfo,eid.GetInstanceId(),Typesystem::HandlerId());

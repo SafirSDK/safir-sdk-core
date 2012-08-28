@@ -26,6 +26,7 @@ with Safir.Dob.Typesystem.Internal_Defs;
 pragma Warnings ("H");  -- turn off warnings for hiding variable
 
 package Safir.Dob.Typesystem.Kernel is
+   pragma Preelaborate (Safir.Dob.Typesystem.Kernel);
 
    type Underlying_Entity_Id_Type is record
       Type_Id   : Safir.Dob.Typesystem.Type_Id;

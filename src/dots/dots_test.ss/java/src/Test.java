@@ -3036,8 +3036,8 @@ public class Test {
                 && MemberTypesProperty.isNullTestClassMember(MT2)
                 && MA1.testClassMember().get(1).isNull()
                 && MemberArraysProperty.isNullTestClassMember(MA2, 1);
-                
-                
+
+
         // Make some tests concerning Set/GetChangedHere
         MT1.testClassMember().setObj(ParameterTypes.getTestClassParameter());
         MT1.testClassMember().setChanged(false);
@@ -10333,7 +10333,10 @@ public class Test {
         long[] ids = Operations.getAllTypeIds();
         for (int i = 0; i < ids.length; i++) {
             if (Operations.isProperty(ids[i])) {
-                System.out.println(Operations.getName(ids[i]));
+                //only care about the ones that are ours
+                if (Operations.getName(ids[i]).startsWith("DotsTest")) {
+                    System.out.println(Operations.getName(ids[i]));
+                }
             }
         }
     }
@@ -10343,7 +10346,10 @@ public class Test {
         long[] ids = Operations.getAllTypeIds();
         for (int i = 0; i < ids.length; i++) {
             if (Operations.isEnumeration(ids[i])) {
-                System.out.println(Operations.getName(ids[i]));
+                //only care about the ones that are ours
+                if (Operations.getName(ids[i]).startsWith("DotsTest")) {
+                    System.out.println(Operations.getName(ids[i]));
+                }
             }
         }
     }
@@ -10353,7 +10359,10 @@ public class Test {
         long[] ids = Operations.getAllTypeIds();
         for (int i = 0; i < ids.length; i++) {
             if (Operations.isException(ids[i])) {
-                System.out.println(Operations.getName(ids[i]));
+                //only care about the ones that are ours
+                if (Operations.getName(ids[i]).startsWith("DotsTest")) {
+                    System.out.println(Operations.getName(ids[i]));
+                }
             }
         }
     }

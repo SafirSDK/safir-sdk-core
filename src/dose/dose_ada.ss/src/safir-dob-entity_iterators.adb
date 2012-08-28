@@ -26,7 +26,6 @@ with Safir.Dob.Typesystem.Library_Exceptions;
 with Safir.Dob.Interf;
 with Safir.Dob.Entity_Proxy_Impl_Pointers;
 with Safir.Dob.Entity_Proxy_Impls;
-with Interfaces.C;
 
 package body Safir.Dob.Entity_Iterators is
 

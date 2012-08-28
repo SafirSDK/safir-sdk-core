@@ -29,15 +29,11 @@
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/asio.hpp>
 #include <set>
 #include <boost/noncopyable.hpp>
 #include <vector>
 #include <map>
-#include <ace/Event_Handler.h>
-
-#ifdef TimerId
-#undef TimerId
-#endif
 
 namespace Safir
 {
@@ -127,12 +123,14 @@ namespace Internal
      *       Only call this from the main dose_main thread!
      */
     class TimerHandler:
-        public ACE_Event_Handler,
         private boost::noncopyable
     {
     public:
-        static TimerHandler & Instance();
+        static void Instantiate(boost::asio::io_service & ioService);
 
+        /** Instantiate must have been called for this to function. */
+        static TimerHandler & Instance();
+        
         const TimerId RegisterTimeoutHandler(const std::wstring & timerName, TimeoutHandler & timeoutHandler);
 
         const std::wstring & GetTimerName(const TimerId timerId) const;
@@ -159,20 +157,16 @@ namespace Internal
         //can be a new timerInfo with the same contents. It does not have to be the same pointer!
         bool IsSet(const TimerInfoPtr & timerInfo) const; //O(1)
 
-
-        //will only handle one timeout at a time, to allow event handling between each timeout.
-        //void HandleTimeout();
-
     private:
 
         //returns the time to the next timeout (relative time)
-        const ACE_Time_Value NextTimeout() const;
+        const boost::posix_time::time_duration NextTimeout() const;
 
-        int handle_timeout(const ACE_Time_Value& current_time, const void* act);
+        void HandleTimeout(const boost::system::error_code & error);
 
         void ScheduleTimer();
 
-        TimerHandler();
+        explicit TimerHandler(boost::asio::io_service & ioService);
         ~TimerHandler();
 
         //must use custom comparer to compare pointer contents rather than pointers.
@@ -184,6 +178,11 @@ namespace Internal
         TimerQueue m_timerQueue;
 
         TimeoutHandlerTable m_timeoutHandlerTable;
+        
+        boost::asio::io_service & m_ioService;
+        boost::scoped_ptr<boost::asio::deadline_timer> m_deadlineTimer;
+
+        static TimerHandler* m_instance;
     };
 
 

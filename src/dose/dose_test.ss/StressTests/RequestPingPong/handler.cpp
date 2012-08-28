@@ -29,7 +29,6 @@
 #include <Safir/Dob/EntityIdResponse.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/SuccessResponse.h>
-#include <ace/OS_NS_unistd.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 
 #include <Safir/Dob/Typesystem/Parameters.h>
@@ -52,8 +51,6 @@ void Handler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId /*typeI
 {
     lllerr << "Handler::OnRevokedRegistration" <<std::endl;
 
-    //ACE_OS::sleep(1);
-    
     m_Connection.RegisterEntityHandlerInjection(DoseTest::SynchronousVolatileEntity::ClassTypeId, 
         m_handlerId, Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId, this);
 }

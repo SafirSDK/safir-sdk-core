@@ -268,7 +268,7 @@ package Safir.Dob.Interf is
       On_Drop_Reference          : access Integer; -- Dummy for Ada
       New_Ctrl_Id                : out Safir.Dob.Defs.Controller_Id;
       Success                    : out C.char);
-   pragma Import (C, Connect_Secondary, "DoseC_ConnectSecondary");
+   pragma Import (CPP, Connect_Secondary, "DoseC_ConnectSecondary");
 
    procedure Disconnect
      (Controller_Id : in  Safir.Dob.Defs.Controller_Id;

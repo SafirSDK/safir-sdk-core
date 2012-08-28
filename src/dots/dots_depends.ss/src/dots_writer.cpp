@@ -22,8 +22,8 @@
 *
 ******************************************************************************/
 #include <iostream>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 #include "dots_depends_defs.h"
 #include "dots_writer.h"
@@ -61,30 +61,17 @@ namespace DotsDepends
             return;
         }
 
-        const char * const part1 = "@LoadLibraryD";
-        const char * const part2 = "@LoadLibrary";
-        const char * const part3 = "@dlopen"; 
+        const char * const loadDll = "@LoadDll";
         const int buff_size = 128;
         char line[128];
 
         // find @
         while( fgets( line, buff_size, txtStream ) != NULL)
         {
-            if (strncmp(part1, line, strlen(part1)) == 0)
+            if (strncmp(loadDll, line, strlen(loadDll)) == 0)
             {
-                WriteImports(cppStream, list, "                lllout << L\"loading dots_generated-", "-cppd.dll\" << std::endl;\n");
-                WriteImports(cppStream, list, "                LoadLibrary(L\"dots_generated-", "-cppd.dll\");\n");
+                WriteImports(cppStream, list, "                LoadDll(\"dots_generated-", "-cpp\");\n");
             }
-            else if (strncmp(part2, line, strlen(part2)) == 0)
-            {
-                WriteImports(cppStream, list, "                lllout << L\"loading dots_generated-", "-cpp.dll\" << std::endl;\n");
-                WriteImports(cppStream, list, "                LoadLibrary(L\"dots_generated-", "-cpp.dll\");\n");
-            }
-            else if (strncmp(part3, line, strlen(part3)) == 0)
-            {
-                WriteImports(cppStream, list, "                lllout << L\"loading ../lib/libdots_generated-", "-cpp.so\" << std::endl;\n");
-                WriteImports(cppStream, list, "                lib_handle = dlopen(\"../lib/libdots_generated-", "-cpp.so\", RTLD_LAZY);\n");
-           }
             else
             {
                 fwrite(line, sizeof( char ), strlen(line), cppStream);

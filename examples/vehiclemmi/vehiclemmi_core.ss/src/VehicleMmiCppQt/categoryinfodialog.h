@@ -25,7 +25,18 @@
 #define CATEGORYINFODIALOG_H
 
 #include "ui_categoryinfodialog.h"
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127)
+#endif
+
 #include <QDialog>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <Capabilities/Vehicles/VehicleCategoryInfo.h>
 #include <Safir/Dob/Connection.h>
 

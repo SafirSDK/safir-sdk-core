@@ -29,14 +29,12 @@
 #include <DoseTest/Partner.h>
 #include <DoseTest/Parameters.h>
 #include <boost/bind.hpp>
+#include <boost/thread.hpp>
 #include "Logger.h"
 #include <DoseTest/Dump.h>
 #include <DoseTest/DumpResult.h>
 #include <Safir/Dob/OverflowException.h>
-#include <ace/OS_NS_unistd.h>
-#include <ace/INET_Addr.h>
-#include <ace/OS_NS_sys_socket.h>
-
+#include <Safir/Dob/DistributionChannelParameters.h>
 #include "dosecom_stuff.h"
 
 #ifdef _MSC_VER
@@ -50,66 +48,80 @@
   #pragma warning(pop)
 #endif
 
-
+//dosecom_stuff.h includes stuff that includes windows.h crap header file!
+//undef the stupid defines from there.
+//TODO: rewrite the dose_com exported header files to not include windows.h!
 #ifdef GetMessage
 #undef GetMessage
 #endif
 
 ActionReader::ActionReader(const boost::function<void (DoseTest::ActionPtr)> & handleActionCallback,
-                           const std::string& multicastNic):
-
-    ACE_Event_Handler(ACE_Reactor::instance()),
-    m_handleActionCallback(handleActionCallback),
-    m_sock(ACE_SOCK_Dgram_Mcast::options(ACE_SOCK_Dgram_Mcast::DEFOPT_BINDADDR |
-                                         ACE_SOCK_Dgram_Mcast::OPT_NULLIFACE_ONE))
+                           const std::string& listenAddressStr,
+                           boost::asio::io_service& ioService):
+    m_socket(ioService),
+    m_buffer(65000, static_cast<char>(0)),
+    m_handleActionCallback(handleActionCallback)
 {
+    if(Safir::Dob::DistributionChannelParameters::DistributionChannels(0)->MulticastAddress() == L"127.0.0.1")
+    {
+        std::wcout << "System appears to be Standalone, not listening for multicasted test actions" << std::endl;
+        return;
+    }
+
+    const unsigned short port = 31789;
+
+    // Create the socket so that multiple may be bound to the same address.
+    const boost::asio::ip::address listenAddress = 
+        boost::asio::ip::address::from_string(listenAddressStr);
+    const boost::asio::ip::udp::endpoint listenEndpoint(listenAddress, port);
+    m_socket.open(listenEndpoint.protocol());
+    m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
+    m_socket.bind(listenEndpoint);
+
     // Port and address must correspond to what is used by the test sequencer
-    const unsigned int cPort = 31789;
-    const std::wstring cMulticastAddr = DoseTest::Parameters::TestMulticastAddress();
+    const std::wstring multicastAddressStr = DoseTest::Parameters::TestMulticastAddress();
 
-    ACE_INET_Addr addr;
-    addr.set(cPort,
-             cMulticastAddr.c_str());
+    //Set up address
+    const boost::asio::ip::address multicastAddress = 
+        boost::asio::ip::address::from_string(Safir::Dob::Typesystem::Utilities::ToUtf8
+                                              (multicastAddressStr));
 
-    ACE_OS::socket_init();
+    std::wcout << "Joining socket to group for multicast reception. Multicast address " 
+               << multicastAddressStr << ":" << port << "." << std::endl;
 
-    std::wcout << "Joined socket to group for multicast reception. Multicast address " << cMulticastAddr << ", port " << cPort << "." << std::endl;
+    // Join the multicast group.
+    m_socket.set_option(boost::asio::ip::multicast::join_group(multicastAddress));
 
-    int res;
-    if (multicastNic.empty())
-    {
-        std::wcout << "NIC is not set ... will listen on default interface." << std::endl;
-        res = m_sock.join(addr);
-    }
-    else
-    {
-        std::wcout << "Used NIC: " << Safir::Dob::Typesystem::Utilities::ToWstring(multicastNic) << std::endl;
-        res = m_sock.join(addr, 1, multicastNic.c_str());
-    }
-    if (res == -1)
-    {
-        std::wcout << "Error joining multicast group!" << std::endl;
-    }
-
-    m_sock.enable(ACE_NONBLOCK);
-
-    reactor ()->register_handler (this, ACE_Event_Handler::READ_MASK); 
+    m_socket.async_receive_from(
+        boost::asio::buffer(m_buffer), m_senderEndpoint,
+        boost::bind(&ActionReader::HandleData, this,
+          boost::asio::placeholders::error,
+          boost::asio::placeholders::bytes_transferred));
 }
 
-int ActionReader::handle_input(ACE_HANDLE)
+void ActionReader::HandleData(const boost::system::error_code& error,
+                              const size_t bytes_recvd)
 {
-    ACE_INET_Addr from;
-    const unsigned int cBufLen = 65000; 
-    char buf[cBufLen];
+    if (error)
+    {
+        std::wcout << "error when receiving data" << std::endl;
+        exit(1);
+    }
 
-    while (m_sock.recv(buf, cBufLen, from) != -1)
+    if (bytes_recvd != 0)
     {
         DoseTest::ActionPtr action =
-            boost::static_pointer_cast<DoseTest::Action>(Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(buf));
-
+            boost::static_pointer_cast<DoseTest::Action>
+            (Safir::Dob::Typesystem::Serialization::ToObject(m_buffer));
+        
         m_handleActionCallback(action);
     }
-    return 0;
+        
+    m_socket.async_receive_from
+        (boost::asio::buffer(m_buffer), m_senderEndpoint,
+         boost::bind(&ActionReader::HandleData, this,
+                     boost::asio::placeholders::error,
+                     boost::asio::placeholders::bytes_transferred));
 }
 
 #ifdef _MSC_VER
@@ -126,9 +138,11 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_isDone(false),
     m_isActive(false),
     m_dispatchTestConnection(true),
-    m_testDispatcher(boost::bind(&Executor::DispatchTestConnection,this)),
-    m_controlDispatcher(boost::bind(&Executor::DispatchControlConnection,this)),
-    m_actionReader(boost::bind(&Executor::HandleAction,this,_1), commandLine.size() > 2 ? commandLine.at(2): ""),
+    m_testDispatcher(boost::bind(&Executor::DispatchTestConnection,this), m_ioService),
+    m_controlDispatcher(boost::bind(&Executor::DispatchControlConnection,this), m_ioService),
+    m_actionReader(boost::bind(&Executor::HandleAction,this,_1), 
+                   commandLine.size() > 2 ? commandLine.at(2): "0.0.0.0",
+                   m_ioService),
     m_callbackActions(Safir::Dob::CallbackId::Size()),
     m_defaultContext(0),
     m_lastRecSeqNbr(0)
@@ -149,8 +163,7 @@ void Executor::OnStopOrder()
     lout << "Got stop order" << std::endl;
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnStopOrder);
     m_isDone = true;
-    ACE_Reactor::instance()->end_reactor_event_loop();
-    ACE_Reactor::instance()->close();
+    m_ioService.stop();
 }
 
 void Executor::OnMessage(const Safir::Dob::MessageProxy messageProxy)
@@ -167,9 +180,10 @@ void Executor::HandleAction(DoseTest::ActionPtr action)
 {
     if (!action->SeqNbr().IsNull())
     {
-        if (action->SeqNbr().GetVal() != m_lastRecSeqNbr + 1)
+        if (action->SeqNbr() != m_lastRecSeqNbr + 1)
         {
-            std::wcout << "Seems an action from the sequencer is lost!!" << std::endl; 
+            std::wcout << "Seems an action from the sequencer is lost! Expected " 
+                       << m_lastRecSeqNbr << " but got " << action->SeqNbr() << std::endl; 
         }
         m_lastRecSeqNbr = action->SeqNbr().GetVal();
     }
@@ -349,12 +363,9 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
         {
             if (m_isActive)
             {
-                std::wcout << "Sleeping " << action->SleepDuration().GetVal() << " seconds"<<std::endl;
-                const double decimals = action->SleepDuration() - static_cast<unsigned int>(action->SleepDuration());
-
-                const ACE_Time_Value time(static_cast<unsigned int>(action->SleepDuration()),
-                                          static_cast<unsigned int>(decimals * 1000000));
-                ACE_OS::sleep(time);
+                std::wcout << "Sleeping " << action->SleepDuration() << " seconds"<<std::endl;
+                boost::this_thread::sleep(boost::posix_time::microseconds
+                                          (static_cast<boost::int64_t>(action->SleepDuration() * 1e6)));
             }
         }
         break;
@@ -452,7 +463,8 @@ Executor::Run()
 {
     std::wcout << m_identifier << ":" <<  m_instance << " Started" <<std::endl;
 
-    ACE_Reactor::instance()->run_reactor_event_loop();
+    boost::asio::io_service::work keepRunning(m_ioService);
+    m_ioService.run();
 }
 
 void

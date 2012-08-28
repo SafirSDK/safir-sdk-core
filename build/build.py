@@ -24,8 +24,10 @@
 #
 ###############################################################################
 from __future__ import print_function
-import os, glob, sys, subprocess, platform
+import os, glob, sys, subprocess, platform, threading, xml.dom.minidom, re
 
+from Queue import Queue, Empty
+from xml.sax.saxutils import escape
 
 #Load some environment variables that are needed throughout as globals
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
@@ -35,7 +37,6 @@ SAFIR_SDK = os.environ.get("SAFIR_SDK")
 known_configs = set(["Release", "Debug", "MinSizeRel", "RelWithDebInfo"])
 
 #define some global variables
-verbose = False
 skip_list= None
 clean = False
 force_config = None
@@ -43,7 +44,6 @@ force_extra_config = None
 target_architecture = None
 ada_support = False
 java_support = False
-
 class FatalError(Exception):pass
 
 def die(message):
@@ -63,14 +63,14 @@ def is_64_bit():
         
 
 def copy_dob_files(source_dir, target_dir):
-    """Copy dou and dom files from the source directory to the given subdirectory in the dots_genereted directory"""
+    """Copy dou and dom files from the source directory to the given subdirectory in the dots_generated directory"""
     import os
     import re
     import shutil
     dots_generated_dir = os.path.join(SAFIR_SDK,"dots","dots_generated")
     abs_target_dir = os.path.join(dots_generated_dir, target_dir)
 
-    log("Copying dob files from " + source_dir + " to " + abs_target_dir, True)
+    logger.log("Copying dob files from " + source_dir + " to " + abs_target_dir,"output")
     
     if not os.path.isdir(dots_generated_dir):
         mkdir(dots_generated_dir)
@@ -142,24 +142,74 @@ def num_cpus():
             return int(os.popen2("sysctl -n hw.ncpu")[1].read())
     # Windows:
     if "NUMBER_OF_PROCESSORS" in os.environ:
-            ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
-            if ncpus > 0:
-                return ncpus
+        ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
+        if ncpus > 0:
+            return ncpus
     return 1 # Default
 
+def physical_memory():
+    if not sys.platform.startswith("linux"):
+        die ("physical_memory() is only implemented on linux")
+    with open("/proc/meminfo") as file:
+        meminfo = file.read()
+    match = re.search(r"MemTotal:\s*([0-9]*) kB", meminfo)
+    return int(match.group(1))/1024
 
-def log(message,ignore_verbose = False):
-    if verbose or ignore_verbose:
-        print(message)
-        sys.stdout.flush()
 
+class Logger(object):
+    LogLevel = ("Brief", "Verbose")
+    Tags = set(["header","brief","normal","command","output"])
+
+    def __init__(self,level):
+        #make stdout unbuffered
+        sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+        if level not in Logger.LogLevel:
+            die("Bad log level")
+        self.__logLevel = level
+
+    def log(self, data, tag = "normal"):
+        if data is None: return
+        
+        if tag not in Logger.Tags:
+            die("unknown logging tag")
+
+        if self.__logLevel == "Brief":
+            if tag == "header" or tag == "normal" or tag == "brief":
+                sys.stdout.write(data + "\n")
+        elif self.__logLevel == "Verbose":
+            if tag == "brief":
+                pass
+            elif tag == "header":
+                sys.stdout.write("\n==== " + data + " ====\n")
+            elif tag == "command":
+                sys.stdout.write("+ " + data + "\n")
+            else:
+                sys.stdout.write(data + "\n")
+
+    def logOutput(self, process):
+        output = list()
+        for line in iter(process.stdout.readline,b''):
+            line = line.rstrip("\n\r")
+            self.log(line,"output")
+            output += (line,)
+        process.wait()
+        if process.returncode != 0:
+            self.log("Failure, return code is " + str(process.returncode))
+        self.log("","output")
+        return "\n".join(output)
 
 def check_environment():
+    global SAFIR_RUNTIME
+    global SAFIR_SDK
+
     if SAFIR_RUNTIME == None or SAFIR_SDK == None:
         die("You need to have both SAFIR_RUNTIME and SAFIR_SDK set");
+
+    #Make sure slashes are the right direction, etc.
+    SAFIR_RUNTIME = os.path.normpath(SAFIR_RUNTIME)
+    SAFIR_SDK = os.path.normpath(SAFIR_SDK)
+
     #TODO check cmake?! and other needed stuff
-
-
 
 
 def parse_command_line(builder):
@@ -181,10 +231,23 @@ def parse_command_line(builder):
                       help="Build for the given config irrespective of what the command file says about config")
     parser.add_option("--force-extra-config", action="store",type="string",dest="force_extra_config",
                       help="Build for the given extra config irrespective of what the command file says about extra_config")    
-    parser.add_option("--verbose", "-v", action="store_true",dest="verbose",default=False,
-                      help="Print more stuff about what is going on")
+    parser.add_option("--jenkins", action="store_true",dest="jenkins",default=False,
+                      help="Set up and use environment variables for a Jenkins automated build.\n" + 
+                      "Currently sets up SAFIR_RUNTIME, SAFIR_SDK, PATH, LD_LIBRARY_PATH and ADA_PROJECT_PATH \n" +
+                      "when needed, and honours the 'Config' matrix axis. Also implies --verbose.")
+    parser.add_option("--verbose", "-v", action="count",dest="verbose",default=0,
+                      help="Print more stuff about what is going on. Use twice to get very verbose output.")
+
     builder.setup_command_line_options(parser)
     (options,args) = parser.parse_args()
+
+    if options.jenkins:
+        options.verbose += 1
+    if options.verbose >= 2:
+        os.environ["VERBOSE"] = "1"
+
+    global logger
+    logger = Logger("Brief" if options.verbose == 0 else "Verbose")
 
     if options.target_architecture == "x86-64":
         if not is_64_bit():
@@ -213,10 +276,7 @@ def parse_command_line(builder):
     global clean
     clean = options.clean
 
-    global verbose
-    verbose = options.verbose
-    
-    if (options.command_file == None):
+    if options.command_file is None:
         die("You need to specify the command file to use")
         
     if not os.path.isfile(options.command_file):
@@ -225,14 +285,36 @@ def parse_command_line(builder):
     command_file = open(options.command_file,'r')
 
     global force_config;
-    if (options.force_config != None):
+    if options.force_config is not None:
         force_config = options.force_config
 
     global force_extra_config;
-    if (options.force_extra_config != None):
+    if options.force_extra_config is not None:
         force_extra_config = options.force_extra_config        
+
+    if options.jenkins:
+        builder.setenv()
+        global SAFIR_RUNTIME
+        global SAFIR_SDK
+        #reload env
+        SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
+        SAFIR_SDK = os.environ.get("SAFIR_SDK")
+
+        config = os.environ.get("Config")
+        if config is not None:
+            if force_config is not None or force_extra_config is not None:
+                die("Cannot combine force_config or force_extra_config with $Config!")
+            if config == "Release":
+                logger.log("Using Config 'Release', building as specified in the command file.")
+            elif config == "DebugOnly":
+                logger.log("Using Config 'DebugOnly', ignoring command file configs, and building everything in Debug only.")
+                force_config = "Debug"
+                force_extra_config = "None"
+            else:
+                die("Unexpected 'Config' value: " + config + ", can handle 'Release' and 'DebugOnly'")
         
     builder.handle_command_line_options(options)
+
 
 def find_sln():
     sln_files = glob.glob("*.sln")
@@ -240,9 +322,27 @@ def find_sln():
         die("There is not exactly one sln file in " + os.getcwd() +
             ", either cmake failed to generate one or there is another one coming from somewhere else!")
     return sln_files[0]
-    
+
+class BuilderBase(object):
+    def __init__(self):
+        self.total_tests = 0
+        self.failed_tests = 0
+
+    def interpret_test_output(self,output):
+        match = re.search(r"tests passed, ([0-9]+) tests failed out of ([0-9]+)",output)
+        if len(match.groups()) != 2:
+            logger.log("Failed to parse test output!")
+            return
+        failed = int(match.group(1))
+        tests = int(match.group(2))
+        self.total_tests += tests
+        self.failed_tests += failed
+        if self.failed_tests == 0:
+            logger.log(" - All tests succeeded.","brief")
+        else:
+            logger.log("!! " + str(failed) + " tests failed out of " + str(tests) + ".","brief")
             
-class VisualStudioBuilder(object):
+class VisualStudioBuilder(BuilderBase):
     def __init__(self):    
         self.tmpdir = os.environ.get("TEMP")
         if self.tmpdir is None:
@@ -253,6 +353,7 @@ class VisualStudioBuilder(object):
             die("I can't seem to use the temp directory " + self.tmpdir)        
 
     def set_studio_version(self):
+        super(VisualStudioBuilder, self).__init__()
         VS80 = os.environ.get("VS80COMNTOOLS")
         VS90 = os.environ.get("VS90COMNTOOLS")
         VS100 = os.environ.get("VS100COMNTOOLS")
@@ -272,7 +373,7 @@ class VisualStudioBuilder(object):
         self.vcvarsall_arg = None
         
         if VSCount > 1:
-            log("I found several Visual Studio installations, will need command line arg!")
+            die("I found several Visual Studio installations, will need command line arg!")
         elif VS80 is not None:
             self.studio = VS80
             if target_architecture == "x86":
@@ -353,14 +454,45 @@ class VisualStudioBuilder(object):
             self.vcvarsall_arg = "amd64"
         else:
             die("Unknown target architecture " + target_architecture)    
-
-    def build(self, directory, configs):
-        log(" - in config(s): " + str(list(configs)),True)
-        if self.__can_use_studio_build(directory):
-            self.__studio_build(directory,configs)
-        else:
-            self.__nmake_build(directory,configs)
             
+    def setenv(self):
+        WORKSPACE = os.environ.get("WORKSPACE")
+        if not WORKSPACE:
+            die("Environment variable WORKSPACE is not set, is this really a Jenkins build?!")
+        os.environ["SAFIR_RUNTIME"] = os.path.join(WORKSPACE,"safir","runtime")
+        os.environ["SAFIR_SDK"] = os.path.join(WORKSPACE,"safir","sdk")
+        os.environ["PATH"] = os.environ.get("PATH") + ";" + os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
+        ADA_PROJECT_PATH = (os.environ.get("ADA_PROJECT_PATH") + ";") if os.environ.get("ADA_PROJECT_PATH") else ""
+        os.environ["ADA_PROJECT_PATH"] = ADA_PROJECT_PATH + os.path.join(os.environ.get("SAFIR_SDK"),"ada")
+        #java path gets set by jenkins
+
+        #set up K: drive:
+        logger.log("Setting up K: drive using subst.exe","header")
+        bindir = os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
+        if not os.path.isdir(bindir):
+            mkdir(bindir)
+        ret = subprocess.call(("subst","/d", "k:"))
+        logger.log("'subst /d k:' exited with return code" + str(ret),"command")
+        subprocess.call(("subst","k:",bindir))
+        logger.log("'subst k:" + bindir + "' exited with return code" + str(ret),"output")
+
+    def build(self, directory, configs, install):
+        if self.__can_use_studio_build(directory):
+            self.__studio_build(directory,configs,install)
+        else:
+            self.__nmake_build(directory,configs,install)
+
+    def test(self, directory):
+        """run ctest in a directory"""
+        if not os.path.isfile("DartConfiguration.tcl"):
+            dummyfile = open("DartConfiguration.tcl","w")
+            dummyfile.close()
+
+        output = self.__run_command(("ctest -T Test --output-on-failure"),
+                                    "Test", directory, allow_fail = True)
+        self.interpret_test_output(output)
+            
+
     def dobmake(self):
         """run the dobmake command"""
         ada = ""
@@ -371,32 +503,37 @@ class VisualStudioBuilder(object):
             java = " --no-java "
             
         batpath = os.path.join(self.tmpdir,"build2.bat")
-        bat = open(batpath,"w")
-        bat.write("@echo off\n" +
+        
+        with open(batpath,"w") as bat:
+            bat.write("@echo off\n" +
                   "call \"" + os.path.join(self.studio_install_dir,"VC","vcvarsall.bat") +  "\" "  + self.vcvarsall_arg + "\n" +
-                  "\"" + os.path.join(SAFIR_RUNTIME,"bin","dobmake.py") + "\" -b --html-output --rebuild" + ada + java + " --target " + target_architecture + "\n") #batch mode (no gui)
-        bat.close()
+                  "\"" + os.path.join(SAFIR_RUNTIME,"bin","dobmake.py") + "\" -b --html-output --rebuild" + ada + java + " --target " + target_architecture) #batch mode (no gui)
+            if force_config == "Debug" and force_extra_config == "None":
+                bat.write (" --no-cpp-release --default-config Debug")
+            bat.write("\n")
         process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
-        result = process.communicate()
-        buildlog.write(result[0])
+        
+        logger.logOutput(process)
+
         if process.returncode != 0:
             die("Failed to run dobmake")
 
     def __can_use_studio_build(self,directory):
-        cmakelists = open("CMakeLists.txt","r")
-        contents = cmakelists.read().lower()
-        cmakelists.close()
+        with open("CMakeLists.txt","r") as cmakelists:
+            contents = cmakelists.read().lower()
+
         bad_keywords = ("add_subdirectory",
                         "add_custom_target",
                         "add_custom_command",
                         "add_cs_library",
                         "dotnet",
                         "java",
-                        "gprmake")
-        log(" - Checking if I can use Visual Studio to speed the build up.")
+                        "gprmake",
+                        "enable_testing")
+        logger.log("Checking if I can use Visual Studio to speed the build up.")
         for bad in bad_keywords:
             if contents.find(bad) != -1:
-                log("  - No, CMakeLists.txt contains " + bad)
+                logger.log(" - No, CMakeLists.txt contains " + bad)
                 return False
 
         good_keywords = ("add_executable",
@@ -404,12 +541,12 @@ class VisualStudioBuilder(object):
 
         for good in good_keywords:
             if contents.find(good) != -1:
-                log("  - Yes, CMakeLists.txt contains " + good)
+                logger.log(" - Yes, CMakeLists.txt contains " + good)
                 return True
-        log("  - No, failed to find either good or bad keywords!")
+        logger.log(" - No, failed to find either good or bad keywords!")
         return False
 
-    def __studio_build(self,directory,configs):
+    def __studio_build(self,directory,configs,install):
         if clean:
             remove(self.generator)
             
@@ -417,35 +554,31 @@ class VisualStudioBuilder(object):
         olddir = os.getcwd();
         os.chdir(self.generator)
     
-        self.__run_command(("cmake -D SAFIR_BUILD_SYSTEM_VERSION:string=2 " +
+        self.__run_command(("cmake " +
                             "-G \"" + self.generator + "\" " +
                             ".."),
                            "Configure", directory)
 
         solution = find_sln()
         
-        if clean:
-            for config in configs:
-                self.__run_command("devenv.com " + solution + " /clean " + config,
-                                   "Clean " + config, directory)
-
-
         for config in configs:
-            self.__run_command("devenv.com " + solution + " /build  " + config,
+            logger.log(" - in config " + config, "brief")
+            self.__run_command("cmake --build . --config " + config + ("--clean-first" if clean else ""),
                                "Build " + config, directory)
 
-            self.__run_command("devenv.com " + solution + " /build " +config +" /Project INSTALL",
-                               "Install " + config, directory)
-        
+            if install:
+                self.__run_command("cmake --build . --config " + config + " --target Install",
+                                   "Install " + config, directory)
+
         os.chdir(olddir)
 
-    def __nmake_build(self,directory,configs):
+    def __nmake_build(self,directory,configs,install):
         """build a directory using nmake"""
-        for config in configs:                
+        for config in configs:
+            logger.log(" - in config " + config, "brief")
             self.__run_command("cmake -D CMAKE_BUILD_TYPE:string=" + config + " " +
                                "-D SAFIR_ADA_SUPPORT:boolean=" + str(ada_support) + " " +
                                "-D SAFIR_JAVA_SUPPORT:boolean=" + str(java_support) + " " +
-                               "-D SAFIR_BUILD_SYSTEM_VERSION:string=2 " +
                                "-G \"NMake Makefiles\" .",
                                "Configure " + config, directory)
             if clean:
@@ -453,8 +586,9 @@ class VisualStudioBuilder(object):
                                    "Clean " + config, directory, allow_fail=True)
             self.__run_command("nmake /NOLOGO",
                                "Build " + config, directory)
-            self.__run_command("nmake /NOLOGO install",
-                               "Install " + config, directory)
+            if install:
+                self.__run_command("nmake /NOLOGO install",
+                                   "Install " + config, directory)
 
     def __run_command(self, cmd, description, what, allow_fail = False):
         """Run a command"""
@@ -464,29 +598,35 @@ class VisualStudioBuilder(object):
                   "call \"" + os.path.join(self.studio_install_dir,"VC","vcvarsall.bat") +  "\" " + self.vcvarsall_arg + "\n" +
                   cmd)
         bat.close()
-        buildlog.write("<h4>" + description + " '" + what + "'</h4><pre style=\"color: green\">" + cmd + "</pre>\n")
+
+        logger.log(description + " " + what + ": '" + cmd + "'", "command")
         process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
-        result = process.communicate()
-        buildlog.write("<pre>")
-        buildlog.write(result[0])
-        buildlog.write("</pre>")
+        output = logger.logOutput(process)
+
         if process.returncode != 0:
             if not allow_fail:
                 die("Failed to run '" + cmd + "' for " + what)
             else:
-                buildlog.write("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing\n")
+                logger.log("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing\n")
+        return output
 
-
-class UnixGccBuilder(object):
+class UnixGccBuilder(BuilderBase):
     def __init__(self):
+        super(UnixGccBuilder, self).__init__()
         #We need to limit ourselves a little bit in how
         #many parallel jobs we perform. Each job may use
-        #up to 400Mb of memory. Maybe we should try 
-        #to work out how much memory there is as well?
-        if num_cpus() > 1:
-            self.num_jobs = 3
-        else:
+        #up to 400Mb of memory.
+        try:
+            memory = physical_memory()
+            self.num_jobs = num_cpus() + 1
+        
+            if memory / self.num_jobs < 400:
+                self.num_jobs = max(1,memory / 400)
+        except:
             self.num_jobs = 2
+        #ada builds (with gnatmake) will look at environment variable that is
+        #defined on windows to determine parallellism. Define it on linux too.
+        os.environ["NUMBER_OF_PROCESSORS"] = str(self.num_jobs)
 
     @staticmethod
     def can_use():
@@ -498,58 +638,78 @@ class UnixGccBuilder(object):
     def handle_command_line_options(self,options):
         pass
 
-    def build(self, directory, configs):
+    def setenv(self):
+        WORKSPACE = os.environ.get("WORKSPACE")
+        if not WORKSPACE:
+            die("Environment variable WORKSPACE is not set, is this really a Jenkins build?!")
+        os.environ["SAFIR_RUNTIME"] = os.path.join(WORKSPACE,"safir","runtime")
+        os.environ["SAFIR_SDK"] = os.path.join(WORKSPACE,"safir","sdk")
+        LD_LIBRARY_PATH = (os.environ.get("LD_LIBRARY_PATH") + ":") if os.environ.get("LD_LIBRARY_PATH") else ""
+        os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH + os.path.join(os.environ.get("SAFIR_RUNTIME"),"lib")
+        ADA_PROJECT_PATH = (os.environ.get("ADA_PROJECT_PATH") + ":") if os.environ.get("ADA_PROJECT_PATH") else ""
+        os.environ["ADA_PROJECT_PATH"] = ADA_PROJECT_PATH + os.path.join(os.environ.get("SAFIR_SDK"),"ada")
+        #java path gets set by jenkins
+
+    def build(self, directory, configs, install):
         """build a directory using make"""
         config = configs[0]
-        log(" - in config: " + config, True)
+        logger.log(" - in config " + config, "brief")
         self.__run_command(("cmake",
                             "-D", "CMAKE_BUILD_TYPE:string=" + config,
-                            "-D SAFIR_ADA_SUPPORT:boolean=" + str(ada_support) + " " +
-                            "-D SAFIR_JAVA_SUPPORT:boolean=" + str(java_support) + " " +
-                            "-D", "SAFIR_BUILD_SYSTEM_VERSION:string=2",
+                            "-D", "SAFIR_ADA_SUPPORT:boolean=" + str(ada_support),
+                            "-D", "SAFIR_JAVA_SUPPORT:boolean=" + str(java_support),
                             "."),
-                           "Configure " + config, directory)
+                           "Configure for " + config + " build", directory)
         if clean:
             self.__run_command(("make", "clean"),
                                "Clean " + config, directory, allow_fail=True)
         self.__run_command(("make","-j", str(self.num_jobs)),
                            "Build " + config, directory)
-        self.__run_command(("make", "install","-j", str(self.num_jobs)),
-                           "Install " + config, directory)
+        if install:
+            self.__run_command(("make", "install","-j", str(self.num_jobs)),
+                               "Install " + config, directory)
+
+    def test(self, directory):
+        """run ctest in a directory"""
+        if not os.path.isfile("DartConfiguration.tcl"):
+            dummyfile = open("DartConfiguration.tcl","w")
+            dummyfile.close()
+
+        output = self.__run_command(("ctest",
+                                     "-T", "Test", "--output-on-failure"),
+                                    "Test", directory, allow_fail = True)
+        self.interpret_test_output(output)
 
     def dobmake(self):
         """run the dobmake command"""
-        ada = ""
+        cmd = (os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b", "--rebuild") #batch mode (no gui)
+        if force_config == "Debug" and force_extra_config == "None":
+            cmd += ("--no-cpp-release","--default-config","Debug")
         if not ada_support:
-            ada = " --no-ada "
-        java = ""
+            cmd += ("--no-ada",)
         if not java_support:
-            java = " --no-java "
-            
-        process = subprocess.Popen((os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b", "--html-output", "--rebuild", ada, java), #batch mode (no gui)
+            cmd += ("--no-java",)
+        
+        process = subprocess.Popen(cmd,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
                                    universal_newlines=True)
-        result = process.communicate()
-        buildlog.write(result[0])
+        logger.logOutput(process)
         if process.returncode != 0:
             die("Failed to run dobmake")
 
     def __run_command(self, cmd, description, what, allow_fail = False):
         """Run a command"""
-        buildlog.write("<h4>" + description + " '" + what + "'</h4><pre style=\"color: green\">" + " ".join(cmd) + "</pre>\n")
+        logger.log(description + " " + what + ": '" + " ".join(cmd) + "'", "command")
         process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
-        result = process.communicate()
-        buildlog.write("<pre>")
-        buildlog.write(result[0])
-        buildlog.write("</pre>")
+        output = logger.logOutput(process)
         if process.returncode != 0:
             if not allow_fail:
                 die("Failed to run '" + " ".join(cmd) + "' for " + what)
             else:
-                buildlog.write("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing<br>")
+                logger.log("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing")
 
-
+        return output
 
 def in_skip_list(line):
     "Check the argument against all regexps in the skip-list"
@@ -561,23 +721,74 @@ def in_skip_list(line):
     return False;
 
 
-def build_dir(directory, configs, builder):
+def build_dir(directory, configs, builder, install = True):
     if not os.path.isdir(directory):
         die("Failed to enter " + directory + ", since it does not exist (or is not a directory)")
     olddir = os.getcwd();
     os.chdir(directory)
     try:
-        buildlog.write("<h1>BUILDING " + directory + "</h1>\n");
         if not os.path.isfile("CMakeLists.txt"):
             die ("Couldn't find a CMakeLists.txt in " + directory + ".")
-        builder.build(directory,configs)
+        builder.build(directory, configs, install)
     finally:
         os.chdir(olddir)
 
+def getText(nodelist):
+    rc = []
+    for node in nodelist:
+        if node.nodeType == node.TEXT_NODE:
+            rc.append(node.data)
+    return ''.join(rc)
 
+def translate_results_to_junit(suite_name):
+    with open(os.path.join("Testing","TAG"), 'r') as TAGfile:
+        dirname = TAGfile.readline().strip()
+    with open(suite_name + ".junit.xml","w") as junitfile:
+        junitfile.write("<?xml version=\"1.0\"?>\n<testsuite>\n")
+
+        dom = xml.dom.minidom.parse(os.path.join("Testing",dirname,"Test.xml"))
+
+        testing = dom.getElementsByTagName("Testing")[0]
+        for child in testing.childNodes:
+            if child.nodeType == xml.dom.Node.ELEMENT_NODE:
+                if child.tagName == "Test":
+                    testName = getText(child.getElementsByTagName("Name")[0].childNodes)
+                    testTarget = os.path.split(getText(child.getElementsByTagName("Path")[0].childNodes))[-1]
+                    testStatus = child.getAttribute("Status")
+                    for meas in child.getElementsByTagName("NamedMeasurement"):
+                        if meas.getAttribute("name") == "Exit Code":
+                            exitCode = getText(meas.getElementsByTagName("Value")[0].childNodes)
+                        if meas.getAttribute("name") == "Exit Value":
+                            exitValue = getText(meas.getElementsByTagName("Value")[0].childNodes)
+                        if meas.getAttribute("name") == "Execution Time":
+                            executionTime = float(getText(meas.getElementsByTagName("Value")[0].childNodes))
+
+                    meas = child.getElementsByTagName("Measurement")[0]
+
+                    junitfile.write("  <testcase name=\"" + testName + "\" classname=\"" + suite_name + "\" time=\"" + str(executionTime) + "\"")
+                    if testStatus == "passed":
+                        """success"""
+                        junitfile.write("/>\n")
+                    else:
+                        """failure"""
+                        output = escape(getText(meas.getElementsByTagName("Value")[0].childNodes))
+                        junitfile.write(">\n    <error message=\"" + exitCode + "(" + exitValue +  ")\">" + 
+                                        output +
+                                        "\n</error>\n  </testcase>\n")
+        junitfile.write("</testsuite>")
+
+
+def run_test_suite(directory, suite_name, builder):
+    olddir = os.getcwd();
+    os.chdir(directory)
+    try:
+        builder.test(directory)
+        translate_results_to_junit(suite_name)
+    finally:
+        os.chdir(olddir)
 
 def dobmake(builder):
-    buildlog.write("<h1>Running dobmake</h1>\n");
+    logger.log("Running dobmake","header");
     builder.dobmake()
 
 def get_builder():
@@ -589,24 +800,23 @@ def get_builder():
         die("Failed to work out what builder to use!")
     
 def main():
-    check_environment()
     builder = get_builder()    
     parse_command_line(builder)
-
-    global buildlog
-    
-
+    check_environment()
 
     olddir = os.getcwd();
+
+    split_line = None
 
     for line in command_file:
         if line[0] == '#' or line.strip() == "":
             continue
 
+        last_line = split_line
         split_line = line.split()
         
         if in_skip_list(line.strip()):
-            log("- Skipping " + str(split_line) + ", matches skip-list",True)
+            logger.log("- Skipping " + str(split_line) + ", matches skip-list","header")
             sys.stdout.flush()
             continue
                 
@@ -624,25 +834,37 @@ def main():
                     configs.append(split_line[2])
             
             if len(split_line) > 3:
-                if (force_extra_config != None):
-                    configs.append(force_extra_config)
-                else:    
+                if force_extra_config is None:
                     configs.append(split_line[3])
+                elif force_extra_config != "None":
+                    configs.append(force_extra_config)
                 
             if not set(configs) <= known_configs:
                 die ("Unknown build kind '" + str(configs) + "' for " + directory)
             if len(configs) < 1:
                 die ("Need at least one config for " + directory)
-            log("Building " + directory,True)
-            build_dir(directory, configs,builder)
+            logger.log("Building " + directory, "header")
+            build_dir(directory, configs, builder)
         elif command == "copy_dob_files":
             if len(split_line) < 3:
                 die ("Need both a source and target directory")
             if len(split_line) > 3:
                 die ("To many parameters for " + command)
+            if last_line is not None and last_line[0] != "copy_dob_files":
+                logger.log("Copying dob files","header")
             copy_dob_files(os.path.normpath(split_line[1]), os.path.normpath(split_line[2]))  
+        elif command == "run_test_suite":
+            if len(split_line) < 3:
+                die ("Need both a source directory and a test suite name")
+            if len(split_line) > 3:
+                die ("To many parameters for " + command)
+            directory = split_line[1]
+            suite_name = split_line[2]
+            logger.log("Building and running test suite " + suite_name + " in " + directory, "header")
+            cf = "Release" if force_config is None else force_config
+            build_dir(directory,(cf,),builder,False) # build, but do not install
+            run_test_suite(directory, suite_name, builder)
         elif command == "dobmake":
-            log("Running dobmake",True)
             dobmake(builder)
         else:
             die("Got unknown command '" + command + "'")
@@ -651,28 +873,30 @@ def main():
         sys.stderr.flush()
 
     os.chdir(olddir)
-    
-    log("Build was successful, but there may have been some warnings (or errors?) while building.",True)
-    log("Look in buildlog.html for clues",True)
 
+    return (builder.total_tests, builder.failed_tests)
 
-#actual code starts here
+#### actual code starts here ####
 
-logpath = "buildlog.html"
-
-try:
-    os.remove(logpath)
-except OSError:
-    pass
-buildlog = open(logpath,'w')
-buildlog.write("<html><title>Build Log</title><body>")
+#reduce process priority (currently only done on unix platforms)
+if hasattr(os,"nice"):
+    try:
+        if os.nice(0) == 0:
+            result = os.nice(10)
+    except Exception, e:
+        logger.log("Failed to set process niceness: " + str(e))
 
 try:
-    main()
+    (tests, failed) = main()
+    logger.log("Result", "header")
+    logger.log("Build completed successfully!")
+    if failed == 0:
+        logger.log("All tests ran successfully!")
+    else:
+        logger.log(str(failed) + " tests failed out of " + str(tests) + ".","brief")
 except FatalError as e:
-    log("Build script failed: " + str(e),True)
+    logger.log("Result", "header")
+    logger.log("Build script failed: " + str(e))
     sys.exit(1)
 
-buildlog.write("</body>")
-buildlog.close()
 sys.exit(0)

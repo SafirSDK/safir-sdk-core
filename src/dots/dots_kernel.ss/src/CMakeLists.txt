@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (dots_kernel)
+project(dots_kernel CXX)
 
 INCLUDE_DIRECTORIES(.)
 
@@ -15,7 +15,8 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dots_kernel SHARED ${sources} ${headers})
 
-find_library(EXPAT_LIBRARY NAMES expat libexpat)
+find_library(EXPAT_LIBRARY NAMES expat libexpat
+             HINTS ${SAFIR_SDK}/lib)
 if (NOT EXPAT_LIBRARY)
     message(FATAL_ERROR "Couldn't find expat.lib or libexpat.lib")
 endif()
@@ -24,6 +25,7 @@ endif()
 #we also check where it ends up if you use the expat install package.
 if (WIN32)
     find_path(EXPAT_HEADER NAMES expat.h
+              HINTS ${SAFIR_SDK}/include
               PATHS ENV PATH
               PATH_SUFFIXES ../Source/lib ../include)
     if (NOT EXPAT_HEADER)
@@ -34,10 +36,11 @@ if (WIN32)
 endif()
 
 FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time)
-TARGET_LINK_LIBRARIES(dots_kernel ${ACE_LIBRARY} ${Boost_LIBRARIES} ${COMMON_LIBRARIES} ${EXPAT_LIBRARY} dots_id)
+
+TARGET_LINK_LIBRARIES(dots_kernel ${COMMON_LIBRARIES} ${EXPAT_LIBRARY})
 
 IF (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dots_kernel lluf_utils)
+  TARGET_LINK_LIBRARIES(dots_kernel dots_id lluf_utils ${Boost_LIBRARIES})
 ENDIF()
 
 ADD_DEFINITIONS(-DDOTSKERNEL_EXPORTS)

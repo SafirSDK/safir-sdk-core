@@ -35,7 +35,8 @@ with Safir.Dob.Typesystem.Utilities; use Safir.Dob.Typesystem.Utilities;
 with Safir.Dob.Instance_Id_Policy;
 with Safir.Dob.Typesystem.Si_64;
 with Safir.Dob.Error_Response;
-with Safir.Dob.Typesystem.Object_Factory;
+with Safir.Dob.Typesystem.Object.Factory;
+with Safir.Dob.Distribution_Channel_Parameters;
 with Unchecked_Conversion;
 with Interfaces.C;
 with Ada.Strings.Wide_Fixed;
@@ -46,6 +47,7 @@ with GNAT.Command_Line;
 with Text_IO; use Text_IO;
 with Ada.Strings.Wide_Unbounded.Wide_Text_IO; use Ada.Strings.Wide_Unbounded.Wide_Text_IO;
 with Ada.Text_IO;
+with Ada.Command_Line;
 
 pragma Warnings ("D"); -- turn off warnings for implicit dereference
 pragma Warnings ("L"); -- turn off warnings for missing elaboration pragma
@@ -64,12 +66,19 @@ package body Executor is
 
    task Action_Reader is
       entry Run (Multicast_Nic : in String);
+      entry Stop;
    end Action_Reader;
+   Socket : Socket_Type;
 
    procedure Run is
+      use Ada.Strings.Wide_Unbounded;
    begin
       MainLoop.Run (GNAT.Command_Line.Get_Argument); -- program instance
-      Action_Reader.Run (GNAT.Command_Line.Get_Argument);  -- NIC to be used for multicast reception
+      if Safir.Dob.Distribution_Channel_Parameters.Distribution_Channels (0).Ref.Multicast_Address.Get_Val = "127.0.0.1" then
+         Put_Line ("System appears to be Standalone, not listening for multicasted test actions");
+      else
+         Action_Reader.Run (GNAT.Command_Line.Get_Argument);  -- NIC to be used for multicast reception
+      end if;
    end Run;
 
 
@@ -88,7 +97,6 @@ package body Executor is
 
       Local_Addr : constant Sock_Addr_Type := (Family => Family_Inet, Addr => Any_Inet_Addr, Port => Port);
 
-      Socket : Socket_Type;
 
       Item : Ada.Streams.Stream_Element_Array (1 .. 65000);
       Last : Ada.Streams.Stream_Element_Offset;
@@ -100,50 +108,59 @@ package body Executor is
       Action : Dose_Test.Action.Smart_Pointer;
 
    begin
+      if Safir.Dob.Distribution_Channel_Parameters.Distribution_Channels (0).Ref.Multicast_Address.Get_Val /= "127.0.0.1" then
+         accept Run (Multicast_Nic : in String) do
 
-      accept Run (Multicast_Nic : in String) do
+            Create_Socket (Socket, Family_Inet, Socket_Datagram);
 
-         Create_Socket (Socket, Family_Inet, Socket_Datagram);
-
-         Set_Socket_Option
-           (Socket,
-            Socket_Level,
-            (Reuse_Address, True));
-
-         -- Needed to set the port
-         Bind_Socket (Socket, Local_Addr);
-
-         if Multicast_Nic'Length = 0 then
             Set_Socket_Option
-              (Socket,
-               IP_Protocol_For_IP_Level,
-               (Add_Membership, Multicast_Addr, Any_Inet_Addr));
+               (Socket,
+                Socket_Level,
+                (Reuse_Address, True));
 
-            Put_Line ("NIC is not set ... listen on default interface.");
+            -- Needed to set the port
+            Bind_Socket (Socket, Local_Addr);
 
-         else
-            Set_Socket_Option
-              (Socket,
-               IP_Protocol_For_IP_Level,
-               (Add_Membership, Multicast_Addr, Inet_Addr (Multicast_Nic)));
+            if Multicast_Nic'Length = 0 then
+               Set_Socket_Option
+                  (Socket,
+                   IP_Protocol_For_IP_Level,
+                   (Add_Membership, Multicast_Addr, Any_Inet_Addr));
 
-            Put_Line ("Used NIC: " & Multicast_Nic);
-         end if;
+               Put_Line ("NIC is not set ... listen on default interface.");
 
-      end Run;
+            else
+               Set_Socket_Option
+                  (Socket,
+                   IP_Protocol_For_IP_Level,
+                   (Add_Membership, Multicast_Addr, Inet_Addr (Multicast_Nic)));
 
-      loop
-         Receive_Socket (Socket, Item, Last);
+               Put_Line ("Used NIC: " & Multicast_Nic);
+            end if;
 
-         Action := Dose_Test.Action.Smart_Pointer (Safir.Dob.Typesystem.Object_Factory.Create_Object
-                                                   (Blob => To_Char_Star (Buf_Ptr)));
+         end Run;
 
-         MainLoop.Handle_Action (Action);
-      end loop;
+         loop
+            begin
+               Receive_Socket (Socket, Item, Last);
+               if Last = Item'First - 1 then
+                  exit;
+               end if;
 
+               Action := Dose_Test.Action.Smart_Pointer (Safir.Dob.Typesystem.Object.Factory.Create_Object
+                                                            (Blob => To_Char_Star (Buf_Ptr)));
+
+               MainLoop.Handle_Action (Action);
+            exception
+               when Socket_Error =>
+                  exit;
+            end;
+         end loop;
+         accept Stop;
+      end if;
    exception when E : others =>
-         Ada.Text_IO.Put_Line
-           (Exception_Name (E) & ": " & Exception_Message (E));
+         Ada.Text_IO.Put_Line ("Exception in Action_Reader task: " & Exception_Name (E));
+         Ada.Text_IO.Put_Line (Exception_Information (E));
    end Action_Reader;
 
    task body MainLoop is
@@ -226,6 +243,19 @@ package body Executor is
 
       end;
 
+      if Safir.Dob.Distribution_Channel_Parameters.Distribution_Channels (0).Ref.Multicast_Address.Get_Val /= "127.0.0.1" then
+         -- TODO: use a selector in the action_reader task instead of
+         -- using this slightly undocumented way of getting receive_socket
+         -- to break from blocking
+         begin
+            Shutdown_Socket (Socket);
+         exception
+            when Socket_Error =>
+               null;
+         end;
+         Action_Reader.Stop;
+      end if;
+
       --  let the testconnection dispatch too.
       select
          accept Dispatch (Conn : in Connection) do
@@ -237,11 +267,13 @@ package body Executor is
       end select;
 
       Logger.Put_Line ("Exiting");
+
+      Ada.Command_Line.Set_Exit_Status (0);
    exception
       when E : others =>
          Logger.Put ("Exception in main loop: ");
          Logger.Put_Line (Safir.Dob.Typesystem.Utilities.From_Utf_8 (Ada.Exceptions.Exception_Name (E)));
-         Logger.Put_Line (Safir.Dob.Typesystem.Utilities.From_Utf_8 (Ada.Exceptions.Exception_Message (E)));
+         Logger.Put_Line (Safir.Dob.Typesystem.Utilities.From_Utf_8 (Ada.Exceptions.Exception_Information (E)));
    end MainLoop;
 
    overriding

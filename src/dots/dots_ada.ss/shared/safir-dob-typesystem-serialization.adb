@@ -26,7 +26,7 @@ with Ada.Unchecked_Conversion;
 with Interfaces.C.Strings;
 with Safir.Dob.Typesystem.Utilities; use Safir.Dob.Typesystem.Utilities;
 with Safir.Dob.Typesystem.Kernel;
-with Safir.Dob.Typesystem.Object_Factory;
+with Safir.Dob.Typesystem.Object.Factory;
 
 pragma Warnings ("D");  -- turn off warnings for implicit dereference
 
@@ -112,7 +112,7 @@ package body Safir.Dob.Typesystem.Serialization is
 
       declare
          Obj_Ptr : constant Safir.Dob.Typesystem.Object.Smart_Pointer'Class :=
-                     Safir.Dob.Typesystem.Object_Factory.Create_Object (Blob);
+                     Safir.Dob.Typesystem.Object.Factory.Create_Object (Blob);
       begin
          Deleter.all (Blob);
          return Obj_Ptr;
@@ -243,7 +243,7 @@ package body Safir.Dob.Typesystem.Serialization is
 
       declare
          Obj_Ptr : constant Safir.Dob.Typesystem.Object.Smart_Pointer'Class :=
-                     Safir.Dob.Typesystem.Object_Factory.Create_Object (Blob);
+                     Safir.Dob.Typesystem.Object.Factory.Create_Object (Blob);
       begin
          C_Free (Blob);
          return Obj_Ptr;

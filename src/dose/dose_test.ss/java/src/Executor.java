@@ -55,18 +55,21 @@ class Executor implements
         m_testDispatcher = new Dispatcher(m_synchronizer);
         m_testStopHandler = new StopHandler();
 
-        if (args.length > 1) {
-            m_multicastNic = args[1];
+        if (com.saabgroup.safir.dob.DistributionChannelParameters.getDistributionChannels(0).multicastAddress().getVal().equals("127.0.0.1")){
+            System.out.println("System appears to be Standalone, not listening for multicasted test actions");
         }
+        else {
+            if (args.length > 1) {
+                m_multicastNic = args[1];
+            }
 
-        m_MCSocket = new MCSocket(m_synchronizer);
-        m_receiveThread = new Thread(m_MCSocket);
+            m_actionReceiver = new ActionReceiver(m_synchronizer, m_multicastNic);
+        }
     }
 
-    public void run() {
+    public void run() throws InterruptedException {
         // Seems that subsequent garbage collections will execute faster after the first one so we start with
         // a GC here.
-        //TODO: necessary?
         System.gc();
         System.runFinalization();
 
@@ -76,7 +79,9 @@ class Executor implements
         m_controlConnection.subscribeMessage(com.saabgroup.dosetest.Action.ClassTypeId, new com.saabgroup.safir.dob.typesystem.ChannelId(m_instance), this);
         m_controlConnection.subscribeMessage(com.saabgroup.dosetest.Action.ClassTypeId, new com.saabgroup.safir.dob.typesystem.ChannelId(), this);
 
-        m_receiveThread.start();
+        if (m_actionReceiver != null) {
+            m_actionReceiver.start();
+        }
 
         System.out.println(m_identifier + ":" + m_instance + " Started");
         boolean DispatchControl;
@@ -85,94 +90,95 @@ class Executor implements
         boolean MC;
 
         while (!m_isDone) {
-            try {
-                synchronized (m_synchronizer) {
-//                    System.out.println("WAIT()");
-                    while (!m_synchronizer.DispatchControl &&
-                           !m_synchronizer.DispatchTest &&
-                           !m_synchronizer.StopOrder &&
-                           !m_synchronizer.MC)
-                    {
-                        m_synchronizer.wait();
-                    }
-                    DispatchControl = m_synchronizer.DispatchControl;
-                    DispatchTest = m_synchronizer.DispatchTest;
-                    StopOrder = m_synchronizer.StopOrder;
-                    MC = m_synchronizer.MC;
-
-                    m_synchronizer.DispatchControl = false;
-                    m_synchronizer.DispatchTest = false;
-                    m_synchronizer.StopOrder = false;
-                    m_synchronizer.MC = false;
+            synchronized (m_synchronizer) {
+                //                    System.out.println("WAIT()");
+                while (!m_synchronizer.DispatchControl &&
+                       !m_synchronizer.DispatchTest &&
+                       !m_synchronizer.StopOrder &&
+                       !m_synchronizer.MC)
+                {
+                    m_synchronizer.wait();
                 }
+                DispatchControl = m_synchronizer.DispatchControl;
+                DispatchTest = m_synchronizer.DispatchTest;
+                StopOrder = m_synchronizer.StopOrder;
+                MC = m_synchronizer.MC;
 
-//                System.out.println("DispatchControl = " + DispatchControl);
-//                System.out.println("MC = " + MC);
-//                System.out.println("DispatchTest = " + DispatchTest);
-//                System.out.println("StopOrder = " + StopOrder);
-               
-                if (DispatchControl) {
-                    
-                    try {
-                        m_controlConnection.dispatch();
-                    } /* TODO:
-                    catch (com.saabgroup.safir.dob.typesystem.Exception exc)
-                    {
-                    Logger.instance().println("Caught Exception when Dispatching controlConnection: " +
-                    com.saabgroup.safir.dob.typesystem.Operations.getName(exc.getTypeId()));
-                    System.out.println("Exception info: " + exc);
-                    }*/ catch (com.saabgroup.safir.dob.typesystem.FundamentalException exc) {
-                        Logger.instance().println("Caught FundamentalException when Dispatching controlConnection: "
-                                + com.saabgroup.safir.dob.typesystem.Operations.getName(exc.getTypeId()));
-                        System.out.println("Exception info: " + exc);
-                    }
-
-                }
-
-                if (MC) {
-                    com.saabgroup.dosetest.Action action;
-                    while (!m_actionQue.isEmpty()) {
-
-                        synchronized (m_actionQue) {
-                            action = m_actionQue.remove(0);
-                        }
-                        HandleAction(action);
-                    }
-
-
-                }
-
-                if (DispatchTest) {
-                     if (m_dispatchTestConnection && m_isActive) {
-                        try {
-                            executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_DO_DISPATCH);
-                            for (Consumer consumer : m_consumers) {
-                                consumer.executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_DO_DISPATCH);
-                            }
-
-                            m_testConnection.dispatch();
-                        } /*                            catch (com.saabgroup.safir.dob.typesystem.Exception exc)
-                        {
-                        Logger.instance().println("Caught Exception when Dispatching testConnection: " +
-                        com.saabgroup.safir.dob.typesystem.Operations.getName(exc.getTypeId()));
-                        System.out.println("Exception info: " + exc);
-                        }*/ catch (com.saabgroup.safir.dob.typesystem.FundamentalException exc) {
-                            Logger.instance().println("Caught FundamentalException when Dispatching testConnection: "
-                                    + com.saabgroup.safir.dob.typesystem.Operations.getName(exc.getTypeId()));
-                            System.out.println("Exception info: " + exc);
-                        }
-                    }
-                }
-
-                if (StopOrder) {
-                    Logger.instance().println("Got stop order");
-                    executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_STOP_ORDER);
-                    m_isDone = true;
-                }
-
-            } catch (InterruptedException e) {
-                Logger.instance().println("Got interrupted!!! exc = " + e);
+                m_synchronizer.DispatchControl = false;
+                m_synchronizer.DispatchTest = false;
+                m_synchronizer.StopOrder = false;
+                m_synchronizer.MC = false;
             }
+
+            //                System.out.println("DispatchControl = " + DispatchControl);
+            //                System.out.println("MC = " + MC);
+            //                System.out.println("DispatchTest = " + DispatchTest);
+            //                System.out.println("StopOrder = " + StopOrder);
+
+            if (DispatchControl) {
+
+                try {
+                    m_controlConnection.dispatch();
+                } /* TODO:
+                     catch (com.saabgroup.safir.dob.typesystem.Exception exc)
+                     {
+                     Logger.instance().println("Caught Exception when Dispatching controlConnection: " +
+                     com.saabgroup.safir.dob.typesystem.Operations.getName(exc.getTypeId()));
+                     System.out.println("Exception info: " + exc);
+                     }*/ catch (com.saabgroup.safir.dob.typesystem.FundamentalException exc) {
+                    Logger.instance().println("Caught FundamentalException when Dispatching controlConnection: "
+                                              + com.saabgroup.safir.dob.typesystem.Operations.getName(exc.getTypeId()));
+                    System.out.println("Exception info: " + exc);
+                }
+
+            }
+
+            if (MC) {
+                com.saabgroup.dosetest.Action action;
+                while (!m_actionQueue.isEmpty()) {
+
+                    synchronized (m_actionQueue) {
+                        action = m_actionQueue.remove(0);
+                    }
+                    HandleAction(action);
+                }
+
+
+            }
+
+            if (DispatchTest) {
+                if (m_dispatchTestConnection && m_isActive) {
+                    try {
+                        executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_DO_DISPATCH);
+                        for (Consumer consumer : m_consumers) {
+                            consumer.executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_DO_DISPATCH);
+                        }
+
+                        m_testConnection.dispatch();
+                    } /*                            catch (com.saabgroup.safir.dob.typesystem.Exception exc)
+                                                    {
+                                                    Logger.instance().println("Caught Exception when Dispatching testConnection: " +
+                                                    com.saabgroup.safir.dob.typesystem.Operations.getName(exc.getTypeId()));
+                                                    System.out.println("Exception info: " + exc);
+                                                    }*/ catch (com.saabgroup.safir.dob.typesystem.FundamentalException exc) {
+                        Logger.instance().println("Caught FundamentalException when Dispatching testConnection: "
+                                                  + com.saabgroup.safir.dob.typesystem.Operations.getName(exc.getTypeId()));
+                        System.out.println("Exception info: " + exc);
+                    }
+                }
+            }
+
+            if (StopOrder) {
+                Logger.instance().println("Got stop order");
+                executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_STOP_ORDER);
+                m_isDone = true;
+            }
+        }
+
+        if (m_actionReceiver != null)
+        {
+            m_actionReceiver.interrupt();
+            m_actionReceiver.join();
         }
     }
 
@@ -613,19 +619,27 @@ class Executor implements
     //
     // MCSocket subclass
     //
-    private class MCSocket implements Runnable {
+    private class ActionReceiver extends Thread {
 
-        public MCSocket(Synchronizer synchronizer) {
+        public ActionReceiver(Synchronizer synchronizer, String multicastNic) {
+            super();
             m_synchronizer = synchronizer;
+            m_multicastNic = multicastNic;
             Init();
         }
 
         @Override
+        public void interrupt() {
+            super.interrupt();
+            m_socket.close();
+        }
+
+        @Override
         public void run() {
-            
-            for (;;) {
-                try {                    
+            while(!isInterrupted()) {
+                try {
                     m_socket.receive(m_recv);
+
                     byte[] data = m_recv.getData();
                     int length = m_recv.getLength();
                     int offset = m_recv.getOffset();
@@ -634,16 +648,19 @@ class Executor implements
   //                  System.out.println("DATA Length = " + length + " Offset = " + offset);
                     blob.put(data, offset, length);
                     com.saabgroup.safir.dob.typesystem.Object obj = com.saabgroup.safir.dob.typesystem.ObjectFactory.getInstance().createObject(blob);
-                    
+
 //                    com.saabgroup.safir.dob.typesystem.BlobOperations.getTypeId(blob);
                     com.saabgroup.dosetest.Action action = (com.saabgroup.dosetest.Action)obj;
-                    
-                    synchronized (m_actionQue) {
-                        m_actionQue.add(action);
+
+                    synchronized (m_actionQueue) {
+                        m_actionQueue.add(action);
                     }
 
                 } catch (IOException ex) {
-                    java.util.logging.Logger.getLogger(Executor.class.getName()).log(Level.SEVERE, null, ex);
+                    if (!isInterrupted())
+                    {
+                        java.util.logging.Logger.getLogger(Executor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
 
                 synchronized (m_synchronizer) {
@@ -652,14 +669,11 @@ class Executor implements
                 }
 
             }
-
         }
 
         private void Init() {
             try {
                 InetAddress group = InetAddress.getByName(com.saabgroup.dosetest.Parameters.getTestMulticastAddress());
-
-                //m_multicastNic
 
                 m_socket = new MulticastSocket(port);
 
@@ -671,7 +685,6 @@ class Executor implements
                 }
 
                 m_socket.joinGroup(group);
-
 
                 System.out.println("Joined socket to group for multicast reception. Multicast address " + group
                         + ", port " + port + ".");
@@ -688,8 +701,8 @@ class Executor implements
         private final Synchronizer m_synchronizer;
         private final int port = 31789;
         private MulticastSocket m_socket;
-        byte[] m_buf = new byte[65000];
-        DatagramPacket m_recv = new DatagramPacket(m_buf, m_buf.length);
+        private byte[] m_buf = new byte[65000];
+        private DatagramPacket m_recv = new DatagramPacket(m_buf, m_buf.length);
     }
     //
     // Data members
@@ -711,9 +724,8 @@ class Executor implements
     private ControlDispatcher m_controlDispatcher;
     private Dispatcher m_testDispatcher;
     private StopHandler m_testStopHandler;
-    private MCSocket m_MCSocket;
-    private Thread m_receiveThread;
-    private final List<Action> m_actionQue = Collections.synchronizedList(new LinkedList<Action>());
+    private ActionReceiver m_actionReceiver;
+    private final List<Action> m_actionQueue = Collections.synchronizedList(new LinkedList<Action>());
     private String m_multicastNic = null;
     java.util.EnumMap<com.saabgroup.safir.dob.CallbackId, java.util.Vector<com.saabgroup.dosetest.Action>> m_callbackActions;
 }

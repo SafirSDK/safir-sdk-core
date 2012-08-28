@@ -30,7 +30,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_array.hpp>
-#include <string.h>
+#include <cstring>
 
 namespace Safir
 {

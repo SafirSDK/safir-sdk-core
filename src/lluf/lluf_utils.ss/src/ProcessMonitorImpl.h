@@ -24,18 +24,7 @@
 #ifndef __PROCESS_MONITOR_IMPL_H__
 #define __PROCESS_MONITOR_IMPL_H__
 
-//disable warnings in ace
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4267 4244)
-#endif
-
-#include <ace/OS_NS_unistd.h>
-
-//and enable the warnings again
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
+#include <Safir/Utilities/ProcessInfo.h>
 
 namespace Safir
 {

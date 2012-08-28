@@ -1,6 +1,6 @@
-with "dots_id.gpr";
-with "dots_kernel.gpr";
-with "safir_defaults.gpr";
+with "safir_defaults";
+with "dots_id";
+with "dots_kernel";
 
 project Dots_Ada_Library is
 
@@ -24,7 +24,7 @@ project Dots_Ada_Library is
                               "Safir.Dob.Typesystem.Members",
                               "Safir.Dob.Typesystem.Object",
                               "Safir.Dob.Typesystem.Object_Container_Base",
-                              "Safir.Dob.Typesystem.Object_Factory",
+                              "Safir.Dob.Typesystem.Object.Factory",
                               "Safir.Dob.Typesystem.Operations",
                               "Safir.Dob.Typesystem.Parameters",
                               "Safir.Dob.Typesystem.Properties",
@@ -38,9 +38,13 @@ project Dots_Ada_Library is
                               "Safir.Dob.Typesystem",
                               "Safir.Dob",
                               "Safir");
-
+   
+   package Builder is
+      for Default_Switches ("Ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
+   end Builder;
+   
    package Compiler is
-      for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
+      for Default_Switches ("Ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
    end Compiler;
 
 end Dots_Ada_Library;

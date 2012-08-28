@@ -27,25 +27,14 @@
 
 
 #include <Safir/Dob/Internal/Semaphore.h>
-#include <ace/RW_Thread_Mutex.h>
-#include <ace/Thread_Mutex.h>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/shared_mutex.hpp>
 #include <Safir/Dob/Internal/ConnectionId.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
-
-//Make a hash_map available even though their locations are different
-//call it unordered_map, as it will be called in tr1
-#if defined _MSC_VER
-    #include <hash_map>
-    #define unordered_map stdext::hash_map
-#elif defined __GNUC__
-    #include <tr1/unordered_map>
-    using std::tr1::unordered_map;
-#else
-#error We need a definition of unordered_map
-#endif
+#include <Safir/Utilities/Internal/UnorderedMap.h>
 
 namespace Safir
 {
@@ -117,7 +106,7 @@ namespace Internal
             typedef unordered_map<Identifier, SemaphorePtr> Semaphores;
             Semaphores m_semaphores;
 
-            typedef Safir::Dob::Internal::LeveledLock<ACE_RW_Thread_Mutex,
+            typedef Safir::Dob::Internal::LeveledLock<boost::shared_mutex,
                                                       SIGNALS_LOCK_LEVEL,
                                                       NO_MASTER_LEVEL_REQUIRED> SignalsLock;
             SignalsLock m_lock;
@@ -128,9 +117,20 @@ namespace Internal
 
         NamedSemaphore m_connectOrOutSignal;
 
-        //Singleton stuff
-        static Signals* volatile m_instance;
-        static ACE_Thread_Mutex m_instantiationLock;
+        /**
+         * This class is here to ensure that only the Instance method can get at the 
+         * instance, so as to be sure that boost call_once is used correctly.
+         * Also makes it easier to grep for singletons in the code, if all 
+         * singletons use the same construction and helper-name.
+         */
+        struct SingletonHelper
+        {
+        private:
+            friend Signals& Signals::Instance();
+
+            static Signals& Instance();
+            static boost::once_flag m_onceFlag;
+        };
     };
 
 }

@@ -21,13 +21,14 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <Safir/Utilities/AceDispatcher.h>
+#include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/NotOpenException.h>
 
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning (disable: 4702 4512)
+#pragma warning (disable: 4512)
 #endif
 
 #include <boost/lexical_cast.hpp>
@@ -42,17 +43,19 @@
 
 std::string gProgramName;
 
-const ACE_Time_Value EXIT_TIMER_INTERVAL(0,100000);
+const boost::posix_time::time_duration EXIT_TIMER_INTERVAL(boost::posix_time::milliseconds(100));
 
-class StopHandler:
-    public Safir::Dob::StopHandler,
-    public ACE_Event_Handler
+class StopHandler
+    : public Safir::Dob::StopHandler
+    , private boost::noncopyable
 {
 public:
-    StopHandler():ACE_Event_Handler(ACE_Reactor::instance()){}
-    void OnStopOrder(){reactor()->end_reactor_event_loop();}
-    int handle_timeout(const ACE_Time_Value & /*currentTime*/, const void * /*act*/)
-    {reactor()->end_reactor_event_loop(); return 0;}
+    explicit StopHandler(boost::asio::io_service& ioService)
+        : m_ioService(ioService) {}
+    virtual void OnStopOrder() {m_ioService.stop();}
+private:
+    boost::asio::io_service& m_ioService;
+    
 };
 
 class MessageSender:
@@ -60,6 +63,8 @@ class MessageSender:
 {
     void OnNotMessageOverflow(){}
 };
+
+void dummy() {}
 
 
 void PrintHelpAndExit(const boost::program_options::options_description & desc)
@@ -71,15 +76,16 @@ void PrintHelpAndExit(const boost::program_options::options_description & desc)
         << "Usage:" << std::endl
         << " " << gProgramName.c_str() << " <options> command\n" << std::endl
         << ostr.str().c_str();
-    exit(-1);
+    exit(1);
 }
 
 int main(int argc, char* argv[])
 {
     gProgramName = argv[0];
+    boost::asio::io_service ioService;
     Safir::Dob::Connection connection;
-    Safir::Utilities::AceDispatcher dispatcher(connection);
-    StopHandler stopHandler;
+    Safir::Utilities::AsioDispatcher dispatcher(connection, ioService);
+    StopHandler stopHandler(ioService);
     MessageSender messageSender;
 
     int inst = 0;
@@ -182,11 +188,13 @@ int main(int argc, char* argv[])
     // send the message
     connection.Send(commandMsg, Safir::Dob::Typesystem::ChannelId(), &messageSender);
 
-    //set a small timer so that our message is delivered. When the get the callback we exit this app
-    ACE_Reactor::instance()->schedule_timer(&stopHandler,
-                                            NULL,
-                                            EXIT_TIMER_INTERVAL);
-    ACE_Reactor::instance()->run_reactor_event_loop();
-    return 0;
+    //set a timer
+    boost::asio::deadline_timer timer(ioService,EXIT_TIMER_INTERVAL);
+    timer.async_wait(boost::bind(dummy));
 
+    //ioService will only run until the timer has timed out, since that is all the work
+    //that there is for it.
+    ioService.run();
+
+    return 0;
 }

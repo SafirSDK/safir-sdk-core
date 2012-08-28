@@ -37,10 +37,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
-#include <Safir/Utilities/Internal/BoostFilesystemWrapper.h>
-
 
 #include <iostream>
+#include <cstdio>
 
 namespace Safir
 {
@@ -91,7 +90,8 @@ namespace Internal
         void Destroy()
         {
             xmlFileName = "";
-            classParser = ClassParser();
+            ClassParser tmp; //we need to do the ClassParser in two steps (declare first and assign second)
+            classParser = tmp; //due to some problem with move semantics and boost>=1.48
             propertyParser = PropertyParser();
             mappingParser = PropertyMappingParser();
             enumParser = EnumParser();
@@ -477,7 +477,7 @@ namespace Internal
                 ErrorHandler::Error("Dou/Dom file parsing","Failed to get environment variable SAFIR_RUNTIME","dots_file_parser");
                 exit(1);
             }
-            boost::filesystem::path filename(env,boost::filesystem::native);
+            boost::filesystem::path filename(env);
 
             filename /= DOB_CLASSES_DIR;
             ENSURE(boost::filesystem::exists(filename) && boost::filesystem::is_directory(filename),
@@ -490,7 +490,7 @@ namespace Internal
         else
         {
             // Read the dou/dom files from a non-standard location
-            boost::filesystem::path filename(env,boost::filesystem::native);
+            boost::filesystem::path filename(env);
 
             ENSURE(boost::filesystem::exists(filename) && boost::filesystem::is_directory(filename),
                 << "The directory for dou and dom files could not be found. $(SAFIR_DOTS_CLASSES_DIR) evaluates to " << filename.string());
@@ -504,14 +504,15 @@ namespace Internal
     {
         lllout << "ParseDouDir: Parsing directory " << dirName.string().c_str() << std::endl;
 
-        for (boost::filesystem::directory_iterator path = boost::filesystem::directory_iterator(dirName);
-             path != boost::filesystem::directory_iterator(); ++path)
+        for (boost::filesystem::directory_iterator dir = boost::filesystem::directory_iterator(dirName);
+             dir != boost::filesystem::directory_iterator(); ++dir)
         {
-            const std::string extension = boost::filesystem::extension(*path);
+            const boost::filesystem::path path = dir->path();
+            const boost::filesystem::path extension = path.extension();
 
-            if ( boost::filesystem::is_directory(*path) )
+            if ( boost::filesystem::is_directory(path) )
             {
-                if (!ParseDouDir(*path))
+                if (!ParseDouDir(path))
                     return false;
                 else
                     continue;
@@ -522,9 +523,9 @@ namespace Internal
                 continue;
             }
 
-            lllout << "ParseDouFiles: Parsing file " << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(path).c_str() << std::endl;
+            lllout << "ParseDouFiles: Parsing file " << path.string().c_str() << std::endl;
 
-            if (!ParseFile(*path))
+            if (!ParseFile(path))
             {
                 return false;
             }
@@ -536,14 +537,15 @@ namespace Internal
 
     bool FileParser::ParseDouFiles()
     {
-        for (boost::filesystem::directory_iterator path = boost::filesystem::directory_iterator(GetDobFileDirectory());
-             path != boost::filesystem::directory_iterator(); ++path)
+        for (boost::filesystem::directory_iterator dir = boost::filesystem::directory_iterator(GetDobFileDirectory());
+             dir != boost::filesystem::directory_iterator(); ++dir)
         {
-            const std::string extension = boost::filesystem::extension(*path);
+            const boost::filesystem::path path = dir->path();
+            const boost::filesystem::path extension = path.extension();
 
-            if ( boost::filesystem::is_directory(*path) )
+            if ( boost::filesystem::is_directory(path) )
             {
-                if (!ParseDouDir(*path))
+                if (!ParseDouDir(path))
                     return false;
                 else
                     continue;
@@ -554,9 +556,9 @@ namespace Internal
                 continue;
             }
 
-            lllout << "ParseDouFiles: Parsing file " << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(path).c_str() << std::endl;
+            lllout << "ParseDouFiles: Parsing file " << path.string().c_str() << std::endl;
 
-            if (!ParseFile(*path))
+            if (!ParseFile(path))
             {
                 return false;
             }
@@ -612,14 +614,15 @@ namespace Internal
     bool FileParser::ParseDomDir(const boost::filesystem::path & dirName)
     {
         lllout << "ParseDomDir: Parsing directory " << dirName.string().c_str() << std::endl;
-        for (boost::filesystem::directory_iterator path = boost::filesystem::directory_iterator(dirName);
-             path != boost::filesystem::directory_iterator(); ++path)
+        for (boost::filesystem::directory_iterator dir = boost::filesystem::directory_iterator(dirName);
+             dir != boost::filesystem::directory_iterator(); ++dir)
         {
-            const std::string extension = boost::filesystem::extension(*path);
+            const boost::filesystem::path path = dir->path();
+            const boost::filesystem::path extension = path.extension();
 
-            if ( boost::filesystem::is_directory(*path) )
+            if ( boost::filesystem::is_directory(path) )
             {
-                if (!ParseDomDir(*path))
+                if (!ParseDomDir(path))
                     return false;
                 else
                     continue;
@@ -630,10 +633,10 @@ namespace Internal
                 continue;
             }
 
-            lllout << "ParseDomFiles: Parsing file " << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(path).c_str() << std::endl;
+            lllout << "ParseDomFiles: Parsing file " << path.string().c_str() << std::endl;
 
-            ParsingState::Instance().mappingParser.SetFileName(*path);
-            if (!ParseFile(*path))
+            ParsingState::Instance().mappingParser.SetFileName(path);
+            if (!ParseFile(path))
             {
                 return false;
             }
@@ -645,14 +648,15 @@ namespace Internal
 
     bool FileParser::ParseDomFiles()
     {
-        for (boost::filesystem::directory_iterator path = boost::filesystem::directory_iterator(GetDobFileDirectory());
-             path != boost::filesystem::directory_iterator(); ++path)
+        for (boost::filesystem::directory_iterator dir = boost::filesystem::directory_iterator(GetDobFileDirectory());
+             dir != boost::filesystem::directory_iterator(); ++dir)
         {
-            const std::string extension = boost::filesystem::extension(*path);
+            const boost::filesystem::path path = dir->path();
+            const boost::filesystem::path extension = path.extension();
 
-            if ( boost::filesystem::is_directory(*path) )
+            if ( boost::filesystem::is_directory(path) )
             {
-                if (!ParseDomDir(*path))
+                if (!ParseDomDir(path))
                     return false;
                 else
                     continue;
@@ -663,10 +667,10 @@ namespace Internal
                 continue;
             }
 
-            lllout << "ParseDomFiles: Parsing file " << Safir::Utilities::Internal::GetFilenameFromDirectoryIterator(path).c_str() << std::endl;
+            lllout << "ParseDomFiles: Parsing file " << path.string().c_str() << std::endl;
 
-            ParsingState::Instance().mappingParser.SetFileName(*path);
-            if (!ParseFile(*path))
+            ParsingState::Instance().mappingParser.SetFileName(path);
+            if (!ParseFile(path))
             {
                 return false;
             }
@@ -1462,9 +1466,9 @@ namespace Internal
             ParsingState::Instance().classParser.Result()[i].m_initialSize = SizeOfClass(ParsingState::Instance().classParser.Result()[i].m_baseClassIndex);
             ParsingState::Instance().classParser.Result()[i].m_thisClassSize = 0;
             ParsingState::Instance().classParser.Result()[i].m_noInheritedMembers = ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_noInheritedMembers+
-                static_cast<unsigned int>(ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_members.size());
+                ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_members.size();
             ParsingState::Instance().classParser.Result()[i].m_noInheritedParameters = ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_noInheritedParameters+
-                static_cast<unsigned int>(ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_parameters.size());
+                ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_parameters.size();
         }
         else //only Safir.Dots.Object goes here
         {

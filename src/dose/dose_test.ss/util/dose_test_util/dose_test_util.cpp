@@ -22,23 +22,10 @@
 *
 ******************************************************************************/
 #include <iostream>
-#include "dose_test_util.h"
+#include <Safir/Dob/Internal/DoseTest/dose_test_util.h>
 #include "dose_com_utils.h"
 #include <Safir/Dob/Typesystem/Utilities.h>
 
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable: 4244)
-#endif
-
-#include <ace/SOCK_Dgram_Mcast.h>
-#include <ace/OS_NS_sys_socket.h>
-
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
-
-ACE_SOCK_Dgram_Mcast g_sock;
 
 void InhibitOutgoingTraffic(const bool inhibit, bool& success)
 {
@@ -66,57 +53,6 @@ void InhibitOutgoingTrafficStatus(bool& isInhibited)
     else
     {
         isInhibited = true;
-    }
-}
-
-void JoinMulticastGroup(const char* const multicastAddress,
-                        const int         multicastPort,
-                        const char* const multicastNic)
-{
-    ACE_INET_Addr addr((unsigned short)multicastPort, multicastAddress);
-
-    ACE_OS::socket_init();
-
-    std::wcout << "Joined socket to group for multicast reception. Multicast address " << multicastAddress << ", port " << multicastPort << "." << std::endl;
-    if (*multicastNic == 0)
-    {
-        std::wcout << "NIC is not set. Windows: Listen on all interfaces. Linux: Listen on default interface." << std::endl;
-    }
-    else
-    {
-        std::wcout << "Used NIC: " << Safir::Dob::Typesystem::Utilities::ToWstring(multicastNic) << std::endl;
-    }
-
-    int res;
-    if (*multicastNic == 0)
-    {
-        res = g_sock.join(addr);
-    }
-    else
-    {
-        res = g_sock.join(addr,
-                          1,  // 1 => reuse address
-                          multicastNic);
-    }
-    if (res == -1)
-    {
-        std::wcout << "Error joining multicast group!" << std::endl;
-    }
-
-    //g_sock.enable(ACE_NONBLOCK);        
-}
-
-
-void ReceiveMulticastPacket(char* buf,
-                            int bufLen)
-{
-    ACE_INET_Addr from;
-    size_t res = g_sock.recv(buf, bufLen, from);
-
-    if (res == -1)
-    {
-        buf[0] = 0;
-        std::wcout << "recv returned error code " << ACE_OS::last_error() << std::endl;      
     }
 }
 
