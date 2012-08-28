@@ -48,7 +48,7 @@ void DoseC_Constructor(long & ctrl,
                        bool & success)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
-    CrashHandler::Instance();
+    //CrashHandler::Instance();
     success = false;
     try
     {
