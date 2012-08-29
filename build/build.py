@@ -155,6 +155,12 @@ def physical_memory():
     match = re.search(r"MemTotal:\s*([0-9]*) kB", meminfo)
     return int(match.group(1))/1024
 
+class DummyLogger(object):
+    def log(self, data, tag = None):
+        sys.stdout.write(data + "\n")        
+        
+    def logOutput(self, process):
+        raise Exception("DummyLogger doesnt support process output logging. You should investigate why the real logger is not instantiated by now...")
 
 class Logger(object):
     LogLevel = ("Brief", "Verbose")
@@ -877,6 +883,9 @@ def main():
     return (builder.total_tests, builder.failed_tests)
 
 #### actual code starts here ####
+
+# create a dummy logger that we use until we have the real thing
+logger = DummyLogger()
 
 #reduce process priority (currently only done on unix platforms)
 if hasattr(os,"nice"):
