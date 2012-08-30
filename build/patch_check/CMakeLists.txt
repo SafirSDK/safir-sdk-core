@@ -4,6 +4,10 @@ project(patch_check CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
+FIND_PACKAGE(Boost COMPONENTS date_time thread chrono system)
+
+set(CMAKE_REQUIRED_LIBRARIES ${Boost_LIBRARIES})
+
 add_subdirectory(boost_iostreams_flushing)
 add_subdirectory(offset_ptr)
 add_subdirectory(tmp_dir_helpers)

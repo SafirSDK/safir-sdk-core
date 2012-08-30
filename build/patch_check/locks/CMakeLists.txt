@@ -1,12 +1,4 @@
 include(CheckCXXSourceCompiles)
-FIND_PACKAGE(Boost COMPONENTS thread system)
-
-#if (NOT MSVC)
-  set(CMAKE_REQUIRED_LIBRARIES ${Boost_LIBRARIES})
-#else()
-#  set(ENV{LIB} "$ENV{LIB};${Boost_LIBRARY_DIRS}")
-#endif()
-
 
 CHECK_CXX_SOURCE_COMPILES("#include \"${CMAKE_CURRENT_SOURCE_DIR}/test.cpp\"" locks_patched)
 

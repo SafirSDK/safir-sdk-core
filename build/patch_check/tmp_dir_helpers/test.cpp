@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <boost/interprocess/detail/tmp_dir_helpers.hpp>
+#include <boost/interprocess/detail/workaround.hpp>
 
 #if (defined BOOST_INTERPROCESS_HAS_WINDOWS_KERNEL_BOOTTIME) || (defined BOOST_INTERPROCESS_HAS_KERNEL_BOOTTIME)
 #  error "WMI is not disabled!"

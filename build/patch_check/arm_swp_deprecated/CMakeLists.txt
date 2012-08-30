@@ -2,6 +2,9 @@ include(CheckCXXSourceRuns)
 
 #we make the assembler generate errors instead of warnings
 #for gcc. Other compilers are not supported by this check, currently.
+if (NOT CMAKE_COMPILER_IS_GNUCXX)
+  return()
+endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} -Wa,--fatal-warnings)
