@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(patch_check)
+project(patch_check CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
