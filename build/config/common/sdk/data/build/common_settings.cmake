@@ -88,8 +88,10 @@ set (Boost_ADDITIONAL_VERSIONS "1.40" "1.40.0" "1.41" "1.41.0" "1.42" "1.42.0" "
 
 set(Boost_USE_MULTITHREADED ON)
 
-# Use boost from tower if it exists
-set(BOOST_ROOT ${SAFIR_SDK})
+# Use boost from tower if it exists, unless specifically set to something else
+if (NOT BOOST_ROOT AND $ENV{BOOST_ROOT} STREQUAL "")
+  set(BOOST_ROOT ${SAFIR_SDK})
+endif()
 find_package(Boost)
 if(Boost_FOUND)
    include_directories(${Boost_INCLUDE_DIRS})
