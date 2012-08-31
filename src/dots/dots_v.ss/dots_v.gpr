@@ -9,17 +9,7 @@ project Dots_V is
    type Warning_Levels is
       ("Default", "Elaboration", "Full");
 
-   type Xml_Ada_Version_Type is ("3", "4");
-   Xml_Ada_Version : Xml_Ada_Version_Type := External("XML_ADA_VER", "3"); 
-  
-  --TODO: rename the private directories to reflect major version number only
-   case Xml_Ada_Version is
-        when "3" =>
-             for Source_Dirs use ("private", "private/xml_ada_3.2.1");
-        when "4" =>
-             for Source_Dirs use ("private", "private/xml_ada_4.2");
-   end case;
-   
+   for Source_Dirs use ("private");
 
    Warning_Level : Warning_Levels := External ("Warning_Level");
    Build : Build_Type := External ("BUILD");
