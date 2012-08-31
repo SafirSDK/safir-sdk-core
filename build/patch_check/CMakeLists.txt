@@ -4,7 +4,9 @@ project(patch_check CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
-FIND_PACKAGE(Boost COMPONENTS date_time thread chrono system)
+FIND_PACKAGE(Boost COMPONENTS date_time thread system REQUIRED)
+set (Boost_FIND_QUIETLY 1)
+FIND_PACKAGE(Boost COMPONENTS chrono)
 
 set(CMAKE_REQUIRED_LIBRARIES ${Boost_LIBRARIES})
 
