@@ -1,6 +1,6 @@
-project(doxygen)
+project(doxygen NONE)
 
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 2.8)
 
 FILE(TO_CMAKE_PATH $ENV{SAFIR_SDK} SAFIR_SDK)
 FILE(TO_CMAKE_PATH $ENV{SAFIR_RUNTIME} SAFIR_RUNTIME)
