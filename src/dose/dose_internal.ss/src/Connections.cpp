@@ -164,7 +164,7 @@ namespace Internal
         m_connectSignal = 1;
         Signals::Instance().SignalConnectOrOut();
         //wait for response
-         m_connectResponseEvent.wait();
+        m_connectResponseEvent.wait();
 
         m_connectResponse.GetAndClear(connect_tag, result, connection);
 
