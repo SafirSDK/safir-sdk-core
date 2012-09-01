@@ -23,8 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import print_function
-import os, glob, sys, subprocess, platform, threading, xml.dom.minidom, re
+import os, glob, sys, subprocess, platform, threading, xml.dom.minidom, re, time
 
 from Queue import Queue, Empty
 from xml.sax.saxutils import escape
@@ -823,10 +822,11 @@ def main():
         
         if in_skip_list(line.strip()):
             logger.log("- Skipping " + str(split_line) + ", matches skip-list","header")
-            sys.stdout.flush()
             continue
                 
         command = split_line[0]
+
+        start_time = time.time()
 
         if command == "build_dir":
             if len(split_line) > 1:
@@ -874,9 +874,8 @@ def main():
             dobmake(builder)
         else:
             die("Got unknown command '" + command + "'")
-        
-        sys.stdout.flush()
-        sys.stderr.flush()
+
+        logger.log("Build step took " + str(int(time.time() - start_time)) + " seconds")
 
     os.chdir(olddir)
 
