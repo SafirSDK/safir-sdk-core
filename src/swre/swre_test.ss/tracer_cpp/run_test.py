@@ -80,10 +80,10 @@ if pattern.match(output):
     print "match!"
     sys.exit(0)
 else:
-    print "no match! (Expected and received output written to template.txt and output.txt.)"
-    with open("output.txt","w") as expected:
+    print "no match! (Expected and received output written to failed_test_template.txt and failed_test_output.txt.)"
+    with open("failed_test_output.txt","w") as expected:
         expected.write(output)
-    with open("template.txt","w") as template:
+    with open("failed_test_template.txt","w") as template:
         template.write(log_template + log_template + log_template)
 
     print output
