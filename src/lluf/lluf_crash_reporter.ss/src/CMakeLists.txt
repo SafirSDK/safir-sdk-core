@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.6)
 project(lluf_crash_reporter C CXX)
 
 #this library has C++ interface that *should* work in both debug and release

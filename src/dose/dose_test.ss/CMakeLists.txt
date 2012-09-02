@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 2.6)
 
 #This directory contains libraries that have C interfaces, so we don't want the "d" 
 #suffix on debug builds on windows. Must be set before including cmake_settings.txt
