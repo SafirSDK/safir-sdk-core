@@ -26,6 +26,8 @@
 
 import subprocess, os, time, sys, shutil, glob
 
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+
 sys.path.append("../../../swre/swre_test.ss/testutil")
 from testenv import TestEnv, TestEnvStopper
 
@@ -45,6 +47,7 @@ def rmdir(directory):
             print "Failed to remove directory, will retry"
             time.sleep(0.2)
             shutil.rmtree(directory)
+
 
 if sys.platform == "win32":
     config_type = os.environ.get("CMAKE_CONFIG_TYPE")
