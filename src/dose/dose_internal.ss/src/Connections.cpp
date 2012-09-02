@@ -95,7 +95,7 @@ namespace Internal
         connect = false;
         connectionOut = false;
         Signals::Instance().WaitForConnectOrOut();
-        //get the events
+       //get the events
         const boost::uint32_t oldconnectSignal = m_connectSignal.compare_exchange(0, 1);
 
         if (oldconnectSignal != 0)
@@ -106,7 +106,7 @@ namespace Internal
         //we could loop through the connection signals, but currently we just assume that we might as well
         //tell dose_main to do it for us even if no signals have been set....
         connectionOut = true;
-        //lllog(9) << "WaitForDoseMainSignal: connect = " << std::boolalpha << connect << ", connectionOut = " << connectionOut << std::endl;
+        //std::wcout << "WaitForDoseMainSignal: connect = " << std::boolalpha << connect << ", connectionOut = " << connectionOut << std::endl;
     }
 
     const boost::function<void(void)> Connections::GetConnectionSignalWaiter(const ConnectionId & connectionId)
@@ -164,7 +164,6 @@ namespace Internal
         m_connectSignal = 1;
         Signals::Instance().SignalConnectOrOut();
         //wait for response
-        lllout << "Waiting on m_connectResponseEvent" << std::endl;
         m_connectResponseEvent.wait();
 
         m_connectResponse.GetAndClear(connect_tag, result, connection);

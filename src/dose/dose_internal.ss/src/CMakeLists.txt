@@ -13,16 +13,6 @@ ADD_LIBRARY(dose_internal SHARED ${sources} ${headers})
 
 ADD_DEFINITIONS(-DDOSE_INT_EXPORTS)
 
-#There is a wierd bug in at least one gcc version that causes the Semaphore
-#class to misbehave in Debug builds
-if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_SYSTEM_PROCESSOR STREQUAL "i686" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-  execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version
-    OUTPUT_VARIABLE GCC_VERSION)
-  if (GCC_VERSION MATCHES "4\\.6\\.3-1ubuntu5")
-    set_source_files_properties(Semaphore.cpp PROPERTIES COMPILE_FLAGS "-O" )
-  endif()
-endif()
-
 FIND_PACKAGE(Boost COMPONENTS regex)
 
 if (NOT MSVC)

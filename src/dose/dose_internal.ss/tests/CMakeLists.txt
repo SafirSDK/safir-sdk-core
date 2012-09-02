@@ -16,7 +16,7 @@ if (NOT MSVC)
   TARGET_LINK_LIBRARIES(distribution_data_test dose_internal dots_generated-Safir-cpp dots_cpp dots_id ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(lamport_clock_test dose_internal ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(dose_message_queue_test dose_internal dots_generated-Safir-cpp dots_generated-cpp dots_cpp ${Boost_LIBRARIES})
-  TARGET_LINK_LIBRARIES(dose_sem_wrapper_test dose_internal ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(dose_sem_wrapper_test ${COMMON_LIBRARIES})
 endif()
 
 ENABLE_TESTING()

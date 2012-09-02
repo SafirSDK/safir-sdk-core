@@ -23,9 +23,7 @@
 ******************************************************************************/
 #ifndef __DOSE_SEMAPHORE_H__
 #define __DOSE_SEMAPHORE_H__
-
 #include <string>
-#include <Safir/Dob/Internal/InternalExportDefs.h>
 
 #if defined (_WIN32)
 
@@ -58,7 +56,7 @@ namespace Dob
 {
 namespace Internal
 {
-    class DOSE_INTERNAL_API NamedSemaphore:
+    class NamedSemaphore:
         private boost::noncopyable
     {
     public:
@@ -83,7 +81,135 @@ namespace Internal
     };
 
 
-    class DOSE_INTERNAL_API Semaphore:
+#ifdef DOSE_SEMAPHORE_WIN32
+
+    namespace Win32 
+    {
+        extern "C" __declspec(dllimport) void * __stdcall CreateSemaphoreA(void*, long, long, const char *);
+        extern "C" __declspec(dllimport) int __stdcall ReleaseSemaphore(void *, long, long *);
+        extern "C" __declspec(dllimport) unsigned long __stdcall WaitForSingleObject(void *, unsigned long);
+        extern "C" __declspec(dllimport) int __stdcall CloseHandle(void*);
+        extern "C" __declspec(dllimport) unsigned long __stdcall GetLastError();
+
+        static const unsigned long infinite_time        = 0xFFFFFFFF;
+        static const unsigned long wait_object_0        = 0;
+        static const unsigned long wait_timeout         = 258L;
+    }
+
+    inline NamedSemaphore::NamedSemaphore(const std::string& name):
+        m_semaphoreHandle(NULL)
+    {
+        m_semaphoreHandle = Win32::CreateSemaphoreA(NULL,0,0x7fffffff,name.c_str());
+        if (m_semaphoreHandle == NULL) 
+        {
+            throw boost::interprocess::interprocess_exception(Win32::GetLastError());
+        }
+    }
+
+    inline NamedSemaphore::~NamedSemaphore()
+    {
+        if (m_semaphoreHandle != NULL) 
+        {
+            Win32::CloseHandle(m_semaphoreHandle);
+            m_semaphoreHandle = NULL;
+        }
+    }
+
+    inline void NamedSemaphore::remove()
+    {
+
+    }
+
+    inline void NamedSemaphore::wait()
+    {
+        const long res = Win32::WaitForSingleObject(m_semaphoreHandle, Win32::infinite_time);
+        if (res != Win32::wait_object_0)
+        {
+            throw boost::interprocess::interprocess_exception(Win32::GetLastError());
+        }
+    }
+
+    inline bool NamedSemaphore::try_wait()
+    {
+        const unsigned long res = Win32::WaitForSingleObject(m_semaphoreHandle, 0);
+        if (res == Win32::wait_object_0)
+        {
+            return true;
+        }
+        else if (res == Win32::wait_timeout)
+        {
+            return false;
+        }
+        else
+        {
+            throw boost::interprocess::interprocess_exception(Win32::GetLastError());
+        }
+    }
+
+    inline void NamedSemaphore::post()
+    {
+        const int res = Win32::ReleaseSemaphore(m_semaphoreHandle,1,NULL);
+        if (!res) 
+        {
+            throw boost::interprocess::interprocess_exception(Win32::GetLastError());
+        }
+    }
+
+#else
+    inline NamedSemaphore::NamedSemaphore(const std::string& name):
+        m_semaphore(boost::interprocess::open_or_create, name.c_str(), 0),
+        m_name(name)
+    {
+
+    }
+
+    inline NamedSemaphore::~NamedSemaphore()
+    {
+
+    }
+
+    inline void NamedSemaphore::remove()
+    {
+        boost::interprocess::named_semaphore::remove(m_name.c_str());
+    }
+
+    inline void NamedSemaphore::wait()
+    {
+        // On Linux, even in the absence of signal handlers, certain blocking interfaces
+        // can fail with the error EINTR. This includes sem_wait wich is what
+        // boost::interprocess::named_semaphore will use. I (STAWI) don't know why this
+        // isn't handled transparantly by boost interprocess, but since this seems not to
+        // be the case it is handled at this level.
+        for (;;)
+        {
+            try
+            {
+                m_semaphore.wait();
+                break;
+            }
+            catch (const boost::interprocess::interprocess_exception& e)
+            {
+                if (e.get_native_error() != EINTR)
+                {
+                    throw;
+                }
+
+            }
+        }  
+    }
+
+    inline bool NamedSemaphore::try_wait()
+    {
+        return m_semaphore.try_wait();
+    }
+
+    inline void NamedSemaphore::post()
+    {
+        m_semaphore.post();
+    }
+#endif
+
+    class Semaphore:
         private boost::noncopyable
     {
     public:
@@ -96,9 +222,38 @@ namespace Internal
         void post() {m_semaphore.post();};
 
     private:
+
         boost::interprocess::interprocess_semaphore m_semaphore;
     };
 
+    inline void Semaphore::wait()
+    {
+#if defined(linux) || defined(__linux) || defined(__linux__)
+        // On Linux, even in the absence of signal handlers, certain blocking interfaces
+        // can fail with the error EINTR. This includes sem_wait wich is what
+        // boost::interprocess::interprocess_semaphore will use. I (STAWI) don't know why this
+        // isn't handled transparantly by boost interprocess, but since this seems not to
+        // be the case it is handled at this level.
+        for (;;)
+        {
+            try
+            {
+                m_semaphore.wait();
+                break;
+            }
+            catch (const boost::interprocess::interprocess_exception& e)
+            {
+                if (e.get_native_error() != EINTR)
+                {
+                    throw;
+                }
+
+            }
+        }  
+#else
+        m_semaphore.wait();
+#endif
+     }
 }
 }
 }
