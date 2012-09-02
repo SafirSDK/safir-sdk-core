@@ -23,7 +23,9 @@
 ******************************************************************************/
 #ifndef __DOSE_SEMAPHORE_H__
 #define __DOSE_SEMAPHORE_H__
+
 #include <string>
+#include <Safir/Dob/Internal/InternalExportDefs.h>
 
 #if defined (_WIN32)
 
@@ -56,7 +58,7 @@ namespace Dob
 {
 namespace Internal
 {
-    class NamedSemaphore:
+    class DOSE_INTERNAL_API NamedSemaphore:
         private boost::noncopyable
     {
     public:
@@ -81,7 +83,7 @@ namespace Internal
     };
 
 
-    class Semaphore:
+    class DOSE_INTERNAL_API Semaphore:
         private boost::noncopyable
     {
     public:
