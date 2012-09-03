@@ -60,6 +60,16 @@ def is_64_bit():
         PROCESSOR_ARCHITEW6432 = os.environ.get("PROCESSOR_ARCHITEW6432")
         return PROCESSOR_ARCHITECTURE == "AMD64" or PROCESSOR_ARCHITEW6432 == "AMD64"
         
+def cmake():
+    """Get the name of the cmake executable. Currently only detects the cmake28/cmake difference on
+    centos/rhel 6"""
+    if not hasattr(cmake, "cmake_executable"):
+        try:
+            subprocess.Popen(("cmake28", "--version"),stdout = subprocess.PIPE).communicate()
+            cmake.cmake_executable = "cmake28"
+        except:
+            cmake.cmake_executable = "cmake"
+    return cmake.cmake_executable
 
 def copy_dob_files(source_dir, target_dir):
     """Copy dou and dom files from the source directory to the given subdirectory in the dots_generated directory"""
@@ -559,8 +569,8 @@ class VisualStudioBuilder(BuilderBase):
         olddir = os.getcwd();
         os.chdir(self.generator)
     
-        self.__run_command(("cmake " +
-                            "-G \"" + self.generator + "\" " +
+        self.__run_command((cmake() +
+                            " -G \"" + self.generator + "\" " +
                             ".."),
                            "Configure", directory)
 
@@ -568,11 +578,11 @@ class VisualStudioBuilder(BuilderBase):
         
         for config in configs:
             logger.log(" - in config " + config, "brief")
-            self.__run_command("cmake --build . --config " + config + ("--clean-first" if clean else ""),
+            self.__run_command(cmake() + " --build . --config " + config + ("--clean-first" if clean else ""),
                                "Build " + config, directory)
 
             if install:
-                self.__run_command("cmake --build . --config " + config + " --target Install",
+                self.__run_command(cmake() + " --build . --config " + config + " --target Install",
                                    "Install " + config, directory)
 
         os.chdir(olddir)
@@ -581,7 +591,7 @@ class VisualStudioBuilder(BuilderBase):
         """build a directory using nmake"""
         for config in configs:
             logger.log(" - in config " + config, "brief")
-            self.__run_command("cmake -D CMAKE_BUILD_TYPE:string=" + config + " " +
+            self.__run_command(cmake() + " -D CMAKE_BUILD_TYPE:string=" + config + " " +
                                "-D SAFIR_ADA_SUPPORT:boolean=" + str(ada_support) + " " +
                                "-D SAFIR_JAVA_SUPPORT:boolean=" + str(java_support) + " " +
                                "-G \"NMake Makefiles\" .",
@@ -659,7 +669,7 @@ class UnixGccBuilder(BuilderBase):
         """build a directory using make"""
         config = configs[0]
         logger.log(" - in config " + config, "brief")
-        self.__run_command(("cmake",
+        self.__run_command((cmake(),
                             "-D", "CMAKE_BUILD_TYPE:string=" + config,
                             "-D", "SAFIR_ADA_SUPPORT:boolean=" + str(ada_support),
                             "-D", "SAFIR_JAVA_SUPPORT:boolean=" + str(java_support),
