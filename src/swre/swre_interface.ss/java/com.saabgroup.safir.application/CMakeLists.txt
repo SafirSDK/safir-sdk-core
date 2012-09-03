@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 
 project(swre_application_java Java)
 find_package(Java REQUIRED)
