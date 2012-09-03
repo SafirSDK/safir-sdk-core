@@ -61,6 +61,7 @@ class TestEnv:
         self.launchProcess("dope_main", dope_main_cmd)
         self.launchProcess("swre_logger", swre_logger_cmd)
 
+        start_time = time.time()
         print "Waiting for dose_main to be ready"
         while True:
             time.sleep(0.2)
@@ -72,7 +73,18 @@ class TestEnv:
                                 "----- Output so far ----\n" + 
                                 self.Output("dose_main") +
                                 "\n---------------------")
-        
+            if time.time() - start_time > 90:
+                start_time = time.time()
+                print "dose_main seems slow to start. Here is some output:"
+                print "----- dose_main output -----"
+                print self.Output("dose_main")
+                print "----- dope_main output -----"
+                print self.Output("dope_main")
+                print "---- swre_logger output ----"
+                print self.Output("swre_logger")
+                print "----------------------------"
+                print "Will keep waiting"
+
     def launchProcess(self, name, cmd):
         print "Launching", name
         proc = subprocess.Popen(cmd, 
