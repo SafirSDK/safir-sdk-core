@@ -56,6 +56,17 @@ def is_64_bit():
         PROCESSOR_ARCHITEW6432 = os.environ.get("PROCESSOR_ARCHITEW6432")
         return PROCESSOR_ARCHITECTURE == "AMD64" or PROCESSOR_ARCHITEW6432 == "AMD64"
 
+def cmake():
+    """Get the name of the cmake executable. Currently only detects the cmake28/cmake difference on
+    centos/rhel 6"""
+    if not hasattr(cmake, "cmake_executable"):
+        try:
+            subprocess.Popen(("cmake28", "--version"),stdout = subprocess.PIPE).communicate()
+            cmake.cmake_executable = "cmake28"
+        except:
+            cmake.cmake_executable = "cmake"
+    return cmake.cmake_executable
+
 def num_cpus():
     """Detects the number of CPUs on a system. Cribbed from pp."""
     # Linux, Unix and MacOS:
@@ -543,7 +554,7 @@ class VisualStudioBuilder(object):
         if buildType == "rebuild":
             Rebuild = "TRUE"
         try:
-            self.run_command2("cmake -G \""+ self.generator + "\" "+
+            self.run_command2(cmake() + " -G \""+ self.generator + "\" "+
                               "-D NO_JAVA:string=TRUE " + 
                               "-D NO_DOTNET:string=TRUE " + 
                               "-D NO_ADA:string=TRUE " + 
@@ -559,9 +570,9 @@ class VisualStudioBuilder(object):
             if build_cpp_release:
                 cppconfig += ["Release"]
             for config in cppconfig:
-                self.run_command("cmake --build . --config " + config,
+                self.run_command(cmake() + " --build . --config " + config,
                                  "Build CPP " + config,what)
-                self.run_command("cmake --build . --config " + config +" --target Install",
+                self.run_command(cmake() + " --build . --config " + config +" --target Install",
                                  "Install CPP " + config,what)
                 save_installed_files_manifest()
             
@@ -578,7 +589,7 @@ class VisualStudioBuilder(object):
         if buildType == "rebuild":
             Rebuild = "TRUE"
         try:
-            self.run_command("cmake -G \""+ "NMake Makefiles" + "\" "+
+            self.run_command(cmake() + " -G \""+ "NMake Makefiles" + "\" "+
                              "-D NO_CXX:string=TRUE " +
                              "-D NO_DOTNET:string=FALSE " +
                              "-D NO_ADA:string=" + str(not build_ada) + " " + 
@@ -588,10 +599,10 @@ class VisualStudioBuilder(object):
                              "..",
                              "Configure", what)
 
-            self.run_command("cmake --build . --config " + default_config,
+            self.run_command(cmake() + " --build . --config " + default_config,
                              "Build " + default_config, what)
             
-            self.run_command("cmake --build . --config " + default_config  +" --target Install",
+            self.run_command(cmake() + " --build . --config " + default_config  +" --target Install",
                              "Install " + default_config, what)
             save_installed_files_manifest()
         finally:
@@ -608,21 +619,21 @@ class VisualStudioBuilder(object):
         try:
             # workaround for bug in CMake with VS2010
             if self.generator.startswith("Visual Studio 10"): 
-                self.run_command(("cmake -G \""+ "NMake Makefiles" + "\" "+
+                self.run_command((cmake() + " -G \""+ "NMake Makefiles" + "\" "+
                                   "-D REBUILD=" + Rebuild + " " +
                                   "."),
                                  "Configure", what)
             else:
-                self.run_command(("cmake -G \""+ self.generator + "\" "+
+                self.run_command((cmake() + " -G \""+ self.generator + "\" "+
                                   "-D REBUILD=" + Rebuild + " " +
                                   "."),
                                  "Configure", what)
                 solution = self.find_sln()
                 
-            self.run_command("cmake --build . --config " + default_config,
+            self.run_command(cmake() + " --build . --config " + default_config,
                              "Build " + default_config, what)
 
-            self.run_command("cmake --build . --config " + default_config  +" --target Install",
+            self.run_command(cmake() + " --build . --config " + default_config  +" --target Install",
                              "Install " + default_config, what)
             
 
@@ -701,7 +712,7 @@ class UnixGccBuilder(object):
         if buildType == "rebuild":
             Rebuild = "TRUE"
         try:
-            self.run_command(("cmake",
+            self.run_command((cmake(),
                               "-D", "CMAKE_BUILD_TYPE:string=" + default_config,
                               "-D", "REBUILD=" + Rebuild,
                               "."),
@@ -725,7 +736,7 @@ class UnixGccBuilder(object):
         if buildType == "rebuild":
             Rebuild = "TRUE"
         try:
-            self.run_command(("cmake",
+            self.run_command((cmake(),
                               "-D", "CMAKE_BUILD_TYPE:string=" + default_config,
                               "-D", "NO_ADA:string="+ str(not build_ada), 
                               "-D", "NO_JAVA:string=" + str(not build_java),
