@@ -1,5 +1,10 @@
-Install Safir SDK Core for RedHat based Linux distributions
+Install Safir SDK Core on RHEL 6.x or Centos 6.x
 ===========================================================
+
+Install epel
+install stuff yum....TBD
+install templates_parser
+set ADA_PROJECT_PATH
 
 For some RedHat based distributions we have provided our own Safir rpm repositories which contain source and binary rpm packages. The repositories
 contain not only rpm packages for Safir SDK Core itself, but also rpm packages for some software that we have dependencies to, and which can not
