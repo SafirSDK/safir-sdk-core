@@ -71,6 +71,17 @@ def cmake():
             cmake.cmake_executable = "cmake"
     return cmake.cmake_executable
 
+def ctest():
+    """Get the name of the ctest executable. Currently only detects the ctest28/ctest difference on
+    centos/rhel 6"""
+    if not hasattr(ctest, "ctest_executable"):
+        try:
+            subprocess.Popen(("ctest28", "--version"),stdout = subprocess.PIPE).communicate()
+            ctest.ctest_executable = "ctest28"
+        except:
+            ctest.ctest_executable = "ctest"
+    return ctest.ctest_executable
+
 def copy_dob_files(source_dir, target_dir):
     """Copy dou and dom files from the source directory to the given subdirectory in the dots_generated directory"""
     import os
@@ -503,7 +514,7 @@ class VisualStudioBuilder(BuilderBase):
             dummyfile = open("DartConfiguration.tcl","w")
             dummyfile.close()
 
-        output = self.__run_command(("ctest -T Test --output-on-failure"),
+        output = self.__run_command((ctest() + " -T Test --output-on-failure"),
                                     "Test", directory, allow_fail = True)
         self.interpret_test_output(output)
             
@@ -690,7 +701,7 @@ class UnixGccBuilder(BuilderBase):
             dummyfile = open("DartConfiguration.tcl","w")
             dummyfile.close()
 
-        output = self.__run_command(("ctest",
+        output = self.__run_command((ctest(),
                                      "-T", "Test", "--output-on-failure"),
                                     "Test", directory, allow_fail = True)
         self.interpret_test_output(output)
