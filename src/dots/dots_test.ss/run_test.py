@@ -43,7 +43,7 @@ if lang == "cpp":
 elif lang == "ada":
     command = (os.path.join("ada", "obj", "dots_test_ada"),)
 elif lang == "dotnet":
-    command = (os.path.join("dotnet", "dots_test_dotnet.csexe"))
+    command = (os.path.join("dotnet", "dots_test_dotnet.csexe"),)
     dependencies = ("dots_generated-dotnet.dll", "Safir.Dob.Typesystem.dll")
 elif lang == "java":
     command = ("java","-jar", os.path.join("java","dots_test_java.jar"))
