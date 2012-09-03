@@ -28,7 +28,10 @@ libexpat1-dev
 python-tk
 
 To install these from the command line "in one go" on Ubuntu/Kubuntu 10.04 or later, run:
-   sudo apt-get install libqt4-dev mono-devel mono-gmcs libboost-all-dev libtemplates-parser.*-dev libxmlada.*-dev libiodbc2-dev cmake g++ default-jdk doxygen graphviz make python-tk libexpat1-dev
+   sudo apt-get install libqt4-dev mono-devel mono-gmcs libboost-all-dev libace-dev libtemplates-parser.*-dev libxmlada.*-dev libiodbc2-dev cmake g++ default-jdk doxygen graphviz make python-tk libexpat1-dev
+
+To install these from the command line "in one go" on Debian 5.0.3 (Lenny), run:
+   sudo apt-get install libqt4-dev mono-2.0-devel mono-1.0-devel libmono-winforms2.0-cil libboost1.35-dev libace-dev libtemplates-parser-dev libxmlada-dev libiodbc2-dev cmake g++ openjdk-6-jdk doxygen graphviz make python-tk libexpat1-dev
 
 These packages should cause quite a few extra packages to be installed (like the gnat Ada compiler and a lot more stuff), which is as it should be.
 
