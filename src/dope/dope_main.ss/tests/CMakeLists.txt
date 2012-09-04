@@ -18,4 +18,4 @@ enable_testing()
 
 ADD_TEST(dope_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
-set_tests_properties(dope_test PROPERTIES TIMEOUT 240)
+set_tests_properties(dope_test PROPERTIES TIMEOUT 480)
