@@ -35,7 +35,7 @@ class Sender
         
         System.Threading.Thread.Sleep(100);
         debug.WriteLine("blahonga");
-        System.Threading.Thread.Sleep(600);
+        System.Threading.Thread.Sleep(800);
         debug.WriteLine("blahonga");
         
         Safir.SwReports.SwReport.Stop();
