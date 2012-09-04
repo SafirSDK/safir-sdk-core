@@ -1,6 +1,22 @@
 Building and Installing on Linux
 --------------------------------
 
+Table of contents
+1.     Prerequisites
+1.1.    Ubuntu
+1.2.    Centos/RHEL
+1.2.1.   Add EPEL repository
+1.2.2.   Install packages
+1.2.3.   Ada templates_parser
+1.2.4.   Set up Mono binfmt_misc
+2.     Patch Boost
+3.     Building
+4.     Building example applications
+5.     Installing runtimes only
+5.1     Ubuntu
+5.2     Centos/RHEL
+
+
 Here are instructions for installing on Centos/RHEL 6.x and Ubuntu 12.04.
 They can most probably be adapted to other versions as well, but those are the ones that we run our tests on currently. See http://safir.sourceforge.net for more info.
 
@@ -25,10 +41,12 @@ sudo yum install cmake28 boost-devel gcc-c++ doxygen graphviz make expat-devel g
 Go to http://libre.adacore.com/ and download the AWS source code.
 Untar the archive and cd into the new directory.
 run "cd templates_parser"
-run "make setup build"
-run "sudo make install" (read Note below first)
+run "make setup build" (see Note 1 if you get an error)
+run "sudo make install" (read Note 2 below first)
 
-Note: If you do not want the templates_parser installed under /usr/, e.g. you want it under /usr/local you can instead run "sudo make prefix=/usr/local". Then you have to make sure you set up your ADA_PROJECT_PATH to point to the directory where templates_parser.gpr gets put.
+Note 1: If you get linking errors complaining about -lxmlada_schema do a "sudo ln -s xmlada/relocatable/libxmlada_*.so ." in /usr/lib (or /usr/lib64 if you're using a 64-bit OS).
+
+Note 2: If you do not want the templates_parser installed under /usr/, e.g. you want it under /usr/local you can instead run "sudo make prefix=/usr/local". Then you have to make sure you set up your ADA_PROJECT_PATH to point to the directory where templates_parser.gpr gets put.
 
 1.2.4. Set up Mono binfmt_misc
 Add "echo ':CLR:M::MZ::/usr/bin/mono:' > /proc/sys/fs/binfmt_misc/register" to the end of /etc/rc.local
@@ -73,3 +91,14 @@ The directory named "examples" contains some test applications. The simplest way
     build/build.py -f build/example_apps.txt
 When this is complete you should have a few new applications installed under $SAFIR_RUNTIME/bin: VehicleAppCpp, VehicleAppCs, VehicleMmiCppQt, VehicleMmiCsWinForms and VehicleAppDb. 
 Note: There is also a build script configuration file dob_tests.txt, which builds the Dob test suite.
+
+5. Installing runtimes only
+If you have built the SDK on one machine and just want to run it on another without installing all the development tools you need to install some libraries and runtimes to get it to run.
+
+5.1 Ubuntu
+
+Run "sudo apt-get install libboost-.*1.48.0 libgnat-4.6 default-jre-headless libmono-corlib2.0-cil libmono-system2.0-cil"
+
+5.2 Centos/RHEL
+
+Run "sudo yum install boost mono-core libgnat"
