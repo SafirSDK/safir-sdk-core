@@ -8,12 +8,6 @@ if (NOT CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-
-#Get some more env variables that may or may not exist
-if (NOT "$ENV{BOOST_DIR}" STREQUAL "")
-   FILE(TO_CMAKE_PATH "$ENV{BOOST_DIR}" BOOST_DIR)
-endif ()
-
 #add include path
 INCLUDE_DIRECTORIES(${SAFIR_SDK}/include)
 if (SAFIR_USER)
