@@ -26,11 +26,11 @@
 from __future__ import print_function
 import os, shutil, stat, subprocess
 
-PATH = os.environ.get("PATH").split(os.pathsep)
+PATH = os.environ.get("PATH").split(";")
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 SAFIR_SDK = os.environ.get("SAFIR_SDK")
 
-SDK_LIB_DESTINATION = os.path.join(SAFIR_SDK, "lib")
+LIB_DESTINATION = os.path.join(SAFIR_SDK, "lib")
 DLL_DESTINATION = os.path.join(SAFIR_RUNTIME, "bin")
 HEADER_DESTINATION = os.path.join(SAFIR_SDK, "include")
 DOCS_DESTINATION = os.path.join(SAFIR_SDK, "docs")
@@ -126,11 +126,11 @@ def copy_lib(name):
         if not SAFIR_RUNTIME in path:
             fn = os.path.join(path,name)
             if os.path.isfile(fn):
-                copy_file(fn, SDK_LIB_DESTINATION)
+                copy_file(fn, LIB_DESTINATION)
                 return
             fn = os.path.join(path,"../lib", name)
             if os.path.isfile(fn):
-                copy_file(fn, SDK_LIB_DESTINATION)
+                copy_file(fn, LIB_DESTINATION)
                 return
     print("could not find "+ name)
 
@@ -138,7 +138,7 @@ def copy_libs_from_dir(dir):
     dirlist = os.listdir(dir)
     for file in dirlist:
         if os.path.splitext(file)[1] == ".lib":
-            copy_file(os.path.join(dir,file),SDK_LIB_DESTINATION)
+            copy_file(os.path.join(dir,file),LIB_DESTINATION)
 
 def copy_dlls_from_dir(dir):
     dirlist = os.listdir(dir)
@@ -169,14 +169,25 @@ def copy_docs_dir(dir, targetname, exclude_regex=None):
     dst = os.path.join(DOCS_DESTINATION,targetname)
     copy_tree(dir, dst, exclude_regex=re.compile(exclude_regex))
 
-def windows():
-    ##############
-    print("Copying boost stuff")
-    boost_dir = os.environ.get("BOOST_ROOT")
+def main():
+    #Copy Boost stuff
+    boost_dir = os.environ.get("BOOST_DIR")
     if boost_dir is None:
-        boost_dir = find_dll(("boost_date_time-vc100-mt-1_41.dll",
-                              "boost_date_time-vc100-mt-1_48.dll",
-                              "boost_date_time-vc100-mt-1_50.dll"))
+        boost_dir = os.environ.get("BOOST_ROOT")
+    if boost_dir is None:
+        boost_dir = find_dll(("boost_date_time-vc80-mt-1_38.dll",
+                              "boost_date_time-vc80-mt-1_39.dll",
+                              "boost_date_time-vc80-mt-1_40.dll",
+                              "boost_date_time-vc80-mt-1_41.dll",
+                              "boost_date_time-vc80-mt-1_42.dll",
+                              "boost_date_time-vc80-mt-1_44.dll",
+                              "boost_date_time-vc90-mt-1_38.dll",
+                              "boost_date_time-vc90-mt-1_39.dll",
+                              "boost_date_time-vc90-mt-1_40.dll",
+                              "boost_date_time-vc90-mt-1_41.dll",
+                              "boost_date_time-vc90-mt-1_42.dll",
+                              "boost_date_time-vc90-mt-1_44.dll",
+                              "boost_date_time-vc100-mt-1_45.dll"))
         boost_dir = os.path.join(boost_dir,"..")
 
     # find lib dir    
@@ -188,56 +199,43 @@ def windows():
     copy_dlls_from_dir(boost_lib_dir)
     copy_header_dir(os.path.join(boost_dir, "boost"))
 
-    ############
-    print("Copying the Qt runtime dll")
+    #Copy ACE stuff
+    copy_dll("ACE.dll")
+    copy_dll("ACEd.dll")
+    copy_lib("ACE.lib")
+    copy_lib("ACEd.lib")
+    copy_header_dir(os.path.join(os.environ.get("ACE_ROOT"),"ace"),("*.cpp","*.h","*.inl"))
+
+    #Copy the Qt runtime dll
     copy_dll("QtCore4.dll")
     copy_dll("QtGui4.dll")
 
-    ############
-    print("Copying expat stuff")
+    #Copy the expat stuff
     copy_dll("libexpat.dll")
     copy_lib("libexpat.lib")
     expat_header_dir = os.path.join(find_dll(("libexpat.dll",)),"..","Source","lib")
     copy_headers(expat_header_dir,("expat.h","expat_external.h"))
 
-    ############
-    print("Copying Ada stuff (GNAT runtime, xmlada and templates_parser")
+    #Copy the GNAT runtime, xmlada and templates_parser.
     copy_dll("libgcc_s.dll")
-    copy_dll("libgnat-6.2.dll",("libgnat-2011.dll", "libgnat-2012.dll"))
-    copy_dll("libgnarl-6.2.dll", ("libgnarl-2011.dll","libgnarl-2012.dll"))
+    copy_dll("libgnat-6.2.dll",("libgnat-2009.dll","libgnat-2010.dll"))
+    copy_dll("libgnarl-6.2.dll", ("libgnarl-2009.dll","libgnarl-2010.dll"))
     copy_dll("libxmlada_unicode.dll")
     copy_dll("libxmlada_input_sources.dll")
     copy_dll("libxmlada_sax.dll")
     copy_dll("libtemplates_parser.dll")
     copy_dll("mingwm10.dll")
 
-
-def linux():
-    pass
-
-def common():
-    print("Copying example apps into the sdk/docs directory")
     #copy example apps to good spot
     copy_docs_dir("examples/vehicleapp/vehicleapp_core.ss", "examples/vehicleapp", ".*\.svn.*")
     copy_docs_dir("examples/vehicledb/vehicledb_core.ss", "examples/vehicledb", ".*\.svn.*")
     copy_docs_dir("examples/vehiclemmi/vehiclemmi_core.ss", "examples/vehiclemmi", ".*\.svn.*")
 
-    print("Running dobmake clean: ------------")
-    #do a dobmake clean in dots_generated
+    #do a make clean or dobmake clean in dots_generated
     dobmake_path = os.path.join(SAFIR_RUNTIME,"bin","dobmake.py")
     retcode = subprocess.call(["python",dobmake_path, "-b", "--clean"])
     if retcode != 0:
         print("Failed to do 'dobmake.py -b --clean'")
-    print("-----------------------------------")
-
-def main():
-    print("Preparing Safir SDK Core binary for distribution") 
-    if sys.platform.startswith("linux"):
-        linux()
-    else:
-        windows()
-
-    common()
 
 if __name__ == "__main__":
     import sys
