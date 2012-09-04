@@ -184,7 +184,7 @@ class DummyLogger(object):
 
 class Logger(object):
     LogLevel = ("Brief", "Verbose")
-    Tags = set(["header","brief","normal","command","output"])
+    Tags = set(["header","brief","normal","detail","command","output"])
 
     def __init__(self,level):
         #make stdout unbuffered
@@ -258,8 +258,8 @@ def parse_command_line(builder):
     parser.add_option("--force-extra-config", action="store",type="string",dest="force_extra_config",
                       help="Build for the given extra config irrespective of what the command file says about extra_config")    
     parser.add_option("--jenkins", action="store_true",dest="jenkins",default=False,
-                      help="Set up and use environment variables for a Jenkins automated build.\n" + 
-                      "Currently sets up SAFIR_RUNTIME, SAFIR_SDK, PATH, LD_LIBRARY_PATH and ADA_PROJECT_PATH \n" +
+                      help="Set up and use environment variables for a Jenkins automated build." + 
+                      "Currently sets up SAFIR_RUNTIME, SAFIR_SDK, PATH, LD_LIBRARY_PATH and ADA_PROJECT_PATH " +
                       "when needed, and honours the 'Config' matrix axis. Also implies --verbose.")
     parser.add_option("--verbose", "-v", action="count",dest="verbose",default=0,
                       help="Print more stuff about what is going on. Use twice to get very verbose output.")
@@ -896,7 +896,7 @@ def main():
         else:
             die("Got unknown command '" + command + "'")
 
-        logger.log("Build step took " + str(int(time.time() - start_time)) + " seconds")
+        logger.log("Build step took " + str(int(time.time() - start_time)) + " seconds", "detail")
 
     os.chdir(olddir)
 
