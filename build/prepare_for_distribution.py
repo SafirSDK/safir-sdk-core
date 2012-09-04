@@ -170,6 +170,10 @@ def copy_docs_dir(dir, targetname, exclude_regex=None):
     copy_tree(dir, dst, exclude_regex=re.compile(exclude_regex))
 
 def windows():
+    """Copy lots of our dependencies into the sdk and runtime directories,
+    to make use of the SDK binaries *a lot* simpler"""
+    
+
     ##############
     print("Copying boost stuff")
     boost_dir = os.environ.get("BOOST_ROOT")
@@ -202,9 +206,8 @@ def windows():
 
     ############
     print("Copying Ada stuff (GNAT runtime, xmlada and templates_parser")
-    copy_dll("libgcc_s.dll")
-    copy_dll("libgnat-6.2.dll",("libgnat-2011.dll", "libgnat-2012.dll"))
-    copy_dll("libgnarl-6.2.dll", ("libgnarl-2011.dll","libgnarl-2012.dll"))
+    copy_dll("libgnat-2011.dll")
+    copy_dll("libgnarl-2011.dll")
     copy_dll("libxmlada_unicode.dll")
     copy_dll("libxmlada_input_sources.dll")
     copy_dll("libxmlada_sax.dll")
