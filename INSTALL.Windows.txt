@@ -7,18 +7,17 @@ Installing Prerequisites
 First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core. 
 Here is a summary of what you need, and below are instructions on where to get them and how to install them.
 
-Visual Studio 2005 SP1, 2008 SP1 or 2010
+Visual Studio 2008 SP1 or 2010 SP1 (express or paid versions work)
 GNAT
 Templates-Parser
 XMLAda
 MinGW and MSYS
-Boost (1.38 or later)
-ACE (>5.x)
+Boost (1.50 or later)
 Qt (>=4.4)
-CMake (>=2.6)
+CMake (>=2.8)
 Expat
 Java Platform (JDK) 
-Python (>= 2.4)
+Python (>= 2.6)
 doxygen
 graphviz
 
@@ -28,9 +27,12 @@ If your application is 64 bit you must build Safir SDK Core for 64 bit wich also
 Unfortunately the support for pre-build binaries isn't as good as for the 32 bit versions which means that in many cases you have to build the packages from source.
 For most packages below there are build/install instructions for both 32 and 64 bit.
 
+Visual Studio
+If you're using the Express version you will need to install the Windows SDK 7.1 to build 64 bit applications.
+See http://stackoverflow.com/questions/1865069/how-to-compile-a-64-bit-application-using-visual-c-2010-express
 
 GNAT
-An Ada compiler capable of generating 64 bit is necessary only if you wan't to build a 64 bit Ada application.
+An Ada compiler capable of generating 64 bit is necessary only if you want to build a 64 bit Ada application.
 Even if you are not concerned with Ada at all you still need an Ada compilator to build the offline tool (dots_v.exe) that is used to generate
 all language interfaces, however, in this case it is sufficient with the 32 bit version.
 The easiest way of getting an open source Ada compiler is to use the GNAT GPL package provided by AdaCore (Unfortunately, it doesn't support 64 bit).
@@ -42,9 +44,6 @@ XMLAda
 See GNAT.
 
 Boost
-64 bit build is mandatory.
-
-ACE
 64 bit build is mandatory.
 
 Qt
@@ -66,33 +65,32 @@ You are also assumed to have some unpacking tool installed that can handle .gz f
 
 Boost
 ~~~~~
-32 bit:
-For 32 bit installations the easiest way to install boost is to use the installer provided by BoostPro Computing: http://www.boostpro.com/downloads. Download the newest installer and run it.
- - In the "Select Default Variants" step, select "Visual C++ 8.0" (or "Visual C++ 9.0"), "Multithread Debug, DLL" and "Multithread, DLL". If you need more variants or compilers, check those as well.
- - In the "Choose Components" step you need at least "Boost DateTime", "Boost Filesystem", "Boost ProgramOptions", "Boost Regex", "Boost System", "Boost Serialization", and "Boost Thread" (again, if you need other things as well, select them too).
+For both 32 and 64 bit installations the easiest way to install boost is to use the installer provided by BoostPro Computing: http://www.boostpro.com/downloads. Download the appropriate installer and run it.
+ - In the "Select Default Variants" step, select your Visual Studio version, "Multithread Debug, DLL" and "Multithread, DLL". If you need more variants or compilers, check those as well.
+ - In the "Choose Components" step you can leave the defaults, or check at least 
+      Boost DateTime
+      Boost Filesystem
+      Boost IOStreams
+      Boost ProgramOptions
+      Boost Random
+      Boost Regex
+      Boost Serialization
+      Boost System
+      Boost Thread
 
-64 bit:
-If you are setting up a build for the x64 arcitecture you must build the separately-compiled boost libraries yourself:
-1. Go to the boost root directory.
-2. Run the command 'bootstrap' (this will build and install bjam). Depending on where you have put the boost root you might need start the command prompt as Administrator.
-3. Run the command 'bjam --build-dir=C:\tmp\boost-build --with-date_time --with-filesystem --with-program_options --with-regex --with-system --with-thread threading=multi toolset=msvc-10.0 address-model=64 variant=release variant=debug link=shared runtime-link=shared stage
-(The directory given for --build-dir can be any temporary directory)
-4. Create a directory 'lib' in the boost root.
-5. Copy all files from {boost root}\stage\lib to this new directory.
- 
+Add the lib directory of the boost installation (e.g. C:\Program Files\boost\boost_1_50\lib or similar) to your PATH. You might also need to set the environment variable BOOST_ROOT to the top directory of your boost installation (e.g. C:\Program Files\boost\boost_1_50) in order for CMake to find it.
 
-Add the lib directory of the boost installation (e.g. C:\Program Files\boost\boost_1_49\lib or similar) to your PATH. You might also need to set the environment
-variable BOOST_DIR to the top directory of your boost installation (e.g. C:\Program Files\boost\boost_1_49) in order for CMake to find it.
-
-If you are using boost version 1.48 or lower there are some boost bugs that need to be patched for Safir SDK to work correctly. The easisest way to install
-the patches that is needed for your version is to use the CMake file in the build/patches/boost directory, run "cmake . -G 'NMake Makefiles'", "nmake install"
+For some boost versions there are some bugs that need to be patched for Safir SDK to work correctly. The easisest way to install the patches that is needed for your version is to use the CMake file in the build/patches directory, run "cmake . -G 'NMake Makefiles'", "nmake install"
 once you have installed cmake, which will install the correct patches automatically.
 
 Qt
 ~~
-Note: As of 2012 there is a precompiled vs2008 version of Qt available from Nokia, use that to avoid having to build from source as described below.
 
-Installing Qt is sort of optional. If you don't install it you won't be able to build dobexplorer and one of the example applications. Be aware that building Qt takes a long time (2 hours 40 minutes on my Windows 7, 64bits). If you decide against installing Qt, you will have to remove the dobexplorer lines from the build/sdk_core.txt file for the build script to complete correctly.
+32 bit:
+Download the Qt Library installer for your compiler from http://qt.nokia.com/downloads. Run and install.
+
+As of 2012 there is a precompiled vs2010 version of Qt available from Nokia, use that to avoid having to build from source as described below.
+
 
 32 bit:
 Instructions for building with VS2010. This should be able to adapt to VS2005/2008 by starting the appropriate command prompt at step 8.
@@ -127,7 +125,7 @@ In the "Select Components" step, add MSYS and the Developer Toolkit to the stuff
 CMake
 ~~~~~
 Go to http://www.cmake.org/ and download and install the CMake installer.
-In the "Install Options" step, check the "Add CMake to the system PATH for all users", or "... current user" if you prefer. (On one of my test machines this didn't work, so I had to add "C:\Program Files\CMake 2.6\bin" to my PATH manually.) 
+In the "Install Options" step, check the "Add CMake to the system PATH for all users", or "... current user" if you prefer.
 
 Expat
 ~~~~~
@@ -147,7 +145,7 @@ Go to http://expat.sourceforge.net/ and download and install the binary installe
 6  Run nmake install
 
 For both 32 and 64 bit builds:
-Add C:\Program Files\expat\bin and C:\Program Files\expat\lib to your PATH.
+Add C:\Program Files\expat\bin to your PATH.
 
 GNAT and Ada libraries
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -160,9 +158,9 @@ Install xmlada:
         run "make" and then "make install"
         (delete c:\xmlada, it is no longer needed)
 
-Install AWS:
+Install AWS/templates_parser:
         unzip aws into c:\aws
-        open a MSYS command prompt (Start --> All Programs --> MinGW --> MinGW shell) and do "cd /c/aws"
+        open a MSYS command prompt (Start --> All Programs --> MinGW --> MinGW shell) and do "cd /c/aws/templates_parser"
         run "make setup build install"
         (delete c:\aws since it is no longer needed)
 
@@ -174,9 +172,9 @@ Go to http://java.sun.com/javase/downloads/index.jsp and download and install a 
 
 Python
 ~~~~~~
-Go to http://www.python.org/ and download and install the python installer. (Please use a version greater than or equal to 2.4, but less than 3.0, 2.6.1 is recommended).
+Go to http://www.python.org/ and download and install the python installer. (Please use a version greater than or equal to 2.6)
 
-Add C:\Python26 to your PATH.
+Add C:\Python26 (or equivalent) to your PATH.
 
 
 Doxygen and Graphviz
@@ -235,14 +233,12 @@ If you do the below step, "Recreating the downloadable binary", you can skip all
 
 Open Visual Studio and go to Tools --> Options --> Projects and Solutions --> VC++ Directories:
 Add the following under "Include files" (top right combo-box)
-    $(ACE_ROOT)
-    $(BOOST_DIR)
-    C:\Program Files\Expat 2.0.1\Source\lib
+    $(BOOST_ROOT)
+    C:\Program Files\Expat 2.1.0\Source\lib
     $(SAFIR_SDK)/include
 Add the following under "Library files"
-    $(ACE_ROOT)/lib
-    $(BOOST_DIR)/lib
-    C:\Program Files\Expat 2.0.1\Bin
+    $(BOOST_ROOT)/lib
+    C:\Program Files\Expat 2.1.0\Bin
     $(SAFIR_SDK)/lib
 
 

@@ -41,8 +41,12 @@ sender_path = os.path.join(exe_path,"tracer_sender")
 env = TestEnv()
 with TestEnvStopper(env):
     subprocess.call(sender_path)
+    time.sleep(1.0)
     subprocess.call(sender_path)
+    time.sleep(1.0)
     subprocess.call(sender_path)
+    time.sleep(1.0)
+
 
 if not env.ReturnCodesOk():
     print "Some process exited with an unexpected value"
