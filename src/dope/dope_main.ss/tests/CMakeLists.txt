@@ -18,4 +18,5 @@ enable_testing()
 
 ADD_TEST(dope_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
-set_tests_properties(dope_test PROPERTIES TIMEOUT 480)
+#this seems to be ridiculously slow on windows debug!
+set_tests_properties(dope_test PROPERTIES TIMEOUT 1800)
