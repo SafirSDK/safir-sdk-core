@@ -101,4 +101,4 @@ Run "sudo apt-get install libboost-.*1.48.0 libgnat-4.6 default-jre-headless lib
 
 5.2 Centos/RHEL
 
-Run "sudo yum install boost mono-core libgnat"
+Run "sudo yum install boost mono-core mono-winforms libgnat"
