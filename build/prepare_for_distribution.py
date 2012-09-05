@@ -223,6 +223,7 @@ def windows():
     print("Copying Ada stuff (GNAT runtime, xmlada and templates_parser")
     copy_dll("libgnat-2011.dll")
     copy_dll("libgnarl-2011.dll")
+    copy_dll("libgcc_s_dw2-1.dll")
     copy_dll("libxmlada_unicode.dll")
     copy_dll("libxmlada_input_sources.dll")
     copy_dll("libxmlada_sax.dll")
