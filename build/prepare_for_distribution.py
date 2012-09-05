@@ -25,6 +25,21 @@
 ###############################################################################
 from __future__ import print_function
 import os, shutil, stat, subprocess
+from optparse import OptionParser
+parser = OptionParser()
+parser.add_option("--jenkins", action="store_true",dest="jenkins",default=False,
+                  help="Set up and use environment variables for a Jenkins automated build.")
+
+(options,args) = parser.parse_args()
+
+if options.jenkins:
+    WORKSPACE = os.environ.get("WORKSPACE")
+    if not WORKSPACE:
+        die("Environment variable WORKSPACE is not set, is this really a Jenkins build?!")
+
+    os.environ["SAFIR_RUNTIME"] = os.path.join(WORKSPACE,"safir","runtime")
+    os.environ["SAFIR_SDK"] = os.path.join(WORKSPACE,"safir","sdk")
+    #os.environ["PATH"] = os.environ.get("PATH") + os.pathsep + os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
 
 PATH = os.environ.get("PATH").split(os.pathsep)
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
