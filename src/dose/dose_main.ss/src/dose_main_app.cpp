@@ -378,15 +378,13 @@ namespace Internal
     {
         lllout << "ConnectionHandler::HandleDisconnect: Disconnected " << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
 
-        //if connection is dead we're being called from within HandleConnectionOutEvent
-        // and we don't want to recurse.
-        if (!connection->IsDead())
-        {
-            //try to handle some outstanding stuff (this does not guarantee that all gets handled,
-            // e.g. dose_com overflow may stop something in here.).
-            std::vector<ConnectionPtr> dummy;
-            HandleConnectionOutEvent(connection,dummy);
-        }
+        //try to handle some outstanding stuff (this does not guarantee that all gets handled,
+        // e.g. dose_com overflow may stop something in here.).
+        std::vector<ConnectionPtr> dummy;
+        HandleConnectionOutEvent(connection,dummy);
+        //TODO: Idea: If not all gets done, just do a SignalOut and let the disconnect
+        //be retried. Maybe need to set a timer? Or use blocking handler?
+        //Then we would have implemented zombie connections!
 
         m_connectionHandler.HandleDisconnect(connection);
 
