@@ -24,6 +24,7 @@
 
 #include "dose_main_message_handler.h"
 
+#include <Safir/Utilities/Internal/PanicLogging.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/MessageTypes.h>
@@ -97,11 +98,27 @@ namespace Internal
 
     void MessageHandler::TraverseMessageQueue(const ConnectionPtr & connection)
     {
+#ifndef NDEBUG
+        const bool dead = connection->IsDead();
+#endif
         size_t noPopped = 0;
 
         connection->GetMessageOutQueue().Dispatch
             (boost::bind(&MessageHandler::DispatchMessage,this,boost::ref(noPopped),boost::cref(connection),_1,_2,_3),
             boost::bind(PostFullAction,boost::cref(connection)));
+
+#ifndef NDEBUG
+        if (dead && !connection->GetMessageOutQueue().empty())
+        {
+            std::ostringstream ostr;
+            ostr << "Failed to distribute all messages in a dead connections out queue. Messages are lost!" << std::endl
+                 << connection->NameWithCounter() << std::endl
+                 << "Size is " << connection->GetMessageOutQueue().size();
+            
+            lllerr << ostr.str().c_str() << std::endl;
+            Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+        }
+#endif
     }
 
     void MessageHandler::HandleMessageFromDoseCom(const DistributionData & msg)
