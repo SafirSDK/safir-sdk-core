@@ -166,8 +166,7 @@ namespace Internal
         //We do nothing about the revoked ownerships, since it doesnt matter if the app has not been notified of revoked ownerships
         //  when it is exiting.
 
-        //ENSURE(m_messageOutQueue.empty(), << "MessageOutQ should have been cleaned up before call to Connection destructor of " << Name());
-        //TODO: The above is only useful when we've implemented zombie connections.
+        ENSURE(m_messageOutQueue.empty(), << "MessageOutQ should have been cleaned up before call to Connection destructor of " << NameWithCounter());
 
         //TODO: check that all other vectors/queues are empty as they should be!
         m_dirtySubscriptions.clear();
