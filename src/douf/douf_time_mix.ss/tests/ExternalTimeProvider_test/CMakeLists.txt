@@ -7,5 +7,5 @@ if (NOT MSVC)
 endif()
 
 ADD_TEST(ExternalTimeProvider_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
-set_tests_properties(ExternalTimeProvider_test PROPERTIES TIMEOUT 10)
+set_tests_properties(ExternalTimeProvider_test PROPERTIES TIMEOUT 60)
 
