@@ -59,10 +59,6 @@ int main()
     Safir::SwReports::SendProgrammingErrorReport(L"ProgrammingErrorCode", L"swreport_sender", L"Programming error text 2");
     Safir::SwReports::SendProgramInfoReport(L"Program info text 2");
 
-    //sleep a little while to let dose_main empty queues. (Close does not
-    //guarantee delivery of messages)
-    //    boost::this_thread::sleep(boost::posix_time::milliseconds(200));
-
     conn.Close();
 
     //send some Safir::SwReports without a connection (to get the bg thread to start)
@@ -71,9 +67,6 @@ int main()
     Safir::SwReports::SendResourceReport(L"ResourceId", false, L"Resource report text");
     Safir::SwReports::SendProgrammingErrorReport(L"ProgrammingErrorCode", L"swreport_sender", L"Programming error text");
     Safir::SwReports::SendProgramInfoReport(L"Program info text");
-
-    //sleep a little while to let dose_main empty queues.
-    //    boost::this_thread::sleep(boost::posix_time::milliseconds(200));
 
     Safir::SwReports::Stop();
     return 0;
