@@ -57,7 +57,7 @@ namespace Internal
 
         void Dispatch(const DispatchFunc& dispatchFunc);
 
-        void MakeEmpty(void);
+        void clear(void);
 
     private:
         //Locking Policy:
