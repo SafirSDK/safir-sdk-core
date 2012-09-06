@@ -382,9 +382,15 @@ namespace Internal
         // e.g. dose_com overflow may stop something in here.).
         std::vector<ConnectionPtr> dummy;
         HandleConnectionOutEvent(connection,dummy);
-        //TODO: Idea: If not all gets done, just do a SignalOut and let the disconnect
-        //be retried. Maybe need to set a timer? Or use blocking handler?
-        //Then we would have implemented zombie connections!
+
+        //if message out queue is not empty we've failed to send the msgs
+        //because of dose_com overflow. We will have been added to the blocking handler
+        //and so we can just leave the connection in here for the time being
+        //and the blocking handler will make sure that we retry the disconnect
+        if (!connection->GetMessageOutQueue().empty())
+        {
+            return;
+        }
 
         m_connectionHandler.HandleDisconnect(connection);
 
@@ -477,6 +483,13 @@ namespace Internal
             {
                 const ConnectionPtr connection = Connections::Instance().GetConnection(ConnectionId(ThisNodeParameters::NodeNumber(), -1, *it));
                 m_messageHandler.DistributeMessages(connection);
+                
+                //If the connection is dead it might be a zombie that has been waiting for dosecom.
+                //signal it so that we try to finish removing it again.
+                if (connection->IsDead())
+                {
+                    connection->SignalOut();
+                }
             }
         }
     }
