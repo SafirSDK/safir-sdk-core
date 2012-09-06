@@ -71,7 +71,6 @@ LoggerApp::~LoggerApp()
 void LoggerApp::OnStopOrder()
 {
     m_ioService.stop();
-    m_reportHandler.Stop();
 };
 
 
@@ -105,6 +104,8 @@ int LoggerApp::Run(const std::vector<std::string> & args)
     boost::asio::io_service::work keepRunning(m_ioService);
     m_ioService.run();
 
+    m_connection.Dispatch();
+    m_reportHandler.Stop();
     return 0;
 }
 
