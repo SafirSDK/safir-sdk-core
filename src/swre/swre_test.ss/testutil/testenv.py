@@ -46,6 +46,7 @@ class TestEnvStopper:
         return self
 
     def __exit__(self, type, value, traceback):
+        time.sleep(1.0)
         self.env.killprocs()
 
 

@@ -40,9 +40,9 @@ sender_path = os.path.join(exe_path,"swreport_sender")
 
 env = TestEnv()
 with TestEnvStopper(env):
-    subprocess.call(sender_path)
-    subprocess.call(sender_path)
-    subprocess.call(sender_path)
+    subprocess.call((sender_path,"first instance"))
+    subprocess.call((sender_path,"second instance"))
+    subprocess.call((sender_path,"third instance"))
 
 if not env.ReturnCodesOk():
     print "Some process exited with an unexpected value"
@@ -59,7 +59,7 @@ Node => StandAlone
 Error Code => FatalErrorCode
 Location => swreport_sender
 Text =>
-Fatal error text 2
+Fatal error text 2 from .* instance
 
 ========== Software Report Received ==========
 Type => Error
@@ -70,7 +70,7 @@ Node => StandAlone
 Error Code => ErrorCode
 Location => swreport_sender
 Text =>
-Error text 2
+Error text 2 from .* instance
 
 ========== Software Report Received ==========
 Type => Resource
@@ -81,7 +81,7 @@ Node => StandAlone
 Resource Id => ResourceId
 Resource Allocated => false
 Text =>
-Resource report text 2
+Resource report text 2 from .* instance
 
 ========== Software Report Received ==========
 Type => Programming Error
@@ -92,7 +92,7 @@ Node => StandAlone
 Error Code => ProgrammingErrorCode
 Location => swreport_sender
 Text =>
-Programming error text 2
+Programming error text 2 from .* instance
 
 ========== Software Report Received ==========
 Type => Program Info
@@ -101,7 +101,7 @@ Application connection => StandAlone;0;sender;[0-9#]*
 Sequence number => 5
 Node => StandAlone
 Text =>
-Program info text 2
+Program info text 2 from .* instance
 
 ========== Software Report Received ==========
 Type => Fatal Error
@@ -112,7 +112,7 @@ Node => StandAlone
 Error Code => FatalErrorCode
 Location => swreport_sender
 Text =>
-Fatal error text
+Fatal error text from .* instance
 
 ========== Software Report Received ==========
 Type => Error
@@ -123,7 +123,7 @@ Node => StandAlone
 Error Code => ErrorCode
 Location => swreport_sender
 Text =>
-Error text
+Error text from .* instance
 
 ========== Software Report Received ==========
 Type => Resource
@@ -134,7 +134,7 @@ Node => StandAlone
 Resource Id => ResourceId
 Resource Allocated => false
 Text =>
-Resource report text
+Resource report text from .* instance
 
 ========== Software Report Received ==========
 Type => Programming Error
@@ -145,7 +145,7 @@ Node => StandAlone
 Error Code => ProgrammingErrorCode
 Location => swreport_sender
 Text =>
-Programming error text
+Programming error text from .* instance
 
 ========== Software Report Received ==========
 Type => Program Info
@@ -154,7 +154,7 @@ Application connection => StandAlone;0;swreport_sender.*;[0-9#]*
 Sequence number => 5
 Node => StandAlone
 Text =>
-Program info text
+Program info text from .* instance
 
 """
 

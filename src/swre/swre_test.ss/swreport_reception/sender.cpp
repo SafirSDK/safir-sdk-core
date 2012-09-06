@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <Safir/SwReports/SwReport.h>
 #include <Safir/Dob/Connection.h>
+#include <iostream>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -44,8 +45,13 @@ class Dummy
 };
 
 
-int main()
+int main(const int argc, const char* const argv [])
 {
+    if (argc != 2)
+    {
+        std::wcout << "Need one argument" << std::endl;
+        return 1;
+    }
     //first send some Safir::SwReports with an own connection (to get swre to attach, rather than
     //use bg thread.
     Dummy dummy;
@@ -53,20 +59,20 @@ int main()
     conn.Open(L"sender",L"",0,&dummy,&dummy);
 
     //These will be sent through the own connection
-    Safir::SwReports::SendFatalErrorReport(L"FatalErrorCode", L"swreport_sender", L"Fatal error text 2");
-    Safir::SwReports::SendErrorReport(L"ErrorCode", L"swreport_sender", L"Error text 2");
-    Safir::SwReports::SendResourceReport(L"ResourceId", false, L"Resource report text 2");
-    Safir::SwReports::SendProgrammingErrorReport(L"ProgrammingErrorCode", L"swreport_sender", L"Programming error text 2");
-    Safir::SwReports::SendProgramInfoReport(L"Program info text 2");
+    Safir::SwReports::SendFatalErrorReport(L"FatalErrorCode", L"swreport_sender", L"Fatal error text 2 from " + Safir::Dob::Typesystem::Utilities::ToWstring(argv[1]));
+    Safir::SwReports::SendErrorReport(L"ErrorCode", L"swreport_sender", L"Error text 2 from " + Safir::Dob::Typesystem::Utilities::ToWstring(argv[1]));
+    Safir::SwReports::SendResourceReport(L"ResourceId", false, L"Resource report text 2 from " + Safir::Dob::Typesystem::Utilities::ToWstring(argv[1]));
+    Safir::SwReports::SendProgrammingErrorReport(L"ProgrammingErrorCode", L"swreport_sender", L"Programming error text 2 from " + Safir::Dob::Typesystem::Utilities::ToWstring(argv[1]));
+    Safir::SwReports::SendProgramInfoReport(L"Program info text 2 from " + Safir::Dob::Typesystem::Utilities::ToWstring(argv[1]));
 
     conn.Close();
 
     //send some Safir::SwReports without a connection (to get the bg thread to start)
-    Safir::SwReports::SendFatalErrorReport(L"FatalErrorCode", L"swreport_sender", L"Fatal error text");
-    Safir::SwReports::SendErrorReport(L"ErrorCode", L"swreport_sender", L"Error text");
-    Safir::SwReports::SendResourceReport(L"ResourceId", false, L"Resource report text");
-    Safir::SwReports::SendProgrammingErrorReport(L"ProgrammingErrorCode", L"swreport_sender", L"Programming error text");
-    Safir::SwReports::SendProgramInfoReport(L"Program info text");
+    Safir::SwReports::SendFatalErrorReport(L"FatalErrorCode", L"swreport_sender", L"Fatal error text from " + Safir::Dob::Typesystem::Utilities::ToWstring(argv[1]));
+    Safir::SwReports::SendErrorReport(L"ErrorCode", L"swreport_sender", L"Error text from " + Safir::Dob::Typesystem::Utilities::ToWstring(argv[1]));
+    Safir::SwReports::SendResourceReport(L"ResourceId", false, L"Resource report text from " + Safir::Dob::Typesystem::Utilities::ToWstring(argv[1]));
+    Safir::SwReports::SendProgrammingErrorReport(L"ProgrammingErrorCode", L"swreport_sender", L"Programming error text from " + Safir::Dob::Typesystem::Utilities::ToWstring(argv[1]));
+    Safir::SwReports::SendProgramInfoReport(L"Program info text from " + Safir::Dob::Typesystem::Utilities::ToWstring(argv[1]));
 
     Safir::SwReports::Stop();
     return 0;
