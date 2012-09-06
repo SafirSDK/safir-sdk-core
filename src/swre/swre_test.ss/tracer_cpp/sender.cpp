@@ -38,7 +38,7 @@ int main(int /*argc*/, char* argv[])
 
     boost::this_thread::sleep(boost::posix_time::milliseconds(100));
     debug << "blahonga" << std::endl;
-    boost::this_thread::sleep(boost::posix_time::milliseconds(800));
+    boost::this_thread::sleep(boost::posix_time::seconds(2));
     debug << "blahonga" << std::endl;
 
     Safir::SwReports::Stop();
