@@ -135,8 +135,7 @@ The latest release is 2.1.0.
 Go to http://expat.sourceforge.net/ and download and install the binary installer for windows.
 
 64 bit:
-1. Download and unpack http://sourceforge.net/projects/expat/files/expat/2.1.0/expat-2.1.0.tar.gz to a directory of your choise (This directory is just used as build
-   directory)
+1. Download and unpack http://sourceforge.net/projects/expat/files/expat/2.1.0/expat-2.1.0.tar.gz to a directory of your choice (This directory is just used as build directory)
 2. Add a subdirectory 'build' (For example: C:\tmp\expat-2.1.0\build)
 3. Open a command window for the 64 bit tool-chain as Administrator. Start -> All Programs -> Microsoft Visual Studio 2010 -> Visual Studio Tools -> Visual Studio x64 Win64 Command Prompt (2010)
    (To be able to install files under "Program Files" you might have to open the command window as Administrator)
