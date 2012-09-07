@@ -27,6 +27,10 @@
 #  if defined (_M_IX86)
 #    define STANDARD_CALLING_CONVENTION __cdecl
 #    define ANOTHER_CALLING_CONVENTION __stdcall
+#  elif defined (_M_AMD64)
+     // Couldnt find any info on using other calling conventions on msvc 64
+#    define STANDARD_CALLING_CONVENTION
+#    define ANOTHER_CALLING_CONVENTION
 #  endif
 #elif defined __GNUC__
 #  define EXPORT

@@ -27,13 +27,18 @@
 #include <cmath>
 
 #if defined _MSC_VER
-#  define ANOTHER_CC __stdcall
-//stdcall name decoration is a bit messy (22 is the size of all arguments... plus 2 bytes padding)
-const char * fun2_name = "_TestFunction2@24";
-namespace
-{
-    BOOST_STATIC_ASSERT(sizeof(short) + 2 + sizeof(int) + sizeof(long) + sizeof(float) + sizeof(double) == 24);
-}
+#  if defined (WIN64)
+     // No other cc on win64 available, I think...
+#    define ANOTHER_CC 
+#  else //32bit windows
+#    define ANOTHER_CC __stdcall
+     //stdcall name decoration is a bit messy (22 is the size of all arguments... plus 2 bytes padding)
+     const char * fun2_name = "_TestFunction2@24";
+     namespace
+     {
+         BOOST_STATIC_ASSERT(sizeof(short) + 2 + sizeof(int) + sizeof(long) + sizeof(float) + sizeof(double) == 24);
+     }
+#  endif
 
 #elif defined __GNUC__
 #  if defined (__i386)

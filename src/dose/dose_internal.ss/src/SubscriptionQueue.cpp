@@ -99,7 +99,7 @@ namespace Internal
         }
     }
 
-    void SubscriptionQueue::MakeEmpty(void) 
+    void SubscriptionQueue::clear(void) 
     { 
         ScopedSubscriptionQueueLock lck(m_lock);
         m_queue.clear(); 

@@ -378,14 +378,18 @@ namespace Internal
     {
         lllout << "ConnectionHandler::HandleDisconnect: Disconnected " << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
 
-        //if connection is dead we're being called from within HandleConnectionOutEvent
-        // and we don't want to recurse.
-        if (!connection->IsDead())
+        //try to handle some outstanding stuff (this does not guarantee that all gets handled,
+        // e.g. dose_com overflow may stop something in here.).
+        std::vector<ConnectionPtr> dummy;
+        HandleConnectionOutEvent(connection,dummy);
+
+        //if message out queue is not empty we've failed to send the msgs
+        //because of dose_com overflow. We will have been added to the blocking handler
+        //and so we can just leave the connection in here for the time being
+        //and the blocking handler will make sure that we retry the disconnect
+        if (!connection->GetMessageOutQueue().empty())
         {
-            //try to handle some outstanding stuff (this does not guarantee that all gets handled,
-            // e.g. dose_com overflow may stop something in here.).
-            std::vector<ConnectionPtr> dummy;
-            HandleConnectionOutEvent(connection,dummy);
+            return;
         }
 
         m_connectionHandler.HandleDisconnect(connection);
@@ -479,6 +483,13 @@ namespace Internal
             {
                 const ConnectionPtr connection = Connections::Instance().GetConnection(ConnectionId(ThisNodeParameters::NodeNumber(), -1, *it));
                 m_messageHandler.DistributeMessages(connection);
+                
+                //If the connection is dead it might be a zombie that has been waiting for dosecom.
+                //signal it so that we try to finish removing it again.
+                if (connection->IsDead())
+                {
+                    connection->SignalOut();
+                }
             }
         }
     }
