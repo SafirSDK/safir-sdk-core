@@ -53,8 +53,11 @@ for dep in dependencies:
 env = TestEnv()
 with TestEnvStopper(env):
     subprocess.call(sender_exe)
+    time.sleep(1.0)
     subprocess.call(sender_exe)
+    time.sleep(1.0)
     subprocess.call(sender_exe)
+    time.sleep(1.0)
 
 os.remove(sender_exe)
 for dep in dependencies:
