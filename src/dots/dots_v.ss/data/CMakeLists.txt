@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
-PROJECT (dots_generated CXX Java)
+if (NOT NO_JAVA)
+  set(PROJ_JAVA Java)
+endif()
+
+PROJECT (dots_generated CXX ${PROJ_JAVA})
 
 #we need to set up include dirs before including cmake_settings.txt
 #since otherwise sdk/include will be before cpp/include in the include path.
