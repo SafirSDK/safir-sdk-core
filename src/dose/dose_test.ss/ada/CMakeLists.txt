@@ -1,15 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-if (NOT SAFIR_ADA_SUPPORT)
-     ADD_CUSTOM_TARGET(empty_dose_test_ada ALL
-                       COMMENT "SAFIR_ADA_SUPPORT set to false, dose_test_ada will not be built.")
-     INSTALL(CODE "MESSAGE(\"SAFIR_ADA_SUPPORT set to false, dose_test_ada will not be installed.\")")
-     return()
-endif (NOT SAFIR_ADA_SUPPORT)
-
 PROJECT (dose_test_ada NONE)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 FILE(MAKE_DIRECTORY obj)
 
