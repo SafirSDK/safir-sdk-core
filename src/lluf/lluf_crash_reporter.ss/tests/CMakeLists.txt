@@ -9,6 +9,16 @@ FIND_PACKAGE(Boost COMPONENTS thread date_time system)
 FIND_PACKAGE(PythonInterp)
 
 ENABLE_TESTING()
-ADD_SUBDIRECTORY(simple_crash_test)
+
+ADD_EXECUTABLE(start_stop start_stop.cpp)
+IF (NOT MSVC)
+  TARGET_LINK_LIBRARIES (start_stop lluf_crash_reporter)
+ENDIF()
+
+
+ADD_TEST(CrashReporter_start_stop start_stop)
+
+
+#ADD_SUBDIRECTORY(simple_crash_test)
 
 

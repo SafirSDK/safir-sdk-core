@@ -15,8 +15,10 @@ add_subdirectory(breakpad)
 
 add_library(lluf_crash_reporter SHARED CrashReporter.cpp Safir/Utilities/CrashReporter.h)
 
+FIND_PACKAGE(Boost COMPONENTS thread)
+
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(lluf_crash_reporter breakpad)
+  TARGET_LINK_LIBRARIES(lluf_crash_reporter breakpad ${Boost_LIBRARIES})
 endif()
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
