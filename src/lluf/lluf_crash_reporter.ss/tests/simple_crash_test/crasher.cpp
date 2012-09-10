@@ -21,35 +21,14 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __LLUF_CRASH_REPORTER_H__
-#define __LLUF_CRASH_REPORTER_H__
+#include <Safir/Utilities/CrashReporter.h>
 
-#if defined (_WIN32) 
-  #if defined(lluf_crash_reporter_EXPORTS)
-    #define  LLUF_CRASH_REPORTER_EXPORT __declspec(dllexport)
-  #else
-    #define LLUF_CRASH_REPORTER_EXPORT __declspec(dllimport)
-  #endif 
-#else 
- #define LLUF_CRASH_REPORTER_EXPORT
-#endif
-
-
-namespace Safir
+int main()
 {
-namespace Utilities
-{
-class LLUF_CRASH_REPORTER_EXPORT CrashReporter
-{
-public:
-    static void Start();
-    static void Stop();
+    Safir::Utilities::CrashReporter::Start();
 
-    typedef void (*CrashCallback)();
-
-    static void RegisterCallback(const CrashCallback callback);
-};
+    Safir::Utilities::CrashReporter::Stop();
+    return 0;
 }
-}
-#endif
+
 
