@@ -496,9 +496,6 @@ class JenkinsInterface:
         else:
             args += cmd
 
-        if os.path.exists("jenkins_password"):
-            args += ("--username", "jenkins", "--password-file", "jenkins_password")
-
         proc = subprocess.Popen(args, 
                                 stdout = subprocess.PIPE, 
                                 stderr = subprocess.STDOUT,
