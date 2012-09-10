@@ -24,12 +24,22 @@
 #ifndef __LLUF_CRASH_REPORTER_H__
 #define __LLUF_CRASH_REPORTER_H__
 
+#if defined (_WIN32) 
+  #if defined(lluf_crash_reporter_EXPORTS)
+    #define  LLUF_CRASH_REPORTER_EXPORT __declspec(dllexport)
+  #else
+    #define LLUF_CRASH_REPORTER_EXPORT __declspec(dllimport)
+  #endif 
+#else 
+ #define LLUF_CRASH_REPORTER_EXPORT
+#endif
+
 
 namespace Safir
 {
 namespace Utilities
 {
-class CrashReporter
+class LLUF_CRASH_REPORTER_EXPORT CrashReporter
 {
 public:
     void Start();

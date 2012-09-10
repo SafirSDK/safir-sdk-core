@@ -52,6 +52,9 @@ namespace
     public:
         static State& Instance();
 
+        void Start();
+        void Stop();
+
         void RegisterCallback(const CrashReporter::CrashCallback callback);
     private:
         State();
@@ -81,13 +84,14 @@ namespace
 
         void HandleCallback();
         
-        google_breakpad::ExceptionHandler * m_reporter;
+        boost::shared_ptr<google_breakpad::ExceptionHandler> m_handler;
 
-        typedef std::vector<CrashReporter::CrashCallback> CrashCallbackTable;
-        CrashCallbackTable m_callbacks;
-
-        boost::mutex m_callbacksLock;
+        boost::mutex m_lock;
+        bool m_started;
+        bool m_stopped;
         
+        typedef std::vector<CrashReporter::CrashCallback> CrashCallbackTable;
+        CrashCallbackTable m_callbacks;        
         /**
          * This class is here to ensure that only the Instance method can get at the 
          * instance, so as to be sure that boost call_once is used correctly.
@@ -120,7 +124,9 @@ namespace
     }
 
 
-    State::State()
+    State::State():
+        m_started(false),
+        m_stopped(false)
     {
     }
 
@@ -132,7 +138,7 @@ namespace
     {
         CrashCallbackTable copy;
         {
-            boost::lock_guard<boost::mutex> lck(m_callbacksLock);
+            boost::lock_guard<boost::mutex> lck(m_lock);
             copy = m_callbacks;
         }
 
@@ -142,9 +148,65 @@ namespace
             (*it)();
         }
     }
+
+    void State::Start()
+    {
+        boost::lock_guard<boost::mutex> lck(m_lock);
+        if (m_stopped)
+        {
+            throw std::logic_error("Cannot restart the CrashReporter after it has been stopped!");
+        }
+        if (!m_started)
+        {
+
+#if defined LLUF_CRASH_REPORTER_LINUX
+            const char * const dumpPath = getenv("SAFIR_RUNTIME");
+#else
+            const wchar_t * const dumpPath = _wgetenv("SAFIR_RUNTIME");
+#endif
+            if (dumpPath == NULL)
+            {
+                throw std::logic_error("SAFIR_RUNTIME environment variable is not set");
+            }
+
+#if defined LLUF_CRASH_REPORTER_LINUX
+            m_handler.reset (new google_breakpad::ExceptionHandler(dumpPath, 
+                                                                   NULL, 
+                                                                   callback, 
+                                                                   NULL, 
+                                                                   true));
+#else
+            m_handler.reset (new google_breakpad::ExceptionHandler(dumpPath,
+                                                                   NULL,
+                                                                   callback,
+                                                                   NULL,
+                                                                   google_breakpad::ExceptionHandler::HANDLER_ALL));
+            
+#endif
+        }
+        m_started = true;
+    }
+
+    void State::Stop()
+    {
+        boost::lock_guard<boost::mutex> lck(m_lock);
+        if (m_started && !m_stopped)
+        {
+            m_handler.reset();
+        }
+        m_started = false;
+        m_stopped = true;
+    }
+
+
     void State::RegisterCallback(const CrashReporter::CrashCallback callback)
     {
-        boost::lock_guard<boost::mutex> lck(m_callbacksLock);
+        boost::lock_guard<boost::mutex> lck(m_lock);
+        if (!m_started || m_stopped)
+        {
+            throw std::logic_error("CrashReporter is not started");
+        }
+
         m_callbacks.push_back(callback);
     }
 
@@ -157,13 +219,12 @@ namespace Utilities
 {
     void CrashReporter::Start()
     {
-        State::Instance();
-        
+        State::Instance().Start();
     }
 
     void  CrashReporter::Stop()
     {
-        
+        State::Instance().Stop();
     }
 
     void  CrashReporter::RegisterCallback(const CrashCallback callback)
