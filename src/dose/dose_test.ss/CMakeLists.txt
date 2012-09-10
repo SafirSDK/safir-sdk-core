@@ -9,14 +9,13 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 ADD_SUBDIRECTORY(util)
 ADD_SUBDIRECTORY(cpp)
 ADD_SUBDIRECTORY(dotnet)
-ADD_SUBDIRECTORY(java)
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-   if (CMAKE_SYSTEM_VERSION STRGREATER "2.6.32-21-generic")
-       ADD_SUBDIRECTORY(ada)      
-   endif()
-else ()
-   ADD_SUBDIRECTORY(ada)      
+if (SAFIR_JAVA_SUPPORT)
+  ADD_SUBDIRECTORY(java)
+endif()
+
+if (SAFIR_ADA_SUPPORT)
+  ADD_SUBDIRECTORY(ada)      
 endif ()
 
 

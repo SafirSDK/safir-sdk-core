@@ -24,7 +24,6 @@
 
 #include "dose_main_message_handler.h"
 
-#include <Safir/Utilities/Internal/PanicLogging.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/MessageTypes.h>

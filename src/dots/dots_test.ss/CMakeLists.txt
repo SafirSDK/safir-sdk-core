@@ -1,13 +1,25 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(dots_test CXX Java)
+if (SAFIR_JAVA_SUPPORT)
+  project(dots_test CXX Java)
+else()
+  project(dots_test CXX)
+endif ()
+
+
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 ADD_SUBDIRECTORY(cpp)
 ADD_SUBDIRECTORY(dotnet)
-ADD_SUBDIRECTORY(ada)
-ADD_SUBDIRECTORY(java)
+
+if (SAFIR_ADA_SUPPORT)
+  ADD_SUBDIRECTORY(ada)
+endif()
+
+if (SAFIR_JAVA_SUPPORT)
+  ADD_SUBDIRECTORY(java)
+endif()
 
 FIND_PACKAGE(PythonInterp)
 
