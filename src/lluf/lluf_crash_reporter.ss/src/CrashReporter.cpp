@@ -124,6 +124,10 @@ namespace
     {
     }
 
+    State::~State()
+    {
+    }
+
     void State::HandleCallback()
     {
         CrashCallbackTable copy;
@@ -159,12 +163,12 @@ namespace Utilities
 
     void  CrashReporter::Stop()
     {
-
+        
     }
 
     void  CrashReporter::RegisterCallback(const CrashCallback callback)
     {
-
+        State::Instance().RegisterCallback(callback);
     }
 }
 }
