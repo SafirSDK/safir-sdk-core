@@ -22,11 +22,20 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/CrashReporter.h>
+#include <iostream>
+void callback()
+{
+    std::wcout << "callback" << std::endl;
+}
+
 
 int main()
 {
     Safir::Utilities::CrashReporter::Start();
-
+    Safir::Utilities::CrashReporter::RegisterCallback(callback);
+    
+    int* foo = NULL;
+    *foo = 10;
     Safir::Utilities::CrashReporter::Stop();
     return 0;
 }
