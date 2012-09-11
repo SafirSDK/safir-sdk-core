@@ -33,8 +33,8 @@ int main()
 {
     try 
     {
-        Safir::Utilities::CrashReporter::Start();
         Safir::Utilities::CrashReporter::RegisterCallback(callback);
+        Safir::Utilities::CrashReporter::Start();
         Safir::Utilities::CrashReporter::Stop();
         return 0;
     }

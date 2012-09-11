@@ -87,32 +87,31 @@ namespace
         
         //Callback functions for writing core dump
 #if defined LLUF_CRASH_REPORTER_LINUX
-        static bool callback(const char* dumpPath_,
+        static bool callback(const char* dumpPath,
                              const char* id,
                              void* /*context*/,
                              bool /*succeeded*/)
         {
-            const std::string dumpPath = std::string(dumpPath_) + "/" + id + ".dmp";
+            sprintf(&Instance().m_dumpPathSpace[0],"%s/%s.dmp",dumpPath,id);
 #else
-        static bool callback(const wchar_t *dumpPath_, 
+        static bool callback(const wchar_t *dumpPath, 
                              const wchar_t *id,
                              void */*context*/, 
                              EXCEPTION_POINTERS */*exinfo*/,
                              MDRawAssertionInfo */*assertion*/,
                              bool /*succeeded*/)
         {
-            //TODO fix windows!
-            //assume that dumpPath_ is ascii only!
-            const std::string dumpPath(dumpPath_, dumpPath+strlen(dumpPath));
+            //assume that dumpPath is ascii only!
+            sprintf(&Instance().m_dumpPathSpace[0],"%S\\%S.dmp",dumpPath,id);
 #endif
-            Instance().HandleCallback(dumpPath);
+            Instance().HandleCallback(&Instance().m_dumpPathSpace[0]);
 
             //Returning false will leave the crash as unhandled
             //causing breakpad to terminate the application
             return false;
         }
 
-        void HandleCallback(const std::string& dumpPath);
+        void HandleCallback(const char* const dumpPath);
         
         boost::shared_ptr<google_breakpad::ExceptionHandler> m_handler;
 
@@ -121,7 +120,11 @@ namespace
         bool m_stopped;
         
         typedef std::vector<CrashReporter::CrashCallback> CrashCallbackTable;
-        CrashCallbackTable m_callbacks;        
+        CrashCallbackTable m_callbacks;
+
+        //Since memory allocation in callback is dangerous, we get some
+        //memory to use later.
+        std::vector<char> m_dumpPathSpace;
         /**
          * This class is here to ensure that only the Instance method can get at the 
          * instance, so as to be sure that boost call_once is used correctly.
@@ -156,7 +159,8 @@ namespace
 
     State::State():
         m_started(false),
-        m_stopped(false)
+        m_stopped(false),
+        m_dumpPathSpace(2048,0) //2K characters should be plenty...
     {
     }
 
@@ -164,18 +168,12 @@ namespace
     {
     }
 
-    void State::HandleCallback(const std::string& dumpPath)
+    void State::HandleCallback(const char* const dumpPath)
     {
-        CrashCallbackTable copy;
+        for (CrashCallbackTable::iterator it = m_callbacks.begin();
+             it != m_callbacks.end(); ++it)
         {
-            boost::lock_guard<boost::mutex> lck(m_lock);
-            copy = m_callbacks;
-        }
-
-        for (CrashCallbackTable::iterator it = copy.begin();
-             it != copy.end(); ++it)
-        {
-            (*it)(dumpPath.c_str());
+            (*it)(dumpPath);
         }
     }
 
@@ -231,9 +229,9 @@ namespace
     void State::RegisterCallback(const CrashReporter::CrashCallback callback)
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
-        if (!m_started || m_stopped)
+        if (m_started || m_stopped)
         {
-            throw std::logic_error("CrashReporter is not started");
+            throw std::logic_error("CrashReporter must not be started when registering callbacks!");
         }
 
         m_callbacks.push_back(callback);
