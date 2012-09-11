@@ -35,7 +35,35 @@ int main()
     {
         Safir::Utilities::CrashReporter::RegisterCallback(callback);
         Safir::Utilities::CrashReporter::Start();
+
+        //expect register after start to fail
+        try
+        {
+            Safir::Utilities::CrashReporter::RegisterCallback(callback);
+            return 1;
+        }
+        catch (...)
+        {
+        }
+
+        //multiple starts ok
+        Safir::Utilities::CrashReporter::Start();
+
         Safir::Utilities::CrashReporter::Stop();
+
+        //multiple stop ok
+        Safir::Utilities::CrashReporter::Stop();
+
+        //no restart
+        try
+        {
+            Safir::Utilities::CrashReporter::Start();
+            return 1;
+        }
+        catch (...)
+        {
+        }
+
         return 0;
     }
     catch (...)
