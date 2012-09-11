@@ -24,7 +24,7 @@
 #
 ###############################################################################
 
-import subprocess, os, time, sys
+import subprocess, os, time, sys, re
 
 if sys.platform == "win32":
     config_type = os.environ.get("CMAKE_CONFIG_TYPE")
@@ -44,6 +44,20 @@ if result.find("callback") == -1:
 if crasher.returncode == 0:
     print "Crasher program exited successfully (it is meant to crash!), exit code = ", crasher.returncode
     sys.exit(1)
+
+match = re.search(u"dumpPath = '(.*)'",result)
+if match is None:
+    print "Failed to find dumpPath in output"
+    print result
+    sys.exit(1)
+    
+dumpPath = match.group(1)
+
+if not os.path.isfile(dumpPath):
+    print "No dumpfile appears to have been generated"
+    print "expected to find", dumpPath
+    sys.exit(1)
+print dumpPath
 
 print "success"
 sys.exit(0)

@@ -23,9 +23,9 @@
 ******************************************************************************/
 #include <Safir/Utilities/CrashReporter.h>
 #include <iostream>
-void callback()
+void callback(const char* const dumpPath)
 {
-    std::wcout << "callback" << std::endl;
+    std::wcout << "callback with dumpPath = '" << dumpPath << "'" << std::endl;
 }
 
 

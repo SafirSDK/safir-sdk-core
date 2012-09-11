@@ -45,7 +45,8 @@ public:
     static void Start();
     static void Stop();
 
-    typedef void (*CrashCallback)();
+    /** dumpPath is ascii only! */
+    typedef void (*CrashCallback)(const char* const dumpPath);
 
     static void RegisterCallback(const CrashCallback callback);
 };

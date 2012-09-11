@@ -42,9 +42,34 @@
 #include "client/windows/handler/exception_handler.h"
 #endif
 
+#define BOOST_FILESYSTEM_NO_DEPRECATED
+#define BOOST_FILESYSTEM_VERSION 3
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/convenience.hpp>
+
+
 namespace
 {
     using namespace Safir::Utilities;
+
+    const boost::filesystem::path GetDumpDirectory()
+    {
+#if defined (LLUF_CRASH_REPORTER_LINUX)
+        const char * const env = getenv("SAFIR_RUNTIME");
+#else
+        const wchar_t * const env = _wgetenv("SAFIR_RUNTIME");
+#endif
+        if (env == NULL)
+        {
+            throw std::logic_error("SAFIR_RUNTIME environment variable is not set");
+        }
+        boost::filesystem::path filename(env);
+
+        filename /= "dump";
+        filename /= "reports";
+        return filename;
+    }
+
 
     /** Singleton class responsible for initiating the crash reporter thread. */
     class State
@@ -62,27 +87,32 @@ namespace
         
         //Callback functions for writing core dump
 #if defined LLUF_CRASH_REPORTER_LINUX
-        static bool callback(const char* /*dumpPath*/,
-                             const char* /*id*/,
+        static bool callback(const char* dumpPath_,
+                             const char* id,
                              void* /*context*/,
                              bool /*succeeded*/)
+        {
+            const std::string dumpPath = std::string(dumpPath_) + "/" + id + ".dmp";
 #else
-        static bool callback(const wchar_t */*dumpPath*/, 
-                             const wchar_t */*id*/,
+        static bool callback(const wchar_t *dumpPath_, 
+                             const wchar_t *id,
                              void */*context*/, 
                              EXCEPTION_POINTERS */*exinfo*/,
                              MDRawAssertionInfo */*assertion*/,
                              bool /*succeeded*/)
-#endif
         {
-            Instance().HandleCallback();
+            //TODO fix windows!
+            //assume that dumpPath_ is ascii only!
+            const std::string dumpPath(dumpPath_, dumpPath+strlen(dumpPath));
+#endif
+            Instance().HandleCallback(dumpPath);
 
             //Returning false will leave the crash as unhandled
             //causing breakpad to terminate the application
             return false;
         }
 
-        void HandleCallback();
+        void HandleCallback(const std::string& dumpPath);
         
         boost::shared_ptr<google_breakpad::ExceptionHandler> m_handler;
 
@@ -134,7 +164,7 @@ namespace
     {
     }
 
-    void State::HandleCallback()
+    void State::HandleCallback(const std::string& dumpPath)
     {
         CrashCallbackTable copy;
         {
@@ -145,7 +175,7 @@ namespace
         for (CrashCallbackTable::iterator it = copy.begin();
              it != copy.end(); ++it)
         {
-            (*it)();
+            (*it)(dumpPath.c_str());
         }
     }
 
@@ -158,25 +188,24 @@ namespace
         }
         if (!m_started)
         {
-
-#if defined LLUF_CRASH_REPORTER_LINUX
-            const char * const dumpPath = getenv("SAFIR_RUNTIME");
-#else
-            const wchar_t * const dumpPath = _wgetenv("SAFIR_RUNTIME");
-#endif
-            if (dumpPath == NULL)
+            try
             {
-                throw std::logic_error("SAFIR_RUNTIME environment variable is not set");
+                boost::filesystem::create_directories(GetDumpDirectory());
+            }
+            catch (const boost::filesystem::filesystem_error&)
+            {
+                throw std::logic_error("Failed to create dump directory '" + GetDumpDirectory().string() + "'.");
             }
 
+
 #if defined LLUF_CRASH_REPORTER_LINUX
-            m_handler.reset (new google_breakpad::ExceptionHandler(dumpPath, 
+            m_handler.reset (new google_breakpad::ExceptionHandler(GetDumpDirectory().string(),
                                                                    NULL, 
                                                                    callback, 
                                                                    NULL, 
                                                                    true));
 #else
-            m_handler.reset (new google_breakpad::ExceptionHandler(dumpPath,
+            m_handler.reset (new google_breakpad::ExceptionHandler(GetDumpDirectory().wstring(),
                                                                    NULL,
                                                                    callback,
                                                                    NULL,
