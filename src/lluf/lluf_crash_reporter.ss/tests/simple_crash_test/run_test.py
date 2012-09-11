@@ -34,30 +34,36 @@ else:
 
 crasher_exe = os.path.join(exe_path,"crasher")
 
-crasher = subprocess.Popen(crasher_exe,
-                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-result = crasher.communicate()[0]
 
-if result.find("callback") == -1:
-    print "CrashReporter did not call callback!", sleeper1.pid
-    sys.exit(1)
-if crasher.returncode == 0:
-    print "Crasher program exited successfully (it is meant to crash!), exit code = ", crasher.returncode
-    sys.exit(1)
+def run_crasher(reason):
+    crasher = subprocess.Popen((crasher_exe,reason),
+                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    result = crasher.communicate()[0]
+    print "Testing signal", reason
+    if result.find("callback") == -1:
+        print "CrashReporter did not call callback!"
+        sys.exit(1)
+    if crasher.returncode == 0:
+        print "Crasher program exited successfully (it is meant to crash!), exit code = ", crasher.returncode
+        sys.exit(1)
 
-match = re.search(u"dumpPath = '(.*)'",result)
-if match is None:
-    print "Failed to find dumpPath in output"
-    print result
-    sys.exit(1)
+    match = re.search(u"dumpPath = '(.*)'",result)
+    if match is None:
+        print "Failed to find dumpPath in output"
+        print result
+        sys.exit(1)
     
-dumpPath = match.group(1)
+    dumpPath = match.group(1)
 
-if not os.path.isfile(dumpPath):
-    print "No dumpfile appears to have been generated"
-    print "expected to find", dumpPath
-    sys.exit(1)
-print dumpPath
+    if not os.path.isfile(dumpPath):
+        print "No dumpfile appears to have been generated"
+        print "expected to find", dumpPath
+        sys.exit(1)
+
+run_crasher("SIGSEGV")
+run_crasher("SIGFPE")
+run_crasher("SIGILL")
+run_crasher("SIGABRT")
 
 print "success"
 sys.exit(0)

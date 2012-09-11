@@ -23,19 +23,46 @@
 ******************************************************************************/
 #include <Safir/Utilities/CrashReporter.h>
 #include <iostream>
+#include <stdlib.h>
 void callback(const char* const dumpPath)
 {
     std::wcout << "callback with dumpPath = '" << dumpPath << "'" << std::endl;
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc != 2)
+    {
+        std::wcout << "Need one argument" << std::endl;
+        return 1;
+    }
+    const std::string arg(argv[1]);
     Safir::Utilities::CrashReporter::Start();
     Safir::Utilities::CrashReporter::RegisterCallback(callback);
     
-    int* foo = NULL;
-    *foo = 10;
+    if (arg == "SIGSEGV")
+    {
+        int* foo = NULL;
+        *foo = 10;
+    }
+    else if (arg == "SIGFPE")
+    {
+        int i = 0;
+        std::wcout << 10/i << std::endl;
+    }
+    else if (arg == "SIGILL")
+    {
+        typedef void(*FUNC)(void);
+        const static unsigned char insn[4] = { 0xff, 0xff, 0xff, 0xff };
+        FUNC function = (FUNC) insn;
+        function();
+    }
+    else if (arg == "SIGABRT")
+    {
+        abort();
+    }
+    
     Safir::Utilities::CrashReporter::Stop();
     return 0;
 }
