@@ -35,28 +35,38 @@ else:
 sleeper_exe = os.path.join(exe_path,"sleeper")
 
 
-def run_sleeper(reason):
+def test_signal(reason, expectCallback = False):
     sleeper = subprocess.Popen(sleeper_exe,
                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    line = sleeper.stdout.readline()
+    if not line.startswith("Started"):
+        print "Strange starting line:", line
+        sys.exit(1)
+
     print "Testing signal", str(reason)
     os.kill(sleeper.pid, reason)
 
     result = sleeper.communicate()[0]
-    if result.find("callback") != -1:
-        print "CrashReporter called callback!"
+    if (result.find("callback") != -1) != expectCallback:
+        print "CrashReporter", "didn't call callback" if expectCallback else "called callback!"
         sys.exit(1)
     if sleeper.returncode != -reason:
         print "Sleeper program exited successfully (it is meant to exit with a signal!), exit code = ", sleeper.returncode
         sys.exit(1)
 
-run_sleeper(signal.SIGHUP)
-run_sleeper(signal.SIGINT)
-run_sleeper(signal.SIGQUIT)
-run_sleeper(signal.SIGKILL)
-run_sleeper(signal.SIGALRM)
-run_sleeper(signal.SIGTERM)
-run_sleeper(signal.SIGUSR1)
-run_sleeper(signal.SIGUSR2)
+test_signal(signal.SIGHUP)
+test_signal(signal.SIGINT)
+test_signal(signal.SIGQUIT)
+test_signal(signal.SIGKILL)
+test_signal(signal.SIGALRM)
+test_signal(signal.SIGTERM)
+test_signal(signal.SIGUSR1)
+test_signal(signal.SIGUSR2)
+
+test_signal(signal.SIGILL, True)
+test_signal(signal.SIGSEGV, True)
+test_signal(signal.SIGFPE, True)
+test_signal(signal.SIGABRT, True)
 
 
 print "success"
