@@ -2420,7 +2420,7 @@ namespace Internal
             dispatchedInjection.SetExplicitlyDeleted(true);
         }
 
-        return std::make_pair<InjectionDispatchAction, DistributionData>(dispatchAction, dispatchedInjection);
+        return std::make_pair(dispatchAction, dispatchedInjection);
     }
 
     bool Controller::DispatchInjection(const InjectionData& injection, const SubscriptionPtr& subscription, bool& confirmInjection)
