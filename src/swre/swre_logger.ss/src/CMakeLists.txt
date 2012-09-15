@@ -9,10 +9,12 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(swre_logger ${sources} ${headers})
 
+FIND_PACKAGE(Boost COMPONENTS regex filesystem system date_time)
+
 TARGET_LINK_LIBRARIES(swre_logger ${ACE_LIBRARY})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(swre_logger dose_cpp douf_time_cpp)
+    TARGET_LINK_LIBRARIES(swre_logger dots_cpp dots_generated-Safir-cpp dots_generated-cpp dose_cpp douf_time_cpp ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS swre_logger

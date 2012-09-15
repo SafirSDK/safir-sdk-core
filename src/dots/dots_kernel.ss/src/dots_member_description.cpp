@@ -79,6 +79,28 @@ namespace Internal
 
     }
 
+    MemberDescription::MemberDescription(const MemberDescription& other):
+        m_name(other.m_name),
+        m_class(other.m_class),
+        m_enum(other.m_enum),
+        m_type(other.m_type),
+        m_dataLength(other.m_dataLength),
+        m_arrayLength(other.m_arrayLength)
+    {
+
+    }
+
+    MemberDescription& MemberDescription::operator=(const MemberDescription& other)
+    {
+        m_name = other.m_name;
+        m_class = other.m_class;
+        m_enum = other.m_enum;
+        m_type = other.m_type;
+        m_dataLength = other.m_dataLength;
+        m_arrayLength = other.m_arrayLength;
+        return *this;
+    }
+
 
     const ClassDescriptionConstPtr
     MemberDescription::Class() const

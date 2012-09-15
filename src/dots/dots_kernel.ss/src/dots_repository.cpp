@@ -270,17 +270,12 @@ namespace Internal
 
                 case Temporary::ParameterMapping:
                     {
-                        bool hasAnonymousParameterMappings = false;
                         bool hasRealParameterMappings = false;
                         for (size_t valueIndex=0; valueIndex<memMapIt->m_parameter.m_values.size(); valueIndex++)
                         {
                             if (memMapIt->m_parameter.m_values[valueIndex].m_valueFromParameter)
                             {
                                 hasRealParameterMappings=true;
-                            }
-                            else
-                            {
-                                hasAnonymousParameterMappings=true;
                             }
                         }
 

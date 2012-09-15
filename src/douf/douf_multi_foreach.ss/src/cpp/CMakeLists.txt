@@ -12,7 +12,7 @@ ADD_EXECUTABLE(foreach ${sources} ${headers})
 TARGET_LINK_LIBRARIES(foreach ${ACE_LIBRARY})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(foreach swre_interface_cpp dose_cpp)
+    TARGET_LINK_LIBRARIES(foreach dots_cpp dots_generated-Safir-cpp dots_generated-cpp dose_cpp swre_interface_cpp ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS foreach

@@ -23,6 +23,7 @@
 ******************************************************************************/
 
 #include <Safir/Dob/Internal/DistributionData.h>
+#include <Safir/Dob/Internal/StateDeleter.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/BlobOperations.h>

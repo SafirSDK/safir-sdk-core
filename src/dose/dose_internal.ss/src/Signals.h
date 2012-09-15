@@ -34,18 +34,7 @@
 #include <Safir/Dob/Internal/ConnectionId.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
-
-//Make a hash_map available even though their locations are different
-//call it unordered_map, as it will be called in tr1
-#if defined _MSC_VER
-    #include <hash_map>
-    #define unordered_map stdext::hash_map
-#elif defined __GNUC__
-    #include <tr1/unordered_map>
-    using std::tr1::unordered_map;
-#else
-#error We need a definition of unordered_map
-#endif
+#include <Safir/Utilities/Internal/UnorderedMap.h>
 
 namespace Safir
 {

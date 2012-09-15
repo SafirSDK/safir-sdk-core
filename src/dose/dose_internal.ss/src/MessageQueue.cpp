@@ -23,6 +23,7 @@
 ******************************************************************************/
 
 #include <Safir/Dob/Internal/MessageQueue.h>
+#include <Safir/Dob/Internal/StateDeleter.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Internal/TimeRegistration.h>
 #include <Safir/Dob/Internal/Atomic.h>

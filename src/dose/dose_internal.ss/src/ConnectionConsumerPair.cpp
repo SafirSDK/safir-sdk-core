@@ -51,6 +51,12 @@ namespace Internal
         return connection->Id() == other.connection->Id() && consumer == other.consumer;
     }
 
+    ConnectionConsumerPair& ConnectionConsumerPair::operator=(const ConnectionConsumerPair& other)
+    {
+        connection = other.connection;
+        consumer = other.consumer;
+        return *this;
+    }
 }
 }
 }

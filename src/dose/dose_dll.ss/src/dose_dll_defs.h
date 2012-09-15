@@ -25,33 +25,8 @@
 #ifndef __DOSE_DLL_DEFS_H__
 #define __DOSE_DLL_DEFS_H__
 
-//Make a hash_map available even though their locations are different
-//call it unordered_map, as it will be called in tr1
-#if defined _MSC_VER
-    #include <hash_map>
-    #define unordered_map stdext::hash_map
-#elif defined __GNUC__
-    #include <tr1/unordered_map>
-    using std::tr1::unordered_map;
-#else
-#error We need a definition of unordered_map
-#endif
-
-
-//Make a hash_set available even though their locations are different
-//call it unordered_set, as it will be called in tr1
-#if defined _MSC_VER
-    #include <hash_set>
-    #define unordered_set stdext::hash_set
-    typedef stdext::hash_compare<void*> PointerHash;
-#elif defined __GNUC__
-    #include <tr1/unordered_set>
-    using std::tr1::unordered_set;
-    typedef std::tr1::hash<void*> PointerHash;
-#else
-#error We need a definition of unordered_set
-#endif
-
+#include <Safir/Utilities/Internal/UnorderedSet.h>
+#include <Safir/Utilities/Internal/UnorderedMap.h>
 
 #endif
 

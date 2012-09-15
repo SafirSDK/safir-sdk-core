@@ -75,6 +75,29 @@ namespace Internal
             id(0)
         {}
 
+        PendingRegistration(const PendingRegistration& other):
+            typeId(other.typeId),
+            handlerId(other.handlerId),
+            instanceIdPolicy(other.instanceIdPolicy),
+            isInjectionHandler(other.isInjectionHandler),
+            consumer(other.consumer),
+            accepted(other.accepted),
+            remove(other.remove),
+            id(other.id) {}
+
+        PendingRegistration& operator=(const PendingRegistration& other)
+        {
+            typeId = other.typeId;
+            handlerId = other.handlerId;
+            instanceIdPolicy = other.instanceIdPolicy;
+            isInjectionHandler = other.isInjectionHandler;
+            consumer = other.consumer;
+            accepted = other.accepted;
+            remove = other.remove;
+            id = other.id;
+            return *this;
+        }
+
         Dob::Typesystem::TypeId typeId;
         ShmHandlerId handlerId;
         InstanceIdPolicy::Enumeration instanceIdPolicy;

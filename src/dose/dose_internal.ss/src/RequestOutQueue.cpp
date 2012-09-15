@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <Safir/Dob/Internal/RequestOutQueue.h>
 
+#include <Safir/Dob/Internal/StateDeleter.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Internal/ScopeExit.h>
 #include <boost/bind.hpp>
