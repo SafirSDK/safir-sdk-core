@@ -8,11 +8,12 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(dose_test_sequencer ${sources} ${headers})
 
+FIND_PACKAGE(Boost COMPONENTS regex system)
 TARGET_LINK_LIBRARIES(dose_test_sequencer ${COMMON_LIBRARIES} ${ACE_LIBRARY})
 
 if (NOT MSVC)
     FIND_PACKAGE(Boost COMPONENTS program_options filesystem)
-    TARGET_LINK_LIBRARIES(dose_test_sequencer dots_generated-cpp dose_cpp ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(dose_test_sequencer dose_cpp dots_generated-DoseTest-cpp dots_generated-Safir-cpp dots_generated-cpp dots_cpp ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS dose_test_sequencer

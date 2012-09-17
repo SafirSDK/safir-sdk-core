@@ -11,7 +11,7 @@ ADD_EXECUTABLE(VehicleAppCpp ${sources}  ${headers})
 TARGET_LINK_LIBRARIES(VehicleAppCpp ${COMMON_LIBRARIES} ${ACE_LIBRARY})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(VehicleAppCpp dose_cpp swre_interface_cpp)
+    TARGET_LINK_LIBRARIES(VehicleAppCpp  dots_generated-Capabilities-cpp dots_generated-Safir-cpp dots_generated-cpp dots_cpp lluf_utils dose_cpp swre_interface_cpp)
 endif()
 
 INSTALL(TARGETS VehicleAppCpp

@@ -24,7 +24,7 @@ ADD_EXECUTABLE(VehicleMmiCppQt WIN32 ${sources} ${ui_headers} ${moc_sources} ${h
 TARGET_LINK_LIBRARIES(VehicleMmiCppQt ${QT_LIBRARIES} ${ACE_LIBRARY})
 
 IF (NOT MSVC)
-   TARGET_LINK_LIBRARIES(VehicleMmiCppQt dose_cpp swre_interface_cpp)
+   TARGET_LINK_LIBRARIES(VehicleMmiCppQt dots_generated-Capabilities-cpp dots_generated-Safir-cpp dots_generated-cpp dots_cpp lluf_utils dose_cpp swre_interface_cpp)
 ENDIF ()
 
 INSTALL(TARGETS VehicleMmiCppQt

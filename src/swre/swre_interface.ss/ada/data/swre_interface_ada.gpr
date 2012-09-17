@@ -1,3 +1,4 @@
+with "swre_library";
 with "externally_built_library";
 
 project swre_interface_ada is

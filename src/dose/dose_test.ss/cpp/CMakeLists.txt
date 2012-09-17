@@ -13,7 +13,7 @@ ADD_EXECUTABLE(dose_test_cpp ${sources} ${dose_com_sources} ${headers})
 TARGET_LINK_LIBRARIES(dose_test_cpp ${COMMON_LIBRARIES} ${ACE_LIBRARY})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(dose_test_cpp dots_generated-cpp dose_cpp swre_interface_cpp)
+    TARGET_LINK_LIBRARIES(dose_test_cpp dots_generated-DoseTest-cpp dots_generated-Safir-cpp dots_generated-cpp dots_cpp dose_cpp swre_interface_cpp)
 endif()
 
 INSTALL(TARGETS dose_test_cpp

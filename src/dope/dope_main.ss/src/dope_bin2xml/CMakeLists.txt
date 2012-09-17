@@ -13,10 +13,10 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(dope_bin2xml ${sources})
 
-FIND_PACKAGE(Boost COMPONENTS program_options)
+FIND_PACKAGE(Boost COMPONENTS filesystem program_options system)
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(dope_bin2xml dots_cpp swre_interface_cpp olib ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(dope_bin2xml dots_cpp dots_generated-Safir-cpp dots_generated-cpp dose_cpp olib swre_interface_cpp ${Boost_LIBRARIES} ${IODBC_LIBRARIES})
 endif()
 
 INSTALL(TARGETS dope_bin2xml

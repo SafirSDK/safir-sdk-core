@@ -1,3 +1,5 @@
+with "dose_dll";
+with "dots_generated_ada";
 with "externally_built_library";
 
 project dose_ada is

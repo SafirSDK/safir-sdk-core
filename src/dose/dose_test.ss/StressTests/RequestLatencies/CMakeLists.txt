@@ -11,7 +11,7 @@ TARGET_LINK_LIBRARIES(RequestLatencies ${COMMON_LIBRARIES} ${ACE_LIBRARY})
 
 if (NOT MSVC)
     FIND_PACKAGE(Boost COMPONENTS program_options)
-    TARGET_LINK_LIBRARIES(RequestLatencies dose_cpp ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(RequestLatencies dots_generated-DoseStressTest-cpp dots_generated-Safir-cpp dots_generated-cpp dots_cpp lluf_utils dose_cpp ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS RequestLatencies

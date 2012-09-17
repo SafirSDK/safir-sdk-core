@@ -13,11 +13,11 @@ FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(dope_main ${sources} ${headers})
-
+FIND_PACKAGE(Boost COMPONENTS filesystem system)
 TARGET_LINK_LIBRARIES(dope_main ${ACE_LIBRARY})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(dope_main dose_cpp swre_interface_cpp olib)
+    TARGET_LINK_LIBRARIES(dope_main dots_cpp dots_generated-Safir-cpp dots_generated-cpp dose_cpp swre_interface_cpp olib ${Boost_LIBRARIES} ${IODBC_LIBRARIES})
 endif()
 
 INSTALL(TARGETS dope_main

@@ -1,4 +1,8 @@
 with "externally_built_library";
+with "dots_kernel";
+with "dots_id";
+
+with "externally_built_library";
 
 project dots_ada is
 

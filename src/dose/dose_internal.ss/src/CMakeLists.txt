@@ -17,7 +17,7 @@ TARGET_LINK_LIBRARIES(dose_internal ${ACE_LIBRARY} ${Boost_LIBRARIES})
 ADD_DEFINITIONS(-DDOSE_INT_EXPORTS)
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dose_internal dots_kernel dots_generated-cpp dots_cpp)
+  TARGET_LINK_LIBRARIES(dose_internal dots_generated-Safir-cpp dots_generated-cpp dots_cpp dots_kernel)
 endif()
 
 INSTALL(DIRECTORY Safir 

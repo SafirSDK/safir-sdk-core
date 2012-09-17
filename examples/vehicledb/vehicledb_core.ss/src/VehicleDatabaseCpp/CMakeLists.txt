@@ -16,7 +16,7 @@ ADD_EXECUTABLE(VehicleAppDb ${sources})
 TARGET_LINK_LIBRARIES(VehicleAppDb ${COMMON_LIBRARIES} ${ACE_LIBRARY})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(VehicleAppDb dose_cpp swre_interface_cpp olib)
+    TARGET_LINK_LIBRARIES(VehicleAppDb dots_generated-Capabilities-cpp dots_generated-Safir-cpp dots_generated-cpp dots_cpp lluf_utils dose_cpp swre_interface_cpp olib ${LIBS})
 endif()
 
 INSTALL(TARGETS VehicleAppDb
