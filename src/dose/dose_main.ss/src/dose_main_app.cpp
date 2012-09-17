@@ -36,6 +36,7 @@
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/PanicLogging.h>
+#include <Safir/Utilities/CrashReporter.h>
 #include <ace/Reactor.h>
 #include <boost/bind.hpp>
 #include <iostream>
@@ -81,6 +82,17 @@ namespace Internal
         Connections::Instance().ForEachConnectionPtr(boost::bind(SetDiedIfPidEquals,_1,pid));
     }
 
+    void CrashFunc(const char* const dumpPath)
+    {
+        std::ostringstream ostr;
+        ostr << "dose_main has crashed! A dump was generated to:\n" 
+             << dumpPath << "\n"
+             << "Please send this file to your nearest Dob developer, along with\n"
+             << "relevant information about what version of Safir SDK you are using" << std::endl;
+        lllerr << ostr.str().c_str();
+        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+    }
+
 
     DoseApp::DoseApp():
         ACE_Event_Handler(ACE_Reactor::instance()),
@@ -91,6 +103,9 @@ namespace Internal
         m_handle_exception_notified(0),
         m_handle_input_notified(0)
     {
+        Safir::Utilities::CrashReporter::RegisterCallback(CrashFunc);
+        Safir::Utilities::CrashReporter::Start();
+
         m_processMonitor.Init(ProcessExited);
     }
 

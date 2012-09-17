@@ -50,11 +50,8 @@ namespace Internal
     ExitHandler::ExitHandler()
     {
         ACE_Sig_Set sigset;
-        sigset.sig_add(SIGABRT);
-        sigset.sig_add(SIGFPE);
-        sigset.sig_add(SIGILL);
         sigset.sig_add(SIGINT);
-        sigset.sig_add(SIGSEGV);
+        sigset.sig_add(SIGQUIT);
         sigset.sig_add(SIGTERM);
         ACE_Sig_Action sig(sigset,&SignalFunc);
         atexit(ExitFunc);

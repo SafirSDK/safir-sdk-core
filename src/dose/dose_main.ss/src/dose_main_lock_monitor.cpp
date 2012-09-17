@@ -141,7 +141,7 @@ namespace Internal
 
                     boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(5));
 
-                    exit(1); // Terminate dose_main!!!!
+                    abort(); // Terminate dose_main!!!!
                 }
                 else if (m_loggingIsEnabled)
                 {
