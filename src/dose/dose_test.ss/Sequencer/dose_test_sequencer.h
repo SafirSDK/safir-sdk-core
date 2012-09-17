@@ -25,18 +25,23 @@
 #ifndef __DOSE_TEST_SEQUENCER_H__
 #define __DOSE_TEST_SEQUENCER_H__
 
+#include <boost/asio.hpp>
+#include <Safir/Dob/Connection.h>
 #include "PartnerState.h"
 #include <string>
-#include <Safir/Dob/Connection.h>
 #include <DoseTest/Items/TestCase.h>
+#include <boost/noncopyable.hpp>
+#include "InjectionTimestampHandler.h"
+
+#if 0
 #include <DoseTest/TestConfigEnum.h>
 #include <iostream>
 #include <fstream>
 #include <list>
-#include <boost/noncopyable.hpp>
+
 #include <map>
 #include "TestCaseReader.h"
-#include "InjectionTimestampHandler.h"
+
 #include "ActionSender.h"
 
 #if defined _MSC_VER
@@ -49,35 +54,10 @@
   #pragma warning (pop)
 #endif
 
-class Sequencer :
-    public Safir::Dob::Requestor,
-    private boost::noncopyable
+#endif
+
+namespace SequencerStates
 {
-public:
-    Sequencer(const int startTc,
-              const int stopTc,
-              const Languages & languages,
-              const bool noTimeout,
-              const int contextId,
-              const std::string& multicastNic,
-              boost::asio::io_service& ioService);
-    ~Sequencer();
-
-    void Tick();
-
-
-    bool IsFinished() const
-    {return m_currentCaseNo >= TestCaseReader::Instance().NumberOfTestCases() || m_currentCaseNo > m_stopTc;}
-
-    void GetTestResults(const int fileNumber);
-    bool GotTestResults() const;
-
-
-    bool DeactivateAll();
-private:
-    virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
-    virtual void OnNotRequestOverflow() {}
-
     enum State
     {
         Created,
@@ -90,15 +70,62 @@ private:
         CleaningUpTestcase,
     };
 
-    void SetState(const State newState);
+
+    char const * const StateNames []=
+    {
+        "Created",
+        "ActivatingPartners",
+        "ResetPartners",
+        "PreparingTestcaseSetup",
+        "RunningSetupAction",
+        "PreparingTestcaseExecution",
+        "RunningTestAction",
+        "CleaningUpTestcase",
+    };
+}
+
+
+class Sequencer :
+    public Safir::Dob::Requestor,
+    private boost::noncopyable
+{
+public:
+    Sequencer(const int startTc,
+              const int stopTc,
+              const Languages & languages,
+              const bool noTimeout,
+              const int contextId,
+              boost::asio::io_service& ioService);
+
+#if 0
+    void Tick();
+
+
+    bool IsFinished() const
+    {return m_currentCaseNo >= TestCaseReader::Instance().NumberOfTestCases() || m_currentCaseNo > m_stopTc;}
+
+    void GetTestResults(const int fileNumber);
+    bool GotTestResults() const;
+
+
+    bool DeactivateAll();
+#endif
+private:
+    virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
+    virtual void OnNotRequestOverflow() {}
+
+#if 0
+
+    void SetState(const SequencerState newState);
 
     static bool VerifyAction(DoseTest::ActionPtr Action);
 
     void PrepareTestcaseSetup();
     void PrepareTestcaseExecution();
     void ExecuteCurrentAction();
-
+#endif
     Safir::Dob::SecondaryConnection m_connection;
+
 
     PartnerState m_partnerState;
 
@@ -107,12 +134,12 @@ private:
 
     int                   m_currentActionNo;
     DoseTest::ActionPtr   m_currentAction;
-
+#if 0
     ActionSender m_actionSender;
-
+#endif
     const int m_stopTc;
 
-    State m_state;
+    SequencerStates::State m_state;
     boost::posix_time::ptime m_lastCleanupTime;
 
     const Languages m_languages;
@@ -123,24 +150,10 @@ private:
     bool m_isDumpRequested;
     int m_fileNumber;
 
+    const int m_contextId;
     //no need to do anything with this. Constructor sets up everything.
     InjectionTimestampHandler m_injectionTimestampHandler;
 
-    int m_contextId;
-
-    DoseTest::TestConfigEnum::Enumeration m_testConfig;
-};
-
-char const * const StateNames []=
-{
-    "Created",
-    "ActivatingPartners",
-    "ResetPartners",
-    "PreparingTestcaseSetup",
-    "RunningSetupAction",
-    "PreparingTestcaseExecution",
-    "RunningTestAction",
-    "CleaningUpTestcase",
 };
 
 #endif

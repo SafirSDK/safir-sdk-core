@@ -6,22 +6,22 @@ SET(NO_LIBRARY_POSTFIXES 1)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
-ADD_SUBDIRECTORY(util)
-ADD_SUBDIRECTORY(cpp)
-ADD_SUBDIRECTORY(dotnet)
+#ADD_SUBDIRECTORY(util)
+#ADD_SUBDIRECTORY(cpp)
+#ADD_SUBDIRECTORY(dotnet)
 
-if (SAFIR_JAVA_SUPPORT)
-  ADD_SUBDIRECTORY(java)
-endif()
+#if (SAFIR_JAVA_SUPPORT)
+#  ADD_SUBDIRECTORY(java)
+#endif()
 
-if (SAFIR_ADA_SUPPORT)
-  ADD_SUBDIRECTORY(ada)      
-endif ()
+#if (SAFIR_ADA_SUPPORT)
+#  ADD_SUBDIRECTORY(ada)      
+#endif ()
 
 
 
 ADD_SUBDIRECTORY(Sequencer)
-ADD_SUBDIRECTORY(StressTests)
+#ADD_SUBDIRECTORY(StressTests)
 
 INSTALL(PROGRAMS run_dose_tests.py
         DESTINATION ${SAFIR_RUNTIME}/bin)

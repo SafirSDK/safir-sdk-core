@@ -25,28 +25,30 @@
 #ifndef __PARTNERSTATE_H__
 #define __PARTNERSTATE_H__
 
-#include <Safir/Dob/Connection.h>
 #include <DoseTest/Partner.h>
-
+#include <Safir/Dob/Connection.h>
+#include <Safir/Dob/ErrorResponse.h>
+#include <vector>
 
 typedef std::vector<std::string> Languages;
 
 
 
+
 class PartnerState:
+    public Safir::Dob::EntityHandler,
     public Safir::Dob::EntitySubscriber,
-    public Safir::Dob::MessageSender,
     private boost::noncopyable
 {
 public:
     explicit PartnerState(const Languages & languages);
 
-    void Activate(const int which, const int contextId);
-    void Deactivate(const int which);
+    //    void Activate(const int which, const int contextId);
+    //    void Deactivate(const int which);
 
     bool IsActive(const int which) const;
 
-    void Reset(const int which);
+    //void Reset(const int which);
     bool IsReady() const;
     bool IsReady(const int which) const;
 
@@ -60,7 +62,19 @@ private:
     virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
                                  const bool                    deletedByOwner);
 
-    virtual void OnNotMessageOverflow() {}
+    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
+                                       const Safir::Dob::Typesystem::HandlerId& handlerId);
+    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+                                 Safir::Dob::ResponseSenderPtr        responseSender)
+    {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
+    
+    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+                                 Safir::Dob::ResponseSenderPtr        responseSender)
+    {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
+
+    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+                                 Safir::Dob::ResponseSenderPtr        responseSender)
+    {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
 
     struct PartnerInfo
     {
@@ -86,6 +100,5 @@ private:
     const Languages m_languages;
 
 };
-
 #endif
 

@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
+#if 0
 #ifndef __ACTIONSENDER_H__
 #define __ACTIONSENDER_H__
 
@@ -55,3 +55,4 @@ private:
 
 #endif
 
+#endif

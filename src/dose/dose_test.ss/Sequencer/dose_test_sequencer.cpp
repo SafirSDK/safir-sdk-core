@@ -21,7 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
 #include "dose_test_sequencer.h"
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/NotOpenException.h>
@@ -63,52 +62,29 @@
 #endif
 
 
-#ifdef SendMessage
-#undef SendMessage
-#endif
-
-#ifdef GetMessage
-#undef GetMessage
-#endif
-
 Sequencer::Sequencer(const int startTc,
                      const int stopTc,
                      const Languages & languages,
                      const bool noTimeout,
                      const int contextId,
-                     const std::string& multicastNic,
                      boost::asio::io_service& ioService):
     m_partnerState(languages),
     m_currentCaseNo(startTc),
-    m_actionSender(multicastNic,ioService),
+    m_currentActionNo(0),
+    //m_actionSender(ioService),
     m_stopTc(stopTc),
-    m_state(Created),
+    m_state(SequencerStates::Created),
     m_lastCleanupTime(boost::posix_time::second_clock::universal_time()),
     m_languages(languages),
     m_noTimeout(noTimeout),
     m_isDumpRequested(false),
-    m_contextId(contextId),
-    m_testConfig()
+    m_contextId(contextId)
 {
-    // Find out if we are running in standalone or multinod configuration
-    Safir::Dob::DistributionChannelPtr systemChannel = Safir::Dob::DistributionChannelParameters::DistributionChannels(0);
-    if (systemChannel->MulticastAddress().Utf8String() == "127.0.0.1")
-    {
-        m_testConfig = DoseTest::TestConfigEnum::StandAlone;
-    }
-    else
-    {
-        m_testConfig = DoseTest::TestConfigEnum::Multinode;
-    }
-
     m_connection.Attach();
 }
 
-Sequencer::~Sequencer()
-{
 
-}
-
+#if 0
 void FillBinaryMemberInternal(Safir::Dob::Typesystem::BinaryContainer & cont)
 {
     //we're only supposed to fill it if it is null
@@ -881,6 +857,7 @@ Sequencer::GotTestResults() const
 {
     return m_isDumpRequested && m_dumpRequestIds.empty();
 }
+#endif
 
 void
 Sequencer::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
@@ -922,3 +899,4 @@ Sequencer::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 
     m_dumpRequestIds.erase(responseProxy.GetRequestId());
 }
+

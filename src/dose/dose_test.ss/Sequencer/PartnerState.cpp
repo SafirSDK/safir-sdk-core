@@ -21,13 +21,17 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
 #include "PartnerState.h"
+
+#include <DoseTest/Sequencer.h>
 #include <boost/bind.hpp>
 #include <iostream>
+
+#if 0
+
 #include <DoseTest/Action.h>
 #include <Safir/Dob/OverflowException.h>
-
+#endif
 
 PartnerState::PartnerState(const Languages & languages):
     m_partnerInfoTable(3),
@@ -35,7 +39,21 @@ PartnerState::PartnerState(const Languages & languages):
 {
     m_connection.Attach();
     m_connection.SubscribeEntity(DoseTest::Partner::ClassTypeId,this);
+    m_connection.RegisterEntityHandler(DoseTest::Sequencer::ClassTypeId,
+                                       Safir::Dob::Typesystem::HandlerId(),
+                                       Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
+                                       this);
+    DoseTest::SequencerPtr seq = DoseTest::Sequencer::Create();
+    seq->Partners()[0].SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(languages[0]));
+    seq->Partners()[1].SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(languages[1]));
+    seq->Partners()[2].SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(languages[2]));
+
+    m_connection.SetAll(seq,
+                        Safir::Dob::Typesystem::InstanceId(),
+                        Safir::Dob::Typesystem::HandlerId());
 }
+
+
 
 bool
 PartnerState::IsReady() const
@@ -57,7 +75,7 @@ PartnerState::SetNotReady()
     std::for_each(m_partnerInfoTable.begin(),m_partnerInfoTable.end(),boost::bind(&PartnerInfo::SetReady,_1,false));
 }
 
-
+#if 0
 void
 PartnerState::Activate(const int which, const int contextId)
 {
@@ -110,7 +128,7 @@ PartnerState::Deactivate(const int which)
     }
 
 }
-
+#endif
 
 bool
 PartnerState::IsActive(const int which) const
@@ -118,6 +136,7 @@ PartnerState::IsActive(const int which) const
     return m_partnerInfoTable.at(which).IsActive();
 }
 
+#if 0
 void
 PartnerState::Reset(const int which)
 {
@@ -141,6 +160,7 @@ PartnerState::Reset(const int which)
     }
 
 }
+#endif
 
 void
 PartnerState::HandlePartnerChange(const DoseTest::PartnerPtr & partner, const int instance)
@@ -152,6 +172,7 @@ PartnerState::HandlePartnerChange(const DoseTest::PartnerPtr & partner, const in
         if (partner->Identifier() == Safir::Dob::Typesystem::Utilities::ToWstring(m_languages.at(instance)))
         {
             thePartner.SetActive(true);
+            std::wcout << "Partner " << instance << " is activated!" << std::endl;
         }
         else
         {
@@ -164,10 +185,10 @@ PartnerState::HandlePartnerChange(const DoseTest::PartnerPtr & partner, const in
 
     if (partner->Incarnation().IsChanged())
     {
-        if (partner->Incarnation().GetVal() > thePartner.m_incarnation)
+        if (partner->Incarnation() > thePartner.m_incarnation)
         {
             thePartner.SetReady(true);
-            thePartner.m_incarnation = partner->Incarnation().GetVal();
+            thePartner.m_incarnation = partner->Incarnation();
         }
     }
 }
@@ -200,5 +221,12 @@ void PartnerState::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
 }
 
 
+
+
+void PartnerState::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
+                                         const Safir::Dob::Typesystem::HandlerId& handlerId)
+{
+    throw std::logic_error("Someone revoked my registrations!!! Don't like that!");
+}
 
 
