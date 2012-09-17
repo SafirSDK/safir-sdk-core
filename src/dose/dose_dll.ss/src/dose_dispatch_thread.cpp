@@ -105,17 +105,14 @@ namespace Internal
     {
         ENSURE(m_thread == boost::thread(), << "Someone tried to start a DispatchThread that was already running!");
 
-        //hold on to a reference to ourselves to ensure that the object is not destroyed until
-        //the thread has ended. Pass this ref into the function object that starts the thread.
-        //The ref is kept in the function object, but never used.
-        boost::shared_ptr<DispatchThread> dummy = shared_from_this();
-
-        m_thread = boost::thread(boost::bind(&DispatchThread::Run,this, dummy));
+        //shared_from_this means that we hold on to a reference to ourselves to ensure that 
+        //the object is not destroyed until the thread has ended.
+        m_thread = boost::thread(boost::bind(&DispatchThread::Run, shared_from_this()));
 
         lllout <<"DispatchThread for connection " << m_connectionName.c_str() <<" started. ThreadId = " << m_thread.get_id() << "."<<std::endl;
     }
 
-    void DispatchThread::Run(const boost::shared_ptr<DispatchThread>&)
+    void DispatchThread::Run()
     {
         const boost::function<void(void)> waiter = Connections::Instance().GetConnectionSignalWaiter(m_id);
         try

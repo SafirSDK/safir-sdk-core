@@ -474,10 +474,12 @@ class Runner:
 class JenkinsInterface:
     def __init__(self, parameters):
         import urllib
-        self.server = os.environ.get("JENKINS_URL")
+        self.server = os.environ.get("JENKINS_URL_OVERRIDE")
         if self.server is None:
-            print "No JENKINS_URL found"
-            sys.exit(1)
+            self.server = os.environ.get("JENKINS_URL")
+            if self.server is None:
+                print "No JENKINS_URL found"
+                sys.exit(1)
         print "Using jenkins server",self.server
             
         cliurl = self.server + "/jnlpJars/jenkins-cli.jar"
@@ -493,9 +495,6 @@ class JenkinsInterface:
             args.append(cmd)
         else:
             args += cmd
-
-        if os.path.exists("jenkins_password"):
-            args += ("--username", "jenkins", "--password-file", "jenkins_password")
 
         proc = subprocess.Popen(args, 
                                 stdout = subprocess.PIPE, 
@@ -602,7 +601,7 @@ class JenkinsInterface:
 class JenkinsController:
     def __init__(self,parameters):
         self.interface = JenkinsInterface(parameters)
-        self.job_name = "multinode-test-slave"
+        self.job_name = "multinode-test-slave-1"
         auth = self.interface.who_am_i()
         if auth.find("authenticated") == -1:
             print "Failed to authenticate using ssh keys, please check that keys are set up correctly"

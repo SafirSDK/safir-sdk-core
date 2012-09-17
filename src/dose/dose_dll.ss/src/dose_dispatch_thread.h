@@ -80,7 +80,7 @@ namespace Internal
         void Start();
 
     private:
-        void Run(const boost::shared_ptr<DispatchThread>& dummy); //dispatch loop
+        void Run(); //dispatch loop
 
         OnDispatchCb * const m_onDispatchCallback;
 

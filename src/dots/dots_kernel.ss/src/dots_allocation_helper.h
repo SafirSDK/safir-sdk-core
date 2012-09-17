@@ -30,6 +30,7 @@
 #pragma warning (disable: 4189)
 #endif
 
+#include <boost/version.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/containers/string.hpp>

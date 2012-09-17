@@ -83,37 +83,27 @@ Add the lib directory of the boost installation (e.g. C:\Program Files\boost\boo
 For some boost versions there are some bugs that need to be patched for Safir SDK to work correctly. The easisest way to install the patches that is needed for your version is to use the CMake file in the build/patches directory, run "cmake . -G 'NMake Makefiles'", "nmake install"
 once you have installed cmake, which will install the correct patches automatically.
 
+TODO: JOM
+
+3. Download the latest version of jom. (Jom is nmake replacement for Qt compilation on multi-core CPU. Its parameter -j N allows to setup number of parallel processes for compilation. Number of physical CPU cores is a good choice for N.)
+#7. Extract jom files to C:\Qt\jom folder
+
 Qt
 ~~
 
 32 bit:
-Download the Qt Library installer for your compiler from http://qt.nokia.com/downloads. Run and install.
-
-As of 2012 there is a precompiled vs2010 version of Qt available from Nokia, use that to avoid having to build from source as described below.
-
-
-32 bit:
-Instructions for building with VS2010. This should be able to adapt to VS2005/2008 by starting the appropriate command prompt at step 8.
-
-1. Install Perl if you are going to compile Qt >= 4.8.0
-2. Download the Qt source code from http://qt.nokia.com/downloads, and unzip it.
-3. Copy contents of the folder qt-everywhere-opensource-src-4.8.1 (asuming you have downloaded version 4.8.1) to the directory where you intend to install Qt (must not contain spaces). In our case this is C:\Qt\4.8.1.
-4. Set up environmental variables
-   QTDIR=C:\Qt\4.7.1
-   QMAKESPEC=win32-msvc2010
-5. Update PATH variable to include %QTDIR%\bin
-6. Download the latest version of jom. (Jom is nmake replacement for Qt compilation on multi-core CPU. Its parameter -j N allows to setup number of parallel processes for compilation. Number of physical CPU cores is a good choice for N.)
-7. Extract jom files to C:\Qt\jom folder
-8. Start Visual Studio 2010 Command Prompt:
-9. Start > Programs > Microsoft Visual Studio 2010 > Visual Studio Tools > Visual Studio Command Prompt.
-10.Run following commands in it:
-   >cd c:\Qt\4.7.1
-   >configure -debug-and-release -opensource -platform win32-msvc2010
-   >..\jom\jom.exe -j N (Where N is number of CPU cores you want to utilize for Qt compilation.)
+Download the "Qt Library" installer for your compiler from http://qt.nokia.com/downloads. Run and install.
 
 64 bit:
-Follow the 32 bit instruction but select the appropriate 64 bit compiler tool chain in step 8.
- 
+Instructions for building with VS2010. This should be able to adapt to VS2005/2008 by starting the appropriate command prompt at step 8.
+
+1. Download the Qt source code from http://qt.nokia.com/downloads, unzip and move the contents to C:\Qt\4.8.1.
+2. Set up environment variable QTDIR=C:\Qt\4.8.1 and add %QTDIR%\bin to PATH environment variable 
+3. Start Visual Studio 2010 Command Prompt (Start > Programs > Microsoft Visual Studio 2010 > Visual Studio Tools > Visual Studio Command Prompt).
+4.Run following commands in it:
+   >cd c:\Qt\4.7.1
+   >configure -debug-and-release -opensource
+   >nmake
 
 MinGW and MSYS
 ~~~~~~~~~~~~~~
