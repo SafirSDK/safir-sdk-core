@@ -43,6 +43,8 @@ class LLUF_CRASH_REPORTER_EXPORT CrashReporter
 {
 public:
     static void Start();
+
+    /** Must NOT be called from within the callback! Deadlock will ensue!*/
     static void Stop();
 
     /** dumpPath is ascii only! */
