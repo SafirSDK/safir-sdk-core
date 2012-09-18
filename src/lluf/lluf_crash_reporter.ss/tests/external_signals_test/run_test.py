@@ -36,15 +36,18 @@ sleeper_exe = os.path.join(exe_path,"sleeper")
 
 
 def test_signal(reason, expectCallback = False):
+    cf = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
     sleeper = subprocess.Popen(sleeper_exe,
-                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                               stdout=subprocess.PIPE, 
+                               stderr=subprocess.STDOUT,
+                               creationflags = cf)
     line = sleeper.stdout.readline()
     if not line.startswith("Started"):
         print "Strange starting line:", line
         sys.exit(1)
 
     print "Testing signal", str(reason)
-    os.kill(sleeper.pid, reason)
+    sleeper.send_signal(reason)
 
     result = sleeper.communicate()[0]
     if (result.find("callback") != -1) != expectCallback:
