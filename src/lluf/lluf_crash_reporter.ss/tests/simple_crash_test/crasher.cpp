@@ -54,8 +54,8 @@ int main(int argc, char* argv[])
     else if (arg == "SIGILL")
     {
         typedef void(*FUNC)(void);
-        const static unsigned char insn[4] = { 0xff, 0xff, 0xff, 0xff };
-        FUNC function = (FUNC) insn;
+        unsigned char insn[4] = { 0xff, 0xff, 0xff, 0xff };
+        FUNC function = reinterpret_cast<FUNC>(insn);
         function();
     }
     else if (arg == "SIGABRT")
