@@ -418,13 +418,10 @@ namespace Internal
     }
 
     void
-    Library::Start(const bool crashReporting)
+    Library::StartCrashReporting()
     {
-        if (crashReporting)
-        {
-            Safir::Utilities::CrashReporter::RegisterCallback(CrashFunc);
-            Safir::Utilities::CrashReporter::Start();
-        }
+        Safir::Utilities::CrashReporter::RegisterCallback(CrashFunc);
+        Safir::Utilities::CrashReporter::Start();
     }
 
     void

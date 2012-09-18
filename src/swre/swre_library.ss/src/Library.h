@@ -55,7 +55,7 @@ namespace Internal
 
         static Library & Instance();
 
-        void Start(const bool crashReporting);
+        void StartCrashReporting();
         void Stop();
 
         void SetProgramName(const std::wstring & programName);

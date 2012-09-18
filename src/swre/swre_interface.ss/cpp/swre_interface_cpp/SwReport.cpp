@@ -31,10 +31,10 @@ namespace Safir
 { 
 namespace SwReports 
 {
-    void Start(const bool crashReporting)
+    void EnableCrashReporting()
     {
         bool success;
-        SwreC_Start(crashReporting, success);
+        SwreC_EnableCrashReporting(success);
         if (!success)
         {
             Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();

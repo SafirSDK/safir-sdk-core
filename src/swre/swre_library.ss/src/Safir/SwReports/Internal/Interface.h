@@ -58,13 +58,15 @@ extern "C"
                                                bool & success);
 
     /**
-     * Start the swre library.
-     * 
-     * @param crashReporting [in] - If set to true google breakpad will be initialized for the current process.
+     * Enable crash reporting.
+     *
+     * Calling this function will cause google breakpad to be enabled for the current process.
+     * This function should be called as early as is humanly possible!
+     * Note that SwreC_Stop must be called before the process exits.
+     *
      * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
      */
-    SWRE_LIBRARY_API void SwreC_Start(const bool crashReporting,
-                                      bool & success);
+    SWRE_LIBRARY_API void SwreC_EnableCrashReporting(bool & success);
 
     /**
      * Stop the swre library.
