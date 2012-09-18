@@ -81,7 +81,7 @@
 #    define BREAKPAD_API __declspec(dllimport)
 #    pragma comment( lib, "breakpad.lib" )
 #  endif
-#  define CALLING_CONVENTION __cdecl
+#   define CALLING_CONVENTION __cdecl
 #elif defined __GNUC__
 #  define BREAKPAD_API
 #  if defined (__i386)
@@ -196,7 +196,7 @@ class ExceptionHandler {
   // NULL, or if out-of-process dump generation registration step fails,
   // in-process dump generation will be used. This also allows specifying
   // the dump type to generate.
-  BREAKPAD_API CALLING_CONVENTION ExceptionHandler(const wstring& dump_path,
+ BREAKPAD_API CALLING_CONVENTION ExceptionHandler(const wstring& dump_path,
                    FilterCallback filter,
                    MinidumpCallback callback,
                    void* callback_context,
@@ -204,7 +204,7 @@ class ExceptionHandler {
                    MINIDUMP_TYPE dump_type,
                    const wchar_t* pipe_name,
                    const CustomClientInfo* custom_info);
-
+  
   // As above, creates a new ExceptionHandler instance to perform
   // out-of-process dump generation if the given pipe_handle is not NULL.
   BREAKPAD_API CALLING_CONVENTION ExceptionHandler(const wstring& dump_path,
@@ -217,7 +217,7 @@ class ExceptionHandler {
                    const CustomClientInfo* custom_info);
 
 
-  ~ExceptionHandler();
+  BREAKPAD_API CALLING_CONVENTION ~ExceptionHandler();
 
   // Get and set the minidump path.
   wstring dump_path() const { return dump_path_; }

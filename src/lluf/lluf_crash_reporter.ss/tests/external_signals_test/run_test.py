@@ -35,7 +35,7 @@ else:
 sleeper_exe = os.path.join(exe_path,"sleeper")
 
 
-def test_signal(reason, expectCallback = False):
+def test_signal(reason, expectCallback = False, expectedReturncode = None):
     cf = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
     sleeper = subprocess.Popen(sleeper_exe,
                                stdout=subprocess.PIPE, 
@@ -53,23 +53,31 @@ def test_signal(reason, expectCallback = False):
     if (result.find("callback") != -1) != expectCallback:
         print "CrashReporter", "didn't call callback" if expectCallback else "called callback!"
         sys.exit(1)
-    if sleeper.returncode != -reason:
+    if expectedReturncode is None:
+        expectedReturncode = -reason
+    if sleeper.returncode != expectedReturncode:
         print "Sleeper program exited successfully (it is meant to exit with a signal!), exit code = ", sleeper.returncode
         sys.exit(1)
 
-test_signal(signal.SIGHUP)
-test_signal(signal.SIGINT)
-test_signal(signal.SIGQUIT)
-test_signal(signal.SIGKILL)
-test_signal(signal.SIGALRM)
-test_signal(signal.SIGTERM)
-test_signal(signal.SIGUSR1)
-test_signal(signal.SIGUSR2)
+        
+        
 
-test_signal(signal.SIGILL, True)
-test_signal(signal.SIGSEGV, True)
-test_signal(signal.SIGFPE, True)
-test_signal(signal.SIGABRT, True)
+if sys.platform == "win32":  
+    test_signal(signal.CTRL_BREAK_EVENT, expectedReturncode = -1073741510)    
+else:
+    test_signal(signal.SIGHUP)
+    test_signal(signal.SIGINT)
+    test_signal(signal.SIGQUIT)
+    test_signal(signal.SIGKILL)
+    test_signal(signal.SIGALRM)
+    test_signal(signal.SIGTERM)
+    test_signal(signal.SIGUSR1)
+    test_signal(signal.SIGUSR2)
+
+    test_signal(signal.SIGILL, True)
+    test_signal(signal.SIGSEGV, True)
+    test_signal(signal.SIGFPE, True)
+    test_signal(signal.SIGABRT, True)
 
 
 print "success"

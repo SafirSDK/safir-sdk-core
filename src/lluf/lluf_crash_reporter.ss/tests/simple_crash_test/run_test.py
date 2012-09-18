@@ -38,6 +38,8 @@ crasher_exe = os.path.join(exe_path,"crasher")
 def run_crasher(reason):
     crasher = subprocess.Popen((crasher_exe,reason),
                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    #while crasher.poll() is None:
+    #        pass
     result = crasher.communicate()[0]
     print "Testing signal", reason
     if result.find("callback") == -1:
@@ -63,7 +65,8 @@ def run_crasher(reason):
 run_crasher("SIGSEGV")
 run_crasher("SIGFPE")
 run_crasher("SIGILL")
-run_crasher("SIGABRT")
+if sys.platform != "win32":
+    run_crasher("SIGABRT")
 
 print "success"
 sys.exit(0)

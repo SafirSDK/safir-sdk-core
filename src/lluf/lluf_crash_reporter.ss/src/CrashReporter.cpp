@@ -40,6 +40,7 @@
 #include "client/linux/handler/exception_handler.h"
 #else
 #include "client/windows/handler/exception_handler.h"
+#include "Windows.h"
 #endif
 
 #define BOOST_FILESYSTEM_NO_DEPRECATED
@@ -61,7 +62,7 @@ namespace
 #if defined (LLUF_CRASH_REPORTER_LINUX)
         const char * const env = getenv("SAFIR_RUNTIME");
 #else
-        const wchar_t * const env = _wgetenv("SAFIR_RUNTIME");
+        const wchar_t * const env = _wgetenv(L"SAFIR_RUNTIME");
 #endif
         if (env == NULL)
         {
@@ -122,7 +123,9 @@ namespace
         boost::mutex m_lock;
         bool m_started;
         bool m_stopped;
-        
+#ifdef LLUF_CRASH_REPORTER_WINDOWS
+        UINT m_errormode;
+#endif
         typedef std::vector<CrashReporter::CrashCallback> CrashCallbackTable;
         CrashCallbackTable m_callbacks;
 
@@ -183,6 +186,7 @@ namespace
 
     void State::Start()
     {
+
         boost::lock_guard<boost::mutex> lck(m_lock);
         if (m_stopped)
         {
@@ -207,6 +211,9 @@ namespace
                                                                    NULL, 
                                                                    true));
 #else
+            m_errormode=GetErrorMode();
+            SetErrorMode(m_errormode | SEM_NOGPFAULTERRORBOX);     //Set the system to not display the Windows Error Reporting dialog.
+
             m_handler.reset (new google_breakpad::ExceptionHandler(GetDumpDirectory().wstring(),
                                                                    NULL,
                                                                    callback,
@@ -220,9 +227,13 @@ namespace
 
     void State::Stop()
     {
+
         boost::lock_guard<boost::mutex> lck(m_lock);
         if (m_started && !m_stopped)
         {
+#ifdef LLUF_CRASH_REPORTER_WINDOWS
+            SetErrorMode(m_errormode);                //Set system default, which is to display all error dialog boxes.
+#endif
             m_handler.reset();
         }
         m_started = false;
