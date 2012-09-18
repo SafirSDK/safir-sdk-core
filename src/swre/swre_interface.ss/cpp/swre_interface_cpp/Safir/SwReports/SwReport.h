@@ -55,7 +55,18 @@ All methods are thread safe.
 */
 namespace SwReports
 {
-    
+    /**
+     * Start the SwReport service.
+     * 
+     * This function needs to be called before calling any of the other functions in this
+     * namespace.
+     *
+     * You can also use the SwReportStarter RAII class below to get the Start and Stop
+     * functions to be called automatically.
+     *
+     * @param [in] crashReporting Enable Google Breakpad crash reporting.
+     */
+    SWRE_API void Start(const bool crashReporting = true);
 
     /**
      * Stop the SwReports background thread.
@@ -63,8 +74,30 @@ namespace SwReports
      * This needs to be called before exiting an application to let SwReports stop
      * its background thread. Failure to do this may cause problems if the
      * thread is currently using its dob connection when it gets killed.
+     *
+     * You can also use the SwReportStarter RAII class below to get the Start and Stop
+     * functions to be called automatically.
+     *
      */
     SWRE_API void Stop();
+
+
+    /** RAII class to call Start and Stop automatically. */
+    class SwReportStarter
+    {
+    public:
+        /** See Start(...) */
+        explicit SwReportStarter(const bool crashReporting = true)
+        {
+            Start(crashReporting);
+        }
+
+        /** See Stop(). */
+        ~SwReportStarter()
+        {
+            Stop();
+        }
+    };
 
     /**
      * Sends a Fatal Error report.

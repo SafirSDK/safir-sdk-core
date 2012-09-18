@@ -47,6 +47,18 @@ void SwreC_SetProgramName(const char * const programName,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
+void SwreC_Start(const bool crashReporting,
+                 bool & success)
+{
+    success = false;
+    try
+    {
+        Library::Instance().Start(crashReporting);
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS;
+}
+
 
 void SwreC_Stop()
 {

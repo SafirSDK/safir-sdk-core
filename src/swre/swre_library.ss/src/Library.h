@@ -55,6 +55,7 @@ namespace Internal
 
         static Library & Instance();
 
+        void Start(const bool crashReporting);
         void Stop();
 
         void SetProgramName(const std::wstring & programName);
@@ -99,8 +100,10 @@ namespace Internal
         Library();
         ~Library() {}
 
+        void StopInternal();
         static void AtExitFunc();
         static void SignalFunc(const int signal);
+        static void CrashFunc(const char* const dumpPath);
   
         //This is called when the thread is exiting (NOT atexit)
         void HandleExit();
@@ -186,6 +189,8 @@ namespace Internal
 
         volatile int m_writeNotified;
         volatile int m_readNotified;
+        
+        volatile int m_crashed;
 
         //Singleton stuff
         static ACE_Mutex m_instantiationLock;

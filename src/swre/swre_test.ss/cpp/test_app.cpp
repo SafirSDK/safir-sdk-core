@@ -140,7 +140,6 @@ namespace SwreTest
     void TestApp::Run()
     {
         reactor()->run_reactor_event_loop();
-
         std::cout << std::endl << "**** Application is shutting down*** " << std::endl << std::endl;
     }
 
@@ -151,7 +150,7 @@ namespace SwreTest
     int TestApp::handle_timeout (const ACE_Time_Value & /*current_time*/,
                                  const void * act)
     {
-        switch ((int)act)
+        switch (reinterpret_cast<long>(act))
         {
         case FATAL_ERROR_TIMER_T1:
             {

@@ -56,6 +56,7 @@
 #include <Safir/Utilities/Internal/PanicLogging.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <ace/Guard_T.h>
+#include <Safir/Utilities/CrashReporter.h>
 
 #ifdef GetMessage
 #undef GetMessage
@@ -167,11 +168,8 @@ namespace Internal
 
                 // Register signals to handle
                 ACE_Sig_Set sigset;
-                sigset.sig_add(SIGABRT);
-                sigset.sig_add(SIGFPE);
-                sigset.sig_add(SIGILL);
                 sigset.sig_add(SIGINT);
-                sigset.sig_add(SIGSEGV);
+                sigset.sig_add(SIGQUIT);
                 sigset.sig_add(SIGTERM);
                 // Register callback for those signals
                 ACE_Sig_Action sig(sigset, &SignalFunc);
@@ -190,7 +188,8 @@ namespace Internal
         m_threadStatus(NotStarted),
         m_threadStartingEvent(0),
         m_writeNotified(0),
-        m_readNotified(0)
+        m_readNotified(0),
+        m_crashed(0)
     {
         std::wstring env;
         {
@@ -403,8 +402,33 @@ namespace Internal
         return 0;
     }
 
+    void Library::CrashFunc(const char* const dumpPath)
+    {
+        Instance().m_crashed = 1;
+        std::ostringstream ostr;
+        ostr << "An application has crashed! A dump was generated to:\n" 
+             << dumpPath;
+        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+
+        // Stop the thread nicely
+        Instance().StopInternal();
+
+        // Then try to exit and cleanup
+        Instance().AtExitFunc();
+    }
+
     void
-    Library::Stop()
+    Library::Start(const bool crashReporting)
+    {
+        if (crashReporting)
+        {
+            Safir::Utilities::CrashReporter::RegisterCallback(CrashFunc);
+            Safir::Utilities::CrashReporter::Start();
+        }
+    }
+
+    void
+    Library::StopInternal()
     {
         //We only let one call to Stop try to do the join. otherwise who knows what will happen...
         if (m_threadStatus == Started)
@@ -424,6 +448,17 @@ namespace Internal
                 }
             }
         }
+    }
+
+    void
+    Library::Stop()
+    {
+        std::wcout << "Stopping" << std::endl;
+        StopInternal();
+
+        //CrashReporter gets stopped in thread, but if the thread was not running
+        //we need to stop it here too.
+        Safir::Utilities::CrashReporter::Stop();
     }
 
     //The swre library thread uses context 0 to connect to the dob. The strange looking negative number
@@ -468,6 +503,10 @@ namespace Internal
         }
 
         m_threadStatus = Stopped;
+        if (!m_crashed)
+        {
+            Safir::Utilities::CrashReporter::Stop();
+        }
     }
 
 

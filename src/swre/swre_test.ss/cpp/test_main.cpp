@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include "test_app.h"
 #include <Safir/Application/Tracer.h>
+#include <Safir/SwReports/SwReport.h>
 
 bool cyclic = false;
 bool noTracer = false;
@@ -46,6 +47,8 @@ int main(int argc, char* argv[])
             panicLog = true;
         }
     }
+        
+    Safir::SwReports::SwReportStarter s;
 
     Safir::Application::Tracer::SetProgramName(Safir::Dob::Typesystem::Utilities::ToWstring(argv[0]));
 

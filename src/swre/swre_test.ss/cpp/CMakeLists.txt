@@ -12,7 +12,7 @@ ADD_EXECUTABLE(swre_test ${sources} ${headers})
 TARGET_LINK_LIBRARIES(swre_test ${ACE_LIBRARY})
 
 IF (NOT MSVC)
-   TARGET_LINK_LIBRARIES(swre_test dose_cpp swre_interface_cpp douf_time_cpp)
+   TARGET_LINK_LIBRARIES(swre_test dots_generated-Safir-cpp dose_cpp swre_interface_cpp dots_cpp douf_time_cpp lluf_utils)
 ENDIF ()
 
 INSTALL(TARGETS swre_test
