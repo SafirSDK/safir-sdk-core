@@ -32,6 +32,15 @@ package Safir.Sw_Reports.Sw_Report is
    -- thread is currently using its dob connection when it gets killed.
    --
 
+   procedure Enable_Crash_Reporting;
+   --
+   -- Enable crash reporting.
+   --
+   -- Calling this function will cause google breakpad to be enabled for the current process.
+   -- This function should be called as early as is humanly possible!
+   -- Note that Stop must be called before the process exits.
+   --
+
    procedure Send_Fatal_Error_Report (Error_Code : in Wide_String;
                                       Location   : in Wide_String;
                                       Text       : in Wide_String);
