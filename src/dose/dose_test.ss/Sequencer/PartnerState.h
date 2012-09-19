@@ -21,7 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
 #ifndef __PARTNERSTATE_H__
 #define __PARTNERSTATE_H__
 
@@ -38,18 +37,16 @@ typedef std::vector<std::string> Languages;
 class PartnerState:
     public Safir::Dob::EntityHandler,
     public Safir::Dob::EntitySubscriber,
+    public Safir::Dob::MessageSender,
     private boost::noncopyable
 {
 public:
     PartnerState(const Languages & languages,
                  const int contextId);
 
-    //    void Activate(const int which, const int contextId);
-    //    void Deactivate(const int which);
-
     bool IsActive(const int which) const;
 
-    //void Reset(const int which);
+    void Reset(const int which);
     bool IsReady() const;
     bool IsReady(const int which) const;
 
@@ -76,6 +73,8 @@ private:
     virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
                                  Safir::Dob::ResponseSenderPtr        responseSender)
     {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
+
+    virtual void OnNotMessageOverflow(){}
 
     struct PartnerInfo
     {

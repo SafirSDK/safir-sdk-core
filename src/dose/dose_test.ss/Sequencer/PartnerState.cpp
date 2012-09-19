@@ -26,12 +26,8 @@
 #include <DoseTest/Sequencer.h>
 #include <boost/bind.hpp>
 #include <iostream>
-
-#if 0
-
 #include <DoseTest/Action.h>
 #include <Safir/Dob/OverflowException.h>
-#endif
 
 PartnerState::PartnerState(const Languages & languages,
                            const int contextId):
@@ -137,7 +133,6 @@ PartnerState::IsActive(const int which) const
     return m_partnerInfoTable.at(which).IsActive();
 }
 
-#if 0
 void
 PartnerState::Reset(const int which)
 {
@@ -161,7 +156,6 @@ PartnerState::Reset(const int which)
     }
 
 }
-#endif
 
 void
 PartnerState::HandlePartnerChange(const DoseTest::PartnerPtr & partner, const int instance)

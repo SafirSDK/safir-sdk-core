@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "dose_test_sequencer.h"
+#include "Sequencer.h"
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/NotOpenException.h>
 #include <Safir/Dob/AccessDeniedException.h>

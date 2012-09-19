@@ -29,7 +29,7 @@
 //#include <boost/thread.hpp>
 #include "TestCaseReader.h"
 #include "PartnerState.h"
-#include "dose_test_sequencer.h"
+#include "Sequencer.h"
 
 #if defined _MSC_VER
   #pragma warning (push)

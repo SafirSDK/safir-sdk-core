@@ -21,7 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#if 0
 #include "ActionSender.h"
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/NodeParameters.h>
@@ -122,4 +121,3 @@ void ActionSender::OnNotMessageOverflow()
     std::wcout << "On_Not_Message_Overflow"
                << std::endl;
 }
-#endif
