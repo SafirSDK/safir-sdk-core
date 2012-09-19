@@ -68,11 +68,8 @@ namespace
         {
             throw std::logic_error("SAFIR_RUNTIME environment variable is not set");
         }
-        boost::filesystem::path filename(env);
 
-        filename /= "dump";
-        filename /= "reports";
-        return filename;
+        return boost::filesystem::path(env) / "data" / "crash_dumps";
     }
 
 

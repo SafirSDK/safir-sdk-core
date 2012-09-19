@@ -53,6 +53,20 @@ def test_signal(reason, expectCallback = False, expectedReturncode = None):
     if (result.find("callback") != -1) != expectCallback:
         print "CrashReporter", "didn't call callback" if expectCallback else "called callback!"
         sys.exit(1)
+    if expectCallback:
+        match = re.search(u"dumpPath = '(.*)'",result)
+        if match is None:
+            print "Failed to find dumpPath in output"
+            print result
+            sys.exit(1)
+            
+        dumpPath = match.group(1)
+        
+        if not os.path.isfile(dumpPath):
+            print "No dumpfile appears to have been generated"
+            print "expected to find", dumpPath
+            sys.exit(1)
+
     if expectedReturncode is None:
         expectedReturncode = -reason
     if sleeper.returncode != expectedReturncode:
