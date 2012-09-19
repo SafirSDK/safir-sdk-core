@@ -59,12 +59,14 @@ namespace Swre
     using namespace Safir::Dob::Typesystem;
 
 //-----------------------------------------------------------------------------
-LoggerApp::LoggerApp() : m_dispatchEvent(m_Connection)
+LoggerApp::LoggerApp()
+    : ACE_Event_Handler(ACE_Reactor::instance())
+    , m_dispatchEvent(m_Connection)
 {
     // Start supervision of dump directory
     reactor()->schedule_timer(this,
                               NULL,
-                              Safir::Time::AceTimeConverter::ToAceTime(boost::posix_time::minutes(1)),
+                              Safir::Time::AceTimeConverter::ToAceTime(boost::posix_time::seconds(1)),
                               Safir::Time::AceTimeConverter::ToAceTime(boost::posix_time::minutes(10)));
     
 };
@@ -72,6 +74,7 @@ LoggerApp::LoggerApp() : m_dispatchEvent(m_Connection)
 //-----------------------------------------------------------------------------
 LoggerApp::~LoggerApp()
 {
+    reactor()->cancel_timer(this);
     m_Connection.Close();
 };
 
@@ -324,17 +327,16 @@ namespace
 }
 int LoggerApp::handle_timeout(const ACE_Time_Value & /*currentTime*/, const void * /*act*/)
 {
-    std::wcout << "Cleaning up dump files" << std::endl;
     namespace bfs = boost::filesystem;
 
-    const size_t MAX_NUM_DUMP_FILES = 10;
+    const size_t MAX_NUM_DUMP_FILES = 1000;
     
     const std::vector<bfs::path> dumpFiles = std::vector<bfs::path>(bfs::directory_iterator(GetDumpDirectory()),
                                                                     bfs::directory_iterator());
     
     if (dumpFiles.size() > MAX_NUM_DUMP_FILES)
     {
-        std::map<std::time_t, bfs::path> sorted;
+        std::multimap<std::time_t, bfs::path> sorted;
         for (std::vector<bfs::path>::const_iterator it = dumpFiles.begin();
              it != dumpFiles.end(); ++it)
         {
@@ -342,7 +344,7 @@ int LoggerApp::handle_timeout(const ACE_Time_Value & /*currentTime*/, const void
         }
         
         const size_t tooMany = dumpFiles.size() - MAX_NUM_DUMP_FILES + 10; //remove a few more...
-        std::map<std::time_t, bfs::path>::iterator it = sorted.begin();
+        std::multimap<std::time_t, bfs::path>::iterator it = sorted.begin();
         for (size_t i = 0; i < tooMany; ++i)
         {
             bfs::remove(it->second);
