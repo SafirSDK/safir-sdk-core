@@ -32,6 +32,8 @@
 #include <DoseTest/Items/TestCase.h>
 #include <boost/noncopyable.hpp>
 #include "InjectionTimestampHandler.h"
+#include "ActionSender.h"
+#include "TestCaseReader.h"
 
 #if 0
 #include <DoseTest/TestConfigEnum.h>
@@ -40,9 +42,7 @@
 #include <list>
 
 #include <map>
-#include "TestCaseReader.h"
 
-#include "ActionSender.h"
 
 #if defined _MSC_VER
   #pragma warning (push)
@@ -61,7 +61,7 @@ namespace SequencerStates
     enum State
     {
         Created,
-        ActivatingPartners,
+        //        ActivatingPartners,
         ResetPartners,
         PreparingTestcaseSetup,
         RunningSetupAction,
@@ -74,7 +74,7 @@ namespace SequencerStates
     char const * const StateNames []=
     {
         "Created",
-        "ActivatingPartners",
+        //        "ActivatingPartners",
         "ResetPartners",
         "PreparingTestcaseSetup",
         "RunningSetupAction",
@@ -97,8 +97,8 @@ public:
               const int contextId,
               boost::asio::io_service& ioService);
 
+
 #if 0
-    void Tick();
 
 
     bool IsFinished() const
@@ -114,16 +114,21 @@ private:
     virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
     virtual void OnNotRequestOverflow() {}
 
-#if 0
+    void PartnersReadyChanged();
 
-    void SetState(const SequencerState newState);
+    void Tick();
+
+    void SetState(const SequencerStates::State newState);
 
     static bool VerifyAction(DoseTest::ActionPtr Action);
 
     void PrepareTestcaseSetup();
+#if 0
     void PrepareTestcaseExecution();
-    void ExecuteCurrentAction();
 #endif
+    void ExecuteCurrentAction();
+
+    boost::asio::io_service& m_ioService;
     Safir::Dob::SecondaryConnection m_connection;
 
 
@@ -134,9 +139,9 @@ private:
 
     int                   m_currentActionNo;
     DoseTest::ActionPtr   m_currentAction;
-#if 0
+
     ActionSender m_actionSender;
-#endif
+
     const int m_stopTc;
 
     SequencerStates::State m_state;
@@ -153,6 +158,8 @@ private:
     const int m_contextId;
     //no need to do anything with this. Constructor sets up everything.
     InjectionTimestampHandler m_injectionTimestampHandler;
+
+    DoseTest::TestConfigEnum::Enumeration m_testConfig;
 
 };
 

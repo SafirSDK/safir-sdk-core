@@ -30,9 +30,12 @@
 #include <Safir/Dob/OverflowException.h>
 
 PartnerState::PartnerState(const Languages & languages,
-                           const int contextId):
+                           const int contextId,
+                           const boost::function<void()>& stateChangedCallback):
     m_partnerInfoTable(3),
-    m_languages(languages)
+    m_languages(languages),
+    m_stateChangedCallback(stateChangedCallback),
+    m_lastState(false)
 {
     m_connection.Attach();
     m_connection.SubscribeEntity(DoseTest::Partner::ClassTypeId,this);
@@ -48,6 +51,12 @@ PartnerState::PartnerState(const Languages & languages,
     m_connection.SetAll(seq,
                         Safir::Dob::Typesystem::InstanceId(),
                         Safir::Dob::Typesystem::HandlerId());
+
+    for (int which = 0; which < 3; ++which)
+    {
+        m_partnerInfoTable.at(which).m_incarnation = -1;
+    }
+
 }
 
 
@@ -58,7 +67,6 @@ PartnerState::IsReady() const
     return std::find_if(m_partnerInfoTable.begin(),m_partnerInfoTable.end(),!boost::bind(&PartnerInfo::IsReady,_1)) == m_partnerInfoTable.end();
 }
 
-
 bool
 PartnerState::IsReady(const int which) const
 {
@@ -66,13 +74,17 @@ PartnerState::IsReady(const int which) const
 }
 
 
+#if 0
+
 void
 PartnerState::SetNotReady()
 {
     std::for_each(m_partnerInfoTable.begin(),m_partnerInfoTable.end(),boost::bind(&PartnerInfo::SetReady,_1,false));
+    m_lastState = false;
+    m_stateChangedCallback(false);
 }
 
-#if 0
+
 void
 PartnerState::Activate(const int which, const int contextId)
 {
@@ -134,27 +146,25 @@ PartnerState::IsActive(const int which) const
 }
 
 void
-PartnerState::Reset(const int which)
+PartnerState::Reset()
 {
-    if (IsReady(which))
+    std::for_each(m_partnerInfoTable.begin(),m_partnerInfoTable.end(),boost::bind(&PartnerInfo::SetReady,_1,false));
+    m_lastState = false;
+    m_stateChangedCallback();
+    
+    DoseTest::ActionPtr reset = DoseTest::Action::Create();
+    reset->ActionKind().SetVal(DoseTest::ActionEnum::Reset);
+    
+    try
     {
-        std::wcerr << "Partner " << which << " is already Ready!" << std::endl;
+        m_connection.Send(reset,Safir::Dob::Typesystem::ChannelId(0),this);
+        m_connection.Send(reset,Safir::Dob::Typesystem::ChannelId(1),this);
+        m_connection.Send(reset,Safir::Dob::Typesystem::ChannelId(2),this);
     }
-    else
+    catch (const Safir::Dob::OverflowException &)
     {
-        DoseTest::ActionPtr reset = DoseTest::Action::Create();
-        reset->ActionKind().SetVal(DoseTest::ActionEnum::Reset);
-
-        try
-        {
-            m_connection.Send(reset,Safir::Dob::Typesystem::ChannelId(which),this);
-        }
-        catch (const Safir::Dob::OverflowException &)
-        {
-            std::wcerr << "Overflow in message out queue when sending Reset to Partner " << which << "." << std::endl;
-        }
+        std::wcerr << "Overflow in message out queue when sending Reset to some Partner." << std::endl;
     }
-
 }
 
 void
@@ -182,9 +192,16 @@ PartnerState::HandlePartnerChange(const DoseTest::PartnerPtr & partner, const in
     {
         if (partner->Incarnation() > thePartner.m_incarnation)
         {
+            std::wcout << "Partner " << instance << " is ready" << std::endl;
             thePartner.SetReady(true);
             thePartner.m_incarnation = partner->Incarnation();
         }
+    }
+
+    if (m_lastState != IsReady())
+    {
+        m_lastState = !m_lastState;
+        m_stateChangedCallback();
     }
 }
 
@@ -209,6 +226,9 @@ void PartnerState::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
     m_partnerInfoTable[instance].SetActive(false);
     m_partnerInfoTable[instance].m_incarnation = -1;
     std::wcout << "Partner " << instance << " is deactivated!" << std::endl;
+
+    m_lastState = false;
+    m_stateChangedCallback();
 }
 
 

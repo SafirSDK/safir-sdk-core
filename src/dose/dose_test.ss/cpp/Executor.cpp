@@ -226,6 +226,7 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
 {
     switch (action->ActionKind().GetVal())
     {
+#if 0
     case DoseTest::ActionEnum::Activate:
         {
             if (action->Identifier() == m_identifier)
@@ -266,7 +267,7 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
             }
         }
         break;
-
+#endif
     case DoseTest::ActionEnum::Reset:
         {
             if (m_isActive)
@@ -278,8 +279,9 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
                     boost::static_pointer_cast<DoseTest::Partner>
                     (m_controlConnection.Read(m_partnerEntityId).GetEntity());
                 ++partner->Incarnation();
-                m_controlConnection.SetChanges(partner,m_partnerEntityId.GetInstanceId(),
-                    Safir::Dob::Typesystem::HandlerId(m_instance));
+                m_controlConnection.SetChanges(partner,
+                                               m_partnerEntityId.GetInstanceId(),
+                                               Safir::Dob::Typesystem::HandlerId(m_instance));
 
                 std::vector<boost::shared_ptr<Consumer> > newConsumers;
                 for (int i = 0; i < 3; ++i)

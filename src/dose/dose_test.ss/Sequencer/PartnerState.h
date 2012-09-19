@@ -28,6 +28,7 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <vector>
+#include <boost/function.hpp>
 
 typedef std::vector<std::string> Languages;
 
@@ -42,17 +43,18 @@ class PartnerState:
 {
 public:
     PartnerState(const Languages & languages,
-                 const int contextId);
-
+                 const int contextId,
+                 const boost::function<void()>& stateChangedCallback);
+    //change from all ready to not all ready or vice versa is signalled
+    void Reset();
+    bool IsReady() const;
+private:
     bool IsActive(const int which) const;
 
-    void Reset(const int which);
-    bool IsReady() const;
+
+
     bool IsReady(const int which) const;
-
-    void SetNotReady();
-
-private:
+    
     void HandlePartnerChange(const DoseTest::PartnerPtr & partner, const int instance);
 
     virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy);
@@ -99,6 +101,8 @@ private:
     Safir::Dob::SecondaryConnection m_connection;
     const Languages m_languages;
 
+    const boost::function<void()> m_stateChangedCallback;
+    bool m_lastState;
 };
 #endif
 

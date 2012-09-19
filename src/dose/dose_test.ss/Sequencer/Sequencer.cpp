@@ -61,30 +61,9 @@
   #pragma warning(pop)
 #endif
 
-
-Sequencer::Sequencer(const int startTc,
-                     const int stopTc,
-                     const Languages & languages,
-                     const bool noTimeout,
-                     const int contextId,
-                     boost::asio::io_service& ioService):
-    m_partnerState(languages,contextId),
-    m_currentCaseNo(startTc),
-    m_currentActionNo(0),
-    //m_actionSender(ioService),
-    m_stopTc(stopTc),
-    m_state(SequencerStates::Created),
-    m_lastCleanupTime(boost::posix_time::second_clock::universal_time()),
-    m_languages(languages),
-    m_noTimeout(noTimeout),
-    m_isDumpRequested(false),
-    m_contextId(contextId)
+namespace 
 {
-    m_connection.Attach();
-}
 
-
-#if 0
 void FillBinaryMemberInternal(Safir::Dob::Typesystem::BinaryContainer & cont)
 {
     //we're only supposed to fill it if it is null
@@ -104,26 +83,66 @@ void FillBinaryMemberInternal(Safir::Dob::Typesystem::BinaryContainer & cont)
     }
 }
 
-void MaybeFillBinaryMember(const Safir::Dob::Typesystem::ObjectPtr & object)
-{
-    if (object->GetTypeId() == DoseTest::ComplexGlobalMessage::ClassTypeId)
+    void MaybeFillBinaryMember(const Safir::Dob::Typesystem::ObjectPtr & object)
     {
-        FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalMessage>(object)->BinaryMember().GetContainer());
-    }
-    else if (object->GetTypeId() == DoseTest::ComplexGlobalEntity::ClassTypeId)
-    {
-        FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryMember().GetContainer());
-        //in the entity we use the binary array as well
-        for (int i = 0; i < DoseTest::ComplexGlobalEntity::BinaryArrayMemberArraySize(); ++i)
+        if (object->GetTypeId() == DoseTest::ComplexGlobalMessage::ClassTypeId)
         {
-            FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryArrayMember()[i]);
+            FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalMessage>(object)->BinaryMember().GetContainer());
+        }
+        else if (object->GetTypeId() == DoseTest::ComplexGlobalEntity::ClassTypeId)
+        {
+            FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryMember().GetContainer());
+            //in the entity we use the binary array as well
+            for (int i = 0; i < DoseTest::ComplexGlobalEntity::BinaryArrayMemberArraySize(); ++i)
+            {
+                FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryArrayMember()[i]);
+            }
+        }
+        else if (object->GetTypeId() == DoseTest::ComplexGlobalService::ClassTypeId)
+        {
+            FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalService>(object)->BinaryMember().GetContainer());
         }
     }
-    else if (object->GetTypeId() == DoseTest::ComplexGlobalService::ClassTypeId)
-    {
-        FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalService>(object)->BinaryMember().GetContainer());
-    }
+
 }
+
+
+Sequencer::Sequencer(const int startTc,
+                     const int stopTc,
+                     const Languages & languages,
+                     const bool noTimeout,
+                     const int contextId,
+                     boost::asio::io_service& ioService):
+    m_ioService(ioService),
+    m_partnerState(languages,contextId,boost::bind(&Sequencer::PartnersReadyChanged,this)),
+    m_currentCaseNo(startTc),
+    m_currentActionNo(0),
+    m_actionSender("",ioService),
+    m_stopTc(stopTc),
+    m_state(SequencerStates::Created),
+    m_lastCleanupTime(boost::posix_time::second_clock::universal_time()),
+    m_languages(languages),
+    m_noTimeout(noTimeout),
+    m_isDumpRequested(false),
+    m_contextId(contextId),
+    m_testConfig()
+{
+
+    // Find out if we are running in standalone or multinod configuration
+    Safir::Dob::DistributionChannelPtr systemChannel = Safir::Dob::DistributionChannelParameters::DistributionChannels(0);
+    if (systemChannel->MulticastAddress().Utf8String() == "127.0.0.1")
+    {
+        m_testConfig = DoseTest::TestConfigEnum::StandAlone;
+    }
+    else
+    {
+        m_testConfig = DoseTest::TestConfigEnum::Multinode;
+    }
+
+    m_connection.Attach();
+}
+
+
 
 
 
@@ -185,6 +204,7 @@ void Sequencer::PrepareTestcaseSetup()
     msg->PrintString().SetVal(out.str());
     m_actionSender.Send(msg);
 }
+#if 0
 void Sequencer::PrepareTestcaseExecution()
 {
     DoseTest::ActionPtr msg = DoseTest::Action::Create();
@@ -193,7 +213,7 @@ void Sequencer::PrepareTestcaseExecution()
     m_actionSender.Send(msg);
     m_currentActionNo=-1;
 }
-
+#endif
 void Sequencer::ExecuteCurrentAction()
 {
     if (!VerifyAction(m_currentAction))
@@ -233,10 +253,11 @@ void Sequencer::ExecuteCurrentAction()
     }
 }
 
-void Sequencer::SetState(const State newState)
+void Sequencer::SetState(const SequencerStates::State newState)
 {
+    std::wcout << "Changing state from " << SequencerStates::StateNames[m_state] << " to " << SequencerStates::StateNames[newState] << std::endl;
     m_state = newState;
-    if (newState == CleaningUpTestcase)
+    if (newState == SequencerStates::CleaningUpTestcase)
     {
         m_lastCleanupTime = boost::posix_time::second_clock::universal_time();
     }
@@ -260,88 +281,51 @@ void Sequencer::Tick()
         }
     }
 
+
+    //TODO what to do if a partner becomes not ready?
+
+    const SequencerStates::State oldState = m_state;
     switch (m_state)
     {
-    case Created:
+    case SequencerStates::Created:
         {
-            SetState(ActivatingPartners);
+            SetState(SequencerStates::PreparingTestcaseSetup);
         }
         break;
 
-    case ActivatingPartners:
+    case SequencerStates::ResetPartners:
         {
-            bool allStarted = true;
-            for (int i = 0; i < 3; ++i)
-            {
-                if (!m_partnerState.IsActive(i))
-                {
-                    allStarted = false;
-                    m_partnerState.Activate(i, m_contextId);
-                    std::wcout << "Sending Activate to " << i << std::endl;
-                }
-            }
-
-            if (allStarted)
-            {
-                SetState(ResetPartners);
-            }
+            m_partnerState.Reset();
+            SetState(SequencerStates::PreparingTestcaseSetup);
         }
         break;
 
-    case ResetPartners:
-        {
-            m_partnerState.SetNotReady();
-            for (int i = 0; i < 3; ++i)
-            {
-                m_partnerState.Reset(i);
-                std::wcout << "Sending Reset to " << i << std::endl;
-            }
-
-            SetState(PreparingTestcaseSetup);
-        }
-        break;
-
-    case PreparingTestcaseSetup:
+    case SequencerStates::PreparingTestcaseSetup:
         {
             if (m_partnerState.IsReady())
             {
                 PrepareTestcaseSetup();
-                SetState(RunningSetupAction);
-            }
-            else
-            {
-                std::wcout << "Not all partners are ready yet! Trying to Reset them again." <<std::endl;
-                for (int i = 0; i < 3; ++i)
-                {
-                    std::wcout << "Partner " << i << " is ready: " << m_partnerState.IsReady(i) << std::endl;
-                }
-                SetState(ResetPartners);
-            }
-        }
-        break;
-    case RunningSetupAction:
-        {
-            if (m_partnerState.IsReady())
-            {
-                m_currentActionNo++;
-                if (m_currentCase->TestCaseSetupActions()[m_currentActionNo].IsNull())
-                {
-                    SetState(PreparingTestcaseExecution);
-                }
-                else
-                {
-                    m_currentAction=m_currentCase->TestCaseSetupActions()[m_currentActionNo].GetPtr();
-                    ExecuteCurrentAction();
-                }
-            }
-            else
-            {
-                SetState(ActivatingPartners);
+                SetState(SequencerStates::RunningSetupAction);
             }
         }
         break;
 
-    case PreparingTestcaseExecution:
+    case SequencerStates::RunningSetupAction:
+        {
+            m_currentActionNo++;
+            if (m_currentCase->TestCaseSetupActions()[m_currentActionNo].IsNull())
+            {
+                SetState(SequencerStates::PreparingTestcaseExecution);
+            }
+            else
+            {
+                m_currentAction=m_currentCase->TestCaseSetupActions()[m_currentActionNo].GetPtr();
+                ExecuteCurrentAction();
+            }
+        }
+        break;
+#if 0
+    case SequencerStates::PreparingTestcaseExecution:
         {
             if (m_partnerState.IsReady())
             {
@@ -354,7 +338,7 @@ void Sequencer::Tick()
             }
         }
         break;
-    case RunningTestAction:
+    case SequencerStates::RunningTestAction:
         {
             if (m_partnerState.IsReady())
             {
@@ -376,7 +360,7 @@ void Sequencer::Tick()
             }
         }
         break;
-    case CleaningUpTestcase:
+    case SequencerStates::CleaningUpTestcase:
         {
             boost::this_thread::sleep(boost::posix_time::milliseconds(300));
             std::wcout << "Test completed" <<std::endl;
@@ -384,9 +368,19 @@ void Sequencer::Tick()
             m_currentCaseNo++;
         }
         break;
+#endif
+    default:
+        std::wcout << "Have no code for handling this state: " << SequencerStates::StateNames[m_state] << std::endl;
+        break;
+    }
+
+    if (m_state != oldState)
+    {
+        boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+        m_ioService.post(boost::bind(&Sequencer::Tick,this));
     }
 }
-
+#if 0
 bool Sequencer::DeactivateAll()
 {
     bool allDeactivated = true;
@@ -402,7 +396,7 @@ bool Sequencer::DeactivateAll()
 
     return allDeactivated;
 }
-
+#endif
 bool Sequencer::VerifyAction(DoseTest::ActionPtr action)
 {
     if (action->Partner().IsNull() && action->ActionKind() != DoseTest::ActionEnum::Sleep)
@@ -834,7 +828,7 @@ bool Sequencer::VerifyAction(DoseTest::ActionPtr action)
     return true;
 }
 
-
+#if 0
 void
 Sequencer::GetTestResults(const int fileNumber)
 {
@@ -900,3 +894,7 @@ Sequencer::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
     m_dumpRequestIds.erase(responseProxy.GetRequestId());
 }
 
+void Sequencer::PartnersReadyChanged()
+{
+    Tick();
+}
