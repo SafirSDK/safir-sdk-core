@@ -47,6 +47,13 @@ if(UNIX)
    SET(COMMON_LIBRARIES rt)
 endif ()
 
+#Set linker flag /OPT:REF (eliminates functions and/or data that are never referenced) reduces size of executable to approx the same size as in Release mode
+if (MSVC)
+    set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF ")
+    set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF")
+endif ()
+
+
 if (MSVC)
    LINK_DIRECTORIES(${SAFIR_SDK}/lib)
    if (SAFIR_USER)
@@ -153,7 +160,8 @@ MACRO(INSTALL_DEBUG_INFO target)
     endif()
 
     STRING(REPLACE .dll ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
-
+    STRING(REPLACE .exe ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
+    
     if (SAFIR_USER)
       INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/bin CONFIGURATIONS RelWithDebInfo)
     else()
