@@ -27,6 +27,8 @@
 
 int main(int argc, char *argv[])
 {
+    Safir::SwReports::SwReportStarter swreports;
+
     try
     {
         VehicleMmiCppQt::App a(argc, argv);    
@@ -36,6 +38,7 @@ int main(int argc, char *argv[])
         // The main event loop receives events from the window system 
         // and dispatches these to the application widgets.
         a.exec();
+        return 0;
     }
     catch (const std::exception & e)
     {
@@ -46,4 +49,5 @@ int main(int argc, char *argv[])
     {
         Safir::SwReports::SendFatalErrorReport(L"0",L"main", L"Unhandled Exception");
     }
+    return 1;
 }

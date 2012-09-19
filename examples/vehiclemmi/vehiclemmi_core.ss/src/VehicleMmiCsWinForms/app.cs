@@ -84,6 +84,7 @@ namespace VehicleMmiCsWinForms
         /// </summary>
         static void Main()
         {
+            Safir.SwReports.SwReport.EnableCrashReporting();
             try
             {
                 App app = new App();
@@ -94,6 +95,10 @@ namespace VehicleMmiCsWinForms
                 String msg = e.Message + " " + e.InnerException + " " + e.StackTrace;
                 Safir.SwReports.SwReport.SendFatalErrorReport("Unhandled Exception", "Main", msg);
                 Console.WriteLine(msg);           
+            }
+            finally
+            {
+                Safir.SwReports.SwReport.Stop();
             }
         }
 
