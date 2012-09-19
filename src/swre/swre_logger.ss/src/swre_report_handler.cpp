@@ -33,7 +33,6 @@
 #include "swre_report_handler.h"
 #include "swre_report_filter.h"
 #include "swre_text_serializer.h"
-#include "swre_timers.h"
 #include <ace/OS_NS_sys_socket.h>
 
 

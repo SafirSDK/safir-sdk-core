@@ -28,6 +28,8 @@
 #pragma warning (disable: 4702)
 #endif
 
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
@@ -39,8 +41,11 @@
 #include "swre_logger_app.h"
 
 #include <Safir/Dob/NotOpenException.h>
+#include <Safir/Time/AceTimeConverter.h>
 
 #include <sstream>
+#include <vector>
+#include <map>
 
 namespace Safir
 {
@@ -56,7 +61,12 @@ namespace Swre
 //-----------------------------------------------------------------------------
 LoggerApp::LoggerApp() : m_dispatchEvent(m_Connection)
 {
-    ;
+    // Start supervision of dump directory
+    reactor()->schedule_timer(this,
+                              NULL,
+                              Safir::Time::AceTimeConverter::ToAceTime(boost::posix_time::minutes(1)),
+                              Safir::Time::AceTimeConverter::ToAceTime(boost::posix_time::minutes(10)));
+    
 };
 
 //-----------------------------------------------------------------------------
@@ -304,6 +314,45 @@ void LoggerApp::Usage()
                << " -excludenode\t: Exclude nodes that match reg expression\n"
                << " -includenode\t: Include only nodes that match the reg expression\n\n";
 }
+
+namespace 
+{
+    const boost::filesystem::path GetDumpDirectory()
+    {
+        return boost::filesystem::path(getenv("SAFIR_RUNTIME")) / "data" / "crash_dumps";
+    }
+}
+int LoggerApp::handle_timeout(const ACE_Time_Value & /*currentTime*/, const void * /*act*/)
+{
+    std::wcout << "Cleaning up dump files" << std::endl;
+    namespace bfs = boost::filesystem;
+
+    const size_t MAX_NUM_DUMP_FILES = 10;
+    
+    const std::vector<bfs::path> dumpFiles = std::vector<bfs::path>(bfs::directory_iterator(GetDumpDirectory()),
+                                                                    bfs::directory_iterator());
+    
+    if (dumpFiles.size() > MAX_NUM_DUMP_FILES)
+    {
+        std::map<std::time_t, bfs::path> sorted;
+        for (std::vector<bfs::path>::const_iterator it = dumpFiles.begin();
+             it != dumpFiles.end(); ++it)
+        {
+            sorted.insert(std::make_pair(bfs::last_write_time(*it),*it));
+        }
+        
+        const size_t tooMany = dumpFiles.size() - MAX_NUM_DUMP_FILES + 10; //remove a few more...
+        std::map<std::time_t, bfs::path>::iterator it = sorted.begin();
+        for (size_t i = 0; i < tooMany; ++i)
+        {
+            bfs::remove(it->second);
+            ++it;
+        }
+    }
+
+    return 0;
+}
+
 }
 }
 

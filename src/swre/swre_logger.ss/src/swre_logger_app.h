@@ -38,7 +38,8 @@ namespace Swre
     class ReportHandler;
 
     class LoggerApp :
-        public Safir::Dob::StopHandler
+        public Safir::Dob::StopHandler,
+        public ACE_Event_Handler
     {
     public:
         LoggerApp();
@@ -46,12 +47,10 @@ namespace Swre
 
         int Run(const std::vector<std::string> & args);
     private:
-
-        /*        // Implementation of application interface methods
-        virtual void Startup();
-        virtual void CloseDown();        */
-
         virtual void OnStopOrder();
+        
+        // Implementation of ACE_Event_Handler interface
+        virtual int handle_timeout(const ACE_Time_Value & /*currentTime*/, const void * /*act*/);
 
         bool ParseCommandLine(const std::vector<std::string> & args);
         void Usage();
