@@ -41,7 +41,8 @@ class PartnerState:
     private boost::noncopyable
 {
 public:
-    explicit PartnerState(const Languages & languages);
+    PartnerState(const Languages & languages,
+                 const int contextId);
 
     //    void Activate(const int which, const int contextId);
     //    void Deactivate(const int which);

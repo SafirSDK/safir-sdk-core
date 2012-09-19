@@ -29,6 +29,7 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/Atomic.h>
 #include <DoseTest/Action.h>
+#include <DoseTest/Sequencer.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include "Consumer.h"
 #include <boost/function.hpp>
@@ -90,6 +91,7 @@ class Executor:
     public Safir::Dob::StopHandler,
     public Safir::Dob::MessageSubscriber,
     public Safir::Dob::EntityHandler,
+    public Safir::Dob::EntitySubscriber,
     public Safir::Dob::ServiceHandler,
     private boost::noncopyable
 {
@@ -121,6 +123,18 @@ private:
 
     virtual void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
                                   Safir::Dob::ResponseSenderPtr         responseSender);
+    
+    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
+    {HandleSequencerState(boost::static_pointer_cast<DoseTest::Sequencer>(entityProxy.GetEntity()));}
+ 
+    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
+    {HandleSequencerState(boost::static_pointer_cast<DoseTest::Sequencer>(entityProxy.GetEntity()));}
+    
+    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy,
+                                 const bool) {HandleSequencerState(DoseTest::SequencerPtr());}
+    
+
+    void HandleSequencerState(const DoseTest::SequencerPtr& sequencer);
 
     void HandleAction(DoseTest::ActionPtr action);
 

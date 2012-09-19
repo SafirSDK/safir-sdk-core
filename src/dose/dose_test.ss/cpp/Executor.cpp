@@ -152,7 +152,7 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     //subscribe to messages going to everyone and to me.
     m_controlConnection.SubscribeMessage(DoseTest::Action::ClassTypeId, Safir::Dob::Typesystem::ChannelId(m_instance),this);
     m_controlConnection.SubscribeMessage(DoseTest::Action::ClassTypeId, Safir::Dob::Typesystem::ChannelId(),this);
-
+    m_controlConnection.SubscribeEntity(DoseTest::Sequencer::ClassTypeId,this);
 }
 #ifdef _MSC_VER
   #pragma warning(pop)
@@ -475,3 +475,45 @@ Executor::OnServiceRequest(const Safir::Dob::ServiceRequestProxy /*serviceReques
     result->Result().SetVal(lout.Dump());
     responseSender->Send(result);
 }
+
+void Executor::HandleSequencerState(const DoseTest::SequencerPtr& sequencer)
+{
+    const bool activate = sequencer != NULL && sequencer->Partners()[m_instance].GetVal() == m_identifier;
+
+    if (activate == m_isActive)
+    {
+        //already active or not active
+        return;
+    }
+
+    if (activate)
+    {
+        m_defaultContext = sequencer->Context();
+        std::wcout << "Activating (default context is " << m_defaultContext << ")" << std::endl;
+        m_controlConnection.RegisterEntityHandler(m_partnerEntityId.GetTypeId(),
+                                                  Safir::Dob::Typesystem::HandlerId(m_instance),
+                                                  Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
+                                                  this);
+        m_controlConnection.RegisterServiceHandler(DoseTest::Dump::ClassTypeId,
+                                                   Safir::Dob::Typesystem::HandlerId(m_instance),this);
+
+        DoseTest::PartnerPtr partner = DoseTest::Partner::Create();
+        partner->Incarnation() = 0;
+        partner->Identifier() = m_identifier;
+        m_controlConnection.SetAll(partner, m_partnerEntityId.GetInstanceId(),
+                                   Safir::Dob::Typesystem::HandlerId(m_instance));
+        m_isActive = true;
+    }
+    else
+    {
+        std::wcout << "Deactivating" << std::endl;
+        m_testConnection.Close();
+        
+        m_controlConnection.Delete(m_partnerEntityId, Safir::Dob::Typesystem::HandlerId(m_instance));
+        m_controlConnection.UnregisterHandler(m_partnerEntityId.GetTypeId(),Safir::Dob::Typesystem::HandlerId(m_instance));
+        
+        m_controlConnection.UnregisterHandler(DoseTest::Dump::ClassTypeId,Safir::Dob::Typesystem::HandlerId(m_instance));
+        m_isActive = false;
+    }
+}
+ 

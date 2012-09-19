@@ -33,7 +33,8 @@
 #include <Safir/Dob/OverflowException.h>
 #endif
 
-PartnerState::PartnerState(const Languages & languages):
+PartnerState::PartnerState(const Languages & languages,
+                           const int contextId):
     m_partnerInfoTable(3),
     m_languages(languages)
 {
@@ -47,7 +48,7 @@ PartnerState::PartnerState(const Languages & languages):
     seq->Partners()[0].SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(languages[0]));
     seq->Partners()[1].SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(languages[1]));
     seq->Partners()[2].SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(languages[2]));
-
+    seq->Context() = contextId;
     m_connection.SetAll(seq,
                         Safir::Dob::Typesystem::InstanceId(),
                         Safir::Dob::Typesystem::HandlerId());
@@ -207,17 +208,13 @@ void PartnerState::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
 }
 
 void PartnerState::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
-                                   const bool                    deletedByOwner)
+                                   const bool                    /*deletedByOwner*/)
 {
-    if (!deletedByOwner)
-    {
-        return;
-    }
-
     const int instance = static_cast<int>(entityProxy.GetInstanceId().GetRawValue());
     m_partnerInfoTable[instance].SetReady(false);
     m_partnerInfoTable[instance].SetActive(false);
     m_partnerInfoTable[instance].m_incarnation = -1;
+    std::wcout << "Partner " << instance << " is deactivated!" << std::endl;
 }
 
 

@@ -68,7 +68,7 @@ Sequencer::Sequencer(const int startTc,
                      const bool noTimeout,
                      const int contextId,
                      boost::asio::io_service& ioService):
-    m_partnerState(languages),
+    m_partnerState(languages,contextId),
     m_currentCaseNo(startTc),
     m_currentActionNo(0),
     //m_actionSender(ioService),
