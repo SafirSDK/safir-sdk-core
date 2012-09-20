@@ -68,6 +68,7 @@ namespace SequencerStates
         PreparingTestcaseExecution,
         RunningTestAction,
         CleaningUpTestcase,
+        CollectingResults,
     };
 
 
@@ -81,6 +82,7 @@ namespace SequencerStates
         "PreparingTestcaseExecution",
         "RunningTestAction",
         "CleaningUpTestcase",
+        "CollectingResults",
     };
 }
 
@@ -98,18 +100,6 @@ public:
               boost::asio::io_service& ioService);
 
 
-#if 0
-
-
-    bool IsFinished() const
-    {return m_currentCaseNo >= TestCaseReader::Instance().NumberOfTestCases() || m_currentCaseNo > m_stopTc;}
-
-    void GetTestResults(const int fileNumber);
-    bool GotTestResults() const;
-
-
-    bool DeactivateAll();
-#endif
 private:
     virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
     virtual void OnNotRequestOverflow() {}
@@ -122,11 +112,13 @@ private:
 
     static bool VerifyAction(DoseTest::ActionPtr Action);
 
-    void PrepareTestcaseSetup();
-#if 0
+    bool PrepareTestcaseSetup(); //return false if no more tc to run
     void PrepareTestcaseExecution();
-#endif
+
     void ExecuteCurrentAction();
+
+    void GetTestResults(const int fileNumber);
+
 
     boost::asio::io_service& m_ioService;
     Safir::Dob::SecondaryConnection m_connection;

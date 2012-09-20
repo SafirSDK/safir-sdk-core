@@ -145,6 +145,7 @@ PartnerState::IsActive(const int which) const
     return m_partnerInfoTable.at(which).IsActive();
 }
 
+
 void
 PartnerState::Reset()
 {
@@ -190,7 +191,7 @@ PartnerState::HandlePartnerChange(const DoseTest::PartnerPtr & partner, const in
 
     if (partner->Incarnation().IsChanged())
     {
-        if (partner->Incarnation() > thePartner.m_incarnation)
+        if (!partner->Incarnation().IsNull() && partner->Incarnation() > thePartner.m_incarnation)
         {
             std::wcout << "Partner " << instance << " is ready" << std::endl;
             thePartner.SetReady(true);

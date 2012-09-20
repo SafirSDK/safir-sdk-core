@@ -278,7 +278,14 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
                 DoseTest::PartnerPtr partner =
                     boost::static_pointer_cast<DoseTest::Partner>
                     (m_controlConnection.Read(m_partnerEntityId).GetEntity());
-                ++partner->Incarnation();
+                if (partner->Incarnation().IsNull())
+                {
+                    partner->Incarnation() = 0;
+                }
+                else
+                {
+                    ++partner->Incarnation();
+                }
                 m_controlConnection.SetChanges(partner,
                                                m_partnerEntityId.GetInstanceId(),
                                                Safir::Dob::Typesystem::HandlerId(m_instance));
@@ -500,7 +507,6 @@ void Executor::HandleSequencerState(const DoseTest::SequencerPtr& sequencer)
                                                    Safir::Dob::Typesystem::HandlerId(m_instance),this);
 
         DoseTest::PartnerPtr partner = DoseTest::Partner::Create();
-        partner->Incarnation() = 0;
         partner->Identifier() = m_identifier;
         m_controlConnection.SetAll(partner, m_partnerEntityId.GetInstanceId(),
                                    Safir::Dob::Typesystem::HandlerId(m_instance));
