@@ -29,6 +29,7 @@
     #define  LLUF_CRASH_REPORTER_EXPORT __declspec(dllexport)
   #else
     #define LLUF_CRASH_REPORTER_EXPORT __declspec(dllimport)
+    #pragma comment(lib , "lluf_crash_reporter.lib")
   #endif 
 #else 
  #define LLUF_CRASH_REPORTER_EXPORT

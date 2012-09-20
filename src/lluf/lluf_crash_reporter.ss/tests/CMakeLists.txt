@@ -13,8 +13,6 @@ ENABLE_TESTING()
 ADD_EXECUTABLE(start_stop start_stop.cpp)
 IF (NOT MSVC)
   TARGET_LINK_LIBRARIES (start_stop lluf_crash_reporter)
-ELSE (NOT MSVC)
-  TARGET_LINK_LIBRARIES (start_stop lluf_crash_reporter)
 ENDIF()
 
 
