@@ -123,6 +123,7 @@ private:
     boost::asio::io_service& m_ioService;
     Safir::Dob::SecondaryConnection m_connection;
 
+    ActionSender m_actionSender;
 
     PartnerState m_partnerState;
 
@@ -132,7 +133,6 @@ private:
     int                   m_currentActionNo;
     DoseTest::ActionPtr   m_currentAction;
 
-    ActionSender m_actionSender;
 
     const int m_stopTc;
 

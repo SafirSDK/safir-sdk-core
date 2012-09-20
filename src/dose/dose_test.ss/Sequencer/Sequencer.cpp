@@ -61,87 +61,85 @@
    #pragma warning(pop)
  #endif
 
- namespace 
- {
+namespace 
+{
+    void FillBinaryMemberInternal(Safir::Dob::Typesystem::BinaryContainer & cont)
+    {
+        //we're only supposed to fill it if it is null
+        if (cont.IsNull())
+        {
+            std::wcout << "Filling a binary member!" << std::endl;
+            Safir::Dob::Typesystem::Binary b;
+            const size_t size = 10 * 1024 * 1024; //10 Mb of data!
+            b.reserve(size);
+            char val = 0;
+            for (size_t i = 0; i < size ; ++i)
+            {
+                b.push_back(val);
+                ++val;
+            }
+            cont.SetVal(b);
+        }
+    }
 
- void FillBinaryMemberInternal(Safir::Dob::Typesystem::BinaryContainer & cont)
- {
-     //we're only supposed to fill it if it is null
-     if (cont.IsNull())
-     {
-         std::wcout << "Filling a binary member!" << std::endl;
-         Safir::Dob::Typesystem::Binary b;
-         const size_t size = 10 * 1024 * 1024; //10 Mb of data!
-         b.reserve(size);
-         char val = 0;
-         for (size_t i = 0; i < size ; ++i)
-         {
-             b.push_back(val);
-             ++val;
-         }
-         cont.SetVal(b);
-     }
- }
+    void MaybeFillBinaryMember(const Safir::Dob::Typesystem::ObjectPtr & object)
+    {
+        if (object->GetTypeId() == DoseTest::ComplexGlobalMessage::ClassTypeId)
+        {
+            FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalMessage>(object)->BinaryMember().GetContainer());
+        }
+        else if (object->GetTypeId() == DoseTest::ComplexGlobalEntity::ClassTypeId)
+        {
+            FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryMember().GetContainer());
+            //in the entity we use the binary array as well
+            for (int i = 0; i < DoseTest::ComplexGlobalEntity::BinaryArrayMemberArraySize(); ++i)
+            {
+                FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryArrayMember()[i]);
+            }
+        }
+        else if (object->GetTypeId() == DoseTest::ComplexGlobalService::ClassTypeId)
+        {
+            FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalService>(object)->BinaryMember().GetContainer());
+        }
+    }
 
-     void MaybeFillBinaryMember(const Safir::Dob::Typesystem::ObjectPtr & object)
-     {
-         if (object->GetTypeId() == DoseTest::ComplexGlobalMessage::ClassTypeId)
-         {
-             FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalMessage>(object)->BinaryMember().GetContainer());
-         }
-         else if (object->GetTypeId() == DoseTest::ComplexGlobalEntity::ClassTypeId)
-         {
-             FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryMember().GetContainer());
-             //in the entity we use the binary array as well
-             for (int i = 0; i < DoseTest::ComplexGlobalEntity::BinaryArrayMemberArraySize(); ++i)
-             {
-                 FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryArrayMember()[i]);
-             }
-         }
-         else if (object->GetTypeId() == DoseTest::ComplexGlobalService::ClassTypeId)
-         {
-             FillBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalService>(object)->BinaryMember().GetContainer());
-         }
-     }
-
- }
+}
 
 
- Sequencer::Sequencer(const int startTc,
-                      const int stopTc,
-                      const Languages & languages,
-                      const bool noTimeout,
-                      const int contextId,
-                      boost::asio::io_service& ioService):
-     m_ioService(ioService),
-     m_partnerState(languages,contextId,boost::bind(&Sequencer::PartnersReadyChanged,this)),
-     m_currentCaseNo(startTc),
-     m_currentActionNo(0),
-     m_actionSender("",ioService),
-     m_stopTc(stopTc),
-     m_state(SequencerStates::Created),
-     m_lastCleanupTime(boost::posix_time::second_clock::universal_time()),
-     m_languages(languages),
-     m_noTimeout(noTimeout),
-     m_isDumpRequested(false),
-     m_contextId(contextId),
-     m_testConfig()
- {
+Sequencer::Sequencer(const int startTc,
+                     const int stopTc,
+                     const Languages & languages,
+                     const bool noTimeout,
+                     const int contextId,
+                     boost::asio::io_service& ioService):
+    m_ioService(ioService),
+    m_actionSender(ioService),
+    m_partnerState(languages,contextId,m_actionSender,boost::bind(&Sequencer::PartnersReadyChanged,this)),
+    m_currentCaseNo(startTc),
+    m_currentActionNo(0),
+    m_stopTc(stopTc),
+    m_state(SequencerStates::Created),
+    m_lastCleanupTime(boost::posix_time::second_clock::universal_time()),
+    m_languages(languages),
+    m_noTimeout(noTimeout),
+    m_isDumpRequested(false),
+    m_contextId(contextId),
+    m_testConfig()
+{
+    // Find out if we are running in standalone or multinode configuration
+    Safir::Dob::DistributionChannelPtr systemChannel = Safir::Dob::DistributionChannelParameters::DistributionChannels(0);
+    if (systemChannel->MulticastAddress().Utf8String() == "127.0.0.1")
+    {
+        m_testConfig = DoseTest::TestConfigEnum::StandAlone;
+    }
+    else
+    {
+        m_testConfig = DoseTest::TestConfigEnum::Multinode;
+    }
 
-     // Find out if we are running in standalone or multinod configuration
-     Safir::Dob::DistributionChannelPtr systemChannel = Safir::Dob::DistributionChannelParameters::DistributionChannels(0);
-     if (systemChannel->MulticastAddress().Utf8String() == "127.0.0.1")
-     {
-         m_testConfig = DoseTest::TestConfigEnum::StandAlone;
-     }
-     else
-     {
-         m_testConfig = DoseTest::TestConfigEnum::Multinode;
-     }
-
-     m_connection.Attach();
-     m_ioService.post(boost::bind(&Sequencer::Tick,this));
- }
+    m_connection.Attach();
+    m_ioService.post(boost::bind(&Sequencer::Tick,this));
+}
 
 
 
@@ -262,7 +260,7 @@ void Sequencer::ExecuteCurrentAction()
 
 void Sequencer::SetState(const SequencerStates::State newState)
 {
-    std::wcout << "Changing state from " << SequencerStates::StateNames[m_state] << " to " << SequencerStates::StateNames[newState] << std::endl;
+    //std::wcout << "Changing state from " << SequencerStates::StateNames[m_state] << " to " << SequencerStates::StateNames[newState] << std::endl;
     m_state = newState;
     if (newState == SequencerStates::CleaningUpTestcase)
     {
@@ -272,7 +270,7 @@ void Sequencer::SetState(const SequencerStates::State newState)
 
 void Sequencer::Tick()
 {
-    std::wcout << "Tick!" << std::endl;
+    //    std::wcout << "Tick!" << std::endl;
     if (!m_noTimeout)
     {
         const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();

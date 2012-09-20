@@ -31,11 +31,13 @@
 
 PartnerState::PartnerState(const Languages & languages,
                            const int contextId,
+                           ActionSender& actionSender,
                            const boost::function<void()>& stateChangedCallback):
     m_partnerInfoTable(3),
     m_languages(languages),
     m_stateChangedCallback(stateChangedCallback),
-    m_lastState(false)
+    m_lastState(false),
+    m_actionSender(actionSender)
 {
     m_connection.Attach();
     m_connection.SubscribeEntity(DoseTest::Partner::ClassTypeId,this);
@@ -74,71 +76,6 @@ PartnerState::IsReady(const int which) const
 }
 
 
-#if 0
-
-void
-PartnerState::SetNotReady()
-{
-    std::for_each(m_partnerInfoTable.begin(),m_partnerInfoTable.end(),boost::bind(&PartnerInfo::SetReady,_1,false));
-    m_lastState = false;
-    m_stateChangedCallback(false);
-}
-
-
-void
-PartnerState::Activate(const int which, const int contextId)
-{
-    if (IsActive(which))
-    {
-        std::wcerr << "Partner " << which << " is already Active!" << std::endl;
-    }
-    else
-    {
-        m_partnerInfoTable.at(which).m_incarnation = -1;
-        DoseTest::ActionPtr activate = DoseTest::Action::Create();
-        activate->ActionKind().SetVal(DoseTest::ActionEnum::Activate);
-        activate->Identifier().SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(m_languages.at(which)));
-        activate->Context().SetVal(contextId);
-
-        try
-        {
-            m_connection.Send(activate,Safir::Dob::Typesystem::ChannelId(which),this);
-        }
-        catch (const Safir::Dob::OverflowException &)
-        {
-            std::wcerr << "Overflow in message out queue when sending Activate to Partner " << which << "." << std::endl;
-        }
-    }
-
-}
-
-void
-PartnerState::Deactivate(const int which)
-{
-    if (!IsActive(which))
-    {
-        std::wcerr << "Partner " << which << " is not Active!" << std::endl;
-    }
-    else
-    {
-        m_partnerInfoTable.at(which).m_incarnation = -1;
-        DoseTest::ActionPtr deactivate = DoseTest::Action::Create();
-        deactivate->ActionKind().SetVal(DoseTest::ActionEnum::Deactivate);
-        deactivate->Identifier().SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(m_languages.at(which)));
-
-        try
-        {
-            m_connection.Send(deactivate,Safir::Dob::Typesystem::ChannelId(which),this);
-        }
-        catch (const Safir::Dob::OverflowException &)
-        {
-            std::wcerr << "Overflow in message out queue when sending Deactivate to Partner " << which << "." << std::endl;
-        }
-    }
-
-}
-#endif
-
 bool
 PartnerState::IsActive(const int which) const
 {
@@ -156,16 +93,9 @@ PartnerState::Reset()
     DoseTest::ActionPtr reset = DoseTest::Action::Create();
     reset->ActionKind().SetVal(DoseTest::ActionEnum::Reset);
     
-    try
-    {
-        m_connection.Send(reset,Safir::Dob::Typesystem::ChannelId(0),this);
-        m_connection.Send(reset,Safir::Dob::Typesystem::ChannelId(1),this);
-        m_connection.Send(reset,Safir::Dob::Typesystem::ChannelId(2),this);
-    }
-    catch (const Safir::Dob::OverflowException &)
-    {
-        std::wcerr << "Overflow in message out queue when sending Reset to some Partner." << std::endl;
-    }
+    m_actionSender.Send(reset);
+    //    m_actionSender.Send(reset,Safir::Dob::Typesystem::ChannelId(1));
+    //m_actionSender.Send(reset,Safir::Dob::Typesystem::ChannelId(2));
 }
 
 void

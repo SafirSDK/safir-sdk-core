@@ -30,26 +30,18 @@
 #include <DoseTest/Action.h>
 #include <boost/asio.hpp>
 
-class ActionSender :
-    public Safir::Dob::MessageSender
+class ActionSender
 {
 public:
-
-    ActionSender(const std::string& multicastNic,
-                 boost::asio::io_service& ioService);
+    explicit ActionSender(boost::asio::io_service& ioService);
     ~ActionSender();
 
     void Send(const DoseTest::ActionPtr& msg);
 
 private:
-
-    virtual void OnNotMessageOverflow();
-
     boost::asio::io_service& m_ioService;
     boost::asio::ip::udp::socket m_socket;
 
-    Safir::Dob::SecondaryConnection m_connection;
-    const bool m_standalone;
     Safir::Dob::Typesystem::Int32 m_seqNbr;
 };
 

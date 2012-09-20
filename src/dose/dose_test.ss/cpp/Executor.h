@@ -89,7 +89,6 @@ private:
 
 class Executor:
     public Safir::Dob::StopHandler,
-    public Safir::Dob::MessageSubscriber,
     public Safir::Dob::EntityHandler,
     public Safir::Dob::EntitySubscriber,
     public Safir::Dob::ServiceHandler,
@@ -104,7 +103,6 @@ public:
 private:
 
     virtual void OnStopOrder();
-    virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy);
 
     virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
                                        const Safir::Dob::Typesystem::HandlerId& handlerId);

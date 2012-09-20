@@ -62,12 +62,6 @@ ActionReader::ActionReader(const boost::function<void (DoseTest::ActionPtr)> & h
     m_buffer(65000, static_cast<char>(0)),
     m_handleActionCallback(handleActionCallback)
 {
-    if(Safir::Dob::DistributionChannelParameters::DistributionChannels(0)->MulticastAddress() == L"127.0.0.1")
-    {
-        std::wcout << "System appears to be Standalone, not listening for multicasted test actions" << std::endl;
-        return;
-    }
-
     const unsigned short port = 31789;
 
     // Create the socket so that multiple may be bound to the same address.
@@ -149,9 +143,6 @@ Executor::Executor(const std::vector<std::string> & commandLine):
 {
     m_controlConnection.Open(m_controlConnectionName, m_instanceString, 0, this, &m_controlDispatcher);
 
-    //subscribe to messages going to everyone and to me.
-    m_controlConnection.SubscribeMessage(DoseTest::Action::ClassTypeId, Safir::Dob::Typesystem::ChannelId(m_instance),this);
-    m_controlConnection.SubscribeMessage(DoseTest::Action::ClassTypeId, Safir::Dob::Typesystem::ChannelId(),this);
     m_controlConnection.SubscribeEntity(DoseTest::Sequencer::ClassTypeId,this);
 }
 #ifdef _MSC_VER
@@ -166,18 +157,11 @@ void Executor::OnStopOrder()
     m_ioService.stop();
 }
 
-void Executor::OnMessage(const Safir::Dob::MessageProxy messageProxy)
-{
-    ExecuteCallbackActions(Safir::Dob::CallbackId::OnMessage);
-
-    DoseTest::ActionPtr action = boost::static_pointer_cast<DoseTest::Action>(messageProxy.GetMessage());
-
-    HandleAction(action);
-}
-
 void Executor::HandleAction(DoseTest::ActionPtr action)
 
 {
+    //TODO: need this?    ExecuteCallbackActions(Safir::Dob::CallbackId::OnMessage);
+
     if (!action->SeqNbr().IsNull())
     {
         if (action->SeqNbr() != m_lastRecSeqNbr + 1)

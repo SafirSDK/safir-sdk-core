@@ -29,57 +29,45 @@
 
 #include <iostream>
 
-ActionSender::ActionSender(const std::string& multicastNic,
-                           boost::asio::io_service& ioService)
+ActionSender::ActionSender(boost::asio::io_service& ioService)
     : m_ioService(ioService)
     , m_socket(ioService)
-    , m_standalone(Safir::Dob::DistributionChannelParameters::DistributionChannels(0)->MulticastAddress() 
-                   == L"127.0.0.1")
     , m_seqNbr(0)
 
 {
-    m_connection.Attach();
-
-    if (m_standalone) 
+    // Port and address must correspond to what is used by the partners
+    const std::wstring multicastAddr = DoseTest::Parameters::TestMulticastAddress();
+    
+    //Set up address
+    const boost::asio::ip::address addr = 
+        boost::asio::ip::address::from_string(Safir::Dob::Typesystem::Utilities::ToUtf8
+                                              (multicastAddr));
+    const unsigned short port = 31789;
+    const boost::asio::ip::udp::endpoint endpoint(addr, port);
+    
+    m_socket.open(endpoint.protocol());
+    
+    const int ttl = Safir::Dob::NodeParameters::RoutingHops();
+    m_socket.set_option(boost::asio::ip::multicast::hops(ttl));
+    
+    std::wcout << "Opening socket for multicast send. Multicast address " << multicastAddr << ", port " << port << "." << std::endl;
+    //if (multicastNic.empty())
     {
-        std::wcout << "System appears to be Standalone, not using multicast for sending test actions" << std::endl;
+        std::wcout << "NIC is not set which means that the system default interface will be used" << std::endl;
     }
-    else
+    /*else
     {
-        // Port and address must correspond to what is used by the partners
-        const std::wstring multicastAddr = DoseTest::Parameters::TestMulticastAddress();
-        
-        //Set up address
-        const boost::asio::ip::address addr = 
-            boost::asio::ip::address::from_string(Safir::Dob::Typesystem::Utilities::ToUtf8
-                                                  (multicastAddr));
-        const unsigned short port = 31789;
-        const boost::asio::ip::udp::endpoint endpoint(addr, port);
-        
-        m_socket.open(endpoint.protocol());
-
-        const int ttl = Safir::Dob::NodeParameters::RoutingHops();
-        m_socket.set_option(boost::asio::ip::multicast::hops(ttl));
-
-        std::wcout << "Opening socket for multicast send. Multicast address " << multicastAddr << ", port " << port << "." << std::endl;
-        if (multicastNic.empty())
-        {
-            std::wcout << "NIC is not set which means that the system default interface will be used" << std::endl;
+        std::wcout << "Used NIC: " << Safir::Dob::Typesystem::Utilities::ToWstring(multicastNic) << std::endl;
         }
-        else
-        {
-            std::wcout << "Used NIC: " << Safir::Dob::Typesystem::Utilities::ToWstring(multicastNic) << std::endl;
-        }
-        
-        if (!multicastNic.empty())
-        {
-            boost::asio::ip::address_v4 local_interface =
-                boost::asio::ip::address_v4::from_string(multicastNic);
-            boost::asio::ip::multicast::outbound_interface option(local_interface);
-            m_socket.set_option(option);
-        }
-        m_socket.connect(endpoint);
-    }
+    
+    if (!multicastNic.empty())
+    {
+        boost::asio::ip::address_v4 local_interface =
+            boost::asio::ip::address_v4::from_string(multicastNic);
+        boost::asio::ip::multicast::outbound_interface option(local_interface);
+        m_socket.set_option(option);
+        }*/
+    m_socket.connect(endpoint);
 }
 
 ActionSender::~ActionSender()
@@ -91,33 +79,16 @@ void ActionSender::Send(const DoseTest::ActionPtr& msg)
     ++m_seqNbr;
     msg->SeqNbr().SetVal(m_seqNbr);
 
-    if (m_standalone)
+    Safir::Dob::Typesystem::BinarySerialization binary;
+    
+    Safir::Dob::Typesystem::Serialization::ToBinary(msg, binary);
+    
+    if (binary.size() > 63000)
     {
-        //        m_connection.Send(msg, msg->Partner().IsNull() ? Safir::Dob::Typesystem::ChannelId() : msg->Partner(), this);
-        m_connection.Send(msg, Safir::Dob::Typesystem::ChannelId(), this);
+        std::wcout << "Can't send messages that don't fit in a UDP datagram via the socket!" << std::endl;
     }
     else
     {
-        Safir::Dob::Typesystem::BinarySerialization binary;
-        
-        Safir::Dob::Typesystem::Serialization::ToBinary(msg, binary);
-
-        if (binary.size() > 63000)
-        {
-            // Can't send messages that don't fit in a UDP datagram via the socket. In this case
-            // we send the action via the DOB.
-            
-            m_connection.Send(msg, msg->Partner().IsNull() ? Safir::Dob::Typesystem::ChannelId() : msg->Partner(), this);
-        }
-        else
-        {
-            m_socket.send(boost::asio::buffer(binary));
-        }
+        m_socket.send(boost::asio::buffer(binary));
     }
-}
-
-void ActionSender::OnNotMessageOverflow()
-{
-    std::wcout << "On_Not_Message_Overflow"
-               << std::endl;
 }

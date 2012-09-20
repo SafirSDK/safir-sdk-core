@@ -191,7 +191,6 @@ int main(int argc, char* argv[])
                         &dispatcher);
 
         Languages languages = commandLine.languages;
-        int context = commandLine.context;
 
         std::wcout << "Languages: ";
         for (Languages::iterator it = languages.begin();
@@ -200,11 +199,7 @@ int main(int argc, char* argv[])
             std::wcout << it->c_str() << " ";
         }
 
-        if (commandLine.context == -1)
-        {
-            // random context
-            context = GetRandomContext();
-        }
+        const int context = commandLine.context == -1 ? GetRandomContext() : commandLine.context;
 
         std::wcout << "Context: " << context << std::endl;
 

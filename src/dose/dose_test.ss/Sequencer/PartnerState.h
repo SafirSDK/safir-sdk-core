@@ -29,21 +29,19 @@
 #include <Safir/Dob/ErrorResponse.h>
 #include <vector>
 #include <boost/function.hpp>
+#include "ActionSender.h"
 
 typedef std::vector<std::string> Languages;
-
-
-
 
 class PartnerState:
     public Safir::Dob::EntityHandler,
     public Safir::Dob::EntitySubscriber,
-    public Safir::Dob::MessageSender,
     private boost::noncopyable
 {
 public:
     PartnerState(const Languages & languages,
                  const int contextId,
+                 ActionSender& actionSender,
                  const boost::function<void()>& stateChangedCallback);
     //change from all ready to not all ready or vice versa is signalled
     void Reset();
@@ -76,8 +74,6 @@ private:
                                  Safir::Dob::ResponseSenderPtr        responseSender)
     {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
 
-    virtual void OnNotMessageOverflow(){}
-
     struct PartnerInfo
     {
     public:
@@ -103,6 +99,8 @@ private:
 
     const boost::function<void()> m_stateChangedCallback;
     bool m_lastState;
+
+    ActionSender& m_actionSender;
 };
 #endif
 
