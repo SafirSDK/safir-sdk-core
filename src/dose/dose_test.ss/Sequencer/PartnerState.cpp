@@ -36,7 +36,6 @@ PartnerState::PartnerState(const Languages & languages,
     m_partnerInfoTable(3),
     m_languages(languages),
     m_stateChangedCallback(stateChangedCallback),
-    m_lastState(false),
     m_actionSender(actionSender)
 {
     m_connection.Attach();
@@ -62,6 +61,17 @@ PartnerState::PartnerState(const Languages & languages,
 }
 
 
+const std::string& PartnerState::Address(const int which) const
+{
+    return m_partnerInfoTable.at(which).m_address;
+}
+
+short PartnerState::Port(const int which) const
+{
+    return m_partnerInfoTable.at(which).m_port;
+}
+
+
 
 bool
 PartnerState::IsReady() const
@@ -77,9 +87,9 @@ PartnerState::IsReady(const int which) const
 
 
 bool
-PartnerState::IsActive(const int which) const
+PartnerState::IsActive() const
 {
-    return m_partnerInfoTable.at(which).IsActive();
+    return std::find_if(m_partnerInfoTable.begin(),m_partnerInfoTable.end(),!boost::bind(&PartnerInfo::IsActive,_1)) == m_partnerInfoTable.end();
 }
 
 
@@ -87,8 +97,8 @@ void
 PartnerState::Reset()
 {
     std::for_each(m_partnerInfoTable.begin(),m_partnerInfoTable.end(),boost::bind(&PartnerInfo::SetReady,_1,false));
-    m_lastState = false;
     m_stateChangedCallback();
+
     
     DoseTest::ActionPtr reset = DoseTest::Action::Create();
     reset->ActionKind().SetVal(DoseTest::ActionEnum::Reset);
@@ -109,6 +119,10 @@ PartnerState::HandlePartnerChange(const DoseTest::PartnerPtr & partner, const in
         {
             thePartner.SetActive(true);
             std::wcout << "Partner " << instance << " is activated!" << std::endl;
+            
+            thePartner.m_address = Safir::Dob::Typesystem::Utilities::ToUtf8(partner->Address());
+            thePartner.m_port = partner->Port();
+
         }
         else
         {
@@ -129,11 +143,7 @@ PartnerState::HandlePartnerChange(const DoseTest::PartnerPtr & partner, const in
         }
     }
 
-    if (m_lastState != IsReady())
-    {
-        m_lastState = !m_lastState;
-        m_stateChangedCallback();
-    }
+    m_stateChangedCallback();
 }
 
 
@@ -158,7 +168,6 @@ void PartnerState::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
     m_partnerInfoTable[instance].m_incarnation = -1;
     std::wcout << "Partner " << instance << " is deactivated!" << std::endl;
 
-    m_lastState = false;
     m_stateChangedCallback();
 }
 

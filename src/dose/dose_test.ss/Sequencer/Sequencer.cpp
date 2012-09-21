@@ -260,7 +260,7 @@ void Sequencer::ExecuteCurrentAction()
 
 void Sequencer::SetState(const SequencerStates::State newState)
 {
-    //std::wcout << "Changing state from " << SequencerStates::StateNames[m_state] << " to " << SequencerStates::StateNames[newState] << std::endl;
+    std::wcout << "Changing state from " << SequencerStates::StateNames[m_state] << " to " << SequencerStates::StateNames[newState] << std::endl;
     m_state = newState;
     if (newState == SequencerStates::CleaningUpTestcase)
     {
@@ -270,7 +270,7 @@ void Sequencer::SetState(const SequencerStates::State newState)
 
 void Sequencer::Tick()
 {
-    //    std::wcout << "Tick!" << std::endl;
+    std::wcout << "Tick!" << std::endl;
     if (!m_noTimeout)
     {
         const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
@@ -295,7 +295,19 @@ void Sequencer::Tick()
     {
     case SequencerStates::Created:
         {
-            SetState(SequencerStates::ResetPartners);
+            SetState(SequencerStates::ActivatingPartners);
+        }
+        break;
+
+    case SequencerStates::ActivatingPartners:
+        {
+            if (m_partnerState.IsActive())
+            {
+                SetState(SequencerStates::ResetPartners);
+                m_actionSender.Open(m_partnerState.Address(0),m_partnerState.Port(0),
+                                    m_partnerState.Address(1),m_partnerState.Port(1),
+                                    m_partnerState.Address(2),m_partnerState.Port(2));
+            }
         }
         break;
 

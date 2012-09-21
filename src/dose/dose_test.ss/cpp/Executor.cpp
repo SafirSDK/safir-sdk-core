@@ -498,6 +498,8 @@ void Executor::HandleSequencerState(const DoseTest::SequencerPtr& sequencer)
         m_controlConnection.RegisterServiceHandler(DoseTest::Dump::ClassTypeId,
                                                    Safir::Dob::Typesystem::HandlerId(m_instance),this);
 
+        m_actionReceiver.Open();
+
         DoseTest::PartnerPtr partner = DoseTest::Partner::Create();
         partner->Identifier() = m_identifier;
         partner->Port() = m_actionReceiver.Port();
@@ -518,13 +520,16 @@ void Executor::HandleSequencerState(const DoseTest::SequencerPtr& sequencer)
     else
     {
         std::wcout << "Deactivating" << std::endl;
+        m_actionReceiver.Close();
+
         m_testConnection.Close();
-        
+
         m_controlConnection.Delete(m_partnerEntityId, Safir::Dob::Typesystem::HandlerId(m_instance));
         m_controlConnection.UnregisterHandler(m_partnerEntityId.GetTypeId(),Safir::Dob::Typesystem::HandlerId(m_instance));
         
         m_controlConnection.UnregisterHandler(DoseTest::Dump::ClassTypeId,Safir::Dob::Typesystem::HandlerId(m_instance));
         m_isActive = false;
+        logger.Clear();
     }
 }
  

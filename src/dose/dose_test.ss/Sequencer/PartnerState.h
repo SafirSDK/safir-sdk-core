@@ -43,11 +43,15 @@ public:
                  const int contextId,
                  ActionSender& actionSender,
                  const boost::function<void()>& stateChangedCallback);
-    //change from all ready to not all ready or vice versa is signalled
+    //callback is called whenever something happens that might change states
     void Reset();
     bool IsReady() const;
+    bool IsActive() const;
+    const std::string& Address(const int which) const;
+    short Port(const int which) const;
+    
 private:
-    bool IsActive(const int which) const;
+
 
 
 
@@ -85,7 +89,9 @@ private:
         bool IsReady()const {return IsActive() && m_ready;}
         void SetReady(const bool ready) {m_ready = ready;}
 
-        int     m_incarnation;
+        int         m_incarnation;
+        std::string m_address;
+        short       m_port;
     private:
         bool    m_ready;
         bool    m_active;
@@ -98,7 +104,6 @@ private:
     const Languages m_languages;
 
     const boost::function<void()> m_stateChangedCallback;
-    bool m_lastState;
 
     ActionSender& m_actionSender;
 };

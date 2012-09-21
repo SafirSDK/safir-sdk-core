@@ -61,7 +61,7 @@ namespace SequencerStates
     enum State
     {
         Created,
-        //        ActivatingPartners,
+        ActivatingPartners,
         ResetPartners,
         PreparingTestcaseSetup,
         RunningSetupAction,
@@ -75,7 +75,7 @@ namespace SequencerStates
     char const * const StateNames []=
     {
         "Created",
-        //        "ActivatingPartners",
+        "ActivatingPartners",
         "ResetPartners",
         "PreparingTestcaseSetup",
         "RunningSetupAction",
