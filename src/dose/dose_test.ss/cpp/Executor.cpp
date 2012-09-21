@@ -34,6 +34,8 @@
 #include <DoseTest/Dump.h>
 #include <DoseTest/DumpResult.h>
 #include <Safir/Dob/OverflowException.h>
+#include <Safir/Dob/NodeInfo.h>
+#include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/DistributionChannelParameters.h>
 #include "dosecom_stuff.h"
 
@@ -63,6 +65,7 @@ ActionReader::ActionReader(const boost::function<void (DoseTest::ActionPtr)> & h
     m_buffer(65000, static_cast<char>(0)),
     m_handleActionCallback(handleActionCallback)
 {
+#if 0
     const unsigned short port = 31789;
 
     // Create the socket so that multiple may be bound to the same address.
@@ -92,11 +95,13 @@ ActionReader::ActionReader(const boost::function<void (DoseTest::ActionPtr)> & h
         boost::bind(&ActionReader::HandleData, this,
           boost::asio::placeholders::error,
           boost::asio::placeholders::bytes_transferred));
+#endif
 }
 
 void ActionReader::HandleData(const boost::system::error_code& error,
                               const size_t bytes_recvd)
 {
+#if 0
     if (error)
     {
         std::wcout << "error when receiving data" << std::endl;
@@ -117,6 +122,7 @@ void ActionReader::HandleData(const boost::system::error_code& error,
          boost::bind(&ActionReader::HandleData, this,
                      boost::asio::placeholders::error,
                      boost::asio::placeholders::bytes_transferred));
+#endif
 }
 
 #ifdef _MSC_VER
@@ -138,7 +144,7 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_actionReader(boost::bind(&Executor::HandleAction,this,_1), 
                    commandLine.size() > 2 ? commandLine.at(2): "0.0.0.0",
                    m_ioService),
-    m_actionReceiver(m_ioService),
+    m_actionReceiver(m_ioService, boost::bind(&Executor::HandleAction,this,_1)),
     m_callbackActions(Safir::Dob::CallbackId::Size()),
     m_defaultContext(0),
     m_lastRecSeqNbr(0)
@@ -494,6 +500,17 @@ void Executor::HandleSequencerState(const DoseTest::SequencerPtr& sequencer)
 
         DoseTest::PartnerPtr partner = DoseTest::Partner::Create();
         partner->Identifier() = m_identifier;
+        partner->Port() = m_actionReceiver.Port();
+
+        {
+            using namespace Safir::Dob;
+            using namespace Safir::Dob::Typesystem;
+            partner->Address() = boost::static_pointer_cast<NodeInfo>
+                (m_controlConnection.Read(EntityId(NodeInfo::ClassTypeId,
+                                                   InstanceId(ThisNodeParameters::NodeNumber()))).
+                 GetEntity())->IpAddress();
+        }
+
         m_controlConnection.SetAll(partner, m_partnerEntityId.GetInstanceId(),
                                    Safir::Dob::Typesystem::HandlerId(m_instance));
         m_isActive = true;

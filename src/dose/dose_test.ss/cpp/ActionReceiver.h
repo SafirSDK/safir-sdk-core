@@ -30,14 +30,18 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Serialization.h>
+#include <DoseTest/Action.h>
 
 class ActionReceiver
 {
 public:
-    explicit ActionReceiver(boost::asio::io_service& ioService)
+    ActionReceiver(boost::asio::io_service& ioService,
+                   const boost::function<void(const DoseTest::ActionPtr&)>& actionCallback)
         : m_ioService(ioService)
         , m_socket(ioService)
         , m_port(-1)
+        , m_actionCallback(actionCallback)
     {
         std::wcout << "Constructing ActionReceiver" << std::endl;
         const short startPort = 30000;
@@ -69,6 +73,11 @@ public:
 
     }
     
+    ~ActionReceiver()
+    {
+        m_socket.close();
+    }
+
     short Port() const
     {
         return m_port;
@@ -114,6 +123,13 @@ private:
                 throw std::logic_error("Error in HandleRead receive!");
             }
 
+            DoseTest::ActionPtr action =
+                boost::static_pointer_cast<DoseTest::Action>
+                (Safir::Dob::Typesystem::Serialization::ToObject(m_data));
+            
+            m_actionCallback(action);
+            
+            //start next receive
             m_socket.async_receive(boost::asio::buffer(&m_data[0], BLOB_HEADER_SIZE),
                                    boost::bind(&ActionReceiver::HandleRead, this,
                                                boost::asio::placeholders::error,
@@ -135,6 +151,7 @@ private:
     enum {BLOB_HEADER_SIZE = 16};
     
     short m_port;
+    const boost::function<void(const DoseTest::ActionPtr&)> m_actionCallback;
 };
 
 
