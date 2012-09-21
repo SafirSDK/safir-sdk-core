@@ -41,12 +41,8 @@ sender_path = os.path.join(exe_path,"tracer_sender")
 env = TestEnv()
 with TestEnvStopper(env):
     subprocess.call(sender_path)
-    time.sleep(1.0)
     subprocess.call(sender_path)
-    time.sleep(1.0)
     subprocess.call(sender_path)
-    time.sleep(1.0)
-
 
 if not env.ReturnCodesOk():
     print "Some process exited with an unexpected value"
@@ -54,41 +50,13 @@ if not env.ReturnCodesOk():
 
 output = env.Output("swre_logger")
 
-log_template = """========== Software Report Received ==========
-Type => Program Info
-Time => [0-9\-:T\.]*
-Application connection => StandAlone;0;tracer_sender.*;[0-9#]*
-Sequence number => 1
-Node => StandAlone
-Text =>
-test: blahonga
-test: blahonga
-test: blahonga
-test: blahonga
-
-========== Software Report Received ==========
-Type => Program Info
-Time => [0-9\-:T\.]*
-Application connection => StandAlone;0;tracer_sender.*;[0-9#]*
-Sequence number => 2
-Node => StandAlone
-Text =>
-test: blahonga
-
-"""
-
-#\A is beginning of file and \Z is EOF
-pattern = re.compile("\A" + log_template + log_template + log_template + "\Z")
-
-if pattern.match(output):
-    print "match!"
+if output.count("blahonga") == 15:
+    print "Found all expected output!"
     sys.exit(0)
 else:
-    print "no match! (Expected and received output written to failed_test_template.txt and failed_test_output.txt.)"
+    print "no match! (Received output written failed_test_output.txt.)"
     with open("failed_test_output.txt","w") as expected:
         expected.write(output)
-    with open("failed_test_template.txt","w") as template:
-        template.write(log_template + log_template + log_template)
 
     print output
     sys.exit(1)
