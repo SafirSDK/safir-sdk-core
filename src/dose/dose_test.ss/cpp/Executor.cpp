@@ -37,6 +37,7 @@
 #include <Safir/Dob/DistributionChannelParameters.h>
 #include "dosecom_stuff.h"
 
+
 #ifdef _MSC_VER
   #pragma warning(push)
   #pragma warning(disable: 4702)
@@ -137,6 +138,7 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_actionReader(boost::bind(&Executor::HandleAction,this,_1), 
                    commandLine.size() > 2 ? commandLine.at(2): "0.0.0.0",
                    m_ioService),
+    m_actionReceiver(m_ioService),
     m_callbackActions(Safir::Dob::CallbackId::Size()),
     m_defaultContext(0),
     m_lastRecSeqNbr(0)

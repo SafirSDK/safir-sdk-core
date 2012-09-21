@@ -35,6 +35,7 @@
 #include <boost/function.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include "ActionReceiver.h"
 
 class Dispatcher:
     public Safir::Dob::Dispatcher,
@@ -166,6 +167,7 @@ private:
     Dispatcher m_controlDispatcher;
 
     ActionReader m_actionReader;
+    ActionReceiver m_actionReceiver;
 
     typedef std::vector<DoseTest::ActionPtr> Actions;
     typedef std::vector<Actions> CallbackActions;
