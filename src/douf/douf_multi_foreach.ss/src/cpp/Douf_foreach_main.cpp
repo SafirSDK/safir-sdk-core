@@ -22,10 +22,12 @@
 *
 ******************************************************************************/
 #include "Douf_foreach_app.h"
-
+#include <Safir/SwReports/SwReport.h>
 
 int main(int /*argc*/, char* /*argv*/[])
 {
+    Safir::SwReports::SwReportStarter starter;
+
     // Start the application.
     Safir::Utilities::ForEach::ForEachApp app;
     app.Run();
