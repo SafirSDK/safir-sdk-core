@@ -58,73 +58,6 @@
 #undef GetMessage
 #endif
 
-ActionReader::ActionReader(const boost::function<void (DoseTest::ActionPtr)> & handleActionCallback,
-                           const std::string& listenAddressStr,
-                           boost::asio::io_service& ioService):
-    m_socket(ioService),
-    m_buffer(65000, static_cast<char>(0)),
-    m_handleActionCallback(handleActionCallback)
-{
-#if 0
-    const unsigned short port = 31789;
-
-    // Create the socket so that multiple may be bound to the same address.
-    const boost::asio::ip::address listenAddress = 
-        boost::asio::ip::address::from_string(listenAddressStr);
-    const boost::asio::ip::udp::endpoint listenEndpoint(listenAddress, port);
-    m_socket.open(listenEndpoint.protocol());
-    m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-    m_socket.bind(listenEndpoint);
-
-    // Port and address must correspond to what is used by the test sequencer
-    const std::wstring multicastAddressStr = DoseTest::Parameters::TestMulticastAddress();
-
-    //Set up address
-    const boost::asio::ip::address multicastAddress = 
-        boost::asio::ip::address::from_string(Safir::Dob::Typesystem::Utilities::ToUtf8
-                                              (multicastAddressStr));
-
-    std::wcout << "Joining socket to group for multicast reception. Multicast address " 
-               << multicastAddressStr << ":" << port << "." << std::endl;
-
-    // Join the multicast group.
-    m_socket.set_option(boost::asio::ip::multicast::join_group(multicastAddress));
-
-    m_socket.async_receive_from(
-        boost::asio::buffer(m_buffer), m_senderEndpoint,
-        boost::bind(&ActionReader::HandleData, this,
-          boost::asio::placeholders::error,
-          boost::asio::placeholders::bytes_transferred));
-#endif
-}
-
-void ActionReader::HandleData(const boost::system::error_code& error,
-                              const size_t bytes_recvd)
-{
-#if 0
-    if (error)
-    {
-        std::wcout << "error when receiving data" << std::endl;
-        exit(1);
-    }
-
-    if (bytes_recvd != 0)
-    {
-        DoseTest::ActionPtr action =
-            boost::static_pointer_cast<DoseTest::Action>
-            (Safir::Dob::Typesystem::Serialization::ToObject(m_buffer));
-        
-        m_handleActionCallback(action);
-    }
-        
-    m_socket.async_receive_from
-        (boost::asio::buffer(m_buffer), m_senderEndpoint,
-         boost::bind(&ActionReader::HandleData, this,
-                     boost::asio::placeholders::error,
-                     boost::asio::placeholders::bytes_transferred));
-#endif
-}
-
 #ifdef _MSC_VER
   #pragma warning(push)
   #pragma warning(disable: 4355)
@@ -141,9 +74,6 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_dispatchTestConnection(true),
     m_testDispatcher(boost::bind(&Executor::DispatchTestConnection,this), m_ioService),
     m_controlDispatcher(boost::bind(&Executor::DispatchControlConnection,this), m_ioService),
-    m_actionReader(boost::bind(&Executor::HandleAction,this,_1), 
-                   commandLine.size() > 2 ? commandLine.at(2): "0.0.0.0",
-                   m_ioService),
     m_actionReceiver(m_ioService, boost::bind(&Executor::HandleAction,this,_1)),
     m_callbackActions(Safir::Dob::CallbackId::Size()),
     m_defaultContext(0),
@@ -529,7 +459,7 @@ void Executor::HandleSequencerState(const DoseTest::SequencerPtr& sequencer)
         
         m_controlConnection.UnregisterHandler(DoseTest::Dump::ClassTypeId,Safir::Dob::Typesystem::HandlerId(m_instance));
         m_isActive = false;
-        logger.Clear();
+        lout.Clear();
     }
 }
  

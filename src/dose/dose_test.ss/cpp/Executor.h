@@ -69,24 +69,6 @@ private:
     boost::asio::io_service & m_ioService;
 };
 
-class ActionReader:
-    private boost::noncopyable
-{
-public:
-    ActionReader(const boost::function<void (DoseTest::ActionPtr)> & handleActionCallback,
-                 const std::string& listenAddressStr,
-                 boost::asio::io_service& ioService);
-
-private:
-    void HandleData(const boost::system::error_code& error,
-                    const size_t bytes_recvd);
-    boost::asio::ip::udp::socket m_socket;
-    boost::asio::ip::udp::endpoint m_senderEndpoint;
-    Safir::Dob::Typesystem::BinarySerialization m_buffer;
-
-    const boost::function<void (DoseTest::ActionPtr)> m_handleActionCallback;
-};
-
 
 class Executor:
     public Safir::Dob::StopHandler,
@@ -166,7 +148,6 @@ private:
     Dispatcher m_testDispatcher;
     Dispatcher m_controlDispatcher;
 
-    ActionReader m_actionReader;
     ActionReceiver m_actionReceiver;
 
     typedef std::vector<DoseTest::ActionPtr> Actions;

@@ -110,8 +110,6 @@ private:
 
     void SetState(const SequencerStates::State newState);
 
-    static bool VerifyAction(DoseTest::ActionPtr Action);
-
     bool PrepareTestcaseSetup(); //return false if no more tc to run
     void PrepareTestcaseExecution();
 
