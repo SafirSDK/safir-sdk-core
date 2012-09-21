@@ -25,12 +25,17 @@ with Ada.Exceptions;
 with Executor;
 with Logger;
 with Safir.Dob.Typesystem.Utilities;
+with Safir.Sw_Reports.Sw_Report;
 
 procedure Dose_Test_Ada is
 begin
-   Executor.Run;
-exception
-   when E : others =>
-      Logger.Put ("Caught some exception: ");
-      Logger.Put_Line (Safir.Dob.Typesystem.Utilities.From_Utf_8 (Ada.Exceptions.Exception_Name (E)));
+   begin
+      Safir.Sw_Reports.Sw_Report.Enable_Crash_Reporting;
+      Executor.Run;
+   exception
+      when E : others =>
+         Logger.Put ("Caught some exception: ");
+         Logger.Put_Line (Safir.Dob.Typesystem.Utilities.From_Utf_8 (Ada.Exceptions.Exception_Name (E)));
+   end;
+   Safir.Sw_Reports.Sw_Report.Stop;
 end Dose_Test_Ada;

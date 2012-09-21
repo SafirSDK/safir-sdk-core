@@ -28,6 +28,7 @@ namespace dose_test_dotnet
     {
         static void Main(string[] args)
         {
+            Safir.SwReports.SwReport.EnableCrashReporting();
 
             System.Console.WriteLine("Starting");
             try
@@ -39,6 +40,10 @@ namespace dose_test_dotnet
             {
                 Logger.Instance.WriteLine("Caught Exception! Contents of exception is:");
                 Logger.Instance.WriteLine(e);
+            }
+            finally
+            {
+                Safir.SwReports.SwReport.Stop();
             }
 
             System.Console.WriteLine("Exiting");

@@ -25,11 +25,14 @@
 #include <iostream>
 #include "Executor.h"
 #include "Logger.h"
+#include <Safir/SwReports/SwReport.h>
 
 
 
 int main(int argc, char* argv[])
 {
+    Safir::SwReports::SwReportStarter starter;
+
     const std::vector<std::string> arguments(&argv[0],&argv[argc]);
 
     std::wcout << "Starting" << std::endl;
