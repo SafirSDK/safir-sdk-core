@@ -89,7 +89,7 @@
               </member>
               <member>
                 <name>SleepDuration</name>
-                <value>30</value>
+                <value>10</value>
               </member>
             </members>
           </object>

@@ -33,6 +33,7 @@
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/DistributionChannelParameters.h>
 #include <DoseTest/Parameters.h>
+#include <boost/thread.hpp>
 
 #include <iostream>
 
@@ -50,42 +51,6 @@ public:
         {
             m_sockets.push_back(SocketPtr(new boost::asio::ip::tcp::socket(ioService)));
         }
-
-#if 0
-        // Port and address must correspond to what is used by the partners
-        const std::wstring multicastAddr = DoseTest::Parameters::TestMulticastAddress();
-        
-        //Set up address
-        const boost::asio::ip::address addr = 
-            boost::asio::ip::address::from_string(Safir::Dob::Typesystem::Utilities::ToUtf8
-                                                  (multicastAddr));
-        const unsigned short port = 31789;
-        const boost::asio::ip::udp::endpoint endpoint(addr, port);
-        
-        m_socket.open(endpoint.protocol());
-        
-        const int ttl = Safir::Dob::NodeParameters::RoutingHops();
-        m_socket.set_option(boost::asio::ip::multicast::hops(ttl));
-        
-        std::wcout << "Opening socket for multicast send. Multicast address " << multicastAddr << ", port " << port << "." << std::endl;
-        //if (multicastNic.empty())
-        {
-            std::wcout << "NIC is not set which means that the system default interface will be used" << std::endl;
-        }
-        /*else
-          {
-          std::wcout << "Used NIC: " << Safir::Dob::Typesystem::Utilities::ToWstring(multicastNic) << std::endl;
-          }
-          
-          if (!multicastNic.empty())
-          {
-          boost::asio::ip::address_v4 local_interface =
-          boost::asio::ip::address_v4::from_string(multicastNic);
-          boost::asio::ip::multicast::outbound_interface option(local_interface);
-          m_socket.set_option(option);
-          }*/
-        m_socket.connect(endpoint);
-#endif
     }
 
     void Open(const std::string& address0, const short port0,
@@ -115,9 +80,16 @@ public:
     {
         Safir::Dob::Typesystem::BinarySerialization binary;
         Safir::Dob::Typesystem::Serialization::ToBinary(msg, binary);
-        SendInternal(binary,0);
-        SendInternal(binary,1);
-        SendInternal(binary,2);
+        if (msg->Partner().IsNull())
+        {
+            SendInternal(binary,0);
+            SendInternal(binary,1);
+            SendInternal(binary,2);
+        }
+        else
+        {
+            SendInternal(binary,msg->Partner().GetVal().GetRawValue());
+        }
     }
 
 private:
@@ -130,7 +102,6 @@ private:
             boost::asio::ip::address::from_string(address);
 
         const boost::asio::ip::tcp::endpoint endpoint(addr, port);
-
         socket->connect(endpoint);
 
     }
@@ -139,6 +110,25 @@ private:
                       const int which)
     {
         boost::asio::write(*m_sockets[which], boost::asio::buffer(&binary[0], binary.size()));
+
+        try
+        {
+            //        std::wcout << "Sent action to " << which << ", waiting for ok" << std::endl;
+            char reply[3];
+            boost::asio::read(*m_sockets[which],
+                              boost::asio::buffer(reply, 3));
+            if (reply != std::string("ok"))
+            {
+                std::wcout << "Got unexpected reply: '" << std::wstring(reply,reply+3) << "'" << std::endl;
+                throw std::logic_error("Got unexpected reply!");
+            }
+        }
+        catch (const boost::system::system_error&)
+        {
+            std::wcout << "reading failed" << std::endl;
+        }
+
+        boost::this_thread::sleep(boost::posix_time::milliseconds(50));
     }
 
     boost::asio::io_service& m_ioService;

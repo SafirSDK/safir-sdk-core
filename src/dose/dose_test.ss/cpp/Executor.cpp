@@ -148,48 +148,6 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
 {
     switch (action->ActionKind().GetVal())
     {
-#if 0
-    case DoseTest::ActionEnum::Activate:
-        {
-            if (action->Identifier() == m_identifier)
-            {
-                m_defaultContext = action->Context().GetVal();
-                std::wcout << "Activating (default context is " << m_defaultContext << ")" << std::endl;
-                if (!m_isActive)
-                {
-                    m_controlConnection.RegisterEntityHandler(m_partnerEntityId.GetTypeId(),
-                                                              Safir::Dob::Typesystem::HandlerId(m_instance),
-                                                              Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
-                                                              this);
-                    m_controlConnection.RegisterServiceHandler(DoseTest::Dump::ClassTypeId,
-                        Safir::Dob::Typesystem::HandlerId(m_instance),this);
-                }
-                DoseTest::PartnerPtr partner = DoseTest::Partner::Create();
-                partner->Incarnation() = 0;
-                partner->Identifier() = m_identifier;
-                m_controlConnection.SetAll(partner, m_partnerEntityId.GetInstanceId(),
-                                           Safir::Dob::Typesystem::HandlerId(m_instance));
-                m_isActive = true;
-            }
-        }
-        break;
-
-    case DoseTest::ActionEnum::Deactivate:
-        {
-            if (action->Identifier() == m_identifier)
-            {
-                std::wcout << "Deactivating" << std::endl;
-                m_testConnection.Close();
-
-                m_controlConnection.Delete(m_partnerEntityId, Safir::Dob::Typesystem::HandlerId(m_instance));
-                m_controlConnection.UnregisterHandler(m_partnerEntityId.GetTypeId(),Safir::Dob::Typesystem::HandlerId(m_instance));
-
-                m_controlConnection.UnregisterHandler(DoseTest::Dump::ClassTypeId,Safir::Dob::Typesystem::HandlerId(m_instance));
-                m_isActive = false;
-            }
-        }
-        break;
-#endif
     case DoseTest::ActionEnum::Reset:
         {
             if (m_isActive)

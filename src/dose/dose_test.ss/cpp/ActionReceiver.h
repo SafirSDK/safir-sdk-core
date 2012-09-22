@@ -140,14 +140,36 @@ private:
             DoseTest::ActionPtr action =
                 boost::static_pointer_cast<DoseTest::Action>
                 (Safir::Dob::Typesystem::Serialization::ToObject(m_data));
+
+            //std::wcout << "Got an action " << std::endl;
             
-            m_actionCallback(action);
-            
+            const bool actionAfterAck = action->ActionKind() == DoseTest::ActionEnum::Sleep;
+
+            if (!actionAfterAck)
+            {
+                m_actionCallback(action);
+            }
+
+            try
+            {
+                //std::wcout << "writing ok" << std::endl;
+                boost::asio::write(*m_socket, boost::asio::buffer("ok", 3));
+            }
+            catch (const boost::system::system_error&)
+            {
+                std::wcout << "writing failed" << std::endl;
+            }
+
             //start next receive
             m_socket->async_receive(boost::asio::buffer(&m_data[0], BLOB_HEADER_SIZE),
                                     boost::bind(&ActionReceiver::HandleRead, this,
                                                 boost::asio::placeholders::error,
                                                 boost::asio::placeholders::bytes_transferred));
+
+            if (actionAfterAck)
+            {
+                m_actionCallback(action);
+            }
         }
         else
         {

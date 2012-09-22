@@ -662,7 +662,7 @@ def main():
         results.check_output(parameters)
 
         if results.num_tc_failed == 0:
-            print "== No failed testcases!"
+            print "== All tests were successful!!"
         else:
             print "!!",results.num_tc_failed, "testcases appear to have failed!"
 

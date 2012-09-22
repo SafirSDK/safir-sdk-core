@@ -114,7 +114,7 @@ Sequencer::Sequencer(const int startTc,
                      boost::asio::io_service& ioService):
     m_ioService(ioService),
     m_actionSender(ioService),
-    m_partnerState(languages,contextId,m_actionSender,boost::bind(&Sequencer::PartnersReadyChanged,this)),
+    m_partnerState(languages,contextId,m_actionSender,boost::bind(&Sequencer::PostTick,this)),
     m_currentCaseNo(startTc),
     m_currentActionNo(0),
     m_stopTc(stopTc),
@@ -138,7 +138,6 @@ Sequencer::Sequencer(const int startTc,
     }
 
     m_connection.Attach();
-    m_ioService.post(boost::bind(&Sequencer::Tick,this));
 }
 
 
@@ -237,7 +236,7 @@ void Sequencer::ExecuteCurrentAction()
 
         m_actionSender.Send(m_currentAction);
 
-
+        /*
         if (m_currentAction->ActionKind() == DoseTest::ActionEnum::CheckReferences ||
             m_currentAction->ActionKind() == DoseTest::ActionEnum::CloseAndCheckReferences ||
             m_currentAction->ActionKind() == DoseTest::ActionEnum::RunGarbageCollector)
@@ -249,13 +248,13 @@ void Sequencer::ExecuteCurrentAction()
             std::wcout << "Sleeping " << sleepDuration << " seconds" << std::endl;
 
             boost::this_thread::sleep(boost::posix_time::seconds(sleepDuration));
-        }
+            }*/
     }
 }
 
 void Sequencer::SetState(const SequencerStates::State newState)
 {
-    std::wcout << "Changing state from " << SequencerStates::StateNames[m_state] << " to " << SequencerStates::StateNames[newState] << std::endl;
+    //std::wcout << "Changing state from " << SequencerStates::StateNames[m_state] << " to " << SequencerStates::StateNames[newState] << std::endl;
     m_state = newState;
     if (newState == SequencerStates::CleaningUpTestcase)
     {
@@ -265,7 +264,7 @@ void Sequencer::SetState(const SequencerStates::State newState)
 
 void Sequencer::Tick()
 {
-    std::wcout << "Tick!" << std::endl;
+    //std::wcout << "Tick!" << std::endl;
     if (!m_noTimeout)
     {
         const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
@@ -342,8 +341,7 @@ void Sequencer::Tick()
                 m_currentAction=m_currentCase->TestCaseSetupActions()[m_currentActionNo].GetPtr();
                 ExecuteCurrentAction();
 
-                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
-                m_ioService.post(boost::bind(&Sequencer::Tick,this));
+                PostTick();
             }
         }
         break;
@@ -365,14 +363,13 @@ void Sequencer::Tick()
                 m_currentAction=m_currentCase->TestActions()[m_currentActionNo].GetPtr();
                 ExecuteCurrentAction();
 
-                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
-                m_ioService.post(boost::bind(&Sequencer::Tick,this));
+                PostTick();
             }
         }
         break;
     case SequencerStates::CleaningUpTestcase:
         {
-            boost::this_thread::sleep(boost::posix_time::milliseconds(300));
+            boost::this_thread::sleep(boost::posix_time::milliseconds(150));
             std::wcout << "Test completed" <<std::endl;
             SetState(SequencerStates::ResetPartners);
             m_currentCaseNo++;
@@ -398,8 +395,7 @@ void Sequencer::Tick()
 
     if (m_state != oldState)
     {
-        boost::this_thread::sleep(boost::posix_time::milliseconds(100));
-        m_ioService.post(boost::bind(&Sequencer::Tick,this));
+        PostTick();
     }
 }
 
@@ -460,10 +456,10 @@ Sequencer::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 
     m_dumpRequestIds.erase(responseProxy.GetRequestId());
 
-    m_ioService.post(boost::bind(&Sequencer::Tick,this));
+    PostTick();
 }
 
-void Sequencer::PartnersReadyChanged()
+void Sequencer::PostTick()
 {
     m_ioService.post(boost::bind(&Sequencer::Tick,this));
 }

@@ -104,7 +104,7 @@ private:
     virtual void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
     virtual void OnNotRequestOverflow() {}
 
-    void PartnersReadyChanged();
+    void PostTick();
 
     void Tick();
 

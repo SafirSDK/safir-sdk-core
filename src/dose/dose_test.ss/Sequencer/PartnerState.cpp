@@ -137,7 +137,7 @@ PartnerState::HandlePartnerChange(const DoseTest::PartnerPtr & partner, const in
     {
         if (!partner->Incarnation().IsNull() && partner->Incarnation() > thePartner.m_incarnation)
         {
-            std::wcout << "Partner " << instance << " is ready" << std::endl;
+            //std::wcout << "Partner " << instance << " is ready" << std::endl;
             thePartner.SetReady(true);
             thePartner.m_incarnation = partner->Incarnation();
         }

@@ -8,10 +8,6 @@
             <type>DoseTest.ActionEnum</type>
         </member>
         <member>
-            <name>SeqNbr</name>
-            <type>Int32</type>
-        </member>
-        <member>
             <name>Partner</name>
             <type>ChannelId</type>
         </member>
@@ -22,11 +18,6 @@
         <member>
             <name>Consumer</name>
             <type>Int32</type>
-        </member>
-        <member>
-            <name>Identifier</name>
-            <type>String</type>
-            <maxLength>10</maxLength>
         </member>
         <member>
             <name>PrintString</name>
