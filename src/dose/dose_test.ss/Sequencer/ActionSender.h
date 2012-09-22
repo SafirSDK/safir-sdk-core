@@ -154,6 +154,7 @@ private:
         case DoseTest::ActionEnum::SetChanges:
         case DoseTest::ActionEnum::UnregisterHandler:
         case DoseTest::ActionEnum::UpdateRequest:
+        case DoseTest::ActionEnum::ResumePostponed:
             boost::this_thread::sleep(boost::posix_time::milliseconds(50));
             break;
         default:
