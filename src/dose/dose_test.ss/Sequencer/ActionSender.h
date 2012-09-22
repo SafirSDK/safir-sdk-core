@@ -74,6 +74,7 @@ public:
         Safir::Dob::Typesystem::BinarySerialization binary;
         Safir::Dob::Typesystem::Serialization::ToBinary(msg, binary);
         SendInternal(binary,which);
+        SleepyTime(msg->ActionKind());
     }
 
     void Send(const DoseTest::ActionPtr& msg)
@@ -90,6 +91,8 @@ public:
         {
             SendInternal(binary,msg->Partner().GetVal().GetRawValue());
         }
+
+        SleepyTime(msg->ActionKind());
     }
 
 private:
@@ -127,8 +130,37 @@ private:
         {
             std::wcout << "reading failed" << std::endl;
         }
+    }
 
-        boost::this_thread::sleep(boost::posix_time::milliseconds(50));
+    void SleepyTime(const DoseTest::ActionEnum::Enumeration actionKind)
+    {
+
+        switch (actionKind)
+        {
+        case DoseTest::ActionEnum::CreateRequest:
+        case DoseTest::ActionEnum::Delete:
+        case DoseTest::ActionEnum::DeleteAllInstances:
+        case DoseTest::ActionEnum::DeleteRequest:
+        case DoseTest::ActionEnum::InitialSet:
+        case DoseTest::ActionEnum::InjectChanges:
+        case DoseTest::ActionEnum::InjectDelete:
+        case DoseTest::ActionEnum::RegisterEntityHandler:
+        case DoseTest::ActionEnum::RegisterEntityHandlerInjection:
+        case DoseTest::ActionEnum::RegisterEntityHandlerPending:
+        case DoseTest::ActionEnum::RegisterServiceHandler:
+        case DoseTest::ActionEnum::RegisterServiceHandlerPending:
+        case DoseTest::ActionEnum::SendMessage:
+        case DoseTest::ActionEnum::SendResponse:
+        case DoseTest::ActionEnum::ServiceRequest:
+        case DoseTest::ActionEnum::SetAll:
+        case DoseTest::ActionEnum::SetChanges:
+        case DoseTest::ActionEnum::UnregisterHandler:
+        case DoseTest::ActionEnum::UpdateRequest:
+            boost::this_thread::sleep(boost::posix_time::milliseconds(50));
+            break;
+        default:
+            break;
+        }
     }
 
     boost::asio::io_service& m_ioService;

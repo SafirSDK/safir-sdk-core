@@ -6,8 +6,6 @@
     <value>Sleep</value>
 
     <!-- **** Executor Actions **** -->
-    <value>Activate</value>
-    <value>Deactivate</value>
     <value>Reset</value>
     <value>CheckReferences</value>
     <value>CloseAndCheckReferences</value>
@@ -80,10 +78,5 @@
     <value>StopBackdoor</value>
     <value>IsBackdoorStarted</value>
 
-
-    <!-- dob-v4 -->
-<!--
-    <value>InhibitPoolScanFlag</value>
--->
   </values>
 </enumeration>

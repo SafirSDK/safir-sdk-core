@@ -68,7 +68,7 @@ namespace
         //we're only supposed to fill it if it is null
         if (cont.IsNull())
         {
-            std::wcout << "Filling a binary member!" << std::endl;
+            std::wcout << " - Filling a binary member!" << std::endl;
             Safir::Dob::Typesystem::Binary b;
             const size_t size = 10 * 1024 * 1024; //10 Mb of data!
             b.reserve(size);
@@ -159,8 +159,7 @@ bool Sequencer::PrepareTestcaseSetup()
         }
         else if (!m_currentCase->TestConfig().IsNull() && m_currentCase->TestConfig().GetVal() != m_testConfig)
         {
-            std::wcout << std::endl
-                       << "Skipping testcase " << m_currentCaseNo << " since it isn't applicable in "
+            std::wcout << "Skipping testcase " << m_currentCaseNo << " since it isn't applicable in "
                        << DoseTest::TestConfigEnum::ToString(m_testConfig) << " mode." << std::endl;
             ++m_currentCaseNo;
         }
@@ -175,8 +174,7 @@ bool Sequencer::PrepareTestcaseSetup()
         return false;
     }
 
-    std::wcout << std::endl
-               << "Running testcase: " << m_currentCaseNo << std::endl;
+    std::wcout << "Running testcase: " << m_currentCaseNo << std::endl;
 
     if (!m_currentCase->AlwaysMarkAsFailed().IsNull() && m_currentCase->AlwaysMarkAsFailed().GetVal())
     {
@@ -222,7 +220,7 @@ void Sequencer::ExecuteCurrentAction()
 {
     if (m_currentAction->Partner().IsNull() && m_currentAction->ActionKind() == DoseTest::ActionEnum::Sleep)
     {
-        std::wcout << "Sleeping " << m_currentAction->SleepDuration() << " seconds"<<std::endl;
+        std::wcout << " - Sleeping " << m_currentAction->SleepDuration() << " seconds"<<std::endl;
         boost::this_thread::sleep(boost::posix_time::microseconds
                                   (static_cast<boost::int64_t>(m_currentAction->SleepDuration() * 1e6)));
     }
@@ -369,8 +367,7 @@ void Sequencer::Tick()
         break;
     case SequencerStates::CleaningUpTestcase:
         {
-            boost::this_thread::sleep(boost::posix_time::milliseconds(150));
-            std::wcout << "Test completed" <<std::endl;
+            boost::this_thread::sleep(boost::posix_time::milliseconds(50));
             SetState(SequencerStates::ResetPartners);
             m_currentCaseNo++;
         }
