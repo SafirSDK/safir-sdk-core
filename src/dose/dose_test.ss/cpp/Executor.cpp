@@ -76,8 +76,7 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_controlDispatcher(boost::bind(&Executor::DispatchControlConnection,this), m_ioService),
     m_actionReceiver(m_ioService, boost::bind(&Executor::HandleAction,this,_1)),
     m_callbackActions(Safir::Dob::CallbackId::Size()),
-    m_defaultContext(0),
-    m_lastRecSeqNbr(0)
+    m_defaultContext(0)
 {
     m_controlConnection.Open(m_controlConnectionName, m_instanceString, 0, this, &m_controlDispatcher);
 
@@ -98,18 +97,6 @@ void Executor::OnStopOrder()
 void Executor::HandleAction(DoseTest::ActionPtr action)
 
 {
-    //TODO: need this?    ExecuteCallbackActions(Safir::Dob::CallbackId::OnMessage);
-
-    if (!action->SeqNbr().IsNull())
-    {
-        if (action->SeqNbr() != m_lastRecSeqNbr + 1)
-        {
-            std::wcout << "Seems an action from the sequencer is lost! Expected " 
-                       << m_lastRecSeqNbr << " but got " << action->SeqNbr() << std::endl; 
-        }
-        m_lastRecSeqNbr = action->SeqNbr().GetVal();
-    }
-
     if (!action->Partner().IsNull() && action->Partner().GetVal() != Safir::Dob::Typesystem::ChannelId(m_instance))
     {
         // Not meant for this partner

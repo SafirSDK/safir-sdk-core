@@ -44,8 +44,6 @@ class ActionSender
 public:
     explicit ActionSender(boost::asio::io_service& ioService)
         : m_ioService(ioService)
-        , m_seqNbr(0)
-          
     {
         for (int i = 0; i < 3; ++i)
         {
@@ -159,14 +157,13 @@ private:
             boost::this_thread::sleep(boost::posix_time::milliseconds(50));
             break;
         default:
+            boost::this_thread::sleep(boost::posix_time::milliseconds(10));
             break;
         }
     }
 
     boost::asio::io_service& m_ioService;
     std::vector<SocketPtr > m_sockets;
-
-    Safir::Dob::Typesystem::Int32 m_seqNbr;
 };
 
 #endif
