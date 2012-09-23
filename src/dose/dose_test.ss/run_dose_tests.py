@@ -290,7 +290,7 @@ class Results:
         res = len(diff0) == 0 and len(diff1) == 0 and len(diff2) == 0
         output = ""
         if not res:
-            output += "(A line with a '-' in front means that it is <b>missing</b>, and one with a '+' in front means that it has been added, compared to the expected result.)\n\n"
+            output += "(A line with a '-' in front means that it is missing, and one with a '+' in front means that it has been added, compared to the expected result.)\n\n"
             if len(diff0) != 0:
                 output += "Partner 0 diff:\n" + escape("".join(diff0)) + "\n\n"
             if len(diff1) != 0:
@@ -665,7 +665,7 @@ def main():
             print "== All tests were successful!!"
         else:
             print "!!",results.num_tc_failed, "testcases appear to have failed!"
-            return 1
+
         if results.num_tc_performed<20:
             print "!! Less than 20 testcases seem to have been performed, this is a sign of trouble!"
             return 1
