@@ -25,22 +25,21 @@
 #ifndef __ACTIONSENDER_H__
 #define __ACTIONSENDER_H__
 
+#include <boost/asio.hpp>
+#ifdef SendMessage
+#undef SendMessage
+#endif
+
 #include <Safir/Dob/Consumer.h>
 #include <Safir/Dob/SecondaryConnection.h>
 #include <DoseTest/Action.h>
-#include <boost/asio.hpp>
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/DistributionChannelParameters.h>
 #include <DoseTest/Parameters.h>
 #include <boost/thread.hpp>
-
 #include <iostream>
-
-#ifdef SendMessage
-#undef SendMessage
-#endif
 
 class ActionSender
     : private boost::noncopyable
