@@ -116,7 +116,7 @@ private:
     }
 
     void HandleRead(const boost::system::error_code& error,
-                    const size_t bytes_transferred)
+                    const size_t /*bytes_transferred*/)
     {
         if (!error)
         {
@@ -126,12 +126,13 @@ private:
                 m_data.resize(blobSize);
             }
 
-            boost::system::error_code receiveError;
-            boost::asio::read(*m_socket,
-                              boost::asio::buffer(&m_data[BLOB_HEADER_SIZE], blobSize - BLOB_HEADER_SIZE),
-                              receiveError);
-            
-            if (receiveError)
+
+            try
+            {
+                boost::asio::read(*m_socket,
+                                  boost::asio::buffer(&m_data[BLOB_HEADER_SIZE], blobSize - BLOB_HEADER_SIZE));
+            }
+            catch (const boost::system::system_error&)
             {
                 std::wcout << "Error in HandleRead receive: " << error << std::endl;
                 Close();

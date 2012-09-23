@@ -29,6 +29,7 @@
 #include <Safir/Dob/SecondaryConnection.h>
 #include <DoseTest/Action.h>
 #include <boost/asio.hpp>
+#include <boost/noncopyable.hpp>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/DistributionChannelParameters.h>
@@ -37,8 +38,12 @@
 
 #include <iostream>
 
+#ifdef SendMessage
+#undef SendMessage
+#endif
 
 class ActionSender
+    : private boost::noncopyable
 {
     typedef boost::shared_ptr<boost::asio::ip::tcp::socket> SocketPtr;
 public:
@@ -155,10 +160,10 @@ private:
         case DoseTest::ActionEnum::UnregisterHandler:
         case DoseTest::ActionEnum::UpdateRequest:
         case DoseTest::ActionEnum::ResumePostponed:
-            boost::this_thread::sleep(boost::posix_time::milliseconds(50));
+            boost::this_thread::sleep(boost::posix_time::milliseconds(100));
             break;
         default:
-            boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+            boost::this_thread::sleep(boost::posix_time::milliseconds(20));
             break;
         }
     }

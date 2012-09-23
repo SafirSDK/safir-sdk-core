@@ -665,7 +665,7 @@ def main():
             print "== All tests were successful!!"
         else:
             print "!!",results.num_tc_failed, "testcases appear to have failed!"
-
+            return 1
         if results.num_tc_performed<20:
             print "!! Less than 20 testcases seem to have been performed, this is a sign of trouble!"
             return 1
