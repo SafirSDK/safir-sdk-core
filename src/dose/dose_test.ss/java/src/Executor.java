@@ -24,18 +24,20 @@
 ******************************************************************************/
 import com.saabgroup.dosetest.Action;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
+import java.net.*;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
+import com.saabgroup.safir.dob.typesystem.InstanceId;
+import com.saabgroup.safir.dob.typesystem.HandlerId;
+import com.saabgroup.safir.dob.typesystem.EntityId;
+
 
 class Executor implements
         com.saabgroup.safir.dob.StopHandler,
-        com.saabgroup.safir.dob.MessageSubscriber,
+        com.saabgroup.safir.dob.EntitySubscriber,
         com.saabgroup.safir.dob.EntityHandler,
         com.saabgroup.safir.dob.ServiceHandler {
 
@@ -55,16 +57,7 @@ class Executor implements
         m_testDispatcher = new Dispatcher(m_synchronizer);
         m_testStopHandler = new StopHandler();
 
-        if (com.saabgroup.safir.dob.DistributionChannelParameters.getDistributionChannels(0).multicastAddress().getVal().equals("127.0.0.1")){
-            System.out.println("System appears to be Standalone, not listening for multicasted test actions");
-        }
-        else {
-            if (args.length > 1) {
-                m_multicastNic = args[1];
-            }
-
-            m_actionReceiver = new ActionReceiver(m_synchronizer, m_multicastNic);
-        }
+        m_actionReceiver = new ActionReceiver(m_synchronizer);
     }
 
     public void run() throws InterruptedException {
@@ -75,13 +68,10 @@ class Executor implements
 
         m_controlConnection.open(m_controlConnectionName, m_instanceString, 0, this, m_controlDispatcher);
 
-        //subscribe to messages going to everyone and to me.
-        m_controlConnection.subscribeMessage(com.saabgroup.dosetest.Action.ClassTypeId, new com.saabgroup.safir.dob.typesystem.ChannelId(m_instance), this);
-        m_controlConnection.subscribeMessage(com.saabgroup.dosetest.Action.ClassTypeId, new com.saabgroup.safir.dob.typesystem.ChannelId(), this);
-
-        if (m_actionReceiver != null) {
-            m_actionReceiver.start();
-        }
+        m_controlConnection.subscribeEntity(com.saabgroup.dosetest.Sequencer.ClassTypeId,this);
+        //if (m_actionReceiver != null) {
+            //m_actionReceiver.start();
+        //}
 
         System.out.println(m_identifier + ":" + m_instance + " Started");
         boolean DispatchControl;
@@ -174,12 +164,12 @@ class Executor implements
                 m_isDone = true;
             }
         }
-
+        /*
         if (m_actionReceiver != null)
         {
             m_actionReceiver.interrupt();
             m_actionReceiver.join();
-        }
+            }*/
     }
 
     private void executeAction(com.saabgroup.dosetest.Action action) {
@@ -467,10 +457,88 @@ class Executor implements
         }
     }
 
+    void handleSequencerState(com.saabgroup.dosetest.Sequencer sequencerState) {
+        boolean activate = sequencerState != null && sequencerState.partners().get(m_instance).getVal().equals(m_identifier);
+
+
+        if (activate == m_isActive)
+        {
+            //already active or not active
+            return;
+        }
+
+        if (activate)
+        {
+
+            m_defaultContext = sequencerState.context().getVal();
+            System.out.println("Activating (default context is " + m_defaultContext + ")");
+
+
+            m_controlConnection.registerEntityHandler(m_partnerEntityId.getTypeId(),
+                                                      new com.saabgroup.safir.dob.typesystem.HandlerId(m_instance),
+                                                      com.saabgroup.safir.dob.InstanceIdPolicy.HANDLER_DECIDES_INSTANCE_ID,
+                                                      this);
+            m_controlConnection.registerServiceHandler(com.saabgroup.dosetest.Dump.ClassTypeId,
+                                                       new com.saabgroup.safir.dob.typesystem.HandlerId(m_instance),
+                                                       this);
+
+            m_actionReceiver.open();
+
+            com.saabgroup.dosetest.Partner partner = new com.saabgroup.dosetest.Partner();
+            partner.identifier().setVal(m_identifier);
+            partner.port().setVal((int) m_actionReceiver.getPort());
+
+            try {
+                InstanceId instance = new InstanceId(com.saabgroup.safir.dob.ThisNodeParameters.getNodeNumber());
+                EntityId eid = new EntityId(com.saabgroup.safir.dob.NodeInfo.ClassTypeId,instance);
+                partner.address().setVal(((com.saabgroup.safir.dob.NodeInfo)
+                                          m_controlConnection.read(eid).getEntity()).ipAddress().getVal());
+            }
+            catch (com.saabgroup.safir.dob.NotFoundException e) {
+
+            }
+
+            m_controlConnection.setAll(partner, m_partnerEntityId.getInstanceId(),
+                                       new HandlerId(m_instance));
+
+            m_isActive = true;
+
+        }
+        else
+        {
+            System.out.println("Deactivating");
+
+            m_actionReceiver.close();
+
+            m_testConnection.close();
+
+            m_controlConnection.delete(m_partnerEntityId, new HandlerId(m_instance));
+            m_controlConnection.unregisterHandler(m_partnerEntityId.getTypeId(), new HandlerId(m_instance));
+
+            m_controlConnection.unregisterHandler(com.saabgroup.dosetest.Dump.ClassTypeId, new HandlerId(m_instance));
+            m_isActive = false;
+            Logger.instance().clear();
+        }
+
+
+    }
+
     //
-    // MessageSubscriber Members
+    // EntitySubscriber Members
     //
-    @Override
+    public void onNewEntity(com.saabgroup.safir.dob.EntityProxy entityProxy) {
+        handleSequencerState((com.saabgroup.dosetest.Sequencer)entityProxy.getEntity());
+    }
+
+    public void onUpdatedEntity(com.saabgroup.safir.dob.EntityProxy entityProxy) {
+        handleSequencerState((com.saabgroup.dosetest.Sequencer)entityProxy.getEntity());
+    }
+
+    public void onDeletedEntity(com.saabgroup.safir.dob.EntityProxy entityProxy,
+                                boolean deletedByOwner) {
+        handleSequencerState(null);
+    }
+    /*@Override
     public void onMessage(com.saabgroup.safir.dob.MessageProxy messageProxy) {
         executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_MESSAGE);
 
@@ -478,7 +546,7 @@ class Executor implements
 
         HandleAction(action);
     }
-
+    */
     //
     // RevokedRegistrationBase Members
     //
@@ -619,90 +687,89 @@ class Executor implements
     //
     // MCSocket subclass
     //
-    private class ActionReceiver extends Thread {
+    private class ActionReceiver {
 
-        public ActionReceiver(Synchronizer synchronizer, String multicastNic) {
+        public ActionReceiver(Synchronizer synchronizer) {
             super();
             m_synchronizer = synchronizer;
-            m_multicastNic = multicastNic;
-            Init();
         }
 
-        @Override
-        public void interrupt() {
-            super.interrupt();
-            m_socket.close();
-        }
-
-        @Override
-        public void run() {
-            while(!isInterrupted()) {
+        public void open() {
+            short startPort = 30000;
+            for (short i = 0; i < 100; ++i) {
                 try {
-                    m_socket.receive(m_recv);
+                    m_acceptor = new ServerSocket(startPort + i);
+                    System.out.println("accepting connections on port " + (startPort + i));
+                    m_port = (short)(startPort + i);
+                    break;
+                }
+                catch (java.io.IOException e) {
+                    System.out.println("Failed to accept on port " + (startPort + i) +  ": " + e);
+                }
+            }
 
-                    byte[] data = m_recv.getData();
-                    int length = m_recv.getLength();
-                    int offset = m_recv.getOffset();
-                    java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(length);
-                    blob.clear();
-  //                  System.out.println("DATA Length = " + length + " Offset = " + offset);
-                    blob.put(data, offset, length);
-                    com.saabgroup.safir.dob.typesystem.Object obj = com.saabgroup.safir.dob.typesystem.ObjectFactory.getInstance().createObject(blob);
+            if (m_acceptor == null) {
+                throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Failed to open any useful port!");
+            }
 
-//                    com.saabgroup.safir.dob.typesystem.BlobOperations.getTypeId(blob);
-                    com.saabgroup.dosetest.Action action = (com.saabgroup.dosetest.Action)obj;
+        }
+        public void close() {
+        }
 
-                    synchronized (m_actionQueue) {
-                        m_actionQueue.add(action);
+        public short getPort() {
+            return m_port;
+        }
+
+        private class ReceiverThread extends Thread {
+            @Override
+            public void interrupt() {
+                super.interrupt();
+                if (m_socket != null) {
+                    try {
+                        m_socket.close();
                     }
-
-                } catch (IOException ex) {
-                    if (!isInterrupted())
-                    {
-                        java.util.logging.Logger.getLogger(Executor.class.getName()).log(Level.SEVERE, null, ex);
+                    catch (IOException ex) {
                     }
                 }
 
-                synchronized (m_synchronizer) {
-                    m_synchronizer.MC = true;
-                    m_synchronizer.notify();
+                if (m_acceptor != null) {
+                    try {
+                        m_acceptor.close();
+                    }
+                    catch (IOException ex) {
+                    }
                 }
 
             }
-        }
 
-        private void Init() {
-            try {
-                InetAddress group = InetAddress.getByName(com.saabgroup.dosetest.Parameters.getTestMulticastAddress());
+            @Override
+                public void run() {
+                while(!isInterrupted()) {
+                    try {
+                        m_socket = m_acceptor.accept();
+                    } catch (IOException ex) {
+                        if (!isInterrupted())
+                        {
+                            java.util.logging.Logger.getLogger(Executor.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
 
-                m_socket = new MulticastSocket(port);
-
-                if (m_multicastNic != null) {
-                    System.out.println("Used NIC: " + m_multicastNic);
-                    m_socket.setInterface(InetAddress.getByName(m_multicastNic));
-                } else {
-                    System.out.println("NIC is not set. Windows: Listen on all interfaces. Linux: Listen on default interface.");
+                    synchronized (m_synchronizer) {
+                        m_synchronizer.MC = true;
+                        m_synchronizer.notify();
+                    }
                 }
-
-                m_socket.joinGroup(group);
-
-                System.out.println("Joined socket to group for multicast reception. Multicast address " + group
-                        + ", port " + port + ".");
-            } catch (UnknownHostException ex) {
-                java.util.logging.Logger.getLogger(Executor.class.getName()).log(Level.SEVERE, "Unknown host.", ex);
-                java.lang.Runtime.getRuntime().exit(-1);
-            } catch (IOException ex) {
-                java.util.logging.Logger.getLogger(Executor.class.getName()).log(Level.SEVERE, "I/O exception", ex);
-                java.lang.Runtime.getRuntime().exit(-1);
             }
-
-
         }
+
         private final Synchronizer m_synchronizer;
-        private final int port = 31789;
-        private MulticastSocket m_socket;
-        private byte[] m_buf = new byte[65000];
-        private DatagramPacket m_recv = new DatagramPacket(m_buf, m_buf.length);
+        private ServerSocket m_acceptor;
+        private Socket m_socket;
+        private short m_port;
+        //        private final int port = 31789;
+        //private Socket m_socket = null;
+        //private byte[] m_buf = new byte[65000];
+        //private DatagramPacket m_recv = new DatagramPacket(m_buf, m_buf.length);
     }
     //
     // Data members

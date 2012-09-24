@@ -743,22 +743,7 @@ class Consumer implements
                         double secs = ((new java.util.Date()).getTime() - actionStartTime.getTime()) / 1000.0;
                         System.out.println("Time elapsed before I got an overflow was " + secs);
                         System.out.println("I managed to send "+ repeats + " times");
-                        if (secs > 28)
-                        {
-                            Logger.instance().println("WARNING: It took more than 28 seconds for me to get an overflow! (" +
-                                                      secs + "s)");
-                            Logger.instance().println("I managed to send " + repeats  + " times");
-                        }
-
                     }
-
-                    //sleep a very short while, to let dose_main empty
-                    //the message out queue. This hopefully reduces the tc 003
-                    //output differences
-                    try {
-                        Thread.sleep(1);
-                    }
-                    catch (InterruptedException e2) { }
 
                     repeat = false;
                 }
@@ -1129,9 +1114,9 @@ class Consumer implements
                                       + "  Request    = " + xml);
             Logger.instance().println();
 
-            
+
             if (!m_responseSenderDiscarded)
-            {                        
+            {
                 m_connection.setAll(req,
                                     entityRequestProxy.getInstanceId(),
                                     entityRequestProxy.getReceivingHandlerId());
