@@ -1251,16 +1251,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
 
                     std::wcout << "Time elapsed before I got an overflow was " <<secs << std::endl;
                     std::wcout << "I managed to send " << repeats << " times."<< std::endl;
-                    if (secs > 28)
-                    {
-                        lout << "WARNING: It took more than 28 seconds for me to get an overflow! (" << secs << "s)" << std::endl;
-                        lout << "I managed to send " << repeats << " times."<< std::endl;
-                    }
                 }
-                //sleep a very short while, to let dose_main empty
-                //the message out queue. This hopefully reduces the tc 003
-                //output differences
-                boost::this_thread::sleep(boost::posix_time::milliseconds(1));
                 repeat = false;
             }
         }

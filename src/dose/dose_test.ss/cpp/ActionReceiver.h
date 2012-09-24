@@ -49,15 +49,18 @@ public:
     
     void Open()
     {
+        using namespace boost::asio::ip;
+
         std::wcout << "Opening ActionReceiver" << std::endl;
         const short startPort = 30000;
         for (short i = 0; i < 100; ++i)
         {
             try
             {
-                m_acceptor.reset(new boost::asio::ip::tcp::acceptor(m_ioService,
-                                                                    boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 
-                                                                                                   startPort + i)));
+                m_acceptor.reset
+                    (new tcp::acceptor(m_ioService,
+                                       tcp::endpoint(tcp::v4(), 
+                                                     startPort + i)));
                 std::wcout << "accepting connections on port " << startPort + i << std::endl;
                 m_port = startPort + i;
                 break;
@@ -73,7 +76,7 @@ public:
             throw std::logic_error("Failed to open any useful port!");
         }
 
-        m_socket.reset(new boost::asio::ip::tcp::socket(m_ioService));
+        m_socket.reset(new tcp::socket(m_ioService));
         m_acceptor->async_accept(*m_socket,
                                  boost::bind(&ActionReceiver::HandleAccept, this,
                                              boost::asio::placeholders::error));
