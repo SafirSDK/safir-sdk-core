@@ -59,6 +59,17 @@ public:
               const std::string& address1, const short port1,
               const std::string& address2, const short port2)
     {
+        if ((address0 == address1 && port0 == port1) ||
+            (address0 == address2 && port0 == port2) ||
+            (address2 == address1 && port2 == port1))
+        {
+            std::wcout << "Some partners claim to have the same address:port, which seems very unlikely to be correct:\n"
+                       << "  " << address0.c_str() << ":" << port0 << "\n"
+                       << "  " << address1.c_str() << ":" << port1 << "\n"
+                       << "  " << address2.c_str() << ":" << port2 << std::endl;
+            throw std::logic_error("Some partners claim to have the same address:port, which seems very unlikely to be correct");
+        }
+
         ConnectSocket(m_sockets[0],address0,port0);
         ConnectSocket(m_sockets[1],address1,port1);
         ConnectSocket(m_sockets[2],address2,port2);
