@@ -213,6 +213,12 @@ namespace Internal
                 : consumer(_consumer),
                   qPtr(_qPtr) {}
 
+            TmpQData(const TmpQData& other)
+                :consumer(other.consumer),
+                 qPtr(other.qPtr) {}
+
+            TmpQData& operator=(const TmpQData& other) {consumer = other.consumer; qPtr = other.qPtr; return *this;}
+
             ConsumerId consumer;
             QueuePtr  qPtr;
         };
