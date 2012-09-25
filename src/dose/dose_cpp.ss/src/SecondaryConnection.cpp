@@ -21,7 +21,18 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#if (defined _MSC_VER) && (_MSC_VER == 1400)
+// LibraryExceptions.h needs to be included first as a workaround for
+// a compiler bug in VS2005 
+#include <Safir/Dob/Typesystem/LibraryExceptions.h>
+#include <Safir/Dob/SecondaryConnection.h>
 
+#include <Safir/Dob/Internal/Interface.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Dob/NotOpenException.h>
+
+#include "Callbacks.h"
+#else
 #include <Safir/Dob/SecondaryConnection.h>
 
 #include <Safir/Dob/Internal/Interface.h>
@@ -30,6 +41,7 @@
 #include <Safir/Dob/NotOpenException.h>
 
 #include "Callbacks.h"
+#endif
 
 namespace Safir
 {
