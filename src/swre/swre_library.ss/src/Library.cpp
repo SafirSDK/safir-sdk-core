@@ -450,7 +450,6 @@ namespace Internal
     void
     Library::Stop()
     {
-        std::wcout << "Stopping" << std::endl;
         StopInternal();
 
         //CrashReporter gets stopped in thread, but if the thread was not running
