@@ -23,7 +23,7 @@
 *
 ******************************************************************************/
 import com.saabgroup.dosetest.Action;
-import java.io.IOException;
+import java.io.*;
 import java.net.*;
 import java.net.UnknownHostException;
 import java.util.Collections;
@@ -77,7 +77,7 @@ class Executor implements
         boolean DispatchControl;
         boolean DispatchTest;
         boolean StopOrder;
-        boolean MC;
+        Action ReceivedAction;
 
         while (!m_isDone) {
             synchronized (m_synchronizer) {
@@ -85,25 +85,20 @@ class Executor implements
                 while (!m_synchronizer.DispatchControl &&
                        !m_synchronizer.DispatchTest &&
                        !m_synchronizer.StopOrder &&
-                       !m_synchronizer.MC)
+                       m_synchronizer.ReceivedAction == null)
                 {
                     m_synchronizer.wait();
                 }
                 DispatchControl = m_synchronizer.DispatchControl;
                 DispatchTest = m_synchronizer.DispatchTest;
                 StopOrder = m_synchronizer.StopOrder;
-                MC = m_synchronizer.MC;
+                ReceivedAction = m_synchronizer.ReceivedAction;
 
                 m_synchronizer.DispatchControl = false;
                 m_synchronizer.DispatchTest = false;
                 m_synchronizer.StopOrder = false;
-                m_synchronizer.MC = false;
+                m_synchronizer.ReceivedAction = null;
             }
-
-            //                System.out.println("DispatchControl = " + DispatchControl);
-            //                System.out.println("MC = " + MC);
-            //                System.out.println("DispatchTest = " + DispatchTest);
-            //                System.out.println("StopOrder = " + StopOrder);
 
             if (DispatchControl) {
 
@@ -123,15 +118,17 @@ class Executor implements
 
             }
 
-            if (MC) {
-                com.saabgroup.dosetest.Action action;
-                while (!m_actionQueue.isEmpty()) {
+            if (ReceivedAction != null) {
+                boolean immediateAck = ReceivedAction.actionKind().getVal() == com.saabgroup.dosetest.ActionEnum.SLEEP;
 
-                    synchronized (m_actionQueue) {
-                        action = m_actionQueue.remove(0);
-                    }
-                    HandleAction(action);
+                if (immediateAck) {
+                    m_actionReceiver.actionHandled();
                 }
+                HandleAction(ReceivedAction);
+                if (!immediateAck) {
+                    m_actionReceiver.actionHandled();
+                }
+
 
 
             }
@@ -164,17 +161,16 @@ class Executor implements
                 m_isDone = true;
             }
         }
-        /*
+
         if (m_actionReceiver != null)
         {
-            m_actionReceiver.interrupt();
-            m_actionReceiver.join();
-            }*/
+            m_actionReceiver.close();
+        }
     }
 
     private void executeAction(com.saabgroup.dosetest.Action action) {
         switch (action.actionKind().getVal()) {
-            case ACTIVATE:
+            /*            case ACTIVATE:
                 if (action.identifier().getVal().equals(m_identifier)) {
                     m_defaultContext = action.context().getVal();
                     System.out.println("Activating (default context is " + m_defaultContext + ")");
@@ -208,7 +204,7 @@ class Executor implements
                             new com.saabgroup.safir.dob.typesystem.HandlerId(m_instance));
                 }
                 break;
-
+            */
             case RESET:
                 if (m_isActive) {
                     m_testConnection.close();
@@ -228,7 +224,12 @@ class Executor implements
                         com.saabgroup.safir.dob.EntityProxy ep = m_controlConnection.read(m_partnerEntityId);
                         try {
                             com.saabgroup.dosetest.Partner partner = (com.saabgroup.dosetest.Partner) ep.getEntity();
-                            partner.incarnation().setVal(partner.incarnation().getVal() + 1);
+                            if (partner.incarnation().isNull()) {
+                                partner.incarnation().setVal(0);
+                            }
+                            else {
+                                partner.incarnation().setVal(partner.incarnation().getVal() + 1);
+                            }
                             m_controlConnection.setChanges(partner, m_partnerEntityId.getInstanceId(),
                                     new com.saabgroup.safir.dob.typesystem.HandlerId(m_instance));
                         } finally {
@@ -491,8 +492,14 @@ class Executor implements
             try {
                 InstanceId instance = new InstanceId(com.saabgroup.safir.dob.ThisNodeParameters.getNodeNumber());
                 EntityId eid = new EntityId(com.saabgroup.safir.dob.NodeInfo.ClassTypeId,instance);
-                partner.address().setVal(((com.saabgroup.safir.dob.NodeInfo)
-                                          m_controlConnection.read(eid).getEntity()).ipAddress().getVal());
+                com.saabgroup.safir.dob.EntityProxy ep = m_controlConnection.read(eid);
+                try {
+                    partner.address().setVal(((com.saabgroup.safir.dob.NodeInfo)
+                                              ep.getEntity()).ipAddress().getVal());
+                }
+                finally {
+                    ep.dispose();
+                }
             }
             catch (com.saabgroup.safir.dob.NotFoundException e) {
 
@@ -538,15 +545,7 @@ class Executor implements
                                 boolean deletedByOwner) {
         handleSequencerState(null);
     }
-    /*@Override
-    public void onMessage(com.saabgroup.safir.dob.MessageProxy messageProxy) {
-        executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_MESSAGE);
 
-        com.saabgroup.dosetest.Action action = (com.saabgroup.dosetest.Action) messageProxy.getMessage();
-
-        HandleAction(action);
-    }
-    */
     //
     // RevokedRegistrationBase Members
     //
@@ -596,12 +595,12 @@ class Executor implements
             DispatchControl = false;
             DispatchTest = false;
             StopOrder = false;
-            MC = false;
+            ReceivedAction = null;
         }
         public boolean DispatchControl;
         public boolean DispatchTest;
         public boolean StopOrder;
-        public boolean MC;
+        public Action ReceivedAction;
     }
 
     //
@@ -685,7 +684,7 @@ class Executor implements
     }
 
     //
-    // MCSocket subclass
+    // ActionReceiver subclass
     //
     private class ActionReceiver {
 
@@ -711,9 +710,30 @@ class Executor implements
             if (m_acceptor == null) {
                 throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Failed to open any useful port!");
             }
-
+            m_receiverThread = new ReceiverThread();
+            m_receiverThread.start();
         }
         public void close() {
+            if (m_receiverThread != null) {
+                m_receiverThread.interrupt();
+                while (m_receiverThread != null) {
+                    try {
+                        m_receiverThread.join();
+                        m_receiverThread  = null;
+                    }
+                    catch (java.lang.InterruptedException exc) {
+
+                    }
+                }
+            }
+
+        }
+
+        public void actionHandled() {
+            synchronized (m_handled) {
+                m_handled.handled = true;
+                m_handled.notify();
+            }
         }
 
         public short getPort() {
@@ -744,20 +764,55 @@ class Executor implements
 
             @Override
                 public void run() {
-                while(!isInterrupted()) {
-                    try {
-                        m_socket = m_acceptor.accept();
-                    } catch (IOException ex) {
-                        if (!isInterrupted())
-                        {
-                            java.util.logging.Logger.getLogger(Executor.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
 
-                    synchronized (m_synchronizer) {
-                        m_synchronizer.MC = true;
-                        m_synchronizer.notify();
+                try {
+                    m_socket = m_acceptor.accept();
+                    System.out.println("Accepted connection");
+                    DataInputStream input = new DataInputStream
+                        (new BufferedInputStream(m_socket.getInputStream()));
+
+                    DataOutputStream output = new
+                        DataOutputStream(m_socket.getOutputStream());
+
+                    while(!isInterrupted()) {
+                        byte [] header = new byte[16];
+                        input.readFully(header);
+                        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(header.length);
+                        blob.clear();
+                        blob.put(header);
+                        int blobSize = com.saabgroup.safir.dob.typesystem.BlobOperations.getSize(blob);
+                        byte [] wholeBinary = new byte[blobSize];
+                        System.arraycopy(header,0,wholeBinary,0,16);
+                        input.readFully(wholeBinary,16,blobSize - 16);
+
+                        Action action = (Action)com.saabgroup.safir.dob.typesystem.Serialization.toObject(wholeBinary);
+                        //System.out.println("Got action " + action.actionKind().getVal());
+
+                        synchronized (m_synchronizer) {
+                            m_synchronizer.ReceivedAction = action;
+                            m_synchronizer.notify();
+                        }
+
+
+                        synchronized (m_handled) {
+                            while (!m_handled.handled) {
+                                m_handled.wait();
+                            }
+                            m_handled.handled = false;
+                        }
+
+                        output.writeBytes("ok");
+                        output.writeByte(0);
+
                     }
+                }
+                catch (IOException ex) {
+                    if (!isInterrupted()) {
+                        java.util.logging.Logger.getLogger(Executor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                catch (InterruptedException ex) {
+
                 }
             }
         }
@@ -766,6 +821,9 @@ class Executor implements
         private ServerSocket m_acceptor;
         private Socket m_socket;
         private short m_port;
+        private ReceiverThread m_receiverThread;
+        private class Handled {public boolean handled;}
+        private Handled m_handled = new Handled();
         //        private final int port = 31789;
         //private Socket m_socket = null;
         //private byte[] m_buf = new byte[65000];
@@ -792,7 +850,6 @@ class Executor implements
     private Dispatcher m_testDispatcher;
     private StopHandler m_testStopHandler;
     private ActionReceiver m_actionReceiver;
-    private final List<Action> m_actionQueue = Collections.synchronizedList(new LinkedList<Action>());
     private String m_multicastNic = null;
     java.util.EnumMap<com.saabgroup.safir.dob.CallbackId, java.util.Vector<com.saabgroup.dosetest.Action>> m_callbackActions;
 }
