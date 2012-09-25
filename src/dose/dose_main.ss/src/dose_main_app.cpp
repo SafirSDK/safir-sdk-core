@@ -36,7 +36,7 @@
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/PanicLogging.h>
-#include <Safir/Utilities/CrashReporter.h>
+//AWI: Temp removal #include <Safir/Utilities/CrashReporter.h>
 #include <ace/Reactor.h>
 #include <boost/bind.hpp>
 #include <iostream>
@@ -103,8 +103,9 @@ namespace Internal
         m_handle_exception_notified(0),
         m_handle_input_notified(0)
     {
-        Safir::Utilities::CrashReporter::RegisterCallback(CrashFunc);
-        Safir::Utilities::CrashReporter::Start();
+        // AWI: Temp removal of breakpad 
+        //Safir::Utilities::CrashReporter::RegisterCallback(CrashFunc);
+        //Safir::Utilities::CrashReporter::Start();
 
         m_processMonitor.Init(ProcessExited);
     }

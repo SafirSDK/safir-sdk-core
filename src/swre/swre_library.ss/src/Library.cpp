@@ -56,7 +56,7 @@
 #include <Safir/Utilities/Internal/PanicLogging.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <ace/Guard_T.h>
-#include <Safir/Utilities/CrashReporter.h>
+//AWI: Temp removal #include <Safir/Utilities/CrashReporter.h>
 
 #ifdef GetMessage
 #undef GetMessage
@@ -420,8 +420,9 @@ namespace Internal
     void
     Library::StartCrashReporting()
     {
-        Safir::Utilities::CrashReporter::RegisterCallback(CrashFunc);
-        Safir::Utilities::CrashReporter::Start();
+        //AWI:Temp removal of breakpad dependency
+        //Safir::Utilities::CrashReporter::RegisterCallback(CrashFunc);
+        //Safir::Utilities::CrashReporter::Start();
     }
 
     void
@@ -454,7 +455,9 @@ namespace Internal
 
         //CrashReporter gets stopped in thread, but if the thread was not running
         //we need to stop it here too.
-        Safir::Utilities::CrashReporter::Stop();
+
+        //AWI: Temp removal of breakpad dependency
+        //Safir::Utilities::CrashReporter::Stop();
     }
 
     //The swre library thread uses context 0 to connect to the dob. The strange looking negative number
@@ -501,7 +504,8 @@ namespace Internal
         m_threadStatus = Stopped;
         if (!m_crashed)
         {
-            Safir::Utilities::CrashReporter::Stop();
+            //AWI: Temp removal of breakpad dependency
+            //Safir::Utilities::CrashReporter::Stop();
         }
     }
 
