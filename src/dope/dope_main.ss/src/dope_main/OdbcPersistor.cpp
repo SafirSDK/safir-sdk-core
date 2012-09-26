@@ -437,7 +437,7 @@ void OdbcPersistor::RestoreAll()
                         if (!xmlDataColumn.IsNull())
                         { //some xml persistent data set
                             std::wstring xml = xmlDataColumn.GetValue();
-                            m_debug << "Restoring " << entityId << ", size = " << xml.size() << ". First 100 chars of the data: " << xml.substr(0,100) <<std::endl;
+                            m_debug << "Restoring from xml" << entityId << ", size = " << xml.size() << ". First 100 chars of the data: " << xml.substr(0,100) <<std::endl;
 
                             Safir::Dob::EntityPtr entity =
                                 boost::dynamic_pointer_cast<Safir::Dob::Entity>(Safir::Dob::Typesystem::Serialization::ToObject(xml));
