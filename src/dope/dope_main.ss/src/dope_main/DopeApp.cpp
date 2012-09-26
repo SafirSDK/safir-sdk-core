@@ -60,8 +60,8 @@ DopeApp::DopeApp():
     m_instanceId(Safir::Dob::ThisNodeParameters::NodeNumber()),
     m_persistenceStarted(false),
     m_persistenceInitialized(false),
-    m_debug(L"DopeApp"),
-    m_connectionThreadRunning(false)
+    m_connectionThreadRunning(false),
+    m_debug(L"DopeApp")
 {
     //perform sanity check!
     if (!Safir::Dob::PersistenceParameters::SystemHasPersistence())
