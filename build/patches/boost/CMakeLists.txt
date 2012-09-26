@@ -1,3 +1,5 @@
+set(Boost_NO_BOOST_CMAKE ON)
+
 find_package(Boost)
 
 if (NOT Boost_FOUND)
