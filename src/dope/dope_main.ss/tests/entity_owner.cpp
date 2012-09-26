@@ -26,7 +26,7 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Consumer.h>
-#include <Safir/Utilities/AsioDispatcher.h>
+#include "AsioDispatcher.h"
 #include <DopeTest/SmallEntity.h>
 #include <DopeTest/BigEntity.h>
 #include <boost/lexical_cast.hpp>
