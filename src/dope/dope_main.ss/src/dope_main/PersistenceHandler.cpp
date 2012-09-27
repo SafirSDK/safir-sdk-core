@@ -195,7 +195,7 @@ PersistenceHandler::StartSubscriptions()
         // Subscribing with updates only this type not subclasses.
         // GhostDeletes == true. Happens when a ghost object is actively deleted by owner app.
         // WantsLastState == true. When a owner app dies we want the last state the app had.
-        // DoesntWantSourceIsPermanent == true. we dont want our own sets
+        // DoesntWantSourceIsPermanent == false. we do want our own sets, in case they're from a "joined" system.
         // timestampChangeInfo == false, we dont want change info at all...
         // WantsAllStateChanges == false. This is for DOSE only. Shall be false.
         inject.SubscribeEntity(*it,              // Dob::Typesystem::TypeId      typeId
