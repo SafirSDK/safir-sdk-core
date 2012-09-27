@@ -99,6 +99,7 @@ private:
     Safir::Databases::Odbc::Int64Parameter m_storeInstanceParam;
     Safir::Databases::Odbc::Int64Parameter m_storeHandlerParam;
     Safir::Databases::Odbc::LongBinaryParameter m_storeBinaryDataParam; //10M
+    Safir::Databases::Odbc::BinaryParameter m_storeBinarySmallDataParam; //5k
 
     /**
      * Statement used to insert a null row in db
