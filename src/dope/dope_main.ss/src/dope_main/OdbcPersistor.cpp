@@ -41,6 +41,7 @@ const ACE_Time_Value RETRY_EXCEPTION_DELAY(0,10000);
 
 const int REPORT_AFTER_RECONNECTS = 100;
 
+#define USE_SMALL_BINARY_COLUMN
 
 //-------------------------------------------------------
 template <class T>
@@ -141,6 +142,7 @@ OdbcPersistor::OdbcPersistor():
     m_odbcConnection(),
     m_environment(),
     m_storeBinaryDataParam(Safir::Dob::PersistenceParameters::XmlDataColumnSize()),
+    m_storeBinarySmallDataParam(5000),
     m_insertTypeNameParam(Safir::Dob::PersistenceParameters::TypeNameColumnSize()),
     m_deleteConnection(),
     m_debug(L"OdbcPersistor")
@@ -170,6 +172,12 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
                           Safir::Dob::Typesystem::BinarySerialization & bin,
                           const bool update)
 {
+#ifdef USE_SMALL_BINARY_COLUMN
+    static int num = 0;
+    ++num;
+    const bool small = bin.size() < 5000;
+    std::wcout << "Store " << num << " size " << bin.size() << ", small = " << small << std::endl;
+#endif
     int retries = 0;
     bool errorReported = false;
 
@@ -189,23 +197,38 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
             if (!m_storeStatement.IsValid())
             {
                 m_storeStatement.Alloc(m_odbcConnection);
+#ifdef USE_SMALL_BINARY_COLUMN
+                m_storeStatement.Prepare(
+                    L"UPDATE PersistentEntity SET xmlData=NULL, binarySmallData=?, binaryData=?, handlerid=? WHERE typeId=? AND instance=?");
+                m_storeStatement.BindParameter( 1, m_storeBinarySmallDataParam );
+                m_storeStatement.BindLongParameter( 2, m_storeBinaryDataParam );
+                m_storeStatement.BindParameter( 3, m_storeHandlerParam );
+                m_storeStatement.BindParameter( 4, m_storeTypeIdParam );
+                m_storeStatement.BindParameter( 5, m_storeInstanceParam );
+#else
                 m_storeStatement.Prepare(
                     L"UPDATE PersistentEntity SET xmlData=NULL, binaryData=?, handlerid=? WHERE typeId=? AND instance=?");
                 m_storeStatement.BindLongParameter( 1, m_storeBinaryDataParam );
                 m_storeStatement.BindParameter( 2, m_storeHandlerParam );
                 m_storeStatement.BindParameter( 3, m_storeTypeIdParam );
                 m_storeStatement.BindParameter( 4, m_storeInstanceParam );
+#endif
                 m_storeStatement.SetStmtAttr( SQL_ATTR_QUERY_TIMEOUT, 15 );
                 paramSet = false;
             }
 
-            if (!m_insertStatement.IsValid())
-            {
-
-            }
-
             if (!paramSet)
             {
+#ifdef USE_SMALL_BINARY_COLUMN
+                if (small)
+                {
+                    m_storeBinarySmallDataParam.SetValue(&bin[0],bin.size());
+                }
+                else
+                {
+                    m_storeBinarySmallDataParam.SetNull();
+                }
+#endif
                 m_storeTypeIdParam.SetValue(entityId.GetTypeId());
                 m_storeInstanceParam.SetValue(entityId.GetInstanceId().GetRawValue());
                 m_storeHandlerParam.SetValue(handlerId.GetRawValue() );
@@ -222,7 +245,30 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
                     // the database at startup. So try to insert them here if the entity already exist
                     Insert( entityId );
                 }
+#ifdef USE_SMALL_BINARY_COLUMN
+                if (!small)
+                {
+                    m_storeBinaryDataParam.SetValueAtExecution(static_cast<int>(bin.size() * sizeof (char)));
+                }
 
+                m_storeStatement.Execute();
+
+                if (!small)
+                {
+                    unsigned short param = 0;
+                    if (!m_storeStatement.ParamData(param))
+                    {
+                        throw Safir::Dob::Typesystem::SoftwareViolationException(L"There should be one call to ParamData!",__WFILE__,__LINE__);
+                    }
+                    m_storeBinaryDataParam.SetValue(&bin[0],
+                                                    static_cast<int>(bin.size() * sizeof (char)));
+                    m_storeStatement.PutData(m_storeBinaryDataParam);
+                    if (m_storeStatement.ParamData(param))
+                    {
+                        throw Safir::Dob::Typesystem::SoftwareViolationException(L"There should only be one call to ParamData!",__WFILE__,__LINE__);
+                    }
+                }
+#else
                 m_storeBinaryDataParam.SetValueAtExecution(static_cast<int>(bin.size() * sizeof (char)));
                 m_storeStatement.Execute();
                 unsigned short param = 0;
@@ -237,7 +283,7 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
                 {
                     throw Safir::Dob::Typesystem::SoftwareViolationException(L"There should only be one call to ParamData!",__WFILE__,__LINE__);
                 }
-
+#endif
                 m_debug << "Successfully stored binary entity in database. Size = "<<bin.size() << std::endl;
                 done = true;
 
@@ -361,7 +407,10 @@ void OdbcPersistor::RestoreAll()
     Safir::Databases::Odbc::Int64Column handlerColumn;
     Safir::Databases::Odbc::WideStringColumn xmlDataColumn(Safir::Dob::PersistenceParameters::XmlDataColumnSize());
     Safir::Databases::Odbc::BinaryColumn binaryDataColumn(Safir::Dob::PersistenceParameters::BinaryDataColumnSize());
-
+    Safir::Databases::Odbc::BinaryColumn binarySmallDataColumn(5000);
+    
+    const boost::posix_time::ptime startTime = boost::posix_time::microsec_clock::universal_time();
+    
     bool done = false;
     while (!done)
     {
@@ -380,12 +429,13 @@ void OdbcPersistor::RestoreAll()
                 if (!getAllStatement.IsValid())
                 {
                     getAllStatement.Alloc(m_odbcConnection);
-                    getAllStatement.Prepare( L"SELECT typeId, instance, handlerid, xmlData, binaryData from PersistentEntity" );
+                    getAllStatement.Prepare( L"SELECT typeId, instance, handlerid, xmlData, binaryData, binarySmallData from PersistentEntity" );
                     getAllStatement.BindColumn( 1, typeIdColumn );
                     getAllStatement.BindColumn( 2, instanceColumn);
                     getAllStatement.BindColumn( 3, handlerColumn);
                     //getAllStatement.BindColumn( 4, xmlDataColumn );
                     //getAllStatement.BindColumn( 5, binaryDataColumn );
+                    getAllStatement.BindColumn( 6, binarySmallDataColumn );
                 }
 
                 try
@@ -450,6 +500,19 @@ void OdbcPersistor::RestoreAll()
                             Safir::Dob::Typesystem::Serialization::ToBinary( entity, bin);
                             Store(entityId, handler, bin, true);
                             m_debug << "Stored it as binary" << std::endl;
+                        }
+                        else if (!binarySmallDataColumn.IsNull())
+                        {
+                            const char * const data = reinterpret_cast<const char * const>(binarySmallDataColumn.GetValue());
+                            m_debug << "Restoring " << entityId << " from binary " <<std::endl;
+
+                            Safir::Dob::EntityPtr entity =
+                                boost::dynamic_pointer_cast<Safir::Dob::Entity>
+                                (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data));
+                            m_debug << "Successfully deserialized" <<std::endl;
+                            
+                            injector.InitialSet(entity, entityId.GetInstanceId(), handler );
+                            m_debug << "InitialSet successful"<<std::endl;
                         }
                         else
                         {
@@ -538,6 +601,8 @@ void OdbcPersistor::RestoreAll()
     Disconnect(m_deleteConnection);
     Free(m_deleteConnection);
     m_debug << "RestoreAll completed" <<std::endl;
+
+    std::wcout << restoredObjects.size() << " objects restored in time " << boost::posix_time::microsec_clock::universal_time() - startTime << std::endl;
 }
 
 
