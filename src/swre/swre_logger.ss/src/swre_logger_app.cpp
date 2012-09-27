@@ -327,29 +327,36 @@ namespace
 }
 int LoggerApp::handle_timeout(const ACE_Time_Value & /*currentTime*/, const void * /*act*/)
 {
-    namespace bfs = boost::filesystem;
-
-    const size_t MAX_NUM_DUMP_FILES = 1000;
-    
-    const std::vector<bfs::path> dumpFiles = std::vector<bfs::path>(bfs::directory_iterator(GetDumpDirectory()),
-                                                                    bfs::directory_iterator());
-    
-    if (dumpFiles.size() > MAX_NUM_DUMP_FILES)
+    try 
     {
-        std::multimap<std::time_t, bfs::path> sorted;
-        for (std::vector<bfs::path>::const_iterator it = dumpFiles.begin();
-             it != dumpFiles.end(); ++it)
-        {
-            sorted.insert(std::make_pair(bfs::last_write_time(*it),*it));
-        }
+        namespace bfs = boost::filesystem;
         
-        const size_t tooMany = dumpFiles.size() - MAX_NUM_DUMP_FILES + 10; //remove a few more...
-        std::multimap<std::time_t, bfs::path>::iterator it = sorted.begin();
-        for (size_t i = 0; i < tooMany; ++i)
+        const size_t MAX_NUM_DUMP_FILES = 1000;
+        
+        const std::vector<bfs::path> dumpFiles = std::vector<bfs::path>(bfs::directory_iterator(GetDumpDirectory()),
+                                                                        bfs::directory_iterator());
+        
+        if (dumpFiles.size() > MAX_NUM_DUMP_FILES)
         {
-            bfs::remove(it->second);
-            ++it;
+            std::multimap<std::time_t, bfs::path> sorted;
+            for (std::vector<bfs::path>::const_iterator it = dumpFiles.begin();
+                 it != dumpFiles.end(); ++it)
+            {
+                sorted.insert(std::make_pair(bfs::last_write_time(*it),*it));
+            }
+            
+            const size_t tooMany = dumpFiles.size() - MAX_NUM_DUMP_FILES + 10; //remove a few more...
+            std::multimap<std::time_t, bfs::path>::iterator it = sorted.begin();
+            for (size_t i = 0; i < tooMany; ++i)
+            {
+                bfs::remove(it->second);
+                ++it;
+            }
         }
+    }
+    catch (const boost::filesystem::filesystem_error& )
+    {
+
     }
 
     return 0;
