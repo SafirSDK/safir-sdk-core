@@ -142,7 +142,7 @@ OdbcPersistor::OdbcPersistor():
     m_odbcConnection(),
     m_environment(),
     m_storeBinaryDataParam(Safir::Dob::PersistenceParameters::XmlDataColumnSize()),
-    m_storeBinarySmallDataParam(5000),
+    m_storeBinarySmallDataParam(Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize()),
     m_insertTypeNameParam(Safir::Dob::PersistenceParameters::TypeNameColumnSize()),
     m_deleteConnection(),
     m_debug(L"OdbcPersistor")
@@ -172,12 +172,9 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
                           Safir::Dob::Typesystem::BinarySerialization & bin,
                           const bool update)
 {
-#ifdef USE_SMALL_BINARY_COLUMN
-    static int num = 0;
-    ++num;
-    const bool small = bin.size() < 5000;
-    std::wcout << "Store " << num << " size " << bin.size() << ", small = " << small << std::endl;
-#endif
+
+    const bool small = static_cast<int>(bin.size()) < (Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize());
+
     int retries = 0;
     bool errorReported = false;
 
@@ -197,7 +194,6 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
             if (!m_storeStatement.IsValid())
             {
                 m_storeStatement.Alloc(m_odbcConnection);
-#ifdef USE_SMALL_BINARY_COLUMN
                 m_storeStatement.Prepare(
                     L"UPDATE PersistentEntity SET xmlData=NULL, binarySmallData=?, binaryData=?, handlerid=? WHERE typeId=? AND instance=?");
                 m_storeStatement.BindParameter( 1, m_storeBinarySmallDataParam );
@@ -205,21 +201,12 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
                 m_storeStatement.BindParameter( 3, m_storeHandlerParam );
                 m_storeStatement.BindParameter( 4, m_storeTypeIdParam );
                 m_storeStatement.BindParameter( 5, m_storeInstanceParam );
-#else
-                m_storeStatement.Prepare(
-                    L"UPDATE PersistentEntity SET xmlData=NULL, binaryData=?, handlerid=? WHERE typeId=? AND instance=?");
-                m_storeStatement.BindLongParameter( 1, m_storeBinaryDataParam );
-                m_storeStatement.BindParameter( 2, m_storeHandlerParam );
-                m_storeStatement.BindParameter( 3, m_storeTypeIdParam );
-                m_storeStatement.BindParameter( 4, m_storeInstanceParam );
-#endif
                 m_storeStatement.SetStmtAttr( SQL_ATTR_QUERY_TIMEOUT, 15 );
                 paramSet = false;
             }
 
             if (!paramSet)
             {
-#ifdef USE_SMALL_BINARY_COLUMN
                 if (small)
                 {
                     m_storeBinarySmallDataParam.SetValue(&bin[0],bin.size());
@@ -229,7 +216,7 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
                 {
                     m_storeBinarySmallDataParam.SetNull();
                 }
-#endif
+
                 m_storeTypeIdParam.SetValue(entityId.GetTypeId());
                 m_storeInstanceParam.SetValue(entityId.GetInstanceId().GetRawValue());
                 m_storeHandlerParam.SetValue(handlerId.GetRawValue() );
@@ -246,7 +233,7 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
                     // the database at startup. So try to insert them here if the entity already exist
                     Insert( entityId );
                 }
-#ifdef USE_SMALL_BINARY_COLUMN
+
                 if (!small)
                 {
                     m_storeBinaryDataParam.SetValueAtExecution(static_cast<int>(bin.size() * sizeof (char)));
@@ -269,22 +256,6 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
                         throw Safir::Dob::Typesystem::SoftwareViolationException(L"There should only be one call to ParamData!",__WFILE__,__LINE__);
                     }
                 }
-#else
-                m_storeBinaryDataParam.SetValueAtExecution(static_cast<int>(bin.size() * sizeof (char)));
-                m_storeStatement.Execute();
-                unsigned short param = 0;
-                if (!m_storeStatement.ParamData(param))
-                {
-                    throw Safir::Dob::Typesystem::SoftwareViolationException(L"There should be one call to ParamData!",__WFILE__,__LINE__);
-                }
-                m_storeBinaryDataParam.SetValue(&bin[0],
-                                                static_cast<int>(bin.size() * sizeof (char)));
-                m_storeStatement.PutData(m_storeBinaryDataParam);
-                if (m_storeStatement.ParamData(param))
-                {
-                    throw Safir::Dob::Typesystem::SoftwareViolationException(L"There should only be one call to ParamData!",__WFILE__,__LINE__);
-                }
-#endif
                 m_debug << "Successfully stored binary entity in database. Size = "<<bin.size() << std::endl;
                 done = true;
 
@@ -408,7 +379,7 @@ void OdbcPersistor::RestoreAll()
     Safir::Databases::Odbc::Int64Column handlerColumn;
     Safir::Databases::Odbc::WideStringColumn xmlDataColumn(Safir::Dob::PersistenceParameters::XmlDataColumnSize());
     Safir::Databases::Odbc::BinaryColumn binaryDataColumn(Safir::Dob::PersistenceParameters::BinaryDataColumnSize());
-    Safir::Databases::Odbc::BinaryColumn binarySmallDataColumn(5000);
+    Safir::Databases::Odbc::BinaryColumn binarySmallDataColumn(Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize());
     
     const boost::posix_time::ptime startTime = boost::posix_time::microsec_clock::universal_time();
     
