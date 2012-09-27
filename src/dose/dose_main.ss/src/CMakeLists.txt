@@ -18,7 +18,7 @@ if (MSVC)
     TARGET_LINK_LIBRARIES(dose_main 
                           debug dose_com${CMAKE_DEBUG_POSTFIX} optimized dose_com)
 else() #NOT MSVC
-  TARGET_LINK_LIBRARIES(dose_main dose_cpp dose_internal dots_generated-Safir-cpp dots_generated-cpp dots_cpp lluf_utils dose_com) # lluf_crash_reporter)
+  TARGET_LINK_LIBRARIES(dose_main dose_cpp dose_internal dots_generated-Safir-cpp dots_generated-cpp dots_cpp lluf_utils dose_com lluf_crash_reporter)
 endif()
 
 INSTALL(TARGETS dose_main
