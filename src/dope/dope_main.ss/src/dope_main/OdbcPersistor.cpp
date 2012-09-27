@@ -223,6 +223,7 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
                 if (small)
                 {
                     m_storeBinarySmallDataParam.SetValue(&bin[0],bin.size());
+                    m_storeBinaryDataParam.SetNull();
                 }
                 else
                 {
