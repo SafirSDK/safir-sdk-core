@@ -21,38 +21,42 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
 #ifndef __PARTNERSTATE_H__
 #define __PARTNERSTATE_H__
 
-#include <Safir/Dob/Connection.h>
 #include <DoseTest/Partner.h>
-
+#include <Safir/Dob/Connection.h>
+#include <Safir/Dob/ErrorResponse.h>
+#include <vector>
+#include <boost/function.hpp>
+#include "ActionSender.h"
 
 typedef std::vector<std::string> Languages;
 
-
-
 class PartnerState:
+    public Safir::Dob::EntityHandler,
     public Safir::Dob::EntitySubscriber,
-    public Safir::Dob::MessageSender,
     private boost::noncopyable
 {
 public:
-    explicit PartnerState(const Languages & languages);
-
-    void Activate(const int which, const int contextId);
-    void Deactivate(const int which);
-
-    bool IsActive(const int which) const;
-
-    void Reset(const int which);
+    PartnerState(const Languages & languages,
+                 const int contextId,
+                 ActionSender& actionSender,
+                 const boost::function<void()>& stateChangedCallback);
+    //callback is called whenever something happens that might change states
+    void Reset();
     bool IsReady() const;
-    bool IsReady(const int which) const;
-
-    void SetNotReady();
-
+    bool IsActive() const;
+    const std::string& Address(const int which) const;
+    short Port(const int which) const;
+    
 private:
+
+
+
+
+    bool IsReady(const int which) const;
+    
     void HandlePartnerChange(const DoseTest::PartnerPtr & partner, const int instance);
 
     virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy);
@@ -60,7 +64,19 @@ private:
     virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
                                  const bool                    deletedByOwner);
 
-    virtual void OnNotMessageOverflow() {}
+    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
+                                       const Safir::Dob::Typesystem::HandlerId& handlerId);
+    virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+                                 Safir::Dob::ResponseSenderPtr        responseSender)
+    {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
+    
+    virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+                                 Safir::Dob::ResponseSenderPtr        responseSender)
+    {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
+
+    virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+                                 Safir::Dob::ResponseSenderPtr        responseSender)
+    {responseSender->Send(Safir::Dob::ErrorResponse::Create());}
 
     struct PartnerInfo
     {
@@ -73,7 +89,9 @@ private:
         bool IsReady()const {return IsActive() && m_ready;}
         void SetReady(const bool ready) {m_ready = ready;}
 
-        int     m_incarnation;
+        int         m_incarnation;
+        std::string m_address;
+        short       m_port;
     private:
         bool    m_ready;
         bool    m_active;
@@ -85,7 +103,9 @@ private:
     Safir::Dob::SecondaryConnection m_connection;
     const Languages m_languages;
 
-};
+    const boost::function<void()> m_stateChangedCallback;
 
+    ActionSender& m_actionSender;
+};
 #endif
 

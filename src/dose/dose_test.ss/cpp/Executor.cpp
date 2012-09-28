@@ -34,8 +34,11 @@
 #include <DoseTest/Dump.h>
 #include <DoseTest/DumpResult.h>
 #include <Safir/Dob/OverflowException.h>
+#include <Safir/Dob/NodeInfo.h>
+#include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/DistributionChannelParameters.h>
 #include "dosecom_stuff.h"
+
 
 #ifdef _MSC_VER
   #pragma warning(push)
@@ -55,75 +58,6 @@
 #undef GetMessage
 #endif
 
-ActionReader::ActionReader(const boost::function<void (DoseTest::ActionPtr)> & handleActionCallback,
-                           const std::string& listenAddressStr,
-                           boost::asio::io_service& ioService):
-    m_socket(ioService),
-    m_buffer(65000, static_cast<char>(0)),
-    m_handleActionCallback(handleActionCallback)
-{
-    if(Safir::Dob::DistributionChannelParameters::DistributionChannels(0)->MulticastAddress() == L"127.0.0.1")
-    {
-        std::wcout << "System appears to be Standalone, not listening for multicasted test actions" << std::endl;
-        return;
-    }
-
-    const unsigned short port = 31789;
-
-    // Create the socket so that multiple may be bound to the same address.
-    const boost::asio::ip::address listenAddress = 
-        boost::asio::ip::address::from_string(listenAddressStr);
-    const boost::asio::ip::udp::endpoint listenEndpoint(listenAddress, port);
-    m_socket.open(listenEndpoint.protocol());
-    m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-    m_socket.bind(listenEndpoint);
-
-    // Port and address must correspond to what is used by the test sequencer
-    const std::wstring multicastAddressStr = DoseTest::Parameters::TestMulticastAddress();
-
-    //Set up address
-    const boost::asio::ip::address multicastAddress = 
-        boost::asio::ip::address::from_string(Safir::Dob::Typesystem::Utilities::ToUtf8
-                                              (multicastAddressStr));
-
-    std::wcout << "Joining socket to group for multicast reception. Multicast address " 
-               << multicastAddressStr << ":" << port << "." << std::endl;
-
-    // Join the multicast group.
-    m_socket.set_option(boost::asio::ip::multicast::join_group(multicastAddress));
-
-    m_socket.async_receive_from(
-        boost::asio::buffer(m_buffer), m_senderEndpoint,
-        boost::bind(&ActionReader::HandleData, this,
-          boost::asio::placeholders::error,
-          boost::asio::placeholders::bytes_transferred));
-}
-
-void ActionReader::HandleData(const boost::system::error_code& error,
-                              const size_t bytes_recvd)
-{
-    if (error)
-    {
-        std::wcout << "error when receiving data" << std::endl;
-        exit(1);
-    }
-
-    if (bytes_recvd != 0)
-    {
-        DoseTest::ActionPtr action =
-            boost::static_pointer_cast<DoseTest::Action>
-            (Safir::Dob::Typesystem::Serialization::ToObject(m_buffer));
-        
-        m_handleActionCallback(action);
-    }
-        
-    m_socket.async_receive_from
-        (boost::asio::buffer(m_buffer), m_senderEndpoint,
-         boost::bind(&ActionReader::HandleData, this,
-                     boost::asio::placeholders::error,
-                     boost::asio::placeholders::bytes_transferred));
-}
-
 #ifdef _MSC_VER
   #pragma warning(push)
   #pragma warning(disable: 4355)
@@ -140,19 +74,13 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_dispatchTestConnection(true),
     m_testDispatcher(boost::bind(&Executor::DispatchTestConnection,this), m_ioService),
     m_controlDispatcher(boost::bind(&Executor::DispatchControlConnection,this), m_ioService),
-    m_actionReader(boost::bind(&Executor::HandleAction,this,_1), 
-                   commandLine.size() > 2 ? commandLine.at(2): "0.0.0.0",
-                   m_ioService),
+    m_actionReceiver(m_ioService, boost::bind(&Executor::HandleAction,this,_1)),
     m_callbackActions(Safir::Dob::CallbackId::Size()),
-    m_defaultContext(0),
-    m_lastRecSeqNbr(0)
+    m_defaultContext(0)
 {
     m_controlConnection.Open(m_controlConnectionName, m_instanceString, 0, this, &m_controlDispatcher);
 
-    //subscribe to messages going to everyone and to me.
-    m_controlConnection.SubscribeMessage(DoseTest::Action::ClassTypeId, Safir::Dob::Typesystem::ChannelId(m_instance),this);
-    m_controlConnection.SubscribeMessage(DoseTest::Action::ClassTypeId, Safir::Dob::Typesystem::ChannelId(),this);
-
+    m_controlConnection.SubscribeEntity(DoseTest::Sequencer::ClassTypeId,this);
 }
 #ifdef _MSC_VER
   #pragma warning(pop)
@@ -166,28 +94,9 @@ void Executor::OnStopOrder()
     m_ioService.stop();
 }
 
-void Executor::OnMessage(const Safir::Dob::MessageProxy messageProxy)
-{
-    ExecuteCallbackActions(Safir::Dob::CallbackId::OnMessage);
-
-    DoseTest::ActionPtr action = boost::static_pointer_cast<DoseTest::Action>(messageProxy.GetMessage());
-
-    HandleAction(action);
-}
-
 void Executor::HandleAction(DoseTest::ActionPtr action)
 
 {
-    if (!action->SeqNbr().IsNull())
-    {
-        if (action->SeqNbr() != m_lastRecSeqNbr + 1)
-        {
-            std::wcout << "Seems an action from the sequencer is lost! Expected " 
-                       << m_lastRecSeqNbr << " but got " << action->SeqNbr() << std::endl; 
-        }
-        m_lastRecSeqNbr = action->SeqNbr().GetVal();
-    }
-
     if (!action->Partner().IsNull() && action->Partner().GetVal() != Safir::Dob::Typesystem::ChannelId(m_instance))
     {
         // Not meant for this partner
@@ -226,47 +135,6 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
 {
     switch (action->ActionKind().GetVal())
     {
-    case DoseTest::ActionEnum::Activate:
-        {
-            if (action->Identifier() == m_identifier)
-            {
-                m_defaultContext = action->Context().GetVal();
-                std::wcout << "Activating (default context is " << m_defaultContext << ")" << std::endl;
-                if (!m_isActive)
-                {
-                    m_controlConnection.RegisterEntityHandler(m_partnerEntityId.GetTypeId(),
-                                                              Safir::Dob::Typesystem::HandlerId(m_instance),
-                                                              Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
-                                                              this);
-                    m_controlConnection.RegisterServiceHandler(DoseTest::Dump::ClassTypeId,
-                        Safir::Dob::Typesystem::HandlerId(m_instance),this);
-                }
-                DoseTest::PartnerPtr partner = DoseTest::Partner::Create();
-                partner->Incarnation() = 0;
-                partner->Identifier() = m_identifier;
-                m_controlConnection.SetAll(partner, m_partnerEntityId.GetInstanceId(),
-                                           Safir::Dob::Typesystem::HandlerId(m_instance));
-                m_isActive = true;
-            }
-        }
-        break;
-
-    case DoseTest::ActionEnum::Deactivate:
-        {
-            if (action->Identifier() == m_identifier)
-            {
-                std::wcout << "Deactivating" << std::endl;
-                m_testConnection.Close();
-
-                m_controlConnection.Delete(m_partnerEntityId, Safir::Dob::Typesystem::HandlerId(m_instance));
-                m_controlConnection.UnregisterHandler(m_partnerEntityId.GetTypeId(),Safir::Dob::Typesystem::HandlerId(m_instance));
-
-                m_controlConnection.UnregisterHandler(DoseTest::Dump::ClassTypeId,Safir::Dob::Typesystem::HandlerId(m_instance));
-                m_isActive = false;
-            }
-        }
-        break;
-
     case DoseTest::ActionEnum::Reset:
         {
             if (m_isActive)
@@ -277,9 +145,17 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
                 DoseTest::PartnerPtr partner =
                     boost::static_pointer_cast<DoseTest::Partner>
                     (m_controlConnection.Read(m_partnerEntityId).GetEntity());
-                ++partner->Incarnation();
-                m_controlConnection.SetChanges(partner,m_partnerEntityId.GetInstanceId(),
-                    Safir::Dob::Typesystem::HandlerId(m_instance));
+                if (partner->Incarnation().IsNull())
+                {
+                    partner->Incarnation() = 0;
+                }
+                else
+                {
+                    ++partner->Incarnation();
+                }
+                m_controlConnection.SetChanges(partner,
+                                               m_partnerEntityId.GetInstanceId(),
+                                               Safir::Dob::Typesystem::HandlerId(m_instance));
 
                 std::vector<boost::shared_ptr<Consumer> > newConsumers;
                 for (int i = 0; i < 3; ++i)
@@ -475,3 +351,60 @@ Executor::OnServiceRequest(const Safir::Dob::ServiceRequestProxy /*serviceReques
     result->Result().SetVal(lout.Dump());
     responseSender->Send(result);
 }
+
+void Executor::HandleSequencerState(const DoseTest::SequencerPtr& sequencer)
+{
+    const bool activate = sequencer != NULL && sequencer->Partners()[m_instance].GetVal() == m_identifier;
+
+    if (activate == m_isActive)
+    {
+        //already active or not active
+        return;
+    }
+
+    if (activate)
+    {
+        m_defaultContext = sequencer->Context();
+        std::wcout << "Activating (default context is " << m_defaultContext << ")" << std::endl;
+        m_controlConnection.RegisterEntityHandler(m_partnerEntityId.GetTypeId(),
+                                                  Safir::Dob::Typesystem::HandlerId(m_instance),
+                                                  Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
+                                                  this);
+        m_controlConnection.RegisterServiceHandler(DoseTest::Dump::ClassTypeId,
+                                                   Safir::Dob::Typesystem::HandlerId(m_instance),this);
+
+        m_actionReceiver.Open();
+
+        DoseTest::PartnerPtr partner = DoseTest::Partner::Create();
+        partner->Identifier() = m_identifier;
+        partner->Port() = m_actionReceiver.Port();
+
+        {
+            using namespace Safir::Dob;
+            using namespace Safir::Dob::Typesystem;
+            partner->Address() = boost::static_pointer_cast<NodeInfo>
+                (m_controlConnection.Read(EntityId(NodeInfo::ClassTypeId,
+                                                   InstanceId(ThisNodeParameters::NodeNumber()))).
+                 GetEntity())->IpAddress();
+        }
+
+        m_controlConnection.SetAll(partner, m_partnerEntityId.GetInstanceId(),
+                                   Safir::Dob::Typesystem::HandlerId(m_instance));
+        m_isActive = true;
+    }
+    else
+    {
+        std::wcout << "Deactivating" << std::endl;
+        m_actionReceiver.Close();
+
+        m_testConnection.Close();
+
+        m_controlConnection.Delete(m_partnerEntityId, Safir::Dob::Typesystem::HandlerId(m_instance));
+        m_controlConnection.UnregisterHandler(m_partnerEntityId.GetTypeId(),Safir::Dob::Typesystem::HandlerId(m_instance));
+        
+        m_controlConnection.UnregisterHandler(DoseTest::Dump::ClassTypeId,Safir::Dob::Typesystem::HandlerId(m_instance));
+        m_isActive = false;
+        lout.Clear();
+    }
+}
+ 

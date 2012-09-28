@@ -43,6 +43,8 @@ public:
 
     std::wstring Dump();
 
+    void Clear() {m_buf.str(L"");}
+
     inline Logger& operator << (const Safir::Dob::ConnectionInfoPtr& connInfo)
     {
         connInfo->ConnectionId().SetNull();

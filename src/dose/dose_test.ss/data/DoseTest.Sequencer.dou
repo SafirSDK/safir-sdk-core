@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>DoseTest.Sequencer</name>
+  <baseClass>Safir.Dob.Entity</baseClass>
+  <members>
+    <member>
+      <summary>The language of the partners that should be active in this test run</summary>
+      <name>Partners</name>
+      <arraySize>3</arraySize>
+      <type>String</type>
+      <maxLength>10</maxLength>
+    </member>
+    <member>
+      <summary>The default context</summary>
+      <name>Context</name>
+      <type>Int32</type>
+    </member>
+  </members>
+</class>

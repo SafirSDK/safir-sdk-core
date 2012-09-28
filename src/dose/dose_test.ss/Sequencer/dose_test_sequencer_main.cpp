@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2006-2012 (http://www.safirsdk.com)
 *
 * Created by: Lars Hagstr�m / stlrha
 *
@@ -23,12 +23,13 @@
 ******************************************************************************/
 
 #include <iostream>
-#include <Safir/Dob/Typesystem/Operations.h>
+//#include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Consumer.h>
-#include <boost/thread.hpp>
+//#include <boost/thread.hpp>
 #include "TestCaseReader.h"
-#include "dose_test_sequencer.h"
+#include "PartnerState.h"
+#include "Sequencer.h"
 
 #if defined _MSC_VER
   #pragma warning (push)
@@ -36,8 +37,7 @@
 #endif
 
 #include <boost/program_options.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/random.hpp>
+//#include <boost/lexical_cast.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
@@ -45,6 +45,7 @@
 #if defined _MSC_VER
   #pragma warning (pop)
 #endif
+
 
 namespace po = boost::program_options;
 
@@ -77,154 +78,9 @@ private:
     boost::asio::io_service & m_ioService;
 };
 
-
-
-std::string GetRandomLanguage()
-{
-#if 1
-    static const char * languages[] = {"cpp", "ada", "java", "dotnet"};
-    return languages[rand()%4];
-#else
-    static const char * languages[] = {"cpp", "dotnet", "java"};
-    return languages[rand()%3];
-#endif
-}
-
 int GetRandomContext()
 {
     return rand()%2;
-}
-
-void DumpAction(const DoseTest::ActionConstPtr currentAction) {
-
-    if (!currentAction->Partner().IsNull())
-    {
-        std::wcout << "P" << currentAction->Partner().GetVal();
-    }
-    if (!currentAction->Consumer().IsNull())
-    {
-        std::wcout << "," << "C" << currentAction->Consumer().GetVal();
-    }
-    if (!currentAction->ActionKind().IsNull())
-    {
-        if (!currentAction->Partner().IsNull())
-        {
-            std::wcout << ",";
-        }
-
-        std::wcout << DoseTest::ActionEnum::ToString(currentAction->ActionKind().GetVal()) << "(";
-        bool first = true;
-
-        if (!currentAction->Context().IsNull())
-        {
-            if (!first)
-                std::wcout << ",";
-            first = false;
-            std::wcout  << currentAction->Context().GetVal();
-        }        
-
-        if (!currentAction->Channel().IsNull())
-        {
-            if (!first)
-                std::wcout << ",";
-            first = false;
-            std::wcout << currentAction->Channel().GetVal().ToString();
-        }
-        if (!currentAction->Handler().IsNull())
-        {
-            if (!first)
-                std::wcout << ",";
-            first = false;
-            std::wcout << currentAction->Handler().GetVal().ToString();
-        }
-        if (!currentAction->TypeId().IsNull())
-        {
-            if (!first)
-                std::wcout << ",";
-            first = false;
-            const std::wstring name = Safir::Dob::Typesystem::Operations::GetName(currentAction->TypeId().GetVal());
-            const std::wstring::size_type index = name.find_last_of('.');
-            std::wcout << name.substr(index + 1, name.length() - index);
-        }
-        std::wcout << ")";
-    }
-
-    std::wcout << std::endl; 
-}
-
-void DumpTestcaseDetailedData(const int first,
-                              const int last)
-{
-
-    for (int testcaseNo = first; testcaseNo <= last; ++testcaseNo)
-    {
-        DoseTest::Items::TestCaseConstPtr tc = TestCaseReader::Instance().GetTestCase(testcaseNo);
-
-        if (tc == NULL)
-        {
-            if (first == last)
-            {
-                std::wcout << std::endl << "TESTCASE " << testcaseNo << "  (null)" << std::endl; 
-            }
-            continue;
-        }
-
-        std::wcout << std::endl << "---------------------------------------------------------" << std::endl;
-        std::wcout << std::endl << "TESTCASE " << testcaseNo << std::endl;
-        std::wcout << "Description: " << tc->Description().GetVal() << std::endl;
-        std::wcout  << "Expectation: " << tc->Expectation().GetVal() << std::endl;
-
-        std::wcout << std::endl << "Setup actions:" << std::endl; 
-        for (int i = 0; i < DoseTest::Items::TestCase::TestCaseSetupActionsArraySize(); ++i)
-        {
-            if (tc->TestCaseSetupActions()[i].IsNull())
-            {
-                continue;
-            }
-
-            DumpAction(tc->TestCaseSetupActions()[i].GetPtr());
-        }
-
-
-        std::wcout << std::endl << "Test actions:" << std::endl; 
-        for (int i = 0; i < DoseTest::Items::TestCase::TestActionsArraySize(); ++i)
-        {
-            if (tc->TestActions()[i].IsNull())
-            {
-                continue;
-            }
-
-            DumpAction(tc->TestActions()[i].GetPtr());
-        }
-    }
-
-}
-
-void DumpTestcaseData(const int first,
-                      const int last,
-                      const bool descriptions,
-                      const bool expectations)
-{
-    for (int i = first; i <= last; ++i)
-    {
-        DoseTest::Items::TestCaseConstPtr tc = TestCaseReader::Instance().GetTestCase(i);
-
-        if (tc == NULL)
-        {
-            continue;
-        }
-
-        std::wcout << std::endl << "TESTCASE " << i;
-        std::wcout << std::endl;
-        if (descriptions)
-        {
-            std::wcout << "Description: " << tc->Description().GetVal() << std::endl;
-        }
-        if (expectations)
-        {
-            std::wcout  << "Expectation: " << tc->Expectation().GetVal() << std::endl;
-        }
-    }
 }
 
 const std::string GetTestcaseDir()
@@ -244,13 +100,10 @@ struct CommandLineResults
     int first;
     int last;
     Languages languages;
-    int repeats;
-    bool randomLanguages;
     std::string testcaseDirectory;
     bool noTimeout;
     int testcaseNo;
     int context;
-    std::string multicastNic;
 };
 
 const CommandLineResults & HandleCommandLine(int argc, char* argv[])
@@ -263,16 +116,11 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
         desc.add_options()
             ("help,h", "show help message")
             ("testcase-directory,d",po::value<std::string>(&results.testcaseDirectory),"directory that contains the test cases")
-            ("descriptions","show descriptions")
-            ("expectations", "show expectations")
-            ("description", po::value<int>(&results.testcaseNo), "Detailed description of the given testcase (-1 = use first/last args)")
-            ("repeats", po::value<int>(&results.repeats)->default_value(1), "number of times to run tests")
-            ("languages,l", po::value<std::vector<std::string> >(&results.languages)->multitoken()->default_value(Languages(3,"cpp"),"cpp cpp cpp"), "choose languages to run, e.g.\n--languages cpp ada java or \n--languages random")
+            ("languages,l", po::value<std::vector<std::string> >(&results.languages)->multitoken()->default_value(Languages(3,"cpp"),"cpp cpp cpp"), "choose languages to run, e.g.\n--languages cpp ada java")
             ("first", po::value<int>(&results.first)->default_value(0), "first testcase")
             ("last", po::value<int>(&results.last)->default_value(9999), "last testcase")
             ("no-timeout", "Do not time out and exit if a partner does not respond for a long time")
-            ("context", po::value<int>(&results.context)->default_value(0), "default context for partner test connection (-1 for random)")
-            ("multicast-nic",po::value<std::string>(&results.multicastNic),"Ip address for Network Interface Card to be used for sending test commands");
+            ("context", po::value<int>(&results.context)->default_value(0), "default context for partner test connection (-1 for random)");
 
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -293,40 +141,11 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
             results.testcaseDirectory = GetTestcaseDir();
         }
 
-        const bool descriptions = vm.count("descriptions") != 0;
-        const bool expectations = vm.count("expectations") != 0;
-        const bool description = vm.count("description") != 0;
-
-        if (descriptions || expectations)
-        {
-            DumpTestcaseData(results.first,results.last,descriptions,expectations);
-            exit(0);
-        }
-
-        if (description)
-        {
-            if (results.testcaseNo < 0){
-                DumpTestcaseDetailedData(results.first,results.last);
-            }
-            else
-            {
-                DumpTestcaseDetailedData(results.testcaseNo, results.testcaseNo);
-            }
-            exit(0);
-        }
-
         results.noTimeout = vm.count("no-timeout") != 0;
 
-        results.randomLanguages = results.languages.size() == 1 && results.languages[0] == "random";
-
-        if (results.randomLanguages)
+        if (results.languages.size() != 3)
         {
-            std::wcout << "Using random languages" << std::endl;
-            results.languages.resize(3,"");
-        }
-        else if (results.languages.size() != 3)
-        {
-            std::wcout << "Need 3 languages or 'random'"<<std::endl;
+            std::wcout << "Need 3 languages"<<std::endl;
             exit(0);
         }
 
@@ -371,81 +190,69 @@ int main(int argc, char* argv[])
                         &stopHandler,
                         &dispatcher);
 
-        for (int i = 0; i < commandLine.repeats; ++i)
+        Languages languages = commandLine.languages;
+
+        std::wcout << "Languages: ";
+        for (Languages::iterator it = languages.begin();
+             it != languages.end(); ++it)
         {
-            std::wcout << "Test run " << i << ", Languages: ";
-            Languages languages = commandLine.languages;
-            int context = commandLine.context;
-
-            if (commandLine.randomLanguages)
-            {
-                for (Languages::iterator it = languages.begin();
-                     it != languages.end(); ++it)
-                {
-                    *it = GetRandomLanguage();
-                }
-            }
-            for (Languages::iterator it = languages.begin();
-                it != languages.end(); ++it)
-            {
-                std::wcout << it->c_str() << " ";
-            }
-
-            if (commandLine.context == -1)
-            {
-                // random context
-                context = GetRandomContext();
-            }
-
-            std::wcout << "Context: " << context;
-
-            std::wcout << std::endl;
-
-            Sequencer sequencer(commandLine.first, 
-                                commandLine.last, 
-                                languages, 
-                                commandLine.noTimeout, 
-                                context, 
-                                commandLine.multicastNic, 
-                                ioService);
-            while (!sequencer.IsFinished())
-            {
-                //stop after 250ms
-                boost::asio::deadline_timer timer(ioService,boost::posix_time::milliseconds(250));
-                timer.async_wait(boost::bind(&boost::asio::io_service::stop, boost::ref(ioService)));
-                
-                ioService.run();
-                ioService.reset();
-
-                sequencer.Tick();
-            }
-            boost::this_thread::sleep(boost::posix_time::seconds(1));
-            sequencer.GetTestResults(i);
-            while (!sequencer.GotTestResults())
-            {
-                //stop after 100ms
-                boost::asio::deadline_timer timer(ioService,boost::posix_time::milliseconds(100));
-                timer.async_wait(boost::bind(&boost::asio::io_service::stop, boost::ref(ioService)));
-                
-                ioService.run();
-                ioService.reset();
-            }
-
-
-            while (!sequencer.DeactivateAll())
-            {
-                //stop after 100ms
-                boost::asio::deadline_timer timer(ioService,boost::posix_time::milliseconds(100));
-                timer.async_wait(boost::bind(&boost::asio::io_service::stop, boost::ref(ioService)));
-
-                ioService.run();
-                ioService.reset();
-            }
-
-
-            std::wcout << "\n" << std::endl; //two newlines
+            std::wcout << it->c_str() << " ";
         }
 
+        const int context = commandLine.context == -1 ? GetRandomContext() : commandLine.context;
+
+        std::wcout << "Context: " << context << std::endl;
+
+        Sequencer sequencer(commandLine.first, 
+                            commandLine.last, 
+                            languages, 
+                            commandLine.noTimeout, 
+                            context, 
+                            ioService);
+
+        ioService.run();
+#if 0
+        Sequencer sequencer(commandLine.first, 
+                            commandLine.last, 
+                            languages, 
+                            commandLine.noTimeout, 
+                            context, 
+                            ioService);
+        while (!sequencer.IsFinished())
+        {
+            //stop after 250ms
+            boost::asio::deadline_timer timer(ioService,boost::posix_time::milliseconds(250));
+            timer.async_wait(boost::bind(&boost::asio::io_service::stop, boost::ref(ioService)));
+                
+            ioService.run();
+            ioService.reset();
+
+            sequencer.Tick();
+        }
+        boost::this_thread::sleep(boost::posix_time::seconds(1));
+        sequencer.GetTestResults(i);
+        while (!sequencer.GotTestResults())
+        {
+            //stop after 100ms
+            boost::asio::deadline_timer timer(ioService,boost::posix_time::milliseconds(100));
+            timer.async_wait(boost::bind(&boost::asio::io_service::stop, boost::ref(ioService)));
+                
+            ioService.run();
+            ioService.reset();
+        }
+
+
+        while (!sequencer.DeactivateAll())
+        {
+            //stop after 100ms
+            boost::asio::deadline_timer timer(ioService,boost::posix_time::milliseconds(100));
+            timer.async_wait(boost::bind(&boost::asio::io_service::stop, boost::ref(ioService)));
+
+            ioService.run();
+            ioService.reset();
+        }
+
+#endif
         connection.Close();
         std::wcout << "End" << std::endl;
     }

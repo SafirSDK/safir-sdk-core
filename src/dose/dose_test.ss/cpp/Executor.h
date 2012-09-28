@@ -29,11 +29,13 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/Atomic.h>
 #include <DoseTest/Action.h>
+#include <DoseTest/Sequencer.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include "Consumer.h"
 #include <boost/function.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include "ActionReceiver.h"
 
 class Dispatcher:
     public Safir::Dob::Dispatcher,
@@ -67,29 +69,11 @@ private:
     boost::asio::io_service & m_ioService;
 };
 
-class ActionReader:
-    private boost::noncopyable
-{
-public:
-    ActionReader(const boost::function<void (DoseTest::ActionPtr)> & handleActionCallback,
-                 const std::string& listenAddressStr,
-                 boost::asio::io_service& ioService);
-
-private:
-    void HandleData(const boost::system::error_code& error,
-                    const size_t bytes_recvd);
-    boost::asio::ip::udp::socket m_socket;
-    boost::asio::ip::udp::endpoint m_senderEndpoint;
-    Safir::Dob::Typesystem::BinarySerialization m_buffer;
-
-    const boost::function<void (DoseTest::ActionPtr)> m_handleActionCallback;
-};
-
 
 class Executor:
     public Safir::Dob::StopHandler,
-    public Safir::Dob::MessageSubscriber,
     public Safir::Dob::EntityHandler,
+    public Safir::Dob::EntitySubscriber,
     public Safir::Dob::ServiceHandler,
     private boost::noncopyable
 {
@@ -102,7 +86,6 @@ public:
 private:
 
     virtual void OnStopOrder();
-    virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy);
 
     virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
                                        const Safir::Dob::Typesystem::HandlerId& handlerId);
@@ -121,6 +104,18 @@ private:
 
     virtual void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
                                   Safir::Dob::ResponseSenderPtr         responseSender);
+    
+    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
+    {HandleSequencerState(boost::static_pointer_cast<DoseTest::Sequencer>(entityProxy.GetEntity()));}
+ 
+    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
+    {HandleSequencerState(boost::static_pointer_cast<DoseTest::Sequencer>(entityProxy.GetEntity()));}
+    
+    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy,
+                                 const bool) {HandleSequencerState(DoseTest::SequencerPtr());}
+    
+
+    void HandleSequencerState(const DoseTest::SequencerPtr& sequencer);
 
     void HandleAction(DoseTest::ActionPtr action);
 
@@ -153,15 +148,13 @@ private:
     Dispatcher m_testDispatcher;
     Dispatcher m_controlDispatcher;
 
-    ActionReader m_actionReader;
+    ActionReceiver m_actionReceiver;
 
     typedef std::vector<DoseTest::ActionPtr> Actions;
     typedef std::vector<Actions> CallbackActions;
     std::vector<std::vector<DoseTest::ActionPtr> > m_callbackActions;
 
     int m_defaultContext;
-
-    Safir::Dob::Typesystem::Int32 m_lastRecSeqNbr;
 };
 
 typedef boost::shared_ptr<Executor> ExecutorPtr;

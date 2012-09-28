@@ -135,6 +135,7 @@ class Parameters:
         self.dose_test_sequencer_cmd = (os.path.join(self.SAFIR_RUNTIME, "bin", "dose_test_sequencer"),
                                         "-d",
                                         self.testcases_path,
+                                        #"--context", "-1", #random context
                                         "-l", self.lang0, self.lang1, self.lang2,
                                         #"--first", "1",
                                         #"--last", "1"
@@ -289,7 +290,7 @@ class Results:
         res = len(diff0) == 0 and len(diff1) == 0 and len(diff2) == 0
         output = ""
         if not res:
-            output += "(A line with a '-' in front means that it is <b>missing</b>, and one with a '+' in front means that it has been added, compared to the expected result.)\n\n"
+            output += "(A line with a '-' in front means that it is missing, and one with a '+' in front means that it has been added, compared to the expected result.)\n\n"
             if len(diff0) != 0:
                 output += "Partner 0 diff:\n" + escape("".join(diff0)) + "\n\n"
             if len(diff1) != 0:
@@ -413,8 +414,8 @@ class Runner:
 
         for i in partners:
             self.__launchProcess("dose_test_cpp." + str(i), parameters.dose_test_cpp_cmd + (str(i),))
-            self.__launchProcess("dose_test_ada." + str(i), parameters.dose_test_ada_cmd + (str(i),))
-            self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
+            #self.__launchProcess("dose_test_ada." + str(i), parameters.dose_test_ada_cmd + (str(i),))
+            #self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
             self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))
 
     def __kill(self, name, proc):
@@ -661,7 +662,7 @@ def main():
         results.check_output(parameters)
 
         if results.num_tc_failed == 0:
-            print "== No failed testcases!"
+            print "== All tests were successful!!"
         else:
             print "!!",results.num_tc_failed, "testcases appear to have failed!"
 

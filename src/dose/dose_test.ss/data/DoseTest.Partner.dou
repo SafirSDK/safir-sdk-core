@@ -12,5 +12,14 @@
             <type>String</type>
             <maxLength>10</maxLength>
         </member>
+        <member>
+            <name>Address</name>
+            <type>String</type>
+            <maxLength>15</maxLength>
+        </member>
+        <member>
+            <name>Port</name>
+            <type>Int32</type>
+        </member>
     </members>
 </class>
