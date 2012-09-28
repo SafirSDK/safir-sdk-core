@@ -60,7 +60,11 @@ public:
                 m_acceptor.reset
                     (new tcp::acceptor(m_ioService,
                                        tcp::endpoint(tcp::v4(), 
-                                                     startPort + i)));
+                                                     startPort + i),
+                                       false)); //no reuseaddr
+                //reuseaddr doesnt work on windows. see:
+                //http://stackoverflow.com/questions/7164879/boost-asio-why-dont-i-get-bind-address-already-in-use-in-windows-but-do-ge
+
                 std::wcout << "accepting connections on port " << startPort + i << std::endl;
                 m_port = startPort + i;
                 break;
