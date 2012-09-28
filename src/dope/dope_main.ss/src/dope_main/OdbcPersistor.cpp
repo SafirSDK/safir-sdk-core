@@ -41,8 +41,6 @@ const ACE_Time_Value RETRY_EXCEPTION_DELAY(0,10000);
 
 const int REPORT_AFTER_RECONNECTS = 100;
 
-#define USE_SMALL_BINARY_COLUMN
-
 //-------------------------------------------------------
 template <class T>
 void Free(T & thing)
@@ -173,7 +171,7 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
                           const bool update)
 {
 
-    const bool small = static_cast<int>(bin.size()) < (Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize());
+    const bool small = static_cast<int>(bin.size()) < Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize();
 
     int retries = 0;
     bool errorReported = false;
@@ -573,8 +571,7 @@ void OdbcPersistor::RestoreAll()
     Disconnect(m_deleteConnection);
     Free(m_deleteConnection);
     m_debug << "RestoreAll completed" <<std::endl;
-
-    std::wcout << restoredObjects.size() << " objects restored in time " << boost::posix_time::microsec_clock::universal_time() - startTime << std::endl;
+    m_debug << restoredObjects.size() << " objects restored in time " << boost::posix_time::microsec_clock::universal_time() - startTime << std::endl;
 }
 
 
