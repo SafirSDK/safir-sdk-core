@@ -697,7 +697,9 @@ class Executor implements
             short startPort = 30000;
             for (short i = 0; i < 100; ++i) {
                 try {
-                    m_acceptor = new ServerSocket(startPort + i);
+                    m_acceptor = new ServerSocket();
+                    m_acceptor.setReuseAddress(false);
+                    m_acceptor.bind(new InetSocketAddress(startPort + i));
                     System.out.println("accepting connections on port " + (startPort + i));
                     m_port = (short)(startPort + i);
                     break;
@@ -764,6 +766,10 @@ class Executor implements
 
             @Override
                 public void run() {
+                byte [] ok = new byte[3];
+                ok[0] = 'o';
+                ok[1] = 'k';
+                ok[2] = 0;
 
                 try {
                     m_socket = m_acceptor.accept();
@@ -786,24 +792,22 @@ class Executor implements
                         input.readFully(wholeBinary,16,blobSize - 16);
 
                         Action action = (Action)com.saabgroup.safir.dob.typesystem.Serialization.toObject(wholeBinary);
-                        //System.out.println("Got action " + action.actionKind().getVal());
+                        System.out.println("Got action " + action.actionKind().getVal());
 
                         synchronized (m_synchronizer) {
                             m_synchronizer.ReceivedAction = action;
                             m_synchronizer.notify();
                         }
 
-
+                        System.out.println("Waiting for action handled");
                         synchronized (m_handled) {
                             while (!m_handled.handled) {
                                 m_handled.wait();
                             }
                             m_handled.handled = false;
                         }
-
-                        output.writeBytes("ok");
-                        output.writeByte(0);
-
+                        System.out.println("Sending reply");
+                        output.write(ok);
                     }
                 }
                 catch (IOException ex) {
@@ -824,10 +828,6 @@ class Executor implements
         private ReceiverThread m_receiverThread;
         private class Handled {public boolean handled;}
         private Handled m_handled = new Handled();
-        //        private final int port = 31789;
-        //private Socket m_socket = null;
-        //private byte[] m_buf = new byte[65000];
-        //private DatagramPacket m_recv = new DatagramPacket(m_buf, m_buf.length);
     }
     //
     // Data members
