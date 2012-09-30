@@ -543,7 +543,7 @@ class Executor implements
 
     public void onDeletedEntity(com.saabgroup.safir.dob.EntityProxy entityProxy,
                                 boolean deletedByOwner) {
-        handleSequencerState(null);
+        //ignore deletes since they may be due to an inhibitoutgoingtraffic on the other side
     }
 
     //

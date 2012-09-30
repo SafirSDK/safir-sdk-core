@@ -111,8 +111,9 @@ private:
     virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
     {HandleSequencerState(boost::static_pointer_cast<DoseTest::Sequencer>(entityProxy.GetEntity()));}
     
+    //ignore deletes since they may be due to an inhibitoutgoingtraffic on the other side
     virtual void OnDeletedEntity(const Safir::Dob::EntityProxy,
-                                 const bool) {HandleSequencerState(DoseTest::SequencerPtr());}
+                                 const bool) {}
     
 
     void HandleSequencerState(const DoseTest::SequencerPtr& sequencer);
