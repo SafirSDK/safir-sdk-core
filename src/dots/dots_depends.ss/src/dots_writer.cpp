@@ -24,6 +24,7 @@
 #include <iostream>
 #include <cstdio>
 #include <cstring>
+#include <map>
 
 #include "dots_depends_defs.h"
 #include "dots_writer.h"
@@ -121,18 +122,41 @@ namespace DotsDepends
         fputs(line.c_str(),stream);
 
         // Dependencies
-        Defs::ns_mapping::const_iterator iter = map.begin();
 
-        while (iter != map.end())
+        // rebuild map
+        typedef std::map<std::string, Defs::ns_list> depend_map;
+        depend_map tmp_map;
+
+        for (Defs::ns_mapping::const_iterator iter = map.begin();iter != map.end(); ++iter)
+        {
+            depend_map::iterator map_iter = tmp_map.find(iter->first);
+            if (map_iter == tmp_map.end())
+            {
+                // key not found, create a new entry
+                tmp_map[iter->first] = Defs::ns_list();
+            }
+            // add dependecy to vector
+            tmp_map[iter->first].push_back(iter->second);
+        }
+
+        // write dependencies
+        for (depend_map::const_iterator iter = tmp_map.begin();iter != tmp_map.end(); ++iter)
         {
             line = "SET(DOTS_NS_";
             line.append(iter->first.c_str());
-            line.append(" \"");
-            line.append(iter->second.c_str());
-            line.append("\")\n");
+
+            // loop through the dependencies for this namespace.
+            for (Defs::ns_list::const_iterator vect_iter = iter->second.begin();vect_iter != iter->second.end(); ++vect_iter)
+            {
+                line.append(" \"");
+                line.append(vect_iter->c_str());
+                line.append("\"");
+            }
+
+            line.append(")\n");
             fputs(line.c_str(),stream);
-            iter++;
-        }    
+        }
+
 
         fclose(stream);
    }
