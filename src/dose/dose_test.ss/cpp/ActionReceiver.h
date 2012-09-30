@@ -38,10 +38,12 @@ class ActionReceiver
     typedef boost::shared_ptr<boost::asio::ip::tcp::socket> SocketPtr;
 public:
     ActionReceiver(boost::asio::io_service& ioService,
-                   const boost::function<void(const DoseTest::ActionPtr&)>& actionCallback)
+                   const boost::function<void(const DoseTest::ActionPtr&)>& actionCallback,
+                   const int instance)
         : m_ioService(ioService)
         , m_port(-1)
         , m_actionCallback(actionCallback)
+        , m_instance(instance)
     {
 
 
@@ -52,26 +54,27 @@ public:
         using namespace boost::asio::ip;
 
         std::wcout << "Opening ActionReceiver" << std::endl;
-        const short startPort = 30000;
+        const short startPort = 30000 + m_instance;
         for (short i = 0; i < 100; ++i)
         {
+            const short port = startPort + i * 3;
             try
             {
                 m_acceptor.reset
                     (new tcp::acceptor(m_ioService,
                                        tcp::endpoint(tcp::v4(), 
-                                                     startPort + i),
+                                                     port),
                                        false)); //no reuseaddr
                 //reuseaddr doesnt work on windows. see:
                 //http://stackoverflow.com/questions/7164879/boost-asio-why-dont-i-get-bind-address-already-in-use-in-windows-but-do-ge
 
-                std::wcout << "accepting connections on port " << startPort + i << std::endl;
-                m_port = startPort + i;
+                std::wcout << "accepting connections on port " << port << std::endl;
+                m_port = port;
                 break;
             }
             catch (const boost::system::system_error& error)
             {
-                std::wcout << "Failed to accept on port " << startPort + i << ": " << error.what() << std::endl;
+                std::wcout << "Failed to accept on port " << port << ": " << error.what() << std::endl;
             }
         }
         
@@ -196,6 +199,7 @@ private:
     
     short m_port;
     const boost::function<void(const DoseTest::ActionPtr&)> m_actionCallback;
+    const int m_instance;
 };
 
 

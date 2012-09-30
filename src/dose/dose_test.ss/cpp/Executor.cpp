@@ -74,7 +74,7 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_dispatchTestConnection(true),
     m_testDispatcher(boost::bind(&Executor::DispatchTestConnection,this), m_ioService),
     m_controlDispatcher(boost::bind(&Executor::DispatchControlConnection,this), m_ioService),
-    m_actionReceiver(m_ioService, boost::bind(&Executor::HandleAction,this,_1)),
+    m_actionReceiver(m_ioService, boost::bind(&Executor::HandleAction,this,_1),m_instance),
     m_callbackActions(Safir::Dob::CallbackId::Size()),
     m_defaultContext(0)
 {

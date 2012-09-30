@@ -694,18 +694,19 @@ class Executor implements
         }
 
         public void open() {
-            short startPort = 30000;
+            short startPort = (short)(30000 + m_instance);
             for (short i = 0; i < 100; ++i) {
+                short port = (short)(startPort + i * 3);
                 try {
                     m_acceptor = new ServerSocket();
                     m_acceptor.setReuseAddress(false);
-                    m_acceptor.bind(new InetSocketAddress(startPort + i));
-                    System.out.println("accepting connections on port " + (startPort + i));
-                    m_port = (short)(startPort + i);
+                    m_acceptor.bind(new InetSocketAddress(port));
+                    System.out.println("accepting connections on port " + port);
+                    m_port = port;
                     break;
                 }
                 catch (java.io.IOException e) {
-                    System.out.println("Failed to accept on port " + (startPort + i) +  ": " + e);
+                    System.out.println("Failed to accept on port " + port +  ": " + e);
                 }
             }
 
