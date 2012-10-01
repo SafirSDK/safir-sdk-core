@@ -40,7 +40,7 @@ INCLUDE_DIRECTORIES(${dobexplorer_BINARY_DIR})
 ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${dose_com_sources} ${headers})
 
 FIND_PACKAGE(Boost COMPONENTS filesystem system)
-TARGET_LINK_LIBRARIES(dobexplorer ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(dobexplorer ${ACE_LIBRARY} ${QT_LIBRARIES})
 
 IF (NOT MSVC)
    TARGET_LINK_LIBRARIES(dobexplorer dots_cpp dots_generated-Safir-cpp dots_generated-cpp dose_internal lluf_utils ${Boost_LIBRARIES})
