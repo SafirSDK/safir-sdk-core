@@ -184,7 +184,7 @@ ENDMACRO()
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SAFIR_SDK}/data/build/)
 
 if (MSVC)
-    SET(COMMON_CS_FLAGS "-warn:4" "-platform:x86")
+    SET(COMMON_CS_FLAGS "-warn:4")
 else()
     SET(COMMON_CS_FLAGS "-warn:4" "-nowarn:1587")
 endif(MSVC)
