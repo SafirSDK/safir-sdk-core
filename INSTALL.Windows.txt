@@ -131,10 +131,11 @@ Go to http://expat.sourceforge.net/ and download and install the binary installe
    (To be able to install files under "Program Files" you might have to open the command window as Administrator)
 4. cd into c:\tmp\expat-2.1.0\build
 5. Run cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
-6  Run nmake install
+6. Run nmake install
+7. Move the expat.lib file into the same directory as expat.dll (they will have been installed under C:\Program Files\expat
 
 For both 32 and 64 bit builds:
-Add C:\Program Files\expat\bin to your PATH.
+Add <expat dir>\bin to your PATH, where <expat dir> is the location where expat got installed.
 
 GNAT and Ada libraries
 ~~~~~~~~~~~~~~~~~~~~~~
