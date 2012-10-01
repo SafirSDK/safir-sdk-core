@@ -37,7 +37,6 @@
 #endif
 
 #include <Safir/Dob/NotOpenException.h>
-#include <Safir/SwReports/SwReport.h>
 
 namespace Safir
 {
@@ -73,11 +72,12 @@ namespace ForEach
                 try
                 {
                     // Open the DOB connection.
-                    m_context[context]->m_connection.Open(connectionName,
-                                                          boost::lexical_cast<std::wstring>(inst),
-                                                          ComposeMinusOneContext(context),
-                                                          this,
-                                                          &m_context[context]->m_dispatcher);
+                    m_context[context]->m_connection.Open
+                        (connectionName,
+                         boost::lexical_cast<std::wstring>(inst),
+                         ComposeMinusOneContext(context),
+                         context == 0 ? this : NULL, //only context 0 connection has stop handler.
+                         &m_context[context]->m_dispatcher);
                     break;
                 }
                 catch (const Safir::Dob::NotOpenException&)
@@ -97,8 +97,7 @@ namespace ForEach
         boost::asio::io_service::work keepRunning(m_ioService);
         m_ioService.run();
 
-        // Stop swre before exiting
-        Safir::SwReports::Stop();
+        m_context.clear();
 
         return 0;
     }

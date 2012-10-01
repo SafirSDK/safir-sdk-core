@@ -22,13 +22,17 @@
 *
 ******************************************************************************/
 #include "Douf_foreach_app.h"
-
+#include <Safir/SwReports/SwReport.h>
 
 int main(int /*argc*/, char* /*argv*/[])
 {
     // Start the application.
     Safir::Utilities::ForEach::ForEachApp app;
     app.Run();
+
+    // Stop swre before exiting
+    Safir::SwReports::Stop();
+
     return 0;
 }
 
