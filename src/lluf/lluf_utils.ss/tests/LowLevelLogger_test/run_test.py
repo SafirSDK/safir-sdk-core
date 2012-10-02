@@ -38,7 +38,7 @@ def rmdir(directory):
             shutil.rmtree(directory)
 
 def enqueue_output(out, queue):
-    for line in iter(out.readline,b''):
+    for line in out:
         queue.put(line.rstrip("\n\r"))
     out.close()
 

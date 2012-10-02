@@ -136,18 +136,25 @@ def copy_dll(name, alternatives = None, Log_Error = True):
        print("could not find "+ name)
     return False
 
-def copy_lib(name):
+def copy_lib(name, alternatives = None, Log_Error = True):
     for path in PATH:
         if not SAFIR_RUNTIME in path:
             fn = os.path.join(path,name)
             if os.path.isfile(fn):
                 copy_file(fn, SDK_LIB_DESTINATION)
-                return
+                return True
             fn = os.path.join(path,"../lib", name)
             if os.path.isfile(fn):
                 copy_file(fn, SDK_LIB_DESTINATION)
-                return
-    print("could not find "+ name)
+                return True
+    if alternatives is not None:
+        for alt in alternatives:
+            res = copy_lib(alt, None, False)
+            if res:
+                return True
+    if Log_Error:
+       print("could not find "+ name)
+    return False
 
 def copy_libs_from_dir(dir):
     dirlist = os.listdir(dir)
@@ -215,7 +222,7 @@ def windows():
     ############
     print("Copying expat stuff")
     copy_dll("libexpat.dll")
-    copy_lib("libexpat.lib")
+    copy_lib("libexpat.lib", ("expat.lib",))
     expat_header_dir = os.path.join(find_dll(("libexpat.dll",)),"..","Source","lib")
     copy_headers(expat_header_dir,("expat.h","expat_external.h"))
 

@@ -23,10 +23,10 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import os, glob, sys, subprocess, platform, threading, xml.dom.minidom, re, time
+import os, glob, sys, subprocess, platform, xml.dom.minidom, re, time, shutil
 
-from Queue import Queue, Empty
 from xml.sax.saxutils import escape
+
 
 #Load some environment variables that are needed throughout as globals
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
@@ -36,23 +36,24 @@ SAFIR_SDK = os.environ.get("SAFIR_SDK")
 known_configs = set(["Release", "Debug", "MinSizeRel", "RelWithDebInfo"])
 
 #define some global variables
-skip_list= None
+skip_list = None
 clean = False
 force_config = None
 force_extra_config = None
 target_architecture = None
 ada_support = False
 java_support = False
-class FatalError(Exception):pass
+class FatalError(Exception):
+    pass
 
 def die(message):
     raise FatalError(message)
 
 def is_64_bit():
-    #Detecting this is a lot more complex than it should be.
-    #See http://stackoverflow.com/questions/2764356/python-get-windows-os-version-and-architecture
-    #and http://bytes.com/topic/python/answers/509764-detecting-64bit-vs-32bit-linux
-    #This will work reasonably well on our supported systems:
+    """Detecting this is a lot more complex than it should be.
+    See http://stackoverflow.com/questions/2764356/python-get-windows-os-version-and-architecture
+    and http://bytes.com/topic/python/answers/509764-detecting-64bit-vs-32bit-linux
+    This will work reasonably well on our supported systems:"""
     if sys.platform.startswith("linux"):
         return platform.architecture()[0] == "64bit"
     else:
@@ -65,7 +66,7 @@ def cmake():
     centos/rhel 6"""
     if not hasattr(cmake, "cmake_executable"):
         try:
-            subprocess.Popen(("cmake28", "--version"),stdout = subprocess.PIPE).communicate()
+            subprocess.Popen(("cmake28", "--version"), stdout = subprocess.PIPE).communicate()
             cmake.cmake_executable = "cmake28"
         except:
             cmake.cmake_executable = "cmake"
@@ -76,7 +77,7 @@ def ctest():
     centos/rhel 6"""
     if not hasattr(ctest, "ctest_executable"):
         try:
-            subprocess.Popen(("ctest28", "--version"),stdout = subprocess.PIPE).communicate()
+            subprocess.Popen(("ctest28", "--version"), stdout = subprocess.PIPE).communicate()
             ctest.ctest_executable = "ctest28"
         except:
             ctest.ctest_executable = "ctest"
@@ -84,10 +85,7 @@ def ctest():
 
 def copy_dob_files(source_dir, target_dir):
     """Copy dou and dom files from the source directory to the given subdirectory in the dots_generated directory"""
-    import os
-    import re
-    import shutil
-    dots_generated_dir = os.path.join(SAFIR_SDK,"dots","dots_generated")
+    dots_generated_dir = os.path.join(SAFIR_SDK, "dots", "dots_generated")
     abs_target_dir = os.path.join(dots_generated_dir, target_dir)
 
     logger.log("Copying dob files from " + source_dir + " to " + abs_target_dir,"output")
@@ -135,13 +133,13 @@ def remove(path):
             die ("Failed to remove file " + path + ". Got exception " + str(e))
             
     for name in os.listdir(path):
-        if os.path.isdir(os.path.join(path,name)):
-            remove(os.path.join(path,name))
+        if os.path.isdir(os.path.join(path, name)):
+            remove(os.path.join(path, name))
         else:
             try:
-                os.remove(os.path.join(path,name))
+                os.remove(os.path.join(path, name))
             except Exception as e:
-                die ("Failed to remove file " + os.path.join(path,name) + ". Got exception " + str(e))
+                die ("Failed to remove file " + os.path.join(path, name) + ". Got exception " + str(e))
 
     try:
         os.rmdir(path)
@@ -162,7 +160,7 @@ def num_cpus():
             return int(os.popen2("sysctl -n hw.ncpu")[1].read())
     # Windows:
     if "NUMBER_OF_PROCESSORS" in os.environ:
-        ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
+        ncpus = int(os.environ["NUMBER_OF_PROCESSORS"])
         if ncpus > 0:
             return ncpus
     return 1 # Default
@@ -170,17 +168,19 @@ def num_cpus():
 def physical_memory():
     if not sys.platform.startswith("linux"):
         die ("physical_memory() is only implemented on linux")
-    with open("/proc/meminfo") as file:
-        meminfo = file.read()
+    with open("/proc/meminfo") as a_file:
+        meminfo = a_file.read()
     match = re.search(r"MemTotal:\s*([0-9]*) kB", meminfo)
     return int(match.group(1))/1024
 
 class DummyLogger(object):
     def log(self, data, tag = None):
-        sys.stdout.write(data + "\n")        
+        sys.stdout.write(data + "\n")
+        sys.stdout.flush()
         
     def logOutput(self, process):
-        raise Exception("DummyLogger doesnt support process output logging. You should investigate why the real logger is not instantiated by now...")
+        raise Exception("DummyLogger doesnt support process output logging. " + 
+                        "You should investigate why the real logger is not instantiated by now...")
 
 class Logger(object):
     LogLevel = ("Brief", "Verbose")
@@ -188,7 +188,6 @@ class Logger(object):
 
     def __init__(self,level):
         #make stdout unbuffered
-        sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
         if level not in Logger.LogLevel:
             die("Bad log level")
         self.__logLevel = level
@@ -211,10 +210,11 @@ class Logger(object):
                 sys.stdout.write("+ " + data + "\n")
             else:
                 sys.stdout.write(data + "\n")
+        sys.stdout.flush()
 
     def logOutput(self, process):
         output = list()
-        for line in iter(process.stdout.readline,b''):
+        for line in process.stdout:
             line = line.rstrip("\n\r")
             self.log(line,"output")
             output += (line,)
@@ -229,7 +229,7 @@ def check_environment():
     global SAFIR_SDK
 
     if SAFIR_RUNTIME == None or SAFIR_SDK == None:
-        die("You need to have both SAFIR_RUNTIME and SAFIR_SDK set");
+        die("You need to have both SAFIR_RUNTIME and SAFIR_SDK set")
 
     #Make sure slashes are the right direction, etc.
     SAFIR_RUNTIME = os.path.normpath(SAFIR_RUNTIME)
@@ -256,7 +256,8 @@ def parse_command_line(builder):
     parser.add_option("--force-config", action="store",type="string",dest="force_config",
                       help="Build for the given config irrespective of what the command file says about config")
     parser.add_option("--force-extra-config", action="store",type="string",dest="force_extra_config",
-                      help="Build for the given extra config irrespective of what the command file says about extra_config")    
+                      help="Build for the given extra config irrespective of what the command " + 
+                      "file says about extra_config")    
     parser.add_option("--jenkins", action="store_true",dest="jenkins",default=False,
                       help="Set up and use environment variables for a Jenkins automated build." + 
                       "Currently sets up SAFIR_RUNTIME, SAFIR_SDK, PATH, LD_LIBRARY_PATH and ADA_PROJECT_PATH " +
@@ -293,11 +294,11 @@ def parse_command_line(builder):
     java_support = options.java_support
     
     
-    global skip_list;
+    global skip_list
     if (options.skip_list == None):
-        skip_list = list();
+        skip_list = list()
     else:
-        skip_list = options.skip_list.split();
+        skip_list = options.skip_list.split()
         
     global clean
     clean = options.clean
@@ -310,11 +311,11 @@ def parse_command_line(builder):
     global command_file
     command_file = open(options.command_file,'r')
 
-    global force_config;
+    global force_config
     if options.force_config is not None:
         force_config = options.force_config
 
-    global force_extra_config;
+    global force_extra_config
     if options.force_extra_config is not None:
         force_extra_config = options.force_extra_config        
 
@@ -333,7 +334,8 @@ def parse_command_line(builder):
             if config == "Release":
                 logger.log("Using Config 'Release', building as specified in the command file.")
             elif config == "DebugOnly":
-                logger.log("Using Config 'DebugOnly', ignoring command file configs, and building everything in Debug only.")
+                logger.log("Using Config 'DebugOnly', ignoring command file configs, and building " + 
+                           "everything in Debug only.")
                 force_config = "Debug"
                 force_extra_config = "None"
             else:
@@ -384,14 +386,14 @@ class VisualStudioBuilder(BuilderBase):
         VS90 = os.environ.get("VS90COMNTOOLS")
         VS100 = os.environ.get("VS100COMNTOOLS")
 
-        VSCount = 0;
+        VSCount = 0
 
         if VS80 is not None:
-            VSCount = VSCount + 1;
+            VSCount = VSCount + 1
         if VS90 is not None:
-            VSCount = VSCount + 1;
+            VSCount = VSCount + 1
         if VS100 is not None:
-            VSCount = VSCount + 1;
+            VSCount = VSCount + 1
 
         self.studio = None
         self.generator = None
@@ -407,7 +409,7 @@ class VisualStudioBuilder(BuilderBase):
             elif target_architecture == "x86-64":
                 self.generator = "Visual Studio 8 2005 Win64"
             else:
-                die("Target architecture " + target_architecture + " is not supported for Visual Studio 8 2005 !")                
+                die("Target architecture " + target_architecture + " is not supported for Visual Studio 8 2005 !")
         elif VS90 is not None:
             self.studio = VS90
             if target_architecture == "x86":
@@ -415,7 +417,7 @@ class VisualStudioBuilder(BuilderBase):
             elif target_architecture == "x86-64":
                 self.generator = "Visual Studio 9 2008 Win64"
             else:
-                die("Target architecture " + target_architecture + " is not supported for Visual Studio 9 2008 !")        
+                die("Target architecture " + target_architecture + " is not supported for Visual Studio 9 2008 !")
         elif VS100 is not None:
             self.studio = VS100
             if target_architecture == "x86":
@@ -532,8 +534,10 @@ class VisualStudioBuilder(BuilderBase):
         
         with open(batpath,"w") as bat:
             bat.write("@echo off\n" +
-                  "call \"" + os.path.join(self.studio_install_dir,"VC","vcvarsall.bat") +  "\" "  + self.vcvarsall_arg + "\n" +
-                  "\"" + os.path.join(SAFIR_RUNTIME,"bin","dobmake.py") + "\" -b --html-output --rebuild" + ada + java + " --target " + target_architecture) #batch mode (no gui)
+                      "call \"" + os.path.join(self.studio_install_dir,"VC","vcvarsall.bat") + 
+                      "\" "  + self.vcvarsall_arg + "\n" +
+                      "\"" + os.path.join(SAFIR_RUNTIME,"bin","dobmake.py") + "\" -b --html-output --rebuild" + 
+                      ada + java + " --target " + target_architecture) #batch mode (no gui)
             if force_config == "Debug" and force_extra_config == "None":
                 bat.write (" --no-cpp-release --default-config Debug")
             bat.write("\n")
@@ -577,7 +581,7 @@ class VisualStudioBuilder(BuilderBase):
             remove(self.generator)
             
         mkdir(self.generator)
-        olddir = os.getcwd();
+        olddir = os.getcwd()
         os.chdir(self.generator)
     
         self.__run_command((cmake() +
@@ -621,7 +625,8 @@ class VisualStudioBuilder(BuilderBase):
         batpath = os.path.join(self.tmpdir,"build.bat")
         bat = open(batpath,"w")
         bat.write("@echo off\n" +
-                  "call \"" + os.path.join(self.studio_install_dir,"VC","vcvarsall.bat") +  "\" " + self.vcvarsall_arg + "\n" +
+                  "call \"" + os.path.join(self.studio_install_dir,"VC","vcvarsall.bat") + 
+                  "\" " + self.vcvarsall_arg + "\n" +
                   cmd)
         bat.close()
 
@@ -633,7 +638,8 @@ class VisualStudioBuilder(BuilderBase):
             if not allow_fail:
                 die("Failed to run '" + cmd + "' for " + what)
             else:
-                logger.log("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing\n")
+                logger.log("This command failed, but failure of this particular command is " + 
+                           "non-fatal to the build process, so I'm continuing\n")
         return output
 
 class UnixGccBuilder(BuilderBase):
@@ -733,7 +739,8 @@ class UnixGccBuilder(BuilderBase):
             if not allow_fail:
                 die("Failed to run '" + " ".join(cmd) + "' for " + what)
             else:
-                logger.log("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing")
+                logger.log("This command failed, but failure of this particular command " + 
+                           "is non-fatal to the build process, so I'm continuing")
 
         return output
 
@@ -744,13 +751,13 @@ def in_skip_list(line):
         p=re.compile(expr)
         if p.search(line):
             return True
-    return False;
+    return False
 
 
 def build_dir(directory, configs, builder, install = True):
     if not os.path.isdir(directory):
         die("Failed to enter " + directory + ", since it does not exist (or is not a directory)")
-    olddir = os.getcwd();
+    olddir = os.getcwd()
     os.chdir(directory)
     try:
         if not os.path.isfile("CMakeLists.txt"):
@@ -791,7 +798,8 @@ def translate_results_to_junit(suite_name):
 
                     meas = child.getElementsByTagName("Measurement")[0]
 
-                    junitfile.write("  <testcase name=\"" + testName + "\" classname=\"" + suite_name + "\" time=\"" + str(executionTime) + "\"")
+                    junitfile.write("  <testcase name=\"" + testName + "\" classname=\"" +
+                                    suite_name + "\" time=\"" + str(executionTime) + "\"")
                     if testStatus == "passed":
                         """success"""
                         junitfile.write("/>\n")
@@ -805,7 +813,7 @@ def translate_results_to_junit(suite_name):
 
 
 def run_test_suite(directory, suite_name, builder):
-    olddir = os.getcwd();
+    olddir = os.getcwd()
     os.chdir(directory)
     try:
         builder.test(directory)
@@ -814,7 +822,7 @@ def run_test_suite(directory, suite_name, builder):
         os.chdir(olddir)
 
 def dobmake(builder):
-    logger.log("Running dobmake","header");
+    logger.log("Running dobmake","header")
     builder.dobmake()
 
 def get_builder():
@@ -830,7 +838,7 @@ def main():
     parse_command_line(builder)
     check_environment()
 
-    olddir = os.getcwd();
+    olddir = os.getcwd()
 
     split_line = None
 
@@ -889,7 +897,7 @@ def main():
             suite_name = split_line[2]
             logger.log("Building and running test suite " + suite_name + " in " + directory, "header")
             cf = "Release" if force_config is None else force_config
-            build_dir(directory,(cf,),builder,False) # build, but do not install
+            build_dir(directory, (cf,), builder, False) # build, but do not install
             run_test_suite(directory, suite_name, builder)
         elif command == "dobmake":
             dobmake(builder)
@@ -912,7 +920,7 @@ if hasattr(os,"nice"):
     try:
         if os.nice(0) == 0:
             result = os.nice(10)
-    except Exception, e:
+    except Exception as e:
         logger.log("Failed to set process niceness: " + str(e))
 
 try:

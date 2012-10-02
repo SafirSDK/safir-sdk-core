@@ -44,6 +44,11 @@ except ImportError:
     import Tkinter as tkinter
     import tkFont as tkfont
 
+def log(data):
+    print(data)
+    sys.stdout.flush()
+
+
 def is_64_bit():
     #Detecting this is a lot more complex than it should be.
     #See http://stackoverflow.com/questions/2764356/python-get-windows-os-version-and-architecture
@@ -294,7 +299,7 @@ class Logger(object):
         return data
 
     def close(self):
-        print("logger.close")
+        log("logger.close")
 
 
 buildType = "build"
@@ -334,10 +339,10 @@ def parse_command_line():
     (options,args) = parser.parse_args()
 
     if options.clean and options.rebuild:
-        print("Specifying both --clean and --rebuild is redundant, ignoring --clean")
+        log("Specifying both --clean and --rebuild is redundant, ignoring --clean")
 
     if options.uninstall and options.rebuild:
-        print("Specifying both --uninstall and --rebuild is redundant, ignoring --uninstall")         
+        log("Specifying both --uninstall and --rebuild is redundant, ignoring --uninstall")         
 
     global buildType
 
@@ -415,7 +420,7 @@ class VisualStudioBuilder(object):
 
         add_section = False
         if not os.path.exists(cfgpath):
-            print("Could not find " + cfgpath + ", trying to create one")
+            log("Could not find " + cfgpath + ", trying to create one")
             add_section = True
         else:
             cfg.read(cfgpath)
@@ -1030,7 +1035,7 @@ def load_gui():
 
                 if self.commandThread.result != None:
                     if self.commandThread.traceback is not None:
-                        print(self.commandThread.traceback)
+                        log(self.commandThread.traceback)
                     self.runButton.config(state="normal")
                     self.cancelButton.config(state="normal")
                     self.commandList = list()
@@ -1062,15 +1067,12 @@ def load_gui():
                     self.traceback = traceback.format_exc()
 
 def main():
-    #make stdout unbuffered
-    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-
     global SAFIR_RUNTIME
     global SAFIR_SDK
     SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
     SAFIR_SDK = os.environ.get("SAFIR_SDK")
     if SAFIR_RUNTIME == None or SAFIR_SDK == None:
-        print("You need to have both SAFIR_RUNTIME and SAFIR_SDK set")
+        log("You need to have both SAFIR_RUNTIME and SAFIR_SDK set")
         sys.exit(1)
     
     start_time = time.time()
@@ -1085,7 +1087,7 @@ def main():
     elif UnixGccBuilder.can_use():
         builder = UnixGccBuilder()
     else:
-        print("Failed to work out what builder to use!")
+        log("Failed to work out what builder to use!")
         return 1
 
     olddir = os.getcwd();
@@ -1093,7 +1095,7 @@ def main():
     os.chdir(dir)
 
     if no_gui:
-        print("Running in batch mode")
+        log("Running in batch mode")
         
         if buildType == "clean" or buildType == "clean_and_uninstall" or buildType == "rebuild":
             builder.clean()
@@ -1107,7 +1109,7 @@ def main():
             check_config()
         
 
-        print ("Success! (dobmake took " + time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time)) + ")")
+        log ("Success! (dobmake took " + time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time)) + ")")
     else:
         load_gui()
         application = tkinter.Tk()
