@@ -140,13 +140,15 @@ int DoseOs::CDoseComEvent::Set()
     int rc;
     //PrintDbg("-----SetEvent() Entry\n");
 
-    pthread_mutex_lock(&m_Mutex);
+    rc = pthread_mutex_lock(&m_Mutex);
+    if(rc != 0) PrintDbg("*--- ERROR pthread_mutex_lock ==> %d\n",rc);
     m_SignalCounter++;
     //PrintDbg("-----SetEvent() Signal Event\n");
 
     // signal the condition variable
     rc = pthread_cond_signal(&m_Condition);
 
+    if(rc != 0) PrintDbg("*--- ERROR pthread_cond_signal ==> %d\n",rc);
     //PrintDbg("-----SetEvent() Has Signal Event. rc=%d\n",rc);
 
     pthread_mutex_unlock(&m_Mutex);

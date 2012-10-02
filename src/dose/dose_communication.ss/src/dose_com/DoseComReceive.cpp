@@ -499,10 +499,12 @@ static THREAD_API RxThread(void *pChNum)
             // We must handle that.
             //
             // Should be improved to use the rx num  to update the expected.
+#if 0 //this bit of code was removed by LAHA on 2012-10-02, since it does nothing but generate a warning
             int     SeqNumSet;
 
             if(MsgHdr.DestinationId<64) SeqNumSet = 0;
             else                        SeqNumSet = MsgHdr.DestinationId - 64+2;
+#endif
             if(*pDbg>=2)
             PrintDbg("*   RxThread[%d] Rx msg Not for me. BitMap= %X.%08X\n",
                     MyIx, MsgHdr.DoseIdBitMap[1], MsgHdr.DoseIdBitMap[0]);

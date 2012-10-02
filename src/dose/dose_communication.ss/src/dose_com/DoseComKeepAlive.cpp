@@ -616,9 +616,8 @@ Check_Timeout:
 
 /**********************************************************
 *
-* Returns: DoseUd which could be auto configured here
 ***********************************************************/
-int DOSE_KeepAlive_Init(dcom_uchar8 DoseId)
+void DOSE_KeepAlive_Init(dcom_uchar8 DoseId)
 {
     if(*pDbg >= 1) PrintDbg("/// KeepAlive_Init().\n");
 
@@ -653,7 +652,5 @@ int DOSE_KeepAlive_Init(dcom_uchar8 DoseId)
 
     if(*pDbg>=1)
     PrintDbg("/   DOSE_KeepAlive_Init() done DoseId=%d\n", g_MyDoseId);
-
-    return(g_MyDoseId);
 }
 /*-------------------------- end DoseComKeepAlive.cpp ------------------*/

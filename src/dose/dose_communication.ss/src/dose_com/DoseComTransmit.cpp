@@ -1164,9 +1164,9 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 }
                 if(*pDbg>3)
                 PrintDbg("#-  Ack from %d SeqNum=%d. New Expected=%IX.%08X\n",
-                  DoseIdFrom, SequenceNum,
-                  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32));
-                  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF);
+                         DoseIdFrom, SequenceNum,
+                         (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32),
+                         (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF));
             }
             else
             {
