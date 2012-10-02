@@ -82,7 +82,7 @@ public:
         TimerHandler::Instance().Set(Replace, timerInfo, GetUtcTime());
     }
 
-    void HandleTimeout(const TimerInfoPtr& timer)
+    void HandleTimeout(const TimerInfoPtr& /*timer*/)
     {
         m_ok = true;
         ioService.stop();
@@ -100,7 +100,7 @@ public:
         TimerHandler::Instance().Set(Replace, timerInfo, GetUtcTime() + 0.01); //replace the previous timer
     }
 
-    void HandleTimeout(const TimerInfoPtr& timer)
+    void HandleTimeout(const TimerInfoPtr& /*timer*/)
     {
         if (GetUtcTime() - m_constructionTime < 1.0)
         {
@@ -122,7 +122,7 @@ public:
 
     }
 
-    void HandleTimeout(const TimerInfoPtr& timer)
+    void HandleTimeout(const TimerInfoPtr& /*timer*/)
     {
         if (GetUtcTime() - m_constructionTime < 1.0)
         {
@@ -147,7 +147,7 @@ public:
         TimerHandler::Instance().Set(Replace, m_timerInfo, m_last + m_delay); 
     }
 
-    void HandleTimeout(const TimerInfoPtr& timer)
+    void HandleTimeout(const TimerInfoPtr& /*timer*/)
     {
         --m_count;
 
