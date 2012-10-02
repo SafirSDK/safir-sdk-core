@@ -4,7 +4,7 @@ project(header_checks NONE)
 
 enable_testing()
 
-execute_process(COMMAND ${CMAKE_COMMAND} .
+execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} .
   WORKING_DIRECTORY no_naughty_includes)
 
 add_test(NAME no_naughty_includes 
