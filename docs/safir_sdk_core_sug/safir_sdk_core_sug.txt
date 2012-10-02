@@ -70,7 +70,7 @@ Component dependencies are illustrated in <<sdk_core_component_dependencies>>.
 
 [[sdk_core_component_dependencies]]
 .Safir SDK Core component dependencies
-image::images/dependencies.jpg["Component Dependencies", width=350, link="images/dependencies.jpg"]
+image::images/dependencies.png["Component Dependencies", width=350, link="images/dependencies.png"]
 
 Again, to be able to use Safir SDK Core you do not need to understand or like these acronyms, but knowing that they are there may make some things in the SDK easier to use.
 
@@ -165,7 +165,7 @@ The xml files are used to generate language interfaces, that any application tha
 
 [[information_model]]
 .Defining the information model
-image::images/typesystem_information_model.jpg["Defining the information model", width=400, link="images/typesystem_information_model.jpg"]
+image::images/typesystem_information_model.png["Defining the information model", width=400, link="images/typesystem_information_model.png"]
 
 The figure <<information_model>> attempts to show how applications contribute to, or partake of, the information model. 
 
@@ -724,7 +724,7 @@ So an A object (myA) could look like in <<example_object>>.
 
 [[example_object]]
 .Example object
-image::images/rc_example_object.jpg["Example object", width=158]
+image::images/rc_example_object.png["Example object", width=158]
 
 ==== Syntax in the different languages
 The design approach is that the generated code should make use of the language's own features in the best possible way. Languages that support operator overloading should use them if it makes the interface ``better'', and languages that support properties should use them. This makes each language interface ``as good as it can possibly be'', but it has one obvious side effect, i.e. the interfaces are _not identical_.
@@ -1054,7 +1054,7 @@ For the discussion in this section the object hierarchy in <<example_object_hier
 
 [[example_object_hierarchy]]
 .Example object hierarchy
-image::images/object_hierarchy.jpg["Example object hierarchy", width=350, link="images/object_hierarchy.jpg"]
+image::images/object_hierarchy.png["Example object hierarchy", width=350, link="images/object_hierarchy.png"]
 
 [[cpp_type_casting]]
 ===== C++ type casting
@@ -1416,7 +1416,7 @@ The upshot is that all callbacks (except, of course, the +OnDoDispatch+ one) are
 
 [[dispatching_sequence_diagram]]
 .Dispatching sequence diagram
-image::images/dispatching_sequence_diagram.jpg["Dispatching Sequence Diagram", width=450, link="images/dispatching_sequence_diagram.jpg"]
+image::images/dispatching_sequence_diagram.png["Dispatching Sequence Diagram", width=450, link="images/dispatching_sequence_diagram.png"]
 
 If you're using C++ and ACE the SDK provides a Dispatcher class that does the thread switch and calls Dispatch, see <<ace_dispatcher>>.
 
@@ -1466,7 +1466,7 @@ Of course it is possible to pass proxies to other methods, as long as the proxy 
 
 [[messages_sequence_diagram]]
 .Sequence diagram for messages
-image::images/messages_sequence_diagram.jpg["Messages Sequence Diagram", width=350, link="images/messages_sequence_diagram.jpg"]
+image::images/messages_sequence_diagram.png["Messages Sequence Diagram", width=350, link="images/messages_sequence_diagram.png"]
 
 For messages there are two different roles involved. The Message Sender sends messages and the Message Subscriber receives messages. The subscriber needs to set up the subscription, and subsequently it will receive messages in its +OnMessage+ callback function whenever a Message Sender sends a message.
 
@@ -1576,7 +1576,7 @@ catch (const Safir::Dob::OverflowException &)
 
 [[services_sequence_diagram]]
 .Sequence diagram for services
-image::images/services_sequence_diagram.jpg["Services Sequence Diagram", width=350, link="images/services_sequence_diagram.jpg"]
+image::images/services_sequence_diagram.png["Services Sequence Diagram", width=350, link="images/services_sequence_diagram.png"]
 
 
 For services there are two different roles involved. The ServiceHandler is the component implementing the service and the Requestor is the component using the service. The Handler needs to register the service and then the Requestor can send requests to it.
@@ -1738,7 +1738,7 @@ When handling entities there are three roles involved. _Entity Handler_ is an ap
 
 [[entities_sequence_diagram]]
 .Sequence diagram for entities
-image::images/entities_sequence_diagram.jpg["Entities Sequence Diagram", width=350, link="images/entities_sequence_diagram.jpg"]
+image::images/entities_sequence_diagram.png["Entities Sequence Diagram", width=350, link="images/entities_sequence_diagram.png"]
 
 
 This section will first describe "simple" entity handling, such as is shown in <<entities_sequence_diagram>>, and later go on to describe more advanced concepts, such as _persistence_ and _injections_.
@@ -2376,7 +2376,7 @@ Now you need to create a dom file as described in <<simple_persistence>>, and th
 
 [[persistence_sequence_diagram]]
 .Sequence diagram for persistent entity
-image::images/persistence_sequence_diagram.jpg["Persistence Sequence Diagram", width=350, link="images/persistence_sequence_diagram.jpg"]
+image::images/persistence_sequence_diagram.png["Persistence Sequence Diagram", width=350, link="images/persistence_sequence_diagram.png"]
 
 
 [[handler_registration_subscription]]
@@ -2996,7 +2996,7 @@ The first time the application instances start, one of the instances will be giv
 
 [[redundancy_sequence_diagram]]
 .Sequence diagram for redundant entity handlers
-image::images/redundancy_sequence_diagram.jpg["Redundancy Sequence Diagram", width=350, link="images/redundancy_sequence_diagram.jpg"]
+image::images/redundancy_sequence_diagram.png["Redundancy Sequence Diagram", width=350, link="images/redundancy_sequence_diagram.png"]
 
 Note that applications subscribing to the entities that are redundancy-handled _may_ see the entity instances as deleted for a short while, since in reality the handler was unregistered for a short while.
 
@@ -3007,7 +3007,7 @@ Applications that own the entities must make sure that no _orphans_ are left beh
 
 [[orphan_example]]
 .Entities that may cause orphans.
-image::images/orphan_object.jpg["Entities that may cause orphans", width=210]
+image::images/orphan_object.png["Entities that may cause orphans", width=210]
 
 For applications that use the entities that contain associations you need to be aware that the Dob does not guarantee the order in which entities are delivered to subscribers, and that while you're handling a subscription an associated entity may be removed, before you've managed to Read it.
 
@@ -3057,7 +3057,7 @@ The +EntityHandlerInjection+ consumer interface has, as described in <<advanced_
 
 [[injection_sequence_diagram]]
 .Injection sequence diagram
-image::images/injection_sequence_diagram.jpg["Injection Sequence Diagram", width=350, link="images/injection_sequence_diagram.jpg"]
+image::images/injection_sequence_diagram.png["Injection Sequence Diagram", width=350, link="images/injection_sequence_diagram.png"]
 
 
 Note that it is not possible to tell the difference between the two kinds of calls to +OnInjectedNewEntity+, and in fact both new and old (i.e. persisted and injected) data can be mixed (i.e. timestamp merged) in a call to +OnInjectedNewEntity+.
@@ -3299,7 +3299,7 @@ For example, you can set up a subscription to an entity, register entity handler
 
 [[sate_overview]]
 .Sate screen shot
-image::images/sate_overview.jpg["Sate Screen shot", width=400, link="images/sate_overview.jpg"]
+image::images/sate_overview.png["Sate Screen shot", width=400, link="images/sate_overview.png"]
 
 The lower left part is an "inbox", containing the most recent entity updates and requests, service requests and messages received. The lower right hand part shows a history of what "has happened", e.g. showing if a request has been successfully sent, etc.
 
@@ -3311,13 +3311,13 @@ Dobexplorer is a tool that is primarily meant for the developers of the Dob, but
 
 [[dobexplorer_memory]]
 .Dobexplorer showing a graph of memory usage.
-image::images/dobexplorer_memory.jpg["Dobexplorer showing memory usage", width=400, link="images/dobexplorer_memory.jpg"]
+image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", width=400, link="images/dobexplorer_memory.png"]
 
 <<dobexplorer_nodes>> shows dobexplorer displaying a table of the node statuses of a multinode system.
 
 [[dobexplorer_nodes]]
 .Dobexplorer showing node statuses.
-image::images/dobexplorer_nodes.jpg["Dobexplorer showing node statuses", width=400, link="images/dobexplorer_nodes.jpg"]
+image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", width=400, link="images/dobexplorer_nodes.png"]
 
 [[olib]]
 == C++ ODBC database wrapper

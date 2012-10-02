@@ -16,7 +16,7 @@ The applications may execute on the same or different nodes, this is in fact one
 
 [[logic-separation]]
 .Separation of logic from GUI
-image::images/separation_tenet.jpg["Separation tenet", width=300, link="images/separation_tenet.jpg"]
+image::images/separation_tenet.png["Separation tenet", width=300, link="images/separation_tenet.png"]
 
 === The (example) problem
 The fictive problem is that we need a system that can give us an overview of a number of manually created vehicles. We also want some services associated with the vehicles.
@@ -48,7 +48,7 @@ A deployment of the applications is shown in <<vehicle-deployment>> where the ap
 
 [[vehicle-deployment]]
 .Deployment of the Vehicle system
-image::images/vehicle_deployment.jpg["Vehicle system deployment", width=300, link="images/vehicle_deployment.jpg"]
+image::images/vehicle_deployment.png["Vehicle system deployment", width=300, link="images/vehicle_deployment.png"]
 
 === VehicleApp - Business Application
 This application exists in the languages C++ and C#.
@@ -100,7 +100,7 @@ Definition of vehicle parameters.
 
 [[vehicleapp-class-diagram]]
 .VehicleApp class diagram
-image::images/vehicleapp_class_diagram.jpg["Class Diagram", width=300, link="images/vehicleapp_class_diagram.jpg"]
+image::images/vehicleapp_class_diagram.png["Class Diagram", width=300, link="images/vehicleapp_class_diagram.png"]
 
 App::
 Main class. Called by the Dob on application stop. Contains the main Dob connection.
@@ -134,31 +134,31 @@ The list view in <<vehiclemmi-list>> contains all published vehicle objects in t
 
 [[vehiclemmi-list]]
 .VehicleMmi list view.
-image::images/vehiclemmi_list.jpg["VehicleMmi List", width=450, link="images/vehiclemmi_list.jpg"]
+image::images/vehiclemmi_list.png["VehicleMmi List", width=450, link="images/vehiclemmi_list.png"]
 
 The dialog in <<vehiclemmi-create>> is opened from the list view and is used to send create requests for new vehicle objects. The requests are received by VehicleApp.
 
 [[vehiclemmi-create]]
 .VehicleMmi Create dialog
-image::images/vehiclemmi_create.jpg["VehicleMmi Create dialog", width=200, link="images/vehiclemmi_create.jpg"]
+image::images/vehiclemmi_create.png["VehicleMmi Create dialog", width=200, link="images/vehiclemmi_create.png"]
 
 The dialog in <<vehiclemmi-update>> is opened from the list view and is used to send update requests for existing vehicle objects. The requests are received by VehicleApp.
 
 [[vehiclemmi-update]]
 .VehicleMmi Update dialog
-image::images/vehiclemmi_update.jpg["VehicleMmi Update dialog", width=200, link="images/vehiclemmi_update.jpg"]
+image::images/vehiclemmi_update.png["VehicleMmi Update dialog", width=200, link="images/vehiclemmi_update.png"]
 
 The dialog in <<vehiclemmi-calculate-speed>> is opened from the list view and is used to send to calculate the difference between the speed for a selected vehicle object and an entered speed. The request is sent through a service to VehicleApp and the result is given in the sevice response.
 
 [[vehiclemmi-calculate-speed]]
 .VehicleMmi Speed calculation dialog
-image::images/vehiclemmi_calculate_speed.jpg["Speed calculation", width=200, link="images/vehiclemmi_calculate_speed.jpg"]
+image::images/vehiclemmi_calculate_speed.png["Speed calculation", width=200, link="images/vehiclemmi_calculate_speed.png"]
 
 The dialog in <<vehiclemmi-category-info>> is opened from the list view and is used to obtain category information for the selected vehicle object. If there is no information the category code in the database, the information entered in the dialog is instead stored for the given category code.
 
 [[vehiclemmi-category-info]]
 .VehicleMmi Category information dialog
-image::images/vehiclemmi_category_info.jpg["Category info", width=200, link="images/vehiclemmi_category_info.jpg"]
+image::images/vehiclemmi_category_info.png["Category info", width=200, link="images/vehiclemmi_category_info.png"]
 
 ==== Dou-files
 No dou files are provided by VehicleMmi.
@@ -168,7 +168,7 @@ No dou files are provided by VehicleMmi.
 
 [[vehiclemmi-class-diagram]]
 .VehicleMmi class diagram
-image::images/vehiclemmi_class_diagram.jpg["Class Diagram", width=350, link="images/vehiclemmi_class_diagram.jpg"]
+image::images/vehiclemmi_class_diagram.png["Class Diagram", width=350, link="images/vehiclemmi_class_diagram.png"]
 
 App::
 Main class. Called by the Dob on application stop.Contains the main Dob connection.
@@ -180,13 +180,13 @@ EntityListHandler::
 Subscribes to vehicle objects. Updates the list view according to subscription responses.
 
 EntityDialog::
-Implements the Create vehicle and Update vehicle dialogs. Sends vehicle object requests that are received by 				VehicleApp.
+Implements the Create vehicle and Update vehicle dialogs. Sends vehicle object requests that are received by VehicleApp.
 
 ServiceDialog::
 Implements the Speed difference calculator dialog. Sends a service request that is received by VehicleApp.
 
 MessageDialog:: 
-Implements the dialog that is presented when the number	of created vehicle objects has reached the limit specified by a parameter. Subscribes to a Dob message.
+Implements the dialog that is presented when the number of created vehicle objects has reached the limit specified by a parameter. Subscribes to a Dob message.
 
 CategoryInfoDialog::
 Implements the Category information dialog. Sends service requests to create new category information data code or to obtain existing data for a category information. The requests are received by VehicleDb.
@@ -235,13 +235,13 @@ This service is used to create a new vehicle category info.
 
 [[vehicledb-class-diagram]]
 .VehicleDb class diagram
-image::images/vehicledb_class_diagram.jpg["Class Diagram", width=300, link="images/vehicledb_class_diagram.jpg"]
+image::images/vehicledb_class_diagram.png["Class Diagram", width=300, link="images/vehicledb_class_diagram.png"]
 
 App::
 Main class. Called by the Dob on application stop. Contains the main Dob connection.
 
 VehicleDatabaseServices::
-Registers ownership of the Vehicle category	information services. Receives all service requests	and triggers action in the DatabaseInteraction class.
+Registers ownership of the Vehicle category information services. Receives all service requests and triggers action in the DatabaseInteraction class.
 
 DatabaseInteraction::
 Performs all database interaction. Sets up the database connection on startup. Prepares database statements that are executes on request.
