@@ -32,8 +32,6 @@
 
 
 #ifdef _MSC_VER
-//this needs to be disabled "permanently", not just for the file inclusion bit.
-#pragma warning (disable:4503)
 
 #pragma warning (push)
 #pragma warning (disable:4512)

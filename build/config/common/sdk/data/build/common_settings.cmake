@@ -60,6 +60,7 @@ if (MSVC)
    ADD_DEFINITIONS(-D_UNICODE -DUNICODE)
    ADD_DEFINITIONS(-D_WIN32_WINNT=0x0501)
    ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
+   ADD_DEFINITIONS(/wd4503) #decorated name length exceeded
 
    #use multiprocessing 
    #LAHA turned off to see if that removes the vs2010 internal compiler errors we're seeing.
