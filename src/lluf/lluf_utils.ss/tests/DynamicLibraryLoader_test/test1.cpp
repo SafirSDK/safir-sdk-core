@@ -30,6 +30,7 @@
 #  if defined (_WIN64)
      // No other cc on win64 available, I think...
 #    define ANOTHER_CC 
+     const char * fun2_name = "TestFunction2";
 #  else //32bit windows
 #    define ANOTHER_CC __stdcall
      //stdcall name decoration is a bit messy (22 is the size of all arguments... plus 2 bytes padding)
