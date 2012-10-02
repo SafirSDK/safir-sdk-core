@@ -23,21 +23,18 @@
 ******************************************************************************/
 
 #include <iostream>
-//#include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Consumer.h>
-//#include <boost/thread.hpp>
 #include "TestCaseReader.h"
 #include "PartnerState.h"
 #include "Sequencer.h"
 
 #if defined _MSC_VER
   #pragma warning (push)
-  #pragma warning (disable : 4127 4244 4702 4267 4251 4275)
+  #pragma warning (disable : 4100 4127 4244 4702 4267 4251 4275)
 #endif
 
 #include <boost/program_options.hpp>
-//#include <boost/lexical_cast.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
@@ -211,48 +208,7 @@ int main(int argc, char* argv[])
                             ioService);
 
         ioService.run();
-#if 0
-        Sequencer sequencer(commandLine.first, 
-                            commandLine.last, 
-                            languages, 
-                            commandLine.noTimeout, 
-                            context, 
-                            ioService);
-        while (!sequencer.IsFinished())
-        {
-            //stop after 250ms
-            boost::asio::deadline_timer timer(ioService,boost::posix_time::milliseconds(250));
-            timer.async_wait(boost::bind(&boost::asio::io_service::stop, boost::ref(ioService)));
-                
-            ioService.run();
-            ioService.reset();
 
-            sequencer.Tick();
-        }
-        boost::this_thread::sleep(boost::posix_time::seconds(1));
-        sequencer.GetTestResults(i);
-        while (!sequencer.GotTestResults())
-        {
-            //stop after 100ms
-            boost::asio::deadline_timer timer(ioService,boost::posix_time::milliseconds(100));
-            timer.async_wait(boost::bind(&boost::asio::io_service::stop, boost::ref(ioService)));
-                
-            ioService.run();
-            ioService.reset();
-        }
-
-
-        while (!sequencer.DeactivateAll())
-        {
-            //stop after 100ms
-            boost::asio::deadline_timer timer(ioService,boost::posix_time::milliseconds(100));
-            timer.async_wait(boost::bind(&boost::asio::io_service::stop, boost::ref(ioService)));
-
-            ioService.run();
-            ioService.reset();
-        }
-
-#endif
         connection.Close();
         std::wcout << "End" << std::endl;
     }

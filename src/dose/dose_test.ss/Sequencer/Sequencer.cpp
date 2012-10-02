@@ -105,6 +105,11 @@ namespace
 
 }
 
+#ifdef _MSC_VER
+   #pragma warning(push)
+   #pragma warning(disable: 4355)
+#endif
+
 
 Sequencer::Sequencer(const int startTc,
                      const int stopTc,
@@ -141,6 +146,9 @@ Sequencer::Sequencer(const int startTc,
 }
 
 
+#ifdef _MSC_VER
+   #pragma warning(pop)
+#endif
 
 
 

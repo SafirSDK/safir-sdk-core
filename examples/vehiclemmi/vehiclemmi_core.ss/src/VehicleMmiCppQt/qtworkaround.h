@@ -21,7 +21,17 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127)
+#endif
+
 #include <QString>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 namespace VehicleMmiCppQt
 {

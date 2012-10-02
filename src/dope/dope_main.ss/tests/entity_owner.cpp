@@ -122,8 +122,8 @@ public:
         }
     }
 private:
-    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
-        const Safir::Dob::Typesystem::HandlerId& handlerId) {}
+    virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId,
+        const Safir::Dob::Typesystem::HandlerId&) {}
 
     virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
         Safir::Dob::ResponseSenderPtr        responseSender) {}
@@ -144,7 +144,7 @@ private:
     }
 
     virtual void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId,
-                                         const Safir::Dob::Typesystem::HandlerId& handlerId)
+                                         const Safir::Dob::Typesystem::HandlerId&)
     {
         if (typeId == DopeTest::SmallEntity::ClassTypeId)
         {

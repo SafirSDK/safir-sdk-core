@@ -54,7 +54,7 @@ public:
         using namespace boost::asio::ip;
 
         std::wcout << "Opening ActionReceiver" << std::endl;
-        const short startPort = 30000 + m_instance;
+        const short startPort = static_cast<short>(30000 + m_instance);
         for (short i = 0; i < 100; ++i)
         {
             const short port = startPort + i * 3;

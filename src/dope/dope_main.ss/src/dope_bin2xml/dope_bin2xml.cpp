@@ -26,6 +26,7 @@
 #pragma warning(push)
 #pragma warning (disable: 4251)
 #pragma warning (disable: 4275)
+#pragma warning (disable: 4100)
 #endif
 
 #include <boost/program_options.hpp>

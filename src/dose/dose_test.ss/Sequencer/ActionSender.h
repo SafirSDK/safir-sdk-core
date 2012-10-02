@@ -102,7 +102,7 @@ public:
         }
         else
         {
-            SendInternal(binary,msg->Partner().GetVal().GetRawValue());
+            SendInternal(binary,static_cast<int>(msg->Partner().GetVal().GetRawValue()));
         }
 
         SleepyTime(msg->ActionKind());

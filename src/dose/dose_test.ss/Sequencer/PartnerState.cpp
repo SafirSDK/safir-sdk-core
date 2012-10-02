@@ -121,7 +121,7 @@ PartnerState::HandlePartnerChange(const DoseTest::PartnerPtr & partner, const in
             std::wcout << "Partner " << instance << " is activated!" << std::endl;
             
             thePartner.m_address = Safir::Dob::Typesystem::Utilities::ToUtf8(partner->Address());
-            thePartner.m_port = partner->Port();
+            thePartner.m_port = static_cast<short>(partner->Port());
 
         }
         else
@@ -174,8 +174,8 @@ void PartnerState::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
 
 
 
-void PartnerState::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
-                                         const Safir::Dob::Typesystem::HandlerId& handlerId)
+void PartnerState::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId,
+                                         const Safir::Dob::Typesystem::HandlerId&)
 {
     throw std::logic_error("Someone revoked my registrations!!! Don't like that!");
 }
