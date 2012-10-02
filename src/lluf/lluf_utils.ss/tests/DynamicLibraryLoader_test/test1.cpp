@@ -27,7 +27,7 @@
 #include <cmath>
 
 #if defined _MSC_VER
-#  if defined (WIN64)
+#  if defined (_WIN64)
      // No other cc on win64 available, I think...
 #    define ANOTHER_CC 
 #  else //32bit windows
