@@ -1465,10 +1465,12 @@ namespace Internal
         {
             ParsingState::Instance().classParser.Result()[i].m_initialSize = SizeOfClass(ParsingState::Instance().classParser.Result()[i].m_baseClassIndex);
             ParsingState::Instance().classParser.Result()[i].m_thisClassSize = 0;
-            ParsingState::Instance().classParser.Result()[i].m_noInheritedMembers = ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_noInheritedMembers+
-                ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_members.size();
-            ParsingState::Instance().classParser.Result()[i].m_noInheritedParameters = ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_noInheritedParameters+
-                ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_parameters.size();
+            ParsingState::Instance().classParser.Result()[i].m_noInheritedMembers = 
+                ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_noInheritedMembers+
+                static_cast<Size>(ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_members.size());
+            ParsingState::Instance().classParser.Result()[i].m_noInheritedParameters = 
+                ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_noInheritedParameters+
+                static_cast<Size>(ParsingState::Instance().classParser.Result()[ParsingState::Instance().classParser.Result()[i].m_baseClassIndex].m_parameters.size());
         }
         else //only Safir.Dots.Object goes here
         {

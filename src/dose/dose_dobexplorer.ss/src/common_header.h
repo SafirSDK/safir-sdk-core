@@ -27,7 +27,6 @@
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning (disable: 4127)
-#pragma warning (disable: 4512)
 #endif
 
 #include <QtGui>

@@ -27,7 +27,7 @@
 
 #if defined _MSC_VER
   #pragma warning (push)
-  #pragma warning (disable : 4127 4512 4702 4267 4251 4275)
+  #pragma warning (disable : 4127 4702 4267 4251 4275)
 #endif
 #include <boost/program_options.hpp>
 #if defined _MSC_VER
