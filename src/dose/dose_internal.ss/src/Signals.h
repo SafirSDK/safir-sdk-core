@@ -94,6 +94,8 @@ namespace Internal
         class SignalTable
         {
         public:
+            SignalTable();
+
             //Get the semaphore for a connection (returns a new one if it wasnt in list)
             const SemaphorePtr GetSemaphore(const ConnectionId& connection);
         private:
@@ -110,6 +112,8 @@ namespace Internal
                                                       SIGNALS_LOCK_LEVEL,
                                                       NO_MASTER_LEVEL_REQUIRED> SignalsLock;
             SignalsLock m_lock;
+
+            const Safir::Dob::Typesystem::Int32 m_nodeNumber;
         };
 
         SignalTable m_waitSignals; //signals that we wait for

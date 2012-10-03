@@ -80,14 +80,18 @@ namespace Internal
         m_signalSignals.GetSemaphore(connection)->post();
     }
 
+    Signals::SignalTable::SignalTable():
+        m_nodeNumber(Safir::Dob::ThisNodeParameters::NodeNumber())
+    {
+
+    }
+
     const Signals::SemaphorePtr
     Signals::SignalTable::GetSemaphore(const ConnectionId & connection)
     {
-#ifndef NDEBUG
-        // Reading dots parameters takes some time, and since this method is called frequently, we don't call it in release builds.
-        ENSURE(connection.m_node == Safir::Dob::ThisNodeParameters::NodeNumber(),
+        ENSURE(connection.m_node == m_nodeNumber,
                << "It is not possible to signal or wait for a connection on other node!!! connId = " << connection);
-#endif
+
         {
             boost::shared_lock<SignalsLock> guard(m_lock);
 
