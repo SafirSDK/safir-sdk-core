@@ -10,9 +10,6 @@ SET(NO_LIBRARY_POSTFIXES 1)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
-#need to add the breakpad stuff to the include path
-INCLUDE_DIRECTORIES( ${SAFIR_SDK}/include/Safir/Utilities/Breakpad)
-
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
@@ -23,7 +20,7 @@ ADD_LIBRARY(dose_dll SHARED ${sources} ${headers})
 ADD_DEFINITIONS(-DDOSE_EXPORTS)
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dose_dll dose_internal ${Boost_LIBRARIES} breakpad)
+  TARGET_LINK_LIBRARIES(dose_dll dose_internal ${Boost_LIBRARIES})
 endif()
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
