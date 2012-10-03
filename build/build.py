@@ -284,8 +284,6 @@ def parse_command_line(builder):
             die("Target x86-64 can't be set since this is not a 64 bit OS")
         if options.ada_support:
             die("64 bit Ada build is currently not supported")
-        if options.java_support:
-            die("64 bit Java build is currently not supported")            
     elif options.target_architecture != "x86":
         die("Unknown target architecture " + options.target_architecture)
     global target_architecture
