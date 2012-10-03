@@ -24,6 +24,8 @@
 #
 ###############################################################################
 
+""" This is a python 2.x script! Will not work on python 3.x, currently. """
+
 import sys, subprocess, os, shutil, difflib, time, xml.dom.minidom, glob, re, traceback, stat, signal
 from xml.sax.saxutils import escape
 

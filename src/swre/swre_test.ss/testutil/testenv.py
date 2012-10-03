@@ -23,10 +23,17 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import os, subprocess, sys, threading, time, signal
-from Queue import Queue, Empty
+
 from threading import Thread
+
+try:
+    # 3.x name
+    from queue import Queue, Empty
+except ImportError:
+    # 2.x name
+    from Queue import Queue, Empty
 
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 dose_main_cmd = (os.path.join(SAFIR_RUNTIME,"bin","dose_main"),)
@@ -65,11 +72,11 @@ class TestEnv:
         self.launchProcess("swre_logger", swre_logger_cmd)
 
         start_time = time.time()
-        print "Waiting for dose_main to be ready"
+        print("Waiting for dose_main to be ready")
         while True:
             time.sleep(0.2)
             if self.Output("dose_main").find("persistence data is ready") != -1:
-                print " dose_main seems to be ready"
+                print(" dose_main seems to be ready")
                 break
             if self.dose_main.poll() is not None:
                 raise Exception(" dose_main appears to have failed to start!\n" +
@@ -78,22 +85,23 @@ class TestEnv:
                                 "\n---------------------")
             if time.time() - start_time > 90:
                 start_time = time.time()
-                print "dose_main seems slow to start. Here is some output:"
-                print "----- dose_main output -----"
-                print self.Output("dose_main")
-                print "----- dope_main output -----"
-                print self.Output("dope_main")
-                print "---- swre_logger output ----"
-                print self.Output("swre_logger")
-                print "----------------------------"
-                print "Will keep waiting"
+                print("dose_main seems slow to start. Here is some output:")
+                print("----- dose_main output -----")
+                print(self.Output("dose_main"))
+                print("----- dope_main output -----")
+                print(self.Output("dope_main"))
+                print("---- swre_logger output ----")
+                print(self.Output("swre_logger"))
+                print("----------------------------")
+                print("Will keep waiting")
 
     def launchProcess(self, name, cmd):
-        print "Launching", name
+        print("Launching", name)
         proc = subprocess.Popen(cmd, 
                                 stdout = subprocess.PIPE, 
                                 stderr = subprocess.STDOUT,
-                                creationflags = self.__creationflags)
+                                creationflags = self.__creationflags,
+                                universal_newlines = True)
         queue = Queue()
         thread = Thread(target=enqueue_output, args=(proc.stdout, queue))
         thread.daemon = True #Thread dies with program, no need to stop explicitly
@@ -104,7 +112,7 @@ class TestEnv:
 
     def __kill(self, name, proc):
         try:
-            print " Terminating", name
+            print(" Terminating", name)
             if sys.platform == "win32":
                 #can't send CTRL_C_EVENT to processes started with subprocess, unfortunately
                 proc.send_signal(signal.CTRL_BREAK_EVENT)
@@ -112,28 +120,28 @@ class TestEnv:
                 proc.terminate()
             for i in range (100):
                 if proc.poll() is not None:
-                    print "   Terminate successful"
+                    print("   Terminate successful")
                     return
                 time.sleep(0.1)
             if proc.poll() is None:
-                print " Killing", name
+                print(" Killing", name)
                 proc.kill()
                 proc.wait()
         except OSError:
             pass
 
     def killprocs(self):
-        print "Terminating all processes"
+        print("Terminating all processes")
         self.__kill("dose_main", self.dose_main)
 
         polls = 0
-        for name, (proc,queue,output) in self.__procs.iteritems():
+        for name, (proc,queue,output) in self.__procs.items():
             while polls < 600 and proc.poll() is None:
                 time.sleep(0.1)
                 polls += 1
 
             if proc.returncode != 0:
-                print " ", name, "returncode is", proc.returncode
+                print(" ", name, "returncode is", proc.returncode)
 
     def Output(self,name):
         (proc,queue,output) = self.__procs[name]
@@ -146,7 +154,7 @@ class TestEnv:
 
     def ReturnCodesOk(self):
         ok = True
-        for name, (proc,queue,output) in self.__procs.iteritems():
+        for name, (proc,queue,output) in self.__procs.items():
             if proc.returncode != 0:
                 ok = False
         return ok;

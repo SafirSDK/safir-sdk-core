@@ -23,10 +23,12 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, os, time, sys, shutil, glob
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+def log(data):
+    print(data)
+    sys.stdout.flush()
 
 sys.path.append("../../../swre/swre_test.ss/testutil")
 from testenv import TestEnv, TestEnvStopper
@@ -44,7 +46,7 @@ def rmdir(directory):
         try:
             shutil.rmtree(directory)
         except OSError:
-            print "Failed to remove directory, will retry"
+            log("Failed to remove directory, will retry")
             time.sleep(0.2)
             shutil.rmtree(directory)
 
@@ -63,7 +65,7 @@ owner_path = os.path.join(exe_path,"entity_owner")
 
 rmdir(file_storage_path)
 
-print "Set a bunch of entities"
+log("Set a bunch of entities")
 env = TestEnv()
 with TestEnvStopper(env):
     env.launchProcess("entity_owner", (owner_path,"set")).wait()
@@ -71,80 +73,80 @@ with TestEnvStopper(env):
         time.sleep(0.1)
 
 if not env.ReturnCodesOk():
-    print "Some process exited with an unexpected value"
+    log("Some process exited with an unexpected value")
     sys.exit(1)
 
-print "See if dope loads them at startup"
+log("See if dope loads them at startup")
 env = TestEnv()
 with TestEnvStopper(env):
     env.launchProcess("entity_owner", (owner_path,"accept")).wait()
 
 if not env.ReturnCodesOk():
-    print "Some process exited with an unexpected value"
+    log("Some process exited with an unexpected value")
     sys.exit(1)
 
 output = env.Output("entity_owner")
 if output.count("OnInjectedNewEntity") != 110:
-    print "could not find the right number of 'OnInjectedNewEntity' in output"
+    log("could not find the right number of 'OnInjectedNewEntity' in output")
     sys.exit(1)
 
 if output.count("<name>DopeTest.SmallEntity</name>") != 100:
-    print "could not find the right number of 'DopeTest.SmallEntity' in output"
+    log("could not find the right number of 'DopeTest.SmallEntity' in output")
     sys.exit(1)
 
 if output.count("<name>DopeTest.BigEntity</name>") != 10:
-    print "could not find the right number of 'DopeTest.BigEntity' in output"
+    log("could not find the right number of 'DopeTest.BigEntity' in output")
     sys.exit(1)
 
 if len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.xml"))) != 0:
-    print "Unexpected xml files found!"
+    log("Unexpected xml files found!")
     sys.exit(1)
 
-print "Convert binaries to xml"
+log("Convert binaries to xml")
 
 #files are automatically chosen by parameter setting
 subprocess.call(os.path.join(SAFIR_RUNTIME,"bin","dope_bin2xml"))
 
 if len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.xml"))) != 110:
-    print "dope_bin2xml appears to have failed"
+    log("dope_bin2xml appears to have failed")
     sys.exit(1)
 
 #remove bin files to check that dope can load xml
 for f in glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin")):
     remove(f)
 
-print "Check that dope can load xml"
+log("Check that dope can load xml")
 
 env = TestEnv()
 with TestEnvStopper(env):
     env.launchProcess("entity_owner", (owner_path,"accept")).wait()
 
 if not env.ReturnCodesOk():
-    print "Some process exited with an unexpected value"
+    log("Some process exited with an unexpected value")
     sys.exit(1)
 
 output = env.Output("entity_owner")
 if output.count("OnInjectedNewEntity") != 110:
-    print "could not find the right number of 'OnInjectedNewEntity' in output"
+    log("could not find the right number of 'OnInjectedNewEntity' in output")
     sys.exit(1)
 
 if output.count("<name>DopeTest.SmallEntity</name>") != 100:
-    print "could not find the right number of 'DopeTest.SmallEntity' in output"
+    log("could not find the right number of 'DopeTest.SmallEntity' in output")
     sys.exit(1)
 
 if output.count("<name>DopeTest.BigEntity</name>") != 10:
-    print "could not find the right number of 'DopeTest.BigEntity' in output"
+    log("could not find the right number of 'DopeTest.BigEntity' in output")
     sys.exit(1)
 
 if len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != 110:
-    print "Unexpected bin files found!"
+    log("Unexpected bin files found!")
     sys.exit(1)
 
 if len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.xml"))) != 0:
-    print "Unexpected bin files found!"
+    log("Unexpected bin files found!")
     sys.exit(1)
 
-print "update the entities"
+log("update the entities")
 
 env = TestEnv()
 with TestEnvStopper(env):
@@ -159,29 +161,29 @@ with TestEnvStopper(env):
         time.sleep(0.1)
 
 if not env.ReturnCodesOk():
-    print "Some process exited with an unexpected value"
+    log("Some process exited with an unexpected value")
     sys.exit(1)
 
-print "Load them again and check output"
+log("Load them again and check output")
 env = TestEnv()
 with TestEnvStopper(env):
     env.launchProcess("entity_owner", (owner_path,"accept")).wait()
 
 if not env.ReturnCodesOk():
-    print "Some process exited with an unexpected value"
+    log("Some process exited with an unexpected value")
     sys.exit(1)
 
 output = env.Output("entity_owner")
 if output.count("name is changed") != 100:
-    print "could not find the right number of updated SmallEntity in output"
+    log("could not find the right number of updated SmallEntity in output")
     sys.exit(1)
 
 if output.count("99999999") != 10:
-    print "could not find the right number of updated BigEntity in output"
+    log("could not find the right number of updated BigEntity in output")
     sys.exit(1)
 
 
 rmdir(file_storage_path)
 
-print "Success"
+log("Success")
 sys.exit(0)

@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, os, time, sys, signal, re
 
 sys.path.append("../testutil")
@@ -45,7 +45,7 @@ with TestEnvStopper(env):
     subprocess.call((sender_path,"third instance"))
 
 if not env.ReturnCodesOk():
-    print "Some process exited with an unexpected value"
+    print("Some process exited with an unexpected value")
     sys.exit(1)
 
 output = env.Output("swre_logger")
@@ -162,15 +162,15 @@ Program info text from .* instance
 pattern = re.compile("\A" + log_template + log_template + log_template + "\Z")
 
 if pattern.match(output):
-    print "match!"
+    print("match!")
     sys.exit(0)
 else:
-    print "no match! (Expected and received output written to failed_test_template.txt and failed_test_output.txt.)"
+    print("no match! (Expected and received output written to failed_test_template.txt and failed_test_output.txt.)")
     with open("failed_test_output.txt","w") as expected:
         expected.write(output)
     with open("failed_test_template.txt","w") as template:
         template.write(log_template + log_template + log_template)
 
-    print output
+    print(output)
     sys.exit(1)
 

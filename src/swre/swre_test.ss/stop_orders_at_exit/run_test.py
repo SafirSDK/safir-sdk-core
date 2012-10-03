@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, os, time, sys, signal, re
 
 sys.path.append("../testutil")
@@ -43,12 +43,12 @@ with TestEnvStopper(env):
     for i in range(95):
         env.launchProcess("swre_logger_" + str(i),swre_logger_cmd)
     while True:
-        print "checking if all have started yet"
+        print("checking if all have started yet")
         subprocess.call(sender_path)
         done = True
         for i in range(95):
             if env.Output("swre_logger_" + str(i)).find("Fatal") == -1:
-                print "Found one that has not started yet (" + str(i) + ")"
+                print("Found one that has not started yet (" + str(i) + ")")
                 done = False
                 break
         if done:
@@ -57,7 +57,7 @@ with TestEnvStopper(env):
 
     
 if not env.ReturnCodesOk():
-    print "Some process exited with an unexpected value"
+    print("Some process exited with an unexpected value")
     sys.exit(1)
 
 sys.exit(0)

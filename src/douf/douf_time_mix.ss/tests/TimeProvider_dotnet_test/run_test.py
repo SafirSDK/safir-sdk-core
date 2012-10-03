@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, sys, os, shutil, time
 
 if sys.platform == "win32":
@@ -53,6 +53,6 @@ os.remove(tester_exe)
 for dep in dependencies:
     os.remove(dep)
 
-print "Result =", result
+print("Result =", result)
 
 sys.exit(result)

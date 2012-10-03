@@ -23,18 +23,18 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, os, time, sys
 
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 
-print "This test program expects to be killed off after about two minutes unless it has finished successfully before then."
+print("This test program expects to be killed off after about two minutes unless it has finished successfully before then.")
 
-proc = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","dose_main"), stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+proc = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","dose_main"), stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines=True)
 lines = list()
 for i in range(3):
     lines.append(proc.stdout.readline().rstrip("\n\r"))
-    print "Line", i, ": '" + lines[-1] + "'"
+    print("Line", i, ": '" + lines[-1] + "'")
 
 #give it one second to output any spurious stuff...
 time.sleep(1)
@@ -53,18 +53,18 @@ if proc.poll() is None:
 res = proc.communicate()[0]
 
 if len(res) != 0:
-    print "More than three lines output! Trailing data is\n'"+res + "'"
+    print("More than three lines output! Trailing data is\n'"+res + "'")
     sys.exit(1)
 
 if lines[0] != "dose_main is waiting for persistence data!":
-    print "Failed to find string 'dose_main is waiting for persistence data!'"
+    print("Failed to find string 'dose_main is waiting for persistence data!'")
     sys.exit(1)
 if lines[1] != "Running in Standalone mode":
-    print "Failed to find string 'Running in Standalone mode'"
+    print("Failed to find string 'Running in Standalone mode'")
     sys.exit(1)
 if lines[2] != "dose_main running (release)..." and lines[2] != "dose_main running (debug)...":
-    print "Failed to find string 'dose_main running (release)...' or 'dose_main running (debug)...'"
+    print("Failed to find string 'dose_main running (release)...' or 'dose_main running (debug)...'")
     sys.exit(1)
 
-print "success"
+print("success")
 sys.exit(0)

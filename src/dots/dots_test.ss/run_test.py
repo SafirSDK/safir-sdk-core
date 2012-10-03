@@ -23,16 +23,16 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import sys, subprocess, os, shutil, difflib
 
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 
 if len(sys.argv) != 2:
-    print "Need one argument!"
+    print("Need one argument!")
     sys.exit(1)
 if sys.argv[1] not in ("cpp","dotnet","java","ada"):
-    print "Need argument cpp, dotnet, java or ada"
+    print("Need argument cpp, dotnet, java or ada")
     sys.exit(1)
 lang = sys.argv[1]
 
@@ -48,13 +48,13 @@ elif lang == "dotnet":
 elif lang == "java":
     command = ("java","-jar", os.path.join("java","dots_test_java.jar"))
     dependencies = ("dots_generated-java.jar", "dots_java.jar")
-print "Test suite command is '" + " ".join(command) + "'"
+print("Test suite command is '" + " ".join(command) + "'")
 
 for dep in dependencies:
     shutil.copy2(os.path.join(SAFIR_RUNTIME,"bin",dep),
                  lang)
 
-proc = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+proc = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines=True)
 res = proc.communicate()[0].replace("\r","").splitlines(1) #fix any DOS newlines
 
 with open("output.txt") as expected_file:
@@ -62,10 +62,10 @@ with open("output.txt") as expected_file:
 diff = list(difflib.unified_diff(expected_output,res))
 
 if len(diff) != 0:
-    print "Unexpected output! Unified diff of expected output and actual output is:"
-    print "".join(diff)
+    print("Unexpected output! Unified diff of expected output and actual output is:")
+    print("".join(diff))
     sys.exit(1)
 
 
-print "Expected output achieved"
+print("Expected output achieved")
 sys.exit(0)

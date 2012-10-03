@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, os, time, sys, xml.dom.minidom, shutil
 
 if sys.platform == "win32":
@@ -84,7 +84,7 @@ result = subprocess.call(os.path.join(exe_path,"ExternalTimeProvider_test"))
 shutil.copy2(backup_path,LibraryParameters_path)
 
 if result != 0:
-    print "Failure"
+    print("Failure")
     sys.exit(1)
 
 sys.exit(0)

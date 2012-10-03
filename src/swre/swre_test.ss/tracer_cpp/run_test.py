@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, os, time, sys, signal, re
 
 sys.path.append("../testutil")
@@ -45,19 +45,19 @@ with TestEnvStopper(env):
     subprocess.call(sender_path)
 
 if not env.ReturnCodesOk():
-    print "Some process exited with an unexpected value"
+    print("Some process exited with an unexpected value")
     sys.exit(1)
 
 output = env.Output("swre_logger")
 
 if output.count("blahonga") == 15:
-    print "Found all expected output!"
+    print("Found all expected output!")
     sys.exit(0)
 else:
-    print "no match! (Received output written failed_test_output.txt.)"
+    print("no match! (Received output written failed_test_output.txt.)")
     with open("failed_test_output.txt","w") as expected:
         expected.write(output)
 
-    print output
+    print(output)
     sys.exit(1)
 
