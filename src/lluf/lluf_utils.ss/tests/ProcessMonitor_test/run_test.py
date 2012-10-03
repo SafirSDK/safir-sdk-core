@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, os, time, sys
 
 #start two sleepers
@@ -48,23 +48,25 @@ sleeper2 = subprocess.Popen(Sleeper)
 listener = subprocess.Popen((ProcessMonitor_test,
                              str(sleeper1.pid),
                              str(sleeper2.pid)),
-                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT,
+                            universal_newlines=True)
 sleeper1.wait()
 sleeper2.wait()
 result = listener.communicate()[0]
 
 if result.find("Process with pid " + str(sleeper1.pid) + " exited.") == -1:
-    print "ProcessMonitor appears to have missed termination of process with pid", sleeper1.pid
+    print("ProcessMonitor appears to have missed termination of process with pid", sleeper1.pid)
     sys.exit(1)
 
 if result.find("Process with pid " + str(sleeper2.pid) + " exited.") == -1:
-    print "ProcessMonitor appears to have missed termination of process with pid", sleeper2.pid
+    print("ProcessMonitor appears to have missed termination of process with pid", sleeper2.pid)
     sys.exit(1)
 
 if result.count("Process with pid") != 2:
-    print "Too many terminated processes! Expected two!"
-    print result
+    print("Too many terminated processes! Expected two!")
+    print(result)
     sys.exit(1)
 
-print "success"
+print("success")
 sys.exit(0)

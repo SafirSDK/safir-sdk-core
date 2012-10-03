@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, os, time, sys
 import socket
 
@@ -45,29 +45,30 @@ sock.settimeout(1)
 sock.bind( (UDP_IP,UDP_PORT) )
 
 #Run the program that sends
-proc = subprocess.Popen(pl_test, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+proc = subprocess.Popen(pl_test, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
 proc.communicate()
 
 if proc.returncode != 0:
-    print "Failed to send panic log!"
+    print("Failed to send panic log!")
     sys.exit(1)
 
 try:
     data, addr = sock.recvfrom( 10 * 1024 ) # buffer size is 10 k
+    data = data.decode("utf-8")
 except:
-    print "Timeout"
+    print("Timeout")
     sys.exit(1)
 
 if addr[0] != "127.0.0.1":
-    print "Receive from unexpected address"
+    print("Receive from unexpected address")
     sys.exit(1)
 
 if data.find("PANIC LOG!") == -1:
-    print "Received data did not contain expected text 'PANIC LOG!'"
+    print("Received data did not contain expected text 'PANIC LOG!'")
     sys.exit(1)
 
 if data.find("Testing PanicLogging") == -1:
-    print "Received data did not contain expected text 'Testing PanicLogging'"
+    print("Received data did not contain expected text 'Testing PanicLogging'")
     sys.exit(1)
 
 sys.exit(0)

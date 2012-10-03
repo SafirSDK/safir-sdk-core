@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, os, time, sys
 
 if sys.platform == "win32":
@@ -42,15 +42,17 @@ sleeper2 = subprocess.Popen(Sleeper)
 listener = subprocess.Popen((ProcessMonitor_test2,
                              str(sleeper1.pid),
                              str(sleeper2.pid)),
-                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                            stdout=subprocess.PIPE, 
+                            stderr=subprocess.STDOUT,
+                            universal_newlines=True)
 sleeper1.wait()
 sleeper2.wait()
 result = listener.communicate()[0]
 
 if result != "":
-    print "ProcessMonitor_test2 exited with non-empty output!"
-    print result
+    print("ProcessMonitor_test2 exited with non-empty output!")
+    print(result)
     sys.exit(1)
 
-print "success"
+print("success")
 sys.exit(0)

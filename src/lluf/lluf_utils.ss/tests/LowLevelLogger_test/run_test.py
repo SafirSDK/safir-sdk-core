@@ -23,17 +23,23 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, os, time, sys, shutil, re
-from Queue import Queue, Empty
 from threading import Thread
+
+try:
+    # 3.x name
+    from queue import Queue, Empty
+except ImportError:
+    # 2.x name
+    from Queue import Queue, Empty
 
 def rmdir(directory):
     if os.path.exists(directory):
         try:
             shutil.rmtree(directory)
         except OSError:
-            print "Failed to remove directory, will retry"
+            print("Failed to remove directory, will retry")
             time.sleep(0.2)
             shutil.rmtree(directory)
 
@@ -47,7 +53,7 @@ def enqueue_output(out, queue):
 
 class LllProc:
     def __init__(self, wait_for_output = True):
-        self.proc = subprocess.Popen(lll_test, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        self.proc = subprocess.Popen(lll_test, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
         self.queue = Queue()
         thread = Thread(target=enqueue_output, args=(self.proc.stdout, self.queue))
         thread.daemon = True #Thread dies with program, no need to stop explicitly
@@ -90,7 +96,7 @@ class LllProc:
 
 def call_logger_control(args):
     cmd = (logger_control,) + args
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
     return proc.communicate()[0]
 
 
@@ -134,13 +140,13 @@ for i in range(100):
     time.sleep(0.1)
     
 if not found:
-    print "failed to find error texts in log file"
+    print("failed to find error texts in log file")
     p.kill()
     sys.exit(1)
 
 
 if data.find("Hello, World!") != -1 or data.find("Goodbye cruel world") != -1:
-    print "found logs when logging should be off"
+    print("found logs when logging should be off")
     p.kill()
     sys.exit(1)
 
@@ -148,7 +154,7 @@ if data.find("Hello, World!") != -1 or data.find("Goodbye cruel world") != -1:
 #turn logging on
 res = call_logger_control(("5",))
 if res.find("Log level should now be 5") == -1:
-    print "failed to turn logging on"
+    print("failed to turn logging on")
     proc.kill()
     sys.exit(1)
 
@@ -158,7 +164,7 @@ p.wait_output(".*Hello, World!$")
 #turn logging off again
 res = call_logger_control(("0",))
 if res.find("Log level should now be 0") == -1:
-    print "failed to turn logging off"
+    print("failed to turn logging off")
     proc.kill()
     sys.exit(1)
 
@@ -166,13 +172,13 @@ if res.find("Log level should now be 0") == -1:
 #check that log file isn't empty
 data = p.logfile()
 if data.find("Hello, World!") == -1 or data.find("1234567890") == -1:
-    print "failed to find expected log data in log file"
+    print("failed to find expected log data in log file")
     p.kill()
     sys.exit(1)
 oldnum = data.count("Hello, World!")
 
 if data.find("Goodbye cruel world!") != -1:
-    print "found unexpected log data in log file"
+    print("found unexpected log data in log file")
     p.kill()
     sys.exit(1)
 
@@ -182,7 +188,7 @@ time.sleep(0.5)
 
 newnum = p.logfile().count("Hello, World!")
 if oldnum != newnum:
-    print "log file appears to have grown with non-error messages even though logging is turned off!"
+    print("log file appears to have grown with non-error messages even though logging is turned off!")
     p.kill()
     sys.exit(1)
 
@@ -192,9 +198,9 @@ call_logger_control(("9",))
 p.wait_output(".*Goodbye cruel world!$")
 data = p.logfile()
 if data.find("Hello, World!") == -1 or data.find("1234567890") == -1 or data.find("Goodbye cruel world") == -1:
-    print "failed to find all expected log data in log file"
+    print("failed to find all expected log data in log file")
     p.kill()
-    print data
+    print(data)
     sys.exit(1)
 
 p.kill()
@@ -202,18 +208,18 @@ p.kill()
 #check that we get output on stdout
 p = LllProc()
 if not p.wait_output(".*1234567890$"):
-    print "lllerr does not output on stdout"
+    print("lllerr does not output on stdout")
     sys.exit(1)
 p.kill()
 
 #check that the timestamps can be turned off
 p = LllProc()
 if not p.wait_output("^\[[0-9.:]*\] 1234567890$"):
-    print "could not find line with timestamp"
+    print("could not find line with timestamp")
     sys.exit(1)
 call_logger_control(("-t","0")) #turn timestamps off
 if not p.wait_output("^1234567890$"):
-    print "could not find line without timestamp"
+    print("could not find line without timestamp")
     sys.exit(1)
 p.kill()
 
@@ -226,8 +232,8 @@ time.sleep(1.0)
 p2.kill()
 data = p2.output()
 if len(data) != 0:
-    print "Flushing doesnt seem to be possible to turn off"
-    print data
+    print("Flushing doesnt seem to be possible to turn off")
+    print(data)
     sys.exit(1)    
 
 #turn flushing on and stdout off
@@ -238,8 +244,8 @@ time.sleep(2.0)
 p2.kill()
 data = p2.output()
 if len(data) != 0:
-    print "stdout logging doesnt seem to be possible to turn off"
-    print data
+    print("stdout logging doesnt seem to be possible to turn off")
+    print(data)
     sys.exit(1)    
 
 #turn file off
@@ -250,8 +256,8 @@ time.sleep(2.0)
 p2.kill()
 data = p2.logfile()
 if len(data) != 0:
-    print "file logging doesnt seem to be possible to turn off"
-    print data
+    print("file logging doesnt seem to be possible to turn off")
+    print(data)
     sys.exit(1)    
 
 p.kill()
@@ -262,7 +268,7 @@ rmdir(logdir)
 #check that we get lllerr output even if no logdir
 p = LllProc()
 if not p.wait_output(".*1234567890$"):
-    print "lllerr does not work without logdir"
+    print("lllerr does not work without logdir")
     sys.exit(1)
 
 p.kill()
@@ -271,7 +277,7 @@ p.kill()
 call_logger_control(("--create-logdir","-p","9"))
 p = LllProc()
 if not p.wait_output(".*Hello, World!$") and not p.wait_output(".*Goodbye cruel world!$"):
-    print "logger_control cannot write permanent settings"
+    print("logger_control cannot write permanent settings")
     sys.exit(1)
 p.kill()
 
@@ -282,10 +288,10 @@ p.wait_output(".*1234567890$")
 p.wait_output(".*1234567890$")
 data = p.logfile()
 if data.find("Hello, World!") != -1 or data.find("Goodbye cruel world!") != -1:
-    print "logger_control cannot write permanent settings"
+    print("logger_control cannot write permanent settings")
     sys.exit(1)
 p.kill()
 
 
-print "success"
+print("success")
 sys.exit(0)

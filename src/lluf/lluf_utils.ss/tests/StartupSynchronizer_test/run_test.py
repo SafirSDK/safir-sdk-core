@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, os, time, sys
 
 if sys.platform == "win32":
@@ -51,12 +51,12 @@ res2 = proc2.returncode
 #check exit codes 
 #res1 should be "Created" | "Used", and res2 should be "Used" as per bit field in ss_test.cpp
 if res1 == 3 and res2 == 2: 
-    print "success"
+    print("success")
     sys.exit(0)
 else:
-    print "failure! res1 =", res1, "and res2 =", res2
-    print "Output from instance 1:"
-    print out1[0]
-    print "Output from instance 2:"
-    print out2[0]
+    print("failure! res1 =", res1, "and res2 =", res2)
+    print("Output from instance 1:")
+    print(out1[0])
+    print("Output from instance 2:")
+    print(out2[0])
     sys.exit(1)
