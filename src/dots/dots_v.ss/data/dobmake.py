@@ -243,6 +243,7 @@ class Logger(object):
                 self.emitStartTag(tag)
                 self.lastTag = tag
             sys.stdout.write(data)
+            sys.stdout.flush()
 
         else:
             self.lock.acquire()
@@ -278,8 +279,8 @@ class Logger(object):
             newlines = 0
             while True:
                 data = self.process.stdout.readline()
-                if data is None or len(data) == 0: # and self.process.returncode is not None:
-                    return
+                if not data:
+                    break
                 self.logger.write(data,"pre")
 
 

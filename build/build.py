@@ -214,7 +214,10 @@ class Logger(object):
 
     def logOutput(self, process):
         output = list()
-        for line in process.stdout:
+        while True:
+            line = process.stdout.readline()
+            if not line:
+                break
             line = line.rstrip("\n\r")
             self.log(line,"output")
             output += (line,)

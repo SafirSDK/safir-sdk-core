@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, os, time, sys, xml.dom.minidom, shutil
 
 if sys.platform == "win32":
@@ -38,27 +38,27 @@ else:
 result = subprocess.call(os.path.join(exe_path,"DynamicLibraryLoader_test1"))
 
 if result != 0:
-    print "test1 Failure"
+    print ("test1 Failure")
     sys.exit(1)
 
 result = subprocess.call(os.path.join(exe_path,"DynamicLibraryLoader_test2"))
 
 if result != -11: #the test2 app returns -11 on accessviol on windows too. see source.
-    print "test2 Failure"
+    print ("test2 Failure")
     sys.exit(1)
 
 
 result = subprocess.call(os.path.join(exe_path,"DynamicLibraryLoader_test3"))
 
 if result != 0:
-    print "test3 Failure"
+    print ("test3 Failure")
     sys.exit(1)
 
 
 result = subprocess.call(os.path.join(exe_path,"DynamicLibraryLoader_test4"))
 
 if result != 0:
-    print "test4 Failure"
+    print ("test4 Failure")
     sys.exit(1)
 
 sys.exit(0)

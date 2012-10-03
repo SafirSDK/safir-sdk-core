@@ -34,7 +34,10 @@ dope_main_cmd = (os.path.join(SAFIR_RUNTIME,"bin","dope_main"),)
 swre_logger_cmd = (os.path.join(SAFIR_RUNTIME,"bin","swre_logger"),)
 
 def enqueue_output(out, queue):
-    for line in out:
+    while True:
+        line = out.readline()
+        if not line:
+            break
         queue.put(line.rstrip("\n\r"))
     out.close()
 
