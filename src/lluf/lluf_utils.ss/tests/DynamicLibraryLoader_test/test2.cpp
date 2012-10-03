@@ -25,7 +25,7 @@
 #include <iostream>
 #include <csignal>
 
-#if defined (_WIN32)
+#if defined (_WIN32) || defined (_WIN64)
 void accessviol(int)
 {
     _exit(-11);
@@ -34,7 +34,7 @@ void accessviol(int)
 
 int main()
 {
-#if defined (_WIN32)
+#if defined (_WIN32) || defined (_WIN64)
     ::signal(SIGSEGV, &accessviol);
 #endif
 
