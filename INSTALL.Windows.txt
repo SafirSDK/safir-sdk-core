@@ -133,6 +133,7 @@ Go to http://expat.sourceforge.net/ and download and install the binary installe
 5. Run cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
 6. Run nmake install
 7. Move the expat.lib file into the same directory as expat.dll (they will have been installed under C:\Program Files\expat
+8. Rename expat.lib and expat.dll to libexpat.lib and libexpat.dll
 
 For both 32 and 64 bit builds:
 Add <expat dir>\bin to your PATH, where <expat dir> is the location where expat got installed.

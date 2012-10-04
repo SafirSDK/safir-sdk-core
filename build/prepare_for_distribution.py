@@ -234,10 +234,17 @@ def windows():
     ############
     log("Copying expat stuff")
     copy_dll("libexpat.dll")
-    copy_lib("libexpat.lib", ("expat.lib",))
-    expat_header_dir = os.path.join(find_dll(("libexpat.dll",)),"..","Source","lib")
-    copy_headers(expat_header_dir,("expat.h","expat_external.h"))
-
+    copy_lib("libexpat.lib")
+    expat_dir=os.path.join(find_dll(("libexpat.dll",)),"..")
+    expat_header_dir_alt1 = os.path.join(expat_dir,"Source","lib")
+    expat_header_dir_alt2 = os.path.join(expat_dir,"include")
+    if os.path.exists(expat_header_dir_alt1):
+        copy_headers(expat_header_dir_alt1,("expat.h","expat_external.h"))
+    elif os.path.exists(expat_header_dir_alt2):
+        copy_headers(expat_header_dir_alt2,("expat.h","expat_external.h"))
+    else:
+        logError("Failed to find expat headers!")
+    
     ############
     log("Copying Ada stuff (GNAT runtime, xmlada and templates_parser")
     copy_dll("libgnat-2011.dll")
