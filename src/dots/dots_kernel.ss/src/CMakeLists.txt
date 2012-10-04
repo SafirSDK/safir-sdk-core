@@ -16,7 +16,9 @@ FILE(GLOB sources *.cpp)
 ADD_LIBRARY(dots_kernel SHARED ${sources} ${headers})
 
 find_library(EXPAT_LIBRARY NAMES expat libexpat
-             HINTS ${SAFIR_SDK}/lib)
+             HINTS ${SAFIR_SDK}/lib
+             PATHS ENV PATH
+             PATH_SUFFIXES ../lib)
 if (NOT EXPAT_LIBRARY)
     message(FATAL_ERROR "Couldn't find expat.lib or libexpat.lib")
 endif()
