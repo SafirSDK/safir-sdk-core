@@ -130,7 +130,7 @@ def find_dll(names):
                 fn = os.path.join(path,name)
                 if os.path.isfile(fn):
                     return path
-    logError("could not find " + str(names))
+    log("could not find " + str(names))
 
 def copy_dll(name, alternatives = None, Log_Error = True):
     for path in PATH:
@@ -214,7 +214,8 @@ def windows():
     if boost_dir is None:
         boost_dir = find_dll(("boost_date_time-vc100-mt-1_41.dll",
                               "boost_date_time-vc100-mt-1_48.dll",
-                              "boost_date_time-vc100-mt-1_50.dll"))
+                              "boost_date_time-vc100-mt-1_50.dll",
+                              "boost_date_time-vc100-mt-1_51.dll"))
         boost_dir = os.path.join(boost_dir,"..")
 
     # find lib dir    
@@ -233,9 +234,9 @@ def windows():
 
     ############
     log("Copying expat stuff")
-    copy_dll("libexpat.dll")
-    copy_lib("libexpat.lib")
-    expat_dir=os.path.join(find_dll(("libexpat.dll",)),"..")
+    copy_dll("expat.dll",("libexpat.dll",))
+    copy_lib("expat.lib",("libexpat.lib",))
+    expat_dir=os.path.join(find_dll(("expat.dll","libexpat.dll")),"..")
     expat_header_dir_alt1 = os.path.join(expat_dir,"Source","lib")
     expat_header_dir_alt2 = os.path.join(expat_dir,"include")
     if os.path.exists(expat_header_dir_alt1):

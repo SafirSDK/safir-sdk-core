@@ -101,7 +101,7 @@ Instructions for building with VS2010. This should be able to adapt to VS2005/20
 2. Set up environment variable QTDIR=C:\Qt\4.8.1 and add %QTDIR%\bin to PATH environment variable 
 3. Start Visual Studio 2010 Command Prompt (Start > Programs > Microsoft Visual Studio 2010 > Visual Studio Tools > Visual Studio Command Prompt).
 4.Run following commands in it:
-   >cd c:\Qt\4.7.1
+   >cd c:\Qt\4.8.1
    >configure -debug-and-release -opensource
    >nmake
 
@@ -132,8 +132,6 @@ Go to http://expat.sourceforge.net/ and download and install the binary installe
 4. cd into c:\tmp\expat-2.1.0\build
 5. Run cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
 6. Run nmake install
-7. Move the expat.lib file into the same directory as expat.dll (they will have been installed under C:\Program Files\expat
-8. Rename expat.lib and expat.dll to libexpat.lib and libexpat.dll
 
 For both 32 and 64 bit builds:
 Add <expat dir>\bin to your PATH, where <expat dir> is the location where expat got installed.
