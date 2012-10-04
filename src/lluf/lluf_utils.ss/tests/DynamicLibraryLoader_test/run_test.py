@@ -44,7 +44,7 @@ if result != 0:
 result = subprocess.call(os.path.join(exe_path,"DynamicLibraryLoader_test2"))
 
 
-if result != -11 and result != -1073741819: #SIGSEGV and ACCESSVIOL exit codes
+if result != -11 and result != -1234: #SIGSEGV and ACCESSVIOL exit codes
     print ("test2 Failure")
     print ("Got returncode", result)
     sys.exit(1)
