@@ -25,23 +25,9 @@
 #include <iostream>
 #include <csignal>
 
-//We want the process to exit with -11 when dying by SIGSEGV, like on *nix, 
-//to make test script simpler.
-#if defined (_WIN32) || defined (_WIN64)
-void accessviol(int)
-{
-    _exit(-11);
-}
-#endif
-
 int main()
 {
     std::wcout << "Starting" << std::endl;
-#if defined (_WIN32) || defined (_WIN64)
-    std::wcout << "Registering windows signal handler" << std::endl;
-    ::signal(SIGSEGV, &accessviol);
-    std::wcout << "Signal handler loaded" << std::endl;
-#endif
 
     try
     {
