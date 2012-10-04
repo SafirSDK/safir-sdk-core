@@ -27,6 +27,12 @@ from __future__ import print_function
 import os, shutil, stat, subprocess, sys
 from optparse import OptionParser
 
+errors = 0
+def logError(data):
+    global errors
+    errors = errors + 1
+    log(data)
+
 def log(data):
     print(data)
     sys.stdout.flush()
@@ -40,7 +46,8 @@ parser.add_option("--jenkins", action="store_true",dest="jenkins",default=False,
 if options.jenkins:
     WORKSPACE = os.environ.get("WORKSPACE")
     if not WORKSPACE:
-        die("Environment variable WORKSPACE is not set, is this really a Jenkins build?!")
+        logError("Environment variable WORKSPACE is not set, is this really a Jenkins build?!")
+        sys.exit(1)
 
     os.environ["SAFIR_RUNTIME"] = os.path.join(WORKSPACE,"safir","runtime")
     os.environ["SAFIR_SDK"] = os.path.join(WORKSPACE,"safir","sdk")
@@ -58,16 +65,16 @@ DOCS_DESTINATION = os.path.join(SAFIR_SDK, "docs")
 
 def copy_file(name,destination):
     if not os.path.isfile(name):
-        log("ERROR! " + name + " is not a file!")
+        logError("ERROR! " + name + " is not a file!")
     if not os.path.isdir(destination):
-        log("ERROR! " + destination + " is not a directory!")
+        logError("ERROR! " + destination + " is not a directory!")
     try:
         shutil.copy2(name, destination)
         os.chmod(os.path.join(destination,os.path.split(name)[-1]),stat.S_IWRITE|stat.S_IREAD)
     except:
         import filecmp
         if not filecmp.cmp(name,os.path.join(destination,os.path.split(name)[-1])):
-            log("Caught exception while copying " + name + " to " + destination + "/. Maybe the destination file or directory is read-only?")
+            logError("Caught exception while copying " + name + " to " + destination + "/. Maybe the destination file or directory is read-only?")
 
 def mkdir(newdir):
     """works the way a good mkdir should :)
@@ -123,7 +130,7 @@ def find_dll(names):
                 fn = os.path.join(path,name)
                 if os.path.isfile(fn):
                     return path
-    log("could not find " + str(names))
+    logError("could not find " + str(names))
 
 def copy_dll(name, alternatives = None, Log_Error = True):
     for path in PATH:
@@ -138,7 +145,7 @@ def copy_dll(name, alternatives = None, Log_Error = True):
             if res:
                 return True
     if Log_Error:
-       log("could not find "+ name)
+       logError("could not find "+ name)
     return False
 
 def copy_lib(name, alternatives = None, Log_Error = True):
@@ -158,7 +165,7 @@ def copy_lib(name, alternatives = None, Log_Error = True):
             if res:
                 return True
     if Log_Error:
-       log("could not find "+ name)
+       logError("could not find "+ name)
     return False
 
 def copy_libs_from_dir(dir):
@@ -175,7 +182,7 @@ def copy_dlls_from_dir(dir):
 
 def copy_header_dir(dir, patterns=None):
     if not os.path.isdir(dir):
-        log("ERROR! " + dir + " is not a directory")
+        logError("ERROR! " + dir + " is not a directory")
         return
     dst = os.path.join(HEADER_DESTINATION,os.path.split(dir)[-1])
     copy_tree(dir,dst, include_patterns=patterns)
@@ -183,7 +190,7 @@ def copy_header_dir(dir, patterns=None):
 
 def copy_headers(dir,files):
     if not os.path.isdir(dir):
-        log("ERROR! " + dir + " is not a directory")
+        logError("ERROR! " + dir + " is not a directory")
         return
     for file in files:
         copy_file(os.path.join(dir,file),HEADER_DESTINATION)
@@ -191,7 +198,7 @@ def copy_headers(dir,files):
 def copy_docs_dir(dir, targetname, exclude_regex=None):
     import re
     if not os.path.isdir(dir):
-        log("ERROR! " + dir + " is not a directory");
+        logError("ERROR! " + dir + " is not a directory");
         return
     dst = os.path.join(DOCS_DESTINATION,targetname)
     copy_tree(dir, dst, exclude_regex=re.compile(exclude_regex))
@@ -258,7 +265,7 @@ def common():
     dobmake_path = os.path.join(SAFIR_RUNTIME,"bin","dobmake.py")
     retcode = subprocess.call(["python",dobmake_path, "-b", "--clean"])
     if retcode != 0:
-        log("Failed to do 'dobmake.py -b --clean'")
+        logError("Failed to do 'dobmake.py -b --clean'")
     log("-----------------------------------")
 
 def main():
@@ -269,6 +276,9 @@ def main():
         windows()
 
     common()
+    if errors != 0:
+        log ("There were " + str(errors) + " errors.")
+    return errors
 
 if __name__ == "__main__":
     import sys
