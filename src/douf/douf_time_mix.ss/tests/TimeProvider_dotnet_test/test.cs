@@ -67,9 +67,10 @@ class Sender
         double now_dotnet = (DateTime.UtcNow - new DateTime(1970,1,1)).TotalSeconds;
         double diff = Math.Abs(now_safir - now_dotnet);
 
-        if (diff > 1.0e-3)
+        if (diff > 0.1)
         {
             Console.WriteLine("Safir::Time::TimeProvider::GetUtcTime() returned incorrect value");
+            Console.WriteLine("Got {0} but expected {1} (+-0.1)",now_safir,now_dotnet);
             return 1;
         }
         
