@@ -26,6 +26,7 @@
 #include <Safir/Databases/Odbc/ReconnectException.h>
 #include <Safir/SwReports/SwReport.h>
 #include "StringConversion.h"
+#include "Diagnostics.h"
 
 namespace Safir
 {
@@ -56,72 +57,51 @@ void Environment::Alloc()
         ret = ::SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_hEnv);
         if (!SQL_SUCCEEDED(ret)) 
         {
-            SQLWCHAR wszSqlState[6];
-            SQLINTEGER lpNativeErrorPtr;
-            SQLWCHAR wszMessageText[512];
-            SQLRETURN ret;
+            const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
+                                                                            SQL_NULL_HANDLE);
 
-            ret = ::SQLGetDiagRecW( SQL_HANDLE_ENV,
-                                    SQL_NULL_HANDLE,
-                                    1,
-                                    wszSqlState,
-                                    &lpNativeErrorPtr,
-                                    wszMessageText,
-                                    512,
-                                    0 );
-            if (Equal(wszSqlState, L"HY000"))     // General error
+            if (rec.first == L"HY000")     // General error
             {
                 ThrowReconnectException(SQL_NULL_HANDLE,__WFILE__,__LINE__);
             }
-            else if (Equal(wszSqlState, L"HY013") ||    
-                     Equal(wszSqlState, L"HY001"))
+            else if (rec.first == L"HY013" ||    
+                     rec.first == L"HY001")
             {
                 throw Safir::Dob::Typesystem::SoftwareViolationException(L"Memory management error",__WFILE__,__LINE__);
             }
-            else if (Equal(wszSqlState, L"HY009"))    
+            else if (rec.first == L"HY009")    
             {
                 throw Safir::Dob::Typesystem::SoftwareViolationException(L"Invalid use of null pointer",__WFILE__,__LINE__);
             }
-            else if (Equal(wszSqlState, L"HY010"))    
+            else if (rec.first == L"HY010")    
             {
                 throw Safir::Dob::Typesystem::SoftwareViolationException(L"Function sequence error",__WFILE__,__LINE__);
             }
-            else if (Equal(wszSqlState, L"HY014"))    // Limit on the number of handles exceeded
+            else if (rec.first == L"HY014")    // Limit on the number of handles exceeded
             {
                 throw Safir::Dob::Typesystem::SoftwareViolationException(L"Limit on the number of handles exceeded",__WFILE__,__LINE__);
             }
-            else if (Equal(wszSqlState, L"HY092"))    
+            else if (rec.first == L"HY092")    
             {
                 throw Safir::Dob::Typesystem::SoftwareViolationException(L"Invalid attribute/option identifier",__WFILE__,__LINE__);
             }
-            else if (Equal(wszSqlState, L"HYC00") ||    // Optional feature not implemented
-                     Equal(wszSqlState, L"IM001"))      // Driver does not support this function
+            else if (rec.first == L"HYC00" ||    // Optional feature not implemented
+                     rec.first == L"IM001")      // Driver does not support this function
             {
                 throw Safir::Dob::Typesystem::SoftwareViolationException(L"Feature not implemented",__WFILE__,__LINE__);
             }
-            else if (Equal(wszSqlState, L"HYT01"))    // Connection timeout expired
+            else if (rec.first == L"HYT01")    // Connection timeout expired
             {
                 ThrowReconnectException(SQL_NULL_HANDLE,__WFILE__,__LINE__);
             }
         }
         if (ret == SQL_SUCCESS_WITH_INFO) // Can only be 01000 - non odbc error.
         {
-            SQLWCHAR wszSqlState[6];
-            SQLINTEGER lpNativeErrorPtr;
-            SQLWCHAR wszMessageText[256];
-            SQLRETURN ret;
-
-            ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
-                                    m_hEnv,
-                                    1,
-                                    wszSqlState,
-                                    &lpNativeErrorPtr,
-                                    wszMessageText,
-                                    256,
-                                    0 );
+            const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_DBC, //TODO: is this correct?
+                                                                            m_hEnv);
             Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
                                                 L"Safir::Databases::Odbc::Environment::Alloc()",
-                                                ToWstring(wszMessageText));
+                                                rec.second);
         }
     }
 
@@ -143,43 +123,33 @@ void Environment::Free()
     ret = ::SQLFreeHandle(SQL_HANDLE_ENV, m_hEnv);
     if (!SQL_SUCCEEDED(ret)) 
     {
-        SQLWCHAR wszSqlState[6];
-        SQLINTEGER lpNativeErrorPtr;
-        SQLWCHAR wszMessageText[512];
-        SQLRETURN ret;
+        const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
+                                                                        m_hEnv);
 
-        ret = ::SQLGetDiagRecW( SQL_HANDLE_ENV,
-                                m_hEnv,
-                                1,
-                                wszSqlState,
-                                &lpNativeErrorPtr,
-                                wszMessageText,
-                                512,
-                                0 );
-        if (Equal(wszSqlState, L"HY010")) // Function sequence error
+        if (rec.first == L"HY010") // Function sequence error
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Cannot free environment due to existing connections",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY017"))    // Stmt already freed.
+        else if (rec.first == L"HY017")    // Stmt already freed.
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Freeing an invalid environment",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"IM001"))    // Driver not implemented this function
+        else if (rec.first == L"IM001")    // Driver not implemented this function
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Driver not implemented this function",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY013") ||    
-                 Equal(wszSqlState, L"HY001"))
+        else if (rec.first == L"HY013" ||    
+                 rec.first == L"HY001")
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Memory management error",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY000"))    // General error
+        else if (rec.first == L"HY000")    // General error
         {
-            Safir::SwReports::SendProgramInfoReport(ToWstring(wszMessageText));
+            Safir::SwReports::SendProgramInfoReport(rec.second);
         }
-        else if (Equal(wszSqlState, L"HYT01"))    // Connection timeout expired.
+        else if (rec.first == L"HYT01")    // Connection timeout expired.
         {
-            Safir::SwReports::SendProgramInfoReport(ToWstring(wszMessageText));
+            Safir::SwReports::SendProgramInfoReport(rec.second);
         }
     }
     // Cant return SQL_SUCCESS_WITH_INFO
@@ -198,85 +168,53 @@ void Environment::SetEnvAttr(long lAttribute, long lValue)
                             SQL_IS_UINTEGER );
     if (!SQL_SUCCEEDED(ret)) 
     {
-        SQLWCHAR wszSqlState[6];
-        SQLINTEGER lpNativeErrorPtr;
-        SQLWCHAR wszMessageText[512];
-        SQLRETURN ret;
+        const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
+                                                                        m_hEnv);
 
-        ret = ::SQLGetDiagRecW( SQL_HANDLE_ENV,
-                                m_hEnv,
-                                1,
-                                wszSqlState,
-                                &lpNativeErrorPtr,
-                                wszMessageText,
-                                512,
-                                0 );
-        if (Equal(wszSqlState, L"HY000")) // General error
+        if (rec.first == L"HY000") // General error
         {
             ThrowReconnectException(__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY009"))    // Invalid use of null pointer
+        else if (rec.first == L"HY009")    // Invalid use of null pointer
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Invalid use of null pointer",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY010"))    // Function sequence error
+        else if (rec.first == L"HY010")    // Function sequence error
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Invalid handle",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY024") ||    // Illegal value
-                 Equal(wszSqlState, L"HY001"))      // Optional value not supported.    
+        else if (rec.first == L"HY024" ||    // Illegal value
+                 rec.first == L"HY001")      // Optional value not supported.    
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Illegal value",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY090"))    // Invalid string or buffer length
+        else if (rec.first == L"HY090")    // Invalid string or buffer length
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Invalid string or buffer length",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HYC00"))    // Driver not implemented this function
+        else if (rec.first == L"HYC00")    // Driver not implemented this function
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Driver not implemented this function",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY013") ||    
-                 Equal(wszSqlState, L"HY001"))
+        else if (rec.first == L"HY013" ||    
+                 rec.first == L"HY001")
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Memory management error",__WFILE__,__LINE__);
         }
     }
     if (ret == SQL_SUCCESS_WITH_INFO) // Can only be 01000 or 01S02
     {
-        SQLWCHAR wszSqlState[6];
-        SQLINTEGER lpNativeErrorPtr;
-        SQLWCHAR wszMessageText[256];
-        SQLRETURN ret;
-
-        ret = ::SQLGetDiagRecW( SQL_HANDLE_ENV,
-                                m_hEnv,
-                                1,
-                                wszSqlState,
-                                &lpNativeErrorPtr,
-                                wszMessageText,
-                                256,
-                                0 );
-        if (Equal(wszSqlState, L"01000"))
+        const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
+                                                                        m_hEnv);
+        if (rec.first == L"01000")
         {
-            SQLWCHAR wszSqlState[6];
-            SQLINTEGER lpNativeErrorPtr;
-            SQLWCHAR wszMessageText[256];
-            SQLRETURN ret;
-
-            ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
-                                    m_hEnv,
-                                    1,
-                                    wszSqlState,
-                                    &lpNativeErrorPtr,
-                                    wszMessageText,
-                                    256,
-                                    0 );
+            const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_DBC, //TODO: is this correct?
+                                                                            m_hEnv);
             Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
                                                 L"Safir::Databases::Odbc::Environment::SetEnvAttr()",
-                                                ToWstring(wszMessageText));
+                                                rec.second);
         }
-        if (Equal(wszSqlState, L"01S02"))
+        if (rec.first == L"01S02")
         {
             Safir::SwReports::SendProgramInfoReport(L"Environment attribute not supported. A similiar attribute used instead");
         }
@@ -293,85 +231,54 @@ void Environment::SetEnvAttr(long lAttribute, const std::wstring & wszValue, uns
                             ulLength );
     if (!SQL_SUCCEEDED(ret)) 
     {
-        SQLWCHAR wszSqlState[6];
-        SQLINTEGER lpNativeErrorPtr;
-        SQLWCHAR wszMessageText[512];
-        SQLRETURN ret;
+        const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
+                                                                        m_hEnv);
 
-        ret = ::SQLGetDiagRecW( SQL_HANDLE_ENV,
-                                m_hEnv,
-                                1,
-                                wszSqlState,
-                                &lpNativeErrorPtr,
-                                wszMessageText,
-                                512,
-                                NULL);
-        if (Equal(wszSqlState, L"HY000")) // General error
+        if (rec.first == L"HY000") // General error
         {
             ThrowReconnectException(__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY009"))    // Invalid use of null pointer
+        else if (rec.first == L"HY009")    // Invalid use of null pointer
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Invalid use of null pointer",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY010"))    // Function sequence error
+        else if (rec.first == L"HY010")    // Function sequence error
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Invalid handle",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY024") ||    // Illegal value
-                 Equal(wszSqlState, L"HY001"))      // Optional value not supported.    
+        else if (rec.first == L"HY024" ||    // Illegal value
+                 rec.first == L"HY001")      // Optional value not supported.    
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Illegal value",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY090"))    // Invalid string or buffer length
+        else if (rec.first == L"HY090")    // Invalid string or buffer length
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Invalid string or buffer length",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HYC00"))    // Driver not implemented this function
+        else if (rec.first == L"HYC00")    // Driver not implemented this function
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Driver not implemented this function",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY013") ||    
-                 Equal(wszSqlState, L"HY001"))
+        else if (rec.first == L"HY013" ||    
+                 rec.first == L"HY001")
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Memory management error",__WFILE__,__LINE__);
         }
     }
     if (ret == SQL_SUCCESS_WITH_INFO) // Can only be 01000 or 01S02
     {
-        SQLWCHAR wszSqlState[6];
-        SQLINTEGER lpNativeErrorPtr;
-        SQLWCHAR wszMessageText[256];
-        SQLRETURN ret;
+        const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
+                                                                        m_hEnv);
 
-        ret = ::SQLGetDiagRecW( SQL_HANDLE_ENV,
-                                m_hEnv,
-                                1,
-                                wszSqlState,
-                                &lpNativeErrorPtr,
-                                wszMessageText,
-                                256,
-                                0 );
-        if (Equal(wszSqlState, L"01000"))
+        if (rec.first == L"01000")
         {
-            SQLWCHAR wszSqlState[6];
-            SQLINTEGER lpNativeErrorPtr;
-            SQLWCHAR wszMessageText[256];
-            SQLRETURN ret;
-
-            ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
-                                    m_hEnv,
-                                    1,
-                                    wszSqlState,
-                                    &lpNativeErrorPtr,
-                                    wszMessageText,
-                                    256,
-                                    0 );
+            const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_DBC, //TODO: is this correct?
+                                                                            m_hEnv);
             Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
                                                 L"Safir::Databases::Odbc::Environment::SetEnvAttr()",
-                                                ToWstring(wszMessageText));
+                                                rec.second);
         }
-        if (Equal(wszSqlState, L"01S02"))
+        if (rec.first == L"01S02")
         {
             Safir::SwReports::SendProgramInfoReport(L"Environment attribute not supported. A similiar attribute used instead");
         }
@@ -389,78 +296,45 @@ void Environment::GetEnvAttr(long lAttribute, long & lValue) const
                             NULL);
     if (!SQL_SUCCEEDED(ret)) 
     {
-        SQLWCHAR wszSqlState[6];
-        SQLINTEGER lpNativeErrorPtr;
-        SQLWCHAR wszMessageText[512];
-        SQLRETURN ret;
-
-        ret = ::SQLGetDiagRecW( SQL_HANDLE_ENV,
-                                m_hEnv,
-                                1,
-                                wszSqlState,
-                                &lpNativeErrorPtr,
-                                wszMessageText,
-                                512,
-                                0 );
-        if (Equal(wszSqlState, L"HY000")) // General error
+        const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
+                                                                        m_hEnv);
+        if (rec.first == L"HY000") // General error
         {
             ThrowReconnectException(__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY013") ||    
-                 Equal(wszSqlState, L"HY001"))
+        else if (rec.first == L"HY013" ||    
+                 rec.first == L"HY001")
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Memory management error",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HYC00"))
+        else if (rec.first == L"HYC00")
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Driver not implemented this function",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY092"))
+        else if (rec.first == L"HY092")
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Optional feature not implemented",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"IM001"))    
+        else if (rec.first == L"IM001")    
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Driver does not support this function",__WFILE__,__LINE__);
         }
     }
     if (ret == SQL_SUCCESS_WITH_INFO) 
     {
-        SQLWCHAR wszSqlState[6];
-        SQLINTEGER lpNativeErrorPtr;
-        SQLWCHAR wszMessageText[256];
-        SQLRETURN ret;
-
-        ret = ::SQLGetDiagRecW( SQL_HANDLE_ENV,
-                                m_hEnv,
-                                1,
-                                wszSqlState,
-                                &lpNativeErrorPtr,
-                                wszMessageText,
-                                256,
-                                0 );
-        if (Equal(wszSqlState, L"01000"))
+        const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
+                                                                        m_hEnv);
+        if (rec.first == L"01000")
         {
-            SQLWCHAR wszSqlState[6];
-            SQLINTEGER lpNativeErrorPtr;
-            SQLWCHAR wszMessageText[256];
-            SQLRETURN ret;
-
-            ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
-                                    m_hEnv,
-                                    1,
-                                    wszSqlState,
-                                    &lpNativeErrorPtr,
-                                    wszMessageText,
-                                    256,
-                                    0 );
+            const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_DBC, //TODO: is this correct?
+                                                                            m_hEnv);
             Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
                                                 L"Safir::Databases::Odbc::Environment::GetEnvAttr()",
-                                                ToWstring(wszMessageText));
+                                                rec.second);
         }
-        if (Equal(wszSqlState, L"01004"))
+        if (rec.first == L"01004")
         {
-            throw Safir::Dob::Typesystem::SoftwareViolationException(ToWstring(wszMessageText), __WFILE__,__LINE__);
+            throw Safir::Dob::Typesystem::SoftwareViolationException(rec.second, __WFILE__,__LINE__);
         }
     }
 }
@@ -476,78 +350,46 @@ void Environment::GetEnvAttr(long lAttribute, wchar_t * wszValue, unsigned long 
                             NULL );
     if (!SQL_SUCCEEDED(ret)) 
     {
-        SQLWCHAR wszSqlState[6];
-        SQLINTEGER lpNativeErrorPtr;
-        SQLWCHAR wszMessageText[512];
-        SQLRETURN ret;
+        const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
+                                                                        m_hEnv);
 
-        ret = ::SQLGetDiagRecW( SQL_HANDLE_ENV,
-                                m_hEnv,
-                                1,
-                                wszSqlState,
-                                &lpNativeErrorPtr,
-                                wszMessageText,
-                                512,
-                                0 );
-        if (Equal(wszSqlState, L"HY000")) // General error
+        if (rec.first == L"HY000") // General error
         {
             ThrowReconnectException(__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY013") ||    
-                 Equal(wszSqlState, L"HY001"))
+        else if (rec.first == L"HY013" ||    
+                 rec.first == L"HY001")
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Memory management error",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HYC00"))
+        else if (rec.first == L"HYC00")
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Driver not implemented this function",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"HY092"))
+        else if (rec.first == L"HY092")
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Optional feature not implemented",__WFILE__,__LINE__);
         }
-        else if (Equal(wszSqlState, L"IM001"))    
+        else if (rec.first == L"IM001")    
         {
             throw Safir::Dob::Typesystem::SoftwareViolationException(L"Driver does not support this function",__WFILE__,__LINE__);
         }
     }
     if (ret == SQL_SUCCESS_WITH_INFO) 
     {
-        SQLWCHAR wszSqlState[6];
-        SQLINTEGER lpNativeErrorPtr;
-        SQLWCHAR wszMessageText[256];
-        SQLRETURN ret;
-
-        ret = ::SQLGetDiagRecW( SQL_HANDLE_ENV,
-                                m_hEnv,
-                                1,
-                                wszSqlState,
-                                &lpNativeErrorPtr,
-                                wszMessageText,
-                                256,
-                                0 );
-        if (Equal(wszSqlState, L"01000"))
+        const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
+                                                                        m_hEnv);
+        if (rec.first == L"01000")
         {
-            SQLWCHAR wszSqlState[6];
-            SQLINTEGER lpNativeErrorPtr;
-            SQLWCHAR wszMessageText[256];
-            SQLRETURN ret;
-
-            ret = ::SQLGetDiagRecW( SQL_HANDLE_DBC,
-                                    m_hEnv,
-                                    1,
-                                    wszSqlState,
-                                    &lpNativeErrorPtr,
-                                    wszMessageText,
-                                    256,
-                                    0 );
+            const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_DBC, //TODO: is this correct?
+                                                                            m_hEnv);
             Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
                                                 L"Safir::Databases::Odbc::Environment::GetEnvAttr()",
-                                                ToWstring(wszMessageText));
+                                                rec.second);
         }
-        if (Equal(wszSqlState, L"01004"))
+        if (rec.first == L"01004")
         {
-            throw Safir::Dob::Typesystem::SoftwareViolationException(ToWstring(wszMessageText), __WFILE__,__LINE__);
+            throw Safir::Dob::Typesystem::SoftwareViolationException(rec.second, __WFILE__,__LINE__);
         }
     }
 }
@@ -588,23 +430,10 @@ void Environment::ThrowReconnectException(SQLHENV hEnv,
                                           const std::wstring & fileName,   
                                           const Safir::Dob::Typesystem::Int64 lineNumber) const
 {
-    SQLWCHAR wszSqlState[6];
-    SQLINTEGER lpNativeErrorPtr;
-    SQLWCHAR wszMessageText[512];
-    SQLRETURN ret;
+    const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
+                                                                    m_hEnv);
 
-    ret = ::SQLGetDiagRecW( SQL_HANDLE_ENV,
-                            hEnv,
-                            1,
-                            wszSqlState,
-                            &lpNativeErrorPtr,
-                            wszMessageText,
-                            256,
-                            0 );
-    std::wstring string = ToWstring(wszSqlState);
-    string += L":";
-    string += ToWstring(wszMessageText);
-    throw ReconnectException(string.c_str(),fileName,lineNumber);
+    throw ReconnectException(rec.first + L":" + rec.second, fileName,lineNumber);
 }
 
 } // End namespace Odbc

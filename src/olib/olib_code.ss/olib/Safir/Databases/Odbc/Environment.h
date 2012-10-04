@@ -153,6 +153,7 @@ private:
     void ThrowReconnectException(   SQLHENV hEnv,
                                     const std::wstring & fileName,
                                     const Safir::Dob::Typesystem::Int64 lineNumber) const;
+
 };
 
 #ifdef _MSC_VER

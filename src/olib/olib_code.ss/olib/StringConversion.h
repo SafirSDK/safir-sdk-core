@@ -22,6 +22,8 @@
 *
 ******************************************************************************/
 #include <sstream>
+#include <vector>
+#include <boost/static_assert.hpp>
 
 #ifndef __OLIB_STRING_CONVERSION_H__
 #define __OLIB_STRING_CONVERSION_H__
@@ -46,6 +48,17 @@ namespace
 #else
         std::wostringstream ostr;
         ostr << str;
+        return ostr.str();
+#endif
+}
+
+    inline const std::wstring ToWstring(const std::vector<SQLWCHAR> str)
+    {
+#ifdef NO_WCHAR_CONVERSION
+        return std::wstring(&str[0]);
+#else
+        std::wostringstream ostr;
+        ostr << &str[0];
         return ostr.str();
 #endif
 }
