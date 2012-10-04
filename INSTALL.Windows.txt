@@ -25,6 +25,14 @@ Visual Studio and utils
 You are assumed to already have Visual Studio 2005 SP1 (aka 8.0) or 2008 SP1 (aka 9.0) installed, so we proceed immediately to the more interesting bits.
 You are also assumed to have some unpacking tool installed that can handle .gz files, like winzip, 7-zip or winrar.
 
+Special note when using VS2005: To build the Crash Reporter you need a newer version of Windows SDK than the one you get with the VS2005 installation.
+Download Win SDK 7.1 from http://www.microsoft.com/en-us/download/details.aspx?id=8279. After installation of the Win SDK you have to make some patches in your VS2005 installation in order to make it work:
+1. Make the following changes to C:\Program Files (x86)\Microsoft Visual Studio 8\Common7\Tools\vsvars32.bat:
+   - Add the path to the Win SDK 'Bin' directory to the PATH environment variable. That is, the line  @set PATH=C:\Program Files ... is changed to  @set PATH=C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin;C:\Program Files ...
+   - Add the path to the Win SDK 'Include' directory to the INCLUDE environment variable.
+   - Add the path to the Win SDK 'Lib' directory to the LIB environment variable.
+2. Comment out line 944 and 945 in file C:\Program Files (x86)\Microsoft Visual Studio 8\VC\include\intrin.h
+
 Boost
 ~~~~~
 The easiest way to install boost is to use the installer provided by BoostPro Computing: http://www.boostpro.com/products/free. Download the newest installer and run it.
