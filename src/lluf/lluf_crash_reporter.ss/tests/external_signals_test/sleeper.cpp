@@ -30,13 +30,14 @@ void callback(const char* const dumpPath)
     std::wcout << "callback with dumpPath = '" << dumpPath << "'" << std::endl;
 }
 
-int main(int argc, char* argv[])
+int main(int, char*[])
 {
     Safir::Utilities::CrashReporter::RegisterCallback(callback);
     Safir::Utilities::CrashReporter::Start();
     std::wcout << "Started" << std::endl;
-    boost::this_thread::sleep(boost::posix_time::seconds(60));
-    
+    boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(60));  // Use absolute time since this prevents boost warnings 
+
+
     Safir::Utilities::CrashReporter::Stop();
     return 0;
 }
