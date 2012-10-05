@@ -34,12 +34,12 @@ else:
 
 ss_test = os.path.join(exe_path,"ss_test")
 #start first instance
-proc1 = subprocess.Popen(ss_test, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+proc1 = subprocess.Popen(ss_test, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
 #print proc1.communicate()
-time.sleep(0.5) #let the process get the create callback
+#time.sleep(0.5) #let the process get the create callback
 
 #start second instance
-proc2 = subprocess.Popen(ss_test, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+proc2 = subprocess.Popen(ss_test, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
 
 #wait for them to exit
 out1 = proc1.communicate()
@@ -50,7 +50,7 @@ res2 = proc2.returncode
 
 #check exit codes 
 #res1 should be "Created" | "Used", and res2 should be "Used" as per bit field in ss_test.cpp
-if res1 == 3 and res2 == 2: 
+if (res1 == 3 and res2 == 2) or (res1 == 2 and res2 == 3): 
     print("success")
     sys.exit(0)
 else:
