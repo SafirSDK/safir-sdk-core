@@ -4,6 +4,16 @@ project(lluf_crash_reporter CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
+if (MSVC)
+
+else()
+  add_custom_target(google-breakpad ALL 
+    COMMAND ./configure
+    COMMAND make
+    WORKING_DIRECTORY google-breakpad
+    COMMENT "Building Google Breakpad")
+endif()
+
 INCLUDE_DIRECTORIES(. google-breakpad/src/)
 LINK_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/google-breakpad/src/)
 
