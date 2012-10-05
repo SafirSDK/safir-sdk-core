@@ -1238,6 +1238,12 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                     }
                 }
                 ++repeats;
+
+                if (repeats % 1000 == 0)
+                {
+                    std::wcout << "I've now done " << repeats << " repeats without an overflow!" << std::endl;
+                }
+
             }
             catch (const Safir::Dob::OverflowException &)
             {

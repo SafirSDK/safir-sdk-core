@@ -733,6 +733,11 @@ class Consumer implements
                         break;
                     }
                     ++repeats;
+
+                    if (repeats % 1000 == 0)
+                    {
+                        System.out.println("I've now done " + repeats  + " repeats without an overflow!");
+                    }
                 }
                 catch (com.saabgroup.safir.dob.OverflowException e)
                 {
