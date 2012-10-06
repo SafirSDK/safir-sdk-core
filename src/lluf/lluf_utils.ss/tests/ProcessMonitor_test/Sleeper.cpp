@@ -35,7 +35,7 @@
 
 int main()
 {
-    boost::this_thread::sleep(boost::posix_time::seconds(2));
+    boost::this_thread::sleep(boost::posix_time::seconds(4));
     return 0;
 }
 
