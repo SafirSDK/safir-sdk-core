@@ -23,6 +23,7 @@
 ******************************************************************************/
 
 #include <Safir/Dob/Internal/ServiceTypes.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Service.h>
@@ -227,6 +228,16 @@ namespace Internal
     ServiceType& ServiceTypes::GetType(const Typesystem::TypeId typeId)
     {
         ServiceTypeTable::iterator findIt = m_serviceTypes.find(typeId);
+        if (findIt == m_serviceTypes.end())
+        {
+            lllerr << "GetType failed to find the service type that was asked for!!! typeId = " <<
+                Dob::Typesystem::Operations::GetName(typeId) << std::endl;
+            
+            lllerr << "Number of service types = " << m_serviceTypes.size() << std::endl;
+            lllerr << "I Am DoseMain = " << m_iAmDoseMain << std::endl;
+            
+        }
+
         ENSURE(findIt != m_serviceTypes.end(), << "GetType failed to find the service type that was asked for!!! typeId = " <<
                                                   Dob::Typesystem::Operations::GetName(typeId));
 
