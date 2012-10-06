@@ -7,7 +7,7 @@
 build_dir         build/config                              Release
 
 #LLUF
-#build_dir        src/lluf/lluf_crash_reporter.ss/src        Release
+build_dir        src/lluf/lluf_crash_reporter.ss/src        Release
 build_dir        src/lluf/lluf_utils.ss/src                 RelWithDebInfo   Debug
 build_dir        src/lluf/lluf_logger_control.ss/src        RelWithDebInfo
 #TODO: lluf ada stuff
