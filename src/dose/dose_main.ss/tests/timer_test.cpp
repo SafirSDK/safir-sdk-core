@@ -155,7 +155,8 @@ public:
 
         const double now = GetUtcTime();
 
-        if (fabs(now - m_last) > m_delay + 0.5) //500ms error is ok for a single timer
+        if (fabs(now - m_last) > m_delay + 2) //2s error is ok for a single timer, remember we might be running
+            //on oversubscribed virtual hw.
         {
             std::wcout << "Diff is " << now - m_last << std::endl;
             ioService.stop();
