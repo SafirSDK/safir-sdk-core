@@ -9,19 +9,23 @@ if (MSVC)
 else()
   add_custom_target(google-breakpad ALL 
     COMMAND ./configure
-    COMMAND make
-    WORKING_DIRECTORY google-breakpad
+    COMMAND make -j 3
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/google-breakpad
     COMMENT "Building Google Breakpad")
+    
+  LINK_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/google-breakpad/src/client/linux)
+
 endif()
 
 INCLUDE_DIRECTORIES(. google-breakpad/src/)
-LINK_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/google-breakpad/src/)
 
 add_library(lluf_crash_reporter SHARED CrashReporter.cpp Safir/Utilities/CrashReporter.h)
 
 FIND_PACKAGE(Boost COMPONENTS filesystem thread system)
 
-TARGET_LINK_LIBRARIES(lluf_crash_reporter breakpad)
+TARGET_LINK_LIBRARIES(lluf_crash_reporter breakpad_client)
+
+add_dependencies(lluf_crash_reporter google-breakpad)
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(lluf_crash_reporter ${Boost_LIBRARIES})
