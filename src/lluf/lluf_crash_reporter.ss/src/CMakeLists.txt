@@ -4,18 +4,6 @@ project(lluf_crash_reporter CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
-if (MSVC)
-
-else()
-  add_custom_target(google-breakpad ALL 
-    COMMAND ./configure
-    COMMAND make -j 3
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/google-breakpad
-    COMMENT "Building Google Breakpad")
-    
-  LINK_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/google-breakpad/src/client/linux)
-
-endif()
 
 INCLUDE_DIRECTORIES(. google-breakpad/src/)
 
@@ -23,13 +11,24 @@ add_library(lluf_crash_reporter SHARED CrashReporter.cpp Safir/Utilities/CrashRe
 
 FIND_PACKAGE(Boost COMPONENTS filesystem thread system)
 
-TARGET_LINK_LIBRARIES(lluf_crash_reporter breakpad_client)
+#some commands to build Google Breakpad on windows and *nix
+if (MSVC)
 
-add_dependencies(lluf_crash_reporter google-breakpad)
+else()
+  add_custom_command(TARGET lluf_crash_reporter PRE_BUILD
+    COMMAND ./configure
+    COMMAND make -j 3
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/google-breakpad
+    COMMENT "Building Google Breakpad")
+endif()
+
+TARGET_LINK_LIBRARIES(lluf_crash_reporter "${CMAKE_CURRENT_SOURCE_DIR}/google-breakpad/src/client/linux/libbreakpad_client.a")
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(lluf_crash_reporter ${Boost_LIBRARIES})
 endif()
+
+
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
