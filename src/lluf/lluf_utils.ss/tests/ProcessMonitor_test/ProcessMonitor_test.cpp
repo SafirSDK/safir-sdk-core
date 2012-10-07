@@ -74,8 +74,11 @@ int main(int argc, char** argv)
         monitor.StartMonitorPid(*it);
     }
 
-    boost::this_thread::sleep(boost::posix_time::seconds(3));
+    for (int i = 0; i < 120; ++i)
+    {
+        boost::this_thread::sleep(boost::posix_time::seconds(1));
+    }
 
-    return 0;
+    return 1;
 }
 

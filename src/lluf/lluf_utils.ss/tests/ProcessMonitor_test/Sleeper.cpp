@@ -21,21 +21,29 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-//disable warnings in boost
+#include <iostream>
+
 #if defined _MSC_VER
   #pragma warning (push)
   #pragma warning (disable : 4244)
 #endif
 
+#include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
 
 #if defined _MSC_VER
   #pragma warning (pop)
 #endif
 
-int main()
+int main(int argc, char* argv[])
 {
-    boost::this_thread::sleep(boost::posix_time::seconds(4));
+    if (argc != 2)
+    {
+        std::wcout << "Need one numeric argument (seconds to sleep)" << std::endl;
+        return 1;
+    }
+
+    boost::this_thread::sleep(boost::posix_time::seconds(boost::lexical_cast<int>(argv[1])));
     return 0;
 }
 

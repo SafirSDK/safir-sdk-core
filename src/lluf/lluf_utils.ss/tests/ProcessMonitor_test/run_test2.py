@@ -36,8 +36,8 @@ ProcessMonitor_test2 = os.path.join(exe_path,"ProcessMonitor_test2")
 Sleeper = os.path.join(exe_path,"Sleeper")
 
 #start two sleepers
-sleeper1 = subprocess.Popen(Sleeper)
-sleeper2 = subprocess.Popen(Sleeper)
+sleeper1 = subprocess.Popen((Sleeper,"120"))
+sleeper2 = subprocess.Popen((Sleeper,"120"))
 
 listener = subprocess.Popen((ProcessMonitor_test2,
                              str(sleeper1.pid),
@@ -45,9 +45,9 @@ listener = subprocess.Popen((ProcessMonitor_test2,
                             stdout=subprocess.PIPE, 
                             stderr=subprocess.STDOUT,
                             universal_newlines=True)
-sleeper1.wait()
-sleeper2.wait()
 result = listener.communicate()[0]
+sleeper1.kill()
+sleeper2.kill()
 
 if result != "":
     print("ProcessMonitor_test2 exited with non-empty output!")

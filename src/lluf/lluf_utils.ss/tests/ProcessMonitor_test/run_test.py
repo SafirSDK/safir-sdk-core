@@ -42,8 +42,8 @@ ProcessMonitor_test = os.path.join(exe_path,"ProcessMonitor_test")
 Sleeper = os.path.join(exe_path,"Sleeper")
 
 #start two sleepers
-sleeper1 = subprocess.Popen(Sleeper)
-sleeper2 = subprocess.Popen(Sleeper)
+sleeper1 = subprocess.Popen((Sleeper,"1"))
+sleeper2 = subprocess.Popen((Sleeper,"1"))
 
 listener = subprocess.Popen((ProcessMonitor_test,
                              str(sleeper1.pid),
@@ -65,6 +65,11 @@ if result.find("Process with pid " + str(sleeper2.pid) + " exited.") == -1:
 
 if result.count("Process with pid") != 2:
     print("Too many terminated processes! Expected two!")
+    print(result)
+    sys.exit(1)
+
+if listener.returncode != 0:
+    print("Unexpected return code from listener:",listener.returncode)
     print(result)
     sys.exit(1)
 
