@@ -141,10 +141,9 @@ public:
                             m_timerInfo(new EmptyTimerInfo(m_timerId)),
                             m_repeats(1000),
                             m_count(m_repeats),
-                            m_delay(0.01),
-                            m_last(m_constructionTime)
+                            m_delay(0.01)
     {
-        TimerHandler::Instance().Set(Replace, m_timerInfo, m_last + m_delay); 
+        TimerHandler::Instance().Set(Replace, m_timerInfo, m_constructionTime + m_delay); 
     }
 
     void HandleTimeout(const TimerInfoPtr& /*timer*/)
@@ -154,14 +153,6 @@ public:
         TimerHandler::Instance().Set(Replace, m_timerInfo, m_constructionTime + (m_repeats - m_count) * m_delay); 
 
         const double now = GetUtcTime();
-
-        if (fabs(now - m_last) > m_delay + 2) //2s error is ok for a single timer, remember we might be running
-            //on oversubscribed virtual hw.
-        {
-            std::wcout << "Diff is " << now - m_last << std::endl;
-            ioService.stop();
-        }
-        m_last = now;
 
         if (m_count == 0)
         {
@@ -185,7 +176,6 @@ private:
     const int m_repeats;
     int m_count;
     const double m_delay;
-    double m_last;
 };
 
 
