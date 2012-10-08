@@ -7,7 +7,7 @@ if (MSVC)
    set(MY_CONFIGURE_COMMAND "")
    set(MY_BUILD_COMMAND "")
 else()
-  set (MY_CONFIGURE_COMMAND <SOURCE_DIR>/configure CFLAGS=-fPIC CXXFLAGS=-fPIC)
+  set(MY_CONFIGURE_COMMAND <SOURCE_DIR>/configure CFLAGS=-fPIC CXXFLAGS=-fPIC)
   set(MY_BUILD_COMMAND make)
 endif()
 
@@ -23,3 +23,20 @@ ExternalProject_Add(
    BUILD_COMMAND ${MY_BUILD_COMMAND}
    INSTALL_COMMAND ""
 ) 
+
+if (MSVC)
+  FILE(GLOB headers 
+    ./client/windows/handler/*.h 
+    ./client/windows/crash_generation/crash_generation_client.h 
+    ./common/windows/guid_string.h)  
+  FILE(GLOB sources 
+    ./client/windows/handler/*.cc 
+    ./client/windows/crash_generation/crash_generation_client.cc 
+    ./common/windows/guid_string.cc)
+  
+  add_library(breakpad_client STATIC  ${headers} ${sources})
+  
+  add_definitions(-DUNICODE -D_UNICODE)
+
+  #SET_TARGET_PROPERTIES(breakpad PROPERTIES LINKER_LANGUAGE CXX)
+endif()
