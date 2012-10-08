@@ -3,26 +3,34 @@
 
 include(ExternalProject)
 
-if (MSVC)
-   set(MY_CONFIGURE_COMMAND "")
-   set(MY_BUILD_COMMAND "")
-else()
-  set(MY_CONFIGURE_COMMAND <SOURCE_DIR>/configure CFLAGS=-fPIC CXXFLAGS=-fPIC)
-  set(MY_BUILD_COMMAND make)
-endif()
+set(MY_SVN_REPOSITORY http://google-breakpad.googlecode.com/svn/trunk)
+set(MY_SVN_REVISION 1064)
 
-ExternalProject_Add(
-   google-breakpad
-   PREFIX ""
-   SOURCE_DIR src
-   BINARY_DIR bin
-   SVN_REPOSITORY http://google-breakpad.googlecode.com/svn/trunk
-   SVN_REVISION -r 1064
-   UPDATE_COMMAND "" #disable update since we're going against fixed revision
-   CONFIGURE_COMMAND ""
-   BUILD_COMMAND ""
-   INSTALL_COMMAND ""
-) 
+if (MSVC)
+  ExternalProject_Add(
+    google-breakpad
+    PREFIX ""
+    SOURCE_DIR src
+    BINARY_DIR bin
+    SVN_REPOSITORY ${MY_SVN_REPOSITORY}
+    SVN_REVISION -r ${MY_SVN_REVISION}
+    UPDATE_COMMAND "" #disable update since we're going against fixed revision
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND "")
+else()
+  ExternalProject_Add(
+    google-breakpad
+    PREFIX ""
+    SOURCE_DIR src
+    BINARY_DIR bin
+    SVN_REPOSITORY ${MY_SVN_REPOSITORY}
+    SVN_REVISION -r ${MY_SVN_REVISION}
+    UPDATE_COMMAND "" #disable update since we're going against fixed revision
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure CFLAGS=-fPIC CXXFLAGS=-fPIC
+    INSTALL_COMMAND ""
+    ) 
+endif()
 
 if (MSVC)
   FILE(GLOB headers 
@@ -38,5 +46,4 @@ if (MSVC)
   
   add_definitions(-DUNICODE -D_UNICODE)
   add_definitions(/wd4127 /wd4245)
-  #SET_TARGET_PROPERTIES(breakpad PROPERTIES LINKER_LANGUAGE CXX)
 endif()
