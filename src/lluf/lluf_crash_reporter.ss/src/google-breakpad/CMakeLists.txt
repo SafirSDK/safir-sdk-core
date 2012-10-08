@@ -8,7 +8,7 @@ ExternalProject_Add(
    SOURCE_DIR src
    BINARY_DIR bin
    SVN_REPOSITORY http://google-breakpad.googlecode.com/svn/trunk
-   SVN_REVISION -r 991
+   SVN_REVISION -r 1064
    UPDATE_COMMAND "" #disable update since we're going against fixed revision
    CONFIGURE_COMMAND <SOURCE_DIR>/configure CFLAGS=-fPIC CXXFLAGS=-fPIC
    INSTALL_COMMAND ""
