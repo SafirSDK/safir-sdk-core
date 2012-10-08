@@ -62,6 +62,14 @@ DLL_DESTINATION = os.path.join(SAFIR_RUNTIME, "bin")
 HEADER_DESTINATION = os.path.join(SAFIR_SDK, "include")
 DOCS_DESTINATION = os.path.join(SAFIR_SDK, "docs")
 
+def rmdir(directory):
+    if os.path.exists(directory):
+        try:
+            shutil.rmtree(directory)
+        except OSError:
+            log("Failed to remove directory, will retry")
+            time.sleep(0.2)
+            shutil.rmtree(directory)
 
 def copy_file(name,destination):
     if not os.path.isfile(name):
@@ -275,6 +283,9 @@ def common():
     if retcode != 0:
         logError("Failed to do 'dobmake.py -b --clean'")
     log("-----------------------------------")
+
+    log("Removing logs from tests during build")
+    rmdir(os.path.join(SAFIR_RUNTIME,"log"))
 
 def main():
     log("Preparing Safir SDK Core binary for distribution") 
