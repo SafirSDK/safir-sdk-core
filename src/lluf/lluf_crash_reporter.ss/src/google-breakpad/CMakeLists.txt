@@ -42,8 +42,12 @@ if (MSVC)
     ./src/src/client/windows/crash_generation/crash_generation_client.cc 
     ./src/src/common/windows/guid_string.cc)
   
+  set(CMAKE_CPP_CREATE_STATIC_LIBRARY ON)
+  
   add_library(breakpad_client STATIC  ${headers} ${sources})
   
+  SET_TARGET_PROPERTIES(breakpad_client PROPERTIES LINKER_LANGUAGE CXX)
+ 
   add_definitions(-DUNICODE -D_UNICODE)
   add_definitions(/wd4127 /wd4245)
 endif()
