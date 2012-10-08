@@ -54,6 +54,8 @@ listener = subprocess.Popen((ProcessMonitor_test,
 sleeper1.wait()
 sleeper2.wait()
 result = listener.communicate()[0]
+print("listener should be waiting for pids", sleeper1.pid, sleeper2.pid)
+print(result)
 
 if result.find("Process with pid " + str(sleeper1.pid) + " exited.") == -1:
     print("ProcessMonitor appears to have missed termination of process with pid", sleeper1.pid)
@@ -65,12 +67,10 @@ if result.find("Process with pid " + str(sleeper2.pid) + " exited.") == -1:
 
 if result.count("Process with pid") != 2:
     print("Too many terminated processes! Expected two!")
-    print(result)
     sys.exit(1)
 
 if listener.returncode != 0:
     print("Unexpected return code from listener:",listener.returncode)
-    print(result)
     sys.exit(1)
 
 print("success")
