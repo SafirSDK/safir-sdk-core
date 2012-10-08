@@ -30,7 +30,7 @@ void callback(const char* const dumpPath)
     std::wcout << "callback with dumpPath = '" << dumpPath << "'" << std::endl;
 }
 
-int main(int argc, char* argv[])
+int main()
 {
     Safir::Utilities::CrashReporter::RegisterCallback(callback);
     Safir::Utilities::CrashReporter::Start();

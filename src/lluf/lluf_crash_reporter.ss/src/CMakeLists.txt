@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(lluf_crash_reporter CXX)
+project(lluf_crash_reporter C CXX)
 
 #this library has an interface which is okay to call between debug/release runtimes,
 #and we only want one version of it, so we don't want the "d" suffix on debug builds on windows.
@@ -16,7 +16,9 @@ add_library(lluf_crash_reporter SHARED CrashReporter.cpp Safir/Utilities/CrashRe
 
 FIND_PACKAGE(Boost COMPONENTS filesystem thread system)
 
-if (NOT MSVC)
+if (MSVC)
+  TARGET_LINK_LIBRARIES(lluf_crash_reporter breakpad_client)
+else()
   TARGET_LINK_LIBRARIES(lluf_crash_reporter 
     ${Boost_LIBRARIES}
     "${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/bin/src/client/linux/libbreakpad_client.a")
