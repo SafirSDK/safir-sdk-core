@@ -35,7 +35,8 @@ namespace dose_test_dotnet
 {
     class Executor :
         Safir.Dob.StopHandler,
-        Safir.Dob.MessageSubscriber,
+        // Safir.Dob.MessageSubscriber,
+        Safir.Dob.EntitySubscriber,
         Safir.Dob.EntityHandler,
         Safir.Dob.ServiceHandler
     {
@@ -56,12 +57,13 @@ namespace dose_test_dotnet
             m_controlDispatcher = new ControlDispatcher(m_controlDispatchEvent);
             m_testDispatcher = new Dispatcher(m_testDispatchEvent);
             m_testStopHandler = new StopHandler();
-            m_controlConnection.Open(m_controlConnectionName, m_instanceString, 0, this, m_controlDispatcher);
+            //m_controlConnection.Open(m_controlConnectionName, m_instanceString, 0, this, m_controlDispatcher);
 
-            //subscribe to messages going to everyone and to me.
-            m_controlConnection.SubscribeMessage(DoseTest.Action.ClassTypeId, new Safir.Dob.Typesystem.ChannelId(m_instance), this);
-            m_controlConnection.SubscribeMessage(DoseTest.Action.ClassTypeId, new Safir.Dob.Typesystem.ChannelId(), this);
-
+            m_actionReceiver = new ActionReceiver(m_instance, m_dataReceivedEvent);
+            ////subscribe to messages going to everyone and to me.
+            //m_controlConnection.SubscribeMessage(DoseTest.Action.ClassTypeId, new Safir.Dob.Typesystem.ChannelId(m_instance), this);
+            //m_controlConnection.SubscribeMessage(DoseTest.Action.ClassTypeId, new Safir.Dob.Typesystem.ChannelId(), this);
+#if D 
             if (Safir.Dob.DistributionChannelParameters.DistributionChannels(0).MulticastAddress.Val == "127.0.0.1")
             {
                 System.Console.WriteLine("System appears to be Standalone, not listening for multicasted test actions");
@@ -76,14 +78,14 @@ namespace dose_test_dotnet
                 const int port = 31789;
                 IPEndPoint iep = new IPEndPoint(IPAddress.Any, port);
                 m_sock.Bind(iep);
-                
+
                 IPAddress multicastAddress = IPAddress.Parse(DoseTest.Parameters.TestMulticastAddress);
-                
-                System.Console.WriteLine("Joined socket to group for multicast reception. Multicast address " + multicastAddress + ", port " + port + "."); 
+
+                System.Console.WriteLine("Joined socket to group for multicast reception. Multicast address " + multicastAddress + ", port " + port + ".");
                 if (args.Length > 1)
                 {
                     System.Console.WriteLine("Used NIC: " + args[1]);
-                    m_sock.SetSocketOption(SocketOptionLevel.IP, 
+                    m_sock.SetSocketOption(SocketOptionLevel.IP,
                                            SocketOptionName.AddMembership,
                                            new MulticastOption(multicastAddress, IPAddress.Parse(args[1])));
                 }
@@ -94,9 +96,10 @@ namespace dose_test_dotnet
                                            SocketOptionName.AddMembership,
                                            new MulticastOption(multicastAddress));
                 }
-                
+
                 m_sock.BeginReceive(m_buf, 0, m_buf.Length, SocketFlags.None, m_pfnCallBack, null);
             }
+#endif
         }
 
         public void Run()
@@ -105,6 +108,9 @@ namespace dose_test_dotnet
             // a GC here.
             System.GC.Collect();
             System.GC.WaitForPendingFinalizers();
+
+            m_controlConnection.Open(m_controlConnectionName, m_instanceString, 0, this, m_controlDispatcher);
+            m_controlConnection.SubscribeEntity(DoseTest.Sequencer.ClassTypeId, this);
 
             System.Console.WriteLine(m_identifier + ":" + m_instance + " Started");
             System.Threading.AutoResetEvent[] waitHandles = new System.Threading.AutoResetEvent[]
@@ -172,22 +178,12 @@ namespace dose_test_dotnet
                         m_isDone = true;
                         break;
                     case 3:
-                        m_actionLock.WaitOne();
-
-                        System.Collections.IEnumerator actionEnum = m_actionList.GetEnumerator();
-                        while (actionEnum.MoveNext())
-                        {
-                            HandleAction((DoseTest.Action)actionEnum.Current);
-                        }
-                        m_actionList.Clear();
-
-                        m_actionLock.ReleaseMutex();
-
+                        HandleAction(m_actionReceiver.getData());
                         break;
                 }
             }
 
-            if(m_sock != null)
+            if (m_sock != null)
             {
                 m_sock.Close();
             }
@@ -199,34 +195,36 @@ namespace dose_test_dotnet
 
         const string DOSE_TEST_UTIL = "dose_test_util.dll";
 
+        ActionReceiver m_actionReceiver;
+
         [DllImport(DOSE_TEST_UTIL, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void InhibitOutgoingTraffic(byte inhibit,
                                                            out byte success);
 
         [DllImport(DOSE_TEST_UTIL, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void InhibitOutgoingTrafficStatus(out byte isInhibited);
-
+#if D
         private void OnDataReceived(IAsyncResult asyn)
         {
             try
             {
                 m_sock.EndReceive(asyn);
-                
+
                 GCHandle pinnedBuf = GCHandle.Alloc(m_buf, GCHandleType.Pinned);
                 System.IntPtr p = Marshal.UnsafeAddrOfPinnedArrayElement(m_buf, 0);
-                
+
                 DoseTest.Action action = (DoseTest.Action)Safir.Dob.Typesystem.ObjectFactory.Instance.CreateObject(p);
-                
+
                 pinnedBuf.Free();
-                
-                m_actionLock.WaitOne();
-                
+
+                lock(m_actionLock) //not correct
+                {
+
                 m_actionList.Add(action);
-                
-                m_actionLock.ReleaseMutex();
-                
+
+                }
                 m_dataReceivedEvent.Set();  //signal main thread
-                
+
                 m_sock.BeginReceive(m_buf, 0, m_buf.Length, SocketFlags.None, m_pfnCallBack, null);
             }
             catch (ObjectDisposedException)
@@ -234,46 +232,117 @@ namespace dose_test_dotnet
                 //socket has been closed, we're exiting
             }
         }
+#endif
+        void HandleSequencerState(DoseTest.Sequencer sequencerState)
+        {
+            bool activate = sequencerState != null && sequencerState.Partners[m_instance].Val.Equals(m_identifier);
+            //bool activate = true;
+
+            if (activate == m_isActive)
+            {
+                Console.WriteLine("already active or not active");
+                //already active or not active
+                return;
+            }
+
+            if (activate)
+            {
+
+                m_defaultContext = sequencerState.Context.Val;
+                System.Console.WriteLine("Activating (default context is " + m_defaultContext + ")");
+
+
+                m_controlConnection.RegisterEntityHandler(m_partnerEntityId.TypeId,
+                                                            new Safir.Dob.Typesystem.HandlerId(m_instance),
+                                                            Safir.Dob.InstanceIdPolicy.Enumeration.HandlerDecidesInstanceId,
+                                                            this);
+                m_controlConnection.RegisterServiceHandler(DoseTest.Dump.ClassTypeId,
+                                                            new Safir.Dob.Typesystem.HandlerId(m_instance),
+                                                            this);
+
+                m_actionReceiver.Open();
+
+                DoseTest.Partner partner = new DoseTest.Partner();
+                partner.Identifier.Val = m_identifier;
+
+                partner.Port.Val = m_actionReceiver.getPort();
+
+                try
+                {
+
+                    Safir.Dob.Typesystem.InstanceId instance = new Safir.Dob.Typesystem.InstanceId(Safir.Dob.ThisNodeParameters.NodeNumber);
+                    Safir.Dob.Typesystem.EntityId eid = new Safir.Dob.Typesystem.EntityId(Safir.Dob.NodeInfo.ClassTypeId, instance);
+                    Safir.Dob.EntityProxy ep = m_controlConnection.Read(eid);
+                    try
+                    {
+                        partner.Address.Val = ((Safir.Dob.NodeInfo)ep.Entity).IpAddress.Val;
+
+                    }
+                    finally
+                    {
+                        ep.Dispose();
+                    }
+                }
+                catch (Safir.Dob.NotFoundException e)
+                {
+                    System.Console.WriteLine("Not found exception: " + e);
+                }
+
+                m_controlConnection.SetAll(partner, m_partnerEntityId.InstanceId,
+                                           new Safir.Dob.Typesystem.HandlerId(m_instance));
+
+                m_isActive = true;
+
+            }
+            else
+            {
+                System.Console.WriteLine("Deactivating");
+                m_actionReceiver.Close();
+
+                m_testConnection.Close();
+
+                m_controlConnection.Delete(m_partnerEntityId, new Safir.Dob.Typesystem.HandlerId(m_instance));
+                m_controlConnection.UnregisterHandler(m_partnerEntityId.TypeId,new Safir.Dob.Typesystem.HandlerId(m_instance));
+        
+                m_controlConnection.UnregisterHandler(DoseTest.Dump.ClassTypeId,new Safir.Dob.Typesystem.HandlerId(m_instance));
+                m_isActive = false;
+         
+            }
+
+        }
+
+        #region EntitySubscriber Members
+
+        void Safir.Dob.EntitySubscriber.OnNewEntity(Safir.Dob.EntityProxy entityProxy)
+        {
+            HandleSequencerState((DoseTest.Sequencer)entityProxy.Entity);
+        }
+
+        void Safir.Dob.EntitySubscriber.OnUpdatedEntity(Safir.Dob.EntityProxy entityProxy)
+        {
+            HandleSequencerState((DoseTest.Sequencer)entityProxy.Entity);
+        }
+
+        void Safir.Dob.EntitySubscriber.OnDeletedEntity(Safir.Dob.EntityProxy entityProxy, bool deletedByOwner)
+        {
+        }
+
+        #endregion
+        //void  OnNewEntity(Safir.Dob.EntityProxy entityProxy)
+        //{
+        //}
+        //void OnUpdatedEntity(Safir.Dob.EntityProxy entityProxy)
+        //{
+        //}
+
+        // void Safir.Dob.EntitySubscriber.OnDeletedEntity(Safir.Dob.EntityProxy entityProxy, bool deletedByOwner)
+        //{
+        //}
 
         private void ExecuteAction(DoseTest.Action action)
         {
             switch (action.ActionKind.Val)
             {
-                case DoseTest.ActionEnum.Enumeration.Activate:
-                    if (action.Identifier == m_identifier)
-                    {
-                        m_defaultContext = action.Context.Val;
-                        System.Console.WriteLine("Activating (default context is " + m_defaultContext + ")");
-                        if (!m_isActive)
-                        {
-                            m_controlConnection.RegisterEntityHandler(m_partnerEntityId.TypeId,
-                                new Safir.Dob.Typesystem.HandlerId(m_instance),
-                                Safir.Dob.InstanceIdPolicy.Enumeration.HandlerDecidesInstanceId,
-                                this);
-                            m_controlConnection.RegisterServiceHandler
-                                (DoseTest.Dump.ClassTypeId,
-                                 new Safir.Dob.Typesystem.HandlerId(m_instance), this);
-                        }
-                        DoseTest.Partner partner = new DoseTest.Partner();
-                        partner.Incarnation.Val = 0;
-                        partner.Identifier.Val = m_identifier;
-                        m_controlConnection.SetAll(partner, m_partnerEntityId.InstanceId,
-                            new Safir.Dob.Typesystem.HandlerId(m_instance));
-                        m_isActive = true;
-                    }
-                    break;
-
-                case DoseTest.ActionEnum.Enumeration.Deactivate:
-                    if (action.Identifier == m_identifier)
-                    {
-                        m_isActive = false;
-                        System.Console.WriteLine("Deactivating");
-                        m_testConnection.Close();
-                        m_controlConnection.Delete(m_partnerEntityId, new Safir.Dob.Typesystem.HandlerId(m_instance));
-                        m_controlConnection.UnregisterHandler(m_partnerEntityId.TypeId, new Safir.Dob.Typesystem.HandlerId(m_instance));
-                        m_controlConnection.UnregisterHandler(DoseTest.Dump.ClassTypeId,new Safir.Dob.Typesystem.HandlerId(m_instance));
-                    }
-                    break;
 
                 case DoseTest.ActionEnum.Enumeration.Reset:
                     if (m_isActive)
@@ -298,7 +367,14 @@ namespace dose_test_dotnet
                         using (Safir.Dob.EntityProxy ep = m_controlConnection.Read(m_partnerEntityId))
                         {
                             DoseTest.Partner partner = ep.Entity as DoseTest.Partner;
-                            partner.Incarnation.Val = partner.Incarnation.Val + 1;
+                            if (partner.Incarnation.IsNull())
+                            {
+                                partner.Incarnation.Val = 0;
+                            }
+                            else
+                            {
+                                partner.Incarnation.Val = partner.Incarnation.Val + 1;
+                            }
                             m_controlConnection.SetChanges(partner, m_partnerEntityId.InstanceId, new Safir.Dob.Typesystem.HandlerId(m_instance));
                         }
                         Consumer[] oldCons = m_consumers; //keep these for a while, so we get new consumer addresses.
@@ -503,16 +579,17 @@ namespace dose_test_dotnet
             }
         }
 
+
         private void HandleAction(DoseTest.Action action)
         {
-            if (!action.SeqNbr.IsNull())
-            {
-                if (action.SeqNbr.Val != m_lastRecSeqNbr + 1)
-                {
-                    System.Console.WriteLine("Seems an action from the sequencer is lost!!"); 
-                }
-                m_lastRecSeqNbr = action.SeqNbr.Val;
-            }
+            //if (!action.SeqNbr.IsNull())
+            //{
+            //    if (action.SeqNbr.Val != m_lastRecSeqNbr + 1)
+            //    {
+            //        System.Console.WriteLine("Seems an action from the sequencer is lost!!"); 
+            //    }
+            //    m_lastRecSeqNbr = action.SeqNbr.Val;
+            //}
 
             if (!action.Partner.IsNull() && action.Partner.Val != new Safir.Dob.Typesystem.ChannelId(m_instance))
             {
@@ -555,18 +632,18 @@ namespace dose_test_dotnet
 
         #endregion
 
-        #region MessageSubscriber Members
+        //#region MessageSubscriber Members
 
-        void Safir.Dob.MessageSubscriber.OnMessage(Safir.Dob.MessageProxy messageProxy)
-        {
-            ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnMessage);
+        //void Safir.Dob.MessageSubscriber.OnMessage(Safir.Dob.MessageProxy messageProxy)
+        //{
+        //    ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnMessage);
 
-            DoseTest.Action action = messageProxy.Message as DoseTest.Action;
+        //    DoseTest.Action action = messageProxy.Message as DoseTest.Action;
 
-            HandleAction(action);
-        }
+        //    HandleAction(action);
+        //}
 
-        #endregion
+        //#endregion
 
         #region RevokedRegistrationBase Members
 
@@ -691,10 +768,12 @@ namespace dose_test_dotnet
         }
         #endregion
 
+       
+
         #region Data members
 
         private readonly string m_identifier = "dotnet";
-        private readonly int m_instance;
+        private readonly int m_instance;   //Consider changing this to not use static for nested
         private readonly string m_instanceString;
         private readonly string m_controlConnectionName;
         private readonly string m_testConnectionName;
@@ -703,7 +782,7 @@ namespace dose_test_dotnet
         private bool m_isActive = false;
         private Consumer[] m_consumers;
         private int m_defaultContext = 0;
-        private int m_lastRecSeqNbr = 0;
+        //private int m_lastRecSeqNbr = 0;
 
         private Safir.Dob.Connection m_controlConnection = new Safir.Dob.Connection();
         private Safir.Dob.Connection m_testConnection = new Safir.Dob.Connection();
@@ -719,12 +798,9 @@ namespace dose_test_dotnet
         private Dispatcher m_testDispatcher;
         private StopHandler m_testStopHandler;
 
-        private Socket m_sock;
-        private AsyncCallback m_pfnCallBack;
+        private Socket m_sock=null;
+        //private AsyncCallback m_pfnCallBack;
 
-        private byte[] m_buf = new byte[65000];
-        private ArrayList m_actionList = new ArrayList();
-        private Mutex m_actionLock = new Mutex();
 
         Dictionary<Safir.Dob.CallbackId.Enumeration, List<DoseTest.Action>> m_callbackActions;
         #endregion
@@ -744,9 +820,183 @@ namespace dose_test_dotnet
         }
 
         #endregion
-
-
-
-
+       
     }
+
+    #region ActionReceiver Class
+    class ActionReceiver
+    {
+        static private short m_port;
+        static private Socket m_acceptor;
+        static private int m_instance;
+        public const int BLOB_HEADER_SIZE = 16;
+        public byte[] m_bufferHeader = new byte[BLOB_HEADER_SIZE];
+        public static ManualResetEvent allDone = new ManualResetEvent(false);
+        public delegate void ActionCallack(DoseTest.Action action);
+ 
+        private DoseTest.Action m_action = null;
+        private Mutex m_actionLock = new Mutex();
+        private AutoResetEvent m_dataReady;
+        private Socket m_socket = null;
+
+        public ActionReceiver(int instance, AutoResetEvent dataReady) 
+        {
+            m_instance=instance;
+            m_dataReady = dataReady;
+        }
+
+        public void ActionHandled()
+        {
+            try
+            {
+                System.Console.WriteLine("Writing ok");
+                string ok = "ok" + char.MinValue;
+                SocketAsyncEventArgs writeEventArgs = new SocketAsyncEventArgs();
+                writeEventArgs.SetBuffer(ASCIIEncoding.ASCII.GetBytes(ok), 0, 3);
+                m_socket.SendAsync(writeEventArgs);
+            }
+            catch (Exception e)
+            {
+                System.Console.WriteLine("writing failed" + e);
+            }
+
+            m_socket.BeginReceive(m_bufferHeader, 0, BLOB_HEADER_SIZE, 0,
+                                new AsyncCallback(ReadCallback), null);
+        }
+
+        public void Open()
+        {
+            short startPort = (short)(30000 + m_instance);
+            for (short i = 0; i < 100; ++i)
+            {
+                short port = (short)(startPort + i * 3);
+                try
+                {
+                    m_acceptor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    m_acceptor.Bind(new IPEndPoint(IPAddress.Any, port));
+                    m_acceptor.Listen(200);
+                   
+                    System.Console.WriteLine("accepting connections on port " + port);
+                    m_socket = m_acceptor;
+                    m_socket.BeginAccept(new AsyncCallback(AcceptCallback), m_socket);
+
+                    m_port = port;
+                    break;
+
+                }
+                catch (Exception e)
+                {
+                    System.Console.WriteLine("Failed to accept on port " + port +  ": " + e);
+                }
+            }
+
+            if (m_acceptor == null)
+            {
+                throw new Safir.Dob.Typesystem.SoftwareViolationException("Failed to open any useful port!");
+            }
+        }
+
+        public short getPort()
+        {
+            return m_port;
+        }
+
+        public DoseTest.Action getData()
+        {
+            DoseTest.Action action=null;
+            lock (m_actionLock)
+            {
+                action = m_action;
+                m_action = null;
+            }
+            return action;  
+        }
+
+        public void AcceptCallback(IAsyncResult ar)
+        {   
+            // Get the socket that handles the client request.
+            Socket listener = (Socket)ar.AsyncState;
+            m_socket = listener.EndAccept(ar);
+
+            // Signal the main thread to continue.
+            allDone.Set();
+
+            m_socket.BeginReceive(m_bufferHeader, 0, BLOB_HEADER_SIZE, 0,
+                        new AsyncCallback(ReadCallback), null);
+        }
+
+        public void ReadCallback(IAsyncResult ar)
+        {
+            try
+            {
+                // Read data from the client socket.
+                int read = m_socket.EndReceive(ar);
+                if (read > 0)
+                {   // Data was read from the client socket.
+                    //Get pointer to data
+                    System.IntPtr blobPointer = Marshal.AllocHGlobal(m_bufferHeader.Length);
+                    Marshal.Copy(m_bufferHeader, 0, blobPointer, m_bufferHeader.Length);
+                    System.Int32 blobSize = Safir.Dob.Typesystem.BlobOperations.GetSize(blobPointer);
+
+                    //Free memory
+                    Marshal.FreeHGlobal(blobPointer);
+
+                    //create buffer for blobdata
+                    byte[] blobData=new byte[blobSize];
+                    m_bufferHeader.CopyTo(blobData, 0);
+
+                    //Read the remaining data
+                    int recievedSize = BLOB_HEADER_SIZE;
+                    while (recievedSize < blobSize)
+                        recievedSize += m_socket.Receive(blobData, recievedSize, blobSize - recievedSize, SocketFlags.None);
+
+                    //Create object action
+                    DoseTest.Action action = (DoseTest.Action)Safir.Dob.Typesystem.Serialization.ToObject(blobData);
+                    System.Console.WriteLine("Got action " + action.ActionKind.Val);
+
+                    bool actionAfterAck = action.ActionKind.Val == DoseTest.ActionEnum.Enumeration.Sleep ;
+                    
+                    if (actionAfterAck)
+                    {
+                        ActionHandled();
+                    }
+                    
+                    if (!actionAfterAck)
+                    {
+                        lock (m_actionLock)
+                        {
+                            m_action = action;
+                            m_dataReady.Set();
+                            
+                        }
+
+                        ActionHandled();
+                    }
+                }
+                else
+                {
+                    System.Console.WriteLine("Error in reading header.");
+                    Close();
+                }
+            }
+            catch (Exception e)
+            {
+                System.Console.WriteLine("Error in ReadCallback: " + e);
+            }
+        }
+
+        public void Close()
+        {
+            System.Console.WriteLine("Closing ActionReceiver");
+            if(m_socket!=null)
+                m_socket.Close();
+        }
+
+
+        ~ActionReceiver()
+        {
+            Close();
+        }
+     }
+    #endregion
 }
