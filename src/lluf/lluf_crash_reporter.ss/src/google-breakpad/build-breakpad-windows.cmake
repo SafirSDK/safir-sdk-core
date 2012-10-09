@@ -19,5 +19,7 @@ add_definitions(-DBREAKPAD_NO_TERMINATE_THREAD)
 add_definitions(-DUNICODE -D_UNICODE)
 add_definitions(/wd4127 /wd4245)
 
+#install in to the source directory so that we're able to find the binary
+#from lluf_crash_reporter
 install(TARGETS breakpad_client
   ARCHIVE DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})

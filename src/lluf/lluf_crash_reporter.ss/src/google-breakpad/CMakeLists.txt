@@ -1,10 +1,20 @@
-#cmake_minimum_required(VERSION 2.8)
-#INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
-
+#We use the cmake ExternalProject functionality to fetch and build google breakpad.
+#It fetches the desired revision from the breakpad svn repository.
+#Just change MY_SVN_REPOSITORY below to change the fetched revision.
+#ExternalProject also supports fetching a zip from an url, if that becomes preferable
+#at some stage. See http://www.kitware.com/media/html/BuildingExternalProjectsWithCMake2.8.html
+#
+#We have different build code for windows and linux:
+#Linux: build using configure & make, but do not install, instead the lluf_crash_reporter 
+#library includes and links directly into the source/build directories in here.
+#Windows: Breakpad uses gyp to generate its project files. Unfortunately gyp is python2 only,
+#and we support python3-only environments. So instead we patch a cmake file on to the breakpad
+#source and use that to build on windows.
 include(ExternalProject)
 
 set(MY_SVN_REPOSITORY http://google-breakpad.googlecode.com/svn/trunk)
 set(MY_SVN_REVISION 1064)
+
 
 if (MSVC)
   ExternalProject_Add(
