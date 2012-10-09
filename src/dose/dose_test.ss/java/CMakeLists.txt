@@ -20,6 +20,7 @@ SET(JAVA_MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
 ADD_JAR(dose_test_java "${sources}" ALL)
 
+add_dependencies(dose_test_java dose_test_util_java)
 
 
 INSTALL(FILES dose_test_java.jar
