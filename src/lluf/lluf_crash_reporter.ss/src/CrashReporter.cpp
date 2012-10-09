@@ -43,7 +43,9 @@
 #include "Windows.h"
 #endif
 
+#ifndef BOOST_FILESYSTEM_NO_DEPRECATED
 #define BOOST_FILESYSTEM_NO_DEPRECATED
+#endif
 #ifdef BOOST_FILESYSTEM_VERSION
 #undef BOOST_FILESYSTEM_VERSION
 #endif
@@ -89,24 +91,23 @@ namespace
         
         //Callback functions for writing core dump
 #if defined LLUF_CRASH_REPORTER_LINUX
-        static bool callback(const char* dumpPath,
-                             const char* id,
+        static bool callback(const google_breakpad::MinidumpDescriptor& descriptor,
                              void* /*context*/,
                              bool /*succeeded*/)
         {
-            sprintf(&Instance().m_dumpPathSpace[0],"%s/%s.dmp",dumpPath,id);
+            Instance().HandleCallback(descriptor.path());
 #else
         static bool callback(const wchar_t *dumpPath, 
                              const wchar_t *id,
-                             void */*context*/, 
-                             EXCEPTION_POINTERS */*exinfo*/,
-                             MDRawAssertionInfo */*assertion*/,
+                             void* /*context*/, 
+                             EXCEPTION_POINTERS* /*exinfo*/,
+                             MDRawAssertionInfo* /*assertion*/,
                              bool /*succeeded*/)
         {
             //assume that dumpPath is ascii only!
             sprintf(&Instance().m_dumpPathSpace[0],"%S\\%S.dmp",dumpPath,id);
-#endif
             Instance().HandleCallback(&Instance().m_dumpPathSpace[0]);
+#endif
 
             //Returning false will leave the crash as unhandled
             //causing breakpad to terminate the application
@@ -120,15 +121,17 @@ namespace
         boost::mutex m_lock;
         bool m_started;
         bool m_stopped;
+
 #ifdef LLUF_CRASH_REPORTER_WINDOWS
         UINT m_errormode;
-#endif
-        typedef std::vector<CrashReporter::CrashCallback> CrashCallbackTable;
-        CrashCallbackTable m_callbacks;
 
         //Since memory allocation in callback is dangerous, we get some
         //memory to use later.
         std::vector<char> m_dumpPathSpace;
+#endif
+        typedef std::vector<CrashReporter::CrashCallback> CrashCallbackTable;
+        CrashCallbackTable m_callbacks;
+
         /**
          * This class is here to ensure that only the Instance method can get at the 
          * instance, so as to be sure that boost call_once is used correctly.
@@ -161,10 +164,12 @@ namespace
     }
 
 
-    State::State():
-        m_started(false),
-        m_stopped(false),
-        m_dumpPathSpace(2048,0) //2K characters should be plenty...
+    State::State()
+        : m_started(false)
+        , m_stopped(false)
+#ifdef LLUF_CRASH_REPORTER_WINDOWS
+        , m_dumpPathSpace(2048,0) //2K characters should be plenty...
+#endif
     {
     }
 
@@ -202,11 +207,12 @@ namespace
 
 
 #if defined LLUF_CRASH_REPORTER_LINUX
-            m_handler.reset (new google_breakpad::ExceptionHandler(GetDumpDirectory().string(),
+            m_handler.reset (new google_breakpad::ExceptionHandler(google_breakpad::MinidumpDescriptor(GetDumpDirectory().string()),
                                                                    NULL, 
                                                                    callback, 
                                                                    NULL, 
-                                                                   true));
+                                                                   true,
+                                                                   -1));
 #else
             m_errormode=GetErrorMode();
             SetErrorMode(m_errormode | SEM_NOGPFAULTERRORBOX);     //Set the system to not display the Windows Error Reporting dialog.

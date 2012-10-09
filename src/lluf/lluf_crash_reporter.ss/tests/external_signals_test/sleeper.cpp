@@ -2,7 +2,7 @@
 *
 * Copyright Saab Systems AB, 2012 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / lars@foldspace.nu
+* Created by: Lars Hagstrï¿½m / lars@foldspace.nu
 *
 *******************************************************************************
 *
@@ -30,7 +30,7 @@ void callback(const char* const dumpPath)
     std::wcout << "callback with dumpPath = '" << dumpPath << "'" << std::endl;
 }
 
-int main(int, char*[])
+int main()
 {
     Safir::Utilities::CrashReporter::RegisterCallback(callback);
     Safir::Utilities::CrashReporter::Start();
