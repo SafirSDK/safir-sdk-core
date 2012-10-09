@@ -99,9 +99,9 @@ namespace
 #else
         static bool callback(const wchar_t *dumpPath, 
                              const wchar_t *id,
-                             void */*context*/, 
-                             EXCEPTION_POINTERS */*exinfo*/,
-                             MDRawAssertionInfo */*assertion*/,
+                             void* /*context*/, 
+                             EXCEPTION_POINTERS* /*exinfo*/,
+                             MDRawAssertionInfo* /*assertion*/,
                              bool /*succeeded*/)
         {
             //assume that dumpPath is ascii only!
