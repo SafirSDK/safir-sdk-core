@@ -826,18 +826,17 @@ namespace dose_test_dotnet
     #region ActionReceiver Class
     class ActionReceiver
     {
-        static private short m_port;
-        static private Socket m_acceptor;
-        static private int m_instance;
-        public const int BLOB_HEADER_SIZE = 16;
-        public byte[] m_bufferHeader = new byte[BLOB_HEADER_SIZE];
-        public static ManualResetEvent allDone = new ManualResetEvent(false);
-        public delegate void ActionCallack(DoseTest.Action action);
- 
+
+        private const int BLOB_HEADER_SIZE = 16;
+        private byte[] m_bufferHeader = new byte[BLOB_HEADER_SIZE];
+        private static ManualResetEvent allDone = new ManualResetEvent(false);
         private DoseTest.Action m_action = null;
         private Mutex m_actionLock = new Mutex();
         private AutoResetEvent m_dataReady;
         private Socket m_socket = null;
+        private short m_port;
+        private Socket m_acceptor;
+        private int m_instance;
 
         public ActionReceiver(int instance, AutoResetEvent dataReady) 
         {
@@ -956,22 +955,27 @@ namespace dose_test_dotnet
 
                     bool actionAfterAck = action.ActionKind.Val == DoseTest.ActionEnum.Enumeration.Sleep ;
                     
-                    if (actionAfterAck)
-                    {
-                        ActionHandled();
-                    }
-                    
+
                     if (!actionAfterAck)
                     {
                         lock (m_actionLock)
                         {
                             m_action = action;
                             m_dataReady.Set();
-                            
                         }
-
-                        ActionHandled();
                     }
+
+                    ActionHandled();
+                          
+                    if (actionAfterAck)
+                    {
+                        lock (m_actionLock)
+                        {
+                            m_action = action;
+                            m_dataReady.Set();
+                        }
+                    }
+                    
                 }
                 else
                 {
