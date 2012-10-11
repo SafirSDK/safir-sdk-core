@@ -713,24 +713,24 @@ namespace dose_test_dotnet
                                 break;
                         }
                         ++repeats;
+
+                        if (repeats % 1000 == 0)
+                        {
+                            Console.WriteLine("I've now done "+repeats+ " repeats without an overflow!");
+                        }
                     }
                     catch (Safir.Dob.OverflowException)
                     {
+                        Logger.Instance.WriteLine("Caught Overflow exception");
+                        
                         if (repeat)
                         {
                             double secs = (DateTime.Now - actionStartTime).TotalSeconds;
                             Console.WriteLine("Time elapsed before I got an overflow was " + secs);
                             Console.WriteLine("I managed to send "+ repeats + " times");
-                            if (secs > 28)
-                            {
-                                Logger.Instance.WriteLine("WARNING: It took more than 28 seconds for me to get an overflow! (" +
-                                                          secs + "s)");
-                                Logger.Instance.WriteLine("I managed to send " + repeats  + " times");
-                            }
-
+ 
                         }
 
-                        Logger.Instance.WriteLine("Caught Overflow exception");
                         //sleep a very short while, to let dose_main empty
                         //the message out queue. This hopefully reduces the tc 003
                         //output differences

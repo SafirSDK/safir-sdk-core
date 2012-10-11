@@ -135,16 +135,24 @@ namespace dose_test_dotnet
                         m_isDone = true;
                         break;
                     case 3:
-                        HandleAction(m_actionReceiver.getData());
+                        DoseTest.Action action = m_actionReceiver.getData();
+                        bool actionAfterAck = action.ActionKind.Val == DoseTest.ActionEnum.Enumeration.Sleep;
+
+                        if (!actionAfterAck)
+                        {
+                            HandleAction(action);
+                        }
+
+                        m_actionReceiver.ActionHandled();
+                          
+                        if (actionAfterAck)
+                        {
+                            HandleAction(action);
+                        }
                         break;
                 }
             }
-
-            if (m_sock != null)
-            {
-                m_sock.Close();
-            }
-
+ 
             //we apparently have to close the connection to not leave a dispatch thread running in the bg.
             m_testConnection.Close();
             m_controlConnection.Close();
@@ -198,15 +206,9 @@ namespace dose_test_dotnet
 
                     Safir.Dob.Typesystem.InstanceId instance = new Safir.Dob.Typesystem.InstanceId(Safir.Dob.ThisNodeParameters.NodeNumber);
                     Safir.Dob.Typesystem.EntityId eid = new Safir.Dob.Typesystem.EntityId(Safir.Dob.NodeInfo.ClassTypeId, instance);
-                    Safir.Dob.EntityProxy ep = m_controlConnection.Read(eid);
-                    try
+                    using (Safir.Dob.EntityProxy ep = m_controlConnection.Read(eid))
                     {
                         partner.Address.Val = ((Safir.Dob.NodeInfo)ep.Entity).IpAddress.Val;
-
-                    }
-                    finally
-                    {
-                        ep.Dispose();
                     }
                 }
                 catch (Safir.Dob.NotFoundException e)
@@ -232,7 +234,7 @@ namespace dose_test_dotnet
         
                 m_controlConnection.UnregisterHandler(DoseTest.Dump.ClassTypeId,new Safir.Dob.Typesystem.HandlerId(m_instance));
                 m_isActive = false;
-         
+
             }
 
         }
@@ -692,9 +694,7 @@ namespace dose_test_dotnet
         private Dispatcher m_testDispatcher;
         private StopHandler m_testStopHandler;
         private ActionReceiver m_actionReceiver;
-
-        private Socket m_sock=null;
-
+ 
 
         Dictionary<Safir.Dob.CallbackId.Enumeration, List<DoseTest.Action>> m_callbackActions;
         #endregion
@@ -801,7 +801,7 @@ namespace dose_test_dotnet
                 action = m_action;
                 m_action = null;
             }
-            return action;  
+            return action;
         }
 
         public void AcceptCallback(IAsyncResult ar)
@@ -853,29 +853,11 @@ namespace dose_test_dotnet
                     DoseTest.Action action = (DoseTest.Action)Safir.Dob.Typesystem.Serialization.ToObject(blobData);
                     System.Console.WriteLine("Got action " + action.ActionKind.Val);
 
-                    bool actionAfterAck = action.ActionKind.Val == DoseTest.ActionEnum.Enumeration.Sleep ;
-                    
-
-                    if (!actionAfterAck)
+                    lock (m_actionLock)
                     {
-                        lock (m_actionLock)
-                        {
-                            m_action = action;
-                            m_dataReady.Set();
-                        }
+                        m_action = action;
+                        m_dataReady.Set();
                     }
-
-                    ActionHandled();
-                          
-                    if (actionAfterAck)
-                    {
-                        lock (m_actionLock)
-                        {
-                            m_action = action;
-                            m_dataReady.Set();
-                        }
-                    }
-                    
                 }
                 else
                 {
@@ -895,7 +877,7 @@ namespace dose_test_dotnet
             if(m_socket!=null)
                 m_socket.Close();
         }
-        
+
         ~ActionReceiver()
         {
             Close();
