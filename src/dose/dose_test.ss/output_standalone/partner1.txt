@@ -17,12 +17,6 @@ Expectation: Consumer 0 does NOT recieve a local message in a multinode conf, fo
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
-TESTCASE 3
-Description: Test of overflow notification while sending message
-Expectation: Overflow exception followed by a not overflow notification
---------- Setup -----------
---------- Test  -----------
-==========================================================================
 TESTCASE 4
 Description: Test of unsubscription of local messages
 Expectation: Consumer 0 recieves ONE local message

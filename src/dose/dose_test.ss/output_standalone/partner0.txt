@@ -41,15 +41,6 @@ Consumer 0: OnMessage:
 
 
 ==========================================================================
-TESTCASE 3
-Description: Test of overflow notification while sending message
-Expectation: Overflow exception followed by a not overflow notification
---------- Setup -----------
---------- Test  -----------
-Caught Overflow exception
-Consumer 1: OnNotMessageOverflow
-
-==========================================================================
 TESTCASE 4
 Description: Test of unsubscription of local messages
 Expectation: Consumer 0 recieves ONE local message
