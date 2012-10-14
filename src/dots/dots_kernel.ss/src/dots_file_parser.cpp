@@ -40,6 +40,7 @@
 
 #include <iostream>
 #include <cstdio>
+#include <cstring>
 
 namespace Safir
 {
@@ -687,8 +688,11 @@ namespace Internal
         FILE* stream = fopen(filename.string().c_str(), "r");
         if (stream == NULL)
         {
-            std::string descr = "Failed to open file: ";
+            std::string descr = "Failed to open file (";
+            descr += strerror(errno);
+            descr += "): ";
             descr += filename.string();
+
             ErrorHandler::Error("File parser error", descr, "dots_file_parser");
             return false;
         }
