@@ -71,10 +71,10 @@ namespace Internal
             Connections::Instance().ForEachConnectionPtr(boost::bind(SetDiedIfPidEquals,_1,pid));
         }
 
-        void CrashFunc(const char* const dumpPath)
+        void DumpFunc(const char* const dumpPath)
         {
             std::ostringstream ostr;
-            ostr << "dose_main has crashed! A dump was generated to:\n" 
+            ostr << "dose_main has generated a dump to:\n" 
                  << dumpPath << "\n"
                  << "Please send this file to your nearest Dob developer, along with\n"
                  << "relevant information about what version of Safir SDK you are using" << std::endl;
@@ -95,7 +95,7 @@ namespace Internal
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
     {
-        Safir::Utilities::CrashReporter::RegisterCallback(CrashFunc);
+        Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
         Safir::Utilities::CrashReporter::Start();
 
         m_processMonitor.Init(ProcessExited);

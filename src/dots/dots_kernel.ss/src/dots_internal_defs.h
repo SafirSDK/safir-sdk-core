@@ -28,6 +28,7 @@
 #include <sstream>
 
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/CrashReporter.h>
 #include <Safir/Utilities/Internal/UnorderedMap.h>
 #include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 #include <iostream>
@@ -245,8 +246,14 @@ namespace Internal
     static inline void EnsureFailed (const std::string & str)
     {
         lllerr << "ENSURE failed: '"<< str.c_str() << "'" << std::endl;
-        //TODO: Safir::Utilities::Internal::Internal::LowLevelLoggerBackend::Instance().OutputInternalBuffer();
         std::wcout << "Please contact your nearest DOB developer!" << std::endl;
+        
+        const bool success = Safir::Utilities::CrashReporter::Dump();
+        
+        if (!success)
+        {
+            lllerr << "ENSURE failed to generate a dump! It looks like CrashReporter is not started." << std::endl;
+        }
 
         throw InternalException(str, __FILE__,__LINE__);
     }
