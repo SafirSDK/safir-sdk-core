@@ -11,9 +11,10 @@ endif()
 #Must be set before including cmake_settings.txt
 SET(NO_LIBRARY_POSTFIXES 1) 
 
+INCLUDE_DIRECTORIES(. google-breakpad/src/src)
+
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
-INCLUDE_DIRECTORIES(. google-breakpad/src/src)
 add_subdirectory(google-breakpad)
 
 add_library(lluf_crash_reporter SHARED CrashReporter.cpp Safir/Utilities/CrashReporter.h)

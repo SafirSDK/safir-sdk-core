@@ -23,59 +23,30 @@
 ******************************************************************************/
 #include <Safir/Utilities/CrashReporter.h>
 #include <iostream>
+#include <stdlib.h>
+#include <string>
 
 void callback(const char* const dumpPath)
 {
-    std::wcout << "Callback! dumpPath = " << dumpPath << std::endl;
+    std::wcout << "callback with dumpPath = '" << dumpPath << "'" << std::endl;
 }
+
 
 int main()
 {
-    try 
+    Safir::Utilities::CrashReporter::RegisterCallback(callback);
+    Safir::Utilities::CrashReporter::Start();
+
+    const bool res = Safir::Utilities::CrashReporter::Dump();
+    if (!res)
     {
-        //dump should fail when not started.
-        if (Safir::Utilities::CrashReporter::Dump())
-        {
-            return 1;
-        }
-
-        Safir::Utilities::CrashReporter::RegisterCallback(callback);
-        Safir::Utilities::CrashReporter::Start();
-
-        //expect register after start to fail
-        try
-        {
-            Safir::Utilities::CrashReporter::RegisterCallback(callback);
-            return 1;
-        }
-        catch (...)
-        {
-        }
-
-        //multiple starts ok
-        Safir::Utilities::CrashReporter::Start();
-
-        Safir::Utilities::CrashReporter::Stop();
-
-        //multiple stop ok
-        Safir::Utilities::CrashReporter::Stop();
-
-        //no restart
-        try
-        {
-            Safir::Utilities::CrashReporter::Start();
-            return 1;
-        }
-        catch (...)
-        {
-        }
-
-        return 0;
-    }
-    catch (...)
-    {
+        std::wcout << "Dump failed unexpectedly" << std::endl;
         return 1;
     }
+
+    Safir::Utilities::CrashReporter::Stop();
+
+    return 0;
 }
 
 

@@ -21,5 +21,6 @@ ADD_TEST(CrashReporter_start_stop start_stop)
 
 ADD_SUBDIRECTORY(simple_crash_test)
 ADD_SUBDIRECTORY(external_signals_test)
+ADD_SUBDIRECTORY(immediate_dump_test)
 
 

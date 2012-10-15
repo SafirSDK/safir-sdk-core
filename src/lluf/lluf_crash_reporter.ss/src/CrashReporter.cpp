@@ -84,7 +84,9 @@ namespace
         void Start();
         void Stop();
 
-        void RegisterCallback(const CrashReporter::CrashCallback callback);
+        void RegisterCallback(const CrashReporter::DumpCallback callback);
+
+        bool Dump();
     private:
         State();
         ~State();
@@ -129,8 +131,8 @@ namespace
         //memory to use later.
         std::vector<char> m_dumpPathSpace;
 #endif
-        typedef std::vector<CrashReporter::CrashCallback> CrashCallbackTable;
-        CrashCallbackTable m_callbacks;
+        typedef std::vector<CrashReporter::DumpCallback> DumpCallbackTable;
+        DumpCallbackTable m_callbacks;
 
         /**
          * This class is here to ensure that only the Instance method can get at the 
@@ -179,7 +181,7 @@ namespace
 
     void State::HandleCallback(const char* const dumpPath)
     {
-        for (CrashCallbackTable::iterator it = m_callbacks.begin();
+        for (DumpCallbackTable::iterator it = m_callbacks.begin();
              it != m_callbacks.end(); ++it)
         {
             (*it)(dumpPath);
@@ -230,7 +232,6 @@ namespace
 
     void State::Stop()
     {
-
         boost::lock_guard<boost::mutex> lck(m_lock);
         if (m_started && !m_stopped)
         {
@@ -244,16 +245,30 @@ namespace
     }
 
 
-    void State::RegisterCallback(const CrashReporter::CrashCallback callback)
+    void State::RegisterCallback(const CrashReporter::DumpCallback callback)
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
         if (m_started || m_stopped)
         {
             throw std::logic_error("CrashReporter must not be started when registering callbacks!");
         }
-
+        
         m_callbacks.push_back(callback);
     }
+        
+    bool State::Dump()
+    {
+        boost::lock_guard<boost::mutex> lck(m_lock);
+        if (!m_started)
+        {
+            return false;
+        }
+        
+        m_handler->WriteMinidump();
+
+        return true;
+    }
+
 
 }
 
@@ -267,14 +282,19 @@ namespace Utilities
         State::Instance().Start();
     }
 
-    void  CrashReporter::Stop()
+    void CrashReporter::Stop()
     {
         State::Instance().Stop();
     }
 
-    void  CrashReporter::RegisterCallback(const CrashCallback callback)
+    void CrashReporter::RegisterCallback(const DumpCallback callback)
     {
         State::Instance().RegisterCallback(callback);
+    }
+    
+    bool CrashReporter::Dump()
+    {
+        return State::Instance().Dump();
     }
 }
 }
