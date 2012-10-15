@@ -174,7 +174,6 @@ namespace dose_test_dotnet
 
             if (activate == m_isActive)
             {
-                Console.WriteLine("already active or not active");
                 //already active or not active
                 return;
             }
