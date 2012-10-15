@@ -37,6 +37,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include <iostream>
 #include <cstdio>
@@ -684,38 +685,52 @@ namespace Internal
 
     bool FileParser::ParseFile(const boost::filesystem::path & filename)
     {
+        std::vector<char> buf(100000);
         ParsingState::Instance().Reset();
-        FILE* stream = fopen(filename.string().c_str(), "r");
-        if (stream == NULL)
-        {
-            std::string descr = "Failed to open file (";
-            descr += strerror(errno);
-            descr += "): ";
-            descr += filename.string();
-
-            ErrorHandler::Error("File parser error", descr, "dots_file_parser");
-            return false;
-        }
-        char buf[100000]; //TODO - better buffer handling. Might crash if xml-file is more than 100000 chars.
         ParsingState::Instance().parser = XML_ParserCreate(NULL);
         ParsingState::Instance().xmlFileName=filename;
-        bool done = false;
         int depth = 0;
         XML_SetUserData(ParsingState::Instance().parser, &depth);
         XML_SetElementHandler(ParsingState::Instance().parser, startElement, endElement);
         XML_SetCharacterDataHandler(ParsingState::Instance().parser, characters);
-        while (!done)
+        boost::filesystem::ifstream file(filename);
+        if (!file.good())
         {
-            size_t len = fread(buf, 1, sizeof(buf), stream);
-            done = len < sizeof(buf);
-            if (XML_Parse(ParsingState::Instance().parser, buf, static_cast<int>(len), done) == XML_STATUS_ERROR)
+            std::ostringstream ostr;
+            ostr << "Failed to open file ("
+                 << std::strerror(errno)
+                 << "): "
+                 << filename.string();
+                
+            ErrorHandler::Error("File parser error", ostr.str(), "dots_file_parser");
+            return false;
+        }
+
+        while (file.good())
+        {
+            file.read(&buf[0],buf.size());
+
+            if (!file.good() && !file.eof())
+            {
+                std::ostringstream ostr;
+                ostr << "Failed to read file ("
+                     << std::strerror(errno)
+                     << "): "
+                     << filename.string();
+                    
+                ErrorHandler::Error("File parser error", ostr.str(), "dots_file_parser");
+                return false;
+            }
+
+            if (XML_Parse(ParsingState::Instance().parser, &buf[0], static_cast<int>(file.gcount()), file.eof()) == XML_STATUS_ERROR)
             {
                 ErrorHandler::Error("File Syntax Error", "Syntax error in dou-file.", filename);
                 std::wcout << "Line number: " << XML_GetCurrentLineNumber(ParsingState::Instance().parser) << std::endl;
                 return !ParsingState::Instance().parseError;
             }
+                
         }
-        fclose(stream);
+            
         XML_ParserFree(ParsingState::Instance().parser);
         ParsingState::Instance().parser=NULL;
         return !ParsingState::Instance().parseError;
