@@ -57,12 +57,9 @@ namespace Internal
     {
         g_signalFunction = boost::bind(&SignalHandler::Impl::HandleSignal,this,_1);
         
-        ::signal(SIGABRT, &SignalFunc);
+        ::signal(SIGABRT, &SignalFunc); //TODO: we should make breakpad handle SIGABRT on windows
         ::signal(SIGBREAK, &SignalFunc);
-        ::signal(SIGFPE, &SignalFunc);
-        ::signal(SIGILL, &SignalFunc);
         ::signal(SIGINT, &SignalFunc);
-        ::signal(SIGSEGV, &SignalFunc);
         ::signal(SIGTERM, &SignalFunc);
     }
 
@@ -133,22 +130,16 @@ namespace Internal
         sa.sa_handler = &SigactionFunc;
         sigemptyset(&sa.sa_mask);
         sa.sa_flags = SA_RESTART;
-        ::sigaction(SIGABRT, &sa, &m_oldSigaction[SIGABRT]);
-        ::sigaction(SIGFPE, &sa, &m_oldSigaction[SIGFPE]);
-        ::sigaction(SIGILL, &sa, &m_oldSigaction[SIGILL]);
+        ::sigaction(SIGQUIT, &sa, &m_oldSigaction[SIGQUIT]);
         ::sigaction(SIGINT, &sa, &m_oldSigaction[SIGINT]);
-        ::sigaction(SIGSEGV, &sa, &m_oldSigaction[SIGSEGV]);
         ::sigaction(SIGTERM, &sa, &m_oldSigaction[SIGTERM]);
     }
 
     
     void SignalHandler::Impl::SigactionFunc(const int sig)
     {
-        ::sigaction(SIGABRT, &m_oldSigaction[SIGABRT], NULL);
-        ::sigaction(SIGFPE, &m_oldSigaction[SIGFPE], NULL);
-        ::sigaction(SIGILL, &m_oldSigaction[SIGILL], NULL);
+        ::sigaction(SIGQUIT, &m_oldSigaction[SIGQUIT], NULL);
         ::sigaction(SIGINT, &m_oldSigaction[SIGINT], NULL);
-        ::sigaction(SIGSEGV, &m_oldSigaction[SIGSEGV], NULL);
         ::sigaction(SIGTERM, &m_oldSigaction[SIGTERM], NULL);
         
         if (m_receivedSignal == 0)

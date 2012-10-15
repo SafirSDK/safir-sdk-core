@@ -39,6 +39,11 @@ namespace Safir.SwReports
                                                          out byte success);
 
 
+        //SwreC_EnableCrashReporting
+        [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "SwreC_EnableCrashReporting")]
+        internal static extern void SwreC_EnableCrashReporting(out byte success);
+
+
         //SwreC_Stop
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SwreC_Stop();

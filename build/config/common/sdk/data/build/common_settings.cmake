@@ -38,14 +38,11 @@ if (UNIX)
    if (SAFIR_USER)
       LINK_DIRECTORIES(${SAFIR_USER}/runtime/lib)
    endif()
-endif()
 
-if (CMAKE_COMPILER_IS_GNUCXX)
    #turn on more warnings
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-endif()
+   SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")
 
-if(UNIX)
    #define some common libraries
    SET(COMMON_LIBRARIES rt pthread)
 endif ()
@@ -76,15 +73,20 @@ if (MSVC)
    ELSE()
      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
    ENDIF()
+
+   #Set linker flag /OPT:REF (eliminates functions and/or data that are never referenced) reduces size of executable to approx the same size as in Release mode
+   set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF ")
+   set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF")
+
 endif ()
 
 #Add some more boost library versions that we want to be able to use,
 # just to try to be "future safe"
 set (Boost_ADDITIONAL_VERSIONS "1.40" "1.40.0" "1.41" "1.41.0" "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0" "1.52" "1.52.0")
 
-set(Boost_USE_MULTITHREADED ON)
 set(Boost_NO_BOOST_CMAKE ON)
-set (Boost_FIND_QUIETLY 1)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_FIND_QUIETLY 1)
 # Use boost from tower if it exists, unless specifically set to something else
 if (NOT BOOST_ROOT AND "$ENV{BOOST_ROOT}" STREQUAL "")
   set(BOOST_ROOT ${SAFIR_SDK})
@@ -154,6 +156,7 @@ MACRO(INSTALL_DEBUG_INFO target)
     endif()
 
     STRING(REPLACE .dll ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
+    STRING(REPLACE .exe ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
 
     if (SAFIR_USER)
       INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/bin CONFIGURATIONS RelWithDebInfo)

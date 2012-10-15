@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
 *
-* Created by: Anders Widén / stawi
+* Created by: Anders Widï¿½n / stawi
 *
 *******************************************************************************
 *
@@ -46,8 +46,9 @@ namespace Swre
 
         int Run(const std::vector<std::string> & args);
     private:
-
         virtual void OnStopOrder();
+        
+        void MonitorDumpDirectory(const boost::system::error_code& error);
 
         bool ParseCommandLine(const std::vector<std::string> & args);
         void Usage();
@@ -56,7 +57,7 @@ namespace Swre
         ReportHandler m_reportHandler;
         Safir::Dob::Connection m_connection;
         Safir::Utilities::AsioDispatcher   m_dispatcher;
-
+        boost::asio::deadline_timer m_monitorTimer;
     };
 
 }

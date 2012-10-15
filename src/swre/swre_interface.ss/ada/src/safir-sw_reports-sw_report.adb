@@ -48,6 +48,22 @@ package body Safir.Sw_Reports.Sw_Report is
    end Stop;
 
    ----------------------------------------------------------------------------
+   -- Enable_Crash_Reporting
+   ----------------------------------------------------------------------------
+   procedure Enable_Crash_Reporting is
+
+      procedure SwreC_EnableCrashReporting (C_Success : out C.char);
+      pragma Import (C, SwreC_EnableCrashReporting, "SwreC_EnableCrashReporting");
+
+      L_Success : C.char;
+   begin
+      SwreC_EnableCrashReporting (C_Success => L_Success);
+      if not (C.char'Pos (L_Success) /= 0) then
+         Safir.Dob.Typesystem.Library_Exceptions.Throw;
+      end if;
+   end Enable_Crash_Reporting;
+
+   ----------------------------------------------------------------------------
    -- Send_Fatal_Error_Report
    ----------------------------------------------------------------------------
    procedure Send_Fatal_Error_Report (Error_Code : in Wide_String;

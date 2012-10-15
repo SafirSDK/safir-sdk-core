@@ -26,6 +26,8 @@
 
 int main(int /*argc*/, char * argv[])
 {
+    Safir::SwReports::SwReportStarter starter;
+
     try
     {
         Safir::Application::Tracer::SetProgramName(Safir::Dob::Typesystem::Utilities::ToWstring(argv[0]));
@@ -46,7 +48,7 @@ int main(int /*argc*/, char * argv[])
                                                L"Since it was not an exception derived from std::exception "
                                                L"I can't provide any more information, sorry.");
     }
-    Safir::SwReports::Stop();
+
     return 0;
 }
 

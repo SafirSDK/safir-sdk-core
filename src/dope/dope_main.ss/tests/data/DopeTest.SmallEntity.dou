@@ -20,5 +20,10 @@
             <name>Show</name>
             <type>Boolean</type>
         </member>
+        <member>
+            <name>AnArray</name>
+            <arraySize>700</arraySize>
+            <type>Int32</type>
+        </member>
     </members>
 </class>

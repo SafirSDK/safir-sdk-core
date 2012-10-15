@@ -58,27 +58,20 @@ extern "C"
                                                bool & success);
 
     /**
+     * Enable crash reporting.
+     *
+     * Calling this function will cause google breakpad to be enabled for the current process.
+     * This function should be called as early as is humanly possible!
+     * Note that SwreC_Stop must be called before the process exits.
+     *
+     * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
+     */
+    SWRE_LIBRARY_API void SwreC_EnableCrashReporting(bool & success);
+
+    /**
      * Stop the swre library.
      */
     SWRE_LIBRARY_API void SwreC_Stop();
-
-    /**
-     * Initialize the SWRE library with the command line.
-     *
-     * The SWRE library needs the command line of the executable that it runs in.
-     *
-     * If this method is not called SWRE will be
-     * unable to use the command line for enabling logging. Everything else will still
-     * function correctly, though.
-     *
-     * @param arguments [in] - An array of strings. All arguments will be considered. Any '@' separation
-     *                         must be done prior to calling this routine.
-     * @param numArguments [in] - The number of strings in the arguments parameter.
-     * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
-     */
-   // SWRE_LIBRARY_API void SwreC_SetCommandLineArguments(const char * const arguments [],
-    //                                                    const Safir::Dob::Typesystem::Int32 numArguments,
-//                                                        bool & success);
 
     /**
      * @name Trace logging buffer manipulation routines.

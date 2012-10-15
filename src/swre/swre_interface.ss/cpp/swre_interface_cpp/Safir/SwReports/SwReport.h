@@ -55,84 +55,123 @@ All methods are thread safe.
 */
 namespace SwReports
 {
-        /**
-         * Stop the SwReports background thread.
-         * 
-         * This needs to be called before exiting an application to let SwReports stop
-         * its background thread. Failure to do this may cause problems if the
-         * thread is currently using its dob connection when it gets killed.
-         */
-        SWRE_API void Stop();
+    /**
+     * Clean up SwReport resources.
+     * 
+     * This needs to be called before exiting an application to let SwReports stop
+     * its background thread if it has been started and to stop crash reporting if
+     * it has been enabled. Failure to do this may cause problems if the
+     * thread is currently using its dob connection when it gets killed.
+     *
+     * You can also use the SwReportStarter RAII class below to get the EnableCrashReporting 
+     * and Stop functions to be called automatically.
+     */
+    SWRE_API void Stop();
 
-        /**
-         * Sends a Fatal Error report.
-         *
-         * Use it to report static conditions that must be fulfilled to be able to start/continue
-         * executing the program, for example missing static resources or invalid configuration.
-         * Normally the program should not continue to execute.
-         *
-         * @param [in] errorCode Application defined error code (mnemonic).
-         * @param [in] location Source code location.
-         * @param [in] text Application defined text.
-         */
-        SWRE_API void SendFatalErrorReport(const std::wstring&   errorCode,
-                                           const std::wstring&   location,
-                                           const std::wstring&   text);
+    /**
+     * Enable crash reporting.
+     *
+     * Calling this function will cause google breakpad to be enabled for the current process.
+     * This function should be called as early as is humanly possible!
+     * Note that Stop() must be called before the process exits.
+     *
+     * You can also use the SwReportStarter RAII class below to get the EnableCrashReporting
+     * and Stop functions to be called automatically.
+     */
+    SWRE_API void EnableCrashReporting();
 
-        /**
-         * Sends an Error report.
-         *
-         * Use it to report detected runtime errors, for example a message from an external system
-         * in an invalid format. Normally the program continues to execute, possibly in a degraded state.
-         *
-         * @param [in] errorCode Application defined error code (mnemonic).
-         * @param [in] location Source code location.
-         * @param [in] text Application defined text.
+    /** RAII class to call EnableCrashReporting and Stop automatically. */
+    class SwReportStarter
+    {
+    public:
+        /** 
+         * If crashReporting is true the EnableCrashReporting function will be called.
+         * Otherwise nothing will happen...
          */
-        SWRE_API void SendErrorReport(const std::wstring&   errorCode,
-                                     const std::wstring&   location,
+        explicit SwReportStarter(const bool crashReporting = true)
+        {
+            if (crashReporting)
+            {
+                EnableCrashReporting();
+            }
+        }
+
+        /** See Stop(). */
+        ~SwReportStarter()
+        {
+            Stop();
+        }
+    };
+
+    /**
+     * Sends a Fatal Error report.
+     *
+     * Use it to report static conditions that must be fulfilled to be able to start/continue
+     * executing the program, for example missing static resources or invalid configuration.
+     * Normally the program should not continue to execute.
+     *
+     * @param [in] errorCode Application defined error code (mnemonic).
+     * @param [in] location Source code location.
+     * @param [in] text Application defined text.
+     */
+    SWRE_API void SendFatalErrorReport(const std::wstring&   errorCode,
+                                       const std::wstring&   location,
+                                       const std::wstring&   text);
+
+    /**
+     * Sends an Error report.
+     *
+     * Use it to report detected runtime errors, for example a message from an external system
+     * in an invalid format. Normally the program continues to execute, possibly in a degraded state.
+     *
+     * @param [in] errorCode Application defined error code (mnemonic).
+     * @param [in] location Source code location.
+     * @param [in] text Application defined text.
+     */
+    SWRE_API void SendErrorReport(const std::wstring&   errorCode,
+                                  const std::wstring&   location,
+                                  const std::wstring&   text);
+
+    /**
+     * Sends a Resource report.
+     *
+     * Use it to report a missing/acquired dynamic resource. Note that it is ok
+     * for dynamic resource to be temporary missing which means that a Resource Report
+     * should be sent only after a reasonably number of retries to acquire it.
+     *
+     * @param [in] resourceId Application defined resource id (mnemonic).
+     * @param [in] allocated True if the resource is allocated, otherwise false.
+     * @param [in] text Application defined text.
+     */
+    SWRE_API void SendResourceReport(const std::wstring&   resourceId,
+                                     bool                  allocated,
                                      const std::wstring&   text);
 
-        /**
-         * Sends a Resource report.
-         *
-         * Use it to report a missing/acquired dynamic resource. Note that it is ok
-         * for dynamic resource to be temporary missing which means that a Resource Report
-         * should be sent only after a reasonably number of retries to acquire it.
-         *
-         * @param [in] resourceId Application defined resource id (mnemonic).
-         * @param [in] allocated True if the resource is allocated, otherwise false.
-         * @param [in] text Application defined text.
-         */
-        SWRE_API void SendResourceReport(const std::wstring&   resourceId,
-                                         bool                  allocated,
-                                         const std::wstring&   text);
+    /**
+     * Sends a Programming Error report.
+     *
+     * Use it to report programming errors, that is, errors of assert-type.
+     * Normally the program should not continue to execute, in that way enabling
+     * a redundant program instance to start.
+     *
+     * @param [in] errorCode Application defined error code (mnemonic).
+     * @param [in] location Source code location.
+     * @param [in] text Application defined text.
+     */
+    SWRE_API void SendProgrammingErrorReport(const std::wstring&   errorCode,
+                                             const std::wstring&   location,
+                                             const std::wstring&   text);
 
-        /**
-         * Sends a Programming Error report.
-         *
-         * Use it to report programming errors, that is, errors of assert-type.
-         * Normally the program should not continue to execute, in that way enabling
-         * a redundant program instance to start.
-         *
-         * @param [in] errorCode Application defined error code (mnemonic).
-         * @param [in] location Source code location.
-         * @param [in] text Application defined text.
-         */
-        SWRE_API void SendProgrammingErrorReport(const std::wstring&   errorCode,
-                                                 const std::wstring&   location,
-                                                 const std::wstring&   text);
-
-        /**
-         * Sends a Programming Info report.
-         *
-         * Use it to report internal program information for debugging purposes.
-         * Normally the sending of this report type is controlled by internal status variables
-         * that are set by sending backdoor commands to the program.
-         *
-         * @param [in] text Application defined text.
-         */
-        SWRE_API void SendProgramInfoReport(const std::wstring&   text);
+    /**
+     * Sends a Programming Info report.
+     *
+     * Use it to report internal program information for debugging purposes.
+     * Normally the sending of this report type is controlled by internal status variables
+     * that are set by sending backdoor commands to the program.
+     *
+     * @param [in] text Application defined text.
+     */
+    SWRE_API void SendProgramInfoReport(const std::wstring&   text);
 
 };
 };

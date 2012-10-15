@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
+* Copyright Saab Systems AB, 2012 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagstrï¿½m / lars@foldspace.nu
 *
 *******************************************************************************
 *
@@ -21,38 +21,25 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
+#include <Safir/Utilities/CrashReporter.h>
 #include <iostream>
-#include "Executor.h"
-#include "Logger.h"
-#include <Safir/SwReports/SwReport.h>
+#include <boost/thread.hpp>
 
-
-
-int main(int argc, char* argv[])
+void callback(const char* const dumpPath)
 {
-    Safir::SwReports::SwReportStarter starter;
+    std::wcout << "callback with dumpPath = '" << dumpPath << "'" << std::endl;
+}
 
-    const std::vector<std::string> arguments(&argv[0],&argv[argc]);
+int main()
+{
+    Safir::Utilities::CrashReporter::RegisterCallback(callback);
+    Safir::Utilities::CrashReporter::Start();
+    std::wcout << "Started" << std::endl;
+    boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(60));  // Use absolute time since this prevents boost warnings 
 
-    std::wcout << "Starting" << std::endl;
-    try
-    {
-        Executor app(arguments);
-        app.Run();
-    }
-    catch(std::exception & e)
-    {
-        lout << "Caught std::exception! Contents of exception is:" << std::endl
-                   << e.what()<<std::endl;
-    }
-    catch (...)
-    {
-        lout << "Caught ... exception!" << std::endl;
-    }
 
-    std::wcout << "Exiting" << std::endl;
-
+    Safir::Utilities::CrashReporter::Stop();
     return 0;
 }
+
 

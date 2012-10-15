@@ -121,15 +121,23 @@ namespace VehicleAppCs
         /// </summary>
         public void Startup()
         {
-            // Open the Dob connection.
-            m_dobConnection.Open("VehicleAppCs", "0", 0, this, this);
+            Safir.SwReports.SwReport.EnableCrashReporting();
+            try
+            {
+                // Open the Dob connection.
+                m_dobConnection.Open("VehicleAppCs", "0", 0, this, this);
 
-            entityHandler.Init();
-            serviceHandler.Init();
-            MessageSender.Instance.Init();
+                entityHandler.Init();
+                serviceHandler.Init();
+                MessageSender.Instance.Init();
 
-            // Start the one and only thread.
-            mainLoop.Run();
+                // Start the one and only thread.
+                mainLoop.Run();
+            }
+            finally
+            {
+                Safir.SwReports.SwReport.Stop();
+            }
         }
 
         /// <summary>

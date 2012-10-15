@@ -28,11 +28,13 @@
 
 int main(int /*argc*/, char* /*argv*/[])
 {
+    Safir::SwReports::SwReportStarter swreports;
+
     try
     {
         VehicleAppCpp::App app;
         app.Run();
-        return 1;
+        return 0;
     }
     catch (const std::exception & e)
     {
@@ -41,11 +43,11 @@ int main(int /*argc*/, char* /*argv*/[])
             L"0",
             L"main",
             Safir::Dob::Typesystem::Utilities::ToWstring(str));
-        return 0;
+        return 1;
    }
    catch (...)
    {
        Safir::SwReports::SendFatalErrorReport(L"0",L"main", L"Unhandled Exception");
-       return 0; 
+       return 1; 
    }
 }

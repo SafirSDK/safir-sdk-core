@@ -26,12 +26,11 @@
 
 int main(int /*argc*/, char* /*argv*/[])
 {
+    Safir::SwReports::SwReportStarter starter;
+
     // Start the application.
     Safir::Utilities::ForEach::ForEachApp app;
     app.Run();
-
-    // Stop swre before exiting
-    Safir::SwReports::Stop();
 
     return 0;
 }

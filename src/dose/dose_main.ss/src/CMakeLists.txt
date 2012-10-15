@@ -25,6 +25,7 @@ else() #NOT MSVC
     dots_generated-cpp
     dots_cpp
     lluf_utils
+    lluf_crash_reporter
     ${Boost_LIBRARIES})
 endif()
 

@@ -136,6 +136,7 @@ void ConvertDb()
     Safir::Databases::Odbc::Int64Column handlerColumn;
     Safir::Databases::Odbc::WideStringColumn xmlDataColumn(Safir::Dob::PersistenceParameters::XmlDataColumnSize());
     Safir::Databases::Odbc::BinaryColumn binaryDataColumn(Safir::Dob::PersistenceParameters::BinaryDataColumnSize());
+    Safir::Databases::Odbc::BinaryColumn binarySmallDataColumn(Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize());
 
     Safir::Databases::Odbc::Statement updateStatement;
     Safir::Databases::Odbc::Int64Parameter updateTypeIdParam;
@@ -146,15 +147,16 @@ void ConvertDb()
     updateConnection.Connect(Safir::Dob::PersistenceParameters::OdbcStorageConnectString());
 
     updateStatement.Alloc(updateConnection);
-    updateStatement.Prepare(L"UPDATE PersistentEntity SET xmlData=?, binaryData=NULL WHERE typeId=? AND instance=?");
+    updateStatement.Prepare(L"UPDATE PersistentEntity SET xmlData=?, binarySmallData=NULL, binaryData=NULL WHERE typeId=? AND instance=?");
     updateStatement.BindLongParameter( 1, updateXmlDataParam );
     updateStatement.BindParameter( 2, updateTypeIdParam );
     updateStatement.BindParameter( 3, updateInstanceParam );
 
     getAllStatement.Alloc(readConnection);
-    getAllStatement.Prepare( L"SELECT typeId, instance, binaryData from PersistentEntity" );
+    getAllStatement.Prepare( L"SELECT typeId, instance, binarySmallData, binaryData from PersistentEntity where binaryData is not null or binarySmallData is not null");
     getAllStatement.BindColumn( 1, typeIdColumn );
     getAllStatement.BindColumn( 2, instanceColumn);
+    getAllStatement.BindColumn( 3, binarySmallDataColumn);
     getAllStatement.Execute();
     for (;;)
     {
@@ -166,19 +168,30 @@ void ConvertDb()
         Safir::Dob::Typesystem::EntityId entityId
             (typeIdColumn.GetValue(), Safir::Dob::Typesystem::InstanceId(instanceColumn.GetValue()));
 
-        getAllStatement.GetData(3, binaryDataColumn);
-        if (!binaryDataColumn.IsNull())
-        { //some binarypersistent data set
-            const char * const data = reinterpret_cast<const char * const>(binaryDataColumn.GetValue());
-            Safir::Dob::Typesystem::ObjectPtr object =
-                Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
+        Safir::Dob::Typesystem::ObjectPtr object;
 
+        if (!binarySmallDataColumn.IsNull())
+        {
+            const char * const data = reinterpret_cast<const char * const>(binarySmallDataColumn.GetValue());
+            object = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
+        }
+        else
+        {
+            getAllStatement.GetData(4, binaryDataColumn);
+            if (!binaryDataColumn.IsNull())
+            { //some binarypersistent data set
+                const char * const data = reinterpret_cast<const char * const>(binaryDataColumn.GetValue());
+                object = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
+            }
+        }
+        if (object != NULL)
+        {
             std::wstring xml = Safir::Dob::Typesystem::Serialization::ToXml(object);
-
+            
             updateTypeIdParam.SetValue(entityId.GetTypeId());
             updateInstanceParam.SetValue(entityId.GetInstanceId().GetRawValue());
             updateXmlDataParam.SetValueAtExecution(static_cast<int>(xml.size() * sizeof (wchar_t)));
-
+            
             updateStatement.Execute();
             unsigned short param = 0;
             if (!updateStatement.ParamData(param))

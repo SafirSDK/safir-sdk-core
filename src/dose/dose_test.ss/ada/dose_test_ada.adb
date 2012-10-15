@@ -2,7 +2,7 @@
 --
 --  Copyright Saab AB, 2009 (http://www.safirsdk.com)
 --
---  Created by: Anders Widén / stawi
+--  Created by: Anders Widï¿½n / stawi
 --
 -------------------------------------------------------------------------------
 --
@@ -26,15 +26,20 @@ with Ada.Command_Line;
 with Executor;
 with Logger;
 with Safir.Dob.Typesystem.Utilities;
+with Safir.Sw_Reports.Sw_Report;
 
 procedure Dose_Test_Ada is
 begin
    -- Set up exit status to be something bad, in case we exit ungracefully
    Ada.Command_Line.Set_Exit_Status (1);
+   begin
+      Safir.Sw_Reports.Sw_Report.Enable_Crash_Reporting;
 
-   Executor.Run;
-exception
-   when E : others =>
-      Logger.Put ("Caught some exception: ");
-      Logger.Put_Line (Safir.Dob.Typesystem.Utilities.From_Utf_8 (Ada.Exceptions.Exception_Name (E)));
+      Executor.Run;
+   exception
+      when E : others =>
+         Logger.Put ("Caught some exception: ");
+         Logger.Put_Line (Safir.Dob.Typesystem.Utilities.From_Utf_8 (Ada.Exceptions.Exception_Name (E)));
+   end;
+   Safir.Sw_Reports.Sw_Report.Stop;
 end Dose_Test_Ada;

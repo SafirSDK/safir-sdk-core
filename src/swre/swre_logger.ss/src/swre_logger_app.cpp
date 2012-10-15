@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
 *
-* Created by: Anders Widén / stawi
+* Created by: Anders Widï¿½n / stawi
 *
 *******************************************************************************
 *
@@ -28,6 +28,8 @@
 #pragma warning (disable: 4702)
 #endif
 
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
@@ -41,6 +43,8 @@
 #include <Safir/Dob/NotOpenException.h>
 
 #include <sstream>
+#include <vector>
+#include <map>
 
 namespace Safir
 {
@@ -57,13 +61,18 @@ namespace Swre
 LoggerApp::LoggerApp() 
     : m_reportHandler(m_ioService)
     , m_dispatcher(m_connection, m_ioService)
+    , m_monitorTimer(m_ioService)      
 {
-
+    m_monitorTimer.expires_from_now(boost::posix_time::seconds(1));
+    m_monitorTimer.async_wait(boost::bind(&LoggerApp::MonitorDumpDirectory, 
+                                   this,
+                                   boost::asio::placeholders::error));
 };
 
 //-----------------------------------------------------------------------------
 LoggerApp::~LoggerApp()
 {
+    m_monitorTimer.cancel();
     m_connection.Close();
 };
 
@@ -305,6 +314,61 @@ void LoggerApp::Usage()
                << " -excludenode\t: Exclude nodes that match reg expression\n"
                << " -includenode\t: Include only nodes that match the reg expression\n" << std::endl;
 }
+
+namespace 
+{
+    const boost::filesystem::path GetDumpDirectory()
+    {
+        return boost::filesystem::path(getenv("SAFIR_RUNTIME")) / "data" / "crash_dumps";
+    }
+}
+
+
+void LoggerApp::MonitorDumpDirectory(const boost::system::error_code& error)
+{
+    m_monitorTimer.expires_from_now(boost::posix_time::seconds(1));
+    m_monitorTimer.async_wait(boost::bind(&LoggerApp::MonitorDumpDirectory, 
+                                          this,
+                                          boost::asio::placeholders::error));
+
+    if (error) 
+    {
+        return;
+    }
+
+    try 
+    {
+        namespace bfs = boost::filesystem;
+        
+        const size_t MAX_NUM_DUMP_FILES = 1000;
+        
+        const std::vector<bfs::path> dumpFiles = std::vector<bfs::path>(bfs::directory_iterator(GetDumpDirectory()),
+                                                                        bfs::directory_iterator());
+        
+        if (dumpFiles.size() > MAX_NUM_DUMP_FILES)
+        {
+            std::multimap<std::time_t, bfs::path> sorted;
+            for (std::vector<bfs::path>::const_iterator it = dumpFiles.begin();
+                 it != dumpFiles.end(); ++it)
+            {
+                sorted.insert(std::make_pair(bfs::last_write_time(*it),*it));
+            }
+            
+            const size_t tooMany = dumpFiles.size() - MAX_NUM_DUMP_FILES + 10; //remove a few more...
+            std::multimap<std::time_t, bfs::path>::iterator it = sorted.begin();
+            for (size_t i = 0; i < tooMany; ++i)
+            {
+                bfs::remove(it->second);
+                ++it;
+            }
+        }
+    }
+    catch (const boost::filesystem::filesystem_error& )
+    {
+
+    }
+}
+
 }
 }
 

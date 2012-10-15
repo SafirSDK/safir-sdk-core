@@ -46,6 +46,7 @@
 #include <Safir/Utilities/Internal/PanicLogging.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <boost/bind.hpp>
+#include <Safir/Utilities/CrashReporter.h>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <iomanip>
@@ -177,7 +178,8 @@ namespace Internal
         m_prefixPending(true),
         m_thread(),
         m_sendReportsPending(0),
-        m_flushPending(0)
+        m_flushPending(0),
+        m_crashed(0)
     {
         std::wstring env;
         {
@@ -224,24 +226,27 @@ namespace Internal
     void Library::Install()
     {
 #if defined (_WIN32)
-        ::signal(SIGABRT, &SignalFunc);
-        ::signal(SIGFPE, &SignalFunc);
-        ::signal(SIGILL, &SignalFunc);
+        ::signal(SIGABRT, &SignalFunc);  //TODO: we should make breakpad handle SIGABRT on windows
+        ::signal(SIGBREAK, &SignalFunc);
         ::signal(SIGINT, &SignalFunc);
-        ::signal(SIGSEGV, &SignalFunc);
         ::signal(SIGTERM, &SignalFunc);
 #else
         struct sigaction sa;
         sa.sa_handler = &SignalFunc;
         sigemptyset(&sa.sa_mask);
         sa.sa_flags = SA_RESTART;
-        ::sigaction(SIGABRT, &sa, NULL);
-        ::sigaction(SIGFPE, &sa, NULL);
-        ::sigaction(SIGILL, &sa, NULL);
+        ::sigaction(SIGQUIT, &sa, NULL);
         ::sigaction(SIGINT, &sa, NULL);
-        ::sigaction(SIGSEGV, &sa, NULL);
         ::sigaction(SIGTERM, &sa, NULL);
 #endif
+        //TODO: when crash reporter is not enabled we will not try to stop thread on 
+        //crashes!
+
+        //TODO: This whole class should be refactored into several smaller ones
+        //with separate duties. This class is getting very messy!
+        //Also make the startup and shutdown easier to understand.
+        //Can we avoid using atexit?!
+
         std::atexit(AtExitFunc);
     }
 
@@ -443,8 +448,30 @@ namespace Internal
     }
 
 
+    void Library::CrashFunc(const char* const dumpPath)
+    {
+        Instance().m_crashed = 1;
+        std::ostringstream ostr;
+        ostr << "An application has crashed! A dump was generated to:\n" 
+             << dumpPath;
+        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+
+        // Stop the thread nicely
+        Instance().StopInternal();
+
+        // Then try to exit and cleanup
+        Instance().AtExitFunc();
+    }
+
     void
-    Library::Stop()
+    Library::StartCrashReporting()
+    {
+        Safir::Utilities::CrashReporter::RegisterCallback(CrashFunc);
+        Safir::Utilities::CrashReporter::Start();
+    }
+
+    void
+    Library::StopInternal()
     {
         //We only let one call to Stop try to do the join. otherwise who knows what will happen...
         if (m_thread != boost::thread())
@@ -458,6 +485,17 @@ namespace Internal
                 m_threadId = boost::thread::id();
             }
         }
+    }
+
+    void
+    Library::Stop()
+    {
+        StopInternal();
+
+        //CrashReporter gets stopped in thread, but if the thread was not running
+        //we need to stop it here too.
+
+        Safir::Utilities::CrashReporter::Stop();
     }
 
     //The swre library thread uses context 0 to connect to the dob. The strange looking negative number
@@ -501,6 +539,10 @@ namespace Internal
         {
             std::wcout << "SwreLibrary caught an unexpected ... exception!" <<std::endl
                        << "Please report this error to the Safir System Kernel team!" <<std::endl;
+        }
+        if (m_crashed != 0)
+        {
+            Safir::Utilities::CrashReporter::Stop();
         }
     }
 

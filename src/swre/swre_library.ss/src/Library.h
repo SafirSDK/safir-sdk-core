@@ -54,11 +54,10 @@ namespace Internal
 
         static Library & Instance();
 
+        void StartCrashReporting();
         void Stop();
 
         void SetProgramName(const std::wstring & programName);
-
-        //void SetCommandLineArguments(const std::vector<std::wstring> & arguments);
 
         PrefixId AddPrefix(const std::wstring & prefix);
         volatile bool * GetPrefixStatePointer(const PrefixId prefixId);
@@ -96,8 +95,10 @@ namespace Internal
         Library();
         ~Library();
 
+        void StopInternal();
         static void AtExitFunc();
         static void SignalFunc(const int signal);
+        static void CrashFunc(const char* const dumpPath);
         
         //install signal and atexit functions
         void Install();
@@ -181,9 +182,11 @@ namespace Internal
 
         boost::thread m_thread;
         boost::thread::id m_threadId;
-
+        
         Safir::Dob::Internal::AtomicUint32 m_sendReportsPending;
         Safir::Dob::Internal::AtomicUint32 m_flushPending;
+
+        Safir::Dob::Internal::AtomicUint32 m_crashed;
 
         /**
          * This class is here to ensure that only the Instance method can get at the 
