@@ -13,7 +13,8 @@
 include(ExternalProject)
 
 set(MY_SVN_REPOSITORY http://google-breakpad.googlecode.com/svn/trunk)
-set(MY_SVN_REVISION 1064)
+#set(MY_SVN_REVISION 1064)
+set(MY_SVN_REVISION HEAD)
 
 
 if (MSVC)
@@ -34,11 +35,11 @@ else()
     google-breakpad
     PREFIX ""
     SOURCE_DIR src
-    BINARY_DIR bin
+    BINARY_DIR src
     SVN_REPOSITORY ${MY_SVN_REPOSITORY}
     SVN_REVISION -r ${MY_SVN_REVISION}
     UPDATE_COMMAND "" #disable update since we're going against fixed revision
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure CFLAGS=-fPIC CXXFLAGS=-fPIC
+    CONFIGURE_COMMAND cd <SOURCE_DIR> && ./configure CFLAGS=-fPIC CXXFLAGS=-fPIC
     INSTALL_COMMAND ""
     ) 
 endif()

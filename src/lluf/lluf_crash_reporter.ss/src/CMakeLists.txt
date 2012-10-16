@@ -27,7 +27,7 @@ if (MSVC)
 else()
   TARGET_LINK_LIBRARIES(lluf_crash_reporter 
     ${Boost_LIBRARIES}
-    "${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/bin/src/client/linux/libbreakpad_client.a")
+    "${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src/client/linux/libbreakpad_client.a")
 endif()
 
 add_dependencies(lluf_crash_reporter google-breakpad)
