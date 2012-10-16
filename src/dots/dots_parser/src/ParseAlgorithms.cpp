@@ -4,6 +4,11 @@
 *
 * Created by: Joel Ottosson / joot
 *
+* $HeadURL:  $
+* $Revision:  $
+* $LastChangedBy:  $
+* $LastChangedDate: $
+*
 *******************************************************************************
 *
 * This file is part of Safir SDK Core.
@@ -23,7 +28,29 @@
 ******************************************************************************/
 #include <cctype>
 #include "ParseAlgorithms.h"
-#include "TypeChecker.h"
+#include "BasicTypes.h"
+
+#include <boost/timer.hpp>
+#include <map>
+
+#ifndef PROFILE_ENABLED
+//--- Uncomment next line to enable Profiling to std:out ---
+//#define PROFILE_ENABLED
+#endif
+#ifdef PROFILE_ENABLED
+std::map<std::string, double> g_time;
+struct prof
+{ 
+    boost::timer m_timer;
+    const char* m_fun;
+    prof(const char* fun) : m_fun(fun) {}
+    ~prof(){g_time[m_fun]+=m_timer.elapsed();}
+};
+struct timeCmp{ bool operator()(const std::pair<std::string, double>& l, const std::pair<std::string, double>& r){return l.second>r.second;}};
+#define PROFILE prof _pr(__FUNCTION__);
+#else
+#define PROFILE
+#endif
 
 namespace Safir
 {
@@ -31,17 +58,19 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Parser
+namespace Internal
 {
     template <class T>
     bool NameComparer(const T& obj, const std::string& name)
     {
+        PROFILE
         return obj.Name==name;
     }
 
     template <class T>
     bool ContainsDuplicates(const std::vector<T>& myVector, const T** duplicated)
     {
+        PROFILE
         for (std::vector<T>::const_iterator it = myVector.begin(); it!=myVector.end(); ++it)
         {
             size_t c = std::count_if(myVector.begin(), myVector.end(), boost::bind(NameComparer<T>, _1, it->Name));
@@ -57,6 +86,7 @@ namespace Parser
     template <class T>
     T* GetByFieldValue(std::vector<T>& v, const std::string& name, boost::function<const std::string&(const T&)> fieldToCmp)
     {
+        PROFILE
         for (std::vector<T>::iterator it=v.begin(); it!=v.end(); ++it)
         {
             if (name==fieldToCmp(*it))
@@ -70,8 +100,15 @@ namespace Parser
     template <class T>
     void CheckBaseClass(std::vector<T>& vec, T& val, const std::string& rootBaseClass, const std::string& secondRootBaseClass)
     {
+        PROFILE
         static const int MaxInheritanceLevel = 100; //Here we introduce a max inheritance level. Should be enough.
-                
+        
+        if (val.Name==rootBaseClass || (val.Name==secondRootBaseClass && !secondRootBaseClass.empty()))
+        {
+            //This is the root base class.
+            return;
+        }
+
         T* current = &val;
 
         for (int inheritanceLevel=0; inheritanceLevel<MaxInheritanceLevel; ++inheritanceLevel)
@@ -95,46 +132,58 @@ namespace Parser
         throw ParseError("Circular inheritance", std::string("The inheritance tree starting from '")+val.Name+std::string("' will never end."), val.FileName);
     }
 
-    void SetArraySize(ClassMemberDefinition& m, int val){m.ArraySize=val;}
-    void SetMaxLength(ClassMemberDefinition& m, int val){m.MaxLength=val;}
+    void SetArraySize(MemberDefinition& m, int val){m.ArraySize=val;}
+    void SetMaxLength(MemberDefinition& m, int val){m.MaxLength=val;}
     
     void ParseResultFinalizer::ProcessResult()
     {
+        PROFILE
         //Add object to result to avoid lots of special handling in the code.
         ClassDefinition objectDef;
-        objectDef.Name="Object";
-        objectDef.BaseClass="Object";
-        objectDef.FileName="Object.dou";
-        m_state.Result.Classes.push_back(objectDef);
-        
+        objectDef.Name=BasicTypes::ObjectName;        
+        objectDef.FileName=BasicTypes::ObjectName+".dou";
+        m_state.Result->Classes.push_back(objectDef);
 
         ResolveParameterToParameterRefs();
         ResolveCreateRoutineValues();
         ResolveReferences(m_state.ArraySizeReferences, "arraySizeRef", SetArraySize);
         ResolveReferences(m_state.MaxLengthReferences, "maxLengthRef", SetMaxLength);
 
-        std::for_each(m_state.Result.Enumerations.begin(), m_state.Result.Enumerations.end(), boost::bind(&ParseResultFinalizer::ProcessEnum, this, _1)); //ProcessEnums
-        std::for_each(m_state.Result.Exceptions.begin(), m_state.Result.Exceptions.end(), boost::bind(&ParseResultFinalizer::ProcessException, this, _1)); //ProcessExceptions
-        std::for_each(m_state.Result.Properties.begin(), m_state.Result.Properties.end(), boost::bind(&ParseResultFinalizer::ProcessProperty, this, _1)); //ProcessProperties
-        std::for_each(m_state.Result.Classes.begin(), m_state.Result.Classes.end(), boost::bind(&ParseResultFinalizer::ProcessClass, this, _1)); //ProcessClasses
+        std::for_each(m_state.Result->Enumerations.begin(), m_state.Result->Enumerations.end(), boost::bind(&ParseResultFinalizer::ProcessEnum, this, _1)); //ProcessEnums
+        std::for_each(m_state.Result->Exceptions.begin(), m_state.Result->Exceptions.end(), boost::bind(&ParseResultFinalizer::ProcessException, this, _1)); //ProcessExceptions
+        std::for_each(m_state.Result->Properties.begin(), m_state.Result->Properties.end(), boost::bind(&ParseResultFinalizer::ProcessProperty, this, _1)); //ProcessProperties
+        std::for_each(m_state.Result->Classes.begin(), m_state.Result->Classes.end(), boost::bind(&ParseResultFinalizer::ProcessClass, this, _1)); //ProcessClasses
         
         ResolvePropertyMappingValueRefs();
 
-        std::for_each(m_state.Result.PropertyMappings.begin(), m_state.Result.PropertyMappings.end(), boost::bind(&ParseResultFinalizer::ProcessPropertyMapping, this, _1)); //ProcessPropertyMappings
+        std::for_each(m_state.Result->PropertyMappings.begin(), m_state.Result->PropertyMappings.end(), boost::bind(&ParseResultFinalizer::ProcessPropertyMapping, this, _1)); //ProcessPropertyMapping
 
-        //Remove object again from result
-        m_state.Result.Classes.pop_back();
+#ifdef PROFILE_ENABLED
+            g_time[_pr.m_fun]+=_pr.m_timer.elapsed();
+
+            std::vector<std::pair<std::string, double>> myvec(g_time.begin(), g_time.end());
+            std::sort(myvec.begin(), myvec.end(), timeCmp());
+
+            std::cout<<std::endl<<"------ Profiling ----------"<<std::endl;
+            for (std::vector<std::pair<std::string, double>>::const_iterator it=myvec.begin(); it!=myvec.end(); ++it)
+            {
+                std::cout<<it->first<<": "<<it->second<<std::endl;
+            }
+            std::cout<<std::endl<<"----------------------------"<<std::endl;
+#endif
     }
 
     void ParseResultFinalizer::ProcessEnum(EnumerationDefinition& e)
     {
+        PROFILE
+
         if (!ValidName(e.Name, true))
         {
             throw ParseError("Invalid name", std::string("Enumeration name '")+e.Name+std::string(" is invalid. Must start with an alphabetic char and then only contain alpha-numeric chars"), e.FileName);
         }
 
         CheckNameAndFilenameConsistency(e.FileName, e.Name);
-        if (std::count_if(m_state.Result.Enumerations.begin(), m_state.Result.Enumerations.end(), boost::bind(NameComparer<EnumerationDefinition>, _1, e.Name))>1)
+        if (std::count_if(m_state.Result->Enumerations.begin(), m_state.Result->Enumerations.end(), boost::bind(NameComparer<EnumerationDefinition>, _1, e.Name))>1)
         {
             throw ParseError("Duplicated enumeration definition", e.Name+std::string(" is defined more than one time."), e.FileName);
         }
@@ -156,43 +205,47 @@ namespace Parser
 
     void ParseResultFinalizer::ProcessException(ExceptionDefinition& e)
     {
+        PROFILE
+
         if (!ValidName(e.Name, true))
         {
             throw ParseError("Invalid name", std::string("Exception name '")+e.Name+std::string(" is invalid. Must start with an alphabetic char and then only contain alpha-numeric chars"), e.FileName);
         }
 
         CheckNameAndFilenameConsistency(e.FileName, e.Name);
-        if (std::count_if(m_state.Result.Exceptions.begin(), m_state.Result.Exceptions.end(), boost::bind(NameComparer<ExceptionDefinition>, _1, e.Name))>1)
+        if (std::count_if(m_state.Result->Exceptions.begin(), m_state.Result->Exceptions.end(), boost::bind(NameComparer<ExceptionDefinition>, _1, e.Name))>1)
         {
             throw ParseError("Duplicated exception definition", e.Name+std::string(" is defined more than one time."), e.FileName);
         }
 
-        CheckBaseClass<ExceptionDefinition>(m_state.Result.Exceptions, e, "Exception", "FundamentalException");
+        CheckBaseClass<ExceptionDefinition>(m_state.Result->Exceptions, e, BasicTypes::ExceptionName, BasicTypes::FundamentalExceptionName);
     }
 
     void ParseResultFinalizer::ProcessProperty(PropertyDefinition& p)
     {
+        PROFILE
+
         if (!ValidName(p.Name, true))
         {
             throw ParseError("Invalid name", std::string("Property name '")+p.Name+std::string(" is invalid. Must start with an alphabetic char and then only contain alpha-numeric chars"), p.FileName);
         }
 
         CheckNameAndFilenameConsistency(p.FileName, p.Name);
-        if (std::count_if(m_state.Result.Properties.begin(), m_state.Result.Properties.end(), boost::bind(NameComparer<PropertyDefinition>, _1, p.Name))>1)
+        if (std::count_if(m_state.Result->Properties.begin(), m_state.Result->Properties.end(), boost::bind(NameComparer<PropertyDefinition>, _1, p.Name))>1)
         {
             throw ParseError("Duplicated property definition", p.Name+std::string(" is defined more than one time."), p.FileName);
         }
         
 
         //Handle property members
-        for (PropertyMemberDefinitions::const_iterator it=p.Members.begin(); it!=p.Members.end(); ++it)
+        for (MemberDefinitions::iterator it=p.Members.begin(); it!=p.Members.end(); ++it)
         {
-            if (std::count_if(p.Members.begin(), p.Members.end(), boost::bind(NameComparer<PropertyMemberDefinition>, _1, it->Name))>1)
+            if (std::count_if(p.Members.begin(), p.Members.end(), boost::bind(NameComparer<MemberDefinition>, _1, it->Name))>1)
             {
                 throw ParseError("Duplicated property member", it->Name+std::string(" is defined more than one time int property '")+p.Name, p.FileName);
             }
-
-            if (!TypeChecker::Instance().IsType(it->TypeName, m_state.Result))
+            
+            if (!BasicTypes::Instance().MemberTypeOf(it->TypeName, m_state.Result, it->MemberType))
             {
                 std::ostringstream ss;
                 ss<<"The member '"<<it->Name<<"' in property '"<<p.Name<<"' has an invalid type specified. Type: "<<it->TypeName;
@@ -203,18 +256,20 @@ namespace Parser
 
     void ParseResultFinalizer::ProcessClass(ClassDefinition& c)
     {
+        PROFILE
+
         if (!ValidName(c.Name, true))
         {
             throw ParseError("Invalid name", std::string("Class name '")+c.Name+std::string(" is invalid. Must start with an alphabetic char and then only contain alpha-numeric chars"), c.FileName);
         }
 
         CheckNameAndFilenameConsistency(c.FileName, c.Name);
-        if (std::count_if(m_state.Result.Classes.begin(), m_state.Result.Classes.end(), boost::bind(NameComparer<ClassDefinition>, _1, c.Name))>1)
+        if (std::count_if(m_state.Result->Classes.begin(), m_state.Result->Classes.end(), boost::bind(NameComparer<ClassDefinition>, _1, c.Name))>1)
         {
             throw ParseError("Duplicated class definition", c.Name+std::string(" is defined more than one time."), c.FileName);
         }
 
-        CheckBaseClass<ClassDefinition>(m_state.Result.Classes, c, "Object", "");
+        CheckBaseClass<ClassDefinition>(m_state.Result->Classes, c, BasicTypes::ObjectName, "");
 
         //Handle CreateRoutines
         std::for_each(c.CreateRoutines.begin(), c.CreateRoutines.end(), boost::bind(&ParseResultFinalizer::ProcessCreateRoutine, this, c, _1));
@@ -228,6 +283,8 @@ namespace Parser
 
     void ParseResultFinalizer::ProcessCreateRoutine(ClassDefinition& host, CreateRoutineDefinition& c)
     {
+        PROFILE
+
         if (!ValidName(c.Name, false))
         {
             std::ostringstream ss;
@@ -238,7 +295,7 @@ namespace Parser
         //Check that all create routine parameters are existing members inte the class
         for (StringVector::const_iterator member=c.Parameters.begin(); member!=c.Parameters.end(); ++member)
         {
-            const ClassMemberDefinition* found = GetMember(host, *member);
+            const MemberDefinition* found = GetMember(host, *member);
             if (found==NULL)
             {
                 //the create routine parameter was not found in class members
@@ -259,7 +316,7 @@ namespace Parser
         //Check that all member values are ok
         for (MemberValueVector::const_iterator memberValue=c.MemberValues.begin(); memberValue!=c.MemberValues.end(); ++memberValue)
         {
-            const ClassMemberDefinition* found = GetMember(host, memberValue->first);            
+            const MemberDefinition* found = GetMember(host, memberValue->first);            
             if (found==NULL)
             {
                 //the create routine parameter was not found in class members
@@ -267,7 +324,7 @@ namespace Parser
                 ss<<"The create routine '"<<c.Name<<"' in class '"<<host.Name<<"' has specified default value for an invalid member: "<<memberValue->first;
                 throw ParseError("Illegal create routine member", ss.str(), host.FileName);
             }
-            else if (!TypeChecker::Instance().CanParseValue(found->TypeName, memberValue->second, m_state.Result))
+            else if (!BasicTypes::Instance().CanParseValue(found->TypeName, memberValue->second, m_state.Result))
             {
                 std::ostringstream ss;
                 ss<<"The create routine '"<<c.Name<<"' in class '"<<host.Name<<"' has specified a default value '"<<memberValue->second<<"' for member '"<<found->Name<<"' that can not be converted to the expected type: "<<found->TypeName;
@@ -278,8 +335,10 @@ namespace Parser
         }
     }
 
-    void ParseResultFinalizer::ProcessClassMember(ClassDefinition& host, ClassMemberDefinition& m)
+    void ParseResultFinalizer::ProcessClassMember(ClassDefinition& host, MemberDefinition& m)
     {
+        PROFILE
+
         if (!ValidName(m.Name, false))
         {
             std::ostringstream ss;
@@ -287,7 +346,7 @@ namespace Parser
             throw ParseError("Illegal name", ss.str(), host.FileName);
         }
 
-        if (!TypeChecker::Instance().IsType(m.TypeName, m_state.Result))
+        if (!BasicTypes::Instance().MemberTypeOf(m.TypeName, m_state.Result, m.MemberType))
         {
             std::ostringstream ss;
             ss<<"The member '"<<m.Name<<"' in class '"<<host.Name<<"' has an invalid type specified. Type: "<<m.TypeName;
@@ -295,7 +354,7 @@ namespace Parser
         }
 
         //Check for member duplicates
-        if (std::count_if(host.Members.begin(), host.Members.end(), boost::bind(NameComparer<ClassMemberDefinition>, _1, m.Name))>1)
+        if (std::count_if(host.Members.begin(), host.Members.end(), boost::bind(NameComparer<MemberDefinition>, _1, m.Name))>1)
         {
             std::ostringstream ss;
             ss<<"The member '"<<m.Name<<"' in class '"<<host.Name<<"' is defined more than one time.";
@@ -305,6 +364,8 @@ namespace Parser
 
     void ParseResultFinalizer::ProcessParameter(ClassDefinition& host, ParameterDefinition& p)
     {
+        PROFILE
+
         if (!ValidName(p.Name, false))
         {
             std::ostringstream ss;
@@ -312,7 +373,7 @@ namespace Parser
             throw ParseError("Illegal name", ss.str(), host.FileName);
         }
 
-        if (!TypeChecker::Instance().IsType(p.TypeName, m_state.Result))
+        if (!BasicTypes::Instance().MemberTypeOf(p.TypeName, m_state.Result, p.MemberType))
         {
             std::ostringstream ss;
             ss<<"The parameter '"<<p.Name<<"' in class '"<<host.Name<<"' has an invalid type specified. Type: "<<p.TypeName;
@@ -332,7 +393,7 @@ namespace Parser
                 throw ParseError("Environment variable expansion error", ss.str(), host.FileName);
             }
 
-            if (!TypeChecker::Instance().CanParseValue(p.TypeName, *valIt, m_state.Result))
+            if (!BasicTypes::Instance().CanParseValue(p.TypeName, *valIt, m_state.Result))
             {
                 std::ostringstream ss;
                 ss<<"The parameter '"<<p.Name<<"' with value '"<<*valIt<<"' cannot be converted to the expected type "<<p.TypeName;
@@ -342,13 +403,15 @@ namespace Parser
     }
 
     void ParseResultFinalizer::ProcessPropertyMapping(PropertyMappingDefinition& p)
-    {        
+    {
+        PROFILE
+
         //std::string classAndPropName=p.ClassName+std::string("-")+p.PropertyName;
         CheckNameAndFilenameConsistency(p.FileName, p.ClassName+std::string("-")+p.PropertyName);
 
         //Check for duplicated property mappings
         int count=0;
-        for (PropertyMappingDefinitions::const_iterator it=m_state.Result.PropertyMappings.begin(); it!=m_state.Result.PropertyMappings.end(); ++it)
+        for (PropertyMappingDefinitions::const_iterator it=m_state.Result->PropertyMappings.begin(); it!=m_state.Result->PropertyMappings.end(); ++it)
         {
             if (it->ClassName==p.ClassName && it->PropertyName==p.PropertyName)
                 ++count;
@@ -359,7 +422,7 @@ namespace Parser
         }
         
         //Verify that property exists
-        PropertyDefinition* prop = GetByFieldValue<PropertyDefinition>(m_state.Result.Properties, p.PropertyName, boost::bind(&PropertyDefinition::Name,_1));        
+        PropertyDefinition* prop = GetByFieldValue<PropertyDefinition>(m_state.Result->Properties, p.PropertyName, boost::bind(&PropertyDefinition::Name,_1));        
         if (!prop)
         {
             std::ostringstream ss;
@@ -368,7 +431,7 @@ namespace Parser
         }
 
         //Verify that class exists
-        ClassDefinition* cls = GetByFieldValue<ClassDefinition>(m_state.Result.Classes, p.ClassName, boost::bind(&ClassDefinition::Name,_1));
+        ClassDefinition* cls = GetByFieldValue<ClassDefinition>(m_state.Result->Classes, p.ClassName, boost::bind(&ClassDefinition::Name,_1));
         if (!cls)
         {
             std::ostringstream ss;
@@ -377,7 +440,7 @@ namespace Parser
         }
 
         //Check that all propertyMembers have been mapped exactly one time
-        for (PropertyMemberDefinitions::const_iterator it=prop->Members.begin(); it!=prop->Members.end(); ++it)
+        for (MemberDefinitions::const_iterator it=prop->Members.begin(); it!=prop->Members.end(); ++it)
         {
             size_t count = std::count_if(p.MappedMembers.begin(), p.MappedMembers.end(), boost::bind(NameComparer<MappedMemberDefinition>, _1, it->Name));
             if (count>1)
@@ -398,7 +461,7 @@ namespace Parser
         //Check that there's no mapped members thats not defined by the property.
         for (MappedMemberDefinitions::const_iterator it=p.MappedMembers.begin(); it!=p.MappedMembers.end(); ++it)
         {       
-            PropertyMemberDefinitions::const_iterator propMemberIt = std::find_if(prop->Members.begin(), prop->Members.end(), boost::bind(NameComparer<PropertyMemberDefinition>, _1, it->Name));
+            MemberDefinitions::const_iterator propMemberIt = std::find_if(prop->Members.begin(), prop->Members.end(), boost::bind(NameComparer<MemberDefinition>, _1, it->Name));
 
             if (propMemberIt==prop->Members.end())
             {
@@ -408,25 +471,33 @@ namespace Parser
             }
             
             //If the propertyMember is mapped to a value, check that the value can be parsed as the expected type.
-            if (it->Kind==MappedMemberDefinition::ValueMapping)
+            if (it->Kind==MappedToParameter)
             {
                 //member is mapped to a value, now check if the value looks correct according to the type specified by the property
-                if (!TypeChecker::Instance().CanParseValue(propMemberIt->TypeName, it->Value, m_state.Result))
+                if (!BasicTypes::Instance().CanParseValue(propMemberIt->TypeName, it->Value, m_state.Result))
                 {
                     std::ostringstream ss;
                     ss<<"The mapped property member '"<<it->Name<<"' with value '"<<it->Value<<"' cannot be converted to the expected type "<<propMemberIt->TypeName;
                     throw ParseError("Failed to interpret mapped value", ss.str(), p.FileName);
                 }
             }
+            else if (it->Kind==MappedToMember) //Mapped to a class member. Verify that member exists, arrayIndices not out of bounds, type compliance.
+            {
+                //TODO:
+                for (MemberReferenceVector::const_iterator memberRefIt=it->MemberReferences.begin(); memberRefIt!=it->MemberReferences.end(); ++memberRefIt)
+                {
+                    //const std::string& memberName=memberRefIt->first;
+                    //const int& arrayIndex=memberRefIt->second;
+                }
+            }
         }
-
-        //TODO:        
-        // verify memberRefs
     }
 
 
     bool ParseResultFinalizer::ValidName(const std::string& name, bool allowDot) const
     {
+        PROFILE
+
         //Maybe better to use regexp?
         //Valid names must start with a alpha char and the rest must be alphanumeric chars. We also allow underscores. 
         std::string::const_iterator it = name.begin();
@@ -450,6 +521,8 @@ namespace Parser
 
     void ParseResultFinalizer::SplitFullName(const std::string& fullName, std::string& part1, std::string& part2) const
     {
+        PROFILE
+
         size_t dotIx = fullName.find_last_of('.');
         if (dotIx>0)
         {
@@ -465,6 +538,8 @@ namespace Parser
 
     void ParseResultFinalizer::CheckNameAndFilenameConsistency(const std::string& filename, const std::string name) const
     {
+        PROFILE
+
         size_t ix = filename.rfind(name);
         if (ix!=filename.length()-name.length()-4)
         {
@@ -474,6 +549,8 @@ namespace Parser
 
     std::string ParseResultFinalizer::ExpandEnvironmentVariables(const std::string& str) const
     {
+        PROFILE
+
         //Copied from dots_kernel::dots_class_parser
         const size_t start=str.find("$(");
         const size_t stop=str.find(')', start);
@@ -498,9 +575,11 @@ namespace Parser
 
     const ParameterDefinition* ParseResultFinalizer::GetParameter(const std::string& name) const
     {
+        PROFILE
+
         std::string cls, par;
         SplitFullName(name, cls, par);
-        ClassDefinition* cd = GetByFieldValue<ClassDefinition>(m_state.Result.Classes, cls, boost::bind(&ClassDefinition::Name,_1));
+        ClassDefinition* cd = GetByFieldValue<ClassDefinition>(m_state.Result->Classes, cls, boost::bind(&ClassDefinition::Name,_1));
         if (cd)
         {
             ParameterDefinition* pd = GetByFieldValue<ParameterDefinition>(cd->Parameters, par, boost::bind(&ParameterDefinition::Name,_1));
@@ -512,17 +591,19 @@ namespace Parser
 
     bool ParseResultFinalizer::IsOfType(const std::string& type, const std::string& ofType) const
     {
+        PROFILE
+
         if (type==ofType) //Will handle the case of basic types and enums
             return true;
 
         //Check object types and handle inheritance.
-        ClassDefinition* tmpClass = GetByFieldValue<ClassDefinition>(m_state.Result.Classes, type, boost::bind(&ClassDefinition::Name,_1));
+        ClassDefinition* tmpClass = GetByFieldValue<ClassDefinition>(m_state.Result->Classes, type, boost::bind(&ClassDefinition::Name,_1));
         while (tmpClass)
         {
             if (tmpClass->Name==ofType)
                 return true;
 
-            tmpClass=GetByFieldValue<ClassDefinition>(m_state.Result.Classes, tmpClass->BaseClass, boost::bind(&ClassDefinition::Name,_1));
+            tmpClass=GetByFieldValue<ClassDefinition>(m_state.Result->Classes, tmpClass->BaseClass, boost::bind(&ClassDefinition::Name,_1));
         }
 
         return false;
@@ -530,13 +611,15 @@ namespace Parser
 
     void ParseResultFinalizer::ResolveReferences(ParseState::ParameterReferenceVector& vec, 
                                                 const std::string& refName, 
-                                                boost::function<void(ClassMemberDefinition&, int)> setVal)
+                                                boost::function<void(MemberDefinition&, int)> setVal)
     {
+        PROFILE
+
         //Resolve index refs
         for (ParseState::ParameterReferenceVector::const_iterator it=vec.begin(); it!=vec.end(); ++it)
         {
-            ClassDefinition& cls = m_state.Result.Classes[it->TopIndex];
-            ClassMemberDefinition& mem = cls.Members[it->SubIndex1];
+            ClassDefinition& cls = m_state.Result->Classes[it->TopIndex];
+            MemberDefinition& mem = cls.Members[it->SubIndex1];
             const ParameterDefinition* par = GetParameter(it->ParameterName);
             if (!par)
             {
@@ -563,12 +646,14 @@ namespace Parser
         }
     }
 
-    const ClassMemberDefinition* ParseResultFinalizer::GetMember(ClassDefinition& cls, const std::string& name) const
+    const MemberDefinition* ParseResultFinalizer::GetMember(ClassDefinition& cls, const std::string& name) const
     {
-        const ClassMemberDefinition* member=GetByFieldValue<ClassMemberDefinition>(cls.Members, name, boost::bind(&ClassMemberDefinition::Name,_1));
+        PROFILE
+
+        const MemberDefinition* member=GetByFieldValue<MemberDefinition>(cls.Members, name, boost::bind(&MemberDefinition::Name,_1));
         if (member==NULL)
         {
-            ClassDefinition* baseClass = GetByFieldValue<ClassDefinition>(m_state.Result.Classes, cls.BaseClass, boost::bind(&ClassDefinition::Name,_1));
+            ClassDefinition* baseClass = GetByFieldValue<ClassDefinition>(m_state.Result->Classes, cls.BaseClass, boost::bind(&ClassDefinition::Name,_1));
             if (baseClass)
             {
                 return GetMember(*baseClass, name);
@@ -580,13 +665,15 @@ namespace Parser
 
     void ParseResultFinalizer::ResolveCreateRoutineValues()
     {
+        PROFILE
+
         for (ParseState::ParameterReferenceVector::const_iterator it=m_state.CreateRoutineValueReferences.begin(); it!=m_state.CreateRoutineValueReferences.end(); ++it)
         {
-            ClassDefinition& cls = m_state.Result.Classes[it->TopIndex];
+            ClassDefinition& cls = m_state.Result->Classes[it->TopIndex];
             CreateRoutineDefinition& cr = cls.CreateRoutines[it->SubIndex1];
             MemberValue& mv = cr.MemberValues[it->SubIndex2];
             const ParameterDefinition* par = GetParameter(it->ParameterName);
-            const ClassMemberDefinition* member=GetMember(cls, mv.first);
+            const MemberDefinition* member=GetMember(cls, mv.first);
             if (!par)
             {
                 std::ostringstream ss;
@@ -620,9 +707,11 @@ namespace Parser
 
     void ParseResultFinalizer::ResolvePropertyMappingValueRefs()
     {
+        PROFILE
+
         for (ParseState::ParameterReferenceVector::const_iterator it=m_state.MappedValueReferences.begin(); it!=m_state.MappedValueReferences.end(); ++it)
         {
-            PropertyMappingDefinition& propertyMapping = m_state.Result.PropertyMappings[it->TopIndex];
+            PropertyMappingDefinition& propertyMapping = m_state.Result->PropertyMappings[it->TopIndex];
             MappedMemberDefinition& mappedMember = propertyMapping.MappedMembers[it->SubIndex1];            
             const ParameterDefinition* par = GetParameter(it->ParameterName);
 
@@ -640,8 +729,8 @@ namespace Parser
                 throw ParseError("Parameter reference error", ss.str(), it->FileName);
             }
 
-            PropertyDefinition* prop = GetByFieldValue<PropertyDefinition>(m_state.Result.Properties, propertyMapping.PropertyName, boost::bind(&PropertyDefinition::Name,_1));            
-            PropertyMemberDefinition* propMember = GetByFieldValue<PropertyMemberDefinition>(prop->Members, mappedMember.Name, boost::bind(&PropertyMemberDefinition::Name,_1));                        
+            PropertyDefinition* prop = GetByFieldValue<PropertyDefinition>(m_state.Result->Properties, propertyMapping.PropertyName, boost::bind(&PropertyDefinition::Name,_1));            
+            MemberDefinition* propMember = GetByFieldValue<MemberDefinition>(prop->Members, mappedMember.Name, boost::bind(&MemberDefinition::Name,_1));                        
             
             if (!IsOfType(par->TypeName, propMember->TypeName))
             {
@@ -651,15 +740,17 @@ namespace Parser
             }
 
             mappedMember.Value=par->Values[it->ParameterIndex];
-            mappedMember.Kind=MappedMemberDefinition::ValueMapping;
+            mappedMember.Kind=MappedToParameter;
         }
     }
 
     void ParseResultFinalizer::ResolveParameterToParameterRefs()
     {
+        PROFILE
+
         for (ParseState::ParameterReferenceVector::const_iterator it=m_state.ParamToParamReferences.begin(); it!=m_state.ParamToParamReferences.end(); ++it)
         {       
-            ParameterDefinition& referencingPar = m_state.Result.Classes[it->TopIndex].Parameters[it->SubIndex1];
+            ParameterDefinition& referencingPar = m_state.Result->Classes[it->TopIndex].Parameters[it->SubIndex1];
             const ParameterDefinition* par = GetParameter(it->ParameterName);
 
             if (!par)

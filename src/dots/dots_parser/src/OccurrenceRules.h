@@ -4,6 +4,11 @@
 *
 * Created by: Joel Ottosson / joot
 *
+* $HeadURL:  $
+* $Revision:  $
+* $LastChangedBy:  $
+* $LastChangedDate: $
+*
 *******************************************************************************
 *
 * This file is part of Safir SDK Core.

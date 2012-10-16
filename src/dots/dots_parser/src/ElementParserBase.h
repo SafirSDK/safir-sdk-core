@@ -4,6 +4,11 @@
 *
 * Created by: Joel Ottosson / joot
 *
+* $HeadURL:  $
+* $Revision:  $
+* $LastChangedBy:  $
+* $LastChangedDate: $
+*
 *******************************************************************************
 *
 * This file is part of Safir SDK Core.
@@ -42,7 +47,7 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Parser
+namespace Internal
 {
     //------------------------------------------------------------
     //Abstract base class for all parsers.
