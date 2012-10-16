@@ -96,13 +96,13 @@ public:
     ReplaceTimerTester() : TimerTesterBase(L"Replace Timer")
     {
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().Set(Replace, timerInfo, GetUtcTime() + 10);
+        TimerHandler::Instance().Set(Replace, timerInfo, GetUtcTime() + 10000);
         TimerHandler::Instance().Set(Replace, timerInfo, GetUtcTime() + 0.01); //replace the previous timer
     }
 
     void HandleTimeout(const TimerInfoPtr& /*timer*/)
     {
-        if (GetUtcTime() - m_constructionTime < 1.0)
+        if (GetUtcTime() - m_constructionTime < 100.0)
         {
             m_ok = true;
         }
