@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, os, time, sys, re, signal
 
 if sys.platform == "win32":
@@ -34,44 +34,55 @@ else:
 
 sleeper_exe = os.path.join(exe_path,"sleeper")
 
-
+print ("stdout isatty:", sys.stdout.isatty())
+print ("stderr isatty:", sys.stderr.isatty())
+print ("stdin isatty:", sys.stdin.isatty())
+print()
+errors = 0
+ 
 def test_signal(reason, expectCallback = False, expectedReturncode = None):
+    global errors
+    print("Testing signal", str(reason) + ":")
     cf = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
     sleeper = subprocess.Popen(sleeper_exe,
                                stdout=subprocess.PIPE, 
                                stderr=subprocess.STDOUT,
                                creationflags = cf)
-    line = sleeper.stdout.readline()
+    line = sleeper.stdout.readline().decode("ascii")
     if not line.startswith("Started"):
-        print "Strange starting line:", line
-        sys.exit(1)
+        print("Strange starting line:", line)
+        errors += 1
+        return
 
-    print "Testing signal", str(reason)
     sleeper.send_signal(reason)
 
-    result = sleeper.communicate()[0]
+    result = sleeper.communicate()[0].decode("ascii")
     if (result.find("callback") != -1) != expectCallback:
-        print "CrashReporter", "didn't call callback" if expectCallback else "called callback!"
-        sys.exit(1)
+        print("CrashReporter", "didn't call callback" if expectCallback else "called callback!")
+        errors += 1
+        return
     if expectCallback:
-        match = re.search(u"dumpPath = '(.*)'",result)
+        match = re.search(r"dumpPath = '(.*)'",result)
         if match is None:
-            print "Failed to find dumpPath in output"
-            print result
-            sys.exit(1)
+            print("Failed to find dumpPath in output")
+            print(result)
+            errors += 1
+            return
             
         dumpPath = match.group(1)
         
         if not os.path.isfile(dumpPath):
-            print "No dumpfile appears to have been generated"
-            print "expected to find", dumpPath
-            sys.exit(1)
+            print("No dumpfile appears to have been generated")
+            print("expected to find", dumpPath)
+            errors += 1
+            return
 
     if expectedReturncode is None:
         expectedReturncode = -reason
     if sleeper.returncode != expectedReturncode:
-        print "Sleeper program exited successfully (it is meant to exit with a signal!), exit code = ", sleeper.returncode
-        sys.exit(1)
+        print("Sleeper program exited successfully (it is meant to exit with a signal!), exit code = ", sleeper.returncode)
+        errors += 1
+        return
 
         
         
@@ -93,6 +104,8 @@ else:
     test_signal(signal.SIGFPE, True)
     test_signal(signal.SIGABRT, True)
 
-
-print "success"
-sys.exit(0)
+if errors == 0:
+    print("success")
+else:
+    print(errors, "test(s) failed")
+sys.exit(errors)

@@ -35,9 +35,7 @@ int main()
     Safir::Utilities::CrashReporter::RegisterCallback(callback);
     Safir::Utilities::CrashReporter::Start();
     std::wcout << "Started" << std::endl;
-    boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(60));  // Use absolute time since this prevents boost warnings 
-
-
+    boost::this_thread::sleep(boost::posix_time::seconds(60));
     Safir::Utilities::CrashReporter::Stop();
     return 0;
 }
