@@ -8,6 +8,7 @@ First of all there are a number of packages that you need to have installed on y
 Here is a summary of what you need, and below are instructions on where to get them and how to install them.
 
 Visual Studio 2008 SP1 or 2010 SP1 (express or paid versions work)
+Subversion
 GNAT
 Templates-Parser
 XMLAda
@@ -62,6 +63,11 @@ Visual Studio and utils
 ~~~~~~~~~~~~~~~~~~~~~~~
 You are assumed to already have Visual Studio 2005 SP1 (aka 8.0), 2008 SP1 (aka 9.0) or 2010 (aka 10.0) installed, so we proceed immediately to the more interesting bits.
 You are also assumed to have some unpacking tool installed that can handle .gz files, like winzip, 7-zip or winrar.
+
+Subversion
+~~~~~~~~~~
+You need a subversion command line client. If you've got TortoiseSVN installed it is quite likely that you've already got one installed. Open a command prompt and type "svn help". If you get some help output you've got one installed.
+Otherwise install either TortoiseSVN (http://tortoisesvn.net/downloads.html), remembering to select installation of command line tools, or some command-line-only svn client, e.g. SlikSVN (http://www.sliksvn.com/en/download).
 
 Boost
 ~~~~~

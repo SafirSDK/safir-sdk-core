@@ -26,7 +26,7 @@ First of all there are a number of packages that you need to have installed on y
 
 1.1. Ubuntu
 To install these from the command line "in one go" on Ubuntu/Kubuntu 12.04 or later, run:
-   sudo apt-get install libqt4-dev mono-devel mono-gmcs libboost1.48-all-dev libtemplates-parser.*-dev libxmlada.*-dev libiodbc2-dev cmake g++ default-jdk doxygen graphviz make python-tk libexpat1-dev autoconf build-essential
+   sudo apt-get install libqt4-dev mono-devel mono-gmcs libboost1.48-all-dev libtemplates-parser.*-dev libxmlada.*-dev libiodbc2-dev cmake g++ default-jdk doxygen graphviz make python-tk libexpat1-dev autoconf build-essential subversion
 
 1.2. Centos/RHEL
 There are a few more steps needed to set up a Centos/RHEL 6.x machine.
@@ -35,7 +35,7 @@ There are a few more steps needed to set up a Centos/RHEL 6.x machine.
 Some of the packages we use are not in the default repositories, so you need to add EPEL to your list of repositories. Follow the instructions on http://fedoraproject.org/wiki/EPEL.
 
 1.2.2. Install packages
-sudo yum install cmake28 boost-devel gcc-c++ doxygen graphviz make expat-devel gcc-gnat tkinter mono-devel xmlada-devel java-1.7.0-openjdk-devel qt-devel libiodbc-devel m4 autoconf
+sudo yum install cmake28 boost-devel gcc-c++ doxygen graphviz make expat-devel gcc-gnat tkinter mono-devel xmlada-devel java-1.7.0-openjdk-devel qt-devel libiodbc-devel m4 autoconf subversion
 
 1.2.3. Ada templates_parser
 Go to http://libre.adacore.com/ and download the AWS source code.
