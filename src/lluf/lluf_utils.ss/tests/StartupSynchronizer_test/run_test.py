@@ -33,39 +33,49 @@ else:
     exe_path = "."
 
 ss_test = os.path.join(exe_path,"ss_test")
-#start first instance
-proc1 = subprocess.Popen(ss_test, 
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.STDOUT,
-                         stdin=subprocess.PIPE,
-                         universal_newlines=True)
+procs = list()
 
-#start second instance
-proc2 = subprocess.Popen(ss_test,
-                         stdout=subprocess.PIPE, 
-                         stderr=subprocess.STDOUT, 
-                         stdin=subprocess.PIPE,
-                         universal_newlines=True)
+#Start a bunch of processes
+for i in range(100):
+    proc = subprocess.Popen(ss_test, 
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT,
+                            stdin=subprocess.PIPE,
+                            universal_newlines=True)
 
-proc2.stdout.readline()
-proc1.stdout.readline()
-print("have read a line from both")
+    procs.append(proc)
 
-out1 = proc1.communicate("\n")
-out2 = proc2.communicate("\n")
+#wait for them to print something that indicates they're started
+for proc in procs:
+    proc.stdout.readline()
 
-res1 = proc1.returncode
-res2 = proc2.returncode
+print("have read a line from all")
+
+outputs = list()
+#tell them it is okay to exit
+for proc in procs:
+    out = proc.communicate("\n")[0].decode("ascii")
+    outputs.append(out)
+
+num_3 = 0
+num_2 = 0
+num_other = 0
+for proc in procs:
+    if proc.returncode == 3:
+        num_3 += 1
+    elif proc.returncode == 2:
+        num_2 += 1
+    else:
+        num_other += 1
 
 #check exit codes 
-#res1 should be "Created" | "Used", and res2 should be "Used" as per bit field in ss_test.cpp
-if (res1 == 3 and res2 == 2) or (res1 == 2 and res2 == 3): 
+#see bit field in ss_test.cpp
+if num_3 == 1 and num_2 == len(procs) - 1 and num_other == 1:
     print("success")
     sys.exit(0)
 else:
-    print("failure! res1 =", res1, "and res2 =", res2)
-    print("Output from instance 1:")
-    print(out1[0])
-    print("Output from instance 2:")
-    print(out2[0])
+    print("failure!")
+    for i in range(len(outputs)):
+        print("Output from instance", i)
+        print(outputs[i])
     sys.exit(1)
