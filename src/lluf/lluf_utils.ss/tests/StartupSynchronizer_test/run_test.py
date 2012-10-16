@@ -34,16 +34,25 @@ else:
 
 ss_test = os.path.join(exe_path,"ss_test")
 #start first instance
-proc1 = subprocess.Popen(ss_test, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
-#print proc1.communicate()
-#time.sleep(0.5) #let the process get the create callback
+proc1 = subprocess.Popen(ss_test, 
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT,
+                         stdin=subprocess.PIPE,
+                         universal_newlines=True)
 
 #start second instance
-proc2 = subprocess.Popen(ss_test, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
+proc2 = subprocess.Popen(ss_test,
+                         stdout=subprocess.PIPE, 
+                         stderr=subprocess.STDOUT, 
+                         stdin=subprocess.PIPE,
+                         universal_newlines=True)
 
-#wait for them to exit
-out1 = proc1.communicate()
-out2 = proc2.communicate()
+proc2.stdout.readline()
+proc1.stdout.readline()
+print("have read a line from both")
+
+out1 = proc1.communicate("\n")
+out2 = proc2.communicate("\n")
 
 res1 = proc1.returncode
 res2 = proc2.returncode

@@ -55,15 +55,17 @@ private:
 
     virtual void Create()
     {
+        std::wcout << "Ignore this line" << std::endl;
         std::wcout << "-- Create" << std::endl;
-        boost::this_thread::sleep(boost::posix_time::seconds(1));
+        //        boost::this_thread::sleep(boost::posix_time::seconds(1));
         std::wcout << "-- Create complete" << std::endl;
         m_state |= Created;
     }
     virtual void Use()
     {
+        std::wcout << "Ignore this line" << std::endl;
         std::wcout << "-- Use" << std::endl;
-        boost::this_thread::sleep(boost::posix_time::seconds(1));
+        //        boost::this_thread::sleep(boost::posix_time::seconds(1));
         std::wcout << "-- Use complete" << std::endl;
         m_state |= Used;
     }
@@ -72,7 +74,7 @@ private:
     {
         //we don't check that destroy has happened, since it is not guaranteed
         std::wcout << "-- Destroy" << std::endl;
-        boost::this_thread::sleep(boost::posix_time::seconds(1));
+        //        boost::this_thread::sleep(boost::posix_time::seconds(1));
         std::wcout << "-- Destroy complete" << std::endl;
     }
 };
@@ -86,6 +88,7 @@ int main()
 
         Safir::Utilities::StartupSynchronizer ss("StartupSynchronizer_test");
         ss.Start(&synched);
+        std::cin.get();
     }
     return state;
 }
