@@ -14,23 +14,6 @@ if (SAFIR_USER)
    INCLUDE_DIRECTORIES(${SAFIR_USER}/sdk/include)
 endif()
 
-#Export symbol files for post-mortem debugging. Set the appropriate flags
-set(EXPORT_SYMBOLS true)
-
-if (EXPORT_SYMBOLS)
-    if(MSVC)
-        set(CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS_RELEASE} /Zi")  #Set C, C++ and linker flags for release
-        set(CMAKE_C_FLAGS_RELEASE    "${CMAKE_C_FLAGS_RELEASE} /Zi")  
-        set(CMAKE_EXE_LINKER_FLAGS_RELEASE  "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG  /OPT:REF")
-        set(CMAKE_SHARED_LINKER_FLAGS_RELEASE  "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG  /OPT:REF")
-    else()
-        #set(CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS_RELEASE} -g")  #Set C, C++ and linker flags for release
-        #set(CMAKE_C_FLAGS_RELEASE    "${CMAKE_C_FLAGS_RELEASE} -g")  
-        #set(CMAKE_EXE_LINKER_FLAGS_RELEASE  "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -g")
-        #set(CMAKE_SHARED_LINKER_FLAGS_RELEASE  "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -g")
-    endif(MSVC)
-endif(EXPORT_SYMBOLS)
-
 #if we're using gcc we need to set up some things
 if (UNIX)
    #link directory for libraries (will this work with gcc under windows?)
@@ -74,9 +57,9 @@ if (MSVC)
      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
    ENDIF()
 
-   #Set linker flag /OPT:REF (eliminates functions and/or data that are never referenced) reduces size of executable to approx the same size as in Release mode
-   set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF ")
-   set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF")
+   #Set linker flag /OPT:REF (eliminates functions and/or data that are never referenced) reduces size of executable to approx the same size as in Release mode. Also disable incremental linking to avoid warning.
+   set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF /INCREMENTAL:NO")
+   set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF /INCREMENTAL:NO")
 
 endif ()
 
