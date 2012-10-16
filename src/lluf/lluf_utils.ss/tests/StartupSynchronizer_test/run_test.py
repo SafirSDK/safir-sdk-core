@@ -70,7 +70,7 @@ for proc in procs:
 
 #check exit codes 
 #see bit field in ss_test.cpp
-if num_3 == 1 and num_2 == len(procs) - 1 and num_other == 1:
+if num_3 == 1 and num_2 == len(procs) - 1 and num_other == 0:
     print("success")
     sys.exit(0)
 else:
