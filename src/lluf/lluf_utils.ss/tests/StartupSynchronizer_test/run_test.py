@@ -54,7 +54,7 @@ print("have read a line from all")
 outputs = list()
 #tell them it is okay to exit
 for proc in procs:
-    out = proc.communicate("\n")[0].decode("ascii")
+    out = proc.communicate(b"\n")[0]
     outputs.append(out)
 
 num_3 = 0
