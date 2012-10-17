@@ -174,10 +174,9 @@ namespace Utilities
         }
         catch (const boost::interprocess::interprocess_exception& exc)
         {
-            perror("open_semaphore");
             std::ostringstream ostr;
             ostr << "It appears that Create failed in some other process for '" << m_name << "'." << std::endl;
-            ostr << "The exception I got was " << exc.what() << std::endl;
+            ostr << "The exception I got was " << exc.what() << " and strerror(errno) returned this info: " << strerror(errno) << std::endl;
             std::wcerr << ostr.str().c_str() << std::flush;
             throw StartupSynchronizerException(ostr.str());
         }
