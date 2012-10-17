@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
+from __future__ import print_function
 import subprocess, os, time, sys, re
 
 if sys.platform == "win32":
@@ -37,27 +37,27 @@ dumper_exe = os.path.join(exe_path,"dumper")
 
 dumper = subprocess.Popen(dumper_exe,
                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-result = dumper.communicate()[0]
+result = dumper.communicate()[0].decode("ascii")
 
 if result.find("callback") == -1:
-    print "CrashReporter did not call callback!"
+    print("CrashReporter did not call callback!")
     sys.exit(1)
 if dumper.returncode != 0:
-    print "Dumper program exited with unexpected returncode", dumper.returncode
+    print("Dumper program exited with unexpected returncode", dumper.returncode)
     sys.exit(1)
 
-match = re.search(u"dumpPath = '(.*)'",result)
+match = re.search(r"dumpPath = '(.*)'",result)
 if match is None:
-    print "Failed to find dumpPath in output"
-    print result
+    print("Failed to find dumpPath in output")
+    print(result)
     sys.exit(1)
     
 dumpPath = match.group(1)
 
 if not os.path.isfile(dumpPath):
-    print "No dumpfile appears to have been generated"
-    print "expected to find", dumpPath
+    print("No dumpfile appears to have been generated")
+    print("expected to find", dumpPath)
     sys.exit(1)
 
-print "success"
+print("success")
 sys.exit(0)
