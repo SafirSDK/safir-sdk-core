@@ -60,6 +60,7 @@ for proc in procs:
 num_3 = 0
 num_2 = 0
 num_other = 0
+num_destroys = 0
 for proc in procs:
     if proc.returncode == 3:
         num_3 += 1
@@ -68,9 +69,13 @@ for proc in procs:
     else:
         num_other += 1
 
+for output in outputs:
+    if output.find("Destroy") != -1:
+        num_destroys += 1
+
 #check exit codes 
 #see bit field in ss_test.cpp
-if num_3 == 1 and num_2 == len(procs) - 1 and num_other == 0:
+if num_3 == 1 and num_2 == len(procs) - 1 and num_other == 0 and num_destroys == 1:
     print("success")
     sys.exit(0)
 else:
