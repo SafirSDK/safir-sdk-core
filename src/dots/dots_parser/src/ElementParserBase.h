@@ -80,6 +80,24 @@ namespace Internal
     typedef boost::shared_ptr<ElementParserBase> ElementParserBasePtr;
     typedef std::vector<ElementParserBasePtr> ElementParserBaseVector;
     
+    //Instantiator class. Instantiates a complete ElementTree based on typelists.
+    template < class ElementTypeVector, int Index > 
+    struct ElementInstantiator
+    {
+        void operator()(ElementParserBase* current, ElementParserBaseVector& subElements)
+        {
+            ElementParserBasePtr subEl(new boost::mpl::at< ElementTypeVector, boost::mpl::int_<Index> >::type(current));
+            subElements.push_back(subEl);
+            ElementInstantiator< ElementTypeVector, Index-1 >()(current, subElements);
+        }
+    };
+
+    template < class ElementTypeVector >
+    struct ElementInstantiator<ElementTypeVector, -1> //This is the end condition in the element instatiation algorithm.
+    {
+        void operator()(ElementParserBase*, ElementParserBaseVector&){}
+    };
+
     //------------------------------------------------------------
     //Helper element class to allow choice between two elements,
     //but can be expanded to allow any number of choices.
@@ -215,12 +233,14 @@ namespace Internal
 
         explicit Element() : m_used(false), ElementParserBase(), m_subElements(), m_occurrences(), m_parseAlgorithm()
         {
-            InitSubElements< boost::mpl::size<SubElem>::type::value - 1 >();
+            ElementInstantiator< SubElem, boost::mpl::size<SubElem>::type::value - 1 >()(this, m_subElements);
+            //InitSubElements< boost::mpl::size<SubElem>::type::value - 1 >();
         }
 
         explicit Element(const ElementParserBase* parent) : m_used(false), ElementParserBase(parent), m_subElements(), m_occurrences()
         {
-            InitSubElements< boost::mpl::size<SubElem>::type::value - 1 >();
+            ElementInstantiator< SubElem, boost::mpl::size<SubElem>::type::value - 1 >()(this, m_subElements);
+            //InitSubElements< boost::mpl::size<SubElem>::type::value - 1 >();
         }
 
         static const std::string& ElementName()

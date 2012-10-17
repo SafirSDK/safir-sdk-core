@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <property>ParserTest.MyProperty</property>
+    <class>ParserTest.MyEntity</class>
+    <memberMapping>
+        <member>
+            <propertyMember>Int32PropertyValue</propertyMember>
+            <classMemberReference>
+        <classMember>MyEntityArray</classMember>
+        <index>1</index>
+                  <classMemberReference>
+                      <classMember>MyEntityArray</classMember>
+            <index>2</index>
+              <classMemberReference>
+                          <classMember>MyItem</classMember>
+                <classMemberReference>
+                              <classMember>MyNumber</classMember>
+                        </classMemberReference>
+                    </classMemberReference>
+                </classMemberReference>
+            </classMemberReference>
+        </member>
+        <member>
+            <propertyMember>TypeIdPropertyValue</propertyMember>
+            <valueRef><name>Test.MyParam.Tid</name></valueRef>
+        </member>
+        <member>
+            <propertyMember>InstanceIdPropertyValue</propertyMember>
+            <value>123</value>
+        </member>
+        <member>
+            <propertyMember>EntityIdPropertyValue</propertyMember>
+        <valueRef><name>Test.MyParam.Eid</name></valueRef>
+            <!--<entityId><name>Safir.Dob.Entity</name><instanceId>123</instanceId></entityId>-->
+        </member>
+        <member>
+            <propertyMember>MyEntityBasePropertyValue</propertyMember>
+            <object>
+                        <name>Safir.Dob.NodeDefinition</name>
+                        <members> <!-- Node 0 -->
+                            <member><name>NodeName</name><value>Nod0</value></member>
+                        </members>
+                    </object>
+        </member>
+    </memberMapping>
+</propertyMapping>
