@@ -78,9 +78,12 @@ def test_signal(reason, expectCallback = False, expectedReturncode = None):
             return
 
     if expectedReturncode is None:
-        expectedReturncode = -reason
-    if sleeper.returncode != expectedReturncode:
-        print("Sleeper program exited successfully (it is meant to exit with a signal!), exit code = ", sleeper.returncode)
+        expectedReturncode = (-reason,)
+    if sleeper.returncode not in expectedReturncode:
+        print("Sleeper program exited with an unexpected exit code. Got", 
+              sleeper.returncode,
+              "but expected one of",
+              expectedReturncode)
         errors += 1
         return
 
@@ -88,7 +91,7 @@ def test_signal(reason, expectCallback = False, expectedReturncode = None):
         
 
 if sys.platform == "win32":  
-    test_signal(signal.CTRL_BREAK_EVENT, expectedReturncode = -1073741510)    
+    test_signal(signal.CTRL_BREAK_EVENT, expectedReturncode = (-1073741510,3221225786))
 else:
     test_signal(signal.SIGHUP)
     test_signal(signal.SIGINT)
