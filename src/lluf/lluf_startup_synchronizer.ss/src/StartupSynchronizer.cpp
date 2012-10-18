@@ -189,14 +189,13 @@ namespace Utilities
         {
             boost::lock_guard<boost::mutex> lck(m_threadLock);
 
-            if (m_synchronized.empty())
+            m_synchronized.insert(synchronized);
+
+            if (m_synchronized.size() == 1)
             {
                 FirstStart(synchronized);
-                m_synchronized.insert(synchronized);
                 return;
             }
-
-            m_synchronized.insert(synchronized);
 
             //invoke user callback
             synchronized->Use();
@@ -442,7 +441,10 @@ namespace Utilities
 
     StartupSynchronizer::~StartupSynchronizer()
     {
-        m_impl->Remove(m_synchronized);
+        if (m_synchronized != NULL)
+        {
+            m_impl->Remove(m_synchronized);
+        }
     }
 
 
