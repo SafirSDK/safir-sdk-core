@@ -34,6 +34,7 @@
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/interprocess/sync/sharable_lock.hpp>
 #include <iostream>
+#include <set>
 
 /* A tip to anyone trying to understand this code:
  * Read up on the boost interprocess file locks, and understand their 
@@ -125,7 +126,8 @@ namespace Utilities
 
     class LLUF_SS_API StartupSynchronizerImpl
     {
-    public:
+        friend class ImplKeeper;
+    private: //constructor and destructor are private, to make sure only ImplKeeper can destroy them
         explicit StartupSynchronizerImpl(const std::string& uniqueName)
             : m_name(uniqueName)
             , m_firstLockFilePath(GetLockFile(m_name + "_FIRST"))
@@ -133,15 +135,16 @@ namespace Utilities
             , m_firstLock(m_firstLockFilePath.string().c_str())
             , m_secondLock(m_secondLockFilePath.string().c_str())
         {
-
         }
 
         ~StartupSynchronizerImpl()
         {
-            if (m_synchronized.empty())
+            if (!m_synchronized.empty())
             {
-                return;
+                throw std::logic_error("Unexpectedly found some stuff in m_synchronized");
             }
+
+#if 0
                 
             //get a candidate for calling Destroy on.
             Synchronized* synchronized = *m_synchronized.begin();
@@ -177,8 +180,9 @@ namespace Utilities
                 //boost::filesystem::remove(m_firstLockFilePath);
                 //boost::filesystem::remove(m_secondLockFilePath);
             }
+#endif
         }
-            
+    public:
         const std::string& Name() const {return m_name;}
 
         void Start(Synchronized* const synchronized)
@@ -188,11 +192,11 @@ namespace Utilities
             if (m_synchronized.empty())
             {
                 FirstStart(synchronized);
-                m_synchronized.push_back(synchronized);
+                m_synchronized.insert(synchronized);
                 return;
             }
 
-            m_synchronized.push_back(synchronized);
+            m_synchronized.insert(synchronized);
 
             //invoke user callback
             synchronized->Use();
@@ -256,9 +260,59 @@ namespace Utilities
             synchronized->Use();
         }
 
+        void Remove(Synchronized* const synchronized)
+        {
+            boost::lock_guard<boost::mutex> lck(m_threadLock);
+            std::multiset<Synchronized*>::iterator findIt = m_synchronized.find(synchronized);
+            if (findIt == m_synchronized.end())
+            {
+                throw std::logic_error("Unexpectedly failed to find synchronized in m_synchronized");
+            }
+            
+            m_synchronized.erase(findIt);
+
+            if (!m_synchronized.empty())
+            {
+                return;
+            }
+
+            //synchronized is now a candidate for calling Destroy on (if we're the last process)                
+
+                
+            //Try to get the inner lock, if we do not already have it
+            if (!m_secondExclusiveLock.owns())
+            {
+                m_secondExclusiveLock = boost::interprocess::scoped_lock<boost::interprocess::file_lock>
+                    (m_secondLock,boost::interprocess::try_to_lock);
+            }
+            if (!m_secondExclusiveLock.owns())
+            {
+                //someone else is holding the second lock, we're not going to be
+                //the last instance out...
+                return;
+            }
+
+            //TODO: what happens after here is not analyzed
+
+            //try to upgrade the first lock (no explicit upgrade path, which is why we have the second lock)
+            m_firstSharableLock.unlock();
+            m_firstExclusiveLock = boost::interprocess::scoped_lock<boost::interprocess::file_lock>
+                (m_firstLock,boost::interprocess::try_to_lock);
+
+            if (m_firstExclusiveLock.owns())
+            {
+                // Got exclusive lock, noone else has it open, so I can remove everything!
+                synchronized->Destroy();
+
+                boost::interprocess::named_semaphore::remove(m_name.c_str());
+                //TODO: can we do these?
+                //boost::filesystem::remove(m_firstLockFilePath);
+                //boost::filesystem::remove(m_secondLockFilePath);
+            }
+        }
 
     private:
-        std::vector<Synchronized*> m_synchronized;
+        std::multiset<Synchronized*> m_synchronized;
         const std::string m_name;
 
         const boost::filesystem::path m_firstLockFilePath;
@@ -276,126 +330,125 @@ namespace Utilities
     };
 
 
-    namespace //anonymous namespace to avoid name collision
+    /** 
+     * A singleton that holds all the impl:s
+     * Note that all instances for the same name in the same process
+     * shares the same impl! This is to make it possible to have 
+     * thread (as opposed to process) guarantees!
+     * The kept references are weak pointers! So this singleton will 
+     * never keep an impl "alive" on its own.
+     */
+    class ImplKeeper
     {
-        /** 
-         * A singleton that holds all the impl:s
-         * Note that all instances for the same name in the same process
-         * shares the same impl! This is to make it possible to have 
-         * thread (as opposed to process) guarantees!
-         * The kept references are weak pointers! So this singleton will 
-         * never keep an impl "alive" on its own.
-         */
-        class ImplKeeper
+    public:
+        static ImplKeeper& Instance()
         {
-        public:
+            boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+            return SingletonHelper::Instance();
+        }
+            
+        const boost::shared_ptr<StartupSynchronizerImpl> Get(const std::string& uniqueName)
+        {
+            boost::lock_guard<boost::mutex> lck(m_lock);
+            Table::iterator findIt = m_table.find(uniqueName);
+            if (findIt != m_table.end())
+            {
+                boost::shared_ptr<StartupSynchronizerImpl> impl = findIt->second.lock();
+                if (impl != NULL)
+                {
+                    return impl;
+                }
+                else
+                {
+                    m_table.erase(findIt);
+                }
+            }
+
+            //Either not found or had already been deleted. Create a new one
+            boost::shared_ptr<StartupSynchronizerImpl> newImpl(new StartupSynchronizerImpl(uniqueName),
+                                                               boost::bind(&ImplKeeper::Deleter,this,_1));
+            m_table.insert(std::make_pair(uniqueName,boost::weak_ptr<StartupSynchronizerImpl>(newImpl)));
+            return newImpl;
+        }
+            
+    private:
+        /** Constructor*/
+        ImplKeeper()
+        {
+                    
+        }
+            
+        /** Destructor */
+        ~ImplKeeper()
+        {
+                    
+        }
+
+        void Deleter(StartupSynchronizerImpl* impl)
+        {
+            boost::lock_guard<boost::mutex> lck(m_lock);
+            Table::iterator findIt = m_table.find(impl->Name());
+
+            if (findIt == m_table.end())
+            {
+                throw std::logic_error("Something very odd has happened!");
+            }
+
+            m_table.erase(findIt);
+            delete impl;
+        }
+
+            
+        boost::mutex m_lock;
+
+        typedef std::map<std::string,boost::weak_ptr<StartupSynchronizerImpl> > Table;
+        Table m_table;
+
+
+    private:
+        /**
+         * This class is here to ensure that only the Instance method can get at the 
+         * instance, so as to be sure that boost call_once is used correctly.
+         * Also makes it easier to grep for singletons in the code, if all 
+         * singletons use the same construction and helper-name.
+         */
+        struct SingletonHelper
+        {
+        private:
+            friend ImplKeeper& ImplKeeper::Instance();
+            
             static ImplKeeper& Instance()
             {
-                boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
-                return SingletonHelper::Instance();
+                static ImplKeeper instance;
+                return instance;
             }
+            static boost::once_flag m_onceFlag;
+        };        
             
-            const boost::shared_ptr<StartupSynchronizerImpl> Get(const std::string& uniqueName)
-            {
-                boost::lock_guard<boost::mutex> lck(m_lock);
-                Table::iterator findIt = m_table.find(uniqueName);
-                if (findIt != m_table.end())
-                {
-                    boost::shared_ptr<StartupSynchronizerImpl> impl = findIt->second.lock();
-                    if (impl != NULL)
-                    {
-                        return impl;
-                    }
-                    else
-                    {
-                        m_table.erase(findIt);
-                    }
-                }
+    };
 
-                //Either not found or had already been deleted. Create a new one
-                boost::shared_ptr<StartupSynchronizerImpl> newImpl(new StartupSynchronizerImpl(uniqueName),
-                                                                   boost::bind(&ImplKeeper::Deleter,this,_1));
-                m_table.insert(std::make_pair(uniqueName,boost::weak_ptr<StartupSynchronizerImpl>(newImpl)));
-                return newImpl;
-            }
-            
-        private:
-            /** Constructor*/
-            ImplKeeper()
-            {
-                    
-            }
-            
-            /** Destructor */
-            ~ImplKeeper()
-            {
-                    
-            }
-
-            void Deleter(StartupSynchronizerImpl* impl)
-            {
-                boost::lock_guard<boost::mutex> lck(m_lock);
-                Table::iterator findIt = m_table.find(impl->Name());
-
-                if (findIt == m_table.end())
-                {
-                    throw std::logic_error("Something very odd has happened!");
-                }
-
-                m_table.erase(findIt);
-                delete impl;
-            }
-
-            
-            boost::mutex m_lock;
-
-            typedef std::map<std::string,boost::weak_ptr<StartupSynchronizerImpl> > Table;
-            Table m_table;
+    //mandatory static initialization
+    boost::once_flag ImplKeeper::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
 
-        private:
-            /**
-             * This class is here to ensure that only the Instance method can get at the 
-             * instance, so as to be sure that boost call_once is used correctly.
-             * Also makes it easier to grep for singletons in the code, if all 
-             * singletons use the same construction and helper-name.
-             */
-            struct SingletonHelper
-            {
-            private:
-                friend ImplKeeper& ImplKeeper::Instance();
-            
-                static ImplKeeper& Instance()
-                {
-                    static ImplKeeper instance;
-                    return instance;
-                }
-                static boost::once_flag m_onceFlag;
-            };        
-            
-        };
-
-        //mandatory static initialization
-        boost::once_flag ImplKeeper::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
-
-
-    }
 
 
     StartupSynchronizer::StartupSynchronizer(const std::string& uniqueName)
-        : m_impl(new StartupSynchronizerImpl(uniqueName))
+        : m_impl(ImplKeeper::Instance().Get(uniqueName))
+        , m_synchronized(NULL)
     {
 
     }
 
     StartupSynchronizer::~StartupSynchronizer()
     {
-        //nothing to do here, impl destructor does it all for us
+        m_impl->Remove(m_synchronized);
     }
 
 
     void StartupSynchronizer::Start(Synchronized* const synchronized)
     {
+        m_synchronized = synchronized;
         m_impl->Start(synchronized);
     }
 
@@ -405,151 +458,3 @@ namespace Utilities
 
 
 
-
-
-
-
-
-
-
-
-#if 0
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/convenience.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/interprocess/sync/named_semaphore.hpp>
-#include <boost/thread/once.hpp>
-#include <boost/bind.hpp>
-#include <cstdio>
-#include <iostream>
-
-
-namespace Safir
-{
-namespace Utilities
-{
-    StartupSynchronizer::StartupSynchronizer(const std::string& uniqeName):
-        m_synchronized(NULL),
-        m_name(uniqeName),
-        m_started(false),
-        m_lockfile(GetLockFile(m_name)),
-        m_lockfile2(GetLockFile(m_name + "2"))
-    {
-
-    }
-
-    StartupSynchronizer::~StartupSynchronizer()
-    {
-        Stop();
-    }
-
-    void StartupSynchronizer::Stop()
-    {
-        if (m_started)
-        {
-            //Get the inner lock, so that noone can start initializing while we upgrade the outer lock.
-            if (m_fileLock2 == NULL)
-            {
-                m_fileLock2 = FileLockKeeper::Instance().Get(m_lockfile2);
-                const bool gotLock2 = m_fileLock2->try_lock();
-                if (!gotLock2)
-                {
-                    m_fileLock2.reset();
-                }
-            }
-            //TODO: what happens after here is not analyzed
-
-            //this is implicit when a call to try_lock is made with an exclusive lock taken.
-            m_fileLock->unlock_sharable();
-
-            //race here!
-
-            const bool gotLock = m_fileLock->try_lock();
-            if (gotLock)
-            {
-                // Got exclusive lock, noone else has it open, so I can remove everything!
-                m_synchronized->Destroy();
-
-                boost::interprocess::named_semaphore::remove(m_name.c_str());
-                boost::filesystem::remove(m_lockfile);
-                m_fileLock->unlock();
-            }
-
-            m_started = false;
-        }
-    }
-
-
-    void StartupSynchronizer::Start(Synchronized* const synchronized)
-    {
-        if (m_started)
-        {
-            return;
-        }
-        m_synchronized = synchronized;
-
-        m_fileLock = FileLockKeeper::Instance().Get(m_lockfile);
-
-        //try to take the first lock exclusively, if we get it we may be allowed to call Create
-        const bool gotLock = m_fileLock->try_lock();
-        if (gotLock)
-        {
-            m_fileLock2 = FileLockKeeper::Instance().Get(m_lockfile2);
-            //Ok, got the first lock. Now see if we can get the second lock
-            const bool gotLock2 = m_fileLock2->try_lock();
-            if (gotLock2)
-            {
-                //We got it! We're allowed to start initializing everything
-
-                //remove any semaphore left over from previous instances
-                boost::interprocess::named_semaphore::remove(m_name.c_str());
-
-                //invoke the user callback
-                m_synchronized->Create();
-                
-                //Create a new semaphore so that users know if we succeeded or not.
-                boost::interprocess::named_semaphore sem(boost::interprocess::create_only,m_name.c_str(),1);
-
-            }
-            else
-            {
-                //keep m_fileLock2 as null if we dont have it locked
-                m_fileLock2.reset();
-            }
-
-            //open the floodgates!
-            m_fileLock->unlock();
-        }
-
-        //Wait for the exclusive lock to be released (or, if we're the Creator, just get the shared lock)
-        //this will cause everyone to wait for Create to have completed successfully.
-        m_fileLock->lock_sharable();
-
-        try
-        {
-            //Try to *open* the semaphore. If it has not been created this will cause an exception
-            //to be thrown.
-            boost::interprocess::named_semaphore sem(boost::interprocess::open_only,m_name.c_str());
-
-            sem.wait();
-            sem.post();
-        }
-        catch (const boost::interprocess::interprocess_exception& exc)
-        {
-            std::ostringstream ostr;
-            ostr << "It appears that Create failed in some other process for '" << m_name << "'." << std::endl;
-            ostr << "The exception I got was " << exc.what() << " and strerror(errno) returned this info: " << strerror(errno) << std::endl;
-            std::wcerr << ostr.str().c_str() << std::flush;
-            throw std::logic_error(ostr.str());
-        }
-
-        //invoke user callback
-        m_synchronized->Use();
-
-        m_started = true;
-    }
-}
-}
-
-
-#endif

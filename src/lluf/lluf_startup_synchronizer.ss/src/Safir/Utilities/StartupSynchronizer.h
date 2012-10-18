@@ -143,6 +143,8 @@ namespace Utilities
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
+        
+        Synchronized* m_synchronized;
 
     };
 
