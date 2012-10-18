@@ -61,7 +61,12 @@ print("have read a line from all")
 outputs = list()
 #tell them it is okay to exit
 for proc in procs:
-    out = proc.communicate("\n".encode())[0]
+    #this is a workaround where pyton 3.3 and 3.2.3 require different argument types, so we
+    #try both
+    try:
+        out = proc.communicate("\n".encode())[0]
+    except TypeError:
+        out = proc.communicate("\n")[0]
     outputs.append(out)
 
 for proc in procs:
