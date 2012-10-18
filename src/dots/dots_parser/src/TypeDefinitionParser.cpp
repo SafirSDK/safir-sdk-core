@@ -75,7 +75,7 @@ namespace Internal
         ParseState state(m_result);
 
         boost::filesystem::recursive_directory_iterator it(definitions), end;
-         for (it; it!=end; ++it)
+         for (; it!=end; ++it)
          {
              if (it->path().extension() == ".dou" || it->path().extension() == ".dom" )
              {    
@@ -84,7 +84,7 @@ namespace Internal
                      std::string leaf = it->leaf();
 #else
                      std::string path = it->path().string();
-                     std::string leaf = it->path().leaf().string();
+                     std::string leaf = it->path().filename().string();
 #endif
                  try
                  {
@@ -319,7 +319,6 @@ namespace Internal
         if (c->GetBaseClass()!=NULL)
             os<<"BaseClass: "<<c->GetBaseClass()->GetName()<<std::endl;
 
-        int numMem=c->GetNumberOfMembers();
         for (int i=0; i<c->GetNumberOfMembers(); ++i)
         {
             DumpMemberDescription(c->GetMember(i), os);

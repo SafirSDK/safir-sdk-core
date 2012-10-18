@@ -13,7 +13,7 @@ ADD_EXECUTABLE(dots_parser_test ${sources} ${headers})
 
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(dots_parser ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(dots_parser_test dots_parser ${Boost_LIBRARIES})
 endif()
 
 #INSTALL(TARGETS dots_parser_test

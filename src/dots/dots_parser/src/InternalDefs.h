@@ -214,7 +214,7 @@ namespace Internal
     static inline void EnsureFailed (const std::string & str)
     {
         lllerr << "ENSURE failed: '"<< str.c_str() << "'" << std::endl;
-        Safir::Utilities::Internal::Internal::LowLevelLoggerBackend::Instance().FlushBuffer();
+        //Safir::Utilities::Internal::Internal::LowLevelLoggerBackend::Instance().FlushBuffer();
         std::wcout << "Please contact your nearest DOB developer!" << std::endl;
 
         throw InternalException(str, __FILE__,__LINE__);

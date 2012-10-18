@@ -214,6 +214,8 @@ namespace Internal
               m_description(description),
               m_file(file){}
 
+        ~ParseError() throw() {}
+
         const std::string& Label() const throw() {return m_label;}
         const std::string& Description() const throw() {return m_description;}
         const std::string& File() const throw() {return m_file;}

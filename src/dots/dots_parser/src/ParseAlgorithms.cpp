@@ -71,7 +71,7 @@ namespace Internal
     bool ContainsDuplicates(const std::vector<T>& myVector, const T** duplicated)
     {
         PROFILE
-        for (std::vector<T>::const_iterator it = myVector.begin(); it!=myVector.end(); ++it)
+        for (typename std::vector<T>::const_iterator it = myVector.begin(); it!=myVector.end(); ++it)
         {
             size_t c = std::count_if(myVector.begin(), myVector.end(), boost::bind(NameComparer<T>, _1, it->Name));
             if (c>1)
@@ -87,7 +87,7 @@ namespace Internal
     T* GetByFieldValue(std::vector<T>& v, const std::string& name, boost::function<const std::string&(const T&)> fieldToCmp)
     {
         PROFILE
-        for (std::vector<T>::iterator it=v.begin(); it!=v.end(); ++it)
+        for (typename std::vector<T>::iterator it=v.begin(); it!=v.end(); ++it)
         {
             if (name==fieldToCmp(*it))
             {
@@ -507,7 +507,7 @@ namespace Internal
         }
       
         ++it;
-        for (it; it!=name.end(); ++it)
+        for (; it!=name.end(); ++it)
         {            
             if (!std::isalnum(*it) && (*it)!='_' &&  !(allowDot && (*it)=='.'))
             {
@@ -561,9 +561,13 @@ namespace Internal
         const std::string var=str.substr(start+2, stop-start-2);
 
         //Get rid of Microsof warning
+#ifdef _MSC_VER
 #pragma warning(disable:4996)
+#endif
         const char * const env = getenv(var.c_str());
+#ifdef _MSC_VER
 #pragma warning(default:4996)
+#endif
 
         if (env == NULL)
         {

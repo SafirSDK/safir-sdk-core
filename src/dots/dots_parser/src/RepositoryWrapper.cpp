@@ -13,47 +13,6 @@ namespace Typesystem
 {
 namespace Internal
 {
-    template <class Key, class Val>
-    const Val* GetPtr(const std::map<Key, Val> & m, Key key)
-    {
-        std::map<Key, Val>::const_iterator it = m.find(key);
-        if (it!=m.end())
-        {
-            return &(it->second);
-        }
-        return NULL;
-    }
-
-    template <class Key, class Val>
-    Val* GetPtr(std::map<Key, Val> & m, Key key)
-    {
-        std::map<Key, Val>::iterator it = m.find(key);
-        if (it!=m.end())
-        {
-            return &(it->second);
-        }
-        return NULL;
-    }
-
-    template <class Key, class Val>
-    void GetKeys(const std::map<Key, Val>& m, std::vector<Key>& keys)
-    {        
-        for (std::map<Key, Val>::const_iterator it=m.begin(); it!=m.end(); ++it)
-        {
-            keys.push_back(it->first);
-        }
-    }
-
-    template <class Def, class Descr>
-    void SetupWithTypeId(const std::vector<Def>& src, std::map<DotsC_TypeId, Descr>& dest)
-    {
-        for (std::vector<Def>::const_iterator it=src.begin(); it!=src.end(); ++it)
-        {
-            DotsC_TypeId typeId = DotsId_Generate64(it->Name.c_str());
-            dest.insert(std::map<DotsC_TypeId, Descr>::value_type(typeId, Descr(*it, typeId)));
-        }
-    }        
-
     RepositoryWrapper::RepositoryWrapper(RawParseResultConstPtr rawResult) : m_rawResult(rawResult), m_parameters()
     {
         SetupWithTypeId(m_rawResult->Enumerations, m_enums);
@@ -64,7 +23,7 @@ namespace Internal
         //Setup Exception baseclass ptr
         for (std::map<DotsC_TypeId, ExceptionDescriptionWrapper>::iterator it=m_exceptions.begin(); it!=m_exceptions.end(); ++it)
         {
-            DotsC_TypeId baseTypeId = DotsId_Generate64(it->second.m_def.BaseClass.c_str());
+            DotsC_TypeId baseTypeId = DotsId_Generate64(it->second.m_def->BaseClass.c_str());
             it->second.m_base=GetPtr(m_exceptions, baseTypeId); //Will return NULL if not found wich is ok, and will happen when exception inherits from preset classes. The validation has already been done.
         }
 
@@ -78,7 +37,7 @@ namespace Internal
         for (std::map<DotsC_TypeId, ClassDescriptionWrapper>::iterator it=m_classes.begin(); it!=m_classes.end(); ++it)
         {            
             //Set base class
-            DotsC_TypeId baseTypeId = DotsId_Generate64(it->second.m_def.BaseClass.c_str());
+            DotsC_TypeId baseTypeId = DotsId_Generate64(it->second.m_def->BaseClass.c_str());
             ClassDescriptionWrapper* bc=GetPtr(m_classes, baseTypeId);
             if (bc)
             {
@@ -91,9 +50,9 @@ namespace Internal
 
             //Parameters            
             it->second.m_allParameters=&m_parameters;
-            for (ParameterDefinitions::const_iterator paramIt=it->second.m_def.Parameters.begin(); paramIt!=it->second.m_def.Parameters.end(); ++paramIt)
+            for (ParameterDefinitions::const_iterator paramIt=it->second.m_def->Parameters.begin(); paramIt!=it->second.m_def->Parameters.end(); ++paramIt)
             {
-                m_parameters.insert( std::map<std::string, ParameterDescriptionWrapper>::value_type(paramIt->Name, ParameterDescriptionWrapper(*paramIt)) );
+                m_parameters.insert( std::map<std::string, ParameterDescriptionWrapper>::value_type(paramIt->Name, ParameterDescriptionWrapper(&(*paramIt))) );
                 it->second.m_ownParameters.push_back(paramIt->Name);
             }
         }
@@ -103,11 +62,11 @@ namespace Internal
         {
             ClassDescriptionWrapper* cls=GetPtr(m_classes, DotsId_Generate64(it->ClassName.c_str()));
             PropertyDescriptionWrapper* prop=GetPtr(m_properties, DotsId_Generate64(it->PropertyName.c_str()));
-            PropertyMappingDescriptionWrapper propMapping(*it, prop);
+            PropertyMappingDescriptionWrapper propMapping(&(*it), prop);
 
             for (MappedMemberDefinitions::const_iterator memberIt=it->MappedMembers.begin(); memberIt!=it->MappedMembers.end(); ++memberIt)
             {
-                MemberMappingWrapper member(*memberIt);
+                MemberMappingWrapper member(&(*memberIt));
                 switch (member.GetMappingKind())
                 {
                 case MappedToParameter:
@@ -351,10 +310,10 @@ namespace Internal
 
     //Enumerations
     //-------------
-    RepositoryWrapper::EnumDescriptionWrapper::EnumDescriptionWrapper(const EnumerationDefinition& def, DotsC_TypeId typeId) : m_def(def), m_typeId(typeId)
+    RepositoryWrapper::EnumDescriptionWrapper::EnumDescriptionWrapper(const EnumerationDefinition* def, DotsC_TypeId typeId) : m_def(def), m_typeId(typeId)
     {
         std::ostringstream ss;
-        for (StringVector::const_iterator it=m_def.EnumerationValues.begin(); it!=m_def.EnumerationValues.end(); ++it)
+        for (StringVector::const_iterator it=m_def->EnumerationValues.begin(); it!=m_def->EnumerationValues.end(); ++it)
         {
             ss<<*it;
         }
@@ -363,9 +322,9 @@ namespace Internal
 
     int RepositoryWrapper::EnumDescriptionWrapper::GetIndexOfValue(const std::string& valueName) const
     {
-        for (int i=0; i<m_def.EnumerationValues.size(); ++i)
+        for (int i=0; i<m_def->EnumerationValues.size(); ++i)
         {
-            if (m_def.EnumerationValues[i]==valueName)
+            if (m_def->EnumerationValues[i]==valueName)
                 return i;
         }
         return -1;
@@ -375,25 +334,25 @@ namespace Internal
     //---------
     DotsC_TypeId RepositoryWrapper::MemberDescriptionWrapper::GetTypeId() const
     {
-        switch (m_def.MemberType)
+        switch (m_def->MemberType)
         {
         case ObjectMemberType:
             return m_class->GetTypeId();
         case EnumerationMemberType:
             return m_enum->GetTypeId();
         default:
-            ENSURE(false, << "Only Object or Enum member descriptions have TypeIds! Type = " << BasicTypes::Instance().StringOf(m_def.MemberType));
+            ENSURE(false, << "Only Object or Enum member descriptions have TypeIds! Type = " << BasicTypes::Instance().StringOf(m_def->MemberType));
             return -1;
         }
     }
 
     //Parameter
     //------------
-    RepositoryWrapper::ParameterDescriptionWrapper::ParameterDescriptionWrapper(const ParameterDefinition& def) : m_def(def) 
+    RepositoryWrapper::ParameterDescriptionWrapper::ParameterDescriptionWrapper(const ParameterDefinition* def) : m_def(def)
     {
-        if (m_def.MemberType==ObjectMemberType || m_def.MemberType==EnumerationMemberType)
+        if (m_def->MemberType==ObjectMemberType || m_def->MemberType==EnumerationMemberType)
         {
-            m_typeId=DotsId_Generate64(m_def.TypeName.c_str());
+            m_typeId=DotsId_Generate64(m_def->TypeName.c_str());
         }
     }
 

@@ -84,9 +84,10 @@ namespace Internal
     template < class ElementTypeVector, int Index > 
     struct ElementInstantiator
     {
+        typedef typename boost::mpl::at< ElementTypeVector, boost::mpl::int_<Index> >::type type;
         void operator()(ElementParserBase* current, ElementParserBaseVector& subElements)
         {
-            ElementParserBasePtr subEl(new boost::mpl::at< ElementTypeVector, boost::mpl::int_<Index> >::type(current));
+            ElementParserBasePtr subEl(new type(current));
             subElements.push_back(subEl);
             ElementInstantiator< ElementTypeVector, Index-1 >()(current, subElements);
         }
@@ -231,13 +232,13 @@ namespace Internal
     {
     public:
 
-        explicit Element() : m_used(false), ElementParserBase(), m_subElements(), m_occurrences(), m_parseAlgorithm()
+        explicit Element() : ElementParserBase(), m_used(false), m_subElements(), m_occurrences(), m_parseAlgorithm()
         {
             ElementInstantiator< SubElem, boost::mpl::size<SubElem>::type::value - 1 >()(this, m_subElements);
             //InitSubElements< boost::mpl::size<SubElem>::type::value - 1 >();
         }
 
-        explicit Element(const ElementParserBase* parent) : m_used(false), ElementParserBase(parent), m_subElements(), m_occurrences()
+        explicit Element(const ElementParserBase* parent) : ElementParserBase(parent), m_used(false), m_subElements(), m_occurrences()
         {
             ElementInstantiator< SubElem, boost::mpl::size<SubElem>::type::value - 1 >()(this, m_subElements);
             //InitSubElements< boost::mpl::size<SubElem>::type::value - 1 >();
@@ -324,7 +325,9 @@ namespace Internal
             if (!m_occurrences)
             {
                 std::ostringstream ss;
+#ifdef _MSC_VER
 #pragma warning(disable:4127) //Get rid of warning that this if-expression is constant (comparing two constants)
+#endif
                 if (m_occurrences.MinOccurrences==m_occurrences.MaxOccurrences)
                 {
                     ss<<"Element '"<<Name()<<"' must occur exactly "<<m_occurrences.MinOccurrences<<" time(s) at location "<<Parent()->Path()<<". Number of occurrences="<<m_occurrences();
@@ -333,19 +336,12 @@ namespace Internal
                 {
                     ss<<"Element '"<<Name()<<"' only allowed to occur between "<<m_occurrences.MinOccurrences<<" and "<<m_occurrences.MaxOccurrences<<" times at location "<<Parent()->Path()<<". Number of occurrences="<<m_occurrences();
                 }
+#ifdef _MSC_VER
 #pragma warning(default:4996)
+#endif
                 throw ParseError("Wrong number of occurrences", ss.str(), state.CurrentPath);
             }            
         }
-
-        template <int N> void InitSubElements()
-        {            
-            //Here we go through all the types in SubElem and instantiates them with 'this' as parent constructor arg.
-            ElementParserBasePtr subEl(new boost::mpl::at< SubElem, boost::mpl::int_<N> >::type(this));
-            m_subElements.push_back(subEl);
-            InitSubElements<N-1>();
-        }
-        template <> void InitSubElements<-1>(){/*m_subElements is now completly instantiated*/}
     };
 }
 }
