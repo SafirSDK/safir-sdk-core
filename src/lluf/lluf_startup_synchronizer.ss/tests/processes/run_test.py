@@ -48,6 +48,8 @@ try:
 except OSError as e:
     print ("Failed to launch processes. maybe you need to increase ulimit -u? I need at least 10000")
     print (e)
+    for proc in procs:
+        proc.kill()
     sys.exit(1)
 
 #wait for them to print something that indicates they're started
