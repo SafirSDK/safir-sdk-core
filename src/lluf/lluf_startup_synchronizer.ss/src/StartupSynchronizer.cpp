@@ -27,7 +27,7 @@
 #include <boost/bind.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/filesystem/operations.hpp>
-//#include <boost/filesystem/convenience.hpp>
+#include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/interprocess/sync/named_semaphore.hpp>
 #include <boost/interprocess/sync/file_lock.hpp>
