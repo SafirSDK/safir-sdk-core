@@ -35,15 +35,20 @@ else:
 ss_test = os.path.join(exe_path,"ss_processes_and_threads_test")
 procs = list()
 
-#Start a bunch of processes
-for i in range(100):
-    proc = subprocess.Popen(ss_test, 
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT,
-                            stdin=subprocess.PIPE,
-                            universal_newlines=True)
-
-    procs.append(proc)
+try:
+    #Start a bunch of processes
+    for i in range(100):
+        proc = subprocess.Popen(ss_test, 
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                stdin=subprocess.PIPE,
+                                universal_newlines=True)
+        
+        procs.append(proc)
+except OSError as e:
+    print ("Failed to launch processes. maybe you need to increase ulimit -u? I need at least 10000")
+    print (e)
+    sys.exit(1)
 
 #wait for them to print something that indicates they're started
 for proc in procs:
