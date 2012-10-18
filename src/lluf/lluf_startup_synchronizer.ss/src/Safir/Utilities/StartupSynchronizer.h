@@ -39,6 +39,13 @@
 #include <boost/shared_ptr.hpp>
 #include <string>
 
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4275)
+#endif
+
+
 namespace Safir
 {
 namespace Utilities
@@ -150,6 +157,11 @@ namespace Utilities
 
 }
 }
+
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 
 #endif
