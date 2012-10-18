@@ -95,7 +95,7 @@ int main()
     {
         boost::packaged_task<int> pt(boost::bind(threadFun,boost::ref(barrier1),boost::ref(barrier2)));
         futures.push_back(boost::shared_future<int>(pt.get_future()));
-        threads.create_thread(boost::move(pt));
+        threads.add_thread(new boost::thread(boost::move(pt)));
     }
 
     std::wcout << "all threads started, collecting result" << std::endl;
