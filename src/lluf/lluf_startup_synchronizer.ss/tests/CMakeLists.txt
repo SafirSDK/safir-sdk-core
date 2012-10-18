@@ -9,7 +9,8 @@ FIND_PACKAGE(Boost COMPONENTS thread system)
 FIND_PACKAGE(PythonInterp)
 
 ENABLE_TESTING()
-ADD_SUBDIRECTORY(StartupSynchronizer_test)
+ADD_SUBDIRECTORY(processes)
+ADD_SUBDIRECTORY(threads)
 
 
 

@@ -79,7 +79,7 @@ int main()
     {
         Synchronized synched(state);
 
-        Safir::Utilities::StartupSynchronizer ss("StartupSynchronizer_test");
+        Safir::Utilities::StartupSynchronizer ss("StartupSynchronizer_processes_test");
         ss.Start(&synched);
         std::cin.get();
     }
