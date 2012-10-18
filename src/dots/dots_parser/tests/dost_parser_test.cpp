@@ -10,17 +10,23 @@
 #include <Safir/Dob/Typesystem/Internal/TypeDefinitionParser.h>
 
 int main(int argc, char* argv[])
-{    
-#ifdef _MSC_VER
-    argc; argv;
-#endif
+{
+    boost::filesystem::path douDir;// = boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_parser/tests/dou_test_files");
+    if (argc>1)
+    {
+        douDir = boost::filesystem::path(argv[1]);
+    }
+    else
+    {
+        //douDir = boost::filesystem::path("C:/dev/safir_sdk_core/src/dots/dots_parser/tests/dou_test_files");
+        douDir = boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_parser/tests/dou_test_files");
+    }
+
+    std::cout<<"DouDir: "<<douDir.string()<<std::endl;
    
     boost::timer timer; 
     double elapsed = 0;
     
-    boost::filesystem::path douDir = boost::filesystem::path("C:/dev/safir_sdk_core/src/dots/dots_parser/tests/dou_test_files");
-    //boost::filesystem::path douDir = boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_parser/tests/dou_test_files");    
-
     Safir::Dob::Typesystem::Internal::TypeDefinitionParser tp;
 
     try
@@ -41,11 +47,12 @@ int main(int argc, char* argv[])
         std::cout<<"* File:  "<<err.File()<<std::endl;
         std::cout<<"*********************************************************************"<<std::endl;
         
-        std::cerr<<err.File()<<":1:1: error: hej"<<std::endl;
+        //std::cerr<<err.File()<<":1:1: error: hej"<<std::endl;
     }
     catch (std::exception err)
     {
         std::cout<<"Unknown exception: "<<err.what()<<std::endl;
+        return 1; //Test failed
     }
 
     std::cout<<"Time elapsed: "<<elapsed<<std::endl;

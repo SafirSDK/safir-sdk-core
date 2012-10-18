@@ -16,9 +16,6 @@ if (NOT MSVC)
     TARGET_LINK_LIBRARIES(dots_parser_test dots_parser ${Boost_LIBRARIES})
 endif()
 
-#INSTALL(TARGETS dots_parser_test
-#        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-#        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-#        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+enable_testing()
 
-#INSTALL_DEBUG_INFO(dots_parser_test)
+add_test(dost_parser_simple_test dots_parser_test ${CMAKE_CURRENT_SOURCE_DIR}/dou_test_files)
