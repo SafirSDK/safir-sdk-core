@@ -24,40 +24,33 @@
 #ifndef __LLUF_STARTUP_SYNCHRONIZER_H__
 #define __LLUF_STARTUP_SYNCHRONIZER_H__
 
-#include <Safir/Utilities/Internal/UtilsExportDefs.h>
-
-//disable warnings in boost
 #if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4267)
-  #pragma warning (disable : 4512)
-  #pragma warning (disable : 4805)
+    #ifdef lluf_startup_synchronizer_EXPORTS
+        #define LLUF_SS_API __declspec(dllexport)
+    #else
+        #define LLUF_SS_API __declspec(dllimport)
+        #pragma comment(lib , "lluf_startup_synchronizer.lib")
+    #endif
+#elif defined __GNUC__
+    #define LLUF_SS_API
 #endif
 
 #include <boost/noncopyable.hpp>
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/interprocess/sync/file_lock.hpp>
-#include <boost/thread/mutex.hpp>
-
-//and enable the warnings again
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
-
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4251) // warning C4251: 'Safir::Dob::Typesystem::LibraryExceptions::m_CallbackMap' : class 'stdext::hash_map<_Kty,_Ty>' needs to have dll-interface to be used by clients of class 'Safir::Dob::Typesystem::LibraryExceptions'
-#pragma warning (disable: 4275) // warning C4275: non dll-interface class 'boost::noncopyable_::noncopyable' used as base for dll-interface class 'Safir::Dob::Typesystem::LibraryExceptions'
-#endif
+#include <string>
 
 namespace Safir
 {
 namespace Utilities
 {
+    /** Forward declaration for pimpl idiom */
+    class StartupSynchronizerImpl;
+
+
     /** 
      * Interface for a synchronized object.
+     * Note that NONE of these callbacks are exception safe! If you let an
+     * exception propagate through the callback anything could happen!
      */
     class Synchronized
     {
@@ -95,55 +88,67 @@ namespace Utilities
     };
 
     /**
-     * WARNING: Note that no thread guarantees are made, only process guarantees.
-     * Also, make sure only one instance (per uniqueName) exists within each
-     * process!
+     * This class can be used to synchronize creation and opening of a resource that
+     * is shared between multiple processes and threads.
+     * The resource has to have a unique name, and the basic idea is that:
+     * One and only one call to Start will generate a Create() callback.
+     * All instances (including the Creator) will get a Use() callback when the create
+     * has completed.
+     * The last instance of StartupSynchronizer to be destroyed will generate a 
+     * Destroy callback.
+     *
+     * Note that multiple threads within a process may call these functions simultaneously
+     * on *different* instances with different arguments to no ill effect.
      */
-    class LLUF_UTILS_API StartupSynchronizer:
+    class LLUF_SS_API StartupSynchronizer:
         private boost::noncopyable
     {
     public:
+        /**
+         * Construct a StartupSynchronizer for a resource with a given name.
+         */
         explicit StartupSynchronizer(const std::string& uniqueName);
+
+        /**
+         * Destructor.
+         *
+         * Stop using the shared resource. If this instance is the last user
+         * of the resource the Destroy callback will *probably* be called
+         * (see Synchronized class documentation).
+         */
+        ~StartupSynchronizer();
 
         /**
          * Call this to start the synchronized startup.
          * The callbacks to synchronized will be called as described in the
          * Synchronized class documentation.
+         *
+         * Only one call to Start is allowed for a particular instance.
+         * Multiple calls result in undefined behaviour.
+         *
+         * Multiple calls to different instances of this class with
+         * the same pointer argument also results in undefined behaviour.
          */
         void Start(Synchronized* const synchronized);
 
-        /**
-         * Stop using the shared resource. If this instance is the last user
-         * of the resource the Destroy callback will *probably* be called
-         * (see Synchronized class documentation).
-         * Calls to Start after Stop has been called (on same instance) 
-         * results in undefined behaviour.
-         */
-        void Stop();
-
-        /**
-         * Destructor implicitly calls Stop.
-         */
-        ~StartupSynchronizer();
     private:
-        Synchronized* m_synchronized;
-        const std::string m_name;
-        bool m_started;
-        const boost::filesystem::path m_lockfile;
-        const boost::filesystem::path m_lockfile2;
 
-        //The idea is to take these locks in a specific fashion, and to never
-        //release them. They get released when the process exits.
-        boost::shared_ptr<boost::interprocess::file_lock> m_fileLock;
-        boost::shared_ptr<boost::interprocess::file_lock> m_fileLock2; //should only be set if we have the lock
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4251)
+#endif
+
+        boost::shared_ptr<StartupSynchronizerImpl> m_impl;
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
     };
 
 }
 }
 
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
 
 #endif
 
