@@ -4,11 +4,6 @@
 * 
 * Created by: Lars Hagström / stlrha
 *
-* $HeadURL: http://loke2/private/safir_sdk/systems/sdk_core/trunk/delivery-system/src/dots/dots_kernel.ss/src/Safir/Dob/Typesystem/Internal/KernelDefs.h $
-* $Revision: 5 $
-* $LastChangedBy: stmrwe $
-* $LastChangedDate: 2009-10-09 09:26:57 +0200 (fr, 09 okt 2009) $
-*
 *******************************************************************************
 *
 * This file is part of Safir SDK Core.

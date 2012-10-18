@@ -4,11 +4,6 @@
 *
 * Created by: Joel Ottosson / stjoot
 *
-* $HeadURL: http://loke2/private/safir_sdk/systems/sdk_core/trunk/delivery-system/src/dots/dots_kernel.ss/src/dots_blob_layout.h $
-* $Revision: 5 $
-* $LastChangedBy: stmrwe $
-* $LastChangedDate: 2009-10-09 09:26:57 +0200 (fr, 09 okt 2009) $
-*
 *******************************************************************************
 *
 * This file is part of Safir SDK Core.

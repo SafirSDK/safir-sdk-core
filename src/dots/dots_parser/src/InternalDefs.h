@@ -4,11 +4,6 @@
 * 
 * Created by: Joel Ottosson / stjoot
 *
-* $HeadURL: http://loke2/private/safir_sdk/systems/sdk_core/trunk/delivery-system/src/dots/dots_kernel.ss/src/dots_internal_defs.h $
-* $Revision: 40849 $
-* $LastChangedBy: stmiwn $
-* $LastChangedDate: 2011-12-20 13:22:29 +0100 (ti, 20 dec 2011) $
-*
 *******************************************************************************
 *
 * This file is part of Safir SDK Core.

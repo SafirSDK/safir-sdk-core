@@ -4,11 +4,6 @@
 *
 * Created by: Joel Ottosson / joot
 *
-* $HeadURL:  $
-* $Revision:  $
-* $LastChangedBy:  $
-* $LastChangedDate: $
-*
 *******************************************************************************
 *
 * This file is part of Safir SDK Core.
@@ -34,7 +29,7 @@
         #define DOTS_API __declspec(dllexport)
     #else
         #define DOTS_API __declspec(dllimport)
-        #define SAFIR_LIBRARY_NAME "dots_kernel_impl"
+        #define SAFIR_LIBRARY_NAME "dots_parser"
         #include <Safir/Utilities/Internal/AutoLink.h>
     #endif
 #elif defined __GNUC__
