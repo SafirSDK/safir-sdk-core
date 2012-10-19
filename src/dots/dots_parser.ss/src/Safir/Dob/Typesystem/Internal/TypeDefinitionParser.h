@@ -36,7 +36,7 @@
     #define DOTS_API
     #define __cdecl
 #endif
-
+/* Not used? Removed by LAHA
 #if defined _MSC_VER
    #if (_MSC_VER >= 1500)
        #include <unordered_map>
@@ -65,7 +65,7 @@ namespace std {namespace tr1 {
 #endif
 
 #endif
-
+*/
 #include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
 #include <Safir/Dob/Typesystem/Internal/ParseResult.h>
