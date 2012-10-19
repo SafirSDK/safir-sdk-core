@@ -30,17 +30,17 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <iostream>
 
-//Make a hash_map available even though their locations are different
-//call it unordered_map, as it will be called in tr1
-#if defined _MSC_VER
-    #include <hash_map>
-    #define unordered_map stdext::hash_map
-#elif defined __GNUC__
-    #include <tr1/unordered_map>
-    using std::tr1::unordered_map;
-#else
-#error We need a definition of unordered_map
-#endif
+////Make a hash_map available even though their locations are different
+////call it unordered_map, as it will be called in tr1
+//#if defined _MSC_VER
+//    #include <hash_map>
+//    #define unordered_map stdext::hash_map
+//#elif defined __GNUC__
+//    #include <tr1/unordered_map>
+//    using std::tr1::unordered_map;
+//#else
+//#error We need a definition of unordered_map
+//#endif
 
 #include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 #include <vector>
