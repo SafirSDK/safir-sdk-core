@@ -24,6 +24,8 @@ run_test_suite   src/lluf/lluf_utils.ss/tests                  lluf_tests
 #DOTS
 build_dir        src/dots/dots_id.ss/src                   RelWithDebInfo
 run_test_suite   src/dots/dots_id.ss/tests                 dots_id_tests
+build_dir        src/dots/dots_parser.ss/src               RelWithDebInfo   Debug
+run_test_suite   src/dots/dots_parser.ss/tests             dots_parser_tests
 build_dir        src/dots/dots_kernel.ss/src               RelWithDebInfo
 build_dir        src/dots/dots_configuration_check.ss/src  RelWithDebInfo
 build_dir        src/dots/dots_schema_validator.ss         RelWithDebInfo
