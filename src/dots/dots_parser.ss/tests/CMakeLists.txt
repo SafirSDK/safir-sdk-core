@@ -18,4 +18,4 @@ endif()
 
 enable_testing()
 
-add_test(dost_parser_simple_test dots_parser_test ${CMAKE_CURRENT_SOURCE_DIR}/dou_test_files)
+add_test(dots_parser_simple_test dots_parser_test ${CMAKE_CURRENT_SOURCE_DIR}/dou_test_files)

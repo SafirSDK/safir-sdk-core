@@ -74,13 +74,8 @@ namespace Internal
          {
              if (it->path().extension() == ".dou" || it->path().extension() == ".dom" )
              {    
-#if BOOST_FILESYSTEM_VERSION<3
-                     std::string path = it->string();
-                     std::string leaf = it->leaf();
-#else
-                     std::string path = it->path().string();
-                     std::string leaf = it->path().filename().string();
-#endif
+                 std::string path = it->path().string();
+
                  try
                  {
                      state.CurrentPath=path;
