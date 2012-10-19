@@ -65,7 +65,7 @@ print("have read a line from all")
 outputs = list()
 #tell them it is okay to exit
 for proc in procs:
-    out = proc.communicate("\n".encode())[0]
+    out = proc.communicate("\n")[0]
     outputs.append(out)
 
 for proc in procs:
