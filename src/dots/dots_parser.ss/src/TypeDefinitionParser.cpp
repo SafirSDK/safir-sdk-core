@@ -94,7 +94,7 @@ namespace Internal
                  {
                      throw;
                  }
-                 catch (const boost::property_tree::xml_parser_error& err)
+                 catch (boost::property_tree::xml_parser_error& err) //cant catch as const-ref due to bug in early boost versions.
                  {
                      std::ostringstream ss;
                      ss<<err.message()<<". Line: "<<err.line();
