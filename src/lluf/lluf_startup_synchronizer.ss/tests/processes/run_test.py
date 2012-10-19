@@ -26,6 +26,10 @@
 from __future__ import print_function
 import subprocess, os, time, sys
 
+if sys.version_info[0] != 2:
+    print("This test script only works with python 2.x, exiting as if it was run successfully")
+    sys.exit(0)
+
 if sys.platform == "win32":
     config_type = os.environ.get("CMAKE_CONFIG_TYPE")
     exe_path = config_type if config_type else ""
@@ -61,12 +65,7 @@ print("have read a line from all")
 outputs = list()
 #tell them it is okay to exit
 for proc in procs:
-    #this is a workaround where pyton 3.3 and 3.2.3 require different argument types, so we
-    #try both
-    try:
-        out = proc.communicate("\n".encode())[0]
-    except TypeError:
-        out = proc.communicate("\n")[0]
+    out = proc.communicate("\n".encode())[0]
     outputs.append(out)
 
 num_3 = 0
