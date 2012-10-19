@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-PROJECT (dots_parser)
+PROJECT (dots_parser CXX)
 
 INCLUDE_DIRECTORIES(.)
 
