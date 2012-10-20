@@ -69,7 +69,7 @@ private:
     }
 };
 
-int threadFun(boost::barrier& barrier1, boost::barrier& barrier2) 
+int threadFun(boost::barrier& barrier1, boost::barrier& barrier2, boost::barrier& barrier3) 
 {
     int state = 0;
     Synchronized synched(state);
@@ -79,6 +79,7 @@ int threadFun(boost::barrier& barrier1, boost::barrier& barrier2)
         barrier1.wait();
         ss.Start(&synched);
         barrier2.wait();
+        barrier3.wait();
     }
     return state;
 }
@@ -88,19 +89,21 @@ int main()
     const int num = 100;
     boost::barrier barrier1(num);
     boost::barrier barrier2(num + 1);
+    boost::barrier barrier3(num + 1);
 
     std::vector<boost::shared_future<int> > futures;
     boost::thread_group threads;
     for(int i = 0; i < num; ++i)
     {
-        boost::packaged_task<int> pt(boost::bind(threadFun,boost::ref(barrier1),boost::ref(barrier2)));
+        boost::packaged_task<int> pt(boost::bind(threadFun,boost::ref(barrier1),boost::ref(barrier2),boost::ref(barrier3)));
         futures.push_back(boost::shared_future<int>(pt.get_future()));
         threads.add_thread(new boost::thread(boost::move(pt)));
     }
 
+    barrier2.wait();    
     std::wcout << "all threads started, collecting result" << std::endl;
     std::cin.get();
-    barrier2.wait(); //open the floodgates
+    barrier3.wait();    
 
     int num_created = 0;
     int num_used = 0;
