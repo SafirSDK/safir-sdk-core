@@ -11,6 +11,7 @@ if (NOT $ENV{VERBOSE} STREQUAL "")
 endif()
 
 set(ATTEMPT 100)
+#look for retries with delay
 while(ATTEMPT GREATER 0)
   math (EXPR ATTEMPT "${ATTEMPT} - 1")
 
