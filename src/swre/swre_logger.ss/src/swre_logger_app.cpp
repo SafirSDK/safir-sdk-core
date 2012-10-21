@@ -212,6 +212,10 @@ bool LoggerApp::ParseCommandLine(const std::vector<std::string> & arg)
         {
             ReportFilter::Inst().SetProgrammingErrorLogging(false);
         }
+        else if (it->compare("-logwhenstarted") == 0)
+        {
+            m_reportHandler.SetLogWhenStarted(true);
+        }
         else if (it->compare("-excludeapp") == 0)
         {
             if (++it == arg.end())
@@ -309,6 +313,7 @@ void LoggerApp::Usage()
                << " -nores\t\t: Don't log Resource reports\n"
                << " -nopi\t\t: Don't log ProgramInfo reports\n"
                << " -noprogerr\t: Don't log Programming Error reports\n"
+               << " -logwhenstarted\t: Print a line when logging subscriptions have been set up\n"
                << " -excludeapp\t: Exclude applications (connections) that match reg expression\n"
                << " -includeapp\t: Include only applications that match reg expression\n"
                << " -excludenode\t: Exclude nodes that match reg expression\n"

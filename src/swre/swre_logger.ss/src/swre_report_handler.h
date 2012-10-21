@@ -97,6 +97,12 @@ public:
     // Comments   : Determines output format.
     void SetOutputFormat(OutputFormat format);
 
+    /**
+     * Make the report handler log a line to stdout when all subscriptions
+     * have been set up.
+     * Default is off.
+     */
+    void SetLogWhenStarted(const bool enabled) {m_logWhenStarted = enabled;}
 private:
 
     // Implementation of MessageSubscriber interface
@@ -111,6 +117,7 @@ private:
 
     OutputDest m_outDest;
     OutputFormat m_outFormat;
+    bool m_logWhenStarted;
 
     boost::filesystem::wofstream m_logFile;
     boost::filesystem::path      m_logFilePath;

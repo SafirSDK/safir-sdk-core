@@ -51,6 +51,7 @@ namespace Swre
     ReportHandler::ReportHandler(boost::asio::io_service& ioService):
         m_outDest(StdOut),
         m_outFormat(SimpleText),
+        m_logWhenStarted(false),
         m_logFile(),
         m_logFilePath(),
         m_oldLogFilePath(),
@@ -138,6 +139,10 @@ namespace Swre
             m_connection.Attach();
             m_connection.SubscribeMessage(Safir::SwReports::Internal::Report::ClassTypeId, Safir::Dob::Typesystem::ChannelId(), this);
 
+            if (m_logWhenStarted)
+            {
+                std::wcout << "Subscriptions have been set up. Logging started." << std::endl;
+            }
             if (m_outDest == File)
             {
                 // Create log directory if it doesn't exist
