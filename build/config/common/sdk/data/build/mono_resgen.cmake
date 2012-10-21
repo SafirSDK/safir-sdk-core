@@ -43,7 +43,7 @@ while(ATTEMPT GREATER 0)
       TIMEOUT ${delay}
       ERROR_QUIET OUTPUT_QUIET)
   else ()
-    message (WARNING "Cannot delay retries as neither sleep nor ping command is available!")
+    message (WARNING "No sleep nor ping command available, cannot delay between retries!")
   endif ()
 endwhile()
 
