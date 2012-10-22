@@ -98,7 +98,8 @@ Qt
 ~~
 
 32 bit:
-Download the "Qt Library" installer for your compiler from http://qt.nokia.com/downloads. Run and install.
+Download the "Qt Library" installer for your compiler from http://qt-project.org/downloads#qt-lib. Run and install.
+Set up environment variable QTDIR to refer the installation directory (for example QTDIR=C:\Qt\4.8.1) and add %QTDIR%\bin to PATH environment variable.
 
 64 bit:
 Instructions for building with VS2010. This should be able to adapt to VS2005/2008 by starting the appropriate command prompt at step 8.
