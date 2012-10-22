@@ -18,7 +18,7 @@
 //If we've got boost > 1.42 we use their unordered set
 #if ((BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) > 42)
     #include <boost/tr1/unordered_set.hpp>
-    using boost::unordered_set;
+    using std::tr1::unordered_set;
 #else
     #if defined _MSC_VER
         #include <hash_set>

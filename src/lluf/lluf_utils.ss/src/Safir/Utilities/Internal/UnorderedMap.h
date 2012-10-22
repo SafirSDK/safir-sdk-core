@@ -19,7 +19,7 @@
 //If we've got boost > 1.42 we use their unordered map
 #if ((BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) > 42)
     #include <boost/tr1/unordered_map.hpp>
-    using boost::unordered_map;
+    using std::tr1::unordered_map;
 #else
     #if defined _MSC_VER
        #if (_MSC_VER >= 1500)
