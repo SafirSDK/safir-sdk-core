@@ -366,7 +366,7 @@ class BuilderBase(object):
         tests = int(match.group(2))
         self.total_tests += tests
         self.failed_tests += failed
-        if self.failed_tests == 0:
+        if failed == 0:
             logger.log(" - All tests succeeded.","brief")
         else:
             logger.log("!! " + str(failed) + " tests failed out of " + str(tests) + ".","brief")
