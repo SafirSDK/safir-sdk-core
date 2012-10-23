@@ -38,15 +38,25 @@ namespace
 #error "Can't work out if conversion is needed"
 #endif
 
+#ifndef NO_WCHAR_CONVERSION
+    size_t strlen(const SQLWCHAR* str)
+    {
+        size_t num = 0;
+        while (*str != 0)
+        {
+            ++str;
+            ++num;
+        }
+        return num;
+    }
+#endif
 
     inline const std::wstring ToWstring(const SQLWCHAR* str)
     {
 #ifdef NO_WCHAR_CONVERSION
         return std::wstring(str);
 #else
-        std::wostringstream ostr;
-        ostr << str;
-        return ostr.str();
+        return std::wstring(str, str + strlen(str));
 #endif
 }
 
