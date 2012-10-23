@@ -26,7 +26,7 @@ USE dope_db;
 
 GRANT ALL ON dope_db.* TO dopeuser;
 
-
+set global max_allowed_packet=1000000000;
 
 
 #==============================================================
