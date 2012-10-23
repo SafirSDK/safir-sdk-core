@@ -49,7 +49,9 @@ class Parameters:
                           help="test against mimer database")
         parser.add_option("--mysql", action="store_true",dest="mysql",default=False,
                           help="test against mysql database")
-
+        parser.add_option("--hostname", action="store",dest="hostname",default="localhost",
+                          help="Hostname of the database server")
+        
         (options,args) = parser.parse_args()
 
         self.mimer = options.mimer
@@ -81,8 +83,12 @@ class Parameters:
                                                        "Safir.Dob.PersistenceParameters.dou")
 
         self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
-        
-        self.connection_string = "Driver={mimersql};Database=SafirDbNew;Uid=dopeuser;Pwd=dopeuser"
+
+        if self.mimer:
+            self.connection_string = "Driver={mimersql};Node=" + options.hostname + ";Database=SafirDbNew;Uid=dopeuser;Pwd=dopeuser"
+        else:
+            self.connection_string = "DRIVER={MySQL};Database=dope_db;Server=" + options.hostname + ";Uid=dopeuser;Pwd=dopeuser"
+        print "Using connection string", self.connection_string
 
 def getText(nodelist):
     rc = []
