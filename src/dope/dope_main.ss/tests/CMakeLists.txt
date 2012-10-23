@@ -25,7 +25,7 @@ ADD_EXECUTABLE(run_sql run_sql.cpp)
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(entity_owner dose_cpp dots_generated-DopeTest-cpp dots_cpp ${Boost_LIBRARIES})
-  TARGET_LINK_LIBRARIES(run_sql olib ${Boost_LIBRARIES} ${ODBC_LIBRARIES})
+  TARGET_LINK_LIBRARIES(run_sql dots_cpp olib ${Boost_LIBRARIES} ${ODBC_LIBRARIES})
 endif()
 
 find_package(PythonInterp)
