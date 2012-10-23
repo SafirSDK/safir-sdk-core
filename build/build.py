@@ -379,9 +379,9 @@ class VisualStudioBuilder(BuilderBase):
             if self.tmpdir is None:
                 die("Failed to find a temp directory!")
         if not os.path.isdir(self.tmpdir):
-            die("I can't seem to use the temp directory " + self.tmpdir)        
+            die("I can't seem to use the temp directory " + self.tmpdir)  
 
-    def set_studio_version(self):
+    def set_studio_version(self, studio):
         super(VisualStudioBuilder, self).__init__()
         VS80 = os.environ.get("VS80COMNTOOLS")
         VS90 = os.environ.get("VS90COMNTOOLS")
@@ -401,26 +401,54 @@ class VisualStudioBuilder(BuilderBase):
         self.studio_install_dir = None
         self.vcvarsall_arg = None
         
-        if VSCount > 1:
-            die("I found several Visual Studio installations, will need command line arg!")
-        elif VS80 is not None:
-            self.studio = VS80
+        if studio is not None:
+            #check that studio given on command line is installed
+            if studio == "2005":
+                if VS80 is None:
+                    die("Visual Studio 2005 seems not to be installed!")
+                else:
+                    self.studio = VS80
+            elif studio == "2008":
+                if VS90 is None:
+                    die("Visual Studio 2008 seems not to be installed!")
+                else:
+                    self.studio = VS90                    
+            elif studio == "2010":
+                if VS100 is None:
+                    die("Visual Studio 2010 seems not to be installed!")
+                else:
+                    self.studio = VS100                    
+            else:
+                die("Studio verson is not supported!")
+        else:
+            #no studio given on command line, check that there is only one version installed
+            if VSCount > 1:
+                die("I found several Visual Studio installations, will need command line arg!")
+            elif VS80 is not None:
+                self.studio = VS80
+            elif VS90 is not None:
+                self.studio = VS90
+            elif VS100 is not None:
+                self.studio = VS100
+            else:
+                die("No Visual Studio version seems to be installed!")
+
+
+        if self.studio == VS80:
             if target_architecture == "x86":
                 self.generator = "Visual Studio 8 2005"
             elif target_architecture == "x86-64":
                 self.generator = "Visual Studio 8 2005 Win64"
             else:
                 die("Target architecture " + target_architecture + " is not supported for Visual Studio 8 2005 !")
-        elif VS90 is not None:
-            self.studio = VS90
+        elif self.studio == VS90:
             if target_architecture == "x86":
                 self.generator = "Visual Studio 9 2008"
             elif target_architecture == "x86-64":
                 self.generator = "Visual Studio 9 2008 Win64"
             else:
                 die("Target architecture " + target_architecture + " is not supported for Visual Studio 9 2008 !")
-        elif VS100 is not None:
-            self.studio = VS100
+        elif self.studio == VS100:
             if target_architecture == "x86":
                 self.generator = "Visual Studio 10"
             elif target_architecture == "x86-64":
@@ -436,43 +464,14 @@ class VisualStudioBuilder(BuilderBase):
         VS90 = os.environ.get("VS90COMNTOOLS")
         VS100 = os.environ.get("VS100COMNTOOLS")
         return VS80 is not None or VS90 is not None or VS100 is not None
-
+            
     def setup_command_line_options(self,parser):
         parser.add_option("--use-studio",action="store",type="string",dest="use_studio",
                           help="The visual studio to use for building, can be '2005', '2008' or '2010'")
 
     def handle_command_line_options(self,options):
-        self.set_studio_version()
-        if self.studio is None and options.use_studio is None:
-            die("Please specify which visual studio you want to use for building.\n" +
-                "Use the --use-studio command line switch, can be '2005', '2008' or '2010'")
-        elif options.use_studio is not None:
-            if options.use_studio == "2005":
-                self.studio = os.environ.get("VS80COMNTOOLS")
-                if target_architecture == "x86":
-                    self.generator = "Visual Studio 8 2005"
-                elif target_architecture == "x86-64":
-                    self.generator = "Visual Studio 8 2005 Win64"
-                else:
-                    die("Target architecture " + target_architecture + " is not supported for Visual Studio 8 2005 !")  
-            elif options.use_studio == "2008":
-                self.studio = os.environ.get("VS90COMNTOOLS")
-                if target_architecture == "x86":
-                    self.generator = "Visual Studio 9 2008"
-                elif target_architecture == "x86-64":
-                    self.generator = "Visual Studio 9 2008 Win64"
-                else:
-                    die("Target architecture " + target_architecture + " is not supported for Visual Studio 9 2008 !")  
-            elif options.use_studio == "2010":
-                self.studio = os.environ.get("VS100COMNTOOLS")
-                if target_architecture == "x86":
-                    self.generator = "Visual Studio 10"
-                elif target_architecture == "x86-64":
-                    self.generator = "Visual Studio 10 Win64"
-                else:
-                    die("Target architecture " + target_architecture + " is not supported for Visual Studio 10 !")  
-            else:
-                die ("Unknown visual studio " + options.use_studio)
+
+        self.set_studio_version(options.use_studio)
 
         self.studio_install_dir = os.path.join(self.studio,"..", "..")
 
