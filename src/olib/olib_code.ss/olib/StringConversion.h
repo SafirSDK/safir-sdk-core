@@ -73,7 +73,7 @@ namespace
     public:
         explicit ToSqlWchars(const std::wstring& str)
             : m_chars(str.begin(),str.end())
-        {}
+        {m_chars.push_back(0);} //null termination!
         
         operator SQLWCHAR*()
         {
