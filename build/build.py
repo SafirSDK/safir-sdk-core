@@ -284,7 +284,7 @@ def parse_command_line(builder):
 
     if sys.platform == "win32":
         if not is_64_bit():
-            options.build_32_bit = True:
+            options.build_32_bit = True
 
         if not options.build_32_bit:
             logger.log("Will not build Ada interfaces, since Ada is not currently supported for 64bit platforms")
