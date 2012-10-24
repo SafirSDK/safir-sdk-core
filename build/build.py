@@ -283,6 +283,9 @@ def parse_command_line(builder):
     logger = Logger("Brief" if options.verbose == 0 else "Verbose")
 
     if sys.platform == "win32":
+        if not is_64_bit():
+            options.build_32_bit = True:
+
         if not options.build_32_bit:
             logger.log("Will not build Ada interfaces, since Ada is not currently supported for 64bit platforms")
             options.ada_support = False
