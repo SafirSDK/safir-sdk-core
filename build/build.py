@@ -40,7 +40,8 @@ skip_list = None
 clean = False
 force_config = None
 force_extra_config = None
-target_architecture = None
+if sys.platform == "win32": #target_architecture is only set on windows platfoms!
+    target_architecture = None
 ada_support = False
 java_support = False
 class FatalError(Exception):
@@ -246,8 +247,6 @@ def parse_command_line(builder):
     parser = OptionParser()
     parser.add_option("--command-file", "-f",action="store",type="string",dest="command_file",
                       help="The command to execute")
-    parser.add_option("--target",action="store",type="string",dest="target_architecture",default="x86",
-                          help="Target architecture, x86 or x86-64")
     parser.add_option("--no-ada-support", action="store_false",dest="ada_support",default=True,
                       help="Disable Ada support")
     parser.add_option("--no-java-support", action="store_false",dest="java_support",default=True,
@@ -268,6 +267,10 @@ def parse_command_line(builder):
     parser.add_option("--verbose", "-v", action="count",dest="verbose",default=0,
                       help="Print more stuff about what is going on. Use twice to get very verbose output.")
 
+    if is_64_bit() and sys.platform == "win32":
+        parser.add_option("--32-bit",action="store",type="store_true",dest="build_32_bit",default=False,
+                          help="Build a 32 bit system even though this machine is 64 bit.")
+
     builder.setup_command_line_options(parser)
     (options,args) = parser.parse_args()
 
@@ -279,21 +282,18 @@ def parse_command_line(builder):
     global logger
     logger = Logger("Brief" if options.verbose == 0 else "Verbose")
 
-    if options.target_architecture == "x86-64":
-        if not is_64_bit():
-            die("Target x86-64 can't be set since this is not a 64 bit OS")
-        if options.ada_support:
-            die("64 bit Ada build is currently not supported")
-    elif options.target_architecture != "x86":
-        die("Unknown target architecture " + options.target_architecture)
-    global target_architecture
-    target_architecture = options.target_architecture
+    if sys.platform == "win32":
+        if not options.build_32_bit:
+            logger.log("Will not build Ada interfaces, since Ada is not currently supported for 64bit platforms")
+            options.ada_support = False
+
+        global target_architecture
+        target_architecture = "x86" if options.build_32_bit else "x86-64"
 
     global ada_support
     ada_support = options.ada_support
     global java_support
     java_support = options.java_support
-    
     
     global skip_list
     if (options.skip_list == None):
