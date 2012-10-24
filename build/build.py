@@ -268,7 +268,7 @@ def parse_command_line(builder):
                       help="Print more stuff about what is going on. Use twice to get very verbose output.")
 
     if is_64_bit() and sys.platform == "win32":
-        parser.add_option("--32-bit",action="store",type="store_true",dest="build_32_bit",default=False,
+        parser.add_option("--32-bit",action="store_true",dest="build_32_bit",default=False,
                           help="Build a 32 bit system even though this machine is 64 bit.")
 
     builder.setup_command_line_options(parser)
