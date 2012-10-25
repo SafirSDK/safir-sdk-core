@@ -39,10 +39,12 @@ namespace Databases
 namespace Odbc
 {
 
-Connection::Connection() :
-    m_hConnection(SQL_NULL_HDBC),
-    m_bIsConnected(false)
+void Connection::CheckSQLWCHARSize(const size_t size)
 {
+    if (size != sizeof(SQLWCHAR))
+    {
+        throw Safir::Dob::Typesystem::SoftwareViolationException(L"Olib was compiled with a different size of SQLWCHAR than the code that uses it. Are you trying to mix iODBC and unixODBC?", __WFILE__, __LINE__);
+    }
 }
 
 Connection::~Connection()

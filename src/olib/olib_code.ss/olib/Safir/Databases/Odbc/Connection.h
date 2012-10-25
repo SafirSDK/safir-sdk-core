@@ -55,11 +55,18 @@ class OLIB_API Connection : private boost::noncopyable
 public:
     /** @brief Constructor
     */
-    Connection(void);
+    Connection():
+        m_hConnection(SQL_NULL_HDBC),
+        m_bIsConnected(false)
+    {
+        // This bit of code will make sure that the client is using the 
+        // same size for SQLWCHAR as the library.
+        CheckSQLWCHARSize(sizeof(SQLWCHAR));
+    }
 
     /** @brief Destructor
     */
-    ~Connection(void);
+    ~Connection();
 
     /** @brief Allocates a new connection to the database.
     *
@@ -239,6 +246,8 @@ private:
     std::vector<Statement *> m_statements;
 
     friend class Safir::Databases::Odbc::Statement;
+
+    static void CheckSQLWCHARSize(const size_t size);
 };
 
 #ifdef _MSC_VER
