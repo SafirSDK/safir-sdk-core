@@ -181,9 +181,8 @@ namespace Internal
         lllerr << "PoolHandler::RequestPoolDistribution: request sent to node " << nodeId << "." << std::endl;
         DistributionData PDRequest
             (request_pool_distribution_request_tag,
-            ConnectionId(ThisNodeParameters::NodeNumber(), -1, -1), //Sender - dummy connection id, only nodeNumber is of interest.
-            ConnectionId(nodeId, -1, -1)); //Receiver - dummy connection id, only nodeNumber is of interest.
-
+            ConnectionId(ThisNodeParameters::NodeNumber(), 0, -1), //Sender - use context 0 for this request
+            ConnectionId(nodeId, 0, -1)); //Receiver - use context 0 for this request
         m_ecom->Send(PDRequest);
     }
 

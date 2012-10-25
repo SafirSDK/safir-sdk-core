@@ -113,7 +113,9 @@ namespace Safir
         {
             DistributionData request
                 (have_persistence_data_request_tag,
-                ConnectionId(ThisNodeParameters::NodeNumber(), -1, -1)); //dummy connection id, since it is a dose_main only thing.
+                ConnectionId(ThisNodeParameters::NodeNumber(),
+                             0,     //use context 0 for this request
+                             -1));  //dummy identifier since it is a dose_main only thing.
 
             const bool result = m_ecom->Send(request);
             lllout << "Sent HavePersistanceDataRequest (send result = " << result << ")" << std::endl;
@@ -171,8 +173,10 @@ namespace Safir
                 lllout << "Got an Action_HavePersistenceDataRequest, responding with " << m_persistDataReady << std::endl;
                 DistributionData response
                     (have_persistence_data_response_tag,
-                    ConnectionId(ThisNodeParameters::NodeNumber(), -1, -1), //dummy connection id, since it is a dose_main only thing.
-                    m_persistDataReady);
+                     ConnectionId(ThisNodeParameters::NodeNumber(),
+                                  0,    //use context 0 for this response
+                                  -1),  //dummy identifier since it is a dose_main only thing.
+                     m_persistDataReady);
 
                 m_ecom->Send(response);
 
