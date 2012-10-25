@@ -2,7 +2,7 @@
 *
 * Copyright Saab Systems AB, 2011 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström
+* Created by: Lars Hagstrï¿½m
 *
 ******************************************************************************/
 #ifndef __LLUF_UNORDERED_SET_H__
@@ -13,7 +13,7 @@
 //If we've got boost > 1.42 we use their unordered set
 #if ((BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) > 42)
     #include <boost/tr1/unordered_set.hpp>
-    using std::tr1::unordered_map;
+    using std::tr1::unordered_set;
 #else
     #if defined _MSC_VER
         #include <hash_set>
