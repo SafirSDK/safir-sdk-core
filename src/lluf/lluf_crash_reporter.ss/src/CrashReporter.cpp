@@ -214,8 +214,10 @@ namespace
                                                                    true,
                                                                    -1));
 #else
-            m_errormode=GetErrorMode();
-            SetErrorMode(m_errormode | SEM_NOGPFAULTERRORBOX);     //Set the system to not display the Windows Error Reporting dialog.
+            //GetErrorMode does not exist in winxp, so we do SetErrorMode twice instead.
+            m_errormode = SetErrorMode(0);     
+            //Set the system to not display the Windows Error Reporting dialog.
+            SetErrorMode(m_errormode|SEM_NOGPFAULTERRORBOX);
 
             m_handler.reset (new google_breakpad::ExceptionHandler(GetDumpDirectory().wstring(),
                                                                    NULL,
@@ -235,7 +237,7 @@ namespace
         if (m_started && !m_stopped)
         {
 #ifdef LLUF_CRASH_REPORTER_WINDOWS
-            SetErrorMode(m_errormode);                //Set system default, which is to display all error dialog boxes.
+            SetErrorMode(m_errormode); //Restore previous value
 #endif
             m_handler.reset();
         }
