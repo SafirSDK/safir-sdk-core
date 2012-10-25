@@ -85,7 +85,7 @@ class Parameters:
         self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
 
         if self.mimer:
-            self.connection_string = "Driver={mimersql};Node=" + options.hostname + ";Database=SafirDbNew;Uid=dopeuser;Pwd=dopeuser"
+            self.connection_string = "Driver={mimersql};Protocol=tcp;Node=" + options.hostname + ";Database=SafirDbNew;Uid=dopeuser;Pwd=dopeuser"
         else:
             self.connection_string = "DRIVER={MySQL};Database=dope_db;Server=" + options.hostname + ";Uid=dopeuser;Pwd=dopeuser"
         print "Using connection string", self.connection_string
