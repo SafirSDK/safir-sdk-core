@@ -45,10 +45,6 @@ IF (NOT MSVC)
   TARGET_LINK_LIBRARIES(dots_kernel dots_id lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
 ENDIF()
 
-set (Boost_FIND_QUIETLY 1)
-FIND_PACKAGE(Boost COMPONENTS chrono)
-  TARGET_LINK_LIBRARIES(dots_kernel dots_id lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
-
 ADD_DEFINITIONS(-DDOTSKERNEL_EXPORTS)
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
