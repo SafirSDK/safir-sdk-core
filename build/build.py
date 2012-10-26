@@ -344,7 +344,6 @@ def parse_command_line(builder):
                 force_extra_config = "None"
             else:
                 die("Unexpected 'Config' value: " + config + ", can handle 'Release' and 'DebugOnly'")
-        
     builder.handle_command_line_options(options)
 
 
@@ -506,6 +505,12 @@ class VisualStudioBuilder(BuilderBase):
         logger.log("'subst /d k:' exited with return code" + str(ret),"command")
         subprocess.call(("subst","k:",bindir))
         logger.log("'subst k:" + bindir + "' exited with return code" + str(ret),"output")
+        
+        #set database from label environment variable
+        label = os.environ.get("label")
+        if label is not None:
+            os.environ["DATABASE_NAME"] = label.replace("-","")
+
 
     def build(self, directory, configs, install):
         if self.__can_use_studio_build(directory):
@@ -684,6 +689,11 @@ class UnixGccBuilder(BuilderBase):
         ADA_PROJECT_PATH = (os.environ.get("ADA_PROJECT_PATH") + ":") if os.environ.get("ADA_PROJECT_PATH") else ""
         os.environ["ADA_PROJECT_PATH"] = ADA_PROJECT_PATH + os.path.join(os.environ.get("SAFIR_SDK"),"ada")
         #java path gets set by jenkins
+
+        #set database from label environment variable
+        label = os.environ.get("label")
+        if label is not None:
+            os.environ["DATABASE_NAME"] = label.replace("-","")
 
     def build(self, directory, configs, install):
         """build a directory using make"""
