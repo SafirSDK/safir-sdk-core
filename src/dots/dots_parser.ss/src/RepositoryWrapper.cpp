@@ -38,6 +38,20 @@ namespace Internal
 {
     RepositoryWrapper::RepositoryWrapper(RawParseResultConstPtr rawResult) : m_rawResult(rawResult), m_parameters()
     {
+        //Add predefined types
+        m_objectDef.Name=BasicTypes::ObjectName;
+        DotsC_TypeId typeId = DotsId_Generate64(m_objectDef.Name.c_str());
+        m_classes.insert(std::make_pair(typeId, ClassDescriptionWrapper(&m_objectDef, typeId)));
+
+        m_exceptionDef.Name=BasicTypes::ExceptionName;
+        typeId = DotsId_Generate64(m_exceptionDef.Name.c_str());
+        m_exceptions.insert(std::make_pair(typeId, ExceptionDescriptionWrapper(&m_exceptionDef, typeId)));
+
+        m_fundamentalExceptionDef.Name=BasicTypes::FundamentalExceptionName;
+        typeId = DotsId_Generate64(m_fundamentalExceptionDef.Name.c_str());
+        m_exceptions.insert(std::make_pair(typeId, ExceptionDescriptionWrapper(&m_fundamentalExceptionDef, typeId)));
+
+        //Insert all types from raw result
         SetupWithTypeId(m_rawResult->Enumerations, m_enums);
         SetupWithTypeId(m_rawResult->Exceptions, m_exceptions);
         SetupWithTypeId(m_rawResult->Properties, m_properties);
@@ -378,6 +392,10 @@ namespace Internal
             m_typeId=DotsId_Generate64(m_def->TypeName.c_str());
         }
     }
+
+    //Exception
+    //--------------
+
 
 }
 }

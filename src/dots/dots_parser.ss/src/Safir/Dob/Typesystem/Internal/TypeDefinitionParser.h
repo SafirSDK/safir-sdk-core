@@ -36,36 +36,7 @@
     #define DOTS_API
     #define __cdecl
 #endif
-/* Not used? Removed by LAHA
-#if defined _MSC_VER
-   #if (_MSC_VER >= 1500)
-       #include <unordered_map>
-       using std::tr1::unordered_map;
-    #else
-       #include <hash_map>
-       #define unordered_map stdext::hash_map
-    #endif
-#elif defined __GNUC__
-   #include <tr1/unordered_map>
-   using std::tr1::unordered_map;
 
-//The int64 hash is not predefined on g++ 4.1, we assume it is in > 4.2
-#if (__GNUC_MINOR__ < 2)
-namespace std {namespace tr1 {
-
-    template<>
-    struct hash<long long int>
-    {
-        size_t
-        operator()(const long long int v) const
-        { return static_cast<size_t>(v);}
-    };
-
-}}
-#endif
-
-#endif
-*/
 #include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
 #include <Safir/Dob/Typesystem/Internal/ParseResult.h>
@@ -81,26 +52,28 @@ namespace Internal
 {    
     /**
      * Parse and validate dou- and dom- files.
+     * This class is immutable. All parsing and validation is made during construction and
+     * after construction all operations are read-operations that will not modify the object.
      */
     class DOTS_API TypeDefinitionParser
     {
     public:
         /**
-         * Default constructor.
-         *
-         * Creates a TypeDefinitionParser object.
-         */
-        TypeDefinitionParser(void);
-       
-        /**
-         * Validate and parse a complete set of dou- and dom-files. If the function returns without errors, the 
+         * Constructor - Creates a TypeDefinitionParser object.
+         * Will validate and parse a complete set of dou- and dom-files. If no error occurs, the
          * result can be retrieved by calling GetResult.
          *
          * @param definitions [in] - Root directory path to location of dou- and dom-files that shall be parsed.
-         * @return True if no error occured, else false.
-         * @throws Safir::Dob::Typesystem::Parser:ParseError The dou- or dom- files att specified path contains errors.
+         * @throws Safir::Dob::Typesystem::Parser:ParseError The dou- or dom- files at the specified path contains errors.
          */
-        void Parse(const boost::filesystem::path& definitions);
+        TypeDefinitionParser(const boost::filesystem::path& definitions);
+       
+        /**
+         * Get the path that was parsed during construction of this object.
+         *
+         * @return Path to the dou- and dom- files.
+         */
+        boost::filesystem::path GetPath() const {return m_path;}
 
         /**
          * Get the result after a successfull call to Parse. Will get the raw parse result. In most cases its more convenient
@@ -133,7 +106,10 @@ namespace Internal
         static std::string ToString(boost::shared_ptr<const TypeRepository> repository);
 
     private:
-        boost::shared_ptr<RawParseResult> m_result;        
+        boost::filesystem::path m_path;
+        boost::shared_ptr<RawParseResult> m_result;
+
+        void Parse();
     };
 }
 }

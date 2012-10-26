@@ -133,11 +133,12 @@ namespace Internal
     void ParseResultFinalizer::ProcessResult()
     {
         PROFILE
+
         //Add object to result to avoid lots of special handling in the code.
-        ClassDefinition objectDef;
-        objectDef.Name=BasicTypes::ObjectName;        
-        objectDef.FileName=BasicTypes::ObjectName+".dou";
-        m_state.Result->Classes.push_back(objectDef);
+//        ClassDefinition objectDef;
+//        objectDef.Name=BasicTypes::ObjectName;
+//        objectDef.FileName=BasicTypes::ObjectName+".dou";
+//        m_state.Result->Classes.push_back(objectDef);
 
         ResolveParameterToParameterRefs();
         ResolveCreateRoutineValues();
@@ -154,17 +155,17 @@ namespace Internal
         std::for_each(m_state.Result->PropertyMappings.begin(), m_state.Result->PropertyMappings.end(), boost::bind(&ParseResultFinalizer::ProcessPropertyMapping, this, _1)); //ProcessPropertyMapping
 
 #ifdef PROFILE_ENABLED
-            g_time[_pr.m_fun]+=_pr.m_timer.elapsed();
+        g_time[_pr.m_fun]+=_pr.m_timer.elapsed();
 
-            std::vector<std::pair<std::string, double>> myvec(g_time.begin(), g_time.end());
-            std::sort(myvec.begin(), myvec.end(), timeCmp());
+        std::vector<std::pair<std::string, double>> myvec(g_time.begin(), g_time.end());
+        std::sort(myvec.begin(), myvec.end(), timeCmp());
 
-            std::cout<<std::endl<<"------ Profiling ----------"<<std::endl;
-            for (std::vector<std::pair<std::string, double>>::const_iterator it=myvec.begin(); it!=myvec.end(); ++it)
-            {
-                std::cout<<it->first<<": "<<it->second<<std::endl;
-            }
-            std::cout<<std::endl<<"----------------------------"<<std::endl;
+        std::cout<<std::endl<<"------ Profiling ----------"<<std::endl;
+        for (std::vector<std::pair<std::string, double>>::const_iterator it=myvec.begin(); it!=myvec.end(); ++it)
+        {
+            std::cout<<it->first<<": "<<it->second<<std::endl;
+        }
+        std::cout<<std::endl<<"----------------------------"<<std::endl;
 #endif
     }
 

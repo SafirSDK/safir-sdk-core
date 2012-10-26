@@ -107,8 +107,12 @@ namespace Internal
 
     private:
         RawParseResultConstPtr m_rawResult;
+        //Pre-defined types
+        ClassDefinition m_objectDef;
+        ExceptionDefinition m_exceptionDef;
+        ExceptionDefinition m_fundamentalExceptionDef;
 
-        //Klar, sätt enum och cls
+        //Klar
         struct MemberDescriptionWrapper : public MemberDescription
         {
             MemberDescriptionWrapper(const MemberDefinition* def) : m_def(def), m_class(NULL), m_enum(NULL) {}
@@ -146,7 +150,7 @@ namespace Internal
             std::vector<MemberDescriptionWrapper> m_members;
         };
     
-        //Klar, sätt basklass
+        //Klar
         struct ExceptionDescriptionWrapper : public ExceptionDescription
         {
             ExceptionDescriptionWrapper(const ExceptionDefinition* def, DotsC_TypeId typeId) : m_def(def), m_typeId(typeId), m_base(NULL) {}
@@ -171,6 +175,7 @@ namespace Internal
             virtual const std::string& GetName() const {return m_def->Name;}
             virtual DotsC_MemberType GetMemberType() const {return m_def->MemberType;}
             virtual DotsC_TypeId GetTypeId() const {return m_typeId;} //only valid if MemberType is object or enum
+            virtual bool IsArray() const {return m_def->IsArray;}
             virtual int GetArraySize() const {return m_def->Values.size();}
             //GetValue<T>
 
@@ -206,6 +211,7 @@ namespace Internal
             virtual const std::string& GetName() const {return m_name;}
             virtual DotsC_MemberType GetMemberType() const {return m_memberType;}
             virtual DotsC_TypeId GetTypeId() const {return m_typeId;} //only valid if MemberType is object or enum
+            virtual bool IsArray() const {return false;}
             virtual int GetArraySize() const {return 1;}
             //GetValue<T>
 

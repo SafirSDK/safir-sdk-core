@@ -64,6 +64,7 @@ namespace Internal
         virtual const std::string& GetName() const = 0;
         virtual DotsC_MemberType GetMemberType() const = 0;
         virtual DotsC_TypeId GetTypeId() const = 0; //only valid if MemberType is object or enum
+        virtual bool IsArray() const = 0;
         virtual int GetArraySize() const = 0;
         //GetValue<T>
     };

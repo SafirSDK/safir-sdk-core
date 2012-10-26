@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
     else
     {
         //douDir = boost::filesystem::path("C:/dev/safir_sdk_core/src/dots/dots_parser/tests/dou_test_files");
-        douDir = boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_parser/tests/dou_test_files");
+        douDir = boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_parser.ss/tests/dou_test_files");
     }
 
     std::cout<<"DouDir: "<<douDir.string()<<std::endl;
@@ -27,15 +27,16 @@ int main(int argc, char* argv[])
     boost::timer timer; 
     double elapsed = 0;
     
-    Safir::Dob::Typesystem::Internal::TypeDefinitionParser tp;
+    boost::shared_ptr<Safir::Dob::Typesystem::Internal::TypeDefinitionParser> parser;
 
     try
     {
-        tp.Parse(douDir);
+        parser.reset(new Safir::Dob::Typesystem::Internal::TypeDefinitionParser(douDir));
         elapsed=timer.elapsed();
-        //tp.Dump(tp.GetResult());
+        //std::cout<<Safir::Dob::Typesystem::Internal::TypeDefinitionParser::ToString(parser->GetRepository())<<std::endl;
+        //std::cout<<Safir::Dob::Typesystem::Internal::TypeDefinitionParser::ToString(parser->GetRawResult())<<std::endl;
 
-        std::cout<<"Parsed OK"<<std::endl;
+        //std::cout<<"Parsed OK"<<std::endl;
     }
     catch (Safir::Dob::Typesystem::Internal::ParseError err)
     {

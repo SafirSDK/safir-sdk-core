@@ -55,21 +55,22 @@ namespace Internal
     void DumpPropertyDescription(const PropertyDescription* c, std::ostringstream& os);
     void DumpMappingDescription(const PropertyMappingDescription* c, std::ostringstream& os);
 
-    TypeDefinitionParser::TypeDefinitionParser(void) :  m_result()
-    {        
+    TypeDefinitionParser::TypeDefinitionParser(const boost::filesystem::path& definitions) : m_path(definitions), m_result()
+    {
+        Parse();
     }
 
-    void TypeDefinitionParser::Parse(const boost::filesystem::path& definitions)
+    void TypeDefinitionParser::Parse()
     {   
-        if (!boost::filesystem::is_directory(definitions))
+        if (!boost::filesystem::is_directory(m_path))
         {
-            throw ParseError("Invalid directory path", "The specified root directory does not exist.", definitions.string());
+            throw ParseError("Invalid directory path", "The specified root directory does not exist.", m_path.string());
         }
 
         m_result.reset(new RawParseResult());        
         ParseState state(m_result);
 
-        boost::filesystem::recursive_directory_iterator it(definitions), end;
+        boost::filesystem::recursive_directory_iterator it(m_path), end;
          for (; it!=end; ++it)
          {
              if (it->path().extension() == ".dou" || it->path().extension() == ".dom" )
@@ -348,7 +349,7 @@ namespace Internal
         os<<"Exception: "<<c->GetName()<<std::endl;
         os<<"TypeId: "<<c->GetTypeId()<<std::endl;
         if (c->GetBaseClass()!=NULL)
-            os<<"BaseClass: "<<c->GetBaseClass()->GetName();
+            os<<"BaseClass: "<<c->GetBaseClass()->GetName()<<std::endl;
     }
 
     void DumpPropertyDescription(const PropertyDescription* c, std::ostringstream& os)
@@ -383,7 +384,14 @@ namespace Internal
             os<<BasicTypes::Instance().StringOf(c->GetMemberType());
             break;
         }
-        os<<", ArraySize: "<<c->GetArraySize()<<std::endl;
+        if (c->IsArray())
+        {
+            os<<", isArray=true, ArraySize: "<<c->GetArraySize()<<std::endl;
+        }
+        else
+        {
+            os<<", isArray=false"<<std::endl;
+        }
     }
 
     void DumpParameterDescription(const ParameterDescription* c, std::ostringstream& os)
@@ -404,7 +412,15 @@ namespace Internal
             os<<BasicTypes::Instance().StringOf(c->GetMemberType());
             /*break;
         }*/
-        os<<", ArraySize: "<<c->GetArraySize()<<std::endl;
+
+        if (c->IsArray())
+        {
+            os<<", isArray=true, ArraySize: "<<c->GetArraySize()<<std::endl;
+        }
+        else
+        {
+            os<<", isArray=false"<<std::endl;
+        }
 
     }
 
