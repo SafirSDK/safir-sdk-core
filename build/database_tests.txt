@@ -1,0 +1,6 @@
+#This file contains the tests that need a database set up to 
+#run correctly.
+#It assumes that the dope test dou files have been installed,
+#e.g. by running the dob_tests.txt control file
+
+run_test_suite   src/dope/dope_main.ss/tests/odbc_backend        dope_odbc_backend
