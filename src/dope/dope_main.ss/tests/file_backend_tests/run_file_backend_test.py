@@ -30,7 +30,7 @@ def log(data):
     print(data)
     sys.stdout.flush()
 
-sys.path.append("../../../swre/swre_test.ss/testutil")
+sys.path.append("../../../../swre/swre_test.ss/testutil")
 from testenv import TestEnv, TestEnvStopper
 
 def remove(filename):

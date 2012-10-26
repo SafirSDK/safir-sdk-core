@@ -26,7 +26,7 @@
 #import subprocess, os, time, sys, shutil, glob, xml.dom.minidom
 import sys, os, shutil, xml.dom.minidom, glob, time, subprocess, re
 
-sys.path.append("../../../swre/swre_test.ss/testutil")
+sys.path.append("../../../../swre/swre_test.ss/testutil")
 from testenv import TestEnv, TestEnvStopper
 
 def rmdir(directory):
@@ -45,25 +45,24 @@ class Parameters:
         import tempfile
 
         parser = OptionParser()
-        parser.add_option("--mimer", action="store_true",dest="mimer",default=False,
-                          help="test against mimer database")
-        parser.add_option("--mysql", action="store_true",dest="mysql",default=False,
-                          help="test against mysql database")
+        parser.add_option("--db", action="store",type="choice",choices=("mimer","mysql","postgres"),dest="db",default=False,
+                          help="Database engine to test against")
         parser.add_option("--hostname", action="store",dest="hostname",default="localhost",
                           help="Hostname of the database server")
-        
+        parser.add_option("--database", action="store",dest="database",
+                          help="Hostname of the database server")
+
         (options,args) = parser.parse_args()
 
-        self.mimer = options.mimer
-        self.mysql = options.mysql
+        if not options.db:
+            print "Need --db argument"
+            sys.exit(1)
 
-        if self.mimer and self.mysql:
-            print "You can only specify one database to test against"
+        if not options.database:
+            print "Need --database argument"
             sys.exit(1)
-            
-        if not self.mimer and not self.mysql:
-            print "You need to specify one database to test against"
-            sys.exit(1)
+
+        self.db = options.db
 
         self.SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
         if not self.SAFIR_RUNTIME:
@@ -84,10 +83,17 @@ class Parameters:
 
         self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
 
-        if self.mimer:
-            self.connection_string = "Driver={mimersql};Protocol=tcp;Node=" + options.hostname + ";Database=SafirDbNew;Uid=dopeuser;Pwd=dopeuser"
-        else:
-            self.connection_string = "DRIVER={MySQL};Database=dope_db;Server=" + options.hostname + ";Uid=dopeuser;Pwd=dopeuser"
+        if self.db == "mimer":
+            self.connection_string = "Driver={mimersql};Protocol=tcp;" + \
+                "Node=" + options.hostname +  ";" + \
+                "Database=" + options.database + ";" + \
+                "Uid=dopeuser;Pwd=dopeuser"
+        elif self.db == "mysql":
+            self.connection_string = "DRIVER={MySQL};"+ \
+                "Server=" + options.hostname + ";" + \
+                "Database=" + options.database + ";" +\
+                "Uid=dopeuser;Pwd=dopeuser"
+
         print "Using connection string", self.connection_string
 
 def getText(nodelist):

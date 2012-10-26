@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(dope_test CXX)
+project(dope_odbc_backend_test CXX)
 
 include($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
@@ -20,7 +20,7 @@ if (UNIX)
 endif()
 
 
-ADD_EXECUTABLE(entity_owner entity_owner.cpp)
+ADD_EXECUTABLE(entity_owner ../entity_owner.cpp)
 ADD_EXECUTABLE(run_sql run_sql.cpp)
 
 if (NOT MSVC)
@@ -32,9 +32,7 @@ find_package(PythonInterp)
 
 enable_testing()
 
-ADD_TEST(dope_file_backend_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_file_backend_test.py)
-#ADD_TEST(dope_odbc_backend_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_odbc_backend_test.py)
+ADD_TEST(dope_odbc_backend_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_odbc_backend_test.py --db mysql --database dope_db --hostname localhost)
 
 #Long timeouts are needed on slow machines.
-set_tests_properties(dope_file_backend_test PROPERTIES TIMEOUT 1800)
-#set_tests_properties(dope_odbc_backend_test PROPERTIES TIMEOUT 1800)
+set_tests_properties(dope_odbc_backend_test PROPERTIES TIMEOUT 1800)
