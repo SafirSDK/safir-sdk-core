@@ -32,7 +32,19 @@ find_package(PythonInterp)
 
 enable_testing()
 
-ADD_TEST(dope_odbc_backend_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_odbc_backend_test.py --db mysql --database dope_db --hostname localhost)
+if("$ENV{Driver}" STREQUAL "")
+  message(FATAL_ERROR "'Driver' environment variable is not set!")
+endif()
+
+if("$ENV{DATABASE_NAME}" STREQUAL "")
+  message(FATAL_ERROR "'DATABASE_NAME' environment variable is not set!")
+endif()
+
+if("$ENV{DATABASE_SERVER}" STREQUAL "")
+  message(FATAL_ERROR "'DATABASE_SERVER' environment variable is not set!")
+endif()
+
+ADD_TEST(dope_odbc_backend_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_odbc_backend_test.py --driver $ENV{Driver} --database $ENV{DATABASE_NAME} --hostname $ENV{DATABASE_SERVER})
 
 #Long timeouts are needed on slow machines.
 set_tests_properties(dope_odbc_backend_test PROPERTIES TIMEOUT 1800)

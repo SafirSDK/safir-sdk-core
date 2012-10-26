@@ -45,7 +45,7 @@ class Parameters:
         import tempfile
 
         parser = OptionParser()
-        parser.add_option("--db", action="store",type="choice",choices=("mimer","mysql","postgres"),dest="db",default=False,
+        parser.add_option("--driver", action="store",type="choice",choices=("mimer","mysql","postgres"),dest="driver",default=False,
                           help="Database engine to test against")
         parser.add_option("--hostname", action="store",dest="hostname",default="localhost",
                           help="Hostname of the database server")
@@ -54,15 +54,15 @@ class Parameters:
 
         (options,args) = parser.parse_args()
 
-        if not options.db:
-            print "Need --db argument"
+        if not options.driver:
+            print "Need --driver argument"
             sys.exit(1)
 
         if not options.database:
             print "Need --database argument"
             sys.exit(1)
 
-        self.db = options.db
+        self.driver = options.driver
 
         self.SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
         if not self.SAFIR_RUNTIME:
@@ -83,12 +83,12 @@ class Parameters:
 
         self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
 
-        if self.db == "mimer":
+        if self.driver == "mimer":
             self.connection_string = "Driver={mimersql};Protocol=tcp;" + \
                 "Node=" + options.hostname +  ";" + \
                 "Database=" + options.database + ";" + \
                 "Uid=dopeuser;Pwd=dopeuser"
-        elif self.db == "mysql":
+        elif self.driver == "mysql":
             self.connection_string = "DRIVER={MySQL};"+ \
                 "Server=" + options.hostname + ";" + \
                 "Database=" + options.database + ";" +\
