@@ -173,6 +173,11 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SAFIR_SDK}/data/build/)
 
 if (MSVC)
     SET(COMMON_CS_FLAGS "-warn:4")
+
+    #this will make 32 bit builds work on a 64bit machine
+    if (NOT "$ENV{Platform}" STREQUAL "X64")
+      SET(COMMON_CS_FLAGS ${COMMON_CS_FLAGS} "-platform:x86")
+    endif()
 else()
     SET(COMMON_CS_FLAGS "-warn:4" "-nowarn:1587")
 endif(MSVC)
