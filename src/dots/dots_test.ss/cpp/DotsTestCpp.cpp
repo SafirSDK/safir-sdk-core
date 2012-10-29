@@ -95,7 +95,7 @@ std::wstring utf8_to_wstr( const std::string& str )
 
     std::wstring wstr( pwszBuf, pwsz - pwszBuf );
 
-    delete pwszBuf;
+    delete [] pwszBuf;
     return wstr;
 }
 
