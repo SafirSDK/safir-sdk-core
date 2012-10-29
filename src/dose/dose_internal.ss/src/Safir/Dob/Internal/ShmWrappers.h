@@ -40,9 +40,10 @@ namespace Internal
     public:
         explicit ShmHandlerId(const Dob::Typesystem::HandlerId& handlerId):
             m_handlerId(handlerId.GetRawValue()),
-            m_handlerIdStr(handlerId.GetRawString().c_str()) {}
+            m_handlerIdStr(handlerId.GetRawString().begin(),handlerId.GetRawString().end()) {}
 
-        const Typesystem::HandlerId GetHandlerId() const {return Typesystem::HandlerId(m_handlerId,m_handlerIdStr.c_str());}
+        const Typesystem::HandlerId GetHandlerId() const {return Typesystem::HandlerId(m_handlerId,
+                                                                                       std::wstring(m_handlerIdStr.begin(), m_handlerIdStr.end()));}
 
         ShmHandlerId& operator=(const ShmHandlerId& other)
         {
