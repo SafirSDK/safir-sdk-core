@@ -33,15 +33,18 @@ find_package(PythonInterp)
 enable_testing()
 
 if("$ENV{Driver}" STREQUAL "")
-  message(FATAL_ERROR "'Driver' environment variable is not set!")
+  set(ENV{Driver} mysql)
+  message("'Driver' environment variable is not set, using '$ENV{Driver}'")
 endif()
 
 if("$ENV{DATABASE_NAME}" STREQUAL "")
-  message(FATAL_ERROR "'DATABASE_NAME' environment variable is not set!")
+  set(ENV{DATABASE_NAME} dope_db)
+  message("'DATABASE_NAME' environment variable is not set, using '$ENV{DATABASE_NAME}'")
 endif()
 
 if("$ENV{DATABASE_SERVER}" STREQUAL "")
-  message(FATAL_ERROR "'DATABASE_SERVER' environment variable is not set!")
+  set(ENV{DATABASE_SERVER} localhost)
+  message("'DATABASE_SERVER' environment variable is not set, using '$ENV{DATABASE_SERVER}'")
 endif()
 
 ADD_TEST(dope_odbc_backend_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_odbc_backend_test.py --driver $ENV{Driver} --database $ENV{DATABASE_NAME} --hostname $ENV{DATABASE_SERVER})
