@@ -30,7 +30,7 @@
 #include <safir/Dob/Typesystem/Serialization.h>
 #include <safir/Dob/Typesystem/BlobOperations.h>
 #include <safir/Dob/Typesystem/ObjectFactory.h>
-
+#include <boost/shared_ptr.hpp>
 
 DbUnitAccess::DbUnitAccess() : 
     m_outParamCallsign(6), m_outParamUnitSizeId(50), m_outParamUnitIdentityId(100), m_paramUnitId(1), 
@@ -46,9 +46,9 @@ DbUnitAccess::DbUnitAccess() :
     m_bUseDbIsPrepared( false ), m_bBinaryReadIsPrepared( false ), m_bBinaryWriteIsPrepared( false ), 
     m_bWriteNClobIsPrepared(false), m_bReadNClobIsPrepared(false), m_bWriteBlobIsPrepared(false),
     m_bReadBlobIsPrepared(false), m_bLongTimeQueryIsPrepared(false),
-    m_bInsertInto42IsPrepared( false )
+    m_bInsertInto42IsPrepared( false ),m_isMySQL(false),m_isPostgreSQL(false),m_isMimerSQL(false)
 {   
-    //Safir::Olib::TestObject* test=new Safir::Olib::TestObject();
+
     m_Object=Safir::Olib::TestObject::Create();
 
     m_Object->Callsign().SetVal(L"CS");
@@ -58,8 +58,8 @@ DbUnitAccess::DbUnitAccess() :
     m_Object->CombatReadinessDescription().SetVal(L"Descp");
     m_Object->Latitude().SetVal(17.6389);
     m_Object->Longitude().SetVal(59.8586);
-    m_Object->Course().SetVal(43.0);
-    m_Object->Speed().SetVal(29.0);
+    m_Object->Course().SetVal(43.3f);
+    m_Object->Speed().SetVal(29.3f);
     m_Object->IsAlive().SetVal(true);
     m_Object->Alargeinteger().SetVal(1);
 
@@ -94,6 +94,96 @@ void DbUnitAccess::OnStopOrder()
 {
     std::wcout << "StopOrder" << std::endl;
 }
+void DbUnitAccess::TestOutputParameters()
+{
+    if (!m_connection.IsConnected())
+    {
+        std::wcout << "Not Connected" << std::endl;
+        return;
+    }
+
+    if(!m_OutputStmt.IsValid())
+    {
+        m_OutputStmt.Alloc(m_connection);
+    }
+
+    if(m_isMimerSQL || m_isPostgreSQL)
+    {
+        m_OutputStmt.Prepare(L"{call spOutputOlibTest (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )}");
+    }
+    else
+    {
+        m_OutputStmt.Prepare(L"call spOutputOlibTest (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    }
+
+    m_OutputStmt.BindParameter(1, m_outParamCallsign);
+    m_OutputStmt.BindParameter(2, m_outParamUnitSizeId);
+    m_OutputStmt.BindParameter(3, m_outParamUnitIdentityId);
+    m_OutputStmt.BindParameter(4, m_outParamCombatReadiness);
+    m_OutputStmt.BindParameter(5, m_outParamCombatReadinessDescription);
+    m_OutputStmt.BindParameter(6, m_outParamLatitude);
+    m_OutputStmt.BindParameter(7, m_outParamLongitude);
+    m_OutputStmt.BindParameter(8, m_outParamSpeed);
+    m_OutputStmt.BindParameter(9, m_outParamCourse);
+    m_OutputStmt.BindParameter(10, m_outParamMeasurementTime);
+    m_OutputStmt.BindParameter(11, m_outParamIsAlive);
+    m_OutputStmt.BindParameter(12, m_outParamAlargeinteger);
+
+    m_OutputStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
+
+    m_outParamUnitId.SetValue(0);
+    m_outParamCallsign.SetValue(L"None");
+    m_outParamUnitSizeId.SetValue(L"None");
+    m_outParamUnitIdentityId.SetValue(L"None");
+    m_outParamCombatReadiness.SetValue(0);
+    m_outParamCombatReadinessDescription.SetValue(L"None");
+    m_outParamLatitude.SetValue(1.0);
+    m_outParamLongitude.SetValue(1.0);
+    m_outParamCourse.SetValue(1.0);
+    m_outParamSpeed.SetValue(1.0);
+    m_outParamMeasurementTime.SetNull();
+    m_outParamIsAlive.SetValue(false);
+    m_outParamAlargeinteger.SetValue(2);
+
+    m_OutputStmt.Execute();
+    while( m_OutputStmt.MoreResults())
+        ;
+
+    //Create objectptr to testobject
+    Safir::Olib::TestObjectPtr outObjPtr =Safir::Olib::TestObject::Create();
+
+    //Get values from columndata and set to outObject
+    outObjPtr->Callsign().SetVal(m_outParamCallsign.GetValue());
+    outObjPtr->UnitSizeId().SetVal(m_outParamUnitSizeId.GetValue());
+    outObjPtr->UnitIdentity().SetVal(m_outParamUnitIdentityId.GetValue());
+    outObjPtr->CombatReadines().SetVal(m_outParamCombatReadiness.GetValue());
+    outObjPtr->CombatReadinessDescription().SetVal(m_outParamCombatReadinessDescription.GetValue());
+    outObjPtr->Latitude().SetVal(m_outParamLatitude.GetValue());
+    outObjPtr->Longitude().SetVal(m_outParamLongitude.GetValue());
+    outObjPtr->Speed().SetVal(m_outParamSpeed.GetValue());
+    outObjPtr->Course().SetVal(m_outParamCourse.GetValue());
+    outObjPtr->IsAlive().SetVal(m_outParamIsAlive.GetValue());
+    outObjPtr->Alargeinteger().SetVal(m_outParamAlargeinteger.GetValue());
+
+
+    m_connection.Commit();
+
+    //Create xml from input and output object
+    std::wstring inObjXml, outObjXml;
+    inObjXml=Safir::Dob::Typesystem::Serialization::ToXml(m_Object);
+    outObjXml=Safir::Dob::Typesystem::Serialization::ToXml(outObjPtr);
+
+    //Reset shared pointer
+    outObjPtr.reset();
+
+    //Check if diff between input and output xml
+    if(inObjXml.compare(outObjXml)!=0)
+    {
+        std::wcout<<inObjXml<<std::endl;
+        std::wcout<<outObjXml<<std::endl;
+        throw Safir::Databases::Odbc::ReconnectException(L"Input and output not equal. ",__WFILE__,__LINE__);
+    }
+}
 
 void DbUnitAccess::Connect(const std::wstring DatabaseLogin)
 {   
@@ -109,16 +199,14 @@ void DbUnitAccess::Connect(const std::wstring DatabaseLogin)
 
     if (!m_connection.IsConnected())
     {
-
-      // m_connection.Connect(DatabaseLogin ); // MIMER
-       // m_connection.Connect(L"DSN=safirDbMySQL;PWD=olibtesteruser;UID=olibtesteruser;SERVER=localhost;" );  //MYSQL
-       m_connection.Connect(L"DSN=SafirDbPSQL;DRIVER=SQL;" );  //postgresql
+      // m_connection.Connect(DatabaseLogin );m_isMimerSQL=true; // MIMER
+       m_connection.Connect(L"DSN=safirDbMySQL;PWD=olibtesteruser;UID=olibtesteruser;SERVER=localhost;" ); m_isMySQL=true; //MYSQL
+     // m_connection.Connect(L"DSN=SafirDbPSQL;DRIVER=SQL;" ); m_isPostgreSQL=true; //postgresql
 
        m_connection.UseManualTransactions();
        //SQL_ATTR_CONNECTION_TIMEOUT seems not to work with postgresql
        //m_connection.SetConnectAttr(SQL_ATTR_CONNECTION_TIMEOUT, 5L);
     }
-
 }
 
 void DbUnitAccess::Disconnect()
@@ -160,22 +248,56 @@ void DbUnitAccess::AllocStmt()
         m_WriteBlobStmt.Alloc( m_connection );
     if (!m_ReadBlobStmt.IsValid())
         m_ReadBlobStmt.Alloc( m_connection );
+    if (!m_PerfTestStmt.IsValid())
+      m_PerfTestStmt.Alloc( m_connection );
+    if (!m_ReadUnitStmt.IsValid())
+        m_ReadUnitStmt.Alloc( m_connection );
+    if(!m_RowCountStmt.IsValid())
+        m_RowCountStmt.Alloc(m_connection);
 
-    //if (!m_PerfTestStmt.IsValid())
-    //  m_PerfTestStmt.Alloc( m_connection );
+    if (!m_bRowCountIsPrepared && m_RowCountStmt.IsValid())
+    {
+        m_RowCountStmt.Prepare(L"select count(*) from tblOlibTest;");
 
-  //  if (!m_bPerfTestIsPrepared && m_PerfTestStmt.IsValid())
-  //  {
-  //      m_PerfTestStmt.Prepare(L"Insert into tblPerfTest values(?, ?, ?)");
-  //      
-        //m_PerfTestStmt.BindParameter(1, m_paramTypeId);
-        //m_PerfTestStmt.BindParameter(2, m_paramInstanceNo);
-        //m_PerfTestStmt.BindParameter(3, m_paramData);
+        m_RowCountStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);
+    }
 
-        //m_PerfTestStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
+    if (!m_bReadUnitIsPrepared && m_ReadUnitStmt.IsValid())
+    {
+        //Set statement to columns for unit with Id
+        m_ReadUnitStmt.Prepare( L"select UnitId, CallSign, UnitSizeId, UnitIdentityId, CombatReadiness, "
+                              L"CombatReadinessDescription, Latitude, Longitude, Speed, Course, MeasurementTime, "
+                              L"IsAlive, ALargeInt from TBLOLIBTEST "
+                              L"where UnitId = 0" );
 
-  //      m_bPerfTestIsPrepared = true;
-  //  }
+        m_ReadUnitStmt.BindColumn(1, m_columnUnitId);
+        m_ReadUnitStmt.BindColumn(2, m_columnCallsign);
+        m_ReadUnitStmt.BindColumn(3, m_columnUnitSizeId);
+        m_ReadUnitStmt.BindColumn(4, m_columnUnitIdentityId);
+        m_ReadUnitStmt.BindColumn(5, m_columnCombatReadiness);
+        m_ReadUnitStmt.BindColumn(6, m_columnCombatReadinessDescription);
+        m_ReadUnitStmt.BindColumn(7, m_columnLatitude);
+        m_ReadUnitStmt.BindColumn(8, m_columnLongitude);
+        m_ReadUnitStmt.BindColumn(9, m_columnSpeed);
+        m_ReadUnitStmt.BindColumn(10, m_columnCourse);
+        m_ReadUnitStmt.BindColumn(11, m_columnMeasurementTime);
+        m_ReadUnitStmt.BindColumn(12, m_columnIsAlive);
+        m_ReadUnitStmt.BindColumn(13, m_columnAlargeinteger);
+
+        m_ReadUnitStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
+    }
+//    if (!m_bPerfTestIsPrepared && m_PerfTestStmt.IsValid())
+//    {
+//        m_PerfTestStmt.Prepare(L"Insert into tblPerfTest values(?, ?, ?)");
+
+//        m_PerfTestStmt.BindParameter(1, m_paramTypeId);
+//        m_PerfTestStmt.BindParameter(2, m_paramInstanceNo);
+//        m_PerfTestStmt.BindParameter(3, m_paramData);
+
+//        m_PerfTestStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
+
+//        m_bPerfTestIsPrepared = true;
+//    }
 
     if (!m_bOutputIsPrepared && m_OutputStmt.IsValid())
     {
@@ -201,7 +323,7 @@ void DbUnitAccess::AllocStmt()
 
     if (!m_bInputOutputIsPrepared && m_InputOutputStmt.IsValid())
     {
-        m_InputOutputStmt.Prepare(L"{call spInputOutputOlibTest(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}");
+        m_InputOutputStmt.Prepare(L"{call spInputOutputOlibTest(?)}");
 
         m_InputOutputStmt.BindParameter(1, m_inoutParamCallsign);
         m_InputOutputStmt.BindParameter(2, m_inoutParamUnitSizeId);
@@ -407,75 +529,32 @@ void DbUnitAccess::ClearTables(void)
     ClearStmt.Prepare(L"DELETE FROM TBLOLIBTEST WHERE UNITID >=0;");
     ClearStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);
     ClearStmt.Execute();
-
+    m_connection.Commit();
 
     ClearStmt.Prepare(L"DELETE FROM TBLOLIBTESTBLOB WHERE ID >=0;");
     ClearStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);
     ClearStmt.Execute();
+    m_connection.Commit();
 
     ClearStmt.Prepare(L"DELETE FROM TBLOLIBTESTBINARY WHERE ID >=0;");
     ClearStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);
     ClearStmt.Execute();
+    m_connection.Commit();
 
     ClearStmt.Prepare(L"DELETE FROM TBLOLIBTESTNCLOB WHERE ID >=0;");
     ClearStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);
     ClearStmt.Execute();
- 
     m_connection.Commit();
-   
+
+    ClearStmt.Prepare(L"DELETE FROM tblPerfTest WHERE TypeId >=0;");
+    ClearStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 20L);
+    ClearStmt.Execute();
+    m_connection.Commit();
+
+    ClearStmt.Free();
 }
 
-void DbUnitAccess::CloseStmt(void)
-{
-    if (m_InputOutputStmt.IsValid())
-    {
-        m_bInputOutputIsPrepared = false;
-        m_InputOutputStmt.Free();
-    }
-
-    if (m_OutputStmt.IsValid())
-    {
-        m_bOutputIsPrepared = false;
-        m_OutputStmt.Free();
-    }
-
-    if (m_CreateStmt.IsValid())
-    {
-        m_bCreateIsPrepared = false;
-        m_CreateStmt.Free();
-    }
-
-    if (m_UpdateStmt.IsValid())
-    {
-        m_bUpdateIsPrepared = false;
-        m_UpdateStmt.Free();
-    }
-
-    if (m_DeleteStmt.IsValid())
-    {
-        m_bDeleteIsPrepared = false;
-        m_DeleteStmt.Free();
-    }
-
-    if (m_GetAllUnitsStmt.IsValid())
-    {
-        m_bGetAllUnitsIsPrepared = false;
-        m_GetAllUnitsStmt.Free();
-    }
-
-    if (m_PerfTestStmt.IsValid())
-    {
-        m_bPerfTestIsPrepared = false;
-        m_PerfTestStmt.Free();
-    }
-}
-
-
-
-
-
-
-void DbUnitAccess::ReadAllUnits()
+void DbUnitAccess::PerfTest()
 {
     if (!m_connection.IsConnected())
     {
@@ -483,95 +562,222 @@ void DbUnitAccess::ReadAllUnits()
         return;
     }
 
-    try
+    if (!m_PerfTestStmt.IsValid())
     {
-        std::wstring wsCallSign = L"None";
-        TIMESTAMP_STRUCT tsTime;
-        Safir::Dob::Typesystem::Si64::Second time;
+        m_PerfTestStmt.Alloc( m_connection );
+    }
 
-        m_GetAllUnitsStmt.Execute();
-        while (m_GetAllUnitsStmt.Fetch())
-        {
-            std::wcout  << "Unit:" << m_columnUnitId.GetValue() << std::endl;
-            if (m_columnCallsign.IsNull())
-                std::wcout << " CallSign: NULL" << std::endl;
-            else
-                std::wcout  << " CallSign: '" << m_columnCallsign.GetValue() << "'" << std::endl;
-            if (m_columnUnitSizeId.IsNull())
-                std::wcout << " Size: NULL" << std::endl;
-            else
-                std::wcout << " Size: '" << m_columnUnitSizeId.GetValue() << "'" << std::endl;
-            if (m_columnUnitIdentityId.IsNull())
-                std::wcout << " Identity: NULL" << std::endl;
-            else
-                std::wcout << " Identity: '" << m_columnUnitIdentityId.GetValue() << "'" << std::endl;
-            if (m_columnCombatReadiness.IsNull())
-                std::wcout << " CombatReadiness: NULL" << std::endl;
-            else
-                std::wcout << " CombatReadiness: " << m_columnCombatReadiness.GetValue() << std::endl;
-            if (m_columnLatitude.IsNull())
-                std::wcout << " Latitude: NULL" << std::endl;
-            else
-                std::wcout << " Latitude: " << m_columnLatitude.GetValue() << std::endl;
-            if (m_columnLongitude.IsNull())
-                std::wcout << " Longitude: NULL" << std::endl;
-            else
-                std::wcout << " Longitude: " << m_columnLongitude.GetValue() << std::endl;
-            if (m_columnSpeed.IsNull())
-                std::wcout << " Speed: null" << std::endl;
-            else
-                std::wcout << " Speed: " << m_columnSpeed.GetValue() << std::endl;
-            if (m_columnCourse.IsNull())
-                std::wcout << " Course: NULL" << std::endl;
-            else
-                std::wcout << " Course: " << m_columnCourse.GetValue() << std::endl;
-            if (m_columnIsAlive.IsNull())
-                std::wcout << " IsAlive: NULL" << std::endl;
-            else
-                std::wcout << " IsAlive: " << m_columnIsAlive.GetValue() << std::endl;
-            if (m_columnMeasurementTime.IsNull())
-                std::wcout << " Measurementtime: NULL" << std::endl;
-            else
-            {
-                tsTime = m_columnMeasurementTime.GetTimeStamp();
-                std::wcout  << " Measurementtime: " << static_cast<int>(tsTime.year)
-                            << "-" << static_cast<int>(tsTime.month)
-                            << "-" << static_cast<int>(tsTime.day)
-                            << " " << static_cast<int>(tsTime.hour)
-                            << ":" << static_cast<int>(tsTime.minute)
-                            << ":" << static_cast<int>(tsTime.second)
-                            << ":" << static_cast<int>(tsTime.fraction)
-                            << std::endl;
-                m_columnMeasurementTime.GetValue( time );
-                std::wcout <<" time ntp: " << time << std::endl;
-            }
-            if (m_columnAlargeinteger.IsNull())
-                std::wcout << " AlargeInteger: NULL" << std::endl;
-            else
-                std::wcout << " AlargeInteger: " << m_columnAlargeinteger.GetValue() << std::endl;
-            std::wcout.flush();
-        }
-        m_GetAllUnitsStmt.CloseCursor();
-        
-        m_connection.Commit();    // TODO: Is commit necessary when reading.
-    }
-    catch(const Safir::Databases::Odbc::RetryException & ex)
+    m_PerfTestStmt.Prepare(L"Insert into tblPerfTest values(?, ?, ?)");
+    m_PerfTestStmt.BindParameter(1, m_paramTypeId);
+    m_PerfTestStmt.BindParameter(2, m_paramInstanceNo);
+    m_PerfTestStmt.BindParameter(3, m_paramData);
+    m_PerfTestStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
+
+    m_paramTypeId.SetValue( 1 );
+
+    std::wstring aString(
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+//        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+//        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+//        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+        L"123456789012345678901234567890123456789012456789012345678901234567890123456789012345678901234567890" );
+    m_paramData.SetValue( aString );
+
+    for (int i = 0; i < 100000; ++i)
     {
-        std::wcout 
-            << "DbUnitAccess CreateUnit " 
-            << ex.GetExceptionInfo()  
-            << std::endl;
-        m_nNoOfErrors++;
-        m_connection.Rollback();
+        m_paramInstanceNo.SetValue( i );
+        m_PerfTestStmt.Execute();
+        m_connection.Commit();
+        if((i%20)==0)
+            std::wcout<<"in loop i="<<i<<std::endl;
     }
-    catch(const Safir::Databases::Odbc::ReconnectException & ex)
+}
+
+void DbUnitAccess::SetReadAllTimeout()
+{
+    if(!m_CreateStmt.IsValid())
     {
-        std::wcout 
-            << "DbUnitAccess CreateUnit " 
-            << ex.GetExceptionInfo()  
-            << std::endl;
-        m_nNoOfErrors++;
-        m_connection.Rollback();
+        m_CreateStmt.Alloc(m_connection);
+    }
+
+    long lTimeout = 1;
+    m_CreateStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, lTimeout);
+}
+
+void DbUnitAccess::GetReadAllTimeout()
+{
+    long lTimeout;
+    m_CreateStmt.GetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, lTimeout);
+
+    if(lTimeout!=1)
+    {
+         throw Safir::Databases::Odbc::ReconnectException(L"SQL_ATTR_QUERY_TIMEOUT not correctly set. ",__WFILE__,__LINE__);
+    }
+}
+
+void DbUnitAccess::SetConnectionTimeout()
+{
+
+    long lTimeout = 1;
+    m_connection.SetConnectAttr(SQL_ATTR_CONNECTION_TIMEOUT, lTimeout);
+}
+
+void DbUnitAccess::GetConnectionTimeout()
+{
+    long lTimeout;
+    m_connection.GetConnectAttr(SQL_ATTR_CONNECTION_TIMEOUT, lTimeout);
+
+    if(lTimeout!=1)
+    {
+         throw Safir::Databases::Odbc::ReconnectException(L"SQL_ATTR_QUERY_TIMEOUT not correctly set. ",__WFILE__,__LINE__);
     }
 }
 
@@ -609,7 +815,6 @@ void DbUnitAccess::ReadUnit(int Id)
     m_ReadUnitStmt.BindColumn(11, m_columnMeasurementTime);
     m_ReadUnitStmt.BindColumn(12, m_columnIsAlive);
     m_ReadUnitStmt.BindColumn(13, m_columnAlargeinteger);
-
     m_ReadUnitStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
 
     //Execute statment
@@ -617,8 +822,6 @@ void DbUnitAccess::ReadUnit(int Id)
     m_ReadUnitStmt.Fetch();
     m_ReadUnitStmt.CloseCursor();
     m_connection.Commit();
-
-
 }
 
 void DbUnitAccess::EvaluateOutData()
@@ -652,56 +855,168 @@ void DbUnitAccess::EvaluateOutData()
     inObjXml=Safir::Dob::Typesystem::Serialization::ToXml(m_Object);
     outObjXml=Safir::Dob::Typesystem::Serialization::ToXml(outObjPtr);
 
-//    std::wcout<<inObjXml<<std::endl;
-//    std::wcout<<outObjXml<<std::endl;
-
     //Reset shared pointer
     outObjPtr.reset();
 
     //Check if diff between input and output xml
     if(inObjXml.compare(outObjXml)!=0)
+    {
+        std::wcout<<inObjXml<<std::endl;
+        std::wcout<<outObjXml<<std::endl;
         throw Safir::Databases::Odbc::ReconnectException(L"Input and output not equal. ",__WFILE__,__LINE__);
+    }
 }
-void DbUnitAccess::TestPSQL()
+
+void DbUnitAccess::CloseStmt(void)
 {
-    //Check connection
-    if (!m_connection.IsConnected())
+    if (m_InputOutputStmt.IsValid())
     {
-        throw Safir::Databases::Odbc::ReconnectException(L"Not connected to database. ",__WFILE__,__LINE__);
+        m_InputOutputStmt.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
     }
 
-    //Check if statement is allocated
-    if (!m_CreateStmt.IsValid())
+    if (m_OutputStmt.IsValid())
     {
-        m_CreateStmt.Alloc( m_connection );
+        m_OutputStmt.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
     }
 
-    //Set create statement
+    if (m_CreateStmt.IsValid())
+    {
+        m_CreateStmt.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
+    }
 
+    if (m_UpdateStmt.IsValid())
+    {
+        m_UpdateStmt.Free();
+    }
 
-    //Set create statement
-    m_CreateStmt.Prepare(L"{call spCreateOlibTest(?, ?,?, ?,?,?,?,?,?,?,?,?)}");
+    if (m_DeleteStmt.IsValid())
+    {
+        m_DeleteStmt.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
+    }
 
-    //Bind parameters to create statement
-    m_CreateStmt.BindParameter(1, m_paramCallsign);
-    m_CreateStmt.BindParameter(2, m_paramUnitSizeId);
-     m_CreateStmt.BindParameter(3, m_paramUnitIdentityId);
-     m_CreateStmt.BindParameter(4, m_paramCombatReadiness);
-    m_CreateStmt.BindParameter(5, m_paramCombatReadinessDescription);
-    m_CreateStmt.BindParameter(6, m_paramLatitude);
-     m_CreateStmt.BindParameter(7, m_paramLongitude);
-      m_CreateStmt.BindParameter(8, m_paramSpeed);
-     m_CreateStmt.BindParameter(9, m_paramCourse);
-     m_CreateStmt.BindParameter(10, m_paramMeasurementTime);
-     m_CreateStmt.BindParameter(11, m_paramIsAlive);
-     m_CreateStmt.BindParameter(12, m_paramAlargeinteger);
+    if (m_GetAllUnitsStmt.IsValid())
+    {
+        m_GetAllUnitsStmt.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
+    }
 
-    m_CreateStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
-    //Execute statement
-    m_CreateStmt.Execute();
+    if (m_PerfTestStmt.IsValid())
+    {
+        m_PerfTestStmt.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
+    }
 
-    //Commit changes to the database
-    m_connection.Commit();
+    if (m_BinaryReadStmt.IsValid())
+    {
+        m_BinaryReadStmt.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
+    }
+
+    if (m_BinaryWriteStmt.IsValid())
+    {
+        m_BinaryWriteStmt.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
+    }
+
+    if (m_WriteNClobStmt.IsValid())
+    {
+        m_WriteNClobStmt.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
+    }
+
+    if (m_ReadNClobStmt.IsValid())
+    {
+        m_ReadNClobStmt.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
+    }
+
+    if (m_WriteBlobStmt.IsValid())
+    {
+        m_WriteBlobStmt.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
+    }
+
+    if (m_ReadBlobStmt.IsValid())
+    {
+        m_ReadBlobStmt.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
+    }
+
+    if (m_ReadUnitStmt.IsValid())
+    {
+        m_ReadUnitStmt.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
+    }
+
+    if (m_LongTimeQuery.IsValid())
+    {
+        m_LongTimeQuery.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
+    }
+
+    if (m_InsertInto42.IsValid())
+    {
+        m_InsertInto42.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
+    }
+
+    if (m_RowCountStmt.IsValid())
+    {
+        m_RowCountStmt.Free();
+    }
+    else
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Statement is not valid. ",__WFILE__,__LINE__);
+    }
 }
 
 void DbUnitAccess::CreateUnit()
@@ -734,8 +1049,6 @@ void DbUnitAccess::CreateUnit()
     m_CreateStmt.BindParameter(10, m_paramMeasurementTime);
     m_CreateStmt.BindParameter(11, m_paramIsAlive);
     m_CreateStmt.BindParameter(12, m_paramAlargeinteger);
-
-
     m_CreateStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
 
     //Execute statement
@@ -776,7 +1089,6 @@ void DbUnitAccess::UpdateUnit()
     m_UpdateStmt.BindParameter(11, m_paramMeasurementTime);
     m_UpdateStmt.BindParameter(12, m_paramIsAlive);
     m_UpdateStmt.BindParameter(13, m_paramAlargeinteger);
-
     m_UpdateStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
 
     //UnitId to update (0)
@@ -796,23 +1108,43 @@ void DbUnitAccess::UpdateUnit()
     m_connection.Commit();
 }
 
+
+void DbUnitAccess::SetConnectionPooling()
+{
+    if (!m_environment.IsValid())
+        m_environment.Alloc();
+    m_environment.SetEnvAttr(SQL_ATTR_CONNECTION_POOLING, SQL_CP_ONE_PER_HENV);
+}
+
+void DbUnitAccess::GetConnectionPooling()
+{
+    long lValue;
+    m_environment.GetEnvAttr(SQL_ATTR_CONNECTION_POOLING, lValue);
+    switch(lValue)
+    {
+    case SQL_CP_OFF :
+        throw Safir::Databases::Odbc::ReconnectException(L"Connection pooling set to SQL_CP_OFF. ",__WFILE__,__LINE__);
+    case SQL_CP_ONE_PER_DRIVER:
+        throw Safir::Databases::Odbc::ReconnectException(L"Connection pooling set to SQL_CP_OFF. ",__WFILE__,__LINE__);
+    case SQL_CP_ONE_PER_HENV:
+         break;
+    default:
+        throw Safir::Databases::Odbc::ReconnectException(L"Connection pooling is undefined. ",__WFILE__,__LINE__);
+    }
+}
+
 Safir::Dob::Typesystem::Int64 DbUnitAccess::TblRowCount()
 {
+    if(!m_RowCountStmt.IsValid())
+    {
+        m_RowCountStmt.Alloc(m_connection);
+    }
 
-    //Safir::Databases::Odbc::Int64OutputParameter    RowCount;
-
-    //std::wcout<<"RowCount: "<<RowCount.GetValue()<<std::endl;
-    m_RowCountStmt.Alloc(m_connection);
-    //m_RowCountStmt.Prepare(L"{call ROWCOUNT(?)}");
-    m_RowCountStmt.Prepare(L"select count(*) from tblOlibTest;");
-    //m_RowCountStmt.BindParameter(1,RowCount);
     Safir::Databases::Odbc::Int64Column RowCount;
-    //m_RowCountStmt.BindColumn(1,RowCount);
+
+    m_RowCountStmt.Prepare(L"select count(*) from tblOlibTest;");
     m_RowCountStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);
     m_RowCountStmt.Execute();
-
-     //std::wcout<<"RowCount: "<<RowCount.GetValue()<<std::endl;
-
 
     while (m_RowCountStmt.Fetch())
     {
@@ -822,7 +1154,6 @@ Safir::Dob::Typesystem::Int64 DbUnitAccess::TblRowCount()
     m_RowCountStmt.Free();
     m_connection.Commit();
 
-    std::wcout<<"RowCount: "<<RowCount.GetValue()<<std::endl;
     return RowCount.GetValue();
 }
 
@@ -876,7 +1207,6 @@ void DbUnitAccess::WriteNClobs()
     m_WriteNClobStmt.BindParameter(1, m_paramUnitId);
     //m_WriteBlobStmt.BindParameter(2, m_paramNClob); // This line causes software violation
     m_WriteNClobStmt.BindLongParameter(2, m_paramNClob);
-
     m_WriteNClobStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);    // Query timeout is 5 secs
 
     int nId=0;
@@ -894,7 +1224,6 @@ void DbUnitAccess::WriteNClobs()
        }
 
     m_paramNClob.SetValue( &NCstrBuffer);
-
     m_WriteNClobStmt.PutData( m_paramNClob );
 
     if ( m_WriteNClobStmt.ParamData(sParameterNumber))
@@ -998,6 +1327,9 @@ void DbUnitAccess::WriteBlob()
 
 void DbUnitAccess::ReadBlob()
 {
+    //Set unit ID to read
+    int nId=0;
+
     if (!m_connection.IsConnected())
     {
         std::wcout << "NotConnected" << std::endl;
@@ -1013,9 +1345,6 @@ void DbUnitAccess::ReadBlob()
     m_ReadBlobStmt.Prepare(L"select data from tblOlibTestBlob where id = ?;");
     m_ReadBlobStmt.BindParameter(1, m_paramUnitId);
     m_ReadBlobStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L); // Query timeout is 5 secs
-
-    //Set unit ID to read
-    int nId=0;
     m_paramUnitId.SetValue( nId );
     m_ReadBlobStmt.Execute();
 
@@ -1036,24 +1365,61 @@ void DbUnitAccess::ReadBlob()
     std::wstring outputXml=Safir::Dob::Typesystem::Serialization::ToXml(entity);
     std::wstring inputXml=Safir::Dob::Typesystem::Serialization::ToXml(m_Object);
 
-//    std::wcout<<outputXml<<std::endl;
-//    std::wcout<<inputXml<<std::endl;
-
     //Check if diff between input and output xml
     if(inputXml.compare(outputXml)!=0)
+    {
+        std::wcout<<outputXml<<std::endl;
+        std::wcout<<inputXml<<std::endl;
         throw Safir::Databases::Odbc::ReconnectException(L"BLOB: Input and output not equal. ",__WFILE__,__LINE__);
+    }
 }
-
-void DbUnitAccess::LotsOfInput()
+void DbUnitAccess::InsertInto42()
 {
     if (!m_connection.IsConnected())
     {
         std::wcout << "Not Connected" << std::endl;
         return;
     }
-    int NrElemnts = 10000;
-    Safir::Dob::Typesystem::Int64 NrRowsBef=TblRowCount();
 
+    if(!m_InsertInto42.IsValid())
+    {
+        m_InsertInto42.Alloc( m_connection );
+    }
+
+    m_InsertInto42.Prepare(
+        L"insert into TBLOLIBTEST (UNITID, CALLSIGN, COMBATREADINESS, "
+        L"COMBATREADINESSDESCRIPTION, UNITSIZEID, UNITIDENTITYID, LATITUDE, "
+        L"LONGITUDE, SPEED, COURSE, MEASUREMENTTIME, ISALIVE, ALARGEINT) "
+        L"values (42, '', 0, '', '', '', 0, 0, 0, 0, NULL, 0, 0)" );
+    m_InsertInto42.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
+    m_InsertInto42.Execute();
+
+    m_connection.Commit();
+    m_Object->Callsign().SetVal(L"");
+    m_Object->CombatReadines().SetVal(0);
+    m_Object->CombatReadinessDescription().SetVal(L"");
+    m_Object->UnitSizeId().SetVal(L"");
+    m_Object->UnitIdentity().SetVal(L"");
+    m_Object->Latitude().SetVal(0);
+    m_Object->Longitude().SetVal(0);
+    m_Object->Speed().SetVal(0.0f);
+    m_Object->Course().SetVal(0.0f);
+    m_Object->IsAlive().SetVal(0);
+    m_Object->Alargeinteger().SetVal(0);
+}
+
+void DbUnitAccess::LotsOfInput()
+{
+    //Nr of elements to add to the table
+    int NrElemnts = 100;
+
+    if (!m_connection.IsConnected())
+    {
+        std::wcout << "Not Connected" << std::endl;
+        return;
+    }
+
+    Safir::Dob::Typesystem::Int64 NrRowsBef=TblRowCount();
 
     //Check if statement is allocated
     if (!m_CreateStmt.IsValid())
@@ -1077,28 +1443,23 @@ void DbUnitAccess::LotsOfInput()
     m_CreateStmt.BindParameter(10, m_paramMeasurementTime);
     m_CreateStmt.BindParameter(11, m_paramIsAlive);
     m_CreateStmt.BindParameter(12, m_paramAlargeinteger);
-
-
     m_CreateStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
+
     for (int i = 0; i< NrElemnts; ++i)
     {
         m_CreateStmt.Execute();
         m_CreateStmt.CloseCursor();
-//        if((i%20)==0)
-//            std::wcout<<"in loop i="<<i<<std::endl;
+        m_connection.Commit();
+        if((i%20)==0)
+            std::wcout<<"in loop i="<<i<<std::endl;
     }
 
-    m_connection.Commit();
+
 
     Safir::Dob::Typesystem::Int64 NrRowsAfter=TblRowCount();
     if((NrRowsAfter-NrRowsBef)!=(NrElemnts))
         throw Safir::Databases::Odbc::ReconnectException(L"LotsOfInput: All elements were not created in table.",__WFILE__,__LINE__);
-
-
 }
-
-
-
 
 void DbUnitAccess::TestInputOutputParameters()
 {
@@ -1108,246 +1469,31 @@ void DbUnitAccess::TestInputOutputParameters()
         return;
     }
 
-    try
+    if(!m_InputOutputStmt.IsValid())
     {
-        std::wstring aString;
-        Safir::Dob::Typesystem::Float64 aFloat;
-        Safir::Dob::Typesystem::Float32 aSmallFloat;
-        SQLSMALLINT anInt;
-        int nId;
-        TIMESTAMP_STRUCT tsTime;
-        bool aBoolean;
-        Safir::Dob::Typesystem::Int64 nAlargeinteger;
-        Safir::Dob::Typesystem::Int32 nASmallinteger;
-
-        std::wcout << "Unit:";
-        std::wcin >> nId;
-        m_inoutParamUnitId.SetValue( nId );
-
-        std::wcout << "Set Callsign (y/n):";
-        std::wcin >> aString;
-        if (aString.compare(L"y") == 0)
-        {
-            std::wcout << "Callsign:";
-            std::wcin >> aString;
-            m_inoutParamCallsign.SetValue( aString );
-        }
-        else
-            m_inoutParamCallsign.SetNull();
-
-        std::wcout << "Set UnitSize (y/n):";
-        std::wcin >> aString;
-        if (aString.compare(L"y") == 0)
-        {
-            std::wcout << "UnitSize:";
-            std::wcin >> aString;
-            m_inoutParamUnitSizeId.SetValue( aString );
-        }
-        else
-            m_inoutParamUnitSizeId.SetNull();
-
-        std::wcout << "Set UnitIdentity (y/n):";
-        std::wcin >> aString;
-        if (aString.compare(L"y") == 0)
-        {
-            std::wcout << "UnitIdentity:";
-            std::wcin >> aString;
-            m_inoutParamUnitIdentityId.SetValue( aString );
-        }
-        else
-            m_inoutParamUnitIdentityId.SetNull();
-
-        std::wcout << "Set CombatReadiness (y/n):";
-        std::wcin >> aString;
-        if (aString.compare(L"y") == 0)
-        {
-            std::wcout << "CombatReadiness:";
-            std::wcin >> nASmallinteger;
-            m_inoutParamCombatReadiness.SetValue( nASmallinteger );
-        }
-        else
-            m_inoutParamCombatReadiness.SetNull();
-
-        std::wcout << "Set CombatReadinessDescription (y/n):";
-        std::wcin >> aString;
-        if (aString.compare(L"y") == 0)
-        {
-            std::wcout << "CombatReadinessDescription:";
-            std::wcin >> aString;
-            m_inoutParamCombatReadinessDescription.SetValue( aString );
-        }
-        else
-            m_inoutParamCombatReadinessDescription.SetNull();
-
-        std::wcout << "Set Position (y/n):";
-        std::wcin >> aString;
-        if (aString.compare(L"y") == 0)
-        {
-            std::wcout << "Latitude:";
-            std::wcin >> aFloat;
-            m_inoutParamLatitude.SetValue( aFloat );
-
-            std::wcout << "Longitude:";
-            std::wcin >> aFloat;
-            m_inoutParamLongitude.SetValue( aFloat );
-        }
-        else
-        {
-            m_inoutParamLatitude.SetNull();
-            m_inoutParamLongitude.SetNull();
-        }
-
-        std::wcout << "Set Course(y/n):";
-        std::wcin >> aString;
-        if (aString.compare(L"y") == 0)
-        {
-            std::wcout << "Course:";
-            std::wcin >> aSmallFloat;
-            m_inoutParamCourse.SetValue( aSmallFloat );
-        }
-        else
-            m_inoutParamCourse.SetNull();
-
-        std::wcout << "Set Speed(y/n):";
-        std::wcin >> aString;
-        if (aString.compare(L"y") == 0)
-        {
-            std::wcout << "Speed:";
-            std::wcin >> aSmallFloat;
-            m_inoutParamSpeed.SetValue( aSmallFloat );
-        }
-        else
-            m_inoutParamSpeed.SetNull();
-
-        std::wcout << "Set MeasurementTime(y/n):";
-        std::wcin >> aString;
-        if (aString.compare(L"y") == 0)
-        {
-            std::wcout << "Year:";
-            std::wcin >> anInt;
-            tsTime.year = anInt;
-            std::wcout << "Month:";
-            std::wcin >> anInt;
-            tsTime.month = anInt;
-            std::wcout << "Day:";
-            std::wcin >> anInt;
-            tsTime.day = anInt;
-            std::wcout << "Hour:";
-            std::wcin >> anInt;
-            tsTime.hour = anInt;
-            std::wcout << "Minute:";
-            std::wcin >> anInt;
-            tsTime.minute = anInt;
-            std::wcout << "Second:";
-            std::wcin >> anInt;
-            tsTime.second = anInt;
-            std::wcout << "Fraction:";
-            std::wcin >> anInt;
-            tsTime.fraction = anInt;
-
-            m_inoutParamMeasurementTime.SetTimeStamp( tsTime );
-        }
-        else
-            m_inoutParamMeasurementTime.SetNull();
-
-        std::wcout << "Set IsAlive(y/n):";
-        std::wcin >> aString;
-        if (aString.compare(L"y") == 0)
-        {
-            std::wcout << "IsAlive:";
-            std::wcin >> aBoolean;
-            m_inoutParamIsAlive.SetValue( aBoolean );
-        }
-        else
-            m_inoutParamIsAlive.SetNull();
-
-        std::wcout << "Set Alargeinteger(y/n):";
-        std::wcin >> aString;
-        if (aString.compare(L"y") == 0)
-        {
-            std::wcout << "Alargeinteger:";
-            std::wcin >> nAlargeinteger;
-            m_inoutParamAlargeinteger.SetValue( nAlargeinteger );
-        }
-        else
-            m_inoutParamAlargeinteger.SetNull();
-
-        m_InputOutputStmt.Execute();
-        //m_InputOutputStmt.Fetch();
-        m_InputOutputStmt.MoreResults();
-
-        if (m_inoutParamUnitId.IsNull())
-            std::wcout << " Unit: NULL" << std::endl;
-        else
-            std::wcout  << "Unit:" << m_inoutParamUnitId.GetValue() << std::endl;
-        if (m_inoutParamCallsign.IsNull())
-            std::wcout << " CallSign: NULL" << std::endl;
-        else
-            std::wcout  << " CallSign:" << m_inoutParamCallsign.GetValue() << std::endl;
-        if (m_inoutParamUnitSizeId.IsNull())
-            std::wcout << " Size: NULL" << std::endl;
-        else
-            std::wcout << " Size: " << m_inoutParamUnitSizeId.GetValue() << std::endl;
-        if (m_inoutParamUnitIdentityId.IsNull())
-            std::wcout << " Identity: NULL" << std::endl;
-        else
-            std::wcout << " Identity: " << m_inoutParamUnitIdentityId.GetValue() << std::endl;
-        if (m_inoutParamCombatReadiness.IsNull())
-            std::wcout << " CombatReadiness: NULL" << std::endl;
-        else
-            std::wcout << " CombatReadiness: " << m_inoutParamCombatReadiness.GetValue() << std::endl;
-        if (m_inoutParamCombatReadinessDescription.IsNull())
-            std::wcout << " CombatReadinessDescription: NULL" << std::endl;
-        else
-            std::wcout << " CombatReadinessDescription: " << m_inoutParamCombatReadinessDescription.GetValue() << std::endl;
-        if (m_inoutParamLatitude.IsNull())
-            std::wcout << " Latitude: NULL" << std::endl;
-        else
-            std::wcout << " Latitude: " << m_inoutParamLatitude.GetValue() << std::endl;
-        if (m_inoutParamLongitude.IsNull())
-            std::wcout << " Longitude: NULL" << std::endl;
-        else
-            std::wcout << " Longitude: " << m_inoutParamLongitude.GetValue() << std::endl;
-        if (m_inoutParamSpeed.IsNull())
-            std::wcout << " Speed: null" << std::endl;
-        else
-            std::wcout << " Speed: " << m_inoutParamSpeed.GetValue() << std::endl;
-        if (m_inoutParamCourse.IsNull())
-            std::wcout << " Course: NULL" << std::endl;
-        else
-            std::wcout << " Course: " << m_inoutParamCourse.GetValue() << std::endl;
-        if (m_inoutParamIsAlive.IsNull())
-            std::wcout << " IsAlive: NULL" << std::endl;
-        else
-            std::wcout << " IsAlive: " << m_inoutParamIsAlive.GetValue() << std::endl;
-        if (m_inoutParamMeasurementTime.IsNull())
-            std::wcout << " Measurementtime: NULL" << std::endl;
-        else
-        {
-            tsTime = m_inoutParamMeasurementTime.GetTimeStamp();
-            std::wcout  << " Measurementtime: " << static_cast<int>(tsTime.year)
-                        << "-" << static_cast<int>(tsTime.month)
-                        << "-" << static_cast<int>(tsTime.day)
-                        << " " << static_cast<int>(tsTime.hour)
-                        << ":" << static_cast<int>(tsTime.minute)
-                        << ":" << static_cast<int>(tsTime.second)
-                        << std::endl;
-        }
-        if (m_inoutParamAlargeinteger.IsNull())
-            std::wcout << " AlargeInteger: NULL" << std::endl;
-        else
-            std::wcout << " AlargeInteger: " << m_inoutParamAlargeinteger.GetValue() << std::endl;
-        std::wcout.flush();
-        m_connection.Commit();
-
+        m_InputOutputStmt.Alloc(m_connection);
     }
-    catch(const Safir::Databases::Odbc::ReconnectException & ex)
+
+    if(m_isMimerSQL || m_isPostgreSQL)
     {
-        std::wcout 
-            << "DbUnitAccess UpdateUnit " 
-            << ex.GetExceptionInfo()  
-            << std::endl;
-        m_connection.Rollback();
+        m_InputOutputStmt.Prepare(L"{call spInputOutputOlibTest(?)}");
+    }
+    else
+    {
+        m_InputOutputStmt.Prepare(L"call spInputOutputOlibTest(?)");
+    }
+
+    m_InputOutputStmt.BindParameter(1, m_inoutParamSpeed);
+    m_InputOutputStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
+    m_inoutParamSpeed.SetValue( m_Object->Speed().GetVal() );
+    m_InputOutputStmt.Execute();
+    //m_InputOutputStmt.Fetch();
+    m_InputOutputStmt.MoreResults();
+    m_connection.Commit();
+
+    if(m_inoutParamSpeed.GetValue()!=(2*m_Object->Speed().GetVal()))
+    {
+        throw Safir::Databases::Odbc::ReconnectException(L"Input and output value did not match. ",__WFILE__,__LINE__);
     }
 }
 
@@ -1365,13 +1511,9 @@ void DbUnitAccess::BinaryTestRead()
     }
 
     m_BinaryReadStmt.Prepare(L"select id, data from tblOlibTestBinary;");
-
     m_BinaryReadStmt.BindColumn(1, m_columnUnitId);
     m_BinaryReadStmt.BindColumn(2, m_columnBinary);
-
     m_BinaryReadStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
-
-
     m_BinaryReadStmt.Execute();
 
     while (m_BinaryReadStmt.Fetch())
@@ -1392,19 +1534,19 @@ void DbUnitAccess::BinaryTestRead()
     std::wstring outputXml=Safir::Dob::Typesystem::Serialization::ToXml(entity);
     std::wstring inputXml=Safir::Dob::Typesystem::Serialization::ToXml(m_Object);
 
-    std::wcout<<outputXml<<std::endl;
-    std::wcout<<inputXml<<std::endl;
-
     //Check if diff between input and output xml
     if(inputXml.compare(outputXml)!=0)
+    {
+        std::wcout<<outputXml<<std::endl;
+        std::wcout<<inputXml<<std::endl;
         throw Safir::Databases::Odbc::ReconnectException(L"Input and output not equal. ",__WFILE__,__LINE__);
-
-
+    }
 }
 
 void DbUnitAccess::BinaryTestWrite()
 {
-
+    // unit id to add to
+    int nId=0;
 
     //Check connection
     if (!m_connection.IsConnected())
@@ -1424,9 +1566,6 @@ void DbUnitAccess::BinaryTestWrite()
     m_BinaryWriteStmt.BindParameter(2, m_paramBinary);
     m_BinaryWriteStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
 
-    // unit id
-    int nId=0;
-
     //Create binary
     Safir::Dob::Typesystem::BinarySerialization binary;
     Safir::Dob::Typesystem::Serialization::ToBinary(m_Object,binary);
@@ -1435,10 +1574,8 @@ void DbUnitAccess::BinaryTestWrite()
     m_paramBinary.SetValue( &binary[0], binary.size() );
     m_BinaryWriteStmt.Execute();
     m_connection.Commit();
-
-
-
 }
+
 std::wstring DbUnitAccess::NCstrBuffer =
             L"012345678901234567890123456789012345678901234567890123456789"
             L"0123456789012345678901234567890123456789";

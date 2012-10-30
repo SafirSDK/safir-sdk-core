@@ -46,6 +46,36 @@ int main(int argc,char* argv[])
                 unitAccess.Connect(DatabaseLogin);
                 unitAccess.Disconnect();
             }
+            else if (argv[1] == std::string("-connectiontimeout"))
+            {
+                unitAccess.Connect(DatabaseLogin);
+                unitAccess.SetConnectionTimeout();
+                unitAccess.GetConnectionTimeout();
+                unitAccess.Disconnect();
+            }
+            else if (argv[1] == std::string("-allocclosestm"))
+            {
+                unitAccess.Connect(DatabaseLogin);
+                unitAccess.AllocStmt();
+                unitAccess.CloseStmt();
+                unitAccess.Disconnect();
+
+            }
+            else if (argv[1] == std::string("-connectionpooling"))
+            {
+                unitAccess.SetConnectionPooling();
+                unitAccess.Connect(DatabaseLogin);
+                unitAccess.GetConnectionPooling();
+                unitAccess.Disconnect();
+            }
+            else if (argv[1] == std::string("-readalltimeout"))
+            {
+                unitAccess.Connect(DatabaseLogin);
+                unitAccess.SetReadAllTimeout();
+                unitAccess.GetReadAllTimeout();
+                unitAccess.Disconnect();
+
+            }
             else if (argv[1] == std::string("-cleartable"))
             {
                 unitAccess.Connect(DatabaseLogin);
@@ -73,11 +103,18 @@ int main(int argc,char* argv[])
                 unitAccess.EvaluateOutData();
                 unitAccess.Disconnect();
             }
+            else if (argv[1] == std::string("-insertinto42"))
+            {
+                unitAccess.Connect(DatabaseLogin);
+                unitAccess.InsertInto42();
+                unitAccess.ReadUnit(42);
+                unitAccess.EvaluateOutData();
+                unitAccess.Disconnect();
+            }
             else if (argv[1] == std::string("-deleteunit"))
             {
                 unitAccess.Connect(DatabaseLogin);
-                unitAccess.CreateUnit();
-                unitAccess.DeleteUnit(1);
+                unitAccess.DeleteUnit(42);
                 unitAccess.Disconnect();
             }
             else if (argv[1] == std::string("-binaryrw"))
@@ -107,13 +144,31 @@ int main(int argc,char* argv[])
                 unitAccess.LotsOfInput();
                 unitAccess.Disconnect();
             }
+            else if (argv[1] == std::string("-outparam"))
+            {
+                unitAccess.Connect(DatabaseLogin);
+                unitAccess.TestOutputParameters();
+                unitAccess.Disconnect();
+            }
+            else if (argv[1] == std::string("-inoutparam"))
+            {
+                unitAccess.Connect(DatabaseLogin);
+                unitAccess.TestInputOutputParameters();
+                unitAccess.Disconnect();
+            }
+            else if (argv[1] == std::string("-perftest"))
+            { //Check what the purpos of this is
+                 unitAccess.Connect(DatabaseLogin);
+                 unitAccess.PerfTest();
+                 unitAccess.Disconnect();
+            }
             else
             {
                 std::wcout<<"Unknown input paramter"<<std::endl;
                 return 1;
             }
 
-            unitAccess.CloseStmt();
+            //unitAccess.CloseStmt();
 
         }
         catch(const Safir::Databases::Odbc::ReconnectException & ex)
@@ -233,7 +288,7 @@ int main(int argc,char* argv[])
     //            unitAccess.SetConnectionTimeout();
     //            break;
     //        case 12: 
-    //            unitAccess.GetConnectionPooling();
+    //            unitAccess.GetConnectioning();
     //            break;
     //        case 13: 
     //            unitAccess.SetConnectionPooling();

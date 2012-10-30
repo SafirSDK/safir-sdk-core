@@ -3,7 +3,7 @@
 * Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
 *
 * Created by: Jörgen Johansson / stjrjo
-* Modified by: Amin Allaou 2012
+* Modified by: Amin Allalou 2012
 *******************************************************************************
 *
 * This file is part of Safir SDK Core.
@@ -42,18 +42,6 @@
 class DbUnitAccess : public Safir::Dob::Dispatcher, public Safir::Dob::StopHandler
 {
 private:
-//    const std::wstring                                  DataCreateUnitCallSign;
-//    const std::wstring                                  DataCreateUnitSizeId;
-//    const std::wstring                                  DataCreateUnitIdentity;
-//    const Safir::Dob::Typesystem::Int32                 DataCreateCombatReadiness;
-//    const std::wstring                                  DataCreateCombatReadinessDescription;
-//    const Safir::Dob::Typesystem::Float64               DataCreateLongitude;
-//    const Safir::Dob::Typesystem::Float64               DataCreateLatitude;
-//    const Safir::Dob::Typesystem::Float32               DataCreateCourse;
-//    const Safir::Dob::Typesystem::Float32               DataCreateSpeed;
-//    const bool                                          DataCreateIsAlive;
-//    const Safir::Dob::Typesystem::Int64                 DataCreateAlargeinteger;
-
     Safir::Olib::TestObjectPtr m_Object;
 
     Safir::Databases::Odbc::Int32OutputParameter        m_outParamUnitId;
@@ -159,14 +147,19 @@ private:
     Safir::Databases::Odbc::Statement m_WriteBlobStmt;
     bool m_bWriteBlobIsPrepared;
     Safir::Databases::Odbc::Statement m_ReadBlobStmt;
-
-    Safir::Databases::Odbc::Statement m_ReadUnitStmt;
     bool m_bReadBlobIsPrepared;
+    Safir::Databases::Odbc::Statement m_ReadUnitStmt;
+    bool m_bReadUnitIsPrepared;
     Safir::Databases::Odbc::Statement m_LongTimeQuery;
     bool m_bLongTimeQueryIsPrepared;
     Safir::Databases::Odbc::Statement m_InsertInto42;
     bool m_bInsertInto42IsPrepared;
     Safir::Databases::Odbc::Statement m_RowCountStmt;
+    bool m_bRowCountIsPrepared;
+
+    bool m_isMySQL;
+    bool m_isPostgreSQL;
+    bool m_isMimerSQL;
 
     DbUnitAccess(const DbUnitAccess &); // Disable copy constructor
     const DbUnitAccess & operator= (const DbUnitAccess & d);    // Disable assignment operator 
@@ -186,18 +179,22 @@ public:
     void EvaluateOutData();
     void UpdateUnit();
     void DeleteUnit(const Safir::Dob::Typesystem::Int32 Id);
-    void ReadAllUnits();
-    void ReadUnit(int Id);
+    void PerfTest();
+    void ReadUnit(const int Id);
     void BinaryTestRead();
     void BinaryTestWrite();
     void WriteNClobs();
     void ReadNClobs();
     void WriteBlob();
     void ReadBlob();
-    void TestPSQL();
     void LotsOfInput();
-
-
+    void InsertInto42();
+    void SetConnectionPooling();
+    void GetConnectionPooling();
+    void SetReadAllTimeout();
+    void GetReadAllTimeout();
+    void SetConnectionTimeout();
+    void GetConnectionTimeout();
     void AllocStmt();
     void CloseStmt();
 
