@@ -80,15 +80,17 @@ void Alloc(T & thing)
                 retries = 0;
             }
         }
-        catch (const Safir::Databases::Odbc::ReconnectException &)
+        catch (const Safir::Databases::Odbc::ReconnectException& e)
         {
             Free(thing);
             ++retries;
             if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
             {
+                std::wostringstream ostr;
+                ostr << "Failed to Alloc something. Exception info:\n" << e.GetExceptionInfo();
                 Safir::SwReports::SendResourceReport
                     (L"ALLOC",false,
-                     L"Failed to Alloc something");
+                     ostr.str());
                 errorReported = true;
             }
             boost::this_thread::sleep(RECONNECT_EXCEPTION_DELAY);
@@ -116,15 +118,17 @@ void Alloc(T & thing, U & arg)
                 retries = 0;
             }
         }
-        catch (const Safir::Databases::Odbc::ReconnectException &)
+        catch (const Safir::Databases::Odbc::ReconnectException& e)
         {
             Free(thing);
             ++retries;
             if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
             {
+                std::wostringstream ostr;
+                ostr << "Failed to Alloc something. Exception info:\n" << e.GetExceptionInfo();
                 Safir::SwReports::SendResourceReport
                     (L"ALLOC",false,
-                     L"Failed to Alloc something");
+                     ostr.str());
                 errorReported = true;
             }
             boost::this_thread::sleep(RECONNECT_EXCEPTION_DELAY);
@@ -266,20 +270,24 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
                     retries = 0;
                 }
             }
-            catch(const Safir::Databases::Odbc::RetryException &)
+            catch(const Safir::Databases::Odbc::RetryException& e)
             {
-                m_debug << "Caught a RetryException in Store" << std::endl;
+                m_debug << "Caught a RetryException in Store:\n" << e.GetExceptionInfo() << std::endl;
                 boost::this_thread::sleep(RETRY_EXCEPTION_DELAY);
             }
         }
-        catch(const Safir::Databases::Odbc::ReconnectException &)
+        catch(const Safir::Databases::Odbc::ReconnectException& e)
         {
-            m_debug << "Caught a ReconnectException in Store" << std::endl;
+            m_debug << "Caught a ReconnectException in Store:\n" << e.GetExceptionInfo() << std::endl;
             if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
             {
+                std::wostringstream ostr;
+                ostr << "Failed to connect to the database, will keep trying. Exception info:\n" 
+                     << e.GetExceptionInfo();
+
                 Safir::SwReports::SendResourceReport
                     (L"DATABASE_CONNECTION",false,
-                     L"Failed to connect to the database, will keep trying");
+                     ostr.str());
                 errorReported = true;
             }
             Disconnect(m_odbcConnection);
@@ -341,20 +349,24 @@ void OdbcPersistor::DeleteAll(Safir::Databases::Odbc::Connection & connectionToU
                     retries = 0;
                 }
             }
-            catch(const Safir::Databases::Odbc::RetryException &)
+            catch(const Safir::Databases::Odbc::RetryException& e)
             {
-                m_debug << "Caught a RetryException in RemoveAll" << std::endl;
+                m_debug << "Caught a RetryException in RemoveAll:\n" << e.GetExceptionInfo() << std::endl;
                 boost::this_thread::sleep(RETRY_EXCEPTION_DELAY);
             }
         }
-        catch(const Safir::Databases::Odbc::ReconnectException &)
+        catch(const Safir::Databases::Odbc::ReconnectException& e)
         {
-            m_debug << "Caught a ReconnectException in RemoveAll" << std::endl;
+            m_debug << "Caught a ReconnectException in RemoveAll:\n" << e.GetExceptionInfo() << std::endl;
             if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
             {
+                std::wostringstream ostr;
+                ostr << "Failed to connect to the database, will keep trying. Exception info:\n" 
+                     << e.GetExceptionInfo();
+
                 Safir::SwReports::SendResourceReport
                     (L"DATABASE_CONNECTION",false,
-                     L"Failed to connect to the database, will keep trying");
+                     ostr.str());
                 errorReported = true;
             }
             Disconnect(connectionToUse);
@@ -413,9 +425,9 @@ void OdbcPersistor::RestoreAll()
                     getAllStatement.Execute();
                     break;
                 }
-                catch(const Safir::Databases::Odbc::RetryException &)
+                catch(const Safir::Databases::Odbc::RetryException& e)
                 {
-                    m_debug << "Caught a RetryException in GetAll" << std::endl;
+                    m_debug << "Caught a RetryException in GetAll:\n" << e.GetExceptionInfo() << std::endl;
                     boost::this_thread::sleep(RETRY_EXCEPTION_DELAY);
                 }
             }
@@ -529,21 +541,25 @@ void OdbcPersistor::RestoreAll()
                         //since we did not remove the objectid from persistentObjects an empty row will be inserted below.
                     }
                 }
-                catch(const Safir::Databases::Odbc::RetryException &)
+                catch(const Safir::Databases::Odbc::RetryException& e)
                 {
-                    m_debug << "Caught a RetryException in Fetch" << std::endl;
+                    m_debug << "Caught a RetryException in Fetch:\n" << e.GetExceptionInfo() << std::endl;
                     boost::this_thread::sleep(RETRY_EXCEPTION_DELAY);
                 }
             }
         }
-        catch(const Safir::Databases::Odbc::ReconnectException &)
+        catch(const Safir::Databases::Odbc::ReconnectException& e)
         {
-            m_debug << "Caught a ReconnectException in RestoreAll" << std::endl;
+            m_debug << "Caught a ReconnectException in RestoreAll:\n" << e.GetExceptionInfo() << std::endl;
             if (connectionAttempts > REPORT_AFTER_RECONNECTS && !errorReported)
             {
+                std::wostringstream ostr;
+                ostr << "Failed to connect to the database, will keep trying. Exception info:\n" 
+                     << e.GetExceptionInfo();
+
                 Safir::SwReports::SendResourceReport
                     (L"DATABASE_CONNECTION",false,
-                     L"Failed to connect to the database, will keep trying");
+                     ostr.str());
                 errorReported = true;
             }
 
@@ -630,16 +646,16 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId & entityId)
                     retries = 0;
                 }
             }
-            catch(const Safir::Databases::Odbc::RetryException &)
+            catch(const Safir::Databases::Odbc::RetryException& e)
             {
-                m_debug << "Caught a RetryException in Insert" << std::endl;
+                m_debug << "Caught a RetryException in Insert:\n" << e.GetExceptionInfo() << std::endl;
                 boost::this_thread::sleep(RETRY_EXCEPTION_DELAY);
             }
 
         }
-        catch(const Safir::Databases::Odbc::ReconnectException &)
+        catch(const Safir::Databases::Odbc::ReconnectException& e)
         {
-            m_debug << "Caught a ReconnectException in Insert" << std::endl;
+            m_debug << "Caught a ReconnectException in Insert:\n" << e.GetExceptionInfo() << std::endl;
             if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
             {
                 Safir::SwReports::SendResourceReport
@@ -708,20 +724,24 @@ OdbcPersistor::Delete(Safir::Databases::Odbc::Connection & connectionToUse,
                     retries = 0;
                 }
             }
-            catch(const Safir::Databases::Odbc::RetryException &)
+            catch(const Safir::Databases::Odbc::RetryException& e)
             {
-                m_debug << "Caught a RetryException in Delete" << std::endl;
+                m_debug << "Caught a RetryException in Delete:\n" << e.GetExceptionInfo() << std::endl;
                 boost::this_thread::sleep(RETRY_EXCEPTION_DELAY);
             }
         }
-        catch(const Safir::Databases::Odbc::ReconnectException &)
+        catch(const Safir::Databases::Odbc::ReconnectException& e)
         {
-            m_debug << "Caught a ReconnectException in Delete" << std::endl;
+            m_debug << "Caught a ReconnectException in Delete:\n" << e.GetExceptionInfo() << std::endl;
             if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
             {
+                std::wostringstream ostr;
+                ostr << "Failed to connect to the database, will keep trying. Exception info:\n" 
+                     << e.GetExceptionInfo();
+
                 Safir::SwReports::SendResourceReport
                     (L"DATABASE_CONNECTION",false,
-                     L"Failed to connect to the database, will keep trying");
+                     ostr.str());
                 errorReported = true;
             }
             Disconnect(connectionToUse);
