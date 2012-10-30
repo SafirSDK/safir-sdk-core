@@ -34,6 +34,7 @@ namespace Dob
 namespace Internal
 {
     ServiceTypes* ServiceTypes::m_instance = NULL;
+    AtomicUint32 ServiceTypes::m_isInitialized(0);
 
     ServiceTypes& ServiceTypes::Instance()
     {
@@ -73,6 +74,13 @@ namespace Internal
                 }
             }
         }
+
+        m_isInitialized = 1;
+    }
+
+    bool ServiceTypes::IsInitialized()
+    {
+        return m_isInitialized != 0;
     }
 
     bool ServiceTypes::Register(const ConnectionPtr&                  connection,

@@ -33,6 +33,7 @@
 #include <Safir/Dob/Internal/LamportClocks.h>
 #include <Safir/Dob/Internal/PendingRegistration.h>
 #include <Safir/Dob/Internal/SubscriptionOptions.h>
+#include <Safir/Dob/Internal/Atomic.h>
 
 namespace Safir
 {
@@ -50,8 +51,10 @@ namespace Internal
         struct private_constructor_t {};
     public:
         static void Initialize(const bool iAmDoseMain = false);
+        static bool IsInitialized();
 
         static ServiceTypes& Instance();
+
 
         /**
          * @name Service handler registrations
@@ -150,6 +153,7 @@ namespace Internal
 
         bool m_iAmDoseMain;
         static ServiceTypes* m_instance;
+        static AtomicUint32  m_isInitialized;
 
         LamportClock m_registrationClock;
     };

@@ -35,6 +35,8 @@
 #include <Safir/Dob/Internal/PendingRegistration.h>
 #include <Safir/Dob/Internal/SubscriptionOptions.h>
 #include <Safir/Dob/Internal/InternalFwd.h>
+#include <Safir/Dob/Internal/Atomic.h>
+
 namespace Safir
 {
 namespace Dob
@@ -61,6 +63,7 @@ namespace Internal
         typedef PairContainers<Typesystem::TypeId, EntityTypePtr>::map EntityTypeTable;
     public:
         static void Initialize(const bool iAmDoseMain = false);
+        static bool IsInitialized();
 
         static EntityTypes& Instance();
 
@@ -347,6 +350,7 @@ namespace Internal
 
         bool m_iAmDoseMain;
         static EntityTypes* m_instance;
+        static AtomicUint32 m_isInitialized;
 
         LamportClock m_registrationClock;
 
