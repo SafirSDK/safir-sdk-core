@@ -71,7 +71,7 @@ Otherwise install either TortoiseSVN (http://tortoisesvn.net/downloads.html), re
 
 Boost
 ~~~~~
-For both 32 and 64 bit installations the easiest way to install boost is to use the installer provided by BoostPro Computing: http://www.boostpro.com/downloads. Download the appropriate installer and run it.
+For both 32 and 64 bit installations the easiest way to install boost is to use the installer provided by BoostPro Computing: http://www.boostpro.com/download/. Download the appropriate installer and run it.
  - In the "Select Default Variants" step, select your Visual Studio version, "Multithread Debug, DLL" and "Multithread, DLL". If you need more variants or compilers, check those as well.
  - In the "Choose Components" step you can leave the defaults, or check at least 
       Boost DateTime
