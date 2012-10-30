@@ -59,5 +59,7 @@ if not os.path.isfile(dumpPath):
     print("expected to find", dumpPath)
     sys.exit(1)
 
+os.remove(dumpPath)
+
 print("success")
 sys.exit(0)

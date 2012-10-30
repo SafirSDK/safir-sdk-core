@@ -59,6 +59,7 @@ def run_crasher(reason):
         print("No dumpfile appears to have been generated")
         print("expected to find", dumpPath)
         sys.exit(1)
+    os.remove(dumpPath)
 
 run_crasher("SIGSEGV")
 run_crasher("SIGFPE")

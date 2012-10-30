@@ -76,6 +76,7 @@ def test_signal(reason, expectCallback = False, expectedReturncode = None):
             print("expected to find", dumpPath)
             errors += 1
             return
+        os.remove(dumpPath)
 
     if expectedReturncode is None:
         expectedReturncode = (-reason,)
