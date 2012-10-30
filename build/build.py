@@ -502,9 +502,9 @@ class VisualStudioBuilder(BuilderBase):
         if not os.path.isdir(bindir):
             mkdir(bindir)
         ret = subprocess.call(("subst","/d", "k:"))
-        logger.log("'subst /d k:' exited with return code" + str(ret),"command")
+        logger.log("'subst /d k:' exited with return code " + str(ret),"command")
         subprocess.call(("subst","k:",bindir))
-        logger.log("'subst k:" + bindir + "' exited with return code" + str(ret),"output")
+        logger.log("'subst k:" + bindir + "' exited with return code " + str(ret),"output")
         
         #set database from label environment variable
         label = os.environ.get("label")
