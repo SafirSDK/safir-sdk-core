@@ -86,7 +86,7 @@ class Parameters:
         if self.driver == "mimer":
             driver = os.environ.get("MIMER_ODBC_DRIVER_NAME")
             if driver is None:
-                driver = "mimersql"
+                driver = "MIMER"
         elif self.driver == "mysql":
             driver = os.environ.get("MYSQL_ODBC_DRIVER_NAME")
             if driver is None:
