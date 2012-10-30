@@ -205,6 +205,7 @@ try:
     env = TestEnv()
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", (owner_path,"set")).wait()
+        print "waiting for 110 entities in db"
         while count_rows(parameters) != 110:
             time.sleep(1)
 
@@ -309,6 +310,7 @@ try:
 
         env.launchProcess("entity_owner", (owner_path,"update")).wait()
 
+        print "waiting for 110 entities in db"
         while count_binares(parameters) != 110:
             time.sleep(1)
 
