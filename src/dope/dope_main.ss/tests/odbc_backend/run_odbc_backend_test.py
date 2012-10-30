@@ -84,15 +84,25 @@ class Parameters:
         self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
 
         if self.driver == "mimer":
-            self.connection_string = "Driver={mimersql};Protocol=tcp;" + \
-                "Node=" + options.hostname +  ";" + \
-                "Database=" + options.database + ";" + \
-                "Uid=dopeuser;Pwd=dopeuser"
+            driver = os.environ.get("MIMER_ODBC_DRIVER_NAME")
+            if driver is None:
+                driver = "mimersql"
         elif self.driver == "mysql":
-            self.connection_string = "DRIVER={MySQL};"+ \
-                "Server=" + options.hostname + ";" + \
-                "Database=" + options.database + ";" +\
-                "Uid=dopeuser;Pwd=dopeuser"
+            driver = os.environ.get("MYSQL_ODBC_DRIVER_NAME")
+            if driver is None:
+                driver = "MySQL"
+
+        #set up the connection string, starting with the driver specific parts
+        if self.driver == "mimer":
+            self.connection_string = "Driver={{{driver}}};Protocol=tcp;Node={hostname};"
+        elif self.driver == "mysql":
+            self.connection_string = "DRIVER={{{driver}}};Server={hostname};"
+        #add common bits
+        self.connection_string += "Database={database};Uid=dopeuser;Pwd=dopeuser"
+
+        self.connection_string = self.connection_string.format(driver = driver,
+                                                               hostname = options.hostname,
+                                                               database = options.database)
 
         print "Using connection string", self.connection_string
 
