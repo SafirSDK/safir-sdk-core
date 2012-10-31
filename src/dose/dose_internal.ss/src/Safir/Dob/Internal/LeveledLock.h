@@ -45,8 +45,8 @@ namespace Internal
     // a real deadlock actually manifesting itself during the test runs.
     //
     // Since keeping track of the held levels imposes a significant overhead (~400x),
-    // compared to "native" locks, the check is performed only if the code is built
-    // with the preprocessor symbol CHECKED_LOCKS.
+    // compared to "native" locks, the check is performed only if the code is not built
+    // with the preprocessor symbol NDEBUG
     //
     // Sometimes there is a need to acquire locks on the same level in different order
     // in different parts of the code. To avoid deadlock in this case, a lock at a higher level,
@@ -76,7 +76,7 @@ namespace Internal
 
         inline void AddLevel()
         {
-#ifdef CHECKED_LOCKS
+#ifndef NDEBUG
             Check();
             LeveledLockHelper::Instance().AddLevel(level);
 #endif
@@ -84,7 +84,7 @@ namespace Internal
 
         inline void RemoveLevel()
         {
-#ifdef CHECKED_LOCKS
+#ifndef NDEBUG
             LeveledLockHelper::Instance().RemoveLevel(level);
 #endif
         }
