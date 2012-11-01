@@ -33,22 +33,53 @@
 #include <boost/shared_ptr.hpp>
 
 DbUnitAccess::DbUnitAccess() : 
-    m_outParamCallsign(6), m_outParamUnitSizeId(50), m_outParamUnitIdentityId(100), m_paramUnitId(1), 
-    m_outParamCombatReadinessDescription(100), m_paramCallsign(6), m_paramUnitSizeId(50), 
-    m_paramUnitIdentityId(50), m_paramCombatReadinessDescription(100), m_paramUnitTypeId(50), 
-    m_paramData(2000), m_columnCallsign(6), m_columnUnitSizeId(50), m_columnUnitIdentityId(50), 
-    m_columnCombatReadinessDescription(100), m_columnUnitTypeId(50), m_paramNClob(100), 
-    m_columnNClob(1000), m_paramBinary(6000), m_columnBinary( 6000 ), m_paramBlob(1000),
-    m_columnBlob(500), m_inoutParamCallsign(6), m_inoutParamUnitSizeId(50), m_inoutParamUnitIdentityId(50),
-    m_inoutParamCombatReadinessDescription(100), m_bInputOutputIsPrepared( false ), 
-    m_bOutputIsPrepared( false ), m_bCreateIsPrepared( false ), m_bUpdateIsPrepared( false ), 
-    m_bDeleteIsPrepared(false), m_bGetAllUnitsIsPrepared( false ), m_bPerfTestIsPrepared( false ), 
-    m_bUseDbIsPrepared( false ), m_bBinaryReadIsPrepared( false ), m_bBinaryWriteIsPrepared( false ), 
-    m_bWriteNClobIsPrepared(false), m_bReadNClobIsPrepared(false), m_bWriteBlobIsPrepared(false),
-    m_bReadBlobIsPrepared(false), m_bLongTimeQueryIsPrepared(false),
-    m_bInsertInto42IsPrepared( false ),m_isMySQL(false),m_isPostgreSQL(false),m_isMimerSQL(false)
+    m_outParamCallsign(6),
+    m_outParamUnitSizeId(50),
+    m_outParamUnitIdentityId(100),
+    m_outParamCombatReadinessDescription(100),
+    m_paramUnitId(1),
+    m_paramCallsign(6),
+    m_paramUnitSizeId(50),
+    m_paramUnitIdentityId(50),
+    m_paramCombatReadinessDescription(100),
+    m_paramUnitTypeId(50),
+    m_paramData(2000),
+    m_columnCallsign(6),
+    m_columnUnitSizeId(50),
+    m_columnUnitIdentityId(50),
+    m_columnCombatReadinessDescription(100),
+    m_columnUnitTypeId(50),
+    m_paramNClob(100),
+    m_columnNClob(1000),
+    m_paramBinary(6000),
+    m_columnBinary( 6000 ),
+    m_paramBlob(1000),
+    m_columnBlob(500),
+    m_inoutParamCallsign(6),
+    m_inoutParamUnitSizeId(50),
+    m_inoutParamUnitIdentityId(50),
+    m_inoutParamCombatReadinessDescription(100),
+    m_bInputOutputIsPrepared( false ),
+    m_bOutputIsPrepared( false ),
+    m_bCreateIsPrepared( false ),
+    m_bUpdateIsPrepared( false ),
+    m_bDeleteIsPrepared(false),
+    m_bGetAllUnitsIsPrepared( false ),
+    m_bPerfTestIsPrepared( false ),
+    m_bUseDbIsPrepared( false ),
+    m_bBinaryReadIsPrepared( false ),
+    m_bBinaryWriteIsPrepared( false ),
+    m_bWriteNClobIsPrepared(false),
+    m_bReadNClobIsPrepared(false),
+    m_bWriteBlobIsPrepared(false),
+    m_bReadBlobIsPrepared(false),
+    m_bLongTimeQueryIsPrepared(false),
+    m_bInsertInto42IsPrepared( false ),
+    m_isMySQL(false),
+    m_isPostgreSQL(false),
+    m_isMimerSQL(false)
 {   
-    m_Object=Safir::Olib::TestObject::Create();
+    m_Object=Safir::OlibTest::TestObject::Create();
 
     m_Object->Callsign().SetVal(L"CS");
     m_Object->UnitSizeId().SetVal(L"Brigade");
@@ -150,7 +181,7 @@ void DbUnitAccess::TestOutputParameters()
         ;
 
     //Create objectptr to testobject
-    Safir::Olib::TestObjectPtr outObjPtr =Safir::Olib::TestObject::Create();
+    Safir::OlibTest::TestObjectPtr outObjPtr =Safir::OlibTest::TestObject::Create();
 
     //Get values from columndata and set to outObject
     outObjPtr->Callsign().SetVal(m_outParamCallsign.GetValue());
@@ -824,7 +855,7 @@ void DbUnitAccess::ReadUnit(int Id)
 void DbUnitAccess::EvaluateOutData()
 {
     //Create objectptr to testobject
-    Safir::Olib::TestObjectPtr outObjPtr =Safir::Olib::TestObject::Create();
+    Safir::OlibTest::TestObjectPtr outObjPtr =Safir::OlibTest::TestObject::Create();
 
     //Get values from columndata and set to outObject
     outObjPtr->Callsign().SetVal(m_columnCallsign.GetValue());
@@ -1576,7 +1607,7 @@ std::wstring DbUnitAccess::NCstrBuffer =
             L"012345678901234567890123456789012345678901234567890123456789"
             L"0123456789012345678901234567890123456789";
 
-char * DbUnitAccess::BinaryData = 
+char DbUnitAccess::BinaryData [] = 
     "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
     "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
     "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"

@@ -35,13 +35,13 @@
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Consumer.h>
-#include <Safir/Olib/TestObject.h>
+#include <Safir/OlibTest/TestObject.h>
 
 
 class DbUnitAccess : public Safir::Dob::Dispatcher, public Safir::Dob::StopHandler
 {
 private:
-    Safir::Olib::TestObjectPtr m_Object;
+    Safir::OlibTest::TestObjectPtr m_Object;
 
     Safir::Databases::Odbc::Int32OutputParameter        m_outParamUnitId;
     Safir::Databases::Odbc::WideStringOutputParameter   m_outParamCallsign;
@@ -163,7 +163,7 @@ private:
 
     static std::wstring NCstrBuffer;
 
-    static char * BinaryData;
+    static char BinaryData [];
 public:
     DbUnitAccess();
     virtual ~DbUnitAccess();
