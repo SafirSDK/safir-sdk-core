@@ -242,6 +242,17 @@ class VisualStudioBuilder(object):
         if not os.path.isdir(self.tmpdir):
             die("I can't seem to use the temp directory " + self.tmpdir)
 
+        #work out whether to use devenv.com or vcexpress.exe to build
+        basepath = os.path.join(self.studio,"..","IDE")
+        vcexpresspath = os.path.join(basepath,"vcexpress.exe")
+        devenvpath = os.path.join(basepath,"devenv.com")
+        if os.path.exists(vcexpresspath):
+            self.build_cmd = vcexpresspath
+        elif  os.path.exists(devenvpath):
+            self.build_cmd = devenvpath
+        else:
+            die("I couldn't find either vcexpress.exe or devenv.com, so I dont know how to build stuff!")            
+
     @staticmethod
     def can_use():
         VS80 = os.environ.get("VS80COMNTOOLS")
@@ -336,15 +347,15 @@ class VisualStudioBuilder(object):
         
         if clean:
             for config in configs:
-                self.__run_command("devenv.com " + solution + " /clean " + config,
+                self.__run_command("\"" + self.build_cmd + "\" " + solution + " /clean " + config,
                                    "Clean " + config, directory)
 
 
         for config in configs:
-            self.__run_command("devenv.com " + solution + " /build  " + config,
+            self.__run_command("\"" + self.build_cmd + "\" " + solution + " /build  " + config,
                                "Build " + config, directory)
 
-            self.__run_command("devenv.com " + solution + " /build " +config +" /Project INSTALL",
+            self.__run_command("\"" + self.build_cmd + "\" " + solution + " /build " +config +" /Project INSTALL",
                                "Install " + config, directory)
         
         os.chdir(olddir)
