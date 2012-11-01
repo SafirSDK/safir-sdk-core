@@ -324,7 +324,7 @@ namespace Internal
     }
 
     //this will block if there is overflow
-    void ExternNodeCommunication::SendPoolDistributionData(const DistributionData & msg, ThreadMonitor& threadMonitor, const boost::thread::id& threadId)
+    void ExternNodeCommunication::SendPoolDistributionData(const DistributionData & msg, boost::shared_ptr<ThreadMonitor> threadMonitorPtr, const boost::thread::id& threadId)
     {
         assert (!m_QualityOfServiceData.IsStandalone());
 
@@ -332,7 +332,7 @@ namespace Internal
 
         while (!success)
         {
-            threadMonitor.KickWatchdog(threadId);
+            threadMonitorPtr->KickWatchdog(threadId);
 
             const DistributionData::Type type = msg.GetType();
 
@@ -397,13 +397,13 @@ namespace Internal
     }
 
 
-    void ExternNodeCommunication::PoolDistributionCompleted(ThreadMonitor& threadMonitor, const boost::thread::id& threadId)
+    void ExternNodeCommunication::PoolDistributionCompleted(boost::shared_ptr<ThreadMonitor> threadMonitorPtr, const boost::thread::id& threadId)
     {
         lllout << "Waiting for m_okToSignalPDComplete to be set to true. Current value = " << m_okToSignalPDComplete.value() << std::endl;
         //there is logic in dose_main_app.cpp that will tell us when/if it is okay to finish pd.
         while (m_okToSignalPDComplete == 0)
         {
-            threadMonitor.KickWatchdog(threadId);
+            threadMonitorPtr->KickWatchdog(threadId);
             lllout << "Waiting for m_okToSignalPDComplete to be set to true. Current value = " << m_okToSignalPDComplete.value() << std::endl;
             ACE_OS::sleep(ACE_Time_Value(0,20000)); //20 milliseconds
         }
