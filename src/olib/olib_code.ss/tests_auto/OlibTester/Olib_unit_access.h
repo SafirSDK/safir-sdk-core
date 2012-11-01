@@ -35,8 +35,7 @@
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Consumer.h>
-#include <safir/Olib/TestObject.h>
-#include <safir/Geodesy/Position.h>
+#include <Safir/Olib/TestObject.h>
 
 
 class DbUnitAccess : public Safir::Dob::Dispatcher, public Safir::Dob::StopHandler
@@ -114,8 +113,6 @@ private:
     Safir::Databases::Odbc::TimeInputOutputParameter        m_inoutParamMeasurementTime;
     Safir::Databases::Odbc::BooleanInputOutputParameter     m_inoutParamIsAlive;
     Safir::Databases::Odbc::Int64InputOutputParameter       m_inoutParamAlargeinteger;
-
-    long m_nNoOfErrors;
 
     Safir::Databases::Odbc::Connection     m_connection;
     Safir::Databases::Odbc::Environment    m_environment;

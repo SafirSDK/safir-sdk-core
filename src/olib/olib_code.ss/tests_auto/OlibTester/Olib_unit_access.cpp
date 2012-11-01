@@ -26,10 +26,10 @@
 #include <iostream>
 #include <Safir/Databases/Odbc/ReconnectException.h>
 #include <Safir/Databases/Odbc/RetryException.h>
-#include <Safir/Databases/Odbc/defs.h>
-#include <safir/Dob/Typesystem/Serialization.h>
-#include <safir/Dob/Typesystem/BlobOperations.h>
-#include <safir/Dob/Typesystem/ObjectFactory.h>
+#include <Safir/Databases/Odbc/Defs.h>
+#include <Safir/Dob/Typesystem/Serialization.h>
+#include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <boost/shared_ptr.hpp>
 
 DbUnitAccess::DbUnitAccess() : 
@@ -48,7 +48,6 @@ DbUnitAccess::DbUnitAccess() :
     m_bReadBlobIsPrepared(false), m_bLongTimeQueryIsPrepared(false),
     m_bInsertInto42IsPrepared( false ),m_isMySQL(false),m_isPostgreSQL(false),m_isMimerSQL(false)
 {   
-
     m_Object=Safir::Olib::TestObject::Create();
 
     m_Object->Callsign().SetVal(L"CS");
@@ -83,6 +82,7 @@ DbUnitAccess::DbUnitAccess() :
 
 DbUnitAccess::~DbUnitAccess(void)
 {
+    m_Object.reset();
 }
 
 void DbUnitAccess::OnDoDispatch()
@@ -199,8 +199,8 @@ void DbUnitAccess::Connect(const std::wstring DatabaseLogin)
 
     if (!m_connection.IsConnected())
     {
-      // m_connection.Connect(DatabaseLogin );m_isMimerSQL=true; // MIMER
-       m_connection.Connect(L"DSN=safirDbMySQL;PWD=olibtesteruser;UID=olibtesteruser;SERVER=localhost;" ); m_isMySQL=true; //MYSQL
+       m_connection.Connect(DatabaseLogin );m_isMimerSQL=true; // MIMER
+      // m_connection.Connect(L"DSN=safirDbMySQL;PWD=olibtesteruser;UID=olibtesteruser;SERVER=localhost;" ); m_isMySQL=true; //MYSQL
      // m_connection.Connect(L"DSN=SafirDbPSQL;DRIVER=SQL;" ); m_isPostgreSQL=true; //postgresql
 
        m_connection.UseManualTransactions();
@@ -219,7 +219,6 @@ void DbUnitAccess::Disconnect()
 
     if (m_environment.IsValid())
         m_environment.Free();
-
 }
 
 void DbUnitAccess::AllocStmt()
@@ -286,18 +285,19 @@ void DbUnitAccess::AllocStmt()
 
         m_ReadUnitStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
     }
-//    if (!m_bPerfTestIsPrepared && m_PerfTestStmt.IsValid())
-//    {
-//        m_PerfTestStmt.Prepare(L"Insert into tblPerfTest values(?, ?, ?)");
 
-//        m_PerfTestStmt.BindParameter(1, m_paramTypeId);
-//        m_PerfTestStmt.BindParameter(2, m_paramInstanceNo);
-//        m_PerfTestStmt.BindParameter(3, m_paramData);
+    if (!m_bPerfTestIsPrepared && m_PerfTestStmt.IsValid())
+    {
+        m_PerfTestStmt.Prepare(L"Insert into tblPerfTest values(?, ?, ?)");
 
-//        m_PerfTestStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
+        m_PerfTestStmt.BindParameter(1, m_paramTypeId);
+        m_PerfTestStmt.BindParameter(2, m_paramInstanceNo);
+        m_PerfTestStmt.BindParameter(3, m_paramData);
 
-//        m_bPerfTestIsPrepared = true;
-//    }
+        m_PerfTestStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
+
+        m_bPerfTestIsPrepared = true;
+    }
 
     if (!m_bOutputIsPrepared && m_OutputStmt.IsValid())
     {
@@ -474,31 +474,31 @@ void DbUnitAccess::AllocStmt()
         m_bReadBlobIsPrepared  = true;
     }
 
-    if (!m_bGetAllUnitsIsPrepared && m_GetAllUnitsStmt.IsValid())
-    {
-        //m_GetAllUnitsStmt.Prepare(    L"select UnitId, CallSign, UnitSizeId, UnitIdentityId, CombatReadiness, "
-        //                          L"CombatReadinessDescription, Latitude, Longitude, Speed, Course, "
-        //                          L"MeasurementTime, IsAlive, ALargeInt from tblUnit;");
-        m_GetAllUnitsStmt.Prepare(L"{call spGetAllOlibTests}");
+//    if (!m_bGetAllUnitsIsPrepared && m_GetAllUnitsStmt.IsValid())
+//    {
+//        //m_GetAllUnitsStmt.Prepare(    L"select UnitId, CallSign, UnitSizeId, UnitIdentityId, CombatReadiness, "
+//        //                          L"CombatReadinessDescription, Latitude, Longitude, Speed, Course, "
+//        //                          L"MeasurementTime, IsAlive, ALargeInt from tblUnit;");
+//        m_GetAllUnitsStmt.Prepare(L"{call spGetAllOlibTests}");
 
-        m_GetAllUnitsStmt.BindColumn(1, m_columnUnitId);
-        m_GetAllUnitsStmt.BindColumn(2, m_columnCallsign);
-        m_GetAllUnitsStmt.BindColumn(3, m_columnUnitSizeId);
-        m_GetAllUnitsStmt.BindColumn(4, m_columnUnitIdentityId);
-        m_GetAllUnitsStmt.BindColumn(5, m_columnCombatReadiness);
-        m_GetAllUnitsStmt.BindColumn(6, m_columnCombatReadinessDescription);
-        m_GetAllUnitsStmt.BindColumn(7, m_columnLatitude);
-        m_GetAllUnitsStmt.BindColumn(8, m_columnLongitude);
-        m_GetAllUnitsStmt.BindColumn(9, m_columnSpeed);
-        m_GetAllUnitsStmt.BindColumn(10, m_columnCourse);
-        m_GetAllUnitsStmt.BindColumn(11, m_columnMeasurementTime);
-        m_GetAllUnitsStmt.BindColumn(12, m_columnIsAlive);
-        m_GetAllUnitsStmt.BindColumn(13, m_columnAlargeinteger);
+//        m_GetAllUnitsStmt.BindColumn(1, m_columnUnitId);
+//        m_GetAllUnitsStmt.BindColumn(2, m_columnCallsign);
+//        m_GetAllUnitsStmt.BindColumn(3, m_columnUnitSizeId);
+//        m_GetAllUnitsStmt.BindColumn(4, m_columnUnitIdentityId);
+//        m_GetAllUnitsStmt.BindColumn(5, m_columnCombatReadiness);
+//        m_GetAllUnitsStmt.BindColumn(6, m_columnCombatReadinessDescription);
+//        m_GetAllUnitsStmt.BindColumn(7, m_columnLatitude);
+//        m_GetAllUnitsStmt.BindColumn(8, m_columnLongitude);
+//        m_GetAllUnitsStmt.BindColumn(9, m_columnSpeed);
+//        m_GetAllUnitsStmt.BindColumn(10, m_columnCourse);
+//        m_GetAllUnitsStmt.BindColumn(11, m_columnMeasurementTime);
+//        m_GetAllUnitsStmt.BindColumn(12, m_columnIsAlive);
+//        m_GetAllUnitsStmt.BindColumn(13, m_columnAlargeinteger);
 
-        m_GetAllUnitsStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
+//        m_GetAllUnitsStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
 
-        m_bGetAllUnitsIsPrepared = true;
-    }
+//        m_bGetAllUnitsIsPrepared = true;
+//    }
 
     m_LongTimeQuery.Alloc( m_connection );
     if (!m_bLongTimeQueryIsPrepared && m_LongTimeQuery.IsValid())
@@ -736,8 +736,6 @@ void DbUnitAccess::PerfTest()
         m_paramInstanceNo.SetValue( i );
         m_PerfTestStmt.Execute();
         m_connection.Commit();
-        if((i%20)==0)
-            std::wcout<<"in loop i="<<i<<std::endl;
     }
 }
 
@@ -765,7 +763,6 @@ void DbUnitAccess::GetReadAllTimeout()
 
 void DbUnitAccess::SetConnectionTimeout()
 {
-
     long lTimeout = 1;
     m_connection.SetConnectAttr(SQL_ATTR_CONNECTION_TIMEOUT, lTimeout);
 }
@@ -1113,6 +1110,7 @@ void DbUnitAccess::SetConnectionPooling()
 {
     if (!m_environment.IsValid())
         m_environment.Alloc();
+
     m_environment.SetEnvAttr(SQL_ATTR_CONNECTION_POOLING, SQL_CP_ONE_PER_HENV);
 }
 
@@ -1453,8 +1451,6 @@ void DbUnitAccess::LotsOfInput()
         if((i%20)==0)
             std::wcout<<"in loop i="<<i<<std::endl;
     }
-
-
 
     Safir::Dob::Typesystem::Int64 NrRowsAfter=TblRowCount();
     if((NrRowsAfter-NrRowsBef)!=(NrElemnts))
