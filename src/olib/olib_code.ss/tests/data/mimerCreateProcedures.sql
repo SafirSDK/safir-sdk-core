@@ -1,51 +1,36 @@
 @
-create procedure spCreateOlibTest (pCallSign nvarchar(6), 
-                        pUnitSizeId nvarchar(50), 
-                    pUnitIdentityId nvarchar(50), 
-                    pCombatReadiness int, 
-                    pCombatReadinessDescription nvarchar(100), 
-                    pLatitude float, 
-                    pLongitude float, 
-                    pSpeed real, 
-                    pCourse real, 
-                    pMeasurementTime timestamp(6), 
-                    pIsAlive int, 
-                    pALargeInt bigint)
+create procedure spCreateOlibTest (pStringName nvarchar(10), 
+                        pStringDescription nvarchar(50), 
+                    pInt32 int,
+                    pInt64 BIGINT,
+                    pFloat32 Float(32),
+                    pFloat64 DOUBLE PRECISION,
+                    pBool int)
 modifies SQL data
 begin
 
-declare pUnitId int;
+declare pId int;
 
-set pUnitId = (select max(UnitId)+1 from tblOlibTest);
-if pUnitId is null then
-    set pUnitId =0;
+set pId = (select max(Id)+1 from tblOlibTest);
+if pId is null then
+    set pId =0;
 end if;
-insert into tblOlibTest(UnitId,
-                        CallSign, 
-                    UnitSizeId, 
-                    UnitIdentityId, 
-                    CombatReadiness, 
-                    CombatReadinessDescription, 
-                    Latitude, 
-                    Longitude, 
-                    Speed, 
-                    Course, 
-                    MeasurementTime, 
-                    IsAlive,
-                    ALargeInt  )
-values (    pUnitId,
-            pCallSign, 
-        pUnitSizeId, 
-        pUnitIdentityId, 
-        pCombatReadiness, 
-        pCombatReadinessDescription, 
-        pLatitude, 
-        pLongitude, 
-        pSpeed, 
-        pCourse, 
-        pMeasurementTime, 
-        pIsAlive,
-        pALargeInt);
+insert into tblOlibTest(Id,
+                        StringName, 
+                    StringDescription, 
+                    Int32, 
+                    Int64, 
+                    Float32, 
+                    Float64,
+                    Bool)
+values (pId,
+        pStringName, 
+        pStringDescription, 
+        pInt32, 
+        pInt64, 
+        pFloat32, 
+        pFloat64,
+        pBool);
 
 end
 @
@@ -68,182 +53,85 @@ END
 @
 
 @
-create procedure spDeleteOlibTest(pUnitId int)
+create procedure spDeleteOlibTest(pId int)
 modifies SQL data
 begin
 
-delete from tblOlibTest where UnitId = pUnitId;
-
-delete from tblOlibTestnclob where Id = pUnitId;
+delete from tblOlibTest where Id = pId;
 
 end
 @
 
-@
-create procedure spGetAllOlibTests ()
-values (int, nvarchar(6), nvarchar(50), nvarchar(50), int, nvarchar(100), 
-        float, float, real, real, timestamp(8), int, bigint) as
-       (UnitId, CallSign, UnitSizeId, UnitIdentityId, CombatReadiness, 
-        CombatReadinessDescription, Latitude, Longitude, Speed, Course,
-        MeasurementTime, IsAlive, ALargeInt )
-reads SQL data
-begin
-declare pUnitId int;
-declare pCallSign nvarchar(6);
-declare pUnitSizeId nvarchar(50);
-declare pUnitIdentityId nvarchar(50);
-declare pCombatReadiness int;
-declare pCombatReadinessDescription nvarchar(100);
-declare pLatitude float;
-declare pLongitude float;
-declare pSpeed real;
-declare pCourse real;
-declare pMeasurementTime timestamp(8);
-declare pIsAlive int;
-declare pALargeInt bigint;
-DECLARE L CURSOR FOR 
-select UnitId, 
-         CallSign, 
-     UnitSizeId, 
-     UnitIdentityId, 
-     CombatReadiness, 
-     CombatReadinessDescription, 
-     Latitude, 
-     Longitude, 
-     Speed, 
-     Course, 
-     MeasurementTime, 
-     IsAlive, 
-     ALargeInt
-from tblOlibTest;
- declare exit handler for not found 
-    begin
-      close L; 
-    end;
- open L;
- loop 
-   fetch L into pUnitId, pCallSign, pUnitSizeId, pUnitIdentityId, pCombatReadiness, 
-                pCombatReadinessDescription, pLatitude, pLongitude, pSpeed, pCourse, 
-                pMeasurementTime, pIsAlive, pALargeInt;
-   return (pUnitId, pCallSign, pUnitSizeId, pUnitIdentityId, pCombatReadiness, 
-           pCombatReadinessDescription, pLatitude, pLongitude, pSpeed, pCourse,
-           pMeasurementTime, pIsAlive, pALargeInt);
- end loop;
-end
-@
+ 
 
-@create procedure spInputOutputOlibTest(inout pSpeed real)
+@
+create procedure spInputOutputOlibTest(inout pInt32 float)
 modifies SQL data
 begin
-declare SpeedSum real;
-declare pUnitId real;
-set pUnitId =  (select max(UnitId)+1 from tblOlibTest);
-set SpeedSum = pSpeed + pSpeed;
+declare Int32Sum float;
+declare pId float;
+set pId =  (select max(Id+1) from tblOlibTest);
+set Int32sum = pInt32 + pInt32;
 
-insert into tblOlibTest(UnitId,
-                        CallSign, 
-                    UnitSizeId, 
-                    UnitIdentityId, 
-                    CombatReadiness, 
-                    CombatReadinessDescription, 
-                    Latitude, 
-                    Longitude, 
-                    Speed, 
-                    Course, 
-                    MeasurementTime, 
-                    IsAlive,
-                    ALargeInt  )
-values (    pUnitId,
-        null, 
-        null, 
-        null, 
-        null, 
-        null, 
-        null, 
-        null, 
-        SpeedSum, 
-        null, 
-        null, 
-        null,
-        null);
+insert into tblOlibTest(Id, Int32  )
+values ( pId, Int32sum);
         
-select Speed into pSpeed from tblOlibTest where UnitId = pUnitId;
+select Int32 into pInt32 from tblOlibTest where Id = pId;
 end
 @
 
-@create procedure spOutputOlibTest (out pCallSign nvarchar(6), 
-                        out pUnitSizeId nvarchar(50), 
-                    out pUnitIdentityId nvarchar(50), 
-                    out pCombatReadiness int, 
-                    out pCombatReadinessDescription nvarchar(100), 
-                    out pLatitude float, 
-                    out pLongitude float, 
-                    out pSpeed real, 
-                    out pCourse real, 
-                    out pMeasurementTime timestamp(0), 
-                    out pIsAlive int, 
-                    out pALargeInt bigint)
+@
+create procedure spOutputOlibTest (out pStringName nvarchar(10), 
+                        out pStringDescription nvarchar(40), 
+                    out pInt32 int, 
+                    out pInt64 BIGINT, 
+                    out pFloat32 float, 
+                    out pFloat64 double precision, 
+                    out pBool int)
 modifies SQL data
 begin
 
 DECLARE L CURSOR FOR 
-select CallSign, 
-     UnitSizeId, 
-     UnitIdentityId, 
-     CombatReadiness, 
-     CombatReadinessDescription, 
-     Latitude, 
-     Longitude, 
-     Speed, 
-     Course, 
-     MeasurementTime, 
-     IsAlive, 
-     ALargeInt
+select StringName, 
+     StringDescription, 
+     Int32, 
+     Int64, 
+     Float32, 
+     Float64, 
+     Bool 
 from tblOlibTest
-where UnitId = 1;
+where Id = 1;
  declare exit handler for not found 
     begin
       close L; 
     end;
  open L;
-fetch L into pCallSign, pUnitSizeId, pUnitIdentityId, pCombatReadiness, 
-                pCombatReadinessDescription, pLatitude, pLongitude, pSpeed, pCourse, 
-                pMeasurementTime, pIsAlive, pALargeInt;
-
+fetch L into pStringName,  pStringDescription, pInt32, pInt64, pFloat32,pFloat64,pBool;
 end
 @
 
 @
-create procedure spUpdateOlibTest (pUnitId int,
-                        pCallSign nvarchar(6), 
-                        pUnitSizeId nvarchar(50), 
-                    pUnitIdentityId nvarchar(50), 
-                    pCombatReadiness int, 
-                    pCombatReadinessDescription nvarchar(100), 
-                    pLatitude float, 
-                    pLongitude float, 
-                    pSpeed real, 
-                    pCourse real, 
-                    pMeasurementTime timestamp(8), 
-                    pIsAlive int, 
-                    pALargeInt bigint)
+create procedure spUpdateOlibTest ( pId int,
+                          pStringName nvarchar(10), 
+                         pStringDescription nvarchar(40), 
+                     pInt32 int, 
+                     pInt64 BIGINT, 
+                     pFloat32 float, 
+                     pFloat64 double precision, 
+                     pBool int)
 modifies SQL data
 begin
 
 update tblOlibTest
-set     CallSign = pCallSign,
-    UnitSizeId = pUnitSizeId,
-    UnitIdentityId = pUnitIdentityId,
-    CombatReadiness = pCombatReadiness,
-    CombatReadinessDescription = pCombatReadinessDescription,
-    Latitude = pLatitude,
-    Longitude = pLongitude,
-    Speed = pSpeed,
-    Course = pCourse,
-    MeasurementTime = pMeasurementTime,
-    IsAlive = pIsAlive,
-    ALargeInt = pALargeInt
-where UnitId = pUnitId
+set StringName = pStringName,
+    StringDescription = pStringDescription,
+    Int32 = pInt32,
+    Int64 = pInt64,
+    Float32 = pFloat32,
+    Float64 = pFloat64,
+    Bool = pBool
+    
+where Id = pId
 ;
 
 end

@@ -32,33 +32,27 @@
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <boost/shared_ptr.hpp>
 
-DbUnitAccess::DbUnitAccess() : 
-    m_outParamCallsign(6),
-    m_outParamUnitSizeId(50),
-    m_outParamUnitIdentityId(100),
-    m_outParamCombatReadinessDescription(100),
-    m_paramUnitId(1),
-    m_paramCallsign(6),
-    m_paramUnitSizeId(50),
-    m_paramUnitIdentityId(50),
-    m_paramCombatReadinessDescription(100),
-    m_paramUnitTypeId(50),
+DbOlibTest::DbOlibTest():
+
+    m_outParamId(1),
+    m_outParamStringName(100),
+    m_outParamStringDescription(100),
+    //m_outParamBool(true),
+    m_paramStringName(10),
+    m_paramStringDescription(40),
     m_paramData(2000),
-    m_columnCallsign(6),
-    m_columnUnitSizeId(50),
-    m_columnUnitIdentityId(50),
-    m_columnCombatReadinessDescription(100),
-    m_columnUnitTypeId(50),
+    m_columnStringName(10),
+    m_columnStringDescription(40),
+    //m_columnBool(true),
     m_paramNClob(100),
     m_columnNClob(1000),
     m_paramBinary(6000),
     m_columnBinary( 6000 ),
     m_paramBlob(1000),
     m_columnBlob(500),
-    m_inoutParamCallsign(6),
-    m_inoutParamUnitSizeId(50),
-    m_inoutParamUnitIdentityId(50),
-    m_inoutParamCombatReadinessDescription(100),
+    m_inoutParamStringName(0),
+    m_inoutParamStringDescription(0),
+    //m_inoutParamBool(true),
     m_bInputOutputIsPrepared( false ),
     m_bOutputIsPrepared( false ),
     m_bCreateIsPrepared( false ),
@@ -80,52 +74,43 @@ DbUnitAccess::DbUnitAccess() :
     m_isMimerSQL(false)
 {   
     m_Object=Safir::OlibTest::TestObject::Create();
-
-    m_Object->Callsign().SetVal(L"CS");
-    m_Object->UnitSizeId().SetVal(L"Brigade");
-    m_Object->UnitIdentity().SetVal(L"Own");
-    m_Object->CombatReadines().SetVal(1);
-    m_Object->CombatReadinessDescription().SetVal(L"Descp");
-    m_Object->Latitude().SetVal(17.6389);
-    m_Object->Longitude().SetVal(59.8586);
-    m_Object->Course().SetVal(43.3f);
-    m_Object->Speed().SetVal(29.3f);
-    m_Object->IsAlive().SetVal(true);
-    m_Object->Alargeinteger().SetVal(1);
-
+    m_Object->StringName().SetVal(L"Name");
+    m_Object->StringDescription().SetVal(L"Description");
+    m_Object->Int32().SetVal(32);
+    m_Object->Int64().SetVal(64);
+    m_Object->Float32().SetVal(32.32f);
+    m_Object->Float64().SetVal(64.64);
+    m_Object->Bool().SetVal(1);
 
     //Setting param values from object
-    m_paramCallsign.SetValue( m_Object->Callsign().GetVal() );
-    std::wstring aString = m_Object->UnitSizeId().GetVal();
-    m_paramUnitSizeId.SetValue( aString.c_str(), static_cast<unsigned int>(aString.size()) );
-    m_paramUnitIdentityId.SetValue( m_Object->UnitIdentity().GetVal() );
-    m_paramCombatReadiness.SetValue( m_Object->CombatReadines().GetVal() );
-    m_paramCombatReadinessDescription.SetValue( m_Object->CombatReadinessDescription().GetVal() );
-    m_paramLongitude.SetValue( m_Object->Longitude().GetVal() );
-    m_paramLatitude.SetValue( m_Object->Latitude().GetVal() );
-    m_paramCourse.SetValue( m_Object->Course().GetVal() );
-    m_paramSpeed.SetValue(m_Object->Speed().GetVal());
-    m_paramMeasurementTime.SetNull();
-    m_paramIsAlive.SetValue( m_Object->IsAlive().GetVal() );
-    m_paramAlargeinteger.SetValue( m_Object->Alargeinteger().GetVal() );
+    m_paramStringName.SetValue(m_Object->StringName().GetVal());
+    std::wstring aString = m_Object->StringDescription().GetVal();
+    m_paramStringDescription.SetValue(m_Object->StringDescription().GetVal());
+    m_paramInt32.SetValue(m_Object->Int32().GetVal());
+    m_paramInt64.SetValue(m_Object->Int64().GetVal());
+    m_paramFloat32.SetValue(m_Object->Float32().GetVal());
+    m_paramFloat64.SetValue(m_Object->Float64().GetVal());
+    m_paramBool.SetValue(m_Object->Bool().GetVal());
+
+
 
 }
 
-DbUnitAccess::~DbUnitAccess(void)
+DbOlibTest::~DbOlibTest(void)
 {
     m_Object.reset();
 }
 
-void DbUnitAccess::OnDoDispatch()
+void DbOlibTest::OnDoDispatch()
 {
     std::wcout << "Dispatch" << std::endl;
 }
 
-void DbUnitAccess::OnStopOrder()
+void DbOlibTest::OnStopOrder()
 {
     std::wcout << "StopOrder" << std::endl;
 }
-void DbUnitAccess::TestOutputParameters()
+void DbOlibTest::TestOutputParameters()
 {
     if (!m_connection.IsConnected())
     {
@@ -140,41 +125,32 @@ void DbUnitAccess::TestOutputParameters()
 
     if(m_isMimerSQL || m_isPostgreSQL)
     {
-        m_OutputStmt.Prepare(L"{call spOutputOlibTest (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )}");
+        m_OutputStmt.Prepare(L"{call spOutputOlibTest (?, ?, ?, ?, ?, ?, ?)}");
     }
     else
     {
-        m_OutputStmt.Prepare(L"call spOutputOlibTest (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        m_OutputStmt.Prepare(L"call spOutputOlibTest (?, ?, ?, ?, ?, ?, ?)");
     }
 
-    m_OutputStmt.BindParameter(1, m_outParamCallsign);
-    m_OutputStmt.BindParameter(2, m_outParamUnitSizeId);
-    m_OutputStmt.BindParameter(3, m_outParamUnitIdentityId);
-    m_OutputStmt.BindParameter(4, m_outParamCombatReadiness);
-    m_OutputStmt.BindParameter(5, m_outParamCombatReadinessDescription);
-    m_OutputStmt.BindParameter(6, m_outParamLatitude);
-    m_OutputStmt.BindParameter(7, m_outParamLongitude);
-    m_OutputStmt.BindParameter(8, m_outParamSpeed);
-    m_OutputStmt.BindParameter(9, m_outParamCourse);
-    m_OutputStmt.BindParameter(10, m_outParamMeasurementTime);
-    m_OutputStmt.BindParameter(11, m_outParamIsAlive);
-    m_OutputStmt.BindParameter(12, m_outParamAlargeinteger);
+    m_OutputStmt.BindParameter(1, m_outParamStringName);
+    m_OutputStmt.BindParameter(2, m_outParamStringDescription);
+    m_OutputStmt.BindParameter(3, m_outParamInt32);
+    m_OutputStmt.BindParameter(4, m_outParamInt64);
+    m_OutputStmt.BindParameter(5, m_outParamFloat32);
+    m_OutputStmt.BindParameter(6, m_outParamFloat64);
+    m_OutputStmt.BindParameter(7, m_outParamBool);
+
 
     m_OutputStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
 
-    m_outParamUnitId.SetValue(0);
-    m_outParamCallsign.SetValue(L"None");
-    m_outParamUnitSizeId.SetValue(L"None");
-    m_outParamUnitIdentityId.SetValue(L"None");
-    m_outParamCombatReadiness.SetValue(0);
-    m_outParamCombatReadinessDescription.SetValue(L"None");
-    m_outParamLatitude.SetValue(1.0);
-    m_outParamLongitude.SetValue(1.0);
-    m_outParamCourse.SetValue(1.0);
-    m_outParamSpeed.SetValue(1.0);
-    m_outParamMeasurementTime.SetNull();
-    m_outParamIsAlive.SetValue(false);
-    m_outParamAlargeinteger.SetValue(2);
+    m_outParamStringName.SetValue(L"NameOut");
+    m_outParamStringDescription.SetValue(L"None");
+    m_outParamInt32.SetValue(0);
+    m_outParamInt64.SetValue(0);
+    m_outParamFloat32.SetValue(0);
+    m_outParamFloat64.SetValue(0);
+    m_outParamBool.SetValue(0);
+
 
     m_OutputStmt.Execute();
     while( m_OutputStmt.MoreResults())
@@ -184,18 +160,17 @@ void DbUnitAccess::TestOutputParameters()
     Safir::OlibTest::TestObjectPtr outObjPtr =Safir::OlibTest::TestObject::Create();
 
     //Get values from columndata and set to outObject
-    outObjPtr->Callsign().SetVal(m_outParamCallsign.GetValue());
-    outObjPtr->UnitSizeId().SetVal(m_outParamUnitSizeId.GetValue());
-    outObjPtr->UnitIdentity().SetVal(m_outParamUnitIdentityId.GetValue());
-    outObjPtr->CombatReadines().SetVal(m_outParamCombatReadiness.GetValue());
-    outObjPtr->CombatReadinessDescription().SetVal(m_outParamCombatReadinessDescription.GetValue());
-    outObjPtr->Latitude().SetVal(m_outParamLatitude.GetValue());
-    outObjPtr->Longitude().SetVal(m_outParamLongitude.GetValue());
-    outObjPtr->Speed().SetVal(m_outParamSpeed.GetValue());
-    outObjPtr->Course().SetVal(m_outParamCourse.GetValue());
-    outObjPtr->IsAlive().SetVal(m_outParamIsAlive.GetValue());
-    outObjPtr->Alargeinteger().SetVal(m_outParamAlargeinteger.GetValue());
+    Safir::Dob::Typesystem::Float32 f32=m_outParamFloat32.GetValue();
+    Safir::Dob::Typesystem::Float64 f64=m_outParamFloat64.GetValue();
+    std::wstring test=m_outParamStringName.GetValue();
 
+    outObjPtr->StringName().SetVal(m_outParamStringName.GetValue());
+    outObjPtr->StringDescription().SetVal(m_outParamStringDescription.GetValue());
+    outObjPtr->Int32().SetVal(m_outParamInt32.GetValue());
+    outObjPtr->Int64().SetVal(m_outParamInt64.GetValue());
+    outObjPtr->Float32().SetVal(m_outParamFloat32.GetValue());
+    outObjPtr->Float64().SetVal(m_outParamFloat64.GetValue());
+    outObjPtr->Bool().SetVal(m_outParamBool.GetValue());
 
     m_connection.Commit();
 
@@ -216,7 +191,7 @@ void DbUnitAccess::TestOutputParameters()
     }
 }
 
-void DbUnitAccess::Connect(const std::wstring DatabaseLogin)
+void DbOlibTest::Connect(const std::wstring DatabaseLogin)
 {   
     std::string strTimestamp("2007-08-05 13:34");
     std::string strMsgSeqNo;
@@ -230,9 +205,9 @@ void DbUnitAccess::Connect(const std::wstring DatabaseLogin)
 
     if (!m_connection.IsConnected())
     {
-      // m_connection.Connect(DatabaseLogin );m_isMimerSQL=true; // MIMER
+       m_connection.Connect(DatabaseLogin );m_isMimerSQL=true; // MIMER
       //m_connection.Connect(L"DSN=safirDbMySQL;PWD=olibtesteruser;UID=olibtesteruser;SERVER=localhost;" ); m_isMySQL=true; //MYSQL
-      m_connection.Connect(L"DSN=SafirDbPSQL;DRIVER=SQL;" ); m_isPostgreSQL=true; //postgresql
+      //m_connection.Connect(L"DSN=SafirDbPSQL;DRIVER=SQL;" ); m_isPostgreSQL=true; //postgresql
 
        m_connection.UseManualTransactions();
        //SQL_ATTR_CONNECTION_TIMEOUT seems not to work with postgresql
@@ -240,7 +215,7 @@ void DbUnitAccess::Connect(const std::wstring DatabaseLogin)
     }
 }
 
-void DbUnitAccess::Disconnect()
+void DbOlibTest::Disconnect()
 {
     if (m_connection.IsConnected())
         m_connection.Disconnect();
@@ -252,7 +227,7 @@ void DbUnitAccess::Disconnect()
         m_environment.Free();
 }
 
-void DbUnitAccess::AllocStmt()
+void DbOlibTest::AllocStmt()
 {   
     if (!m_OutputStmt.IsValid())
         m_OutputStmt.Alloc( m_connection );
@@ -295,24 +270,18 @@ void DbUnitAccess::AllocStmt()
     if (!m_bReadUnitIsPrepared && m_ReadUnitStmt.IsValid())
     {
         //Set statement to columns for unit with Id
-        m_ReadUnitStmt.Prepare( L"select UnitId, CallSign, UnitSizeId, UnitIdentityId, CombatReadiness, "
-                              L"CombatReadinessDescription, Latitude, Longitude, Speed, Course, MeasurementTime, "
-                              L"IsAlive, ALargeInt from TBLOLIBTEST "
+        m_ReadUnitStmt.Prepare( L"select UnitId, StringName, StringDescription, Int32, Int64,"
+                              L"Float32, Float64, Bool from TBLOLIBTEST "
                               L"where UnitId = 0" );
 
-        m_ReadUnitStmt.BindColumn(1, m_columnUnitId);
-        m_ReadUnitStmt.BindColumn(2, m_columnCallsign);
-        m_ReadUnitStmt.BindColumn(3, m_columnUnitSizeId);
-        m_ReadUnitStmt.BindColumn(4, m_columnUnitIdentityId);
-        m_ReadUnitStmt.BindColumn(5, m_columnCombatReadiness);
-        m_ReadUnitStmt.BindColumn(6, m_columnCombatReadinessDescription);
-        m_ReadUnitStmt.BindColumn(7, m_columnLatitude);
-        m_ReadUnitStmt.BindColumn(8, m_columnLongitude);
-        m_ReadUnitStmt.BindColumn(9, m_columnSpeed);
-        m_ReadUnitStmt.BindColumn(10, m_columnCourse);
-        m_ReadUnitStmt.BindColumn(11, m_columnMeasurementTime);
-        m_ReadUnitStmt.BindColumn(12, m_columnIsAlive);
-        m_ReadUnitStmt.BindColumn(13, m_columnAlargeinteger);
+        m_ReadUnitStmt.BindColumn(1, m_columnId);
+        m_ReadUnitStmt.BindColumn(2, m_columnStringName);
+        m_ReadUnitStmt.BindColumn(3, m_columnStringDescription);
+        m_ReadUnitStmt.BindColumn(4, m_columnInt32);
+        m_ReadUnitStmt.BindColumn(5, m_columnInt64);
+        m_ReadUnitStmt.BindColumn(6, m_columnFloat32);
+        m_ReadUnitStmt.BindColumn(7, m_columnFloat64);
+        m_ReadUnitStmt.BindColumn(8, m_columnBool);
 
         m_ReadUnitStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
     }
@@ -332,20 +301,15 @@ void DbUnitAccess::AllocStmt()
 
     if (!m_bOutputIsPrepared && m_OutputStmt.IsValid())
     {
-        m_OutputStmt.Prepare(L"{call spOutputOlibTest (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}");
+        m_OutputStmt.Prepare(L"{call spOutputOlibTest (?, ?, ?, ?, ?, ?, ?)}");
 
-        m_OutputStmt.BindParameter(1, m_outParamCallsign);
-        m_OutputStmt.BindParameter(2, m_outParamUnitSizeId);
-        m_OutputStmt.BindParameter(3, m_outParamUnitIdentityId);
-        m_OutputStmt.BindParameter(4, m_outParamCombatReadiness);
-        m_OutputStmt.BindParameter(5, m_outParamCombatReadinessDescription);
-        m_OutputStmt.BindParameter(6, m_outParamLatitude);
-        m_OutputStmt.BindParameter(7, m_outParamLongitude);
-        m_OutputStmt.BindParameter(8, m_outParamSpeed);
-        m_OutputStmt.BindParameter(9, m_outParamCourse);
-        m_OutputStmt.BindParameter(10, m_outParamMeasurementTime);
-        m_OutputStmt.BindParameter(11, m_outParamIsAlive);
-        m_OutputStmt.BindParameter(12, m_outParamAlargeinteger);
+        m_OutputStmt.BindParameter(1, m_outParamStringName);
+        m_OutputStmt.BindParameter(2, m_outParamStringDescription);
+        m_OutputStmt.BindParameter(3, m_outParamInt32);
+        m_OutputStmt.BindParameter(4, m_outParamInt64);
+        m_OutputStmt.BindParameter(5, m_outParamFloat32);
+        m_OutputStmt.BindParameter(6, m_outParamFloat64);
+        m_OutputStmt.BindParameter(7, m_outParamBool);
 
         m_OutputStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
 
@@ -355,20 +319,7 @@ void DbUnitAccess::AllocStmt()
     if (!m_bInputOutputIsPrepared && m_InputOutputStmt.IsValid())
     {
         m_InputOutputStmt.Prepare(L"{call spInputOutputOlibTest(?)}");
-
-        m_InputOutputStmt.BindParameter(1, m_inoutParamCallsign);
-        m_InputOutputStmt.BindParameter(2, m_inoutParamUnitSizeId);
-        m_InputOutputStmt.BindParameter(3, m_inoutParamUnitIdentityId);
-        m_InputOutputStmt.BindParameter(4, m_inoutParamCombatReadiness);
-        m_InputOutputStmt.BindParameter(5, m_inoutParamCombatReadinessDescription);
-        m_InputOutputStmt.BindParameter(6, m_inoutParamLatitude);
-        m_InputOutputStmt.BindParameter(7, m_inoutParamLongitude);
-        m_InputOutputStmt.BindParameter(8, m_inoutParamSpeed);
-        m_InputOutputStmt.BindParameter(9, m_inoutParamCourse);
-        m_InputOutputStmt.BindParameter(10, m_inoutParamMeasurementTime);
-        m_InputOutputStmt.BindParameter(11, m_inoutParamIsAlive);
-        m_InputOutputStmt.BindParameter(12, m_inoutParamAlargeinteger);
-
+        m_InputOutputStmt.BindParameter(1, m_inoutParamInt32);
         m_InputOutputStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
 
         m_bInputOutputIsPrepared = true;
@@ -376,20 +327,16 @@ void DbUnitAccess::AllocStmt()
 
     if (!m_bCreateIsPrepared && m_CreateStmt.IsValid())
     {
-        m_CreateStmt.Prepare(L"{call spCreateOlibTest(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}");
+        m_CreateStmt.Prepare(L"{call spCreateOlibTest(?, ?, ?, ?, ?, ?, ?)}");
 
-        m_CreateStmt.BindParameter(1, m_paramCallsign);
-        m_CreateStmt.BindParameter(2, m_paramUnitSizeId);
-        m_CreateStmt.BindParameter(3, m_paramUnitIdentityId);
-        m_CreateStmt.BindParameter(4, m_paramCombatReadiness);
-        m_CreateStmt.BindParameter(5, m_paramCombatReadinessDescription);
-        m_CreateStmt.BindParameter(6, m_paramLatitude);
-        m_CreateStmt.BindParameter(7, m_paramLongitude);
-        m_CreateStmt.BindParameter(8, m_paramSpeed);
-        m_CreateStmt.BindParameter(9, m_paramCourse);
-        m_CreateStmt.BindParameter(10, m_paramMeasurementTime);
-        m_CreateStmt.BindParameter(11, m_paramIsAlive);
-        m_CreateStmt.BindParameter(12, m_paramAlargeinteger);
+        //Bind parameters to create statement
+        m_CreateStmt.BindParameter(1, m_paramStringName);
+        m_CreateStmt.BindParameter(2, m_paramStringDescription);
+        m_CreateStmt.BindParameter(3, m_paramInt32);
+        m_CreateStmt.BindParameter(4, m_paramInt64);
+        m_CreateStmt.BindParameter(5, m_paramFloat32);
+        m_CreateStmt.BindParameter(6, m_paramFloat64);
+        m_CreateStmt.BindParameter(7, m_paramBool);
 
 
         m_CreateStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
@@ -399,21 +346,17 @@ void DbUnitAccess::AllocStmt()
 
     if (!m_bUpdateIsPrepared && m_UpdateStmt.IsValid())
     {
-        m_UpdateStmt.Prepare(L"{call spUpdateOlibTest(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}");
+        m_UpdateStmt.Prepare(L"{call spUpdateOlibTest(?, ?, ?, ?, ?, ?, ?, ?)}");
 
-        m_UpdateStmt.BindParameter(1, m_paramUnitId);
-        m_UpdateStmt.BindParameter(2, m_paramCallsign);
-        m_UpdateStmt.BindParameter(3, m_paramUnitSizeId);
-        m_UpdateStmt.BindParameter(4, m_paramUnitIdentityId);
-        m_UpdateStmt.BindParameter(5, m_paramCombatReadiness);
-        m_UpdateStmt.BindParameter(6, m_paramCombatReadinessDescription);
-        m_UpdateStmt.BindParameter(7, m_paramLatitude);
-        m_UpdateStmt.BindParameter(8, m_paramLongitude);
-        m_UpdateStmt.BindParameter(9, m_paramSpeed);
-        m_UpdateStmt.BindParameter(10, m_paramCourse);
-        m_UpdateStmt.BindParameter(11, m_paramMeasurementTime);
-        m_UpdateStmt.BindParameter(12, m_paramIsAlive);
-        m_UpdateStmt.BindParameter(13, m_paramAlargeinteger);
+        //Bind parameters
+        m_UpdateStmt.BindParameter(1, m_paramId);
+        m_UpdateStmt.BindParameter(2, m_paramStringName);
+        m_UpdateStmt.BindParameter(3, m_paramStringDescription);
+        m_UpdateStmt.BindParameter(4, m_paramInt32);
+        m_UpdateStmt.BindParameter(5, m_paramInt64);
+        m_UpdateStmt.BindParameter(6, m_paramFloat32);
+        m_UpdateStmt.BindParameter(7, m_paramFloat64);
+        m_UpdateStmt.BindParameter(8, m_paramBool);
 
         m_UpdateStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
 
@@ -424,7 +367,7 @@ void DbUnitAccess::AllocStmt()
     {
         m_DeleteStmt.Prepare(L"{call spDeleteOlibTest(?)}");
 
-        m_DeleteStmt.BindParameter(1, m_paramUnitId);
+        m_DeleteStmt.BindParameter(1, m_paramId);
 
         m_DeleteStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
 
@@ -435,7 +378,7 @@ void DbUnitAccess::AllocStmt()
     {
         m_BinaryReadStmt.Prepare(L"select id, data from tblOlibTestBinary;");
 
-        m_BinaryReadStmt.BindColumn(1, m_columnUnitId);
+        m_BinaryReadStmt.BindColumn(1, m_columnId);
         m_BinaryReadStmt.BindColumn(2, m_columnBinary);
 
         m_BinaryReadStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
@@ -447,7 +390,7 @@ void DbUnitAccess::AllocStmt()
     {
         m_BinaryWriteStmt.Prepare(L"insert into tblOlibTestBinary (id, data) values (?, ?);");
 
-        m_BinaryWriteStmt.BindParameter(1, m_paramUnitId);
+        m_BinaryWriteStmt.BindParameter(1, m_paramId);
         m_BinaryWriteStmt.BindParameter(2, m_paramBinary);
 
         m_BinaryWriteStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
@@ -459,7 +402,7 @@ void DbUnitAccess::AllocStmt()
     {
         m_WriteNClobStmt.Prepare(L"insert into tblOlibTestNClob (id, data) values (?, ?);");
 
-        m_WriteNClobStmt.BindParameter(1, m_paramUnitId);
+        m_WriteNClobStmt.BindParameter(1, m_paramId);
         //m_WriteNClobStmt.BindParameter(2, m_paramNClob); // This line causes software violation
         m_WriteNClobStmt.BindLongParameter(2, m_paramNClob);
 
@@ -472,7 +415,7 @@ void DbUnitAccess::AllocStmt()
     {
         m_ReadNClobStmt.Prepare(L"select data from tblOlibTestNClob where id = ?;");
 
-        m_ReadNClobStmt.BindParameter(1, m_paramUnitId);
+        m_ReadNClobStmt.BindParameter(1, m_paramId);
         //m_ReadNClobStmt.BindColumn(1, m_columnNClob);
 
         m_ReadNClobStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);    // Query timeout is 5 secs
@@ -484,7 +427,7 @@ void DbUnitAccess::AllocStmt()
     {
         m_WriteBlobStmt.Prepare(L"insert into tblOlibTestBlob (id, data) values (?, ?);");
 
-        m_WriteBlobStmt.BindParameter(1, m_paramUnitId);
+        m_WriteBlobStmt.BindParameter(1, m_paramId);
         //m_WriteBlobStmt.BindParameter(2, m_paramBlob); // This line causes software violation
         m_WriteBlobStmt.BindLongParameter(2, m_paramBlob);
 
@@ -497,7 +440,7 @@ void DbUnitAccess::AllocStmt()
     {
         m_ReadBlobStmt.Prepare(L"select data from tblOlibTestBlob where id = ?;");
 
-        m_ReadBlobStmt.BindParameter(1, m_paramUnitId);
+        m_ReadBlobStmt.BindParameter(1, m_paramId);
         //m_ReadBlobStmt.BindColumn(1, m_paramBlob);
 
         m_ReadBlobStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L); // Query timeout is 5 secs
@@ -505,59 +448,58 @@ void DbUnitAccess::AllocStmt()
         m_bReadBlobIsPrepared  = true;
     }
 
-//    if (!m_bGetAllUnitsIsPrepared && m_GetAllUnitsStmt.IsValid())
-//    {
-//        //m_GetAllUnitsStmt.Prepare(    L"select UnitId, CallSign, UnitSizeId, UnitIdentityId, CombatReadiness, "
-//        //                          L"CombatReadinessDescription, Latitude, Longitude, Speed, Course, "
-//        //                          L"MeasurementTime, IsAlive, ALargeInt from tblUnit;");
-//        m_GetAllUnitsStmt.Prepare(L"{call spGetAllOlibTests}");
+////    if (!m_bGetAllUnitsIsPrepared && m_GetAllUnitsStmt.IsValid())
+////    {
+////        //m_GetAllUnitsStmt.Prepare(    L"select UnitId, CallSign, UnitSizeId, UnitIdentityId, CombatReadiness, "
+////        //                          L"CombatReadinessDescription, Latitude, Longitude, Speed, Course, "
+////        //                          L"MeasurementTime, IsAlive, ALargeInt from tblUnit;");
+////        m_GetAllUnitsStmt.Prepare(L"{call spGetAllOlibTests}");
 
-//        m_GetAllUnitsStmt.BindColumn(1, m_columnUnitId);
-//        m_GetAllUnitsStmt.BindColumn(2, m_columnCallsign);
-//        m_GetAllUnitsStmt.BindColumn(3, m_columnUnitSizeId);
-//        m_GetAllUnitsStmt.BindColumn(4, m_columnUnitIdentityId);
-//        m_GetAllUnitsStmt.BindColumn(5, m_columnCombatReadiness);
-//        m_GetAllUnitsStmt.BindColumn(6, m_columnCombatReadinessDescription);
-//        m_GetAllUnitsStmt.BindColumn(7, m_columnLatitude);
-//        m_GetAllUnitsStmt.BindColumn(8, m_columnLongitude);
-//        m_GetAllUnitsStmt.BindColumn(9, m_columnSpeed);
-//        m_GetAllUnitsStmt.BindColumn(10, m_columnCourse);
-//        m_GetAllUnitsStmt.BindColumn(11, m_columnMeasurementTime);
-//        m_GetAllUnitsStmt.BindColumn(12, m_columnIsAlive);
-//        m_GetAllUnitsStmt.BindColumn(13, m_columnAlargeinteger);
+////        m_GetAllUnitsStmt.BindColumn(1, m_columnUnitId);
+////        m_GetAllUnitsStmt.BindColumn(2, m_columnCallsign);
+////        m_GetAllUnitsStmt.BindColumn(3, m_columnUnitSizeId);
+////        m_GetAllUnitsStmt.BindColumn(4, m_columnUnitIdentityId);
+////        m_GetAllUnitsStmt.BindColumn(5, m_columnCombatReadiness);
+////        m_GetAllUnitsStmt.BindColumn(6, m_columnCombatReadinessDescription);
+////        m_GetAllUnitsStmt.BindColumn(7, m_columnLatitude);
+////        m_GetAllUnitsStmt.BindColumn(8, m_columnLongitude);
+////        m_GetAllUnitsStmt.BindColumn(9, m_columnSpeed);
+////        m_GetAllUnitsStmt.BindColumn(10, m_columnCourse);
+////        m_GetAllUnitsStmt.BindColumn(11, m_columnMeasurementTime);
+////        m_GetAllUnitsStmt.BindColumn(12, m_columnIsAlive);
+////        m_GetAllUnitsStmt.BindColumn(13, m_columnAlargeinteger);
 
-//        m_GetAllUnitsStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
+////        m_GetAllUnitsStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
 
-//        m_bGetAllUnitsIsPrepared = true;
-//    }
+////        m_bGetAllUnitsIsPrepared = true;
+////    }
 
     m_LongTimeQuery.Alloc( m_connection );
     if (!m_bLongTimeQueryIsPrepared && m_LongTimeQuery.IsValid())
     {
-        m_LongTimeQuery.Prepare(  L"Update tblOlibTest set Latitude = 42.0;" );
+        m_LongTimeQuery.Prepare(  L"Update tblOlibTest set Float32 = 42.0;" );
         m_LongTimeQuery.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 1L);  // Query timeout is 5 secs
         m_bLongTimeQueryIsPrepared = true;
-    }    
+    }
 
     m_InsertInto42.Alloc( m_connection );
     if (!m_bInsertInto42IsPrepared && m_InsertInto42.IsValid())
     {
-        m_InsertInto42.Prepare(  
-            L"insert into TBLOLIBTEST (UNITID, CALLSIGN, COMBATREADINESS, "
-            L"COMBATREADINESSDESCRIPTION, UNITSIZEID, UNITIDENTITYID, LATITUDE, "
-            L"LONGITUDE, SPEED, COURSE, MEASUREMENTTIME, ISALIVE, ALARGEINT) "
-            L"values (42, '', 0, '', '', '', 0, 0, 0, 0, NULL, 0, 0)" );
+        m_InsertInto42.Prepare(
+            L"insert into TBLOLIBTEST (Id, StringName,StringDescription, Int32, Int64,"
+            L"Float32, Float64, Bool) "
+            L"values (42, 'Name42', 'Desc42',23, 46, 0.0, 0.0,1)" );
         m_InsertInto42.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
         m_bInsertInto42IsPrepared = true;
     }
 }
 
 
-void DbUnitAccess::ClearTables(void)
+void DbOlibTest::ClearTables(void)
 {
     Safir::Databases::Odbc::Statement ClearStmt;
     ClearStmt.Alloc( m_connection );
-    ClearStmt.Prepare(L"DELETE FROM TBLOLIBTEST WHERE UNITID >=0;");
+    ClearStmt.Prepare(L"DELETE FROM TBLOLIBTEST WHERE ID >=0;");
     ClearStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);
     ClearStmt.Execute();
     m_connection.Commit();
@@ -585,7 +527,7 @@ void DbUnitAccess::ClearTables(void)
     ClearStmt.Free();
 }
 
-void DbUnitAccess::PerfTest()
+void DbOlibTest::PerfTest()
 {
     if (!m_connection.IsConnected())
     {
@@ -770,7 +712,7 @@ void DbUnitAccess::PerfTest()
     }
 }
 
-void DbUnitAccess::SetReadAllTimeout()
+void DbOlibTest::SetReadAllTimeout()
 {
     if(!m_CreateStmt.IsValid())
     {
@@ -781,7 +723,7 @@ void DbUnitAccess::SetReadAllTimeout()
     m_CreateStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, lTimeout);
 }
 
-void DbUnitAccess::GetReadAllTimeout()
+void DbOlibTest::GetReadAllTimeout()
 {
     long lTimeout;
     m_CreateStmt.GetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, lTimeout);
@@ -792,13 +734,13 @@ void DbUnitAccess::GetReadAllTimeout()
     }
 }
 
-void DbUnitAccess::SetConnectionTimeout()
+void DbOlibTest::SetConnectionTimeout()
 {
     long lTimeout = 1;
     m_connection.SetConnectAttr(SQL_ATTR_CONNECTION_TIMEOUT, lTimeout);
 }
 
-void DbUnitAccess::GetConnectionTimeout()
+void DbOlibTest::GetConnectionTimeout()
 {
     long lTimeout;
     m_connection.GetConnectAttr(SQL_ATTR_CONNECTION_TIMEOUT, lTimeout);
@@ -809,7 +751,7 @@ void DbUnitAccess::GetConnectionTimeout()
     }
 }
 
-void DbUnitAccess::ReadUnit(int Id)
+void DbOlibTest::ReadUnit(int Id)
 {
     //Check Connection
     if (!m_connection.IsConnected())
@@ -824,25 +766,20 @@ void DbUnitAccess::ReadUnit(int Id)
     }
 
     //Set statement to columns for unit with Id
-    m_ReadUnitStmt.Prepare( L"select UnitId, CallSign, UnitSizeId, UnitIdentityId, CombatReadiness, "
-                          L"CombatReadinessDescription, Latitude, Longitude, Speed, Course, MeasurementTime, "
-                          L"IsAlive, ALargeInt from TBLOLIBTEST "
-                          L"where UnitId = " + boost::lexical_cast<std::wstring>( Id ));
+    m_ReadUnitStmt.Prepare( L"select Id, StringName, StringDescription, Int32, Int64,"
+                            L"Float32, Float64, Bool from TBLOLIBTEST "
+                            L"where Id = " + boost::lexical_cast<std::wstring>( Id ));
 
     //Bind parameters
-    m_ReadUnitStmt.BindColumn(1, m_columnUnitId);
-    m_ReadUnitStmt.BindColumn(2, m_columnCallsign);
-    m_ReadUnitStmt.BindColumn(3, m_columnUnitSizeId);
-    m_ReadUnitStmt.BindColumn(4, m_columnUnitIdentityId);
-    m_ReadUnitStmt.BindColumn(5, m_columnCombatReadiness);
-    m_ReadUnitStmt.BindColumn(6, m_columnCombatReadinessDescription);
-    m_ReadUnitStmt.BindColumn(7, m_columnLatitude);
-    m_ReadUnitStmt.BindColumn(8, m_columnLongitude);
-    m_ReadUnitStmt.BindColumn(9, m_columnSpeed);
-    m_ReadUnitStmt.BindColumn(10, m_columnCourse);
-    m_ReadUnitStmt.BindColumn(11, m_columnMeasurementTime);
-    m_ReadUnitStmt.BindColumn(12, m_columnIsAlive);
-    m_ReadUnitStmt.BindColumn(13, m_columnAlargeinteger);
+    m_ReadUnitStmt.BindColumn(1, m_columnId);
+    m_ReadUnitStmt.BindColumn(2, m_columnStringName);
+    m_ReadUnitStmt.BindColumn(3, m_columnStringDescription);
+    m_ReadUnitStmt.BindColumn(4, m_columnInt32);
+    m_ReadUnitStmt.BindColumn(5, m_columnInt64);
+    m_ReadUnitStmt.BindColumn(6, m_columnFloat32);
+    m_ReadUnitStmt.BindColumn(7, m_columnFloat64);
+    m_ReadUnitStmt.BindColumn(8, m_columnBool);
+
     m_ReadUnitStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
 
     //Execute statment
@@ -852,30 +789,25 @@ void DbUnitAccess::ReadUnit(int Id)
     m_connection.Commit();
 }
 
-void DbUnitAccess::EvaluateOutData()
+void DbOlibTest::EvaluateOutData()
 {
     //Create objectptr to testobject
     Safir::OlibTest::TestObjectPtr outObjPtr =Safir::OlibTest::TestObject::Create();
 
     //Get values from columndata and set to outObject
-    outObjPtr->Callsign().SetVal(m_columnCallsign.GetValue());
-    outObjPtr->UnitSizeId().SetVal(m_columnUnitSizeId.GetValue());
-    outObjPtr->UnitIdentity().SetVal(m_columnUnitIdentityId.GetValue());
-    outObjPtr->CombatReadines().SetVal(m_columnCombatReadiness.GetValue());
-    outObjPtr->CombatReadinessDescription().SetVal(m_columnCombatReadinessDescription.GetValue());
-    outObjPtr->Latitude().SetVal(m_columnLatitude.GetValue());
-    outObjPtr->Longitude().SetVal(m_columnLongitude.GetValue());
-    outObjPtr->Speed().SetVal(m_columnSpeed.GetValue());
-    outObjPtr->Course().SetVal(m_columnCourse.GetValue());
-    outObjPtr->IsAlive().SetVal(m_columnIsAlive.GetValue());
-
-    if(m_columnAlargeinteger.IsNull())
+    outObjPtr->StringName().SetVal(m_columnStringName.GetValue());
+    outObjPtr->StringDescription().SetVal(m_columnStringDescription.GetValue());
+    outObjPtr->Int32().SetVal(m_columnInt32.GetValue());
+    outObjPtr->Float32().SetVal(m_columnFloat32.GetValue());
+    outObjPtr->Float64().SetVal(m_columnFloat64.GetValue());
+    outObjPtr->Bool().SetVal(m_columnBool.GetValue());
+    if(m_columnInt64.IsNull())
     {
-        outObjPtr->Alargeinteger().SetNull();
+        outObjPtr->Int64().SetNull();
     }
     else
     {
-        outObjPtr->Alargeinteger().SetVal(m_columnAlargeinteger.GetValue());
+        outObjPtr->Int64().SetVal(m_columnInt64.GetValue());
     }
 
     //Create xml from input and output object
@@ -895,7 +827,7 @@ void DbUnitAccess::EvaluateOutData()
     }
 }
 
-void DbUnitAccess::CloseStmt(void)
+void DbOlibTest::CloseStmt(void)
 {
     if (m_InputOutputStmt.IsValid())
     {
@@ -1047,7 +979,7 @@ void DbUnitAccess::CloseStmt(void)
     }
 }
 
-void DbUnitAccess::CreateUnit()
+void DbOlibTest::CreateUnit()
 {
     //Check connection
     if (!m_connection.IsConnected())
@@ -1062,21 +994,17 @@ void DbUnitAccess::CreateUnit()
     }
 
     //Set create statement
-    m_CreateStmt.Prepare(L"{call spCreateOlibTest(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}");
+    m_CreateStmt.Prepare(L"{call spCreateOlibTest(?, ?, ?, ?, ?, ?, ?)}");
 
     //Bind parameters to create statement
-    m_CreateStmt.BindParameter(1, m_paramCallsign);
-    m_CreateStmt.BindParameter(2, m_paramUnitSizeId);
-    m_CreateStmt.BindParameter(3, m_paramUnitIdentityId);
-    m_CreateStmt.BindParameter(4, m_paramCombatReadiness);
-    m_CreateStmt.BindParameter(5, m_paramCombatReadinessDescription);
-    m_CreateStmt.BindParameter(6, m_paramLatitude);
-    m_CreateStmt.BindParameter(7, m_paramLongitude);
-    m_CreateStmt.BindParameter(8, m_paramSpeed);
-    m_CreateStmt.BindParameter(9, m_paramCourse);
-    m_CreateStmt.BindParameter(10, m_paramMeasurementTime);
-    m_CreateStmt.BindParameter(11, m_paramIsAlive);
-    m_CreateStmt.BindParameter(12, m_paramAlargeinteger);
+    m_CreateStmt.BindParameter(1, m_paramStringName);
+    m_CreateStmt.BindParameter(2, m_paramStringDescription);
+    m_CreateStmt.BindParameter(3, m_paramInt32);
+    m_CreateStmt.BindParameter(4, m_paramInt64);
+    m_CreateStmt.BindParameter(5, m_paramFloat32);
+    m_CreateStmt.BindParameter(6, m_paramFloat64);
+    m_CreateStmt.BindParameter(7, m_paramBool);
+
     m_CreateStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
 
     //Execute statement
@@ -1086,7 +1014,7 @@ void DbUnitAccess::CreateUnit()
     m_connection.Commit();
 }
 
-void DbUnitAccess::UpdateUnit()
+void DbOlibTest::UpdateUnit()
 {
     //Check connection
     if (!m_connection.IsConnected())
@@ -1101,43 +1029,39 @@ void DbUnitAccess::UpdateUnit()
     }
 
     //Set statement for update
-    m_UpdateStmt.Prepare(L"{call spUpdateOlibTest(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}");
+    m_UpdateStmt.Prepare(L"{call spUpdateOlibTest(?, ?, ?, ?, ?, ?, ?, ?)}");
 
     //Bind parameters
-    m_UpdateStmt.BindParameter(1, m_paramUnitId);
-    m_UpdateStmt.BindParameter(2, m_paramCallsign);
-    m_UpdateStmt.BindParameter(3, m_paramUnitSizeId);
-    m_UpdateStmt.BindParameter(4, m_paramUnitIdentityId);
-    m_UpdateStmt.BindParameter(5, m_paramCombatReadiness);
-    m_UpdateStmt.BindParameter(6, m_paramCombatReadinessDescription);
-    m_UpdateStmt.BindParameter(7, m_paramLatitude);
-    m_UpdateStmt.BindParameter(8, m_paramLongitude);
-    m_UpdateStmt.BindParameter(9, m_paramSpeed);
-    m_UpdateStmt.BindParameter(10, m_paramCourse);
-    m_UpdateStmt.BindParameter(11, m_paramMeasurementTime);
-    m_UpdateStmt.BindParameter(12, m_paramIsAlive);
-    m_UpdateStmt.BindParameter(13, m_paramAlargeinteger);
+    m_UpdateStmt.BindParameter(1, m_paramId);
+    m_UpdateStmt.BindParameter(2, m_paramStringName);
+    m_UpdateStmt.BindParameter(3, m_paramStringDescription);
+    m_UpdateStmt.BindParameter(4, m_paramInt32);
+    m_UpdateStmt.BindParameter(5, m_paramInt64);
+    m_UpdateStmt.BindParameter(6, m_paramFloat32);
+    m_UpdateStmt.BindParameter(7, m_paramFloat64);
+    m_UpdateStmt.BindParameter(8, m_paramBool);
+
     m_UpdateStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
 
-    //UnitId to update (0)
-    m_paramUnitId.SetValue(0);
+    //Id to update (0)
+    m_paramId.SetValue(0);
 
-    //Change value of Callsign and speed and AlargeInteger
-    m_Object->Callsign().SetVal(L"CS2");
-    m_paramCallsign.SetValue(m_Object->Callsign().GetVal());
+    //Change value of Name and Float32 and AlargeInteger
+    m_Object->StringName().SetVal(L"Name2");
+    m_paramStringName.SetValue(m_Object->StringName().GetVal());
 
-    m_Object->Speed().SetVal(33.3f);
-    m_paramSpeed.SetValue( m_Object->Speed().GetVal());
+    m_Object->Float32().SetVal(33.3f);
+    m_paramFloat32.SetValue( m_Object->Float32().GetVal());
 
-    m_Object->Alargeinteger().SetNull();
-    m_paramAlargeinteger.SetNull();
+    m_Object->Int64().SetNull();
+    m_paramInt64.SetNull();
 
     m_UpdateStmt.Execute();
     m_connection.Commit();
 }
 
 
-void DbUnitAccess::SetConnectionPooling()
+void DbOlibTest::SetConnectionPooling()
 {
     if (!m_environment.IsValid())
         m_environment.Alloc();
@@ -1145,7 +1069,7 @@ void DbUnitAccess::SetConnectionPooling()
     m_environment.SetEnvAttr(SQL_ATTR_CONNECTION_POOLING, SQL_CP_ONE_PER_HENV);
 }
 
-void DbUnitAccess::GetConnectionPooling()
+void DbOlibTest::GetConnectionPooling()
 {
     long lValue;
     m_environment.GetEnvAttr(SQL_ATTR_CONNECTION_POOLING, lValue);
@@ -1162,7 +1086,7 @@ void DbUnitAccess::GetConnectionPooling()
     }
 }
 
-Safir::Dob::Typesystem::Int64 DbUnitAccess::TblRowCount()
+Safir::Dob::Typesystem::Int64 DbOlibTest::TblRowCount()
 {
     if(!m_RowCountStmt.IsValid())
     {
@@ -1186,7 +1110,7 @@ Safir::Dob::Typesystem::Int64 DbUnitAccess::TblRowCount()
     return RowCount.GetValue();
 }
 
-void DbUnitAccess::DeleteUnit(const Safir::Dob::Typesystem::Int32 Id)
+void DbOlibTest::DeleteUnit(const Safir::Dob::Typesystem::Int32 Id)
 {
     if (!m_connection.IsConnected())
     {
@@ -1203,10 +1127,10 @@ void DbUnitAccess::DeleteUnit(const Safir::Dob::Typesystem::Int32 Id)
     }
 
     m_DeleteStmt.Prepare(L"{call spDeleteOlibTest(?)}");
-    m_DeleteStmt.BindParameter(1, m_paramUnitId);
+    m_DeleteStmt.BindParameter(1, m_paramId);
     m_DeleteStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
 
-    m_paramUnitId.SetValue( Id );
+    m_paramId.SetValue( Id );
     m_DeleteStmt.Execute();
     m_connection.Commit();
 
@@ -1218,7 +1142,7 @@ void DbUnitAccess::DeleteUnit(const Safir::Dob::Typesystem::Int32 Id)
     }
 }
 
-void DbUnitAccess::WriteNClobs()
+void DbOlibTest::WriteNClobs()
 {
     //Check connection
     if (!m_connection.IsConnected())
@@ -1233,7 +1157,7 @@ void DbUnitAccess::WriteNClobs()
 
     //prepare statment and bind paramters
     m_WriteNClobStmt.Prepare(L"insert into tblOlibTestNClob (id, data) values (?, ?);");
-    m_WriteNClobStmt.BindParameter(1, m_paramUnitId);
+    m_WriteNClobStmt.BindParameter(1, m_paramId);
     //m_WriteBlobStmt.BindParameter(2, m_paramNClob); // This line causes software violation
     m_WriteNClobStmt.BindLongParameter(2, m_paramNClob);
     m_WriteNClobStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);    // Query timeout is 5 secs
@@ -1243,7 +1167,7 @@ void DbUnitAccess::WriteNClobs()
     unsigned short sParameterNumber;
 
     //set values for putting into the database
-    m_paramUnitId.SetValue( nId );
+    m_paramId.SetValue( nId );
     m_paramNClob.SetValueAtExecution(static_cast<int>(nSize* sizeof (char)));
     m_WriteNClobStmt.Execute();
 
@@ -1263,7 +1187,7 @@ void DbUnitAccess::WriteNClobs()
     m_connection.Commit();
 }
 
-void DbUnitAccess::ReadNClobs()
+void DbOlibTest::ReadNClobs()
 {
     if (!m_connection.IsConnected())
     {
@@ -1279,13 +1203,13 @@ void DbUnitAccess::ReadNClobs()
 
     //Prepare statement and bind paramters
     m_ReadNClobStmt.Prepare(L"select data from tblOlibTestNClob where id = ?;");
-    m_ReadNClobStmt.BindParameter(1, m_paramUnitId);
+    m_ReadNClobStmt.BindParameter(1, m_paramId);
     //m_ReadNClobStmt.BindColumn(1, m_columnNClob);
     m_ReadNClobStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);    // Query timeout is 5 secs
 
     //Set unit Id
     int nId=0;
-    m_paramUnitId.SetValue( nId );
+    m_paramId.SetValue( nId );
     m_ReadNClobStmt.Execute();
 
     while (m_ReadNClobStmt.Fetch())
@@ -1302,7 +1226,7 @@ void DbUnitAccess::ReadNClobs()
         throw Safir::Databases::Odbc::ReconnectException(L"NCLOBS: Input and output not equal. ",__WFILE__,__LINE__);
 }
 
-void DbUnitAccess::WriteBlob()
+void DbOlibTest::WriteBlob()
 {
     //Check connection
     if (!m_connection.IsConnected())
@@ -1318,7 +1242,7 @@ void DbUnitAccess::WriteBlob()
 
     //prepare statment and bind paramters
     m_WriteBlobStmt.Prepare(L"insert into tblOlibTestBlob (id, data) values (?, ?);");
-    m_WriteBlobStmt.BindParameter(1, m_paramUnitId);
+    m_WriteBlobStmt.BindParameter(1, m_paramId);
     //m_WriteBlobStmt.BindParameter(2, m_paramBlob); // This line causes software violation
     m_WriteBlobStmt.BindLongParameter(2, m_paramBlob);
     m_WriteBlobStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);    // Query timeout is 5 secs
@@ -1334,7 +1258,7 @@ void DbUnitAccess::WriteBlob()
 
 
     //set values for putting into the database
-    m_paramUnitId.SetValue( nId );
+    m_paramId.SetValue( nId );
     m_paramBlob.SetValueAtExecution(static_cast<int>(nSize* sizeof (char)));
     m_WriteBlobStmt.Execute();
 
@@ -1354,7 +1278,7 @@ void DbUnitAccess::WriteBlob()
     m_connection.Commit();
 }
 
-void DbUnitAccess::ReadBlob()
+void DbOlibTest::ReadBlob()
 {
     //Set unit ID to read
     int nId=0;
@@ -1372,9 +1296,9 @@ void DbUnitAccess::ReadBlob()
     }
 
     m_ReadBlobStmt.Prepare(L"select data from tblOlibTestBlob where id = ?;");
-    m_ReadBlobStmt.BindParameter(1, m_paramUnitId);
+    m_ReadBlobStmt.BindParameter(1, m_paramId);
     m_ReadBlobStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L); // Query timeout is 5 secs
-    m_paramUnitId.SetValue( nId );
+    m_paramId.SetValue( nId );
     m_ReadBlobStmt.Execute();
 
     while (m_ReadBlobStmt.Fetch())
@@ -1402,7 +1326,7 @@ void DbUnitAccess::ReadBlob()
         throw Safir::Databases::Odbc::ReconnectException(L"BLOB: Input and output not equal. ",__WFILE__,__LINE__);
     }
 }
-void DbUnitAccess::InsertInto42()
+void DbOlibTest::InsertInto42()
 {
     if (!m_connection.IsConnected())
     {
@@ -1416,36 +1340,31 @@ void DbUnitAccess::InsertInto42()
     }
 
     m_InsertInto42.Prepare(
-        L"insert into TBLOLIBTEST (UNITID, CALLSIGN, COMBATREADINESS, "
-        L"COMBATREADINESSDESCRIPTION, UNITSIZEID, UNITIDENTITYID, LATITUDE, "
-        L"LONGITUDE, SPEED, COURSE, MEASUREMENTTIME, ISALIVE, ALARGEINT) "
-        L"values (42, '', 0, '', '', '', 0, 0, 0, 0, NULL, 0, 0)" );
+        L"insert into TBLOLIBTEST (Id, StringName,StringDescription, Int32, Int64,"
+        L"Float32, Float64, Bool) "
+        L"values (42, 'Name42', 'Desc42',23, 46, 0.0, 0.0,1)" );
     m_InsertInto42.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
     m_InsertInto42.Execute();
 
     m_connection.Commit();
-    m_Object->Callsign().SetVal(L"");
-    m_Object->CombatReadines().SetVal(0);
-    m_Object->CombatReadinessDescription().SetVal(L"");
-    m_Object->UnitSizeId().SetVal(L"");
-    m_Object->UnitIdentity().SetVal(L"");
-    m_Object->Latitude().SetVal(0);
-    m_Object->Longitude().SetVal(0);
-    m_Object->Speed().SetVal(0.0f);
-    m_Object->Course().SetVal(0.0f);
-    m_Object->IsAlive().SetVal(0);
-    m_Object->Alargeinteger().SetVal(0);
+    m_Object->StringName().SetVal(L"Name42");
+    m_Object->StringDescription().SetVal(L"Desc42");
+    m_Object->Int32().SetVal(23);
+    m_Object->Int64().SetVal(46);
+    m_Object->Float32().SetVal(0.0f);
+    m_Object->Float64().SetVal(0.0f);
+    m_Object->Bool().SetVal(1);
+
 }
 
-void DbUnitAccess::LotsOfInput()
+void DbOlibTest::LotsOfInput()
 {
     //Nr of elements to add to the table
     int NrElemnts = 100;
 
     if (!m_connection.IsConnected())
     {
-        std::wcout << "Not Connected" << std::endl;
-        return;
+        throw Safir::Databases::Odbc::ReconnectException(L"Not connected to database. ",__WFILE__,__LINE__);
     }
 
     Safir::Dob::Typesystem::Int64 NrRowsBef=TblRowCount();
@@ -1457,21 +1376,16 @@ void DbUnitAccess::LotsOfInput()
     }
 
     //Set create statement
-    m_CreateStmt.Prepare(L"{call spCreateOlibTest(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}");
+    m_CreateStmt.Prepare(L"{call spCreateOlibTest(?, ?, ?, ?, ?, ?, ?)}");
 
     //Bind parameters to create statement
-    m_CreateStmt.BindParameter(1, m_paramCallsign);
-    m_CreateStmt.BindParameter(2, m_paramUnitSizeId);
-    m_CreateStmt.BindParameter(3, m_paramUnitIdentityId);
-    m_CreateStmt.BindParameter(4, m_paramCombatReadiness);
-    m_CreateStmt.BindParameter(5, m_paramCombatReadinessDescription);
-    m_CreateStmt.BindParameter(6, m_paramLatitude);
-    m_CreateStmt.BindParameter(7, m_paramLongitude);
-    m_CreateStmt.BindParameter(8, m_paramSpeed);
-    m_CreateStmt.BindParameter(9, m_paramCourse);
-    m_CreateStmt.BindParameter(10, m_paramMeasurementTime);
-    m_CreateStmt.BindParameter(11, m_paramIsAlive);
-    m_CreateStmt.BindParameter(12, m_paramAlargeinteger);
+    m_CreateStmt.BindParameter(1, m_paramStringName);
+    m_CreateStmt.BindParameter(2, m_paramStringDescription);
+    m_CreateStmt.BindParameter(3, m_paramInt32);
+    m_CreateStmt.BindParameter(4, m_paramInt64);
+    m_CreateStmt.BindParameter(5, m_paramFloat32);
+    m_CreateStmt.BindParameter(6, m_paramFloat64);
+    m_CreateStmt.BindParameter(7, m_paramBool);
     m_CreateStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
 
     for (int i = 0; i< NrElemnts; ++i)
@@ -1479,8 +1393,8 @@ void DbUnitAccess::LotsOfInput()
         m_CreateStmt.Execute();
         m_CreateStmt.CloseCursor();
         m_connection.Commit();
-        if((i%20)==0)
-            std::wcout<<"in loop i="<<i<<std::endl;
+//        if((i%20)==0)
+//            std::wcout<<"in loop i="<<i<<std::endl;
     }
 
     Safir::Dob::Typesystem::Int64 NrRowsAfter=TblRowCount();
@@ -1488,7 +1402,7 @@ void DbUnitAccess::LotsOfInput()
         throw Safir::Databases::Odbc::ReconnectException(L"LotsOfInput: All elements were not created in table.",__WFILE__,__LINE__);
 }
 
-void DbUnitAccess::TestInputOutputParameters()
+void DbOlibTest::TestInputOutputParameters()
 {
     if (!m_connection.IsConnected())
     {
@@ -1509,22 +1423,23 @@ void DbUnitAccess::TestInputOutputParameters()
     {
         m_InputOutputStmt.Prepare(L"call spInputOutputOlibTest(?)");
     }
-
-    m_InputOutputStmt.BindParameter(1, m_inoutParamSpeed);
+    Safir::Dob::Typesystem::Int32 bef= m_Object->Int32().GetVal();
+    m_InputOutputStmt.BindParameter(1, m_inoutParamInt32);
     m_InputOutputStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
-    m_inoutParamSpeed.SetValue( m_Object->Speed().GetVal() );
+    m_inoutParamInt32.SetValue( m_Object->Int32().GetVal() );
     m_InputOutputStmt.Execute();
     //m_InputOutputStmt.Fetch();
     m_InputOutputStmt.MoreResults();
     m_connection.Commit();
 
-    if(m_inoutParamSpeed.GetValue()!=(2*m_Object->Speed().GetVal()))
+    Safir::Dob::Typesystem::Int32 af= m_inoutParamInt32.GetValue();
+    if(m_inoutParamInt32.GetValue()!=(2*m_Object->Int32().GetVal()))
     {
         throw Safir::Databases::Odbc::ReconnectException(L"Input and output value did not match. ",__WFILE__,__LINE__);
     }
 }
 
-void DbUnitAccess::BinaryTestRead()
+void DbOlibTest::BinaryTestRead()
 {
     //Check connection
     if (!m_connection.IsConnected())
@@ -1538,7 +1453,7 @@ void DbUnitAccess::BinaryTestRead()
     }
 
     m_BinaryReadStmt.Prepare(L"select id, data from tblOlibTestBinary;");
-    m_BinaryReadStmt.BindColumn(1, m_columnUnitId);
+    m_BinaryReadStmt.BindColumn(1, m_columnId);
     m_BinaryReadStmt.BindColumn(2, m_columnBinary);
     m_BinaryReadStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);   // Query timeout is 5 secs
     m_BinaryReadStmt.Execute();
@@ -1552,6 +1467,8 @@ void DbUnitAccess::BinaryTestRead()
     m_BinaryReadStmt.CloseCursor();
     m_connection.Commit();
 
+
+
     const char * const data = reinterpret_cast<const char * const>(m_columnBinary.GetValue());
 
     Safir::Dob::EntityPtr entity = boost::dynamic_pointer_cast<Safir::Dob::Entity>
@@ -1564,13 +1481,13 @@ void DbUnitAccess::BinaryTestRead()
     //Check if diff between input and output xml
     if(inputXml.compare(outputXml)!=0)
     {
-        std::wcout<<outputXml<<std::endl;
         std::wcout<<inputXml<<std::endl;
+        std::wcout<<outputXml<<std::endl;
         throw Safir::Databases::Odbc::ReconnectException(L"Input and output not equal. ",__WFILE__,__LINE__);
     }
 }
 
-void DbUnitAccess::BinaryTestWrite()
+void DbOlibTest::BinaryTestWrite()
 {
     // unit id to add to
     int nId=0;
@@ -1589,7 +1506,7 @@ void DbUnitAccess::BinaryTestWrite()
 
     //Prepare statement and bind paramters
     m_BinaryWriteStmt.Prepare(L"insert into tblOlibTestBinary (id, data) values (?, ?);");
-    m_BinaryWriteStmt.BindParameter(1, m_paramUnitId);
+    m_BinaryWriteStmt.BindParameter(1, m_paramId);
     m_BinaryWriteStmt.BindParameter(2, m_paramBinary);
     m_BinaryWriteStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
 
@@ -1597,17 +1514,17 @@ void DbUnitAccess::BinaryTestWrite()
     Safir::Dob::Typesystem::BinarySerialization binary;
     Safir::Dob::Typesystem::Serialization::ToBinary(m_Object,binary);
 
-    m_paramUnitId.SetValue( nId );
+    m_paramId.SetValue( nId );
     m_paramBinary.SetValue( &binary[0], binary.size() );
     m_BinaryWriteStmt.Execute();
     m_connection.Commit();
 }
 
-std::wstring DbUnitAccess::NCstrBuffer =
+std::wstring DbOlibTest::NCstrBuffer =
             L"012345678901234567890123456789012345678901234567890123456789"
             L"0123456789012345678901234567890123456789";
 
-char DbUnitAccess::BinaryData [] = 
+char DbOlibTest::BinaryData [] =
     "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
     "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
     "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"

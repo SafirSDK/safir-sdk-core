@@ -37,59 +37,42 @@
 #include <Safir/Dob/Consumer.h>
 #include <Safir/OlibTest/TestObject.h>
 
-
-class DbUnitAccess : public Safir::Dob::Dispatcher, public Safir::Dob::StopHandler
+class DbOlibTest : public Safir::Dob::Dispatcher, public Safir::Dob::StopHandler
 {
 private:
     Safir::OlibTest::TestObjectPtr m_Object;
 
-    Safir::Databases::Odbc::Int32OutputParameter        m_outParamUnitId;
-    Safir::Databases::Odbc::WideStringOutputParameter   m_outParamCallsign;
-    Safir::Databases::Odbc::WideStringOutputParameter   m_outParamUnitSizeId;
-    Safir::Databases::Odbc::WideStringOutputParameter   m_outParamUnitIdentityId;
-    Safir::Databases::Odbc::Int32OutputParameter        m_outParamCombatReadiness;
-    Safir::Databases::Odbc::WideStringOutputParameter   m_outParamCombatReadinessDescription;
-    Safir::Databases::Odbc::Float64OutputParameter      m_outParamLatitude;
-    Safir::Databases::Odbc::Float64OutputParameter      m_outParamLongitude;
-    Safir::Databases::Odbc::Float32OutputParameter      m_outParamCourse;
-    Safir::Databases::Odbc::Float32OutputParameter      m_outParamSpeed;
-    Safir::Databases::Odbc::TimeOutputParameter         m_outParamMeasurementTime;
-    Safir::Databases::Odbc::BooleanOutputParameter      m_outParamIsAlive;
-    Safir::Databases::Odbc::Int64OutputParameter        m_outParamAlargeinteger;
+    Safir::Databases::Odbc::Int32OutputParameter        m_outParamId;
+    Safir::Databases::Odbc::WideStringOutputParameter   m_outParamStringName;
+    Safir::Databases::Odbc::WideStringOutputParameter   m_outParamStringDescription;
+    Safir::Databases::Odbc::Int32OutputParameter        m_outParamInt32;
+    Safir::Databases::Odbc::Int64OutputParameter        m_outParamInt64;
+    Safir::Databases::Odbc::Float32OutputParameter      m_outParamFloat32;
+    Safir::Databases::Odbc::Float64OutputParameter      m_outParamFloat64;
+    Safir::Databases::Odbc::BooleanOutputParameter      m_outParamBool;
 
-    Safir::Databases::Odbc::Int32Parameter          m_paramUnitId;
-    Safir::Databases::Odbc::WideStringParameter     m_paramCallsign;
-    Safir::Databases::Odbc::WideStringParameter     m_paramUnitSizeId;
-    Safir::Databases::Odbc::WideStringParameter     m_paramUnitIdentityId;
-    Safir::Databases::Odbc::Int32Parameter          m_paramCombatReadiness;
-    Safir::Databases::Odbc::WideStringParameter     m_paramCombatReadinessDescription;
-    Safir::Databases::Odbc::Float64Parameter        m_paramLatitude;
-    Safir::Databases::Odbc::Float64Parameter        m_paramLongitude;
-    Safir::Databases::Odbc::Float32Parameter        m_paramCourse;
-    Safir::Databases::Odbc::Float32Parameter        m_paramSpeed;
-    Safir::Databases::Odbc::TimeParameter           m_paramMeasurementTime;
-    Safir::Databases::Odbc::WideStringParameter     m_paramUnitTypeId;
-    Safir::Databases::Odbc::BooleanParameter        m_paramIsAlive;
-    Safir::Databases::Odbc::Int64Parameter          m_paramAlargeinteger;
+    Safir::Databases::Odbc::Int32Parameter              m_paramId;
+    Safir::Databases::Odbc::WideStringParameter         m_paramStringName;
+    Safir::Databases::Odbc::WideStringParameter         m_paramStringDescription;
+    Safir::Databases::Odbc::Int32Parameter              m_paramInt32;
+    Safir::Databases::Odbc::Int64Parameter              m_paramInt64;
+    Safir::Databases::Odbc::Float32Parameter            m_paramFloat32;
+    Safir::Databases::Odbc::Float64Parameter            m_paramFloat64;
+    Safir::Databases::Odbc::BooleanParameter            m_paramBool;
+
 
     Safir::Databases::Odbc::Int64Parameter      m_paramTypeId;
     Safir::Databases::Odbc::Int32Parameter      m_paramInstanceNo;
     Safir::Databases::Odbc::WideStringParameter m_paramData;
 
-    Safir::Databases::Odbc::Int32Column         m_columnUnitId;
-    Safir::Databases::Odbc::WideStringColumn    m_columnCallsign;
-    Safir::Databases::Odbc::WideStringColumn    m_columnUnitSizeId;
-    Safir::Databases::Odbc::WideStringColumn    m_columnUnitIdentityId;
-    Safir::Databases::Odbc::Int32Column         m_columnCombatReadiness;
-    Safir::Databases::Odbc::WideStringColumn    m_columnCombatReadinessDescription;
-    Safir::Databases::Odbc::Float64Column       m_columnLatitude;
-    Safir::Databases::Odbc::Float64Column       m_columnLongitude;
-    Safir::Databases::Odbc::Float32Column       m_columnCourse;
-    Safir::Databases::Odbc::Float32Column       m_columnSpeed;
-    Safir::Databases::Odbc::TimeColumn          m_columnMeasurementTime;
-    Safir::Databases::Odbc::WideStringColumn    m_columnUnitTypeId;
-    Safir::Databases::Odbc::BooleanColumn       m_columnIsAlive;
-    Safir::Databases::Odbc::Int64Column         m_columnAlargeinteger;
+    Safir::Databases::Odbc::Int32Column         m_columnId;
+    Safir::Databases::Odbc::WideStringColumn    m_columnStringName;
+    Safir::Databases::Odbc::WideStringColumn    m_columnStringDescription;
+    Safir::Databases::Odbc::Int32Column         m_columnInt32;
+    Safir::Databases::Odbc::Int64Column         m_columnInt64;
+    Safir::Databases::Odbc::Float32Column       m_columnFloat32;
+    Safir::Databases::Odbc::Float64Column       m_columnFloat64;
+    Safir::Databases::Odbc::BooleanColumn       m_columnBool;
     
     Safir::Databases::Odbc::LongWideStringParameter m_paramNClob;
     Safir::Databases::Odbc::WideStringColumn        m_columnNClob;
@@ -101,18 +84,14 @@ private:
     Safir::Databases::Odbc::BinaryColumn        m_columnBlob;
 
     Safir::Databases::Odbc::Int32InputOutputParameter       m_inoutParamUnitId;
-    Safir::Databases::Odbc::WideStringInputOutputParameter  m_inoutParamCallsign;
-    Safir::Databases::Odbc::WideStringInputOutputParameter  m_inoutParamUnitSizeId;
-    Safir::Databases::Odbc::WideStringInputOutputParameter  m_inoutParamUnitIdentityId;
-    Safir::Databases::Odbc::Int32InputOutputParameter       m_inoutParamCombatReadiness;
-    Safir::Databases::Odbc::WideStringInputOutputParameter  m_inoutParamCombatReadinessDescription;
-    Safir::Databases::Odbc::Float64InputOutputParameter     m_inoutParamLatitude;
-    Safir::Databases::Odbc::Float64InputOutputParameter     m_inoutParamLongitude;
-    Safir::Databases::Odbc::Float32InputOutputParameter     m_inoutParamCourse;
-    Safir::Databases::Odbc::Float32InputOutputParameter     m_inoutParamSpeed;
-    Safir::Databases::Odbc::TimeInputOutputParameter        m_inoutParamMeasurementTime;
-    Safir::Databases::Odbc::BooleanInputOutputParameter     m_inoutParamIsAlive;
-    Safir::Databases::Odbc::Int64InputOutputParameter       m_inoutParamAlargeinteger;
+    Safir::Databases::Odbc::WideStringInputOutputParameter  m_inoutParamStringName;
+    Safir::Databases::Odbc::WideStringInputOutputParameter  m_inoutParamStringDescription;
+    Safir::Databases::Odbc::Int32InputOutputParameter       m_inoutParamInt32;
+    Safir::Databases::Odbc::Int64InputOutputParameter       m_inoutParamInt64;
+    Safir::Databases::Odbc::Float64InputOutputParameter     m_inoutParamFloat32;
+    Safir::Databases::Odbc::Float64InputOutputParameter     m_inoutParamFloat64;
+    Safir::Databases::Odbc::BooleanInputOutputParameter     m_inoutParamBool;
+
 
     Safir::Databases::Odbc::Connection     m_connection;
     Safir::Databases::Odbc::Environment    m_environment;
@@ -158,15 +137,15 @@ private:
     bool m_isPostgreSQL;
     bool m_isMimerSQL;
 
-    DbUnitAccess(const DbUnitAccess &); // Disable copy constructor
-    const DbUnitAccess & operator= (const DbUnitAccess & d);    // Disable assignment operator 
+    DbOlibTest(const DbOlibTest &); // Disable copy constructor
+    const DbOlibTest & operator= (const DbOlibTest & d);    // Disable assignment operator
 
     static std::wstring NCstrBuffer;
 
     static char BinaryData [];
 public:
-    DbUnitAccess();
-    virtual ~DbUnitAccess();
+    DbOlibTest();
+    virtual ~DbOlibTest();
 
     void TestInputOutputParameters();
     void TestOutputParameters();

@@ -29,7 +29,7 @@
 using namespace std;
 int main(int argc,char* argv[])
 {
-    DbUnitAccess unitAccess;
+    DbOlibTest dbOlibTest;
     std::wstring DatabaseLogin = L"DSN=SafirDb;PWD=olibtesteruser;UID=olibtesteruser;";
 
     if (argc > 1)
@@ -38,129 +38,129 @@ int main(int argc,char* argv[])
         {
             if (argv[1] == std::string("-connect"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-disconnect"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-connectiontimeout"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.SetConnectionTimeout();
-                unitAccess.GetConnectionTimeout();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.SetConnectionTimeout();
+                dbOlibTest.GetConnectionTimeout();
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-allocclosestm"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.AllocStmt();
-                unitAccess.CloseStmt();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.AllocStmt();
+                dbOlibTest.CloseStmt();
+                dbOlibTest.Disconnect();
 
             }
             else if (argv[1] == std::string("-connectionpooling"))
             {
-                unitAccess.SetConnectionPooling();
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.GetConnectionPooling();
-                unitAccess.Disconnect();
+                dbOlibTest.SetConnectionPooling();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.GetConnectionPooling();
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-readalltimeout"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.SetReadAllTimeout();
-                unitAccess.GetReadAllTimeout();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.SetReadAllTimeout();
+                dbOlibTest.GetReadAllTimeout();
+                dbOlibTest.Disconnect();
 
             }
             else if (argv[1] == std::string("-cleartable"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.ClearTables();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.ClearTables();
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-createunit"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.CreateUnit();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.CreateUnit();
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-readunit"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.ReadUnit(0);
-                unitAccess.EvaluateOutData();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.ReadUnit(0);
+                dbOlibTest.EvaluateOutData();
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-updateunit"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.UpdateUnit();
-                unitAccess.ReadUnit(0);
-                unitAccess.EvaluateOutData();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.UpdateUnit();
+                dbOlibTest.ReadUnit(0);
+                dbOlibTest.EvaluateOutData();
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-insertinto42"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.InsertInto42();
-                unitAccess.ReadUnit(42);
-                unitAccess.EvaluateOutData();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.InsertInto42();
+                dbOlibTest.ReadUnit(42);
+                dbOlibTest.EvaluateOutData();
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-deleteunit"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.DeleteUnit(42);
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.DeleteUnit(42);
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-binaryrw"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.BinaryTestWrite();
-                unitAccess.BinaryTestRead();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.BinaryTestWrite();
+                dbOlibTest.BinaryTestRead();
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-blobrw"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.WriteBlob();
-                unitAccess.ReadBlob();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.WriteBlob();
+                dbOlibTest.ReadBlob();
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-nclobrw"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.WriteNClobs();
-                unitAccess.ReadNClobs();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.WriteNClobs();
+                dbOlibTest.ReadNClobs();
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-lotsofinput"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.LotsOfInput();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.LotsOfInput();
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-outparam"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.TestOutputParameters();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.TestOutputParameters();
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-inoutparam"))
             {
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.TestInputOutputParameters();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.TestInputOutputParameters();
+                dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-perftest"))
             { //Check what the purpos of this is
-                unitAccess.Connect(DatabaseLogin);
-                unitAccess.PerfTest();
-                unitAccess.Disconnect();
+                dbOlibTest.Connect(DatabaseLogin);
+                dbOlibTest.PerfTest();
+                dbOlibTest.Disconnect();
             }
             else
             {
@@ -168,7 +168,7 @@ int main(int argc,char* argv[])
                 return 1;
             }
 
-            //unitAccess.CloseStmt();
+
 
         }
         catch(const Safir::Databases::Odbc::ReconnectException & ex)
