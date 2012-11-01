@@ -142,12 +142,8 @@ class Executor implements
                         }
 
                         m_testConnection.dispatch();
-                    } /*                            catch (com.saabgroup.safir.dob.typesystem.Exception exc)
-                                                    {
-                                                    Logger.instance().println("Caught Exception when Dispatching testConnection: " +
-                                                    com.saabgroup.safir.dob.typesystem.Operations.getName(exc.getTypeId()));
-                                                    System.out.println("Exception info: " + exc);
-                                                    }*/ catch (com.saabgroup.safir.dob.typesystem.FundamentalException exc) {
+                    }
+                    catch (com.saabgroup.safir.dob.typesystem.FundamentalException exc) {
                         Logger.instance().println("Caught FundamentalException when Dispatching testConnection: "
                                                   + com.saabgroup.safir.dob.typesystem.Operations.getName(exc.getTypeId()));
                         System.out.println("Exception info: " + exc);
@@ -162,49 +158,11 @@ class Executor implements
             }
         }
 
-        if (m_actionReceiver != null)
-        {
-            m_actionReceiver.close();
-        }
+        m_actionReceiver.close();
     }
 
     private void executeAction(com.saabgroup.dosetest.Action action) {
         switch (action.actionKind().getVal()) {
-            /*            case ACTIVATE:
-                if (action.identifier().getVal().equals(m_identifier)) {
-                    m_defaultContext = action.context().getVal();
-                    System.out.println("Activating (default context is " + m_defaultContext + ")");
-                    if (!m_isActive) {
-                        m_controlConnection.registerEntityHandler(m_partnerEntityId.getTypeId(),
-                                new com.saabgroup.safir.dob.typesystem.HandlerId(m_instance),
-                                com.saabgroup.safir.dob.InstanceIdPolicy.HANDLER_DECIDES_INSTANCE_ID,
-                                this);
-                        m_controlConnection.registerServiceHandler(com.saabgroup.dosetest.Dump.ClassTypeId,
-                                new com.saabgroup.safir.dob.typesystem.HandlerId(m_instance), this);
-                    }
-                    com.saabgroup.dosetest.Partner partner = new com.saabgroup.dosetest.Partner();
-                    partner.incarnation().setVal(0);
-                    partner.identifier().setVal(m_identifier);
-                    m_controlConnection.setAll(partner, m_partnerEntityId.getInstanceId(),
-                            new com.saabgroup.safir.dob.typesystem.HandlerId(m_instance));
-                    m_isActive = true;
-                }
-                break;
-
-            case DEACTIVATE:
-                if (action.identifier().getVal().equals(m_identifier)) {
-                    m_isActive = false;
-                    System.out.println("Deactivating");
-                    m_testConnection.close();
-                    m_controlConnection.delete(m_partnerEntityId,
-                            new com.saabgroup.safir.dob.typesystem.HandlerId(m_instance));
-                    m_controlConnection.unregisterHandler(m_partnerEntityId.getTypeId(),
-                            new com.saabgroup.safir.dob.typesystem.HandlerId(m_instance));
-                    m_controlConnection.unregisterHandler(com.saabgroup.dosetest.Dump.ClassTypeId,
-                            new com.saabgroup.safir.dob.typesystem.HandlerId(m_instance));
-                }
-                break;
-            */
             case RESET:
                 if (m_isActive) {
                     m_testConnection.close();
@@ -813,7 +771,7 @@ class Executor implements
                 }
                 catch (IOException ex) {
                     if (!isInterrupted()) {
-                        java.util.logging.Logger.getLogger(Executor.class.getName()).log(Level.SEVERE, null, ex);
+                        System.out.println("Got an IOException, ActionReceiver will stop running: " + ex.toString());
                     }
                 }
                 catch (InterruptedException ex) {
