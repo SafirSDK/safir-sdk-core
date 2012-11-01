@@ -28,7 +28,7 @@ FILE(GLOB sources *.cpp)
 add_executable(OlibTester ${sources} ${headers})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(OlibTester olib iodbc swre_interface_cpp dots_generated-Safir-cpp dots_cpp ${ODBC_LIBRARIES} )
+    TARGET_LINK_LIBRARIES(OlibTester olib swre_interface_cpp dots_generated-Safir-cpp dots_cpp ${ODBC_LIBRARIES} )
 endif()
 
 ADD_TEST(OlibTest_Connect OlibTester -connect)
