@@ -199,9 +199,9 @@ void DbUnitAccess::Connect(const std::wstring DatabaseLogin)
 
     if (!m_connection.IsConnected())
     {
-       m_connection.Connect(DatabaseLogin );m_isMimerSQL=true; // MIMER
-      // m_connection.Connect(L"DSN=safirDbMySQL;PWD=olibtesteruser;UID=olibtesteruser;SERVER=localhost;" ); m_isMySQL=true; //MYSQL
-     // m_connection.Connect(L"DSN=SafirDbPSQL;DRIVER=SQL;" ); m_isPostgreSQL=true; //postgresql
+      // m_connection.Connect(DatabaseLogin );m_isMimerSQL=true; // MIMER
+      //m_connection.Connect(L"DSN=safirDbMySQL;PWD=olibtesteruser;UID=olibtesteruser;SERVER=localhost;" ); m_isMySQL=true; //MYSQL
+      m_connection.Connect(L"DSN=SafirDbPSQL;DRIVER=SQL;" ); m_isPostgreSQL=true; //postgresql
 
        m_connection.UseManualTransactions();
        //SQL_ATTR_CONNECTION_TIMEOUT seems not to work with postgresql

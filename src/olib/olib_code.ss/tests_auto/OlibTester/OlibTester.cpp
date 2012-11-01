@@ -30,7 +30,7 @@ using namespace std;
 int main(int argc,char* argv[])
 {
     DbUnitAccess unitAccess;
-    std::wstring DatabaseLogin = L"DSN=SafirDb;PWD=sysadm;UID=sysadm;";
+    std::wstring DatabaseLogin = L"DSN=SafirDb;PWD=olibtesteruser;UID=olibtesteruser;";
 
     if (argc > 1)
     {
