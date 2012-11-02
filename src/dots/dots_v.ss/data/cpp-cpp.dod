@@ -468,6 +468,19 @@ namespace @_NAMESPACEV_@
         const bool registered =
             Safir::Dob::Typesystem::ObjectFactory::Instance().RegisterClass(@_CLASS_@::ClassTypeId, CreateObject);
         const bool dlls_loaded = Safir::Dob::Typesystem::Dll_Imports::Init();
+
+        Safir::Dob::Typesystem::Int32 Pad(const Safir::Dob::Typesystem::Int32 unpaddedSize)
+        {
+            const Safir::Dob::Typesystem::Int32 pad = unpaddedSize % 8;
+            if (pad == 0) 
+            {
+                return unpaddedSize;
+            }
+            else
+            {
+                return unpaddedSize + pad;
+            }
+        }
     }
 
     static bool isInitialised = false;
@@ -595,7 +608,7 @@ namespace @_NAMESPACEV_@
         for (Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@ContainerArray::const_iterator it = m_@_MEMBER_@Member.begin();
              it != m_@_MEMBER_@Member.end(); ++it)
         {
-            size += it->Utf8StringLength();
+            size += Pad(it->Utf8StringLength());
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Binary)
         for (@_MEMBERTYPE_@ContainerArray::const_iterator it = m_@_MEMBER_@Member.begin();
@@ -603,7 +616,7 @@ namespace @_NAMESPACEV_@
         {
             if (!it->IsNull())
             {
-                size += (static_cast<Safir::Dob::Typesystem::Int32>(it->GetVal().size())+4);
+                size += Pad(static_cast<Safir::Dob::Typesystem::Int32>(it->GetVal().size()))+4;
             }
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
@@ -612,7 +625,7 @@ namespace @_NAMESPACEV_@
         {
             if (!it->IsNull() && !it->GetVal().GetRawString().empty())
             {
-                size += 8 + 4 + it->GetVal().Utf8StringLength();
+                size += 8 + 4*2 + Pad(it->GetVal().Utf8StringLength());
             }
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
@@ -621,34 +634,34 @@ namespace @_NAMESPACEV_@
         {
             if (!it->IsNull() && !it->GetVal().GetInstanceId().GetRawString().empty())
             {
-                size += 16 + 4 + it->GetVal().GetInstanceId().Utf8StringLength();
+                size += 16 + 4*2 + Pad(it->GetVal().GetInstanceId().Utf8StringLength());
             }
         }
 @@ELSE@@
         for (@_MEMBERTYPE_@ContainerArray::const_iterator it = m_@_MEMBER_@Member.begin();
              it != m_@_MEMBER_@Member.end(); ++it)
         {
-            size += it->CalculateBlobSize();
+            size += Pad(it->CalculateBlobSize());
         }
 @@END_IF@@
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = String)
-        size += m_@_MEMBER_@Member.Utf8StringLength();
+    size += Pad(m_@_MEMBER_@Member.Utf8StringLength());
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Object)
         size += m_@_MEMBER_@Member.CalculateBlobSize();
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Binary)
         if (!m_@_MEMBER_@Member.IsNull())
         {
-            size += (static_cast<Safir::Dob::Typesystem::Int32>(m_@_MEMBER_@Member.GetVal().size())+4);
+            size += Pad(static_cast<Safir::Dob::Typesystem::Int32>(m_@_MEMBER_@Member.GetVal().size()))+4;
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
         if (!m_@_MEMBER_@Member.IsNull() && !m_@_MEMBER_@Member.GetVal().GetRawString().empty())
         {
-            size += 8 + 4 + m_@_MEMBER_@Member.GetVal().Utf8StringLength();
+            size += 8 + 4*2 + Pad(m_@_MEMBER_@Member.GetVal().Utf8StringLength());
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
         if (!m_@_MEMBER_@Member.IsNull() && !m_@_MEMBER_@Member.GetVal().GetInstanceId().GetRawString().empty())
         {
-            size += 16 + 4 + m_@_MEMBER_@Member.GetVal().GetInstanceId().Utf8StringLength();
+            size += 16 + 4*2 + Pad(m_@_MEMBER_@Member.GetVal().GetInstanceId().Utf8StringLength());
         }
 @@END_IF@@
 @@END_IF@@

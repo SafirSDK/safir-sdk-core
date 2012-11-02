@@ -26,6 +26,7 @@
 #define _dots_blob_layout_h
 
 #include "dots_internal_defs.h"
+#include <boost/type_traits.hpp>
 
 namespace Safir
 {
@@ -43,11 +44,12 @@ namespace Internal
     private:
 
 #pragma pack (push)
-#pragma pack(1)
+#pragma pack(4)
 
         struct BlobHeader
         {
             Size   size;
+            Size   padding;
             TypeId typeId;
         };
 
@@ -58,14 +60,14 @@ namespace Internal
         // Blob specification
         //**********************************************************
         static const Size OFFSET_SIZE                   = 0;
-        static const Size OFFSET_TYPE_ID                = 4;
-        static const Size OFFSET_HEADER_LENGTH          = 12;
+        static const Size OFFSET_TYPE_ID                = 8;
+        static const Size OFFSET_HEADER_LENGTH          = 16;
 
-        static const Size MEMBER_STATUS_LENGTH          = sizeof(char); //1
+        static const Size MEMBER_STATUS_LENGTH          = sizeof(char) * 8; //1
 
-        static const Size OFFSET_MEMBER_LENGTH          =   sizeof(Offset); //4
+        static const Size OFFSET_MEMBER_LENGTH          =   sizeof(Offset) * 2; //4
 
-        static const Size DYNAMIC_MEMBER_SIZE           =   sizeof(Offset) + sizeof(Size); //8
+        static const Size DYNAMIC_MEMBER_SIZE           =   sizeof(Offset) * 2 + sizeof(Size) * 2; //8
     private:
 
         BOOST_STATIC_ASSERT(sizeof(BlobLayout::BlobHeader) == BlobLayout::OFFSET_HEADER_LENGTH);
@@ -77,12 +79,14 @@ namespace Internal
         template <class T>
         static inline T * AnyPtrCast(char * const blob)
         {
+            CheckAlignment<T>(blob);
             return static_cast<T*>(static_cast<void*>(blob));
         }
 
         template <class T>
         static inline const T * AnyPtrCast(const char * const blob)
         {
+            CheckAlignment<T>(blob);
             return AnyPtrCast<T>(const_cast<char*>(blob));
         }
 
@@ -150,11 +154,11 @@ namespace Internal
             {
                 char * const dataLocation = beginningOfUnused;
                 *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH) = static_cast<Offset>(beginningOfUnused - blob);
-                beginningOfUnused += sizeof(T) + sizeof(Int32) + stringLength; //the value + the string length + the string itself
-
+                beginningOfUnused += sizeof(T) + sizeof(Int32)*2 + stringLength; //the value + the string length + the string itself
+                beginningOfUnused += Padding(stringLength);
                 *AnyPtrCast<T>(dataLocation) = hashVal;
                 *AnyPtrCast<Int32>(dataLocation + sizeof(T)) = stringLength;
-                strncpy(dataLocation + sizeof(T) + sizeof(Int32),strVal,stringLength);
+                strncpy(dataLocation + sizeof(T) + sizeof(Int32)*2,strVal,stringLength);
             }
             else //no string
             {
@@ -213,6 +217,20 @@ namespace Internal
                                      const MemberIndex member,
                                      const ArrayIndex index);
 
+        template <typename T>
+        static void CheckAlignment(const char * const blob)
+        {
+            if (reinterpret_cast<const uintptr_t>(blob) % boost::alignment_of<T>::value != 0)
+            {
+                std::wcerr << "Unaligned data of type " << typeid(T).name() 
+                           << ": expected = " 
+                           << boost::alignment_of<T>::value 
+                           << " got " 
+                           << (reinterpret_cast<const uintptr_t>(blob) % boost::alignment_of<T>::value) << std::endl;                
+                exit(1);
+            }
+        }
+
         //Basic types - not string and object
         template <typename T>
         static InternalMemberStatus GetMember(const char * const blob,
@@ -252,7 +270,7 @@ namespace Internal
             {
                 const Offset dynOffs = *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
                 val = *AnyPtrCast<T>(blob + dynOffs);
-                strVal = blob + dynOffs + sizeof(T) + sizeof(Int32);
+                strVal = blob + dynOffs + sizeof(T) + sizeof(Int32) * 2;
                 assert(strVal[0] != '\0');
             }
             else
@@ -275,6 +293,8 @@ namespace Internal
     private:
         BlobLayout(); //declared but not defined to prevent creation of this class
 
+        static Int32 Padding(const Int32 size);
+        
         static Offset GetOffset(const char * const blob, const MemberIndex member);
         static void SetOffset(char * const blob, const MemberIndex member, const Offset offset);
         static Size GetNumberOfBytesInString(const char* s, size_t maxNumberOfLetters);

@@ -168,7 +168,12 @@ namespace Internal
         {
         case StringMemberType:
             {
-                m_parameterBlobSize+=m_tmpParameterValue.m_value.size()+1 + sizeof(void*);
+                const size_t size = m_tmpParameterValue.m_value.size()+1 + sizeof(void*);
+                m_parameterBlobSize+=size;
+                if (size % 8 != 0) //pad to get alignment
+                {
+                    m_parameterBlobSize += 8 - (size % 8);
+                }
             }
             break;
         case InstanceIdMemberType:
