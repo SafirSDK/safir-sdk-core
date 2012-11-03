@@ -24,7 +24,7 @@
 
 #ifndef _dots_basic_types_h
 #define _dots_basic_types_h
-
+#include <cassert>
 #include "dots_internal_defs.h"
 
 #include <map>
@@ -47,6 +47,12 @@ namespace Internal
         static const char* StringOf(MemberType m);
         static Size SizeOfType(const MemberType& m);
 
+        template <typename T>
+        static inline Size SizeOf() 
+        {
+            BOOST_STATIC_ASSERT(sizeof(T)%8 == 0);
+            return sizeof(T);
+        }
     private:
         
         typedef std::map<std::string, MemberType> NameToTypeTable;
@@ -112,6 +118,17 @@ namespace Internal
 
         //static const Size  m_typeSize[49];
     };
+
+    template <>
+    inline Size BasicTypes::SizeOf<bool>() {return 8;}
+
+    template <>
+    inline Size BasicTypes::SizeOf<Int32>() {return 8;} //EnumInternal is covered by this.
+
+    template <>
+    inline Size BasicTypes::SizeOf<Float32>() {return 8;}
+
+
 }
 }
 }

@@ -55,19 +55,28 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(ConnectionId) == 16);
 #ifdef REGISTER_TIMES
         BOOST_STATIC_ASSERT(sizeof(Header) == 4 + sizeof(ConnectionId) + 4);
+#error aasdff
 #else
-        BOOST_STATIC_ASSERT(sizeof(Header) == 4 + sizeof(ConnectionId));
+        BOOST_STATIC_ASSERT(sizeof(Header) == 4 + 4 + sizeof(ConnectionId));
 #endif
+        BOOST_STATIC_ASSERT(sizeof(Header) % 8 == 0);
 
-        BOOST_STATIC_ASSERT(sizeof(ConnectHeader) == sizeof(Header) + 4);
+        BOOST_STATIC_ASSERT(sizeof(ConnectHeader) == sizeof(Header) + 4 + 4);
+
+        BOOST_STATIC_ASSERT(sizeof(ConnectHeader) % 8 == 0);
 
         BOOST_STATIC_ASSERT(sizeof(MessageHeader) == sizeof(Header)
                             + 8); //m_channelId
+
+        BOOST_STATIC_ASSERT(sizeof(MessageHeader) % 8 == 0);
+
 
         BOOST_STATIC_ASSERT(sizeof(StateHeader) == sizeof(Header)
                             + 8   //m_typeId
                             + 8   //handlerid
                             + 8); //m_regTime
+
+        BOOST_STATIC_ASSERT(sizeof(StateHeader) % 8 == 0);
 
         BOOST_STATIC_ASSERT(sizeof(InstanceIdPolicy::Enumeration) == 4);
 
@@ -78,7 +87,9 @@ namespace Internal
                             + 4  //handlerStrSize
                             + 4  //m_instanceIdPolicy
                             + 4  //m_kind
+                            + 4  //m_padding
                             );
+        BOOST_STATIC_ASSERT(sizeof(RegistrationStateHeader) % 8 == 0);
 
         BOOST_STATIC_ASSERT(sizeof(EntityStateKind) == 4);
 
@@ -94,6 +105,8 @@ namespace Internal
                             + 1  //m_versionIsDecremented
                             + 4  //m_numTimestamps
                             );
+        BOOST_STATIC_ASSERT(sizeof(EntityStateHeader) % 8 == 0);
+
 
         BOOST_STATIC_ASSERT(sizeof (PendingRegistrationMsg) == sizeof(Header)
                             + sizeof(Typesystem::TypeId)
@@ -104,6 +117,7 @@ namespace Internal
 
         BOOST_STATIC_ASSERT(sizeof (RequestPDHeader) == sizeof(Header)
                             + sizeof(ConnectionId));
+        BOOST_STATIC_ASSERT(sizeof(RequestPDHeader) % 8 == 0);
 
         BOOST_STATIC_ASSERT(sizeof (HavePersistenceDataResponseMsg) == sizeof(Header)
                             + 4); //bool plus padding
@@ -112,21 +126,29 @@ namespace Internal
                             + sizeof(Typesystem::Int64)
                             + sizeof(InternalRequestId)
                             + sizeof (ResponseId));
+        BOOST_STATIC_ASSERT(sizeof(RequestHeader) % 8 == 0);
+
 
         BOOST_STATIC_ASSERT(sizeof(EntityCreateRequestHeader) == sizeof(RequestHeader)
                             + sizeof(Typesystem::Int64)
-                            + sizeof(bool)*4);
+                            + sizeof(bool)*4
+                            + 4); //padding
+
+        BOOST_STATIC_ASSERT(sizeof(EntityCreateRequestHeader) % 8 == 0);
 
         BOOST_STATIC_ASSERT(sizeof(EntityUpdateRequestHeader) == sizeof(RequestHeader)
                             + sizeof(Typesystem::Int64));
+        BOOST_STATIC_ASSERT(sizeof(EntityUpdateRequestHeader) % 8 == 0);
 
         BOOST_STATIC_ASSERT(sizeof(EntityDeleteRequestHeader) == sizeof(RequestHeader)
                             + sizeof(Typesystem::Int64)*2);
+        BOOST_STATIC_ASSERT(sizeof(EntityDeleteRequestHeader) % 8 == 0);
 
         BOOST_STATIC_ASSERT(sizeof(ResponseHeader) == sizeof(Header)
                             + sizeof(InternalRequestId)
+                            + 4 //padding
                             + sizeof(ConnectionId));
-
+        BOOST_STATIC_ASSERT(sizeof(ResponseHeader) % 8 == 0);
 
         BOOST_STATIC_ASSERT(sizeof (unsigned int) == sizeof(boost::uint32_t));
 

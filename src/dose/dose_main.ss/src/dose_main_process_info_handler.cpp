@@ -176,6 +176,7 @@ namespace Internal
             processInfo->ConnectionNames()[0].SetVal(ConnectionAspectMisc(m_connection).GetConnectionName());
 
             m_connection.SetAll(processInfo,eid.GetInstanceId(),Typesystem::HandlerId());
+            std::wcout << "*** MARK ***" << std::endl;
         }
         catch (const Safir::Dob::AccessDeniedException &)
         {

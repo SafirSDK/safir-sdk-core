@@ -215,7 +215,7 @@ namespace Internal
                                         char * & beginningOfUnused)
     {
         char * const binary = beginningOfUnused;
-        beginningOfUnused += binarySize + Padding(binarySize) +sizeof(Size);
+        beginningOfUnused += binarySize + Padding(binarySize) +sizeof(Size) * 2;
         SetDynamicOffset(insideBlob,member,index,static_cast<Offset>(binary - insideBlob));
         SetDynamicSize(insideBlob, member, index, binarySize);
         SetStatus(false,isChanged,insideBlob,member,index);
@@ -532,7 +532,7 @@ namespace Internal
             if (memberDesc->GetMemberType() == BinaryMemberType)
             {
                 size=*AnyPtrCast<Size>(blob+dynOffs);
-                val=AnyPtrCast<char>(blob+dynOffs+sizeof(Size));
+                val=AnyPtrCast<char>(blob+dynOffs+sizeof(Size)*2);
             }
             else
             {
@@ -564,7 +564,7 @@ namespace Internal
         }
         else if (memberDesc->GetMemberType()==BinaryMemberType)
         {
-            newSize=binarySize+sizeof(Size); //add size before binary data
+            newSize=binarySize+sizeof(Size)*2; //add size before binary data
         }
         else //ObjectMemberType
         {
@@ -585,7 +585,7 @@ namespace Internal
             if (memberDesc->GetMemberType()==BinaryMemberType)
             {
                 memcpy(blob+dynamicOffset, &binarySize, sizeof(Size));
-                memcpy(blob+dynamicOffset+sizeof(Size), val, binarySize);
+                memcpy(blob+dynamicOffset+sizeof(Size)*2, val, binarySize);
             }
             else
             {
@@ -641,7 +641,7 @@ namespace Internal
                         if (memberDesc->GetMemberType()==BinaryMemberType)
                         {
                             memcpy(tmpBlob, &binarySize, sizeof(Size));
-                            memcpy(tmpBlob+sizeof(Size), val, binarySize);
+                            memcpy(tmpBlob+sizeof(Size)*2, val, binarySize);
                         }
                         else //ObjectMemberType or StringMemberType
                         {
@@ -689,7 +689,7 @@ namespace Internal
         //Assertion that we calculated the blobSize correct.
 #ifndef NDEBUG
         if (newBlobSize != static_cast<Size>(END_OF_STATIC+currentDynOffs))
-            throw "Blobsize was not correct calculated!";
+            throw "Blobsize was not correctly calculated!";
 #endif
 
     }
@@ -962,6 +962,7 @@ namespace Internal
                                                  const MemberIndex member,
                                                  const ArrayIndex index)
     {
+        BOOST_STATIC_ASSERT(sizeof(T) % 8 == 0);
         const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
         if (strVal == NULL) // no string, this will be easy!
         {

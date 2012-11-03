@@ -27,6 +27,7 @@
 
 #include "dots_internal_defs.h"
 #include <boost/type_traits.hpp>
+#include "dots_basic_types.h"
 
 namespace Safir
 {
@@ -72,6 +73,7 @@ namespace Internal
 
         BOOST_STATIC_ASSERT(sizeof(BlobLayout::BlobHeader) == BlobLayout::OFFSET_HEADER_LENGTH);
         BOOST_STATIC_ASSERT(sizeof(char) == 1);
+        BOOST_STATIC_ASSERT(sizeof(bool) == 1);
         BOOST_STATIC_ASSERT(sizeof(Offset) == 4);
         BOOST_STATIC_ASSERT(sizeof(Size) == 4);
         BOOST_STATIC_ASSERT(sizeof(Offset) <= sizeof(Int64)); //this is to ensure that an offset can fit into a hashedId member.
@@ -149,6 +151,7 @@ namespace Internal
                                                          const bool isChanged,
                                                          char * & beginningOfUnused)
         {
+            BOOST_STATIC_ASSERT(sizeof(T) % 8 == 0);
             const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
             if (strVal != NULL) //if we have a string
             {
@@ -238,7 +241,7 @@ namespace Internal
                                               const ArrayIndex index,
                                               T & t)
         {
-            size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
+            size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+BasicTypes::SizeOf<T>())*index;
             t=*AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH);
             const char* tmp=blob + startOfElement;
             InternalMemberStatus s=static_cast<InternalMemberStatus>(tmp[0]);
@@ -251,7 +254,7 @@ namespace Internal
                               const MemberIndex member,
                               const ArrayIndex index)
         {
-            size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
+            size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+BasicTypes::SizeOf<T>())*index;
             T* t=AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH);
             (*t)=val;
         }
@@ -264,6 +267,7 @@ namespace Internal
                                                                 T & val,
                                                                 const char * & strVal)
         {
+            BOOST_STATIC_ASSERT(sizeof(T) % 8 == 0);
             const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
             const InternalMemberStatus status = blob[startOfElement];
             if (MemberStatusHandler::HasDynamicPart(status))
