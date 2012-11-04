@@ -31,7 +31,6 @@
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 
-
 namespace Safir
 {
 namespace Dob
@@ -128,10 +127,6 @@ namespace Typesystem
         char * beginningOfUnused = 0;
         DotsC_FormatBlob(&binary[0], blobSize, object->GetTypeId(),beginningOfUnused);
         object->WriteToBlob(&binary[0], beginningOfUnused);
-        if (beginningOfUnused != &binary[0] + blobSize)
-        {
-            std::wcout << "ToBinary: unexpected blob size mismatch! overwrite by " << static_cast<int>(beginningOfUnused - &binary[0] - blobSize) << std::endl;
-        }
     }
 
     Dob::Typesystem::ObjectPtr 

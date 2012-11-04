@@ -28,6 +28,7 @@
 #include "dots_internal_defs.h"
 #include <boost/type_traits.hpp>
 #include "dots_basic_types.h"
+#include <iostream>
 
 namespace Safir
 {
@@ -230,7 +231,7 @@ namespace Internal
                            << boost::alignment_of<T>::value 
                            << " got " 
                            << (reinterpret_cast<const uintptr_t>(blob) % boost::alignment_of<T>::value) << std::endl;                
-                exit(1);
+                abort();
             }
         }
 
