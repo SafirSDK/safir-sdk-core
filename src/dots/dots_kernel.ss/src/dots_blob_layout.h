@@ -29,6 +29,7 @@
 #include <boost/type_traits.hpp>
 #include "dots_basic_types.h"
 #include <iostream>
+#include <boost/type_traits/alignment_of.hpp>
 
 namespace Safir
 {
