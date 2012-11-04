@@ -723,7 +723,10 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@END_IF@@
 @@END_TABLE@@
-        if(ClassTypeId == Safir::Dob::Typesystem::BlobOperations::GetTypeId(blob) && beginningOfUnused != blob + Safir::Dob::Typesystem::BlobOperations::GetSize(blob))
+
+        //Check that CalculateBlobSize and WriteToBlob agree on the sizes...
+        if(ClassTypeId == Safir::Dob::Typesystem::BlobOperations::GetTypeId(blob) && 
+           beginningOfUnused != blob + Safir::Dob::Typesystem::BlobOperations::GetSize(blob))
         {
             std::wcerr << "WriteToBlob: unexpected blob size mismatch! overwrite by " << static_cast<int>(beginningOfUnused - blob - Safir::Dob::Typesystem::BlobOperations::GetSize(blob)) << std::endl;
             abort();
