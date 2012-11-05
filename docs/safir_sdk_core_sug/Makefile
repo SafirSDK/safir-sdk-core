@@ -1,7 +1,7 @@
 .SILENT:
 .PHONY: all clean
 
-DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wildcard images/*.png)
+DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wildcard images/*.png) Makefile
 
 default: safir_sdk_core_sug.pdf
 
@@ -23,21 +23,13 @@ archives: safir_sdk_core_sug.pdf.zip \
 
 safir_sdk_core_sug.pdf: $(DEPS)
 	echo "Building pdf"
-	a2x -L -f pdf -d book --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" safir_sdk_core_sug.txt 2>&1
-
-#The grepping above is to get rid of some warnings from 
-#some underlying component that cant handle some properties.
-#(I believe this is fixed in some newer version of a2x 
-#than the one I'm using.)
+	a2x -L -f pdf -d book --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" safir_sdk_core_sug.txt
 
 safir_sdk_core_sug.pdf.zip: safir_sdk_core_sug.pdf
 	zip safir_sdk_core_sug.pdf.zip safir_sdk_core_sug.pdf
 
 safir_sdk_core_sug.pdf.bz2: safir_sdk_core_sug.pdf
 	bzip2 -9 -fk safir_sdk_core_sug.pdf
-
-#docbook_html: 
-#	a2x -f xhtml -d book safir_sdk_core_sug.txt
 
 safir_sdk_core_sug.chunked/index.html: $(DEPS)
 	echo "Building chunked html"
