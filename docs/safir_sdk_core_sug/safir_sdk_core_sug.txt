@@ -7,6 +7,9 @@ Safir SDK Core Users Guide
 Author
 30 Aug 2010
 
+:cpp: {basebackend@docbook:c++:cpp}
+:csharp: {basebackend@docbook:c:csharp}
+
 == Preface
 The purpose of this document is to provide a comprehensive guide to using the services in Safir SDK Core. The reader should have general knowledge about object-oriented programming. Some knowledge of distributed real-time systems programming is also desirable, but not essential.
 
@@ -1002,7 +1005,7 @@ An Ada smart pointer exposes an operation called +Ref+ which could be tought of 
 
 Ada smart pointers work like you expect (Well, almost. See below), they are reference counted and the pointed-to object will be deleted when there are no more references to it.
 
-The user of an Ada smart pointer must be aware of some important differences when compared to a ``normal'' smart pointer. (The differences are due to Ada language rules). When accessing members via an Ada smart pointer using prefix notation you must start with a local variable holding the underlaying ``raw'' pointer (Ada access type). Assuming that we have a smart pointer My_A:
+The user of an Ada smart pointer must be aware of some important differences when compared to a ``normal'' smart pointer. (The differences are due to Ada language rules). When accessing members via an Ada smart pointer using prefix notation you must start with a local variable holding the underlying ``raw'' pointer (Ada access type). Assuming that we have a smart pointer My_A:
 
 .Smart pointer usage in Ada
 [source,ada]
