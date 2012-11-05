@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 #include <iostream>
-#include "Olib_unit_access.h"
+#include "DbOlibTest.h"
 #include <Safir/Databases/Odbc/ReconnectException.h>
 #include <Safir/Databases/Odbc/TimeoutException.h>
  
