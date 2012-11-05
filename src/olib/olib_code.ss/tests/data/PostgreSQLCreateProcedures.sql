@@ -2,52 +2,36 @@
  --=   spcreateolibtest =--
 CREATE OR REPLACE FUNCTION spcreateolibtest(character varying, 
                                             character varying, 
-                                            character varying, 
                                             integer, 
-                                            character varying, 
+                                            bigint, 
+                                            float, 
                                             double precision, 
-                                            double precision, 
-                                            double precision, 
-                                            double precision, 
-                                            timestamp without time zone, 
-                                            integer, 
-                                            bigint)  RETURNS void AS
+                                            integer)  RETURNS void AS
 $BODY$
-DEClARE pUnitId integer;
+DEClARE pId integer;
 BEGIN
-pUnitId = (select  max(UnitId)+1 from tblOlibTest);
+pId = (select  max(Id)+1 from tblOlibTest);
 case 
-    when pUnitId is null then pUnitId=0 ;
+    when pId is null then pId=0 ;
     else
 end case;
  
-insert into tblOlibTest( UnitID,                  
-                    CallSign, 
-                    UnitSizeId, 
-                    UnitIdentityId,
-                    CombatReadiness,                    
-                    CombatReadinessDescription, 
-                    Latitude, 
-                     Longitude,
-                     Speed, 
-                     Course,
-                    MeasurementTime, 
-                     IsAlive,
-                     ALargeInt                    
-          )
-values (    pUnitId,
+insert into tblOlibTest( Id,                  
+                    StringName, 
+                    StringDescription, 
+                    Int32,
+                    Int64,                    
+                    Float32, 
+                    Float64, 
+                    Bool)
+values (    pId,
             $1, 
             $2,
             $3,
             $4,
             $5,
             $6,
-            $7,
-            $8,
-            $9,
-            $10,
-            $11,
-            $12
+            $7
  );
  END;
 $BODY$
@@ -71,32 +55,22 @@ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION spupdateolibtest(integer, 
                                             character varying, 
                                             character varying, 
-                                            character varying, 
                                             integer, 
-                                            character varying, 
+                                            bigint, 
+                                            float, 
                                             double precision, 
-                                            double precision, 
-                                            double precision, 
-                                            double precision, 
-                                            timestamp without time zone, 
-                                            integer, 
-                                            bigint) RETURNS void AS
+                                            integer) RETURNS void AS
 $BODY$                    
 begin
 update tblOlibTest
-set     CallSign = $2,
-        UnitSizeId = $3,
-        UnitIdentityId = $4,
-        CombatReadiness = $5,
-        CombatReadinessDescription = $6,
-        Latitude = $7,
-        Longitude = $8,
-        Speed = $9,
-        Course = $10,
-        MeasurementTime = $11,
-        IsAlive = $12,
-        ALargeInt = $13
-where UnitId = $1
+set     StringName = $2,
+        StringDescription = $3,
+        Int32 = $4,
+        Int64 = $5,
+        Float32 = $6,
+        Float64 = $7,
+        Bool = $8
+where Id = $1
 ;
 
 end;
@@ -107,84 +81,51 @@ CREATE OR REPLACE FUNCTION spdeleteolibtest(integer)
   RETURNS void AS
 $BODY$                    
  begin
-delete from tblOlibTest where UnitId = $1;
+delete from tblOlibTest where Id = $1;
  end;
 $BODY$
   LANGUAGE plpgsql;
  
 
  --=   spinputoutputolibtest =--
-CREATE OR REPLACE FUNCTION spinputoutputolibtest(INOUT pspeed double precision)
+CREATE OR REPLACE FUNCTION spinputoutputolibtest(INOUT pInt32 double precision)
   RETURNS double precision AS
 $BODY$  
-declare SpeedSum float;
-declare pUnitId float;               
+declare Int32Sum float;
+declare pId float;               
 begin
 
-pUnitId =  (select max(UnitId)+1 from tblOlibTest);
-SpeedSum = pSpeed + pSpeed;
+pId =  (select max(Id)+1 from tblOlibTest);
+Int32Sum = pInt32 + pInt32;
 
-insert into tblOlibTest(UnitId,
-                        CallSign, 
-                        UnitSizeId, 
-                        UnitIdentityId, 
-                        CombatReadiness, 
-                        CombatReadinessDescription, 
-                        Latitude, 
-                        Longitude, 
-                        Speed, 
-                        Course, 
-                        MeasurementTime, 
-                        IsAlive,
-                        ALargeInt  )
-values (pUnitId,
-        null, 
-        null, 
-        null, 
-        null, 
-        null, 
-        null, 
-        null, 
-        SpeedSum, 
-        null, 
-        null, 
-        null,
-        null);
+insert into tblOlibTest(Id, Int32  )
+values ( pId, Int32sum);
         
-pSpeed = (select Speed from tblOlibTest where UnitId = pUnitId);
+pInt32 = (select Int32 from tblOlibTest where Id = pId);
 end;
 $BODY$
   LANGUAGE plpgsql;
   
 --=   spoutputolibtest =--
-CREATE OR REPLACE FUNCTION spoutputolibtest(OUT pcallsign character varying, 
-                                            OUT punitsizeid character varying, 
-                                            OUT punitidentityid character varying, 
-                                            OUT pcombatreadiness integer, 
-                                            OUT pcombatreadinessdescription character varying, 
-                                            OUT platitude double precision, 
-                                            OUT plongitude double precision, 
-                                            OUT pspeed real, 
-                                            OUT pcourse real, 
-                                            OUT pmeasurementtime timestamp without time zone, 
-                                            OUT pisalive integer, 
-                                            OUT palargeint bigint)
+CREATE OR REPLACE FUNCTION spoutputolibtest(OUT pStringName character varying, 
+                                            OUT pStringDescription character varying, 
+                                            out pInt32 int, 
+                                            out pInt64 BIGINT, 
+                                            out pFloat32 float, 
+                                            out pFloat64 double precision, 
+                                            out pBool int)
   RETURNS record AS
 $BODY$                    
  begin
 
-pCallSign = (select CallSign from tblOlibTest where UnitId = 1);
-pUnitSizeId = (select UnitSizeId from tblOlibTest where UnitId = 1);
-pUnitIdentityId = (select UnitIdentityId from tblOlibTest where UnitId = 1);
-pCombatReadiness = (select CombatReadiness from tblOlibTest where UnitId = 1);
-pCombatReadinessDescription = (select CombatReadinessDescription from tblOlibTest where UnitId = 1);
-pLatitude = (select Latitude from tblOlibTest where UnitId = 1);
-pLongitude = (select Longitude from tblOlibTest where UnitId = 1);
-pSpeed = (select Speed from tblOlibTest where UnitId = 1);
-pCourse = (select Course from tblOlibTest where UnitId = 1);
-pMeasurementTime = (select MeasurementTime from tblOlibTest where UnitId = 1);
-pIsAlive = (select IsAlive from tblOlibTest where UnitId = 1);
-pALargeInt = (select ALargeInt from tblOlibTest where UnitId = 1);
+pStringName = (select StringName from tblOlibTest where Id = 1);
+pStringDescription = (select StringDescription from tblOlibTest where Id = 1);
+pInt32 = (select Int32 from tblOlibTest where Id = 1);
+pInt64 = (select Int64 from tblOlibTest where Id = 1);
+pFloat32 = (select Float32 from tblOlibTest where Id = 1);
+pFloat64 = (select Float64 from tblOlibTest where Id = 1);
+pBool = (select Bool from tblOlibTest where Id = 1);
+ 
  end;
 $BODY$
   LANGUAGE plpgsql;

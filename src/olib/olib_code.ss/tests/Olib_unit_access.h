@@ -150,13 +150,13 @@ public:
     void TestInputOutputParameters();
     void TestOutputParameters();
     Safir::Dob::Typesystem::Int64 TblRowCount();
-    void CreateUnit();
+    void CreateData();
     void ClearTables();
     void EvaluateOutData();
-    void UpdateUnit();
-    void DeleteUnit(const Safir::Dob::Typesystem::Int32 Id);
+    void UpdateData();
+    void DeleteData(const Safir::Dob::Typesystem::Int32 Id);
     void PerfTest();
-    void ReadUnit(const int Id);
+    void ReadData(const int Id);
     void BinaryTestRead();
     void BinaryTestWrite();
     void WriteNClobs();

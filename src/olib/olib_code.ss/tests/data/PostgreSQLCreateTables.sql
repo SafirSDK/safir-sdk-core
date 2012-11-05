@@ -1,20 +1,15 @@
 CREATE TABLE tblolibtest
 (
-  unitid integer NOT NULL,
-  callsign character varying(6),
-  combatreadiness integer,
-  combatreadinessdescription character varying(100),
-  unitsizeid character varying(50),
-  unitidentityid character varying(50),
-  latitude double precision,
-  longitude double precision,
-  speed real,
-  course real,
-  measurementtime timestamp(6) without time zone,
-  isalive integer,
-  alargeint bigint,
-  CONSTRAINT tblolibtest_pkey PRIMARY KEY (unitid),
-  CONSTRAINT tblolibtest_unitid_check CHECK (unitid IS NOT NULL)
+  ID integer NOT NULL,
+  STRINGNAME character varying(10),
+  STRINGDESCRIPTION character varying(40),
+  INT32 integer,
+  INT64 BIGINT,
+  FLOAT32 float,
+  FLOAT64 double precision,
+  BOOL integer,
+  CONSTRAINT tblolibtest_pkey PRIMARY KEY (ID),
+  CONSTRAINT tblolibtest_unitid_check CHECK (ID IS NOT NULL)
 );
 
 CREATE TABLE tblolibtestbinary

@@ -12,63 +12,48 @@ $$
 
 
 delimiter $$
-CREATE DEFINER=root@localhost PROCEDURE spCreateOlibTest(   pCallSign nvarchar(6), 
-                                                            pUnitSizeId nvarchar(50), 
-                                                            pUnitIdentityId nvarchar(50), 
-                                                            pCombatReadiness int, 
-                                                            pCombatReadinessDescription nvarchar(100), 
-                                                            pLatitude double, 
-                                                            pLongitude double, 
-                                                            pSpeed real, 
-                                                            pCourse real, 
-                                                            pMeasurementTime timestamp, 
-                                                            pIsAlive int, 
-                                                            pALargeInt bigint)
+CREATE DEFINER=root@localhost PROCEDURE spCreateOlibTest(   pStringName varchar(10), 
+                                                            pStringDescription varchar(40), 
+                                                            pInt32 Int, 
+                                                            pInt64 BIGINT, 
+                                                            pFloat32 Float,
+                                                            pFloat64 double, 
+                                                            pBool Int)
     MODIFIES SQL DATA
 begin
 
-declare pUnitId int;
+declare pId int;
 
-set pUnitId = (select max(UnitId)+1 from tblOlibTest);
-if pUnitId is null then
-    set pUnitId =0;
+set pId = (select max(Id)+1 from tblOlibTest);
+if pId is null then
+    set pId =0;
 end if;
 
-insert into tblOlibTest(UnitId,
-                        CallSign, 
-                        UnitSizeId, 
-                        UnitIdentityId, 
-                        CombatReadiness, 
-                        CombatReadinessDescription, 
-                        Latitude, 
-                        Longitude, 
-                        Speed, 
-                        Course, 
-                        MeasurementTime, 
-                        IsAlive,
-                        ALargeInt  )
-values (pUnitId,
-        pCallSign, 
-        pUnitSizeId, 
-        pUnitIdentityId, 
-        pCombatReadiness, 
-        pCombatReadinessDescription, 
-        pLatitude, 
-        pLongitude, 
-        pSpeed, 
-        pCourse, 
-        pMeasurementTime, 
-        pIsAlive,
-        pALargeInt);
+insert into tblOlibTest(Id,
+                        StringName, 
+                        StringDescription, 
+                        Int32, 
+                        Int64, 
+                        Float32,
+                        Float64, 
+                        Bool)
+values (pId,
+        pStringName, 
+        pStringDescription, 
+        pInt32, 
+        pInt64, 
+        pFloat32,
+        pFloat64, 
+        pBool);
 
 end$$
 
 delimiter $$
-CREATE DEFINER=root@localhost PROCEDURE spDeleteOlibTest(pUnitId int)
+CREATE DEFINER=root@localhost PROCEDURE spDeleteOlibTest(pId int)
     MODIFIES SQL DATA
 begin
 
-delete from tblOlibTest where UnitId = pUnitId;
+delete from tblOlibTest where Id = pId;
 -- delete from tblOlibTestnclob where Id = pUnitId;
 
 end
@@ -78,77 +63,42 @@ $$
 
 delimiter $$
 
-CREATE DEFINER=root@localhost PROCEDURE spInputOutputOlibTest(inout pSpeed float)
+CREATE DEFINER=root@localhost PROCEDURE spInputOutputOlibTest(inout pInt32 float)
 BEGIN
-declare SpeedSum float;
-declare pUnitId float;
+declare Int32Sum float;
+declare pId float;
 declare result float;
-set pUnitId =  (select max(UnitId)+1 from tblOlibTest);
-set SpeedSum = pSpeed + pSpeed;
+set pId =  (select max(Id)+1 from tblOlibTest);
+set Int32Sum = pInt32 + pInt32;
 
-insert into tblOlibTest(UnitId,
-                        CallSign, 
-                        UnitSizeId, 
-                        UnitIdentityId, 
-                        CombatReadiness, 
-                        CombatReadinessDescription, 
-                        Latitude, 
-                        Longitude, 
-                        Speed, 
-                        Course, 
-                        MeasurementTime, 
-                        IsAlive,
-                        ALargeInt  )
-values (pUnitId,
-        null, 
-        null, 
-        null, 
-        null, 
-        null, 
-        null, 
-        null, 
-        SpeedSum, 
-        null, 
-        null, 
-        null,
-        null);
-        
-select Speed into pSpeed from tblOlibTest where UnitId = pUnitId;
+insert into tblOlibTest(Id, Int32  )
+values ( pId, Int32sum);
+ 
+select Int32 into pInt32 from tblOlibTest where Id = pId;        
+ 
  
 END
 $$
 
 delimiter $$
-CREATE DEFINER=root@localhost PROCEDURE spOutputOlibTest(   out pCallSign nvarchar(6), 
-                                                            out pUnitSizeId nvarchar(50), 
-                                                            out pUnitIdentityId nvarchar(50), 
-                                                            out pCombatReadiness int, 
-                                                            out pCombatReadinessDescription nvarchar(100), 
-                                                            out pLatitude double, 
-                                                            out pLongitude double, 
-                                                            out pSpeed real, 
-                                                            out pCourse real, 
-                                                            out pMeasurementTime timestamp, 
-                                                            out pIsAlive int, 
-                                                            out pALargeInt bigint)
+CREATE DEFINER=root@localhost PROCEDURE spOutputOlibTest(   out pStringName varchar(10), 
+                                                            out pStringDescription varchar(40), 
+                                                            out pInt32 int, 
+                                                            out pInt64 BIGINT, 
+                                                            out pFloat32 float, 
+                                                            out pFloat64 double precision, 
+                                                            out pBool int)
 MODIFIES SQL DATA
 begin
-select  CallSign, 
-        UnitSizeId, 
-        UnitIdentityId, 
-        CombatReadiness, 
-        CombatReadinessDescription, 
-        Latitude, 
-        Longitude, 
-        Speed, 
-        Course, 
-        MeasurementTime, 
-        IsAlive, 
-        ALargeInt
-from    tblOlibTest where   UnitId = 1 
-into    pCallSign, pUnitSizeId, pUnitIdentityId, pCombatReadiness, 
-        pCombatReadinessDescription, pLatitude, pLongitude, pSpeed, pCourse, 
-        pMeasurementTime, pIsAlive, pALargeInt;
+select StringName, 
+     StringDescription, 
+     Int32, 
+     Int64, 
+     Float32, 
+     Float64, 
+     Bool 
+from tblOlibTest where Id = 1
+into    pStringName, pStringDescription, pInt32, pInt64, pFloat32,pFloat64,pBool;
 
 end
 $$
@@ -156,35 +106,27 @@ $$
 
 delimiter $$
 
-CREATE DEFINER=root@localhost PROCEDURE spUpdateOlibTest(   pUnitId int,
-                                                            pCallSign nvarchar(6), 
-                                                            pUnitSizeId nvarchar(50), 
-                                                            pUnitIdentityId nvarchar(50), 
-                                                            pCombatReadiness int, 
-                                                            pCombatReadinessDescription nvarchar(100), 
-                                                            pLatitude double, 
-                                                            pLongitude double, 
-                                                            pSpeed real, 
-                                                            pCourse real, 
-                                                            pMeasurementTime timestamp, 
-                                                            pIsAlive int, 
-                                                            pALargeInt bigint)
+CREATE DEFINER=root@localhost PROCEDURE spUpdateOlibTest(   pId int,
+                                                            pStringName varchar(10), 
+                                                            pStringDescription varchar(40), 
+                                                            pInt32 int, 
+                                                            pInt64 BIGINT, 
+                                                            pFloat32 float, 
+                                                            pFloat64 double precision, 
+                                                            pBool int)
 MODIFIES SQL DATA
 begin
-update  tblOlibTest
-set     CallSign = pCallSign,
-        UnitSizeId = pUnitSizeId,
-        UnitIdentityId = pUnitIdentityId,
-        CombatReadiness = pCombatReadiness,
-        CombatReadinessDescription = pCombatReadinessDescription,
-        Latitude = pLatitude,
-        Longitude = pLongitude,
-        Speed = pSpeed,
-        Course = pCourse,
-        MeasurementTime = pMeasurementTime,
-        IsAlive = pIsAlive,
-        ALargeInt = pALargeInt
-where   UnitId = pUnitId
+
+update tblOlibTest
+set StringName = pStringName,
+    StringDescription = pStringDescription,
+    Int32 = pInt32,
+    Int64 = pInt64,
+    Float32 = pFloat32,
+    Float64 = pFloat64,
+    Bool = pBool
+    
+where Id = pId
 ;
 
 end

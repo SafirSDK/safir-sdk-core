@@ -82,24 +82,24 @@ int main(int argc,char* argv[])
                 dbOlibTest.ClearTables();
                 dbOlibTest.Disconnect();
             }
-            else if (argv[1] == std::string("-createunit"))
+            else if (argv[1] == std::string("-createdata"))
             {
                 dbOlibTest.Connect(DatabaseLogin);
-                dbOlibTest.CreateUnit();
+                dbOlibTest.CreateData();
                 dbOlibTest.Disconnect();
             }
-            else if (argv[1] == std::string("-readunit"))
+            else if (argv[1] == std::string("-readdata"))
             {
                 dbOlibTest.Connect(DatabaseLogin);
-                dbOlibTest.ReadUnit(0);
+                dbOlibTest.ReadData(0);
                 dbOlibTest.EvaluateOutData();
                 dbOlibTest.Disconnect();
             }
-            else if (argv[1] == std::string("-updateunit"))
+            else if (argv[1] == std::string("-updatedata"))
             {
                 dbOlibTest.Connect(DatabaseLogin);
-                dbOlibTest.UpdateUnit();
-                dbOlibTest.ReadUnit(0);
+                dbOlibTest.UpdateData();
+                dbOlibTest.ReadData(0);
                 dbOlibTest.EvaluateOutData();
                 dbOlibTest.Disconnect();
             }
@@ -107,14 +107,14 @@ int main(int argc,char* argv[])
             {
                 dbOlibTest.Connect(DatabaseLogin);
                 dbOlibTest.InsertInto42();
-                dbOlibTest.ReadUnit(42);
+                dbOlibTest.ReadData(42);
                 dbOlibTest.EvaluateOutData();
                 dbOlibTest.Disconnect();
             }
-            else if (argv[1] == std::string("-deleteunit"))
+            else if (argv[1] == std::string("-deletedata"))
             {
                 dbOlibTest.Connect(DatabaseLogin);
-                dbOlibTest.DeleteUnit(42);
+                dbOlibTest.DeleteData(42);
                 dbOlibTest.Disconnect();
             }
             else if (argv[1] == std::string("-binaryrw"))
