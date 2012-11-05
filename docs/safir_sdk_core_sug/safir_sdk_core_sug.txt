@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 :encoding: UTF-8
 
-Safir SDK Core Users Guide
+Safir SDK Core User's Guide
 ==========================
 :Author: Lars Hagström (main author), Anders Widén, Mikael Wennerberg
 Author
@@ -19,7 +19,7 @@ This document is intended to be used both as an introduction to new users of the
 === Acknowledgements
 This document is a combination of several other documents, so some parts of the text have different authors, or is based on texts authored by other people. 
 
-More specifically the database section is written by Jörgen Johansson, the software error reporting section was originally written by Anders Widén, the section on Safir.Utilities.Foreach was written by Stefan Lindström, and the appendix about the example applications was written by Petter Lönnstedt. Most of the text on the basic Dob services is based on the original Dob Software Users Guide written by Jörgen Johansson. The context section, and the bits on how to use the Ada interfaces, are written by Anders Widén.
+More specifically the database section is written by Jörgen Johansson, the software error reporting section was originally written by Anders Widén, the section on Safir.Utilities.Foreach was written by Stefan Lindström, and the appendix about the example applications was written by Petter Lönnstedt. Most of the text on the basic Dob services is based on the original Dob Software User's Guide written by Jörgen Johansson. The context section, and the bits on how to use the Ada interfaces, are written by Anders Widén.
 
 This document has also been reviewed by a number of people: Henrik Sundberg, Mattias Gålnander and Anders Widén. If I've left someone out, then I apologise and I'll happily add you.
 
