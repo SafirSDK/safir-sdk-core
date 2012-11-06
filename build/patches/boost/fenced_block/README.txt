@@ -5,10 +5,13 @@ Affected platforms:
 ARMv6 and up
 
 References:
-TODO
+https://svn.boost.org/trac/boost/ticket/7140
 
 Fixed in:
-TODO
+1.51
 
 Applies to:
-TODO
+All versions up to and including 1.50.
+
+Comments:
+Since this only affects arm platforms we only install it on arm systems.
