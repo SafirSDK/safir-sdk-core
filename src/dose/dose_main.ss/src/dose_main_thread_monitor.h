@@ -26,12 +26,12 @@
 #define _dose_main_thread_monitor_h
 
 #include <Safir/Dob/Internal/Atomic.h>
-#include <boost/thread.hpp>
 
 #if defined _MSC_VER
   #pragma warning (push)
-  #pragma warning (disable : 4127)
+  #pragma warning (disable : 4244 4127)
 #endif
+#include <boost/thread.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #if defined _MSC_VER
   #pragma warning (pop)
@@ -43,11 +43,19 @@ namespace Dob
 {
 namespace Internal
 {
+    // Monitors threads by checking that they kick their watchdog at regular intervals.
+    //
+    // This is an active object that contains its own thread. The thread will
+    // be started by the constructor and it will be stopped by the destructor.
     class ThreadMonitor
     {
     public:
 
+        // Constructor starts monitoring thread
         ThreadMonitor();
+
+        // Destructor waits for the monitoring thread to be stopped
+        // before returning.
         ~ThreadMonitor();
 
         void StartWatchdog(const boost::thread::id& threadId,

@@ -46,6 +46,7 @@ namespace Internal
     ThreadMonitor::~ThreadMonitor()
     {
         m_checkerThread.interrupt();
+        m_checkerThread.join();
     }
 
     void ThreadMonitor::StartWatchdog(const boost::thread::id& threadId,
@@ -78,59 +79,68 @@ namespace Internal
 
     void ThreadMonitor::Check()
     {
-        for (;;)
+        try
         {
-            boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(7));
-
-            const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
-
+            for (;;)
             {
-                boost::lock_guard<boost::mutex> lock(m_lock);
+                boost::this_thread::sleep(boost::posix_time::seconds(7));
 
-                for (WatchdogMap::iterator it = m_watchdogs.begin(); it != m_watchdogs.end(); ++it)
+                const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
+
                 {
-                    if (it->second.counter != it->second.lastCheckedCounterVal)
+                    boost::lock_guard<boost::mutex> lock(m_lock);
+
+                    for (WatchdogMap::iterator it = m_watchdogs.begin(); it != m_watchdogs.end(); ++it)
                     {
-                        // The counter has been kicked
-                        it->second.lastTimeAlive = now;
-                        it->second.lastCheckedCounterVal = it->second.counter;
-                        it->second.errorLogIsGenerated = false;
-                    }
-                    else
-                    {
-                        // The counter hasn't been kicked ...
-                        if (now - it->second.lastTimeAlive >
-                            boost::posix_time::seconds(Safir::Dob::NodeParameters::DoseMainThreadWatchdogTimeout()))
+                        if (it->second.counter != it->second.lastCheckedCounterVal)
                         {
-                            // ... and this thread has been hanging for so long time now
-                            // that we actually will kill dose_main itself!!
-                            std::ostringstream ostr;
-                            ostr << it->second.threadName << " (tid " << it->first
-                                 << ") seems to have been hanging for at least "
-                                 << boost::posix_time::to_simple_string(now - it->second.lastTimeAlive) << '\n';
-                            if (Safir::Dob::NodeParameters::TerminateDoseMainWhenUnrecoverableError())
+                            // The counter has been kicked
+                            it->second.lastTimeAlive = now;
+                            it->second.lastCheckedCounterVal = it->second.counter;
+                            it->second.errorLogIsGenerated = false;
+                        }
+                        else
+                        {
+                            // The counter hasn't been kicked ...
+                            if (now - it->second.lastTimeAlive >
+                                boost::posix_time::seconds(Safir::Dob::NodeParameters::DoseMainThreadWatchdogTimeout()))
                             {
-                                ostr << "Parameter TerminateDoseMainWhenUnrecoverableError is set to true"
+                                // ... and this thread has been hanging for so long time now
+                                // that we actually will kill dose_main itself!!
+                                std::ostringstream ostr;
+                                ostr << it->second.threadName << " (tid " << it->first
+                                    << ") seems to have been hanging for at least "
+                                    << boost::posix_time::to_simple_string(now - it->second.lastTimeAlive) << '\n';
+                                if (Safir::Dob::NodeParameters::TerminateDoseMainWhenUnrecoverableError())
+                                {
+                                    ostr << "Parameter TerminateDoseMainWhenUnrecoverableError is set to true"
                                         " which means that dose_main will now be terminated!!" << std::endl;
-                                lllerr << ostr.str().c_str();
-                                Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+                                    lllerr << ostr.str().c_str();
+                                    Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
 
-                                boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(5));
+                                    boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(5));
 
-                                exit(1); // Terminate dose_main!!!!
-                            }
-                            else if (!it->second.errorLogIsGenerated)
-                            {
-                                ostr << "Parameter TerminateDoseMainWhenUnrecoverableError is set to false"
+                                    exit(1); // Terminate dose_main!!!!
+                                }
+                                else if (!it->second.errorLogIsGenerated)
+                                {
+                                    ostr << "Parameter TerminateDoseMainWhenUnrecoverableError is set to false"
                                         " which means that dose_main will not be terminated!!" << std::endl;
-                                lllerr << ostr.str().c_str();
-                                Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
-                                it->second.errorLogIsGenerated = true;
-                            }                           
+                                    lllerr << ostr.str().c_str();
+                                    Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+                                    it->second.errorLogIsGenerated = true;
+                                }                           
+                            }
                         }
                     }
-                }
-            }  // lock released here
+                }  // lock released here
+            }
+        }
+        catch (boost::thread_interrupted&)
+        {
+            // Thread was interrupted, which is expected behaviour. By catching this exception we make
+            // sure that the whole program is not aborted, which could otherwise be the case on some platforms
+            // where an unhandled exception in a thread brings down the whole program.
         }
     }
 }
