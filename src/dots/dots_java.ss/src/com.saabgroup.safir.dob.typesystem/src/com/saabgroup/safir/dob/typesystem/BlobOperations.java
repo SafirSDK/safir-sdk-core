@@ -927,7 +927,7 @@ public class BlobOperations {
 
 
     /**
-     * Set an Binary in a blob.
+     * Set a Binary in a blob.
      *
      * If the container is null then the member will be set to null in the blob.
      * The change flag from the container will be set in the blob.
@@ -964,6 +964,7 @@ public class BlobOperations {
             java.nio.ByteOrder oldOrder = blob.order();
             blob.order(java.nio.ByteOrder.nativeOrder());
             blob.putInt(container.getVal().length);
+            blob.putInt(0);//padding
             blob.order(oldOrder);
             blob.put(container.getVal(),0,container.getVal().length);
             beginningOfUnused = beginningOfUnusedInOut[0];
@@ -3139,7 +3140,7 @@ public class BlobOperations {
                                       index,
                                       container.isChangedHere(),
                                       beginningOfUnusedInOut);
-                                      
+
             int childBeginningOfUnused = beginningOfUnusedInOut[0] - beginningOfUnused;
             childBeginningOfUnused = container.getObjInternal().writeToBlob(childBlob, childBeginningOfUnused);
 
