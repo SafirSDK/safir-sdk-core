@@ -6,6 +6,6 @@ file(STRINGS ${offset_ptr_path} FOUND_ATTRIBUTE_NOINLINE
 if("${FOUND_ATTRIBUTE_NOINLINE}" STREQUAL "")
   message (FATAL_ERROR 
     "${offset_ptr_path} does not appear to be patched.\n"
-    "Please follow the included instructions for patching your Boost headers."
+    "Please follow the included instructions for patching your Boost headers.\n"
     "Then remove CMakeCache.txt from the build/patch_check directory.")
 endif()
