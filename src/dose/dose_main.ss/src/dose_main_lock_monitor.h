@@ -25,7 +25,15 @@
 #ifndef _dose_main_lock_monitor_h
 #define _dose_main_lock_monitor_h
 
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244)
+#endif
 #include <boost/thread.hpp>
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
 #include <Safir/Dob/Internal/InternalDefs.h>
 
 namespace Safir
@@ -34,21 +42,19 @@ namespace Dob
 {
 namespace Internal
 {
+    // Monitors apparently abandoned locks in shared memory.
+    //
+    // This is an active object that contains its own thread. The thread will
+    // be started by the constructor and it will be stopped by the destructor. 
     class LockMonitor
     {
     public:
-
-        // Monitors apparently abandoned locks in shared memory
-
+        // Constructor starts monitoring thread
         LockMonitor();
+
+        // Destructor waits for the monitoring thread to be stopped
+        // before returning.
         ~LockMonitor();
-
-        //void StartWatchdog(const boost::thread::id& threadId,
-        //                   const std::string& threadName);
-
-        //void StopWatchdog(const boost::thread::id& threadId);
-
-        //void KickWatchdog(const boost::thread::id& threadId);
 
     private:
 
