@@ -165,10 +165,14 @@ namespace Internal
         Safir::Utilities::ProcessMonitor m_processMonitor;
 
         // For monitoring abandoned shared memory locks
-        LockMonitor m_lockMonitor;
+        // The lock monitor is an active object so we keep it in the form
+        // of a pointer. This enables us to execute the constructor (which wiil
+        // start the built in thread) any time we want.
+        boost::shared_ptr<LockMonitor> m_lockMonitorPtr;
 
         // For monitoring dose_main:s own threads
-        ThreadMonitor m_threadMonitor;
+        // Se comment above why a pointer is used.
+        boost::shared_ptr<ThreadMonitor> m_threadMonitorPtr;
         boost::thread::id m_mainThreadId;
 
         AtomicUint32 m_HandleEvents_notified;

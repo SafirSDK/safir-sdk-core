@@ -128,8 +128,12 @@ namespace Internal
         AllocateStatic();
 
         // Start monitoring of this thread (that is, the main thread)
+        m_threadMonitorPtr.reset(new ThreadMonitor());  // Create active object. This will start the built-in thread
         m_mainThreadId = boost::this_thread::get_id();
-        m_threadMonitor.StartWatchdog(m_mainThreadId, "dose_main main thread");
+        m_threadMonitorPtr->StartWatchdog(m_mainThreadId, "dose_main main thread");
+
+        // Start monitoring of abandoned locks
+        m_lockMonitorPtr.reset(new LockMonitor());  // Create active object. This will start the built-in thread
 
         // Schedule a timer so that the main thread will kick the watchdog.
         TimerInfoPtr timerInfo(new EmptyTimerInfo(TimerHandler::Instance().RegisterTimeoutHandler(L"dose_main watchdog timer", *this)));
@@ -285,7 +289,7 @@ namespace Internal
 
     void DoseApp::HandleTimeout(const TimerInfoPtr& timer)
     {
-        m_threadMonitor.KickWatchdog(m_mainThreadId);
+        m_threadMonitorPtr->KickWatchdog(m_mainThreadId);
 
         TimerHandler::Instance().Set(Discard,
                                      timer,
@@ -368,7 +372,7 @@ namespace Internal
                            m_pendingRegistrationHandler,
                            m_persistHandler,
                            m_connectionHandler,
-                           m_threadMonitor);
+                           m_threadMonitorPtr);
         
         
         m_processInfoHandler.Init(m_ecom,m_processMonitor);

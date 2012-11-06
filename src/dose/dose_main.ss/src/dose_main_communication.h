@@ -62,9 +62,9 @@ namespace Internal
         bool Send(const DistributionData & msg);
 
         //this will block if there is overflow
-        void SendPoolDistributionData(const DistributionData & msg, ThreadMonitor& threadMonitor, const boost::thread::id& threadId);
+        void SendPoolDistributionData(const DistributionData & msg, boost::shared_ptr<ThreadMonitor> threadMonitorPtr, const boost::thread::id& threadId);
         //this will block if necessary.
-        void PoolDistributionCompleted(ThreadMonitor& threadMonitor, const boost::thread::id& threadId);
+        void PoolDistributionCompleted(boost::shared_ptr<ThreadMonitor> threadMonitorPtr, const boost::thread::id& threadId);
 
         // tell DoseCom that nodeId need a pool distribution. 
         void ForcePoolDistribution(const int nodeId);

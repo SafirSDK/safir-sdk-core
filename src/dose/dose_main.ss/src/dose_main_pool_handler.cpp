@@ -77,7 +77,7 @@ namespace Internal
         m_pendingRegistrationHandler(NULL),
         m_persistHandler(NULL),
         m_connectionHandler(NULL),
-        m_threadMonitor(NULL),
+        m_threadMonitorPtr(),
         m_stateSubscriptionConnections(Safir::Dob::NodeParameters::NumberOfContexts()),
         m_pdThread(),
         m_ioService(ioService)
@@ -133,14 +133,14 @@ namespace Internal
                            PendingRegistrationHandler & pendingHandler,
                            PersistHandler & persistHandler,
                            ConnectionHandler & connectionHandler,
-                           ThreadMonitor & threadMonitor)
+                           boost::shared_ptr<ThreadMonitor> threadMonitorPtr)
     {
         m_blockingHandler = &blockingHandler;
         m_ecom = &ecom;
         m_pendingRegistrationHandler = &pendingHandler;
         m_persistHandler = &persistHandler;
         m_connectionHandler = &connectionHandler;
-        m_threadMonitor = &threadMonitor;
+        m_threadMonitorPtr = threadMonitorPtr;
 
         // dose_main must subscribe for states in all contexts
         for (ContextId context = 0; context < Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
@@ -225,7 +225,7 @@ namespace Internal
             lllout << "Pool distribution thread started" << std::endl;
             
         m_poolDistributionThreadId = boost::this_thread::get_id();
-        m_threadMonitor->StartWatchdog(m_poolDistributionThreadId, "pool distribution thread");
+        m_threadMonitorPtr->StartWatchdog(m_poolDistributionThreadId, "pool distribution thread");
 
             // Wait until persistent data is ready.
             if (!m_persistHandler->IsPersistentDataReady())
@@ -235,7 +235,7 @@ namespace Internal
                 {
                     boost::this_thread::sleep(boost::posix_time::milliseconds(10)); //sleep is interruption point
                 
-                m_threadMonitor->KickWatchdog(m_poolDistributionThreadId);
+                m_threadMonitorPtr->KickWatchdog(m_poolDistributionThreadId);
                 }
                 lllout << "Pool distribution thread thinks DOPE is done." << std::endl;
             }
@@ -250,7 +250,7 @@ namespace Internal
             for ( msgIter = ConnectionMsgsToSend.begin( ) ; msgIter != ConnectionMsgsToSend.end( ) ; msgIter++ )
             {
                 boost::this_thread::interruption_point();
-                m_ecom->SendPoolDistributionData(*msgIter, *m_threadMonitor, m_poolDistributionThreadId);
+                m_ecom->SendPoolDistributionData(*msgIter, m_threadMonitorPtr, m_poolDistributionThreadId);
             }
             ConnectionMsgsToSend.clear();
             lllout << "Setting up connection in each context for pool distribution" << std::endl;
@@ -278,7 +278,7 @@ namespace Internal
 
             lllout << "Pool distribution completed (calling ecom::PoolDistributionCompleted" << std::endl;
 
-            m_ecom->PoolDistributionCompleted(*m_threadMonitor, m_poolDistributionThreadId);
+            m_ecom->PoolDistributionCompleted(m_threadMonitorPtr, m_poolDistributionThreadId);
         }
         catch (const boost::thread_interrupted&)
         {
@@ -313,7 +313,7 @@ namespace Internal
         //No need for m_isNotified flag guard, since this happens very seldom.
         m_ioService.post(boost::bind(&PoolHandler::PDCompletedHandler,this,exceptionInfo));
 
-        m_threadMonitor->StopWatchdog(m_poolDistributionThreadId);
+        m_threadMonitorPtr->StopWatchdog(m_poolDistributionThreadId);
     }
 
     void PoolHandler::HandleRegistrationStateFromDoseCom(const DistributionData& state, const bool isAckedData)
@@ -573,7 +573,7 @@ namespace Internal
                     currentState.GetEntityStateKind() == DistributionData::Ghost ||
                     !currentState.HasBlob())
                 {
-                    m_ecom->SendPoolDistributionData(currentState, *m_threadMonitor, m_poolDistributionThreadId);
+                    m_ecom->SendPoolDistributionData(currentState, m_threadMonitorPtr, m_poolDistributionThreadId);
                 }
             }
             subscription->SetLastRealState(currentState);
@@ -586,7 +586,7 @@ namespace Internal
 
             if (!currentState.IsNoState())
             {
-                m_ecom->SendPoolDistributionData(currentState, *m_threadMonitor, m_poolDistributionThreadId);
+                m_ecom->SendPoolDistributionData(currentState, m_threadMonitorPtr, m_poolDistributionThreadId);
                 subscription->SetLastInjectionState(currentState);
             }
         }
@@ -637,7 +637,7 @@ namespace Internal
                 if (IsLocal(state) ||
                     !state.IsRegistered())
                 {
-                    m_ecom->SendPoolDistributionData(state, *m_threadMonitor, m_poolDistributionThreadId);
+                    m_ecom->SendPoolDistributionData(state, m_threadMonitorPtr, m_poolDistributionThreadId);
                 }
             }
             subscription->SetLastRealState(state); //update this so we only dispatch this state once (see "if" above)
