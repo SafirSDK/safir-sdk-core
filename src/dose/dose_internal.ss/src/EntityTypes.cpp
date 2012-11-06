@@ -35,6 +35,7 @@ namespace Dob
 namespace Internal
 {
     EntityTypes* EntityTypes::m_instance = NULL;
+    AtomicUint32 EntityTypes::m_isInitialized(0);
 
     EntityTypes& EntityTypes::Instance()
     {
@@ -75,6 +76,13 @@ namespace Internal
                 }
             }
         }
+
+        m_isInitialized = 1;
+    }
+
+    bool EntityTypes::IsInitialized()
+    {
+        return m_isInitialized != 0;
     }
 
     bool EntityTypes::Register(const ConnectionPtr&                connection,
