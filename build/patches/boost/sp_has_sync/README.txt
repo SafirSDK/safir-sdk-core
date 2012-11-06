@@ -6,10 +6,11 @@ ARMv6 and up
 
 References:
 https://svn.boost.org/trac/boost/ticket/5331
-TODO
+https://svn.boost.org/trac/boost/ticket/7141
 
 Fixed in:
 TODO
+It is fixed in trunk as of 2012-11-06, but we need to check which release it got into.
 
 Applies to:
-TODO
+All versions up to and including 1.52
