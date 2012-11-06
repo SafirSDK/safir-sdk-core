@@ -13,8 +13,7 @@
 include(ExternalProject)
 
 set(MY_SVN_REPOSITORY http://google-breakpad.googlecode.com/svn/trunk)
-#set(MY_SVN_REVISION 1064)
-set(MY_SVN_REVISION HEAD)
+set(MY_SVN_REVISION 1064)
 
 
 if (MSVC)
