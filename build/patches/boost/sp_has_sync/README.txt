@@ -14,3 +14,6 @@ It is fixed in trunk as of 2012-11-06, but we need to check which release it got
 
 Applies to:
 All versions up to and including 1.52
+
+Comments:
+Since this only affects arm platforms we only install it on arm systems.
