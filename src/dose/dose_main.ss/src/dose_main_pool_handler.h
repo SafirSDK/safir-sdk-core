@@ -129,7 +129,7 @@ namespace Internal
                   PendingRegistrationHandler & pendingHandler,
                   PersistHandler & persistHandler,
                   ConnectionHandler & connectionHandler,
-                  boost::shared_ptr<ThreadMonitor> threadMonitorPtr);
+                  ThreadMonitor & threadMonitor);
 
         void StartPoolDistribution();
 
@@ -190,7 +190,7 @@ namespace Internal
         PendingRegistrationHandler * m_pendingRegistrationHandler;
         PersistHandler * m_persistHandler;
         ConnectionHandler * m_connectionHandler;
-        boost::shared_ptr<ThreadMonitor> m_threadMonitorPtr;
+        ThreadMonitor * m_threadMonitor;
 
         boost::thread::id m_poolDistributionThreadId;
 
