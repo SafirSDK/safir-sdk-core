@@ -3,9 +3,8 @@
 
 Safir SDK Core User's Guide
 ==========================
-:Author: Lars Hagström (main author), Anders Widén, Mikael Wennerberg
-Author
-30 Aug 2010
+:Author: Lars Hagström (main author), Anders Widén and Mikael Wennerberg
+7 Nov 2012
 
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
@@ -2893,16 +2892,85 @@ Under the namespace +Safir.Time+ there are a few classes that provide functional
 
 The time library also has support for loading an external library at runtime which could provide a higher accuracy time. The full Safir SDK provides such a library, which provides a much higher accuracy multi-node synchronised clock than NTP can provide on both GNU/Linux or Windows based systems. For more information on this, contact Saab AB (contact information at http://www.safirsdk.com[]).
 
-
 === Crash Reporting
-Safir SDK Core includes a crash reporting library, google-breakpad, provided by Google (http://code.google.com/p/google-breakpad/[]). The crash reporting library is responsible for monitoring the application for crashes (exceptions) and handling them by generating dumps. The dump files contain information, such as, general system information, call stack for each thread and list of loaded modules. The dump file together with symbolic debugging information can be used to identify where in the software the crash occurred.  
+Safir SDK Core includes a crash reporting library, google-breakpad (http://code.google.com/p/google-breakpad/[]). The crash reporting library can be used to monitor applications for crashes (e.g. access violation or segmentation fault) and handling them by generating dumps. The dumps contain, among other things, general system information, call stack for each thread and the list of loaded modules. A dump file, together with symbolic debugging information, can be used to identify where in the software the crash occurred.  
 
-When building Safir SDK Core with the provided build-script the crash reporting library is built and linked to Safir SDK Core. In addition, under Windows debugging symbol files (PDB- files) are generated during the build in a separate folder ($(SAFIR_RUNTIME)/dump/Symbols). For Linux debug information can be enabled by adding the compiler flag -g.  
+==== Enabling the Crash Reporter
+To use the crash reporter you need to initiate it in your application. The initiation should occur as early as is at all possible.
 
-Once Safir SDK Core is built with google-breakpad each crash will generate a dump file (.dmp) located in $(SAFIR_RUNTIME)/dump/report. In Windows opening the .dmp file with Visual Studio and running a debug with the binary and symbol files will produce a stack trace of the program at the time of the crash. In Linux, a software like StackWalker can be used to analyze the .dmp files.  
+For example, in C++ you would do something like this:
 
-The crash reporter is initiated in dose_dll.dll. If you are designing your own application the crash reporter will be initiated when dose_dll is loaded. The crash reporter will handle an exception by writing a dump file and then resend the exception. This makes it possible for you to have your own exception handler or letting the OS take care of the error.  
+.Initializing crash reporting in C++ using RAII object
+[source,{cpp}]
+----------------------------
+int main(int argc, char* argv[])
+{
+    Safir::SwReports::SwReportStarter swreports;
+    ... run your application ...
+}
+----------------------------
 
+Since the +SwReportStarter+ class is an RAII object this is the same as doing the following
+
+.Initializing and stopping crash reporter in C++ manually
+[source,{cpp}]
+----------------------------
+int main(int argc, char* argv[])
+{
+    Safir::SwReports::SwReport::EnableCrashReporting();
+    try
+    {
+        ... run your application ...
+    }
+    catch (all exceptions)
+    {
+        ... handle your exceptions ...
+    }
+    Safir::SwReports::SwReport::Stop()
+}
+----------------------------
+
+So if you already have calls to +SwReport::Stop()+ in your main function and want the crash reporter you should use the RAII object and remove the +Stop+ call. This way is much easier to get to be exception safe.
+
+.Initializing and stopping crash reporting in C#
+[source,{csharp}]
+----------------------------
+static void Main()
+{
+    Safir.SwReports.SwReport.EnableCrashReporting();
+    try
+    {
+        ... run your application ...
+    }
+    catch (Exception e)
+    {
+        ... handle your exceptions ...
+    }
+    finally
+    {
+        Safir.SwReports.SwReport.Stop();
+    }
+}
+----------------------------
+
+In Ada you need to call +Enable_Crash_Reporting+ at the start of the program, and +Stop+ at the end of the program.
+Java has its own crash handler, so the Crash Reporter should not be used there, so there is no interface to start it.
+
+See <<stop_tracer>> for a bit more info on the Stop function.
+
+You also need to make sure that you build your application with debug information enabled. For example in CMake you could use the RelWithDebInfo, which produces release binaries but with debug information. When using Visual Studio you would then get a .pdb file for every .dll or .exe. Make sure to keep these .pdb files, since they are required when you're analyzing a crash dump.
+
+////
+TODO: write about reporting sdk crashes
+////
+
+==== Analyzing a crash dump
+
+When an application crashes in a way that is caught by the crash reporter a dump file will be placed under +$(SAFIR_RUNTIME)/ data/crash_dumps+ with a rather cryptic name (a lot of digits followed by .dmp). Apart from generating this dump file the crash reporter will attempt to log an error to swre_logger and to standard output that a crash has happened.
+
+If you're using Visual Studio you can just open the .dmp file and if you've got all the debug information and binaries available you will then see the call stack and be able to inspect the state of the application.
+On Linux, you can use gdb to analyze the .dmp files, although you will have to convert the dumps to a core file using the minidump-2-core tool that can be found under src/lluf_crash_reporter.ss/src/google-breakpad/tools/.
+For more information about how to use the dump files please see the Google Breakpad website at http://code.google.com/p/google-breakpad/[].
 
 == Tips and Tricks
 This section discusses some good design strategies for applications

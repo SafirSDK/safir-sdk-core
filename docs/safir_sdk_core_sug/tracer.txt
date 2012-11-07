@@ -47,6 +47,12 @@ debug.println("Testing logging " + myFloat + ", " + myInt);
  - Log output will be sent to the swre_logger application. Remember that it is possible to filter output in the swre_logger. Do a swre_logger -? to find out how to do it.
  - Log output is also sent to the applications standard output (its console).
 
+[[stop_tracer]]
+==== Stopping the tracer
+
+As is described below the tracer will launch a background thread and create its own connection. Since these need to be stopped in a controlled fashion when your program exits you need to call the Stop() routine in the SwReport package when your program is about to exit.
+
+This call to Stop will also stop the crash reporter as described in the section on crash reporting.
 
 ==== Notes
 Some notes on how the Tracer works and is implemented.
