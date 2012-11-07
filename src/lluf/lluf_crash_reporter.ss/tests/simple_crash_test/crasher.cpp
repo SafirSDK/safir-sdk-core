@@ -69,8 +69,8 @@ int main(int argc, char* argv[])
     }
 
     Safir::Utilities::CrashReporter::Stop();
-
-    return 0;
+    std::wcout << "unrecognized argument" << std::endl;
+    return 1;
 }
 
 
