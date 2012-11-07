@@ -41,9 +41,6 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/bind.hpp>
-#include <boost/lambda/algorithm.hpp>
-#include <boost/interprocess/sync/scoped_lock.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/regex.hpp>
 
 #ifdef _MSC_VER
