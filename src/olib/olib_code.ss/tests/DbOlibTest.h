@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#if !defined(OLIB_UNIT_ACCESS_H)
-#define OLIB_UNIT_ACCESS_H
+#ifndef __OLIB_DB_OLIB_TEST_H
+#define __OLIB_DB_OLIB_TEST_H
 
 #include <Safir/Databases/Odbc/Defs.h>
 #include <Safir/Databases/Odbc/Statement.h>
@@ -137,8 +137,8 @@ private:
     bool m_isPostgreSQL;
     bool m_isMimerSQL;
 
-    DbOlibTest(const DbOlibTest &); // Disable copy constructor
-    const DbOlibTest & operator= (const DbOlibTest & d);    // Disable assignment operator
+    DbOlibTest(const DbOlibTest&); // Disable copy constructor
+    const DbOlibTest & operator= (const DbOlibTest&);    // Disable assignment operator
 
     static std::wstring NCstrBuffer;
 
@@ -183,4 +183,4 @@ protected:
 
 };
 
-#endif // OLIB_UNIT_ACCESS_H
+#endif

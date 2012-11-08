@@ -1,4 +1,5 @@
- 
+CREATE USER olibuser IDENTIFIED BY 'olibuser';
+GRANT ALL ON dope_db.* TO olibuser;
 
 CREATE TABLE tblolibtest (
   ID int(11) NOT NULL,
@@ -35,4 +36,3 @@ CREATE TABLE tblperftest (
   InstanceNo int(11) DEFAULT NULL,
   data varchar(2100) DEFAULT NULL
 );
- 

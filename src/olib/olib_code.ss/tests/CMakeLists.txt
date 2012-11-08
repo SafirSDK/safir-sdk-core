@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 project(OlibTester CXX)
 
-enable_testing()
 
 INCLUDE_DIRECTORIES(.)
 
@@ -30,7 +29,24 @@ add_executable(OlibTester ${sources} ${headers})
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(OlibTester olib swre_interface_cpp dots_generated-Safir-cpp dots_cpp ${ODBC_LIBRARIES} )
 endif()
-set(CTEST_OUTPUT_ON_FAILURE ON)
+
+enable_testing()
+
+if("$ENV{Driver}" STREQUAL "")
+  set(ENV{Driver} mysql)
+  message("'Driver' environment variable is not set, using '$ENV{Driver}'")
+endif()
+
+if("$ENV{DATABASE_NAME}" STREQUAL "")
+  set(ENV{DATABASE_NAME} SafirDb)
+  message("'DATABASE_NAME' environment variable is not set, using '$ENV{DATABASE_NAME}'")
+endif()
+
+if("$ENV{DATABASE_SERVER}" STREQUAL "")
+  set(ENV{DATABASE_SERVER} localhost)
+  message("'DATABASE_SERVER' environment variable is not set, using '$ENV{DATABASE_SERVER}'")
+endif()
+
 ADD_TEST(OlibTest_Connect OlibTester -connect)
 ADD_TEST(OlibTest_Disconnect OlibTester -disconnect)
 ADD_TEST(OlibTest_AllocCloseStatement OlibTester -allocclosestm)
