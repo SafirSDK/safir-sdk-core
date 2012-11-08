@@ -38,7 +38,7 @@ if("$ENV{Driver}" STREQUAL "")
 endif()
 
 if("$ENV{DATABASE_NAME}" STREQUAL "")
-  set(ENV{DATABASE_NAME} dope_db)
+  set(ENV{DATABASE_NAME} SafirDb)
   message("'DATABASE_NAME' environment variable is not set, using '$ENV{DATABASE_NAME}'")
 endif()
 
