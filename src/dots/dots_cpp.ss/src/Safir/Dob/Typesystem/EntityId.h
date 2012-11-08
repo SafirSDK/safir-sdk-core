@@ -169,7 +169,7 @@ namespace Typesystem
 
 #ifdef _MSC_VER
 #pragma pack (push)
-#pragma pack (1)
+#pragma pack (4)
 #endif
 
         Dob::Typesystem::TypeId m_typeId;
