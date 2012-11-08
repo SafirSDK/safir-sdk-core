@@ -454,6 +454,7 @@ namespace Internal
         std::ostringstream ostr;
         ostr << "An application has crashed! A dump was generated to:\n" 
              << dumpPath;
+        std::wcout << ostr.str().c_str() << std::endl;
         Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
 
         // Stop the thread nicely
