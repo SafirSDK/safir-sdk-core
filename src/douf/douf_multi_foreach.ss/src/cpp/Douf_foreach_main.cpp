@@ -28,6 +28,7 @@ int main(int /*argc*/, char* /*argv*/[])
 {
     Safir::SwReports::SwReportStarter starter;
 
+    std::wcout<<L"Start application" <<std::endl;
     // Start the application.
     Safir::Utilities::ForEach::ForEachApp app;
     app.Run();

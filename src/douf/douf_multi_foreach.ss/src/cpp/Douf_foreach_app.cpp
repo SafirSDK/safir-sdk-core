@@ -52,6 +52,7 @@ namespace ForEach
 
     ForEachApp::ForEachApp()
     {
+        std::wcout<<L"Start ForEachApp" <<std::endl;
         const Safir::Dob::Typesystem::Int32 numContexts = Safir::Dob::NodeParameters::NumberOfContexts();
         for (int context = 0; context < numContexts; ++context)
         {
@@ -61,6 +62,7 @@ namespace ForEach
 
     int ForEachApp::Run()
     {
+        std::wcout<<L"In Run" <<std::endl;
         // Open a connection in each context
         for (unsigned int context = 0; context < m_context.size(); ++context)
         {
@@ -87,7 +89,7 @@ namespace ForEach
             }
             // Send something to the tracer to open the connection.
             m_context[context]->m_debug << "Starting ForEach in context " << context << std::endl;
-
+            std::wcout<<"Starting ForEach in context " << context <<std::endl;
             // Call the init method on startup.
             // Register as a service provider.
             m_context[context]->m_service.Init(connectionName,

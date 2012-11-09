@@ -62,6 +62,7 @@ namespace Safir
             //m_debug.Enable(true);
             // Send something to the tracer to open the connection.
             m_debug << " " << std::endl;
+            std::wcout<<L"Services" <<std::endl;
         }
 
         Services::~Services() 
@@ -76,6 +77,7 @@ namespace Safir
                             const std::wstring& connectionNameInstancePart)
         {
             m_debug << "**** Initializing Services ****"<<std::endl;
+            std::wcout<<L"**** Initializing Services ****" <<std::endl;
             m_connection.Attach(connectionNameCommonPart, connectionNameInstancePart);
             Safir::Dob::ConnectionAspectMisc connnectionAspectMisc(m_connection);
 
@@ -96,12 +98,14 @@ namespace Safir
             connnectionAspectMisc.SimulateOverflows(m_backdoorOverflow, m_backdoorOverflow);
 
             m_debug << "Force overflow is: " << m_backdoorOverflow << std::endl;
+            std::wcout<<L"Force overflow is: " << m_backdoorOverflow <<std::endl;
         }
 
          void Services::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    /*typeId*/,
                                     const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
          {
             m_debug << "**** Services::OnRevokedRegistration() ****"<<std::endl;
+            std::wcout<<L"**** Services::OnRevokedRegistration() ****"<<std::endl;
          }
      
          void Services::OnServiceRequest(
@@ -109,6 +113,7 @@ namespace Safir
              Safir::Dob::ResponseSenderPtr replySender)
          {
              m_debug << "**** Services::OnServiceRequest() ****" << std::endl;
+             std::wcout<<L"**** Services::OnServiceRequest() ****" <<std::endl;
 
              /*
              boost::posix_time::ptime pt = Safir::Time::TimeProvider::ToLocalTime(Safir::Time::TimeProvider::GetUtcTime());
@@ -145,6 +150,7 @@ namespace Safir
                      boost::static_pointer_cast<Safir::Utilities::ForEach::DeleteRequest>(service);
 
                  m_debug << "Delete request" << std::endl;
+                 std::wcout<<L"Delete request"  <<std::endl;
 
                  requestSpecificData->RequestType() = Delete;
 
@@ -156,6 +162,7 @@ namespace Safir
                      replySender->Send(errorList);
                      errorMessageSent = true;
                      m_debug << "ResponseType is NULL - sending error response" << std::endl;
+                     std::wcout<<L"ResponseType is NULL - sending error response"   <<std::endl;
                      Safir::SwReports::SendProgramInfoReport(L"ResponseType is NULL - sending error response");
                  }
                  else
@@ -179,12 +186,14 @@ namespace Safir
                              if (!errorMessageSent)
                              {
                                  m_debug << "Inserting into map in for loop - " << requestSpecificData << std::endl;
+                                 std::wcout<<L"Inserting into map in for loop - " << requestSpecificData   <<std::endl;
                                  /* insert into map */
                                  m_requestData[replySender] = requestSpecificData;
                              }
                              else
                              {
                                  m_debug << "Error message sent. NOT saving into map" << std::endl;
+                                 std::wcout<<L"Error message sent. NOT saving into map"<<std::endl;
                              }
                          }
 
@@ -203,6 +212,7 @@ namespace Safir
                      if (deleteService->ResponseType().GetVal() == Safir::Utilities::ForEach::ResponseType::Immediate)
                      {
                          m_debug << "ReponseType Immediate" << std::endl;
+                         std::wcout<<L"ReponseType Immediate"<<std::endl;
                          Safir::Dob::ResponsePtr response = Safir::Dob::SuccessResponse::Create();
                          replySender -> Send(response);      
                          requestSpecificData->ResponseType() = Safir::Utilities::ForEach::ResponseType::Immediate;
@@ -210,12 +220,14 @@ namespace Safir
                      else if (deleteService->ResponseType().GetVal() == Safir::Utilities::ForEach::ResponseType::Brief)
                      {
                          m_debug << "ReponseType Brief" << std::endl;
+                         std::wcout<<L"ReponseType Brief"<<std::endl;
                          Safir::Dob::ResponsePtr response = Safir::Utilities::ForEach::BriefResponse::Create();
                          requestSpecificData->ResponseType() = Safir::Utilities::ForEach::ResponseType::Brief;
                      }
                      else /* Full */
                      {
                          m_debug << "ReponseType Full" << std::endl;
+                         std::wcout<<L"ReponseType Full"<<std::endl;
                          Safir::Dob::ResponsePtr response = Safir::Utilities::ForEach::FullResponse::Create();
                          requestSpecificData->ResponseType() = Safir::Utilities::ForEach::ResponseType::Full;
                      }
@@ -237,6 +249,7 @@ namespace Safir
 
 
                  m_debug << "DeleteAll request" << std::endl;
+                 std::wcout<<L"DeleteAll request" <<std::endl;
 
                  requestSpecificData->RequestType() = Delete;
 
@@ -248,6 +261,7 @@ namespace Safir
                      replySender->Send(errorList);
                      errorMessageSent = true;
                      m_debug << "ResponseType is NULL - sending error response" << std::endl;
+                     std::wcout<<L"ResponseType is NULL - sending error response" <<std::endl;
                      Safir::SwReports::SendProgramInfoReport(L"ResponseType is NULL - sending error response");
                  }
                  else if (deleteAllService->TypeId().IsNull())
@@ -269,6 +283,7 @@ namespace Safir
                          includeSubClasses = deleteAllService->IncludeSubClasses().GetVal();
                      }
                      m_debug << "Include subclasses is set to " << includeSubClasses << std::endl;
+                     std::wcout<<L"Include subclasses is set to " << includeSubClasses  <<std::endl;
 
                      Safir::Dob::Typesystem::HandlerId handlerId;
                      bool handlerIdSet = false;
@@ -293,6 +308,8 @@ namespace Safir
                          requestSpecificData->NumberOfObjects()++;
                          Safir::Dob::Typesystem::EntityId entityId = it->GetEntityId();
                          m_debug << "Added entityId to transaction list: " << it->GetEntityId().ToString() << std::endl;
+                         std::wcout<<L"Added entityId to transaction list: " << it->GetEntityId().ToString()   <<std::endl;
+
                          Safir::Utilities::ForEach::TransactionTableEntry entry;
                          entry.entityId = entityId;
                          /* unknown requestId so far, indicates that no request has been done yet */
@@ -303,6 +320,7 @@ namespace Safir
                      if (!errorMessageSent)
                      {
                          m_debug << "Inserting into map in for loop - " << requestSpecificData << std::endl;
+                         std::wcout<<L"Inserting into map in for loop - " << requestSpecificData <<std::endl;
                          /* insert into map */
                          m_requestData[replySender] = requestSpecificData;
                      }
@@ -332,12 +350,14 @@ namespace Safir
                      else if (deleteAllService->ResponseType().GetVal() == Safir::Utilities::ForEach::ResponseType::Brief)
                      {
                          m_debug << "ReponseType Brief" << std::endl;
+                         std::wcout<<L"ReponseType Brief" <<std::endl;
                          Safir::Dob::ResponsePtr response = Safir::Utilities::ForEach::BriefResponse::Create();
                          requestSpecificData->ResponseType() = Safir::Utilities::ForEach::ResponseType::Brief;
                      }
                      else /* Full */
                      {
                          m_debug << "ReponseType Full" << std::endl;
+                         std::wcout<<L"ReponseType Full" <<std::endl;
                          Safir::Dob::ResponsePtr response = Safir::Utilities::ForEach::FullResponse::Create();
                          requestSpecificData->ResponseType() = Safir::Utilities::ForEach::ResponseType::Full;
                      }
@@ -360,6 +380,7 @@ namespace Safir
 
 
                  m_debug << "Update request";
+                 std::wcout<<L"Update request" <<std::endl;
 
                  requestSpecificData->RequestType() = Update;
 
@@ -371,10 +392,12 @@ namespace Safir
                      replySender->Send(errorList);
                      errorMessageSent = true;
                      m_debug << "ResponseType is NULL - sending error response" << std::endl;
+                     std::wcout<<L"ResponseType is NULL - sending error response" <<std::endl;
                  }
                  else if (updateService->TemplateEntityRequest().IsNull())
                  {
                      m_debug << "TemplateEntityRequest is NULL - handling as an error!" << std::endl;
+                     std::wcout<<L"TemplateEntityRequest is NULL - handling as an error!" <<std::endl;
                      Safir::SwReports::SendProgramInfoReport(L"TemplateEntityRequest is NULL");
 
                      error -> Code().SetVal(Safir::Dob::ResponseGeneralErrorCodes::SafirNullMember());
@@ -404,12 +427,14 @@ namespace Safir
                              if (!errorMessageSent)
                              {
                                  m_debug << "Inserting into map in for loop - " << requestSpecificData << std::endl;
+                                 std::wcout<<L"Inserting into map in for loop - " << requestSpecificData <<std::endl;
                                  /* insert into map */
                                  m_requestData[replySender] = requestSpecificData;
                              }
                              else
                              {
                                  m_debug << "Error message sent - NOT saving into map!" << std::endl;
+                                 std::wcout<<L"Error message sent - NOT saving into map!" <<std::endl;
                              }
                          }
                      }
@@ -424,6 +449,7 @@ namespace Safir
                      if (updateService->ResponseType().GetVal() == Safir::Utilities::ForEach::ResponseType::Immediate)
                      {
                          m_debug << "ReponseType Immediate" << std::endl;
+                         std::wcout<<L"ReponseType Immediate" <<std::endl;
                          Safir::Dob::ResponsePtr response = Safir::Dob::SuccessResponse::Create();
                          // Send response.
                          replySender -> Send(response);      
@@ -432,11 +458,13 @@ namespace Safir
                      else if (updateService->ResponseType().GetVal() == Safir::Utilities::ForEach::ResponseType::Brief)
                      {
                          m_debug << "ReponseType Brief" << std::endl;
+                         std::wcout<<L"ReponseType Brief" <<std::endl;
                          requestSpecificData->ResponseType() = Safir::Utilities::ForEach::ResponseType::Brief;
                      }
                      else /* Full */
                      {
                          m_debug << "ReponseType Full" << std::endl;
+                         std::wcout<<L"ReponseType Full" <<std::endl;
                          requestSpecificData->ResponseType() = Safir::Utilities::ForEach::ResponseType::Full;
                      }
 
@@ -447,6 +475,7 @@ namespace Safir
              else /* no service we know about */
              {
                  m_debug << "before throw" << std::endl;
+                 std::wcout<<L"no service! before throw" <<std::endl;
                  /* what to do??? */
                  throw;
              }
@@ -457,12 +486,14 @@ namespace Safir
              if (!errorMessageSent)
              {
                  m_debug << "Inserting into map - " << requestSpecificData << std::endl;
+                 std::wcout<<L"Inserting into map - " << requestSpecificData <<std::endl;
                  /* insert into map */
                  m_requestData[replySender] = requestSpecificData;
              }
              else
              {
                  m_debug << "Error message sent - NOT saving into map!" << std::endl;
+                 std::wcout<<L"Error message sent - NOT saving into map!" <<std::endl;
              }
          }
 
@@ -475,47 +506,57 @@ namespace Safir
          void Services::SendEmptyResponse(Safir::Utilities::ForEach::RequestSpecificDataPtr requestSpecificData,
              Safir::Dob::ResponseSenderPtr replySender)
          {
+             std::wcout<<L"SendEmptyResponse" <<std::endl;
              if (requestSpecificData->ResponseType() == Safir::Utilities::ForEach::ResponseType::Immediate)
              {
                  m_debug << "ReponseType Immediate" << std::endl;
+                 std::wcout<<L"ReponseType Immediate"<<std::endl;
                  Safir::Dob::ResponsePtr response = Safir::Dob::SuccessResponse::Create();
                  replySender -> Send(response);      
                  m_debug << "Sent success response back" << std::endl;
+                 std::wcout<<L"Sent success response back"<<std::endl;
              }
              else if (requestSpecificData->ResponseType() == Safir::Utilities::ForEach::ResponseType::Brief)
              {
                  m_debug << "ReponseType Brief" << std::endl;
+                 std::wcout<<L"ReponseType Brief"<<std::endl;
                  Safir::Utilities::ForEach::BriefResponsePtr response = Safir::Utilities::ForEach::BriefResponse::Create();
                  response->NumberOfErrorResponses().SetVal(0);
                  response->NumberOfResponses().SetVal(0);
                  response->NumberOfSuccessResponses().SetVal(0);
                  replySender->Send(response);
                  m_debug << "Sent Brief response back" << std::endl;
+                 std::wcout<<L"Sent Brief response back"<<std::endl;
              }
              else /* Full */
              {
                  m_debug << "ReponseType Full" << std::endl;
+                 std::wcout<<L"ReponseType Full"<<std::endl;
                  Safir::Utilities::ForEach::FullResponsePtr response = Safir::Utilities::ForEach::FullResponse::Create();
                  response->NumberOfErrorResponses().SetVal(0);
                  response->NumberOfResponses().SetVal(0);
                  response->NumberOfSuccessResponses().SetVal(0);
                  replySender->Send(response);
                  m_debug << "Sent Full response back" << std::endl;
+                 std::wcout<<L"Sent Full response back"<<std::endl;
              }
          }
 
          void Services::ScheduleNextRequest(Safir::Utilities::ForEach::RequestSpecificDataPtr requestSpecificData, bool addToQueue)
          {
              m_debug << "ScheduleNextRequest()" << std::endl;
+             std::wcout<<L"ScheduleNextRequest()"<<std::endl;
              if (addToQueue)
              {
                  // make sure this request will be handled
                  m_sendQueue.push_back(requestSpecificData);
                  m_debug << "added " << requestSpecificData << " to sendQueue" << std::endl;
+                 std::wcout<<L"added " << requestSpecificData << L" to sendQueue" <<std::endl;
              }
              else
              {
                  m_debug << "without adding anything to the queue" << std::endl;
+                 std::wcout<<L"without adding anything to the queue"<<std::endl;
              }
              
              //make us send the requests once we've completed dispatching.
@@ -537,12 +578,14 @@ namespace Safir
             bool requestToSend = false;
 
             m_debug << "SendNextRequest" << std::endl;
+            std::wcout<<L"SendNextRequest"<<std::endl;
 
             for (TransactionTable::iterator it = requestSpecificData->Transactions().begin();
                 it != requestSpecificData->Transactions().end(); 
                 ++it)
             {
                 m_debug << "looping element ";
+                std::wcout<<L"looping element ";
                 Safir::Utilities::ForEach::TransactionTableEntry &entry = *it;
                 if (entry.requestId == -1)
                 {
@@ -554,10 +597,13 @@ namespace Safir
                             reqId = m_connection.DeleteRequest(entry.entityId, this);
                             m_debug << "DeleteRequest on type " << Safir::Dob::Typesystem::Operations::GetName(entry.entityId.GetTypeId()) 
                                 << " instanceId: " << entry.entityId.GetInstanceId().ToString() << std::endl;
+                            std::wcout<<L"DeleteRequest on type " << Safir::Dob::Typesystem::Operations::GetName(entry.entityId.GetTypeId())
+                                     << L" instanceId: " << entry.entityId.GetInstanceId().ToString()<<std::endl;
                         }
                         else /* UPDATE_REQUEST */
                         {
                             m_debug << "update request" << std::endl;
+                            std::wcout<<L"update request"<<std::endl;
 
                             Safir::Dob::EntityPtr templateObject;
 
@@ -565,23 +611,28 @@ namespace Safir
                             {
                                 m_debug << "Entry object is of type: " << Safir::Dob::Typesystem::Operations::GetName(entry.entityId.GetTypeId()) << std::endl;
                                 m_debug << "TER is of type: " << Safir::Dob::Typesystem::Operations::GetName(requestSpecificData->TemplateEntityRequest()->GetTypeId()) << std::endl;
+                                std::wcout<<L"Entry object is of type: " << Safir::Dob::Typesystem::Operations::GetName(entry.entityId.GetTypeId()) <<std::endl;
+                                std::wcout<<L"TER is of type: " << Safir::Dob::Typesystem::Operations::GetName(requestSpecificData->TemplateEntityRequest()->GetTypeId())<<std::endl;
 
                                 if ((Safir::Dob::Typesystem::Operations::IsOfType(requestSpecificData->TemplateEntityRequest()->GetTypeId(),
                                     entry.entityId.GetTypeId()) && (Safir::Dob::Typesystem::Operations::IsOfType(entry.entityId.GetTypeId(), 
                                     requestSpecificData->TemplateEntityRequest()->GetTypeId()))))
                                 {
                                     m_debug << "TER and entry object is of the exactly same type" << std::endl;
+                                    std::wcout<<L"TER and entry object is of the exactly same type"<<std::endl;
 
                                     requestToSend = true;
                                     templateObject = requestSpecificData->TemplateEntityRequest();
                                     //templateObject->SetInstanceNumber(entry.entityId.GetInstance());
                                     reqId = m_connection.UpdateRequest(templateObject, entry.entityId.GetInstanceId(), this);
                                     m_debug << "UpdateRequest on type " << Safir::Dob::Typesystem::Operations::GetName(templateObject->GetTypeId()) << std::endl;
+                                    std::wcout<<L"UpdateRequest on type " << Safir::Dob::Typesystem::Operations::GetName(templateObject->GetTypeId())<<std::endl;
 
                                 }
                                 else
                                 {
                                     m_debug << "No relation between objects" << std::endl;
+                                    std::wcout<<L"No relation between objects"<<std::endl;
                                 }  
 
                                 }
@@ -592,16 +643,19 @@ namespace Safir
 
                             }
                             m_debug << "Request id: " << reqId << std::endl;
+                            std::wcout<<L"Request id: " << reqId<<std::endl;
 
                             /* Copy the request id */
                             entry.requestId = reqId;
                             requestSpecificData->SetCurrentTransaction(&entry);
                             m_debug << "Set CurrentTransaction" << std::endl;
+                            std::wcout<<L"Set CurrentTransaction"<<std::endl;
                             // requestSpecificData->CurrentTransaction() = (TransactionTableEntry *) &entry;
                         }
                         catch (const Safir::Dob::OverflowException &)
                         {
                             m_debug << "We got overflow... Add requestSpecificData to sendQueue for later retry" << std::endl;
+                            std::wcout<<L"We got overflow... Add requestSpecificData to sendQueue for later retry"<<std::endl;
                             m_sendQueue.push_back(requestSpecificData);
                         }
                         /*
@@ -621,19 +675,23 @@ namespace Safir
                         catch (const Safir::Dob::NotFoundException &e)
                         {
                             m_debug << "Couldn't find object in DOB! - " << e.GetExceptionInfo() << std::endl;
+                            std::wcout<<L"Couldn't find object in DOB! - " << e.GetExceptionInfo() <<std::endl;
                         }
                         m_debug << "Only send out one request. Breaking out!" << std::endl;
+                        std::wcout<<L"Only send out one request. Breaking out!" <<std::endl;
                         break;
                     }
                 }
 
                 m_debug << "DEBUG - transactions" << std::endl;
+                std::wcout<<L"DEBUG - transactions" <<std::endl;
                 for (TransactionTable::iterator it = requestSpecificData->Transactions().begin();
                     it != requestSpecificData->Transactions().end(); 
                     ++it)
                 {
                     Safir::Utilities::ForEach::TransactionTableEntry entry = (*it);
                     m_debug << "entry.requestId: " << entry.requestId << std::endl;
+                    std::wcout<<L"entry.requestId: " << entry.requestId <<std::endl;
                 }
 
                 return requestToSend;
@@ -645,6 +703,7 @@ namespace Safir
             void Services::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
             {
                 m_debug << " in OnResponse() - requestId: " << responseProxy.GetRequestId() << std::endl;
+                std::wcout<<L" in OnResponse() - requestId: " << responseProxy.GetRequestId() <<std::endl;
 /*
                 boost::posix_time::ptime pt = Safir::Time::TimeProvider::ToLocalTime(Safir::Time::TimeProvider::GetUtcTime());
                 m_debug << boost::posix_time::to_simple_wstring(pt) << std::endl;
@@ -658,15 +717,19 @@ namespace Safir
                     if (data->CurrentTransaction() == 0)
                     {
                         m_debug << "CurrentTransaction is NULL" << std::endl;
+                        std::wcout<<L"CurrentTransaction is NULL" <<std::endl;
                     }
                     else
                     {
                         Safir::Utilities::ForEach::TransactionTableEntry &entry = (*data->CurrentTransaction());
                         m_debug << "CurrentTransaction is set. requestId is " << entry.requestId << std::endl;
+                        std::wcout<<L"CurrentTransaction is set. requestId is " << entry.requestId  <<std::endl;
+
                         if (entry.requestId == responseProxy.GetRequestId())
                         {
                             foundRequest = true;
                             m_debug << entry.entityId << " with requestId " << entry.requestId << std::endl;
+                            std::wcout<<entry.entityId << L" with requestId " << entry.requestId  <<std::endl;
                             /* save response for later use */
                             entry.responsePtr = responseProxy.GetResponse();
 
@@ -674,16 +737,20 @@ namespace Safir
                             data->NumberOfResponses()++;
                             m_debug << "Got " << data->NumberOfResponses() << " number of responses so far." << 
                                 " Expecting " << data->NumberOfObjects() << std::endl;
+                            std::wcout<<L"Got " << data->NumberOfResponses() << L" number of responses so far." <<
+                                        L" Expecting " << data->NumberOfObjects()<<std::endl;
 
                             Safir::Dob::SuccessResponsePtr tmp = boost::dynamic_pointer_cast<Safir::Dob::SuccessResponse>(responseProxy.GetResponse());
                             if (tmp != NULL)
                             {
                                 m_debug << "classified as a successresponse" << std::endl;
+                                std::wcout<<L"classified as a successresponse"<<std::endl;
                                 data->NumberOfSuccessResponses()++;
                             }
                             else
                             {
                                 m_debug << "classified as an errorresponse" << std::endl;
+                                std::wcout<<L"classified as an errorresponse"<<std::endl;
                                 data->NumberOfErrorResponses()++;
                             }
                         }
@@ -692,6 +759,7 @@ namespace Safir
                     if (foundRequest && (data->NumberOfResponses() == data->NumberOfObjects()))
                     {
                         m_debug << "We got all " << data->NumberOfResponses() << " and are now ready to send a response back!" << std::endl;
+                        std::wcout<<L"We got all " << data->NumberOfResponses() << L" and are now ready to send a response back!"<<std::endl;
 /*
                         boost::posix_time::ptime pt = Safir::Time::TimeProvider::ToLocalTime(Safir::Time::TimeProvider::GetUtcTime());
                         m_debug << boost::posix_time::to_simple_wstring(pt) << std::endl;
@@ -709,6 +777,7 @@ namespace Safir
                             response->NumberOfSuccessResponses().SetVal(data->NumberOfSuccessResponses());
                             replySender->Send(response);
                             m_debug << "Sent Brief response back" << std::endl;
+                            std::wcout<<L"Sent Brief response back"<<std::endl;
                         }
                         else if (data->ResponseType() == Safir::Utilities::ForEach::ResponseType::Full)
                         {
@@ -726,6 +795,8 @@ namespace Safir
                                 Safir::Utilities::ForEach::TransactionTableEntry entry = (*it);
                                 m_debug << "entityId: " << entry.entityId << " requestId: " << entry.requestId <<
                                     " responsePtr: " << entry.responsePtr << std::endl;
+                               std::wcout<< L"entityId: " << entry.entityId << L" requestId: " << entry.requestId <<
+                                    L" responsePtr: " << entry.responsePtr << std::endl;
 
                                 /* because of ResponseContainerArray we can't use insert/delete */
                                 response->Response()[i++].SetPtr(entry.responsePtr);
@@ -733,12 +804,15 @@ namespace Safir
 
                             replySender->Send(response);
                             m_debug << "Sent Full response back" << std::endl;
+                            std::wcout << L"Sent Full response back" << std::endl;
 
                         }
                         else if (data->ResponseType() == Safir::Utilities::ForEach::ResponseType::Immediate)
                         {
                             m_debug << "We have requested an Immediate response type... " 
                                 << "So just ignoring the response and not sending anything back (already done!)" << std::endl;
+                            std::wcout << L"We have requested an Immediate response type... "
+                                << L"So just ignoring the response and not sending anything back (already done!)" << std::endl;
                         }
                         else /* e.g. NULL, should not happen */
                         {
@@ -752,14 +826,17 @@ namespace Safir
                             replySender->Send(errorList);
 
                             m_debug << "ResponseType is NULL - sending error response. Shouldn't happen!" << std::endl;
+                            std::wcout << L"ResponseType is NULL - sending error response. Shouldn't happen!" << std::endl;
                         }
 
                         /* in order to process a new service request we need to cleanup */
                         m_debug << "Cleaning up" << std::endl;
+                        std::wcout << L"Cleaning up" << std::endl;
                         m_requestData.erase(iter->first);
 
                         // we are finished, no more work to do.
                         m_debug << "Sending next request (if any in queue)......." << std::endl;
+                        std::wcout << L"Sending next request (if any in queue)......." << std::endl;
                         // schedule, but don't add anything to the queue!!!!
                         ScheduleNextRequest(data, false);
                         break;
@@ -772,13 +849,16 @@ namespace Safir
                     if (foundRequest) /* if we already found a request and still in for loop, we probably have outstanding requests to send out */
                     {
                         m_debug << " Sending next request......." << std::endl;
+                        std::wcout << L" Sending next request......." << std::endl;
                         ScheduleNextRequest(data, true);
                         m_debug << "Breaking out.. Only send one request. Must wait for response." << std::endl;
+                        std::wcout << L"Breaking out.. Only send one request. Must wait for response." << std::endl;
                         break;
                     }
                     else
                     {
                         m_debug << "Haven't found request. Looking further..." << std::endl;
+                        std::wcout << L"Haven't found request. Looking further..."  << std::endl;
                     }
                 }
             }
@@ -789,6 +869,8 @@ namespace Safir
                 m_debug << "in OnNotRequestOverflow()" << std::endl;
                 m_debug << "overflow is set to: " << m_backdoorOverflow << std::endl;
 
+                std::wcout << L"in OnNotRequestOverflow()" << std::endl;
+                std::wcout << L"overflow is set to: " << m_backdoorOverflow << std::endl;
                 /**************************************************
                 WRONG - must at least loop!!!
                 ***************************************************/
@@ -813,6 +895,9 @@ namespace Safir
 
                 m_debug << "Queue size: " << m_sendQueue.size() << std::endl;       
 
+                std::wcout << L"**** Received timeout event ****" << std::endl;
+
+                std::wcout << L"Queue size: " << m_sendQueue.size() << std::endl;
                 /* debug */
                 for (int i = 0; i < (signed) m_sendQueue.size(); i++)
                 {
@@ -820,6 +905,8 @@ namespace Safir
                     int no = requestSpecificData->ResponseType(); 
                     m_debug << "sendQueue element " << i << " has address " << m_sendQueue[i] << std::endl;
                     m_debug << "sendQueue contains a request of response type " << no << std::endl; 
+                    std::wcout << L"sendQueue element " << i << L" has address " << m_sendQueue[i] << std::endl;
+                    std::wcout << L"sendQueue contains a request of response type " << no << std::endl;
                 }
 
                 if (!m_sendQueue.empty())
@@ -830,11 +917,15 @@ namespace Safir
 
                     m_debug << "sendQueue not empty - processing a request containing " << requestSpecificData->NumberOfObjects() 
                         << " no of objects" << std::endl;
+                    std::wcout << L"sendQueue not empty - processing a request containing " << requestSpecificData->NumberOfObjects()
+                        << L" no of objects" << std::endl;
+
                     SendNextRequest(requestSpecificData);
                 }
                 else
                 {
                     m_debug << "sendQueue EMPTY!" << std::endl;
+                    std::wcout << L"sendQueue EMPTY!" << std::endl;
                     /* not needed. Will fail if another ongoing service request will end, and request a ScheduleNextRequest(asd, false)
                     and add a timer without something in sendQueue. This branch will be selected and we will have more than one outstanding
                     request */
@@ -863,6 +954,7 @@ namespace Safir
 
                 }
                 m_debug << "Force overflow is: " << m_backdoorOverflow << std::endl;
+                std::wcout << L"Force overflow is: " << m_backdoorOverflow << std::endl;
 //                m_connection.SetAlwaysOverflowFlag(m_backdoorOverflow);
             }
 
