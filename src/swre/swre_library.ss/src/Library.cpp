@@ -113,14 +113,16 @@ namespace Internal
         }
     }
 
-    void Library::SignalFunc(const int /*signal*/)
+    void Library::SignalFunc(const int signal)
     {
+        std::wcerr << "swre_library caught a signal! signal = " << signal << ". Will try to clean up and call exit" << std::endl;
+
         // Stop the thread nicely
         Instance().Stop();
         // Then try to exit and cleanup
         Instance().AtExitFunc();
         // Return that something was wrong
-        _exit(1);
+        _exit(200);
     }
 
     void Library::HandleExit()
@@ -454,7 +456,7 @@ namespace Internal
         std::ostringstream ostr;
         ostr << "An application has crashed! A dump was generated to:\n" 
              << dumpPath;
-        std::wcout << ostr.str().c_str() << std::endl;
+        std::wcerr << ostr.str().c_str() << std::endl;
         Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
 
         // Stop the thread nicely
