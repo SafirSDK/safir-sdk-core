@@ -159,7 +159,7 @@ namespace Internal
         }
 
         // Got exception. Connection is broken. Exit process.
-        exit(1);
+        exit(100);
     }
 }
 }
