@@ -1143,15 +1143,16 @@ public class @_CLASS_@
 @@END_IF@@
 @@END_IF@@
 @@END_TABLE@@
-        /* TODO write this check, work out how to do pointer arithmetic in java...
+
         //Check that calculateBlobSize and writeToBlob agree on the sizes...
         if(ClassTypeId == com.saabgroup.safir.dob.typesystem.BlobOperations.getTypeId(blob) &&
-           beginningOfUnused != blob + com.saabgroup.safir.dob.typesystem.BlobOperations.getSize(blob))
+           beginningOfUnused != com.saabgroup.safir.dob.typesystem.BlobOperations.getSize(blob))
         {
-            System.out.println("writeToBlob: unexpected blob size mismatch! overwrite by " + (beginningOfUnused - blob - com.saabgroup.safir.dob.typesystem.getSize(blob)));
+            System.out.println("writeToBlob: unexpected blob size mismatch! overwrite by " + 
+                               (beginningOfUnused - com.saabgroup.safir.dob.typesystem.BlobOperations.getSize(blob)));
             System.exit(1);
         }
-        */
+        
         return beginningOfUnused;
     }
 
