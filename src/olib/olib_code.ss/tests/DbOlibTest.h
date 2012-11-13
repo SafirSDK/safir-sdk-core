@@ -133,10 +133,6 @@ private:
     Safir::Databases::Odbc::Statement m_RowCountStmt;
     bool m_bRowCountIsPrepared;
 
-    bool m_isMySQL;
-    bool m_isPostgreSQL;
-    bool m_isMimerSQL;
-
     DbOlibTest(const DbOlibTest&); // Disable copy constructor
     const DbOlibTest & operator= (const DbOlibTest&);    // Disable assignment operator
 
@@ -147,8 +143,8 @@ public:
     DbOlibTest();
     virtual ~DbOlibTest();
 
-    void TestInputOutputParameters();
-    void TestOutputParameters();
+    void TestInputOutputParameters(const bool curlyBracesNeeded);
+    void TestOutputParameters(const bool curlyBracesNeeded);
     Safir::Dob::Typesystem::Int64 TblRowCount();
     void CreateData();
     void ClearTables();

@@ -1,3 +1,11 @@
+drop procedure ROWCOUNT;
+drop procedure spCreateOlibTest;
+drop procedure spDeleteOlibTest;
+drop procedure spInputOutputOlibTest;
+drop procedure spOutputOlibTest;
+drop procedure spUpdateOlibTest;
+
+
 delimiter $$
 
 CREATE DEFINER=root@localhost PROCEDURE ROWCOUNT(OUT P1 BIGINT)
@@ -12,8 +20,8 @@ $$
 
 
 delimiter $$
-CREATE DEFINER=root@localhost PROCEDURE spCreateOlibTest(   pStringName varchar(10), 
-                                                            pStringDescription varchar(40), 
+CREATE DEFINER=root@localhost PROCEDURE spCreateOlibTest(   pStringName nvarchar(10), 
+                                                            pStringDescription nvarchar(40), 
                                                             pInt32 Int, 
                                                             pInt64 BIGINT, 
                                                             pFloat32 Float,
@@ -81,8 +89,8 @@ END
 $$
 
 delimiter $$
-CREATE DEFINER=root@localhost PROCEDURE spOutputOlibTest(   out pStringName varchar(10), 
-                                                            out pStringDescription varchar(40), 
+CREATE DEFINER=root@localhost PROCEDURE spOutputOlibTest(   out pStringName nvarchar(10), 
+                                                            out pStringDescription nvarchar(40), 
                                                             out pInt32 int, 
                                                             out pInt64 BIGINT, 
                                                             out pFloat32 float, 
@@ -107,8 +115,8 @@ $$
 delimiter $$
 
 CREATE DEFINER=root@localhost PROCEDURE spUpdateOlibTest(   pId int,
-                                                            pStringName varchar(10), 
-                                                            pStringDescription varchar(40), 
+                                                            pStringName nvarchar(10), 
+                                                            pStringDescription nvarchar(40), 
                                                             pInt32 int, 
                                                             pInt64 BIGINT, 
                                                             pFloat32 float, 
