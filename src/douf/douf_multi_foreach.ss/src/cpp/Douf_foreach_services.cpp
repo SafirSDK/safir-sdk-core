@@ -143,9 +143,7 @@ namespace Safir
              const std::wstring serviceXML=Safir::Dob::Typesystem::Serialization::ToXml(service) ;
              std::wcout<<serviceXML<<std::endl;
 
-             std::wcout<<"Connection info: "<<serviceRequestProxy.GetSenderConnectionInfo()->ConnectionName().GetVal()<<std::endl;
-             std::wcout<<"Connection Id: "<<serviceRequestProxy.GetSenderConnectionInfo()->ConnectionId().GetVal()<<std::endl;
-             std::wcout<<"Connection nodenumber: "<<serviceRequestProxy.GetSenderConnectionInfo()->NodeNumber().GetVal()<<std::endl;
+
 
              if (serviceRequestProxy.GetTypeId()== Safir::Utilities::ForEach::DeleteRequest::ClassTypeId)
              {
