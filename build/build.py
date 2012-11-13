@@ -178,42 +178,93 @@ class DummyLogger(object):
     def log(self, data, tag = None):
         sys.stdout.write(data + "\n")
         sys.stdout.flush()
+
+    def close(self):
+        pass
         
-    def logOutput(self, process):
+    def log_output(self, process):
         raise Exception("DummyLogger doesnt support process output logging. " + 
                         "You should investigate why the real logger is not instantiated by now...")
 
 class Logger(object):
     LogLevel = ("Brief", "Verbose")
-    Tags = set(["header","brief","normal","detail","command","output"])
+    Tags = set(["header", "brief","normal","detail", "command_description", "command","output"])
 
-    def __init__(self,level):
-        #make stdout unbuffered
+    def __init__(self,level,command_file):
         if level not in Logger.LogLevel:
             die("Bad log level")
-        self.__logLevel = level
+        self.__log_level = level
+        self.__last_tag = None
 
-    def log(self, data, tag = "normal"):
-        if data is None: return
+        if command_file is None:
+            name = ""
+        else:
+            name = os.path.split(command_file)[-1].replace(".txt","")
+
+        self.__buildlog = open("buildlog_" + name + ".html", "w")
+        self.__buildlog.write("<html><head><title>Safir SDK Core Build Log</title></head>\n")
+        self.__buildlog.write("<body>\n")
+        self.__buildlog.write("<h1>Safir SDK Core Build Log</h1>")
+        self.__buildlog.write("Command file: " + command_file + "<br/>")
+        self.__buildlog.write("Start time (local time): " + time.asctime() + "<br/>")
+
+    def close(self):
+        self.__buildlog.write("\n<p/>End time (local time): " + time.asctime())
+        self.__buildlog.write("\n</body>\n")
         
+    def __log_stdout(self, data, tag):
         if tag not in Logger.Tags:
             die("unknown logging tag")
 
-        if self.__logLevel == "Brief":
+        if self.__log_level == "Brief":
             if tag == "header" or tag == "normal" or tag == "brief":
                 sys.stdout.write(data + "\n")
-        elif self.__logLevel == "Verbose":
+        elif self.__log_level == "Verbose":
             if tag == "brief":
                 pass
             elif tag == "header":
                 sys.stdout.write("\n==== " + data + " ====\n")
+            elif tag == "command_description":
+                sys.stdout.write("+ " + data + ": ")
             elif tag == "command":
-                sys.stdout.write("+ " + data + "\n")
+                sys.stdout.write("'" + data + "'\n")
             else:
                 sys.stdout.write(data + "\n")
         sys.stdout.flush()
 
-    def logOutput(self, process):
+    def __log_file(self, data, tag):
+        log = self.__buildlog
+
+        if self.__last_tag == "output" and self.__last_tag != tag:
+            log.write("</pre>\n")
+
+        if tag == "header":
+            log.write("<h3>" + data + "</h3>\n")
+        elif tag == "brief":
+            pass
+        elif tag == "normal":
+            log.write(data + "<br/>\n")
+        elif tag == "detail":
+            log.write(data + "<br/>\n")
+        if tag == "command_description":
+            log.write("<h4>" + data + "</h4>\n")
+        elif tag == "command":
+            log.write("<pre style=\"color: green\">" + data + "</pre>\n")
+        elif tag == "output":
+            if self.__last_tag != tag:
+                log.write("<pre>")
+            log.write(data + "\n")
+        log.flush()
+        self.__last_tag = tag
+
+    def log(self, data, tag = "normal"):
+        if data is None: return
+        
+        self.__log_stdout(data,tag)
+        self.__log_file(data,tag)
+        
+
+    def log_output(self, process):
         output = list()
         while True:
             line = process.stdout.readline()
@@ -280,7 +331,8 @@ def parse_command_line(builder):
         os.environ["VERBOSE"] = "1"
 
     global logger
-    logger = Logger("Brief" if options.verbose == 0 else "Verbose")
+    logger = Logger("Brief" if options.verbose == 0 else "Verbose",
+                    options.command_file)
 
     if sys.platform == "win32":
         if not is_64_bit():
@@ -551,7 +603,7 @@ class VisualStudioBuilder(BuilderBase):
             bat.write("\n")
         process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         
-        logger.logOutput(process)
+        logger.log_output(process)
 
         if process.returncode != 0:
             die("Failed to run dobmake")
@@ -637,10 +689,11 @@ class VisualStudioBuilder(BuilderBase):
                   "\" " + self.vcvarsall_arg + "\n" +
                   cmd)
         bat.close()
-
-        logger.log(description + " " + what + ": '" + cmd + "'", "command")
+        
+        logger.log(description + " " + what, "command_description")
+        logger.log(cmd, "command")
         process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
-        output = logger.logOutput(process)
+        output = logger.log_output(process)
 
         if process.returncode != 0:
             if not allow_fail:
@@ -739,15 +792,18 @@ class UnixGccBuilder(BuilderBase):
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
                                    universal_newlines=True)
-        logger.logOutput(process)
+        logger.log_output(process)
         if process.returncode != 0:
             die("Failed to run dobmake")
 
     def __run_command(self, cmd, description, what, allow_fail = False):
         """Run a command"""
-        logger.log(description + " " + what + ": '" + " ".join(cmd) + "'", "command")
+
+        logger.log(description + " " + what, "command_description")
+        logger.log(" ".join(cmd), "command")
+
         process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
-        output = logger.logOutput(process)
+        output = logger.log_output(process)
         if process.returncode != 0:
             if not allow_fail:
                 die("Failed to run '" + " ".join(cmd) + "' for " + what)
@@ -944,9 +1000,12 @@ try:
         logger.log("All tests ran successfully!")
     else:
         logger.log(str(failed) + " tests failed out of " + str(tests) + ".","brief")
+    logger.close()
 except FatalError as e:
     logger.log("Result", "header")
-    logger.log("Build script failed: " + str(e))
+    logger.log("Build script failed:")
+    logger.log(str(e), "output")
+    logger.close()
     sys.exit(1)
 
 sys.exit(0)
