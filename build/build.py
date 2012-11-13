@@ -205,8 +205,6 @@ class Logger(object):
         self.__buildlog.write("<html><head><title>Safir SDK Core Build Log</title></head>\n")
         self.__buildlog.write("<body>\n")
         self.__buildlog.write("<h1>Safir SDK Core Build Log for " + command_file + "</h1>")
-        self.__buildlog.write("<b>SAFIR_RUNTIME</b>: " + SAFIR_RUNTIME + "<br/>")
-        self.__buildlog.write("<b>SAFIR_SDK:</b> " + SAFIR_SDK + "<br/>")
         self.__buildlog.write("<b>Command line:</b> " + " ".join(sys.argv) + "<br/>")
         self.__buildlog.write("<b>Start time (local time)</b>: " + time.asctime() + "<br/>")
         self.__buildlog.write("<h2>Starting build</h2>\n")
