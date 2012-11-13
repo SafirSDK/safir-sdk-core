@@ -686,7 +686,7 @@ void DbOlibTest::SetReadAllTimeout()
 
 void DbOlibTest::GetReadAllTimeout()
 {
-    long lTimeout;
+    long lTimeout = 0;
     m_CreateStmt.GetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, lTimeout);
 
     if(lTimeout!=1)
@@ -709,7 +709,7 @@ void DbOlibTest::GetConnectionTimeout()
     if(lTimeout!=1)
     {
         std::wcout << "timeout = " << lTimeout << std::endl;
-        throw Safir::Databases::Odbc::ReconnectException(L"SQL_ATTR_QUERY_TIMEOUT not correctly set. ",__WFILE__,__LINE__);
+        throw Safir::Databases::Odbc::ReconnectException(L"SQL_ATTR_CONNECTION_TIMEOUT not correctly set. ",__WFILE__,__LINE__);
     }
 }
 
