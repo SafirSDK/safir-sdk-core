@@ -204,9 +204,12 @@ class Logger(object):
         self.__buildlog = open("buildlog_" + name + ".html", "w")
         self.__buildlog.write("<html><head><title>Safir SDK Core Build Log</title></head>\n")
         self.__buildlog.write("<body>\n")
-        self.__buildlog.write("<h1>Safir SDK Core Build Log</h1>")
-        self.__buildlog.write("Command file: " + command_file + "<br/>")
-        self.__buildlog.write("Start time (local time): " + time.asctime() + "<br/>")
+        self.__buildlog.write("<h1>Safir SDK Core Build Log for " + command_file + "</h1>")
+        self.__buildlog.write("<b>SAFIR_RUNTIME</b>: " + SAFIR_RUNTIME + "<br/>")
+        self.__buildlog.write("<b>SAFIR_SDK:</b> " + SAFIR_SDK + "<br/>")
+        self.__buildlog.write("<b>Command line:</b> " + " ".join(sys.argv) + "<br/>")
+        self.__buildlog.write("<b>Start time (local time)</b>: " + time.asctime() + "<br/>")
+        self.__buildlog.write("<h2>Starting build</h2>\n")
 
     def close(self):
         self.__buildlog.write("\n<p/>End time (local time): " + time.asctime())
@@ -252,8 +255,9 @@ class Logger(object):
             log.write("<pre style=\"color: green\">" + data + "</pre>\n")
         elif tag == "output":
             if self.__last_tag != tag:
-                log.write("<pre>")
-            log.write(data + "\n")
+                log.write("<pre>" + data)
+            else:
+                log.write("\n" + data)
         log.flush()
         self.__last_tag = tag
 
@@ -596,7 +600,7 @@ class VisualStudioBuilder(BuilderBase):
             bat.write("@echo off\n" +
                       "call \"" + os.path.join(self.studio_install_dir,"VC","vcvarsall.bat") + 
                       "\" "  + self.vcvarsall_arg + "\n" +
-                      "\"" + os.path.join(SAFIR_RUNTIME,"bin","dobmake.py") + "\" -b --html-output --rebuild" + 
+                      "\"" + os.path.join(SAFIR_RUNTIME,"bin","dobmake.py") + "\" -b --rebuild" + 
                       ada + java + " --target " + target_architecture) #batch mode (no gui)
             if force_config == "Debug" and force_extra_config == "None":
                 bat.write (" --no-cpp-release --default-config Debug")

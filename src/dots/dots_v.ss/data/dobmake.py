@@ -207,33 +207,10 @@ class Logger(object):
         self.lastTag = None
 
     def emitStartTag(self,tag):
-        if not html:
-            return
-        if tag == "header":
-            sys.stdout.write("<h3>\n")
-        if tag == "title":
-            sys.stdout.write("<title>\n")
-        if tag == "command":
-            sys.stdout.write("<pre style=\"color: green\">\n")
-        if tag == "pre":
-            sys.stdout.write("<pre>\n")
-        if tag == "error":
-            sys.stdout.write("<font color=\"red\">\n")
-        
+        pass
 
     def emitEndTag(self,tag):
-        if not html:
-            return
-        if tag == "header":
-            sys.stdout.write("</h3>\n")
-        if tag == "title":
-            sys.stdout.write("</title>\n")
-        if tag == "command":
-            sys.stdout.write("</pre>\n")
-        if tag == "pre":
-            sys.stdout.write("</pre>\n")
-        if tag == "error":
-            sys.stdout.write("</font>\n")
+        pass
 
     def write(self, data, tag = "normal"):
         if data is None: return
@@ -310,7 +287,6 @@ build_ada = True
 build_cpp_release = True
 build_cpp_debug = True
 no_gui = False
-html = False
 target_architecture = None
 
 def parse_command_line():
@@ -335,8 +311,6 @@ def parse_command_line():
                       help="Configuration for the other languages. Release is default.")
     parser.add_option("--no-gui", "--batch", "-b", action="store_true",dest="stdoutlog",default=False,
                       help="Run in batch (non-gui) mode")
-    parser.add_option("--html-output", action="store_true",dest="html",default=False,
-                      help="When running in batch mode, markup the output with html tags.")
     (options,args) = parser.parse_args()
 
     if options.clean and options.rebuild:
@@ -396,9 +370,6 @@ def parse_command_line():
     global no_gui
     no_gui = options.stdoutlog
 
-
-    global html
-    html = options.html
 
 def run_dots_depends():
     buildlog.writeHeader("Checking dependencies in dou files\n")
