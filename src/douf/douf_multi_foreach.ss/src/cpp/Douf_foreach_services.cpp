@@ -46,7 +46,7 @@
 #include <Safir/Time/TimeProvider.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
-
+#include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/Members.h>
 
 namespace Safir
@@ -120,6 +120,8 @@ namespace Safir
              m_debug << boost::posix_time::to_simple_wstring(pt) << std::endl;
              */
 
+
+
              /* data for an invalid request should not be stored */
              bool errorMessageSent = false;
 
@@ -129,6 +131,7 @@ namespace Safir
              // Prepare error response
              Safir::Dob::ResponseErrorInfoPtr error = Safir::Dob::ResponseErrorInfo::Create();
              Safir::Dob::ErrorListResponsePtr errorList = Safir::Dob::ErrorListResponse::Create();
+
              // Create the common fields in the error list.
              errorList -> NumberOfErrors().SetVal(1);
              errorList -> Error()[0].SetPtr(error);
@@ -136,6 +139,13 @@ namespace Safir
              // Handle service request.
 
              Safir::Dob::ServicePtr service = serviceRequestProxy.GetRequest();
+
+             const std::wstring serviceXML=Safir::Dob::Typesystem::Serialization::ToXml(service) ;
+             std::wcout<<serviceXML<<std::endl;
+
+             std::wcout<<"Connection info: "<<serviceRequestProxy.GetSenderConnectionInfo()->ConnectionName().GetVal()<<std::endl;
+             std::wcout<<"Connection Id: "<<serviceRequestProxy.GetSenderConnectionInfo()->ConnectionId().GetVal()<<std::endl;
+             std::wcout<<"Connection nodenumber: "<<serviceRequestProxy.GetSenderConnectionInfo()->NodeNumber().GetVal()<<std::endl;
 
              if (serviceRequestProxy.GetTypeId()== Safir::Utilities::ForEach::DeleteRequest::ClassTypeId)
              {
