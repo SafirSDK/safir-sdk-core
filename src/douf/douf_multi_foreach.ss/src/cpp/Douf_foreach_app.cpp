@@ -80,11 +80,13 @@ namespace ForEach
                          ComposeMinusOneContext(context),
                          context == 0 ? this : NULL, //only context 0 connection has stop handler.
                          &m_context[context]->m_dispatcher);
+
                     break;
                 }
                 catch (const Safir::Dob::NotOpenException&)
                 {
                     ++inst;
+                    std::wcout<<"Could not open connection: "<<connectionName;
                 }
             }
             // Send something to the tracer to open the connection.
