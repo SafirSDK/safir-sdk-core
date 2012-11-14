@@ -6,12 +6,12 @@
         <member>
             <name>StringName</name>
             <type>String</type>
-            <maxLength>10</maxLength>
+            <maxLength>100</maxLength>
         </member>
         <member>
             <name>StringDescription</name>
             <type>String</type>
-            <maxLength>40</maxLength>
+            <maxLength>200</maxLength>
         </member> 
         <member>
             <name>Int32</name>
