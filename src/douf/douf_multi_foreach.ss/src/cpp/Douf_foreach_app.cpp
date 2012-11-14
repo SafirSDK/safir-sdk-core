@@ -96,6 +96,7 @@ namespace ForEach
             // Register as a service provider.
             m_context[context]->m_service.Init(connectionName,
                                                boost::lexical_cast<std::wstring>(inst));
+
         }
 
         boost::asio::io_service::work keepRunning(m_ioService);
@@ -109,7 +110,9 @@ namespace ForEach
 
     void ForEachApp::OnStopOrder()
     {
+        std::wcout<<"OnStopOrder in foreach"<<std::endl;
         m_ioService.stop();
+
     } 
 }
 }
