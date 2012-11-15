@@ -9,8 +9,8 @@ drop table tblPerfTest;
 
 CREATE TABLE tblOlibTest (
   ID int(11) NOT NULL,
-  STRINGNAME nvarchar(10) DEFAULT NULL,
-  STRINGDESCRIPTION nvarchar(40) DEFAULT NULL,
+  STRINGNAME varchar(10) default NULL,
+  STRINGDESCRIPTION varchar(40) default NULL,
   INT32 INTEGER,
   INT64 BIGINT,
   FLOAT32 FLOAT,
@@ -40,5 +40,5 @@ CREATE TABLE tblOlibTestNClob (
 CREATE TABLE tblPerfTest (
   TypeID bigint(20) DEFAULT NULL,
   InstanceNo int(11) DEFAULT NULL,
-  data nvarchar(2100) DEFAULT NULL
+  data varchar(2100) DEFAULT NULL
 );

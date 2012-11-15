@@ -1,3 +1,26 @@
+
+CREATE IDENT olibuser AS USER USING 'olibuser';
+
+GRANT DATABANK TO olibuser;
+GRANT IDENT TO olibuser WITH GRANT OPTION;
+
+DISCONNECT;
+
+
+--==============================================================
+-- Connect as the OLIB database owner.
+--==============================================================
+
+CONNECT TO 'SafirDb' USER 'olibuser' USING 'olibuser';
+
+
+--==============================================================
+-- Create databanks to hold the tables.
+--==============================================================
+
+CREATE DATABANK olib_db OF 1000 PAGES IN 'olib_db.dbf' WITH TRANS OPTION;
+
+
 @
 create table "TBLOLIBTEST"(
      "ID" INTEGER,
