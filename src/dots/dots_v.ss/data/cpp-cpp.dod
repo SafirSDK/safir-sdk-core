@@ -617,7 +617,7 @@ namespace @_NAMESPACEV_@
         {
             if (!it->IsNull())
             {
-                size += Pad(static_cast<Safir::Dob::Typesystem::Int32>(it->GetVal().size()))+4*2;
+                size += Pad(static_cast<Safir::Dob::Typesystem::Int32>(it->GetVal().size()));
             }
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
@@ -652,7 +652,7 @@ namespace @_NAMESPACEV_@
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Binary)
         if (!m_@_MEMBER_@Member.IsNull())
         {
-            size += Pad(static_cast<Safir::Dob::Typesystem::Int32>(m_@_MEMBER_@Member.GetVal().size()))+4*2;
+            size += Pad(static_cast<Safir::Dob::Typesystem::Int32>(m_@_MEMBER_@Member.GetVal().size()));
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
         if (!m_@_MEMBER_@Member.IsNull() && !m_@_MEMBER_@Member.GetVal().GetRawString().empty())

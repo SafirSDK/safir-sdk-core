@@ -961,11 +961,6 @@ public class BlobOperations {
                                       beginningOfUnusedInOut);
 
             blob.position(binaryStart);
-            java.nio.ByteOrder oldOrder = blob.order();
-            blob.order(java.nio.ByteOrder.nativeOrder());
-            blob.putInt(container.getVal().length);
-            blob.putInt(0);//padding
-            blob.order(oldOrder);
             blob.put(container.getVal(),0,container.getVal().length);
             beginningOfUnused = beginningOfUnusedInOut[0];
         }

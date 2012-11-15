@@ -311,6 +311,14 @@ namespace Internal
                                             Offset & dynOffs,
                                             Size & dynSize);
 
+        static void GetOffsetDynamicOffsetAndSize(const char * blob,
+                                                  const MemberIndex member,
+                                                  const ArrayIndex index,
+                                                  Offset& offset,
+                                                  Offset& dynOffs,
+                                                  Size& dynSize);
+        
+
         static void SetDynamicOffset(char * const blob,
                                      const MemberIndex member,
                                      const ArrayIndex index,

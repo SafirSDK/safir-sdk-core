@@ -1424,8 +1424,7 @@ namespace Safir.Dob.Typesystem
                                                          Internal.InternalOperations.ByteOf(container.IsChanged()),
                                                          ref beginningOfUnused);
 
-                Marshal.WriteInt32(binaryStart, binarySize);
-                Marshal.Copy(container.Val, 0, new IntPtr(binaryStart.ToInt64() + 4*2), binarySize);
+                Marshal.Copy(container.Val, 0, new IntPtr(binaryStart.ToInt64()), binarySize);
             }
             else if (container.IsChanged())
             {

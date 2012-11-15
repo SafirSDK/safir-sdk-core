@@ -877,10 +877,9 @@ namespace Typesystem
                                      index,
                                      binary.IsChanged(),
                                      beginningOfUnused);
-            (*reinterpret_cast<Int32*>(binaryStart))=binarySize;
             if (binarySize != 0)
             {
-                memcpy(binaryStart+sizeof(Int32) * 2, &(binary.GetVal()[0]), binarySize);
+                memcpy(binaryStart, &binary.GetVal()[0], binarySize);
             }
         }
         else if(binary.IsChanged())

@@ -215,7 +215,7 @@ namespace Internal
                                         char * & beginningOfUnused)
     {
         char * const binary = beginningOfUnused;
-        beginningOfUnused += binarySize + Padding(binarySize) +sizeof(Size) * 2;
+        beginningOfUnused += binarySize + Padding(binarySize);
         SetDynamicOffset(insideBlob,member,index,static_cast<Offset>(binary - insideBlob));
         SetDynamicSize(insideBlob, member, index, binarySize);
         SetStatus(false,isChanged,insideBlob,member,index);
@@ -508,9 +508,12 @@ namespace Internal
                                                       char* &val,
                                                       Int32& size)
     {
-        size=0;
-        Offset offset=GetOffset(blob, member)+static_cast<Offset>((MEMBER_STATUS_LENGTH+DYNAMIC_MEMBER_SIZE)*index);
-        Offset dynOffs=*AnyPtrCast<Offset>(blob+offset+MEMBER_STATUS_LENGTH);
+        size = 0;
+        Offset offset;
+        Offset dynOffs;
+        Size dynSize;
+        GetOffsetDynamicOffsetAndSize(blob,member,index,offset,dynOffs,dynSize);
+
         InternalMemberStatus status=*AnyPtrCast<InternalMemberStatus> (blob + offset);
         if (MemberStatusHandler::IsNull(status) || dynOffs==0)
         {
@@ -531,8 +534,8 @@ namespace Internal
             const MemberDescription * memberDesc = Repository::Classes().FindClass(GetTypeId(blob))->GetMember(member);
             if (memberDesc->GetMemberType() == BinaryMemberType)
             {
-                size=*AnyPtrCast<Size>(blob+dynOffs);
-                val=AnyPtrCast<char>(blob+dynOffs+sizeof(Size)*2);
+                size = static_cast<Int32>(dynSize);
+                val=AnyPtrCast<char>(blob+dynOffs);
             }
             else
             {
@@ -564,7 +567,7 @@ namespace Internal
         }
         else if (memberDesc->GetMemberType()==BinaryMemberType)
         {
-            newSize=binarySize+sizeof(Size)*2; //add size before binary data
+            newSize=binarySize;
         }
         else //ObjectMemberType
         {
@@ -582,15 +585,7 @@ namespace Internal
 
         if (newSize + newPadding <= allocatedSize + currentPadding) //no allocation needed
         {
-            if (memberDesc->GetMemberType()==BinaryMemberType)
-            {
-                memcpy(blob+dynamicOffset, &binarySize, sizeof(Size));
-                memcpy(blob+dynamicOffset+sizeof(Size)*2, val, binarySize);
-            }
-            else
-            {
-                memcpy(blob+dynamicOffset, val, newSize);
-            }
+            memcpy(blob+dynamicOffset, val, newSize);
             return;
         }
 
@@ -640,8 +635,7 @@ namespace Internal
 
                         if (memberDesc->GetMemberType()==BinaryMemberType)
                         {
-                            memcpy(tmpBlob, &binarySize, sizeof(Size));
-                            memcpy(tmpBlob+sizeof(Size)*2, val, binarySize);
+                            memcpy(tmpBlob, val, binarySize);
                         }
                         else //ObjectMemberType or StringMemberType
                         {
@@ -726,6 +720,19 @@ namespace Internal
         dynSize=*AnyPtrCast<Size>(blob+of+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
 
     }
+
+    void BlobLayout::GetOffsetDynamicOffsetAndSize(const char * blob,
+                                                   const MemberIndex member,
+                                                   const ArrayIndex index,
+                                                   Offset& offset,
+                                                   Offset& dynOffs,
+                                                   Size& dynSize)
+    {
+        offset=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+DYNAMIC_MEMBER_SIZE)*index;
+        dynOffs=*AnyPtrCast<Offset>(blob+offset+MEMBER_STATUS_LENGTH);
+        dynSize=*AnyPtrCast<Size>(blob+offset+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
+    }
+
 
     void BlobLayout::SetDynamicOffset(char * const blob,
                                       const MemberIndex member,

@@ -816,14 +816,14 @@ namespace @_NAMESPACE_@
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
             for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
             {
-                size += (m_@_MEMBER_@Member[i].CalculateBlobSize();
+                size += m_@_MEMBER_@Member[i].CalculateBlobSize();
             }
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
             for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
             {
                 if (!m_@_MEMBER_@Member[i].IsNull())
                 {
-                    size += Pad(m_@_MEMBER_@Member[i].Val.Length)+4*2;
+                    size += Pad(m_@_MEMBER_@Member[i].Val.Length);
                 }
             }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
@@ -851,7 +851,7 @@ namespace @_NAMESPACE_@
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
             if (!m_@_MEMBER_@Member.IsNull())
             {
-                size += Pad(m_@_MEMBER_@Member.Val.Length)+4*2;
+                size += Pad(m_@_MEMBER_@Member.Val.Length);
             }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
             if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.Val.RawString.Length != 0)
