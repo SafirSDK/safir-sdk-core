@@ -55,7 +55,6 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(ConnectionId) == 16);
 #ifdef REGISTER_TIMES
         BOOST_STATIC_ASSERT(sizeof(Header) == 4 + sizeof(ConnectionId) + 4);
-#error aasdff
 #else
         BOOST_STATIC_ASSERT(sizeof(Header) == 4 + 4 + sizeof(ConnectionId));
 #endif
