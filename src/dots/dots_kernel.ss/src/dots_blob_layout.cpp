@@ -86,6 +86,7 @@ namespace Internal
         }
 
         const MemberIndex numMembers = cd->NumberOfMembers();
+        const MemberIndex numMembersPadded = numMembers + numMembers % 2;
         const Size blobSize=cd->InitialSize();
         blob = new char[blobSize];
 
@@ -93,7 +94,7 @@ namespace Internal
         header.size = blobSize;
         header.typeId = typeId;
 
-        Offset currentPos=OFFSET_HEADER_LENGTH+numMembers*OFFSET_MEMBER_LENGTH; //start of data part
+        Offset currentPos=OFFSET_HEADER_LENGTH+numMembersPadded*OFFSET_MEMBER_LENGTH; //start of data part
         for (MemberIndex i=0; i < numMembers; i++)
         {
             SetOffset(blob, i, currentPos);
@@ -124,11 +125,12 @@ namespace Internal
         const ClassDescription * cd=Repository::Classes().FindClass(typeId);
         beginningOfUnused = blob + cd->InitialSize();
         const MemberIndex numMembers=cd->NumberOfMembers();
+        const MemberIndex numMembersPadded = numMembers + numMembers % 2;
         BlobHeader & header = *AnyPtrCast<BlobHeader>(blob);
         header.size = blobSize;
         header.typeId = typeId;
 
-        Offset currentPos=OFFSET_HEADER_LENGTH+numMembers*OFFSET_MEMBER_LENGTH; //start of data part
+        Offset currentPos=OFFSET_HEADER_LENGTH+numMembersPadded*OFFSET_MEMBER_LENGTH; //start of data part
         for (MemberIndex i=0; i<numMembers; i++)
         {
             SetOffset(blob, i, currentPos);
@@ -166,11 +168,12 @@ namespace Internal
         SetDynamicSize(insideBlob, member, index, blobSize);
         SetStatus(false,isChanged,insideBlob,member,index);
         const MemberIndex numMembers = cd->NumberOfMembers();
+        const MemberIndex numMembersPadded = numMembers + numMembers % 2;
         BlobHeader & header = *AnyPtrCast<BlobHeader>(childBlob);
         header.size = blobSize;
         header.typeId = typeId;
 
-        Offset currentPos=static_cast<Offset>(OFFSET_HEADER_LENGTH+numMembers*OFFSET_MEMBER_LENGTH); //start of data part
+        Offset currentPos=static_cast<Offset>(OFFSET_HEADER_LENGTH+numMembersPadded*OFFSET_MEMBER_LENGTH); //start of data part
         for (MemberIndex i=0; i<numMembers; i++)
         {
             SetOffset(childBlob, static_cast<MemberIndex>(i), currentPos);

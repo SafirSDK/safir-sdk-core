@@ -68,9 +68,9 @@ namespace Internal
 
         static const Size MEMBER_STATUS_LENGTH          = sizeof(char) * 8; //1
 
-        static const Size OFFSET_MEMBER_LENGTH          =   sizeof(Offset) * 2; //4
+        static const Size OFFSET_MEMBER_LENGTH          =   sizeof(Offset); //4
 
-        static const Size DYNAMIC_MEMBER_SIZE           =   sizeof(Offset) * 2 + sizeof(Size) * 2; //8
+        static const Size DYNAMIC_MEMBER_SIZE           =   sizeof(Offset) + sizeof(Size); //8
     private:
 
         BOOST_STATIC_ASSERT(sizeof(BlobLayout::BlobHeader) == BlobLayout::OFFSET_HEADER_LENGTH);
@@ -228,6 +228,7 @@ namespace Internal
             if (reinterpret_cast<const uintptr_t>(blob) % boost::alignment_of<T>::value != 0)
             {
                 std::wcerr << "Unaligned data of type " << typeid(T).name() 
+                           << " (size = " << sizeof(T) << ")"
                            << ": expected = " 
                            << boost::alignment_of<T>::value 
                            << " got " 

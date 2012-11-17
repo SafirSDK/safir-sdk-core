@@ -1614,6 +1614,14 @@ namespace Internal
             tmpSize *= ParsingState::Instance().classParser.Result()[i].m_members[mi].m_arrayLength;
             size += (tmpSize+BlobLayout::OFFSET_MEMBER_LENGTH);
         }
+        //pad offsets part of blob to be an even number
+        const size_t noMembers = ParsingState::Instance().classParser.Result()[i].m_noInheritedParameters + 
+            ParsingState::Instance().classParser.Result()[i].m_members.size();
+        if (noMembers % 2 != 0)
+        {
+            size += BlobLayout::OFFSET_MEMBER_LENGTH;
+        }
+        
         ParsingState::Instance().classParser.Result()[i].m_initialSize += size;
         if (ParsingState::Instance().classParser.Result()[i].m_baseClassIndex >= 0) //not Safir.Dob.Typesystem.Object
         {
