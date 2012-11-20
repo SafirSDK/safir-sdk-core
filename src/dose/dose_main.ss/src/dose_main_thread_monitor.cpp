@@ -81,9 +81,11 @@ namespace Internal
     {
         try
         {
+            const boost::posix_time::seconds watchdogTimeout = boost::posix_time::seconds(Safir::Dob::NodeParameters::DoseMainThreadWatchdogTimeout());
+
             for (;;)
             {
-                boost::this_thread::sleep(boost::posix_time::seconds(7));
+                boost::this_thread::sleep(watchdogTimeout/4);
 
                 const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
 
@@ -102,15 +104,26 @@ namespace Internal
                         else
                         {
                             // The counter hasn't been kicked ...
-                            if (now - it->second.lastTimeAlive >
-                                boost::posix_time::seconds(Safir::Dob::NodeParameters::DoseMainThreadWatchdogTimeout()))
+
+                            const boost::posix_time::time_duration timeSinceLastKick = now - it->second.lastTimeAlive;
+
+                            // Check if the duration since last kick is "abnormal", thus indicating some sort of external
+                            // manipulation of the clock. For instance, a very long duration could be caused by the cpu going
+                            // into sleep/hibernate mode.
+                            if (timeSinceLastKick.is_negative() || timeSinceLastKick > watchdogTimeout * 2)
+                            {
+                                it->second.lastTimeAlive = now;
+                                continue;
+                            }
+                            
+                            if (timeSinceLastKick > watchdogTimeout)
                             {
                                 // ... and this thread has been hanging for so long time now
                                 // that we actually will kill dose_main itself!!
                                 std::ostringstream ostr;
                                 ostr << it->second.threadName << " (tid " << it->first
                                     << ") seems to have been hanging for at least "
-                                    << boost::posix_time::to_simple_string(now - it->second.lastTimeAlive) << '\n';
+                                    << boost::posix_time::to_simple_string(timeSinceLastKick) << '\n';
                                 if (Safir::Dob::NodeParameters::TerminateDoseMainWhenUnrecoverableError())
                                 {
                                     ostr << "Parameter TerminateDoseMainWhenUnrecoverableError is set to true"
