@@ -95,13 +95,13 @@ namespace Internal
         switch(m)
         {
         case BooleanMemberType:
-            return sizeof(bool) * 8;
+            return sizeof(bool) * 4;
 
         case EnumerationMemberType:
-            return sizeof(EnumInternal) * 2;
+            return sizeof(EnumInternal);
 
         case Int32MemberType:
-            return sizeof(Int32) * 2;
+            return sizeof(Int32);
 
         case Int64MemberType:
             return sizeof(Int64);
@@ -143,7 +143,7 @@ namespace Internal
         case Steradian32MemberType:
         case Volt32MemberType:
         case Watt32MemberType:
-            return sizeof(Float32) * 2;
+            return sizeof(Float32);
 
             //  64 bit floats
         case Float64MemberType:

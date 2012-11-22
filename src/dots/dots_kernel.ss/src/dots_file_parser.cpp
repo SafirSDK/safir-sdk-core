@@ -1501,7 +1501,6 @@ namespace Internal
         unsigned int size = 0;
         for (size_t mi = 0; mi<ParsingState::Instance().classParser.Result()[i].m_members.size(); mi++)
         {
-            Int32 tmpSize = BlobLayout::MEMBER_STATUS_LENGTH;
             if (ParsingState::Instance().classParser.Result()[i].m_members[mi].m_type == StringMemberType)
             {
                 if (ParsingState::Instance().classParser.Result()[i].m_members[mi].m_strLenFromParameter)
@@ -1565,7 +1564,8 @@ namespace Internal
                     throw descr.c_str();
                 }
             }
-            tmpSize += Safir::Dob::Typesystem::Internal::BasicTypes::SizeOfType(ParsingState::Instance().classParser.Result()[i].m_members[mi].m_type);
+            Int32 tmpSize = Safir::Dob::Typesystem::Internal::BasicTypes::SizeOfType(ParsingState::Instance().classParser.Result()[i].m_members[mi].m_type);
+            tmpSize += tmpSize == 4 ? BlobLayout::MEMBER_STATUS_LENGTH_SHORT : BlobLayout::MEMBER_STATUS_LENGTH_LONG;
 
             if (ParsingState::Instance().classParser.Result()[i].m_members[mi].m_arrSizeFromParameter)
             {

@@ -66,7 +66,8 @@ namespace Internal
         static const Size OFFSET_TYPE_ID                = 8;
         static const Size OFFSET_HEADER_LENGTH          = 16;
 
-        static const Size MEMBER_STATUS_LENGTH          = sizeof(char) * 8; //1
+        static const Size MEMBER_STATUS_LENGTH_SHORT    = sizeof(char) * 4; //4
+        static const Size MEMBER_STATUS_LENGTH_LONG     = sizeof(char) * 8; //8
 
         static const Size OFFSET_MEMBER_LENGTH          =   sizeof(Offset); //4
 
@@ -154,11 +155,11 @@ namespace Internal
                                                          char * & beginningOfUnused)
         {
             BOOST_STATIC_ASSERT(sizeof(T) % 8 == 0);
-            const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
+            const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH_LONG+sizeof(T))*index;
             if (strVal != NULL) //if we have a string
             {
                 char * const dataLocation = beginningOfUnused;
-                *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH) = static_cast<Offset>(beginningOfUnused - blob);
+                *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH_LONG) = static_cast<Offset>(beginningOfUnused - blob);
                 beginningOfUnused += sizeof(T) + sizeof(Int32)*2 + stringLength; //the value + the string length + the string itself
                 beginningOfUnused += Padding(stringLength);
                 *AnyPtrCast<T>(dataLocation) = hashVal;
@@ -167,7 +168,7 @@ namespace Internal
             }
             else //no string
             {
-                *AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH) = hashVal;
+                *AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH_LONG) = hashVal;
             }
 
             //Set status
@@ -244,8 +245,9 @@ namespace Internal
                                               const ArrayIndex index,
                                               T & t)
         {
-            size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+BasicTypes::SizeOf<T>())*index;
-            t=*AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH);
+            const Size memberStatusLength = BasicTypes::SizeOf<T>() == 4 ? MEMBER_STATUS_LENGTH_SHORT : MEMBER_STATUS_LENGTH_LONG;
+            size_t startOfElement=GetOffset(blob, member)+(memberStatusLength+BasicTypes::SizeOf<T>())*index;
+            t=*AnyPtrCast<T>(blob+startOfElement+memberStatusLength);
             const char* tmp=blob + startOfElement;
             InternalMemberStatus s=static_cast<InternalMemberStatus>(tmp[0]);
             return s;
@@ -257,8 +259,9 @@ namespace Internal
                               const MemberIndex member,
                               const ArrayIndex index)
         {
-            size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+BasicTypes::SizeOf<T>())*index;
-            T* t=AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH);
+            const Size memberStatusLength = BasicTypes::SizeOf<T>() == 4 ? MEMBER_STATUS_LENGTH_SHORT : MEMBER_STATUS_LENGTH_LONG;
+            size_t startOfElement=GetOffset(blob, member)+(memberStatusLength+BasicTypes::SizeOf<T>())*index;
+            T* t=AnyPtrCast<T>(blob+startOfElement+memberStatusLength);
             (*t)=val;
         }
 
@@ -271,18 +274,18 @@ namespace Internal
                                                                 const char * & strVal)
         {
             BOOST_STATIC_ASSERT(sizeof(T) % 8 == 0);
-            const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
+            const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH_LONG+sizeof(T))*index;
             const InternalMemberStatus status = blob[startOfElement];
             if (MemberStatusHandler::HasDynamicPart(status))
             {
-                const Offset dynOffs = *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
+                const Offset dynOffs = *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH_LONG);
                 val = *AnyPtrCast<T>(blob + dynOffs);
                 strVal = blob + dynOffs + sizeof(T) + sizeof(Int32) * 2;
                 assert(strVal[0] != '\0');
             }
             else
             {
-                val = *AnyPtrCast<T>(blob + startOfElement + MEMBER_STATUS_LENGTH);
+                val = *AnyPtrCast<T>(blob + startOfElement + MEMBER_STATUS_LENGTH_LONG);
                 strVal = NULL;
             }
 

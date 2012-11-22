@@ -120,13 +120,13 @@ namespace Internal
     };
 
     template <>
-    inline Size BasicTypes::SizeOf<bool>() {return 8;}
+    inline Size BasicTypes::SizeOf<bool>() {return 4;}
 
     template <>
-    inline Size BasicTypes::SizeOf<Int32>() {return 8;} //EnumInternal is covered by this.
+    inline Size BasicTypes::SizeOf<Int32>() {return 4;} //EnumInternal is covered by this.
 
     template <>
-    inline Size BasicTypes::SizeOf<Float32>() {return 8;}
+    inline Size BasicTypes::SizeOf<Float32>() {return 4;}
 
 
 }

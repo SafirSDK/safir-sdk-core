@@ -71,7 +71,9 @@ namespace Internal
         const MemberDescription * const mde=Repository::Classes().FindClass(GetTypeId(blob))->GetMember(member);
 
         const Size memberSize=BasicTypes::SizeOfType(mde->GetMemberType());
-        const size_t startOfElement = GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+memberSize)*index;
+        const Size memberStatusLength = memberSize == 4 ? MEMBER_STATUS_LENGTH_SHORT : MEMBER_STATUS_LENGTH_LONG;
+
+        const size_t startOfElement = GetOffset(blob, member)+(memberStatusLength+memberSize)*index;
         return *AnyPtrCast<InternalMemberStatus>(blob + startOfElement);
     }
 
@@ -99,16 +101,17 @@ namespace Internal
         {
             SetOffset(blob, i, currentPos);
             const MemberDescription * const memberDesc = cd->GetMember(i);
-            Size tmpSize=MEMBER_STATUS_LENGTH+BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            Size tmpSize=BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            tmpSize += tmpSize == 4 ? BlobLayout::MEMBER_STATUS_LENGTH_SHORT : BlobLayout::MEMBER_STATUS_LENGTH_LONG;
             for (Size ai=0; ai<memberDesc->ArrayLength(); ai++)
             {
                 char* s = AnyPtrCast<char>(blob + currentPos + ai*tmpSize);
                 s[0]=MemberStatusHandler::STARTING_VALUE;;
                 if (memberDesc->GetMemberType() == StringMemberType || memberDesc->GetMemberType() == ObjectMemberType || memberDesc->GetMemberType() == BinaryMemberType)
                 {
-                    Offset* dynPartOff=AnyPtrCast<Offset>(s+MEMBER_STATUS_LENGTH);
+                    Offset* dynPartOff=AnyPtrCast<Offset>(s+MEMBER_STATUS_LENGTH_LONG);
                     (*dynPartOff)=0;
-                    Size* dynPartSize=AnyPtrCast<Size>(s+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
+                    Size* dynPartSize=AnyPtrCast<Size>(s+MEMBER_STATUS_LENGTH_LONG+OFFSET_MEMBER_LENGTH);
                     (*dynPartSize)=0;
                 }
             }
@@ -135,16 +138,17 @@ namespace Internal
         {
             SetOffset(blob, i, currentPos);
             const MemberDescription * memberDesc = cd->GetMember(i);
-            Size tmpSize=MEMBER_STATUS_LENGTH+BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            Size tmpSize=BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            tmpSize += tmpSize == 4 ? BlobLayout::MEMBER_STATUS_LENGTH_SHORT : BlobLayout::MEMBER_STATUS_LENGTH_LONG;
             for (Size ai=0; ai<memberDesc->ArrayLength(); ai++)
             {
                 char* s=AnyPtrCast<char> (blob + currentPos + ai*tmpSize);
                 s[0]=MemberStatusHandler::STARTING_VALUE;;
                 if (memberDesc->GetMemberType()==StringMemberType || memberDesc->GetMemberType()==ObjectMemberType || memberDesc->GetMemberType()==BinaryMemberType)
                 {
-                    Offset* dynPartOff=AnyPtrCast<Offset>(s+MEMBER_STATUS_LENGTH);
+                    Offset* dynPartOff=AnyPtrCast<Offset>(s+MEMBER_STATUS_LENGTH_LONG);
                     (*dynPartOff)=0;
-                    Size* dynPartSize=AnyPtrCast<Size>(s+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
+                    Size* dynPartSize=AnyPtrCast<Size>(s+MEMBER_STATUS_LENGTH_LONG+OFFSET_MEMBER_LENGTH);
                     (*dynPartSize)=0;
                 }
             }
@@ -178,16 +182,17 @@ namespace Internal
         {
             SetOffset(childBlob, static_cast<MemberIndex>(i), currentPos);
             const MemberDescription * memberDesc = cd->GetMember(i);
-            Size tmpSize=MEMBER_STATUS_LENGTH+BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            Size tmpSize=BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            tmpSize += tmpSize == 4 ? BlobLayout::MEMBER_STATUS_LENGTH_SHORT : BlobLayout::MEMBER_STATUS_LENGTH_LONG;
             for (Size ai=0; ai<memberDesc->ArrayLength(); ai++)
             {
                 char* s=AnyPtrCast<char> (childBlob + currentPos + ai*tmpSize);
                 s[0]=MemberStatusHandler::STARTING_VALUE;;
                 if (memberDesc->GetMemberType()==StringMemberType || memberDesc->GetMemberType()==ObjectMemberType || memberDesc->GetMemberType()==BinaryMemberType)
                 {
-                    Offset* dynPartOff=AnyPtrCast<Offset>(s+MEMBER_STATUS_LENGTH);
+                    Offset* dynPartOff=AnyPtrCast<Offset>(s+MEMBER_STATUS_LENGTH_LONG);
                     (*dynPartOff)=0;
-                    Size* dynPartSize=AnyPtrCast<Size>(s+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
+                    Size* dynPartSize=AnyPtrCast<Size>(s+MEMBER_STATUS_LENGTH_LONG+OFFSET_MEMBER_LENGTH);
                     (*dynPartSize)=0;
                 }
             }
@@ -231,7 +236,8 @@ namespace Internal
                                 const ArrayIndex index)
     {
         const MemberDescription * memberDesc=Repository::Classes().FindClass(GetTypeId(blob))->GetMember(member);
-        Size size=BasicTypes::SizeOfType(memberDesc->GetMemberType())+MEMBER_STATUS_LENGTH;
+        Size size=BasicTypes::SizeOfType(memberDesc->GetMemberType());
+        size += size == 4 ? BlobLayout::MEMBER_STATUS_LENGTH_SHORT : BlobLayout::MEMBER_STATUS_LENGTH_LONG;
         InternalMemberStatus oldStatus = *AnyPtrCast<char>(blob + GetOffset(blob, member) + index*size);
         InternalMemberStatus status=MemberStatusHandler::ToInternalFormat(isNull, isChanged, MemberStatusHandler::HasDynamicPart(oldStatus));
         *AnyPtrCast<char>(blob + GetOffset(blob, member) + index*size) = status;
@@ -246,8 +252,9 @@ namespace Internal
             MemberIndex member=static_cast<MemberIndex>(i);
             const MemberDescription * memberDesc=cde->GetMember(member);
 
-            Size size=MEMBER_STATUS_LENGTH+BasicTypes::SizeOfType(memberDesc->GetMemberType());
-
+            Size size=BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            size += size == 4 ? BlobLayout::MEMBER_STATUS_LENGTH_SHORT : BlobLayout::MEMBER_STATUS_LENGTH_LONG;
+        
             for (Size ix=0; ix<memberDesc->ArrayLength(); ix++)
             {
                 const InternalMemberStatus status=*AnyPtrCast<InternalMemberStatus>(blob + GetOffset(blob, member) + ix*size);
@@ -279,7 +286,8 @@ namespace Internal
         {
             MemberIndex member=static_cast<MemberIndex>(i);
             const MemberDescription * memberDesc=cde->GetMember(member);
-            Size size=MEMBER_STATUS_LENGTH+BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            Size size=BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            size += size == 4 ? BlobLayout::MEMBER_STATUS_LENGTH_SHORT : BlobLayout::MEMBER_STATUS_LENGTH_LONG;
             Offset memOffs=GetOffset(blob, member);
             for (Size ix=0; ix<memberDesc->ArrayLength(); ix++)
             {
@@ -312,7 +320,8 @@ namespace Internal
         {
             MemberIndex member=static_cast<MemberIndex>(i);
             const MemberDescription * memberDesc=cde->GetMember(member);
-            Size size=MEMBER_STATUS_LENGTH+BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            Size size=BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            size += size == 4 ? BlobLayout::MEMBER_STATUS_LENGTH_SHORT : BlobLayout::MEMBER_STATUS_LENGTH_LONG;
             Offset memOffs=GetOffset(blob, member);
             for (Size ix=0; ix<memberDesc->ArrayLength(); ix++)
             {
@@ -340,7 +349,8 @@ namespace Internal
             MemberIndex member=static_cast<MemberIndex>(i);
             const MemberDescription * memberDesc=cde->GetMember(member);
 
-            Size size=MEMBER_STATUS_LENGTH+BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            Size size=BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            size += size == 4 ? BlobLayout::MEMBER_STATUS_LENGTH_SHORT : BlobLayout::MEMBER_STATUS_LENGTH_LONG;
             for (Size ix=0; ix<memberDesc->ArrayLength(); ix++)
             {
                 const InternalMemberStatus status=*AnyPtrCast<InternalMemberStatus>(val + GetOffset(val, member) + ix*size);
@@ -664,11 +674,11 @@ namespace Internal
                 for (Size ix=0; ix<lm->ArrayLength(); ix++)
                 {
                     const Size memberSize = BasicTypes::SizeOfType(lm->GetMemberType());
-                    const size_t startOfElement=GetOffset(blob, mem)+(MEMBER_STATUS_LENGTH+memberSize)*ix;
+                    const size_t startOfElement=GetOffset(blob, mem)+(MEMBER_STATUS_LENGTH_LONG+memberSize)*ix;
                     if (MemberStatusHandler::HasDynamicPart(blob[startOfElement]))
                     { //there is only need to do anything if the member had a dynamic part in the old blob
-                        *AnyPtrCast<Offset>(newObj + startOfElement + MEMBER_STATUS_LENGTH) = END_OF_STATIC + currentDynOffs;
-                        const char * const dataLocation = blob + *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
+                        *AnyPtrCast<Offset>(newObj + startOfElement + MEMBER_STATUS_LENGTH_LONG) = END_OF_STATIC + currentDynOffs;
+                        const char * const dataLocation = blob + *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH_LONG);
                         const Int32 currentStringLength = *AnyPtrCast<Int32>(dataLocation + memberSize);
                         const Int32 currentPadding = Padding(currentStringLength);
                         memcpy(newObj+END_OF_STATIC+currentDynOffs,dataLocation,memberSize + sizeof(Int32) * 2 + currentStringLength);
@@ -718,9 +728,9 @@ namespace Internal
                                              Offset& dynOffs,
                                              Size& dynSize)
     {
-        Offset of=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+DYNAMIC_MEMBER_SIZE)*index;
-        dynOffs=*AnyPtrCast<Offset>(blob+of+MEMBER_STATUS_LENGTH);
-        dynSize=*AnyPtrCast<Size>(blob+of+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
+        Offset of=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH_LONG+DYNAMIC_MEMBER_SIZE)*index;
+        dynOffs=*AnyPtrCast<Offset>(blob+of+MEMBER_STATUS_LENGTH_LONG);
+        dynSize=*AnyPtrCast<Size>(blob+of+MEMBER_STATUS_LENGTH_LONG+OFFSET_MEMBER_LENGTH);
 
     }
 
@@ -731,9 +741,9 @@ namespace Internal
                                                    Offset& dynOffs,
                                                    Size& dynSize)
     {
-        offset=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+DYNAMIC_MEMBER_SIZE)*index;
-        dynOffs=*AnyPtrCast<Offset>(blob+offset+MEMBER_STATUS_LENGTH);
-        dynSize=*AnyPtrCast<Size>(blob+offset+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
+        offset=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH_LONG+DYNAMIC_MEMBER_SIZE)*index;
+        dynOffs=*AnyPtrCast<Offset>(blob+offset+MEMBER_STATUS_LENGTH_LONG);
+        dynSize=*AnyPtrCast<Size>(blob+offset+MEMBER_STATUS_LENGTH_LONG+OFFSET_MEMBER_LENGTH);
     }
 
 
@@ -742,8 +752,8 @@ namespace Internal
                                       const ArrayIndex index,
                                       const Offset dynOffs)
     {
-        Offset of=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+DYNAMIC_MEMBER_SIZE)*index;
-        Offset* dof=AnyPtrCast<Offset>(blob+of+MEMBER_STATUS_LENGTH);
+        Offset of=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH_LONG+DYNAMIC_MEMBER_SIZE)*index;
+        Offset* dof=AnyPtrCast<Offset>(blob+of+MEMBER_STATUS_LENGTH_LONG);
         (*dof)=dynOffs;
     }
 
@@ -752,8 +762,8 @@ namespace Internal
                                     const ArrayIndex index,
                                     const Size& dynSize)
     {
-        Offset of=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+DYNAMIC_MEMBER_SIZE)*index;
-        Size* dsz=AnyPtrCast<Size>(blob+of+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
+        Offset of=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH_LONG+DYNAMIC_MEMBER_SIZE)*index;
+        Size* dsz=AnyPtrCast<Size>(blob+of+MEMBER_STATUS_LENGTH_LONG+OFFSET_MEMBER_LENGTH);
         (*dsz)=dynSize;
     }
 
@@ -775,7 +785,8 @@ namespace Internal
         {
             MemberIndex member=static_cast<MemberIndex>(i);
             const MemberDescription * memberDesc=cde->GetMember(member);
-            Size size=MEMBER_STATUS_LENGTH+BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            Size size=BasicTypes::SizeOfType(memberDesc->GetMemberType());
+            size += size == 4 ? BlobLayout::MEMBER_STATUS_LENGTH_SHORT : BlobLayout::MEMBER_STATUS_LENGTH_LONG;
             for (Size ix=0; ix<memberDesc->ArrayLength(); ix++)
             {
                 bool currentNull, currentChanged, lastNull, lastChanged;
@@ -973,10 +984,10 @@ namespace Internal
                                                  const ArrayIndex index)
     {
         BOOST_STATIC_ASSERT(sizeof(T) % 8 == 0);
-        const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
+        const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH_LONG+sizeof(T))*index;
         if (strVal == NULL) // no string, this will be easy!
         {
-            *AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH) = val;
+            *AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH_LONG) = val;
             blob[startOfElement] = MemberStatusHandler::ToInternalFormat(false,true,false);
         }
         else
@@ -989,7 +1000,7 @@ namespace Internal
             const bool currentlyHasDynamicPart = MemberStatusHandler::HasDynamicPart(blob[startOfElement]);
             if (currentlyHasDynamicPart)
             {
-                dataLocation = blob + *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
+                dataLocation = blob + *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH_LONG);
                 currentStringLength = *AnyPtrCast<Int32>(dataLocation + sizeof(T));
                 currentPadding = Padding(currentStringLength);
                 if (newStringLength + newPadding <= currentStringLength + currentPadding) //easy! we just fit the new string in the old.
@@ -1061,11 +1072,11 @@ namespace Internal
                         if (mem!=member || ix!=static_cast<Size>(index))
                         {
                             const Size memSize = BasicTypes::SizeOfType(lm->GetMemberType());
-                            const size_t startOfElement=GetOffset(blob, mem)+(MEMBER_STATUS_LENGTH+memSize)*ix;
+                            const size_t startOfElement=GetOffset(blob, mem)+(MEMBER_STATUS_LENGTH_LONG+memSize)*ix;
                             if (MemberStatusHandler::HasDynamicPart(blob[startOfElement]))
                             { //there is only need to do anything if the member had a dynamic part in the old blob
-                                *AnyPtrCast<Offset>(newObj + startOfElement + MEMBER_STATUS_LENGTH) = END_OF_STATIC + currentDynOffs;
-                                const char * const dataLocation = blob + *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
+                                *AnyPtrCast<Offset>(newObj + startOfElement + MEMBER_STATUS_LENGTH_LONG) = END_OF_STATIC + currentDynOffs;
+                                const char * const dataLocation = blob + *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH_LONG);
                                 const Int32 currentStringLength = *AnyPtrCast<Int32>(dataLocation + memSize);
                                 const Int32 currentPadding = Padding(currentStringLength);
                                 memcpy(newObj+END_OF_STATIC+currentDynOffs,dataLocation,memSize + sizeof(Int32) * 2 + currentStringLength);
@@ -1074,9 +1085,9 @@ namespace Internal
                         }
                         else //the member this call is all about
                         {
-                            const size_t startOfElement=GetOffset(newObj, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
+                            const size_t startOfElement=GetOffset(newObj, member)+(MEMBER_STATUS_LENGTH_LONG+sizeof(T))*index;
                             newObj[startOfElement] = MemberStatusHandler::ToInternalFormat(false,true,true);
-                            *AnyPtrCast<Offset>(newObj + startOfElement + MEMBER_STATUS_LENGTH) = END_OF_STATIC + currentDynOffs;
+                            *AnyPtrCast<Offset>(newObj + startOfElement + MEMBER_STATUS_LENGTH_LONG) = END_OF_STATIC + currentDynOffs;
 
                             *AnyPtrCast<T>(newObj + END_OF_STATIC + currentDynOffs) = val;
                             *AnyPtrCast<Int32>(newObj + END_OF_STATIC + currentDynOffs + sizeof(T)) = newStringLength;
