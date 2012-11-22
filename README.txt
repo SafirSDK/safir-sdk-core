@@ -1,4 +1,4 @@
-Welcome to Safir SDK Core 4.3.11.
+Welcome to Safir SDK Core 4.3.12.
 
 Safir SDK Core is released under the GPL v3 license, a copy of which can be found in COPYING.txt.
 
