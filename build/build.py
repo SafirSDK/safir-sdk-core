@@ -415,8 +415,9 @@ class BuilderBase(object):
 
     def interpret_test_output(self,output):
         match = re.search(r"tests passed, ([0-9]+) tests failed out of ([0-9]+)",output)
-        if len(match.groups()) != 2:
-            logger.log("Failed to parse test output!")
+        if not match:
+            if output.find("No tests were found") == -1:
+                logger.log("Failed to parse test output!")
             return
         failed = int(match.group(1))
         tests = int(match.group(2))
