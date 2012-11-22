@@ -139,8 +139,11 @@ namespace Internal
                                 {
                                     ostr << "Parameter TerminateDoseMainWhenUnrecoverableError is set to false"
                                         " which means that dose_main will not be terminated!!" << std::endl;
-                                    lllerr << ostr.str().c_str();
-                                    Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+                                    // Temporarily removed log output in the case that dose_main should not be terminated. The reason
+                                    // is that time adjustments can cause a false indication that a thread is hanging and in this case
+                                    // we don't want logs when in fact dose_main continues to run.
+                                    //lllerr << ostr.str().c_str();
+                                    //Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
                                     it->second.errorLogIsGenerated = true;
                                 }                           
                             }
