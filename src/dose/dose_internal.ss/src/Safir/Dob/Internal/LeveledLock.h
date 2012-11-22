@@ -46,7 +46,8 @@ namespace Internal
     //
     // Since keeping track of the held levels imposes a significant overhead (~400x),
     // compared to "native" locks, the check is performed only if the code is not built
-    // with the preprocessor symbol NDEBUG
+    // with the preprocessor symbol NDEBUG. It is also possible to turn off in debug builds
+    // by defining the DOSE_NO_LOCK_CHECKING symbol.
     //
     // Sometimes there is a need to acquire locks on the same level in different order
     // in different parts of the code. To avoid deadlock in this case, a lock at a higher level,
@@ -76,7 +77,7 @@ namespace Internal
 
         inline void AddLevel()
         {
-#ifndef NDEBUG
+#if !defined(NDEBUG) && !defined(DOSE_NO_LOCK_CHECKING)
             Check();
             LeveledLockHelper::Instance().AddLevel(level);
 #endif
@@ -84,7 +85,7 @@ namespace Internal
 
         inline void RemoveLevel()
         {
-#ifndef NDEBUG
+#if !defined(NDEBUG) && !defined(DOSE_NO_LOCK_CHECKING)
             LeveledLockHelper::Instance().RemoveLevel(level);
 #endif
         }

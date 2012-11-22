@@ -6,7 +6,7 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 FIND_PACKAGE(Boost COMPONENTS system thread)
 
-#ADD_SUBDIRECTORY(signals_test)
+ADD_SUBDIRECTORY(signals_test)
 
 ADD_EXECUTABLE(distribution_data_test distribution_data_test.cpp)
 ADD_EXECUTABLE(lamport_clock_test lamport_clock_test.cpp)
