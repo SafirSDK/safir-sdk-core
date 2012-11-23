@@ -10398,10 +10398,10 @@ public class Test {
                 int beginningOfUnused = InternalOperations.formatBlob(blob,
                         blobSize, -2925416069731213711L);
                 check(BlobOperations.getTypeId(blob) == -2925416069731213711L);
-                check(beginningOfUnused == 1432);
+                check(beginningOfUnused == 992);
 
                 MemberTypes mt = new MemberTypes();
-                check(mt.calculateBlobSize() == 1432);
+                check(mt.calculateBlobSize() == 992);
             }
 
             // int32 container testing
