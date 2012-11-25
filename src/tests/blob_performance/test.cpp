@@ -33,10 +33,13 @@ int main()
     obj->StringMember() = L"hello sail"; //or! :-)
     obj->EntityIdMember() = EntityId(DotsTest::MemberTypes::ClassTypeId,
                                      InstanceId(L"foooofjklsakdfjlaksdjfklfjjfeijfijijasijfasdf"));
+    obj->BooleanMember() = true;
     obj->Int32Member() = 10;
     obj->Int64Member() = 10;
     obj->Float64Member() = 10.0;
     obj->Float32Member() = 10.0f;
+    obj->Meter32Member() = 10.0f;
+    obj->Meter64Member() = 10.0f;
     obj->ObjectMember() = DotsTest::TestItem::Create();
 
     std::wcout << "CalculateBlobSize: " << obj->CalculateBlobSize() << std::endl;
