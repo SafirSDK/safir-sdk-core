@@ -1031,7 +1031,7 @@ namespace Safir.Dob.Typesystem
                      ref beginningOfUnused);
                 if (stringLength != 0)
                 {
-                    Marshal.WriteByte(stringStart, 8 + 4*2 + utf8Bytes.Length, 0); //add '\0'
+                    Marshal.WriteByte(stringStart, 8 + 4 + utf8Bytes.Length, 0); //add '\0'
                 }
             }
             else if (container.IsChanged())
@@ -1100,7 +1100,7 @@ namespace Safir.Dob.Typesystem
 
                 if (stringLength != 0)
                 {
-                    Marshal.WriteByte(stringStart, 16 + 4*2 + utf8Bytes.Length, 0); //add '\0'
+                    Marshal.WriteByte(stringStart, 16 + 4 + utf8Bytes.Length, 0); //add '\0'
                 }
             }
             else if (container.IsChanged())
@@ -1166,7 +1166,7 @@ namespace Safir.Dob.Typesystem
 
                 if (stringLength != 0)
                 {
-                    Marshal.WriteByte(stringStart, 8 + 4*2 + utf8Bytes.Length, 0); //add '\0'
+                    Marshal.WriteByte(stringStart, 8 + 4 + utf8Bytes.Length, 0); //add '\0'
                 }
             }
             else if (container.IsChanged())
@@ -1232,7 +1232,7 @@ namespace Safir.Dob.Typesystem
 
                 if (stringLength != 0)
                 {
-                    Marshal.WriteByte(stringStart, 8 + 4*2 + utf8Bytes.Length, 0); //add '\0'
+                    Marshal.WriteByte(stringStart, 8 + 4 + utf8Bytes.Length, 0); //add '\0'
                 }
             }
             else if (container.IsChanged())

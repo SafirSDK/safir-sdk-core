@@ -784,21 +784,6 @@ namespace @_NAMESPACE_@
 @@END_TABLE@@
         }
 
-        // Calculate needed padding to get 8 byte alignment
-        private static System.Int32 Pad(System.Int32 unpaddedSize) 
-        {
-            System.Int32 pad = 8 - unpaddedSize % 8;
-            if (pad == 8)
-            {
-                return unpaddedSize;
-            }
-            else
-            {
-                return unpaddedSize + pad;
-            }
-        }
-
-
         override public System.Int32 CalculateBlobSize()
         {
             Init();
@@ -811,7 +796,7 @@ namespace @_NAMESPACE_@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=String
             for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
             {
-                size += Pad(m_@_MEMBER_@Member[i].Utf8StringLength());
+                size += m_@_MEMBER_@Member[i].Utf8StringLength();
             }
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
             for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
@@ -823,7 +808,7 @@ namespace @_NAMESPACE_@
             {
                 if (!m_@_MEMBER_@Member[i].IsNull())
                 {
-                    size += Pad(m_@_MEMBER_@Member[i].Val.Length);
+                    size += m_@_MEMBER_@Member[i].Val.Length;
                 }
             }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
@@ -831,7 +816,7 @@ namespace @_NAMESPACE_@
             {
                 if (!m_@_MEMBER_@Member[i].IsNull() && m_@_MEMBER_@Member[i].Val.RawString.Length != 0)
                 {
-                    size += 8 + 4 * 2 + Pad(m_@_MEMBER_@Member[i].Val.Utf8StringLength());
+                    size += 8 + 4 + m_@_MEMBER_@Member[i].Val.Utf8StringLength();
                 }
             }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
@@ -839,36 +824,36 @@ namespace @_NAMESPACE_@
             {
                 if (!m_@_MEMBER_@Member[i].IsNull() && m_@_MEMBER_@Member[i].Val.InstanceId.RawString.Length != 0)
                 {
-                    size += 16 + 4 * 2 + Pad(m_@_MEMBER_@Member[i].Val.InstanceId.Utf8StringLength());
+                    size += 16 + 4 + m_@_MEMBER_@Member[i].Val.InstanceId.Utf8StringLength();
                 }
             }
 @@END_IF@@
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=String
-            size += Pad(m_@_MEMBER_@Member.Utf8StringLength());
+            size += m_@_MEMBER_@Member.Utf8StringLength();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
             size += m_@_MEMBER_@Member.CalculateBlobSize();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
             if (!m_@_MEMBER_@Member.IsNull())
             {
-                size += Pad(m_@_MEMBER_@Member.Val.Length);
+                size += m_@_MEMBER_@Member.Val.Length;
             }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
             if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.Val.RawString.Length != 0)
             {
-                size += 8 + 4*2 + Pad(m_@_MEMBER_@Member.Val.Utf8StringLength());
+                size += 8 + 4 + m_@_MEMBER_@Member.Val.Utf8StringLength());
             }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
             if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.Val.InstanceId.RawString.Length != 0)
             {
-                size += 16 + 4*2 + Pad(m_@_MEMBER_@Member.Val.InstanceId.Utf8StringLength());
+                size += 16 + 4 + m_@_MEMBER_@Member.Val.InstanceId.Utf8StringLength();
             }
 @@END_IF@@
 @@END_IF@@
 @@END_IF@@
 
 @@END_TABLE@@
-            return Pad(size);
+            return size;
         }
 
         override public void WriteToBlob(System.IntPtr blob, ref System.IntPtr beginningOfUnused)
@@ -917,16 +902,6 @@ namespace @_NAMESPACE_@
 @@END_IF@@
 
 @@END_TABLE@@
-
-            //Check that calculateBlobSize and writeToBlob agree on the sizes...
-            if(ClassTypeId == Safir.Dob.Typesystem.BlobOperations.GetTypeId(blob) &&
-               beginningOfUnused.ToInt64() != blob.ToInt64() + Safir.Dob.Typesystem.BlobOperations.GetSize(blob))
-            {
-                Console.WriteLine("writeToBlob: unexpected blob size mismatch! overwrite by " + 
-                                  (beginningOfUnused.ToInt64() - blob.ToInt64() - 
-                                   Safir.Dob.Typesystem.BlobOperations.GetSize(blob)));
-                Environment.Exit(1);
-            }
         }
 
         #endregion

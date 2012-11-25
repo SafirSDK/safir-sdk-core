@@ -52,7 +52,6 @@ namespace Internal
         struct BlobHeader
         {
             Size   size;
-            Size   padding;
             TypeId typeId;
         };
 
@@ -64,10 +63,9 @@ namespace Internal
         //**********************************************************
         static const Size OFFSET_SIZE                   = 0;
         static const Size OFFSET_TYPE_ID                = 8;
-        static const Size OFFSET_HEADER_LENGTH          = 16;
+        static const Size OFFSET_HEADER_LENGTH          = 12;
 
-        static const Size MEMBER_STATUS_LENGTH_SHORT    = sizeof(char) * 4; //4
-        static const Size MEMBER_STATUS_LENGTH_LONG     = sizeof(char) * 8; //8
+        static const Size MEMBER_STATUS_LENGTH          = sizeof(char); //1
 
         static const Size OFFSET_MEMBER_LENGTH          =   sizeof(Offset); //4
 
@@ -84,14 +82,14 @@ namespace Internal
         template <class T>
         static inline T * AnyPtrCast(char * const blob)
         {
-            CheckAlignment<T>(blob);
+            //CheckAlignment<T>(blob);
             return static_cast<T*>(static_cast<void*>(blob));
         }
 
         template <class T>
         static inline const T * AnyPtrCast(const char * const blob)
         {
-            CheckAlignment<T>(blob);
+            //CheckAlignment<T>(blob);
             return AnyPtrCast<T>(const_cast<char*>(blob));
         }
 
@@ -154,21 +152,20 @@ namespace Internal
                                                          const bool isChanged,
                                                          char * & beginningOfUnused)
         {
-            BOOST_STATIC_ASSERT(sizeof(T) % 8 == 0);
-            const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH_LONG+sizeof(T))*index;
+            const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
             if (strVal != NULL) //if we have a string
             {
                 char * const dataLocation = beginningOfUnused;
-                *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH_LONG) = static_cast<Offset>(beginningOfUnused - blob);
-                beginningOfUnused += sizeof(T) + sizeof(Int32)*2 + stringLength; //the value + the string length + the string itself
-                beginningOfUnused += Padding(stringLength);
+                *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH) = static_cast<Offset>(beginningOfUnused - blob);
+                beginningOfUnused += sizeof(T) + sizeof(Int32) + stringLength; //the value + the string length + the string itself
+
                 *AnyPtrCast<T>(dataLocation) = hashVal;
                 *AnyPtrCast<Int32>(dataLocation + sizeof(T)) = stringLength;
-                strncpy(dataLocation + sizeof(T) + sizeof(Int32)*2,strVal,stringLength);
+                strncpy(dataLocation + sizeof(T) + sizeof(Int32),strVal,stringLength);
             }
             else //no string
             {
-                *AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH_LONG) = hashVal;
+                *AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH) = hashVal;
             }
 
             //Set status
@@ -245,9 +242,8 @@ namespace Internal
                                               const ArrayIndex index,
                                               T & t)
         {
-            const Size memberStatusLength = BasicTypes::SizeOf<T>() == 4 ? MEMBER_STATUS_LENGTH_SHORT : MEMBER_STATUS_LENGTH_LONG;
-            size_t startOfElement=GetOffset(blob, member)+(memberStatusLength+BasicTypes::SizeOf<T>())*index;
-            t=*AnyPtrCast<T>(blob+startOfElement+memberStatusLength);
+            size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
+            t=*AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH);
             const char* tmp=blob + startOfElement;
             InternalMemberStatus s=static_cast<InternalMemberStatus>(tmp[0]);
             return s;
@@ -259,9 +255,8 @@ namespace Internal
                               const MemberIndex member,
                               const ArrayIndex index)
         {
-            const Size memberStatusLength = BasicTypes::SizeOf<T>() == 4 ? MEMBER_STATUS_LENGTH_SHORT : MEMBER_STATUS_LENGTH_LONG;
-            size_t startOfElement=GetOffset(blob, member)+(memberStatusLength+BasicTypes::SizeOf<T>())*index;
-            T* t=AnyPtrCast<T>(blob+startOfElement+memberStatusLength);
+            size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
+            T* t=AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH);
             (*t)=val;
         }
 
@@ -273,19 +268,18 @@ namespace Internal
                                                                 T & val,
                                                                 const char * & strVal)
         {
-            BOOST_STATIC_ASSERT(sizeof(T) % 8 == 0);
-            const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH_LONG+sizeof(T))*index;
+            const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
             const InternalMemberStatus status = blob[startOfElement];
             if (MemberStatusHandler::HasDynamicPart(status))
             {
-                const Offset dynOffs = *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH_LONG);
+                const Offset dynOffs = *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
                 val = *AnyPtrCast<T>(blob + dynOffs);
-                strVal = blob + dynOffs + sizeof(T) + sizeof(Int32) * 2;
+                strVal = blob + dynOffs + sizeof(T) + sizeof(Int32);
                 assert(strVal[0] != '\0');
             }
             else
             {
-                val = *AnyPtrCast<T>(blob + startOfElement + MEMBER_STATUS_LENGTH_LONG);
+                val = *AnyPtrCast<T>(blob + startOfElement + MEMBER_STATUS_LENGTH);
                 strVal = NULL;
             }
 
@@ -303,8 +297,6 @@ namespace Internal
     private:
         BlobLayout(); //declared but not defined to prevent creation of this class
 
-        static Int32 Padding(const Int32 size);
-        
         static Offset GetOffset(const char * const blob, const MemberIndex member);
         static void SetOffset(char * const blob, const MemberIndex member, const Offset offset);
         static Size GetNumberOfBytesInString(const char* s, size_t maxNumberOfLetters);

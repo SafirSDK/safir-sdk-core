@@ -582,15 +582,12 @@ namespace Internal
 #ifdef REGISTER_TIMES
             Typesystem::Int32 m_id;
 #endif
-            Typesystem::Int32 m_padding;
-
         };
 
         struct ConnectHeader
         {
             Header m_commonHeader;
             Typesystem::Int32 m_counter;
-            Typesystem::Int32 m_padding;
         };
 
         struct MessageHeader
@@ -613,7 +610,6 @@ namespace Internal
             Typesystem::Int32               m_handlerStrSize;
             InstanceIdPolicy::Enumeration   m_instanceIdPolicy;
             RegistrationStateKind           m_kind;
-            Typesystem::Int32               m_padding;
         };
 
         /* A few thoughts on the way to store timestamps in entity states:
@@ -674,7 +670,6 @@ namespace Internal
             bool dummy1;
             bool dummy2;
             bool dummy3;
-            Typesystem::Int32 m_padding;
         };
 
         struct EntityUpdateRequestHeader
@@ -694,7 +689,6 @@ namespace Internal
         {
             Header m_commonHeader;
             InternalRequestId m_requestId;
-            Typesystem::Int32 m_padding;
             ConnectionId m_receiver;
         };
 
@@ -781,14 +775,14 @@ namespace Internal
         public:
             static inline char * Allocate(const size_t size)
             {
-                char * data = static_cast<char*>(GetSharedMemory().allocate(size + sizeof(AtomicUint32)*2)) + sizeof(AtomicUint32)*2;
+                char * data = static_cast<char*>(GetSharedMemory().allocate(size + sizeof(AtomicUint32))) + sizeof(AtomicUint32);
                 GetCount(data) = 0;
                 return data;
             }
 
             static inline AtomicUint32& GetCount(const char * p)
             {
-                return *static_cast<AtomicUint32*>(static_cast<void *>(const_cast<char*>(p - sizeof(AtomicUint32)*2)));
+                return *static_cast<AtomicUint32*>(static_cast<void *>(const_cast<char*>(p - sizeof(AtomicUint32))));
             }
 
             static inline void AddRef(const char * p)
@@ -800,7 +794,7 @@ namespace Internal
                 //if the old value is 0 the new value is 0 and we can deallocate.
                 if(1 == GetCount(p)--)
                 {
-                    GetSharedMemory().deallocate(const_cast<char*>(p) - sizeof(AtomicUint32)*2);
+                    GetSharedMemory().deallocate(const_cast<char*>(p) - sizeof(AtomicUint32));
                 }
             }
 

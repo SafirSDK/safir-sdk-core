@@ -434,7 +434,6 @@ namespace @_NAMESPACEV_@
 #include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <@_REPLACE_ALL(\./\/):UNIT_@.h>
 #include <dll_imports.h>
-#include <iostream>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -469,19 +468,6 @@ namespace @_NAMESPACEV_@
         const bool registered =
             Safir::Dob::Typesystem::ObjectFactory::Instance().RegisterClass(@_CLASS_@::ClassTypeId, CreateObject);
         const bool dlls_loaded = Safir::Dob::Typesystem::Dll_Imports::Init();
-
-        Safir::Dob::Typesystem::Int32 Pad(const Safir::Dob::Typesystem::Int32 unpaddedSize)
-        {
-            const Safir::Dob::Typesystem::Int32 pad = 8 - unpaddedSize % 8;
-            if (pad == 8) 
-            {
-                return unpaddedSize;
-            }
-            else
-            {
-                return unpaddedSize + pad;
-            }
-        }
     }
 
     static bool isInitialised = false;
@@ -609,7 +595,7 @@ namespace @_NAMESPACEV_@
         for (Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@ContainerArray::const_iterator it = m_@_MEMBER_@Member.begin();
              it != m_@_MEMBER_@Member.end(); ++it)
         {
-            size += Pad(it->Utf8StringLength());
+            size += it->Utf8StringLength();
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Binary)
         for (@_MEMBERTYPE_@ContainerArray::const_iterator it = m_@_MEMBER_@Member.begin();
@@ -617,7 +603,7 @@ namespace @_NAMESPACEV_@
         {
             if (!it->IsNull())
             {
-                size += Pad(static_cast<Safir::Dob::Typesystem::Int32>(it->GetVal().size()));
+                size += static_cast<Safir::Dob::Typesystem::Int32>(it->GetVal().size());
             }
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
@@ -626,7 +612,7 @@ namespace @_NAMESPACEV_@
         {
             if (!it->IsNull() && !it->GetVal().GetRawString().empty())
             {
-                size += 8 + 4*2 + Pad(it->GetVal().Utf8StringLength());
+                size += 8 + 4 + it->GetVal().Utf8StringLength();
             }
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
@@ -635,7 +621,7 @@ namespace @_NAMESPACEV_@
         {
             if (!it->IsNull() && !it->GetVal().GetInstanceId().GetRawString().empty())
             {
-                size += 16 + 4*2 + Pad(it->GetVal().GetInstanceId().Utf8StringLength());
+                size += 16 + 4 + it->GetVal().GetInstanceId().Utf8StringLength();
             }
         }
 @@ELSE@@
@@ -646,29 +632,29 @@ namespace @_NAMESPACEV_@
         }
 @@END_IF@@
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = String)
-        size += Pad(m_@_MEMBER_@Member.Utf8StringLength());
+        size += m_@_MEMBER_@Member.Utf8StringLength();
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Object)
         size += m_@_MEMBER_@Member.CalculateBlobSize();
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Binary)
         if (!m_@_MEMBER_@Member.IsNull())
         {
-            size += Pad(static_cast<Safir::Dob::Typesystem::Int32>(m_@_MEMBER_@Member.GetVal().size()));
+            size += static_cast<Safir::Dob::Typesystem::Int32>(m_@_MEMBER_@Member.GetVal().size());
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
         if (!m_@_MEMBER_@Member.IsNull() && !m_@_MEMBER_@Member.GetVal().GetRawString().empty())
         {
-            size += 8 + 4*2 + Pad(m_@_MEMBER_@Member.GetVal().Utf8StringLength());
+            size += 8 + 4 + m_@_MEMBER_@Member.GetVal().Utf8StringLength();
         }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
         if (!m_@_MEMBER_@Member.IsNull() && !m_@_MEMBER_@Member.GetVal().GetInstanceId().GetRawString().empty())
         {
-            size += 16 + 4*2 + Pad(m_@_MEMBER_@Member.GetVal().GetInstanceId().Utf8StringLength());
+            size += 16 + 4 + m_@_MEMBER_@Member.GetVal().GetInstanceId().Utf8StringLength();
         }
 @@END_IF@@
 @@END_IF@@
 @@END_TABLE@@
 
-        return Pad(size);
+        return size;
     }
 
     void
@@ -724,13 +710,6 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@END_TABLE@@
 
-        //Check that CalculateBlobSize and WriteToBlob agree on the sizes...
-        if(ClassTypeId == Safir::Dob::Typesystem::BlobOperations::GetTypeId(blob) && 
-           beginningOfUnused != blob + Safir::Dob::Typesystem::BlobOperations::GetSize(blob))
-        {
-            std::wcerr << "WriteToBlob: unexpected blob size mismatch! overwrite by " << static_cast<int>(beginningOfUnused - blob - Safir::Dob::Typesystem::BlobOperations::GetSize(blob)) << std::endl;
-            abort();
-        }
     }
 
     const Safir::Dob::Typesystem::ContainerBase &

@@ -400,12 +400,7 @@ namespace Internal
                 ParameterOffsetCast<ParameterOffset>(m_firstFree);
             *currentOffset = nextString;
             strcpy(nextString.get(), val.m_values[ix].m_value.c_str());
-            const size_t size = val.m_values[ix].m_value.size() + 1;
-            nextString += size;
-            if (size % 8 != 0) //pad to get alignment
-            {
-                nextString += 8 - (size % 8);
-            }
+            nextString += val.m_values[ix].m_value.size() + 1;
             m_firstFree += sizeof(ParameterOffset);
         }
         m_firstFree = nextString;

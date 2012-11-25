@@ -1038,19 +1038,6 @@ public class @_CLASS_@
 @@END_TABLE@@
     }
 
-    /** Calculate needed padding to get 8 byte alignment */
-    private static int pad(int unpaddedSize) {
-        int pad = 8 - unpaddedSize % 8;
-        if (pad == 8)
-        {
-            return unpaddedSize;
-        }
-        else
-        {
-            return unpaddedSize + pad;
-        }
-    }
-
     /**
      * @see com.saabgroup.safir.dob.typesystem.Object#calculateBlobSize()
      */
@@ -1065,18 +1052,18 @@ public class @_CLASS_@
 @@IF@@ @_EXIST:MEMBERISARRAY_@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=String
         for (com.saabgroup.safir.dob.typesystem.StringContainer cont: m_@_MEMBER_@Member) {
-            size += pad(cont.utf8StringLength());
+            size += cont.utf8StringLength();
         }
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=EntityId
         for (@_MEMBERTYPE_@Container cont: m_@_MEMBER_@Member) {
             if (!cont.isNull() && !cont.getVal().getInstanceId().getRawString().isEmpty()){
-                size += 16 + 4*2 + pad(cont.getVal().getInstanceId().utf8StringLength());
+                size += 16 + 4 + cont.getVal().getInstanceId().utf8StringLength();
             }
         }
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=InstanceId or @_UNIFORM_MEMBERTYPE_@=ChannelId or @_UNIFORM_MEMBERTYPE_@=HandlerId
         for (@_MEMBERTYPE_@Container cont: m_@_MEMBER_@Member){
             if (!cont.isNull() && !cont.getVal().getRawString().isEmpty()){
-                size += 8 + 4*2 + pad(cont.getVal().utf8StringLength());
+                size += 8 + 4 + cont.getVal().utf8StringLength();
             }
         }
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
@@ -1087,33 +1074,33 @@ public class @_CLASS_@
         for (com.saabgroup.safir.dob.typesystem.BinaryContainer cont: m_@_MEMBER_@Member){
             if (!cont.isNull())
             {
-                size += pad(cont.getVal().length);
+                size += cont.getVal().length;
             }
         }
 @@END_IF@@
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=String
-        size += pad(m_@_MEMBER_@Member.utf8StringLength());
+        size += m_@_MEMBER_@Member.utf8StringLength();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=EntityId
         if (!m_@_MEMBER_@Member.isNull() && !m_@_MEMBER_@Member.getVal().getInstanceId().getRawString().isEmpty()){
-            size += 16 + 4*2 + pad(m_@_MEMBER_@Member.getVal().getInstanceId().utf8StringLength());
+            size += 16 + 4 + m_@_MEMBER_@Member.getVal().getInstanceId().utf8StringLength();
         }
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=InstanceId or @_UNIFORM_MEMBERTYPE_@=ChannelId or @_UNIFORM_MEMBERTYPE_@=HandlerId
         if (!m_@_MEMBER_@Member.isNull() && !m_@_MEMBER_@Member.getVal().getRawString().isEmpty()){
-            size += 8 + 4*2 + pad(m_@_MEMBER_@Member.getVal().utf8StringLength());
+            size += 8 + 4 + m_@_MEMBER_@Member.getVal().utf8StringLength();
         }
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
         size += m_@_MEMBER_@Member.calculateBlobSize();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
         if (!m_@_MEMBER_@Member.isNull())
         {
-            size += pad(m_@_MEMBER_@Member.getVal().length);
+            size += m_@_MEMBER_@Member.getVal().length;
         }
 @@END_IF@@
 @@END_IF@@
 @@END_TABLE@@
 
-        return pad(size);
+        return size;
     }
 
 
@@ -1148,15 +1135,6 @@ public class @_CLASS_@
 @@END_IF@@
 @@END_TABLE@@
 
-        //Check that calculateBlobSize and writeToBlob agree on the sizes...
-        if(ClassTypeId == com.saabgroup.safir.dob.typesystem.BlobOperations.getTypeId(blob) &&
-           beginningOfUnused != com.saabgroup.safir.dob.typesystem.BlobOperations.getSize(blob))
-        {
-            System.out.println("writeToBlob: unexpected blob size mismatch! overwrite by " + 
-                               (beginningOfUnused - com.saabgroup.safir.dob.typesystem.BlobOperations.getSize(blob)));
-            System.exit(1);
-        }
-        
         return beginningOfUnused;
     }
 

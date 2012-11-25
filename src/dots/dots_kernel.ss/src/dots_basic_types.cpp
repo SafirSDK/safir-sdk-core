@@ -95,7 +95,7 @@ namespace Internal
         switch(m)
         {
         case BooleanMemberType:
-            return sizeof(bool) * 4;
+            return sizeof(bool);
 
         case EnumerationMemberType:
             return sizeof(EnumInternal);
