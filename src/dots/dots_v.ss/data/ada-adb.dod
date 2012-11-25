@@ -1154,7 +1154,7 @@ package body @_NAMESPACE_@.@_CLASS_@ is
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
       for Idx in 0 .. @_MEMBER_@_Size - 1 loop
          if not Self.@_MEMBER_@_Member.Element (Idx).Is_Null then
-            Size := Size + Safir.Dob.Typesystem.Int_32 (Self.@_MEMBER_@_Member.Element (Idx).Get_Val.Length) + 4;
+            Size := Size + Safir.Dob.Typesystem.Int_32 (Self.@_MEMBER_@_Member.Element (Idx).Get_Val.Length);
          end if;
       end loop;
 @@END_IF@@
@@ -1183,7 +1183,7 @@ package body @_NAMESPACE_@.@_CLASS_@ is
       end if;
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
       if not Self.@_MEMBER_@_Member.Is_Null then
-         Size := Size + Safir.Dob.Typesystem.Int_32 (Self.@_MEMBER_@_Member.Get_Val.Length) + 4;
+         Size := Size + Safir.Dob.Typesystem.Int_32 (Self.@_MEMBER_@_Member.Get_Val.Length);
       end if;
 @@END_IF@@
 @@END_IF@@
