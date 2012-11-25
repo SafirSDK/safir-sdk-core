@@ -889,9 +889,7 @@ package body Safir.Dob.Typesystem.Blob_Operations is
             Array_Index,
             C.char'Val (Boolean'Pos (Value.Is_Changed)),
             Beginning_Of_Unused);
-         To_Int_Ptr (Binary_Start).all := Binary_Size;
          if Binary_Size > 0 then
-            Binary_Start := Binary_Start + 4;  -- Adjust for the initial length Int
             for I in Value.Get_Val.First_Index .. Value.Get_Val.Last_Index loop
                Binary_Start.all := To_Char (Value.Get_Val.Element (I));
                Binary_Start := Binary_Start + 1;
