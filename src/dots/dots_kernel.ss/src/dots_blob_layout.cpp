@@ -40,6 +40,16 @@ namespace Typesystem
 {
 namespace Internal
 {
+    //mandatory definition for static const declarations.
+    const Size BlobLayout::OFFSET_SIZE;
+    const Size BlobLayout::OFFSET_TYPE_ID;
+    const Size BlobLayout::OFFSET_HEADER_LENGTH;
+    const Size BlobLayout::MEMBER_STATUS_LENGTH_SHORT;
+    const Size BlobLayout::MEMBER_STATUS_LENGTH_LONG;
+    const Size BlobLayout::OFFSET_MEMBER_LENGTH;
+    const Size BlobLayout::DYNAMIC_MEMBER_SIZE;
+
+    
     Int32 BlobLayout::Padding(const Int32 size)
     {
         if (size % 8 != 0) //pad to get alignment
