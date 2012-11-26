@@ -841,7 +841,7 @@ namespace @_NAMESPACE_@
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
             if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.Val.RawString.Length != 0)
             {
-                size += 8 + 4 + m_@_MEMBER_@Member.Val.Utf8StringLength());
+                size += 8 + 4 + m_@_MEMBER_@Member.Val.Utf8StringLength();
             }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
             if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.Val.InstanceId.RawString.Length != 0)

@@ -209,7 +209,7 @@ namespace Internal
                                         char * & beginningOfUnused)
     {
         char * const binary = beginningOfUnused;
-        beginningOfUnused += binarySize + binarySize;
+        beginningOfUnused += binarySize;
         SetDynamicOffset(insideBlob,member,index,static_cast<Offset>(binary - insideBlob));
         SetDynamicSize(insideBlob, member, index, binarySize);
         SetStatus(false,isChanged,insideBlob,member,index);
