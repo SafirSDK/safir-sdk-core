@@ -29,6 +29,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/once.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/mem_fn.hpp>
 #include <ostream>
 
 /**
@@ -44,12 +45,12 @@
   * values may cause unexpected behavior).
   */
 #define lllog(level) if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() < level) ; \
-                     else if(boost::unique_lock<boost::mutex> lck_fjki34 = \
-                             boost::unique_lock<boost::mutex>(Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().m_lock)) ; \
+                     else if(Safir::Utilities::Internal::Internal::LowLevelLogger::Magic lck_fjki34 =           \
+                             Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().MagicLock()) ;    \
                      else Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
 #define lllout lllog(7)
-#define lllerr if(boost::unique_lock<boost::mutex> lck_fjki34 = \
-                  boost::unique_lock<boost::mutex>(Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().m_lock)) ; \
+#define lllerr if(Safir::Utilities::Internal::Internal::LowLevelLogger::Magic lck_fjki34 =        \
+                  Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().MagicLock()) ; \
                else Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
 
 namespace Safir
@@ -84,9 +85,33 @@ namespace Internal
                     return *m_pLogLevel;
                 }
             }
+
+            //This is a magic unlocker that has the strange behaviour of having a bool
+            //operator that always returns false. It is for the use in preprocessor
+            //magic only.
+            class Magic
+            {
+            public:
+                explicit Magic(boost::mutex& mutex):
+                    m_lock(&mutex,boost::mem_fn(&boost::mutex::unlock))
+                {
+                }
+
+                operator bool() const 
+                {
+                    return false;
+                }
+            private:
+                boost::shared_ptr<boost::mutex> m_lock;
+            };
+
+            //Returns a Magic object that will unlock the lock when destroyed
+            const Magic MagicLock()
+            {
+                Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().m_lock.lock();
+                return Magic(Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().m_lock);
+            }
             
-            //this lock needs to be taken before logging to the logger!
-            boost::mutex m_lock;
         private:
             /** Constructor*/
             explicit LowLevelLogger();
@@ -109,12 +134,16 @@ namespace Internal
                 static boost::once_flag m_onceFlag;
             };
 
-        class Impl;
-        class LoggingImpl;
-        class FallbackImpl;
-        boost::shared_ptr<Impl> m_impl;
+            class Impl;
+            class LoggingImpl;
+            class FallbackImpl;
+            boost::shared_ptr<Impl> m_impl;
+            
+            const int* m_pLogLevel;            
 
-        const int* m_pLogLevel;            
+            //this lock needs to be taken before logging to the logger!
+            boost::mutex m_lock;
+
         };
 #ifdef _MSC_VER
 #pragma warning (pop)
