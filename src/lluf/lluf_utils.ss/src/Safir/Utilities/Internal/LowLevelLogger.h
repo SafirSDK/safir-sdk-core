@@ -28,12 +28,13 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/once.hpp>
+#include <boost/thread/mutex.hpp>
 #include <ostream>
 
 /**
   * This is a utility for logging to file that is _only_ intended for
   * use by low level parts of the Safir system. All other applications should
-  * Use some other mechanism for logging.
+  * use some other mechanism for logging.
   *
   * Just use lllog like you would any ostream
   *   lllog(1) << "hello world 1"<<std::endl;
@@ -42,9 +43,14 @@
   * Level is a value between 1 and 9 (no checks are made for this, but any other
   * values may cause unexpected behavior).
   */
-#define lllog(level) if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() < level) ; else Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
+#define lllog(level) if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() < level) ; \
+                     else if(boost::unique_lock<boost::mutex> lck_fjki34 = \
+                             boost::unique_lock<boost::mutex>(Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().m_lock)) ; \
+                     else Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
 #define lllout lllog(7)
-#define lllerr Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
+#define lllerr if(boost::unique_lock<boost::mutex> lck_fjki34 = \
+                  boost::unique_lock<boost::mutex>(Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().m_lock)) ; \
+               else Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
 
 namespace Safir
 {
@@ -78,6 +84,9 @@ namespace Internal
                     return *m_pLogLevel;
                 }
             }
+            
+            //this lock needs to be taken before logging to the logger!
+            boost::mutex m_lock;
         private:
             /** Constructor*/
             explicit LowLevelLogger();
