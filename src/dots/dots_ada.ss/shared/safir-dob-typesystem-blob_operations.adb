@@ -41,8 +41,7 @@ package body Safir.Dob.Typesystem.Blob_Operations is
 
    function To_Int_8 is new Ada.Unchecked_Conversion (C.char, Safir.Dob.Typesystem.Int_8);
    function To_Char is new Ada.Unchecked_Conversion (Safir.Dob.Typesystem.Int_8, C.char);
-   function To_Int_Ptr is new Ada.Unchecked_Conversion (Char_Ptrs.Pointer, Int_Ptrs.Pointer);
-
+   
    function Get_Type_Id (Blob   : in Safir.Dob.Typesystem.Blob_T)
                          return Safir.Dob.Typesystem.Type_Id is
    begin
