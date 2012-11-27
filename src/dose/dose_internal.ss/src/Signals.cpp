@@ -40,13 +40,20 @@
   #pragma warning(pop)
 #endif
 
+namespace
+{
+    const std::string GetSemaphoreName(const Safir::Dob::Internal::ConnectionId& connection)
+    {
+        return std::string("dose") + boost::lexical_cast<std::string>(connection.m_id);
+    }
+}
+
 namespace Safir
 {
 namespace Dob
 {
 namespace Internal
 {
-    const std::string Prefix = "dose";
     const char * ConnectOrOutSignalName = "DOSE_CONN_OR_OUT";
 
 
@@ -134,7 +141,7 @@ namespace Internal
                 m_semaphores.erase(it);
             }
         }
-        const std::string name = Prefix + boost::lexical_cast<std::string>(connection.m_id);
+        const std::string name = GetSemaphoreName(connection);
         return m_semaphores.insert(std::make_pair(connection.m_id,
                                                   new NamedSemaphore(name))).
             first->second;
@@ -178,7 +185,7 @@ namespace Internal
 
     void Signals::Remove(const ConnectionId& connection)
     {
-        m_waitSignals.GetSemaphore(connection)->remove();
+        NamedSemaphore::remove(GetSemaphoreName(connection));
     }
 }
 }

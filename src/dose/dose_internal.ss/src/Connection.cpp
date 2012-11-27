@@ -96,6 +96,11 @@ namespace Internal
         const std::string nameWithCounter = Typesystem::Utilities::ToUtf8(wNameWithCounter);
         m_nameWithCounter = ShmString(nameWithCounter.begin(),nameWithCounter.end());
         m_id = ConnectionId(node, contextId, CalculateIdentifier(nameWithCounter));
+
+        if (IsLocal())
+        {
+            Signals::Remove(Id());
+        }
         lllout << "In Connection constructor: Constructing '" << name.c_str() << "' id = " << m_id <<" pid = " << m_pid << std::endl;
     }
 
@@ -105,7 +110,7 @@ namespace Internal
 
         if (IsLocal())
         {
-            Signals::Instance().Remove(Id());
+            Signals::Remove(Id());
         }
     }
 

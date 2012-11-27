@@ -65,7 +65,7 @@ namespace Internal
 
         ~NamedSemaphore();
 
-        void remove();
+        static void remove(const std::string& name);
 
         void wait();
         bool try_wait();
@@ -76,7 +76,6 @@ namespace Internal
         void* m_semaphoreHandle;
 #else
         boost::interprocess::named_semaphore m_semaphore;
-        const std::string m_name;
 #endif
     };
 
@@ -115,7 +114,7 @@ namespace Internal
         }
     }
 
-    inline void NamedSemaphore::remove()
+    inline void NamedSemaphore::remove(const std::string&)
     {
 
     }
@@ -157,8 +156,7 @@ namespace Internal
 
 #else
     inline NamedSemaphore::NamedSemaphore(const std::string& name):
-        m_semaphore(boost::interprocess::open_or_create, name.c_str(), 0),
-        m_name(name)
+        m_semaphore(boost::interprocess::open_or_create, name.c_str(), 0)
     {
 
     }
@@ -168,9 +166,9 @@ namespace Internal
 
     }
 
-    inline void NamedSemaphore::remove()
+    inline void NamedSemaphore::remove(const std::string& name)
     {
-        boost::interprocess::named_semaphore::remove(m_name.c_str());
+        boost::interprocess::named_semaphore::remove(name.c_str());
     }
 
     inline void NamedSemaphore::wait()

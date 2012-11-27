@@ -38,6 +38,7 @@ int main()
     for (int i = 0; i < 100; ++i)
     {
         ConnectionId id(0,0,i);
+        Signals::Remove(id);
         connids.insert(id);
         threads.create_thread(boost::bind(user,id));
     }

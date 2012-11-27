@@ -82,9 +82,11 @@ namespace Internal
 
         /** This method causes the underlying semaphore to be deleted, so that new process may
          * not be able to get hold of the semaphore.
-         * This should be called for connections when dose_main are removing them.
+         * This should be called for connections when dose_main are removing them,
+         * and when constructing a connection so that we don't reuse some old corrupt
+         * semaphore data.
          */
-        void Remove(const ConnectionId& connectionId);
+        static void Remove(const ConnectionId& connectionId);
 
     private:
         Signals();
