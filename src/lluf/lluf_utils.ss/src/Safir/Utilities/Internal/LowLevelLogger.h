@@ -28,7 +28,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/once.hpp>
-#include <boost/thread/mutex.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 #include <boost/mem_fn.hpp>
 #include <ostream>
 
@@ -92,8 +92,8 @@ namespace Internal
             class Magic
             {
             public:
-                explicit Magic(boost::mutex& mutex):
-                    m_lock(&mutex,boost::mem_fn(&boost::mutex::unlock))
+                explicit Magic(boost::recursive_mutex& mutex):
+                    m_lock(&mutex,boost::mem_fn(&boost::recursive_mutex::unlock))
                 {
                 }
 
@@ -102,7 +102,7 @@ namespace Internal
                     return false;
                 }
             private:
-                boost::shared_ptr<boost::mutex> m_lock;
+                boost::shared_ptr<boost::recursive_mutex> m_lock;
             };
 
             //Returns a Magic object that will unlock the lock when destroyed
@@ -142,7 +142,7 @@ namespace Internal
             const int* m_pLogLevel;            
 
             //this lock needs to be taken before logging to the logger!
-            boost::mutex m_lock;
+            boost::recursive_mutex m_lock;
 
         };
 #ifdef _MSC_VER
