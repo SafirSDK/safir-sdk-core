@@ -49,12 +49,12 @@ namespace Internal
 
     Offset BlobLayout::GetOffset(const char * const blob, const MemberIndex member)
     {
-        return *AnyPtrCast<Offset>(blob+OFFSET_HEADER_LENGTH+member*OFFSET_MEMBER_LENGTH);
+        return Read<Offset>(blob+OFFSET_HEADER_LENGTH+member*OFFSET_MEMBER_LENGTH);
     }
 
     void BlobLayout::SetOffset(char * const blob, const MemberIndex member, const Offset offset)
     {
-        *AnyPtrCast<Offset>(blob+OFFSET_HEADER_LENGTH+member*OFFSET_MEMBER_LENGTH) = offset;
+        Write(blob+OFFSET_HEADER_LENGTH+member*OFFSET_MEMBER_LENGTH, offset);
     }
 
     InternalMemberStatus BlobLayout::GetStatus(const char * const blob,
@@ -66,7 +66,7 @@ namespace Internal
 
         const Size memberSize=BasicTypes::SizeOfType(mde->GetMemberType());
         const size_t startOfElement = GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+memberSize)*index;
-        return *AnyPtrCast<InternalMemberStatus>(blob + startOfElement);
+        return Read<InternalMemberStatus>(blob + startOfElement);
     }
 
     void BlobLayout::CreateBlob(const TypeId typeId, char * & blob)
@@ -83,9 +83,7 @@ namespace Internal
         const Size blobSize=cd->InitialSize();
         blob = new char[blobSize];
 
-        BlobHeader & header = *AnyPtrCast<BlobHeader>(blob);
-        header.size = blobSize;
-        header.typeId = typeId;
+        WriteHeader(blob,blobSize,typeId);
 
         Offset currentPos=OFFSET_HEADER_LENGTH+numMembers*OFFSET_MEMBER_LENGTH; //start of data part
         for (MemberIndex i=0; i < numMembers; i++)
@@ -95,14 +93,12 @@ namespace Internal
             Size tmpSize=MEMBER_STATUS_LENGTH+BasicTypes::SizeOfType(memberDesc->GetMemberType());
             for (Size ai=0; ai<memberDesc->ArrayLength(); ai++)
             {
-                char* s = AnyPtrCast<char>(blob + currentPos + ai*tmpSize);
-                s[0]=MemberStatusHandler::STARTING_VALUE;;
+                char* s = blob + currentPos + ai*tmpSize;
+                Write<char>(s, MemberStatusHandler::STARTING_VALUE);
                 if (memberDesc->GetMemberType() == StringMemberType || memberDesc->GetMemberType() == ObjectMemberType || memberDesc->GetMemberType() == BinaryMemberType)
                 {
-                    Offset* dynPartOff=AnyPtrCast<Offset>(s+MEMBER_STATUS_LENGTH);
-                    (*dynPartOff)=0;
-                    Size* dynPartSize=AnyPtrCast<Size>(s+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
-                    (*dynPartSize)=0;
+                    Write(s+MEMBER_STATUS_LENGTH,0);
+                    Write(s+MEMBER_STATUS_LENGTH + OFFSET_MEMBER_LENGTH,0);
                 }
             }
             tmpSize*=memberDesc->ArrayLength();
@@ -118,9 +114,7 @@ namespace Internal
         const ClassDescription * cd=Repository::Classes().FindClass(typeId);
         beginningOfUnused = blob + cd->InitialSize();
         const MemberIndex numMembers=cd->NumberOfMembers();
-        BlobHeader & header = *AnyPtrCast<BlobHeader>(blob);
-        header.size = blobSize;
-        header.typeId = typeId;
+        WriteHeader(blob,blobSize,typeId);
 
         Offset currentPos=OFFSET_HEADER_LENGTH+numMembers*OFFSET_MEMBER_LENGTH; //start of data part
         for (MemberIndex i=0; i<numMembers; i++)
@@ -130,14 +124,12 @@ namespace Internal
             Size tmpSize=MEMBER_STATUS_LENGTH+BasicTypes::SizeOfType(memberDesc->GetMemberType());
             for (Size ai=0; ai<memberDesc->ArrayLength(); ai++)
             {
-                char* s=AnyPtrCast<char> (blob + currentPos + ai*tmpSize);
-                s[0]=MemberStatusHandler::STARTING_VALUE;;
+                char* s=blob + currentPos + ai*tmpSize;
+                Write<char>(s,MemberStatusHandler::STARTING_VALUE);
                 if (memberDesc->GetMemberType()==StringMemberType || memberDesc->GetMemberType()==ObjectMemberType || memberDesc->GetMemberType()==BinaryMemberType)
                 {
-                    Offset* dynPartOff=AnyPtrCast<Offset>(s+MEMBER_STATUS_LENGTH);
-                    (*dynPartOff)=0;
-                    Size* dynPartSize=AnyPtrCast<Size>(s+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
-                    (*dynPartSize)=0;
+                    Write(s+MEMBER_STATUS_LENGTH,0);
+                    Write(s+MEMBER_STATUS_LENGTH + OFFSET_MEMBER_LENGTH,0);
                 }
             }
             tmpSize*=memberDesc->ArrayLength();
@@ -160,9 +152,7 @@ namespace Internal
         SetDynamicSize(insideBlob, member, index, blobSize);
         SetStatus(false,isChanged,insideBlob,member,index);
         const MemberIndex numMembers = cd->NumberOfMembers();
-        BlobHeader & header = *AnyPtrCast<BlobHeader>(childBlob);
-        header.size = blobSize;
-        header.typeId = typeId;
+        WriteHeader(childBlob,blobSize,typeId);
 
         Offset currentPos=static_cast<Offset>(OFFSET_HEADER_LENGTH+numMembers*OFFSET_MEMBER_LENGTH); //start of data part
         for (MemberIndex i=0; i<numMembers; i++)
@@ -172,14 +162,12 @@ namespace Internal
             Size tmpSize=MEMBER_STATUS_LENGTH+BasicTypes::SizeOfType(memberDesc->GetMemberType());
             for (Size ai=0; ai<memberDesc->ArrayLength(); ai++)
             {
-                char* s=AnyPtrCast<char> (childBlob + currentPos + ai*tmpSize);
-                s[0]=MemberStatusHandler::STARTING_VALUE;;
+                char* s=childBlob + currentPos + ai*tmpSize;
+                Write<char>(s,MemberStatusHandler::STARTING_VALUE);
                 if (memberDesc->GetMemberType()==StringMemberType || memberDesc->GetMemberType()==ObjectMemberType || memberDesc->GetMemberType()==BinaryMemberType)
                 {
-                    Offset* dynPartOff=AnyPtrCast<Offset>(s+MEMBER_STATUS_LENGTH);
-                    (*dynPartOff)=0;
-                    Size* dynPartSize=AnyPtrCast<Size>(s+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
-                    (*dynPartSize)=0;
+                    Write(s+MEMBER_STATUS_LENGTH,0);
+                    Write(s+MEMBER_STATUS_LENGTH + OFFSET_MEMBER_LENGTH,0);
                 }
             }
             tmpSize*=memberDesc->ArrayLength();
@@ -223,9 +211,9 @@ namespace Internal
     {
         const MemberDescription * memberDesc=Repository::Classes().FindClass(GetTypeId(blob))->GetMember(member);
         Size size=BasicTypes::SizeOfType(memberDesc->GetMemberType())+MEMBER_STATUS_LENGTH;
-        InternalMemberStatus oldStatus = *AnyPtrCast<char>(blob + GetOffset(blob, member) + index*size);
+        InternalMemberStatus oldStatus = Read<char>(blob + GetOffset(blob, member) + index*size);
         InternalMemberStatus status=MemberStatusHandler::ToInternalFormat(isNull, isChanged, MemberStatusHandler::HasDynamicPart(oldStatus));
-        *AnyPtrCast<char>(blob + GetOffset(blob, member) + index*size) = status;
+        Write<char>(blob + GetOffset(blob, member) + index*size, status);
     }
 
     bool BlobLayout::IsAnythingChanged(const char * const blob)
@@ -241,7 +229,7 @@ namespace Internal
 
             for (Size ix=0; ix<memberDesc->ArrayLength(); ix++)
             {
-                const InternalMemberStatus status=*AnyPtrCast<InternalMemberStatus>(blob + GetOffset(blob, member) + ix*size);
+                const InternalMemberStatus status=Read<InternalMemberStatus>(blob + GetOffset(blob, member) + ix*size);
                 if (MemberStatusHandler::HasChanged(status))
                 {
                     return true;
@@ -274,7 +262,7 @@ namespace Internal
             Offset memOffs=GetOffset(blob, member);
             for (Size ix=0; ix<memberDesc->ArrayLength(); ix++)
             {
-                char* s= AnyPtrCast<char>(blob + memOffs + ix*size);
+                char* s= blob + memOffs + ix*size;
                 const bool isNull = MemberStatusHandler::IsNull(static_cast<InternalMemberStatus>(s[0]));
                 const bool hasDynPart = MemberStatusHandler::HasDynamicPart(static_cast<InternalMemberStatus>(s[0]));
                 s[0] = MemberStatusHandler::ToInternalFormat(isNull,changed,hasDynPart);
@@ -307,7 +295,7 @@ namespace Internal
             Offset memOffs=GetOffset(blob, member);
             for (Size ix=0; ix<memberDesc->ArrayLength(); ix++)
             {
-                char* s=AnyPtrCast<char>(blob + memOffs + ix*size);
+                char* s=blob + memOffs + ix*size;
                 MemberStatusHandler::SetChanged(s[0],false);
             }
         }
@@ -334,7 +322,7 @@ namespace Internal
             Size size=MEMBER_STATUS_LENGTH+BasicTypes::SizeOfType(memberDesc->GetMemberType());
             for (Size ix=0; ix<memberDesc->ArrayLength(); ix++)
             {
-                const InternalMemberStatus status=*AnyPtrCast<InternalMemberStatus>(val + GetOffset(val, member) + ix*size);
+                const InternalMemberStatus status=Read<char>(val + GetOffset(val, member) + ix*size);
 
                 if (MemberStatusHandler::HasChanged(status))
                 {
@@ -508,7 +496,7 @@ namespace Internal
         Size dynSize;
         GetOffsetDynamicOffsetAndSize(blob,member,index,offset,dynOffs,dynSize);
 
-        InternalMemberStatus status=*AnyPtrCast<InternalMemberStatus> (blob + offset);
+        InternalMemberStatus status=Read<char>(blob + offset);
         if (MemberStatusHandler::IsNull(status) || dynOffs==0)
         {
             const MemberDescription * memberDesc = Repository::Classes().FindClass(GetTypeId(blob))->GetMember(member);
@@ -529,12 +517,8 @@ namespace Internal
             if (memberDesc->GetMemberType() == BinaryMemberType)
             {
                 size = static_cast<Int32>(dynSize);
-                val=AnyPtrCast<char>(blob+dynOffs);
             }
-            else
-            {
-                val=AnyPtrCast<char>(blob+dynOffs);
-            }
+            val=blob+dynOffs;
         }
         return status;
     }
@@ -588,8 +572,7 @@ namespace Internal
         Size newBlobSize=GetSize(blob)+newSize - allocatedSize;
         char * const newObj=new char[newBlobSize];
         memcpy(newObj, blob, END_OF_STATIC); //copy the static part
-        Size* totSize=AnyPtrCast<Size>(newObj+OFFSET_SIZE); //set new size
-        (*totSize)=newBlobSize;
+        Write(newObj+OFFSET_SIZE,newBlobSize); //set new size
 
         Offset currentDynOffs=0;
         MemberIndex lastMember=static_cast<MemberIndex>(cde->NumberOfMembers()-1);
@@ -655,9 +638,9 @@ namespace Internal
                     const size_t startOfElement=GetOffset(blob, mem)+(MEMBER_STATUS_LENGTH+memberSize)*ix;
                     if (MemberStatusHandler::HasDynamicPart(blob[startOfElement]))
                     { //there is only need to do anything if the member had a dynamic part in the old blob
-                        *AnyPtrCast<Offset>(newObj + startOfElement + MEMBER_STATUS_LENGTH) = END_OF_STATIC + currentDynOffs;
-                        const char * const dataLocation = blob + *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
-                        const Int32 currentStringLength = *AnyPtrCast<Int32>(dataLocation + memberSize);
+                        Write(newObj + startOfElement + MEMBER_STATUS_LENGTH, END_OF_STATIC + currentDynOffs);
+                        const char * const dataLocation = blob + Read<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
+                        const Int32 currentStringLength = Read<Int32>(dataLocation + memberSize);
                         memcpy(newObj+END_OF_STATIC+currentDynOffs,dataLocation,memberSize + sizeof(Int32) + currentStringLength);
                         currentDynOffs += memberSize + sizeof(Int32) + currentStringLength;
                     }
@@ -706,8 +689,8 @@ namespace Internal
                                              Size& dynSize)
     {
         Offset of=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+DYNAMIC_MEMBER_SIZE)*index;
-        dynOffs=*AnyPtrCast<Offset>(blob+of+MEMBER_STATUS_LENGTH);
-        dynSize=*AnyPtrCast<Size>(blob+of+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
+        dynOffs=Read<Offset>(blob+of+MEMBER_STATUS_LENGTH);
+        dynSize=Read<Size>(blob+of+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
 
     }
 
@@ -719,8 +702,8 @@ namespace Internal
                                                    Size& dynSize)
     {
         offset=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+DYNAMIC_MEMBER_SIZE)*index;
-        dynOffs=*AnyPtrCast<Offset>(blob+offset+MEMBER_STATUS_LENGTH);
-        dynSize=*AnyPtrCast<Size>(blob+offset+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
+        dynOffs=Read<Offset>(blob+offset+MEMBER_STATUS_LENGTH);
+        dynSize=Read<Size>(blob+offset+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
     }
 
 
@@ -729,9 +712,8 @@ namespace Internal
                                       const ArrayIndex index,
                                       const Offset dynOffs)
     {
-        Offset of=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+DYNAMIC_MEMBER_SIZE)*index;
-        Offset* dof=AnyPtrCast<Offset>(blob+of+MEMBER_STATUS_LENGTH);
-        (*dof)=dynOffs;
+        const Offset of=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+DYNAMIC_MEMBER_SIZE)*index;
+        Write(blob+of+MEMBER_STATUS_LENGTH, dynOffs);
     }
 
     void BlobLayout::SetDynamicSize(char * const blob,
@@ -739,9 +721,8 @@ namespace Internal
                                     const ArrayIndex index,
                                     const Size& dynSize)
     {
-        Offset of=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+DYNAMIC_MEMBER_SIZE)*index;
-        Size* dsz=AnyPtrCast<Size>(blob+of+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH);
-        (*dsz)=dynSize;
+        const Offset of=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+DYNAMIC_MEMBER_SIZE)*index;
+        Write(blob+of+MEMBER_STATUS_LENGTH+OFFSET_MEMBER_LENGTH,dynSize);
     }
 
     bool BlobLayout::SetChangedSinceLastRead(const char * lastRead, char * current)
@@ -767,10 +748,10 @@ namespace Internal
             {
                 bool currentNull, currentChanged, lastNull, lastChanged;
 
-                char* currStat=AnyPtrCast<char>(current + GetOffset(current, member) + ix*size);
+                char* currStat=current + GetOffset(current, member) + ix*size;
                 MemberStatusHandler::ToExternalFormat(currStat[0], currentNull, currentChanged);
 
-                const char* lastStat=AnyPtrCast<char>(lastRead + GetOffset(lastRead, member) + ix*size);
+                const char* lastStat=lastRead + GetOffset(lastRead, member) + ix*size;
                 MemberStatusHandler::ToExternalFormat(lastStat[0], lastNull, lastChanged);
 
                 if (currentNull!=lastNull) //changed from val->null or null->val
@@ -963,7 +944,7 @@ namespace Internal
         const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
         if (strVal == NULL) // no string, this will be easy!
         {
-            *AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH) = val;
+            Write(blob+startOfElement+MEMBER_STATUS_LENGTH, val);
             blob[startOfElement] = MemberStatusHandler::ToInternalFormat(false,true,false);
         }
         else
@@ -974,12 +955,12 @@ namespace Internal
             const bool currentlyHasDynamicPart = MemberStatusHandler::HasDynamicPart(blob[startOfElement]);
             if (currentlyHasDynamicPart)
             {
-                dataLocation = blob + *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
-                currentStringLength = *AnyPtrCast<Int32>(dataLocation + sizeof(T));
+                dataLocation = blob + Read<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
+                currentStringLength = Read<Int32>(dataLocation + sizeof(T));
                 if (newStringLength <= currentStringLength) //easy! we just fit the new string in the old.
                 {
-                    *AnyPtrCast<T>(dataLocation) = val;
-                    *AnyPtrCast<Int32>(dataLocation + sizeof(T)) = newStringLength;
+                    Write(dataLocation, val);
+                    Write(dataLocation + sizeof(T), newStringLength);
                     strncpy(dataLocation + sizeof(T) + sizeof(Int32), strVal, newStringLength);
                     return;
                 }
@@ -1005,8 +986,7 @@ namespace Internal
             }
             char * const newObj=new char[newBlobSize];
             memcpy(newObj, blob, END_OF_STATIC); //copy the static part
-            Size * totSize = AnyPtrCast<Size>(newObj+OFFSET_SIZE); //set new size
-            (*totSize)=newBlobSize;
+            Write(newObj+OFFSET_SIZE, newBlobSize); //set new size
 
             Offset currentDynOffs=0;
             const MemberIndex lastMember=static_cast<MemberIndex>(cde->NumberOfMembers()-1);
@@ -1048,9 +1028,9 @@ namespace Internal
                             const size_t startOfElement=GetOffset(blob, mem)+(MEMBER_STATUS_LENGTH+memSize)*ix;
                             if (MemberStatusHandler::HasDynamicPart(blob[startOfElement]))
                             { //there is only need to do anything if the member had a dynamic part in the old blob
-                                *AnyPtrCast<Offset>(newObj + startOfElement + MEMBER_STATUS_LENGTH) = END_OF_STATIC + currentDynOffs;
-                                const char * const dataLocation = blob + *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
-                                const Int32 currentStringLength = *AnyPtrCast<Int32>(dataLocation + memSize);
+                                Write(newObj + startOfElement + MEMBER_STATUS_LENGTH, END_OF_STATIC + currentDynOffs);
+                                const char * const dataLocation = blob + Read<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
+                                const Int32 currentStringLength = Read<Int32>(dataLocation + memSize);
                                 memcpy(newObj+END_OF_STATIC+currentDynOffs,dataLocation,memSize + sizeof(Int32) + currentStringLength);
                                 currentDynOffs += memSize + sizeof(Int32) + currentStringLength;
                             }
@@ -1059,10 +1039,10 @@ namespace Internal
                         {
                             const size_t startOfElement=GetOffset(newObj, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
                             newObj[startOfElement] = MemberStatusHandler::ToInternalFormat(false,true,true);
-                            *AnyPtrCast<Offset>(newObj + startOfElement + MEMBER_STATUS_LENGTH) = END_OF_STATIC + currentDynOffs;
+                            Write(newObj + startOfElement + MEMBER_STATUS_LENGTH, END_OF_STATIC + currentDynOffs);
 
-                            *AnyPtrCast<T>(newObj + END_OF_STATIC + currentDynOffs) = val;
-                            *AnyPtrCast<Int32>(newObj + END_OF_STATIC + currentDynOffs + sizeof(T)) = newStringLength;
+                            Write(newObj + END_OF_STATIC + currentDynOffs, val);
+                            Write(newObj + END_OF_STATIC + currentDynOffs + sizeof(T), newStringLength);
                             strncpy(newObj + END_OF_STATIC + currentDynOffs + sizeof(T) + sizeof(Int32), strVal, newStringLength);
                             currentDynOffs += sizeof(T) + sizeof(Int32) + newStringLength;
                         }

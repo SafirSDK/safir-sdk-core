@@ -79,19 +79,29 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(Size) == 4);
         BOOST_STATIC_ASSERT(sizeof(Offset) <= sizeof(Int64)); //this is to ensure that an offset can fit into a hashedId member.
 
+#define ALIGNED_ACCESS
         template <class T>
-        static inline T * AnyPtrCast(char * const blob)
+        static inline void Write(char* const blob, const T val)
         {
-            //CheckAlignment<T>(blob);
-            return static_cast<T*>(static_cast<void*>(blob));
+#ifdef ALIGNED_ACCESS
+            memcpy(blob,&val,sizeof(T));
+#else
+            *static_cast<T*>(static_cast<void*>(blob)) = val;
+#endif
         }
 
         template <class T>
-        static inline const T * AnyPtrCast(const char * const blob)
+        static inline T Read(const char* const blob)
         {
-            //CheckAlignment<T>(blob);
-            return AnyPtrCast<T>(const_cast<char*>(blob));
+#ifdef ALIGNED_ACCESS
+            T val;
+            memcpy(&val,blob,sizeof(T));
+            return val;
+#else
+            return *static_cast<const T*>(static_cast<const void*>(blob));
+#endif
         }
+
 
 
     public:
@@ -156,16 +166,16 @@ namespace Internal
             if (strVal != NULL) //if we have a string
             {
                 char * const dataLocation = beginningOfUnused;
-                *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH) = static_cast<Offset>(beginningOfUnused - blob);
+                Write(blob + startOfElement + MEMBER_STATUS_LENGTH, static_cast<Offset>(beginningOfUnused - blob));
                 beginningOfUnused += sizeof(T) + sizeof(Int32) + stringLength; //the value + the string length + the string itself
 
-                *AnyPtrCast<T>(dataLocation) = hashVal;
-                *AnyPtrCast<Int32>(dataLocation + sizeof(T)) = stringLength;
+                Write(dataLocation, hashVal);
+                Write(dataLocation + sizeof(T), stringLength);
                 strncpy(dataLocation + sizeof(T) + sizeof(Int32),strVal,stringLength);
             }
             else //no string
             {
-                *AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH) = hashVal;
+                Write(blob+startOfElement+MEMBER_STATUS_LENGTH, hashVal);
             }
 
             //Set status
@@ -173,8 +183,15 @@ namespace Internal
         }
 
         //Get header info
-        static inline Size GetSize(const char * const blob) {return AnyPtrCast<BlobHeader>(blob)->size;}
-        static inline TypeId GetTypeId(const char * const blob) {return AnyPtrCast<BlobHeader>(blob)->typeId;}
+        static inline Size GetSize(const char * const blob) {return Read<BlobHeader>(blob).size;}
+        static inline TypeId GetTypeId(const char * const blob) {return Read<BlobHeader>(blob).typeId;}
+        static inline void WriteHeader(char* const blob, 
+                                       const Size size, 
+                                       const TypeId typeId)
+        {
+            const BlobHeader b = {size, typeId};
+            Write(blob,b);
+        }
 
         static InternalMemberStatus GetStatus(const char * const blob,
                                               const MemberIndex member,
@@ -243,7 +260,7 @@ namespace Internal
                                               T & t)
         {
             size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
-            t=*AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH);
+            t = Read<T>(blob+startOfElement+MEMBER_STATUS_LENGTH);
             const char* tmp=blob + startOfElement;
             InternalMemberStatus s=static_cast<InternalMemberStatus>(tmp[0]);
             return s;
@@ -256,8 +273,7 @@ namespace Internal
                               const ArrayIndex index)
         {
             size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
-            T* t=AnyPtrCast<T>(blob+startOfElement+MEMBER_STATUS_LENGTH);
-            (*t)=val;
+            Write<T>(blob+startOfElement+MEMBER_STATUS_LENGTH,val);
         }
 
 
@@ -272,14 +288,14 @@ namespace Internal
             const InternalMemberStatus status = blob[startOfElement];
             if (MemberStatusHandler::HasDynamicPart(status))
             {
-                const Offset dynOffs = *AnyPtrCast<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
-                val = *AnyPtrCast<T>(blob + dynOffs);
+                const Offset dynOffs = Read<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
+                val = Read<T>(blob + dynOffs);
                 strVal = blob + dynOffs + sizeof(T) + sizeof(Int32);
                 assert(strVal[0] != '\0');
             }
             else
             {
-                val = *AnyPtrCast<T>(blob + startOfElement + MEMBER_STATUS_LENGTH);
+                val = Read<T>(blob + startOfElement + MEMBER_STATUS_LENGTH);
                 strVal = NULL;
             }
 
