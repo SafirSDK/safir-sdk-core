@@ -1038,7 +1038,7 @@ void DbOlibTest::SetConnectionPooling()
 
 void DbOlibTest::GetConnectionPooling()
 {
-    long lValue;
+    long lValue = 0;
     m_environment.GetEnvAttr(SQL_ATTR_CONNECTION_POOLING, lValue);
     switch(lValue)
     {
@@ -1049,6 +1049,7 @@ void DbOlibTest::GetConnectionPooling()
     case SQL_CP_ONE_PER_HENV:
         break;
     default:
+        std::wcout << "Unexpected value for SQL_ATTR_CONNECTION_POOLING: expected " << SQL_CP_ONE_PER_HENV << ", got " << lValue << std::endl;
         throw Safir::Databases::Odbc::ReconnectException(L"Connection pooling is undefined. ",__WFILE__,__LINE__);
     }
 }
