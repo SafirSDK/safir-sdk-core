@@ -257,9 +257,9 @@ void DbOlibTest::AllocStmt()
     if (!m_bReadUnitIsPrepared && m_ReadUnitStmt.IsValid())
     {
         //Set statement to columns for unit with Id
-        m_ReadUnitStmt.Prepare( L"select UnitId, StringName, StringDescription, Int32, Int64,"
+        m_ReadUnitStmt.Prepare( L"select Id, StringName, StringDescription, Int32, Int64,"
                                 L"Float32, Float64, Bool from tblOlibTest "
-                                L"where UnitId = 0" );
+                                L"where Id = 0" );
 
         m_ReadUnitStmt.BindColumn(1, m_columnId);
         m_ReadUnitStmt.BindColumn(2, m_columnStringName);
