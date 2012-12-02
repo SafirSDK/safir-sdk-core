@@ -79,11 +79,10 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(Size) == 4);
         BOOST_STATIC_ASSERT(sizeof(Offset) <= sizeof(Int64)); //this is to ensure that an offset can fit into a hashedId member.
 
-#define ALIGNED_ACCESS
         template <class T>
         static inline void Write(char* const blob, const T val)
         {
-#ifdef ALIGNED_ACCESS
+#ifdef NO_UNALIGNED_ACCESS
             memcpy(blob,&val,sizeof(T));
 #else
             *static_cast<T*>(static_cast<void*>(blob)) = val;
@@ -93,7 +92,7 @@ namespace Internal
         template <class T>
         static inline T Read(const char* const blob)
         {
-#ifdef ALIGNED_ACCESS
+#ifdef NO_UNALIGNED_ACCESS
             T val;
             memcpy(&val,blob,sizeof(T));
             return val;
