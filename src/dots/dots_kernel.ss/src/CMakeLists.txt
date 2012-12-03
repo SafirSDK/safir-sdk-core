@@ -50,7 +50,7 @@ ADD_DEFINITIONS(-DDOTSKERNEL_EXPORTS)
 #check if we can do unaligned accesses, or if we should define a symbol that fixes it.
 include(CheckCXXSourceRuns)
 SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} -O2)
-CHECK_CXX_SOURCE_RUNS("#include \"${CMAKE_CURRENT_SOURCE_DIR}/test.cpp\"" can_do_unaligned_access)
+CHECK_CXX_SOURCE_RUNS("#include \"${CMAKE_CURRENT_SOURCE_DIR}/checks/check_unaligned_access.cpp\"" can_do_unaligned_access)
 if(NOT can_do_unaligned_access)
   MESSAGE("This platform does not appear able to do unaligned accesses, so we'll use memcpy instead")
   ADD_DEFINITIONS(-DNO_UNALIGNED_ACCESS)
