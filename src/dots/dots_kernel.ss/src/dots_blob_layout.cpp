@@ -39,14 +39,6 @@ namespace Typesystem
 {
 namespace Internal
 {
-    //mandatory definition for static const declarations.
-    const Size BlobLayout::OFFSET_SIZE;
-    const Size BlobLayout::OFFSET_TYPE_ID;
-    const Size BlobLayout::OFFSET_HEADER_LENGTH;
-    const Size BlobLayout::MEMBER_STATUS_LENGTH;
-    const Size BlobLayout::OFFSET_MEMBER_LENGTH;
-    const Size BlobLayout::DYNAMIC_MEMBER_SIZE;
-
     Offset BlobLayout::GetOffset(const char * const blob, const MemberIndex member)
     {
         return Read<Offset>(blob+OFFSET_HEADER_LENGTH+member*OFFSET_MEMBER_LENGTH);
