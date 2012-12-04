@@ -236,21 +236,6 @@ namespace Internal
                                      const MemberIndex member,
                                      const ArrayIndex index);
 
-        template <typename T>
-        static void CheckAlignment(const char * const blob)
-        {
-            if (reinterpret_cast<const uintptr_t>(blob) % boost::alignment_of<T>::value != 0)
-            {
-                std::wcerr << "Unaligned data of type " << typeid(T).name() 
-                           << " (size = " << sizeof(T) << ")"
-                           << ": expected = " 
-                           << boost::alignment_of<T>::value 
-                           << " got " 
-                           << (reinterpret_cast<const uintptr_t>(blob) % boost::alignment_of<T>::value) << std::endl;                
-                abort();
-            }
-        }
-
         //Basic types - not string and object
         template <typename T>
         static InternalMemberStatus GetMember(const char * const blob,
