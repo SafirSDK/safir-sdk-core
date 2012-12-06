@@ -3,6 +3,12 @@
   <name>DoseTest.Items.TestCase</name>
   <members>
     <member>
+      <!-- This test is valid only in multinode mode, since it is not completely unlikely to take an infinite amount of time
+           on a standalone machine, if dose_main is faster than the partner.-->
+      <name>TestConfig</name>
+      <value>DoseTest.TestConfigEnum.Multinode</value>
+    </member>
+    <member>
       <name>Description</name>
       <value>Test of simulate overflows on message in queues.</value>
     </member>

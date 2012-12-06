@@ -807,19 +807,25 @@ namespace @_NAMESPACE_@
             for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
             {
                 if (!m_@_MEMBER_@Member[i].IsNull())
-                   size += (m_@_MEMBER_@Member[i].Val.Length+4);
+                {
+                    size += m_@_MEMBER_@Member[i].Val.Length;
+                }
             }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
             for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
             {
                 if (!m_@_MEMBER_@Member[i].IsNull() && m_@_MEMBER_@Member[i].Val.RawString.Length != 0)
-                   size += 8 + 4 + m_@_MEMBER_@Member[i].Val.Utf8StringLength();
+                {
+                    size += 8 + 4 + m_@_MEMBER_@Member[i].Val.Utf8StringLength();
+                }
             }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
             for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
             {
                 if (!m_@_MEMBER_@Member[i].IsNull() && m_@_MEMBER_@Member[i].Val.InstanceId.RawString.Length != 0)
-                   size += 16 + 4 + m_@_MEMBER_@Member[i].Val.InstanceId.Utf8StringLength();
+                {
+                    size += 16 + 4 + m_@_MEMBER_@Member[i].Val.InstanceId.Utf8StringLength();
+                }
             }
 @@END_IF@@
 @@ELSE@@
@@ -829,13 +835,19 @@ namespace @_NAMESPACE_@
             size += m_@_MEMBER_@Member.CalculateBlobSize();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
             if (!m_@_MEMBER_@Member.IsNull())
-               size += (m_@_MEMBER_@Member.Val.Length+4);
+            {
+                size += m_@_MEMBER_@Member.Val.Length;
+            }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
             if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.Val.RawString.Length != 0)
-               size += 8 + 4 + m_@_MEMBER_@Member.Val.Utf8StringLength();
+            {
+                size += 8 + 4 + m_@_MEMBER_@Member.Val.Utf8StringLength();
+            }
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
             if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.Val.InstanceId.RawString.Length != 0)
-               size += 16 + 4 + m_@_MEMBER_@Member.Val.InstanceId.Utf8StringLength();
+            {
+                size += 16 + 4 + m_@_MEMBER_@Member.Val.InstanceId.Utf8StringLength();
+            }
 @@END_IF@@
 @@END_IF@@
 @@END_IF@@

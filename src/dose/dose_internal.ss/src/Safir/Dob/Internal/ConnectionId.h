@@ -41,7 +41,7 @@ namespace Internal
     typedef std::set<Identifier> IdentifierSet;
 
 #pragma pack (push)
-#pragma pack (1)
+#pragma pack (4)
     //POD type that is possible to store in shared memory.
     //Since it is a POD type it does not inherit from SharedMemoryObject!
     struct ConnectionId

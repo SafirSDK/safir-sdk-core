@@ -80,14 +80,6 @@ Consumer 0: SimulateOverflows(false, false)
 Consumer 0: OnNotMessageOverflow
 
 ==========================================================================
-TESTCASE 7
-Description: Test of simulate overflows on message in queues.
-Expectation: No messages received in partner 0
---------- Setup -----------
---------- Test  -----------
-Consumer 0: SimulateOverflows(true, false)
-Consumer 0: SimulateOverflows(false, false)
-==========================================================================
 TESTCASE 8
 Description: Test of sending and subscribing of to a message with all types defined in it.
 Expectation: Consumer 0 recieves a global message with the correct data in it.

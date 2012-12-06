@@ -1073,7 +1073,9 @@ public class @_CLASS_@
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
         for (com.saabgroup.safir.dob.typesystem.BinaryContainer cont: m_@_MEMBER_@Member){
             if (!cont.isNull())
-                size += cont.getVal().length + 4;
+            {
+                size += cont.getVal().length;
+            }
         }
 @@END_IF@@
 @@ELSE@@
@@ -1091,7 +1093,9 @@ public class @_CLASS_@
         size += m_@_MEMBER_@Member.calculateBlobSize();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
         if (!m_@_MEMBER_@Member.isNull())
-            size += m_@_MEMBER_@Member.getVal().length + 4;
+        {
+            size += m_@_MEMBER_@Member.getVal().length;
+        }
 @@END_IF@@
 @@END_IF@@
 @@END_TABLE@@

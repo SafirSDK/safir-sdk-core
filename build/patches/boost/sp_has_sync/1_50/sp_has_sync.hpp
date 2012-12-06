@@ -24,13 +24,11 @@
 
 #define BOOST_SP_HAS_SYNC
 
-#if !defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4)
-
 #if defined( __arm__ )  || defined( __armel__ )
+#if !defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4)
 #undef BOOST_SP_HAS_SYNC
 #endif
-
-#endif // __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4
+#endif
 
 #if defined( __hppa ) || defined( __hppa__ )
 #undef BOOST_SP_HAS_SYNC
