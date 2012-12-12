@@ -143,44 +143,6 @@ namespace Utilities
             {
                 throw std::logic_error("Unexpectedly found some stuff in m_synchronized");
             }
-
-#if 0
-                
-            //get a candidate for calling Destroy on.
-            Synchronized* synchronized = *m_synchronized.begin();
-            m_synchronized.clear();
-                
-            //Try to get the inner lock, if we do not already have it
-            if (!m_secondExclusiveLock.owns())
-            {
-                m_secondExclusiveLock = boost::interprocess::scoped_lock<boost::interprocess::file_lock>
-                    (m_secondLock,boost::interprocess::try_to_lock);
-            }
-            if (!m_secondExclusiveLock.owns())
-            {
-                //someone else is holding the second lock, we're not going to be
-                //the last instance out...
-                return;
-            }
-
-            //TODO: what happens after here is not analyzed
-
-            //try to upgrade the first lock (no explicit upgrade path, which is why we have the second lock)
-            m_firstSharableLock.unlock();
-            m_firstExclusiveLock = boost::interprocess::scoped_lock<boost::interprocess::file_lock>
-                (m_firstLock,boost::interprocess::try_to_lock);
-
-            if (m_firstExclusiveLock.owns())
-            {
-                // Got exclusive lock, noone else has it open, so I can remove everything!
-                synchronized->Destroy();
-
-                boost::interprocess::named_semaphore::remove(m_name.c_str());
-                //TODO: can we do these?
-                //boost::filesystem::remove(m_firstLockFilePath);
-                //boost::filesystem::remove(m_secondLockFilePath);
-            }
-#endif
         }
     public:
         const std::string& Name() const {return m_name;}
@@ -311,6 +273,12 @@ namespace Utilities
         }
 
     private:
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
+
         std::multiset<Synchronized*> m_synchronized;
         const std::string m_name;
 
@@ -326,6 +294,11 @@ namespace Utilities
         boost::interprocess::scoped_lock<boost::interprocess::file_lock> m_firstExclusiveLock;
         boost::interprocess::sharable_lock<boost::interprocess::file_lock> m_firstSharableLock;
         boost::interprocess::scoped_lock<boost::interprocess::file_lock> m_secondExclusiveLock;
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
     };
 
 
