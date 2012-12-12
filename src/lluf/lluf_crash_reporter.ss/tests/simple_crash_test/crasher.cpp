@@ -26,6 +26,11 @@
 #include <stdlib.h>
 #include <string>
 
+#ifdef _MSC_VER
+#pragma warning (disable: 4723)
+#endif
+
+
 void callback(const char* const dumpPath)
 {
     std::wcout << "callback with dumpPath = '" << dumpPath << "'" << std::endl;
