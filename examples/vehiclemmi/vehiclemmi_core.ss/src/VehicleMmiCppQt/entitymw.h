@@ -38,13 +38,11 @@
 #endif
 
 #include <QtGui/QMainWindow>
+#include "ui_entitymw.h"
 
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-
-
-#include "ui_entitymw.h"
 
 namespace VehicleMmiCppQt
 {

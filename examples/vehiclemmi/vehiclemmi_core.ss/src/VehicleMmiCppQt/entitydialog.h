@@ -24,19 +24,19 @@
 #ifndef __ENTITYDIALOG_H
 #define __ENTITYDIALOG_H
 
-#include "ui_entitydialog.h"
-#include "entitytablehandler.h"
-
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning (disable: 4127)
+#pragma warning (disable: 4251)
 #endif
 
 #include <QDialog>
+#include "ui_entitydialog.h"
 
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
+#include "entitytablehandler.h"
 
 #include <Safir/Dob/Connection.h>
 

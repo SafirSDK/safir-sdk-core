@@ -24,14 +24,14 @@
 #ifndef CATEGORYINFODIALOG_H
 #define CATEGORYINFODIALOG_H
 
-#include "ui_categoryinfodialog.h"
-
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning (disable: 4127)
+#pragma warning (disable: 4251)
 #endif
 
 #include <QDialog>
+#include "ui_categoryinfodialog.h"
 
 #ifdef _MSC_VER
 #pragma warning(pop)

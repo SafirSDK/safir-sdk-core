@@ -25,7 +25,18 @@
 #include "entitytablehandler.h"
 #include "qtworkaround.h"
 #include <Capabilities/Vehicles/Vehicle.h>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127)
+#pragma warning (disable: 4251)
+#endif
+
 #include <QHeaderView>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 namespace VehicleMmiCppQt
 {
