@@ -216,7 +216,7 @@ FilePersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
     std::ofstream file(path.string().c_str(),std::ios::out | std::ios::binary);
     if(file.good())
     {
-        if (bin.size() <= static_cast<size_t>(boost::integer_traits<std::streamsize>::const_max))
+        if (static_cast<std::streamsize>(bin.size()) <= boost::integer_traits<std::streamsize>::const_max)
         {
             file.write(&bin[0],static_cast<std::streamsize>(bin.size()));
         }
