@@ -124,8 +124,8 @@ int main()
     const boost::posix_time::ptime now_ptime = boost::posix_time::microsec_clock::universal_time();
     const boost::posix_time::ptime epoch(boost::gregorian::date(1970,1,1));
     const double diff = fabs(now_double - (now_ptime - epoch).total_microseconds()/1.0e6);
-    //check that it matches to within 1 millisecond
-    if (diff > 1.0e-3)
+    //check that it matches to within 0.1 seconds
+    if (diff > 0.1)
     {
         std::wcout << "Safir::Time::TimeProvider::GetUtcTime() returned incorrect value" << std::endl;
         std::wcout << std::setprecision(20) << "Got " << now_double << ", expected " << (now_ptime - epoch).total_microseconds()/1.0e6 << std::endl;
