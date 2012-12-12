@@ -340,7 +340,7 @@ void ConvertFiles()
             while (file.good())
             {
                 file.read(&bin[0] + numBytesRead,4096);
-                numBytesRead += file.gcount();
+                numBytesRead += static_cast<size_t>(file.gcount());
             }
 
             if(fileSize != numBytesRead)
