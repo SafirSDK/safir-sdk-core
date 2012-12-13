@@ -93,7 +93,7 @@ namespace VehicleMmiCppQt
                 *a = wchar_t(u);
                 ++a;
             }
-            return a - pArray;
+            return static_cast<int>(a - pArray);
         }
     }
 
