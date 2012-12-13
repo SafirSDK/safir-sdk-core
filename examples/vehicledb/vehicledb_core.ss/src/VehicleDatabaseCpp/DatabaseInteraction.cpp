@@ -255,8 +255,15 @@ namespace VehicleDatabaseCpp
         //StopRemoveInExercise
 
         //StartRemoveInSolution
-        // Remove this line.
+        // Remove these lines
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4702)
+#endif
         return Safir::Dob::SuccessResponse::Create();
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
         //StopRemoveInSolution
     }
 
