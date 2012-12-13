@@ -160,6 +160,13 @@ namespace VehicleDatabaseCpp
         }
     }
 
+//the example has some unreachable code (the very last return statement)
+//since it is also meant to be able to become an exercise.
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4702)
+#endif
+
     //--------------------------------------------------------------------------
     Safir::Dob::ResponsePtr  DatabaseInteraction::GetVehicleCategory
                     (Capabilities::Vehicles::GetVehicleCategoryServicePtr  request)
@@ -255,17 +262,14 @@ namespace VehicleDatabaseCpp
         //StopRemoveInExercise
 
         //StartRemoveInSolution
-        // Remove these lines
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4702)
-#endif
+        // Remove this lines
         return Safir::Dob::SuccessResponse::Create();
+        //StopRemoveInSolution
+    }
+
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
-        //StopRemoveInSolution
-    }
 
     //--------------------------------------------------------------------------
     Safir::Dob::ResponsePtr  DatabaseInteraction::SetVehicleCategory
