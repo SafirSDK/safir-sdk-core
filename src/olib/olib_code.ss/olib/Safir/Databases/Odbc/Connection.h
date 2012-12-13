@@ -233,6 +233,10 @@ private:
     SQLHDBC m_hConnection;
     bool m_bIsConnected;
 
+    typedef std::pair<std::wstring,std::wstring> StateMessagePair;
+    //returns pair of SQLState and MessageText
+    const StateMessagePair GetDiagRec() const;
+
     void AddStatement(Statement * pStatement);
     void RemoveStatement(Statement * pStatement);
     void EndTran(short sCompletionType);

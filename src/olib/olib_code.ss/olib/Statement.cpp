@@ -29,6 +29,9 @@
 #include <Safir/Databases/Odbc/ReconnectException.h>
 #include <Safir/SwReports/SwReport.h>
 #include "StringConversion.h"
+#include "Diagnostics.h"
+
+
 namespace Safir
 {
 
@@ -345,140 +348,107 @@ void Statement::ThrowException(SQLSMALLINT HandleType,
                                const Safir::Dob::Typesystem::Int64 lineNumber,
                                SQLRETURN original_returncode) const
 {
-    SQLWCHAR wszSqlState[6];
-    SQLINTEGER lpNativeErrorPtr;
-    SQLWCHAR wszMessageText[512];
-    SQLRETURN ret;
-
-    ret = ::SQLGetDiagRecW( HandleType,
-                            Handle,
-                            1,
-                            wszSqlState,
-                            &lpNativeErrorPtr,
-                            wszMessageText,
-                            256,
-                            0 );
-    if (Equal(wszSqlState, L"01S07")) // Fractional truncation
+    const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(HandleType,Handle);
+    if (rec.first == L"01S07") // Fractional truncation
     {
         if (original_returncode == SQL_ERROR)   // Only report if its an SQL_ERROR
         {
-            std::wstring string = ToWstring(wszSqlState);
-            string += L":";
-            string += ToWstring(wszMessageText);
-            throw Safir::Dob::Typesystem::SoftwareViolationException(string.c_str(), fileName,lineNumber);
+            throw Safir::Dob::Typesystem::SoftwareViolationException(rec.first + L":" + rec.second, fileName,lineNumber);
         }
     }
-    else if (Equal(wszSqlState, L"23000"))        // Integrity constraint violation
+    else if (rec.first == L"23000")        // Integrity constraint violation
     {
-        std::wstring string = ToWstring(wszSqlState);
-        string += L":";
-        string += ToWstring(wszMessageText);
-        throw IntegrityConstraintException(string.c_str(),fileName,lineNumber);
+        throw IntegrityConstraintException(rec.first + L":" + rec.second,fileName,lineNumber);
     }
-    else if (Equal(wszSqlState, L"07002") ||
-             Equal(wszSqlState, L"07006") ||
-             Equal(wszSqlState, L"07009") ||
-             Equal(wszSqlState, L"07S01") ||
-             Equal(wszSqlState, L"21S01") ||    // Insert value list does not match column list
-             Equal(wszSqlState, L"21S02") ||
-             Equal(wszSqlState, L"22001") ||    // truncation of non null string or binary data.
-             Equal(wszSqlState, L"22002") ||
-             Equal(wszSqlState, L"22007") ||
-             Equal(wszSqlState, L"22008") ||
-             Equal(wszSqlState, L"22012") ||
-             Equal(wszSqlState, L"22018") ||
-             Equal(wszSqlState, L"22019") ||
-             Equal(wszSqlState, L"22025") ||
-             Equal(wszSqlState, L"24000") ||
-             Equal(wszSqlState, L"34000") ||
-             Equal(wszSqlState, L"3D000") ||
-             Equal(wszSqlState, L"3F000") ||
-             Equal(wszSqlState, L"42000") ||
-             Equal(wszSqlState, L"42S01") ||
-             Equal(wszSqlState, L"42S02") ||
-             Equal(wszSqlState, L"42S22") ||
-             Equal(wszSqlState, L"HY003") ||
-             Equal(wszSqlState, L"HY009") ||
-             Equal(wszSqlState, L"HY010") ||    // Function sequence error
-             Equal(wszSqlState, L"HY104") ||
-             Equal(wszSqlState, L"HY105") ||
-             Equal(wszSqlState, L"HYC00") ||
-             Equal(wszSqlState, L"IM001") ||
-             Equal(wszSqlState, L"01001") ||
-             Equal(wszSqlState, L"01006") ||
-             Equal(wszSqlState, L"01007") ||
-             Equal(wszSqlState, L"01S00") ||
-             Equal(wszSqlState, L"01S06") ||    // Used in ExtendedFetch or FetchScroll.
-             Equal(wszSqlState, L"01S09"))
+    else if (rec.first == L"07002" ||
+             rec.first == L"07006" ||
+             rec.first == L"07009" ||
+             rec.first == L"07S01" ||
+             rec.first == L"21S01" ||    // Insert value list does not match column list
+             rec.first == L"21S02" ||
+             rec.first == L"22001" ||    // truncation of non null string or binary data.
+             rec.first == L"22002" ||
+             rec.first == L"22007" ||
+             rec.first == L"22008" ||
+             rec.first == L"22012" ||
+             rec.first == L"22018" ||
+             rec.first == L"22019" ||
+             rec.first == L"22025" ||
+             rec.first == L"24000" ||
+             rec.first == L"34000" ||
+             rec.first == L"3D000" ||
+             rec.first == L"3F000" ||
+             rec.first == L"42000" ||
+             rec.first == L"42S01" ||
+             rec.first == L"42S02" ||
+             rec.first == L"42S22" ||
+             rec.first == L"HY003" ||
+             rec.first == L"HY009" ||
+             rec.first == L"HY010" ||    // Function sequence error
+             rec.first == L"HY104" ||
+             rec.first == L"HY105" ||
+             rec.first == L"HYC00" ||
+             rec.first == L"IM001" ||
+             rec.first == L"01001" ||
+             rec.first == L"01006" ||
+             rec.first == L"01007" ||
+             rec.first == L"01S00" ||
+             rec.first == L"01S06" ||    // Used in ExtendedFetch or FetchScroll.
+             rec.first == L"01S09")
     {
-        std::wstring string = ToWstring(wszSqlState);
-        string += L":";
-        string += ToWstring(wszMessageText);
-        throw Safir::Dob::Typesystem::SoftwareViolationException(string.c_str(), fileName,lineNumber);
+        throw Safir::Dob::Typesystem::SoftwareViolationException(rec.first + L":" + rec.second, fileName,lineNumber);
     }
-    else if (Equal(wszSqlState, L"HYT00") ||    // Statement timeout
-             Equal(wszSqlState, L"HYT01"))      // Connection timeout
+    else if (rec.first == L"HYT00" ||    // Statement timeout
+             rec.first == L"HYT01")      // Connection timeout
     {
-        std::wstring string = ToWstring(wszSqlState);
-        string += L":";
-        string += ToWstring(wszMessageText);
-        throw TimeoutException(string.c_str(),fileName,lineNumber);
+        throw TimeoutException(rec.first + L":" + rec.second,fileName,lineNumber);
     }
-    else if (Equal(wszSqlState, L"08S01") ||    // Communication link failure
-             Equal(wszSqlState, L"HY000"))      // General error
+    else if (rec.first == L"08S01" ||    // Communication link failure
+             rec.first == L"HY000")      // General error
     {
-        std::wstring string = ToWstring(wszSqlState);
-        string += L":";
-        string += ToWstring(wszMessageText);
-        throw ReconnectException(string.c_str(),fileName,lineNumber);
+        throw ReconnectException(rec.first + L":" + rec.second,fileName,lineNumber);
     }
-    else if (Equal(wszSqlState, L"40001") ||    // Serialization failure. Transaction rollback.
-             Equal(wszSqlState, L"HY001") ||    // Memory allocation error
-             Equal(wszSqlState, L"HY013"))      // Memory management error
+    else if (rec.first == L"40001" ||    // Serialization failure. Transaction rollback.
+             rec.first == L"HY001" ||    // Memory allocation error
+             rec.first == L"HY013")      // Memory management error
     {
-        std::wstring string = ToWstring(wszSqlState);
-        string += L":";
-        string += ToWstring(wszMessageText);
-        throw RetryException(string.c_str(),fileName,lineNumber);
+        throw RetryException(rec.first + L":" + rec.second,fileName,lineNumber);
     }
-    else if (Equal(wszSqlState, L"01000"))
+    else if (rec.first == L"01000")
     {
         // This is a warning from the rdbms driver and its not specified as an error.
         Safir::SwReports::SendProgramInfoReport(std::wstring(L"Non Odbc Error caught:: ") +
-                                                ToWstring(wszMessageText) );
+                                                rec.second);
     }
-    else if (Equal(wszSqlState, L"01004"))
+    else if (rec.first == L"01004")
     {
         // This is a warning from the rdbms driver and its not specified as an error.
         Safir::SwReports::SendProgramInfoReport(L"String data, right truncated");
     }
-    else if (Equal(wszSqlState, L"01002"))
+    else if (rec.first == L"01002")
     {
         Safir::SwReports::SendProgramInfoReport(L"Cursor operation conflict");
     }
-    else if (Equal(wszSqlState, L"01003"))
+    else if (rec.first == L"01003")
     {
         Safir::SwReports::SendProgramInfoReport(L"NULL value eliminated in set function");
     }
-    else if (Equal(wszSqlState, L"01S01"))
+    else if (rec.first == L"01S01")
     {
         Safir::SwReports::SendProgramInfoReport(L"Error in row");
     }
-    else if (Equal(wszSqlState, L"01S02"))
+    else if (rec.first == L"01S02")
     {
         Safir::SwReports::SendProgramInfoReport(
             L"Statement attribute not supported. A similiar attribute used instead");
     }
-    else if (Equal(wszSqlState, L"01S08"))
+    else if (rec.first == L"01S08")
     {
         Safir::SwReports::SendProgramInfoReport(L"Error saving file dsn.");
     }
     else
     {
-        std::wstring string = ToWstring(wszSqlState);
-        string += L":";
-        string += ToWstring(wszMessageText);
-        throw ReconnectException(string.c_str(),fileName,lineNumber);
+        throw ReconnectException(rec.first + L":" + rec.second,fileName,lineNumber);
     }
 }
 
