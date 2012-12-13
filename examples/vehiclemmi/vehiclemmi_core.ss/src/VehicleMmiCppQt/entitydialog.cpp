@@ -132,7 +132,7 @@ namespace VehicleMmiCppQt
         {
             if(!pVehicle->Position()->Latitude().IsNull())
             {
-                float posLat = pVehicle->Position()->Latitude().GetVal();
+                double posLat = pVehicle->Position()->Latitude().GetVal();
                 QString qstrPosLat("");
                 qstrPosLat.setNum(posLat);
                 ui.lineEditPositionLat->setText(qstrPosLat);
@@ -140,7 +140,7 @@ namespace VehicleMmiCppQt
 
             if(!pVehicle->Position()->Longitude().IsNull())
             {
-                float posLong = pVehicle->Position()->Longitude().GetVal();
+                double posLong = pVehicle->Position()->Longitude().GetVal();
                 QString qstrPosLong("");
                 qstrPosLong.setNum(posLong);
                 ui.lineEditPositionLong->setText(qstrPosLong);
