@@ -709,7 +709,7 @@ jbyteArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Base64ToBinary
   (JNIEnv * env, jclass, jstring _base64Source)
 {
     const StringHolder source = GetUtf8(env,_base64Source);
-    const size_t sourceSize = strlen(source.get());
+    const DotsC_Int32 sourceSize = static_cast<DotsC_Int32>(strlen(source.get()));
     DotsC_Int32 resultSize=0;
     DotsC_Int32 size = DotsC_CalculateBinaryBufferSize(sourceSize);
     std::vector<char> binary (size);
@@ -1171,7 +1171,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetHashedIdMemberInP
                                           _member,
                                           _index,
                                           beginningOfUnused);
-    SetJArray(env,_beginningOfUnused,beginningOfUnused - blob);
+    SetJArray(env,_beginningOfUnused,static_cast<DotsC_Int32>(beginningOfUnused - blob));
     assert(_stringLength == 0 || *(beginningOfUnused - 1) == 0); //check that we got null terminated correctly
 }
 
@@ -1197,7 +1197,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetEntityIdMemberInP
                                           _member,
                                           _index,
                                           beginningOfUnused);
-    SetJArray(env,_beginningOfUnused,beginningOfUnused - blob);
+    SetJArray(env,_beginningOfUnused,static_cast<DotsC_Int32>(beginningOfUnused - blob));
     
     assert(_stringLength == 0 || *(beginningOfUnused - 1) == 0); //check that we got null terminated correctly
 }
@@ -1422,7 +1422,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_FormatBlob
     char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
     char * beginningOfUnused;
     DotsC_FormatBlob(blob,_blobSize,_typeId,beginningOfUnused);
-    SetJArray(env,_beginningOfUnused, beginningOfUnused - blob);
+    SetJArray(env,_beginningOfUnused, static_cast<DotsC_Int32>(beginningOfUnused - blob));
 }
 
 
@@ -1437,7 +1437,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_CreateObjectMember
     char * insideBlob = static_cast<char*>(env->GetDirectBufferAddress(_insideBlob));
     char * beginningOfUnused = insideBlob + GetJArrayInt32(env,_beginningOfUnused);
     DotsC_CreateObjectMember(insideBlob,_blobSize,_typeId,_member,_index,_isChanged == JNI_TRUE, beginningOfUnused);
-    SetJArray(env,_beginningOfUnused,beginningOfUnused - insideBlob);
+    SetJArray(env,_beginningOfUnused,static_cast<DotsC_Int32>(beginningOfUnused - insideBlob));
 }
 
 /*
@@ -1451,7 +1451,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_CreateStringMember
     char * insideBlob = static_cast<char*>(env->GetDirectBufferAddress(_insideBlob));
     char * beginningOfUnused = insideBlob + GetJArrayInt32(env,_beginningOfUnused);
     DotsC_CreateStringMember(insideBlob,_strLength,_member,_index,_isChanged == JNI_TRUE, beginningOfUnused);
-    SetJArray(env,_beginningOfUnused,beginningOfUnused - insideBlob);
+    SetJArray(env,_beginningOfUnused,static_cast<DotsC_Int32>(beginningOfUnused - insideBlob));
 }
 
 /*
@@ -1465,7 +1465,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_CreateBinaryMember
     char * insideBlob = static_cast<char*>(env->GetDirectBufferAddress(_insideBlob));
     char * beginningOfUnused = insideBlob + GetJArrayInt32(env,_beginningOfUnused);
     DotsC_CreateBinaryMember(insideBlob,_binaryLength,_member,_index,_isChanged == JNI_TRUE, beginningOfUnused);
-    SetJArray(env,_beginningOfUnused,beginningOfUnused - insideBlob);
+    SetJArray(env,_beginningOfUnused,static_cast<DotsC_Int32>(beginningOfUnused - insideBlob));
 }
 
 /*
