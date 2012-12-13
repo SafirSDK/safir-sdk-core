@@ -50,6 +50,12 @@ namespace Typesystem
 {
 namespace Internal
 {    
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4275)
+#pragma warning (disable: 4251)
+#endif
+
     /**
      * Parse and validate dou- and dom- files.
      * This class is immutable. All parsing and validation is made during construction and
@@ -111,6 +117,11 @@ namespace Internal
 
         void Parse();
     };
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 }
 }
 }
