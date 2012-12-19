@@ -838,8 +838,10 @@ namespace Internal
             case HandlerNotRegistered:
             {
                 std::wostringstream ostr;
-                ostr << "SetEntity called with handler that is not previously registered. connId = " << connection->Id()
-                     << " handlerId = " << handlerId << ")";
+                ostr << "SetEntity called with handler that is not previously registered. (typeId = " 
+                     << Typesystem::Operations::GetName(m_typeId)
+                     << ", connId = " << connection->Id()
+                     << ", handlerId = " << handlerId << ")";
                 throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
 
             }
@@ -848,8 +850,10 @@ namespace Internal
             case InstanceOwnedByOtherHandler:
             {
                 std::wostringstream ostr;
-                ostr << "SetEntity not allowed, instance owned by another handler. instanceId = " << instanceId
-                     << " handlerId = " << handlerId << ")";
+                ostr << "SetEntity not allowed, instance owned by another handler. (typeId = " 
+                     << Typesystem::Operations::GetName(m_typeId)
+                     << ", instanceId = " << instanceId
+                     << ", handlerId = " << handlerId << ")";
                 throw Safir::Dob::AccessDeniedException(ostr.str(),__WFILE__,__LINE__);
 
             }
@@ -858,8 +862,10 @@ namespace Internal
             case InstanceIsGhost:
             {
                 std::wostringstream ostr;
-                ostr << "SetEntity not allowed, persistence exists. instanceId = " << instanceId
-                     << " handlerId = " << handlerId << ")";
+                ostr << "SetEntity not allowed, persistence exists. (typeId = " 
+                     << Typesystem::Operations::GetName(m_typeId)
+                     << ", instanceId = " << instanceId
+                     << ", handlerId = " << handlerId << ")";
                 throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
 
             }
@@ -899,8 +905,10 @@ namespace Internal
             case HandlerNotRegistered:
             {
                 std::wostringstream ostr;
-                ostr << "DeleteEntity called with handler that is not previously registered. connId = " << connection->Id()
-                     << " handlerId = " << handlerId << ")";
+                ostr << "DeleteEntity called with handler that is not previously registered. (typeId = " 
+                     << Typesystem::Operations::GetName(m_typeId)
+                     << ", connId = " << connection->Id()
+                     << ", handlerId = " << handlerId << ")";
                 throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
             }
             break;
@@ -908,8 +916,10 @@ namespace Internal
             case InstanceOwnedByOtherHandler:
             {
                 std::wostringstream ostr;
-                ostr << "DeleteEntity not allowed, instance owned by another handler. instanceId = " << instanceId
-                     << " handlerId = " << handlerId << ")";
+                ostr << "DeleteEntity not allowed, instance owned by another handler. (typeId = " 
+                     << Typesystem::Operations::GetName(m_typeId)
+                     << ", instanceId = " << instanceId
+                     << ", handlerId = " << handlerId << ")";
                 throw Safir::Dob::AccessDeniedException(ostr.str(),__WFILE__,__LINE__);
             }
             break;
@@ -917,8 +927,10 @@ namespace Internal
             case InstanceIsGhost:
             {
                 std::wostringstream ostr;
-                ostr << "DeleteEntity not allowed, persistence exists. instanceId = " << instanceId
-                     << " handlerId = " << handlerId << ")";
+                ostr << "DeleteEntity not allowed, persistence exists. (typeId = " 
+                     << Typesystem::Operations::GetName(m_typeId)
+                     << ", instanceId = " << instanceId
+                     << ", handlerId = " << handlerId << ")";
                 throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
 
             }
@@ -1304,8 +1316,10 @@ namespace Internal
             case HandlerNotRegistered:
             {
                 std::wostringstream ostr;
-                ostr << "SetEntity (in an OnInjected... callback) called with handler that is not previously registered. connId = " << connection->Id()
-                     << " handlerId = " << handlerId << ")";
+                ostr << "SetEntity (in an OnInjected... callback) called with handler that is not previously registered. (typeId = " 
+                     << Typesystem::Operations::GetName(m_typeId)
+                     << ", connId = " << connection->Id()
+                     << ", handlerId = " << handlerId << ")";
                 throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
 
             }
@@ -1314,8 +1328,10 @@ namespace Internal
             case InstanceOwnedByOtherHandler:
             {
                 std::wostringstream ostr;
-                ostr << "SetEntity (in an OnInjected... callback) not allowed, instance owned by another handler. instanceId = " << instanceId
-                     << " handlerId = " << handlerId << ")";
+                ostr << "SetEntity (in an OnInjected... callback) not allowed, instance owned by another handler. (typeId = " 
+                     << Typesystem::Operations::GetName(m_typeId)
+                     << ", instanceId = " << instanceId
+                     << ", handlerId = " << handlerId << ")";
                 throw Safir::Dob::AccessDeniedException(ostr.str(),__WFILE__,__LINE__);
 
             }
@@ -1363,8 +1379,10 @@ namespace Internal
             case HandlerNotRegistered:
             {
                 std::wostringstream ostr;
-                ostr << "DeleteEntity (in an OnInjected... callback) called with handler that is not previously registered. connId = " << connection->Id()
-                     << " handlerId = " << handlerId << ")";
+                ostr << "DeleteEntity (in an OnInjected... callback) called with handler that is not previously registered. (typeId = " 
+                     << Typesystem::Operations::GetName(m_typeId)
+                     << ", connId = " << connection->Id()
+                     << ", handlerId = " << handlerId << ")";
                 throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
             }
             break;
@@ -1372,8 +1390,10 @@ namespace Internal
             case InstanceOwnedByOtherHandler:
             {
                 std::wostringstream ostr;
-                ostr << "DeleteEntity (in an OnInjected... callback) not allowed, instance owned by another handler. instanceId = " << instanceId
-                     << " handlerId = " << handlerId << ")";
+                ostr << "DeleteEntity (in an OnInjected... callback) not allowed, instance owned by another handler. (typeId = " 
+                     << Typesystem::Operations::GetName(m_typeId)
+                     << ", instanceId = " << instanceId
+                     << ", handlerId = " << handlerId << ")";
                 throw Safir::Dob::AccessDeniedException(ostr.str(),__WFILE__,__LINE__);
             }
             break;
