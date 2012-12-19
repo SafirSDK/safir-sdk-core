@@ -139,9 +139,9 @@ namespace Internal
 
         // enter main loop
 #ifndef NDEBUG
-        std::wcout<<"dose_main running (debug)..." << std::endl;
+        lllerr<<"dose_main running (debug)..." << std::endl;
 #else
-        std::wcout<<"dose_main running (release)..." << std::endl;
+        lllerr<<"dose_main running (release)..." << std::endl;
 #endif
 
         //we want the io service to keep running for ever.
@@ -279,8 +279,6 @@ namespace Internal
             m_connectionHandler.MaybeSignalConnectSemaphore();
             m_pendingRegistrationHandler.CheckForPending();
         }
-
-        //        std::wcout << "End handle_input (" << numEvents <<" events)" << std::endl;
     }
 
     void DoseApp::HandleTimeout(const TimerInfoPtr& timer)

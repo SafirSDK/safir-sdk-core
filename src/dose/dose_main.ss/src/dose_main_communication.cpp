@@ -148,11 +148,11 @@ namespace Internal
 
         if (m_QualityOfServiceData.IsStandalone())
         {
-            std::wcout << "Running in Standalone mode" <<std::endl;
+            lllerr << "Running in Standalone mode" <<std::endl;
             return false;
         }
 
-        std::wcout << "Running in multi node mode. Configuration is expected to contain " << NodeParameters::NumberOfNodes() << " nodes." <<std::endl;
+        lllerr << "Running in multi node mode. Configuration is expected to contain " << NodeParameters::NumberOfNodes() << " nodes." <<std::endl;
 
         for (DistributionChannelTable::const_iterator it = m_QualityOfServiceData.GetDistributionChannelTable().begin();
              it != m_QualityOfServiceData.GetDistributionChannelTable().end(); ++it)

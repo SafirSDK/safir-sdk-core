@@ -154,7 +154,7 @@ namespace Internal
         }
         else
         {
-            std::wcout << "got extra signal " << sig << std::endl;
+            lllerr << "Got extra signal " << sig << std::endl;
         }
     }
 

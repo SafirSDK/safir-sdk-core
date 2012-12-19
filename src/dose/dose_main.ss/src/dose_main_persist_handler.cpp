@@ -57,8 +57,7 @@ namespace Safir
 
             if (Dob::PersistenceParameters::SystemHasPersistence())
             {
-                std::wcout << "dose_main is waiting for persistence data!" << std::endl;
-                lllout << "dose_main is waiting for persistence data!" << std::endl;
+                lllerr << "dose_main is waiting for persistence data!" << std::endl;
             }
 
         }
@@ -97,7 +96,7 @@ namespace Safir
             {
                 if(Dob::PersistenceParameters::TestMode())
                 {
-                    std::wcout << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
+                    lllerr << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
                         << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
                 }
                 else
@@ -263,8 +262,7 @@ namespace Safir
 
         void PersistHandler::SetPersistentDataReady()
         {
-            std::wcout << "dose_main persistence data is ready!" << std::endl;
-            lllout << "dose_main persistence data is ready!" << std::endl;
+            lllerr << "dose_main persistence data is ready!" << std::endl;
             ENSURE(Dob::PersistenceParameters::SystemHasPersistence(), << "This system does not have persistence, it is an error to call SetPersistentDataReady");
 
             m_persistDataReady = true;
