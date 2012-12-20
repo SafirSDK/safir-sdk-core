@@ -24,13 +24,17 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys
+import subprocess, os, time, sys, signal
 
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 
 print("This test program expects to be killed off after about two minutes unless it has finished successfully before then.")
 
-proc = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","dose_main"), stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines=True)
+proc = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","dose_main"), 
+                        stdout = subprocess.PIPE, 
+                        stderr = subprocess.STDOUT, 
+                        universal_newlines=True,
+                        creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
 lines = list()
 for i in range(3):
     lines.append(proc.stdout.readline().rstrip("\n\r"))
@@ -39,8 +43,13 @@ for i in range(3):
 #give it one second to output any spurious stuff...
 time.sleep(1)
 
-proc.terminate()
-for i in range (10):
+if sys.platform == "win32":
+    #can't send CTRL_C_EVENT to processes started with subprocess, unfortunately
+    proc.send_signal(signal.CTRL_BREAK_EVENT)
+else:
+    proc.terminate()
+
+for i in range (100):
     if proc.poll() is not None:
         break
     time.sleep(0.1)
