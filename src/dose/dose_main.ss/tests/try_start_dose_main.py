@@ -50,10 +50,14 @@ if proc.poll() is None:
     except OSError:
         pass
     proc.wait()
+
+lines.append(proc.stdout.readline().rstrip("\n\r"))
+print("Line", 3, ": '" + lines[-1] + "'")
+
 res = proc.communicate()[0]
 
 if len(res) != 0:
-    print("More than three lines output! Trailing data is\n'"+res + "'")
+    print("More than four lines output! Trailing data is\n'"+res + "'")
     sys.exit(1)
 
 if not lines[0].endswith("dose_main is waiting for persistence data!"):
@@ -64,6 +68,9 @@ if not lines[1].endswith("Running in Standalone mode"):
     sys.exit(1)
 if not lines[2].endswith("dose_main running (release)...") and not lines[2].endswith("dose_main running (debug)..."):
     print("Failed to find string ending in 'dose_main running (release)...' or 'dose_main running (debug)...'")
+    sys.exit(1)
+if not lines[3].endswith("Exiting..."):
+    print("Failed to find string ending in 'Exiting...'")
     sys.exit(1)
 
 print("success")
