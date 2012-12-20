@@ -29,8 +29,11 @@ int main()
 {
     try 
     {
-        Safir::Dob::Internal::DoseApp theApp;
-        theApp.Run();
+        {
+            Safir::Dob::Internal::DoseApp theApp;
+            theApp.Run();
+        }
+        lllerr << "Exiting..." << std::endl;
         return 0;
     }
     catch (const std::exception & exc)
