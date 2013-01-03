@@ -69,9 +69,6 @@ class Executor implements
         m_controlConnection.open(m_controlConnectionName, m_instanceString, 0, this, m_controlDispatcher);
 
         m_controlConnection.subscribeEntity(com.saabgroup.dosetest.Sequencer.ClassTypeId,this);
-        //if (m_actionReceiver != null) {
-            //m_actionReceiver.start();
-        //}
 
         System.out.println(m_identifier + ":" + m_instance + " Started");
         boolean DispatchControl;
@@ -652,6 +649,11 @@ class Executor implements
         }
 
         public void open() {
+            if (m_receiverThread != null) {
+                System.out.println("ActionReader: Must call close before calling open again!");
+                throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Cannot call open when thread is not null!");
+            }
+
             short startPort = (short)(30000 + m_instance);
             for (short i = 0; i < 100; ++i) {
                 short port = (short)(startPort + i * 3);
@@ -659,12 +661,12 @@ class Executor implements
                     m_acceptor = new ServerSocket();
                     m_acceptor.setReuseAddress(false);
                     m_acceptor.bind(new InetSocketAddress(port));
-                    System.out.println("accepting connections on port " + port);
+                    System.out.println("ActionReader: accepting connections on port " + port);
                     m_port = port;
                     break;
                 }
                 catch (java.io.IOException e) {
-                    System.out.println("Failed to accept on port " + port +  ": " + e);
+                    System.out.println("ActionReader: Failed to accept on port " + port +  ": " + e);
                 }
             }
 
@@ -674,6 +676,7 @@ class Executor implements
             m_receiverThread = new ReceiverThread();
             m_receiverThread.start();
         }
+
         public void close() {
             if (m_receiverThread != null) {
                 m_receiverThread.interrupt();
@@ -724,7 +727,7 @@ class Executor implements
             }
 
             @Override
-                public void run() {
+            public void run() {
                 byte [] ok = new byte[3];
                 ok[0] = 'o';
                 ok[1] = 'k';
@@ -732,7 +735,7 @@ class Executor implements
 
                 try {
                     m_socket = m_acceptor.accept();
-                    System.out.println("Accepted connection");
+                    System.out.println("ActionReader: Accepted connection");
                     DataInputStream input = new DataInputStream
                         (new BufferedInputStream(m_socket.getInputStream()));
 
@@ -740,6 +743,8 @@ class Executor implements
                         DataOutputStream(m_socket.getOutputStream());
 
                     while(!isInterrupted()) {
+                        System.out.println("ActionReader: Waiting for action");
+
                         byte [] header = new byte[16];
                         input.readFully(header);
                         java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(header.length);
@@ -751,27 +756,27 @@ class Executor implements
                         input.readFully(wholeBinary,16,blobSize - 16);
 
                         Action action = (Action)com.saabgroup.safir.dob.typesystem.Serialization.toObject(wholeBinary);
-                        System.out.println("Got action " + action.actionKind().getVal());
+                        System.out.println("ActionReader: Got action " + action.actionKind().getVal());
 
                         synchronized (m_synchronizer) {
                             m_synchronizer.ReceivedAction = action;
                             m_synchronizer.notify();
                         }
 
-                        System.out.println("Waiting for action handled");
+                        System.out.println("ActionReader: Waiting for action handled");
                         synchronized (m_handled) {
                             while (!m_handled.handled) {
                                 m_handled.wait();
                             }
                             m_handled.handled = false;
                         }
-                        System.out.println("Sending reply");
+                        System.out.println("ActionReader: Sending reply");
                         output.write(ok);
                     }
                 }
                 catch (IOException ex) {
                     if (!isInterrupted()) {
-                        System.out.println("Got an IOException, ActionReceiver will stop running: " + ex.toString());
+                        System.out.println("ActionReader: Got an IOException, ActionReceiver will stop running: " + ex.toString());
                     }
                 }
                 catch (InterruptedException ex) {
