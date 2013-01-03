@@ -61,6 +61,17 @@ class Executor implements
     }
 
     public void run() throws InterruptedException {
+        try {
+            runInternal();
+        }
+        finally {
+            m_testConnection.close();
+            m_controlConnection.close();
+            m_actionReceiver.close();
+        }
+    }
+
+    private void runInternal() throws InterruptedException {
         // Seems that subsequent garbage collections will execute faster after the first one so we start with
         // a GC here.
         System.gc();
@@ -154,8 +165,6 @@ class Executor implements
                 m_isDone = true;
             }
         }
-
-        m_actionReceiver.close();
     }
 
     private void executeAction(com.saabgroup.dosetest.Action action) {
