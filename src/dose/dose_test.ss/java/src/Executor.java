@@ -27,6 +27,7 @@ import java.io.*;
 import java.net.*;
 import java.net.UnknownHostException;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -229,7 +230,7 @@ class Executor implements
 
                     // After releasing the executor's references and a garabage collection, there should be no
                     // Consumer instances
-                    if (Consumer.instanceCount != 0) {
+                    if (Consumer.instanceCount.get() != 0) {
                         Logger.instance().println("Expected 0 consumer instances, but there is " + Consumer.instanceCount);
                     }
 
@@ -263,13 +264,13 @@ class Executor implements
 
                     // After releasing the executor's references and a garabage collection, there should be no
                     // Consumer instances and no Dispatcher instances
-                    if (Consumer.instanceCount != 0) {
+                    if (Consumer.instanceCount.get() != 0) {
                         Logger.instance().println("Expected 0 consumer instances, but there is " + Consumer.instanceCount);
                     }
-                    if (Dispatcher.instanceCount != 0) {
+                    if (Dispatcher.instanceCount.get() != 0) {
                         Logger.instance().println("Expected 0 dispatcher instances, but there is " + Dispatcher.instanceCount);
                     }
-                    if (StopHandler.instanceCount != 0) {
+                    if (StopHandler.instanceCount.get() != 0) {
                         Logger.instance().println("Expected 0 stopHandler instances, but there is " + StopHandler.instanceCount);
                     }
 
@@ -594,10 +595,10 @@ class Executor implements
     //
     static private class Dispatcher implements com.saabgroup.safir.dob.Dispatcher {
 
-        public static int instanceCount = 0;
+        public static AtomicInteger instanceCount = new AtomicInteger();
 
         public Dispatcher(Synchronizer synchronizer) {
-            //TODO            Interlocked.Increment(ref instanceCount);
+            instanceCount.incrementAndGet();
             m_synchronizer = synchronizer;
         }
 
@@ -611,13 +612,17 @@ class Executor implements
                 m_synchronizer.notify();
             }
         }
+
         private final Synchronizer m_synchronizer;
-        /* TODO:
-        ~Dispatcher()
-        {
-        Interlocked.Decrement(ref instanceCount);
+
+        protected void finalize() throws java.lang.Throwable {
+            try {
+                instanceCount.decrementAndGet();
+            }
+            finally {
+                super.finalize();
+            }
         }
-         */
     }
 
     //
@@ -625,20 +630,21 @@ class Executor implements
     //
     static private class StopHandler implements com.saabgroup.safir.dob.StopHandler {
 
-        public static int instanceCount = 0;
+        public static AtomicInteger instanceCount = new AtomicInteger();
 
         public StopHandler() {
-            /* TODO:
-            Interlocked.Increment(ref instanceCount);
-             */
+            instanceCount.incrementAndGet();
         }
 
-        /* TODO
-        ~StopHandler()
-        {
-        Interlocked.Decrement(ref instanceCount);
+        protected void finalize() throws java.lang.Throwable {
+            try {
+                instanceCount.decrementAndGet();
+            }
+            finally {
+                super.finalize();
+            }
         }
-         */
+
         //
         // StopHandler Members
         //

@@ -22,6 +22,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+import java.util.concurrent.atomic.AtomicInteger;
 
 class Consumer implements
                    com.saabgroup.safir.dob.MessageSubscriber,
@@ -36,7 +37,7 @@ class Consumer implements
                    com.saabgroup.safir.dob.Requestor,
                    com.saabgroup.safir.application.Backdoor
 {
-    public static long instanceCount = 0;
+    public static AtomicInteger instanceCount = new AtomicInteger();
 
     private final String PREFIX = "Consumer ";
 
@@ -44,7 +45,7 @@ class Consumer implements
                     String connectionName,
                     String instance)
     {
-        //TODO: Interlocked.Increment(ref instanceCount);
+        instanceCount.incrementAndGet();
 
         m_consumerNumber = consumerNumber;
         m_connectionName = connectionName;
@@ -57,12 +58,14 @@ class Consumer implements
         m_connection.attach(connectionName,instance);
     }
 
-    /* TODO
-       ~Consumer()
-       {
-       Interlocked.Decrement(ref instanceCount);
-       }*/
-
+    protected void finalize() throws java.lang.Throwable {
+        try {
+            instanceCount.decrementAndGet();
+        }
+        finally {
+            super.finalize();
+        }
+    }
 
     static boolean needBinaryCheck(com.saabgroup.safir.dob.typesystem.Object obj)
     {
