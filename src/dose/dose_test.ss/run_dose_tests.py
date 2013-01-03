@@ -61,10 +61,6 @@ class Parameters:
         from optparse import OptionParser
         import tempfile
 
-        self.lang0 = "cpp";
-        self.lang1 = "cpp";
-        self.lang2 = "cpp";
-    
         parser = OptionParser()
         parser.add_option("--jenkins", action="store_true",dest="jenkins",default=False,
                           help="Set up the needed environment variables for a Jenkins automated build," +
@@ -76,9 +72,21 @@ class Parameters:
                           help="Run multinode tests instead of standalone tests")
         parser.add_option("--slave", action="store_true",dest="slave",default=False,
                           help="Be a multinode slave")
+        parser.add_option("--lang0", action="store",dest="lang0",default="cpp",
+                          help="Which partner 0 to run. [default: %default]. "
+                          "If --jenkins is specified the lang0 environment variable will override this.")
+        parser.add_option("--lang1", action="store",dest="lang1",default="cpp",
+                          help="Which partner 1 to run. [default: %default]. "
+                          "If --jenkins is specified the lang1 environment variable will override this.")
+        parser.add_option("--lang2", action="store",dest="lang2",default="cpp",
+                          help="Which partner 2 to run. [default: %default]. "
+                          "If --jenkins is specified the lang2 environment variable will override this.")
 
         (options,args) = parser.parse_args()
 
+        self.lang0 = options.lang0
+        self.lang1 = options.lang1
+        self.lang2 = options.lang2
         
         self.multinode = options.multinode
         self.slave = options.slave
@@ -104,15 +112,16 @@ class Parameters:
                 separator = ";"
             os.environ["PATH"] = os.environ.get("PATH") + separator + os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
         
-            self.lang0 = os.environ.get("lang0")
-            if self.lang0 is None:
-                self.lang0 = "cpp";
-            self.lang1 = os.environ.get("lang1")
-            if self.lang1 is None:
-                self.lang1 = "cpp";
-            self.lang2 = os.environ.get("lang2")
-            if self.lang2 is None:
-                self.lang2 = "cpp";
+            #Get env variables if they're set
+            tmp = os.environ.get("lang0")
+            if tmp is not None:
+                self.lang0 = tmp;
+            tmp = os.environ.get("lang1")
+            if tmp is not None:
+                self.lang1 = tmp;
+            tmp = os.environ.get("lang2")
+            if tmp is not None:
+                self.lang2 = tmp;
         
             #make stdout unbuffered
             sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
@@ -139,8 +148,8 @@ class Parameters:
                                         self.testcases_path,
                                         #"--context", "-1", #random context
                                         "-l", self.lang0, self.lang1, self.lang2,
-                                        #"--first", "1",
-                                        #"--last", "1"
+                                        #"--first", "9999",
+                                        #"--last", "9999"
                                         )
         
         self.expected_output_path = os.path.join(self.SAFIR_RUNTIME, "data", "text", "dose_test", 
