@@ -82,8 +82,20 @@ bool GetJArray(JNIEnv * _env,
 JNIEnv* Callbacks::CallbackEnv()
 {
     JNIEnv* env;
-    m_vm->GetEnv((void**)&env, m_version);
-    return env;
+    const jint res = m_vm->GetEnv((void**)&env, m_version);
+    if (res == JNI_OK)
+    {
+        return env;
+    }
+    else if (res == JNI_EDETACHED)
+    {
+        std::wcout << "CallbackEnv() failed, GetEnv returned JNI_EDETACHED!" << std::endl;
+    }
+    else
+    {
+        std::wcout << "CallbackEnv() failed, GetEnv returned " << res << "!" << std::endl;
+    }
+    abort();
 }
 
 
@@ -96,7 +108,7 @@ jclass Callbacks::GetCallbacksClass()
         if (localCallbacks==NULL)
         {
             std::wcout<<"dose_java_internal.dll - InitCallbacks: Couldn't find class com/saabgroup/safir/dob/Callbacks!"<<std::endl;
-            return false;
+            return NULL;
         }
         callbacks = (jclass)CallbackEnv()->NewGlobalRef(localCallbacks);
     }
