@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-if (SAFIR_JAVA_SUPPORT)
-  project(dots_test CXX Java)
-else()
-  project(dots_test CXX)
-endif ()
-
-
+project(dots_test CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 

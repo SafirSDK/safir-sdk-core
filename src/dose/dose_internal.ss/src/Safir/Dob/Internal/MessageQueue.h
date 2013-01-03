@@ -57,7 +57,8 @@ namespace Internal
         typedef boost::function<void(const DistributionData & msg, bool & exitDispatch, bool & dontRemove)> DispatchFunc;
         typedef boost::function<void (void)> ActionFunc;
 
-        void Dispatch(const DispatchFunc & dispatchFunc, const ActionFunc & postFullAction);
+        //returns number of dispatched messages
+        size_t Dispatch(const DispatchFunc & dispatchFunc, const ActionFunc & postFullAction);
 
         //Checks if the queue is empty
         bool empty() const

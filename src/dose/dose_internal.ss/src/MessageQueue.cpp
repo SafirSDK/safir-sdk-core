@@ -24,9 +24,7 @@
 
 #include <Safir/Dob/Internal/MessageQueue.h>
 #include <Safir/Dob/Internal/StateDeleter.h>
-#include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Internal/TimeRegistration.h>
-#include <Safir/Dob/Internal/Atomic.h>
 #include <Safir/Dob/Internal/ScopeExit.h>
 
 namespace Safir
@@ -84,15 +82,15 @@ namespace Internal
         }
     }
 
-    void MessageQueue::Dispatch(const DispatchFunc & dispatchFunc,
-                                const ActionFunc & postFullAction)
+    size_t MessageQueue::Dispatch(const DispatchFunc & dispatchFunc,
+                                  const ActionFunc & postFullAction)
     {
         //This is set to true by the guard if the queue has gone from a full to a not-full state.
         bool isNoLongerFull = false;
+        size_t numDispatched = 0;
 
         {
             QueueData toDispatch;
-            size_t numDispatched = 0;
 
             //This will cause the FinishDispatch method to be called when the scope exits
             //normally or if exitDispatch is used or there is an exception.
@@ -113,7 +111,7 @@ namespace Internal
 
             if (oldSize == 0)
             {
-                return;
+                return 0;
             }
 
             bool exitDispatch;
@@ -151,6 +149,7 @@ namespace Internal
         {
             postFullAction();
         }
+        return numDispatched;
     }
 }
 }

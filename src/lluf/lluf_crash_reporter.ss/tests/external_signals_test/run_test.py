@@ -38,9 +38,14 @@ print ("stdout isatty:", sys.stdout.isatty())
 print ("stderr isatty:", sys.stderr.isatty())
 print ("stdin isatty:", sys.stdin.isatty())
 print()
+sys.stdout.flush()
 errors = 0
  
 def test_signal(reason, expectCallback = False, expectedReturncode = None):
+    test_signal_internal(reason,expectCallback,expectedReturncode)
+    sys.stdout.flush()
+
+def test_signal_internal(reason, expectCallback, expectedReturncode):
     global errors
     print("Testing signal", str(reason) + ":")
     cf = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0

@@ -23,7 +23,11 @@
 ******************************************************************************/
 
 #include <iostream>
-#include <Safir/Dob/Internal/Connections.h>
+#include <Safir/Dob/Internal/ConnectionId.h>
+#include <Safir/Dob/Internal/DistributionData.h>
+#include <Safir/Dob/Internal/MessageQueue.h>
+#include <Safir/Dob/Internal/StateDeleter.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
 #include <Safir/Dob/Message.h>
@@ -38,26 +42,30 @@ long dispatched = 0;
 void Dispatch(const DistributionData &, bool & exitDispatch, bool & dontRemove)
 {
     ++dispatched;
+    
+    if (dispatched % 100 == 0)
+    {
+        lllerr << "Dispatched " << dispatched << std::endl;
+    }
+
     exitDispatch = false;
     dontRemove = false;
 }
 
 MessageQueue queue(10);
 
-volatile long sent = 0;
-void Sender()
+void Sender(long& sent)
 {
     Safir::Dob::MessagePtr m = Safir::Dob::Message::Create();
     Safir::Dob::Typesystem::BinarySerialization ser;
     Safir::Dob::Typesystem::Serialization::ToBinary(m,ser);
 
     DistributionData d(message_tag,ConnectionId(100,0,100),Safir::Dob::Typesystem::ChannelId(),&ser[0]);
-
+    lllerr << "Push loop starting (in thread)" << std::endl;
     for (;;)
     {
         if (sent == NUM_MSG)
         {
-            std::wcout << NUM_MSG << " sent" << std::endl;
             return;
         }
 
@@ -70,24 +78,46 @@ void Sender()
         else
         {
             boost::this_thread::yield();
+            continue;
+        }
+
+        if (sent % 100 == 0)
+        {
+            lllerr << sent << " sent" << std::endl;
         }
     }
 }
 
 int main(int, char**)
 {
-    boost::thread t(Sender);
+    lllerr << "Starting thread" << std::endl;
+    long sent = 0;
+    boost::thread t(boost::bind(Sender,boost::ref(sent)));
+
+    lllerr << "Dispatch loop starting" << std::endl;
     for(;;)
     {
-        queue.Dispatch(Dispatch,NULL);
-        if (sent == NUM_MSG && dispatched == NUM_MSG)
+        const size_t res = queue.Dispatch(Dispatch,NULL);
+        
+        if (res == 0)
         {
-            std::wcout << "Dispatched " << dispatched << std::endl;
+            boost::this_thread::yield();
+            continue;
+        }
+
+        if (dispatched == NUM_MSG)
+        {
             break;
         }
     }
+    lllerr << "Joining thread" << std::endl;
     t.join();
-    
+    if (sent != NUM_MSG)
+    {
+        lllerr << "unexpected number of sent " << sent << std::endl;
+        return 1;
+    }
+    lllerr << "all seems good" << std::endl;
     return 0;
 }
 

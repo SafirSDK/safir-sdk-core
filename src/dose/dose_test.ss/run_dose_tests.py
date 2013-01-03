@@ -72,6 +72,8 @@ class Parameters:
                           help="Run multinode tests instead of standalone tests")
         parser.add_option("--slave", action="store_true",dest="slave",default=False,
                           help="Be a multinode slave")
+        parser.add_option("--no-java", action="store_true",dest="no_java",default=False,
+                          help="Do not run java partners")
         parser.add_option("--lang0", action="store",dest="lang0",default="cpp",
                           help="Which partner 0 to run. [default: %default]. "
                           "If --jenkins is specified the lang0 environment variable will override this.")
@@ -91,6 +93,8 @@ class Parameters:
         self.multinode = options.multinode
         self.slave = options.slave
         self.standalone = not options.multinode and not options.slave
+
+        self.no_java = options.no_java
 
         if options.autostart_slave and not self.multinode:
             print "--autostart-slave can only be used together with --multinode"
@@ -148,8 +152,8 @@ class Parameters:
                                         self.testcases_path,
                                         #"--context", "-1", #random context
                                         "-l", self.lang0, self.lang1, self.lang2,
-                                        #"--first", "9999",
-                                        #"--last", "9999"
+                                        #"--first", "1",
+                                        #"--last", "1"
                                         )
         
         self.expected_output_path = os.path.join(self.SAFIR_RUNTIME, "data", "text", "dose_test", 
@@ -427,7 +431,8 @@ class Runner:
             self.__launchProcess("dose_test_cpp." + str(i), parameters.dose_test_cpp_cmd + (str(i),))
             #self.__launchProcess("dose_test_ada." + str(i), parameters.dose_test_ada_cmd + (str(i),))
             self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
-            self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))
+            if not parameters.no_java:
+                self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))
 
     def __kill(self, name, proc):
         try:

@@ -1,15 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(dose_java_jni CXX Java)
-find_package(Java REQUIRED)
 find_package(JNI REQUIRED)
 string (REPLACE "javac" "javah" JAVAH ${JAVA_COMPILE})
-
-#this library has a C interface, so we don't want the "d" suffix on debug builds on windows
-#Must be set before including cmake_settings.txt
-SET(NO_LIBRARY_POSTFIXES 1) 
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 INCLUDE_DIRECTORIES(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
 
