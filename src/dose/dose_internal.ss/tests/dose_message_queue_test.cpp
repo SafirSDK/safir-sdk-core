@@ -32,6 +32,12 @@
 #include <boost/thread.hpp>
 #include <Safir/Dob/Message.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
+#include <Safir/Utilities/CrashReporter.h>
+
+void DumpFunc(const char* const dumpPath)
+{
+    lllog(0) << "Crash! Dump generated at " << dumpPath << std::endl;
+}
 
 using namespace Safir::Dob::Internal;
 
@@ -43,9 +49,9 @@ void Dispatch(const DistributionData &, bool & exitDispatch, bool & dontRemove)
 {
     ++dispatched;
     
-    if (dispatched % 100 == 0)
+    if (dispatched % 100 == 1)
     {
-        lllerr << "Dispatched " << dispatched << std::endl;
+        lllog(0) << "Dispatched " << dispatched << std::endl;
     }
 
     exitDispatch = false;
@@ -61,7 +67,7 @@ void Sender(long& sent)
     Safir::Dob::Typesystem::Serialization::ToBinary(m,ser);
 
     DistributionData d(message_tag,ConnectionId(100,0,100),Safir::Dob::Typesystem::ChannelId(),&ser[0]);
-    lllerr << "Push loop starting (in thread)" << std::endl;
+    lllog(0) << "Push loop starting (in thread)" << std::endl;
     for (;;)
     {
         if (sent == NUM_MSG)
@@ -81,20 +87,23 @@ void Sender(long& sent)
             continue;
         }
 
-        if (sent % 100 == 0)
+        if (sent % 100 == 1)
         {
-            lllerr << sent << " sent" << std::endl;
+            lllog(0) << sent << " sent" << std::endl;
         }
     }
 }
 
 int main(int, char**)
 {
-    lllerr << "Starting thread" << std::endl;
+    Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
+    Safir::Utilities::CrashReporter::Start();
+
+    lllog(0) << "Starting thread" << std::endl;
     long sent = 0;
     boost::thread t(boost::bind(Sender,boost::ref(sent)));
 
-    lllerr << "Dispatch loop starting" << std::endl;
+    lllog(0) << "Dispatch loop starting" << std::endl;
     for(;;)
     {
         const size_t res = queue.Dispatch(Dispatch,NULL);
@@ -110,14 +119,14 @@ int main(int, char**)
             break;
         }
     }
-    lllerr << "Joining thread" << std::endl;
+    lllog(0) << "Joining thread" << std::endl;
     t.join();
     if (sent != NUM_MSG)
     {
-        lllerr << "unexpected number of sent " << sent << std::endl;
+        lllog(0) << "unexpected number of sent " << sent << std::endl;
         return 1;
     }
-    lllerr << "all seems good" << std::endl;
+    lllog(0) << "all seems good" << std::endl;
     return 0;
 }
 
