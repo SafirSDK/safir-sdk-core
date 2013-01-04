@@ -379,7 +379,7 @@ def parse_command_line(builder):
         force_extra_config = options.force_extra_config        
 
     if options.jenkins:
-        builder.setenv_jenkin()
+        builder.setenv_jenkins()
         global SAFIR_RUNTIME
         global SAFIR_SDK
         #reload env
