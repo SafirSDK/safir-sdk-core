@@ -58,9 +58,7 @@ void Dispatch(const DistributionData &, bool & exitDispatch, bool & dontRemove)
     dontRemove = false;
 }
 
-MessageQueue queue(10);
-
-void Sender(long& sent)
+void Sender(MessageQueue& queue, long& sent)
 {
     Safir::Dob::MessagePtr m = Safir::Dob::Message::Create();
     Safir::Dob::Typesystem::BinarySerialization ser;
@@ -96,12 +94,18 @@ void Sender(long& sent)
 
 int main(int, char**)
 {
+    MessageQueue queue(10);
+    queue.size(); //call this to make sure the leveled lock helper gets instantiated
+    //this is a temporary workaround to see if it solves a crash.
+
     Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
     Safir::Utilities::CrashReporter::Start();
 
     lllog(0) << "Starting thread" << std::endl;
     long sent = 0;
-    boost::thread t(boost::bind(Sender,boost::ref(sent)));
+    boost::thread t(boost::bind(Sender,
+                                boost::ref(queue),
+                                boost::ref(sent)));
 
     lllog(0) << "Dispatch loop starting" << std::endl;
     for(;;)
