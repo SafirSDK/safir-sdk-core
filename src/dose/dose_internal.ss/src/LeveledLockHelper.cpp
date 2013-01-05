@@ -35,12 +35,18 @@ namespace Internal
     // to add methods that fetch lock-related information for any process/thread. If the fetching of such information
     // is not anticipated there should be no problem to store the data in process internal memory.
 
-    LeveledLockHelper& LeveledLockHelper::Instance()
+    boost::once_flag LeveledLockHelper::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+
+    LeveledLockHelper & LeveledLockHelper::SingletonHelper::Instance()
     {
-        //find_or_construct has good synchronization guarantees,
-        //so we dont need extra locking here.
-        static LeveledLockHelper* instance = GetSharedMemory().find_or_construct<LeveledLockHelper>("LEVELEDLOCKHELPER")(private_constructor_t());
+        static LeveledLockHelper* instance = GetSharedMemory().find_or_construct<LeveledLockHelper>("CONNECTIONS")(private_constructor_t());
         return *instance;
+    }
+
+    LeveledLockHelper & LeveledLockHelper::Instance()
+    {
+        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        return SingletonHelper::Instance();
     }
 
     LeveledLockHelper::LeveledLockHelper(private_constructor_t)

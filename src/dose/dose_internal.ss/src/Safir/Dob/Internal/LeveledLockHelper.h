@@ -75,6 +75,22 @@ namespace Internal
         mutable LevelMap m_levelMap;
 
         mutable boost::interprocess::interprocess_mutex m_levelMapLock;
+
+        /**
+         * This class is here to ensure that only the Instance method can get at the 
+         * instance, so as to be sure that boost call_once is used correctly.
+         * Also makes it easier to grep for singletons in the code, if all 
+         * singletons use the same construction and helper-name.
+         */
+        struct SingletonHelper
+        {
+        private:
+            friend LeveledLockHelper& LeveledLockHelper::Instance();
+
+            static LeveledLockHelper& Instance();
+            static boost::once_flag m_onceFlag;
+        };
+
     };
 }
 }

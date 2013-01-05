@@ -95,8 +95,6 @@ void Sender(MessageQueue& queue, long& sent)
 int main(int, char**)
 {
     MessageQueue queue(10);
-    queue.size(); //call this to make sure the leveled lock helper gets instantiated
-    //this is a temporary workaround to see if it solves a crash.
 
     Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
     Safir::Utilities::CrashReporter::Start();
