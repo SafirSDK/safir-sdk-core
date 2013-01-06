@@ -150,6 +150,7 @@ class Parameters:
         self.dose_test_sequencer_cmd = (os.path.join(self.SAFIR_RUNTIME, "bin", "dose_test_sequencer"),
                                         "-d",
                                         self.testcases_path,
+                                        "--no-timeout",
                                         #"--context", "-1", #random context
                                         "-l", self.lang0, self.lang1, self.lang2,
                                         #"--first", "1",

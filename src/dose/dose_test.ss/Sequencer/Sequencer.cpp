@@ -274,9 +274,9 @@ void Sequencer::Tick()
     if (!m_noTimeout)
     {
         const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
-        if (now - m_lastCleanupTime > boost::posix_time::minutes(30))
+        if (now - m_lastCleanupTime > boost::posix_time::minutes(10))
         {
-            std::wcout << "TIMEOUT: Sequencer has not been in CleaningUpTestcase state for 30 minutes!"
+            std::wcout << "TIMEOUT: Sequencer has not been in CleaningUpTestcase state for 10 minutes!"
                        << "Maybe a partner crashed? "
                        << "(" << m_languages.at(0).c_str() << ","
                        <<        m_languages.at(1).c_str() << ","
