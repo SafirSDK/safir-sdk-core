@@ -39,7 +39,7 @@ namespace Internal
 
     LeveledLockHelper & LeveledLockHelper::SingletonHelper::Instance()
     {
-        static LeveledLockHelper* instance = GetSharedMemory().find_or_construct<LeveledLockHelper>("CONNECTIONS")(private_constructor_t());
+        static LeveledLockHelper* instance = GetSharedMemory().find_or_construct<LeveledLockHelper>("LEVELEDLOCKHELPER")(private_constructor_t());
         return *instance;
     }
 
