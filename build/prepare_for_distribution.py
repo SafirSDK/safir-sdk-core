@@ -156,6 +156,9 @@ def copy_dll(name, alternatives = None, Log_Error = True):
        logError("could not find "+ name)
     return False
 
+def copy_exe(name, alternatives = None, Log_Error = True):
+    copy_dll(name,alternatives,Log_Error)
+
 def copy_lib(name, alternatives = None, Log_Error = True):
     for path in PATH:
         if not SAFIR_RUNTIME in path:
@@ -265,6 +268,9 @@ def windows():
     copy_dll("libtemplates_parser.dll")
     copy_dll("mingwm10.dll")
 
+    ###########
+    log("Copying jom.exe")
+    copy_exe("jom.exe")
 
 def linux():
     pass
