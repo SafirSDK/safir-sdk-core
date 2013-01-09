@@ -2893,7 +2893,7 @@ Under the namespace +Safir.Time+ there are a few classes that provide functional
 The time library also has support for loading an external library at runtime which could provide a higher accuracy time. The full Safir SDK provides such a library, which provides a much higher accuracy multi-node synchronised clock than NTP can provide on both GNU/Linux or Windows based systems. For more information on this, contact Saab AB (contact information at http://www.safirsdk.com[]).
 
 === Crash Reporting
-Safir SDK Core includes a crash reporting library, google-breakpad (http://code.google.com/p/google-breakpad/[]). The crash reporting library can be used to monitor applications for crashes (e.g. access violation or segmentation fault) and handling them by generating dumps. The dumps contain, among other things, general system information, call stack for each thread and the list of loaded modules. A dump file, together with symbolic debugging information, can be used to identify where in the software the crash occurred.  
+Safir SDK Core includes a crash reporting library, google-breakpad (http://code.google.com/p/google-breakpad/[]). The crash reporting library can be used to generate dumps when applications crash (e.g. access violation or segmentation fault). The dumps contain, among other things, general system information, the call stack for each thread and the list of loaded modules. A dump file, together with symbolic debugging information, can be used to identify where in the software the crash occurred.  
 
 ==== Enabling the Crash Reporter
 To use the crash reporter you need to initiate it in your application. The initiation should occur as early as is at all possible.
@@ -2954,7 +2954,7 @@ static void Main()
 ----------------------------
 
 In Ada you need to call +Enable_Crash_Reporting+ at the start of the program, and +Stop+ at the end of the program.
-Java has its own crash handler, so the Crash Reporter should not be used there, so there is no interface to start it.
+Java has its own crash handler, so the Crash Reporter should not be used there, and there is no interface to start it.
 
 See <<stop_tracer>> for a bit more info on the Stop function.
 
@@ -2966,7 +2966,7 @@ TODO: write about reporting sdk crashes
 
 ==== Analyzing a crash dump
 
-When an application crashes in a way that is caught by the crash reporter a dump file will be placed under +$(SAFIR_RUNTIME)/ data/crash_dumps+ with a rather cryptic name (a lot of digits followed by .dmp). Apart from generating this dump file the crash reporter will attempt to log an error to swre_logger and to standard output that a crash has happened.
+When an application crashes in a way that is caught by the crash reporter a dump file will be placed under +$(SAFIR_RUNTIME)/data/crash_dumps+ with a rather cryptic name (a lot of digits followed by .dmp). Apart from generating this dump file the crash reporter will attempt to log an error to swre_logger and to standard output that a crash has happened.
 
 If you're using Visual Studio you can just open the .dmp file and if you've got all the debug information and binaries available you will then see the call stack and be able to inspect the state of the application.
 On Linux, you can use gdb to analyze the .dmp files, although you will have to convert the dumps to a core file using the minidump-2-core tool that can be found under src/lluf_crash_reporter.ss/src/google-breakpad/tools/.
