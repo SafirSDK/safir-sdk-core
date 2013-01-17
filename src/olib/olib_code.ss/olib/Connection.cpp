@@ -58,6 +58,7 @@ const StateMessagePair Connection::GetDiagRec() const
     return Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_DBC,
                                               m_hConnection);
 }
+
     
 void Connection::Alloc(const Environment & environment)
 {
@@ -496,12 +497,12 @@ void Connection::ThrowReconnectException(const std::wstring & fileName,
     ThrowReconnectException(SQL_HANDLE_DBC, m_hConnection,fileName,lineNumber);
 }
 
-void Connection::ThrowReconnectException(SQLSMALLINT HandleType,
-                                         SQLHANDLE Handle,
+void Connection::ThrowReconnectException(SQLSMALLINT handleType,
+                                         SQLHANDLE handle,
                                          const std::wstring & fileName,
                                          const Safir::Dob::Typesystem::Int64 lineNumber) const
 {
-    const StateMessagePair rec = GetDiagRec();
+    const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(handleType, handle);
 
     throw ReconnectException(rec.first + L":" + rec.second, fileName,lineNumber);
 }

@@ -431,9 +431,9 @@ void Environment::ThrowReconnectException(SQLHENV hEnv,
                                           const Safir::Dob::Typesystem::Int64 lineNumber) const
 {
     const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
-                                                                    m_hEnv);
+                                                                    hEnv);
 
-    throw ReconnectException(rec.first + L":" + rec.second, fileName,lineNumber);
+    throw ReconnectException(rec.first + L":" + rec.second, fileName, lineNumber);
 }
 
 } // End namespace Odbc
