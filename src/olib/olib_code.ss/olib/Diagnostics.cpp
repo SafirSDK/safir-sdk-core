@@ -44,11 +44,11 @@ std::pair<std::wstring,std::wstring> GetDiagRec(const SQLSMALLINT handleType,
 
     ret = ::SQLGetDiagRecW(handleType,
                            handle,
-                           static_cast<SQLSMALLINT>(1),
+                           1,
                            wszSqlState,
                            &lpNativeErrorPtr,
                            &wszMessageText[0],
-                           wszMessageText.size(),
+                           static_cast<SQLSMALLINT>(wszMessageText.size()),
                            &textLength);
 
     switch(ret)
@@ -59,11 +59,11 @@ std::pair<std::wstring,std::wstring> GetDiagRec(const SQLSMALLINT handleType,
         wszMessageText.resize(textLength);
         ret = ::SQLGetDiagRecW(handleType,
                                handle,
-                               static_cast<SQLSMALLINT>(1),
+                               1,
                                wszSqlState,
                                &lpNativeErrorPtr,
                                &wszMessageText[0],
-                               wszMessageText.size(),
+                               static_cast<SQLSMALLINT>(wszMessageText.size()),
                                &textLength);
         if (ret == SQL_SUCCESS)
         {
