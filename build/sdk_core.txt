@@ -102,3 +102,6 @@ run_test_suite   src/swre/swre_test.ss                     swre_test
 run_test_suite   src/tests/header_check                    header_check
 
 build_dir        docs/doxygen                              Release
+
+#This will install the code examples under sdk/docs
+build_dir        docs/examples                             Release

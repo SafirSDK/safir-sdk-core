@@ -206,14 +206,6 @@ def copy_headers(dir,files):
     for file in files:
         copy_file(os.path.join(dir,file),HEADER_DESTINATION)
 
-def copy_docs_dir(dir, targetname, exclude_regex=None):
-    import re
-    if not os.path.isdir(dir):
-        logError("ERROR! " + dir + " is not a directory");
-        return
-    dst = os.path.join(DOCS_DESTINATION,targetname)
-    copy_tree(dir, dst, exclude_regex=re.compile(exclude_regex))
-
 def windows():
     """Copy lots of our dependencies into the sdk and runtime directories,
     to make use of the SDK binaries *a lot* simpler"""
@@ -276,12 +268,6 @@ def linux():
     pass
 
 def common():
-    log("Copying example apps into the sdk/docs directory")
-    #copy example apps to good spot
-    copy_docs_dir("examples/vehicleapp/vehicleapp_core.ss", "examples/vehicleapp", ".*\.svn.*")
-    copy_docs_dir("examples/vehicledb/vehicledb_core.ss", "examples/vehicledb", ".*\.svn.*")
-    copy_docs_dir("examples/vehiclemmi/vehiclemmi_core.ss", "examples/vehiclemmi", ".*\.svn.*")
-
     log("Running dobmake clean: ------------")
     #do a dobmake clean in dots_generated
     dobmake_path = os.path.join(SAFIR_RUNTIME,"bin","dobmake.py")
