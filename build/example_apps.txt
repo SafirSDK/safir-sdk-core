@@ -8,7 +8,7 @@ copy_dob_files   examples/vehicledb/vehicledb_core.ss/config/      definitions/s
 
 dobmake
 
-build_dir        examples/vehicleapp/vehicleapp_core.ss/src     RelWithDebInfo
-build_dir        examples/vehicledb/vehicledb_core.ss/src       RelWithDebInfo
-build_dir        examples/vehiclemmi/vehiclemmi_core.ss/src/    RelWithDebInfo
+build_dir        examples/vehicleapp/src      RelWithDebInfo
+build_dir        examples/vehicledb/src       RelWithDebInfo
+build_dir        examples/vehiclemmi/src      RelWithDebInfo
 
