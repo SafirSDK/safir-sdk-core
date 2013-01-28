@@ -41,24 +41,24 @@ namespace Internal
         {
             //--- Class ---
             Class,
-            ClassSummary,
-            ClassName,
-            BaseClass,
+            Classsummary,
+            className,
+            baseClass,
             ClassMembers,
             Parameters,
-            CreateRoutines,
+            createRoutines,
 
             Member,
-            MemberSummary,
+            Membersummary,
             MemberName,
             MemberType,
-            ArraySize,
-            ArraySizeRef,
-            MaxLength,
-            MaxLengthRef,            
+            arraySize,
+            arraySizeRef,
+            maxLength,
+            maxLengthRef,            
 
             CreateRoutine,
-            CreateRoutineSummary,
+            CreateRoutinesummary,
             CreateRoutineName,
             CreateRoutineParameterList,
             CreateRoutineMemberName,
@@ -68,7 +68,7 @@ namespace Internal
             CreateRoutineValueParameter,
 
             Parameter,
-            ParameterSummary,
+            Parametersummary,
             ParameterName,
             ParameterType,
             ParameterValue,
@@ -83,33 +83,33 @@ namespace Internal
             
             //--- Enum ---
             Enumeration,
-            EnumerationSummary,
+            Enumerationsummary,
             EnumerationName,
-            EnumerationValues,
+            enumerationValues,
             EnumerationValue,
 
             //--- Exception ---
             Exception,
-            ExceptionSummary,
+            Exceptionsummary,
             ExceptionName,
             ExceptionBase,
             
 
             //--- Property ---
             Property,
-            PropertySummary,
-            PropertyName,
+            Propertysummary,
+            propertyName,
             PropertyMembers,
 
             PropertyMember,
-            PropertyMemberSummary,
+            PropertyMembersummary,
             PropertyMemberName,
             PropertyMemberType,
-            PropertyMemberIsArray,
+            PropertyMemberisArray,
 
             //--- PropertyMapping ---
             PropertyMapping,
-            PropertyMappingSummary,
+            PropertyMappingsummary,
             MappedProperty,
             MappedClass,
             MemberMappings,
@@ -155,17 +155,17 @@ namespace Internal
             m_map[XmlAttribute]="<xmlattr>";
             m_map[XmlComment]="<xmlcomment>";
 
-            m_map[ClassSummary]="summary";
-            m_map[ExceptionSummary]="summary";
-            m_map[EnumerationSummary]="summary";
-            m_map[PropertySummary]="summary";
-            m_map[ParameterSummary]="summary";
-            m_map[MemberSummary]="summary";
-            m_map[CreateRoutineSummary]="summary";
-            m_map[ClassName]="name";
+            m_map[Classsummary]="summary";
+            m_map[Exceptionsummary]="summary";
+            m_map[Enumerationsummary]="summary";
+            m_map[Propertysummary]="summary";
+            m_map[Parametersummary]="summary";
+            m_map[Membersummary]="summary";
+            m_map[CreateRoutinesummary]="summary";
+            m_map[className]="name";
             m_map[ExceptionName]="name";
             m_map[EnumerationName]="name";
-            m_map[PropertyName]="name";
+            m_map[propertyName]="name";
             m_map[ParameterName]="name";
             m_map[MemberName]="name";
             m_map[CreateRoutineName]="name";
@@ -178,12 +178,12 @@ namespace Internal
             m_map[ParameterEntityId]="entityId";
             m_map[ParameterArrayIndex]="index";
 
-            m_map[ArraySize]="arraySize";
-            m_map[BaseClass]="baseClass";
+            m_map[arraySize]="arraySize";
+            m_map[baseClass]="baseClass";
             m_map[ExceptionBase]="baseClass";
             m_map[Class]="class";
             m_map[CreateRoutine]="createRoutine";
-            m_map[CreateRoutines]="createRoutines";
+            m_map[createRoutines]="createRoutines";
             m_map[CreateRoutineMemberName]="member";
             m_map[CreateRoutineParameterList]="parameters";
             m_map[CreateRoutineValues]="values";
@@ -194,7 +194,7 @@ namespace Internal
             m_map[PropertyMember]="member";
             m_map[Enumeration]="enumeration";
             m_map[Exception]="exception";
-            m_map[MaxLength]="maxLength";
+            m_map[maxLength]="maxLength";
             m_map[Member]="member";
             m_map[ClassMembers]="members";
             m_map[Parameter]="parameter";
@@ -202,15 +202,15 @@ namespace Internal
             m_map[Property]="property";
             m_map[MemberType]="type";
             m_map[EnumerationValue]="value";
-            m_map[EnumerationValues]="values";
-            m_map[PropertyMemberSummary]="summary";
+            m_map[enumerationValues]="values";
+            m_map[PropertyMembersummary]="summary";
             m_map[PropertyMemberName]="name";
             m_map[PropertyMemberType]="type";
             m_map[PropertyMembers]="members";
-            m_map[PropertyMemberIsArray]="array";
+            m_map[PropertyMemberisArray]="array";
 
             m_map[PropertyMapping]="propertyMapping";
-            m_map[PropertyMappingSummary]="summary";
+            m_map[PropertyMappingsummary]="summary";
             m_map[MappedProperty]="property";
             m_map[MappedClass]="class";
             m_map[MemberMappings]="memberMapping";
@@ -224,15 +224,15 @@ namespace Internal
             m_map[MapEntityId]="entityId";
             m_map[MapObject]="object";
 
-            m_map[ArraySizeRef]="arraySizeRef"; //member array 
-            m_map[MaxLengthRef]="maxLengthRef"; //member maxLength
+            m_map[arraySizeRef]="arraySizeRef"; //member array 
+            m_map[maxLengthRef]="maxLengthRef"; //member maxLength
             m_map[InstanceIdRef]="instanceIdRef"; //??????
             
             m_map[ReferenceName]="name";
             m_map[ReferenceIndex]="index";
 
             //m_map[Index]="index";
-            //m_map[IndexRef]="indexRef"; //???????? troligen dom mot värde i array
+            //m_map[IndexRef]="indexRef"; //???????? troligen dom mot vrde i array
                         
             m_map[InstanceId]="instanceId"; //<entityId><name/><instanceId/>..
 

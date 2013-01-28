@@ -36,13 +36,14 @@ namespace Typesystem
 namespace Internal
 {
     //forward declarations
-    class ParameterDescription;
     class ClassDescription;
-    class MemberDescription;    
+    class MemberDescription;
 
     class PropertyDescription
     {
     public:
+        virtual const std::string& FileName() const = 0;
+        virtual const std::string& Summary() const = 0;
         virtual DotsC_TypeId GetTypeId() const = 0;
         virtual const std::string& GetName() const = 0;
         virtual int GetNumberOfMembers() const = 0;
@@ -53,25 +54,30 @@ namespace Internal
     class ExceptionDescription
     {
     public:
+        virtual const std::string& FileName() const = 0;
+        virtual const std::string& Summary() const = 0;
         virtual DotsC_TypeId GetTypeId() const = 0;
         virtual const std::string& GetName() const = 0;
-        virtual const ExceptionDescription* GetBaseClass() const = 0;
+        virtual const ExceptionDescription* GetbaseClass() const = 0;
     };
 
     class ParameterDescription
     {
-    public:        
+    public:
+        virtual const std::string& Summary() const = 0;
         virtual const std::string& GetName() const = 0;
         virtual DotsC_MemberType GetMemberType() const = 0;
         virtual DotsC_TypeId GetTypeId() const = 0; //only valid if MemberType is object or enum
         virtual bool IsArray() const = 0;
-        virtual int GetArraySize() const = 0;
+        virtual int GetarraySize() const = 0;
         //GetValue<T>
     };
 
     class EnumDescription
     {
     public:
+        virtual const std::string& FileName() const = 0;
+        virtual const std::string& Summary() const = 0;
         virtual DotsC_TypeId GetTypeId() const = 0;
         virtual const std::string& GetName() const = 0;
         virtual DotsC_TypeId GetCheckSum() const = 0;
@@ -83,18 +89,20 @@ namespace Internal
     class MemberDescription
     {
     public:
+        virtual const std::string& Summary() const = 0;
         virtual DotsC_TypeId GetTypeId() const = 0;
         virtual const std::string& GetName() const = 0;
         virtual DotsC_MemberType GetMemberType() const = 0;
         virtual const ClassDescription* GetClass() const = 0;
         virtual const EnumDescription* GetEnum() const = 0;
         virtual const bool IsArray() const = 0;
-        virtual int GetArraySize() const = 0;
+        virtual int GetarraySize() const = 0;
         //GetDataLength
     };
 
     class MemberMappingDescription
     {
+    public:
         virtual DotsC_PropertyMappingKind GetMappingKind() const = 0;
         virtual const ParameterDescription * GetParameter() const = 0; //if mapped to parameter
 
@@ -105,18 +113,38 @@ namespace Internal
 
     class PropertyMappingDescription
     {
-    public:        
+    public:
+        virtual const std::string& FileName() const = 0;
+        virtual const std::string& Summary() const = 0;
         virtual const PropertyDescription* GetProperty() const = 0;
+        virtual const ClassDescription* GetClass() const = 0;
         virtual int GetNumberOfMappings() const = 0;
         virtual const MemberMappingDescription* GetMapping(int index) const = 0;
+    };
+
+    class CreateRoutineDescription
+    {
+    public:
+        virtual const std::string& Summary() const = 0;
+        virtual const std::string& GetName() const = 0;
+        virtual const ClassDescription* GetClass() const = 0;
+
+        virtual int GetNumberOfInParameters() const = 0;
+        virtual const MemberDescription* GetInParameterMember(int index) const = 0;
+
+        virtual int GetNumberOfDefaultValues() const = 0;
+        virtual const MemberDescription* GetDefaultValueMember(int index) const = 0;        
+        virtual std::pair<const ParameterDescription*, int /*paramIndex*/> GetDefaultValue(int index) const = 0;
     };
 
     class ClassDescription
     {
     public:
+        virtual const std::string& FileName() const = 0;
+        virtual const std::string& Summary() const = 0;
         virtual DotsC_TypeId GetTypeId() const = 0;
         virtual const std::string& GetName() const = 0;
-        virtual const ClassDescription* GetBaseClass() const = 0;
+        virtual const ClassDescription* GetbaseClass() const = 0;
         virtual int GetNumberOfDescendants() const = 0;
         virtual const ClassDescription* GetDescendant(int index) const = 0;
         virtual int GetNumberOfMembers() const = 0;
@@ -127,10 +155,11 @@ namespace Internal
         virtual int GetNumberOfParameters() const = 0;
         virtual int GetNumberOfOwnParameters() const = 0;
         virtual int GetNumberOfInheritedParameters() const = 0;
-        virtual const ParameterDescription* GetParameter(DotsC_ParameterIndex index) const = 0;        
-        virtual int GetNumberOfProperties() const = 0;
+        virtual const ParameterDescription* GetParameter(DotsC_ParameterIndex index) const = 0;
         virtual void GetPropertyIds(std::vector<DotsC_TypeId>& propertyIds) const = 0;
         virtual const PropertyMappingDescription* GetPropertyMapping(DotsC_TypeId propertyType, bool & isInherited) const = 0;
+        virtual int GetNumberOfCreateRoutines() const = 0;
+        virtual const CreateRoutineDescription* GetCreateRoutine(int index) const = 0;
         virtual int InitialSize() const = 0;
         virtual int OwnSize() const = 0;
     };

@@ -24,10 +24,8 @@
 #ifndef __DOTS_REPOSITORY_WRAPPER_H__
 #define __DOTS_REPOSITORY_WRAPPER_H__
 
-#include <map>
-#include <Safir/Dob/Typesystem/Internal/Id.h>
 #include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
-#include <Safir/Dob/Typesystem/Internal/ParseResult.h>
+#include "ParseState.h"
 #include "BasicTypes.h"
 
 namespace Safir
@@ -39,9 +37,9 @@ namespace Typesystem
 namespace Internal
 {
     template <class Key, class Val>
-    const Val* GetPtr(const std::map<Key, Val> & m, Key key)
+    const Val* GetPtr(const boost::unordered_map<Key, Val> & m, Key key)
     {
-        typename std::map<Key, Val>::const_iterator it = m.find(key);
+        typename boost::unordered_map<Key, Val>::const_iterator it = m.find(key);
         if (it!=m.end())
         {
             return &(it->second);
@@ -50,9 +48,9 @@ namespace Internal
     }
 
     template <class Key, class Val>
-    Val* GetPtr(std::map<Key, Val> & m, Key key)
+    Val* GetPtr(boost::unordered_map<Key, Val> & m, Key key)
     {
-        typename std::map<Key, Val>::iterator it = m.find(key);
+        typename boost::unordered_map<Key, Val>::iterator it = m.find(key);
         if (it!=m.end())
         {
             return &(it->second);
@@ -61,70 +59,65 @@ namespace Internal
     }
 
     template <class Key, class Val>
-    void GetKeys(const std::map<Key, Val>& m, std::vector<Key>& keys)
+    void GetKeys(const boost::unordered_map<Key, Val>& m, std::vector<Key>& keys)
     {
-        for (typename std::map<Key, Val>::const_iterator it=m.begin(); it!=m.end(); ++it)
+        for (typename boost::unordered_map<Key, Val>::const_iterator it=m.begin(); it!=m.end(); ++it)
         {
             keys.push_back(it->first);
         }
     }
 
     template <class Def, class Descr>
-    void SetupWithTypeId(const std::vector<Def>& src, std::map<DotsC_TypeId, Descr>& dest)
+    void SetupWithTypeId(const std::vector<Def>& src, boost::unordered_map<DotsC_TypeId, Descr>& dest)
     {
         for (typename std::vector<Def>::const_iterator it=src.begin(); it!=src.end(); ++it)
         {
-            DotsC_TypeId typeId = DotsId_Generate64(it->Name.c_str());
-            dest.insert(typename std::map<DotsC_TypeId, Descr>::value_type(typeId, Descr(&(*it), typeId)));
+            DotsC_TypeId typeId = DotsId_Generate64(it->name.c_str());
+            dest.insert(typename boost::unordered_map<DotsC_TypeId, Descr>::value_type(typeId, Descr(&(*it), typeId)));
         }
     }
 
     class RepositoryWrapper : public TypeRepository
     {
     public:
-        RepositoryWrapper(RawParseResultConstPtr rawResult);
-        virtual ~RepositoryWrapper(void);
+        RepositoryWrapper(const ParseState& state);
+        virtual ~RepositoryWrapper(void) {}
 
         //Enmerations
-        virtual const EnumDescription* GetEnum(DotsC_TypeId typeId) const;
-        virtual size_t GetNumberOfEnums() const;
-        virtual std::vector<DotsC_TypeId> GetAllEnumTypeIds() const;
+        virtual const EnumDescription* GetEnum(DotsC_TypeId typeId) const {return GetPtr(m_enums, typeId);}
+        virtual size_t GetNumberOfEnums() const {return m_enums.size();}
+        virtual void GetAllEnumTypeIds(std::vector<DotsC_TypeId>& typeIds) const {GetKeys(m_enums, typeIds);}
 
-        //Properties
-        virtual const PropertyDescription* GetProperty(DotsC_TypeId typeId) const;
-        virtual size_t GetNumberOfProperties() const;
-        virtual std::vector<DotsC_TypeId> GetAllPropertyTypeIds() const;
+        //properties
+        virtual const PropertyDescription* GetProperty(DotsC_TypeId typeId) const {return GetPtr(m_properties, typeId);}
+        virtual size_t GetNumberOfproperties() const {return m_properties.size();}
+        virtual void GetAllPropertyTypeIds(std::vector<DotsC_TypeId>& typeIds) const {GetKeys(m_properties, typeIds);}
 
-        //Classes
-        virtual const ClassDescription* GetClass(DotsC_TypeId typeId) const;
-        virtual size_t GetNumberOfClasses() const;
-        virtual std::vector<DotsC_TypeId> GetAllClassTypeIds() const;
+        //classes
+        virtual const ClassDescription* GetClass(DotsC_TypeId typeId) const {return GetPtr(m_classes, typeId);}
+        virtual size_t GetNumberOfclasses() const {return m_classes.size();}
+        virtual void GetAllClassTypeIds(std::vector<DotsC_TypeId>& typeIds) const {GetKeys(m_classes, typeIds);}
 
-        //Exceptions
-        virtual const ExceptionDescription* GetException(DotsC_TypeId typeId) const;
-        virtual size_t GetNumberOfExceptions() const;
-        virtual std::vector<DotsC_TypeId> GetAllExceptionTypeIds() const;
+        //exceptions
+        virtual const ExceptionDescription* GetException(DotsC_TypeId typeId) const {return GetPtr(m_exceptions, typeId);}
+        virtual size_t GetNumberOfexceptions() const {return m_exceptions.size();}
+        virtual void GetAllExceptionTypeIds(std::vector<DotsC_TypeId>& typeIds) const {GetKeys(m_exceptions, typeIds);}
 
     private:
-        RawParseResultConstPtr m_rawResult;
-        //Pre-defined types
-        ClassDefinition m_objectDef;
-        ExceptionDefinition m_exceptionDef;
-        ExceptionDefinition m_fundamentalExceptionDef;
 
-        //Klar
         struct MemberDescriptionWrapper : public MemberDescription
         {
             MemberDescriptionWrapper(const MemberDefinition* def) : m_def(def), m_class(NULL), m_enum(NULL) {}
 
-            //Visible interface
+            //Visible interface            
+            virtual const std::string& Summary() const {return m_def->summary;}
             virtual DotsC_TypeId GetTypeId() const;
-            virtual const std::string& GetName() const { return m_def->Name; }
-            virtual DotsC_MemberType GetMemberType() const {return m_def->MemberType;}
+            virtual const std::string& GetName() const { return m_def->name; }
+            virtual DotsC_MemberType GetMemberType() const {return m_def->memberType;}
             virtual const ClassDescription* GetClass() const {return m_class;}
             virtual const EnumDescription* GetEnum() const {return m_enum;}
-            virtual const bool IsArray() const {return m_def->IsArray;}
-            virtual int GetArraySize() const {return m_def->ArraySize;}
+            virtual const bool IsArray() const {return m_def->isArray;}
+            virtual int GetarraySize() const {return m_def->arraySize;}
             //GetDataLength
 
             //Fields            
@@ -138,9 +131,11 @@ namespace Internal
             PropertyDescriptionWrapper(const PropertyDefinition* def, DotsC_TypeId typeId) : m_def(def), m_typeId(typeId), m_members() {}
             
             //Visible interface
+            virtual const std::string& FileName() const {return m_def->fileName;}
+            virtual const std::string& Summary() const {return m_def->summary;}
             virtual DotsC_TypeId GetTypeId() const {return m_typeId;}
-            virtual const std::string& GetName() const {return m_def->Name;}
-            virtual int GetNumberOfMembers() const {return m_def->Members.size();}
+            virtual const std::string& GetName() const {return m_def->name;}
+            virtual int GetNumberOfMembers() const {return m_def->members.size();}
             virtual DotsC_MemberIndex GetMemberIndex(const std::string& memberName) const;
             virtual const MemberDescription* GetMember(DotsC_MemberIndex index) const {return &m_members[index];}
 
@@ -149,16 +144,17 @@ namespace Internal
             DotsC_TypeId m_typeId;
             std::vector<MemberDescriptionWrapper> m_members;
         };
-    
-        //Klar
+
         struct ExceptionDescriptionWrapper : public ExceptionDescription
         {
             ExceptionDescriptionWrapper(const ExceptionDefinition* def, DotsC_TypeId typeId) : m_def(def), m_typeId(typeId), m_base(NULL) {}
 
             //Visible interface
+            virtual const std::string& FileName() const {return m_def->fileName;}
+            virtual const std::string& Summary() const {return m_def->summary;}
             virtual DotsC_TypeId GetTypeId() const {return m_typeId;}
-            virtual const std::string& GetName() const {return m_def->Name;}
-            virtual const ExceptionDescription* GetBaseClass() const {return m_base;}
+            virtual const std::string& GetName() const {return m_def->name;}
+            virtual const ExceptionDescription* GetbaseClass() const {return m_base;}
             
             //Fields
             const ExceptionDefinition* m_def;
@@ -166,35 +162,37 @@ namespace Internal
             const ExceptionDescriptionWrapper* m_base;
         };
 
-        //Klar förutom Get<T>
         struct ParameterDescriptionWrapper : public ParameterDescription
         {
-            ParameterDescriptionWrapper(const ParameterDefinition* def);
+            ParameterDescriptionWrapper(const ParameterDefinition* def, const std::string& fullName);
 
-            //Visible interface
-            virtual const std::string& GetName() const {return m_def->Name;}
-            virtual DotsC_MemberType GetMemberType() const {return m_def->MemberType;}
+            //Visible interface            
+            virtual const std::string& Summary() const {return m_def->summary;}
+            virtual const std::string& GetName() const {return m_fullParameterName;}
+            virtual DotsC_MemberType GetMemberType() const {return m_def->memberType;}
             virtual DotsC_TypeId GetTypeId() const {return m_typeId;} //only valid if MemberType is object or enum
-            virtual bool IsArray() const {return m_def->IsArray;}
-            virtual int GetArraySize() const {return m_def->Values.size();}
+            virtual bool IsArray() const {return m_def->isArray;}
+            virtual int GetarraySize() const {return m_def->values.size();}
             //GetValue<T>
 
             //Fields
             const ParameterDefinition* m_def;
-            DotsC_TypeId m_typeId;
+            std::string m_fullParameterName; //Full parameter name including namespace and class.
+            DotsC_TypeId m_typeId; //TypeId belonging to the value of this parameter. Only valid if parameter is object or enum.
         };
 
-        //Klar
         struct EnumDescriptionWrapper : public EnumDescription
         {
             EnumDescriptionWrapper(const EnumerationDefinition* def, DotsC_TypeId typeId);
 
             //Visible interface
+            virtual const std::string& FileName() const {return m_def->fileName;}
+            virtual const std::string& Summary() const {return m_def->summary;}
             virtual DotsC_TypeId GetTypeId() const {return m_typeId;}
-            virtual const std::string& GetName() const {return m_def->Name;}
+            virtual const std::string& GetName() const {return m_def->name;}
             virtual DotsC_TypeId GetCheckSum() const {return m_checksum;}
-            virtual int GetNumberOfValues() const {return m_def->EnumerationValues.size();}
-            virtual const std::string& GetValueName(DotsC_EnumerationValue val) const {return m_def->EnumerationValues[val];}
+            virtual int GetNumberOfValues() const {return m_def->enumerationValues.size();}
+            virtual const std::string& GetValueName(DotsC_EnumerationValue val) const {return m_def->enumerationValues[val];}
             virtual int GetIndexOfValue(const std::string& valueName) const;
 
             //Fields
@@ -203,57 +201,67 @@ namespace Internal
             DotsC_TypeId m_checksum;            
         };
 
-        struct ValueMappingWrapper : public ParameterDescription
-        {
-            ValueMappingWrapper() {}            
-
-            //Visible interface
-            virtual const std::string& GetName() const {return m_name;}
-            virtual DotsC_MemberType GetMemberType() const {return m_memberType;}
-            virtual DotsC_TypeId GetTypeId() const {return m_typeId;} //only valid if MemberType is object or enum
-            virtual bool IsArray() const {return false;}
-            virtual int GetArraySize() const {return 1;}
-            //GetValue<T>
-
-            //Fields
-            std::string m_name;
-            std::string m_value;
-            DotsC_MemberType m_memberType;
-            DotsC_TypeId m_typeId;
-        };
-
-        //Klar, sätt param och memberRef
         struct MemberMappingWrapper : public MemberMappingDescription
         {
-            MemberMappingWrapper(const MappedMemberDefinition* def) : m_def(def), m_valueParameter(), m_memberRef() {}
+            MemberMappingWrapper(const MappedMemberDefinition* def) : m_def(def), m_paramRef(NULL), m_paramIndex(-1), m_memberRef() {}
 
             //Visible interface
-            virtual DotsC_PropertyMappingKind GetMappingKind() const {return m_def->Kind;}
-            virtual const ParameterDescription * GetParameter() const {return &m_valueParameter;} //if mapped to parameter
+            virtual DotsC_PropertyMappingKind GetMappingKind() const {return m_def->kind;}
+            virtual const ParameterDescription * GetParameter() const {return m_paramRef;} //if mapped to parameter
             virtual int MemberReferenceDepth() const {return m_memberRef.size();} //if mapped to member
             virtual std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> GetMemberReference(int depth) const {return m_memberRef[depth];} //if mapped to member
 
             //Fields
             DotsC_TypeId m_typeId;
             const MappedMemberDefinition* m_def;
-            ValueMappingWrapper m_valueParameter;
+            ParameterDescriptionWrapper* m_paramRef;
+            int m_paramIndex;
             std::vector< std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> > m_memberRef;
         };
 
         struct PropertyMappingDescriptionWrapper : public PropertyMappingDescription
         {
-            PropertyMappingDescriptionWrapper(const PropertyMappingDefinition* def, const PropertyDescription* p) : m_def(def), m_property(p), m_memberMappings() {}
+            PropertyMappingDescriptionWrapper(const PropertyMappingDefinition* def, const PropertyDescription* p, const ClassDescription* c) : m_def(def), m_property(p), m_class(c), m_memberMappings() {}
 
-            //Visible interface
+            //Visible interface            
+            virtual const std::string& FileName() const {return m_def->fileName;}
+            virtual const std::string& Summary() const {return m_def->summary;}
             virtual const PropertyDescription* GetProperty() const {return m_property;}
+            virtual const ClassDescription* GetClass() const {return m_class;}
             virtual int GetNumberOfMappings() const {return m_memberMappings.size();}
             virtual const MemberMappingDescription* GetMapping(int index) const {return &m_memberMappings[index];}
 
             //Fields
             const PropertyMappingDefinition* m_def;
             const PropertyDescription* m_property;
+            const ClassDescription* m_class;
             std::vector<MemberMappingWrapper> m_memberMappings;
 
+        };
+
+        class ClassDescriptionWrapper; //forward declaration
+        struct CreateRoutineDescriptionWrapper : public CreateRoutineDescription
+        {
+            CreateRoutineDescriptionWrapper(const CreateRoutineDefinition* def, const ClassDescriptionWrapper* c)
+                : m_def(def)
+                ,m_class(c)
+            {
+            }
+
+            virtual const std::string& Summary() const {return m_def->summary;}
+            virtual const std::string& GetName() const {return m_def->name;}
+            virtual const ClassDescription* GetClass() const {return m_class;}
+
+            virtual int GetNumberOfInParameters() const {return m_def->parameters.size();}
+            virtual const MemberDescription* GetInParameterMember(int index) const;
+
+            virtual int GetNumberOfDefaultValues() const {return m_def->memberValues.size();}
+            virtual const MemberDescription* GetDefaultValueMember(int index) const;
+
+            virtual std::pair<const ParameterDescription*, int /*paramIndex*/> GetDefaultValue(int index) const;
+
+            const CreateRoutineDefinition* m_def;
+            const ClassDescriptionWrapper* m_class; //ptr to class this createRoutine belongs to
         };
 
         struct ClassDescriptionWrapper : public ClassDescription
@@ -271,9 +279,11 @@ namespace Internal
             }
 
             //Visible interface
+            virtual const std::string& FileName() const {return m_def->fileName;}
+            virtual const std::string& Summary() const {return m_def->summary;}
             virtual DotsC_TypeId GetTypeId() const {return m_typeId;}
-            virtual const std::string& GetName() const {return m_def->Name;}
-            virtual const ClassDescription* GetBaseClass() const {return m_base;}
+            virtual const std::string& GetName() const {return m_def->name;}
+            virtual const ClassDescription* GetbaseClass() const {return m_base;}
             virtual int GetNumberOfDescendants() const {return m_descendants.size();}
             virtual const ClassDescription* GetDescendant(int index) const {return m_descendants[index];}
             virtual int GetNumberOfOwnMembers() const {return m_members.size();}
@@ -281,13 +291,18 @@ namespace Internal
             virtual int GetNumberOfMembers() const {return GetNumberOfOwnMembers()+GetNumberOfInheritedMembers();}
             virtual DotsC_MemberIndex GetMemberIndex(const std::string& memberName) const;
             virtual const MemberDescription* GetMember(DotsC_MemberIndex index) const;
+
             virtual int GetNumberOfOwnParameters() const {return m_ownParameters.size();}
             virtual int GetNumberOfInheritedParameters() const {return m_base ? m_base->GetNumberOfParameters() : 0;}
             virtual int GetNumberOfParameters() const {return GetNumberOfOwnParameters()+GetNumberOfInheritedParameters();}
             virtual const ParameterDescription* GetParameter(DotsC_ParameterIndex index) const;
-            virtual int GetNumberOfProperties() const;
+
             virtual void GetPropertyIds(std::vector<DotsC_TypeId>& propertyIds) const;
             virtual const PropertyMappingDescription* GetPropertyMapping(DotsC_TypeId propertyType, bool & isInherited) const;
+
+            virtual int GetNumberOfCreateRoutines() const {return m_createRoutines.size();}
+            virtual const CreateRoutineDescription* GetCreateRoutine(int index) const {return &m_createRoutines[index];}
+
             virtual int InitialSize() const {return 0;}
             virtual int OwnSize() const {return 0;}
 
@@ -297,31 +312,40 @@ namespace Internal
             const ClassDescription* m_base;
             std::vector<const ClassDescription*> m_descendants;
             std::vector<MemberDescriptionWrapper> m_members;
+            std::vector<CreateRoutineDescriptionWrapper> m_createRoutines;
             std::vector<PropertyMappingDescriptionWrapper> m_properties;
             std::vector<std::string> m_ownParameters; //name used to look-up ParameterDescription in m_parameters
-            std::map<std::string, ParameterDescriptionWrapper>* m_allParameters;
+            boost::unordered_map<std::string, ParameterDescriptionWrapper>* m_allParameters; //ptr to the global m_parameters
         };
 
-        std::map<DotsC_TypeId, EnumDescriptionWrapper> m_enums;
-        std::map<DotsC_TypeId, ClassDescriptionWrapper> m_classes;
-        std::map<DotsC_TypeId, PropertyDescriptionWrapper> m_properties;
-        std::map<DotsC_TypeId, ExceptionDescriptionWrapper> m_exceptions;
-        std::map<std::string, ParameterDescriptionWrapper> m_parameters;        
+        //Raw parse result
+        RawParseResultConstPtr m_rawResult;
+
+        //Pre-defined types
+        ExceptionDefinition m_exceptionDef;
+        ExceptionDefinition m_fundamentalExceptionDef;
+
+        //Type containers
+        boost::unordered_map<DotsC_TypeId, EnumDescriptionWrapper> m_enums;
+        boost::unordered_map<DotsC_TypeId, ClassDescriptionWrapper> m_classes;
+        boost::unordered_map<DotsC_TypeId, PropertyDescriptionWrapper> m_properties;
+        boost::unordered_map<DotsC_TypeId, ExceptionDescriptionWrapper> m_exceptions;
+        boost::unordered_map<std::string, ParameterDescriptionWrapper> m_parameters;
 
         template <class Description>
         void CreateMembers(Description& d)
         {
-            for (MemberDefinitions::const_iterator memberIt=d.m_def->Members.begin(); memberIt!=d.m_def->Members.end(); ++memberIt)
+            for (MemberDefinitions::const_iterator memberIt=d.m_def->members.begin(); memberIt!=d.m_def->members.end(); ++memberIt)
             {
                 MemberDescriptionWrapper member(&(*memberIt));
                 
-                switch (memberIt->MemberType)
+                switch (memberIt->memberType)
                 {
                 case EnumerationMemberType:
-                    member.m_enum=GetPtr(m_enums, DotsId_Generate64(member.m_def->TypeName.c_str()));
+                    member.m_enum=GetPtr(m_enums, DotsId_Generate64(member.m_def->typeName.c_str()));
                     break;
                 case ObjectMemberType:
-                    member.m_class=GetPtr(m_classes, DotsId_Generate64(member.m_def->TypeName.c_str()));
+                    member.m_class=GetPtr(m_classes, DotsId_Generate64(member.m_def->typeName.c_str()));
                     break;
                 default:
                     break;

@@ -28,7 +28,7 @@
 #include <map>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
-#include <Safir/Dob/Typesystem/Internal/ParseResult.h>
+#include "ParseResult.h"
 #include "InternalDefs.h"
 
 namespace Safir
@@ -49,7 +49,8 @@ namespace Internal
         Size SizeOfType(DotsC_MemberType type) const;        
 
         bool MemberTypeOf(const std::string& typeName, RawParseResultConstPtr res, DotsC_MemberType& memberType) const;
-        bool CanParseValue(const std::string& typeName, const std::string value, RawParseResultConstPtr res) const;
+        bool CanParseValue(const std::string& typeName, const std::string& value, RawParseResultConstPtr res) const;
+        bool ParseValue(const std::string& typeName, RawParseResultConstPtr rawResult, ValueDefinition& val) const;
 
 
         //Built in object names
@@ -69,11 +70,11 @@ namespace Internal
         typedef boost::function<bool(const std::string&, RawParseResultConstPtr res)> ValueCheckerFunction;
         struct TypeInfo
         {
-            DotsC_MemberType Type;
-            std::string Name;            
-            ValueCheckerFunction ValCheck;
+            DotsC_MemberType type;
+            std::string name;
+            ValueCheckerFunction valCheck;
 
-            TypeInfo(DotsC_MemberType mt, const char* name, ValueCheckerFunction f) : Type(mt), Name(name), ValCheck(f) {}
+            TypeInfo(DotsC_MemberType mt, const char* name, ValueCheckerFunction f) : type(mt), name(name), valCheck(f) {}
         };
 
         typedef std::vector<TypeInfo> TypeInfoVector;

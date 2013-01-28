@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <iostream>
+#include <algorithm>
 #include <boost/property_tree/xml_parser.hpp>
 #include <Safir/Dob/Typesystem/Internal/TypeDefinitionParser.h>
 #include "ElementParserDefs.h"
@@ -35,17 +36,7 @@ namespace Typesystem
 {
 namespace Internal
 {
-    //Funcions for debug
-    void DumpResult(boost::shared_ptr<const RawParseResult> result, std::ostringstream& os);
-    void DumpClassDefinition(const ClassDefinition& c, std::ostringstream& os);
-    void DumpMemberDefinition(const MemberDefinition& c, std::ostringstream& os);
-    void DumpParameterDefinition(const ParameterDefinition& c, std::ostringstream& os);
-    void DumpCreateRoutineDefinition(const CreateRoutineDefinition& c, std::ostringstream& os);
-    void DumpEnumerationDefinition(const EnumerationDefinition& c, std::ostringstream& os);
-    void DumpExceptionDefinition(const ExceptionDefinition& c, std::ostringstream& os);
-    void DumpPropertyDefinition(const PropertyDefinition& c, std::ostringstream& os);
-    void DumpMappingDefinition(const PropertyMappingDefinition& c, std::ostringstream& os);
-
+    //Funcions for debug   
     void DumpRepository(boost::shared_ptr<const TypeRepository> rep, std::ostringstream& os);
     void DumpClassDescription(const ClassDescription* c, std::ostringstream& os);
     void DumpMemberDescription(const MemberDescription* c, std::ostringstream& os);
@@ -54,79 +45,77 @@ namespace Internal
     void DumpExceptionDescription(const ExceptionDescription* c, std::ostringstream& os);
     void DumpPropertyDescription(const PropertyDescription* c, std::ostringstream& os);
     void DumpMappingDescription(const PropertyMappingDescription* c, std::ostringstream& os);
+    void DumpCreateRoutineDescription(const CreateRoutineDescription* c, std::ostringstream& os);
 
-    TypeDefinitionParser::TypeDefinitionParser(const boost::filesystem::path& definitions) : m_path(definitions), m_result()
+    TypeDefinitionParser::TypeDefinitionParser(const boost::filesystem::path& definitions) : m_path(definitions)
     {
-        Parse();
-    }
-
-    void TypeDefinitionParser::Parse()
-    {   
         if (!boost::filesystem::is_directory(m_path))
         {
             throw ParseError("Invalid directory path", "The specified root directory does not exist.", m_path.string());
         }
 
-        m_result.reset(new RawParseResult());        
-        ParseState state(m_result);
+        boost::shared_ptr<RawParseResult> result(new RawParseResult());
+        ParseState state(result);
+        ParseResultFinalizer finalizer(state);
 
+        StringVector domFiles;
         boost::filesystem::recursive_directory_iterator it(m_path), end;
-         for (; it!=end; ++it)
-         {
-             if (it->path().extension() == ".dou" || it->path().extension() == ".dom" )
-             {    
-                 std::string path = it->path().string();
+        for (; it!=end; ++it)
+        {
+            if (it->path().extension() == ".dou")
+            {
+                ParseFile(it->path().string(), state);
+            }
+            else if (it->path().extension()==".dom")
+            {
+                //Dom files have to wait until all dou-files have been parsed
+                domFiles.push_back(it->path().string());
+            }
+        }
+        finalizer.ProcessDouResults();
 
-                 try
-                 {
-                     state.CurrentPath=path;
-                     boost::property_tree::ptree pt;
-                     boost::property_tree::read_xml(path, pt, boost::property_tree::xml_parser::trim_whitespace);
-                     DobUnitParser parser;
-                     boost::property_tree::ptree::iterator ptIt=pt.begin();
-                     if (parser.Match(ptIt->first, state))
-                     {
-                         parser.Parse(ptIt->second, state);
-                         parser.Reset(state);
-                     }
-                     
-                 }
-                 catch (const ParseError&)
-                 {
-                     throw;
-                 }
-                 catch (boost::property_tree::xml_parser_error& err) //cant catch as const-ref due to bug in early boost versions.
-                 {
-                     std::ostringstream ss;
-                     ss<<err.message()<<". Line: "<<err.line();
-                     throw ParseError("Invalid XML", ss.str(), state.CurrentPath);
-                 }
-                 catch (const std::exception& err)
-                 {
-                     throw ParseError("Unexpected Error", err.what(), state.CurrentPath);
-                 }
-                 catch(...)
-                 {
-                     throw ParseError("Programming Error", "You have found a bug in DotsParser. Please save the this dou-file and attach it to your bug report.", state.CurrentPath);
-                 }
-             }
-         }
+        //now parse the dom-files
+        std::for_each(domFiles.begin(), domFiles.end(), boost::bind(&TypeDefinitionParser::ParseFile, this, _1, boost::ref(state)));
+        finalizer.ProcessDomResults();
 
-         ParseResultFinalizer finalizer(state);
-         finalizer.ProcessResult();
+        //Wrap result in a repository interface
+        m_repository.reset(new RepositoryWrapper(state));
     }
 
-    boost::shared_ptr<const TypeRepository> TypeDefinitionParser::GetRepository() const
+    void TypeDefinitionParser::ParseFile(const std::string& path, ParseState& state)
     {
-        boost::shared_ptr<const TypeRepository> repository(new RepositoryWrapper(m_result));        
-        return repository;
-    }
+        try
+        {
+            state.currentPath=path;
+            boost::property_tree::ptree pt;
+            boost::property_tree::read_xml(path, pt, boost::property_tree::xml_parser::trim_whitespace);
+            DobUnitParser parser;
+            boost::property_tree::ptree::iterator ptIt=pt.begin();
+            if (parser.Match(ptIt->first, state))
+            {
+                parser.Parse(ptIt->second, state);
+                parser.Reset(state);
+            }
 
-    std::string TypeDefinitionParser::ToString(boost::shared_ptr<const RawParseResult> rawResult)
-    {
-        std::ostringstream os;
-        DumpResult(rawResult, os);
-        return os.str();
+        }
+        catch (const ParseError&)
+        {
+            throw;
+        }
+        catch (boost::property_tree::xml_parser_error& err) //cant catch as const-ref due to bug in early boost versions.
+        {
+            std::ostringstream ss;
+            ss<<err.message()<<". Line: "<<err.line();
+            throw ParseError("Invalid XML", ss.str(), state.currentPath);
+        }
+        catch (const std::exception& err)
+        {
+            throw ParseError("Unexpected Error", err.what(), state.currentPath);
+        }
+        catch(...)
+        {
+            throw ParseError("Programming Error", "You have found a bug in DotsParser. Please save the this dou-file and attach it to your bug report.", state.currentPath);
+        }
     }
 
     std::string TypeDefinitionParser::ToString(boost::shared_ptr<const TypeRepository> repository)
@@ -139,160 +128,34 @@ namespace Internal
     //--------------------------------------------------
     // Debug trace functions
     //--------------------------------------------------
-    void DumpResult(boost::shared_ptr<const RawParseResult> result, std::ostringstream& os)
-    {
-        os<<"========== Result =========="<<std::endl;
-        std::for_each(result->Classes.begin(), result->Classes.end(), boost::bind(DumpClassDefinition, _1, boost::ref(os)));
-        std::for_each(result->Enumerations.begin(), result->Enumerations.end(), boost::bind(DumpEnumerationDefinition, _1, boost::ref(os)));
-        std::for_each(result->Exceptions.begin(), result->Exceptions.end(), boost::bind(DumpExceptionDefinition, _1, boost::ref(os)));
-        std::for_each(result->Properties.begin(), result->Properties.end(), boost::bind(DumpPropertyDefinition, _1, boost::ref(os)));
-        std::for_each(result->PropertyMappings.begin(), result->PropertyMappings.end(), boost::bind(DumpMappingDefinition, _1, boost::ref(os)));
-        os<<"============================"<<std::endl;
-    }
-
-    void DumpClassDefinition(const ClassDefinition& c, std::ostringstream& os)
-    {
-        os<<"=========================================================="<<std::endl;
-        os<<"ClassName: "<<c.Name<<std::endl;        
-        os<<"BaseClass: "<<c.BaseClass<<std::endl;
-        os<<"FileName: "<<c.FileName<<std::endl;
-        os<<"Summary: "<<c.Summary<<std::endl;
-        std::for_each(c.Members.begin(), c.Members.end(), boost::bind(DumpMemberDefinition, _1, boost::ref(os)));
-        std::for_each(c.Parameters.begin(), c.Parameters.end(), boost::bind(DumpParameterDefinition, _1, boost::ref(os)));
-        std::for_each(c.CreateRoutines.begin(), c.CreateRoutines.end(), boost::bind(DumpCreateRoutineDefinition, _1, boost::ref(os)));
-    }
-    
-    void DumpMemberDefinition(const MemberDefinition& m, std::ostringstream& os)
-    {
-        os<<"  - MemberName: "<<m.Name<<std::endl;
-        os<<"    Type: "<<m.TypeName<<std::endl;
-        os<<"    IsArray: "<<std::boolalpha<<m.IsArray<<std::endl;
-        os<<"    ArraySize: "<<m.ArraySize<<std::endl;
-        os<<"    MaxLength: "<<m.MaxLength<<std::endl;
-        os<<"    Summary: "<<m.Summary<<std::endl;
-
-    }
-
-    void DumpParameterDefinition(const ParameterDefinition& p, std::ostringstream& os)
-    {
-        os<<"  - ParameterName: "<<p.Name<<std::endl;
-        os<<"    Type:    "<<p.TypeName<<std::endl;
-        os<<"    IsArray: "<<std::boolalpha<<p.IsArray<<std::endl;
-        os<<"    Summary: "<<p.Summary<<std::endl;
-        for (StringVector::const_iterator it = p.Values.begin(); it!=p.Values.end(); ++it)
-        {
-            os<<"      Value: "<<(*it)<<std::endl;
-        }
-    }
-
-    void DumpCreateRoutineDefinition(const CreateRoutineDefinition& c, std::ostringstream& os)
-    {
-        os<<"  - CreateRoutine: "<<c.Name<<std::endl;
-        os<<"    Summary:    "<<c.Summary<<std::endl;
-        for (StringVector::const_iterator it = c.Parameters.begin(); it!=c.Parameters.end(); ++it)
-        {
-            os<<"      Parameter: "<<(*it)<<std::endl;
-        }
-        for (MemberValueVector::const_iterator it = c.MemberValues.begin(); it!=c.MemberValues.end(); ++it)
-        {
-            os<<"      MemberVal: "<<it->first<<" = "<<it->second<<std::endl;
-        }
-    }
-
-    void DumpEnumerationDefinition(const EnumerationDefinition& e, std::ostringstream& os)
-    {
-        os<<"=========================================================="<<std::endl;
-        os<<"Enumeration: "<<e.Name<<std::endl;
-        os<<"File:    "<<e.FileName<<std::endl;
-        os<<"Summary: "<<e.Summary<<std::endl;
-        for (StringVector::const_iterator it = e.EnumerationValues.begin(); it!=e.EnumerationValues.end(); ++it)
-        {
-            os<<"      Value: "<<(*it)<<std::endl;
-        }
-    }
-
-    void DumpExceptionDefinition(const ExceptionDefinition& e, std::ostringstream& os)
-    {
-        os<<"=========================================================="<<std::endl;
-        os<<"Exception: "<<e.Name<<std::endl;
-        os<<"BaseClass: "<<e.BaseClass<<std::endl;
-        os<<"File:    "<<e.FileName<<std::endl;
-        os<<"Summary: "<<e.Summary<<std::endl;
-    }
-
-    void DumpPropertyDefinition(const PropertyDefinition& p, std::ostringstream& os)
-    {
-        os<<"=========================================================="<<std::endl;
-        os<<"Property: "<<p.Name<<std::endl;
-        os<<"File:    "<<p.FileName<<std::endl;
-        os<<"Summary: "<<p.Summary<<std::endl;
-        for (MemberDefinitions::const_iterator it = p.Members.begin(); it!=p.Members.end(); ++it)
-        {
-            os<<"  - Member:  "<<it->Name<<std::endl;
-            os<<"    Type:    "<<it->TypeName<<std::endl;
-            os<<"    Summary: "<<it->Summary<<std::endl;
-            if (it->IsArray)
-                os<<"    IsArray: true"<<std::endl;
-        }
-    }
-
-    void DumpMappingDefinition(const PropertyMappingDefinition& p, std::ostringstream& os)
-    {
-        os<<"=========================================================="<<std::endl;
-        os<<"PropertyMapping"<<std::endl;
-        os<<"ClassName:    "<<p.ClassName<<std::endl;
-        os<<"PropertyName:    "<<p.PropertyName<<std::endl;
-        os<<"File:    "<<p.FileName<<std::endl;
-        os<<"Summary: "<<p.Summary<<std::endl;
-        for (MappedMemberDefinitions::const_iterator it=p.MappedMembers.begin(); it!=p.MappedMembers.end(); ++it)
-        {
-            os<<"  - PropertyMember:  "<<it->Name<<std::endl;            
-            if (it->Kind==MappedToParameter)
-            {
-                os<<"    MappingKind:     ValueMapping"<<std::endl;
-                os<<"    Value:           "<<it->Value<<std::endl;
-            }
-            else if (it->Kind==MappedToMember)
-            {
-                os<<"    MappingKind:     MemberMapping"<<std::endl;
-                os<<"    MemberRef:       ";
-                for (MemberReferenceVector::const_iterator memIt=it->MemberReferences.begin(); memIt!=it->MemberReferences.end(); ++memIt)
-                {
-                    os<<"->"<<memIt->first<<"["<<memIt->second<<"]";
-                }
-                os<<std::endl;
-            }
-            else
-            {
-                os<<"    MappingKind:     NullMapping"<<std::endl;
-            }
-        }
-    }
-
     void DumpRepository(boost::shared_ptr<const TypeRepository> rep, std::ostringstream& os)
     {
-        std::vector<DotsC_TypeId> types=rep->GetAllClassTypeIds();
+        std::vector<DotsC_TypeId> types;
+        rep->GetAllClassTypeIds(types);
         for (std::vector<DotsC_TypeId>::const_iterator it=types.begin(); it!=types.end(); ++it)
         {
             const ClassDescription* tmp = rep->GetClass(*it);
             DumpClassDescription(tmp, os);
         }
 
-        types=rep->GetAllEnumTypeIds();
+        types.clear();
+        rep->GetAllEnumTypeIds(types);
         for (std::vector<DotsC_TypeId>::const_iterator it=types.begin(); it!=types.end(); ++it)
         {
             const EnumDescription* tmp = rep->GetEnum(*it);
             DumpEnumerationDescription(tmp, os);
         }
 
-        types=rep->GetAllExceptionTypeIds();
+        types.clear();
+        rep->GetAllExceptionTypeIds(types);
         for (std::vector<DotsC_TypeId>::const_iterator it=types.begin(); it!=types.end(); ++it)
         {
             const ExceptionDescription* tmp = rep->GetException(*it);
             DumpExceptionDescription(tmp, os);
         }
 
-        types=rep->GetAllPropertyTypeIds();
+        types.clear();
+        rep->GetAllPropertyTypeIds(types);
         for (std::vector<DotsC_TypeId>::const_iterator it=types.begin(); it!=types.end(); ++it)
         {
             const PropertyDescription* tmp = rep->GetProperty(*it);
@@ -302,17 +165,20 @@ namespace Internal
 
     void DumpClassDescription(const ClassDescription* c, std::ostringstream& os)
     {
-        if (c==NULL) return;
-
         os<<"=========================================================="<<std::endl;
         os<<"Class: "<<c->GetName()<<std::endl;
         os<<"TypeId: "<<c->GetTypeId()<<std::endl;
-        if (c->GetBaseClass()!=NULL)
-            os<<"BaseClass: "<<c->GetBaseClass()->GetName()<<std::endl;
+        if (c->GetbaseClass()!=NULL)
+            os<<"baseClass: "<<c->GetbaseClass()->GetName()<<std::endl;
 
         for (int i=0; i<c->GetNumberOfMembers(); ++i)
         {
             DumpMemberDescription(c->GetMember(i), os);
+        }
+
+        for (int i=0; i<c->GetNumberOfCreateRoutines(); ++i)
+        {
+            DumpCreateRoutineDescription(c->GetCreateRoutine(i), os);
         }
 
         for (int i=0; i<c->GetNumberOfParameters(); ++i)
@@ -320,17 +186,18 @@ namespace Internal
             DumpParameterDescription(c->GetParameter(i), os);
         }
 
-        /*for (int i=0; i<c->GetNumberOfProperties(); ++i)
+        std::vector<DotsC_TypeId> properties;
+        c->GetPropertyIds(properties);
+        for (std::vector<DotsC_TypeId>::const_iterator it=properties.begin(); it!=properties.end(); ++it)
         {
-            DumpParameterDescription(c->FindPropertyMapping((i), os);
-        }*/
-
+            bool inherited;
+            const PropertyMappingDescription* tmp = c->GetPropertyMapping(*it, inherited);
+            DumpMappingDescription(tmp, os);
+        }
     }
 
     void DumpEnumerationDescription(const EnumDescription* c, std::ostringstream& os)
     {
-        if (c==NULL) return;
-
         os<<"=========================================================="<<std::endl;
         os<<"Enumeration: "<<c->GetName()<<std::endl;
         os<<"TypeId: "<<c->GetTypeId()<<std::endl;
@@ -343,19 +210,15 @@ namespace Internal
 
     void DumpExceptionDescription(const ExceptionDescription* c, std::ostringstream& os)
     {
-        if (c==NULL) return;
-
         os<<"=========================================================="<<std::endl;
         os<<"Exception: "<<c->GetName()<<std::endl;
         os<<"TypeId: "<<c->GetTypeId()<<std::endl;
-        if (c->GetBaseClass()!=NULL)
-            os<<"BaseClass: "<<c->GetBaseClass()->GetName()<<std::endl;
+        if (c->GetbaseClass()!=NULL)
+            os<<"baseClass: "<<c->GetbaseClass()->GetName()<<std::endl;
     }
 
     void DumpPropertyDescription(const PropertyDescription* c, std::ostringstream& os)
     {
-        if (c==NULL) return;
-
         os<<"=========================================================="<<std::endl;
         os<<"Property: "<<c->GetName()<<std::endl;
         os<<"TypeId: "<<c->GetTypeId()<<std::endl;
@@ -368,8 +231,6 @@ namespace Internal
 
     void DumpMemberDescription(const MemberDescription* c, std::ostringstream& os)
     {
-        if (c==NULL) return;
-
         os<<"    Member: "<<c->GetName()<<"  :  Type";
         
         switch (c->GetMemberType())
@@ -386,7 +247,7 @@ namespace Internal
         }
         if (c->IsArray())
         {
-            os<<", isArray=true, ArraySize: "<<c->GetArraySize()<<std::endl;
+            os<<", isArray=true, arraySize: "<<c->GetarraySize()<<std::endl;
         }
         else
         {
@@ -396,8 +257,6 @@ namespace Internal
 
     void DumpParameterDescription(const ParameterDescription* c, std::ostringstream& os)
     {
-        if (c==NULL) return;       
-
         os<<"    Parameter: "<<c->GetName()<<"  :  Type";
         
         /*switch (c->GetMemberType())
@@ -415,7 +274,7 @@ namespace Internal
 
         if (c->IsArray())
         {
-            os<<", isArray=true, ArraySize: "<<c->GetArraySize()<<std::endl;
+            os<<", isArray=true, arraySize: "<<c->GetarraySize()<<std::endl;
         }
         else
         {
@@ -424,10 +283,67 @@ namespace Internal
 
     }
 
-    void DumpMappingDescription(const PropertyMappingDescription* c, std::ostringstream& os)
+    void DumpMappingDescription(const PropertyMappingDescription* pmd, std::ostringstream& os)
     {
-        if (c==NULL) return;
-        os<<"    Property: "<<c->GetProperty()->GetName()<<std::endl;
+        const PropertyDescription* p = pmd->GetProperty();
+        const ClassDescription* c = pmd->GetClass();
+        os<<"    Property: "<<p->GetName()<<std::endl;
+
+        for (int i=0; i<pmd->GetNumberOfMappings(); ++i)
+        {
+            const MemberMappingDescription* md=pmd->GetMapping(i);
+
+            os<<"  - PropertyMember:  "<<p->GetMember(i)->GetName()<<std::endl;
+            switch(md->GetMappingKind())
+            {
+            case MappedToParameter:
+            {
+                os<<"    MappingKind:     ValueMapping"<<std::endl;
+                os<<"    Parameter:       "<<md->GetParameter()->GetName()<<std::endl;
+                os<<"    Value:           <Not implemented>"<<std::endl;
+            }
+                break;
+            case MappedToMember:
+            {
+                os<<"    MappingKind:     MemberMapping"<<std::endl;
+                os<<"    MemberRef:       ";
+                for (int memRef=0; memRef<md->MemberReferenceDepth(); ++memRef)
+                {
+                    std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> ref = md->GetMemberReference(memRef);
+                    const MemberDescription* member = c->GetMember(ref.first);
+                    os<<"->"<<member->GetName();
+                    if (member->IsArray())
+                    {
+                        os<<"["<<ref.second<<"]";
+                    }
+                }
+                os<<std::endl;
+            }
+                break;
+
+            case MappedToNull:
+            {
+                os<<"    MappingKind:     NullMapping"<<std::endl;
+            }
+                break;
+            }
+        }
+    }
+
+    void DumpCreateRoutineDescription(const CreateRoutineDescription* c, std::ostringstream& os)
+    {
+        os<<"  - CreateRoutine: "<<c->GetName()<<std::endl;
+        os<<"    summary:    "<<c->Summary()<<std::endl;
+        for (int i=0; i<c->GetNumberOfInParameters(); ++i)
+        {
+            os<<"      Parameter: "<<c->GetInParameterMember(i)->GetName()<<std::endl;
+        }
+        for (int i=0; i<c->GetNumberOfDefaultValues(); ++i)
+        {
+            auto val=c->GetDefaultValue(i);
+            os<<"      DefaultVal: "<<c->GetDefaultValueMember(i)->GetName()<<" = "<<val.first->GetName()<<"["<<val.second<<"]"<<std::endl;
+        }
+
     }
 }
 }

@@ -50,22 +50,22 @@ namespace Internal
         //Enmerations
         virtual const EnumDescription* GetEnum(DotsC_TypeId typeId) const = 0;
         virtual size_t GetNumberOfEnums() const = 0;
-        virtual std::vector<DotsC_TypeId> GetAllEnumTypeIds() const = 0;
+        virtual void GetAllEnumTypeIds(std::vector<DotsC_TypeId>& typeIds) const = 0;
 
-        //Properties
+        //properties
         virtual const PropertyDescription* GetProperty(DotsC_TypeId typeId) const = 0;
-        virtual size_t GetNumberOfProperties() const = 0;
-        virtual std::vector<DotsC_TypeId> GetAllPropertyTypeIds() const = 0;
+        virtual size_t GetNumberOfproperties() const = 0;
+        virtual void GetAllPropertyTypeIds(std::vector<DotsC_TypeId>& typeIds) const = 0;
 
-        //Classes
+        //classes
         virtual const ClassDescription* GetClass(DotsC_TypeId typeId) const = 0;
-        virtual size_t GetNumberOfClasses() const = 0;
-        virtual std::vector<DotsC_TypeId> GetAllClassTypeIds() const = 0;
+        virtual size_t GetNumberOfclasses() const = 0;
+        virtual void GetAllClassTypeIds(std::vector<DotsC_TypeId>& typeIds) const = 0;
 
-        //Exceptions
+        //exceptions
         virtual const ExceptionDescription* GetException(DotsC_TypeId typeId) const = 0;
-        virtual size_t GetNumberOfExceptions() const = 0;
-        virtual std::vector<DotsC_TypeId> GetAllExceptionTypeIds() const = 0;
+        virtual size_t GetNumberOfexceptions() const = 0;
+        virtual void GetAllExceptionTypeIds(std::vector<DotsC_TypeId>& typeIds) const = 0;
     };
 
 

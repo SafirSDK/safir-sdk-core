@@ -24,22 +24,9 @@
 #ifndef __DOTS_TYPE_DEFINITION_PARSER_H__
 #define __DOTS_TYPE_DEFINITION_PARSER_H__
 
-#if defined _MSC_VER
-    #if defined DOTS_PARSER_EXPORTS
-        #define DOTS_API __declspec(dllexport)
-    #else
-        #define DOTS_API __declspec(dllimport)
-        #define SAFIR_LIBRARY_NAME "dots_parser"
-        #include <Safir/Utilities/Internal/AutoLink.h>
-    #endif
-#elif defined __GNUC__
-    #define DOTS_API
-    #define __cdecl
-#endif
-
 #include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
-#include <Safir/Dob/Typesystem/Internal/ParseResult.h>
+#include <Safir/Dob/Typesystem/Internal/ParseError.h>
 #include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
 
 namespace Safir
@@ -49,7 +36,10 @@ namespace Dob
 namespace Typesystem
 {
 namespace Internal
-{    
+{
+    //Forward declaration of internal state.
+    class ParseState;
+
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4275)
@@ -67,7 +57,7 @@ namespace Internal
         /**
          * Constructor - Creates a TypeDefinitionParser object.
          * Will validate and parse a complete set of dou- and dom-files. If no error occurs, the
-         * result can be retrieved by calling GetResult.
+         * result can be retrieved by calling GetRepository.
          *
          * @param definitions [in] - Root directory path to location of dou- and dom-files that shall be parsed.
          * @throws Safir::Dob::Typesystem::Parser:ParseError The dou- or dom- files at the specified path contains errors.
@@ -79,15 +69,7 @@ namespace Internal
          *
          * @return Path to the dou- and dom- files.
          */
-        boost::filesystem::path GetPath() const {return m_path;}
-
-        /**
-         * Get the result after a successfull call to Parse. Will get the raw parse result. In most cases its more convenient
-         * to use the GetRepository-method.
-         *         
-         * @return All types, i.e classes, exceptions, enums, properties and property mappings.
-         */
-        boost::shared_ptr<const RawParseResult> GetRawResult() const {return m_result;}
+        boost::filesystem::path GetPath() const {return m_path;}     
 
         /**
          * Get the result after a successfull call to Parse. Will get the complete type system as a TypeRepository
@@ -95,14 +77,7 @@ namespace Internal
          *         
          * @return All types, i.e classes, exceptions, enums, properties and property mappings.
          */
-        boost::shared_ptr<const TypeRepository> GetRepository() const;
-
-        /**
-         * Return string representation of the entire content of a RawParseResult.
-         *
-         * @param result [in] - RawParseResult.
-         */
-        static std::string ToString(boost::shared_ptr<const RawParseResult> rawResult);
+        boost::shared_ptr<const TypeRepository> GetRepository() const {return m_repository;}
 
         /**
          * Return string representation of the entire content of a TypeRepository.
@@ -113,9 +88,9 @@ namespace Internal
 
     private:
         boost::filesystem::path m_path;
-        boost::shared_ptr<RawParseResult> m_result;
+        boost::shared_ptr<TypeRepository> m_repository;
 
-        void Parse();
+        void ParseFile(const std::string& path, ParseState& state);
     };
 
 #ifdef _MSC_VER

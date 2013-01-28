@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 2.8)
 
 PROJECT (dots_parser CXX)
 
+if (MSVC_VERSION EQUAL 1600) #vs2010 doesnt have noexcept
+  add_definitions(-DSAFIR_NO_NOEXCEPT)
+endif()
+
+if (NOT MSVC)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+endif()
+
 INCLUDE_DIRECTORIES(.)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)

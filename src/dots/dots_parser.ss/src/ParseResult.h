@@ -28,6 +28,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/Internal/ParseError.h>
 
 namespace Safir
 {
@@ -38,20 +39,49 @@ namespace Typesystem
 namespace Internal
 {
     typedef std::vector<std::string> StringVector;
+    typedef DotsC_TypeId TypeId;
+    typedef DotsC_MemberType MemberType;
+    typedef DotsC_PropertyMappingKind MappingKind;
+
+
 
     //---------------------------------------------------
     // Sub units - these are part of the top level units
     //---------------------------------------------------
     /**
+     * Definition of a value. Used in parameters, createRoutines and propertyMappings.
+     */
+    struct ValueDefinition
+    {
+        bool isNull;
+        std::string stringVal;
+        union
+        {
+            DotsC_Int32 int32Val;
+            DotsC_Int64 int64Val;
+            DotsC_Float32 float32Val;
+            DotsC_Float64 float64Val;
+            DotsC_EntityId entityIdVal;
+            bool boolVal;
+        };
+
+        ValueDefinition() : isNull(true){}
+        explicit ValueDefinition(const std::string& strVal) : isNull(false), stringVal(strVal) {}
+    };
+    typedef std::vector<ValueDefinition> ParameterValues;
+
+    /**
      * Definition of a parameter.
      */
     struct ParameterDefinition
     {
-        std::string Summary;
-        std::string Name;
-        std::string TypeName;
-        DotsC_MemberType MemberType;
-        bool IsArray;
+        std::string summary;
+        std::string name;
+        std::string typeName;
+        MemberType memberType;
+        bool isArray;
+        bool hidden;   //Some parameters are derived from propertyMapping values. The parser will automatically generate a
+                        //hidden parameter for those values. All explicitly declared parameters will have hidden=false.
 
         //Values will contain the parameter value as a string.
         //- If type is 'String' the value can be grabbed as is.
@@ -60,10 +90,11 @@ namespace Internal
         //- Objects are still xml-serialized since dots_parser knows noting about blobs.
         //- InstanceId can be either a its string representation or Int64 value, anything goes. Must be handled by user. For example by
         //  using boost::lexical_cast<DotsC_Int64, std::string> and catch boost::bad_lexical_cast.
-        //- EntityId are returned as a string on the same format as SATE is using, i.e "typeName : instanceId".
-        StringVector Values; //if not IsArray is false, Values contains only one value
+        //- EntityId are returned as a string on on format "typeName, instanceId". Example "Safir.Dob.Entity, 123"
+        //StringVector values; //if not isArray is false, Values contains only one value
+        ParameterValues values;
 
-        ParameterDefinition() : IsArray(false) {}
+        ParameterDefinition() : isArray(false), hidden(false) {}
     };
     typedef std::vector<ParameterDefinition> ParameterDefinitions;
 
@@ -72,47 +103,48 @@ namespace Internal
      */
     struct MemberDefinition
     {
-        std::string Summary;
-        std::string Name;
-        std::string TypeName;
-        DotsC_MemberType MemberType;
-        bool IsArray;
-        int ArraySize; //If IsArray and ArraySize<0 its an dynamic array.
-        int MaxLength; //Max string length. Only applicable if TypeName is 'String'.
+        std::string summary;
+        std::string name;
+        std::string typeName;
+        MemberType memberType;
+        bool isArray;
+        int arraySize; //If isArray and arraySize<0 its an dynamic array.
+        int maxLength; //Max string length. Only applicable if typeName is 'String'.
 
-        MemberDefinition() : IsArray(false), ArraySize(0), MaxLength(0) {}
+        MemberDefinition() : isArray(false), arraySize(0), maxLength(0) {}
     };
-    typedef std::vector<MemberDefinition> MemberDefinitions;   
-
-    /**
-     * Definition of a create routine, similair to a constructor.
-     */
-    typedef std::pair<std::string, std::string> MemberValue;
-    typedef std::vector<MemberValue> MemberValueVector;
-    struct CreateRoutineDefinition
-    {   
-        std::string Summary;
-        std::string Name;
-        StringVector Parameters;        
-        MemberValueVector MemberValues;
-    };
-    typedef std::vector<CreateRoutineDefinition> CreateRoutineDefinitions;
+    typedef std::vector<MemberDefinition> MemberDefinitions;
 
     /**
      * Definition of a mapping between a property member and a parameter value,
      * class member, or null.
      */
-    typedef DotsC_PropertyMappingKind MappingKind;
-    typedef std::pair<std::string, int> MemberReference; //pair <Member, Index>
+    typedef std::pair<std::string, int> MemberReference; //pair<Member, Index> or pair<Parameter, Index>
     typedef std::vector<MemberReference> MemberReferenceVector;
     struct MappedMemberDefinition
     {        
-        std::string Name; //Name of the member.
-        MappingKind Kind;
-        std::string Value;
-        MemberReferenceVector MemberReferences; //pair<MemberName, index>
+        std::string name; //Name of the member.
+        MappingKind kind;
+
+        //if Kind=MappedToMember -> pair<MemberName, index>
+        //if Kind=MappedToParameter -> pair<Parameter, index>
+        MemberReferenceVector memberReferences;
     };
     typedef std::vector<MappedMemberDefinition> MappedMemberDefinitions;
+
+    /**
+     * Definition of a create routine, similair to a constructor.
+     */
+    typedef std::pair<std::string, MemberReference> MemberValue; //pair <memberName, pair<Parameter,Index> >
+    typedef std::vector<MemberValue> MemberValueVector;
+    struct CreateRoutineDefinition
+    {
+        std::string summary;
+        std::string name;
+        StringVector parameters;
+        MemberValueVector memberValues;
+    };
+    typedef std::vector<CreateRoutineDefinition> CreateRoutineDefinitions;
 
     //-------------------------------------------------
     // Top level units
@@ -122,13 +154,13 @@ namespace Internal
      */
     struct ClassDefinition
     {
-        std::string Summary;
-        std::string FileName;
-        std::string Name;
-        std::string BaseClass;
-        ParameterDefinitions Parameters;
-        MemberDefinitions Members;
-        CreateRoutineDefinitions CreateRoutines;
+        std::string summary;
+        std::string fileName;
+        std::string name;
+        std::string baseClass;
+        ParameterDefinitions parameters;
+        MemberDefinitions members;
+        CreateRoutineDefinitions createRoutines;
     };
     typedef std::vector<ClassDefinition> ClassDefinitions;
 
@@ -137,10 +169,10 @@ namespace Internal
      */
     struct ExceptionDefinition
     {
-        std::string Summary;
-        std::string FileName;
-        std::string Name;
-        std::string BaseClass;
+        std::string summary;
+        std::string fileName;
+        std::string name;
+        std::string baseClass;
     };
     typedef std::vector<ExceptionDefinition> ExceptionDefinitions;
 
@@ -149,10 +181,10 @@ namespace Internal
      */
     struct EnumerationDefinition
     {
-        std::string Summary;
-        std::string FileName;
-        std::string Name;
-        StringVector EnumerationValues;
+        std::string summary;
+        std::string fileName;
+        std::string name;
+        StringVector enumerationValues;
     };
     typedef std::vector<EnumerationDefinition> EnumerationDefinitions;
 
@@ -161,10 +193,10 @@ namespace Internal
      */
     struct PropertyDefinition
     {
-        std::string Summary;
-        std::string FileName;
-        std::string Name;
-        MemberDefinitions Members;
+        std::string summary;
+        std::string fileName;
+        std::string name;
+        MemberDefinitions members;
     };
     typedef std::vector<PropertyDefinition> PropertyDefinitions;
 
@@ -173,11 +205,11 @@ namespace Internal
      */
     struct PropertyMappingDefinition
     {
-        std::string Summary;
-        std::string FileName;
-        std::string ClassName;
-        std::string PropertyName;
-        MappedMemberDefinitions MappedMembers;
+        std::string summary;
+        std::string fileName;
+        std::string className;
+        std::string propertyName;
+        MappedMemberDefinitions mappedMembers;
     };
     typedef std::vector<PropertyMappingDefinition> PropertyMappingDefinitions;
 
@@ -189,37 +221,14 @@ namespace Internal
      */
     struct RawParseResult
     {
-        ClassDefinitions Classes;
-        EnumerationDefinitions Enumerations;
-        ExceptionDefinitions Exceptions;
-        PropertyDefinitions Properties;
-        PropertyMappingDefinitions PropertyMappings;
+        ClassDefinitions classes;
+        EnumerationDefinitions enumerations;
+        ExceptionDefinitions exceptions;
+        PropertyDefinitions properties;
+        PropertyMappingDefinitions propertyMappings;
     };
     typedef boost::shared_ptr<RawParseResult> RawParseResultPtr;
     typedef boost::shared_ptr<const RawParseResult> RawParseResultConstPtr;
-    
-    /**
-     * Exception used to report errors in dou- and dom- files.
-     */
-    class ParseError : public std::exception
-    {
-    public:
-        ParseError(const std::string& label, const std::string& description, const std::string& file) :
-          m_label(label),
-              m_description(description),
-              m_file(file){}
-
-        ~ParseError() throw() {}
-
-        const std::string& Label() const throw() {return m_label;}
-        const std::string& Description() const throw() {return m_description;}
-        const std::string& File() const throw() {return m_file;}
-
-        virtual const char* what () const throw (){return m_description.c_str();}
-
-    private:
-        std::string m_label, m_description, m_file;
-    };
 }
 }
 }

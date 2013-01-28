@@ -24,6 +24,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/bind.hpp>
+#include <boost/algorithm/string.hpp>
 #include "BasicTypes.h"
 
 namespace Safir
@@ -41,7 +42,7 @@ namespace Internal
     template <class T>
     bool NameComparer(const T& obj, const std::string& name)
     {
-        return obj.Name==name;
+        return obj.name==name;
     }
 
     template <class T> struct ValueChecker
@@ -73,6 +74,28 @@ namespace Internal
         }
     };
 
+    struct ValueCheckerTypeId
+    {
+        bool operator()(const std::string& val, RawParseResultConstPtr res) const
+        {
+            if (std::find_if(res->classes.begin(), res->classes.end(), boost::bind(NameComparer<ClassDefinition>, _1, boost::cref(val))) != res->classes.end())
+                return true; //A class type
+            else if (std::find_if(res->enumerations.begin(), res->enumerations.end(), boost::bind(NameComparer<EnumerationDefinition>, _1, boost::cref(val))) != res->enumerations.end())
+                return true; //An enum type
+            else
+                return false; //TypeId not valid
+        }
+    };
+
+    template<> struct ValueChecker<DotsC_EntityId>
+    {
+        bool operator()(const std::string& val, RawParseResultConstPtr res) const
+        {
+            size_t split = val.find_first_of(',');
+            return ValueCheckerTypeId()(val.substr(0, split), res);
+        }
+    };
+
     const BasicTypes& BasicTypes::Instance()
     {
         static BasicTypes instance;
@@ -87,10 +110,12 @@ namespace Internal
         ValueChecker<double> float64Checker;
         ValueChecker<bool> boolChecker;
         ValueChecker<std::string> noCheck;
+        ValueCheckerTypeId typeIdChecker;
+        ValueChecker<DotsC_EntityId> entityIdChecker;
               
         m_typeInfo.push_back( TypeInfo(EnumerationMemberType, "Enumeration", noCheck) );        
-        m_typeInfo.push_back( TypeInfo(TypeIdMemberType, "TypeId", noCheck));
-        m_typeInfo.push_back( TypeInfo(EntityIdMemberType, "EntityId", noCheck));
+        m_typeInfo.push_back( TypeInfo(TypeIdMemberType, "TypeId", typeIdChecker));
+        m_typeInfo.push_back( TypeInfo(EntityIdMemberType, "EntityId", entityIdChecker));
         m_typeInfo.push_back( TypeInfo(BooleanMemberType, "Boolean", boolChecker));
         m_typeInfo.push_back( TypeInfo(Int32MemberType, "Int32", int32Checker));
         m_typeInfo.push_back( TypeInfo(Int64MemberType, "Int64", int64Checker));
@@ -146,7 +171,7 @@ namespace Internal
     {
         for (TypeInfoVector::const_iterator it=m_typeInfo.begin(); it!=m_typeInfo.end(); ++it)
         {
-            if (it->Type==mt)
+            if (it->type==mt)
                 return &(*it);
         }
         return NULL;
@@ -156,7 +181,7 @@ namespace Internal
     {
         for (TypeInfoVector::const_iterator it=m_typeInfo.begin(); it!=m_typeInfo.end(); ++it)
         {
-            if (it->Name==typeName)
+            if (it->name==typeName)
                 return &(*it);
         }
         return NULL;
@@ -167,16 +192,17 @@ namespace Internal
         const TypeInfo* ti = GetTypeInfo(typeName);
         if (ti!=NULL)
         {
-            memberType=ti->Type;
+            memberType=ti->type;
             return true;
         }
-        else if (std::find_if(res->Classes.begin(), res->Classes.end(), boost::bind(NameComparer<ClassDefinition>, _1, boost::cref(typeName))) != res->Classes.end())
+
+        else if (std::find_if(res->classes.begin(), res->classes.end(), boost::bind(NameComparer<ClassDefinition>, _1, boost::cref(typeName))) != res->classes.end())
         {
             //a class
             memberType=ObjectMemberType;
             return true;
         }
-        else if (std::find_if(res->Enumerations.begin(), res->Enumerations.end(), boost::bind(NameComparer<EnumerationDefinition>, _1, boost::cref(typeName))) != res->Enumerations.end())
+        else if (std::find_if(res->enumerations.begin(), res->enumerations.end(), boost::bind(NameComparer<EnumerationDefinition>, _1, boost::cref(typeName))) != res->enumerations.end())
         {
             //an enum
             memberType=EnumerationMemberType;
@@ -189,29 +215,39 @@ namespace Internal
         }
     }
 
-    bool BasicTypes::CanParseValue(const std::string& typeName, const std::string value, RawParseResultConstPtr res) const
+    bool BasicTypes::CanParseValue(const std::string& typeName, const std::string& value, RawParseResultConstPtr res) const
     {
         const TypeInfo* ti = GetTypeInfo(typeName);
         if (ti!=NULL)
         {
-            return ti->ValCheck(value, res);
+            return ti->valCheck(value, res);
         }
 
-        EnumerationDefinitions::const_iterator enumIt = std::find_if(res->Enumerations.begin(), res->Enumerations.end(), boost::bind(NameComparer<EnumerationDefinition>, _1, boost::cref(typeName)));
-        if (enumIt!=res->Enumerations.end())
+        EnumerationDefinitions::const_iterator enumIt = std::find_if(res->enumerations.begin(), res->enumerations.end(), boost::bind(NameComparer<EnumerationDefinition>, _1, boost::cref(typeName)));
+        if (enumIt!=res->enumerations.end())
         {
-            StringVector::const_iterator valIt = std::find(enumIt->EnumerationValues.begin(), enumIt->EnumerationValues.end(), value);
-            return valIt!=enumIt->EnumerationValues.end();            
+            StringVector::const_iterator valIt = std::find(enumIt->enumerationValues.begin(), enumIt->enumerationValues.end(), value);
+            return valIt!=enumIt->enumerationValues.end();            
         }
 
-        ClassDefinitions::const_iterator classIt = std::find_if(res->Classes.begin(), res->Classes.end(), boost::bind(NameComparer<ClassDefinition>, _1, boost::cref(typeName)));
-        if (classIt!=res->Classes.end())
+        ClassDefinitions::const_iterator classIt = std::find_if(res->classes.begin(), res->classes.end(), boost::bind(NameComparer<ClassDefinition>, _1, boost::cref(typeName)));
+        if (classIt!=res->classes.end())
         {
             //TODO: check xml
             return true;
         }
 
         return false;
+    }
+
+    bool BasicTypes::ParseValue(const std::string& typeName, RawParseResultConstPtr rawResult, ValueDefinition& val) const
+    {
+        return true;
+//        const TypeInfo* ti = GetTypeInfo(typeName);
+//        if (ti!=NULL)
+//        {
+//            return ti->valCheck(value, res);
+//        }
     }
 
     Size BasicTypes::SizeOfType(MemberType type) const
@@ -300,7 +336,7 @@ namespace Internal
         const TypeInfo* ti = GetTypeInfo(type);
         if (ti!=NULL)
         {
-            return ti->Name;
+            return ti->name;
         }
         
         throw InternalException("Illegal member type", __FILE__, __LINE__);

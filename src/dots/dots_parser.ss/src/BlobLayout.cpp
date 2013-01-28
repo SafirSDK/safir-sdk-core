@@ -49,8 +49,8 @@
 //                                               const MemberIndex member,
 //                                               const ArrayIndex index)
 //    {
-//        //        MemberDescription* mde=Repository::Classes().GetMember(GetTypeId(blob), member);
-//        const MemberDescription * const mde=Repository::Classes().FindClass(GetTypeId(blob))->GetMember(member);
+//        //        MemberDescription* mde=Repository::classes().GetMember(GetTypeId(blob), member);
+//        const MemberDescription * const mde=Repository::classes().FindClass(GetTypeId(blob))->GetMember(member);
 //
 //        const Size memberSize=BasicTypes::SizeOfType(mde->GetMemberType());
 //        const size_t startOfElement = GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+memberSize)*index;
@@ -59,7 +59,7 @@
 //
 //    void BlobLayout::CreateBlob(const TypeId typeId, char * & blob)
 //    {
-//        const ClassDescription * const cd=Repository::Classes().FindClass(typeId);
+//        const ClassDescription * const cd=Repository::classes().FindClass(typeId);
 //
 //        if (cd == NULL)
 //        {
@@ -103,7 +103,7 @@
 //                                const TypeId typeId,
 //                                char * & beginningOfUnused)
 //    {
-//        const ClassDescription * cd=Repository::Classes().FindClass(typeId);
+//        const ClassDescription * cd=Repository::classes().FindClass(typeId);
 //        beginningOfUnused = blob + cd->InitialSize();
 //        const MemberIndex numMembers=cd->NumberOfMembers();
 //        BlobHeader & header = *AnyPtrCast<BlobHeader>(blob);
@@ -141,7 +141,7 @@
 //                                        const bool isChanged,
 //                                        char * & beginningOfUnused)
 //    {
-//        const ClassDescription * cd=Repository::Classes().FindClass(typeId);
+//        const ClassDescription * cd=Repository::classes().FindClass(typeId);
 //        char * const childBlob = beginningOfUnused;
 //        beginningOfUnused += cd->InitialSize();//blobSize;
 //        SetDynamicOffset(insideBlob,member,index,static_cast<Offset>(childBlob - insideBlob));
@@ -209,7 +209,7 @@
 //                                MemberIndex member,
 //                                const ArrayIndex index)
 //    {
-//        const MemberDescription * memberDesc=Repository::Classes().FindClass(GetTypeId(blob))->GetMember(member);
+//        const MemberDescription * memberDesc=Repository::classes().FindClass(GetTypeId(blob))->GetMember(member);
 //        Size size=BasicTypes::SizeOfType(memberDesc->GetMemberType())+MEMBER_STATUS_LENGTH;
 //        InternalMemberStatus oldStatus = *AnyPtrCast<char>(blob + GetOffset(blob, member) + index*size);
 //        InternalMemberStatus status=MemberStatusHandler::ToInternalFormat(isNull, isChanged, MemberStatusHandler::HasDynamicPart(oldStatus));
@@ -218,7 +218,7 @@
 //
 //    bool BlobLayout::IsAnythingChanged(const char * const blob)
 //    {
-//        const ClassDescription * cde=Repository::Classes().FindClass(GetTypeId(blob));
+//        const ClassDescription * cde=Repository::classes().FindClass(GetTypeId(blob));
 //        size_t noMembers = cde->NumberOfMembers();
 //        for (size_t i=0; i<noMembers; i++)
 //        {
@@ -252,7 +252,7 @@
 //
 //    void BlobLayout::SetChanged(char * const blob, const bool changed)
 //    {
-//        const ClassDescription * cde=Repository::Classes().FindClass(GetTypeId(blob));
+//        const ClassDescription * cde=Repository::classes().FindClass(GetTypeId(blob));
 //        size_t noMembers=cde->NumberOfMembers();
 //        for (size_t i=0; i<noMembers; i++)
 //        {
@@ -285,7 +285,7 @@
 //
 //    void BlobLayout::ResetChanged(char * blob)
 //    {
-//        const ClassDescription * cde=Repository::Classes().FindClass(GetTypeId(blob));
+//        const ClassDescription * cde=Repository::classes().FindClass(GetTypeId(blob));
 //        size_t noMembers=cde->NumberOfMembers();
 //        for (size_t i=0; i<noMembers; i++)
 //        {
@@ -311,7 +311,7 @@
 //            return;
 //        }
 //
-//        const ClassDescription * cde=Repository::Classes().FindClass(GetTypeId(blob));
+//        const ClassDescription * cde=Repository::classes().FindClass(GetTypeId(blob));
 //        size_t noMembers=cde->NumberOfMembers();
 //
 //        for (size_t i=0; i<noMembers; i++)
@@ -496,7 +496,7 @@
 //        InternalMemberStatus status=*AnyPtrCast<InternalMemberStatus> (blob + offset);
 //        if (MemberStatusHandler::IsNull(status) || dynOffs==0)
 //        {
-//            const MemberDescription * memberDesc = Repository::Classes().FindClass(GetTypeId(blob))->GetMember(member);
+//            const MemberDescription * memberDesc = Repository::classes().FindClass(GetTypeId(blob))->GetMember(member);
 //            if (!MemberStatusHandler::IsNull(status) &&
 //                (memberDesc->GetMemberType() == BinaryMemberType ||
 //                 memberDesc->GetMemberType() == StringMemberType))
@@ -510,7 +510,7 @@
 //        }
 //        else
 //        {
-//            const MemberDescription * memberDesc = Repository::Classes().FindClass(GetTypeId(blob))->GetMember(member);
+//            const MemberDescription * memberDesc = Repository::classes().FindClass(GetTypeId(blob))->GetMember(member);
 //            if (memberDesc->GetMemberType() == BinaryMemberType)
 //            {
 //                size=*AnyPtrCast<Size>(blob+dynOffs);
@@ -530,7 +530,7 @@
 //                                      const MemberIndex member,
 //                                      const ArrayIndex index)
 //    {
-//        const ClassDescription * cde=Repository::Classes().FindClass(GetTypeId(blob));
+//        const ClassDescription * cde=Repository::classes().FindClass(GetTypeId(blob));
 //        const MemberDescription * memberDesc=cde->GetMember(member);
 //
 //        Offset dynamicOffset;
@@ -553,7 +553,7 @@
 //            //verify new blob is of correct type
 //            const char * const newBlob = val;
 //#ifndef NDEBUG
-//            if (!Repository::Classes().IsOfType(GetTypeId(newBlob), memberDesc->GetTypeId()))
+//            if (!Repository::classes().IsOfType(GetTypeId(newBlob), memberDesc->GetTypeId()))
 //            {
 //                throw InternalException("Bad class type!",__FILE__,__LINE__);
 //            }
@@ -737,7 +737,7 @@
 //            return true;
 //        }
 //
-//        const ClassDescription * cde=Repository::Classes().FindClass(GetTypeId(current));
+//        const ClassDescription * cde=Repository::classes().FindClass(GetTypeId(current));
 //        size_t noMembers=cde->NumberOfMembers();
 //
 //        for (size_t i=0; i<noMembers; i++)
@@ -970,7 +970,7 @@
 //            // 1 no previous dynamic part, we need to reallocate the blob and set the dynamic part
 //            // 2 previous dynamic part is too small, we need to reallocate the blob and set the dynamic part.
 //
-//            const ClassDescription * cde=Repository::Classes().FindClass(GetTypeId(blob));
+//            const ClassDescription * cde=Repository::classes().FindClass(GetTypeId(blob));
 //
 //            //----- Alright, we got some hard work to do... -----
 //

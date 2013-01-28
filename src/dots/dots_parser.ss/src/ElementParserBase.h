@@ -130,7 +130,7 @@ namespace Internal
                 {
                     std::stringstream ss;
                     ss<<"You cant have both '"<<A::ElementName()<<"' and '"<<B::ElementName()<<"' at location "<<Parent()->Path()<<". Choose one of them.";
-                    throw ParseError("Element Missmatch", ss.str(), state.CurrentPath);
+                    throw ParseError("Element Missmatch", ss.str(), state.currentPath);
                 }
                 return false;
             }
@@ -172,7 +172,7 @@ namespace Internal
             {
                 std::ostringstream ss;
                 ss<<"Expecting one of following elements: "<<ElementName();
-                throw ParseError("Wrong number of occurrences", ss.str(), state.CurrentPath);
+                throw ParseError("Wrong number of occurrences", ss.str(), state.currentPath);
             }
             m_parser.reset(); //m_parser set to 0, and is now ready to match any of A and B again.
             m_occurrences.Reset();
@@ -304,7 +304,7 @@ namespace Internal
                 {
                     std::ostringstream ss;
                     ss<<"Element '"<<it->first<<"' is not expected at location "<<Path();
-                    throw ParseError("Unexpected Element", ss.str(), state.CurrentPath);
+                    throw ParseError("Unexpected Element", ss.str(), state.currentPath);
                 }
             }
         }
@@ -334,7 +334,7 @@ namespace Internal
 #ifdef _MSC_VER
 #pragma warning(default:4996)
 #endif
-                throw ParseError("Wrong number of occurrences", ss.str(), state.CurrentPath);
+                throw ParseError("Wrong number of occurrences", ss.str(), state.currentPath);
             }            
         }
     };
