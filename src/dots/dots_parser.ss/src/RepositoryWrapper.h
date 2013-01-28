@@ -239,10 +239,11 @@ namespace Internal
 
         };
 
-        class ClassDescriptionWrapper; //forward declaration
+        struct ClassDescriptionWrapper; //forward declaration
         struct CreateRoutineDescriptionWrapper : public CreateRoutineDescription
         {
-            CreateRoutineDescriptionWrapper(const CreateRoutineDefinition* def, const ClassDescriptionWrapper* c)
+            CreateRoutineDescriptionWrapper() {}
+            explicit CreateRoutineDescriptionWrapper(const CreateRoutineDefinition* def, const ClassDescriptionWrapper* c)
                 : m_def(def)
                 ,m_class(c)
             {
@@ -266,7 +267,7 @@ namespace Internal
 
         struct ClassDescriptionWrapper : public ClassDescription
         {
-            ClassDescriptionWrapper(const ClassDefinition* def,
+            explicit ClassDescriptionWrapper(const ClassDefinition* def,
                                     DotsC_TypeId typeId) :  m_def(def),
                                                             m_typeId(typeId),
                                                             m_base(NULL),

@@ -33,8 +33,12 @@ int main(int argc, char* argv[])
     }
     else
     {
+        //For testing locally on developer machine without args.
+#ifdef _MSC_VER
+        douDir = boost::filesystem::path("C:/dev/safir_sdk_core/src/dots/dots_parser.ss/tests/dou_test_files");
+#else
         douDir = boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_parser.ss/tests/dou_test_files");
-        //douDir = boost::filesystem::path("C:/dev/safir_sdk_core/src/dots/dots_parser/tests/dou_test_files");
+#endif
     }
 
     boost::timer timer;

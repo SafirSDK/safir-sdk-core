@@ -35,15 +35,7 @@ namespace Dob
 namespace Typesystem
 {
 namespace Internal
-{   
-    class ClassDescription;
-    class MemberDescription;
-    class EnumDescription;
-    class ParameterDescription;
-    class PropertyDescription;
-    class PropertyMappingDescription;
-    class ExceptionDescription;
-
+{
     class TypeRepository : private boost::noncopyable
     {
     public:        

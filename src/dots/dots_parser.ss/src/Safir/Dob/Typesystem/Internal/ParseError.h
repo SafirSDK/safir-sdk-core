@@ -45,6 +45,13 @@ namespace Typesystem
 {
 namespace Internal
 {
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4275)
+#pragma warning (disable: 4251)
+#endif
+
     /**
      * Exception used to report errors in dou- and dom- files.
      */
@@ -69,6 +76,11 @@ namespace Internal
         std::string m_description;
         std::string m_file;
     };
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 }
 }
 }

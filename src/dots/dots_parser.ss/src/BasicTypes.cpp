@@ -240,15 +240,15 @@ namespace Internal
         return false;
     }
 
-    bool BasicTypes::ParseValue(const std::string& typeName, RawParseResultConstPtr rawResult, ValueDefinition& val) const
-    {
-        return true;
-//        const TypeInfo* ti = GetTypeInfo(typeName);
-//        if (ti!=NULL)
-//        {
-//            return ti->valCheck(value, res);
-//        }
-    }
+//    bool BasicTypes::ParseValue(const std::string& typeName, RawParseResultConstPtr rawResult, ValueDefinition& val) const
+//    {        
+//        return true;
+////        const TypeInfo* ti = GetTypeInfo(typeName);
+////        if (ti!=NULL)
+////        {
+////            return ti->valCheck(value, res);
+////        }
+//    }
 
     Size BasicTypes::SizeOfType(MemberType type) const
     {

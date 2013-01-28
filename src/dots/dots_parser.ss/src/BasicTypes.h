@@ -50,7 +50,7 @@ namespace Internal
 
         bool MemberTypeOf(const std::string& typeName, RawParseResultConstPtr res, DotsC_MemberType& memberType) const;
         bool CanParseValue(const std::string& typeName, const std::string& value, RawParseResultConstPtr res) const;
-        bool ParseValue(const std::string& typeName, RawParseResultConstPtr rawResult, ValueDefinition& val) const;
+        //bool ParseValue(const std::string& typeName, RawParseResultConstPtr rawResult, ValueDefinition& val) const;
 
 
         //Built in object names

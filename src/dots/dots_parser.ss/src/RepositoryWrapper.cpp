@@ -89,7 +89,7 @@ namespace Internal
             //CreateRoutines
             std::for_each(it->second.m_def->createRoutines.cbegin(), it->second.m_def->createRoutines.cend(), [&](const CreateRoutineDefinition& crd)
             {
-                it->second.m_createRoutines.push_back(CreateRoutineDescriptionWrapper(&crd, &(it->second)));
+                it->second.m_createRoutines.push_back(RepositoryWrapper::CreateRoutineDescriptionWrapper(&crd, &(it->second)));
 
             });
 

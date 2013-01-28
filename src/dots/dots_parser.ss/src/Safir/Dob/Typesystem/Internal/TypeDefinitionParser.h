@@ -38,7 +38,7 @@ namespace Typesystem
 namespace Internal
 {
     //Forward declaration of internal state.
-    class ParseState;
+    struct ParseState;
 
 #ifdef _MSC_VER
 #pragma warning (push)
