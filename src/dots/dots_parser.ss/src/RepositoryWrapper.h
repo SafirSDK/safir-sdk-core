@@ -135,7 +135,7 @@ namespace Internal
             virtual const std::string& Summary() const {return m_def->summary;}
             virtual DotsC_TypeId GetTypeId() const {return m_typeId;}
             virtual const std::string& GetName() const {return m_def->name;}
-            virtual int GetNumberOfMembers() const {return m_def->members.size();}
+            virtual int GetNumberOfMembers() const {return static_cast<int>(m_def->members.size());}
             virtual DotsC_MemberIndex GetMemberIndex(const std::string& memberName) const;
             virtual const MemberDescription* GetMember(DotsC_MemberIndex index) const {return &m_members[index];}
 
@@ -172,7 +172,7 @@ namespace Internal
             virtual DotsC_MemberType GetMemberType() const {return m_def->memberType;}
             virtual DotsC_TypeId GetTypeId() const {return m_typeId;} //only valid if MemberType is object or enum
             virtual bool IsArray() const {return m_def->isArray;}
-            virtual int GetarraySize() const {return m_def->values.size();}
+            virtual int GetarraySize() const {return static_cast<int>(m_def->values.size());}
             //GetValue<T>
 
             //Fields
@@ -191,7 +191,7 @@ namespace Internal
             virtual DotsC_TypeId GetTypeId() const {return m_typeId;}
             virtual const std::string& GetName() const {return m_def->name;}
             virtual DotsC_TypeId GetCheckSum() const {return m_checksum;}
-            virtual int GetNumberOfValues() const {return m_def->enumerationValues.size();}
+            virtual int GetNumberOfValues() const {return static_cast<int>(m_def->enumerationValues.size());}
             virtual const std::string& GetValueName(DotsC_EnumerationValue val) const {return m_def->enumerationValues[val];}
             virtual int GetIndexOfValue(const std::string& valueName) const;
 
@@ -208,7 +208,7 @@ namespace Internal
             //Visible interface
             virtual DotsC_PropertyMappingKind GetMappingKind() const {return m_def->kind;}
             virtual const ParameterDescription * GetParameter() const {return m_paramRef;} //if mapped to parameter
-            virtual int MemberReferenceDepth() const {return m_memberRef.size();} //if mapped to member
+            virtual int MemberReferenceDepth() const {return static_cast<int>(m_memberRef.size());} //if mapped to member
             virtual std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> GetMemberReference(int depth) const {return m_memberRef[depth];} //if mapped to member
 
             //Fields
@@ -228,7 +228,7 @@ namespace Internal
             virtual const std::string& Summary() const {return m_def->summary;}
             virtual const PropertyDescription* GetProperty() const {return m_property;}
             virtual const ClassDescription* GetClass() const {return m_class;}
-            virtual int GetNumberOfMappings() const {return m_memberMappings.size();}
+            virtual int GetNumberOfMappings() const {return static_cast<int>(m_memberMappings.size());}
             virtual const MemberMappingDescription* GetMapping(int index) const {return &m_memberMappings[index];}
 
             //Fields
@@ -242,7 +242,6 @@ namespace Internal
         struct ClassDescriptionWrapper; //forward declaration
         struct CreateRoutineDescriptionWrapper : public CreateRoutineDescription
         {
-            CreateRoutineDescriptionWrapper() {}
             explicit CreateRoutineDescriptionWrapper(const CreateRoutineDefinition* def, const ClassDescriptionWrapper* c)
                 : m_def(def)
                 ,m_class(c)
@@ -253,10 +252,10 @@ namespace Internal
             virtual const std::string& GetName() const {return m_def->name;}
             virtual const ClassDescription* GetClass() const {return m_class;}
 
-            virtual int GetNumberOfInParameters() const {return m_def->parameters.size();}
+            virtual int GetNumberOfInParameters() const {return static_cast<int>(m_def->parameters.size());}
             virtual const MemberDescription* GetInParameterMember(int index) const;
 
-            virtual int GetNumberOfDefaultValues() const {return m_def->memberValues.size();}
+            virtual int GetNumberOfDefaultValues() const {return static_cast<int>(m_def->memberValues.size());}
             virtual const MemberDescription* GetDefaultValueMember(int index) const;
 
             virtual std::pair<const ParameterDescription*, int /*paramIndex*/> GetDefaultValue(int index) const;
@@ -285,15 +284,15 @@ namespace Internal
             virtual DotsC_TypeId GetTypeId() const {return m_typeId;}
             virtual const std::string& GetName() const {return m_def->name;}
             virtual const ClassDescription* GetbaseClass() const {return m_base;}
-            virtual int GetNumberOfDescendants() const {return m_descendants.size();}
+            virtual int GetNumberOfDescendants() const {return static_cast<int>(m_descendants.size());}
             virtual const ClassDescription* GetDescendant(int index) const {return m_descendants[index];}
-            virtual int GetNumberOfOwnMembers() const {return m_members.size();}
+            virtual int GetNumberOfOwnMembers() const {return static_cast<int>(m_members.size());}
             virtual int GetNumberOfInheritedMembers() const {return m_base ? m_base->GetNumberOfMembers() : 0;}
             virtual int GetNumberOfMembers() const {return GetNumberOfOwnMembers()+GetNumberOfInheritedMembers();}
             virtual DotsC_MemberIndex GetMemberIndex(const std::string& memberName) const;
             virtual const MemberDescription* GetMember(DotsC_MemberIndex index) const;
 
-            virtual int GetNumberOfOwnParameters() const {return m_ownParameters.size();}
+            virtual int GetNumberOfOwnParameters() const {return static_cast<int>(m_ownParameters.size());}
             virtual int GetNumberOfInheritedParameters() const {return m_base ? m_base->GetNumberOfParameters() : 0;}
             virtual int GetNumberOfParameters() const {return GetNumberOfOwnParameters()+GetNumberOfInheritedParameters();}
             virtual const ParameterDescription* GetParameter(DotsC_ParameterIndex index) const;
@@ -301,7 +300,7 @@ namespace Internal
             virtual void GetPropertyIds(std::vector<DotsC_TypeId>& propertyIds) const;
             virtual const PropertyMappingDescription* GetPropertyMapping(DotsC_TypeId propertyType, bool & isInherited) const;
 
-            virtual int GetNumberOfCreateRoutines() const {return m_createRoutines.size();}
+            virtual int GetNumberOfCreateRoutines() const {return static_cast<int>(m_createRoutines.size());}
             virtual const CreateRoutineDescription* GetCreateRoutine(int index) const {return &m_createRoutines[index];}
 
             virtual int InitialSize() const {return 0;}

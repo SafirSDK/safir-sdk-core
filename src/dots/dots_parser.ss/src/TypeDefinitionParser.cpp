@@ -340,7 +340,7 @@ namespace Internal
         }
         for (int i=0; i<c->GetNumberOfDefaultValues(); ++i)
         {
-            auto val=c->GetDefaultValue(i);
+            std::pair<const ParameterDescription*, int> val=c->GetDefaultValue(i);
             os<<"      DefaultVal: "<<c->GetDefaultValueMember(i)->GetName()<<" = "<<val.first->GetName()<<"["<<val.second<<"]"<<std::endl;
         }
 

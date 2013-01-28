@@ -86,12 +86,13 @@ namespace Internal
             //Create members
             CreateMembers(it->second);
 
-            //CreateRoutines
-            std::for_each(it->second.m_def->createRoutines.cbegin(), it->second.m_def->createRoutines.cend(), [&](const CreateRoutineDefinition& crd)
+            //CreateRoutines            
+            for (CreateRoutineDefinitions::const_iterator crit=it->second.m_def->createRoutines.begin();
+                 crit!=it->second.m_def->createRoutines.end(); ++crit)
             {
-                it->second.m_createRoutines.push_back(RepositoryWrapper::CreateRoutineDescriptionWrapper(&crd, &(it->second)));
+                it->second.m_createRoutines.push_back(RepositoryWrapper::CreateRoutineDescriptionWrapper(&(*crit), &(it->second)));
 
-            });
+            };
 
             //Parameters            
             it->second.m_allParameters=&m_parameters;
@@ -215,7 +216,7 @@ namespace Internal
         {
             if (it->GetName()==memberName)
             {
-                return std::distance(m_members.begin(), it) + GetNumberOfInheritedMembers();
+                return static_cast<DotsC_MemberIndex>(std::distance(m_members.begin(), it) + GetNumberOfInheritedMembers());
             }
         }
 
@@ -246,7 +247,7 @@ namespace Internal
         {
             if (it->GetName()==memberName)
             {
-                return std::distance(m_members.begin(), it);
+                return static_cast<DotsC_MemberIndex>(std::distance(m_members.begin(), it));
             }
         }
         return -1;
