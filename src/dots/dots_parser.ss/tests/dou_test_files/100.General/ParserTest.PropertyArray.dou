@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<property xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Defines array property.</summary>
+    <name>ParserTest.PropertyArray</name>
+    <members>
+        <member>
+            <summary>Int32 property</summary>
+            <name>Int32PropertyValue</name>
+        <array/>
+            <type>Int32</type>
+        </member>
+        <!--member>
+            <summary>TypeId property</summary>
+            <name>TypeIdPropertyValue</name>
+            <type>TypeId</type>
+        </member>
+        <member>
+            <summary>InstanceId property</summary>
+            <name>InstanceIdPropertyValue</name>
+            <type>InstanceId</type>
+        </member>
+        <member>
+            <summary>EntityId property</summary>
+            <name>EntityIdPropertyValue</name>
+            <type>EntityId</type>
+        </member>
+        <member>
+            <summary>object property</summary>
+            <name>MyEntityBasePropertyValue</name>
+            <type>ParserTest.MyEntityBase</type>
+        </member-->
+    </members>
+</property>
