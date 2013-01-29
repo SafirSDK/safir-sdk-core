@@ -23,9 +23,12 @@
 ******************************************************************************/
 #include "common_header.h"
 #include "dosemon.h"
+#include <Safir/Utilities/CrashReporter.h>
 
 int main(int argc, char *argv[])
 {
+    Safir::Utilities::CrashReporter::Start();
+
     QApplication app(argc, argv);
     DoseMon *dialog = new DoseMon();
 
