@@ -142,7 +142,11 @@ bool CheckResult(const std::string& expected, const std::string& result)
 
 bool TestInfoFromPath(const boost::filesystem::path& testDir, int& testNumber, std::string& testName, std::string& expectedResult)
 {
+#if BOOST_FILESYSTEM_VERSION == 2
+    std::string name = testDir.filename();
+#else
     std::string name = testDir.filename().string();
+#endif
     size_t ix = name.find_first_of('.');
     if (ix==name.npos || ix==0)
     {
