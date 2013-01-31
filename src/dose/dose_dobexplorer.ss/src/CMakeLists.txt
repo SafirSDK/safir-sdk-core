@@ -43,7 +43,7 @@ FIND_PACKAGE(Boost COMPONENTS filesystem system)
 TARGET_LINK_LIBRARIES(dobexplorer ${QT_LIBRARIES})
 
 IF (NOT MSVC)
-   TARGET_LINK_LIBRARIES(dobexplorer dots_cpp dots_generated-Safir-cpp dots_generated-cpp dose_internal lluf_utils ${Boost_LIBRARIES})
+   TARGET_LINK_LIBRARIES(dobexplorer dots_cpp dots_generated-Safir-cpp dots_generated-cpp dose_internal lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
 ENDIF ()
 
 INSTALL(TARGETS dobexplorer
