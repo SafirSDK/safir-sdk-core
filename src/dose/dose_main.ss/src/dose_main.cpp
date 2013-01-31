@@ -25,8 +25,15 @@
 #include "dose_main_app.h"
 #include <Safir/Utilities/Internal/PanicLogging.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/CrashReporter.h>
+
 int main()
 {
+    //ensure call to CrashReporter::Stop at application exit
+    //Start is called in DoseApp
+    boost::shared_ptr<void> guard(static_cast<void*>(0), 
+                                  boost::bind(Safir::Utilities::CrashReporter::Stop));
+
     try 
     {
         {

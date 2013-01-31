@@ -99,6 +99,10 @@ int main(int, char**)
     Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
     Safir::Utilities::CrashReporter::Start();
 
+    //ensure call to CrashReporter::Stop at application exit
+    boost::shared_ptr<void> guard(static_cast<void*>(0), 
+                                  boost::bind(Safir::Utilities::CrashReporter::Stop));
+
     lllog(0) << "Starting thread" << std::endl;
     long sent = 0;
     boost::thread t(boost::bind(Sender,
