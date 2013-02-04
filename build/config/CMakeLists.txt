@@ -13,7 +13,7 @@ SET(sdk_dirs "common/sdk")
 #This is needed for version control systems that don't handle
 #empty directories.
 FILE(MAKE_DIRECTORY 
-     "${sdk_dirs}/ada/lib-obj/Release"
+     "${sdk_dirs}/ada/lib-obj/RelWithDebInfo"
      "${sdk_dirs}/ada/lib-obj/Debug")
 
 

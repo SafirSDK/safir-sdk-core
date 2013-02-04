@@ -333,6 +333,14 @@ def parse_command_line(builder):
     if options.verbose >= 2:
         os.environ["VERBOSE"] = "1"
 
+    if options.command_file is None:
+        die("You need to specify the command file to use")
+        
+    if not os.path.isfile(options.command_file):
+        die("The specified command file could not be found")
+    global command_file
+    command_file = open(options.command_file,'r')
+
     global logger
     logger = Logger("Brief" if options.verbose == 0 else "Verbose",
                     options.command_file)
@@ -361,14 +369,6 @@ def parse_command_line(builder):
         
     global clean
     clean = options.clean
-
-    if options.command_file is None:
-        die("You need to specify the command file to use")
-        
-    if not os.path.isfile(options.command_file):
-        die("The specified command file could not be found")
-    global command_file
-    command_file = open(options.command_file,'r')
 
     global force_config
     if options.force_config is not None:
@@ -467,7 +467,7 @@ class BuilderBase(object):
                 os.chdir(config)
                 
             self.__build_internal(directory,
-                                  ".." if olddir else ".",
+                                  os.pardir if olddir else ".",
                                   config,
                                   install)
             
@@ -517,11 +517,14 @@ class BuilderBase(object):
         if not java_support:
             cmd += ("--no-java",)
             
-        #On windows we need to prepend the python executable since subprocess can't
-        #call python scripts out of the box.
-        #and we need to specifiy target arch
         if sys.platform == "win32":
-            cmd = (sys.executable,) + cmd + ("--target", target_architecture)
+            #On windows we need to prepend the python executable since subprocess can't
+            #call python scripts out of the box.
+            cmd = (sys.executable,) + cmd
+
+            #and we may need to specifiy target arch
+            if is_64_bit():
+                cmd += ("--target", target_architecture)
         
         process = subprocess.Popen(cmd,
                                    stdout=subprocess.PIPE,
@@ -859,7 +862,7 @@ def main():
             directory = split_line[1]
             suite_name = split_line[2]
             logger.log("Building and running test suite " + suite_name + " in " + directory, "header")
-            cf = "Release" if force_config is None else force_config
+            cf = "RelWithDebInfo" if force_config is None else force_config
             build_dir(directory, (cf,), builder, False) # build, but do not install
             run_test_suite(directory, suite_name, builder)
         elif command == "dobmake":
@@ -899,6 +902,7 @@ except FatalError as e:
     logger.log("Result", "header")
     logger.log("Build script failed:")
     logger.log(str(e), "output")
+    logger.log(str(e), "brief")
     logger.close()
     sys.exit(1)
 

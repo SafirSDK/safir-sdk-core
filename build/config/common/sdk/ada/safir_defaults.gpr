@@ -26,7 +26,7 @@ project Safir_Defaults is
 
    type OS_Type is ("Windows_NT","Linux");
 
-   type Build_Type is ("Release", "Debug");
+   type Build_Type is ("RelWithDebInfo", "Debug");
 
    type Boolean is ("False", "True");
 
@@ -53,7 +53,7 @@ project Safir_Defaults is
       case Build is
          when "Debug" =>
             for Global_Configuration_Pragmas use "configuration_pragmas.gnat";
-         when "Release" =>
+         when "RelWithDebInfo" =>
             null;
       end case;
    end Builder;
@@ -106,10 +106,11 @@ project Safir_Defaults is
              "");
 
       case Build is
-         when "Release" =>
+         when "RelWithDebInfo" =>
             for Default_Switches ("Ada") use
               Compiler'Default_Switches ("Ada") &
-            ("-O2",     -- Full optimisation.
+            ("-g",
+             "-O2",     -- Full optimisation.
              "-gnatn"); -- Inlining of subprograms.
 
          when "Debug" =>

@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import os, glob, subprocess, threading, sys, stat, shutil, time, traceback, re
+import os, glob, subprocess, threading, sys, stat, shutil, time, traceback, re, platform
 from optparse import OptionParser
 
 try:
@@ -114,17 +114,17 @@ class DobmakeError(Exception):
         Exception.__init__(self,msg)
 
 def die(msg):
-    buildlog.writeError(msg + "\n")
+    logger.writeError(msg + "\n")
     raise DobmakeError("\n" + msg)
 
 def physical_memory():
-    if not sys.platform.startswith("linux"):
-        die ("physical_memory() is only implemented on linux")
-    with open("/proc/meminfo") as file:
-        meminfo = file.read()
-    match = re.search(r"MemTotal:\s*([0-9]*) kB", meminfo)
-    return int(match.group(1))/1024
-
+    if sys.platform.startswith("linux"):
+        with open("/proc/meminfo") as a_file:
+            meminfo = a_file.read()
+        match = re.search(r"MemTotal:\s*([0-9]*) kB", meminfo)
+        return int(match.group(1))/1024
+    else:
+        return None
 
 def chmod(path):
     flags = stat.S_IWRITE | stat.S_IREAD
@@ -173,11 +173,11 @@ def save_installed_files_manifest():
     installed_files.close()
 
 def uninstall():
-    buildlog.writeHeader("Uninstalling...\n")
+    logger.writeHeader("Uninstalling...\n")
         
     path = os.path.join(SAFIR_SDK,"dots","dots_generated","installed_files.txt")
     if not os.path.exists(path):
-        buildlog.write("Can't find " + path + ", files are probably already uninstalled.\n")        
+        logger.write("Can't find " + path + ", files are probably already uninstalled.\n")        
         return
     files = open(path)
     for file in files:
@@ -194,7 +194,7 @@ def uninstall():
 
     remove(path)
     
-    buildlog.write("Uninstalling done.\n")
+    logger.write("Uninstalling done.\n")
     
 def get_config_file():
     return os.path.join(SAFIR_SDK,"dots","dots_generated","dobmake.ini")
@@ -238,8 +238,6 @@ class Logger(object):
         self.write(data,"title")
 
     def writeCommand(self, data):
-        if not no_gui:
-            self.write(time.strftime("%H:%M:%S", time.localtime()) + "\n","command")
         self.write(data,"command")
 
     def writeError(self,data):
@@ -247,22 +245,23 @@ class Logger(object):
 
 
     class PollThread(threading.Thread):
-        def __init__(self, process, logger):
+        def __init__(self, process, logger, strip_cr):
             threading.Thread.__init__(self)
             self.process = process
             self.logger = logger
+            self.strip_cr = strip_cr and (sys.platform == "win32")
 
         def run(self):
-            newlines = 0
             while True:
                 data = self.process.stdout.readline()
                 if not data:
                     break
+                if self.strip_cr:
+                    data = data.decode("utf8").replace('\r','')
                 self.logger.write(data,"pre")
 
-
-    def logOutput(self, process):
-        thread = Logger.PollThread(process,self)
+    def logOutput(self, process, strip_cr = False):
+        thread = Logger.PollThread(process, self, strip_cr)
         thread.start()
         thread.join()
         process.wait()
@@ -279,15 +278,15 @@ class Logger(object):
     def close(self):
         log("logger.close")
 
-
 buildType = "build"
-default_config="Release"
+default_config="RelWithDebInfo"
 build_java = True
 build_ada = True
 build_cpp_release = True
 build_cpp_debug = True
 no_gui = False
-target_architecture = None
+if sys.platform == "win32": #target_architecture is only set on windows platfoms!
+    target_architecture = None
 
 def parse_command_line():
     parser = OptionParser()
@@ -297,8 +296,6 @@ def parse_command_line():
                       help="Remove all old build files and installed files before starting the build")
     parser.add_option("--uninstall", action="store_true",dest="uninstall",default=False,
                       help="Remove all installed files")
-    parser.add_option("--target",action="store",type="string",dest="target_architecture",default="x86",
-                          help="Target architecture, x86 or x86-64")
     parser.add_option("--no-ada", action="store_true",dest="no_ada",default=False,
                       help="Dont attempt to build Ada code")
     parser.add_option("--no-java", action="store_true",dest="no_java",default=False,
@@ -307,10 +304,17 @@ def parse_command_line():
                       help="Dont attempt to build cpp debug code")      
     parser.add_option("--no-cpp-release", action="store_true",dest="no_cpp_release",default=False,
                       help="Dont attempt to build cpp release code")      
-    parser.add_option("--default-config", action="store",type="string",dest="default_config",default="Release",
-                      help="Configuration for the other languages. Release is default.")
+    parser.add_option("--default-config", action="store",type="string",dest="default_config",default="RelWithDebInfo",
+                      help="Configuration for the other languages. RelWithDebInfo is default.")
     parser.add_option("--no-gui", "--batch", "-b", action="store_true",dest="stdoutlog",default=False,
                       help="Run in batch (non-gui) mode")
+
+    if is_64_bit() and sys.platform == "win32":
+        parser.add_option("--target", "--arch", action="store",dest="arch",choices=("x86","x86-64"),
+                          help="The target architecture to build for. x86 or x86-64 are valid args. "
+                          "This value will be stored in dobmake.ini, so it only needs to specified "
+                          "if the stored value needs to be changed, or if no value is stored.")
+
     (options,args) = parser.parse_args()
 
     if options.clean and options.rebuild:
@@ -335,21 +339,13 @@ def parse_command_line():
     global default_config
     default_config = options.default_config
 
-    if options.target_architecture == "x86-64":
+    if sys.platform == "win32":
+        #builds on 32-bit windows always get x86 set.
         if not is_64_bit():
-            die("Target x86-64 can't be set since this is not a 64 bit OS")
-    elif options.target_architecture != "x86":
-        die("Unknown target architecture " + options.target_architecture)
-    global target_architecture
-    target_architecture = options.target_architecture
-
-    global vcvarsall_arg
-    if target_architecture == "x86":
-        vcvarsall_arg = "x86"
-    elif target_architecture == "x86-64":
-        vcvarsall_arg = "x86_amd64"
-    else:
-        die("Unknown target architecture " + target_architecture)
+            options.arch = "x86"
+        
+        global target_architecture
+        target_architecture = options.arch #can be None if not set on cmd line
 
     global build_java
     global build_ada
@@ -370,24 +366,196 @@ def parse_command_line():
     global no_gui
     no_gui = options.stdoutlog
 
+def invoke_in_dir(function, directory):
+    olddir = os.getcwd()
+    os.chdir(directory)
+    try:
+        function()
+    finally:
+        os.chdir(olddir)
+
 
 def run_dots_depends():
-    buildlog.writeHeader("Checking dependencies in dou files\n")
-    buildlog.writeCommand("Running dots_depends...\n")
+    logger.writeHeader("Checking dependencies in dou files\n")
+    logger.writeCommand("Running dots_depends...\n")
     process = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","dots_depends"),
                                stdout=subprocess.PIPE, 
                                stderr=subprocess.STDOUT,
                                universal_newlines=True)    
-    buildlog.logOutput(process)
+    logger.logOutput(process)
     if process.returncode != 0:
         die("dots_depends failed!")
         
-    
 
-class VisualStudioBuilder(object):
+class BuilderBase(object):
     def __init__(self):
-        cfg = SafeConfigParser()
+        #We need to limit ourselves a little bit in how
+        #many parallel jobs we perform. Each job may use
+        #up to ~100Mb of memory.
+        try:
+            self.num_jobs = num_cpus() + 1
         
+            mem_per_job = 100
+            memory = physical_memory()
+            if memory is not None and memory / self.num_jobs < mem_per_job:
+                self.num_jobs = max(1,memory / mem_per_job)
+        except:
+            self.num_jobs = 2
+
+    def __run_cmake(self, cmd, description, what, allow_fail = False):
+        """Run a command"""
+        logger.writeHeader(description + " '" + what + "'\n")
+        command = [cmake(),]
+        command += cmd
+        logger.writeCommand(" ".join(cmd) + "\n")
+        process = subprocess.Popen(command,
+                                   stdout=subprocess.PIPE, 
+                                   stderr=subprocess.STDOUT)
+        #universal_newlines does not work with cmake on windows, so we
+        #ask logger to do stripping for us.
+        logger.logOutput(process, strip_cr = True)
+        if process.returncode != 0:
+            if not allow_fail:
+                die("Failed to run '" + " ".join(cmd) + "' for " + what)
+            else:
+                logger.write("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing\n")    
+
+    def __generate_code(self):
+        what = "Process DOU files - Generate code"
+
+        rebuild = "TRUE" if buildType == "rebuild" else "FALSE"
+
+        self.__run_cmake(("-G", self.cmake_generator,
+                          "-D", "REBUILD=" + rebuild,
+                          "."),
+                         "Configure", what)
+        command = ["--build", ".", 
+                   "--target", self.install_target]
+
+        command += self.target_specific_build_cmds()
+        
+        self.__run_cmake(command,
+                         "Build and install", what)
+
+        save_installed_files_manifest()
+
+    def __build(self, config, cpp, dotnet, java, ada):
+        what = "dots_generated"        
+        rebuild = "TRUE" if buildType == "rebuild" else "FALSE"
+
+        self.__run_cmake(("-G", self.cmake_generator,
+                          "-D", "CMAKE_BUILD_TYPE:string=" + config,
+                          "-D", "NO_CXX:string="+ str(not cpp), 
+                          "-D", "NO_DOTNET:string="+ str(not dotnet), 
+                          "-D", "NO_JAVA:string=" + str(not java),
+                          "-D", "NO_ADA:string="+ str(not ada), 
+                          "-D", "REBUILD=" + rebuild,
+                          os.pardir),
+                         "Configure", what)
+            
+        command = ["--build", ".", 
+                   "--target", self.install_target]
+        
+        command += self.target_specific_build_cmds()
+        
+        self.__run_cmake(command,
+                         "Build and install " + default_config, what)
+        
+        save_installed_files_manifest()
+        
+
+
+    def build(self):
+        invoke_in_dir(lambda: self.__generate_code(), "gen")
+
+        run_dots_depends()
+
+        default_builds = ["dotnet",]
+        other_builds = []
+        if build_java:
+            default_builds.append("java")
+        if build_ada:
+            default_builds.append("ada")
+        #if default_config is a release build
+        if default_config.find("Rel") != -1:
+            other_config = "Debug"
+            if build_cpp_release:
+                default_builds.append("cpp")
+            if build_cpp_debug:
+                other_builds.append("cpp")
+        else:
+            other_config = "RelWithDebInfo"
+            if build_cpp_debug:
+                default_builds.append("cpp")
+            if build_cpp_release:
+                other_builds.append("cpp")
+
+        if len(default_builds) != 0:
+            mkdir(default_config)
+            invoke_in_dir(lambda: self.__build(default_config,
+                                               "cpp" in default_builds,
+                                               "dotnet" in default_builds,
+                                               "java" in default_builds,
+                                               "ada" in default_builds),
+                          default_config)
+
+        if len (other_builds) != 0 and sys.platform == "win32":
+            mkdir(other_config)
+            invoke_in_dir(lambda: self.__build(other_config,
+                                               "cpp" in other_builds,
+                                               "dotnet" in other_builds,
+                                               "java" in other_builds,
+                                               "ada" in other_builds),
+                          other_config)
+
+        
+    def clean(self):
+        logger.write("Cleaning!\n")
+                       
+        remove("others")                  
+        remove("build")
+        remove("Debug")
+        remove("Release")
+        remove("RelWithDebInfo")
+        remove("MinSizeRel")
+        remove("cpp")
+        remove("java")
+        remove("ada")
+        remove("dotnet")
+        remove("tags")
+        remove("dll_imports.cpp")
+
+        # empty file, must exist
+        tmp_file = open("cmake_depend.txt", "w")
+        tmp_file.close()
+
+        for name in os.listdir("gen"):
+            if name != "CMakeLists.txt":
+                remove(os.path.join("gen",name))
+    
+class VisualStudioBuilder(BuilderBase):
+    def __init__(self):
+        super(VisualStudioBuilder, self).__init__()
+
+        self.install_target = "Install"
+
+        # Use Jom (google for qt jom) to build if it is available
+        try:
+            subprocess.Popen(("jom", "/version"), stdout = subprocess.PIPE).communicate()
+            self.cmake_generator = "NMake Makefiles JOM"
+            self.have_jom = True
+        except:
+            self.cmake_generator = "NMake Makefiles"
+            self.have_jom = False
+        
+        self.__read_config()
+
+        if os.environ.get("VSINSTALLDIR") is None:
+            #looks like we need to load vcvarsall.bat to get environment variables
+            self.__setup_build_environment()
+
+    def __read_config(self):
+        cfg = SafeConfigParser()
         cfgpath = get_config_file()
 
         add_section = False
@@ -398,6 +566,7 @@ class VisualStudioBuilder(object):
             cfg.read(cfgpath)
             try:
                 cfg.get("main","VSPATH")
+                cfg.get("main","target_architecture")
             except:
                  add_section = True
         
@@ -405,372 +574,108 @@ class VisualStudioBuilder(object):
             DIR = os.environ.get("VSINSTALLDIR")
             if DIR is None:
                 die("Could not work out which studio you are using, make sure you run dobmake.py in a Visual Studio command prompt.")
-            cfg.add_section("main")
+            if target_architecture is None:
+                die("No target_architecture set. Please specify on command line, using the --target-architecture switch.")
+            if not cfg.has_section("main"):
+                cfg.add_section("main")
             cfg.set("main","VSPATH",os.path.join(DIR,"Common7","Tools"))
+            cfg.set("main","target_architecture",target_architecture)
+            with open(cfgpath,"w") as configfile:
+                cfg.write(configfile)           
+        elif target_architecture is not None and cfg.get("main","target_architecture") != target_architecture:
+            #if it is set on the command line we want to write that value
+            cfg.set("main","target_architecture",target_architecture)
             with open(cfgpath,"w") as configfile:
                 cfg.write(configfile)           
         
         self.studio = os.path.normcase(os.path.normpath(cfg.get("main","VSPATH")))
+        self.arch = cfg.get("main","target_architecture")
 
-        self.studio_install_dir = os.path.join(self.studio,"..", "..")
-
-        if not os.path.isdir(self.studio) or not os.path.isfile(os.path.join(self.studio_install_dir,"VC","vcvarsall.bat")):
+        if not os.path.isdir(self.studio) or not os.path.isfile(os.path.join(self.studio,os.pardir,os.pardir,"VC","vcvarsall.bat")):
             die("Something seems to have happened to your dobmake.ini or Visual Studio installations!"+
                 "\nVSPATH (in dots_generated/dobmake.ini) does not seem to point to a valid path." +
                 "\nTry to delete dots_generated/dobmake.ini and run dobmake.py in a Visual Studio command prompt.")
-        def getenv_and_normalize(variable):
-            env = os.environ.get(variable)
-            if env is not None:
-                return os.path.normcase(os.path.normpath(env))
-            return None
+
+    def __setup_build_environment(self):
+        """Find vcvarsall.bat and load the relevant environment variables from it.
+        This function is inspired (but not copied, for licensing reasons) by the one in python distutils2 msvc9compiler.py"""
+        vcvarsall = os.path.join(self.studio,os.pardir,os.pardir,"VC","vcvarsall.bat")
+
+        #use uppercase only in this variable!
+        required_variables = set(["LIB", "LIBPATH", "PATH", "INCLUDE"])
+        optional_variables = set(["PLATFORM",])
+        wanted_variables = required_variables | optional_variables #union
+
+        arch = "x86" if self.arch == "x86" else "amd64"
+        cmd = '"%s" %s & set' % (vcvarsall, arch)
+        proc = subprocess.Popen(cmd,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                universal_newlines = True)
+        output = proc.communicate()[0]
+        if proc.returncode != 0:
+            die ("Failed to fetch environment variables out of vcvarsall.bat: " + output)
         
-        VS80 = getenv_and_normalize("VS80COMNTOOLS")
-        VS90 = getenv_and_normalize("VS90COMNTOOLS")
-        VS100 = getenv_and_normalize("VS100COMNTOOLS")
-        
-        if self.studio == VS80:
-            if target_architecture == "x86":
-                self.generator = "Visual Studio 8 2005"
-            elif target_architecture == "x86-64":
-                self.generator = "Visual Studio 8 2005 Win64"
-            else:
-                die("Target architecture " + target_architecture + " is not supported for Visual Studio 8 2005 !")  
-        elif self.studio == VS90:
-            if target_architecture == "x86":
-                self.generator = "Visual Studio 9 2008"
-            elif target_architecture == "x86-64":
-                self.generator = "Visual Studio 9 2008 Win64"
-            else:
-                die("Target architecture " + target_architecture + " is not supported for Visual Studio 9 2008 !")
-        elif self.studio == VS100:
-            if target_architecture == "x86":
-                self.generator = "Visual Studio 10"
-            elif target_architecture == "x86-64":
-                self.generator = "Visual Studio 10 Win64"
-            else:
-                die("Target architecture " + target_architecture + " is not supported for Visual Studio 10 !")
-        else:
-            die("VSPATH (in dots_generated/dobmake.ini) is set to something I dont recognize\n" +
-                "It should be either the value of %VS80COMNTOOLS%, %VS90COMNTOOLS% or %VS100COMNTOOLS%" +
-                "\nTry to delete dots_generated/dobmake.ini and run dobmake.py in a Visual Studio command prompt.")
+        found_variables = set()
 
-        #work out where to put temp files
-        self.tmpdir = os.environ.get("TEMP")
-        if self.tmpdir is None:
-            self.tmpdir = os.environ.get("TMP")
-            if self.tmpdir is None:
-                die("Failed to find a temp directory!")
-        if not os.path.isdir(self.tmpdir):
-            die("I can't seem to use the temp directory " + self.tmpdir)
-            
-        #work out what compiler tools to use
-        if target_architecture == "x86":
-            self.vcvarsall_arg = "x86"
-        elif target_architecture == "x86-64":
-            self.vcvarsall_arg = "amd64"
-        else:
-            die("Unknown target architecture " + target_architecture)
-            
-    @staticmethod
-    def can_use():
-        VS80 = os.environ.get("VS80COMNTOOLS")
-        VS90 = os.environ.get("VS90COMNTOOLS")
-        VS100 = os.environ.get("VS100COMNTOOLS")
-        return VS80 is not None or VS90 is not None or VS100 is not None
-
-    def run_command(self, cmd, description, what, allow_fail = False):
-        """Run a command"""            
-        batpath = os.path.join(self.tmpdir,"build.bat")
-        bat = open(batpath,"w")
-        bat.write("@echo off\n" +
-                  "call \"" + os.path.join(self.studio_install_dir,"VC","vcvarsall.bat") +  "\" " + self.vcvarsall_arg + "\n" +
-                  cmd)
-        bat.close()
-        buildlog.writeHeader(description + " '" + what + "'\n")
-        buildlog.writeCommand(cmd + "\n")
-        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
-        
-        buildlog.logOutput(process)
-
-        if process.returncode != 0:
-            if not allow_fail:
-                die("Failed to run '" + cmd + "' for " + what)
-            else:
-                buildlog.write("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing\n")
-
-    def run_command2(self, cmd, description, what, allow_fail = False):
-        """Run a command"""
-        
-        buildlog.writeHeader(description + " '" + what + "'\n")
-        buildlog.writeCommand(cmd + "\n")
-        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
-
-        buildlog.logOutput(process)
-
-        if process.returncode != 0:
-            if not allow_fail:
-                die("Failed to run '" + cmd + "' for " + what)
-            else:
-                buildlog.write("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing\n")    
-
-
-    def find_sln(self):
-        sln_files = glob.glob("*.sln")
-        if (len(sln_files) != 1):
-            die("There is not exactly one sln file in " + os.getcwd() +
-                ", either cmake failed to generate one or there is another one coming from somewhere else!")
-        return sln_files[0]
-
-    def build_cpp(self):
-        what = "CPP - dots_generated"
-        buildlog.writeHeader("Building C++ using "+self.generator + "\n")
-        mkdir(self.generator)
-        olddir = os.getcwd();
-        os.chdir(self.generator)
-        Rebuild = "FALSE"
-        if buildType == "rebuild":
-            Rebuild = "TRUE"
-        try:
-            self.run_command2(cmake() + " -G \""+ self.generator + "\" "+
-                              "-D NO_JAVA:string=TRUE " + 
-                              "-D NO_DOTNET:string=TRUE " + 
-                              "-D NO_ADA:string=TRUE " + 
-                              "-D REBUILD=" + Rebuild + " " +
-                              "..",
-                              "Configure", what)
-
-            solution = self.find_sln()
-
-            cppconfig = []
-            if build_cpp_debug:
-                cppconfig += ["Debug"]
-            if build_cpp_release:
-                cppconfig += ["Release"]
-            for config in cppconfig:
-                self.run_command(cmake() + " --build . --config " + config,
-                                 "Build CPP " + config,what)
-                self.run_command(cmake() + " --build . --config " + config +" --target Install",
-                                 "Install CPP " + config,what)
-                save_installed_files_manifest()
-            
-        finally:
-            os.chdir(olddir)
-            
-    def build_others(self):
-        what = "DOTNET JAVA ADA - dots_generated"
-        buildlog.writeHeader("Building others using "+self.generator+"\n")
-        olddir = os.getcwd();
-        mkdir("others")
-        os.chdir("others")
-        Rebuild = "FALSE"
-        if buildType == "rebuild":
-            Rebuild = "TRUE"
-        try:
-            self.run_command(cmake() + " -G \""+ "NMake Makefiles" + "\" "+
-                             "-D NO_CXX:string=TRUE " +
-                             "-D NO_DOTNET:string=FALSE " +
-                             "-D NO_ADA:string=" + str(not build_ada) + " " + 
-                             "-D NO_JAVA:string=" + str(not build_java) + " " + 
-                              "-D SAFIR_BUILD_TARGET_ARCHITECTURE:string=" + target_architecture + " " +
-                             "-D REBUILD=" + Rebuild + " " +
-                             "..",
-                             "Configure", what)
-
-            self.run_command(cmake() + " --build . --config " + default_config,
-                             "Build " + default_config, what)
-            
-            self.run_command(cmake() + " --build . --config " + default_config  +" --target Install",
-                             "Install " + default_config, what)
-            save_installed_files_manifest()
-        finally:
-            os.chdir(olddir)
-        
-    def build_dots(self):
-        what = "Process DOU files - dots_generated"
-        buildlog.writeHeader("Building dots using "+self.generator+"\n")
-        olddir = os.getcwd();
-        os.chdir("gen")
-        Rebuild = "FALSE"
-        if buildType == "rebuild":
-            Rebuild = "TRUE"
-        try:
-            # workaround for bug in CMake with VS2010
-            if self.generator.startswith("Visual Studio 10"): 
-                self.run_command((cmake() + " -G \""+ "NMake Makefiles" + "\" "+
-                                  "-D REBUILD=" + Rebuild + " " +
-                                  "."),
-                                 "Configure", what)
-            else:
-                self.run_command((cmake() + " -G \""+ self.generator + "\" "+
-                                  "-D REBUILD=" + Rebuild + " " +
-                                  "."),
-                                 "Configure", what)
-                solution = self.find_sln()
+        for line in output.split("\n"):
+            if '=' not in line:
+                continue
+            line = line.strip()
+            name, value = line.split('=', 1)
+            name = name.upper()
+            if name in wanted_variables:
+                if value.endswith(os.pathsep):
+                    value = value[:-1]
+                os.environ[name] = value
+                found_variables.add(name)
                 
-            self.run_command(cmake() + " --build . --config " + default_config,
-                             "Build " + default_config, what)
+        if len(required_variables - found_variables) != 0:
+            die("Failed to find all expected variables in vcvarsall.bat! Missing = " + str(required_variables - found_variables))
 
-            self.run_command(cmake() + " --build . --config " + default_config  +" --target Install",
-                             "Install " + default_config, what)
-            
-
-            save_installed_files_manifest()
-                        
-        finally:
-            os.chdir(olddir)    
-            
-    def clean(self):
-        buildlog.writeHeader("Cleaning...\n")
-        
-        remove("others")
-        remove(self.generator)
-        remove("cpp")
-        remove("java")
-        remove("ada")
-        remove("dotnet")
-        remove("tags")
-        remove("dll_imports.cpp")
-
-        # empty file, must exist
-        tmp_file = open("cmake_depend.txt", "w")
-        tmp_file.close()
-        
-        for name in os.listdir("gen"):
-            if name != "CMakeLists.txt":
-                remove(os.path.join("gen",name))
-
-        buildlog.write("Cleaning done.\n")
-           
-    def build(self):
-        self.build_dots()
-        run_dots_depends()
-        self.build_others()
-        self.build_cpp()
-
-
-class UnixGccBuilder(object):
-    def __init__(self):
-        #We need to limit ourselves a little bit in how
-        #many parallel jobs we perform. Each job may use
-        #up to 400Mb of memory.
-        try:
-            memory = physical_memory()
-            self.num_jobs = num_cpus() + 1
-        
-            if memory / self.num_jobs < 400:
-                self.num_jobs = max(1,memory / 400)
-        except:
-            self.num_jobs = 2
-        #ada builds (with gnatmake) will look at environment to determine parallellism
-        os.environ["NUMBER_OF_PROCESSORS"] = str(self.num_jobs)
 
     @staticmethod
     def can_use():
-        return sys.platform.startswith("linux2")
-    
+        return sys.platform == "win32"
 
-    def run_command(self, cmd, description, what, allow_fail = False):
-        """Run a command"""
-        buildlog.writeHeader(description + " '" + what + "'\n")
-        buildlog.writeCommand(" ".join(cmd) + "\n")
-        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
-        buildlog.logOutput(process)
-        if process.returncode != 0:
-            if not allow_fail:
-                die("Failed to run '" + " ".join(cmd) + "' for " + what)
-            else:
-                buildlog.write("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing\n")    
+    def target_specific_build_cmds(self):
+        if self.have_jom:
+            return (("--", "/nologo", "/j", str(self.num_jobs)))
+        else:
+            return (("--", "/nologo"))
 
-    def build_dots(self):
-        what = "Process DOU files - dots_generated"        
-        olddir = os.getcwd()
-        os.chdir("gen")
-        Rebuild = "FALSE"
-        if buildType == "rebuild":
-            Rebuild = "TRUE"
-        try:
-            self.run_command((cmake(),
-                              "-D", "CMAKE_BUILD_TYPE:string=" + default_config,
-                              "-D", "REBUILD=" + Rebuild,
-                              "."),
-                             "Configure", what)
-            
-            self.run_command(("make","-j",str(self.num_jobs)),
-                             "Build " + default_config, what)
-            self.run_command(("make","-j",str(self.num_jobs),"install"),
-                             "Install " + default_config, what)
+class UnixGccBuilder(BuilderBase):
+    def __init__(self):
+        super(UnixGccBuilder, self).__init__()
 
-            save_installed_files_manifest()
-        finally:
-            os.chdir(olddir)
+        self.install_target = "install"
+        self.cmake_generator = "Unix Makefiles"
 
-    def build_others(self):
-        what = "dots_generated"        
-        mkdir("build")
-        olddir = os.getcwd()
-        os.chdir("build")
-        Rebuild = "FALSE"
-        if buildType == "rebuild":
-            Rebuild = "TRUE"
-        try:
-            self.run_command((cmake(),
-                              "-D", "CMAKE_BUILD_TYPE:string=" + default_config,
-                              "-D", "NO_ADA:string="+ str(not build_ada), 
-                              "-D", "NO_JAVA:string=" + str(not build_java),
-                              "-D", "REBUILD=" + Rebuild,
-                              ".."),
-                             "Configure", what)
-            
-            os.putenv("MONO_PATH", SAFIR_RUNTIME + "/bin")
 
-            self.run_command(("make","-j",str(self.num_jobs)),
-                             "Build " + default_config, what)
-            self.run_command(("make","-j",str(self.num_jobs),"install"),
-                             "Install " + default_config, what)
+    @staticmethod
+    def can_use():
+        return sys.platform.startswith("linux")
 
-            save_installed_files_manifest()
-            
-        finally:
-            os.chdir(olddir)
-        
-    def build(self):
-        self.build_dots()
-        run_dots_depends()
-        self.build_others()
-
-    def clean(self):
-        buildlog.write("Cleaning!\n")
-                                         
-        remove("build")
-        remove("cpp")
-        remove("java")
-        remove("ada")
-        remove("dotnet")
-        remove("tags")
-        remove("dll_imports.cpp")
-
-        # empty file, must exist
-        tmp_file = open("cmake_depend.txt", "w")
-        tmp_file.close()
-
-        for name in os.listdir("gen"):
-            if name != "CMakeLists.txt":
-                remove(os.path.join("gen",name))
+    def target_specific_build_cmds(self):
+        return (("--", "-j", str(self.num_jobs)))
 
 def run_dots_configuration_check():
-    process = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","dots_configuration_check"),stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)    
-    buildlog.logOutput(process)
+    process = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","dots_configuration_check"),
+                               stdout=subprocess.PIPE, 
+                               stderr=subprocess.STDOUT,
+                               universal_newlines=True)    
+    logger.logOutput(process)
     if process.returncode != 0:
         die("dots_configuration_check failed! There is something wrong with your dou and dom files")
         
 def check_config():
-    buildlog.writeHeader("Checking dou and dom files\n")
-    buildlog.writeCommand("dou and dom files located under $(SAFIR_RUNTIME)/data/text/dots/classes/ are checked.\n")
+    logger.writeHeader("Checking dou and dom files\n")
+    logger.writeCommand("dou and dom files located under $(SAFIR_RUNTIME)/data/text/dots/classes/ are checked.\n")
     run_dots_configuration_check()
 
 def check_config_dots_generated():
-    buildlog.writeHeader("Checking dou and dom files\n")
-    buildlog.writeCommand("dou and dom files located under $(SAFIR_SDK)/dots/dots_generated/ are checked.\n")
+    logger.writeHeader("Checking dou and dom files\n")
+    logger.writeCommand("dou and dom files located under $(SAFIR_SDK)/dots/dots_generated/ are checked.\n")
     
     # Set a "special" environment variable for the sub-process. The env variable determines where dots_kernel should
     # load dou/dom files from
@@ -801,7 +706,8 @@ def load_gui():
             self.buildDebugCpp = tkinter.IntVar()
             self.getGuiConfiguration()
             self.createWidgets()
-            self.cppDebugBoxChanged()
+            if sys.platform == "win32":
+                self.cppDebugBoxChanged()
             self.buildTypeChanged()
             self.commandList = list()
             self.commandThread = None
@@ -899,21 +805,21 @@ def load_gui():
                                                command=self.javaBoxChanged)
             self.javaBox.grid(row=2,column=4,sticky=tkinter.W + tkinter.N)
             
-            tkinter.Label(self,
-                          text="C++ build type:").grid(row=3,column=0,sticky=tkinter.W + tkinter.N)
+            if sys.platform == "win32":
+                tkinter.Label(self,
+                              text="C++ build type:").grid(row=3,column=0,sticky=tkinter.W + tkinter.N)
 
-            cppReleaseBuildBox = tkinter.Checkbutton(self,
-                                                     text="Release",
-                                                     state="disabled")
-            cppReleaseBuildBox.grid(row=3,column=1,sticky=tkinter.W + tkinter.N)
-            cppReleaseBuildBox.select()
+                cppReleaseBuildBox = tkinter.Checkbutton(self,
+                                                         text="Release",
+                                                         state="disabled")
+                cppReleaseBuildBox.grid(row=3,column=1,sticky=tkinter.W + tkinter.N)
+                cppReleaseBuildBox.select()
             
-
-            self.cppDebugBuildBox = tkinter.Checkbutton(self,
-                                                        text="Debug",
-                                                        variable = self.buildDebugCpp,
-                                                        command=self.cppDebugBoxChanged)
-            self.cppDebugBuildBox.grid(row=3,column=2,sticky=tkinter.W + tkinter.N)             
+                self.cppDebugBuildBox = tkinter.Checkbutton(self,
+                                                            text="Debug",
+                                                            variable = self.buildDebugCpp,
+                                                            command=self.cppDebugBoxChanged)
+                self.cppDebugBuildBox.grid(row=3,column=2,sticky=tkinter.W + tkinter.N)             
             
             tkinter.Label(self, text="Build output").grid(row=4,column=0,sticky=tkinter.W + tkinter.N)
           
@@ -977,7 +883,7 @@ def load_gui():
 
         def updateLog(self):
             self.after(100,self.updateLog)
-            delta = buildlog.getDelta()
+            delta = logger.getDelta()
             for chunk in delta:
                 self.output.insert(tkinter.END,chunk[0],chunk[1])
                 self.output.see(tkinter.END)
@@ -1022,7 +928,7 @@ def load_gui():
             else:
                 self.runButton.config(state="normal")
                 self.cancelButton.config(state="normal")
-                buildlog.write("dobmake took " + time.strftime("%H:%M:%S", time.gmtime(time.time() - self.start_time)) + "\n")
+                logger.write("dobmake took " + time.strftime("%H:%M:%S", time.gmtime(time.time() - self.start_time)) + "\n")
 
         class CommandThread(threading.Thread):
             def __init__(self, command):
@@ -1050,9 +956,9 @@ def main():
     start_time = time.time()
     parse_command_line()
 
-    global buildlog
+    global logger
 
-    buildlog = Logger()
+    logger = Logger()
 
     if VisualStudioBuilder.can_use():
         builder = VisualStudioBuilder()

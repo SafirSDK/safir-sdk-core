@@ -7,9 +7,9 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 SET(gprmake_arguments -q -XBUILD=${CUSTOM_BUILD_TYPE} -XWarning_Level=Default)
 
 SET(build_directories 
-      program/lib-obj/Release 
+      program/lib-obj/RelWithDebInfo
       program/lib-obj/Debug 
-      lib-obj/Release 
+      lib-obj/RelWithDebInfo
       lib-obj/Debug)
 
 FILE(MAKE_DIRECTORY ${build_directories})
@@ -42,6 +42,7 @@ INSTALL(FILES
         data/CMakeLists.txt 
         data/Manifest.java.txt
         data/precompiled_header_for_cpp.h
+        data/precompiled_header_for_cpp.cpp
         data/dots_generated_ada.gpr_template
         data/dots_generated_ada_library.gpr_template
         data/dots_generated_main_ada.gpr_template

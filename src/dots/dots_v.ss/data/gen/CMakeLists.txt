@@ -5,13 +5,15 @@ PROJECT (dots_generated-code NONE)
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 SET(dod_directory ${SAFIR_RUNTIME}/data/text/dots/config/)
+SET(dots_v_command "${SAFIR_RUNTIME}/bin/dots_v" ARGS -dod=${dod_directory} -xdir=${dots_generated-code_SOURCE_DIR}/..)
+
 FILE(GLOB dod_files ${dod_directory} *.dod)
 
 if (REBUILD)
    message("Rebuilding all dou files...")
 
    ADD_CUSTOM_COMMAND(OUTPUT tags
-       COMMAND "${SAFIR_RUNTIME}/bin/dots_v" ARGS -dod=${dod_directory} -xdir=${dots_generated-code_SOURCE_DIR}/.. ${dots_generated-code_SOURCE_DIR}/..
+       COMMAND ${dots_v_command} ${dots_generated-code_SOURCE_DIR}/..
        DEPENDS ${dod_files}
        WORKING_DIRECTORY ..)
  
@@ -19,10 +21,8 @@ if (REBUILD)
                      DEPENDS tags)
 
 else()
-
-
-   message("Building only changed dou files...")
-   FILE(GLOB_RECURSE dou_files ../*.dou)
+  message("Building only changed dou files...")
+  FILE(GLOB_RECURSE dou_files ../*.dou)
 
   #Loop over all dou files and add rules to generate them
   FOREACH(dou_file ${dou_files})
@@ -36,40 +36,13 @@ else()
       SET(dependencies ${dependencies} ${txt_file})
 
      ADD_CUSTOM_COMMAND(OUTPUT ${txt_file}
-       COMMAND "${SAFIR_RUNTIME}/bin/dots_v" ARGS -dod=${dod_directory} -xdir=${dots_generated-code_SOURCE_DIR}/.. ${dou_file}
+       COMMAND ${dots_v_command} ${dou_file}
        DEPENDS ${dod_files} ${dou_file}
        WORKING_DIRECTORY ..)
   ENDFOREACH()
 
-  #Add several targets in order to enable parallel builds on multicore machines.
-  #Ideally number_of_targets should be adapted to the build machine HW, but I
-  #haven't figured out how to get this information, so for the time being, we use
-  #a hardcoded value 
-  SET(number_of_targets 8)
-
-  LIST(LENGTH dependencies number_of_dependencies)
-  MATH(EXPR target_size ${number_of_dependencies}/${number_of_targets})
-
-  FOREACH(target RANGE 0 ${number_of_targets})
-  
-    SET(dependencies_subset)
-    FOREACH(idx RANGE 1 ${target_size})
-
-      LIST(LENGTH dependencies remaining_number_of_dependencies)
-      IF(${remaining_number_of_dependencies} EQUAL 0)
-        BREAK()
-      ENDIF()
-
-      LIST(GET dependencies 0 dependency)
-      SET(dependencies_subset "${dependencies_subset};${dependency}")
-      LIST(REMOVE_AT dependencies 0)
-
-    ENDFOREACH()
-  
-    ADD_CUSTOM_TARGET(generated_code_${target} ALL
-      DEPENDS ${dependencies_subset})
-  
-  ENDFOREACH()
+  ADD_CUSTOM_TARGET(generated_code ALL
+    DEPENDS ${dependencies})
 
 endif()
 
@@ -78,41 +51,13 @@ endif()
 ###################################################
 #    Installation rules for dou and dom files     #
 ###################################################
-    INSTALL(CODE "FILE(REMOVE_RECURSE \"${SAFIR_RUNTIME}/data/text/dots/classes/\")")
+INSTALL(CODE "FILE(REMOVE_RECURSE \"${SAFIR_RUNTIME}/data/text/dots/classes/\")")
 
-    INSTALL(DIRECTORY ../ DESTINATION ${SAFIR_RUNTIME}/data/text/dots/classes
-            PATTERN "ada" EXCLUDE
-            PATTERN "gen" EXCLUDE
-            PATTERN "others" EXCLUDE
-            PATTERN "cpp" EXCLUDE
-            PATTERN "dotnet" EXCLUDE
-            PATTERN "java" EXCLUDE
-            PATTERN "*.txt" EXCLUDE
-            PATTERN "*.ini" EXCLUDE
-            PATTERN "*.cs" EXCLUDE
-            PATTERN "*.snk" EXCLUDE
-            PATTERN "*.h" EXCLUDE
-            PATTERN "*.cpp" EXCLUDE
-            PATTERN "*.*_template" EXCLUDE
-            PATTERN "*.gpr" EXCLUDE
-            PATTERN "tags" EXCLUDE
-            PATTERN "build_1" EXCLUDE
-            PATTERN "build_2" EXCLUDE
-                        PATTERN "Visual Studio*"EXCLUDE)
+INSTALL(DIRECTORY ../definitions DESTINATION ${SAFIR_RUNTIME}/data/text/dots/classes
+  FILES_MATCHING 
+  PATTERN "*.dou"
+  PATTERN "*.dom"
+  PATTERN "*.namespace.txt")
 
-
-    INSTALL(DIRECTORY ../ DESTINATION ${SAFIR_RUNTIME}/data/text/dots/classes
-            FILES_MATCHING PATTERN "*.namespace.txt"
-            PATTERN "ada" EXCLUDE
-            PATTERN "gen" EXCLUDE
-            PATTERN "others" EXCLUDE
-            PATTERN "cpp" EXCLUDE
-            PATTERN "dotnet" EXCLUDE
-            PATTERN "java" EXCLUDE
-            PATTERN "tags" EXCLUDE
-            PATTERN "build_1" EXCLUDE
-            PATTERN "build_2" EXCLUDE
-                        PATTERN "Visual Studio*"EXCLUDE)
-        
 
 

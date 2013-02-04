@@ -5,7 +5,7 @@ with "safir_defaults";
 project Dots_V is
 
    type Build_Type is
-      ("Release", "Debug", "gcov", "gperf", "normal");
+      ("RelWithDebInfo", "Debug", "gcov", "gperf", "normal");
    type Warning_Levels is
       ("Default", "Elaboration", "Full");
 
@@ -23,69 +23,11 @@ project Dots_V is
    end Linker;
 
    package Compiler is
-
-      case Warning_Level is
-
-         when "Full" =>
-            for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
-
-         when "Elaboration" =>
-            for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
-
-         when "Default" =>
-
-            case Build is
-
-               when "normal" =>
-                  for Default_Switches ("ada") use ("-gnatwcfijmpruv", "-gnatwe" ,"-gnaty3abcefhiklmnoprst", "-gnat05");
-
-               when "gperf" =>
-                  for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
-
-               when "gcov" =>
-                  for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
-
-               when "Debug" =>
-                  --for Default_Switches ("ada") use ("-gnatwcfijmpruv", "-gnatwe" ,"-gnaty3abcefhiklmnoprst", "-gnat05");
-                  for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
-
-               when "Release" =>
-                  for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
-            end case;
-      end case;
+      for Default_Switches ("ada") use Safir_Defaults.Compiler'Default_Switches ("Ada");
    end Compiler;
 
    package Builder is
-
-      case Warning_Level is
-
-         when "Full" =>
-            for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
-
-         when "Elaboration" =>
-            for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
-
-         when "Default" =>
-
-            case BUILD is
-
-               when "normal" =>
-                  for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
-
-               when "gperf" =>
-                  for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
-
-               when "gcov" =>
-                  for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
-
-               when "Debug" =>
-                  for Default_Switches ("ada") use ("-s", "-k", "-g", "-C");
-                  --for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
-
-               when "Release" =>
-                  for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
-            end case;
-      end case;
+      for Default_Switches ("ada") use Safir_Defaults.Builder'Default_Switches ("Ada");
    end Builder;
 
 end Dots_V;

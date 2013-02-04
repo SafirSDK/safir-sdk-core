@@ -32,9 +32,9 @@ build_dir        src/dots/dots_schema_validator.ss         RelWithDebInfo
 build_dir        src/dots/dots_cpp.ss/src                  RelWithDebInfo   Debug
 run_test_suite   src/dots/dots_cpp.ss/tests/constants_test dots_cpp_constants_test
 build_dir        src/dots/dots_dotnet.ss/src               RelWithDebInfo
-build_dir        src/dots/dots_ada.ss                      Release
+build_dir        src/dots/dots_ada.ss                      RelWithDebInfo
 build_dir        src/dots/dots_java.ss/src                 RelWithDebInfo
-build_dir        src/dots/dots_v.ss                        Release
+build_dir        src/dots/dots_v.ss                        RelWithDebInfo
 build_dir        src/dots/dots_depends.ss                  RelWithDebInfo
 
 #COPY DOB FILES
@@ -65,7 +65,7 @@ build_dir        src/dose/dose_main.ss/src                 RelWithDebInfo
 run_test_suite   src/dose/dose_main.ss/tests               dose_main_tests
 build_dir        src/dose/dose_dotnet.ss/src               RelWithDebInfo
 build_dir        src/dose/dose_java.ss/src                 RelWithDebInfo
-build_dir        src/dose/dose_ada.ss                      Release
+build_dir        src/dose/dose_ada.ss                      RelWithDebInfo
 #TODO cmake file will move to src dir.
 
 build_dir        src/dose/dose_sate.ss/src                 RelWithDebInfo
@@ -78,7 +78,7 @@ build_dir        src/douf/douf_time_library.ss/src         RelWithDebInfo
 #them contain a cpp dll, which must be built in two flavors.
 build_dir        src/douf/douf_time_mix.ss/cpp             RelWithDebInfo   Debug
 build_dir        src/douf/douf_time_mix.ss/dotnet          RelWithDebInfo
-build_dir        src/douf/douf_time_mix.ss/ada             Release
+build_dir        src/douf/douf_time_mix.ss/ada             RelWithDebInfo
 run_test_suite   src/douf/douf_time_mix.ss/tests           douf_time_tests
 
 #this is really just some header files (a lot of stuff for just one file...),
@@ -89,7 +89,7 @@ build_dir        src/swre/swre_library.ss/src              RelWithDebInfo
 build_dir        src/swre/swre_interface.ss/cpp/swre_interface_cpp         RelWithDebInfo   Debug
 build_dir        src/swre/swre_interface.ss/dotnet/swre_interface_dotnet   RelWithDebInfo
 build_dir        src/swre/swre_interface.ss/java           RelWithDebInfo
-build_dir        src/swre/swre_interface.ss/ada            Release
+build_dir        src/swre/swre_interface.ss/ada            RelWithDebInfo
 build_dir        src/swre/swre_logger.ss/src               RelWithDebInfo
 build_dir        src/swre/swre_backdoor.ss/src             RelWithDebInfo
 build_dir        src/douf/douf_multi_foreach.ss/src/cpp    RelWithDebInfo
