@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
 *
-* Created by: Anders Wid�n / stawi
+* Created by: Anders Widén / stawi
 *
 *******************************************************************************
 *

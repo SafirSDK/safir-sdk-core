@@ -2,7 +2,7 @@
 *
 * Copyright Saab Systems AB, 2011 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagstr�m
+* Created by: Lars Hagström
 *
 ******************************************************************************/
 #ifndef __LLUF_UNORDERED_SET_H__

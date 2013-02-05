@@ -212,7 +212,7 @@ volatile static struct
 //  N+1     N+1         N+1     Last fragment or non-fragmented acked = Idle
 //
 // PutIx-Max       = GetIxToAck + MAX_XMIT_QUEUE - 1
-// GetIxToSend-Max = GetIxToAck +�MAX_AHEAD_NF
+// GetIxToSend-Max = GetIxToAck + MAX_AHEAD_NF
 //============================================================================
 
 #define NUM_TX_QUEUES   MAX_NUM_PRIO_CHANNELS
@@ -2642,7 +2642,7 @@ Send_The_Message:
             bThereMightBeMore = TRUE;
 
             // Allowed to send max this many before processing next queue
-            // ### f�r test kan man l�gga en PrintDbg() h�r f�r att kolla om/n�r det intr�ffar
+            // ### för test kan man lägga en PrintDbg() här för att kolla om/när det inträffar
             if(++TxQ[qIx].LapCount >= g_MaxLapCount[qIx])
                qIx++;
 
