@@ -2,7 +2,7 @@
 *
 * Copyright Saab Systems AB, 2012 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / lars@foldspace.nu
+* Created by: Lars HagstrÃ¶m / lars@foldspace.nu
 *
 ******************************************************************************/
 #include <boost/cstdint.hpp>

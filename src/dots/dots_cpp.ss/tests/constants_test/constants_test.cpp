@@ -2,7 +2,7 @@
 *
 * Copyright Saab Systems AB, 2012 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström
+* Created by: Lars HagstrÃ¶m
 *
 ******************************************************************************/
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>

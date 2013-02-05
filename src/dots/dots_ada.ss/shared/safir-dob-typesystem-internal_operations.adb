@@ -2,7 +2,7 @@
 --
 --  Copyright Saab AB, 2009 (http://www.safirsdk.com)
 --
---  Created by: Anders WidÈn / stawi
+--  Created by: Anders Wid√©n / stawi
 --
 -------------------------------------------------------------------------------
 --
@@ -119,7 +119,7 @@ package body Safir.Dob.Typesystem.Internal_Operations is
                            end if;
 
                            -- if it was null we don't warn (even if it is a little bit suspicious to do that...)
-                           -- AWI: Varfˆr inte anv‰nda virtuella container-copy h‰r?
+                           -- AWI: Varf√∂r inte anv√§nda virtuella container-copy h√§r?
                            Into_Container_Obj_Base_Ptr.Set_Ptr (From_Object_Ptr.Clone);
                            Into_Container_Obj_Base_Ptr.Set_Changed_Here (True);
                         else

@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Stefan Lindström / stsyli
+* Created by: Stefan LindstrÃ¶m / stsyli
 *
 *******************************************************************************
 *
@@ -102,7 +102,7 @@ namespace Safir
                 Safir::Dob::EntityPtr & TemplateEntityRequest() { return m_templateEntityRequest; }
 
 
-                // TODO: ta bort enum här enligt Lars.. går ej att kompilera då
+                // TODO: ta bort enum hÃ¤r enligt Lars.. gÃ¥r ej att kompilera dÃ¥
                 const enum RequestType & RequestType() const { return m_requestType; }
                 enum RequestType & RequestType() { return m_requestType; }
 

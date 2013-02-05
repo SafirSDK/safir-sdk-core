@@ -484,7 +484,7 @@ namespace Internal
 
         bool m_incompleteInjection;
 
-        // AWI:! Denna var förut ett entiyId. Om inte Distribution data behövs för blob diff jämförelse kan det bytas tillbaka till
+        // AWI:! Denna var fÃ¶rut ett entiyId. Om inte Distribution data behÃ¶vs fÃ¶r blob diff jÃ¤mfÃ¶relse kan det bytas tillbaka till
         // entityId.
         DistributionData m_dispatchedInjection;
 

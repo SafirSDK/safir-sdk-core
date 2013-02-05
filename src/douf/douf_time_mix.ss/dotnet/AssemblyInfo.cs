@@ -35,7 +35,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany( "SaabTech" )]
 [assembly: AssemblyProduct( "Safir" )]
-[assembly: AssemblyCopyright( "Copyright © SaabTech 2006" )]
+[assembly: AssemblyCopyright( "Copyright Â© SaabTech 2006" )]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

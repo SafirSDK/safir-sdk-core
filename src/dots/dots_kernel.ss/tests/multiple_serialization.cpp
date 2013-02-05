@@ -2,7 +2,7 @@
 *
 * Copyright Saab Systems AB, 2012 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars HagstrÃ¶m / stlrha
 *
 ******************************************************************************/
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
