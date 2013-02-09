@@ -187,6 +187,11 @@ namespace Internal
     {
         NamedSemaphore::remove(GetSemaphoreName(connection));
     }
+
+    void Signals::RemoveConnectOrOut()
+    {
+        NamedSemaphore::remove(ConnectOrOutSignalName);
+    }
 }
 }
 }

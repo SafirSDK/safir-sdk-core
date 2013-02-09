@@ -61,6 +61,10 @@ namespace Internal
         explicit Connections(private_constructor_t);
         ~Connections();
 
+        //Remove some underlying os primitives. This needs to be called before
+        //Connections is instantiated in dose_main. This is not really pretty
+        //and should maybe be changed in some Connections class refactoring
+        static void Cleanup();
 
         /**
          * This is for applications waiting for "things" to happen to its connection.

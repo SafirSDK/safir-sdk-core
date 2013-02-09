@@ -647,6 +647,11 @@ namespace Internal
     {
         Signals::Instance().SignalConnectOrOut();
     }
+    
+    void Connections::Cleanup()
+    {
+        Signals::RemoveConnectOrOut();
+    }
 }
 }
 }

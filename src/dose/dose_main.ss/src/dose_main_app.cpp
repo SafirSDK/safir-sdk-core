@@ -326,6 +326,7 @@ namespace Internal
 
     void DoseApp::AllocateStatic()
     {
+        Connections::Cleanup();
         ContextSharedTable::Initialize();
         MessageTypes::Initialize(/*iAmDoseMain = */ true);
         EndStates::Initialize();

@@ -88,6 +88,8 @@ namespace Internal
          */
         static void Remove(const ConnectionId& connectionId);
 
+        /** As above, but for the special dose_main semaphore. */
+        static void RemoveConnectOrOut();
     private:
         Signals();
         ~Signals();
