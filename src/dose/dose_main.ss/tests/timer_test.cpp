@@ -61,7 +61,6 @@ public:
         {
             std::wcout << TimerHandler::Instance().GetTimerName(m_timerId)
                        << " test succeeded!" << std::endl;
-
         }
         
     }
@@ -76,10 +75,10 @@ class SingleTimerTester
     : public TimerTesterBase
 {
 public:
-    SingleTimerTester() : TimerTesterBase(L"Single Timer")
+    SingleTimerTester(const std::wstring& name, const double delay) : TimerTesterBase(name)
     {
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().Set(Replace, timerInfo, GetUtcTime());
+        TimerHandler::Instance().Set(Replace, timerInfo, GetUtcTime() + delay);
     }
 
     void HandleTimeout(const TimerInfoPtr& /*timer*/)
@@ -179,6 +178,37 @@ private:
 };
 
 
+class TimerStarver
+    : public TimerTesterBase
+{
+public:
+    TimerStarver()
+        : TimerTesterBase(L"Starver Timer")
+        , m_timeoutCount(0)
+    {
+        m_timerInfo.reset(new EmptyTimerInfo(m_timerId));
+        TimerHandler::Instance().Set(Discard, m_timerInfo, GetUtcTime() + 0.0001);
+        m_ok = true;
+    }
+
+    void HandleTimeout(const TimerInfoPtr& /*timer*/)
+    {
+        ++m_timeoutCount;
+        const double now = GetUtcTime();
+        boost::this_thread::sleep(boost::posix_time::milliseconds(20));
+        TimerHandler::Instance().Set(Discard, m_timerInfo, now + 0.01);
+    }
+
+    ~TimerStarver()
+    {
+        std::wcout << "TimerStarver timed out " << m_timeoutCount << " times" <<std::endl;
+        TimerHandler::Instance().Remove(m_timerInfo);
+    }
+private:
+    long m_timeoutCount;
+    TimerInfoPtr m_timerInfo;
+};
+
 int main(int,char**)
 {
     TimerHandler::Instantiate(ioService);
@@ -186,7 +216,15 @@ int main(int,char**)
     try 
     {
         {
-            SingleTimerTester tester;
+            SingleTimerTester tester(L"Starved Timer",5.0);
+            TimerStarver starver;
+            
+            ioService.run();
+            ioService.reset();
+        }
+
+        {
+            SingleTimerTester tester(L"Single Timer",0.1);
             
             ioService.run();
             ioService.reset();

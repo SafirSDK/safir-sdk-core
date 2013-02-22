@@ -6,7 +6,7 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 ADD_EXECUTABLE(timer_test timer_test.cpp ../src/dose_main_timers.h ../src/dose_main_timers.cpp)
 
-FIND_PACKAGE(Boost COMPONENTS system)
+FIND_PACKAGE(Boost COMPONENTS thread system)
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(timer_test 
@@ -22,4 +22,4 @@ ADD_TEST(TryStart_dose_main  ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tr
 set_tests_properties(TryStart_dose_main PROPERTIES TIMEOUT 120)
 
 ADD_TEST(dose_main_timers timer_test)
-#set_tests_properties(dose_main_timers PROPERTIES TIMEOUT 60)
+set_tests_properties(dose_main_timers PROPERTIES TIMEOUT 120)
