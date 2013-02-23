@@ -53,11 +53,24 @@ endif()
 ###################################################
 INSTALL(CODE "FILE(REMOVE_RECURSE \"${SAFIR_RUNTIME}/data/text/dots/classes/\")")
 
-INSTALL(DIRECTORY ../definitions DESTINATION ${SAFIR_RUNTIME}/data/text/dots/classes
+INSTALL(DIRECTORY ../ DESTINATION ${SAFIR_RUNTIME}/data/text/dots/classes/
   FILES_MATCHING 
   PATTERN "*.dou"
   PATTERN "*.dom"
-  PATTERN "*.namespace.txt")
+  PATTERN "*.namespace.txt"
+
+  #below are directories to exclude
+  PATTERN "ada" EXCLUDE
+  PATTERN "cpp" EXCLUDE
+  PATTERN "dotnet" EXCLUDE
+  PATTERN "gen" EXCLUDE
+  PATTERN "java" EXCLUDE
+  PATTERN "tags" EXCLUDE
+  PATTERN "Release" EXCLUDE
+  PATTERN "Debug" EXCLUDE
+  PATTERN "RelWithDebInfo" EXCLUDE
+  PATTERN "MinSizeRel" EXCLUDE
+  )
 
 
 

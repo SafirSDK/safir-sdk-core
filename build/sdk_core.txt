@@ -38,20 +38,20 @@ build_dir        src/dots/dots_v.ss                        RelWithDebInfo
 build_dir        src/dots/dots_depends.ss                  RelWithDebInfo
 
 #COPY DOB FILES
-copy_dob_files   src/dose/dose_config.ss/data              definitions/safir_core
-copy_dob_files   src/dose/dose_config.ss/config            definitions/safir_core/config
+copy_dob_files   src/dose/dose_config.ss/data              safir_core
+copy_dob_files   src/dose/dose_config.ss/config            safir_core/config
 
-copy_dob_files   src/swre/swre_library.ss/data             definitions/safir_core
+copy_dob_files   src/swre/swre_library.ss/data             safir_core
 
-copy_dob_files   src/douf/douf_multi_foreach.ss/data       definitions/safir_core
-copy_dob_files   src/douf/douf_multi_foreach.ss/config     definitions/safir_core/config
+copy_dob_files   src/douf/douf_multi_foreach.ss/data       safir_core
+copy_dob_files   src/douf/douf_multi_foreach.ss/config     safir_core/config
 
-copy_dob_files   src/douf/douf_time_library.ss/config      definitions/safir_core/config
+copy_dob_files   src/douf/douf_time_library.ss/config      safir_core/config
 
-copy_dob_files   src/olib/olib_code.ss/data                definitions/safir_core
+copy_dob_files   src/olib/olib_code.ss/data                safir_core
 
-copy_dob_files   src/dope/dope_main.ss/data                definitions/safir_core
-copy_dob_files   src/dope/dope_main.ss/config              definitions/safir_core/config
+copy_dob_files   src/dope/dope_main.ss/data                safir_core
+copy_dob_files   src/dope/dope_main.ss/config              safir_core/config
 
 #run dobmake to build dots_generated dlls/libs
 dobmake

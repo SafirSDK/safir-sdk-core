@@ -164,7 +164,6 @@ class Parameters:
                                             "text", 
                                             "dots", 
                                             "classes", 
-                                            "definitions",
                                             "safir_core", 
                                             "config")
 

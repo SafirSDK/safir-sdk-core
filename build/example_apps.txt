@@ -1,10 +1,10 @@
 #COPY DOB FILES
-copy_dob_files   examples/vehicleapp/data       definitions/safir_example_apps
-copy_dob_files   examples/vehicleapp/config     definitions/safir_example_apps/config
-copy_dob_files   examples/vehicleapp/extra/     definitions/safir_example_apps
+copy_dob_files   examples/vehicleapp/data       safir_example_apps
+copy_dob_files   examples/vehicleapp/config     safir_example_apps/config
+copy_dob_files   examples/vehicleapp/extra/     safir_example_apps
 
-copy_dob_files   examples/vehicledb/data/        definitions/safir_example_apps
-copy_dob_files   examples/vehicledb/config/      definitions/safir_example_apps/config
+copy_dob_files   examples/vehicledb/data/        safir_example_apps
+copy_dob_files   examples/vehicledb/config/      safir_example_apps/config
 
 dobmake
 

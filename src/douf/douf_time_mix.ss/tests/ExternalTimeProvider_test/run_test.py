@@ -42,7 +42,6 @@ parameters_path = os.path.join(SAFIR_RUNTIME,
                                "text", 
                                "dots", 
                                "classes", 
-                               "definitions",
                                "safir_core", 
                                "config")
 
