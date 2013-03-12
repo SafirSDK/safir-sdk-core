@@ -26,6 +26,7 @@
 #define __LIBRARY_H__
 
 #include "ReportCreator.h"
+#include <Safir/SwReports/Internal/Report.h>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Internal/Atomic.h>
@@ -137,8 +138,9 @@ namespace Internal
         static PrefixState & ToPrefix(const PrefixId prefixId);
         static PrefixId ToPrefixId(PrefixState & prefix);
 
-
         void SendReports(); //only callable from the internal thread
+
+        void Send(ReportPtr report);
 
         bool TrySend(ReportPtr report);
         class TryMessageSender:

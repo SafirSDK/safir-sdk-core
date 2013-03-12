@@ -45,6 +45,12 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/PanicLogging.h>
 #include <Safir/Utilities/ProcessInfo.h>
+#include <Safir/Utilities/LogInterface.h>
+#include <Safir/SwReports/Internal/FatalErrorReport.h>
+#include <Safir/SwReports/Internal/ErrorReport.h>
+#include <Safir/SwReports/Internal/ResourceReport.h>
+#include <Safir/SwReports/Internal/ProgrammingErrorReport.h>
+#include <Safir/SwReports/Internal/ProgramInfoReport.h>
 #include <boost/bind.hpp>
 #include <Safir/Utilities/CrashReporter.h>
 #include <boost/regex.hpp>
@@ -64,6 +70,9 @@ namespace SwReports
 {
 namespace Internal
 {
+
+    static const std::wstring nullIndStr = L"*** NOT DEFINED ***";
+
     static const wchar_t* pingCmd = L"ping";
     static const wchar_t* helpCmd = L"help";
 
@@ -739,6 +748,72 @@ namespace Internal
         return reinterpret_cast<PrefixId>(&prefix);
     }
 
+    void
+    Library::Send(ReportPtr report)
+    {
+        // For now a report is always sent as an swre report AND to platform specific logging via the interface provided by lluf.
+        // We might want to make this configurable in the future.
+
+        // Send to swre_logger
+        if (!TrySend(report))
+        {
+
+            StartThread();
+
+            {
+                boost::lock_guard<boost::mutex> lck(m_reportQueueLock);
+                m_reportQueue.push_back(report);
+            }
+
+            if (m_sendReportsPending == 0)
+            {
+                m_sendReportsPending = 1;
+                m_ioService.post(boost::bind(&Library::SendReports,this));
+            }
+
+        }
+
+        // Send to platform specific logging
+
+        // Map the swre report type to an lluf severity
+        Safir::Utilities::LogInterface::Severity severity;
+
+        switch (report->GetTypeId())
+        {
+            case Safir::SwReports::Internal::FatalErrorReport::ClassTypeId:
+            {
+                severity = Safir::Utilities::LogInterface::Critical;
+            }
+            break;
+
+            case Safir::SwReports::Internal::ErrorReport::ClassTypeId:
+            {
+
+            }
+            break;
+
+            case Safir::SwReports::Internal::ResourceReport::ClassTypeId:
+            {
+
+            }
+            break;
+
+            case Safir::SwReports::Internal::ProgrammingErrorReport::ClassTypeId:
+            {
+
+            }
+            break;
+
+            case Safir::SwReports::Internal::ProgramInfoReport::ClassTypeId:
+            {
+
+            }
+            break;
+
+        }
+
+
+    }
 
     bool
     Library::TrySend(ReportPtr report)
@@ -778,22 +853,9 @@ namespace Internal
                                   const std::wstring & location,
                                   const std::wstring & text)
     {
-        ReportPtr report = m_reportCreator.CreateFatalErrorReport(errorCode,location,text);
-        if (!TrySend(report))
-        {
-            StartThread();
 
-            {
-                boost::lock_guard<boost::mutex> lck(m_reportQueueLock);
-                m_reportQueue.push_back(report);
-            }
-
-            if (m_sendReportsPending == 0)
-            {
-                m_sendReportsPending = 1;
-                m_ioService.post(boost::bind(&Library::SendReports,this));
-            }
-        }
+        ReportPtr report = m_reportCreator.CreateFatalErrorReport(errorCode, location, text);
+        Send(report);
     }
 
     void
@@ -802,21 +864,7 @@ namespace Internal
                              const std::wstring & text)
     {
         ReportPtr report = m_reportCreator.CreateErrorReport(errorCode,location,text);
-        if (!TrySend(report))
-        {
-            StartThread();
-
-            {
-                boost::lock_guard<boost::mutex> lck(m_reportQueueLock);
-                m_reportQueue.push_back(report);
-            }
-
-            if (m_sendReportsPending == 0)
-            {
-                m_sendReportsPending = 1;
-                m_ioService.post(boost::bind(&Library::SendReports,this));
-            }
-        }
+        Send(report);
     }
 
     void
@@ -825,21 +873,7 @@ namespace Internal
                                 const std::wstring & text)
     {
         ReportPtr report = m_reportCreator.CreateResourceReport(resourceId,allocated,text);
-        if (!TrySend(report))
-        {
-            StartThread();
-
-            {
-                boost::lock_guard<boost::mutex> lck(m_reportQueueLock);
-                m_reportQueue.push_back(report);
-            }
-
-            if (m_sendReportsPending == 0)
-            {
-                m_sendReportsPending = 1;
-                m_ioService.post(boost::bind(&Library::SendReports,this));
-            }
-        }
+        Send(report);
     }
 
     void
@@ -848,42 +882,14 @@ namespace Internal
                                         const std::wstring & text)
     {
         ReportPtr report = m_reportCreator.CreateProgrammingErrorReport(errorCode,location,text);
-        if (!TrySend(report))
-        {
-            StartThread();
-
-            {
-                boost::lock_guard<boost::mutex> lck(m_reportQueueLock);
-                m_reportQueue.push_back(report);
-            }
-
-            if (m_sendReportsPending == 0)
-            {
-                m_sendReportsPending = 1;
-                m_ioService.post(boost::bind(&Library::SendReports,this));
-            }
-        }
+        Send(report);
     }
 
     void
     Library::SendProgramInfoReport(const std::wstring & text)
     {
         ReportPtr report = m_reportCreator.CreateProgramInfoReport(text);
-        if (!TrySend(report))
-        {
-            StartThread();
-
-            {
-                boost::lock_guard<boost::mutex> lck(m_reportQueueLock);
-                m_reportQueue.push_back(report);
-            }
-
-            if (m_sendReportsPending == 0)
-            {
-                m_sendReportsPending = 1;
-                m_ioService.post(boost::bind(&Library::SendReports,this));
-            }
-        }
+        Send(report);
     }
 
     void Library::SendReports()
