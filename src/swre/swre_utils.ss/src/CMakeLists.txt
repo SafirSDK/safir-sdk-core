@@ -1,0 +1,31 @@
+cmake_minimum_required(VERSION 2.8)
+
+PROJECT (swre_utils CXX)
+
+INCLUDE_DIRECTORIES(.)
+
+INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+
+FILE(GLOB_RECURSE headers *.h)
+FILE(GLOB sources *.cpp)
+
+ADD_LIBRARY(swre_utils SHARED ${sources} ${headers})
+
+TARGET_LINK_LIBRARIES(swre_utils ${COMMON_LIBRARIES})
+
+if (NOT MSVC)
+  TARGET_LINK_LIBRARIES(swre_utils ${Boost_LIBRARIES})
+endif()
+
+ADD_DEFINITIONS(-DSWRE_UTILS_EXPORTS)
+
+INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
+        PATTERN ".svn" EXCLUDE
+        PATTERN "*~" EXCLUDE)
+
+INSTALL(TARGETS swre_utils 
+        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+
+INSTALL_DEBUG_INFO(swre_utils)
