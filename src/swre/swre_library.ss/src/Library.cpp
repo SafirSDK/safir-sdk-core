@@ -51,6 +51,7 @@
 #include <Safir/SwReports/Internal/ResourceReport.h>
 #include <Safir/SwReports/Internal/ProgrammingErrorReport.h>
 #include <Safir/SwReports/Internal/ProgramInfoReport.h>
+#include <Safir/SwReports/Internal/ReportSerializer.h>
 #include <boost/bind.hpp>
 #include <Safir/Utilities/CrashReporter.h>
 #include <boost/regex.hpp>
@@ -70,9 +71,6 @@ namespace SwReports
 {
 namespace Internal
 {
-
-    static const std::wstring nullIndStr = L"*** NOT DEFINED ***";
-
     static const wchar_t* pingCmd = L"ping";
     static const wchar_t* helpCmd = L"help";
 
@@ -776,7 +774,7 @@ namespace Internal
         // Send to platform specific logging
 
         // Map the swre report type to an lluf severity
-        Safir::Utilities::LogInterface::Severity severity;
+        Safir::Utilities::LogInterface::Severity severity = Safir::Utilities::LogInterface::Debug;
 
         switch (report->GetTypeId())
         {
@@ -788,30 +786,33 @@ namespace Internal
 
             case Safir::SwReports::Internal::ErrorReport::ClassTypeId:
             {
-
+                severity = Safir::Utilities::LogInterface::Error;
             }
             break;
 
             case Safir::SwReports::Internal::ResourceReport::ClassTypeId:
             {
-
+                severity = Safir::Utilities::LogInterface::Notice;
             }
             break;
 
             case Safir::SwReports::Internal::ProgrammingErrorReport::ClassTypeId:
             {
-
+                severity = Safir::Utilities::LogInterface::Emergency;
             }
             break;
 
             case Safir::SwReports::Internal::ProgramInfoReport::ClassTypeId:
             {
-
+                severity = Safir::Utilities::LogInterface::Debug;
             }
             break;
-
         }
 
+        // Convert the report to a textual format
+        std::wstring log = Safir::SwReports::Internal::ReportSerializer::SerializeReport(report, true);
+
+        Safir::Utilities::LogInterface::Log(severity, Safir::Dob::Typesystem::Utilities::ToUtf8(log));
 
     }
 

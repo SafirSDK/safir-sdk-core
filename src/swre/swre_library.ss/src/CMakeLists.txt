@@ -16,7 +16,7 @@ FILE(GLOB sources *.cpp)
 ADD_LIBRARY(swre_library SHARED ${sources} ${headers})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(swre_library dose_cpp dots_generated-cpp douf_time_cpp lluf_utils lluf_crash_reporter)
+    TARGET_LINK_LIBRARIES(swre_library swre_utils dose_cpp dots_generated-cpp douf_time_cpp lluf_utils lluf_crash_reporter)
 endif()
 
 ADD_DEFINITIONS(-DSWRE_LIBRARY_EXPORTS)

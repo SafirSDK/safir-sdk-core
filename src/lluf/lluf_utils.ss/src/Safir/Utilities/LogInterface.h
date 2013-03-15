@@ -33,14 +33,11 @@ namespace Utilities
 {
 
 /**
- * Services for sending log messages to the native system logging mechanism.
+ * Service for sending log messages to the native system logging mechanism.
  *
- * There is a simple service for sending a log message given a severity and an arbitrary string.
+ * The service takes a severity and an arbitrary string.
  * The severity levels conforms to the ones used by the well known syslog format as specified
  * in http://www.ietf.org/rfc/rfc3164.txt.
- *
- * Also, there are services to generate log messages based on the information from the legacy
- * mechanism used in Safir SDK Core.
  *
  */
 class LLUF_UTILS_API LogInterface
