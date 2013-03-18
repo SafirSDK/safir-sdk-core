@@ -27,47 +27,42 @@
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <string>
 
+
 namespace Safir
 {
 namespace Utilities
 {
 
-/**
- * Service for sending log messages to the native system logging mechanism.
- *
- * The service takes a severity and an arbitrary string.
- * The severity levels conforms to the ones used by the well known syslog format as specified
- * in http://www.ietf.org/rfc/rfc3164.txt.
- *
- */
-class LLUF_UTILS_API LogInterface
+namespace LogSeverity
 {
-public:
 
-    enum Severity
-    {
-        Emergency,
-        Alert,
-        Critical,
-        Error,
-        Warning,
-        Notice,
-        Informational,
-        Debug
-    };
-
-    /**
-     * Generate log message.
-     *
-     * @param [in] severity Severity according to RFC 3164.
-     * @param [in] text Log text.
-     */
-    static void Log(const Severity severity, const std::string& text);
-
-
-private:
-    LogInterface(); //not instantiable
+enum Level
+{
+    Emergency,
+    Alert,
+    Critical,
+    Error,
+    Warning,
+    Notice,
+    Informational,
+    Debug
 };
+}
+
+
+/**
+* Service for sending log messages to the native system logging mechanism.
+*
+* The service takes a severity and an arbitrary string.
+* The severity levels conforms to the ones used by the well known syslog format as specified
+* in http://www.ietf.org/rfc/rfc3164.txt.
+*
+* @param [in] severity Severity according to RFC 3164.
+* @param [in] text Log text.
+*
+*/
+void SystemLog(const LogSeverity::Level severity, const std::string& text);
+
 }
 }
 
