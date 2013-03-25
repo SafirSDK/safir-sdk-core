@@ -31,6 +31,7 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
+#include <boost/asio/ip/host_name.hpp>
 
 #if defined _MSC_VER
   #pragma warning (push)
@@ -96,9 +97,11 @@ std::string GetSyslogTimestamp()
 {
     using namespace boost::posix_time;
 
-    //AWI:More here
-    ptime now = second_clock::local_time();
-   //date today = now.date(); //Get the date part out of the time
+    std::stringstream ss;
+
+    ss.imbue(std::locale(ss.getloc(), new time_facet("%b %e %H:%M:%S")));
+    ss << second_clock::local_time();
+    return ss.str();
 }
 
 }
@@ -170,7 +173,10 @@ private:
 public:
     ~SystemLogImpl()
     {
+#if defined(linux) || defined(__linux) || defined(__linux__)
 
+        closelog();
+#endif
     }
 
     void Send(const SystemLog::Severity severity, const std::string& text)
@@ -203,8 +209,14 @@ private:
     void SendToSyslogServer(const SystemLog::Severity severity, const std::string& text)
     {
         std::stringstream log;
-        log << "<" << (SAFIR_FACILITY | severity) << ">";
+        log << "<" << (SAFIR_FACILITY | severity) << ">"
+            << GetSyslogTimestamp() << ' '
+            << boost::asio::ip::host_name() << ' '
+            << text;
 
+        m_sock.send_to(boost::asio::buffer(log.str().c_str(),
+                                           log.str().size()),
+                       m_syslogServerEndpoint);
     }
 
     bool                            m_nativeLogging;
@@ -246,8 +258,8 @@ public:
     }
 
 private:
-    ImplKeeper();
-    ~ImplKeeper();
+    ImplKeeper() {}
+    ~ImplKeeper() {}
 
     boost::mutex m_lock;
 
@@ -293,150 +305,4 @@ void SystemLog::Send(const Severity severity, const std::string& text)
 
 }
 }
-
-
-//namespace // anynomous namespace for implementation
-//{
-//    boost::mutex m_lock;
-
-//    bool configurationRead = false;
-//    bool syslogOpened = false;
-//    bool sendSocketOpened = false;
-
-//    // Configuration parameters
-//    bool nativeLogging = false;
-//    bool sendToSyslogServer = false;
-//    boost::asio::ip::address syslogServerAddr = boost::asio::ip::address::from_string("127.0.0.1");
-//    boost::asio::ip::udp::endpoint
-
-//    // Socket stuff
-//    const boost::asio::ip::address addr =
-//      boost::asio::ip::address::from_string("127.0.0.1");
-//    const unsigned short port = 31221;
-//    const boost::asio::ip::udp::endpoint endpoint(addr, port);
-
-//    boost::asio::io_service         syslogIoService;
-//    boost::asio::ip::udp::socket    syslogSocket(syslogIoService);
-//    boost::asio::ip::udp::endpoint  syslogDestination(boost::asio::ip::address_v4::from_string(syslogServerAddr), syslogServerPort);
-
-//    //-------------------------------------------------------------------------
-//    const boost::filesystem::path GetLogSettingsPath()
-//    {
-//        const char * const env = getenv("SAFIR_RUNTIME");
-//        if (env == NULL)
-//        {
-//            throw std::logic_error("SAFIR_RUNTIME environment variable is not set");
-//        }
-//        boost::filesystem::path filename(env);
-
-//        filename /= "log";
-//        filename /= "logging.ini";
-//        return filename;
-//    }
-
-//    //-------------------------------------------------------------------------
-//    bool LogSettingsFileExists()
-//    {
-//        try
-//        {
-//            return boost::filesystem::exists(GetLogSettingsPath());
-//        }
-//        catch(const std::logic_error&)
-//        {
-//            return false;
-//        }
-//    }
-
-//    //-------------------------------------------------------------------------
-//    void ReadConfiguration()
-//    {
-//        boost::lock_guard<boost::mutex> lck(m_lock);
-
-//        if (configurationRead)
-//        {
-//            return;
-//        }
-
-//        if (LogSettingsFileExists())
-//        {
-//            try
-//            {
-
-//                using boost::property_tree::ptree;
-
-//                ptree root;
-//                read_ini(GetLogSettingsPath().string(), root);
-
-//                nativeLogging = root.get("native-logging", false);
-//                sendToSyslogServer = root.get("send-to-syslog-server", false);
-
-//                if (sendToSyslogServer)
-//                {
-//                    syslogServerAddr = root.get("syslog-server-address", "127.0.0.1");
-//                    syslogServerPort = root.get("syslog-server-port", 514);
-//                }
-
-//            }
-//            catch (const std::exception&)
-//            {
-//                // If there is no configuration file, it is malformed, or some value is missing,
-//                // we rely on the default values.
-//            }
-//        }
-
-//        configurationRead = true;
-
-//        std::cout << "Native logging i set to " << nativeLogging << std::endl;
-//    }
-
-//    //-------------------------------------------------------------------------
-//    void SendNativeLog(const LogSeverity::Level severity, const std::string& text)
-//    {
-//#if defined(linux) || defined(__linux) || defined(__linux__)
-
-//        if (!syslogOpened)
-//        {
-//            //For simplicity we hard code the facilty to LOG_USER (generic user-level messages)
-//            openlog(NULL, LOG_PID, LOG_USER);
-//            syslogOpened = true;
-//        }
-
-//        syslog(severity, "%s", text.c_str());
-
-//#endif
-//    }
-
-//    //-------------------------------------------------------------------------
-//    void SendToSyslogServer(const LogSeverity::Level severity, const std::string& text)
-//    {
-//        if (!sendSocketOpened)
-//        {
-//            syslogSocket.open(boost::asio::ip::udp::v4());
-//        }
-//    }
-//}
-
-//void SystemLog(const LogSeverity::Level severity, const std::string& text)
-//{
-//    if (!configurationRead)
-//    {
-//        ReadConfiguration();
-//    }
-
-//    if (nativeLogging)
-//    {
-//        SendNativeLog(severity, text);
-//    }
-
-//    if (sendToSyslogServer)
-//    {
-//        SendToSyslogServer(severity, text);
-//    }
-
-
-//}
-
-
-//}
-//}
 
