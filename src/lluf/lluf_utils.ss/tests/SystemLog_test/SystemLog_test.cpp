@@ -27,6 +27,7 @@ int main()
 {
     Safir::Utilities::SystemLog logger;
     logger.Send(Safir::Utilities::SystemLog::Critical, "Sending a critical log");
+    logger.Send(Safir::Utilities::SystemLog::Warning, "Sending a warning log with \n newline and \t tab");
     return 0;
 }
 
