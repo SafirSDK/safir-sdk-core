@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/SystemLog.h>
+#include <Safir/Utilities/ProcessInfo.h>
 #include <boost/thread/once.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/property_tree/ini_parser.hpp>
@@ -65,34 +66,6 @@ namespace
 // Syslog facility used for all Safir logs
 const int SAFIR_FACILITY = (1 << 3); // 1 => user-level messages
 
-//-------------------------------------------------------------------------
-const boost::filesystem::path GetLogSettingsPath()
-{
-    const char * const env = getenv("SAFIR_RUNTIME");
-    if (env == NULL)
-    {
-        throw std::logic_error("SAFIR_RUNTIME environment variable is not set");
-    }
-    boost::filesystem::path filename(env);
-
-    filename /= "log";
-    filename /= "logging.ini";
-    return filename;
-}
-
-//-------------------------------------------------------------------------
-bool LogSettingsFileExists()
-{
-    try
-    {
-        return boost::filesystem::exists(GetLogSettingsPath());
-    }
-    catch(const std::logic_error&)
-    {
-        return false;
-    }
-}
-
 std::string GetSyslogTimestamp()
 {
     using namespace boost::posix_time;
@@ -113,61 +86,57 @@ class LLUF_UTILS_API SystemLogImpl
 private:
     //constructor is private, to make sure only ImplKeeper can create it
     SystemLogImpl()
-        : m_nativeLogging(false),
+        : m_pid(Safir::Utilities::ProcessInfo::GetPid()),
+          m_processName(Safir::Utilities::ProcessInfo(m_pid).GetProcessName()),
+          m_nativeLogging(false),
           m_sendToSyslogServer(false),
           m_syslogServerEndpoint(),
           m_service(),
           m_sock(m_service),
           m_lock()
     {
-        // Read configuration from file if it exists otherwise use default values
-        if (LogSettingsFileExists())
+        try
         {
-            try
+
+            using boost::property_tree::ptree;
+
+            ptree root;
+
+            read_ini(GetLogSettingsPath().string(), root);
+
+            m_nativeLogging = root.get<bool>("SYSTEM-LOG.native-logging");
+            m_sendToSyslogServer = root.get<bool>("SYSTEM-LOG.send-to-syslog-server");
+
+            if (m_nativeLogging)
             {
-
-                using boost::property_tree::ptree;
-
-                ptree root;
-                read_ini(GetLogSettingsPath().string(), root);
-
-                m_nativeLogging = root.get<bool>("native-logging");
-                m_sendToSyslogServer = root.get<bool>("send-to-syslog-server");
-
-                if (m_nativeLogging)
-                {
 #if defined(linux) || defined(__linux) || defined(__linux__)
 
-                    // Include pid in log message
-                    openlog(NULL, LOG_PID, SAFIR_FACILITY);
+                // Include pid in log message
+                openlog(NULL, LOG_PID, SAFIR_FACILITY);
 
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 
-                    throw std::logic_error("Currently no implementation for native logging on Windows!");
+                FatalError("Currently no implementation for native logging on Windows!");
 #endif
-                }
-
-                if (m_sendToSyslogServer)
-                {
-
-                    m_sock.open(boost::asio::ip::udp::v4());
-                    m_sock.bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0));
-
-                    m_syslogServerEndpoint =
-                            boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(root.get<std::string>("syslog-server-address")),
-                                                           root.get<int>("syslog-server-port"));
-                }
-
             }
-            catch (const std::exception& e)
+
+            if (m_sendToSyslogServer)
             {
-                // If there is a configuration file, we expect it to contain the expected parameters
-                throw std::logic_error("The logging configuration file " + GetLogSettingsPath().string() +
-                                       " is missing an expected parameter or has a malformed parameter " +
-                                       e.what());
-            }
-        }
 
+                m_sock.open(boost::asio::ip::udp::v4());
+                m_sock.bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0));
+
+                m_syslogServerEndpoint =
+                        boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(root.get<std::string>("SYSTEM-LOG.syslog-server-address")),
+                                                       root.get<int>("SYSTEM-LOG.syslog-server-port"));
+            }
+
+        }
+        catch (const std::exception& e)
+        {
+            // Something really bad has happened, we have to stop executing
+            FatalError(e.what());
+        }
     }
 
 public:
@@ -196,6 +165,7 @@ public:
 
 private:
 
+    //-------------------------------------------------------------------------
     void SendNativeLog(const SystemLog::Severity severity, const std::string& text)
     {
 #if defined(linux) || defined(__linux) || defined(__linux__)
@@ -212,13 +182,38 @@ private:
         log << "<" << (SAFIR_FACILITY | severity) << ">"
             << GetSyslogTimestamp() << ' '
             << boost::asio::ip::host_name() << ' '
-            << text;
+            << m_processName << "[" << m_pid << "]: " << text;
 
         m_sock.send_to(boost::asio::buffer(log.str().c_str(),
                                            log.str().size()),
                        m_syslogServerEndpoint);
     }
 
+    //-------------------------------------------------------------------------
+    const boost::filesystem::path GetLogSettingsPath()
+    {
+        const char * const env = getenv("SAFIR_RUNTIME");
+        if (env == NULL)
+        {
+            FatalError("SAFIR_RUNTIME environment variable is not set");
+        }
+        boost::filesystem::path filename(env);
+
+        filename /= "log";
+        filename /= "logging.ini";
+        return filename;
+    }
+
+    //-------------------------------------------------------------------------
+    void FatalError(const std::string& errTxt)
+    {
+        SendNativeLog(SystemLog::Critical, errTxt);
+        std::wcerr << errTxt.c_str() << std::endl;
+        throw std::logic_error(errTxt);
+    }
+
+    pid_t                           m_pid;
+    std::string                     m_processName;
     bool                            m_nativeLogging;
     bool                            m_sendToSyslogServer;
 
