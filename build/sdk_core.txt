@@ -85,6 +85,7 @@ run_test_suite   src/douf/douf_time_mix.ss/tests           douf_time_tests
 #so we dont build it in release, even though it "looks" like a cpp dll.
 build_dir        src/douf/douf_utilities_mix.ss/src        RelWithDebInfo
 
+build_dir        src/swre/swre_utils.ss/src                RelWithDebInfo
 build_dir        src/swre/swre_library.ss/src              RelWithDebInfo
 build_dir        src/swre/swre_interface.ss/cpp/swre_interface_cpp         RelWithDebInfo   Debug
 build_dir        src/swre/swre_interface.ss/dotnet/swre_interface_dotnet   RelWithDebInfo
