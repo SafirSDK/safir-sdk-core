@@ -29,6 +29,10 @@ if (WIN32)
   TARGET_LINK_LIBRARIES(lluf_utils psapi)
 endif(WIN32)
 
+INSTALL(FILES  
+        data/logging.ini
+        DESTINATION ${SAFIR_RUNTIME}/log)
+
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)
