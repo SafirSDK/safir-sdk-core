@@ -81,10 +81,10 @@ std::string GetSyslogTimestamp()
 
 class LLUF_UTILS_API SystemLogImpl
 {
-    friend class ImplKeeper;
+    friend class SystemLogImplKeeper;
 
 private:
-    //constructor is private, to make sure only ImplKeeper can create it
+    //constructor is private, to make sure only SystemLogImplKeeper can create it
     SystemLogImpl()
         : m_pid(Safir::Utilities::ProcessInfo::GetPid()),
           m_processName(Safir::Utilities::ProcessInfo(m_pid).GetProcessName()),
@@ -228,10 +228,10 @@ private:
 * A singleton that holds a weak pointer to the impl which means
 * that this singleton will never keep an impl "alive" on its own.
 */
-class ImplKeeper
+class SystemLogImplKeeper
 {
 public:
-    static ImplKeeper& Instance()
+    static SystemLogImplKeeper& Instance()
     {
         boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
         return SingletonHelper::Instance();
@@ -253,8 +253,8 @@ public:
     }
 
 private:
-    ImplKeeper() {}
-    ~ImplKeeper() {}
+    SystemLogImplKeeper() {}
+    ~SystemLogImplKeeper() {}
 
     boost::mutex m_lock;
 
@@ -269,11 +269,11 @@ private:
     struct SingletonHelper
     {
     private:
-        friend ImplKeeper& ImplKeeper::Instance();
+        friend SystemLogImplKeeper& SystemLogImplKeeper::Instance();
 
-        static ImplKeeper& Instance()
+        static SystemLogImplKeeper& Instance()
         {
-            static ImplKeeper instance;
+            static SystemLogImplKeeper instance;
             return instance;
         }
         static boost::once_flag m_onceFlag;
@@ -282,10 +282,10 @@ private:
 };
 
 //mandatory static initialization
-boost::once_flag ImplKeeper::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+boost::once_flag SystemLogImplKeeper::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
 SystemLog::SystemLog()
-    : m_impl(ImplKeeper::Instance().Get())
+    : m_impl(SystemLogImplKeeper::Instance().Get())
 {
 }
 
