@@ -10,8 +10,8 @@ find_package(PythonInterp)
 
 enable_testing()
 
-#add_subdirectory(panic_log_reception)
+add_subdirectory(panic_log_reception)
 add_subdirectory(swreport_reception)
-#add_subdirectory(tracer_cpp)
-#add_subdirectory(tracer_dotnet)
-#add_subdirectory(stop_orders_at_exit)
+add_subdirectory(tracer_cpp)
+add_subdirectory(tracer_dotnet)
+add_subdirectory(stop_orders_at_exit)
