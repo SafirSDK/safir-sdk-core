@@ -30,6 +30,7 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/SystemLog.h>
 #include <boost/asio.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/static_assert.hpp>
@@ -177,6 +178,9 @@ namespace Internal
         ReportCreator m_reportCreator;
         boost::mutex m_reportQueueLock;
         std::deque<ReportPtr> m_reportQueue;
+
+        //system logger
+        Safir::Utilities::SystemLog m_systemLog;
 
         //thread stuff
         boost::mutex m_threadStartingLock; //make sure that only one thread starts the logger thread...

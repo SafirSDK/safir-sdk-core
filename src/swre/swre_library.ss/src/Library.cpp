@@ -45,7 +45,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/PanicLogging.h>
 #include <Safir/Utilities/ProcessInfo.h>
-#include <Safir/Utilities/LogInterface.h>
+#include <Safir/Utilities/SystemLog.h>
 #include <Safir/SwReports/Internal/FatalErrorReport.h>
 #include <Safir/SwReports/Internal/ErrorReport.h>
 #include <Safir/SwReports/Internal/ResourceReport.h>
@@ -749,8 +749,7 @@ namespace Internal
     void
     Library::Send(ReportPtr report)
     {
-        // For now a report is always sent as an swre report AND to platform specific logging via the interface provided by lluf.
-        // We might want to make this configurable in the future.
+        // A report is always sent as an swre report AND to platform specific logging via the interface provided by lluf.
 
         // Send to swre_logger
         if (!TrySend(report))
@@ -774,37 +773,37 @@ namespace Internal
         // Send to platform specific logging
 
         // Map the swre report type to an lluf severity
-        Safir::Utilities::LogInterface::Severity severity = Safir::Utilities::LogInterface::Debug;
+        Safir::Utilities::SystemLog::Severity severity = Safir::Utilities::SystemLog::Debug;
 
         switch (report->GetTypeId())
         {
             case Safir::SwReports::Internal::FatalErrorReport::ClassTypeId:
             {
-                severity = Safir::Utilities::LogInterface::Critical;
+                severity = Safir::Utilities::SystemLog::Critical;
             }
             break;
 
             case Safir::SwReports::Internal::ErrorReport::ClassTypeId:
             {
-                severity = Safir::Utilities::LogInterface::Error;
+                severity = Safir::Utilities::SystemLog::Error;
             }
             break;
 
             case Safir::SwReports::Internal::ResourceReport::ClassTypeId:
             {
-                severity = Safir::Utilities::LogInterface::Notice;
+                severity = Safir::Utilities::SystemLog::Notice;
             }
             break;
 
             case Safir::SwReports::Internal::ProgrammingErrorReport::ClassTypeId:
             {
-                severity = Safir::Utilities::LogInterface::Emergency;
+                severity = Safir::Utilities::SystemLog::Emergency;
             }
             break;
 
             case Safir::SwReports::Internal::ProgramInfoReport::ClassTypeId:
             {
-                severity = Safir::Utilities::LogInterface::Debug;
+                severity = Safir::Utilities::SystemLog::Debug;
             }
             break;
         }
@@ -812,7 +811,7 @@ namespace Internal
         // Convert the report to a textual format
         std::wstring log = Safir::SwReports::Internal::ReportSerializer::SerializeReport(report, true);
 
-        Safir::Utilities::LogInterface::Log(severity, Safir::Dob::Typesystem::Utilities::ToUtf8(log));
+        m_systemLog.Send(severity, Safir::Dob::Typesystem::Utilities::ToUtf8(log));
 
     }
 
