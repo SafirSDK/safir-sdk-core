@@ -52,7 +52,7 @@ if not os.path.exists(tmp_log_file_dir):
     os.mkdir(tmp_log_file_dir)
 config = ConfigParser.RawConfigParser()
 config.add_section('SYSTEM-LOG')
-config.set('SYSTEM-LOG', 'native-logging', 'true')
+config.set('SYSTEM-LOG', 'native-logging', 'false')
 config.set('SYSTEM-LOG', 'send-to-syslog-server', 'true')
 config.set('SYSTEM-LOG', 'syslog-server-address', syslog_server_address)
 config.set('SYSTEM-LOG', 'syslog-server-port', str(syslog_server_port))
