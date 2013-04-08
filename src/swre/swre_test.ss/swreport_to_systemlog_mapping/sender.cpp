@@ -69,9 +69,7 @@ int main(const int argc, const char* const argv [])
 
     conn.Close();
 
-
-
-//    Safir::SwReports::Stop();
+    Safir::SwReports::Stop();
 
     return 0;
 }
