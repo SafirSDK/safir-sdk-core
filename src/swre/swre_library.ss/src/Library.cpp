@@ -77,7 +77,7 @@ namespace Internal
     {
         // To late to call Stop() here. We must do that before getting here.
         
-        if (Instance().m_thread != boost::thread())
+        if (Instance().m_thread.get_id() != boost::thread::id())
         {
             lllerr << "Swre logger thread was still running when this program exited!" << std::endl
                    << "Please make sure that Safir::SwReports::Stop is called before exiting your application!" << std::endl
@@ -423,7 +423,7 @@ namespace Internal
         }
         else
         {
-            if (m_thread != boost::thread())
+            if (m_thread.get_id() != boost::thread::id())
             {
                 if (m_flushPending == 0)
                 {
@@ -438,10 +438,10 @@ namespace Internal
     inline void
     Library::StartThread()
     {
-        if (m_thread == boost::thread())
+        if (m_thread.get_id() == boost::thread::id())
         {
             boost::lock_guard<boost::mutex> lock(m_threadStartingLock);
-            if (m_thread == boost::thread())
+            if (m_thread.get_id() == boost::thread::id())
             {
                 m_thread = boost::thread(boost::bind(&Library::Run,this));
                 m_threadId = m_thread.get_id();
@@ -477,10 +477,10 @@ namespace Internal
     Library::StopInternal()
     {
         //We only let one call to Stop try to do the join. otherwise who knows what will happen...
-        if (m_thread != boost::thread())
+        if (m_thread.get_id() != boost::thread::id())
         {
             boost::lock_guard<boost::mutex> lock(m_threadStartingLock);
-            if (m_thread != boost::thread())
+            if (m_thread.get_id() != boost::thread::id())
             {
                 m_ioService.stop();
                 m_thread.join();

@@ -48,7 +48,6 @@ namespace Internal
                                        AllocationHelper & allocHelper):
         m_name(name.begin(),name.end(),allocHelper.GetAllocator<char>()),
         m_baseClass(),
-        m_baseClassTypeId(baseClassTypeId),
         m_typeId(typeId),
         m_initialSize(initialSize),
         m_thisClassSize(thisClassSize),

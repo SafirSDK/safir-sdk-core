@@ -74,8 +74,6 @@ private:
 
     boost::filesystem::path m_storagePath;
 
-    bool m_isAllocated;
-
     Safir::Application::Tracer m_debug;
 };
 

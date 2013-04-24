@@ -353,7 +353,7 @@ namespace Utilities
     {
         lllout << "ProcessMonitorLinux::StartThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
         
-        if (m_thread != boost::thread())
+        if (m_thread.get_id() != boost::thread::id())
         {
             return;
         }
@@ -369,7 +369,7 @@ namespace Utilities
     {
         lllout << "ProcessMonitorLinux::StopThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
 
-        if (m_thread != boost::thread())
+        if (m_thread.get_id() != boost::thread::id())
         {
             m_ioService.stop();
 

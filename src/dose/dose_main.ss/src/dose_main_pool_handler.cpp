@@ -87,7 +87,7 @@ namespace Internal
 
     PoolHandler::~PoolHandler()
     {
-        if (m_pdThread != boost::thread())
+        if (m_pdThread.get_id() != boost::thread::id())
         {
             m_pdThread.interrupt();
             m_pdThread.join();
@@ -161,7 +161,7 @@ namespace Internal
     void PoolHandler::StartPoolDistribution()
     {
         lllout << "Starting pool distribution thread" << std::endl;
-        ENSURE(m_pdThread == boost::thread(), << "There is already a pd thread running! m_pdThread id = "
+        ENSURE(m_pdThread.get_id() == boost::thread::id(), << "There is already a pd thread running! m_pdThread id = "
                                               << m_pdThread.get_id());
         m_pdThread = boost::thread(boost::bind(&PoolHandler::PoolDistributionWorker,this));
     }

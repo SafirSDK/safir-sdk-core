@@ -39,11 +39,9 @@ namespace Dob
 {
 namespace Internal
 {
-    PendingRegistrationHandler::PendingRegistrationHandler(ExternNodeCommunication & ecom,
-                                                           NodeHandler & nodeHandler):
+    PendingRegistrationHandler::PendingRegistrationHandler(ExternNodeCommunication & ecom):
         m_nextId(1),
-        m_ecom(ecom),
-        m_nodeHandler(nodeHandler)
+        m_ecom(ecom)
     {
         m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(L"Pending Registrations Timer",*this);
     }

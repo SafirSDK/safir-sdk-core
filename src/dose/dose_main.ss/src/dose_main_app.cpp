@@ -90,7 +90,7 @@ namespace Internal
         m_signalHandler(m_ioService),
         m_timerHandlerInitiated(initiateTimerHandler(m_ioService)),
         m_poolHandler(m_ioService),
-        m_pendingRegistrationHandler(m_ecom, m_nodeHandler),
+        m_pendingRegistrationHandler(m_ecom),
         m_ecom(m_ioService),
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
@@ -103,14 +103,14 @@ namespace Internal
 
     DoseApp::~DoseApp()
     {
-        if (m_memoryMonitorThread != boost::thread())
+        if (m_memoryMonitorThread.get_id() != boost::thread::id())
         {
             m_memoryMonitorThread.interrupt();
             m_memoryMonitorThread.join();
             m_memoryMonitorThread = boost::thread();
         }
 
-        if (m_connectionThread != boost::thread())
+        if (m_connectionThread.get_id() != boost::thread::id())
         {
             //set the interrupt state so that when we generate the spurious signal
             //the thread will be interrupted at the interruption_point.

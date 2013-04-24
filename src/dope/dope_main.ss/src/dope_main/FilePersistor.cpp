@@ -191,7 +191,6 @@ FilePersistor::GetFilePath(const FilePersistor::EntityIdAndHandlerId& entityAndH
 FilePersistor::FilePersistor(boost::asio::io_service& ioService) :
     PersistenceHandler(ioService),
     m_storagePath(GetStorageDirectory()),
-    m_isAllocated(false),
     m_debug(L"FilePersistor")
 {
     m_debug << "Persisting to '" << m_storagePath.string().c_str() << std::endl;

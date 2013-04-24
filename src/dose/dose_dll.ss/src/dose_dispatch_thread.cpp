@@ -53,7 +53,7 @@ namespace Internal
 
     DispatchThread::~DispatchThread()
     {
-        ENSURE (m_thread == boost::thread(), << "DispatchThread is being destroyed while the thread is still running!");
+        ENSURE (m_thread.get_id() == boost::thread::id(), << "DispatchThread is being destroyed while the thread is still running!");
     }
 
     bool DispatchThread::Stop(const bool waitAWhile)
@@ -72,7 +72,7 @@ namespace Internal
 
         m_stop = 1;
 
-        if (m_thread == boost::thread())
+        if (m_thread.get_id() == boost::thread::id())
         {
             return true;
         }
@@ -103,7 +103,7 @@ namespace Internal
 
     void DispatchThread::Start()
     {
-        ENSURE(m_thread == boost::thread(), << "Someone tried to start a DispatchThread that was already running!");
+        ENSURE(m_thread.get_id() == boost::thread::id(), << "Someone tried to start a DispatchThread that was already running!");
 
         //shared_from_this means that we hold on to a reference to ourselves to ensure that 
         //the object is not destroyed until the thread has ended.
