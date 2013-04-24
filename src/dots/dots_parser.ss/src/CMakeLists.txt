@@ -10,10 +10,12 @@ FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dots_parser SHARED ${sources} ${headers})
-TARGET_LINK_LIBRARIES(dots_parser)
 
 FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time)
-TARGET_LINK_LIBRARIES(dots_parser ${Boost_LIBRARIES} ${COMMON_LIBRARIES})
+
+if (NOT MSVC)
+  TARGET_LINK_LIBRARIES(dots_parser ${Boost_LIBRARIES})
+endif()
 
 
 ADD_DEFINITIONS(-DDOTS_PARSER_EXPORTS)

@@ -15,7 +15,7 @@ if (ACE_FOUND)
   
   FIND_PACKAGE(Boost COMPONENTS program_options)
   
-  TARGET_LINK_LIBRARIES(SplitJoinStresser ${COMMON_LIBRARIES} ${ACE_LIBRARY})
+  TARGET_LINK_LIBRARIES(SplitJoinStresser ${ACE_LIBRARY})
   
   if (NOT MSVC)
     TARGET_LINK_LIBRARIES(SplitJoinStresser dose_cpp ${Boost_LIBRARIES})

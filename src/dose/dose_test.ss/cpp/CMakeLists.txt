@@ -11,7 +11,6 @@ FILE(GLOB dose_com_sources ${SAFIR_SDK}/include/Safir/Dob/Internal/DoseComAux/*.
 ADD_EXECUTABLE(dose_test_cpp ${sources} ${dose_com_sources} ${headers})
 
 FIND_PACKAGE(Boost COMPONENTS thread system)
-TARGET_LINK_LIBRARIES(dose_test_cpp ${COMMON_LIBRARIES})
 
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(dose_test_cpp swre_interface_cpp dose_cpp dots_generated-Safir-cpp dots_generated-DoseTest-cpp dots_cpp ${Boost_LIBRARIES})

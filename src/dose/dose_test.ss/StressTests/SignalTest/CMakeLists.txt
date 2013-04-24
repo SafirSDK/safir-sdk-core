@@ -10,8 +10,6 @@ ADD_EXECUTABLE(SignalTest ${sources} ${headers})
 
 FIND_PACKAGE(Boost COMPONENTS program_options)
 
-TARGET_LINK_LIBRARIES(SignalTest ${COMMON_LIBRARIES})
-
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(SignalTest dose_internal ${Boost_LIBRARIES})
 endif()

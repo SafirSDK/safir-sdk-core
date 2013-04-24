@@ -16,18 +16,7 @@ ADD_DEFINITIONS(-DDOSE_INT_EXPORTS)
 FIND_PACKAGE(Boost COMPONENTS regex)
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dose_internal dots_generated-Safir-cpp dots_generated-cpp dots_cpp dots_kernel lluf_utils lluf_startup_synchronizer ${Boost_LIBRARIES})
-endif()
-
-#debug builds on linux 32 bit have a wierd bug, that makes Signals.cpp not work
-#unless it is compiled with sime kind of optimizations on. Something to do with
-#some code in boost.interprocess that needs to be inlined.
-if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-  if (NOT MSVC)
-    if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug") 
-      set_source_files_properties(Signals.cpp PROPERTIES COMPILE_FLAGS "-O1")
-    endif()
-  endif()
+  TARGET_LINK_LIBRARIES(dose_internal dots_generated-Safir-cpp dots_generated-cpp dots_cpp dots_kernel lluf_utils lluf_startup_synchronizer ${Boost_LIBRARIES} rt)
 endif()
 
 INSTALL(DIRECTORY Safir 

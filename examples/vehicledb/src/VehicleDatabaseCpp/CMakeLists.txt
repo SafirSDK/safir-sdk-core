@@ -32,7 +32,7 @@ if (UNIX)
   endif()
 endif()
   
-TARGET_LINK_LIBRARIES(VehicleAppDb ${COMMON_LIBRARIES} ${ODBC_LIBRARIES})
+TARGET_LINK_LIBRARIES(VehicleAppDb ${ODBC_LIBRARIES})
   
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(VehicleAppDb olib swre_interface_cpp dose_cpp dots_generated-Capabilities-cpp dots_generated-Safir-cpp dots_cpp lluf_utils)

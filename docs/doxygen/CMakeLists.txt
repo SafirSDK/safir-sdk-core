@@ -10,3 +10,8 @@ ADD_CUSTOM_TARGET(html ALL
 
 INSTALL(DIRECTORY html
   DESTINATION ${SAFIR_SDK}/docs/)
+
+#just use these variables to avoid some cmake warnings 
+#(they're set in the build script)
+if(SAFIR_ADA_SUPPORT OR SAFIR_JAVA_SUPPORT)
+endif()

@@ -20,8 +20,6 @@ else()
   TARGET_LINK_LIBRARIES(VehicleAppCpp ${Boost_LIBRARIES})
 endif()
   
-TARGET_LINK_LIBRARIES(VehicleAppCpp ${COMMON_LIBRARIES})
-  
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(VehicleAppCpp swre_interface_cpp dose_cpp dots_generated-Capabilities-cpp dots_generated-Safir-cpp dots_cpp lluf_utils)
 endif()

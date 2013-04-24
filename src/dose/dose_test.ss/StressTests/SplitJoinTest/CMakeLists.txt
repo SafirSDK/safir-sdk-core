@@ -13,7 +13,7 @@ if (ACE_FOUND)
   
   ADD_EXECUTABLE(SplitJoinTest ${sources} ${headers})
   
-  TARGET_LINK_LIBRARIES(SplitJoinTest ${COMMON_LIBRARIES} ${ACE_LIBRARY})
+  TARGET_LINK_LIBRARIES(SplitJoinTest ${ACE_LIBRARY})
   
   if (NOT MSVC)
     FIND_PACKAGE(Boost COMPONENTS program_options)

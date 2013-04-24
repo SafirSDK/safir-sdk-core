@@ -13,8 +13,6 @@ ADD_DEFINITIONS(-DDOSE_EXPORTS)
 
 ADD_LIBRARY(dose_test_util SHARED ${sources} ${dose_com_sources} ${headers})
 
-TARGET_LINK_LIBRARIES(dose_test_util ${COMMON_LIBRARIES})
-
 INSTALL(DIRECTORY Safir 
   DESTINATION ${SAFIR_SDK}/include
   PATTERN ".svn" EXCLUDE

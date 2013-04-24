@@ -22,12 +22,13 @@ if (UNIX)
       LINK_DIRECTORIES(${SAFIR_USER}/runtime/lib)
    endif()
 
-   #turn on more warnings
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+   #turn on more warnings and set up use of threads etc
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread")
+   SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wall -pthread")
    SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")
 
-   #define some common libraries
-   SET(COMMON_LIBRARIES rt pthread)
+   #make sure we get the correct posix version
+   ADD_DEFINITIONS(-D_POSIX_C_SOURCE=200809L)
 endif ()
 
 if (MSVC)
@@ -205,4 +206,7 @@ else()
     SET(CUSTOM_BUILD_TYPE "Release")
 endif()
 
-
+#just use these variables to avoid some cmake warnings 
+#(they're set in the build script)
+if(SAFIR_ADA_SUPPORT OR SAFIR_JAVA_SUPPORT)
+endif()

@@ -3,8 +3,6 @@ FILE(GLOB headers *.h ../common/*.h)
 
 ADD_EXECUTABLE(MessageStresser ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(MessageStresser ${COMMON_LIBRARIES})
-
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(MessageStresser dose_cpp dots_generated-DoseStressTest-cpp dots_generated-Safir-cpp dots_cpp lluf_utils  ${Boost_LIBRARIES})
 endif()

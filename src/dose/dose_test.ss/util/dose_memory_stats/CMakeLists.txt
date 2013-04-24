@@ -9,8 +9,6 @@ ADD_EXECUTABLE(dose_memory_stats ${sources})
 
 FIND_PACKAGE(Boost COMPONENTS system thread)
 
-TARGET_LINK_LIBRARIES(dose_memory_stats ${COMMON_LIBRARIES})
-
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(dose_memory_stats dose_internal dots_cpp ${Boost_LIBRARIES})
 endif()
