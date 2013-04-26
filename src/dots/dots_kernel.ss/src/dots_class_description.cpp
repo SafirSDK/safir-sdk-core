@@ -36,7 +36,7 @@ namespace Internal
 
     ClassDescription::ClassDescription(const std::string & name,
                                        const TypeId typeId,
-                                       const TypeId baseClassTypeId,
+                                       const TypeId /*baseClassTypeId*/,
                                        const Size initialSize,
                                        const unsigned int thisClassSize,
                                        const Size noInheritedMembers,
