@@ -41,7 +41,7 @@ namespace
 #endif
 
 #ifndef NO_WCHAR_CONVERSION
-    size_t strlen(const SQLWCHAR* str)
+    static inline size_t strlen(const SQLWCHAR* str)
     {
         size_t num = 0;
         while (*str != 0)
@@ -53,7 +53,7 @@ namespace
     }
 #endif
 
-    inline const std::wstring ToWstring(const SQLWCHAR* str)
+    static inline const std::wstring ToWstring(const SQLWCHAR* str)
     {
 #ifdef NO_WCHAR_CONVERSION
         return std::wstring(str);
@@ -62,7 +62,7 @@ namespace
 #endif
 }
 
-    inline const std::wstring ToWstring(const std::vector<SQLWCHAR> str)
+    static inline const std::wstring ToWstring(const std::vector<SQLWCHAR> str)
     {
 #ifdef NO_WCHAR_CONVERSION
         return std::wstring(&str[0]);
@@ -76,7 +76,7 @@ namespace
 // const_cast is used because string inputs are declared as input in the ODBC
 // specification and should be a const wchar_t *.
 #ifdef NO_WCHAR_CONVERSION
-    SQLWCHAR* ToSqlWchars(const std::wstring& str)
+    static inline SQLWCHAR* ToSqlWchars(const std::wstring& str)
     {
         return const_cast<SQLWCHAR*>(str.c_str());
     }
@@ -97,7 +97,7 @@ namespace
     };
 #endif
 
-    inline bool Equal(const SQLWCHAR* left, const wchar_t* right)
+    static inline bool Equal(const SQLWCHAR* left, const wchar_t* right)
     {
 #ifdef NO_WCHAR_CONVERSION
         return wcscmp(left,right) == 0;
@@ -108,7 +108,7 @@ namespace
 
 
     //not meant to be called, ever.
-    void size_checks()
+    static inline void size_checks()
     {
 #ifdef NO_WCHAR_CONVERSION 
         BOOST_STATIC_ASSERT(sizeof(SQLWCHAR) == sizeof(wchar_t));

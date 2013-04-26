@@ -726,6 +726,8 @@ namespace Internal
 
     DispatcherIsInCallback::~DispatcherIsInCallback()
     {
+        (void)m_callback; //unused variable in release
+
         //Can't use ENSURE in destructor, since throwing exceptions inside a destructor is no good idea.
         assert(m_callbackStack.top().m_callbackId == m_callback);
         m_callbackStack.pop();

@@ -47,7 +47,6 @@ class ActionSender
     typedef boost::shared_ptr<boost::asio::ip::tcp::socket> SocketPtr;
 public:
     explicit ActionSender(boost::asio::io_service& ioService)
-        : m_ioService(ioService)
     {
         for (int i = 0; i < 3; ++i)
         {
@@ -178,7 +177,6 @@ private:
         }
     }
 
-    boost::asio::io_service& m_ioService;
     std::vector<SocketPtr > m_sockets;
 };
 

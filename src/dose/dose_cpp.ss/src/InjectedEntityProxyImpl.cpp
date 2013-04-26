@@ -46,6 +46,7 @@ namespace Internal
         m_currentBlob(currentBlob),
         m_currentState(currentState)
     {
+        (void)m_currentState; //currently unused
     }
 
     const Dob::Typesystem::TypeId
