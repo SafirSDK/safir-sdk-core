@@ -114,7 +114,7 @@ private:
             m_sendToSyslogServer = root.get<bool>("SYSTEM-LOG.send-to-syslog-server");
 
             // TODO test ska bort
-            Internal::InitWindowsLogging();
+            m_eventLog.AddRegistryEntries();
 
             if (m_nativeLogging)
             {
@@ -125,7 +125,7 @@ private:
 
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 
-                Internal::InitWindowsLogging();
+                 m_eventLog.AddRegistryEntries();
 
                 //FatalError("Currently no implementation for native logging on Windows!");
 #endif

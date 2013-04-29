@@ -36,19 +36,20 @@ namespace Utilities
 {
 namespace Internal
 {
-
-    void InitWindowsLogging();
-
     class WindowsLogger
     {
     public:
         WindowsLogger(const std::string& processName);
         ~WindowsLogger();
 
+        bool AddRegistryEntries();
+
+        //TODO Add windows severity
         void Send(const std::string& log);
 
     private:
-        HANDLE m_sourceHandle;
+        HANDLE      m_sourceHandle;
+        std::string m_processName;
     };
 
 }
