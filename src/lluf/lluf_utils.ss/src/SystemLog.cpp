@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <Safir/Utilities/SystemLog.h>
 #include <Safir/Utilities/ProcessInfo.h>
+#include <boost/weak_ptr.hpp>
 #include <boost/thread/once.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/property_tree/ini_parser.hpp>
@@ -52,6 +53,8 @@
 #include <syslog.h>
 
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+
+#include "LogWin32.h"
 
 #endif
 
@@ -93,6 +96,9 @@ private:
           m_syslogServerEndpoint(),
           m_service(),
           m_sock(m_service),
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+          m_eventLog(m_processName),
+#endif
           m_lock()
     {
         try
@@ -107,6 +113,9 @@ private:
             m_nativeLogging = root.get<bool>("SYSTEM-LOG.native-logging");
             m_sendToSyslogServer = root.get<bool>("SYSTEM-LOG.send-to-syslog-server");
 
+            // TODO test ska bort
+            Internal::InitWindowsLogging();
+
             if (m_nativeLogging)
             {
 #if defined(linux) || defined(__linux) || defined(__linux__)
@@ -116,7 +125,9 @@ private:
 
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 
-                FatalError("Currently no implementation for native logging on Windows!");
+                Internal::InitWindowsLogging();
+
+                //FatalError("Currently no implementation for native logging on Windows!");
 #endif
             }
 
@@ -128,7 +139,7 @@ private:
 
                 m_syslogServerEndpoint =
                         boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(root.get<std::string>("SYSTEM-LOG.syslog-server-address")),
-                                                       root.get<int>("SYSTEM-LOG.syslog-server-port"));
+                                                       root.get<unsigned short>("SYSTEM-LOG.syslog-server-port"));
             }
 
         }
@@ -152,6 +163,9 @@ public:
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
 
+        //TODO TEST!!!!
+        SendNativeLog(severity, text);
+
         if (m_nativeLogging)
         {
             SendNativeLog(severity, text);
@@ -168,10 +182,16 @@ private:
     //-------------------------------------------------------------------------
     void SendNativeLog(const SystemLog::Severity severity, const std::string& text)
     {
+        // To stop compiler warn about unused variables
+        severity;
+        text;
+
 #if defined(linux) || defined(__linux) || defined(__linux__)
 
         syslog(SAFIR_FACILITY | severity, "%s", text.c_str());
 
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        m_eventLog.Send(text);
 #endif
     }
 
@@ -212,6 +232,11 @@ private:
         throw std::logic_error(errTxt);
     }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
+
     pid_t                           m_pid;
     std::string                     m_processName;
     bool                            m_nativeLogging;
@@ -221,7 +246,16 @@ private:
     boost::asio::io_service         m_service;
     boost::asio::ip::udp::socket    m_sock;
 
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+    Internal::WindowsLogger         m_eventLog;
+#endif
+
     boost::mutex                    m_lock;
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 };
 
 /**
