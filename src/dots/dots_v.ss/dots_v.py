@@ -196,10 +196,10 @@ seek_member_in_base_class_cache = {}
 def seek_member_in_base_class(seek_name, baseClass):
     if baseClass is None: 
         return None
-    
+        
     if (seek_name, baseClass) in seek_member_in_base_class_cache: 
         return seek_member_in_base_class_cache[(seek_name, baseClass)]
-        
+    
     parent = None
     baseClassFile = baseClass + ".dou"
     
@@ -221,10 +221,9 @@ def seek_member_in_base_class(seek_name, baseClass):
                                     readTextPropery(m, "array"), \
                                     readTextPropery(m, "arraySize"), \
                                     m.find("{urn:safir-dots-unit}arraySizeRef") is not None)
-                        
                         seek_member_in_base_class_cache[(seek_name, baseClass)] = found_member
                         return found_member
-                            
+    
     # No match, try next level
     return seek_member_in_base_class(seek_name, parent)
 
@@ -348,7 +347,7 @@ def parse_dou(dou_xmlfile):
                                                                 found_member.arraySize) )
                                 member_name_to_type_lookup[found_member.name] = found_member.type
                                 member_name_to_is_array_lookup[found_member.name] = (found_member.arraySize is not None or found_member.array is not None or found_member.arraySizeRef)
-                            
+                                
                                 if not found_member.type in dod_types:
                                     dod_types[found_member.type] = DodType(found_member.type, \
                                                                         found_member.type, \
@@ -356,6 +355,8 @@ def parse_dou(dou_xmlfile):
                                                                         type_formatter(found_member.type), \
                                                                         dependency_formatter(found_member.type))
                                     parsed.unique_dependencies.append(dependency_formatter(found_member.type))
+                                elif len(dod_types[found_member.type].dependency) > 0:
+                                    parsed.unique_dependencies.append(dod_types[found_member.type].dependency)
                             else:
                                 print >> sys.stderr, ">!< cannot find member reference", p.text
                     elif parameter_tag == "parameter":
