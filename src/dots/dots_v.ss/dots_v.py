@@ -56,7 +56,6 @@ class Dou(object):
         self.classname = ""
         self.namespaces = []
         self.members = []
-        #self.unique_membertypes = []
         self.unique_dependencies = []
         self.dependency_base = []
         self.parameters = []
@@ -206,7 +205,7 @@ def seek_member_in_base_class(seek_name, baseClass):
     
     for path, dirs, files in os.walk(dou_file_root): # Walk directory tree
         if baseClassFile in files:
-            dou_xml = ET.parse(path + "\\" + baseClassFile)
+            dou_xml = ET.parse(os.path.join(path,baseClassFile))
             xml_root = dou_xml.getroot()
             parent = readTextPropery(xml_root, "baseClass")
             members = xml_root.find("{urn:safir-dots-unit}members")
@@ -1404,7 +1403,7 @@ def generator_main(dod_file, dou_filename, gen_src_output_path):
                 empty_dou = Dou()
                 output_path = gen_src_output_path + dod_parameters["Output_Directory"]
                 parent_name = filename_formatter(PARENT_NAMESPACE) + dod_parameters["File_Suffix"]
-                CURRENT_GENERATED_FILENAME = output_path + parent_name
+                CURRENT_GENERATED_FILENAME = os.path.join(output_path, parent_name)
                 mkdir(output_path)
 
                 parse_dod(dod_file, empty_dou)
@@ -1428,13 +1427,13 @@ def generator_main(dod_file, dou_filename, gen_src_output_path):
                 dou.namespaces = namespaces.split(".")
 
             if dod_parameters["Filename_Separator"] == "/":
-                output_path += directory_name_formatter(namespaces) + dod_parameters["Filename_Separator"]
+                output_path += directory_name_formatter(namespaces) + os.sep
                 filename = filename_formatter(dou.classname) + dod_parameters["File_Suffix"]
             else:
                 filename = filename_formatter(namespaces) + dod_parameters["Filename_Separator"] + filename_formatter(dou.classname) + dod_parameters["File_Suffix"]
                 
             mkdir(output_path)
-            CURRENT_GENERATED_FILENAME = output_path + filename
+            CURRENT_GENERATED_FILENAME = os.path.join(output_path, filename)
             
             parse_dod(dod_file, dou)
             if CURRENT_GENERATED_FILE is not None:
