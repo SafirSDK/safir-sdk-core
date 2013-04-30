@@ -56,6 +56,21 @@ const DWORD typesSupported = (EVENTLOG_SUCCESS |
                               EVENTLOG_ERROR_TYPE);
 const char* logSourceName ="Safir";
 
+bool Is64Bit()
+{
+#pragma warning(disable:4127) //Get rid of warning that this if-expression is constant (comparing two constants)
+
+    if (sizeof(void*) > 4)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+#pragma warning(default:4127)
+}
+
 //------------------------------------------
 LSTATUS GetRegistryValue(HKEY hKey, const char* lpValueName, std::string& value)
 {
@@ -91,55 +106,34 @@ LSTATUS GetRegistryValue(HKEY hKey, const char* lpValueName, DWORD& value)
     return res;
 }
 
-//------------------------------------------
-bool RegistryIsInitialized(const std::string& regKey,
-                           const std::string& eventMessageFile,
-                           DWORD              typesSupported)
-{
-    // Open the key
-    HKEY hKey = 0;
-    LSTATUS res = RegOpenKeyExA(HKEY_LOCAL_MACHINE,
-                                regKey.c_str(),
-                                REG_OPTION_NON_VOLATILE,
-                                KEY_READ,
-                                &hKey);
-    if (res != ERROR_SUCCESS)
-    {
-        return false;
-    }
-
-    // Shared pointer used as guard to close registry key when we leave scope
-    boost::shared_ptr<void> hKeyGuard(hKey, RegCloseKey);
-
-    std::string msgFile;
-    res = GetRegistryValue(hKey, eventMessageFileParamName, msgFile);
-    if (res != ERROR_SUCCESS || msgFile != eventMessageFile)
-    {
-        return false;
-    }
-
-    DWORD eventTypes = 0;
-    res = GetRegistryValue(hKey, typesSupportedParamName, eventTypes);
-    if (res != ERROR_SUCCESS || eventTypes != typesSupported)
-    {
-        return false;
-    }
-
-    return true;
-}
-
 } // anonymous namespace
 
 
 WindowsLogger::WindowsLogger(const std::string& processName)
-    : m_sourceHandle(0),
-      m_processName(processName)
+    : m_startupSynchronizer("LLUF_WINDOWS_LOGGING_INITIALIZATION"),
+      m_sourceHandle(0),
+      m_processName(processName),
+      m_eventMessageFile()
 {
+    // In order not to complicate our own build process (for example, we don't want to mess
+    // with the MessageCompiler) we use the resources provided by EventLogMessages.dll from the
+    // .Net framework.
+    if (Is64Bit())
+    {
+        m_eventMessageFile = eventMessageFile64;
+    }
+    else
+    {
+        m_eventMessageFile = eventMessageFile64;
+    }
+
     m_sourceHandle = RegisterEventSourceA(NULL, "Safir");
     if (!m_sourceHandle)
     {
         throw std::logic_error("Could not register event source");
     }
+
+    m_startupSynchronizer.Start(this);
 }
 
 WindowsLogger::~WindowsLogger()
@@ -148,7 +142,25 @@ WindowsLogger::~WindowsLogger()
 }
 
 //------------------------------------------
-bool WindowsLogger::AddRegistryEntries()
+// Implementation of synchronization callbacks
+//
+void WindowsLogger::Create()
+{
+    AddRegistryEntries();
+}
+
+void WindowsLogger::Use()
+{
+    // No action
+}
+
+void WindowsLogger::Destroy()
+{
+    // no action
+}
+
+//------------------------------------------
+bool WindowsLogger::AddRegistryEntries() const
 {
     //TODO
     const std::string errTxt = "\n\nThis is a non-fatal error and the only issue is that\n"
@@ -158,23 +170,10 @@ bool WindowsLogger::AddRegistryEntries()
                                "the necessary registry keys can be added prior to running the Safir system\n"
                                "using a provided reg file. Check $SAFIR_RUNTIME\\????";
 
-    // In order not to complicate our own build process (for example, we don't want to mess
-    // with the MessageCompiler) we use the resources provided by EventLogMessages.dll from the
-    // .Net framework.
-    std::string eventMessageFile;
-    if (sizeof(void*) > 4)
-    {
-        eventMessageFile = eventMessageFile64;
-    }
-    else
-    {
-        eventMessageFile = eventMessageFile64;
-    }
-
     // First check the registry keys and values in read-only mode.
     // This allow us to avoid to elevate permissions to modify the registry
     // when we dont need to.
-    if (RegistryIsInitialized(regKey, eventMessageFile, typesSupported))
+    if (RegistryIsInitialized())
     {
         return true;
     }
@@ -205,8 +204,8 @@ bool WindowsLogger::AddRegistryEntries()
                          eventMessageFileParamName,
                          0,
                          REG_EXPAND_SZ,
-                         reinterpret_cast<LPBYTE>(const_cast<char*>(eventMessageFile.c_str())),
-                         static_cast<DWORD>(eventMessageFile.size() + 1));
+                         reinterpret_cast<LPBYTE>(const_cast<char*>(m_eventMessageFile.c_str())),
+                         static_cast<DWORD>(m_eventMessageFile.size() + 1));
     if (res != ERROR_SUCCESS)
     {
         Send("The process " + m_processName + " could not create registry value " + eventMessageFileParamName + errTxt);
@@ -230,7 +229,7 @@ bool WindowsLogger::AddRegistryEntries()
     return true;
 }
 
-void WindowsLogger::Send(const std::string& log)
+void WindowsLogger::Send(const std::string& log) const
 {
     const char* message = log.c_str();
 
@@ -244,6 +243,40 @@ void WindowsLogger::Send(const std::string& log)
                  0,
                  &message,
                  NULL);
+}
+
+bool WindowsLogger::RegistryIsInitialized() const
+{
+    // Open the key
+    HKEY hKey = 0;
+    LSTATUS res = RegOpenKeyExA(HKEY_LOCAL_MACHINE,
+                                regKey.c_str(),
+                                REG_OPTION_NON_VOLATILE,
+                                KEY_READ,
+                                &hKey);
+    if (res != ERROR_SUCCESS)
+    {
+        return false;
+    }
+
+    // Shared pointer used as guard to close registry key when we leave scope
+    boost::shared_ptr<void> hKeyGuard(hKey, RegCloseKey);
+
+    std::string msgFile;
+    res = GetRegistryValue(hKey, eventMessageFileParamName, msgFile);
+    if (res != ERROR_SUCCESS || msgFile != m_eventMessageFile)
+    {
+        return false;
+    }
+
+    DWORD eventTypes = 0;
+    res = GetRegistryValue(hKey, typesSupportedParamName, eventTypes);
+    if (res != ERROR_SUCCESS || eventTypes != typesSupported)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 }

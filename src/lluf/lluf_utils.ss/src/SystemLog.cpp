@@ -113,9 +113,6 @@ private:
             m_nativeLogging = root.get<bool>("SYSTEM-LOG.native-logging");
             m_sendToSyslogServer = root.get<bool>("SYSTEM-LOG.send-to-syslog-server");
 
-            // TODO test ska bort
-            m_eventLog.AddRegistryEntries();
-
             if (m_nativeLogging)
             {
 #if defined(linux) || defined(__linux) || defined(__linux__)
@@ -123,11 +120,6 @@ private:
                 // Include pid in log message
                 openlog(NULL, LOG_PID, SAFIR_FACILITY);
 
-#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-
-                 m_eventLog.AddRegistryEntries();
-
-                //FatalError("Currently no implementation for native logging on Windows!");
 #endif
             }
 

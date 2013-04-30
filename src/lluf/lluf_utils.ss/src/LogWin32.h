@@ -27,8 +27,8 @@
 #ifdef _MSC_VER
 
 #include <windows.h>
-
 #include <string>
+#include <Safir/Utilities/StartupSynchronizer.h>
 
 namespace Safir
 {
@@ -36,20 +36,31 @@ namespace Utilities
 {
 namespace Internal
 {
-    class WindowsLogger
+    class WindowsLogger :
+            private boost::noncopyable, public Synchronized
     {
     public:
         WindowsLogger(const std::string& processName);
         ~WindowsLogger();
 
-        bool AddRegistryEntries();
-
         //TODO Add windows severity
-        void Send(const std::string& log);
+        void Send(const std::string& log) const;
+
+        bool RegistryIsInitialized() const;
 
     private:
-        HANDLE      m_sourceHandle;
-        std::string m_processName;
+
+        //Synchronized stuff
+        virtual void Create();
+        virtual void Use();
+        virtual void Destroy();
+
+        bool AddRegistryEntries() const;
+
+        Safir::Utilities::StartupSynchronizer m_startupSynchronizer;
+        HANDLE                                m_sourceHandle;
+        std::string                           m_processName;
+        std::string                           m_eventMessageFile;
     };
 
 }
