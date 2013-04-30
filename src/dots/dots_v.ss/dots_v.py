@@ -684,7 +684,7 @@ def summary_formatter(summary):
 
         i = 0
         for s in summary_split:
-            if i != 0 or len(summary) > 0: summary = summary + "\r\n" 
+            if i != 0 or len(summary) > 0: summary = summary + "\n" 
             summary = summary + s[min_strip:]
             i = i + 1
     else:
@@ -1258,13 +1258,13 @@ def write_to_file(s):
     global CURRENT_GENERATED_FILE
     
     if CURRENT_GENERATED_FILE is None: 
-        CURRENT_GENERATED_FILE = open(CURRENT_GENERATED_FILENAME, "wb") #codecs.open(CURRENT_GENERATED_FILENAME, "wb", "utf-8")
+        CURRENT_GENERATED_FILE = open(CURRENT_GENERATED_FILENAME, "wt") #codecs.open(CURRENT_GENERATED_FILENAME, "wb", "utf-8")
         if CURRENT_GENERATED_FILE is None:
             print >> sys.stderr, "** ERROR - could not open output file!", CURRENT_GENERATED_FILENAME
             sys.exit(1)
             
     # TODO - wierd way that the original parses the .dod, decide later if we should remove this
-    if s != "\r\n" and s.strip() == "": return 
+    if s != "\n" and s.strip() == "": return 
 
     CURRENT_GENERATED_FILE.write(s.encode('utf8'))
     if loglevel >=4 : print >> sys.stderr, s,
@@ -1291,7 +1291,7 @@ def mkdir(newdir):
 # Faster file reader, buffers all in memory (good since we loop through same file multiple times)
 class FileReader(object):
     def __init__(self, filename, preprocess):
-        file = open(filename)
+        file = open(filename, "rt")
         self.index = 0
         # reads up all the lines of the file in memory
         self.lines = file.readlines()
@@ -1306,7 +1306,7 @@ class FileReader(object):
                 if line != "\n" and line.strip() == "": continue
         
                 # Removed trailing whitespaces, we add the linebreak again to distinguish this from EOF
-                self.lines[i] = line.rstrip() + "\r\n"
+                self.lines[i] = line.rstrip() + "\n"
     
     def tell(self):
         return self.index
@@ -1405,7 +1405,7 @@ def generator_main(dod_file, dou_filename, gen_src_output_path):
                 dod_file.seek(0)
                 if CURRENT_GENERATED_FILE is not None:
                     # Write final newline and close
-                    CURRENT_GENERATED_FILE.write("\r\n")
+                    CURRENT_GENERATED_FILE.write("\n")
                     CURRENT_GENERATED_FILE.close()
                     CURRENT_GENERATED_FILE = None
                 
@@ -1433,7 +1433,7 @@ def generator_main(dod_file, dou_filename, gen_src_output_path):
             parse_dod(dod_file, dou)
             if CURRENT_GENERATED_FILE is not None:
                 # Write final newline and close
-                CURRENT_GENERATED_FILE.write("\r\n")
+                CURRENT_GENERATED_FILE.write("\n")
                 CURRENT_GENERATED_FILE.close()
                 CURRENT_GENERATED_FILE = None
                 
