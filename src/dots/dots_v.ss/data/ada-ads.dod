@@ -324,7 +324,7 @@ use type Safir.Dob.Typesystem.Type_Id;
 @@TABLE@@
 @@IF@@ @_EXIST:DEPENDENCY_@
 @@IF@@ @_MATCH(:.*_Id:):DEPENDENCY_@
-@@IF@@ (@_PARAMETER'Length_@>0_@ or @_CREATEROUTINE'Length_@>0 )and not @_MEMBER'Length_@>0
+@@IF@@ (@_PARAMETER'Length_@>0 or @_CREATEROUTINE'Length_@>0)
 with Safir.Dob.Typesystem.@_REPLACE_ALL(:/):DEPENDENCY_@;
 pragma Warnings (Off, Safir.Dob.Typesystem.@_REPLACE_ALL(:/):DEPENDENCY_@);
 @@END_IF@@
