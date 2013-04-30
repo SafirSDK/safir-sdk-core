@@ -595,6 +595,12 @@ def separator_formatter(name, style):
         
     return name.replace(".", style)
 
+def directory_name_formatter(directory_name):
+    directory_name = underscore_formatter(directory_name, dod_parameters["Filename_Underscore_Style"])
+    directory_name = separator_formatter(directory_name, dod_parameters["Filename_Separator"])
+    directory_name = case_formatter(directory_name, dod_parameters["Namespace_Case_Style"])
+    return directory_name
+    
 def filename_formatter(filename):
     filename = underscore_formatter(filename, dod_parameters["Filename_Underscore_Style"])
     filename = separator_formatter(filename, dod_parameters["Filename_Separator"])
@@ -1422,7 +1428,7 @@ def generator_main(dod_file, dou_filename, gen_src_output_path):
                 dou.namespaces = namespaces.split(".")
 
             if dod_parameters["Filename_Separator"] == "/":
-                output_path += filename_formatter(namespaces) + dod_parameters["Filename_Separator"]
+                output_path += directory_name_formatter(namespaces) + dod_parameters["Filename_Separator"]
                 filename = filename_formatter(dou.classname) + dod_parameters["File_Suffix"]
             else:
                 filename = filename_formatter(namespaces) + dod_parameters["Filename_Separator"] + filename_formatter(dou.classname) + dod_parameters["File_Suffix"]
