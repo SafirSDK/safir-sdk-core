@@ -11,11 +11,7 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(lluf_utils SHARED ${sources} ${headers})
 
-if (Boost_VERSION LESS 105100) #less than 1.41 then we need program options
-  FIND_PACKAGE(Boost COMPONENTS filesystem date_time system thread program_options)
-else()
-  FIND_PACKAGE(Boost COMPONENTS filesystem date_time system thread)
-endif()
+FIND_PACKAGE(Boost COMPONENTS filesystem date_time system thread program_options)
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(lluf_utils lluf_startup_synchronizer ${Boost_LIBRARIES} dl rt)
