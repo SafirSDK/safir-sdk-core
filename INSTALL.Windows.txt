@@ -10,9 +10,6 @@ Here is a summary of what you need, and below are instructions on where to get t
 Visual Studio 2008 SP1 or 2010 SP1 (express or paid versions work)
 Subversion
 GNAT
-Templates-Parser
-XMLAda
-MinGW and MSYS
 Boost (1.50 or later)
 Qt (>=4.4)
 CMake (>=2.8)
@@ -34,15 +31,7 @@ See http://stackoverflow.com/questions/1865069/how-to-compile-a-64-bit-applicati
 
 GNAT
 An Ada compiler capable of generating 64 bit is necessary only if you want to build a 64 bit Ada application.
-Even if you are not concerned with Ada at all you still need an Ada compilator to build the offline tool (dots_v.exe) that is used to generate
-all language interfaces, however, in this case it is sufficient with the 32 bit version.
 The easiest way of getting an open source Ada compiler is to use the GNAT GPL package provided by AdaCore (Unfortunately, it doesn't support 64 bit).
-
-Templates-Parser
-See GNAT.
-
-XMLAda
-See GNAT.
 
 Boost
 64 bit build is mandatory.
@@ -112,13 +101,6 @@ Instructions for building with VS2010. This should be able to adapt to VS2005/20
    >configure -debug-and-release -opensource
    >nmake
 
-MinGW and MSYS
-~~~~~~~~~~~~~~
-MinGW and MSYS are not requirements of Safir SDK Core, but some of the installations of the other prerequisites need more stuff from MinGW and MSYS, so we have to install them. Fortunately, as of 2012 they're now in the same installer, so this step is easier than it used to be.
-
-Download the mingw-get-inst from http://www.mingw.org (direct link: http://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/) and run it. 
-In the "Select Components" step, add MSYS and the Developer Toolkit to the stuff to be installed. Install to C:\MinGW, or you'll get into trouble later.
-
 CMake
 ~~~~~
 Go to http://www.cmake.org/ and download and install the CMake installer.
@@ -143,22 +125,10 @@ Go to http://expat.sourceforge.net/ and download and install the binary installe
 For both 32 and 64 bit builds:
 Add <expat dir>\bin to your PATH, where <expat dir> is the location where expat got installed.
 
-GNAT and Ada libraries
-~~~~~~~~~~~~~~~~~~~~~~
+GNAT
+~~~~
 Go to http://libre.adacore.com/ and download the GPL version of GNAT. Also download XMLAda and AWS.
 Install GNAT. (and reboot, as the installer says)
-Install xmlada:
-        unzip xmlada to C:\xmlada
-        open a MSYS command prompt (Start --> All Programs --> MinGW --> MinGW shell) and do "cd /c/xmlada"
-        run "./configure --prefix=C:/GNAT/2011" (note the direction of the slashes!)
-        run "make" and then "make install"
-        (delete c:\xmlada, it is no longer needed)
-
-Install AWS/templates_parser:
-        unzip aws into c:\aws
-        open a MSYS command prompt (Start --> All Programs --> MinGW --> MinGW shell) and do "cd /c/aws/templates_parser"
-        run "make setup build install"
-        (delete c:\aws since it is no longer needed)
 
 Add c:\GNAT\2011\lib to your PATH.
 
