@@ -24,9 +24,13 @@
 #
 ###############################################################################
 
+# Prepared for Python 3
+from __future__ import print_function
+
 import sys, os, re, hashlib
 import xml.etree.ElementTree as ET
 from glob import glob
+
 
 CURRENT_SECTION = None
 CURRENT_GENERATED_FILENAME = None
@@ -140,7 +144,7 @@ def dou_uniform_lookup_init():
 def dou_uniform_lookup(typename):
     if typename in duo_uniform_lookup_cache: return duo_uniform_lookup_cache[typename]
                 
-    print >> sys.stderr, "** ERROR - Cannot match dou type", typename
+    print("** ERROR - Cannot match dou type", typename, file=sys.stderr)
     return "** ERROR - Cannot match dou type"
 
 namespace_prefixes = {}
@@ -358,7 +362,7 @@ def parse_dou(dou_xmlfile):
                                 elif len(dod_types[found_member.type].dependency) > 0:
                                     parsed.unique_dependencies.append(dod_types[found_member.type].dependency)
                             else:
-                                print >> sys.stderr, ">!< cannot find member reference", p.text
+                                print(">!< cannot find member reference", p.text, file=sys.stderr)
                     elif parameter_tag == "parameter":
                         
                         m_type = readTextPropery(p, "type")
@@ -387,7 +391,7 @@ def parse_dou(dou_xmlfile):
 
                     
                     else:
-                        print >> sys.stderr, "** ERROR unknown CreateRoutineParameter subtag", parameter_tag
+                        print("** ERROR unknown CreateRoutineParameter subtag", parameter_tag, file=sys.stderr)
 
             values = []
             vs = cr.find("{urn:safir-dots-unit}values")
@@ -498,7 +502,7 @@ def read_dod_parameter(line, parameter_name, dod_parameters):
     if line.startswith(parameter_name): 
         # All parameters are strings with quotes
         dod_parameters[parameter_name] = line.split("\"")[1]
-        if loglevel > 5: print "[DEBUG5]", parameter_name , "is: [" , dod_parameters[parameter_name] , "]"
+        if loglevel > 5: print("[DEBUG5]", parameter_name , "is: [" , dod_parameters[parameter_name] , "]")
         return 1
         
     return 0
@@ -506,7 +510,7 @@ def read_dod_parameter(line, parameter_name, dod_parameters):
 def are_dod_parameters_complete(dod_parameters, dod_parameter_names):
     for dp in dod_parameter_names:
         if not dod_parameters.has_key(dp): 
-            print >> sys.stderr, "** Missing parameter:", dp
+            print("** Missing parameter:", dp, file=sys.stderr)
             return 0
     return 1
     
@@ -530,7 +534,7 @@ def read_dod_exception(line, dod_exceptions):
     
     parsed_exception = DodException(dou_name, generated, dependency)
     dod_exceptions[parsed_exception.dou_name] = parsed_exception
-    if loglevel > 5: print "[DEBUG5]", parsed_exception.dou_name , "is: [" , parsed_exception.printme() , "]"
+    if loglevel > 5: print("[DEBUG5]", parsed_exception.dou_name , "is: [" , parsed_exception.printme() , "]")
     
     return 0
 
@@ -558,7 +562,7 @@ def read_dod_type(line, dod_types):
     
     parsed_type = DodType(dou_name, set_get, set_get, generated, dependency)
     dod_types[parsed_type.dou_name] = parsed_type
-    if loglevel > 5: print "[DEBUG5]", parsed_type.dou_name , "is: [" , parsed_type.printme() , "]"
+    if loglevel > 5: print("[DEBUG5]", parsed_type.dou_name , "is: [" , parsed_type.printme() , "]")
     
     return 0
 
@@ -577,7 +581,7 @@ def underscore_formatter(name, style):
         s4 = re.sub('([A-Za-z])([0-9])', r'\1_\2', s3)
         return s4
     else:
-        print >> sys.stderr, "** Error, unsupported underscore format", style
+        print("** Error, unsupported underscore format", style, file=sys.stderr)
         return name
 
 def case_formatter(name, style):
@@ -586,7 +590,7 @@ def case_formatter(name, style):
     elif style == "Upper": return name.upper()
     elif style == "Lower": return name.lower()
     else:
-        print >> sys.stderr, "** Error, unsupported case format", style
+        print("** Error, unsupported case format", style, file=sys.stderr)
         return name
 
 def separator_formatter(name, style):
@@ -806,7 +810,7 @@ def process_at_variable_lookup(var, dou, table_line, parent_table_line):
         else:
             return enum_formatter(dou.values[index])
     elif var == "ENUMVALUE'LENGTH": return get_iterator_length("ENUMVALUE", dou, 0, 0)
-    print >> sys.stderr, "** ERROR - invalíd var lookup,", var
+    print("** ERROR - invalíd var lookup,", var, file=sys.stderr)
     return None
 
 def get_iterator_length(var, dou, table_line, parent_table_line):
@@ -832,7 +836,7 @@ def get_iterator_length(var, dou, table_line, parent_table_line):
     elif var == "PARAMETER" or var == "PARAMETERSUMMARY" : return len(dou.parameters)
     elif var == "ENUMVALUE" : return len(dou.values)
     
-    print >> sys.stderr, "** ERROR ** - bad iterator: ", var
+    print("** ERROR ** - bad iterator: ", var, file=sys.stderr)
     return -1
 
 def create_parameter_is_array(dou, table_line, parent_table_line):
@@ -901,7 +905,7 @@ def process_at_exist(at_string, dou, table_line, parent_table_line):
     elif var == "CREATEVALUEISARRAY": return create_value_is_array(dou, table_line, parent_table_line)
     elif var == "CREATEVALUEPARAMETERINDEX": return create_value_parameter_index(dou, table_line, parent_table_line)        
     else:
-        print "process_at_exist: Missing", var
+        print("process_at_exist: Missing", var, file=sys.stderr)
         return False
     
 def process_at_line(line, dou, table_line, parent_table_line, strings_with_quotes):
@@ -911,7 +915,7 @@ def process_at_line(line, dou, table_line, parent_table_line, strings_with_quote
         post = process_at_line(post, dou, table_line, parent_table_line, strings_with_quotes)
         processed = process_at_str(at_string, dou, table_line, parent_table_line, strings_with_quotes)
         if processed is None: 
-            if loglevel >= 4: print >> sys.stderr, "** Warning: Lookup of nonexistent variable: ", at_string, table_line, parent_table_line
+            if loglevel >= 4: print("** Warning: Lookup of nonexistent variable: ", at_string, table_line, parent_table_line, file=sys.stderr)
             processed = ""
         
         return pre + processed + post
@@ -1014,7 +1018,7 @@ def process_at_str(at_string, dou, table_line, parent_table_line, strings_with_q
                 result = re.sub(ptn, repl, result)
                 
             else:
-                print >> sys.stderr, "** ERROR - Unknown @ command", command
+                print("** ERROR - Unknown @ command", command, file=sys.stderr)
     
     if strings_with_quotes and isinstance(result, str) and not result.isdigit(): result = '"' + result + '"'
     elif isinstance(result, (bool, int)): result = str(result)
@@ -1185,7 +1189,7 @@ def parse_parameters(line):
                 break
             
     if not valid_parameter:
-        print >> sys.stderr, "** ERROR - Cannot parse parameter line:", line
+        print("** ERROR - Cannot parse parameter line:", line, file=sys.stderr)
 
     
 if_level = 0        
@@ -1258,22 +1262,21 @@ def parse_if_clause(current_line, file, dou, process_if_content, table_line, par
                 write_to_file(line)
         # else we skip the line
 
-import codecs
 def write_to_file(s):
     global CURRENT_GENERATED_FILENAME
     global CURRENT_GENERATED_FILE
     
     if CURRENT_GENERATED_FILE is None: 
-        CURRENT_GENERATED_FILE = open(CURRENT_GENERATED_FILENAME, "wt") #codecs.open(CURRENT_GENERATED_FILENAME, "wb", "utf-8")
+        CURRENT_GENERATED_FILE = open(CURRENT_GENERATED_FILENAME, "wt") 
         if CURRENT_GENERATED_FILE is None:
-            print >> sys.stderr, "** ERROR - could not open output file!", CURRENT_GENERATED_FILENAME
+            print("** ERROR - could not open output file!", CURRENT_GENERATED_FILENAME, file=sys.stderr)
             sys.exit(1)
             
     # TODO - wierd way that the original parses the .dod, decide later if we should remove this
     if s != "\n" and s.strip() == "": return 
 
     CURRENT_GENERATED_FILE.write(s.encode('utf8'))
-    if loglevel >=4 : print >> sys.stderr, s,
+    if loglevel >=4 : print(s, end='', file=sys.stderr)
     
 
 def mkdir(newdir):
@@ -1323,7 +1326,7 @@ class FileReader(object):
     def get_next_line(self):
         if self.index < len(self.lines): 
             self.index += 1
-            if loglevel >= 5: print self.lines[self.index-1],
+            if loglevel >= 5: print(self.lines[self.index-1], end='')
             return self.lines[self.index-1]
         return ""
             
@@ -1366,7 +1369,7 @@ def dod_init(dod_filename):
     
     parse_dod(dod_file, None)
     if not are_dod_parameters_complete(dod_parameters, dod_parameter_names):
-        print >> sys.stderr, "** ERROR - missing mandatory parameters, check ", dod_file
+        print("** ERROR - missing mandatory parameters, check ", dod_file, file=sys.stderr)
         sys.exit(1)
     
     dod_file.seek(0)
@@ -1445,75 +1448,114 @@ def generator_main(dod_file, dou_filename, gen_src_output_path):
                 
     # end for
     
-import argparse
     
 def main():
     global dou_file_root
     global loglevel
+
+    # Argument parsing is Python version dependent
+    use_argparse = False
+    if sys.version_info[0] == 2 and sys.version_info[1] >= 7:
+        # Was added in 2.7
+        use_argparse = True
+    elif sys.version_info[0] <= 2 and sys.version_info[1] < 6:
+        print("Update your Python version, 2.6 or higher required by this module", file=sys.stderr)
+        sys.exit(1)
+    elif sys.version_info[0] == 3 and sys.version_info[1] >= 2:
+        # Was added in 3.2, all 3.x version support optparse
+        use_argparse = True
     
-    parser = argparse.ArgumentParser(description='Source code generator tool for Safir SDK Core. Processes .dou files into source code for all supported languages. Files are generated in language specific subdirectories of root path of processed dou files.')
+    arguments = None
+    if use_argparse:
+        import argparse
+
+        parser = argparse.ArgumentParser(description='Source code generator tool for Safir SDK Core. Processes .dou files into source code for all supported languages. Files are generated in language specific subdirectories of root path of processed dou files.')
     
-    parser.add_argument('dou_files', metavar='DOU_FILE(S)', help='.dou file(s) to process. Accepts wildcards (*). If a directory is specified, all .dou files in the directory are processed (recursive)')
-    parser.add_argument('-dod', '--dod_files', metavar='DOD_FILE(S)', required=True, help='Specifies .dod files to use as templates for the processing. Accepts wildcards (*). If it is a directory, all .dod files in that directory are used.')
-    parser.add_argument('-xdir', '--dou_root', metavar='DOU_ROOT', required=True, help='Path to the top directory containing the .dou files')
-    parser.add_argument('-o', '--output_path', metavar='OUTPUT_PATH', required=False, default='', help='Directory where the generated file structure starts. Defaults to current working directory.')
-    parser.add_argument('-i', '-info', '--show_files', required=False, default=False, action='store_true', help='Prints out the dod and dou filenames for each parsing')
-    parser.add_argument('-v', '-verbose', '--show_parsing', required=False, default=False, action='store_true', help='Prints debugging info from the parsing to stderr')
+        parser.add_argument('dou_files', metavar='DOU_FILE(S)', help='.dou file(s) to process. Accepts wildcards (*). If a directory is specified, all .dou files in the directory are processed (recursive)')
+        parser.add_argument('-dod', '--dod', '--dod_files', dest='dod_files', metavar='DOD_FILE(S)', required=True, help='Specifies .dod files to use as templates for the processing. Accepts wildcards (*). If it is a directory, all .dod files in that directory are used.')
+        parser.add_argument('-xdir', '--xdir', '--dou_root', dest='dou_root', metavar='DOU_ROOT', required=True, help='Path to the top directory containing the .dou files')
+        parser.add_argument('-o', '--output_path', dest='output_path', metavar='OUTPUT_PATH', required=False, default='', help='Directory where the generated file structure starts. Defaults to current working directory.')
+        parser.add_argument('-i', '-info', '--info', '--show_files', dest='show_files', required=False, default=False, action='store_true', help='Prints out the dod and dou filenames for each parsing')
+        parser.add_argument('-v', '-verbose', '--verbose', '--show_parsing', dest='show_parsing', required=False, default=False, action='store_true', help='Prints debugging info from the parsing to stderr')
     
-    args = parser.parse_args()
+        arguments = parser.parse_args()
+    else:
+        import optparse
+        ## Preparse option names, optparse does not support single dash options with long names
+        ## This is only supported because the old dots_v supports it
+        for i in range(len(sys.argv)):
+            if i == 0: continue
+            if sys.argv[i] == "-dod" or sys.argv[i].startswith("-dod="): sys.argv[i] = sys.argv[i].replace("-dod", "--dod")            
+            if sys.argv[i] == "-xdir" or sys.argv[i].startswith("-xdir="): sys.argv[i] = sys.argv[i].replace("-xdir", "--xdir")
+            if sys.argv[i] == "-info" : sys.argv[i] = "--info"
+            if sys.argv[i] == "-verbose" : sys.argv[i] = "--verbose"
+        
+        parser = optparse.OptionParser(usage='usage: %prog [options] DOU_FILE(S)', description='Source code generator tool for Safir SDK Core. Processes .dou files into source code for all supported languages. Files are generated in language specific subdirectories of root path of processed dou files. DOU_FILE(S): .dou file(s) to process. Accepts wildcards (*). If a directory is specified, all .dou files in the directory are processed (recursive)')
+    
+        parser.add_option('--dod', '--dod_files', dest='dod_files', metavar='DOD_FILE(S)', default='-', help='Specifies .dod files to use as templates for the processing. Accepts wildcards (*). If it is a directory, all .dod files in that directory are used.')
+        parser.add_option('--xdir', '--dou_root', dest='dou_root', metavar='DOU_ROOT', default='-', help='Path to the top directory containing the .dou files')
+        parser.add_option('--output_path', '-o', dest='output_path', metavar='OUTPUT_PATH', default='', help='Directory where the generated file structure starts. Defaults to current working directory.')
+        parser.add_option( '-i', '--info', '--show_files', dest='show_files', default=False, action='store_true', help='Prints out the dod and dou filenames for each parsing')
+        parser.add_option('-v', '--verbose', '--show_parsing', dest='show_parsing', default=False, action='store_true', help='Prints debugging info from the parsing to stderr')
+    
+        ## Check existense
+    
+        (arguments, args) = parser.parse_args()
+        if len(args) == 0: arguments.dou_files
+        else: arguments.dou_files = args[0]
 
     dod_files = []
-    if os.path.isdir(args.dod_files):
-        normalized_path = os.path.abspath(args.dod_files) + os.sep    
+    if os.path.isdir(arguments.dod_files):
+        normalized_path = os.path.abspath(arguments.dod_files) + os.sep    
         for dod_file in os.listdir(normalized_path + "."):
             if dod_file.endswith(".dod"):
                 dod_files.append(normalized_path + dod_file)
-    elif os.path.isfile(args.dod_files):
-        dod_files.append(args.dod_files)
-    elif args.dod_files.find("*") != -1:
+    elif os.path.isfile(arguments.dod_files):
+        dod_files.append(arguments.dod_files)
+    elif arguments.dod_files.find("*") != -1:
         # Has wildcard
-        dod_files = glob(args.dod_files)
+        dod_files = glob(arguments.dod_files)
     
     if len(dod_files) == 0 or not os.path.isfile(dod_files[0]):
-        print >> sys.stderr, "Invalid argument for dod files."
+        print("Invalid argument for dod files.", file=sys.stderr)
         sys.exit(1)
     
-    dou_file_root = os.path.abspath(args.dou_root) + os.sep
+    dou_file_root = os.path.abspath(arguments.dou_root) + os.sep
     if not os.path.isdir(dou_file_root):
-        print >> sys.stderr, "Invalid argument for dou root."
+        print("Invalid argument for dou root.", file=sys.stderr)
         sys.exit(1)
 
-    gen_src_output_path = args.output_path
+    gen_src_output_path = arguments.output_path
     if gen_src_output_path == "":
         gen_src_output_path = os.getcwd()
     else:
         if not os.path.isdir(gen_src_output_path):
             mkdir(gen_src_output_path)
             if not os.path.isdir(gen_src_output_path):
-                print >> sys.stderr, "Invalid argument for output path."
+                print("Invalid argument for output path.", file=sys.stderr)
                 sys.exit(1)
     gen_src_output_path = os.path.abspath(gen_src_output_path) + os.sep
     
         
     dou_files = []    
-    if os.path.isdir(args.dou_files):
-        for path, dirs, files in os.walk(args.dou_files): # Walk directory tree
+    if os.path.isdir(arguments.dou_files):
+        for path, dirs, files in os.walk(arguments.dou_files): # Walk directory tree
             for file in files:
                 if file.endswith(".dou"):
                     dou_files.append(path + os.sep + file)
-    elif os.path.isfile(args.dou_files):
-        path, file = os.path.split(args.dou_files)
-        dou_files.append(args.dou_files)
-    elif args.dou_files.find("*") != -1:
+    elif os.path.isfile(arguments.dou_files):
+        path, file = os.path.split(arguments.dou_files)
+        dou_files.append(arguments.dou_files)
+    elif arguments.dou_files.find("*") != -1:
         # Has wildcard
-        path, file = os.path.split(args.dou_files)
-        dou_files = glob(args.dou_files)
+        path, file = os.path.split(arguments.dou_files)
+        dou_files = glob(arguments.dou_files)
     
     if len(dou_files) == 0:
-        print >> sys.stderr, "No valid dou files to process."
+        print("No valid dou files to process.", file=sys.stderr)
         sys.exit(1)
 
-    if args.show_parsing: loglevel = 4
+    if arguments.show_parsing: loglevel = 4
     
     # Prepare dou uniform lookup table
     dou_uniform_lookup_init()
@@ -1522,7 +1564,7 @@ def main():
         dod_file = dod_init(dod_filename)
         ## Execute in threads?
         for dou_file in dou_files:
-            if args.show_files: print >> sys.stderr, ">>Processing", dod_filename, "  ", dou_file
+            if arguments.show_files: print(">>Processing", dod_filename, "  ", dou_file, file=sys.stderr)
             generator_main(dod_file, dou_file, gen_src_output_path)
     
     return 0
