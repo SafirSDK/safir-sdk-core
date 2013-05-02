@@ -125,7 +125,7 @@ Type:Watt64:Float_64:"Safir.Dob.Typesystem.Si_64.Watt":""
 @@--
 @@-- PROPERTY
 @@--
-@@IF@@ not @_MATCH(:String:):DEPENDENCY_@ and @_EXIST:MEMBER_@
+@@IF@@ not @_MATCH(.*:String:.*):DEPENDENCY_@ and @_EXIST:MEMBER_@
 with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 @@END_IF@@
 with Safir.Dob.Typesystem.Members;
@@ -385,7 +385,7 @@ pragma Elaborate_All (Safir.Dob.Typesystem.Blob_Operations);
 with Safir.Dob.Typesystem.Object.Factory;
 pragma Elaborate_All (Safir.Dob.Typesystem.Object.Factory);
 @@IF@@ @_MATCH(.*:Entity_Id:.*):DEPENDENCY_@
-@@IF@@ not((@_PARAMETER'Length_@>0_@ or @_CREATEROUTINE'Length_@>0 )and not @_MEMBER'Length_@>0)
+@@IF@@ (not (@_PARAMETER'Length_@>0 or @_CREATEROUTINE'Length_@>0)) and @_MEMBER'Length_@>0
 with Safir.Dob.Typesystem.Entity_Id;
 pragma Warnings (Off, Safir.Dob.Typesystem.Entity_Id);
 @@END_IF@@
@@ -394,18 +394,18 @@ with Safir.Dob.Typesystem.Instance_Id;
 @@END_IF@@
 @@END_IF@@
 @@IF@@ @_MATCH(.*:Instance_Id:.*):DEPENDENCY_@
-@@IF@@ not((@_PARAMETER'Length_@>0_@ or @_CREATEROUTINE'Length_@>0 )and not @_MEMBER'Length_@>0)
+@@IF@@ (not (@_PARAMETER'Length_@>0 or @_CREATEROUTINE'Length_@>0)) and @_MEMBER'Length_@>0
 with Safir.Dob.Typesystem.Instance_Id;
 @@END_IF@@
 @@END_IF@@
 @@IF@@ @_MATCH(.*:Channel_Id:.*):DEPENDENCY_@
-@@IF@@ not((@_PARAMETER'Length_@>0_@ or @_CREATEROUTINE'Length_@>0 )and not @_MEMBER'Length_@>0)
+@@IF@@ (not (@_PARAMETER'Length_@>0 or @_CREATEROUTINE'Length_@>0)) and @_MEMBER'Length_@>0
 with Safir.Dob.Typesystem.Channel_Id;
 pragma Warnings (Off, Safir.Dob.Typesystem.Channel_Id);
 @@END_IF@@
 @@END_IF@@
 @@IF@@ @_MATCH(.*:Handler_Id:.*):DEPENDENCY_@
-@@IF@@ not((@_PARAMETER'Length_@>0_@ or @_CREATEROUTINE'Length_@>0 )and not @_MEMBER'Length_@>0)
+@@IF@@ (not (@_PARAMETER'Length_@>0 or @_CREATEROUTINE'Length_@>0)) and @_MEMBER'Length_@>0
 with Safir.Dob.Typesystem.Handler_Id;
 @@END_IF@@
 @@END_IF@@
