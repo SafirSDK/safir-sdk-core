@@ -26,11 +26,12 @@
 
 # Prepared for Python 3
 from __future__ import print_function
+##from __future__ import unicode_literals
 
 import sys, os, re, hashlib
 import xml.etree.ElementTree as ET
 from glob import glob
-
+import codecs
 
 CURRENT_SECTION = None
 CURRENT_GENERATED_FILENAME = None
@@ -166,7 +167,7 @@ def namespace_prefix_init():
     for path, dirs, files in os.walk(dou_file_root): # Walk directory tree
         for file in files:
             if file.endswith(dod_parameters['Namespace_Prefix_File_Suffix']):
-                prefix_file = open(os.path.join(path, file))
+                prefix_file = codecs.open(os.path.join(path, file), "r", encoding="utf-8")
                 found = False
                 line = prefix_file.readline()
                 while len(line) > 0 and not found:
@@ -575,7 +576,7 @@ def underscore_formatter(name, style):
         #    - number preceeded by capital or small letter
         #    - small letter preceeded by a number
         #    - last capital letter in a sequence of capital letters, if followed by small letter or number
-        s1 = re.sub('([^\._:¤])([A-Z][a-z]+)', r'\1_\2', name)
+        s1 = re.sub(u'([^\._:\u00A4])([A-Z][a-z]+)', r'\1_\2', name)
         s2 = re.sub('([a-z])([A-Z])', r'\1_\2', s1)
         s3 = re.sub('([0-9])([A-Za-z])', r'\1_\2', s2)
         s4 = re.sub('([A-Za-z])([0-9])', r'\1_\2', s3)
@@ -704,7 +705,7 @@ def summary_formatter(summary):
     return summary
 
 def md5_first64(str):
-    digest = hashlib.md5(str).hexdigest()
+    digest = hashlib.md5(str.encode("utf-8")).hexdigest()
     md5_first64_bytes = digest[:16]
     if sys.byteorder == "little":
         md5_first64_bytes = digest[14:16] + digest[12:14] + digest[10:12] + digest[8:10] + digest[6:8] + digest[4:6] + digest[2:4] + digest[0:2]
@@ -724,7 +725,7 @@ def process_at_variable_lookup(var, dou, table_line, parent_table_line):
     elif var == "DEPENDENCY": 
         # Special case - the ADA dod file uses an uniterated MATCH(..):DEPENDENCY, which means match to all strings in the iterator
         if index < 0: 
-            return dependency_formatter("¤".join(dou.unique_dependencies))
+            return dependency_formatter(u"\u00A4".join(dou.unique_dependencies))
         return dou.unique_dependencies[index]
     elif var == "DEPENDENCYBASE": return dou.dependency_base[index]
     elif var == "TABLE_LINE": return table_line
@@ -995,13 +996,13 @@ def process_at_str(at_string, dou, table_line, parent_table_line, strings_with_q
                 # ensure we only remove leading and last parentheses in case 
                 # there are any in the expression
                 rc1 = command[command.find("(")+1:-1]
-                # first replace all escaped slashes with something else
-                rc1 = rc1.replace("\/", "¤")
+                # first replace all escaped slashes with something else (¤)
+                rc1 = rc1.replace("\/", u"\u00A4")
                 # Then split on the non-espaced slash
                 ptn, repl = rc1.split("/",1)
                 # now put the slashes back, unescaped
-                ptn = ptn.replace("¤", "/")
-                repl = repl.replace("¤", "/")
+                ptn = ptn.replace(u"\u00A4", "/")
+                repl = repl.replace(u"\u00A4", "/")
                 result = re.sub(ptn, repl, result, 1)
                 
             elif command.startswith("REPLACE_ALL("):
@@ -1009,19 +1010,19 @@ def process_at_str(at_string, dou, table_line, parent_table_line, strings_with_q
                 # there are any in the expression
                 rc1 = command[command.find("(")+1:-1]
                 # first replace all escaped slashes with something else
-                rc1 = rc1.replace("\/", "¤")
+                rc1 = rc1.replace("\/", u"\u00A4")
                 # Then split on the non-espaced slash
                 ptn, repl = rc1.split("/",1)
                 # now put the slashes back, unescaped
-                ptn = ptn.replace("¤", "/")
-                repl = repl.replace("¤", "/")
+                ptn = ptn.replace(u"\u00A4", "/")
+                repl = repl.replace(u"\u00A4", "/")
                 result = re.sub(ptn, repl, result)
                 
             else:
                 print("** ERROR - Unknown @ command", command, file=sys.stderr)
     
-    if strings_with_quotes and isinstance(result, str) and not result.isdigit(): result = '"' + result + '"'
-    elif isinstance(result, (bool, int)): result = str(result)
+    if isinstance(result, (bool, int)): result = str(result)
+    elif strings_with_quotes and not result.isdigit(): result = '"' + result + '"'
     return result
 
 def get_at_string_iterator_length(line, dou, table_line, parent_table_line):
@@ -1267,7 +1268,7 @@ def write_to_file(s):
     global CURRENT_GENERATED_FILE
     
     if CURRENT_GENERATED_FILE is None: 
-        CURRENT_GENERATED_FILE = open(CURRENT_GENERATED_FILENAME, "wt") 
+        CURRENT_GENERATED_FILE = codecs.open(CURRENT_GENERATED_FILENAME, "w", encoding="utf-8") 
         if CURRENT_GENERATED_FILE is None:
             print("** ERROR - could not open output file!", CURRENT_GENERATED_FILENAME, file=sys.stderr)
             sys.exit(1)
@@ -1275,7 +1276,11 @@ def write_to_file(s):
     # TODO - wierd way that the original parses the .dod, decide later if we should remove this
     if s != "\n" and s.strip() == "": return 
 
-    CURRENT_GENERATED_FILE.write(s.encode('utf8'))
+    # Make the line endings native
+    s = s.replace("\n", os.linesep)
+    
+    CURRENT_GENERATED_FILE.write(s)
+    #CURRENT_GENERATED_FILE.write(s.encode('utf8'))
     if loglevel >=4 : print(s, end='', file=sys.stderr)
     
 
@@ -1300,22 +1305,36 @@ def mkdir(newdir):
 # Faster file reader, buffers all in memory (good since we loop through same file multiple times)
 class FileReader(object):
     def __init__(self, filename, preprocess):
-        file = open(filename, "rt")
+        file = codecs.open(filename, "r", encoding="utf-8")
         self.index = 0
         # reads up all the lines of the file in memory
         self.lines = file.readlines()
         file.close()
         
         # preprocess
-        if preprocess:
+        if preprocess :            
+            eol_string = ""
             for i in range(len(self.lines)):
-                # TODO - wierd way that the original parses the .dod, decide later if we should remove this
-                # All lines with spaces before the newline marker are skipped in the output by the old parser...
-                line = self.lines[i]
-                if line != "\n" and line.strip() == "": continue
+                # Replace the files EOL with plain \n. This is converted to native EOL style when we write the output files
+                if i == 0: 
+                    if self.lines[0].endswith("\r\n"): eol_string = "\r\n"
+                    elif self.lines[0].endswith("\n"): eol_string = "\n"
+                    elif self.lines[0].endswith("\r"): eol_string = "\r"
+                    else:
+                        print("** ERROR, file", filename, "has unknown EOL characters", file=sys.stderr)
+                        sys.exit(1)
+                
+                if eol_string != "\n":
+                    self.lines[i] = self.lines[i].replace(eol_string, "\n")
+                
+                if preprocess:
+                    # TODO - wierd way that the original parses the .dod, decide later if we should remove this
+                    # All lines with spaces before the newline marker are skipped in the output by the old parser...
+                    line = self.lines[i]
+                    if line != "\n" and line.strip() == "": continue
         
-                # Removed trailing whitespaces, we add the linebreak again to distinguish this from EOF
-                self.lines[i] = line.rstrip() + "\n"
+                    # Removed trailing whitespaces, we add the linebreak again to distinguish this from EOF
+                    self.lines[i] = line.rstrip() + "\n"
     
     def tell(self):
         return self.index
@@ -1414,7 +1433,7 @@ def generator_main(dod_file, dou_filename, gen_src_output_path):
                 dod_file.seek(0)
                 if CURRENT_GENERATED_FILE is not None:
                     # Write final newline and close
-                    CURRENT_GENERATED_FILE.write("\n")
+                    CURRENT_GENERATED_FILE.write(os.linesep)
                     CURRENT_GENERATED_FILE.close()
                     CURRENT_GENERATED_FILE = None
                 
@@ -1442,7 +1461,7 @@ def generator_main(dod_file, dou_filename, gen_src_output_path):
             parse_dod(dod_file, dou)
             if CURRENT_GENERATED_FILE is not None:
                 # Write final newline and close
-                CURRENT_GENERATED_FILE.write("\n")
+                CURRENT_GENERATED_FILE.write(os.linesep)
                 CURRENT_GENERATED_FILE.close()
                 CURRENT_GENERATED_FILE = None
                 
