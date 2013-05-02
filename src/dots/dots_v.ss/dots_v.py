@@ -509,7 +509,7 @@ def read_dod_parameter(line, parameter_name, dod_parameters):
 
 def are_dod_parameters_complete(dod_parameters, dod_parameter_names):
     for dp in dod_parameter_names:
-        if not dod_parameters.has_key(dp): 
+        if not dp in dod_parameters: 
             print("** Missing parameter:", dp, file=sys.stderr)
             return 0
     return 1
