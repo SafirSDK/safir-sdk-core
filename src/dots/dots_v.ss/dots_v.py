@@ -4,7 +4,7 @@
 #
 # Copyright Saab AB, 2013 (http://www.safirsdk.com)
 #
-# Created by: Björn Weström
+# Created by: BjÃ¶rn WestrÃ¶m
 #
 ###############################################################################
 #
@@ -155,13 +155,13 @@ def namespace_prefix_init():
     
     if dod_parameters['Namespace_Prefix_File_Suffix'] == "" : return
     if len(namespace_prefixes) != 0 and \
-            (namespace_prefixes["¤¤Namespace_Prefix_File_Suffix¤¤"] == \
+            (namespace_prefixes["Â¤Â¤Namespace_Prefix_File_SuffixÂ¤Â¤"] == \
             dod_parameters['Namespace_Prefix_File_Suffix']):
         # The dict has already been initialized for this file suffix, leave it
         return
     
     namespace_prefixes.clear()
-    namespace_prefixes["¤¤Namespace_Prefix_File_Suffix¤¤"] = dod_parameters['Namespace_Prefix_File_Suffix']
+    namespace_prefixes["Â¤Â¤Namespace_Prefix_File_SuffixÂ¤Â¤"] = dod_parameters['Namespace_Prefix_File_Suffix']
     
     for path, dirs, files in os.walk(dou_file_root): # Walk directory tree
         for file in files:
@@ -570,12 +570,12 @@ def underscore_formatter(name, style):
     if style == "Keep": return name
     elif style == "Add":
         # Underscores allowed before 
-        #    - word (captial + small) preceeded by any char except . _ : ¤
+        #    - word (captial + small) preceeded by any char except . _ : Â¤
         #    - capital letter preceeded with small letter or number
         #    - number preceeded by capital or small letter
         #    - small letter preceeded by a number
         #    - last capital letter in a sequence of capital letters, if followed by small letter or number
-        s1 = re.sub('([^\._:¤])([A-Z][a-z]+)', r'\1_\2', name)
+        s1 = re.sub('([^\._:Â¤])([A-Z][a-z]+)', r'\1_\2', name)
         s2 = re.sub('([a-z])([A-Z])', r'\1_\2', s1)
         s3 = re.sub('([0-9])([A-Za-z])', r'\1_\2', s2)
         s4 = re.sub('([A-Za-z])([0-9])', r'\1_\2', s3)
@@ -724,7 +724,7 @@ def process_at_variable_lookup(var, dou, table_line, parent_table_line):
     elif var == "DEPENDENCY": 
         # Special case - the ADA dod file uses an uniterated MATCH(..):DEPENDENCY, which means match to all strings in the iterator
         if index < 0: 
-            return dependency_formatter("¤".join(dou.unique_dependencies))
+            return dependency_formatter("Â¤".join(dou.unique_dependencies))
         return dou.unique_dependencies[index]
     elif var == "DEPENDENCYBASE": return dou.dependency_base[index]
     elif var == "TABLE_LINE": return table_line
@@ -810,7 +810,7 @@ def process_at_variable_lookup(var, dou, table_line, parent_table_line):
         else:
             return enum_formatter(dou.values[index])
     elif var == "ENUMVALUE'LENGTH": return get_iterator_length("ENUMVALUE", dou, 0, 0)
-    print("** ERROR - invalíd var lookup,", var, file=sys.stderr)
+    print("** ERROR - invalÃ­d var lookup,", var, file=sys.stderr)
     return None
 
 def get_iterator_length(var, dou, table_line, parent_table_line):
@@ -996,12 +996,12 @@ def process_at_str(at_string, dou, table_line, parent_table_line, strings_with_q
                 # there are any in the expression
                 rc1 = command[command.find("(")+1:-1]
                 # first replace all escaped slashes with something else
-                rc1 = rc1.replace("\/", "¤")
+                rc1 = rc1.replace("\/", "Â¤")
                 # Then split on the non-espaced slash
                 ptn, repl = rc1.split("/",1)
                 # now put the slashes back, unescaped
-                ptn = ptn.replace("¤", "/")
-                repl = repl.replace("¤", "/")
+                ptn = ptn.replace("Â¤", "/")
+                repl = repl.replace("Â¤", "/")
                 result = re.sub(ptn, repl, result, 1)
                 
             elif command.startswith("REPLACE_ALL("):
@@ -1009,12 +1009,12 @@ def process_at_str(at_string, dou, table_line, parent_table_line, strings_with_q
                 # there are any in the expression
                 rc1 = command[command.find("(")+1:-1]
                 # first replace all escaped slashes with something else
-                rc1 = rc1.replace("\/", "¤")
+                rc1 = rc1.replace("\/", "Â¤")
                 # Then split on the non-espaced slash
                 ptn, repl = rc1.split("/",1)
                 # now put the slashes back, unescaped
-                ptn = ptn.replace("¤", "/")
-                repl = repl.replace("¤", "/")
+                ptn = ptn.replace("Â¤", "/")
+                repl = repl.replace("Â¤", "/")
                 result = re.sub(ptn, repl, result)
                 
             else:
