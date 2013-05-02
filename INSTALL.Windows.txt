@@ -78,10 +78,11 @@ Add the lib directory of the boost installation (e.g. C:\Program Files\boost\boo
 For some boost versions there are some bugs that need to be patched for Safir SDK to work correctly. The easisest way to install the patches that is needed for your version is to use the CMake file in the build/patches directory, run "cmake . -G 'NMake Makefiles'", "nmake install"
 once you have installed cmake, which will install the correct patches automatically.
 
-TODO: JOM
+jom
+~~~
 
-3. Download the latest version of jom. (Jom is nmake replacement for Qt compilation on multi-core CPU. Its parameter -j N allows to setup number of parallel processes for compilation. Number of physical CPU cores is a good choice for N.)
-#7. Extract jom files to C:\Qt\jom folder
+Jom is an nmake replacement with support for multi-core CPU, which will speed up compilation both of Qt below, and of the Safir SDK Core components. Installing it is optional.
+Download the latest version of jom from http://qt-project.org/wiki/jom, and put the jom executable in a folder that is in your PATH.
 
 Qt
 ~~
@@ -99,7 +100,7 @@ Instructions for building with VS2010. This should be able to adapt to VS2005/20
 4.Run following commands in it:
    >cd c:\Qt\4.8.1
    >configure -debug-and-release -opensource
-   >nmake
+   >jom (or nmake if you didnt install jom)
 
 CMake
 ~~~~~
@@ -127,7 +128,7 @@ Add <expat dir>\bin to your PATH, where <expat dir> is the location where expat 
 
 GNAT
 ~~~~
-Go to http://libre.adacore.com/ and download the GPL version of GNAT. Also download XMLAda and AWS.
+Go to http://libre.adacore.com/ and download the GPL version of GNAT.
 Install GNAT. (and reboot, as the installer says)
 
 Add c:\GNAT\2011\lib to your PATH.
