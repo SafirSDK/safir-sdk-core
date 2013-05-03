@@ -2,10 +2,12 @@ cmake_minimum_required(VERSION 2.8)
 
 #this cmake file just installs the example code into $SAFIR_RUNTIME/sdk/docs/examples
 
+FILE(TO_CMAKE_PATH "$ENV{SAFIR_SDK}" SAFIR_SDK)
+
 INSTALL(
   DIRECTORY ../../examples/
 
-  DESTINATION $ENV{SAFIR_SDK}/docs/examples/
+  DESTINATION ${SAFIR_SDK}/docs/examples/
   
   FILES_MATCHING
   PATTERN "*.dou"
