@@ -93,7 +93,7 @@ namespace Internal
     void Repository::Use()
     {
         m_sharedMemory.reset(new boost::interprocess::managed_shared_memory
-                             (boost::interprocess::open_only,
+                             (boost::interprocess::open_read_only,
                               DOTS_SHMEM_NAME));
         m_classDb.reset(new ClassDatabase(open_only,*m_sharedMemory));
         m_parameterDb.reset(new ParameterDatabase(open_only,*m_sharedMemory));
