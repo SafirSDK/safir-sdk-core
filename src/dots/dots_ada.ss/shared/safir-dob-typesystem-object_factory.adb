@@ -2,7 +2,7 @@
 --
 --  Copyright Saab AB, 2009 (http://www.safirsdk.com)
 --
---  Created by: Anders Widén / stawi
+--  Created by: Anders Widï¿½n / stawi
 --
 -------------------------------------------------------------------------------
 --
@@ -120,15 +120,4 @@ package body Safir.Dob.Typesystem.Object_Factory is
       return Callback_Maps.Element (C).Create_Smart_Ptr.all;
    end Create_Smart_Ptr;
 
-   -- The factory registers the create function for Object ...
-   Object_Create_Callback_Function : constant Safir.Dob.Typesystem.Object_Factory.Create_Object_Callback :=
-                                       Safir.Dob.Typesystem.Object.Create_Object'Access;
-   -- ... and for the smart pointer
-   Smart_Ptr_Create_Callback_Function : constant Safir.Dob.Typesystem.Object_Factory.Create_Smart_Ptr_Callback :=
-                                          Safir.Dob.Typesystem.Object.Create_Smart_Ptr'Access;
-
-begin
-   Register_Type (Safir.Dob.Typesystem.Object.Class_Type_Id,
-                  Object_Create_Callback_Function,
-                  Smart_Ptr_Create_Callback_Function);
 end Safir.Dob.Typesystem.Object_Factory;
