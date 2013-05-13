@@ -256,8 +256,10 @@ class Logger(object):
                 data = self.process.stdout.readline()
                 if not data:
                     break
+                if type(data) is not str:
+                    data = data.decode("utf8")
                 if self.strip_cr:
-                    data = data.decode("utf8").replace('\r','')
+                    data = data.replace('\r','')
                 self.logger.write(data,"pre")
 
     def logOutput(self, process, strip_cr = False):
