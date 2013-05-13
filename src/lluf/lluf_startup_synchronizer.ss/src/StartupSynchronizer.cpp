@@ -24,6 +24,7 @@
 #include <Safir/Utilities/StartupSynchronizer.h>
 #include <boost/thread/once.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/lock_guard.hpp>
 #include <boost/bind.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/filesystem/operations.hpp>

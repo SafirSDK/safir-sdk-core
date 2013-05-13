@@ -35,6 +35,7 @@
 #endif
 
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/lock_guard.hpp>
 #include <boost/thread.hpp>
 
 //and enable the warnings again

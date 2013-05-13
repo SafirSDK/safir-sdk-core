@@ -31,6 +31,7 @@
 #include <Safir/SwReports/Internal/Report.h>
 #include <Safir/Dob/Connection.h>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/lock_guard.hpp>
 
 namespace Safir
 {
