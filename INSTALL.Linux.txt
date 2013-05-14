@@ -62,8 +62,9 @@ export SAFIR_SDK=$HOME/safir/sdk
 export PATH=$PATH:$SAFIR_RUNTIME/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SAFIR_RUNTIME/lib
 export ADA_PROJECT_PATH=$SAFIR_SDK/ada
-export JAVA_HOME=/usr/lib/jvm/default-java/
 -------------
+
+If you have trouble building java stuff you may also need to set the JAVA_HOME environment variable. E.g. add "export JAVA_HOME=/usr/lib/jvm/default-java/" to your .bashrc file.
 
 The easiest way to build Safir SDK Core is to use the build script (a python script that just uses cmake and/or make to build the components and subsystems).
 To run the build script go to the directory that contains the build and src directories, and run 
