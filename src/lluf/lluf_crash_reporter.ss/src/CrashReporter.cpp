@@ -27,7 +27,7 @@
 #include <boost/bind.hpp>
 #include <boost/thread/once.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/thread/lock_guard.hpp>
+#include <boost/thread/locks.hpp>
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
 #define LLUF_CRASH_REPORTER_LINUX

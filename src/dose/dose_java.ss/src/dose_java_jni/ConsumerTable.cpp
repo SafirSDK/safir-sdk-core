@@ -24,7 +24,7 @@
 #include "ConsumerTable.h"
 #include <iostream>
 #include <boost/bind.hpp>
-#include <boost/thread/lock_guard.hpp>
+#include <boost/thread/locks.hpp>
 
 boost::once_flag ConsumerTable::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
