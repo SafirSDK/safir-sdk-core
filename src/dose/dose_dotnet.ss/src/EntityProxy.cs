@@ -293,6 +293,11 @@ namespace Safir.Dob
         /// <item><description>EntitySubscriber.OnUpdatedEntity</description></item>
         /// <item><description>EntitySubscriber.OnDeletedEntity</description></item>
         /// </list><para/>
+        /// Calling this function inside an OnDeletedEntity when the subscription was set up with 
+        /// includeUpdates set to false may yield an entity state that you have not received in an 
+        /// OnNewEntity callback. In fact it will most likely give you one of the updated entity
+        /// states that were filtered out because you didn't include updates.
+        /// <para>
         /// No change flags will be set in the returned entity.
         /// </summary>
         public PreviousEntityProxy Previous

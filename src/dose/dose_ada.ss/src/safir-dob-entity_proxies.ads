@@ -130,6 +130,11 @@ package Safir.Dob.Entity_Proxies is
    --
    -- No change flags will be set in the returned entity.
    --
+   -- Calling this function inside an On_Deleted_Entity when the subscription was set up with 
+   -- Include_Updates set to false may yield an entity state that you have not received in an 
+   -- On_New_Entity callback. In fact it will most likely give you one of the updated entity
+   -- states that were filtered out because you didn't include updates.
+   --
    -- Returns: Previous entity.
    --
    function Get_Previous (Self : in Entity_Proxy)
