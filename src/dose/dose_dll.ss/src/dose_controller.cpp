@@ -2154,9 +2154,10 @@ namespace Internal
         m_postponeCurrent = false;
         m_postpone = false;
 
-        const bool timestampChangeInfo =
-            boost::interprocess::static_pointer_cast<const EntitySubscriptionOptions>
-            (subscription->GetSubscriptionOptions())->timestampChangeInfo;
+        const EntitySubscriptionOptions & subscriptionOptions =
+            *boost::interprocess::static_pointer_cast<const EntitySubscriptionOptions>(subscription->GetSubscriptionOptions());
+
+        const bool timestampChangeInfo = subscriptionOptions.timestampChangeInfo;
 
         const ConsumerId consumer = subscription->GetSubscriptionId().connectionConsumer.consumer;
 
@@ -2224,6 +2225,8 @@ namespace Internal
                 //to "fudge" this delete to have the correct states.
                 if (created || updated)
                 {
+                    ENSURE(subscriptionOptions.wantsLastState, << "Unexpected combination of created, updated and deleted (" 
+                           << created << ", " << updated << ", " << deleted << ") when wantsLastState is not set");
                     m_dispatcher.InvokeOnDeletedEntityCb(consumer, currState, currState, deleteIsExplicit, timestampChangeInfo);
                 }
                 else
