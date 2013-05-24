@@ -106,7 +106,7 @@ public class EntityProxy {
         checkNotDisposed();
         if (m_currentBlob == null)
         {
-            throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Not possible to use call Entity on OnDeletedEntity proxy!");
+            throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Not possible to use call getEntity on onDeletedEntity proxy!");
         }
         return (Entity)com.saabgroup.safir.dob.typesystem.ObjectFactory.getInstance().createObject(m_currentBlob);
     }
@@ -228,7 +228,7 @@ public class EntityProxy {
      *
      * This method will give you a pointer to the underlying representation of the object.
      * Note that this pointer is only valid while the EntityProxy is in scope.
-     * If you want to keep the blob you must copy it using methods in Safir::Dob::com.saabgroup.safir.dob.typesystem.
+     * If you want to keep the blob you must copy it using methods in com.saabgroup.safir.dob.typesystem.
      *
      * This method is mainly useful if all you want to do with a received object is to write it
      * to a database or pass it over a C-interface to a library or plugin.
@@ -240,7 +240,7 @@ public class EntityProxy {
         checkNotDisposed();
         if (m_currentBlob == null)
         {
-            throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Not possible to do GetBlob on proxies from OnDeletedEntity (entity = " +
+            throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("Not possible to do getBlob on proxies from onDeletedEntity (entity = " +
                                                                                     getEntityId());
         }
         return m_currentBlob;
@@ -262,7 +262,7 @@ public class EntityProxy {
         if (m_currentBlob == null)
         {
             throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException
-                ("Not possible to do GetBlobWithChangeInfo on proxies from OnDeletedEntity (entity = " +
+                ("Not possible to do getBlobWithChangeInfo on proxies from onDeletedEntity (entity = " +
                  getEntityId());
         }
         if (m_currentBlobWithChangeInfo == null)
@@ -315,8 +315,8 @@ public class EntityProxy {
      * Used to get the entity state that preceeded this state.
      *
      * Can be used when a "previous" state exists, that is, from within the following callbacks:
-     * @li EntitySubscriber#OnUpdatedEntity
-     * @li EntitySubscriber#OnDeletedEntity
+     * @li EntitySubscriber#onUpdatedEntity
+     * @li EntitySubscriber#onDeletedEntity
      *
      * No change flags will be set in the returned entity.
      *
