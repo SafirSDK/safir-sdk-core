@@ -170,6 +170,10 @@ namespace Dob
          *
          * No change flags will be set in the returned entity.
          *
+         * Calling this function inside an OnDeletedEntity when the subscription was set up with 
+         * includeUpdates set to false will yield an undefined state. That is, it is okay to call
+         * this function but you may get a state that you have not "seen" in an OnNewEntity callback.
+         *
          * @return Previous entity.
          */
         const Dob::PreviousEntityProxy GetPrevious() const;
