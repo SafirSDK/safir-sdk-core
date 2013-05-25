@@ -297,7 +297,7 @@ namespace Safir.Dob
         /// includeUpdates set to false may yield an entity state that you have not received in an 
         /// OnNewEntity callback. In fact it will most likely give you one of the updated entity
         /// states that were filtered out because you didn't include updates.
-        /// <para>
+        /// <para/>
         /// No change flags will be set in the returned entity.
         /// </summary>
         public PreviousEntityProxy Previous
