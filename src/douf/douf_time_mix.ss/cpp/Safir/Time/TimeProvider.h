@@ -60,7 +60,7 @@ namespace Time
 {
 
     /**
-     * The Time class entertains functions to operate on time.
+     * The Time class contains functions to operate on time.
      */
     class DOUF_TIME_CPP_API TimeProvider
     {
