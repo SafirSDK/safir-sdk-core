@@ -288,6 +288,11 @@ namespace Internal
 
         ContextId GetContext() const;
 
+        //-------------------------------
+        // Debug
+        //-------------------------------
+        void SimulateOverflows(const bool inQueues, const bool outQueues);
+
 
     private:
         void SendRequest(const DistributionData& request,
