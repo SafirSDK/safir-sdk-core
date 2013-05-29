@@ -42,19 +42,17 @@ package Executor is
    procedure Run;
 
 private
-
-   type Connection is (Control, Test);
-
    task MainLoop is
       entry Run (Arg : in String);
-      entry Dispatch (Conn : in Connection);
-      entry Handle_Action (Action : in Dose_Test.Action.Smart_Pointer);
+      --      entry Handle_Action (Action : in Dose_Test.Action.Smart_Pointer);
    end MainLoop;
+
+   type Event_T is (Stop, Dispatch_Control, Dispatch_Test);
 
    type Dispatcher is limited new
      Safir.Dob.Consumers.Dispatcher with
       record
-         Conn :  Connection;
+        Event : Event_T;
       end record;
 
    overriding
@@ -87,7 +85,6 @@ private
 
          Partner_Entity_Id          : Safir.Dob.Typesystem.Entity_Id.Entity_Id_Type;
 
-         Is_Done                    : Boolean := False;
          Is_Active                  : Boolean := False;
          The_Consumers              : Consumer_Array;
 
@@ -95,8 +92,8 @@ private
          Test_Connection            : Safir.Dob.Connections.Connection;
          Dispatch_Test_Connection   : Boolean := True;
 
-         Test_Dispatcher            : aliased Dispatcher := (Conn => Test);
-         Control_Dispatcher         : aliased Dispatcher := (Conn => Control);
+         Test_Dispatcher            : aliased Dispatcher := (Event => Dispatch_Test);
+         Control_Dispatcher         : aliased Dispatcher := (Event => Dispatch_Control);
 
          Callback_Actions           : Callback_Actions_Table;
 
