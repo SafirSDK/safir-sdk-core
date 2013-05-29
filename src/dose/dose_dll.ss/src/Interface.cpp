@@ -591,8 +591,13 @@ void DoseC_Dispatch(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
-        ControllerTable::Instance().GetController(ctrl)->Dispatch();
+        const ControllerPtr controller = ControllerTable::Instance().GetController(ctrl);
+        if (controller->IsConnected())
+        {       
+            ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
+            controller->Dispatch();
+        }
+
         success = true;
     }
     CATCH_LIBRARY_EXCEPTIONS;
