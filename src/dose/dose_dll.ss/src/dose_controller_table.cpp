@@ -124,10 +124,10 @@ namespace Internal
         ThreadControllersTable::const_iterator findIt = m_threadControllersTable.find(boost::this_thread::get_id());
         if (findIt != m_threadControllersTable.end())
         {
-            for (ControllerInfoList::const_iterator it = findIt->second.begin();
+            for (ControllerIdList::const_iterator it = findIt->second.begin();
                  it != findIt->second.end(); ++it)
             {
-                if (ctrl == it->m_ctrl)
+                if (ctrl == *it)
                 {
                     return;
                 }
@@ -158,10 +158,10 @@ namespace Internal
         for (ThreadControllersTable::const_iterator it = m_threadControllersTable.begin();
              it != m_threadControllersTable.end(); ++it)
         {
-            for (ControllerInfoList::const_iterator it2 = it->second.begin();
+            for (ControllerIdList::const_iterator it2 = it->second.begin();
                  it2 != it->second.end(); ++it2)
             {
-                if (ctrl == it2->m_ctrl)
+                if (ctrl == *it2)
                 {
                     ostr << "The thread id that you called from was "
                          << boost::this_thread::get_id()
@@ -234,10 +234,10 @@ namespace Internal
         if (findIt == m_threadControllersTable.end())  //need to insert the thread id into the map
         {
             //controller id list added will be empty to start off with.
-            findIt = m_threadControllersTable.insert(std::make_pair(tid,ControllerInfoList())).first;
+            findIt = m_threadControllersTable.insert(std::make_pair(tid,ControllerIdList())).first;
         }
 
-        findIt->second.push_back(ControllerInfo(ctrl));
+        findIt->second.push_back(ctrl);
 
         //            std::wcout << "ControllerTable::SetThread() - ctrl: " << ctrl << ". tid: " << tid << std::endl;
     }
@@ -253,7 +253,7 @@ namespace Internal
         }
         else
         {
-            return findIt->second.front().m_ctrl;
+            return findIt->second.front();
         }
     }
 
@@ -266,13 +266,13 @@ namespace Internal
         ThreadControllersTable::const_iterator findIt = m_threadControllersTable.find(boost::this_thread::get_id());
         if (findIt != m_threadControllersTable.end()) //if it was not found we will go into the bit below
         {
-            for (ControllerInfoList::const_iterator it = findIt->second.begin();
+            for (ControllerIdList::const_iterator it = findIt->second.begin();
                  it != findIt->second.end(); ++it)
             {
-                ControllerConstPtr ctrlPtr = GetControllerInternal(it->m_ctrl);
+                ControllerConstPtr ctrlPtr = GetControllerInternal(*it);
                 if (ctrlPtr != NULL && ctrlPtr->NameIsEqual(connectionNameCommonPart,connectionNameInstancePart))
                 {
-                    return it->m_ctrl;
+                    return *it;
                 }
             }
         }
@@ -290,10 +290,10 @@ namespace Internal
         ThreadControllersTable::iterator findIt = m_threadControllersTable.find(boost::this_thread::get_id());
         if (findIt != m_threadControllersTable.end())
         {
-            for (ControllerInfoList::iterator it = findIt->second.begin();
+            for (ControllerIdList::iterator it = findIt->second.begin();
                  it != findIt->second.end(); ++it)
             {
-                if (ctrl == it->m_ctrl)
+                if (ctrl == *it)
                 {
                     findIt->second.erase(it);
                     return;
@@ -329,10 +329,10 @@ namespace Internal
             for (ThreadControllersTable::iterator it = m_threadControllersTable.begin();
                  it != m_threadControllersTable.end(); ++it)
             {
-                for (ControllerInfoList::iterator it2 = it->second.begin();
+                for (ControllerIdList::iterator it2 = it->second.begin();
                      it2 != it->second.end(); ++it2)
                 {
-                    if (ctrl == it2->m_ctrl)
+                    if (ctrl == *it2)
                     {
                         ostr << "The thread id that you called from was "
                              << boost::this_thread::get_id()

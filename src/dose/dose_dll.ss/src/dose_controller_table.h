@@ -125,16 +125,9 @@ namespace Internal
         typedef std::map<long, ControllerPtr> ControllerMap;
         ControllerMap m_controllers;
 
-        struct ControllerInfo
-        {
-            ControllerInfo(const long ctrl):m_ctrl(ctrl) {}
-            long m_ctrl; //controller id
-            //NodeNumber m_lastDataSender; //maybe we want something like this here...
-        };
 
-        typedef std::vector<ControllerInfo> ControllerInfoList;
-        typedef std::map<boost::thread::id, ControllerInfoList > ThreadControllersTable;
-
+        typedef std::vector<long> ControllerIdList;
+        typedef std::map<boost::thread::id, ControllerIdList> ThreadControllersTable;
         ThreadControllersTable m_threadControllersTable;
 
         const bool m_threadWarningsEnabled;
