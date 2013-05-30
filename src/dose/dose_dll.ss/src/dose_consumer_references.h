@@ -66,18 +66,6 @@ namespace Internal
         void AddDispatcherReference(const ConsumerId& consumer);
 
         /**
-         * Move the dispatcher refereneces to the attic for the given thread and clear
-         * the original counter.
-         */
-        void MoveDispatcherReferencesToAttic(const DispatchThreadPtr& dispatchThread);
-
-        /**
-         * Method to be called when a thread has been removed from the attic.
-         */
-        void DropAtticDispatcherReferences(const DispatchThreadPtr& dispatchThread,
-                                           const DropReferencesFunc&  dropReferencesFunc);
-
-        /**
          * Returns true if there is at least one dispatcher reference for the given consumer.
          */
         bool HasDispatcherReference(const ConsumerId& consumer) const;
@@ -268,9 +256,6 @@ namespace Internal
         CounterMap m_entitySubscriptionCounters;
         CounterMap m_entityRegistrationSubscriptionCounters;
         CounterMap m_serviceRegistrationSubscriptionCounters;
-
-        typedef std::map<DispatchThreadPtr, CounterMap> Attic;
-        Attic m_dispatcherCountersAttic;
 
         typedef boost::tuple<Dob::Typesystem::TypeId, Dob::Typesystem::HandlerId, ConsumerId> RegistrationKey;
         typedef std::map<RegistrationKey, long> RegistrationCounterMap;

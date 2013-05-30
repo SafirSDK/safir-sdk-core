@@ -404,9 +404,7 @@ namespace Internal
         typedef std::map<DispatchThreadPtr, int> DispatchThreadPtrStopCountMap;
 
         DispatchThreadPtr  m_dispatchThread;
-        DispatchThreadPtrStopCountMap m_dispatchThreadAttic; //This is where dispatch threads go to die if they cannot be stopped.
-        //the int that each thread is mapped to is the number of stop attempts that have been made. If a thread is not successfully stopped
-        //after a few attempts Dispatch will throw an exception.
+
         bool m_exitDispatch;
 
         Postponer m_postponedTypes;

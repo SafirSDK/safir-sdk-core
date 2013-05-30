@@ -45,8 +45,7 @@ namespace Internal
         m_consumer(consumer),
         m_id(id),
         m_connectionName(connectionName),
-        m_stop(0),
-        m_stopSignalled(false)
+        m_stop(0)
     {
 
     }
@@ -56,49 +55,26 @@ namespace Internal
         ENSURE (m_thread.get_id() == boost::thread::id(), << "DispatchThread is being destroyed while the thread is still running!");
     }
 
-    bool DispatchThread::Stop(const bool waitAWhile)
+    void DispatchThread::Stop()
     {
-        /**
-         * Case 1: Thread has not been started at all.
-         * Case 2: Thread has been started and this is the first call to Stop.
-         * Case 3: Stop has been called before, successfully.
-         * Case 4: Stop has been called before, unsuccessfully, and the thread is still running (i.e.
-         waiting in user code to notify main thread)
-         * Case 5: Stop has been called before, unsuccessfully, but the thread has stopped since then.
-         * Case 5: Stop has been called before, unsuccessfully, but the thread is about to stop
-         *          (m_isRunning is still true and the semaphore hasnt been signalled).
-         */
-        lllout <<"DispatchThread for connection " << m_connectionName.c_str() <<": Stop was called. waitAWhile = " << std::boolalpha << waitAWhile << std::endl;
+        lllout <<"DispatchThread for connection " << m_connectionName.c_str() <<": Stop was called." << std::endl;
 
         m_stop = 1;
 
         if (m_thread.get_id() == boost::thread::id())
         {
-            return true;
+            return;
         }
 
-        if (!m_stopSignalled)
-        {
-            Connections::Instance().GetConnection(m_id)->SignalIn();
-            m_stopSignalled = true;
-        }
+        //kick the thread to get it to wake up
+        Connections::Instance().GetConnection(m_id)->SignalIn();
 
-        const bool joined = m_thread.timed_join(waitAWhile ? boost::posix_time::milliseconds(100) : boost::posix_time::milliseconds(0));
-        if (joined)
-        {   
-            //we got it, the thread has stopped
-            m_thread = boost::thread();
+        m_thread.join();
+        
+        //we got it, the thread has stopped
+        m_thread = boost::thread();
 
-            lllout << "DispatchThread for connection " << m_connectionName.c_str() <<": Stop() joined thread." << std::endl;
-            
-            return true;
-        }
-        else
-        {
-            //oh, no! The thread is probably waiting to do a thread switch in the user app.
-            //we return false and sort it out at a higher level
-            return false;
-        }
+        lllout << "DispatchThread for connection " << m_connectionName.c_str() <<": Stop() joined thread." << std::endl;
     }
 
     void DispatchThread::Start()

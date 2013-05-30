@@ -360,32 +360,10 @@ namespace Internal
             m_exitDispatch = true;
         }
 
-        bool dispatchThreadStopped = true;
-
         //stop m_dispatchThread first of all
         if (m_dispatchThread != NULL)
         {
-            dispatchThreadStopped = m_dispatchThread->Stop(true);
-
-            //if it couldnt be stopped it - assuming that the user didn't do anything stupid - is
-            //in user code waiting to tell the main thread about a dispatch. But the main thread is
-            //in here (we're it...), trying to stop the dispatch thread. So we put the dispatch thread in
-            //the "attic" so that we can stop and remove it when we're dispatched again.
-            if (!dispatchThreadStopped)
-            {
-                lllout << "Failed to stop the DispatchThread (addr = "
-                       << (void *)m_dispatchThread.get()
-                       << ") in connection "
-                       << m_connectionName.c_str()
-                       << ", sticking it in the attic for later removal" << std::endl;
-
-                m_dispatchThreadAttic.insert(std::make_pair(m_dispatchThread,1));
-
-                // For GC collected languages: Since this thread can't be stopped we can't remove
-                // the referenses to the dispatcher, therefor the counter is saved in a "reference attic".
-                m_consumerReferences.MoveDispatcherReferencesToAttic(m_dispatchThread);
-            }
-
+            m_dispatchThread->Stop();
             m_dispatchThread.reset();
         }
 
@@ -1501,50 +1479,6 @@ namespace Internal
     //---------------------------------------
     void Controller::Dispatch()
     {
-        //get rid of any old dispatch threads.
-        if (!m_dispatchThreadAttic.empty())
-        {
-            DispatchThreadPtrStopCountMap::iterator it = m_dispatchThreadAttic.begin();
-
-            while (it != m_dispatchThreadAttic.end()) // it is increased in loop
-            {
-                lllout << "Found an old DispatchThread (addr = " << (void *)it->first.get()
-                       << ") in the attic, will try to stop and delete it (have tried "
-                       << it->second << " time(s) before)" <<std::endl;
-
-                if (it->first->Stop(false))
-                {
-                    lllout << "Stop of DispatchThread was successful! Deleting it." << std::endl;
-
-                    // Drop dispatcher references related to this thread
-                    m_consumerReferences.DropAtticDispatcherReferences(it->first,
-                                                                       boost::bind(&Dispatcher::InvokeDropReferenceCb,
-                                                                                   m_dispatcher,
-                                                                                   _1,
-                                                                                   _2));
-
-                    DispatchThreadPtrStopCountMap::iterator eraseIt = it;
-                    ++it;
-
-                    m_dispatchThreadAttic.erase(eraseIt);
-                }
-                else
-                {
-                    lllout << "Stop failed!" << std::endl;
-                    ++(it->second); //increase the stopcount
-                    if (it->second > 10)
-                    {
-                        lllout << "We have tried to stop this DispatchThread " << it->second
-                               << " times, but it hasn't worked. Someone must have screwed up, most likely the user" << std::endl;
-                        throw Typesystem::SoftwareViolationException(L"This connection has an old dispatch thread which it has tried to get rid of 10 times now, but the thread is still blocked!"
-                                                                     L" You must not block the dispatch thread after you have closed your connection, or the Dob is unable to clean up its resources!",
-                                                                     __WFILE__,__LINE__);
-                    }
-                    ++it;
-                }
-            }
-        }
-
         m_exitDispatch=false;
 
         if (!m_isConnected)
