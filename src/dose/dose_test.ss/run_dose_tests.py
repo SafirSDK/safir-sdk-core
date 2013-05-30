@@ -429,7 +429,7 @@ class Runner:
 
         for i in partners:
             self.__launchProcess("dose_test_cpp." + str(i), parameters.dose_test_cpp_cmd + (str(i),))
-            #self.__launchProcess("dose_test_ada." + str(i), parameters.dose_test_ada_cmd + (str(i),))
+            self.__launchProcess("dose_test_ada." + str(i), parameters.dose_test_ada_cmd + (str(i),))
             self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
             if not parameters.no_java:
                 self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))

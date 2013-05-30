@@ -27,13 +27,13 @@ with Dose_Test.Action_Enum;
 with Dose_Test.Dump;
 with Dose_Test.Dump_Result;
 --with Dose_Test.Parameters;
-with Safir.Dob.Entity_Proxies;
 with Safir.Dob.Typesystem;
 with Safir.Dob.Typesystem.Instance_Id;
 with Safir.Dob.Typesystem.Blob_Operations;
+with Safir.Dob.Typesystem.String_Container; use Safir.Dob.Typesystem.String_Container;
 with Safir.Dob.Typesystem.Channel_Id;
 with Safir.Dob.Typesystem.Utilities; use Safir.Dob.Typesystem.Utilities;
---with Safir.Dob.Instance_Id_Policy;
+with Safir.Dob.Instance_Id_Policy;
 with Safir.Dob.Typesystem.Si_64;
 with Safir.Dob.Error_Response;
 with Safir.Dob.Typesystem.Object.Factory;
@@ -88,13 +88,16 @@ package body Executor is
       end Wait;
    end Reactor;
 
-   task type Action_Reader_T is
+   task Action_Reader is
       entry Run (The_Instance : in Safir.Dob.Typesystem.Int_64);
+      entry Start (Port : out Port_Type);
+      entry Stop;
       entry Get_Action (The_Action : out Dose_Test.Action.Smart_Pointer);
       entry Action_Completed;
-      entry Stop;
-   end Action_Reader_T;
-   Socket : Socket_Type;
+      entry Kill;
+   end Action_Reader;
+   Server_Socket : Socket_Type;
+   Data_Socket : Socket_Type;
 
    procedure Run is
       use Ada.Strings.Wide_Unbounded;
@@ -109,21 +112,16 @@ package body Executor is
       Reactor.Post (Self.Event);
    end On_Do_Dispatch;
 
-   task body Action_Reader_T is
+   task body Action_Reader is
       use Ada.Strings.Wide_Unbounded;
       use type Safir.Dob.Typesystem.Int_64;
       use Ada.Streams;
-      Server : Socket_Type;
+
       Instance : Safir.Dob.Typesystem.Int_64;
 
-      Port : Port_Type;
-   --     Multicast_Addr : constant Inet_Addr_Type := Inet_Addr (To_Utf_8 (Dose_Test.Parameters.Test_Multicast_Address));
-
-   --     Local_Addr : constant Sock_Addr_Type := (Family => Family_Inet, Addr => Any_Inet_Addr, Port => Port);
       Remote_Address : Sock_Addr_Type;
       Receive_Stream : Stream_Access;
-   --     Item : Ada.Streams.Stream_Element_Array (1 .. 65000);
-   --     Last : Ada.Streams.Stream_Element_Offset;
+
       type Stream_Element_Ptr is access all Stream_Element;
 
       type Stream_Element_Array_Ptr is access all Stream_Element_Array;
@@ -136,104 +134,132 @@ package body Executor is
       Action : Dose_Test.Action.Smart_Pointer;
       Header : aliased Stream_Element_Array (1 .. 16);
 
-
+      Ok : constant Stream_Element_Array := (Stream_Element (Character'Pos ('o')),
+                                             Stream_Element (Character'Pos ('k')),
+                                             Stream_Element (0));
    begin
       accept Run (The_Instance : in Safir.Dob.Typesystem.Int_64) do
          Instance := The_Instance;
       end Run;
 
-      Create_Socket (Server, Family_Inet, Socket_Stream);
+      Action_Reader_Loop : loop
+         select
+            accept Start (Port : out Port_Type) do
+               Create_Socket (Server_Socket, Family_Inet, Socket_Stream);
 
-      Set_Socket_Option
-         (Server,
-          Socket_Level,
-          (Reuse_Address, False));
+               Set_Socket_Option
+                  (Server_Socket,
+                   Socket_Level,
+                   (Reuse_Address, False));
 
-      for I in 0 .. 100 loop
-         Port := Port_Type (30000) + Port_Type (Instance) + Port_Type (I * 3);
-         begin
-            Bind_Socket (Server, (Family => Family_Inet,
-                                  Addr => Any_Inet_Addr,
-                                  Port => Port));
-            Put_Line ("Action_Reader: accepting connections on port " & Port_Type'Image (Port));
-            exit;
-         exception
-            when Socket_Error =>
-               null;
-         end;
-      end loop;
+               for I in 0 .. 99 loop
+                  Port := Port_Type (30000) + Port_Type (Instance) + Port_Type (I * 3);
+                  begin
+                     Bind_Socket (Server_Socket, (Family => Family_Inet,
+                                                  Addr => Any_Inet_Addr,
+                                                  Port => Port));
+                     Put_Line ("Action_Reader: accepting connections on port " & Port_Type'Image (Port));
+                     exit;
+                  exception
+                     when Socket_Error =>
+                        null;
+                  end;
+               end loop;
+            end Start;
+         or
+            accept Kill;
+            exit Action_Reader_Loop;
+         end select;
 
-      Listen_Socket (Server);
-      Accept_Socket (Server, Socket, Remote_Address);
-      Receive_Stream := Stream (Socket);
+         Put_Line ("Calling Listen_Socket");
+         Listen_Socket (Server_Socket);
+         Put_Line ("Calling Accept_Socket");
+         Accept_Socket (Server_Socket, Data_Socket, Remote_Address);
+         Put_Line ("Calling Stream");
+         Receive_Stream := Stream (Data_Socket);
 
-      loop
-         declare
-            Header_Ptr : constant Stream_Element_Ptr := Header (1)'Access;
-            Last   : Stream_Element_Offset;
-            Blob_Size : Stream_Element_Offset;
-         begin
-            Receive_Stream.Read (Header, Last);
-            if Last /= 16 then
-               Put_Line ("Wierdness!");
-               exit;
-            end if;
-            Blob_Size := Stream_Element_Offset (Safir.Dob.Typesystem.Blob_Operations.Get_Size (Blob => To_Char_Star (Header_Ptr)));
+         Put_Line ("Checking for kills");
+         select
+            accept Kill;
+            exit Action_Reader_Loop;
+         or
+            delay 0.01;
+         end select;
+
+         Put_Line ("Entering Receive_Loop");
+         Receive_Loop : loop
             declare
-               Blob : Stream_Element_Array_Ptr :=
-                  new Stream_Element_Array (1 .. Blob_Size);
-               Blob_Ptr : constant Stream_Element_Ptr := Blob (1)'Access;
+               Header_Ptr : constant Stream_Element_Ptr := Header (1)'Access;
+               Last   : Stream_Element_Offset;
+               Blob_Size : Stream_Element_Offset;
             begin
-               Blob.all (1 .. 16) := Header;
-               Receive_Stream.Read (Blob.all (16 .. Blob_Size), Last);
-
-               if Last + 16 /= Blob_Size then
-                  Put_Line ("Wierdness 2");
-                  exit;
+               Receive_Stream.Read (Header, Last);
+               if Last /= 16 then
+                  Put_Line ("Wierdness!");
+                  exit Action_Reader_Loop;
                end if;
+               Blob_Size := Stream_Element_Offset (Safir.Dob.Typesystem.Blob_Operations.Get_Size (Blob => To_Char_Star (Header_Ptr)));
+               Put_Line ("Got Header (size " & Stream_Element_Offset'Image (Blob_Size) & ")");
+               declare
+                  Blob : Stream_Element_Array_Ptr :=
+                     new Stream_Element_Array (1 .. Blob_Size);
+                  Blob_Ptr : constant Stream_Element_Ptr := Blob (1)'Access;
+               begin
+                  Blob.all (1 .. 16) := Header;
+                  Receive_Stream.Read (Blob.all (17 .. Blob_Size), Last);
 
-               Action := Dose_Test.Action.Smart_Pointer (Safir.Dob.Typesystem.Object.Factory.Create_Object
-                                                            (Blob => To_Char_Star (Blob_Ptr)));
+                  if Last /= Blob_Size then
+                     Put_Line ("Wierdness 2");
+                     exit Action_Reader_Loop;
+                  end if;
 
-               Reactor.Post (Received_Action);
+                  Put_Line ("Got Blob");
+                  Action := Dose_Test.Action.Smart_Pointer (Safir.Dob.Typesystem.Object.Factory.Create_Object
+                                                               (Blob => To_Char_Star (Blob_Ptr)));
 
-               select
-                  accept Get_Action (The_Action : out Dose_Test.Action.Smart_Pointer) do
-                     The_Action := Action;
-                  end Get_Action;
-               or
-                  accept Stop;
-                  exit;
-               end select;
+                  Put_Line ("Posting to reactor");
+                  Reactor.Post (Received_Action);
 
-               select
-                  accept Action_Completed;
-               or
-                  accept Stop;
-                  exit;
-               end select;
+                  Put_Line ("Waiting for Get_Action");
+                  select
+                     accept Get_Action (The_Action : out Dose_Test.Action.Smart_Pointer) do
+                        The_Action := Action;
+                     end Get_Action;
+                  or
+                     accept Stop;
+                     exit Receive_Loop;
+                  or
+                     accept Kill;
+                     exit Action_Reader_Loop;
+                  end select;
 
+                  Put_Line ("Waiting for Action_Completed");
+                  select
+                     accept Action_Completed;
+                  or
+                     accept Stop;
+                     exit Receive_Loop;
+                  or
+                     accept Kill;
+                     exit Action_Reader_Loop;
+                  end select;
 
-               Free (Blob);
+                  Receive_Stream.Write (Ok);
+
+                  Free (Blob);
+               end;
+            exception
+               when Socket_Error =>
+                  exit Receive_Loop;
             end;
-
-   --           Action := Dose_Test.Action.Smart_Pointer (Safir.Dob.Typesystem.Object.Factory.Create_Object
-   --                                                        (Blob => To_Char_Star (Buf_Ptr)));
-
-   --           MainLoop.Handle_Action (Action);
-         exception
-            when Socket_Error =>
-               exit;
-         end;
-      end loop;
-      accept Stop;
+         end loop Receive_Loop;
+      end loop Action_Reader_Loop;
    exception when E : others =>
       Put_Line ("Exception in Action_Reader task: " & Exception_Name (E));
       Put_Line (Exception_Information (E));
-   end Action_Reader_T;
+   end Action_Reader;
 
    task body MainLoop is
-      Action_Reader : Action_Reader_T;
       The_Executor : aliased Executor_Type;
       use Ada.Strings.Wide_Unbounded;
    begin
@@ -254,9 +280,8 @@ package body Executor is
            Safir.Dob.Typesystem.Entity_Id.Create_Entity_Id
            (Dose_Test.Partner.Class_Type_Id,
             Safir.Dob.Typesystem.Instance_Id.Create_Instance_Id (The_Executor.Instance));
+         Action_Reader.Run (The_Executor.Instance);
       end Run;
-
-      Action_Reader.Run (The_Executor.Instance);
 
       The_Executor.Control_Connection.Open (The_Executor.Control_Connection_Name,
                                             The_Executor.Instance_String,
@@ -264,15 +289,9 @@ package body Executor is
                                             The_Executor'Access,
                                             The_Executor.Control_Dispatcher'Access);
 
-      The_Executor.Control_Connection.Subscribe_Message
-        (Dose_Test.Action.Class_Type_Id,
-         Safir.Dob.Typesystem.Channel_Id.Create_Channel_Id (The_Executor.Instance),
-         The_Executor'Access);
-
-      The_Executor.Control_Connection.Subscribe_Message
-        (Dose_Test.Action.Class_Type_Id,
-         Safir.Dob.Typesystem.Channel_Id.Default_Channel,
-         The_Executor'Access);
+      The_Executor.Control_Connection.Subscribe_Entity
+         (Dose_Test.Sequencer.Class_Type_Id,
+          The_Executor'Access);
 
       Put_Line (The_Executor.Identifier & ":" & Safir.Dob.Typesystem.Int_64'Wide_Image (The_Executor.Instance) & " Started");
       declare
@@ -318,12 +337,13 @@ package body Executor is
       -- use a slightly undocumented way of getting receive_socket
       -- to break from blocking
       begin
-         Shutdown_Socket (Socket);
+         Shutdown_Socket (Server_Socket);
+         Shutdown_Socket (Data_Socket);
       exception
          when Socket_Error =>
             null;
       end;
-      Action_Reader.Stop;
+      Action_Reader.Kill;
 
       Logger.Put_Line ("Exiting");
 
@@ -345,18 +365,19 @@ package body Executor is
       Reactor.Post (Stop);
    end On_Stop_Order;
 
-   overriding
-   procedure On_Message
-     (Self    : in out Executor_Type;
-      Message_Proxy : in Safir.Dob.Message_Proxies.Message_Proxy) is
-
-      Action : constant Dose_Test.Action.Smart_Pointer :=
-                 Dose_Test.Action.Smart_Pointer
-                   (Safir.Dob.Message_Proxies.Get_Message (Message_Proxy));
+   procedure On_New_Entity
+      (Self         : in out Executor_Type;
+       Entity_Proxy : in     Safir.Dob.Entity_Proxies.Entity_Proxy) is
    begin
-      Self.Execute_Callback_Actions (Safir.Dob.Callback_Id.On_Message);
-      Self.Handle_Action (Action);
-   end On_Message;
+      Self.Handle_Sequencer_State (Dose_Test.Sequencer.Smart_Pointer (Entity_Proxy.Get_Entity));
+   end On_New_Entity;
+
+   procedure On_Updated_Entity
+      (Self         : in out Executor_Type;
+       Entity_Proxy : in     Safir.Dob.Entity_Proxies.Entity_Proxy) is
+   begin
+      Self.Handle_Sequencer_State (Dose_Test.Sequencer.Smart_Pointer (Entity_Proxy.Get_Entity));
+   end On_Updated_Entity;
 
    overriding
    procedure On_Revoked_Registration
@@ -488,54 +509,6 @@ package body Executor is
       Entity_Proxy : Safir.Dob.Entity_Proxies.Entity_Proxy;
    begin
       case Action.Ref.Action_Kind.Get_Val is
-
-         --  when Dose_Test.Action_Enum.Activate =>
-         --     if Action.Ref.Identifier.Get_Val = Self.Identifier then
-         --        Self.Default_Context := Action.Ref.Context.Get_Val;
-         --        Put_Line ("Activating (default context is " & Safir.Dob.Typesystem.Int_32'Image (Self.Default_Context) & ")");
-         --        if not Self.Is_Active then
-
-         --           Self.Control_Connection.Register_Entity_Handler
-         --             (Safir.Dob.Typesystem.Entity_Id.Get_Type_Id (Self.Partner_Entity_Id),
-         --              Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance),
-         --              Safir.Dob.Instance_Id_Policy.Handler_Decides_Instance_Id,
-         --              Self'Access);
-
-         --           Self.Control_Connection.Register_Service_Handler
-         --             (Dose_Test.Dump.Class_Type_Id,
-         --              Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance),
-         --              Self'Access);
-
-         --           Partner := Dose_Test.Partner.Create;
-         --           Partner.Ref.Incarnation.Set_Val (0);
-         --           Partner.Ref.Identifier.Set_Val (Self.Identifier);
-
-         --           Self.Control_Connection.Set_All
-         --             (Partner,
-         --              Safir.Dob.Typesystem.Entity_Id.Get_Instance_Id (Self.Partner_Entity_Id),
-         --              Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance));
-
-         --           Self.Is_Active := True;
-         --        end if;
-         --     end if;
-
-         --  when Dose_Test.Action_Enum.Deactivate =>
-         --     if Action.Ref.Identifier.Get_Val = Self.Identifier then
-         --        Put_Line ("Deactivating");
-
-         --        Self.Test_Connection.Close;
-         --        Self.Control_Connection.Delete
-         --          (Self.Partner_Entity_Id,
-         --           Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance));
-         --        Self.Control_Connection.Unregister_Handler
-         --          (Safir.Dob.Typesystem.Entity_Id.Get_Type_Id (Self.Partner_Entity_Id),
-         --           Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance));
-         --        Self.Control_Connection.Unregister_Handler
-         --          (Dose_Test.Dump.Class_Type_Id,
-         --           Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance));
-         --        Self.Is_Active := False;
-         --     end if;
-
          when Dose_Test.Action_Enum.Reset =>
             if Self.Is_Active then
                Self.Test_Connection.Close;
@@ -666,5 +639,69 @@ package body Executor is
    begin
       Self.Callback_Actions (Callback).Iterate (Execute'Access);
    end Execute_Callback_Actions;
+
+   procedure Handle_Sequencer_State
+      (Self  : in out Executor_Type;
+       State : in     Dose_Test.Sequencer.Smart_Pointer) is
+      use type Dose_Test.Sequencer.Sequencer_Class_Access;
+
+      Raw : constant Dose_Test.Sequencer.Sequencer_Class_Access := State.Ref;
+
+      Activate : constant Boolean := State.Ref /= null and then
+         Raw.Partners.Element (Safir.Dob.Typesystem.Array_Index (Self.Instance)) = Self.Identifier;
+
+      Partner : Dose_Test.Partner.Smart_Pointer;
+      Port : Port_Type;
+   begin
+      if Activate = Self.Is_Active then
+         return;
+      end if;
+
+      if Activate then
+         Self.Default_Context := Raw.Context.Get_Val;
+         Put_Line ("Activating (default context is " & Safir.Dob.Typesystem.Int_32'Image (Self.Default_Context) & ")");
+         Self.Control_Connection.Register_Entity_Handler
+            (Safir.Dob.Typesystem.Entity_Id.Get_Type_Id (Self.Partner_Entity_Id),
+             Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance),
+             Safir.Dob.Instance_Id_Policy.Handler_Decides_Instance_Id,
+             Self'Access);
+
+         Self.Control_Connection.Register_Service_Handler
+            (Dose_Test.Dump.Class_Type_Id,
+             Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance),
+             Self'Access);
+
+         Action_Reader.Start (Port);
+
+         Partner := Dose_Test.Partner.Create;
+         Partner.Ref.Incarnation.Set_Val (0);
+         Partner.Ref.Identifier.Set_Val (Self.Identifier);
+         Partner.Ref.Port.Set_Val (Safir.Dob.Typesystem.Int_32 (Port));
+         Partner.Ref.Address.Set_Val (Ada.Strings.Wide_Unbounded.To_Unbounded_Wide_String ("127.0.0.1"));
+
+         Self.Control_Connection.Set_All
+            (Partner,
+             Safir.Dob.Typesystem.Entity_Id.Get_Instance_Id (Self.Partner_Entity_Id),
+             Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance));
+
+         Self.Is_Active := True;
+      else
+         Put_Line ("Deactivating");
+         Action_Reader.Stop;
+
+         Self.Test_Connection.Close;
+         Self.Control_Connection.Delete
+            (Self.Partner_Entity_Id,
+             Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance));
+         Self.Control_Connection.Unregister_Handler
+            (Safir.Dob.Typesystem.Entity_Id.Get_Type_Id (Self.Partner_Entity_Id),
+             Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance));
+         Self.Control_Connection.Unregister_Handler
+            (Dose_Test.Dump.Class_Type_Id,
+             Safir.Dob.Typesystem.Handler_Id.Create_Handler_Id (Self.Instance));
+         Self.Is_Active := False;
+      end if;
+
+   end Handle_Sequencer_State;
 
 end Executor;
