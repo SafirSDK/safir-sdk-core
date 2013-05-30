@@ -54,6 +54,15 @@ package Safir.Dob.Typesystem.Blob_Operations is
    function Get_Type_Id (Blob   : in Safir.Dob.Typesystem.Blob_T)
                          return Safir.Dob.Typesystem.Type_Id;
 
+
+   -- Get the size of the blob contained by this object
+   --
+   -- Parameters: Blob - The blob
+   -- Returns: The size of the blob, in bytes.
+   --
+   function Get_Size (Blob   : in Safir.Dob.Typesystem.Blob_T)
+                     return Safir.Dob.Typesystem.Int_32;
+
    -- =========================================================================
    -- Value operations on blobs.
    -- =========================================================================
