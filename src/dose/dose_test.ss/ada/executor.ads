@@ -44,10 +44,9 @@ package Executor is
 private
    task MainLoop is
       entry Run (Arg : in String);
-      --      entry Handle_Action (Action : in Dose_Test.Action.Smart_Pointer);
    end MainLoop;
 
-   type Event_T is (Stop, Dispatch_Control, Dispatch_Test);
+   type Event_T is (Stop, Dispatch_Control, Dispatch_Test, Received_Action);
 
    type Dispatcher is limited new
      Safir.Dob.Consumers.Dispatcher with
