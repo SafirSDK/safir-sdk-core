@@ -91,7 +91,7 @@ package Safir.Dob.Typesystem.Kernel is
 
    function Get_Size (Blob : in Safir.Dob.Typesystem.Blob_T)
                      return Safir.Dob.Typesystem.Int_32;
-   pragma Import (C, Get_Size, "DotsC_Get_Size");
+   pragma Import (C, Get_Size, "DotsC_GetSize");
 
 --
 --      // Function:    DotsC_IsAnythingChanged
