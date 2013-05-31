@@ -322,10 +322,20 @@ package body Executor is
                      when Received_Action =>
                         declare
                            Action : Dose_Test.Action.Smart_Pointer;
+                           Immediate_Ack : Boolean;
+                           use type Dose_Test.Action_Enum.Enumeration;
                         begin
                            Action_Reader.Get_Action (Action);
+                           Immediate_Ack := Action.Ref.Action_Kind.Get_Val = Dose_Test.Action_Enum.Sleep;
+                           if Immediate_Ack then
+                              Action_Reader.Action_Completed;
+                           end if;
+
                            The_Executor.Handle_Action (Action);
-                           Action_Reader.Action_Completed;
+
+                           if not Immediate_Ack then
+                              Action_Reader.Action_Completed;
+                           end if;
                         end;
                   end case;
                end if;
