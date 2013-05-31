@@ -94,7 +94,6 @@ package body Executor is
       entry Stop;
       entry Get_Action (The_Action : out Dose_Test.Action.Smart_Pointer);
       entry Action_Completed;
-      entry Kill;
    end Action_Reader;
    Server_Socket : Socket_Type;
    Data_Socket : Socket_Type;
@@ -167,8 +166,7 @@ package body Executor is
                end loop;
             end Start;
          or
-            accept Kill;
-            exit Action_Reader_Loop;
+            terminate;
          end select;
 
          Put_Line ("Calling Listen_Socket");
@@ -177,14 +175,6 @@ package body Executor is
          Accept_Socket (Server_Socket, Data_Socket, Remote_Address);
          Put_Line ("Calling Stream");
          Receive_Stream := Stream (Data_Socket);
-
-         Put_Line ("Checking for kills");
-         select
-            accept Kill;
-            exit Action_Reader_Loop;
-         or
-            delay 0.01;
-         end select;
 
          Put_Line ("Entering Receive_Loop");
          Receive_Loop : loop
@@ -195,7 +185,7 @@ package body Executor is
             begin
                Receive_Stream.Read (Header, Last);
                if Last /= 16 then
-                  Put_Line ("Wierdness!");
+                  Put_Line ("Failed to read Header, exiting Action_Reader_Loop!");
                   exit Action_Reader_Loop;
                end if;
                Blob_Size := Stream_Element_Offset (Safir.Dob.Typesystem.Blob_Operations.Get_Size (Blob => To_Char_Star (Header_Ptr)));
@@ -209,7 +199,7 @@ package body Executor is
                   Receive_Stream.Read (Blob.all (17 .. Blob_Size), Last);
 
                   if Last /= Blob_Size then
-                     Put_Line ("Wierdness 2");
+                     Put_Line ("Failed to read Blob, exiting Action_Reader_Loop!");
                      exit Action_Reader_Loop;
                   end if;
 
@@ -229,8 +219,7 @@ package body Executor is
                      accept Stop;
                      exit Receive_Loop;
                   or
-                     accept Kill;
-                     exit Action_Reader_Loop;
+                     terminate;
                   end select;
 
                   Put_Line ("Waiting for Action_Completed");
@@ -240,8 +229,7 @@ package body Executor is
                      accept Stop;
                      exit Receive_Loop;
                   or
-                     accept Kill;
-                     exit Action_Reader_Loop;
+                     terminate;
                   end select;
 
                   Receive_Stream.Write (Ok);
@@ -353,7 +341,6 @@ package body Executor is
          when Socket_Error =>
             null;
       end;
-      Action_Reader.Kill;
 
       Logger.Put_Line ("Exiting");
 
