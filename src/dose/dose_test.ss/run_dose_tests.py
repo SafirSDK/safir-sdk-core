@@ -56,6 +56,18 @@ def mkdir(newdir):
         if tail:
             os.mkdir(newdir)
 
+def is_64_bit():
+    """Detecting this is a lot more complex than it should be.
+    See http://stackoverflow.com/questions/2764356/python-get-windows-os-version-and-architecture
+    and http://bytes.com/topic/python/answers/509764-detecting-64bit-vs-32bit-linux
+    This will work reasonably well on our supported systems:"""
+    if sys.platform.startswith("linux"):
+        return platform.architecture()[0] == "64bit"
+    else:
+        PROCESSOR_ARCHITECTURE = os.environ.get("PROCESSOR_ARCHITECTURE")
+        PROCESSOR_ARCHITEW6432 = os.environ.get("PROCESSOR_ARCHITEW6432")
+        return PROCESSOR_ARCHITECTURE == "AMD64" or PROCESSOR_ARCHITEW6432 == "AMD64"
+
 class Parameters:
     def __init__(self):
         from optparse import OptionParser
@@ -429,7 +441,8 @@ class Runner:
 
         for i in partners:
             self.__launchProcess("dose_test_cpp." + str(i), parameters.dose_test_cpp_cmd + (str(i),))
-            self.__launchProcess("dose_test_ada." + str(i), parameters.dose_test_ada_cmd + (str(i),))
+            if not (sys.platform == "win32" and is_64_bit()): #Dont run ada on win64
+                self.__launchProcess("dose_test_ada." + str(i), parameters.dose_test_ada_cmd + (str(i),))
             self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
             if not parameters.no_java:
                 self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))
