@@ -142,7 +142,7 @@ class Parameters:
         
         self.dose_test_cpp_cmd = (os.path.join(self.SAFIR_RUNTIME, "bin", "dose_test_cpp"),)
         self.dose_test_ada_cmd = (os.path.join(self.SAFIR_RUNTIME, "bin", "dose_test_ada", ),)
-        self.dose_test_ada_exe_name = self.dose_test_ada_cmd[0] + ".exe" if sys.platform == "win32" else ""
+        self.dose_test_ada_exe_name = self.dose_test_ada_cmd[0] + (".exe" if sys.platform == "win32" else "")
         self.dose_test_dotnet_cmd = (os.path.join(self.SAFIR_RUNTIME, "bin", "dose_test_dotnet.exe"),)
         self.dose_test_java_cmd = ("java", "-Xcheck:jni", "-Xfuture", "-jar", 
                                    os.path.join(self.SAFIR_RUNTIME, "bin", "dose_test_java.jar"),)
