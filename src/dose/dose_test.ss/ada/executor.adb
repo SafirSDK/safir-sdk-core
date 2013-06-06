@@ -26,7 +26,6 @@ with Logger;
 with Dose_Test.Action_Enum;
 with Dose_Test.Dump;
 with Dose_Test.Dump_Result;
---with Dose_Test.Parameters;
 with Safir.Dob.Typesystem;
 with Safir.Dob.Typesystem.Instance_Id;
 with Safir.Dob.Typesystem.Blob_Operations;
@@ -36,13 +35,14 @@ with Safir.Dob.Typesystem.Utilities; use Safir.Dob.Typesystem.Utilities;
 with Safir.Dob.Instance_Id_Policy;
 with Safir.Dob.Typesystem.Si_64;
 with Safir.Dob.Error_Response;
+with Safir.Dob.This_Node_Parameters;
 with Safir.Dob.Typesystem.Object.Factory;
---with Safir.Dob.Distribution_Channel_Parameters;
+with Safir.Dob.Node_Info;
 with Unchecked_Conversion;
 with Unchecked_Deallocation;
 with Interfaces.C;
 with Ada.Strings.Wide_Fixed;
-with Ada.Strings.Wide_Unbounded;
+with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 with Ada.Exceptions; use Ada.Exceptions;
 with GNAT.Sockets; use GNAT.Sockets;
 with GNAT.Command_Line;
@@ -500,7 +500,6 @@ package body Executor is
      (Self   : in out Executor_Type;
       Action : in Dose_Test.Action.Smart_Pointer) is
 
-      use type Ada.Strings.Wide_Unbounded.Unbounded_Wide_String;
       use type Safir.Dob.Typesystem.Int_32;
       Partner : Dose_Test.Partner.Smart_Pointer;
       Entity_Proxy : Safir.Dob.Entity_Proxies.Entity_Proxy;
@@ -649,6 +648,7 @@ package body Executor is
 
       Partner : Dose_Test.Partner.Smart_Pointer;
       Port : Port_Type;
+      NodeInfo : Safir.Dob.Node_Info.Smart_Pointer;
    begin
       if Activate = Self.Is_Active then
          return;
@@ -674,7 +674,14 @@ package body Executor is
          Partner.Ref.Incarnation.Set_Val (0);
          Partner.Ref.Identifier.Set_Val (Self.Identifier);
          Partner.Ref.Port.Set_Val (Safir.Dob.Typesystem.Int_32 (Port));
-         Partner.Ref.Address.Set_Val (Ada.Strings.Wide_Unbounded.To_Unbounded_Wide_String ("127.0.0.1"));
+
+         -- Get the address from Node_Info object
+         NodeInfo := Safir.Dob.Node_Info.Smart_Pointer
+            (Self.Control_Connection.Read (Safir.Dob.Typesystem.Entity_Id.Create_Entity_Id
+                                              (Safir.Dob.Node_Info.Class_Type_Id,
+                                               Safir.Dob.Typesystem.Instance_Id.Create_Instance_Id
+                                                  (Safir.Dob.Typesystem.Int_64 (Safir.Dob.This_Node_Parameters.Node_Number)))).Get_Entity);
+         Partner.Ref.Address.Set_Val (NodeInfo.Ref.Ip_Address.Get_Val);
 
          Self.Control_Connection.Set_All
             (Partner,
