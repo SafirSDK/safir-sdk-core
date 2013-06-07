@@ -25,6 +25,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <signal.h>
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4723)
@@ -59,8 +60,9 @@ int main(int argc, char* argv[])
     }
     else if (arg == "SIGFPE")
     {
-        int i = 0;
-        std::wcout << 10/i << std::endl;
+        //Doing a divide by zero does not work on all platforms and compilers (e.g. clang)
+        //so we do an explicit raise instead.
+        raise(SIGFPE);
         std::wcout << "Program did not crash! Error!" << std::endl;
         return 1;
     }
