@@ -61,8 +61,14 @@ int main(int argc, char* argv[])
     else if (arg == "SIGFPE")
     {
         //Doing a divide by zero does not work on all platforms and compilers (e.g. clang)
-        //so we do an explicit raise instead.
+        //so we do an explicit raise instead, unless we're on windows where raise doesnt 
+        //seem to work...
+#ifdef _MSC_VER
+        int i = 0;
+        std::wcout << 10/i << std::endl;
+#else
         raise(SIGFPE);
+#endif
         std::wcout << "Program did not crash! Error!" << std::endl;
         return 1;
     }
