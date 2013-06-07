@@ -81,9 +81,9 @@ build_dir        src/douf/douf_time_mix.ss/dotnet          RelWithDebInfo
 build_dir        src/douf/douf_time_mix.ss/ada             RelWithDebInfo
 run_test_suite   src/douf/douf_time_mix.ss/tests           douf_time_tests
 
-#this is really just some header files (a lot of stuff for just one file...),
+#this is really just some header files (a lot of stuff for just two files...),
 #so we dont build it in release, even though it "looks" like a cpp dll.
-build_dir        src/douf/douf_utilities_mix.ss/src        RelWithDebInfo
+build_dir        src/douf/douf_utilities.ss/src            RelWithDebInfo
 
 build_dir        src/swre/swre_library.ss/src              RelWithDebInfo
 build_dir        src/swre/swre_interface.ss/cpp/swre_interface_cpp         RelWithDebInfo   Debug
