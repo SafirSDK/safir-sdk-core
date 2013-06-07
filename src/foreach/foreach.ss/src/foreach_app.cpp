@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 
-#include "Douf_foreach_app.h"
+#include "foreach_app.h"
 #include <Safir/Dob/NodeParameters.h>
 
 #ifdef _MSC_VER

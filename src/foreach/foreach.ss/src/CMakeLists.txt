@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(douf_foreach CXX)
+project(foreach CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 

@@ -21,10 +21,10 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOUF_FOREACH_SERVICES_H
-#define __DOUF_FOREACH_SERVICES_H
+#ifndef __FOREACH_SERVICES_H
+#define __FOREACH_SERVICES_H
 
-#include "Douf_foreach_data.h"
+#include "foreach_data.h"
 
 #include <Safir/Application/Backdoor.h>
 #include <Safir/Application/BackdoorKeeper.h>

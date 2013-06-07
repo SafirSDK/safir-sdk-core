@@ -43,8 +43,8 @@ copy_dob_files   src/dose/dose_config.ss/config            safir_core/config
 
 copy_dob_files   src/swre/swre_library.ss/data             safir_core
 
-copy_dob_files   src/douf/douf_multi_foreach.ss/data       safir_core
-copy_dob_files   src/douf/douf_multi_foreach.ss/config     safir_core/config
+copy_dob_files   src/foreach/foreach.ss/data               safir_core
+copy_dob_files   src/foreach/foreach.ss/config             safir_core/config
 
 copy_dob_files   src/douf/douf_time_library.ss/config      safir_core/config
 
@@ -92,7 +92,7 @@ build_dir        src/swre/swre_interface.ss/java           RelWithDebInfo
 build_dir        src/swre/swre_interface.ss/ada            RelWithDebInfo
 build_dir        src/swre/swre_logger.ss/src               RelWithDebInfo
 build_dir        src/swre/swre_backdoor.ss/src             RelWithDebInfo
-build_dir        src/douf/douf_multi_foreach.ss/src/cpp    RelWithDebInfo
+build_dir        src/foreach/foreach.ss/src                RelWithDebInfo
 build_dir        src/olib/olib_code.ss/olib                RelWithDebInfo   Debug
 build_dir        src/dope/dope_main.ss/src                 RelWithDebInfo
 

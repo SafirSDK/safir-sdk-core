@@ -21,11 +21,9 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-
-#include "Douf_foreach_services.h"
-#include "Douf_foreach_app.h"
-#include "Douf_foreach_data.h"
+#include "foreach_services.h"
+#include "foreach_app.h"
+#include "foreach_data.h"
 
 #include <Safir/Dob/Response.h>
 #include <Safir/Dob/SuccessResponse.h>

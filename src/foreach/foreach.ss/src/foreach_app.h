@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOUF_FOREACH_APP_H
-#define __DOUF_FOREACH_APP_H
+#ifndef __FOREACH_APP_H
+#define __FOREACH_APP_H
 
 
 #include <Safir/Dob/Connection.h>
@@ -30,7 +30,7 @@
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <vector>
 
-#include "Douf_foreach_services.h"
+#include "foreach_services.h"
 
 namespace Safir
 {

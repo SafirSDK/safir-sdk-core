@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOUF_FOREACH_DATA_H
-#define __DOUF_FOREACH_DATA_H
+#ifndef __FOREACH_DATA_H
+#define __FOREACH_DATA_H
 
 #include <Safir/Application/Tracer.h>
 #include <Safir/Utilities/ForEach/ResponseType.h>

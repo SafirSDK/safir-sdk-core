@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "Douf_foreach_app.h"
+#include "foreach_app.h"
 #include <Safir/SwReports/SwReport.h>
 
 int main(int /*argc*/, char* /*argv*/[])
