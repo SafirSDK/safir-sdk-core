@@ -54,11 +54,15 @@ int main(int argc, char* argv[])
     {
         int* foo = NULL;
         *foo = 10;
+        std::wcout << "Program did not crash! Error" << std::endl;
+        return 1;
     }
     else if (arg == "SIGFPE")
     {
         int i = 0;
         std::wcout << 10/i << std::endl;
+        std::wcout << "Program did not crash! Error!" << std::endl;
+        return 1;
     }
     else if (arg == "SIGILL")
     {
@@ -66,11 +70,14 @@ int main(int argc, char* argv[])
         unsigned char insn[4] = { 0xff, 0xff, 0xff, 0xff };
         FUNC function = reinterpret_cast<FUNC>((char*)insn);
         function();
-       
+        std::wcout << "Program did not crash! Error!" << std::endl;
+        return 1;
     }
     else if (arg == "SIGABRT")
     {
         abort();
+        std::wcout << "Program did not crash! Error!" << std::endl;
+        return 1;
     }
 
     Safir::Utilities::CrashReporter::Stop();
