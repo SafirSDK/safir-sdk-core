@@ -37,7 +37,6 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/DistributionChannelParameters.h>
-#include <DoseTest/Parameters.h>
 #include <boost/thread.hpp>
 #include <iostream>
 

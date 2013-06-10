@@ -27,7 +27,6 @@
 
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <DoseTest/Partner.h>
-#include <DoseTest/Parameters.h>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include "Logger.h"
