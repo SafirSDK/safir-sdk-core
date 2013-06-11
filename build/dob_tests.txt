@@ -2,7 +2,7 @@
 copy_dob_files   src/dots/dots_test_dou.ss/data    safir_dob_tests
 copy_dob_files   src/dose/dose_test_dou.ss/data    safir_dob_tests
 copy_dob_files   src/dope/dope_test_dou.ss/data  safir_dob_tests
-copy_dob_files   src/olib/olib_code.ss/tests/data  safir_dob_tests
+copy_dob_files   src/olib/olib_dou.ss/data  safir_dob_tests
 dobmake
 
 run_test_suite   src/dots/dots_cpp.ss/tests/container_test       dots_cpp_container_tests
