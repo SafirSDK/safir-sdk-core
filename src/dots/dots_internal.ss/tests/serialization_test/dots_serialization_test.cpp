@@ -55,11 +55,11 @@ int main(int argc, char* argv[])
     }
     else
     {
-        douDir=boost::filesystem::path("C:/dev/dots_internal.ss/tests/serialization_test/dou");
-        testDir=boost::filesystem::path("C:/dev/dots_internal.ss/tests/serialization_test/testcases");
+        //douDir=boost::filesystem::path("C:/dev/dots_internal.ss/tests/serialization_test/dou");
+        //testDir=boost::filesystem::path("C:/dev/dots_internal.ss/tests/serialization_test/testcases");
 
-        //douDir=boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_internal.ss/tests/serialization_test/dou");
-        //testDir=boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_internal.ss/tests/serialization_test/testcases");
+        douDir=boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_internal.ss/tests/serialization_test/dou");
+        testDir=boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_internal.ss/tests/serialization_test/testcases");
         //douDir=boost::filesystem::path("/home/joot/dev/safir-svn/src/dots/dots_internal.ss/tests/serialization_test/dou");
         //testDir=boost::filesystem::path("/home/joot/dev/safir-svn/src/dots/dots_internal.ss/tests/serialization_test/testcases");
     }
