@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BlobTest.MyEntity type="BlobTest.MyEntity">
+    <MyBoolVal>true</MyBoolVal>
+    <MyInt32Val>123</MyInt32Val>
+    <MyInt64Val>1000000000</MyInt64Val>
+    <MyFloat32Val>3.65</MyFloat32Val>
+    <MyFloat64Val>-681231.65</MyFloat64Val>
+</BlobTest.MyEntity>

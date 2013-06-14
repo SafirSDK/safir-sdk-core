@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Test.MyClass2</name>
+    <baseClass>Test.MyClass1</baseClass>
+    <members>
+        <member>
+            <name>Arr</name>
+            <type>String</type>
+            <maxLength>3</maxLength>
+            <arraySizeRef>
+                <name>ParserTest.MyParam1.IntArray</name>
+                <index>10</index>
+            </arraySizeRef>
+        </member>
+    </members>
+</class>

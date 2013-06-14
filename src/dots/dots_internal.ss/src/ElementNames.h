@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2012 (http://www.safirsdk.com)
+* Copyright Saab AB, 2004-2013 (http://www.safirsdk.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -21,11 +21,16 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_ELEMENT_NAMES_H__
-#define __DOTS_ELEMENT_NAMES_H__
+#ifndef __DOTS_INTERNAL_ELEMENT_NAMES_H__
+#define __DOTS_INTERNAL_ELEMENT_NAMES_H__
 
 #include <map>
 
+
+//---------------------------------------------------
+// Defines all xml-elements used in dou/dom-syntax.
+// The class is a singleton.
+//---------------------------------------------------
 namespace Safir
 {
 namespace Dob
@@ -42,20 +47,20 @@ namespace Internal
             //--- Class ---
             Class,
             Classsummary,
-            className,
-            baseClass,
+            ClassName,
+            BaseClass,
             ClassMembers,
             Parameters,
-            createRoutines,
+            CreateRoutines,
 
             Member,
             Membersummary,
             MemberName,
             MemberType,
-            arraySize,
-            arraySizeRef,
-            maxLength,
-            maxLengthRef,            
+            ArraySize,
+            ArraySizeRef,
+            MaxLength,
+            MaxLengthRef,
 
             CreateRoutine,
             CreateRoutinesummary,
@@ -66,6 +71,9 @@ namespace Internal
             CreateRoutineValue,
             CreateRoutineValueMember,
             CreateRoutineValueParameter,
+            CreateRoutineValueValue,
+            CreateRoutineValueEntityId,
+            CreateRoutineValueObject,
 
             Parameter,
             Parametersummary,
@@ -85,7 +93,7 @@ namespace Internal
             Enumeration,
             Enumerationsummary,
             EnumerationName,
-            enumerationValues,
+            EnumerationValues,
             EnumerationValue,
 
             //--- Exception ---
@@ -98,7 +106,7 @@ namespace Internal
             //--- Property ---
             Property,
             Propertysummary,
-            propertyName,
+            PropertyName,
             PropertyMembers,
 
             PropertyMember,
@@ -137,7 +145,8 @@ namespace Internal
 
             //This one is a placeholder for all xml attributes and xml elements. I.e not a normal element.
             XmlAttribute,
-            XmlComment
+            XmlComment,
+            Any
         };
 
         static ElementNames& Instance()
@@ -154,6 +163,7 @@ namespace Internal
         {
             m_map[XmlAttribute]="<xmlattr>";
             m_map[XmlComment]="<xmlcomment>";
+            m_map[Any]="any";
 
             m_map[Classsummary]="summary";
             m_map[Exceptionsummary]="summary";
@@ -162,10 +172,10 @@ namespace Internal
             m_map[Parametersummary]="summary";
             m_map[Membersummary]="summary";
             m_map[CreateRoutinesummary]="summary";
-            m_map[className]="name";
+            m_map[ClassName]="name";
             m_map[ExceptionName]="name";
             m_map[EnumerationName]="name";
-            m_map[propertyName]="name";
+            m_map[PropertyName]="name";
             m_map[ParameterName]="name";
             m_map[MemberName]="name";
             m_map[CreateRoutineName]="name";
@@ -178,23 +188,26 @@ namespace Internal
             m_map[ParameterEntityId]="entityId";
             m_map[ParameterArrayIndex]="index";
 
-            m_map[arraySize]="arraySize";
-            m_map[baseClass]="baseClass";
+            m_map[ArraySize]="arraySize";
+            m_map[BaseClass]="baseClass";
             m_map[ExceptionBase]="baseClass";
             m_map[Class]="class";
             m_map[CreateRoutine]="createRoutine";
-            m_map[createRoutines]="createRoutines";
+            m_map[CreateRoutines]="createRoutines";
             m_map[CreateRoutineMemberName]="member";
             m_map[CreateRoutineParameterList]="parameters";
             m_map[CreateRoutineValues]="values";
             m_map[CreateRoutineValue]="value";
             m_map[CreateRoutineValueMember]="member";
             m_map[CreateRoutineValueParameter]="parameter";
+            m_map[CreateRoutineValueValue]="value";
+            m_map[CreateRoutineValueEntityId]="entityId";
+            m_map[CreateRoutineValueObject]="object";
 
             m_map[PropertyMember]="member";
             m_map[Enumeration]="enumeration";
             m_map[Exception]="exception";
-            m_map[maxLength]="maxLength";
+            m_map[MaxLength]="maxLength";
             m_map[Member]="member";
             m_map[ClassMembers]="members";
             m_map[Parameter]="parameter";
@@ -202,7 +215,7 @@ namespace Internal
             m_map[Property]="property";
             m_map[MemberType]="type";
             m_map[EnumerationValue]="value";
-            m_map[enumerationValues]="values";
+            m_map[EnumerationValues]="values";
             m_map[PropertyMembersummary]="summary";
             m_map[PropertyMemberName]="name";
             m_map[PropertyMemberType]="type";
@@ -224,8 +237,8 @@ namespace Internal
             m_map[MapEntityId]="entityId";
             m_map[MapObject]="object";
 
-            m_map[arraySizeRef]="arraySizeRef"; //member array 
-            m_map[maxLengthRef]="maxLengthRef"; //member maxLength
+            m_map[ArraySizeRef]="arraySizeRef"; //member array
+            m_map[MaxLengthRef]="maxLengthRef"; //member maxLength
             m_map[InstanceIdRef]="instanceIdRef"; //??????
             
             m_map[ReferenceName]="name";

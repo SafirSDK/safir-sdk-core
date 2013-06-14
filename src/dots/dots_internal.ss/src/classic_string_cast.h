@@ -1,17 +1,19 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2012 (http://www.safirsdk.com)
+* Copyright Saab AB, 2004-2013 (http://www.safirsdk.com)
 *
 * Created by: Joel Ottosson / joot
 *
 *******************************************************************************/
-#ifndef CLASSIC_STRING_CAST_H
-#define CLASSIC_STRING_CAST_H
+#ifndef __CLASSIC_STRING_CAST_H__
+#define __CLASSIC_STRING_CAST_H__
 
+#include <iomanip>
+#include <sstream>
+#include <limits>
 #include <boost/lexical_cast.hpp>
 #include <boost/mpl/contains.hpp>
 #include <boost/mpl/vector.hpp>
-#include <sstream>
 
 namespace Safir
 {
@@ -32,8 +34,8 @@ namespace Internal
   *          Target classic_string_cast<Target, Source>(const Source& src)
   *
   * Usage example:
-  *             std::wstring numStr = classic_string_cast<std::wstring>(123);
-  *             double dblVal = classic_string_cast<double>("123.456");
+  *             std::wstring numStr=classic_string_cast<std::wstring>(123);
+  *             double dblVal=classic_string_cast<double>("123.456");
   */
 
 
@@ -62,9 +64,10 @@ struct classic_string_cast_impl<Target, Source, TargetIsString>
     inline Target operator()(const Source& src) const
     {
         typedef typename Target::traits_type::char_type CharType;
+        typedef std::numeric_limits< Source > Limit;
         std::basic_stringstream<CharType> os;
         os.imbue(std::locale::classic());
-        os<<src;
+        os<<std::setprecision(Limit::digits10)<<src;
         return os.str();
     }
 };
@@ -75,10 +78,11 @@ struct classic_string_cast_impl<Target, Source, SourceIsString>
     inline Target operator()(const Source& src) const
     {
         typedef typename Source::traits_type::char_type CharType;
+        typedef std::numeric_limits< Source > Limit;
         std::basic_stringstream<CharType> is(src);
         is.imbue(std::locale::classic());
         Target result;
-        is>>result;
+        is>>std::setprecision(Limit::digits10)>>result;
         if (!is.eof()) //not all chars were read, means that some chars are not allowed
         {
             throw boost::bad_lexical_cast();
@@ -97,7 +101,7 @@ inline Target classic_string_cast(const Source& src)
                                             Target >::type TargetIsString;
     typedef typename boost::mpl::contains<  boost::mpl::vector< std::string, std::wstring >,
                                             Source >::type SourceIsString;
-    typedef typename IsStringType< (TargetIsString::value > 0), (SourceIsString::value > 0) >::type SelectedVersion;
+    typedef typename IsStringType< TargetIsString::value, SourceIsString::value >::type SelectedVersion;
     return classic_string_cast_impl< Target, Source, SelectedVersion > ()(src);
 }
 

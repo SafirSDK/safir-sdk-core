@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Contains the definition of a distribution channel name.</summary>
+    <name>BlobTest.MyEntityBase</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <member>
+            <summary>InstanceId.</summary>
+            <name>MyBaseInstanceId</name>
+            <type>InstanceId</type>            
+        </member>        
+        <member>
+            <summary>EntityId.</summary>
+            <name>MyBaseEntityId</name>
+            <type>EntityId</type>            
+        </member>
+    <member>
+            <summary>string array</summary>
+            <name>MyBaseStringArray</name>
+            <type>String</type>            
+        <arraySize>5</arraySize>
+            <maxLength>10</maxLength>
+        </member>
+    </members>
+</class>

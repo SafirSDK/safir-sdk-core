@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2012 (http://www.safirsdk.com)
+* Copyright Saab AB, 2004-2013 (http://www.safirsdk.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_PARSER_OCCURRENCE_RULES_H__
-#define __DOTS_PARSER_OCCURRENCE_RULES_H__
+#ifndef __DOTS_INTERNAL_PARSER_OCCURRENCE_RULES_H__
+#define __DOTS_INTERNAL_PARSER_OCCURRENCE_RULES_H__
 
 #include <limits>
 
@@ -32,11 +32,15 @@ namespace Dob
 {
 namespace Typesystem
 {
+    //-----------------------------------------------------------------------------------------
+    //Keeps track of the number of occurrences a xml-element is exists at a specific location
+    //Used in ElementParsers to implement the schema validaton.
+    //-----------------------------------------------------------------------------------------
     template <int Min, int Max>
     struct Occurrences
     {
-        static const int MinOccurrences = Min;
-        static const int MaxOccurrences = Max;
+        static const int MinOccurrences=Min;
+        static const int MaxOccurrences=Max;
 
         Occurrences() : m_val(0) {}
         bool Valid() const {return m_val>=MinOccurrences && m_val<=MaxOccurrences;}

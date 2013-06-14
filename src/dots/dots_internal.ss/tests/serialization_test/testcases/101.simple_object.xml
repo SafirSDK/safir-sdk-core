@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BlobTest.MyEntity type="BlobTest.MyEntity">
+  <MyInt32Val>123</MyInt32Val>
+  <MyStringVal xml:space="preserve">Bill &amp; Bul</MyStringVal>
+  <MyItemVal type="BlobTest.MyItem">
+    <MyNumber>666</MyNumber>
+  </MyItemVal>
+  <MyInt32Array>
+    <Int32 index="0">10</Int32>
+    <Int32 index="1">11</Int32>
+    <Int32 index="2">12</Int32>
+  </MyInt32Array>
+</BlobTest.MyEntity>

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2012 (http://www.safirsdk.com)
+* Copyright Saab AB, 2004-2013 (http://www.safirsdk.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -21,15 +21,21 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_PARSER_BASIC_TYPES_H__
-#define __DOTS_PARSER_BASIC_TYPES_H__
+#ifndef __DOTS_INTERNAL_BASIC_TYPES_H__
+#define __DOTS_INTERNAL_BASIC_TYPES_H__
 
 #include <string>
 #include <map>
+#include <vector>
 #include <boost/noncopyable.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
-#include "ParseResult.h"
+#include <boost/bind.hpp>
+#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/Internal/ParseError.h>
 #include "InternalDefs.h"
+#include "classic_string_cast.h"
 
 namespace Safir
 {
@@ -48,10 +54,11 @@ namespace Internal
         const std::string& StringOf(DotsC_MemberType type) const;
         Size SizeOfType(DotsC_MemberType type) const;        
 
-        bool MemberTypeOf(const std::string& typeName, RawParseResultConstPtr res, DotsC_MemberType& memberType) const;
-        bool CanParseValue(const std::string& typeName, const std::string& value, RawParseResultConstPtr res) const;
-        //bool ParseValue(const std::string& typeName, RawParseResultConstPtr rawResult, ValueDefinition& val) const;
+        bool IsBasicType(const std::string& typeName, DotsC_MemberType& memberType) const;                
+        bool ParseValue(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result) const;
 
+        static std::string ToBase64(const std::string& bin);
+        static bool FromBase64(std::string base64, std::string& bin);
 
         //Built in object names
         static const std::string ObjectName;
@@ -66,21 +73,33 @@ namespace Internal
 
     private:
         BasicTypes(void);
-        
-        typedef boost::function<bool(const std::string&, RawParseResultConstPtr res)> ValueCheckerFunction;
-        struct TypeInfo
-        {
-            DotsC_MemberType type;
-            std::string name;
-            ValueCheckerFunction valCheck;
 
-            TypeInfo(DotsC_MemberType mt, const char* name, ValueCheckerFunction f) : type(mt), name(name), valCheck(f) {}
-        };
+//        typedef boost::function<bool(const std::string& str, ValueDefinition& val)> FromStringConversion;
+//        typedef boost::function<bool(const ValueDefinition& val, std::string& str)> ToStringConversion;
 
-        typedef std::vector<TypeInfo> TypeInfoVector;
-        TypeInfoVector m_typeInfo;
-        const TypeInfo* GetTypeInfo(DotsC_MemberType mt) const;
-        const TypeInfo* GetTypeInfo(const std::string& typeName) const;
+//        struct TypeInfo
+//        {
+//            std::string name;
+//            DotsC_MemberType memberType;
+//            size_t size;
+//            FromStringConversion fromString;
+//            ToStringConversion toString;
+
+//            TypeInfo(const std::string& name_, DotsC_MemberType mt_, size_t size_, FromStringConversion fs_, ToStringConversion ts_)
+//                :name(name_)
+//                ,memberType(mt_)
+//                ,size(size_)
+//                ,fromString(fs_)
+//                ,toString(ts_)
+//            {
+//            }
+//        };
+
+        boost::unordered_map<std::string, DotsC_MemberType> m_nameToMt;
+        boost::unordered_map<DotsC_MemberType, std::string> m_mtToName;
+
+        const std::string* MemberTypeToString(DotsC_MemberType mt) const;
+        const DotsC_MemberType* StringToMemberType(const std::string& typeName) const;
     };
 }
 }

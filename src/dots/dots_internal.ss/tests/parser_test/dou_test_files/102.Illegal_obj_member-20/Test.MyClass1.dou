@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Test.MyClass1</name>
+    <baseClass>Object</baseClass>    
+    <members>
+        <member>
+            <name>First</name>
+            <type>Test.MyClass1</type>            
+        </member>
+        <member>
+            <name>Second</name>
+            <type>Test.MyClass2</type>
+        </member>
+        <member>
+            <name>Third</name>
+            <type>Test.MyClass3</type>
+        </member>
+    </members>
+</class>

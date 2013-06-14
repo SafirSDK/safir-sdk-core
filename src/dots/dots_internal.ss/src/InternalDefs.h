@@ -66,6 +66,8 @@ namespace Typesystem
 {
 namespace Internal
 {
+    typedef std::vector<std::string> StringVector;
+
     typedef DotsC_Int32 Int32;
     typedef DotsC_Int64 Int64;
     typedef DotsC_Float32 Float32;
@@ -77,6 +79,7 @@ namespace Internal
     typedef DotsC_ArrayIndex ArrayIndex;
     typedef DotsC_EnumerationValue EnumerationValue;
     typedef DotsC_MemberType MemberType;
+    typedef DotsC_PropertyMappingKind MappingKind;
 
     typedef boost::uint32_t Offset;
     typedef boost::uint32_t Size;
@@ -84,77 +87,40 @@ namespace Internal
     typedef DotsC_Int64 ChannelId;
     typedef DotsC_Int64 HandlerId;
 
-    static const Size DYNAMIC_MEMBER_SIZE =   sizeof(Offset) + sizeof(Size); //8
+    static const Size OFFSET_SIZE                  =0;
+    static const Size OFFSET_TYPE_ID               =4;
+    static const Size OFFSET_HEADER_LENGTH         =12;
+    static const Size MEMBER_STATUS_LENGTH         =sizeof(char); //1
+    static const Size OFFSET_MEMBER_LENGTH         =  sizeof(Offset); //4
+    static const Size DYNAMIC_MEMBER_SIZE          =  sizeof(Offset) + sizeof(Size); //8
 
-    //Preset class names
-    const char * const NULL_CLASS           = "Null_Class";
-    const char * const OBJECT_CLASS         = "Object"; //"Safir.Dots.Object";
 
-    //-------------------------------------------------------------------------
-    //Helper class for conversion between internal and external status formats
-    //-------------------------------------------------------------------------
-    typedef char InternalMemberStatus;
-    class MemberStatusHandler
+    BOOST_STATIC_ASSERT(sizeof(char) == 1);
+    BOOST_STATIC_ASSERT(sizeof(Offset) == 4);
+    BOOST_STATIC_ASSERT(sizeof(Size) == 4);
+    BOOST_STATIC_ASSERT(sizeof(Offset) <= sizeof(Int64)); //this is to ensure that an offset can fit into a hashedId member.
+
+    /**
+     * Definition of a value. Used in parameters, createRoutines and propertyMappings.
+     */
+    enum ValueDefinitionKind {ValueKind, NullKind, RefKind};
+    struct ValueDefinition
     {
-    private:
-        MemberStatusHandler(); //declared but not defined, since this class is not possible to instantiate
-        static const InternalMemberStatus NULL_FLAG_MASK = 0x1;
-        static const InternalMemberStatus CHANGE_FLAG_MASK = 0x2;
-        static const InternalMemberStatus SEMIDYNAMIC_FLAG_MASK = 0x4; //means that a HashedId member or EntityId has a string.
-
-    public:
-        static const InternalMemberStatus STARTING_VALUE = NULL_FLAG_MASK;
-
-        static void ToExternalFormat(const InternalMemberStatus internalFormat, bool& isNull, bool& isChanged)
+        ValueDefinitionKind kind;
+        std::string stringVal;        
+        DotsC_Int64 hashedVal;
+        union
         {
-            isNull = (internalFormat & NULL_FLAG_MASK) != 0;
-            isChanged = (internalFormat & CHANGE_FLAG_MASK) != 0;
-        }
+            DotsC_Int32 int32Val;
+            DotsC_Int64 int64Val;
+            DotsC_Float32 float32Val;
+            DotsC_Float64 float64Val;
+            bool boolVal;
+        };
 
-        static InternalMemberStatus ToInternalFormat(const bool isNull, const bool isChanged)
-        {
-            return (isNull?NULL_FLAG_MASK:0) | (isChanged?CHANGE_FLAG_MASK:0);
-        }
-
-        static InternalMemberStatus ToInternalFormat(const bool isNull, const bool isChanged, const bool hasDynamicPart)
-        {
-            return (isNull?NULL_FLAG_MASK:0) | (isChanged?CHANGE_FLAG_MASK:0) | (hasDynamicPart?SEMIDYNAMIC_FLAG_MASK:0);
-        }
-
-
-        static bool HasChanged(const InternalMemberStatus internalFormat)
-        {
-            return (internalFormat & CHANGE_FLAG_MASK) != 0;
-        }
-
-        static bool IsNull(const InternalMemberStatus internalFormat)
-        {
-            return (internalFormat & NULL_FLAG_MASK) != 0;
-        }
-
-        static bool ChangedOrNotNull(const InternalMemberStatus internalFormat)
-        {
-            return HasChanged(internalFormat) || !IsNull(internalFormat);
-        }
-
-        static void SetChanged(InternalMemberStatus & internalFormat, const bool changed)
-        {
-            if (changed)
-            {
-                internalFormat |= CHANGE_FLAG_MASK;
-            }
-            else
-            {
-                internalFormat &= (0xff ^ CHANGE_FLAG_MASK);
-            }
-        }
-
-        static bool HasDynamicPart(const InternalMemberStatus internalFormat)
-        {
-            return (internalFormat & SEMIDYNAMIC_FLAG_MASK) != 0;
-        }
+        ValueDefinition() : kind(ValueKind){}
+        ValueDefinition(ValueDefinitionKind k) : kind(k){}
     };
-
 
     inline bool operator ==(const DotsC_EntityId& left, const DotsC_EntityId& right)
     {
@@ -178,7 +144,7 @@ namespace Internal
             std::ostringstream msgWriter;
             msgWriter << "Description: " << description  << std::endl
                   << "Occurred at: " << filename << ": " << lineNumber;
-            m_msg = msgWriter.str();
+            m_msg=msgWriter.str();
         }
 
         virtual ~InternalException() throw()

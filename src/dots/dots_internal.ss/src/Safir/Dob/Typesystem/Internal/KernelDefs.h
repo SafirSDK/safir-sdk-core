@@ -53,7 +53,7 @@ typedef DotsC_Int32 DotsC_EnumerationValue;
 
 typedef enum
 {
-    BooleanMemberType = 0,
+    BooleanMemberType=0,
     EnumerationMemberType,
     Int32MemberType,
     Int64MemberType,
@@ -114,7 +114,7 @@ typedef enum
 
 typedef enum
 {
-    NoError = 0,
+    NoError=0,
     ReadOnlyProperty,           //when reading properties straight from blobs
     UnableToDereferenceProperty, //when reading properties straight from blobs
     IllegalValue,
@@ -128,6 +128,44 @@ typedef enum
     MappedToMember,
     MappedToParameter,
 } DotsC_PropertyMappingKind;
+
+class DotsC_MemberStatus
+{
+public:
+
+    DotsC_MemberStatus()
+        :m_status(DotsC_MemberStatus::NULL_FLAG_MASK) {}
+
+    DotsC_MemberStatus(char status)
+        :m_status(status) {}
+
+    char RawValue() const {return m_status;}
+
+    bool HasChanged() const {return (m_status & CHANGE_FLAG_MASK) != 0;}
+    bool IsNull() const {return (m_status & NULL_FLAG_MASK) != 0;}
+    bool HasDynamicPart() const {return (m_status & SEMIDYNAMIC_FLAG_MASK) != 0;}
+
+    void SetChanged(bool changed) {Set(changed, DotsC_MemberStatus::CHANGE_FLAG_MASK);}
+    void SetNull(bool isNull) {Set(isNull, DotsC_MemberStatus::NULL_FLAG_MASK);}
+    void SetDynamicPart(bool hasDynamicPart) {Set(hasDynamicPart, DotsC_MemberStatus::SEMIDYNAMIC_FLAG_MASK);}
+
+private:
+    char m_status;
+    static const char NULL_FLAG_MASK=0x1;
+    static const char CHANGE_FLAG_MASK=0x2;
+    static const char SEMIDYNAMIC_FLAG_MASK=0x4; //means that a HashedId member or EntityId has a string.
+    void Set(bool val, char mask)
+    {
+        if (val)
+        {
+            m_status |= mask;
+        }
+        else
+        {
+            m_status &= (0xff ^ mask);
+        }
+    }
+};
 
 #endif
 

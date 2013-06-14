@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2012 (http://www.safirsdk.com)
+* Copyright Saab AB, 2004-2013 (http://www.safirsdk.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_ELEMENT_PARSER_BASE_H__
-#define __DOTS_ELEMENT_PARSER_BASE_H__
+#ifndef __DOTS_INTERNAL_ELEMENT_PARSER_BASE_H__
+#define __DOTS_INTERNAL_ELEMENT_PARSER_BASE_H__
 
 #include <iostream>
 #include <string>
@@ -36,6 +36,10 @@
 #include "ParseAlgorithms.h"
 #include "OccurrenceRules.h"
 
+//------------------------------------------------------------------------------------
+// Implementation of the xml-parser engine.
+// Will iterate over all elements in the files and call appropriate ParseAlgortihm
+//------------------------------------------------------------------------------------
 namespace Safir
 {
 namespace Dob
@@ -52,19 +56,19 @@ namespace Internal
     public:
         explicit ElementParserBase() : m_parent(NULL) {}
         explicit ElementParserBase(const ElementParserBase* parent) : m_parent(parent) {}
-        virtual bool Match(const std::string& name, ParseState& state) const = 0;
-        virtual const std::string& Name() const = 0;
-        virtual void Parse(boost::property_tree::ptree& pt, ParseState& state) = 0;
-        virtual void Reset(ParseState& state) = 0;
+        virtual bool Match(const std::string& name, ParseState& state) const=0;
+        virtual const std::string& Name() const=0;
+        virtual void Parse(boost::property_tree::ptree& pt, ParseState& state)=0;
+        virtual void Reset(ParseState& state)=0;
         virtual const ElementParserBase * const Parent() const {return m_parent;}
         virtual std::string Path() const
         {
-            std::string result = "<" + Name() + ">";
-            const ElementParserBase* el = m_parent;
+            std::string result="<" + Name() + ">";
+            const ElementParserBase* el=m_parent;
             while (el!=NULL)
             {
-                result = "<" + el->Name() + ">" + result;
-                el = el->Parent();
+                result="<" + el->Name() + ">" + result;
+                el=el->Parent();
             }
             return result;
         }
@@ -75,7 +79,10 @@ namespace Internal
     typedef boost::shared_ptr<ElementParserBase> ElementParserBasePtr;
     typedef std::vector<ElementParserBasePtr> ElementParserBaseVector;
     
-    //Instantiator class. Instantiates a complete ElementTree based on typelists.
+    //----------------------------------------------------------------------------
+    // Instantiator class. Instantiates a complete ElementTree based on typelists.
+    // See definitions in ElementParserDefs.
+    //----------------------------------------------------------------------------
     template < class ElementTypeVector, int Index > 
     struct ElementInstantiator
     {
@@ -130,7 +137,7 @@ namespace Internal
                 {
                     std::stringstream ss;
                     ss<<"You cant have both '"<<A::ElementName()<<"' and '"<<B::ElementName()<<"' at location "<<Parent()->Path()<<". Choose one of them.";
-                    throw ParseError("Element Missmatch", ss.str(), state.currentPath);
+                    throw ParseError("Element Missmatch", ss.str(), state.currentPath, 12);
                 }
                 return false;
             }
@@ -172,7 +179,7 @@ namespace Internal
             {
                 std::ostringstream ss;
                 ss<<"Expecting one of following elements: "<<ElementName();
-                throw ParseError("Wrong number of occurrences", ss.str(), state.currentPath);
+                throw ParseError("Wrong number of occurrences", ss.str(), state.currentPath, 13);
             }
             m_parser.reset(); //m_parser set to 0, and is now ready to match any of A and B again.
             m_occurrences.Reset();
@@ -187,6 +194,7 @@ namespace Internal
     #define ELEMENT_CHOICE_3(A,B,C,Occurrence) Choice<A, ELEMENT_CHOICE_2(B, C, Occurrence), Occurrence >
     #define ELEMENT_CHOICE_4(A,B,C,D,Occurrence) Choice<A, ELEMENT_CHOICE_3(B,C,D,Occurrence), Occurrence >
     #define ELEMENT_CHOICE_5(A,B,C,D,E,Occurrence) Choice<A, ELEMENT_CHOICE_4(B,C,D,E,Occurrence), Occurrence >
+    #define ELEMENT_CHOICE_6(A,B,C,D,E,F,Occurrence) Choice<A, ELEMENT_CHOICE_5(B,C,D,E,F,Occurrence), Occurrence >
 
     //------------------------------------------------------------
     //Helper element class that allows an element to be ignored
@@ -214,29 +222,45 @@ namespace Internal
         virtual const std::string& Name() const {static std::string dummy=""; return dummy;}
         virtual void Parse(boost::property_tree::ptree&, ParseState&) {}
         virtual void Reset(ParseState&) {}
-    };    
+    };
+ 
+    //-------------------------------
+    // Element matching algorithms
+    //-------------------------------
+    //this is the normal matcher alg, compares elements
+    struct ElementNameMatcher {static bool Match(const std::string& element , const std::string& name) {return element==name;}};
+    //this alg matches anything, if used be sure its added as the last element to be checked since it will swallow all elements.
+    struct AnyMatcher{static bool Match(const std::string& /*element*/, const std::string& /*name*/) {return true;}};
 
     //---------------------------------------------------------------------------------
     //Generic element class representing an element and contains all its subelements.
     //---------------------------------------------------------------------------------
     template <  int ElemName,
                 class Occurrence,
-                class SubElem = boost::mpl::vector<>,
-                class Algorithm = ParseAlgorithm<ElemName> >
+                class SubElem=boost::mpl::vector<>,
+                class Algorithm=ParseAlgorithm<ElemName>,
+                class MatchAlg=ElementNameMatcher >
     class Element : public ElementParserBase
     {
     public:
 
-        explicit Element() : ElementParserBase(), m_used(false), m_subElements(), m_occurrences(), m_parseAlgorithm()
+        Element()
+            :ElementParserBase()
+            ,m_used(false)
+            ,m_subElements()
+            ,m_occurrences()
+            ,m_parseAlgorithm()
         {
             ElementInstantiator< SubElem, boost::mpl::size<SubElem>::type::value - 1 >()(this, m_subElements);
-            //InitSubElements< boost::mpl::size<SubElem>::type::value - 1 >();
         }
 
-        explicit Element(const ElementParserBase* parent) : ElementParserBase(parent), m_used(false), m_subElements(), m_occurrences()
+        explicit Element(const ElementParserBase* parent)
+            :ElementParserBase(parent)
+            ,m_used(false)
+            ,m_subElements()
+            ,m_occurrences()
         {
             ElementInstantiator< SubElem, boost::mpl::size<SubElem>::type::value - 1 >()(this, m_subElements);
-            //InitSubElements< boost::mpl::size<SubElem>::type::value - 1 >();
         }
 
         static const std::string& ElementName()
@@ -246,11 +270,11 @@ namespace Internal
 
         static bool MatchElementName(const std::string& name)
         {
-            return ElementName()==name;
+            return MatchAlg::Match(ElementName(), name);
         }
 
         virtual const std::string& Name() const
-        {
+        {            
             return ElementName();
         }
         
@@ -284,18 +308,21 @@ namespace Internal
             m_parseAlgorithm(pt, state);
 
             //Handle sub elements
-            for (boost::property_tree::ptree::iterator it = pt.begin(); it!=pt.end(); ++it)
+            for (boost::property_tree::ptree::iterator it=pt.begin(); it!=pt.end(); ++it)
             {             
-                static std::string xmlComment = ElementNames::Instance().String(ElementNames::XmlComment);
+                static const std::string xmlComment=ElementNames::Instance().String(ElementNames::XmlComment);
                 if (it->first==xmlComment) //Instead of adding Ignore<XmlComment> to every element we hard-code it here.
                 {
                     continue;
                 }
 
-                //it->first = ElementName, it->second = subTree
-                ElementParserBaseVector::iterator match = std::find_if( m_subElements.begin(), 
+                //it->first=ElementName, it->second=subTree
+                ElementParserBaseVector::iterator match=std::find_if( m_subElements.begin(), 
                                                                         m_subElements.end(), 
-                                                                        boost::bind(&ElementParserBase::Match, _1, boost::cref(it->first), boost::ref(state)));
+                                                                        boost::bind(&ElementParserBase::Match, _1,
+                                                                                    boost::cref(it->first),
+                                                                                    boost::ref(state))
+                                                                        );
                 if (match!=m_subElements.end())
                 {
                     (*match)->Parse(it->second, state);
@@ -304,7 +331,7 @@ namespace Internal
                 {
                     std::ostringstream ss;
                     ss<<"Element '"<<it->first<<"' is not expected at location "<<Path();
-                    throw ParseError("Unexpected Element", ss.str(), state.currentPath);
+                    throw ParseError("Unexpected Element", ss.str(), state.currentPath, 14);
                 }
             }
         }
@@ -334,7 +361,7 @@ namespace Internal
 #ifdef _MSC_VER
 #pragma warning(default:4996)
 #endif
-                throw ParseError("Wrong number of occurrences", ss.str(), state.currentPath);
+                throw ParseError("Wrong number of occurrences", ss.str(), state.currentPath, 15);
             }            
         }
     };

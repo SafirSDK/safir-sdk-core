@@ -21,15 +21,17 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_TYPE_PARSER_ERROR_H__
-#define __DOTS_TYPE_PARSER_ERROR_H__
+#ifndef __DOTS_INTERNAL_ERROR_H__
+#define __DOTS_INTERNAL_ERROR_H__
+
+#include <sstream>
 
 #if defined _MSC_VER
-    #if defined DOTS_PARSER_EXPORTS
+    #if defined DOTS_INTERNAL_EXPORTS
         #define DOTS_API __declspec(dllexport)
     #else
         #define DOTS_API __declspec(dllimport)
-        #define SAFIR_LIBRARY_NAME "dots_parser"
+        #define SAFIR_LIBRARY_NAME "dots_internal"
         #include <Safir/Utilities/Internal/AutoLink.h>
     #endif
 #elif defined __GNUC__
@@ -58,23 +60,74 @@ namespace Internal
     class DOTS_API ParseError : public std::exception
     {
     public:
-        ParseError(const std::string& label, const std::string& description, const std::string& file) :
-            m_label(label),
-            m_description(description),
-            m_file(file) {}
 
+        /**
+         * Constructor - Creates a ParseError object.
+         *
+         * @param label [in] - Short description of the error.
+         * @param description [in] - Detailed description of the error.
+         * @param file [in] - Name of the dou- or dom-file that caused the error.
+         * @param errorId [in] - Id of this specific error. Can be used by test code and developvers to locate from where this error was thrown.
+         */
+        ParseError(const std::string& label, const std::string& description, const std::string& file, int errorId)
+            :m_label(label)
+            ,m_description(description)
+            ,m_file(file)
+            ,m_errorId(errorId)
+        {
+            std::ostringstream os;
+            os<<m_label<<"; "<<m_description<<"; "<<m_file<<"; ErrCode="<<m_errorId;
+            m_what=os.str();  //composed error info
+        }
+
+        /**
+         * Destructor.
+         */
         ~ParseError() throw() {}
 
+        /**
+         * Get short error description.
+         *
+         * @return Error label.
+         */
         const std::string& Label() const throw() {return m_label;}
+
+        /**
+         * Get detailed error description.
+         *
+         * @return Error description.
+         */
         const std::string& Description() const throw() {return m_description;}
+
+        /**
+         * Get file where error occured.
+         *
+         * @return Complete path to a dou- or dom- file.
+         */
         const std::string& File() const throw() {return m_file;}
 
-        virtual const char* what () const throw (){return m_description.c_str();}
+        /**
+         * Get an error identifier that can be used to find out exactly where this error was generated.
+         * Mostly intended for test and development.
+         *
+         * @return Error id.
+         */
+        int ErrorId() const {return m_errorId;}
+
+        /**
+         * Get error informtation on the form "Label; Description; File; ErrorId".
+         * Inherited from std:exception.
+         *
+         * @return Error information.
+         */
+        virtual const char* what () const throw (){return m_what.c_str();}
 
     private:
         std::string m_label;
         std::string m_description;
         std::string m_file;
+        std::string m_what;
+        int m_errorId;
     };
 
 #ifdef _MSC_VER
