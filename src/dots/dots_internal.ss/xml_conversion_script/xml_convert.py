@@ -137,12 +137,13 @@ def convert_member_item(src, dest, member_name):
     #2. <entityId> ---> <memEid> <name>Entity</name> <instanceId>3</instanceId> </memEid>
     #3. <object> ---> <memObj type="typeName"> ..... </memObj>
 
+    member_name=member_name.strip()
     value_element=src.find(ns('value'))
     if value_element!=None:
         if member_name=='':
             member_name='value'
         member_element=ET.SubElement(dest, member_name)
-        member_element.text=value_element.text
+        member_element.text=value_element.text.strip()
     else:
         eid_element=src.find(ns('entityId'))
         if eid_element!=None:
@@ -151,8 +152,8 @@ def convert_member_item(src, dest, member_name):
             member_element=ET.SubElement(dest, member_name)
             typename_element=ET.SubElement(member_element, 'name')
             instance_element=ET.SubElement(member_element, 'instanceId')
-            typename_element.text=eid_element.find(ns('name')).text
-            instance_element.text=eid_element.find(ns('instanceId')).text
+            typename_element.text=eid_element.find(ns('name')).text.strip()
+            instance_element.text=eid_element.find(ns('instanceId')).text.strip()
         else:
             obj_element=src.find(ns('object'))
             if obj_element!=None:
@@ -167,7 +168,7 @@ def convert_member_item(src, dest, member_name):
 
 def convert_object(tree, root_name=''):
     """Convert object structure"""
-    type_name=tree.find(ns('name')).text
+    type_name=tree.find(ns('name')).text.strip()
     if root_name=='':
         root_name=type_name
     obj=ET.Element(root_name)
@@ -178,7 +179,7 @@ def convert_object(tree, root_name=''):
     members=tree.find(ns('members'))
     if members!=None:        
         for member in members.findall(ns('member')):
-            member_name=member.find(ns('name')).text
+            member_name=member.find(ns('name')).text.strip()
             if member.find(ns('arrayElements'))!=None:
                 convert_array(member, obj, member_name)
             else:

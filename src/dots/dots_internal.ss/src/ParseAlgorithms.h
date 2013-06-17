@@ -124,7 +124,7 @@ namespace Internal
         void operator()(boost::property_tree::ptree& /*pt*/, ParseState& /*state*/) const {}
     };
 
-    template<> struct ParseAlgorithm<ElementNames::ParameterObject>// : private ObjectParameterHandler
+    template<> struct ParseAlgorithm<ElementNames::ParameterObject>
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
@@ -1376,6 +1376,7 @@ namespace Internal
     private:
         boost::shared_ptr<RepositoryBasic>& m_result;
 
+        void DeserializeObjects(const std::vector<ParseStatePtr>& states);
         void ResolveReferences(const std::vector<ParseStatePtr>& states);
         void ResolveParamToParamRefs(const std::vector<ParseStatePtr>& states);
         bool ResolveParamToParamRef(const ParseState::ParameterReference<ParameterDescriptionBasic>& ref);

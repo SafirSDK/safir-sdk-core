@@ -24,6 +24,8 @@
 #ifndef __DOTS_INTERNAL_PARSE_JOB_H__
 #define __DOTS_INTERNAL_PARSE_JOB_H__
 
+#include <boost/thread/mutex.hpp>
+
 #ifdef _MSC_VER
 #pragma warning(disable:4702) //unreachable code
 #endif

@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include "ParseAlgorithms.h"
+#include "XmlToBlobSerializer.h"
 
 namespace Safir
 {
@@ -344,6 +345,15 @@ namespace Internal
             }
         }
 
+        //Class sizes
+        for (boost::unordered_map<DotsC_TypeId, ClassDescriptionBasicPtr>::iterator it=m_result->m_classes.begin(); it!=m_result->m_classes.end(); ++it)
+        {
+            CalculateClassSize(it->second.get());
+        }
+
+        //Deserialize xml objects
+        DeserializeObjects(states);
+
         //Resolve parameter to parameter references
         ResolveParamToParamRefs(states);
 
@@ -355,12 +365,61 @@ namespace Internal
 
         //Create routines
         std::for_each(classesWithCreateRoutines.begin(), classesWithCreateRoutines.end(), boost::bind(&RepositoryCompletionAlgorithms::HandleCreateRoutines, this, _1));
+    }
 
-        //Class sizes
-        for (boost::unordered_map<DotsC_TypeId, ClassDescriptionBasicPtr>::iterator it=m_result->m_classes.begin(); it!=m_result->m_classes.end(); ++it)
+    void RepositoryCompletionAlgorithms::DeserializeObjects(const std::vector<ParseStatePtr>& states)
+    {
+        XmlToBlobSerializer serializer(m_result.get());
+
+        for (std::vector<ParseStatePtr>::const_iterator stateIt=states.begin(); stateIt!=states.end(); ++stateIt)
         {
-            CalculateClassSize(it->second.get());
+            //check object parameters
+            for (std::vector<ParseState::ObjectParameter>::const_iterator parIt=(*stateIt)->objectParameters.begin();
+                 parIt!=(*stateIt)->objectParameters.end(); ++parIt)
+            {
+                ParameterDescriptionBasic* param=parIt->referee.referencingItem;
+                size_t paramIndex=parIt->referee.referencingIndex;
+                ValueDefinition& val=param->values[paramIndex];
+
+                //Get the correct type name of the serialized object
+                const boost::property_tree::ptree& pt=*(parIt->obj);
+                boost::optional<std::string> typeAttr=pt.get_optional<std::string>("<xmlattr>.type");
+                std::string typeName;
+                if (typeAttr)
+                {
+                    //if type has an explicit type-attribute, check type compliance
+                    typeName=*typeAttr;
+                    TypeId tid=DotsId_Generate64(typeName.c_str());
+                    if (!IsOfType(m_result.get(), ObjectMemberType, tid, ObjectMemberType, param->GetTypeId()))
+                    {
+                        std::ostringstream os;
+                        os<<param->GetName()<<" index="<<paramIndex<<" in class "<<parIt->referee.referencingClass->GetName()<<" contains a value of type '"
+                         <<typeName<<"'' that is not a subtype of the declared type "<<param->typeName;
+                        throw ParseError("Type missmatch", os.str(), parIt->referee.referencingClass->FileName(), 105);
+                    }
+                }
+                else
+                {
+                    //type defaults to dou declaration
+                    typeName=param->typeName;
+                }
+
+                //do the serialization to the expected type
+                try
+                {
+                    serializer.SerializeObjectContent(typeName, val.binaryVal, pt); //since pt does not include the root element we have to use method SerializeObjectContent
+                    std::cout<<"Done"<<std::endl;
+                }
+                catch (const ParseError& err)
+                {
+                    std::ostringstream os;
+                    os<<"Failed to deserialize object parameter "<<param->GetName()<<" index="<<paramIndex<<" in class "<<parIt->referee.referencingClass->GetName()
+                     <<". "<<err.Description();
+                    throw ParseError("Invalid Object", os.str(), err.File(), err.ErrorId());
+                }
+            }
         }
+
     }
 
     void RepositoryCompletionAlgorithms::ResolveParamToParamRefs(const std::vector<ParseStatePtr>& states)
@@ -568,21 +627,6 @@ namespace Internal
     {
         for (std::vector<ParseStatePtr>::const_iterator stateIt=states.begin(); stateIt!=states.end(); ++stateIt)
         {
-            //check object parameters
-//            for (std::vector<ParseState::ObjectParameterTypeCheck>::const_iterator parIt=(*stateIt)->objectParameterTypeChecks.begin();
-//                 parIt!=(*stateIt)->objectParameterTypeChecks.end(); ++parIt)
-//            {
-
-//                //std::ostringstream ss, val;
-//                //boost::property_tree::write_xml(ss, *parIt->obj);
-//                //                val << "<object>"  //add start element <object>
-//                //                    << ss.str().substr(ss.str().find_first_of('>')+1)  //remove <? xml version... ?>
-//                //                    << "</" << ElementNames::Instance().String(ElementNames::ParameterObject)<< ">"; //add end element </object>
-//                //std::cout<<"<object>"<<val.str()<<"</object>" <<std::endl;
-
-
-//            }
-
             //array size refs
             std::for_each((*stateIt)->arraySizeReferences.begin(),
                           (*stateIt)->arraySizeReferences.end(),

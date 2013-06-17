@@ -42,7 +42,7 @@
 //#error We need a definition of unordered_map
 //#endif
 
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/Internal/KernelDefs2.h>
 #include <vector>
 
 //disable warnings in boost
@@ -107,7 +107,8 @@ namespace Internal
     struct ValueDefinition
     {
         ValueDefinitionKind kind;
-        std::string stringVal;        
+        std::string stringVal;
+        std::vector<char> binaryVal; //object and binary
         DotsC_Int64 hashedVal;
         union
         {

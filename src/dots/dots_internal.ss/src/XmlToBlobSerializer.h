@@ -43,16 +43,19 @@ namespace Internal
     class XmlToBlobSerializer : private boost::noncopyable
     {
     public:
-        XmlToBlobSerializer(const TypeRepository* repository, const char* xml);
-        void operator()(std::vector<char>& blob) const;
+        XmlToBlobSerializer(const TypeRepository* repository);
+        void operator()(const char* xml, std::vector<char>& blob) const;
+        void operator()(const boost::property_tree::ptree& xml, std::vector<char>& blob) const;
+
+        //This one is for internal use and should be considered private. It parses an xml-object but starts one level in from the root
+        //i.e <myObject type="anyType><myInt>4</myInt><myString>hello</myString></myObject>, when using this mehtod the ptree members
+        // must be <myInt>4</myInt><myString>hello</myString> and typeName must be handed as in-parameter. In then normal case when we
+        //have an ptree at root level use operator()(const boost::property_tree::ptree& xml, std::vector<char>& blob)
+        void SerializeObjectContent(const std::string& typeName, std::vector<char>& blob, const boost::property_tree::ptree& members) const;
 
     private:
         const TypeRepository* m_repository;
-        size_t m_xmlSize;
-        boost::property_tree::ptree m_pt;
         const BlobLayoutImpl m_blobLayout;
-
-        void SerializeMembers(const std::string& typeName, std::vector<char>& blob, const boost::property_tree::ptree& members) const;
 
         void SetMember(const MemberDescription* md,
                        DotsC_MemberIndex memIx,

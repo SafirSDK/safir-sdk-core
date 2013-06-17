@@ -32,7 +32,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/Internal/KernelDefs2.h>
 #include <Safir/Dob/Typesystem/Internal/ParseError.h>
 #include "InternalDefs.h"
 #include "classic_string_cast.h"

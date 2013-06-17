@@ -18,11 +18,6 @@ static bool PrintRepository=true;
 struct MyTimer
 {
     MyTimer() : m_last(boost::posix_time::microsec_clock().universal_time()) {}
-//    ~MyTimer()
-//    {
-//        boost::posix_time::time_duration dur=(boost::posix_time::microsec_clock().universal_time()-m_last);
-//        std::cout<<"Elapsed "<<dur.total_milliseconds()<<std::endl;
-//    }
 
     double Elapsed() const
     {
@@ -58,7 +53,7 @@ void PrintTestFailMessage(const std::string& result, const std::string& shortInf
 
 int main(int argc, char* argv[])
 {    
-    //ParseDir(boost::filesystem::path("/home/joel/Dropbox/Dev/Dots parser/dots_generated"));
+    //ParseDir(boost::filesystem::path("/home/joot/Dropbox/Dev/Dots parser/dots_generated_conv"));
     //return 0;
 
     boost::filesystem::path douDir;  //= boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_parser.ss/tests/dou_test_files");
@@ -73,7 +68,7 @@ int main(int argc, char* argv[])
         douDir=boost::filesystem::path("C:/dev/dots_internal.ss/tests/parser_test/dou_test_files");
 #else
         douDir=boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_internal.ss/tests/parser_test/dou_test_files");
-        //douDir=boost::filesystem::path("/home/joot/dev/safir-svn/src/dots/dots_parser.ss/tests/parser_test/dou_test_files");
+        //douDir=boost::filesystem::path("/home/joot/dev/safir-svn/src/dots/dots_internal.ss/tests/parser_test/dou_test_files");
 #endif
     }
 

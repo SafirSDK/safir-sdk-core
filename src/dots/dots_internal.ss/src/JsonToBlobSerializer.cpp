@@ -43,26 +43,24 @@ namespace Typesystem
 {
 namespace Internal
 {
-    JsonToBlobSerializer::JsonToBlobSerializer(const TypeRepository* repository, const char* json)
+    JsonToBlobSerializer::JsonToBlobSerializer(const TypeRepository* repository)
         :m_repository(repository)
-        ,m_jsonSize(strlen(json))
         ,m_blobLayout(repository)
     {
-        try
-        {
-        boost::iostreams::array_source src(json, m_jsonSize);
-        boost::iostreams::stream<boost::iostreams::array_source> stream(src);
-        boost::property_tree::json_parser::read_json(stream, m_pt);
-        }
-        catch (const std::exception& ex)
-        {
-            std::cout<<ex.what()<<std::endl;
-        }
     }
 
-    void JsonToBlobSerializer::operator()(std::vector<char>& blob) const
+    void JsonToBlobSerializer::operator()(const char* json, std::vector<char>& blob) const
     {
-        const boost::property_tree::ptree& members=m_pt.front().second;
+        boost::property_tree::ptree pt;
+        boost::iostreams::array_source src(json, strlen(json));
+        boost::iostreams::stream<boost::iostreams::array_source> stream(src);
+        boost::property_tree::json_parser::read_json(stream, pt);
+        this->operator ()(pt, blob);
+    }
+
+    void JsonToBlobSerializer::operator()(const boost::property_tree::ptree& json, std::vector<char>& blob) const
+    {
+        const boost::property_tree::ptree& members=json.front().second;
         boost::optional<std::string> typeName=members.get_optional<std::string>("_DobType");
 
         if (!typeName)
@@ -70,10 +68,10 @@ namespace Internal
             throw ParseError("JsonToBinary serialization error", "Json object does not have the _DobType field", "", 200);
         }
 
-        SerializeMembers(*typeName, blob, members);
+        SerializeObjectContent(*typeName, blob, members);
     }
 
-    void JsonToBlobSerializer::SerializeMembers(const std::string& typeName, std::vector<char>& blob, const boost::property_tree::ptree& members) const
+    void JsonToBlobSerializer::SerializeObjectContent(const std::string& typeName, std::vector<char>& blob, const boost::property_tree::ptree& members) const
     {
         const DotsC_TypeId typeId=DotsId_Generate64(typeName.c_str());
         const ClassDescription* cd=m_repository->GetClass(typeId);
@@ -84,7 +82,7 @@ namespace Internal
 
         char* beginningOfUnused=NULL;
 
-        size_t blobInitSize=std::max(m_jsonSize, static_cast<size_t>(2*cd->InitialSize()));
+        size_t blobInitSize=std::max(size_t(1000), static_cast<size_t>(2*cd->InitialSize()));
         blob.reserve(blobInitSize); //Note: maybe JsonSize/2 would be enogh in almost all cases
         blob.resize(cd->InitialSize(), 0);
         m_blobLayout.FormatBlob(&blob[0], blob.size(), typeId, beginningOfUnused);
@@ -290,7 +288,7 @@ namespace Internal
             }
 
             std::vector<char> insideBlob;
-            SerializeMembers(*xsiType, insideBlob, memberContent);
+            SerializeObjectContent(*xsiType, insideBlob, memberContent);
             CreateSpaceForDynamicMember(blob, beginningOfUnused, insideBlob.size());
             char* writeObj=beginningOfUnused;
             m_blobLayout.CreateObjectMember(&blob[0], insideBlob.size(), DotsId_Generate64(xsiType->c_str()), memIx, arrIx, false, beginningOfUnused);
@@ -448,7 +446,7 @@ namespace Internal
             blob.clear(); //unneccessary?
             blob.reserve(tmp.capacity()*2);
             blob.insert(blob.begin(), tmp.begin(), tmp.end());
-            beginningOfUnused=&blob[usedSize];
+            beginningOfUnused=&blob[0]+usedSize;
         }
 
         //When we get here, the blob is guaranteed to have capacity for the needed extra space. Just resize.

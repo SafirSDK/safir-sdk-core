@@ -10,16 +10,13 @@ FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dots_internal SHARED ${sources} ${headers})
-TARGET_LINK_LIBRARIES(dots_internal)
 
 FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time)
-TARGET_LINK_LIBRARIES(dots_internal ${Boost_LIBRARIES} ${COMMON_LIBRARIES})
-
 
 ADD_DEFINITIONS(-DDOTS_INTERNAL_EXPORTS)
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dots_internal dots_id lluf_utils)
+  TARGET_LINK_LIBRARIES(dots_internal dots_id lluf_utils  ${Boost_LIBRARIES})
 endif()
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include

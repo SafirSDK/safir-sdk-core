@@ -53,26 +53,26 @@ namespace Internal
 
     void BinaryToXml(const TypeRepository* repository, const char* blob, std::ostringstream& xml)
     {
-        BlobToXmlSerializer serializer(repository, blob);
-        serializer(xml);
+        BlobToXmlSerializer serializer(repository);
+        serializer(blob, xml);
     }
 
     void XmlToBinary(const TypeRepository* repository, const char* xml, std::vector<char>& blob)
     {
-        XmlToBlobSerializer serializer(repository, xml);
-        serializer(blob);
+        XmlToBlobSerializer serializer(repository);
+        serializer(xml, blob);
     }
 
     void BinaryToJson(const TypeRepository* repository, const char* blob, std::ostringstream& json)
     {
-        BlobToJsonSerializer serializer(repository, blob);
-        serializer(json);
+        BlobToJsonSerializer serializer(repository);
+        serializer(blob, json);
     }
 
     void JsonToBinary(const TypeRepository* repository, const char* json, std::vector<char>& blob)
     {
-        JsonToBlobSerializer serializer(repository, json);
-        serializer(blob);
+        JsonToBlobSerializer serializer(repository);
+        serializer(json, blob);
     }
 }
 }

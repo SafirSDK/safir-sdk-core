@@ -43,24 +43,24 @@ namespace Internal
     class BlobToXmlSerializer : private boost::noncopyable
     {
     public:
-        BlobToXmlSerializer(const TypeRepository* repository, const char* blob);
-        void operator()(std::ostream& os) const;
+        BlobToXmlSerializer(const TypeRepository* repository);
+        void operator()(const char* blob, std::ostream& os) const;
 
     private:
         const TypeRepository* m_repository;
-        const char* m_blob;
         const BlobLayoutImpl m_blobLayout;
 
-        void SerializeMembers(boost::property_tree::ptree& content, bool addTypeAttr) const;
+        void SerializeMembers(const char* blob, boost::property_tree::ptree& content, bool addTypeAttr) const;
 
-        void SerializeMember(const MemberDescription* md,
+        void SerializeMember(const char* blob,
+                             const MemberDescription* md,
                              DotsC_MemberIndex memberIndex,
                              DotsC_ArrayIndex arrayIndex,
                              const char* elementName,
                              boost::property_tree::ptree& pt) const;
 
         const char* TypeIdToString(DotsC_TypeId tid) const;
-        const ClassDescription* GetClass() const;
+        const ClassDescription* GetClass(const char* blob) const;
     };
 
 }

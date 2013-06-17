@@ -24,7 +24,7 @@
 #ifndef __DOTS_INTERNAL_BLOB_LAYOUT_H__
 #define __DOTS_INTERNAL_BLOB_LAYOUT_H__
 
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/Internal/KernelDefs2.h>
 #include <boost/shared_ptr.hpp>
 
 #if defined _MSC_VER

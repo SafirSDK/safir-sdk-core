@@ -43,16 +43,18 @@ namespace Internal
     class JsonToBlobSerializer : private boost::noncopyable
     {
     public:
-        JsonToBlobSerializer(const TypeRepository* repository, const char* json);
-        void operator()(std::vector<char>& blob) const;
+        JsonToBlobSerializer(const TypeRepository* repository);
+
+        void operator()(const char* json, std::vector<char>& blob) const;
+        void operator()(const boost::property_tree::ptree& json, std::vector<char>& blob) const;
+
+        void SerializeObjectContent(const std::string& typeName, std::vector<char>& blob, const boost::property_tree::ptree& members) const;
 
     private:
         const TypeRepository* m_repository;
-        size_t m_jsonSize;
-        boost::property_tree::ptree m_pt;
         const BlobLayoutImpl m_blobLayout;
 
-        void SerializeMembers(const std::string& typeName, std::vector<char>& blob, const boost::property_tree::ptree& members) const;
+
 
         void SetMember(const MemberDescription* md,
                        DotsC_MemberIndex memIx,

@@ -34,25 +34,24 @@ namespace Typesystem
 {
 namespace Internal
 {
-    BlobToXmlSerializer::BlobToXmlSerializer(const TypeRepository* repository, const char* blob)
+    BlobToXmlSerializer::BlobToXmlSerializer(const TypeRepository* repository)
         :m_repository(repository)
-        ,m_blob(blob)
         ,m_blobLayout(repository)
     {
     }
 
-    void BlobToXmlSerializer::operator()(std::ostream& os) const
+    void BlobToXmlSerializer::operator()(const char* blob, std::ostream& os) const
     {
         boost::property_tree::ptree content;
-        SerializeMembers(content, false);
+        SerializeMembers(blob, content, false);
         boost::property_tree::ptree root;
-        root.push_back(std::make_pair(GetClass()->GetName(), content));
+        root.push_back(std::make_pair(GetClass(blob)->GetName(), content));
         boost::property_tree::xml_parser::write_xml(os, root);
     }
 
-    void BlobToXmlSerializer::SerializeMembers(boost::property_tree::ptree& content, bool addTypeAttr) const
+    void BlobToXmlSerializer::SerializeMembers(const char* blob, boost::property_tree::ptree& content, bool addTypeAttr) const
     {
-        const ClassDescription* cd=GetClass();
+        const ClassDescription* cd=GetClass(blob);
 
         if (addTypeAttr)
         {
@@ -64,7 +63,7 @@ namespace Internal
             const MemberDescription* md=cd->GetMember(memberIx);
             if (!md->IsArray()) //normal member
             {
-                SerializeMember(md, memberIx, 0, md->GetName(), content);
+                SerializeMember(blob, md, memberIx, 0, md->GetName(), content);
             }
             else //array member
             {
@@ -86,7 +85,7 @@ namespace Internal
                 boost::property_tree::ptree arrayValues;
                 for (DotsC_ArrayIndex arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
                 {
-                    SerializeMember(md, memberIx, arrIx, typeName, arrayValues);
+                    SerializeMember(blob, md, memberIx, arrIx, typeName, arrayValues);
                 }
                 if (arrayValues.size()>0) //only add array element if there are non-null values
                 {
@@ -96,7 +95,8 @@ namespace Internal
         }
     }
 
-    void BlobToXmlSerializer::SerializeMember(const MemberDescription* md,
+    void BlobToXmlSerializer::SerializeMember(const char* blob,
+                                              const MemberDescription* md,
                                               DotsC_MemberIndex memberIndex,
                                               DotsC_ArrayIndex arrayIndex,
                                               const char* elementName,
@@ -109,7 +109,7 @@ namespace Internal
         case BooleanMemberType:
         {
             bool val=true;
-            DotsC_MemberStatus status=m_blobLayout.GetMember<bool>(m_blob, memberIndex, arrayIndex, val);
+            DotsC_MemberStatus status=m_blobLayout.GetMember<bool>(blob, memberIndex, arrayIndex, val);
             if (!status.IsNull())
             {
                 arrayElementPt=&pt.add(elementName, val ? "true" : "false");
@@ -120,7 +120,7 @@ namespace Internal
         case EnumerationMemberType:
         {
             DotsC_Int32 val=0;
-            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int32>(m_blob, memberIndex, arrayIndex, val);
+            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
             if (!status.IsNull())
             {
                 const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
@@ -132,7 +132,7 @@ namespace Internal
         case Int32MemberType:
         {
             DotsC_Int32 val=0;
-            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int32>(m_blob, memberIndex, arrayIndex, val);
+            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
             if (!status.IsNull())
             {
                 arrayElementPt=&pt.add(elementName, val);
@@ -143,7 +143,7 @@ namespace Internal
         case Int64MemberType:
         {
             DotsC_Int64 val=0;
-            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int64>(m_blob, memberIndex, arrayIndex, val);
+            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
             if (!status.IsNull())
             {
                 arrayElementPt=&pt.add(elementName, val);
@@ -154,7 +154,7 @@ namespace Internal
         case TypeIdMemberType:
         {
             DotsC_Int64 val=0;
-            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int64>(m_blob, memberIndex, arrayIndex, val);
+            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
             if (!status.IsNull())
             {
                 const char* typeName=TypeIdToString(val);
@@ -176,7 +176,7 @@ namespace Internal
         {
             DotsC_Int64 val=0;
             const char* hashStr=NULL;
-            DotsC_MemberStatus status=m_blobLayout.GetMemberWithOptionalString(m_blob, memberIndex, arrayIndex, val, hashStr);
+            DotsC_MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, val, hashStr);
             if (!status.IsNull())
             {
                 if (hashStr)
@@ -195,7 +195,7 @@ namespace Internal
         {
             DotsC_EntityId entId;
             const char* hashStr=0;
-            DotsC_MemberStatus status=m_blobLayout.GetMemberWithOptionalString(m_blob, memberIndex, arrayIndex, entId, hashStr);
+            DotsC_MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, entId, hashStr);
             if (!status.IsNull())
             {
                 boost::property_tree::ptree eid;
@@ -227,7 +227,7 @@ namespace Internal
         {
             const char* strVal=NULL;
             DotsC_Int32 size=0;
-            DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(m_blob, memberIndex, arrayIndex, strVal, size);            
+            DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, strVal, size);
             if (!status.IsNull())
             {
 
@@ -241,13 +241,13 @@ namespace Internal
         {
             const char* obj=NULL;
             DotsC_Int32 size=0;
-            DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(m_blob, memberIndex, arrayIndex, obj, size);
+            DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, obj, size);
             if (!status.IsNull())
             {
                 boost::property_tree::ptree members; //Serialize without the root-element, only members
-                BlobToXmlSerializer objParser(m_repository, obj);
+                BlobToXmlSerializer objParser(m_repository);
                 bool typesDiffer=m_blobLayout.GetTypeId(obj)!=md->GetTypeId();
-                objParser.SerializeMembers(members, typesDiffer); //we only need to add typeAttribute if types are not same as declared in dou (differ by inheritance)
+                objParser.SerializeMembers(obj, members, typesDiffer); //we only need to add typeAttribute if types are not same as declared in dou (differ by inheritance)
                 pt.push_back(std::make_pair(elementName, members));
                 arrayElementPt=&pt.back().second;
             }
@@ -258,7 +258,7 @@ namespace Internal
         {
             const char* binary=NULL;
             DotsC_Int32 size=0;
-            DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(m_blob, memberIndex, arrayIndex, binary, size);
+            DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, binary, size);
             if (!status.IsNull())
             {
                 std::string bin(binary, size);
@@ -290,7 +290,7 @@ namespace Internal
         case Watt32MemberType:
         {
             DotsC_Float32 val=0;
-            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Float32>(m_blob, memberIndex, arrayIndex, val);
+            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Float32>(blob, memberIndex, arrayIndex, val);
             if (!status.IsNull())
             {
                 arrayElementPt=&pt.add(elementName, val);
@@ -321,7 +321,7 @@ namespace Internal
         case Watt64MemberType:
         {
             DotsC_Float64 val=0;
-            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Float64>(m_blob, memberIndex, arrayIndex, val);
+            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Float64>(blob, memberIndex, arrayIndex, val);
             if (!status.IsNull())
             {
                 arrayElementPt=&pt.add(elementName, val);
@@ -359,9 +359,9 @@ namespace Internal
         return NULL;
     }
 
-    const ClassDescription* BlobToXmlSerializer::GetClass() const
+    const ClassDescription* BlobToXmlSerializer::GetClass(const char* blob) const
     {
-        TypeId typeId=m_blobLayout.GetTypeId(m_blob);
+        TypeId typeId=m_blobLayout.GetTypeId(blob);
         const ClassDescription* cd=m_repository->GetClass(typeId);
         if (cd==NULL)
         {

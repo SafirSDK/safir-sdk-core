@@ -159,6 +159,7 @@ namespace Internal
         virtual double GetFloat64Value(int index) const {return values[static_cast<size_t>(index)].float64Val;}
         virtual bool GetBoolValue(int index) const {return values[static_cast<size_t>(index)].boolVal;}
         virtual const char* GetStringValue(int index) const {return values[static_cast<size_t>(index)].stringVal.c_str();}
+        virtual const char* GetObjectValue(int index) const {return &values[static_cast<size_t>(index)].binaryVal[0];}
         virtual std::pair<const char*, size_t> GetBinaryValue(int index) const
         {
             return std::make_pair(  values[static_cast<size_t>(index)].stringVal.c_str(),

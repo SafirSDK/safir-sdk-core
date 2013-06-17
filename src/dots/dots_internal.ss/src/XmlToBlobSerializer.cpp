@@ -37,19 +37,24 @@ namespace Typesystem
 {
 namespace Internal
 {
-    XmlToBlobSerializer::XmlToBlobSerializer(const TypeRepository* repository, const char* xml)
+    XmlToBlobSerializer::XmlToBlobSerializer(const TypeRepository* repository)
         :m_repository(repository)
-        ,m_xmlSize(strlen(xml))
         ,m_blobLayout(repository)
     {
-        boost::iostreams::array_source src(xml, m_xmlSize);
-        boost::iostreams::stream<boost::iostreams::array_source> stream(src);
-        boost::property_tree::xml_parser::read_xml(stream, m_pt, boost::property_tree::xml_parser::trim_whitespace);
     }
 
-    void XmlToBlobSerializer::operator()(std::vector<char>& blob) const
+    void XmlToBlobSerializer::operator()(const char* xml, std::vector<char>& blob) const
     {
-        const boost::property_tree::ptree& members=m_pt.front().second;
+        boost::property_tree::ptree pt;
+        boost::iostreams::array_source src(xml, strlen(xml));
+        boost::iostreams::stream<boost::iostreams::array_source> stream(src);
+        boost::property_tree::xml_parser::read_xml(stream, pt, boost::property_tree::xml_parser::trim_whitespace);
+        this->operator ()(pt, blob);
+    }
+
+    void XmlToBlobSerializer::operator()(const boost::property_tree::ptree& xml, std::vector<char>& blob) const
+    {
+        const boost::property_tree::ptree& members=xml.front().second;
         boost::optional<std::string> xsiType=members.get_optional<std::string>("<xmlattr>.type");
         std::string typeName;
         if (xsiType)
@@ -58,13 +63,16 @@ namespace Internal
         }
         else
         {
-            typeName=m_pt.front().first;
+            typeName=xml.front().first;
         }
 
-        SerializeMembers(typeName, blob, members);
+        SerializeObjectContent(typeName, blob, members);
+
     }
 
-    void XmlToBlobSerializer::SerializeMembers(const std::string& typeName, std::vector<char>& blob, const boost::property_tree::ptree& members) const
+    void XmlToBlobSerializer::SerializeObjectContent(const std::string& typeName,
+                                                     std::vector<char>& blob,
+                                                     const boost::property_tree::ptree& members) const
     {
         TypeId typeId=DotsId_Generate64(typeName.c_str());
         const ClassDescription* cd=m_repository->GetClass(typeId);
@@ -75,7 +83,7 @@ namespace Internal
 
         char* beginningOfUnused=NULL;
 
-        size_t blobInitSize=std::max(m_xmlSize, static_cast<size_t>(2*cd->InitialSize()));
+        size_t blobInitSize=std::max(size_t(1000), static_cast<size_t>(2*cd->InitialSize()));
         blob.reserve(blobInitSize); //Note: maybe xmlSize/2 would be enogh in almost all cases
         blob.resize(cd->InitialSize(), 0);
         m_blobLayout.FormatBlob(&blob[0], blob.size(), typeId, beginningOfUnused);
@@ -292,7 +300,7 @@ namespace Internal
             }
 
             std::vector<char> insideBlob;
-            SerializeMembers(cd->GetName(), insideBlob, memberContent);
+            SerializeObjectContent(cd->GetName(), insideBlob, memberContent);
             CreateSpaceForDynamicMember(blob, beginningOfUnused, insideBlob.size());
             char* writeObj=beginningOfUnused;
             m_blobLayout.CreateObjectMember(&blob[0], insideBlob.size(), cd->GetTypeId(), memIx, arrIx, false, beginningOfUnused);
@@ -450,7 +458,7 @@ namespace Internal
             blob.clear(); //unneccessary?
             blob.reserve((tmp.capacity()+dynamicMemberSizeNeeded)*2);
             blob.insert(blob.begin(), tmp.begin(), tmp.end());
-            beginningOfUnused=&blob[usedSize];
+            beginningOfUnused=&blob[0]+usedSize;
         }
 
         //When we get here, the blob is guaranteed to have capacity for the needed extra space. Just resize.

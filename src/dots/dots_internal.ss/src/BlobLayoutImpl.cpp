@@ -212,6 +212,10 @@ namespace Internal
                                 MemberIndex member,
                                 const ArrayIndex index) const
     {
+        //Remove
+        TypeId ulu=GetTypeId(blob);
+        std::string ulun=m_repository->GetClass(ulu)->GetName();
+
         const MemberDescription * memberDesc=m_repository->GetClass(GetTypeId(blob))->GetMember(member);
         Size size=BasicTypes::Instance().SizeOfType(memberDesc->GetMemberType())+MEMBER_STATUS_LENGTH;
         char oldStatus = *AnyPtrCast<char>(blob + GetOffset(blob, member) + index*size);

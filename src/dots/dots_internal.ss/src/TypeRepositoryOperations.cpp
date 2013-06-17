@@ -26,6 +26,7 @@
 #include <Safir/Dob/Typesystem/Internal/TypeRepositoryOperations.h>
 #include "ParseJob.h"
 #include "ElementParserDefs.h"
+#include "BlobToJsonSerializer.h"
 
 namespace Safir
 {
@@ -329,6 +330,14 @@ namespace //anonymous namespace
 
         case ObjectMemberType:
         {
+//            for (int i=0; i<c->GetArraySize(); ++i)
+//            {
+//                const char* objParam=c->GetObjectValue(i);
+//                BlobToJsonSerializer ser(m_rep);
+//                std::ostringstream json;
+//                ser(objParam, json);
+//                os<<"      value["<<i<<"]="<<json.str()<<std::endl;
+//            }
         }
             break;
 

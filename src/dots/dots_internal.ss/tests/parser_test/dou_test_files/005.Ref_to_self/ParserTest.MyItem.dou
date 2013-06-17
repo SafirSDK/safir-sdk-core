@@ -16,7 +16,7 @@
             <summary>bla bla</summary>
             <name>kalle</name>
             <type>ParserTest.MyItem</type>
-            <ParserTest.MyItem>hej</ParserTest.MyItem>
+            <ParserTest.MyItem/>
         </parameter>
     </parameters>
 </class>

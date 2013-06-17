@@ -26,7 +26,7 @@
 
 #include <vector>
 #include <string>
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/Internal/KernelDefs2.h>
 
 namespace Safir
 {
@@ -81,7 +81,8 @@ namespace Internal
         virtual double GetFloat64Value(int index) const=0; //float64, si64
         virtual bool GetBoolValue(int index) const=0;
         virtual const char* GetStringValue(int index) const=0;
-        virtual std::pair<const char*, size_t> GetBinaryValue(int index) const=0; //binary, object
+        virtual const char* GetObjectValue(int index) const=0;
+        virtual std::pair<const char*, size_t> GetBinaryValue(int index) const=0;
         virtual std::pair<boost::int64_t, const char*> GetHashedValue(int index) const=0; //instanceId, channelId, handlerId
     };
 

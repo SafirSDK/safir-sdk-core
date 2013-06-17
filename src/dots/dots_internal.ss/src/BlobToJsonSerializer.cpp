@@ -164,26 +164,24 @@ namespace boostfix
     }
 }
 
-    BlobToJsonSerializer::BlobToJsonSerializer(const TypeRepository* repository, const char* blob)
+    BlobToJsonSerializer::BlobToJsonSerializer(const TypeRepository* repository)
         :m_repository(repository)
-        ,m_blob(blob)
         ,m_blobLayout(repository)
     {
     }
 
-    void BlobToJsonSerializer::operator()(std::ostream& os) const
+    void BlobToJsonSerializer::operator()(const char* blob, std::ostream& os) const
     {
         boost::property_tree::ptree content;
-        SerializeMembers(content);
+        SerializeMembers(blob, content);
         boost::property_tree::ptree root;
-        root.push_back(std::make_pair(GetClass()->GetName(), content));
+        root.push_back(std::make_pair(GetClass(blob)->GetName(), content));
         boostfix::write_json_internal(os, root, std::string(), true);
-        //boost::property_tree::json_parser::write_json(os, root);
     }
 
-    void BlobToJsonSerializer::SerializeMembers(boost::property_tree::ptree& content) const
+    void BlobToJsonSerializer::SerializeMembers(const char* blob, boost::property_tree::ptree& content) const
     {
-        const ClassDescription* cd=GetClass();
+        const ClassDescription* cd=GetClass(blob);
 
         content.add("_DobType", Quoted(cd->GetName()));
 
@@ -192,7 +190,7 @@ namespace boostfix
             const MemberDescription* md=cd->GetMember(memberIx);
             if (!md->IsArray()) //normal member
             {
-                SerializeMember(md, memberIx, 0, md->GetName(), content);
+                SerializeMember(blob, md, memberIx, 0, md->GetName(), content);
             }
             else //array member
             {
@@ -200,7 +198,7 @@ namespace boostfix
                 boost::property_tree::ptree arrayValues;
                 for (DotsC_ArrayIndex arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
                 {
-                    if (SerializeMember(md, memberIx, arrIx, "", arrayValues))
+                    if (SerializeMember(blob, md, memberIx, arrIx, "", arrayValues))
                     {
                         nonNullValueInserted=true;
                     }
@@ -218,7 +216,8 @@ namespace boostfix
         }
     }
 
-    bool BlobToJsonSerializer::SerializeMember(const MemberDescription* md,
+    bool BlobToJsonSerializer::SerializeMember(const char* blob,
+                                               const MemberDescription* md,
                                                DotsC_MemberIndex memberIndex,
                                                DotsC_ArrayIndex arrayIndex,
                                                const char* elementName,
@@ -229,7 +228,7 @@ namespace boostfix
         case BooleanMemberType:
         {
             bool val=true;
-            DotsC_MemberStatus status=m_blobLayout.GetMember<bool>(m_blob, memberIndex, arrayIndex, val);
+            DotsC_MemberStatus status=m_blobLayout.GetMember<bool>(blob, memberIndex, arrayIndex, val);
             if (!status.IsNull())
             {
                 pt.push_back(std::make_pair(elementName, val ? "true" : "false"));
@@ -241,7 +240,7 @@ namespace boostfix
         case EnumerationMemberType:
         {
             DotsC_Int32 val=0;
-            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int32>(m_blob, memberIndex, arrayIndex, val);
+            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
             if (!status.IsNull())
             {
                 const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
@@ -254,7 +253,7 @@ namespace boostfix
         case Int32MemberType:
         {
             DotsC_Int32 val=0;
-            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int32>(m_blob, memberIndex, arrayIndex, val);
+            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
             if (!status.IsNull())
             {
                 pt.push_back(std::make_pair(elementName, boost::lexical_cast<std::string>(val)));
@@ -266,7 +265,7 @@ namespace boostfix
         case Int64MemberType:
         {
             DotsC_Int64 val=0;
-            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int64>(m_blob, memberIndex, arrayIndex, val);
+            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
             if (!status.IsNull())
             {
                 pt.push_back(std::make_pair(elementName, boost::lexical_cast<std::string>(val)));
@@ -278,7 +277,7 @@ namespace boostfix
         case TypeIdMemberType:
         {
             DotsC_Int64 val=0;
-            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int64>(m_blob, memberIndex, arrayIndex, val);
+            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
             if (!status.IsNull())
             {
                 const char* typeName=TypeIdToString(val);
@@ -301,7 +300,7 @@ namespace boostfix
         {
             DotsC_Int64 val=0;
             const char* hashStr=NULL;
-            DotsC_MemberStatus status=m_blobLayout.GetMemberWithOptionalString(m_blob, memberIndex, arrayIndex, val, hashStr);
+            DotsC_MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, val, hashStr);
             if (!status.IsNull())
             {
                 if (hashStr)
@@ -321,7 +320,7 @@ namespace boostfix
         {
             DotsC_EntityId entId;
             const char* hashStr=0;
-            DotsC_MemberStatus status=m_blobLayout.GetMemberWithOptionalString(m_blob, memberIndex, arrayIndex, entId, hashStr);
+            DotsC_MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, entId, hashStr);
             if (!status.IsNull())
             {
                 boost::property_tree::ptree entIdPt;
@@ -353,7 +352,7 @@ namespace boostfix
         {
             const char* strVal=NULL;
             DotsC_Int32 size=0;
-            DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(m_blob, memberIndex, arrayIndex, strVal, size);
+            DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, strVal, size);
             if (!status.IsNull())
             {
                 pt.push_back(std::make_pair(elementName, Quoted(strVal)));
@@ -366,12 +365,12 @@ namespace boostfix
         {
             const char* obj=NULL;
             DotsC_Int32 size=0;
-            DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(m_blob, memberIndex, arrayIndex, obj, size);
+            DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, obj, size);
             if (!status.IsNull())
             {
                 boost::property_tree::ptree members; //Serialize without the root-element, only members
-                BlobToJsonSerializer objParser(m_repository, obj);
-                objParser.SerializeMembers(members);
+                BlobToJsonSerializer objParser(m_repository);
+                objParser.SerializeMembers(obj, members);
                 pt.push_back(std::make_pair(elementName, members));
                 return true;
             }
@@ -382,7 +381,7 @@ namespace boostfix
         {
             const char* binary=NULL;
             DotsC_Int32 size=0;
-            DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(m_blob, memberIndex, arrayIndex, binary, size);
+            DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, binary, size);
             if (!status.IsNull())
             {
                 std::string bin(binary, size);
@@ -415,7 +414,7 @@ namespace boostfix
         case Watt32MemberType:
         {
             DotsC_Float32 val=0;
-            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Float32>(m_blob, memberIndex, arrayIndex, val);
+            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Float32>(blob, memberIndex, arrayIndex, val);
             if (!status.IsNull())
             {
                 pt.push_back(std::make_pair(elementName, classic_string_cast<std::string>(val)));
@@ -447,7 +446,7 @@ namespace boostfix
         case Watt64MemberType:
         {
             DotsC_Float64 val=0;
-            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Float64>(m_blob, memberIndex, arrayIndex, val);
+            DotsC_MemberStatus status=m_blobLayout.GetMember<DotsC_Float64>(blob, memberIndex, arrayIndex, val);
             if (!status.IsNull())
             {
                 pt.push_back(std::make_pair(elementName, classic_string_cast<std::string>(val)));
@@ -483,9 +482,9 @@ namespace boostfix
         return NULL;
     }
 
-    const ClassDescription* BlobToJsonSerializer::GetClass() const
+    const ClassDescription* BlobToJsonSerializer::GetClass(const char* blob) const
     {
-        TypeId typeId=m_blobLayout.GetTypeId(m_blob);
+        TypeId typeId=m_blobLayout.GetTypeId(blob);
         const ClassDescription* cd=m_repository->GetClass(typeId);
         if (cd==NULL)
         {
