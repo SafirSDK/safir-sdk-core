@@ -103,7 +103,7 @@ namespace
             {
                 return false;
             }
-            return attr & FILE_ATTRIBUTE_NORMAL;
+            return (attr & FILE_ATTRIBUTE_NORMAL) != 0;
 #endif
         }
 
@@ -123,7 +123,7 @@ namespace
             {
                 return false;
             }
-            return attr & FILE_ATTRIBUTE_DIRECTORY;
+            return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
 #endif
         }
         
@@ -172,9 +172,9 @@ namespace
 #ifdef LLUF_CONFIG_READER_USE_WINDOWS
     Path GetFolderPathFromCSIDL(const int csidl)
     {
-        TCHAR path[MAX_PATH];
+        char path[MAX_PATH];
 
-        if(SUCCEEDED(SHGetFolderPath(NULL, 
+        if(SUCCEEDED(SHGetFolderPathA(NULL, 
                                      csidl|CSIDL_FLAG_CREATE, 
                                      NULL, 
                                      0, 
@@ -184,7 +184,7 @@ namespace
         }
         else
         {
-            throw logic_error("Call to SHGetFolderPath failed!");
+            throw std::logic_error("Call to SHGetFolderPath failed!");
         }
     }
 #endif
