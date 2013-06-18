@@ -103,7 +103,7 @@ namespace
             {
                 return false;
             }
-            return (attr & FILE_ATTRIBUTE_NORMAL) != 0;
+            return (attr & FILE_ATTRIBUTE_DIRECTORY) == 0;
 #endif
         }
 

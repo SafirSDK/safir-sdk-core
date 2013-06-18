@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/ConfigReader.h>
+#include <iostream>
 
 int main()
 {
@@ -38,6 +39,7 @@ int main()
     {
         return 1;
     }
+    std::wcout << "success" << std::endl;
     return 0;
 }
 
