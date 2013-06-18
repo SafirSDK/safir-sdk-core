@@ -33,6 +33,7 @@
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 #define LLUF_CONFIG_READER_USE_WINDOWS
 #  include <windows.h>
+#  include <Shlobj.h>
 #else
 #  error You need to implement ConfigReader for this platform!
 #endif
@@ -59,11 +60,13 @@ namespace
         explicit Path(const std::string& path):m_path(path) {}
 
         /** 
-         * True if IsFile and IsDirectory returns true.
-         * Note that a symlink or block device will return false!
+         * True if it is possible to call lstat or GetFileAttributesW on the path.
+         * Basically this means that there is something there that could be a file
+         * or a directory that we can at least look at.
          */
         bool Exists() const
         {
+#ifdef LLUF_CONFIG_READER_USE_LINUX
             struct stat pathstat;
             const int res = ::lstat(m_path.c_str(), &pathstat);
             if (res != 0)
@@ -78,10 +81,15 @@ namespace
                 S_ISFIFO(pathstat.st_mode) ||
                 S_ISLNK(pathstat.st_mode) ||
                 S_ISSOCK(pathstat.st_mode);                
+#else
+            DWORD attr(::GetFileAttributesW(m_path.c_str()));
+            return attr != INVALID_FILE_ATTRIBUTES;
+#endif
         }
         
         bool IsFile() const
         {
+#ifdef LLUF_CONFIG_READER_USE_LINUX
             struct stat pathstat;
             const int res = ::lstat(m_path.c_str(), &pathstat);
             if (res != 0)
@@ -89,10 +97,19 @@ namespace
                 return false;
             }
             return S_ISREG(pathstat.st_mode);
+#else
+            DWORD attr(::GetFileAttributesW(m_path.c_str()));
+            if (attr == INVALID_FILE_ATTRIBUTES)
+            {
+                return false;
+            }
+            return attr & FILE_ATTRIBUTE_NORMAL;
+#endif
         }
 
         bool IsDirectory() const
         {
+#ifdef LLUF_CONFIG_READER_USE_LINUX
             struct stat pathstat;
             const int res = ::lstat(m_path.c_str(), &pathstat);
             if (res != 0)
@@ -100,6 +117,14 @@ namespace
                 return false;
             }
             return S_ISDIR(pathstat.st_mode);
+#else
+            DWORD attr(::GetFileAttributesW(m_path.c_str()));
+            if (attr == INVALID_FILE_ATTRIBUTES)
+            {
+                return false;
+            }
+            return attr & FILE_ATTRIBUTE_DIRECTORY;
+#endif
         }
         
         void operator/=(const std::string& p)
@@ -144,14 +169,34 @@ namespace
         return path / "data" / "core_config";
     }
     
+#ifdef LLUF_CONFIG_READER_USE_WINDOWS
+    Path GetFolderPathFromCSIDL(const int csidl)
+    {
+        TCHAR path[MAX_PATH];
+
+        if(SUCCEEDED(SHGetFolderPath(NULL, 
+                                     csidl|CSIDL_FLAG_CREATE, 
+                                     NULL, 
+                                     0, 
+                                     path))) 
+        {
+            return Path(path);
+        }
+        else
+        {
+            throw logic_error("Call to SHGetFolderPath failed!");
+        }
+    }
+#endif
+
     Path SystemConfigDirectory()
     {
 #ifdef LLUF_CONFIG_READER_USE_LINUX
         return Path("/etc/safir_sdk_core/");
 #else
-//#  include <windows.h>
+        //this should be c:/ProgramData most of the time
+        return GetFolderPathFromCSIDL(CSIDL_COMMON_APPDATA) / "safir_sdk_core" / "config";
 #endif
-
     }
 
     Path UserConfigDirectory()
@@ -176,7 +221,8 @@ namespace
         throw std::logic_error("Could not find either HOME or XDG_CONFIG_HOME environment variables.");
 
 #else
-//#  include <windows.h>
+        //try %USERPROFILE%/AppData/Local/
+        return GetFolderPathFromCSIDL(CSIDL_LOCAL_APPDATA) / "safir_sdk_core" / "config";
 #endif
 
     }
@@ -225,20 +271,17 @@ namespace Internal
 
         void Read()
         {
-            const Path safirDir = SafirRuntimeConfigDirectory();
-            if (TryLoad(safirDir))
+            if (TryLoad(SystemConfigDirectory()))
             {
                 return;
             }
             
-            const Path systemDir = SystemConfigDirectory();
-            if (TryLoad(systemDir))
+            if (TryLoad(UserConfigDirectory()))
             {
                 return;
             }
-            
-            const Path userDir = UserConfigDirectory();
-            if (TryLoad(safirDir))
+
+            if (TryLoad(SafirRuntimeConfigDirectory()))
             {
                 return;
             }
