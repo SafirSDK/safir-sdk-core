@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/StartupSynchronizer.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -69,17 +70,11 @@ namespace Utilities
 
     const boost::filesystem::path GetLockfileDirectory()
     {
+        Internal::ConfigReader config;
+
         using namespace boost::filesystem;
+        const path dir(config.Locations().get<std::string>("lock_file_directory"));
 
-        const char * ENV_NAME = "SAFIR_RUNTIME";
-        char * env = getenv(ENV_NAME);
-        if (env == NULL)
-        {
-            throw StartupSynchronizerException("Environment variable SAFIR_RUNTIME does not appear to be set");
-        }
-        path dir(env,native);
-
-        dir /= "data/text/lluf/";
         if (!exists(dir))
         {
             try

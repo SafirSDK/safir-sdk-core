@@ -25,6 +25,10 @@
 #define __SAFIR_UTILITIES_CONFIG_READER_H__
 
 #include <boost/shared_ptr.hpp>
+#include <boost/property_tree/ptree.hpp>
+
+
+
 
 namespace Safir
 {
@@ -41,7 +45,10 @@ namespace Internal
          */
         ConfigReader();
 
-        
+        const boost::property_tree::ptree& Locations() const;
+        const boost::property_tree::ptree& Logging() const;
+        const boost::property_tree::ptree& Typesystem() const;
+
     private:
         class Impl;
         boost::shared_ptr<Impl> m_impl;            

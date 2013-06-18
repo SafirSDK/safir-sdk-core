@@ -22,8 +22,8 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/ConfigReader.h>
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
+#include <iostream>
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
 #  include <sys/types.h>
@@ -64,7 +64,7 @@ namespace
         {
             struct stat pathstat;
             const int res = ::lstat(m_path.c_str(), &pathstat);
-            if (res == 0)
+            if (res != 0)
             {
                 return false;
             }
@@ -82,7 +82,7 @@ namespace
         {
             struct stat pathstat;
             const int res = ::lstat(m_path.c_str(), &pathstat);
-            if (res == 0)
+            if (res != 0)
             {
                 return false;
             }
@@ -93,7 +93,7 @@ namespace
         {
             struct stat pathstat;
             const int res = ::lstat(m_path.c_str(), &pathstat);
-            if (res == 0)
+            if (res != 0)
             {
                 return false;
             }
@@ -139,13 +139,13 @@ namespace
     Path SafirRuntimeConfigDirectory()
     {
         const Path path(GetEnv("SAFIR_RUNTIME"));
-        return path / "data" / "config";
+        return path / "data" / "core_config";
     }
     
     Path SystemConfigDirectory()
     {
 #if defined(linux) || defined(__linux) || defined(__linux__)
-        return Path("/etc/safir/");
+        return Path("/etc/safir_sdk_core/");
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 //#  include <windows.h>
 #endif
@@ -155,10 +155,9 @@ namespace
     Path UserConfigDirectory()
     {
 #if defined(linux) || defined(__linux) || defined(__linux__)
-        //const std::string tail("/safir/");
         try
         {
-            return Path(GetEnv("XDG_CONFIG_HOME")) / "safir";
+            return Path(GetEnv("XDG_CONFIG_HOME")) / "safir_sdk_core";
         }
         catch (const std::logic_error&)
         {
@@ -166,7 +165,7 @@ namespace
 
         try
         {
-            return Path(GetEnv("HOME")) / ".config" / "safir";
+            return Path(GetEnv("HOME")) / ".config" / "safir_sdk_core";
         }
         catch (const std::logic_error&)
         {
@@ -179,6 +178,25 @@ namespace
 #endif
 
     }
+
+
+    std::string ExpandEnv(const std::string& str)
+    {
+        const size_t start=str.rfind("$(");
+        const size_t stop=str.find(')', start);
+
+        if (start==std::string::npos || stop==std::string::npos)
+            return str;
+
+        const std::string var=str.substr(start+2, stop-start-2);
+        const std::string env = GetEnv(var);
+
+        const std::string res=str.substr(0, start) + env + str.substr(stop+1, str.size()-stop-1);
+        //search for next environment variable or
+        //recursively expand nested variable, e.g. $(NAME_$(NUMBER))
+        return ExpandEnv(res); 
+    }
+
 
 }
 
@@ -196,49 +214,40 @@ namespace Internal
 
         }
 
+        void ExpandEnvironmentVariables()
+        {
+            ExpandEnvironmentVariables(m_locations);
+            ExpandEnvironmentVariables(m_logging);
+            ExpandEnvironmentVariables(m_typesystem);
+        }
+
         void Read()
         {
-            try
+            const Path safirDir = SafirRuntimeConfigDirectory();
+            if (TryLoad(safirDir))
             {
-                const Path safirDir = SafirRuntimeConfigDirectory();
-                if (TryLoad(safirDir))
-                {
-                    return;
-                }
-
-                const Path systemDir = SystemConfigDirectory();
-                if (TryLoad(systemDir))
-                {
-                    return;
-                }
-
-                const Path userDir = UserConfigDirectory();
-                if (TryLoad(safirDir))
-                {
-                    return;
-                }
-
-                throw std::logic_error("Failed to load configuration");
-                // boost::property_tree::read_ini(JoinPath(systemDir,"locations.ini"), m_locations);
-                //boost::property_tree::read_ini(JoinPath(systemDir,"locations.ini"), m_locations);
-
-                /*nej, kolla om filerna finns och går att öppna först.
-                    om inte katalogen finns --> försök med user
-                    om ingen av filerna finns --> försök med user
-                    om inte alla tre filerna finns --> exception
-                    om inte alla tre filerna går att läsa korrekt --> exception
-
-                    Vi vill nog ha "load_user_config" som en option i alla (eller några av) filerna.
-                    Den gör så att vi går vidare och läser user config efter att vi läst system
-                    vid något fel --> exception
-                    
-                    vi kanske vill använda SAFIR_RUNTIME i en övergångsperiod här?!*/
+                return;
             }
-            catch (const std::exception& e)
+            
+            const Path systemDir = SystemConfigDirectory();
+            if (TryLoad(systemDir))
             {
-                //TODO
+                return;
             }
+            
+            const Path userDir = UserConfigDirectory();
+            if (TryLoad(safirDir))
+            {
+                return;
+            }
+            
+            throw std::logic_error("Failed to load configuration");
         }
+
+        boost::property_tree::ptree m_locations;
+        boost::property_tree::ptree m_logging;
+        boost::property_tree::ptree m_typesystem;
+
     private:
         /**
          * Returns false if it fails to find a configuration in the directory.
@@ -264,24 +273,52 @@ namespace Internal
                 boost::property_tree::read_ini(locations.str(), m_locations);
                 boost::property_tree::read_ini(logging.str(), m_logging);
                 boost::property_tree::read_ini(typesystem.str(), m_typesystem);
+                return true;
             }
             else
             {
                 throw std::logic_error("Failed to find all three ini files");
             }
-
-            return false;
         }
 
-        boost::property_tree::ptree m_locations;
-        boost::property_tree::ptree m_logging;
-        boost::property_tree::ptree m_typesystem;
+        static void ExpandEnvironmentVariables(boost::property_tree::ptree& ptree)
+        {
+            for (boost::property_tree::ptree::iterator it = ptree.begin();
+                 it != ptree.end(); ++it)
+            {
+                std::string value = it->second.get<std::string>("");
+                if (!value.empty())
+                {
+                    it->second.put("",ExpandEnv(value));
+                }
+                
+                ExpandEnvironmentVariables(it->second);
+            }
+        }
+
+
     };
 
     ConfigReader::ConfigReader()
         : m_impl(new Impl())
     {
         m_impl->Read();
+        m_impl->ExpandEnvironmentVariables();
+    }
+
+    const boost::property_tree::ptree& ConfigReader::Locations() const
+    {
+        return m_impl->m_locations;
+    }
+
+    const boost::property_tree::ptree& ConfigReader::Logging() const
+    {
+        return m_impl->m_logging;
+    }
+
+    const boost::property_tree::ptree& ConfigReader::Typesystem() const
+    {
+        return m_impl->m_typesystem;
     }
 }
 }

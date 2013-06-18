@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Typesystem/Utilities.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -322,7 +323,8 @@ namespace
 {
     const boost::filesystem::path GetDumpDirectory()
     {
-        return boost::filesystem::path(getenv("SAFIR_RUNTIME")) / "data" / "crash_dumps";
+        Internal::ConfigReader config;
+        return boost::filesystem::path(config.Locations().get<std::string>("crash_dump_directory"));
     }
 }
 int LoggerApp::handle_timeout(const ACE_Time_Value & /*currentTime*/, const void * /*act*/)

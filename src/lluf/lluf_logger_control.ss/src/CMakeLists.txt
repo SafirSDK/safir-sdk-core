@@ -7,7 +7,7 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(logger_control ${sources})
-TARGET_LINK_LIBRARIES(logger_control ${COMMON_LIBRARIES})
+TARGET_LINK_LIBRARIES(logger_control lluf_utils ${COMMON_LIBRARIES})
 
 INSTALL(TARGETS logger_control 
   DESTINATION ${SAFIR_RUNTIME}/bin)
