@@ -64,8 +64,18 @@ namespace Internal
         const boost::property_tree::ptree& Typesystem() const;
 
     private:
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4251)
+#endif
+
         class Impl;
-        boost::shared_ptr<Impl> m_impl;            
+        boost::shared_ptr<Impl> m_impl;  
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif          
     };
 }
 }

@@ -82,7 +82,7 @@ namespace
                 S_ISLNK(pathstat.st_mode) ||
                 S_ISSOCK(pathstat.st_mode);                
 #else
-            DWORD attr(::GetFileAttributesW(m_path.c_str()));
+            DWORD attr(::GetFileAttributesA(m_path.c_str()));
             return attr != INVALID_FILE_ATTRIBUTES;
 #endif
         }
@@ -98,7 +98,7 @@ namespace
             }
             return S_ISREG(pathstat.st_mode);
 #else
-            DWORD attr(::GetFileAttributesW(m_path.c_str()));
+            DWORD attr(::GetFileAttributesA(m_path.c_str()));
             if (attr == INVALID_FILE_ATTRIBUTES)
             {
                 return false;
@@ -118,7 +118,7 @@ namespace
             }
             return S_ISDIR(pathstat.st_mode);
 #else
-            DWORD attr(::GetFileAttributesW(m_path.c_str()));
+            DWORD attr(::GetFileAttributesA(m_path.c_str()));
             if (attr == INVALID_FILE_ATTRIBUTES)
             {
                 return false;
