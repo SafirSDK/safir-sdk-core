@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2013 (http://www.safirsdk.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -21,41 +21,24 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __SAFIR_UTILITIES_CONFIG_READER_H__
-#define __SAFIR_UTILITIES_CONFIG_READER_H__
+#include <Safir/Utilities/Internal/ConfigReader.h>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/property_tree/ptree.hpp>
-
-
-
-
-namespace Safir
+int main()
 {
-namespace Utilities
-{
-namespace Internal
-{
-    class ConfigReader
+    try
     {
-    public:
-        /** 
-         * Reads the Safir SDK Core configuration files and populates
-         * the property trees for use.
-         */
-        ConfigReader();
-
-        const boost::property_tree::ptree& Locations() const;
-        const boost::property_tree::ptree& Logging() const;
-        const boost::property_tree::ptree& Typesystem() const;
-
-    private:
-        class Impl;
-        boost::shared_ptr<Impl> m_impl;            
-    };
-}
-}
+        using namespace Safir::Utilities::Internal;
+        ConfigReader reader;
+        if (reader.Locations().get<std::string>("lock_file_directory").empty())
+        {
+            return 1;
+        }
+    }
+    catch (...)
+    {
+        return 1;
+    }
+    return 0;
 }
 
-#endif
 

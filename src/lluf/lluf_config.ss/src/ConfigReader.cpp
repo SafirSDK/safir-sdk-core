@@ -26,11 +26,13 @@
 #include <iostream>
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
+#define LLUF_CONFIG_READER_USE_LINUX
 #  include <sys/types.h>
 #  include <sys/stat.h>
 #  include <unistd.h>
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-//#  include <windows.h>
+#define LLUF_CONFIG_READER_USE_WINDOWS
+#  include <windows.h>
 #else
 #  error You need to implement ConfigReader for this platform!
 #endif
@@ -38,7 +40,7 @@
 
 namespace
 {
-#if defined(linux) || defined(__linux) || defined(__linux__)
+#ifdef LLUF_CONFIG_READER_USE_LINUX
     const char PATH_SEPARATOR = '/';
 #else
     const char PATH_SEPARATOR = '\\';
@@ -115,9 +117,9 @@ namespace
         static bool IsSeparator(const char c)
         {
             return c == PATH_SEPARATOR
-#     ifdef BOOST_WINDOWS_API
+#ifdef LLUF_CONFIG_READER_USE_WINDOWS
                 || c == ALTERNATE_PATH_SEPARATOR
-#     endif
+#endif
                 ;
         }
         
@@ -144,9 +146,9 @@ namespace
     
     Path SystemConfigDirectory()
     {
-#if defined(linux) || defined(__linux) || defined(__linux__)
+#ifdef LLUF_CONFIG_READER_USE_LINUX
         return Path("/etc/safir_sdk_core/");
-#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+#else
 //#  include <windows.h>
 #endif
 
@@ -154,7 +156,7 @@ namespace
 
     Path UserConfigDirectory()
     {
-#if defined(linux) || defined(__linux) || defined(__linux__)
+#ifdef LLUF_CONFIG_READER_USE_LINUX
         try
         {
             return Path(GetEnv("XDG_CONFIG_HOME")) / "safir_sdk_core";
@@ -173,7 +175,7 @@ namespace
 
         throw std::logic_error("Could not find either HOME or XDG_CONFIG_HOME environment variables.");
 
-#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+#else
 //#  include <windows.h>
 #endif
 

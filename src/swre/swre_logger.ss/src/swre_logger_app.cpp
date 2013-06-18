@@ -323,7 +323,7 @@ namespace
 {
     const boost::filesystem::path GetDumpDirectory()
     {
-        Internal::ConfigReader config;
+        Safir::Utilities::Internal::ConfigReader config;
         return boost::filesystem::path(config.Locations().get<std::string>("crash_dump_directory"));
     }
 }
