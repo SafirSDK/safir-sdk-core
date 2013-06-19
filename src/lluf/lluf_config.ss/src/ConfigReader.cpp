@@ -331,13 +331,19 @@ namespace Internal
             for (boost::property_tree::ptree::iterator it = ptree.begin();
                  it != ptree.end(); ++it)
             {
-                std::string value = it->second.get<std::string>("");
-                if (!value.empty())
+                const bool isSection = !it->second.empty();
+
+                if (isSection)
                 {
-                    it->second.put("",ExpandEnv(value));
+                    ExpandEnvironmentVariables(it->second);
+                }
+                else
+                {
+                    const std::string value = it->second.get_value<std::string>();
+                    it->second.put_value(ExpandEnv(value));
                 }
                 
-                ExpandEnvironmentVariables(it->second);
+
             }
         }
 
