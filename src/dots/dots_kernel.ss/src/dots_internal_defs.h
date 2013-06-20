@@ -71,9 +71,7 @@ namespace Internal
     typedef Int64 ChannelId;
     typedef Int64 HandlerId;
 
-    //Files and environment variables
-    //const char * const RUNTIME_ENV                      = "SAFIR_RUNTIME";
-    //const char * const DOB_CLASSES_DIR                  = "/data/text/dots/classes"; //root=RUNTIME_ENV   /data/text/dots/classes
+    //Files extensions
     const char * const DOU_FILE_EXTENSION                    = ".dou";
     const char * const DOM_FILE_EXTENSION                    = ".dom";
 
