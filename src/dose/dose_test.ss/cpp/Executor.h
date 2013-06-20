@@ -148,7 +148,6 @@ private:
 
     const Safir::Dob::Typesystem::EntityId m_partnerEntityId;
 
-    bool m_isDone;
     bool m_isActive;
 
     std::vector<boost::shared_ptr<Consumer> > m_consumers;
