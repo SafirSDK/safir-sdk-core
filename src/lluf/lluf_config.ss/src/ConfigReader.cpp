@@ -227,8 +227,57 @@ namespace
 
     }
 
+    //expandera @@CSIDL_LOCAL_APPDATA@@
+    //gör i dots_kernel också...
+    //dokumentera alltihopa wp och sug
 
-    std::string ExpandEnv(const std::string& str)
+
+
+
+    std::string ExpandSpecial(const std::string& str)
+    {
+#ifdef LLUF_CONFIG_READER_USE_WINDOWS
+        const size_t start=str.rfind("@{");
+        const size_t stop=str.find('}', start);
+
+        if (start==std::string::npos || stop==std::string::npos)
+            return str;
+
+        const std::string var=str.substr(start+2, stop-start-2);
+        std::string value;
+        if (var == "CSIDL_APPDATA" || var == "FOLDERID_RoamingAppData")
+        {
+            value = GetFolderPathFromCSIDL(CSIDL_APPDATA);
+        }
+        else if (var == "CSIDL_LOCAL_APPDATA" || var == "FOLDERID_LocalAppData")
+        {
+            value = GetFolderPathFromCSIDL(CSIDL_LOCAL_APPDATA);
+        }
+        else if (var == "CSIDL_COMMON_APPDATA" || var == "FOLDERID_ProgramData")
+        {
+            value = GetFolderPathFromCSIDL(CSIDL_COMMON_APPDATA);
+        }
+        else if (var == "CSIDL_MYDOCUMENTS" || var == "FOLDERID_Documents")
+        {
+            value = GetFolderPathFromCSIDL(CSIDL_MYDOCUMENTS);
+        }
+        else if (var == "CSIDL_COMMON_DOCUMENTS" || var == "FOLDERID_PublicDocuments")
+        {
+            value = GetFolderPathFromCSIDL(CSIDL_COMMON_DOCUMENTS);
+        }
+
+        const std::string res=str.substr(0, start) + value + str.substr(stop+1, str.size()-stop-1);
+        //search for next special variable 
+        return ExpandSpecial(res); 
+#else
+        return str;
+#endif
+
+    }
+
+
+
+    std::string ExpandEnvironment(const std::string& str)
     {
         const size_t start=str.rfind("$(");
         const size_t stop=str.find(')', start);
@@ -242,7 +291,7 @@ namespace
         const std::string res=str.substr(0, start) + env + str.substr(stop+1, str.size()-stop-1);
         //search for next environment variable or
         //recursively expand nested variable, e.g. $(NAME_$(NUMBER))
-        return ExpandEnv(res); 
+        return ExpandEnvironment(res); 
     }
 
 
@@ -340,7 +389,8 @@ namespace Internal
                 else
                 {
                     const std::string value = it->second.get_value<std::string>();
-                    it->second.put_value(ExpandEnv(value));
+                    it->second.put_value(ExpandSpecial(value));
+                    it->second.put_value(ExpandEnvironment(value));
                 }
                 
 
@@ -371,6 +421,17 @@ namespace Internal
     {
         return m_impl->m_typesystem;
     }
+
+    std::string ConfigReader::ExpandEnvironment(const std::string& str)
+    {
+        return ::ExpandEnvironment(str);
+    }
+   
+    std::string ConfigReader::ExpandSpecial(const std::string& str)
+    {
+        return ::ExpandSpecial(str);
+    }
+
 }
 }
 }

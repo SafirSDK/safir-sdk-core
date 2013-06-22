@@ -63,6 +63,26 @@ namespace Internal
         const boost::property_tree::ptree& Logging() const;
         const boost::property_tree::ptree& Typesystem() const;
 
+
+        /**
+         * Expand environment variables in the string. 
+         *
+         * Looks for $(VARIABLE) and replaces it with the value of getenv("VARIABLE").
+         * Throws std::logic_error if the variable cannot be found.
+         *
+         * The function will handle recursive lookup, e.g. $(NAME_$(NUMBER)) will
+         * be expanded to the value of NAME_0 if NUMBER is 0.
+         */
+        static std::string ExpandEnvironment(const std::string& str);
+
+        /**
+         * Expand special variables int the string.
+
+         * Currently these are only a number of special folders on 
+         * Windows, please look at the source code or the Safir SDK Users Guide
+         * for a list of variables that are expanded (search for Special Folders).
+         */
+        static std::string ExpandSpecial(const std::string& str);
     private:
 
 #ifdef _MSC_VER
