@@ -227,7 +227,6 @@ namespace
 
     }
 
-    //expandera @@CSIDL_LOCAL_APPDATA@@
     //gör i dots_kernel också...
     //dokumentera alltihopa wp och sug
 
@@ -236,7 +235,6 @@ namespace
 
     std::string ExpandSpecial(const std::string& str)
     {
-#ifdef LLUF_CONFIG_READER_USE_WINDOWS
         const size_t start=str.rfind("@{");
         const size_t stop=str.find('}', start);
 
@@ -244,7 +242,9 @@ namespace
             return str;
 
         const std::string var=str.substr(start+2, stop-start-2);
+
         std::string value;
+#ifdef LLUF_CONFIG_READER_USE_WINDOWS
         if (var == "CSIDL_APPDATA" || var == "FOLDERID_RoamingAppData")
         {
             value = GetFolderPathFromCSIDL(CSIDL_APPDATA);
@@ -265,14 +265,15 @@ namespace
         {
             value = GetFolderPathFromCSIDL(CSIDL_COMMON_DOCUMENTS);
         }
+        else
+#endif
+        {
+            throw std::logic_error("Special variable " + var + " could not be found");
+        }
 
         const std::string res=str.substr(0, start) + value + str.substr(stop+1, str.size()-stop-1);
         //search for next special variable 
         return ExpandSpecial(res); 
-#else
-        return str;
-#endif
-
     }
 
 
