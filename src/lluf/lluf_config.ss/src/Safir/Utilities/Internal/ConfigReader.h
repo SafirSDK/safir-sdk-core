@@ -77,7 +77,10 @@ namespace Internal
 
         /**
          * Expand special variables int the string.
-
+         *
+         * E.g. looks for @{CSIDL_COMMON_APPDATA} and replaces it with the value of that special
+         * varible (in this case usually C:\ProgramData on Windows Vista and later).
+         *
          * Currently these are only a number of special folders on 
          * Windows, please look at the source code or the Safir SDK Users Guide
          * for a list of variables that are expanded (search for Special Folders).
@@ -89,7 +92,7 @@ namespace Internal
 #pragma warning (push)
 #pragma warning (disable: 4251)
 #endif
-
+        
         class Impl;
         boost::shared_ptr<Impl> m_impl;  
 

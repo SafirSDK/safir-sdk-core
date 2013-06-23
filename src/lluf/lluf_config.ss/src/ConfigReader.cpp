@@ -24,279 +24,11 @@
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <boost/property_tree/ini_parser.hpp>
 #include <iostream>
-
-#if defined(linux) || defined(__linux) || defined(__linux__)
-#define LLUF_CONFIG_READER_USE_LINUX
-#  include <sys/types.h>
-#  include <sys/stat.h>
-#  include <unistd.h>
-#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-#define LLUF_CONFIG_READER_USE_WINDOWS
-#  include <windows.h>
-#  include <Shlobj.h>
-#else
-#  error You need to implement ConfigReader for this platform!
-#endif
-
-
-namespace
-{
-#ifdef LLUF_CONFIG_READER_USE_LINUX
-    const char PATH_SEPARATOR = '/';
-#else
-    const char PATH_SEPARATOR = '\\';
-    const char ALTERNATE_PATH_SEPARATOR = '/';
-#endif
-
-
-    /** 
-     * A simple path class that is okay to use during elaboration
-     * (which boost::filesystem::path is not...
-     */
-    class Path
-    {
-    public:
-        Path() {}
-        explicit Path(const std::string& path):m_path(path) {}
-
-        /** 
-         * True if it is possible to call lstat or GetFileAttributesW on the path.
-         * Basically this means that there is something there that could be a file
-         * or a directory that we can at least look at.
-         */
-        bool Exists() const
-        {
-#ifdef LLUF_CONFIG_READER_USE_LINUX
-            struct stat pathstat;
-            const int res = ::lstat(m_path.c_str(), &pathstat);
-            if (res != 0)
-            {
-                return false;
-            }
-            return 
-                S_ISREG(pathstat.st_mode) ||
-                S_ISDIR(pathstat.st_mode) ||
-                S_ISCHR(pathstat.st_mode) ||
-                S_ISBLK(pathstat.st_mode) ||
-                S_ISFIFO(pathstat.st_mode) ||
-                S_ISLNK(pathstat.st_mode) ||
-                S_ISSOCK(pathstat.st_mode);                
-#else
-            DWORD attr(::GetFileAttributesA(m_path.c_str()));
-            return attr != INVALID_FILE_ATTRIBUTES;
-#endif
-        }
-        
-        bool IsFile() const
-        {
-#ifdef LLUF_CONFIG_READER_USE_LINUX
-            struct stat pathstat;
-            const int res = ::lstat(m_path.c_str(), &pathstat);
-            if (res != 0)
-            {
-                return false;
-            }
-            return S_ISREG(pathstat.st_mode);
-#else
-            DWORD attr(::GetFileAttributesA(m_path.c_str()));
-            if (attr == INVALID_FILE_ATTRIBUTES)
-            {
-                return false;
-            }
-            return (attr & FILE_ATTRIBUTE_DIRECTORY) == 0;
-#endif
-        }
-
-        bool IsDirectory() const
-        {
-#ifdef LLUF_CONFIG_READER_USE_LINUX
-            struct stat pathstat;
-            const int res = ::lstat(m_path.c_str(), &pathstat);
-            if (res != 0)
-            {
-                return false;
-            }
-            return S_ISDIR(pathstat.st_mode);
-#else
-            DWORD attr(::GetFileAttributesA(m_path.c_str()));
-            if (attr == INVALID_FILE_ATTRIBUTES)
-            {
-                return false;
-            }
-            return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
-#endif
-        }
-        
-        void operator/=(const std::string& p)
-        {
-            if (!IsSeparator(m_path[m_path.size() - 1]))
-            {
-                m_path += PATH_SEPARATOR;
-            }
-            m_path += p;
-        }
-        Path operator/(const std::string& p) const {Path tmp = *this; tmp /= p; return tmp;}
-
-        const std::string& str() const {return m_path;}
-    private:
-        static bool IsSeparator(const char c)
-        {
-            return c == PATH_SEPARATOR
-#ifdef LLUF_CONFIG_READER_USE_WINDOWS
-                || c == ALTERNATE_PATH_SEPARATOR
-#endif
-                ;
-        }
-        
-
-        std::string m_path;
-    };
-
-    std::string GetEnv(const std::string& name)
-    {
-        char* env = getenv(name.c_str());
-        if (env == NULL)
-        {
-            throw std::logic_error("Environment variable " + name + " does not appear to be set");
-        }
-        return std::string(env);
-    }
-    
-    /** Throws logic_error if environment variable is not set */
-    Path SafirRuntimeConfigDirectory()
-    {
-        const Path path(GetEnv("SAFIR_RUNTIME"));
-        return path / "data" / "core_config";
-    }
-    
-#ifdef LLUF_CONFIG_READER_USE_WINDOWS
-    Path GetFolderPathFromCSIDL(const int csidl)
-    {
-        char path[MAX_PATH];
-
-        if(SUCCEEDED(SHGetFolderPathA(NULL, 
-                                     csidl|CSIDL_FLAG_CREATE, 
-                                     NULL, 
-                                     0, 
-                                     path))) 
-        {
-            return Path(path);
-        }
-        else
-        {
-            throw std::logic_error("Call to SHGetFolderPath failed!");
-        }
-    }
-#endif
-
-    Path SystemConfigDirectory()
-    {
-#ifdef LLUF_CONFIG_READER_USE_LINUX
-        return Path("/etc/safir_sdk_core/");
-#else
-        //this should be c:/ProgramData most of the time
-        return GetFolderPathFromCSIDL(CSIDL_COMMON_APPDATA) / "safir_sdk_core" / "config";
-#endif
-    }
-
-    Path UserConfigDirectory()
-    {
-#ifdef LLUF_CONFIG_READER_USE_LINUX
-        try
-        {
-            return Path(GetEnv("XDG_CONFIG_HOME")) / "safir_sdk_core";
-        }
-        catch (const std::logic_error&)
-        {
-        }
-
-        try
-        {
-            return Path(GetEnv("HOME")) / ".config" / "safir_sdk_core";
-        }
-        catch (const std::logic_error&)
-        {
-        }
-
-        throw std::logic_error("Could not find either HOME or XDG_CONFIG_HOME environment variables.");
-
-#else
-        //try %USERPROFILE%/AppData/Local/
-        return GetFolderPathFromCSIDL(CSIDL_LOCAL_APPDATA) / "safir_sdk_core" / "config";
-#endif
-
-    }
+#include "Path.h"
+#include "PathFinders.h"
 
     //gör i dots_kernel också...
     //dokumentera alltihopa wp och sug
-
-
-
-
-    std::string ExpandSpecial(const std::string& str)
-    {
-        const size_t start=str.rfind("@{");
-        const size_t stop=str.find('}', start);
-
-        if (start==std::string::npos || stop==std::string::npos)
-            return str;
-
-        const std::string var=str.substr(start+2, stop-start-2);
-
-        std::string value;
-#ifdef LLUF_CONFIG_READER_USE_WINDOWS
-        if (var == "CSIDL_APPDATA" || var == "FOLDERID_RoamingAppData")
-        {
-            value = GetFolderPathFromCSIDL(CSIDL_APPDATA);
-        }
-        else if (var == "CSIDL_LOCAL_APPDATA" || var == "FOLDERID_LocalAppData")
-        {
-            value = GetFolderPathFromCSIDL(CSIDL_LOCAL_APPDATA);
-        }
-        else if (var == "CSIDL_COMMON_APPDATA" || var == "FOLDERID_ProgramData")
-        {
-            value = GetFolderPathFromCSIDL(CSIDL_COMMON_APPDATA);
-        }
-        else if (var == "CSIDL_MYDOCUMENTS" || var == "FOLDERID_Documents")
-        {
-            value = GetFolderPathFromCSIDL(CSIDL_MYDOCUMENTS);
-        }
-        else if (var == "CSIDL_COMMON_DOCUMENTS" || var == "FOLDERID_PublicDocuments")
-        {
-            value = GetFolderPathFromCSIDL(CSIDL_COMMON_DOCUMENTS);
-        }
-        else
-#endif
-        {
-            throw std::logic_error("Special variable " + var + " could not be found");
-        }
-
-        const std::string res=str.substr(0, start) + value + str.substr(stop+1, str.size()-stop-1);
-        //search for next special variable 
-        return ExpandSpecial(res); 
-    }
-
-
-
-    std::string ExpandEnvironment(const std::string& str)
-    {
-        const size_t start=str.rfind("$(");
-        const size_t stop=str.find(')', start);
-
-        if (start==std::string::npos || stop==std::string::npos)
-            return str;
-
-        const std::string var=str.substr(start+2, stop-start-2);
-        const std::string env = GetEnv(var);
-
-        const std::string res=str.substr(0, start) + env + str.substr(stop+1, str.size()-stop-1);
-        //search for next environment variable or
-        //recursively expand nested variable, e.g. $(NAME_$(NUMBER))
-        return ExpandEnvironment(res); 
-    }
-
-
-}
 
 namespace Safir
 {
@@ -306,6 +38,12 @@ namespace Internal
 {
     class ConfigReader::Impl
     {
+#ifdef LLUF_CONFIG_READER_USE_WINDOWS
+        typedef WindowsPathsFinder PathFinder;
+#else
+        typedef LinuxPathsFinder PathFinder;
+#endif
+
     public:
         Impl()
         {
@@ -321,17 +59,17 @@ namespace Internal
 
         void Read()
         {
-            if (TryLoad(SystemConfigDirectory()))
+            if (TryLoad(PathFinder::SystemConfigDirectory()))
             {
                 return;
             }
             
-            if (TryLoad(UserConfigDirectory()))
+            if (TryLoad(PathFinder::UserConfigDirectory()))
             {
                 return;
             }
 
-            if (TryLoad(SafirRuntimeConfigDirectory()))
+            if (TryLoad(PathFinder::SafirRuntimeConfigDirectory()))
             {
                 return;
             }
@@ -425,12 +163,12 @@ namespace Internal
 
     std::string ConfigReader::ExpandEnvironment(const std::string& str)
     {
-        return ::ExpandEnvironment(str);
+        return Safir::Utilities::Internal::ExpandEnvironment(str);
     }
    
     std::string ConfigReader::ExpandSpecial(const std::string& str)
     {
-        return ::ExpandSpecial(str);
+        return Safir::Utilities::Internal::ExpandSpecial(str);
     }
 
 }
