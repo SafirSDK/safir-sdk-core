@@ -33,7 +33,7 @@ namespace Utilities
 {
 namespace Internal
 {
-    struct CommonPathsFinder
+    struct CommonPathFinder
     {
         /** Throws logic_error if environment variable is not set */
         static Path SafirRuntimeConfigDirectory()
@@ -46,8 +46,8 @@ namespace Internal
 
 
 #ifdef LLUF_CONFIG_READER_USE_WINDOWS
-    struct WindowsPathsFinder
-        : public CommonPathsFinder
+    struct WindowsPathFinder
+        : public CommonPathFinder
     {
         static Path SystemConfigDirectory()
         {
@@ -64,8 +64,8 @@ namespace Internal
 #endif
 
 #ifdef LLUF_CONFIG_READER_USE_LINUX
-    struct LinuxPathsFinder
-        : public CommonPathsFinder
+    struct LinuxPathFinder
+        : public CommonPathFinder
     {
         static Path SystemConfigDirectory()
         {

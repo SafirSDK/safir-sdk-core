@@ -38,12 +38,6 @@ namespace Internal
 {
     class ConfigReader::Impl
     {
-#ifdef LLUF_CONFIG_READER_USE_WINDOWS
-        typedef WindowsPathsFinder PathFinder;
-#else
-        typedef LinuxPathsFinder PathFinder;
-#endif
-
     public:
         Impl()
         {
@@ -57,6 +51,7 @@ namespace Internal
             ExpandEnvironmentVariables(m_typesystem);
         }
 
+        template <class PathFinder>
         void Read()
         {
             if (TryLoad(PathFinder::SystemConfigDirectory()))
@@ -142,7 +137,12 @@ namespace Internal
     ConfigReader::ConfigReader()
         : m_impl(new Impl())
     {
-        m_impl->Read();
+#ifdef LLUF_CONFIG_READER_USE_WINDOWS
+        typedef WindowsPathFinder PathFinder;
+#else
+        typedef LinuxPathFinder PathFinder;
+#endif
+        m_impl->Read<PathFinder>();
         m_impl->ExpandEnvironmentVariables();
     }
 

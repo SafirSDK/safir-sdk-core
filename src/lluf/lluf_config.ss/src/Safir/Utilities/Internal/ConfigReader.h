@@ -92,7 +92,7 @@ namespace Internal
 #pragma warning (push)
 #pragma warning (disable: 4251)
 #endif
-        
+
         class Impl;
         boost::shared_ptr<Impl> m_impl;  
 
