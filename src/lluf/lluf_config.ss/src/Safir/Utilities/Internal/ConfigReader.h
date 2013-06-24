@@ -50,6 +50,8 @@ namespace Utilities
 {
 namespace Internal
 {
+    class ConfigReaderImpl;
+
     class LLUF_CONFIG_API ConfigReader
     {
     public:
@@ -93,8 +95,7 @@ namespace Internal
 #pragma warning (disable: 4251)
 #endif
 
-        class Impl;
-        boost::shared_ptr<Impl> m_impl;  
+        boost::shared_ptr<ConfigReaderImpl> m_impl;  
 
 #ifdef _MSC_VER
 #pragma warning (pop)
