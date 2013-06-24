@@ -37,6 +37,37 @@ namespace
     }
 }
 
+
+#ifdef LLUF_CONFIG_READER_USE_WINDOWS
+    std::string GetCSIDL(const int csidl)
+    {
+        char path[MAX_PATH];
+
+        if(SUCCEEDED(SHGetFolderPathA(NULL, 
+                                     csidl|CSIDL_FLAG_CREATE, 
+                                     NULL, 
+                                     0, 
+                                     path))) 
+        {
+            return path;
+        }
+        else
+        {
+            throw std::logic_error("Call to SHGetFolderPath failed!");
+        }
+    }
+
+    void TestCSIDLExpand(const int csidl, const std::string& variableName)
+    {
+        using namespace Safir::Utilities::Internal;
+        const std::string expected = "asdf" + GetCSIDL(csidl) + "foobar";
+        if (ExpandSpecial("asdf@{" + variableName + "}foobar") != expected)
+        {
+            throw std::logic_error("TestCSIDLExpand failed");
+        }
+    }
+#endif
+
 int main()
 {
     using namespace Safir::Utilities::Internal;
@@ -97,9 +128,16 @@ int main()
             }
 
 #ifdef LLUF_CONFIG_READER_USE_WINDOWS
-            const std::string expected = "asdf" + GetFolderPathFromCSIDL(CSIDL_APPDATA).str() + "foobar";
-            todo!
-                add an environment variable in there as well
+            TestCSIDLExpand(CSIDL_APPDATA,"CSIDL_APPDATA");
+            TestCSIDLExpand(CSIDL_APPDATA,"FOLDERID_RoamingAppData");
+            TestCSIDLExpand(CSIDL_LOCAL_APPDATA,"CSIDL_LOCAL_APPDATA");
+            TestCSIDLExpand(CSIDL_LOCAL_APPDATA,"FOLDERID_LocalAppData");
+            TestCSIDLExpand(CSIDL_COMMON_APPDATA,"CSIDL_COMMON_APPDATA");
+            TestCSIDLExpand(CSIDL_COMMON_APPDATA,"FOLDERID_ProgramData");
+            TestCSIDLExpand(CSIDL_MYDOCUMENTS,"CSIDL_MYDOCUMENTS");
+            TestCSIDLExpand(CSIDL_MYDOCUMENTS,"FOLDERID_Documents");
+            TestCSIDLExpand(CSIDL_COMMON_DOCUMENTS,"CSIDL_COMMON_DOCUMENTS");
+            TestCSIDLExpand(CSIDL_COMMON_DOCUMENTS,"FOLDERID_PublicDocuments");
 #endif
 
         }

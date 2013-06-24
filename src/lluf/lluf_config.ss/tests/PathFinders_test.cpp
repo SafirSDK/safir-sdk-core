@@ -45,7 +45,25 @@ namespace
 #endif
     }
 
+#ifdef _WIN32
+    std::string GetCSIDL(const int csidl)
+    {
+        char path[MAX_PATH];
 
+        if(SUCCEEDED(SHGetFolderPathA(NULL, 
+                                     csidl|CSIDL_FLAG_CREATE, 
+                                     NULL, 
+                                     0, 
+                                     path))) 
+        {
+            return path;
+        }
+        else
+        {
+            throw std::logic_error("Call to SHGetFolderPath failed!");
+        }
+    }
+#endif
 }
 
 int main()
@@ -78,7 +96,10 @@ int main()
                 return 1;
             }
 #else
-            todo
+            if (PathFinder::SystemConfigDirectory().str() != GetCSIDL(CSIDL_COMMON_APPDATA) + "\\safir_sdk_core\\config")
+            {
+                return 1;
+            }
 #endif
         }
 
@@ -118,7 +139,10 @@ int main()
             }
 
 #else
-            todo
+            if (PathFinder::UserConfigDirectory().str() != GetCSIDL(CSIDL_LOCAL_APPDATA) + "\\safir_sdk_core\\config")
+            {
+                return 1;
+            }
 #endif
         }
 
