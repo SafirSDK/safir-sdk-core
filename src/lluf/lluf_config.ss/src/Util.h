@@ -25,6 +25,8 @@
 #define __LLUF_CONFIG_UTIL_H__
 
 #include "Path.h"
+#include <stdlib.h>
+#include <stdexcept>
 
 namespace Safir
 {
