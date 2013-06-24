@@ -69,6 +69,26 @@ namespace
 #endif
     }
 
+
+#ifdef LLUF_CONFIG_READER_USE_WINDOWS
+    std::string GetCSIDL(const int csidl)
+    {
+        char path[MAX_PATH];
+
+        if(SUCCEEDED(SHGetFolderPathA(NULL, 
+                                     csidl|CSIDL_FLAG_CREATE, 
+                                     NULL, 
+                                     0, 
+                                     path))) 
+        {
+            return path;
+        }
+        else
+        {
+            throw std::logic_error("Call to SHGetFolderPath failed!");
+        }
+    }
+#endif
 }
 int main(const int argc, const char* argv[])
 {
@@ -214,7 +234,21 @@ int main(const int argc, const char* argv[])
             }
         }
 
+#ifdef LLUF_CONFIG_READER_USE_WINDOWS
+        std::wcout << "test windows special folders" << std::endl;
+        {
+            ::system_config = dir / "windows";
+            
+            ConfigReaderImpl impl;
+            impl.Read<TestDirs>();
+            impl.ExpandEnvironmentVariables();
 
+            if (impl.m_locations.get<std::string>("special") != GetCSIDL(CSIDL_COMMON_APPDATA) + "/asdf/asdf")
+            {
+                return 1;
+            }
+        }
+#endif
 
     }
     catch (const std::exception& e)
