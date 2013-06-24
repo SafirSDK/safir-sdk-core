@@ -50,6 +50,25 @@ namespace
         }
     };
 
+    void SetEnv(const std::string& name, const std::string& value)
+    {
+#ifdef _WIN32
+        _putenv((name + "=" + value).c_str());
+#else
+        setenv(name.c_str(),value.c_str(),1);
+#endif
+    }
+
+
+    void UnsetEnv(const std::string& name)
+    {
+#ifdef _WIN32
+        _putenv((name + "=").c_str());
+#else
+        unsetenv(name.c_str());
+#endif
+    }
+
 }
 int main(const int argc, const char* argv[])
 {
@@ -71,6 +90,7 @@ int main(const int argc, const char* argv[])
             {
                 ConfigReaderImpl impl;
                 impl.Read<TestDirs>();
+                impl.ExpandEnvironmentVariables();
                 return 1;
             }
             catch(const std::logic_error&)
@@ -85,6 +105,7 @@ int main(const int argc, const char* argv[])
             
             ConfigReaderImpl impl;
             impl.Read<TestDirs>();
+            impl.ExpandEnvironmentVariables();
 
             if (impl.m_locations.get<std::string>("question") != "blahonga")
             {
@@ -106,12 +127,19 @@ int main(const int argc, const char* argv[])
         std::wcout << "find user" << std::endl;
         {
             ::user_config = dir / "user";
-            
+            SetEnv("SOME_ENVIRONMENT_VARIABLE_THAT_I_NEED","myvalue");
             ConfigReaderImpl impl;
             impl.Read<TestDirs>();
+            impl.ExpandEnvironmentVariables();
 
             if (impl.m_locations.get<std::string>("question") != "9*5")
             {
+                return 1;
+            }
+            
+            if (impl.m_locations.get<std::string>("env") != "myvalue:blahonga")
+            {
+                std::wcout << impl.m_locations.get<std::string>("env").c_str() << std::endl;
                 return 1;
             }
 
@@ -126,12 +154,32 @@ int main(const int argc, const char* argv[])
             }
         }
 
+        std::wcout << "missing env" << std::endl;
+        {
+            ::user_config = dir / "user";
+            UnsetEnv("SOME_ENVIRONMENT_VARIABLE_THAT_I_NEED");
+
+            try
+            {
+                ConfigReaderImpl impl;
+                impl.Read<TestDirs>();
+                impl.ExpandEnvironmentVariables();
+        
+                return 1;
+            }
+            catch (const std::logic_error&)
+            {
+
+            }
+        }
+
         std::wcout << "find system" << std::endl;
         {
             ::system_config = dir / "system";
             
             ConfigReaderImpl impl;
             impl.Read<TestDirs>();
+            impl.ExpandEnvironmentVariables();
 
             if (impl.m_locations.get<std::string>("question") != "bryna nuppa fjässa sponken")
             {
@@ -157,6 +205,7 @@ int main(const int argc, const char* argv[])
                 ::system_config = dir / "broken";
                 ConfigReaderImpl impl;
                 impl.Read<TestDirs>();
+                impl.ExpandEnvironmentVariables();
                 return 1;
             }
             catch(const std::logic_error&)
@@ -164,6 +213,7 @@ int main(const int argc, const char* argv[])
                 
             }
         }
+
 
 
     }

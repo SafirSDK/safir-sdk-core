@@ -30,7 +30,6 @@ namespace
     {
 #ifdef _WIN32
         _putenv((name + "=" + value).c_str());
-
 #else
         setenv(name.c_str(),value.c_str(),1);
 #endif
