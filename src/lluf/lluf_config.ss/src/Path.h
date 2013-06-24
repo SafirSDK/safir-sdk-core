@@ -24,6 +24,8 @@
 #ifndef __PATH_H__
 #define __PATH_H__
 
+#include <string>
+
 #if defined(linux) || defined(__linux) || defined(__linux__)
 #define LLUF_CONFIG_READER_USE_LINUX
 #  include <sys/types.h>
@@ -57,9 +59,6 @@ namespace Utilities
 {
 namespace Internal
 {
-
-
-
     /** 
      * A simple path class that is okay to use during elaboration
      * (which boost::filesystem::path is not...
