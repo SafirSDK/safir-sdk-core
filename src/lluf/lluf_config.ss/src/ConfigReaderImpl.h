@@ -119,8 +119,8 @@ namespace Internal
                 }
                 else
                 {
-                    const std::string value = it->second.get_value<std::string>();
-                    it->second.put_value(ExpandSpecial(value));
+                    std::string value = it->second.get_value<std::string>();
+                    value = ExpandSpecial(value);
                     it->second.put_value(ExpandEnvironment(value));
                 }
                 
