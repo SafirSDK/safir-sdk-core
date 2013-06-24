@@ -22,7 +22,6 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/ConfigReader.h>
-#include <boost/property_tree/ini_parser.hpp>
 #include <iostream>
 #include "ConfigReaderImpl.h"
 #include "Path.h"

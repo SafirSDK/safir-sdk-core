@@ -25,10 +25,7 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <iostream>
 #include "Path.h"
-#include "PathFinders.h"
-
-    //gör i dots_kernel också...
-    //dokumentera alltihopa wp och sug
+#include "Util.h"
 
 namespace Safir
 {
