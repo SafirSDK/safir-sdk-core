@@ -146,7 +146,7 @@ namespace Internal
         std::string result;
         try
         {
-            result = Safir::Utilities::Internal::ConfigReader::ExpandSpecial(str);
+            result = Safir::Utilities::Internal::Expansion::ExpandSpecial(str);
         }
         catch (const std::logic_error& e)
         {
@@ -156,7 +156,7 @@ namespace Internal
 
         try
         {
-            result = Safir::Utilities::Internal::ConfigReader::ExpandEnvironment(result);
+            result = Safir::Utilities::Internal::Expansion::ExpandEnvironment(result);
         }
         catch (const std::logic_error& e)
         {

@@ -50,6 +50,8 @@ namespace Utilities
 {
 namespace Internal
 {
+
+
     class ConfigReaderImpl;
 
     class LLUF_CONFIG_API ConfigReader
@@ -58,6 +60,10 @@ namespace Internal
         /** 
          * Reads the Safir SDK Core configuration files and populates
          * the property trees for use.
+         *
+         * Also expands environment and special variables (see below) in the 
+         * property trees. There is no need to do that yourself!
+         *
          */
         ConfigReader();
 
@@ -66,28 +72,7 @@ namespace Internal
         const boost::property_tree::ptree& Typesystem() const;
 
 
-        /**
-         * Expand environment variables in the string. 
-         *
-         * Looks for $(VARIABLE) and replaces it with the value of getenv("VARIABLE").
-         * Throws std::logic_error if the variable cannot be found.
-         *
-         * The function will handle recursive lookup, e.g. $(NAME_$(NUMBER)) will
-         * be expanded to the value of NAME_0 if NUMBER is 0.
-         */
-        static std::string ExpandEnvironment(const std::string& str);
 
-        /**
-         * Expand special variables int the string.
-         *
-         * E.g. looks for @{CSIDL_COMMON_APPDATA} and replaces it with the value of that special
-         * varible (in this case usually C:\ProgramData on Windows Vista and later).
-         *
-         * Currently these are only a number of special folders on 
-         * Windows, please look at the source code or the Safir SDK Users Guide
-         * for a list of variables that are expanded (search for Special Folders).
-         */
-        static std::string ExpandSpecial(const std::string& str);
     private:
 
 #ifdef _MSC_VER
@@ -100,6 +85,43 @@ namespace Internal
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif          
+    };
+
+    /** 
+     * Utility functions for expanding environment and special variables.
+     *
+     * These are exported in case there are any other places where the same
+     * expansion as the ConfigReader uses is needed.
+     *
+     * The ConfigReader already does the expansion in the property trees,
+     * so there is no need to use these functions if you're just using
+     * ConfigReader
+     */
+    class Expansion
+    {
+    public:
+        /**
+         * Expand environment variables in the string. 
+         *
+         * Looks for $(VARIABLE) and replaces it with the value of getenv("VARIABLE").
+         * Throws std::logic_error if the variable cannot be found.
+         *
+         * The function will handle recursive lookup, e.g. $(NAME_$(NUMBER)) will
+         * be expanded to the value of NAME_0 if NUMBER is 0.
+         */
+        static std::string ExpandEnvironment(const std::string& str);
+        
+        /**
+         * Expand special variables int the string.
+         *
+         * E.g. looks for @{CSIDL_COMMON_APPDATA} and replaces it with the value of that special
+         * varible (in this case usually C:\ProgramData on Windows Vista and later).
+         *
+         * Currently these are only a number of special folders on 
+         * Windows, please look at the source code or the Safir SDK Users Guide
+         * for a list of variables that are expanded (search for Special Folders).
+         */
+        static std::string ExpandSpecial(const std::string& str);
     };
 }
 }

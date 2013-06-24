@@ -64,12 +64,12 @@ namespace Internal
         return m_impl->m_typesystem;
     }
 
-    std::string ConfigReader::ExpandEnvironment(const std::string& str)
+    std::string Expansion::ExpandEnvironment(const std::string& str)
     {
         return Safir::Utilities::Internal::ExpandEnvironment(str);
     }
    
-    std::string ConfigReader::ExpandSpecial(const std::string& str)
+    std::string Expansion::ExpandSpecial(const std::string& str)
     {
         return Safir::Utilities::Internal::ExpandSpecial(str);
     }
