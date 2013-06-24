@@ -97,7 +97,7 @@ namespace Internal
      * so there is no need to use these functions if you're just using
      * ConfigReader
      */
-    class Expansion
+    class LLUF_CONFIG_API Expansion
     {
     public:
         /**
