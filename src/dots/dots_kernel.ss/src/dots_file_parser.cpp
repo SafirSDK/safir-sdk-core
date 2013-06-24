@@ -96,7 +96,7 @@ namespace
                     if (!boost::filesystem::exists(douDirectory) || !boost::filesystem::is_directory(douDirectory))
                     {
                         ErrorHandler::Error("Dou/Dom file parsing",
-                                            "dou_directory in section " + it->first + " of typesystem.ini does not appear to be a directory",
+                                            "dou_directory '" + douDirectory.string() + "' in section " + it->first + " of typesystem.ini does not appear to be a directory",
                                             "dots_file_parser");
                         exit(1);
                     }
