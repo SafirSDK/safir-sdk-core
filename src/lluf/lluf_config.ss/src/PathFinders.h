@@ -69,7 +69,7 @@ namespace Internal
     {
         static Path SystemConfigDirectory()
         {
-            return Path("/etc/safir_sdk_core/");
+            return Path("/etc/safir_sdk_core");
         }
 
         static Path UserConfigDirectory()
