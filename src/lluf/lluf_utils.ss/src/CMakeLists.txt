@@ -38,8 +38,4 @@ INSTALL(TARGETS lluf_utils
         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL(FILES  
-        ../data/logging.ini
-        DESTINATION ${SAFIR_RUNTIME}/log/)
-
 INSTALL_DEBUG_INFO(lluf_utils)
