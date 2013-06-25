@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2008 (http://www.safirsdk.com)
-* 
-* Created by: Joel Ottosson / stjoot
+* Copyright Saab AB, 2013 (http://www.safirsdk.com)
+*
+* Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
 *******************************************************************************
 *
@@ -21,33 +21,26 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#include <Safir/Utilities/Internal/ConfigReader.h>
+#include <iostream>
 
-#if 0
-#ifndef _dots_param_h
-#define _dots_param_h
-
-#include <vector>
-#include <adty/adty_shared_memory_pool.h>
-
-namespace Safir
+int main()
 {
-namespace Dob
-{
-namespace Typesystem
-{
-namespace Internal
-{
-    /**
-     * Reads parameter files.
-     */
-    class Param
+    try
     {
-    public:
-        static adty::BlockGroupVector MemoryPoolParameters();
-    };
+        using namespace Safir::Utilities::Internal;
+        ConfigReader reader;
+        if (reader.Locations().get<std::string>("lock_file_directory").empty())
+        {
+            return 1;
+        }
+    }
+    catch (...)
+    {
+        return 1;
+    }
+    std::wcout << "success" << std::endl;
+    return 0;
 }
-}
-}
-}
-#endif
-#endif
+
+
