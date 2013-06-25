@@ -1,6 +1,8 @@
 Windows Building and Installing
 ===============================
 
+NOTE: These instructions are written for Visual Studio 2005 and 2008, but building the SDK works fine with at least VS2010, and probably with VS2012 as well. The Express versions can also be used.
+
 Installing Prerequisites
 ------------------------
 
