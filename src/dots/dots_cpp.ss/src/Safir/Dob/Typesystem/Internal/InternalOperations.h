@@ -100,14 +100,13 @@ namespace Internal
      */
     DOTS_API Int64 GenerateRandom64Bit();
 
-    //These constants used to be calculated from the strings, but that caused some
-    //strange elaboration errors, so they were changed to hard-coded constants.
+    const Int64 DEFAULT_CHANNEL_ID = Internal::Generate64BitHash(L"DEFAULT_CHANNEL");
+    const Int64 DEFAULT_HANDLER_ID = Internal::Generate64BitHash(L"DEFAULT_HANDLER");
 
-    const Int64 DEFAULT_CHANNEL_ID = 3313918482685577033LL; //Internal::Generate64BitHash(L"DEFAULT_CHANNEL");
-    const Int64 DEFAULT_HANDLER_ID = -6778878277529052275LL; //Internal::Generate64BitHash(L"DEFAULT_HANDLER");
+    
+    const Int64 ALL_CHANNELS_ID = Internal::Generate64BitHash(L"ALL_CHANNELS");
+    const Int64 ALL_HANDLERS_ID = Internal::Generate64BitHash(L"ALL_HANDLERS");
 
-    const Int64 ALL_CHANNELS_ID = -3399801522715850860LL; //Internal::Generate64BitHash(L"ALL_CHANNELS");
-    const Int64 ALL_HANDLERS_ID = 192125831057403942LL; //Internal::Generate64BitHash(L"ALL_HANDLERS");
 }
 }
 }

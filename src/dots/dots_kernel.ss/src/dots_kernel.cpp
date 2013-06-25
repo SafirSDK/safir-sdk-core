@@ -2062,3 +2062,80 @@ void DotsC_PeekAtException(DotsC_TypeId & exceptionId)
     std::string desc;
     ExceptionKeeper::Instance().Peek(exceptionId,desc);
 }
+
+
+boost::filesystem::path GetLogDirectory()
+{
+    const char * ENV_NAME = "SAFIR_RUNTIME";
+    char * env = getenv(ENV_NAME);
+    if (env == NULL)
+    {
+        return "";
+    }
+    boost::filesystem::path filename(env,boost::filesystem::native);
+
+    filename /= "log";
+    filename /= "dump";
+
+    try
+    {
+        boost::filesystem::create_directory(filename);
+    }
+    catch (const boost::filesystem::filesystem_error &)
+    {
+        std::wcout << "Failed to create directory for binary dumps!!" <<std::endl;
+        return "";
+    }
+    return filename;
+}
+
+std::string MakeFileName(const std::string & filenamePart, int no)
+{
+    const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
+    std::string filename = filenamePart + "_" + boost::posix_time::to_iso_string(now) + "-" + boost::lexical_cast<std::string>(no) + ".bin";
+    if (!boost::filesystem::portable_name(filename))
+    {
+        filename = boost::regex_replace(filename,boost::regex("[^0-9a-zA-Z\\._-]"),"_");
+        if (!boost::filesystem::portable_name(filename))
+        {
+            filename = "strange_exe_name";
+        }
+    }
+    return filename;
+}
+
+void DotsC_BinaryDump(const char * const blob,
+                      const char * const filenamePart)
+{
+    try
+    {
+        //create a new file
+        static boost::filesystem::path path = GetLogDirectory();
+
+        boost::filesystem::path filename;
+        for (int i = 0;;++i)
+        {
+            filename = path / MakeFileName(filenamePart, i);
+            if (!boost::filesystem::exists(filename))
+            {
+                break;
+            }
+        }
+
+        //write blob to file
+        DotsC_Int32 blobSize = DotsC_GetSize(blob);
+        boost::filesystem::ofstream output;
+        output.open (filename, std::ios::binary);
+        output.write(blob, blobSize);
+    }
+    catch(const std::exception & exc)
+    {
+        lllout << "Caught exception in DotsC_BinaryDump on "<< filenamePart << ": " << exc.what() <<std::endl;
+        std::wcout << "Caught exception in DotsC_BinaryDump on "<< filenamePart << ": " << exc.what() <<std::endl;
+    }
+    catch(...)
+    {
+        lllout << "Caught ... exception in DotsC_BinaryDump on "<< filenamePart << ": " <<std::endl;
+        std::wcout << "Caught ... exception in DotsC_BinaryDump on "<< filenamePart << ": " <<std::endl;
+    }
+}

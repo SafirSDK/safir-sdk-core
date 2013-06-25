@@ -27,15 +27,13 @@
 *
 ******************************************************************************/
 #include <iostream>
-#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 
 void PrintHelp()
 {
-    Safir::Utilities::Internal::ConfigReader reader;
-    std::wcout<< "Program to turn on or off low level logging to " << reader.Logging().get<std::string>("low_level_log_directory").c_str() << "\n";
-    std::wcout<< "Logging can also be turned on by creating a file called 'logging_on' in that directory.\n";
+    std::wcout<< "Program to turn on or off low level logging to %SAFIR_RUNTIME%/log/Dob-LowLevelLog" << std::endl;
+    std::wcout<< "Logging can also be turned on by creating a file called 'logging_on' in that directory." << std::endl;
     std::wcout<< "Command line parameter must be 'on' or 'off'"<<std::endl;
     exit(1);
 }

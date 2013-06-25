@@ -25,7 +25,6 @@
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Internal/Id.h>
 #include "com_saabgroup_safir_dob_typesystem_Kernel.h"
-#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <iostream>
 #include <vector>
 #include <assert.h>
@@ -1528,55 +1527,6 @@ jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Generate64
 }
 
 
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetDouDirectories
- * Signature: ()[Ljava/lang/String;
- */
-JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetDouDirectories
-  (JNIEnv * env, jclass)
-{
-    std::vector<std::string> directories;
-
-    try
-    {
-        //Read the config files
-        Safir::Utilities::Internal::ConfigReader reader;
-        
-        //loop through all sections in typesystem.ini
-        for (boost::property_tree::ptree::const_iterator it = reader.Typesystem().begin();
-             it != reader.Typesystem().end(); ++it)
-        {
-            const bool isSection = !it->second.empty();
-            
-            if (isSection)
-            {
-                //these directories have already been checked  by dots_kernel by the time we get here
-                //so we know that they exist.
-                //the only reason that we may fail here is if we do not have read permissions on 
-                //the ini files...
-                directories.push_back(it->second.get<std::string>("dou_directory"));
-            }
-        }
-    }
-    catch (const std::exception& e)
-    {
-        std::wcerr << "Failed to read ini files!\nException:" << 
-            e.what() << std::endl;
-        exit(1);
-    }
-    
-    jobjectArray stringArray = env->NewObjectArray(directories.size(),
-                                                   env->FindClass("java/lang/String"),  
-                                                   env->NewStringUTF(""));
-    for(size_t i = 0; i < directories.size(); ++i) 
-    {  
-        env->SetObjectArrayElement(stringArray,
-                                   i,
-                                   env->NewStringUTF(directories[i].c_str()));
-    }
-    return stringArray;
-}
 
 
 

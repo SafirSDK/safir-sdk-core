@@ -71,13 +71,15 @@ namespace Internal
     typedef Int64 ChannelId;
     typedef Int64 HandlerId;
 
-    //Files extensions
-    const char * const DOU_FILE_EXTENSION                    = ".dou";
-    const char * const DOM_FILE_EXTENSION                    = ".dom";
+    //Files and environment variables
+    const char * const RUNTIME_ENV                      = "SAFIR_RUNTIME";
+    const char * const DOB_CLASSES_DIR                  = "/data/text/dots/classes"; //root=RUNTIME_ENV   /data/text/dots/classes
+    const char * const UNIT_FILE_EXT                    = ".dou";
+    const char * const PROPERTY_MAPPING_FILE_EXT        = ".dom";
 
     //Preset class names
     const char * const NULL_CLASS           = "Null_Class";
-    const char * const OBJECT_CLASS         = "Object";
+    const char * const OBJECT_CLASS         = "Object"; //"Safir.Dots.Object";
 
     //--------------------------------------------------
     // Unsigned types

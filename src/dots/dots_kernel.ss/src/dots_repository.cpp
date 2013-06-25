@@ -24,6 +24,7 @@
 
 #include "dots_repository.h"
 #include "dots_file_parser.h"
+#include "dots_param.h"
 #include "dots_error_handler.h"
 #include "dots_allocation_helper.h"
 #include <iostream>

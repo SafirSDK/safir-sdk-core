@@ -517,7 +517,7 @@ package body @_NAMESPACE_@.@_CLASS_@ is
 
       function Is_Changed (Self : in Container_Proxy'Class) return Boolean is
       begin
-         return Is_Changed (Self.Container_Ptr.all);
+         return Is_Changed(Self.Container_Ptr.all);
       end Is_Changed;
 
       procedure Set_Changed (Self : in  Container_Proxy'Class;

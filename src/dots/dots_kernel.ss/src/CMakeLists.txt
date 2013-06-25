@@ -37,7 +37,7 @@ FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time)
 TARGET_LINK_LIBRARIES(dots_kernel ${ACE_LIBRARY} ${Boost_LIBRARIES} ${COMMON_LIBRARIES} ${EXPAT_LIBRARY} dots_id)
 
 IF (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dots_kernel lluf_utils lluf_config)
+  TARGET_LINK_LIBRARIES(dots_kernel lluf_utils)
 ENDIF()
 
 ADD_DEFINITIONS(-DDOTSKERNEL_EXPORTS)

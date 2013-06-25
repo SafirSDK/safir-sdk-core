@@ -279,6 +279,7 @@ final class Kernel {
     public static native long Generate64(String id);
 
 
-    //Get all the dou directories defined in typesystem.ini
-    public static native String[] GetDouDirectories();
+
+
+
 }
