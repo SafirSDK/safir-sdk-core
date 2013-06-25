@@ -55,6 +55,8 @@ namespace Internal
 
         static Library & Instance();
 
+        void SetProgramName(const std::wstring & programName);
+
         void StartTraceBackdoor(const std::wstring& connectionNameCommonPart,
                                 const std::wstring& connectionNameInstancePart);
         void StopTraceBackdoor();
@@ -127,6 +129,8 @@ namespace Internal
         
         typedef std::list<PrefixState> Prefixes;
         typedef std::vector<std::wstring> Arguments;
+
+        std::wstring m_programName;
 
         Arguments m_arguments;
 

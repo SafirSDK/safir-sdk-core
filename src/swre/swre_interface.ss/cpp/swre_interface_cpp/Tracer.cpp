@@ -49,6 +49,18 @@ Tracer::~Tracer()
 
 using Safir::Dob::Typesystem::Utilities::ToUtf8;
 
+void Tracer::SetProgramName(const std::wstring& programName)
+{
+    using namespace Safir::Dob::Typesystem::Utilities;
+
+    bool success;
+    SwreC_SetProgramName(ToUtf8(programName).c_str(), success);
+    if (!success)
+    {
+        Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
+    }
+}
+
 void Tracer::StartTraceBackdoor(const Safir::Dob::ConnectionBase& connection)
 {
     Safir::Dob::ConnectionAspectMisc conn(connection);

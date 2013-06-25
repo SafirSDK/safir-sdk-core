@@ -44,6 +44,14 @@ namespace Application
         typedef std::basic_ostream<wchar_t, std::char_traits<wchar_t> > stream_type;
 
         /**
+         * Set the program name of the current executable.
+         * This should be set to argv[0] in the main program.
+         *
+         * @param programName [in] The name of the executable
+         */
+        static void SetProgramName(const std::wstring& programName);
+
+        /**
          * Start reception of trace on/off commands
          *
          * The given connection must be opened before this method is called.

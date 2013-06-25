@@ -90,7 +90,8 @@ namespace Internal
 
 
     Library::Library()
-        : m_arguments(),
+        : m_programName(),
+          m_arguments(),
           m_prefixes(),
           m_prefixSearchLock(),
           m_backdoorConnection(),
@@ -139,6 +140,12 @@ namespace Internal
     Library::~Library() 
     {
 
+    }
+
+    void
+    Library::SetProgramName(const std::wstring& programName)
+    {
+        m_programName = programName.substr(programName.find_last_of(L"/\\")+1);
     }
 
     void
@@ -409,11 +416,8 @@ namespace Internal
                 Safir::Dob::SecondaryConnection conn;
                 conn.Attach();
                 Safir::Dob::ConnectionAspectMisc connectionAspectMisc(conn);
-                if (!boost::regex_search(connectionAspectMisc.GetConnectionName(), boost::wregex(cmd->ConnectionName().GetVal(), regExpFlags)))
-
-                   // AIWI TODO varför behövs denna koll?
-                    //&&
-                    //!boost::regex_search(m_programName, boost::wregex(cmd->ConnectionName().GetVal(), regExpFlags)))
+                if (!boost::regex_search(connectionAspectMisc.GetConnectionName(), boost::wregex(cmd->ConnectionName().GetVal(), regExpFlags)) &&
+                    !boost::regex_search(m_programName, boost::wregex(cmd->ConnectionName().GetVal(), regExpFlags)))
                 {
                     // Connection name doesn't match
                     return;  // *** RETURN ***
