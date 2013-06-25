@@ -40,38 +40,38 @@
 
 extern "C"
 {
-    /**
-     * Initialize the SWRE library with the program name.
-     *
-     * The SWRE library needs the program name of the executable
-     * that it runs in.
-     * If this method is not called SWRE will not be able to use a correct connection
-     * name for its DOB connection ("Program name not set" will be used instead).
-     * Everything else will still function correctly, though.
-     *
-     * @param programName [in] - The name of the program. In C++ and C# this will likely be argv[0]
-     *                           and in Java it will be the name of the main class. This parameter
-     *                           is used as the connection name of the SWRE library connection.
-     * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
-     */
-    SWRE_LIBRARY_API void SwreC_SetProgramName(const char * const programName,
-                                               bool & success);
 
     /**
-     * Enable crash reporting.
+     * Start reception of trace on/off commands
+     *
+     * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
+     */
+    SWRE_LIBRARY_API void SwreC_StartTraceBackdoor(const char * const connectionNameCommonPart,
+                                                   const char * const connectionNameInstancePart,
+                                                   bool &             success);
+
+    /**
+     * Stop reception of trace on/off commands
+     */
+    SWRE_LIBRARY_API void SwreC_StopTraceBackdoor();
+
+    /**
+     * Start crash reporting.
      *
      * Calling this function will cause google breakpad to be enabled for the current process.
      * This function should be called as early as is humanly possible!
-     * Note that SwreC_Stop must be called before the process exits.
+     * Note that SwreC_StopCrashReporting must be called before the process exits.
      *
      * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
      */
-    SWRE_LIBRARY_API void SwreC_EnableCrashReporting(bool & success);
+    SWRE_LIBRARY_API void SwreC_StartCrashReporting(bool & success);
 
     /**
-     * Stop the swre library.
+     * Stop crash reporting.
+     *
+     * Must be called before the process exits.
      */
-    SWRE_LIBRARY_API void SwreC_Stop();
+    SWRE_LIBRARY_API void SwreC_StopCrashReporting();
 
     /**
      * @name Trace logging buffer manipulation routines.
@@ -144,14 +144,6 @@ extern "C"
       SwreC_TraceAppendWcharPrefix(const DotsC_Int64 prefixId,
                                    const wchar_t ch,
                                    bool & success);
-
-    /**
-     * Flush the buffer to output if more than 0.5 seconds have passed since buffer
-     * became not empty.
-     *
-     * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
-     */
-    SWRE_LIBRARY_API void SwreC_TraceSyncBuffer(bool & success);
 
     /**
      * Flush the buffer to output.

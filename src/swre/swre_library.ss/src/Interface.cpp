@@ -35,19 +35,35 @@ std::wstring ToWstring(const char * const str)
     return Safir::Dob::Typesystem::Utilities::ToWstring(str);
 }
 
-void SwreC_SetProgramName(const char * const programName,
-                          bool & success)
+void SwreC_StartTraceBackdoor(const char * const connectionNameCommonPart,
+                              const char * const connectionNameInstancePart,
+                              bool & success)
 {
+    using Safir::Dob::Typesystem::Utilities::ToWstring;
+
     success = false;
     try
     {
-        Library::Instance().SetProgramName(ToWstring(programName));
+        Library::Instance().StartTraceBackdoor(ToWstring(connectionNameCommonPart),
+                                               ToWstring(connectionNameInstancePart));
         success = true;
     }
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void SwreC_EnableCrashReporting(bool & success)
+void SwreC_StopTraceBackdoor()
+{
+    try
+    {
+        Library::Instance().StopTraceBackdoor();
+    }
+    catch (...)
+    {
+        std::wcerr << "Got an exception in SwreC_StopTraceBackdoor. Please tell your nearest Safir System Kernel developer" << std::endl;
+    }
+}
+
+void SwreC_StartCrashReporting(bool & success)
 {
     success = false;
     try
@@ -59,15 +75,15 @@ void SwreC_EnableCrashReporting(bool & success)
 }
 
 
-void SwreC_Stop()
+void SwreC_StopCrashReporting()
 {
     try
     {
-        Library::Instance().Stop();
+        Library::Instance().StopCrashReporting();
     }
     catch (...)
     {
-        std::wcerr << "Got an exception in SwreC_Stop. Please tell your nearest Safir System Kernel developer" << std::endl;
+        std::wcerr << "Got an exception in SwreC_StopCrashReporting. Please tell your nearest Safir System Kernel developer" << std::endl;
     }
 }
 
@@ -140,17 +156,6 @@ SwreC_TraceAppendWcharPrefix(const Safir::Dob::Typesystem::Int64 prefixId,
     try
     {
         Library::Instance().Trace(prefixId,ch);
-        success = true;
-    }
-    CATCH_LIBRARY_EXCEPTIONS;
-}
-
-void SwreC_TraceSyncBuffer(bool & success)
-{
-    success = false;
-    try
-    {
-        Library::Instance().TraceSync();
         success = true;
     }
     CATCH_LIBRARY_EXCEPTIONS;

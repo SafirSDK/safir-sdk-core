@@ -26,6 +26,7 @@
 
 #include <Safir/Application/Internal/SwReportExportDefs.h>
 #include <Safir/Application/Internal/TraceStreamBuffer.h>
+#include <Safir/Dob/ConnectionBase.h>
 #include <iostream>
 
 namespace Safir
@@ -43,12 +44,26 @@ namespace Application
         typedef std::basic_ostream<wchar_t, std::char_traits<wchar_t> > stream_type;
 
         /**
-         * Set the program name of the current executable.
-         * This should be set to argv[0] in the main program.
+         * Start reception of trace on/off commands
          *
-         * @param programName [in] The name of the executable
+         * The given connection must be opened before this method is called.
+         * If the connection is closed the reception of backdoor commands is
+         * stopped. If a new connection is opened this method needs to be called
+         * in order to start reception of backdoor commands.
+         *
+         * In situations when a connection is regularly closed and reopened,
+         * for instance in the case of context switches, you should consider
+         * using a dedicated connection as parameter.
+         *
+         * @param connection [in] The connection used for setting up a subscription for
+         *                        backdoor commands.
          */
-        static void SetProgramName(const std::wstring & programName);
+        static void StartTraceBackdoor(const Safir::Dob::ConnectionBase& connection);
+
+        /**
+         * Stop reception of trace on/off commands
+         */
+        static void StopTraceBackdoor();
 
         /**
          * Constructor.

@@ -56,50 +56,51 @@ All methods are thread safe.
 namespace SwReports
 {
     /**
-     * Clean up SwReport resources.
-     * 
-     * This needs to be called before exiting an application to let SwReports stop
-     * its background thread if it has been started and to stop crash reporting if
-     * it has been enabled. Failure to do this may cause problems if the
-     * thread is currently using its dob connection when it gets killed.
-     *
-     * You can also use the SwReportStarter RAII class below to get the EnableCrashReporting 
-     * and Stop functions to be called automatically.
-     */
-    SWRE_API void Stop();
-
-    /**
-     * Enable crash reporting.
+     * Start crash reporting.
      *
      * Calling this function will cause google breakpad to be enabled for the current process.
      * This function should be called as early as is humanly possible!
-     * Note that Stop() must be called before the process exits.
+     * Note that StopCrashReporting() must be called before the process exits.
+     *
+     * You can also use the SwReportStarter RAII class below to get the StartCrashReporting
+     * and StopCrashReporting functions to be called automatically.
+     */
+    SWRE_API void StartCrashReporting();
+
+    /**
+     * Stop crash reporting
+     *
+     * This needs to be called before exiting an application to stop crash reporting if
+     * it has been started.
      *
      * You can also use the SwReportStarter RAII class below to get the EnableCrashReporting
      * and Stop functions to be called automatically.
      */
-    SWRE_API void EnableCrashReporting();
+    SWRE_API void StopCrashReporting();
 
-    /** RAII class to call EnableCrashReporting and Stop automatically. */
-    class SwReportStarter
+
+
+    /**
+     * RAII class to call StartCrashReporting and StopCrashReporting automatically.
+     *
+     * Use this class at "program scope" in order to start the crash reporting functionality
+     * as early as possible in your program.
+     */
+    class ScopedCrashReporting
     {
     public:
         /** 
          * If crashReporting is true the EnableCrashReporting function will be called.
          * Otherwise nothing will happen...
          */
-        explicit SwReportStarter(const bool crashReporting = true)
+        ScopedCrashReporting()
         {
-            if (crashReporting)
-            {
-                EnableCrashReporting();
-            }
+            StartCrashReporting();
         }
 
-        /** See Stop(). */
-        ~SwReportStarter()
+        ~ScopedCrashReporting()
         {
-            Stop();
+            StopCrashReporting();
         }
     };
 

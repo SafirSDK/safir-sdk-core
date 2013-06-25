@@ -77,16 +77,29 @@ namespace Internal
         return _Tr::not_eof(c);
     }
 
+    using Safir::Dob::Typesystem::Utilities::ToUtf8;
+
     //-------------------------------------------------------
-    int 
-    TraceStreamBuffer::sync()
+    std::streamsize TraceStreamBuffer::xsputn(const wchar_t* s, std::streamsize num)
     {
+        if (m_prefixId == 0)
+        {
+            AddPrefix();
+        }
         bool success;
-        SwreC_TraceSyncBuffer(success);
+        SwreC_TraceAppendStringPrefix(m_prefixId, ToUtf8(s).c_str(), success);
         if (!success)
         {
             Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
         }
+        return num;
+    }
+
+    //-------------------------------------------------------
+    int 
+    TraceStreamBuffer::sync()
+    {
+        Flush();
         return 0;
     }
 
@@ -117,7 +130,7 @@ namespace Internal
         if (m_prefixId == 0)
         { 
             bool success;
-            SwreC_TracePrefixAdd(Safir::Dob::Typesystem::Utilities::ToUtf8(m_prefix).c_str(), m_prefixId, success);
+            SwreC_TracePrefixAdd(ToUtf8(m_prefix).c_str(), m_prefixId, success);
             if (!success)
             {
                 Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();

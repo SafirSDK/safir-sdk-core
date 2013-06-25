@@ -25,6 +25,8 @@
 #include <Safir/SwReports/Internal/Interface.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
+#include <Safir/Dob/ConnectionAspectMisc.h>
+
 namespace Safir
 {
 namespace Application
@@ -45,20 +47,28 @@ Tracer::~Tracer()
 
 }
 
-void Tracer::SetProgramName(const std::wstring & programName)
+using Safir::Dob::Typesystem::Utilities::ToUtf8;
+
+void Tracer::StartTraceBackdoor(const Safir::Dob::ConnectionBase& connection)
 {
-    using namespace Safir::Dob::Typesystem::Utilities;
+    Safir::Dob::ConnectionAspectMisc conn(connection);
 
     bool success;
-    SwreC_SetProgramName(ToUtf8(programName).c_str(), success);
+    SwreC_StartTraceBackdoor(ToUtf8(conn.GetConnectionNameCommonPart()).c_str(),
+                             ToUtf8(conn.GetConnectionNameInstancePart()).c_str(),
+                             success);
     if (!success)
     {
         Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
     }
 }
 
-void
-Tracer::flush() const
+void Tracer::StopTraceBackdoor()
+{
+    SwreC_StopTraceBackdoor();
+}
+
+void Tracer::flush() const
 {
     if (IsEnabled())
     {
@@ -66,8 +76,7 @@ Tracer::flush() const
     }
 }
 
-void
-Tracer::InitializeEnabledHandling() const
+void Tracer::InitializeEnabledHandling() const
 {
     if (m_isEnabled == NULL)
     {

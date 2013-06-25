@@ -31,19 +31,19 @@ namespace Safir
 { 
 namespace SwReports 
 {
-    void EnableCrashReporting()
+    void StartCrashReporting()
     {
         bool success;
-        SwreC_EnableCrashReporting(success);
+        SwreC_StartCrashReporting(success);
         if (!success)
         {
             Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
         }
     }
 
-    void Stop()
+    void StopCrashReporting()
     {
-        SwreC_Stop();
+        SwreC_StopCrashReporting();
     }
 
     using Safir::Dob::Typesystem::Utilities::ToUtf8;
