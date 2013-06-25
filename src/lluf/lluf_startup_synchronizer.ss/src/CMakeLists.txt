@@ -16,7 +16,7 @@ add_library(lluf_startup_synchronizer SHARED StartupSynchronizer.cpp Safir/Utili
 FIND_PACKAGE(Boost COMPONENTS filesystem thread system)
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(lluf_startup_synchronizer ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(lluf_startup_synchronizer lluf_config ${Boost_LIBRARIES})
 endif()
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
