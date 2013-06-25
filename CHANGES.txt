@@ -1,0 +1,21 @@
+2013-06-25 version 4.4:
+
+This release is intended to implement the "First Step" chapter from the paper "Readonly installation of Safir SDK Core" (https://projekt.consoden.se/safir/job/Whitepapers/lastSuccessfulBuild/artifact/readonly_install.html).
+
+Add use of configuration (ini) files that allow for configuring some directories that the SDK Core uses to store temporary files during runtime:
+  * lock files
+  * crash dumps
+  * low level logs
+Ini file parser supports environment variable and "special variable" (e.g. Windows Known Folders) expansion.
+Default configuration puts all files in the "old" locations.
+
+Add "special variable" expansion to dou/dom file parser.
+
+Add ability to specify where dou/dom files should be found (also configured in ini file), which allows for "parameter overlays".
+
+Bugfixes:
+  * Ada warning in dots_generated
+  * dots_generated shared library loading on Linux
+  * static evaluation order bugfix in dots_cpp
+  * remove unused function DotsC_BinaryDump
+
