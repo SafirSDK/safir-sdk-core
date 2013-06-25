@@ -101,6 +101,13 @@ namespace Dob
          */
         bool IsAttached() const;
 
+        /**
+         * For a secondary connection this is the same as the IsAttached check.
+         *
+         * @return True if the SecondaryConnection is attached to a Connection and that Connection is open.
+         */
+        virtual bool IsOpen() const;
+
     private:
 
         //implementation of pure virtual

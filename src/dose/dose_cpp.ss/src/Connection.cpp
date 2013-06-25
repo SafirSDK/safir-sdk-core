@@ -127,7 +127,7 @@ namespace Dob
         }
     }
 
-    bool Connection::IsOpen()
+    bool Connection::IsOpen() const
     {
         bool isConn;
         bool success;

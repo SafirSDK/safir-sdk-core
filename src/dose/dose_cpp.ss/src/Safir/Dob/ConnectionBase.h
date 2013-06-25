@@ -62,6 +62,11 @@ namespace Dob
         virtual ~ConnectionBase();
 
         /**
+         * Tells if the connection is opened.
+         */
+        virtual bool IsOpen() const = 0;
+
+        /**
          * @name Non-pending (synchronous) registration of entity handler.
          */
         /** @{ */
