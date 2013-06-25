@@ -27,9 +27,6 @@
 #include "Path.h"
 #include "PathFinders.h"
 
-    //gör i dots_kernel också...
-    //dokumentera alltihopa wp och sug
-
 namespace Safir
 {
 namespace Utilities
