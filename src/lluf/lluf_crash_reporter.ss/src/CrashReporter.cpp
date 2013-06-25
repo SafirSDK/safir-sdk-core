@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/CrashReporter.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <string>
 #include <vector>
 #include <boost/bind.hpp>
@@ -61,17 +62,8 @@ namespace
 
     const boost::filesystem::path GetDumpDirectory()
     {
-#if defined (LLUF_CRASH_REPORTER_LINUX)
-        const char * const env = getenv("SAFIR_RUNTIME");
-#else
-        const wchar_t * const env = _wgetenv(L"SAFIR_RUNTIME");
-#endif
-        if (env == NULL)
-        {
-            throw std::logic_error("SAFIR_RUNTIME environment variable is not set");
-        }
-
-        return boost::filesystem::path(env) / "data" / "crash_dumps";
+        Internal::ConfigReader config;
+        return boost::filesystem::path(config.Locations().get<std::string>("crash_dump_directory"));
     }
 
 

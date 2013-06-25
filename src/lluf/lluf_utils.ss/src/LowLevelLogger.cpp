@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <time.h>
 #include <boost/filesystem/path.hpp>
@@ -61,17 +62,8 @@ namespace Internal
 {
     boost::filesystem::path GetLogDirectory()
     {
-        const char * ENV_NAME = "SAFIR_RUNTIME";
-        char * env = getenv(ENV_NAME);
-        if (env == NULL)
-        {
-            return "";
-        }
-        boost::filesystem::path filename(env,boost::filesystem::native);
-
-        filename /= "log";
-        filename /= "Dob-LowLevelLog";
-        return filename;
+        ConfigReader reader;
+        return reader.Logging().get<std::string>("low_level_log_directory");
     }
 
     //also creates directories and removes files that are in the way
@@ -109,7 +101,7 @@ namespace Internal
      }
 
 
-    //check for file %SAFIR_RUNTIME%\log\Dob-LowLevelLog\logging_on
+    //check for file logging_on file in log directory
     bool IsLoggingOnByDefault()
     {
         boost::filesystem::path filename = GetLogDirectory();

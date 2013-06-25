@@ -58,10 +58,6 @@ namespace Internal
         void DumpProperties();
 
     private:
-        bool ParseDouFiles();
-        bool ParseDomFiles();
-        bool ParseDouDir(const boost::filesystem::path & dirName);
-        bool ParseDomDir(const boost::filesystem::path & dirName);
         bool ParseFile(const boost::filesystem::path & filename);
 
         bool UniqueTypes();

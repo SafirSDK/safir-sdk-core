@@ -123,7 +123,6 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_controlConnectionName(m_identifier + L"_control"),
     m_testConnectionName(L"partner_test_connection"),
     m_partnerEntityId(DoseTest::Partner::ClassTypeId,Safir::Dob::Typesystem::InstanceId(m_instance)),
-    m_isDone(false),
     m_isActive(false),
     m_dispatchTestConnection(true),
     m_testDispatcher(boost::bind(&Executor::DispatchTestConnection,this)),
@@ -148,9 +147,7 @@ void Executor::OnStopOrder()
 {
     lout << "Got stop order" << std::endl;
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnStopOrder);
-    m_isDone = true;
     ACE_Reactor::instance()->end_reactor_event_loop();
-    ACE_Reactor::instance()->close();
 }
 
 void Executor::OnMessage(const Safir::Dob::MessageProxy messageProxy)
@@ -453,6 +450,8 @@ Executor::Run()
     std::wcout << m_identifier << ":" <<  m_instance << " Started" <<std::endl;
 
     ACE_Reactor::instance()->run_reactor_event_loop();
+
+    ACE_Reactor::instance()->close();
 }
 
 void
