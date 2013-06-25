@@ -192,7 +192,8 @@ bool WindowsLogger::AddRegistryEntries() const
                                   &disposition);
     if (res != ERROR_SUCCESS)
     {
-        Send("The process " + m_processName + " could not create registry key " + regKey + errTxt);
+        Send(EVENTLOG_INFORMATION_TYPE,
+             "The process " + m_processName + " could not create registry key " + regKey + errTxt);
         return false;
     }
 
@@ -208,7 +209,8 @@ bool WindowsLogger::AddRegistryEntries() const
                          static_cast<DWORD>(m_eventMessageFile.size() + 1));
     if (res != ERROR_SUCCESS)
     {
-        Send("The process " + m_processName + " could not create registry value " + eventMessageFileParamName + errTxt);
+        Send(EVENTLOG_INFORMATION_TYPE,
+             "The process " + m_processName + " could not create registry value " + eventMessageFileParamName + errTxt);
         return false;
     }
 
@@ -222,20 +224,20 @@ bool WindowsLogger::AddRegistryEntries() const
                          static_cast<DWORD>(sizeof(eventTypes)));
     if (res != ERROR_SUCCESS)
     {
-        Send("The process " + m_processName + " could not create registry value " + typesSupportedParamName + errTxt);
+        Send(EVENTLOG_INFORMATION_TYPE,
+             "The process " + m_processName + " could not create registry value " + typesSupportedParamName + errTxt);
         return false;
     }
 
     return true;
 }
 
-void WindowsLogger::Send(const std::string& log) const
+void WindowsLogger::Send(const WORD eventType, const std::string& log) const
 {
     const char* message = log.c_str();
 
-    // TODO Bara vanlig enkel log?
     ReportEventA(m_sourceHandle,
-                 EVENTLOG_INFORMATION_TYPE,
+                 eventType,
                  0,
                  0,
                  NULL,

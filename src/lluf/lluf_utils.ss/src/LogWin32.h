@@ -43,8 +43,7 @@ namespace Internal
         WindowsLogger(const std::string& processName);
         ~WindowsLogger();
 
-        //TODO Add windows severity
-        void Send(const std::string& log) const;
+        void Send(const WORD eventType, const std::string& log) const;
 
         bool RegistryIsInitialized() const;
 

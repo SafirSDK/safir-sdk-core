@@ -153,10 +153,46 @@ public:
 
     void Send(const SystemLog::Severity severity, const std::string& text)
     {
-        boost::lock_guard<boost::mutex> lck(m_lock);
+        switch (severity)
+        {
+            // fatal errors are written to std::cerr
+            case SystemLog::Emergency:
+            {
+                std::cerr << "EMERGENCY: " << text << std::flush;
+            }
+            break;
 
-        //TODO TEST!!!!
-        SendNativeLog(severity, text);
+            case SystemLog::Alert:
+            {
+                std::cerr << "ALERT: " << text << std::flush;
+            }
+            break;
+
+            case SystemLog::Critical:
+            {
+                std::cerr << "CRITICAL: " << text << std::flush;
+            }
+            break;
+
+            case SystemLog::Error:
+            {
+                std::cerr << "ERROR: " << text << std::flush;
+            }
+            break;
+
+            case SystemLog::Warning:
+            case SystemLog::Notice:
+            case SystemLog::Informational:
+            case SystemLog::Debug:
+            {
+                // No output to std::cerr in these cases.
+                ;
+            }
+            break;
+
+            default:
+                FatalError("SystemLogImpl::SendNativeLog: Unknown severity!");
+        }
 
         if (m_nativeLogging)
         {
@@ -183,7 +219,39 @@ private:
         syslog(SAFIR_FACILITY | severity, "%s", text.c_str());
 
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-        m_eventLog.Send(text);
+
+        // Translate syslog severity to windows event log type
+        WORD eventType = 0;
+        switch (severity)
+        {
+            case SystemLog::Emergency:
+            case SystemLog::Alert:
+            case SystemLog::Critical:
+            case SystemLog::Error:
+            {
+                eventType = EVENTLOG_ERROR_TYPE;
+            }
+            break;
+
+            case SystemLog::Warning:
+            {
+                eventType = EVENTLOG_WARNING_TYPE;
+            }
+            break;
+
+            case SystemLog::Notice:
+            case SystemLog::Informational:
+            case SystemLog::Debug:
+            {
+                eventType = EVENTLOG_INFORMATION_TYPE;
+            }
+            break;
+
+            default:
+                FatalError("SystemLogImpl::SendNativeLog: Unknown severity!");
+        }
+
+        m_eventLog.Send(eventType, text);
 #endif
     }
 
@@ -196,14 +264,30 @@ private:
             << boost::asio::ip::host_name() << ' '
             << m_processName << "[" << m_pid << "]: " << text;
 
-        m_sock.send_to(boost::asio::buffer(log.str().c_str(),
-                                           log.str().size()),
+        std::string logStr = log.str();
+
+        const int LOG_MAX_SIZE = 1024;
+
+        // RFC 3164 says that we must not send messages larger that 1024 bytes.
+        if (logStr.size() > LOG_MAX_SIZE)
+        {
+            // truncate string ...
+            logStr.erase(LOG_MAX_SIZE - 3, std::string::npos);
+
+            // ... and put in "..." to indicate this
+            logStr += "...";
+
+        }
+
+        m_sock.send_to(boost::asio::buffer(logStr.c_str(),
+                                           logStr.size()),
                        m_syslogServerEndpoint);
     }
 
     //-------------------------------------------------------------------------
     const boost::filesystem::path GetLogSettingsPath()
     {
+        /* AIWI TODO Lars klass istället
         const char * const env = getenv("SAFIR_RUNTIME");
         if (env == NULL)
         {
@@ -211,8 +295,10 @@ private:
         }
         boost::filesystem::path filename(env);
 
-        filename /= "log";
-        filename /= "logging.ini";
+        filename /= "data" / "text" / "logging.ini";
+        */
+
+        boost::filesystem::path filename;
         return filename;
     }
 
