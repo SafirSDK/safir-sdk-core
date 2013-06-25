@@ -89,12 +89,10 @@ package Safir.Dob.Typesystem.Kernel is
                          return Safir.Dob.Typesystem.Type_Id;
    pragma Import (C, Get_Type_Id, "DotsC_GetTypeId");
 
---
---      // Function:    DotsC_GetSize
---      // Parameters:  blob - the blob
---      // Returns:     size of the blob
---      // Comments:    Gives the total size of the blob
---      DOTS_KERNEL_API DotsC_Int32 CALLING_CONVENTION DotsC_GetSize(const char * const blob);
+   function Get_Size (Blob : in Safir.Dob.Typesystem.Blob_T)
+                     return Safir.Dob.Typesystem.Int_32;
+   pragma Import (C, Get_Size, "DotsC_GetSize");
+
 --
 --      // Function:    DotsC_IsAnythingChanged
 --      // Parameters:  blob - the blob

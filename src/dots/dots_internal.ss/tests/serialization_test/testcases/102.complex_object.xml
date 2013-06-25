@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BlobTest.MyEntity type="BlobTest.MyEntity">
+    <MyBoolVal>true</MyBoolVal>
+    <MyInt32Val>123</MyInt32Val>
+    <MyInt64Val>1000000000</MyInt64Val>
+    <MyFloat32Val>3.65</MyFloat32Val>
+    <MyFloat64Val>-681231.65</MyFloat64Val>
+    <MyTypeIdVal>BlobTest.MyColorEnum</MyTypeIdVal>
+    <MyEntityIdVal><name>BlobTest.MyItem</name><instanceId>first</instanceId></MyEntityIdVal>
+    <MyInstanceIdVal>second</MyInstanceIdVal>
+    <MyChannelIdVal>100</MyChannelIdVal>
+    <MyHandlerIdVal>-321</MyHandlerIdVal>
+    <MyStringVal xml:space="preserve">Bill &amp; Bul</MyStringVal>
+    <MyBinaryVal>
+        SSdsbCBwcm90ZWN0IHlvdSBmcm9tIHRoZSBob29kZWQgY2xhdyAKS2VlcCB0aGUgdmFtcGlyZXMg
+        ZnJvbSB5b3VyIGRvb3IgCldoZW4gdGhlIGNoaXBzIGFyZSBkb3duIEknbGwgYmUgYXJvdW5kIApX
+        aXRoIG15IHVuZHlpbmcsIGRlYXRoLWRlZnlpbmcgCkxvdmUgZm9yIHlvdSA=
+    </MyBinaryVal>
+    <MyItemVal type="BlobTest.MyItem">
+        <MyNumber>666</MyNumber>
+        <MyStrings>
+               <String xml:space="preserve" index="0">Joel is
+               Ottosson</String>
+            <String xml:space="preserve" index="1">bbbb</String>
+            <String xml:space="preserve" index="2">cccc</String>
+            <String xml:space="preserve" index="3">dddd</String>
+            <String xml:space="preserve" index="4">eeee</String>
+        </MyStrings>
+    </MyItemVal>
+    <MyInt32Array>
+        <Int32 index="1">23</Int32>
+    </MyInt32Array>
+</BlobTest.MyEntity>

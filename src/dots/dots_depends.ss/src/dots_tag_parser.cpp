@@ -158,7 +158,7 @@ namespace DotsDepends
 
         const int buff_size = 128;
         char line[buff_size];
-        const char delimiter[] = ".\t\n";
+        const char delimiter[] = ".\t\n\r";
         char* token;
 
         //find namspace token

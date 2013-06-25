@@ -134,6 +134,21 @@
             </members>
           </object>
         </arrayElement>
+        <arrayElement><!-- Sleep a little while to let the unreg propagate to node0 -->
+          <object>
+            <name>DoseTest.Action</name>
+            <members>
+              <member>
+                <name>ActionKind</name>
+                <value>DoseTest.ActionEnum.Sleep</value>
+              </member>
+              <member>
+                <name>SleepDuration</name>
+                <value>10</value>
+              </member>
+            </members>
+          </object>
+        </arrayElement>
 <!-- unsubscribe to avoid spurious sub responses -->
         <arrayElement>
           <object>

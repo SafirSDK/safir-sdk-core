@@ -1,0 +1,9 @@
+FILE(GLOB headers *.h)
+FILE(GLOB sources *.cpp)
+ADD_EXECUTABLE(dots_parser_test ${sources} ${headers})
+
+if (NOT MSVC)
+    TARGET_LINK_LIBRARIES(dots_parser_test dots_internal ${Boost_LIBRARIES})
+endif()
+
+add_test(dots_parser_test_cases dots_parser_test ${CMAKE_CURRENT_SOURCE_DIR}/dou_test_files)

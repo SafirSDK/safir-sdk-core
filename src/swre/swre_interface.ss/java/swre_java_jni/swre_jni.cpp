@@ -59,10 +59,7 @@ private:
 class StringArrayConverter
 {
 public:
-    StringArrayConverter(JNIEnv * _env, jobjectArray jstrArr):
-        m_env(_env),
-        m_jstrArray(jstrArr),
-        m_isCopy(false)
+    StringArrayConverter(JNIEnv * _env, jobjectArray jstrArr)
     {
         m_size = _env->GetArrayLength(jstrArr);
         m_stringConverters.reserve(m_size);
@@ -86,9 +83,6 @@ public:
         return m_size;
     }
 private:
-    JNIEnv * m_env;
-    jobjectArray m_jstrArray;
-    jboolean m_isCopy;
     int m_size;
 
     std::vector<StringConverter> m_stringConverters;

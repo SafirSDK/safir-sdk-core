@@ -968,7 +968,7 @@
               </member>
               <member>
                 <name>SleepDuration</name>
-                <value>1</value>
+                <value>10</value>
               </member>              
             </members>
           </object>
@@ -1854,7 +1854,7 @@
               </member>
               <member>
                 <name>SleepDuration</name>
-                <value>1</value>
+                <value>10</value>
               </member>              
             </members>
           </object>
@@ -1902,7 +1902,7 @@
               </member>
               <member>
                 <name>SleepDuration</name>
-                <value>1</value>
+                <value>10</value>
               </member>              
             </members>
           </object>

@@ -280,10 +280,10 @@ namespace Internal
     inline void
     Library::StartThread()
     {
-        if (m_thread == boost::thread())
+        if (m_thread.get_id() == boost::thread::id())
         {
             boost::lock_guard<boost::mutex> lock(m_threadStartingLock);
-            if (m_thread == boost::thread())
+            if (m_thread.get_id() == boost::thread::id())
             {
                 m_thread = boost::thread(boost::bind(&Library::Run,this));
                 m_threadId = m_thread.get_id();
@@ -319,10 +319,10 @@ namespace Internal
     Library::StopInternal()
     {
         //We only let one call to Stop try to do the join. otherwise who knows what will happen...
-        if (m_thread != boost::thread())
+        if (m_thread.get_id() != boost::thread::id())
         {
             boost::lock_guard<boost::mutex> lock(m_threadStartingLock);
-            if (m_thread != boost::thread())
+            if (m_thread.get_id() != boost::thread::id())
             {
                 m_ioService.stop();
                 m_thread.join();

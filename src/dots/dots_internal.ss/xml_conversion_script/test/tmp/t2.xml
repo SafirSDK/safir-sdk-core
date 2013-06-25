@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BlobTest.MyEntity type="BlobTest.MyEntity">
+    <MyBoolVal>true</MyBoolVal>
+    <MyInt32Val>123</MyInt32Val>
+    <fruit>
+        <banana index="1">banankontakt</banana>
+        <banana index="2"><object><name>split</name></object></banana>
+    </fruit>
+    <MyInt64Val>1000000000</MyInt64Val>
+    <object><name>kalle</name></object>
+    <MyFloat32Val>3.65</MyFloat32Val>
+    <object><name>Pelle</name><object><name>inner</name></object></object>
+    <MyFloat64Val>-681231.65</MyFloat64Val>
+</BlobTest.MyEntity>

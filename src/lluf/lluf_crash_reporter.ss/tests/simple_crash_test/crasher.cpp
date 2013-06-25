@@ -25,6 +25,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <signal.h>
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4723)
@@ -54,11 +55,22 @@ int main(int argc, char* argv[])
     {
         int* foo = NULL;
         *foo = 10;
+        std::wcout << "Program did not crash! Error" << std::endl;
+        return 1;
     }
     else if (arg == "SIGFPE")
     {
+        //Doing a divide by zero does not work on all platforms and compilers (e.g. clang)
+        //so we do an explicit raise instead, unless we're on windows where raise doesnt 
+        //seem to work...
+#ifdef _MSC_VER
         int i = 0;
         std::wcout << 10/i << std::endl;
+#else
+        raise(SIGFPE);
+#endif
+        std::wcout << "Program did not crash! Error!" << std::endl;
+        return 1;
     }
     else if (arg == "SIGILL")
     {
@@ -66,11 +78,14 @@ int main(int argc, char* argv[])
         unsigned char insn[4] = { 0xff, 0xff, 0xff, 0xff };
         FUNC function = reinterpret_cast<FUNC>((char*)insn);
         function();
-       
+        std::wcout << "Program did not crash! Error!" << std::endl;
+        return 1;
     }
     else if (arg == "SIGABRT")
     {
         abort();
+        std::wcout << "Program did not crash! Error!" << std::endl;
+        return 1;
     }
 
     Safir::Utilities::CrashReporter::Stop();

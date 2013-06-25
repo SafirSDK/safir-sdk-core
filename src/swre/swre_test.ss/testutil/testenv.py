@@ -131,7 +131,8 @@ class TestEnv:
                 proc.send_signal(signal.CTRL_BREAK_EVENT)
             else:
                 proc.terminate()
-            for i in range (100):
+            #let it have a minute to die...
+            for i in range (600):
                 if proc.poll() is not None:
                     print("   Terminate successful")
                     return

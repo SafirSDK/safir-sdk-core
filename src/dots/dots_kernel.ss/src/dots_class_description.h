@@ -140,7 +140,6 @@ namespace Internal
     private:
         ShmString m_name; //including namespace ex: MyNamespace1.MyNamespace2.MyClass
         ClassDescriptionConstPtr m_baseClass;
-        TypeId m_baseClassTypeId;
 
         TypeId m_typeId;
         Size m_initialSize; //size of data part in the blob

@@ -48,7 +48,7 @@
                      else if(Safir::Utilities::Internal::Internal::LowLevelLogger::Magic lck_fjki34 =           \
                              Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().MagicLock()) ;    \
                      else Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
-#define lllout lllog(7)
+#define lllout lllog(8)
 #define lllerr if(Safir::Utilities::Internal::Internal::LowLevelLogger::Magic lck_fjki34 =        \
                   Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().MagicLock()) ; \
                else Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()

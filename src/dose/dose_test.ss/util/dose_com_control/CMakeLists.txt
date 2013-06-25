@@ -10,8 +10,6 @@ FILE(GLOB dose_com_sources ${SAFIR_SDK}/include/Safir/Dob/Internal/DoseComAux/*.
 
 ADD_EXECUTABLE(dose_com_control ${sources} ${dose_com_sources} ${headers})
 
-TARGET_LINK_LIBRARIES(dose_com_control ${COMMON_LIBRARIES})
-
 INSTALL(TARGETS dose_com_control
         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib

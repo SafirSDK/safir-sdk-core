@@ -3,7 +3,6 @@ FILE(GLOB headers *.h ../common/*.h)
 
 ADD_EXECUTABLE(MultiPingPong ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(MultiPingPong ${COMMON_LIBRARIES})
 
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(MultiPingPong dose_cpp dots_generated-DoseStressTest-cpp dots_generated-Safir-cpp dots_cpp lluf_utils ${Boost_LIBRARIES})

@@ -14,9 +14,9 @@ if (SAFIR_JAVA_SUPPORT)
   ADD_SUBDIRECTORY(java)
 endif()
 
-#if (SAFIR_ADA_SUPPORT)
-#  ADD_SUBDIRECTORY(ada)      
-#endif ()
+if (SAFIR_ADA_SUPPORT)
+  ADD_SUBDIRECTORY(ada)      
+endif ()
 
 
 

@@ -21,20 +21,22 @@
 --  along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 --
 -------------------------------------------------------------------------------
-with Safir.Dob.Consumers;
-with Safir.Dob.Message_Proxies;
-with Safir.Dob.Typesystem;
-with Safir.Dob.Typesystem.Handler_Id;
-with Safir.Dob.Entity_Request_Proxies;
-with Safir.Dob.Typesystem.Entity_Id;
-with Safir.Dob.Service_Request_Proxies;
-with Safir.Dob.Response_Senders;
-with Safir.Dob.Connections;
-with Safir.Dob.Callback_Id;
-with Ada.Strings.Wide_Unbounded;
-with Dose_Test.Action;
 with Ada.Containers.Vectors;
+with Ada.Strings.Wide_Unbounded;
 with Consumers;
+with Dose_Test.Action;
+with Dose_Test.Sequencer;
+with Safir.Dob.Callback_Id;
+with Safir.Dob.Connections;
+with Safir.Dob.Consumers;
+with Safir.Dob.Entity_Proxies;
+with Safir.Dob.Entity_Request_Proxies;
+with Safir.Dob.Response_Senders;
+with Safir.Dob.Service_Request_Proxies;
+with Safir.Dob.Typesystem.Entity_Id;
+with Safir.Dob.Typesystem.Handler_Id;
+with Safir.Dob.Typesystem;
+
 pragma Warnings ("L"); -- turn off warnings for missing elaboration pragma
 
 package Executor is
@@ -42,19 +44,16 @@ package Executor is
    procedure Run;
 
 private
-
-   type Connection is (Control, Test);
-
    task MainLoop is
       entry Run (Arg : in String);
-      entry Dispatch (Conn : in Connection);
-      entry Handle_Action (Action : in Dose_Test.Action.Smart_Pointer);
    end MainLoop;
+
+   type Event_T is (Stop, Dispatch_Control, Dispatch_Test, Received_Action);
 
    type Dispatcher is limited new
      Safir.Dob.Consumers.Dispatcher with
       record
-         Conn :  Connection;
+        Event : Event_T;
       end record;
 
    overriding
@@ -75,7 +74,7 @@ private
 
    type Executor_Type is limited new
      Safir.Dob.Consumers.Stop_Handler and
-     Safir.Dob.Consumers.Message_Subscriber and
+     Safir.Dob.Consumers.Entity_Subscriber and
      Safir.Dob.Consumers.Entity_Handler and
      Safir.Dob.Consumers.Service_Handler with
       record
@@ -87,7 +86,6 @@ private
 
          Partner_Entity_Id          : Safir.Dob.Typesystem.Entity_Id.Entity_Id_Type;
 
-         Is_Done                    : Boolean := False;
          Is_Active                  : Boolean := False;
          The_Consumers              : Consumer_Array;
 
@@ -95,8 +93,8 @@ private
          Test_Connection            : Safir.Dob.Connections.Connection;
          Dispatch_Test_Connection   : Boolean := True;
 
-         Test_Dispatcher            : aliased Dispatcher := (Conn => Test);
-         Control_Dispatcher         : aliased Dispatcher := (Conn => Control);
+         Test_Dispatcher            : aliased Dispatcher := (Event => Dispatch_Test);
+         Control_Dispatcher         : aliased Dispatcher := (Event => Dispatch_Control);
 
          Callback_Actions           : Callback_Actions_Table;
 
@@ -108,9 +106,21 @@ private
      (Self : in out Executor_Type);
 
    overriding
-   procedure On_Message
-     (Self          : in out Executor_Type;
-      Message_Proxy : in Safir.Dob.Message_Proxies.Message_Proxy);
+   procedure On_New_Entity
+      (Self         : in out Executor_Type;
+       Entity_Proxy : in     Safir.Dob.Entity_Proxies.Entity_Proxy);
+
+   overriding
+   procedure On_Updated_Entity
+      (Self         : in out Executor_Type;
+       Entity_Proxy : in     Safir.Dob.Entity_Proxies.Entity_Proxy);
+
+   overriding
+   procedure On_Deleted_Entity
+      (Self             : in out Executor_Type;
+       Entity_Proxy     : in     Safir.Dob.Entity_Proxies.Entity_Proxy;
+       Deleted_By_Owner : in     Boolean) is null;
+   -- ignore deletes since they may be due to an inhibitoutgoingtraffic on the other side
 
    overriding
    procedure On_Revoked_Registration
@@ -146,15 +156,19 @@ private
                             Action : in Dose_Test.Action.Smart_Pointer);
 
    procedure Execute_Action
-     (Self   : in out Executor_Type;
-      Action : in Dose_Test.Action.Smart_Pointer);
+      (Self   : in out Executor_Type;
+       Action : in     Dose_Test.Action.Smart_Pointer);
 
    procedure Add_Callback_Action
-     (Self   : in out Executor_Type;
-      Action : in Dose_Test.Action.Smart_Pointer);
+      (Self   : in out Executor_Type;
+       Action : in     Dose_Test.Action.Smart_Pointer);
 
    procedure Execute_Callback_Actions
-     (Self     : in out Executor_Type;
-      Callback : in     Safir.Dob.Callback_Id.Enumeration);
+      (Self     : in out Executor_Type;
+       Callback : in     Safir.Dob.Callback_Id.Enumeration);
+
+   procedure Handle_Sequencer_State
+      (Self  : in out Executor_Type;
+       State : in     Dose_Test.Sequencer.Smart_Pointer);
 
 end Executor;

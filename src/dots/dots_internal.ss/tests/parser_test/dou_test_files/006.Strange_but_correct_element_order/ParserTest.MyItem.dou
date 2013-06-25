@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    
+    <createRoutines>
+        <createRoutine>
+            <values>
+                <value>
+                    <parameter><name>ParserTest.MyItem.kalle</name></parameter>
+                    <member>Obj</member>
+                </value>
+                <value>
+                    <value>123.5</value>
+                    <member>Fnum</member>
+                </value>
+            </values>
+                                    
+            <summary>A create routine</createRoutine>
+            
+            <parameters>
+                <member>Num</member>
+            </parameters>
+                                    
+            <name>MyCreateRoutine1</name>
+        </createRoutine>
+    </createRoutines>
+    
+    <parameters>
+        <parameter>
+            <ParserTest.MyItem>hej</ParserTest.MyItem>
+            <summary>bla bla</summary>            
+            <type>ParserTest.MyItem</type>
+            <name>kalle</name>
+        </parameter>
+    </parameters>
+    
+    <members>
+        <member>
+            <type>ParserTest.MyItem</type>
+            <name>Obj</name>
+            <summary>Object of same type.</summary>
+        </member>
+        
+        <member>
+            <type>Int32</type>
+            <name>Num</name>
+            <summary>A number & nothing else!</summary>
+        </member>
+        
+        <member>
+            <type>Float32</type>
+            <name>Fnum</name>
+            <summary>A decimal number & nothing else!</summary>
+        </member>
+    </members>
+
+    
+    
+    <baseClass>Object</baseClass>
+    <summary>Test item.</summary>
+    <name>ParserTest.MyItem</name>
+    
+</class>

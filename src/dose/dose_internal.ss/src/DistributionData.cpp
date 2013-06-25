@@ -1228,6 +1228,7 @@ namespace Internal
                      << "\tExplicitlyDeleted: " << std::boolalpha << IsExplicitlyDeleted() << std::endl
                      << "\tSourceIsPermanentStore: " << SourceIsPermanentStore() << std::endl
                      << "\tHasBlob: " << HasBlob() << std::endl
+                     << "\tVersionIsDecremented: " << GetEntityStateHeader().m_versionIsDecremented << std::endl
                      << "\tNumTimestamps: " << GetEntityStateHeader().m_numTimestamps <<std::endl;
                 if (GetEntityStateHeader().m_numTimestamps != 0)
                 {

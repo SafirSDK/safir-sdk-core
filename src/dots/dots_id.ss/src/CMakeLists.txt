@@ -14,8 +14,6 @@ ADD_LIBRARY(dots_id SHARED dots_id.cpp md5.c md5.h Safir/Dob/Typesystem/Internal
 
 FIND_PACKAGE(Boost COMPONENTS filesystem date_time thread)
 
-TARGET_LINK_LIBRARIES(dots_id ${COMMON_LIBRARIES})
-
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(dots_id lluf_utils ${Boost_LIBRARIES})
 endif()

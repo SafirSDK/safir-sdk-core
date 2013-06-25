@@ -42,6 +42,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/locks.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)

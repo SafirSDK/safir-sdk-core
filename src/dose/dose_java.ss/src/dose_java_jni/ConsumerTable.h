@@ -56,7 +56,7 @@ private:
             references(1){}
 
         jobject doseConsumer;
-        boost::uint32_t references;
+        boost::int32_t references;
     };
 
 

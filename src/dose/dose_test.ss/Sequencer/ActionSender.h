@@ -37,7 +37,6 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/DistributionChannelParameters.h>
-#include <DoseTest/Parameters.h>
 #include <boost/thread.hpp>
 #include <iostream>
 
@@ -47,7 +46,6 @@ class ActionSender
     typedef boost::shared_ptr<boost::asio::ip::tcp::socket> SocketPtr;
 public:
     explicit ActionSender(boost::asio::io_service& ioService)
-        : m_ioService(ioService)
     {
         for (int i = 0; i < 3; ++i)
         {
@@ -178,7 +176,6 @@ private:
         }
     }
 
-    boost::asio::io_service& m_ioService;
     std::vector<SocketPtr > m_sockets;
 };
 

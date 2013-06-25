@@ -24,8 +24,6 @@ run_test_suite   src/lluf/lluf_utils.ss/tests                  lluf_tests
 #DOTS
 build_dir        src/dots/dots_id.ss/src                   RelWithDebInfo
 run_test_suite   src/dots/dots_id.ss/tests                 dots_id_tests
-build_dir        src/dots/dots_parser.ss/src               RelWithDebInfo   Debug
-run_test_suite   src/dots/dots_parser.ss/tests             dots_parser_tests
 build_dir        src/dots/dots_kernel.ss/src               RelWithDebInfo
 build_dir        src/dots/dots_configuration_check.ss/src  RelWithDebInfo
 build_dir        src/dots/dots_schema_validator.ss         RelWithDebInfo
@@ -38,20 +36,20 @@ build_dir        src/dots/dots_v.ss                        RelWithDebInfo
 build_dir        src/dots/dots_depends.ss                  RelWithDebInfo
 
 #COPY DOB FILES
-copy_dob_files   src/dose/dose_config.ss/data              safir_core
-copy_dob_files   src/dose/dose_config.ss/config            safir_core/config
+copy_dob_files   src/dose/dose_dou.ss/data                 safir_core
+copy_dob_files   src/dose/dose_dou.ss/config               safir_core/config
 
-copy_dob_files   src/swre/swre_library.ss/data             safir_core
+copy_dob_files   src/swre/swre_dou.ss/data                 safir_core
 
-copy_dob_files   src/douf/douf_multi_foreach.ss/data       safir_core
-copy_dob_files   src/douf/douf_multi_foreach.ss/config     safir_core/config
+copy_dob_files   src/foreach/foreach_dou.ss/data           safir_core
+copy_dob_files   src/foreach/foreach_dou.ss/config         safir_core/config
 
-copy_dob_files   src/douf/douf_time_library.ss/config      safir_core/config
+copy_dob_files   src/douf/douf_dou.ss/config               safir_core/config
 
-copy_dob_files   src/olib/olib_code.ss/data                safir_core
+copy_dob_files   src/olib/olib_dou.ss/data                 safir_core
 
-copy_dob_files   src/dope/dope_main.ss/data                safir_core
-copy_dob_files   src/dope/dope_main.ss/config              safir_core/config
+copy_dob_files   src/dope/dope_dou.ss/data                 safir_core
+copy_dob_files   src/dope/dope_dou.ss/config               safir_core/config
 
 #run dobmake to build dots_generated dlls/libs
 dobmake
@@ -76,16 +74,16 @@ build_dir        src/douf/douf_time_library.ss/src         RelWithDebInfo
 
 #we need to build the douf_time subdirectories separately, since one of 
 #them contain a cpp dll, which must be built in two flavors.
-build_dir        src/douf/douf_time_mix.ss/cpp             RelWithDebInfo   Debug
-build_dir        src/douf/douf_time_mix.ss/dotnet          RelWithDebInfo
-build_dir        src/douf/douf_time_mix.ss/ada             RelWithDebInfo
-run_test_suite   src/douf/douf_time_mix.ss/tests           douf_time_tests
+build_dir        src/douf/douf_time_interface.ss/cpp       RelWithDebInfo   Debug
+build_dir        src/douf/douf_time_interface.ss/dotnet    RelWithDebInfo
+build_dir        src/douf/douf_time_interface.ss/ada       RelWithDebInfo
+run_test_suite   src/douf/douf_time_interface.ss/tests     douf_time_tests
 
-#this is really just some header files (a lot of stuff for just one file...),
+#this is really just some header files (a lot of stuff for just two files...),
 #so we dont build it in release, even though it "looks" like a cpp dll.
-build_dir        src/douf/douf_utilities_mix.ss/src        RelWithDebInfo
+build_dir        src/douf/douf_utilities.ss/src            RelWithDebInfo
 
-build_dir        src/swre/swre_utils.ss/src                RelWithDebInfo
+#SWRE
 build_dir        src/swre/swre_library.ss/src              RelWithDebInfo
 build_dir        src/swre/swre_interface.ss/cpp/swre_interface_cpp         RelWithDebInfo   Debug
 build_dir        src/swre/swre_interface.ss/dotnet/swre_interface_dotnet   RelWithDebInfo
@@ -93,10 +91,17 @@ build_dir        src/swre/swre_interface.ss/java           RelWithDebInfo
 build_dir        src/swre/swre_interface.ss/ada            RelWithDebInfo
 build_dir        src/swre/swre_logger.ss/src               RelWithDebInfo
 build_dir        src/swre/swre_backdoor.ss/src             RelWithDebInfo
-build_dir        src/douf/douf_multi_foreach.ss/src/cpp    RelWithDebInfo
+
+#FOREACH
+build_dir        src/foreach/foreach.ss/src                RelWithDebInfo
+
+#OLIB
 build_dir        src/olib/olib_code.ss/olib                RelWithDebInfo   Debug
+
+#DOPE
 build_dir        src/dope/dope_main.ss/src                 RelWithDebInfo
 
+#swre tests need dope..
 run_test_suite   src/swre/swre_test.ss                     swre_test
 
 #Run static header checks to ensure only "good" headers have been included

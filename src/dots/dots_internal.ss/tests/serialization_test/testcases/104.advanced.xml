@@ -1,0 +1,65 @@
+<BlobTest.ArrayTest type="BlobTest.ArrayTest">
+  <SingelString>Hello</SingelString>
+  <SingelItem type="BlobTest.MySpecialItem">
+    <MyNumber>5</MyNumber>
+    <MyStrings>
+      <value index="0">Svarre</value>
+      <value index="2">Hello</value>
+      <value index="3">Sheldon is cool</value>
+    </MyStrings>
+  </SingelItem>
+  <SingleEntityId>
+    <name>Safir.Dob.Item</name>
+    <instanceId>3</instanceId>
+  </SingleEntityId>
+  <SingleChannel>anyChannel</SingleChannel>
+  <MyStrings>
+    <value index="1">Pelle</value>
+    <value index="3">Kalle</value>
+    <value index="4">Rune</value>
+    <value index="6">Erik</value>
+  </MyStrings>
+  <MyItemArray>
+    <BlobTest.MyItem index="0" type="BlobTest.MyItem">
+      <MyNumber>4</MyNumber>
+      <MyStrings>
+        <value index="0">Hello</value>
+      </MyStrings>
+    </BlobTest.MyItem>
+    <BlobTest.MySpecialItem index="1" type="BlobTest.MySpecialItem">
+      <MyNumber>76</MyNumber>
+      <MyStrings>
+        <value index="1">My name is Sven</value>
+        <value index="3">Whats yours?</value>
+      </MyStrings>
+      <Child type="BlobTest.MySpecialItem">
+        <MyNumber>8</MyNumber>
+        <ChildName>Bob Jr</ChildName>
+      </Child>
+      <ChildName>Senior Bob</ChildName>
+    </BlobTest.MySpecialItem>
+    <BlobTest.MyItem index="5" type="BlobTest.MyItem">
+      <MyNumber>123</MyNumber>
+      <MyStrings>
+        <value index="4">Shut up!</value>
+      </MyStrings>
+    </BlobTest.MyItem>
+  </MyItemArray>
+  <MyEntityIds>
+    <entityId index="1">
+      <name>BlobTest.MyItem</name>
+      <instanceId>one</instanceId>
+    </entityId>
+    <entityId index="3">
+      <name>BlobTest.MySpecialItem</name>
+      <instanceId>2</instanceId>
+    </entityId>
+  </MyEntityIds>
+  <MyChannels>
+    <value index="0">One</value>
+    <value index="1">2</value>
+    <value index="2">3</value>
+    <value index="3">Four</value>
+    <value index="9">Last 9</value>
+  </MyChannels>
+</BlobTest.ArrayTest>

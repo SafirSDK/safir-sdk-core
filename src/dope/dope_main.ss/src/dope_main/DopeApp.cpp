@@ -246,7 +246,7 @@ void DopeApp::StartUp(bool restore)
 {
     Start(restore);
 
-    if (m_thread != boost::thread())
+    if (m_thread.get_id() != boost::thread::id())
     {
         // wait for ok to connect on context 0
         m_thread = boost::thread(boost::bind(&DopeApp::ConnectionThread, this));

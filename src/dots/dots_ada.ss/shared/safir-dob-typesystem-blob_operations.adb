@@ -49,6 +49,13 @@ package body Safir.Dob.Typesystem.Blob_Operations is
       return Safir.Dob.Typesystem.Kernel.Get_Type_Id (Blob);
    end Get_Type_Id;
 
+   function Get_Size (Blob : in Safir.Dob.Typesystem.Blob_T)
+                     return Safir.Dob.Typesystem.Int_32 is
+   begin
+      pragma Assert (Blob /= null, "Cannot get size from NULL blob!");
+      return Safir.Dob.Typesystem.Kernel.Get_Size (Blob);
+   end Get_Size;
+
    -- ================
    -- Value operations
    -- ================

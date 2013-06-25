@@ -128,6 +128,21 @@
             <name>DoseTest.Action</name>
             <members>
               <member>
+                <name>ActionKind</name>
+                <value>DoseTest.ActionEnum.Sleep</value>
+              </member>
+              <member>
+                <name>SleepDuration</name>
+                <value>10</value>
+              </member>
+            </members>
+          </object>
+        </arrayElement>
+        <arrayElement>
+          <object>
+            <name>DoseTest.Action</name>
+            <members>
+              <member>
                 <name>Partner</name>
                 <value>0</value>
               </member>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <property>Safir.Dob.RequestTimeoutProperty</property>
+    <class>DoseTest.ComplexGlobalEntity</class>
+    <memberMapping>
+        <member>
+            <propertyMember>Timeout</propertyMember>
+            <value>20</value>
+        </member>
+    </memberMapping>
+</propertyMapping>

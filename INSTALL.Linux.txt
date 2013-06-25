@@ -7,8 +7,7 @@ Table of contents
 1.2.    Centos/RHEL
 1.2.1.   Add EPEL repository
 1.2.2.   Install packages
-1.2.3.   Ada templates_parser
-1.2.4.   Set up Mono binfmt_misc
+1.2.3.   Set up Mono binfmt_misc
 2.     Patch Boost
 3.     Building
 4.     Building example applications
@@ -26,7 +25,7 @@ First of all there are a number of packages that you need to have installed on y
 
 1.1. Ubuntu
 To install these from the command line "in one go" on Ubuntu/Kubuntu 12.04 or later, run:
-   sudo apt-get install libqt4-dev mono-devel mono-gmcs libboost1.48-all-dev libtemplates-parser.*-dev libxmlada.*-dev libiodbc2-dev cmake g++ default-jdk doxygen graphviz make python-tk libexpat1-dev autoconf build-essential subversion
+   sudo apt-get install libqt4-dev mono-devel mono-gmcs libboost1.48-all-dev libiodbc2-dev cmake g++ default-jdk doxygen graphviz make python-tk libexpat1-dev autoconf build-essential subversion
 
 1.2. Centos/RHEL
 There are a few more steps needed to set up a Centos/RHEL 6.x machine.
@@ -35,20 +34,9 @@ There are a few more steps needed to set up a Centos/RHEL 6.x machine.
 Some of the packages we use are not in the default repositories, so you need to add EPEL to your list of repositories. Follow the instructions on http://fedoraproject.org/wiki/EPEL.
 
 1.2.2. Install packages
-sudo yum install cmake28 boost-devel gcc-c++ doxygen graphviz make expat-devel gcc-gnat tkinter mono-devel xmlada-devel java-1.7.0-openjdk-devel qt-devel libiodbc-devel m4 autoconf subversion
+sudo yum install cmake28 boost-devel gcc-c++ doxygen graphviz make expat-devel gcc-gnat tkinter mono-devel java-1.7.0-openjdk-devel qt-devel libiodbc-devel m4 autoconf subversion python-argparse
 
-1.2.3. Ada templates_parser
-Go to http://libre.adacore.com/ and download the AWS source code.
-Untar the archive and cd into the new directory.
-run "cd templates_parser"
-run "make setup build" (see Note 1 if you get an error)
-run "sudo make install" (read Note 2 below first)
-
-Note 1: If you get linking errors complaining about -lxmlada_schema do a "sudo ln -s xmlada/relocatable/libxmlada_*.so ." in /usr/lib (or /usr/lib64 if you're using a 64-bit OS).
-
-Note 2: If you do not want the templates_parser installed under /usr/, e.g. you want it under /usr/local you can instead run "sudo make prefix=/usr/local". Then you have to make sure you set up your ADA_PROJECT_PATH to point to the directory where templates_parser.gpr gets put.
-
-1.2.4. Set up Mono binfmt_misc
+1.2.3. Set up Mono binfmt_misc
 Add "echo ':CLR:M::MZ::/usr/bin/mono:' > /proc/sys/fs/binfmt_misc/register" to the end of /etc/rc.local
 
 This allows C# executables to be run directly, like "program.exe" instead of "mono program.exe".
@@ -74,8 +62,9 @@ export SAFIR_SDK=$HOME/safir/sdk
 export PATH=$PATH:$SAFIR_RUNTIME/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SAFIR_RUNTIME/lib
 export ADA_PROJECT_PATH=$SAFIR_SDK/ada
-export JAVA_HOME=/usr/lib/jvm/default-java/
 -------------
+
+If you have trouble building java stuff you may also need to set the JAVA_HOME environment variable. E.g. add "export JAVA_HOME=/usr/lib/jvm/default-java/" to your .bashrc file.
 
 The easiest way to build Safir SDK Core is to use the build script (a python script that just uses cmake and/or make to build the components and subsystems).
 To run the build script go to the directory that contains the build and src directories, and run 

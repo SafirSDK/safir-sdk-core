@@ -7,13 +7,13 @@ if (NOT CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
-  SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} -Wa,--fatal-warnings)
+  SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} -Wa,--fatal-warnings -pthread)
 endif()
 
 FIND_PACKAGE(Boost COMPONENTS system)
 
 if (NOT MSVC)
-  set(CMAKE_REQUIRED_LIBRARIES ${Boost_LIBRARIES} pthread)
+  set(CMAKE_REQUIRED_LIBRARIES ${Boost_LIBRARIES})
 endif()
 
 find_path(HAVE_FENCED_BLOCK_HPP boost/asio/detail/fenced_block.hpp)

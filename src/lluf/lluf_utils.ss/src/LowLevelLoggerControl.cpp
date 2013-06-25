@@ -133,7 +133,7 @@ namespace Internal
                     data->logLevel = root.get("logLevel", 9);
                     data->timestamps = root.get("timestamps", true);
                     data->toStdout = root.get("toStdout", true);
-                    data->toStdout = root.get("toFile", true);
+                    data->toFile = root.get("toFile", true);
                     data->ignoreFlush = root.get("ignoreFlush", false);
 #else
                     using namespace boost::program_options;
@@ -151,7 +151,7 @@ namespace Internal
 
                     data->timestamps = vm["timestamps"].as<std::string>() == "true";
                     data->toStdout = vm["toStdout"].as<std::string>() == "true";
-                    data->toStdout = vm["toFile"].as<std::string>() == "true";
+                    data->toFile = vm["toFile"].as<std::string>() == "true";
                     data->ignoreFlush = vm["ignoreFlush"].as<std::string>() == "true";
 
 #endif

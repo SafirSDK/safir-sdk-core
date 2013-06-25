@@ -69,10 +69,9 @@ namespace Internal
         ~DispatchThread();
 
         /**
-         * Attempt to stop the thread. If it could not be stopped false is returned.
-         * If waitAWhile is true this call will delay with up to 100 ms before returning false.
+         * Stop the thread. Blocks until the thread is stopped!
          */
-        bool Stop(const bool waitAWhile);
+        void Stop();
 
         /**
          * Start the dispatch thread.
@@ -92,8 +91,6 @@ namespace Internal
         boost::thread m_thread;
 
         AtomicUint32 m_stop;
-
-        bool m_stopSignalled;
     };
 }
 }

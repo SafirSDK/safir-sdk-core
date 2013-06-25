@@ -1168,7 +1168,7 @@ namespace Internal
                             success = false;
                             continue;
                         }
-                        else if (arrIndex<0 || arrIndex >= findIt->second.m_values.size())
+                        else if (arrIndex >= findIt->second.m_values.size())
                         {
                             std::string desc = "Parameter array index for array size out of bounds. Parameter '";
                             desc += ParsingState::Instance().classParser.Result()[i].m_name;
@@ -1229,7 +1229,7 @@ namespace Internal
                             success = false;
                             continue;
                         }
-                        else if (arrIndex<0 || arrIndex >= findIt->second.m_values.size())
+                        else if (arrIndex >= findIt->second.m_values.size())
                         {
                             std::string desc = "Parameter array index for array size out of bounds. Parameter '";
                             desc += ParsingState::Instance().classParser.Result()[i].m_name;
@@ -1523,7 +1523,7 @@ namespace Internal
                         ErrorHandler::Error("File parser error", desc, "dots_file_parser");
                         throw desc.c_str();
                     }
-                    else if (arrIndex<0 || arrIndex >= it->second.m_values.size())
+                    else if (arrIndex >= it->second.m_values.size())
                     {
                         std::string desc = "Parameter array index for string length out of bounds. Parameter '";
                         desc += ParsingState::Instance().classParser.Result()[i].m_members[mi].m_strLenParameter;
@@ -1586,7 +1586,7 @@ namespace Internal
                     ErrorHandler::Error("File parser error", desc, "dots_file_parser");
                     throw desc.c_str();
                 }
-                else if (arrIndex<0 || arrIndex >= it->second.m_values.size())
+                else if (arrIndex >= it->second.m_values.size())
                 {
                     std::string desc = "Parameter array index for array size out of bounds. Parameter '";
                     desc += ParsingState::Instance().classParser.Result()[i].m_members[mi].m_arrSizeParameter;

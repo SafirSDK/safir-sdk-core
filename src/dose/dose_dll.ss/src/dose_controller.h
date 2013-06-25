@@ -293,75 +293,6 @@ namespace Internal
         //-------------------------------
         void SimulateOverflows(const bool inQueues, const bool outQueues);
 
-        /*             //------------------------------------------------------------------- */
-        /*             // Statistics - static funtions */
-        /*             //------------------------------------------------------------------- */
-        /*             static void GetConnectionId(const char* name,  */
-        /*                                         Dob::Typesystem::Int32& node,  */
-        /*                                         Dob::Typesystem::Int64& id, */
-        /*                                         bool& nameExists); */
-
-        /*             static void GetConnectionStats( const char* connName[], */
-        /*                                             int reqSent[], */
-        /*                                             int reqRecv[], */
-        /*                                             int reqSendOverflow[], */
-        /*                                             int reqRecvOverflow[], */
-        /*                                             int reqTimedOut[], */
-        /*                                             int respSent[], */
-        /*                                             int respRecv[], */
-        /*                                             int msgSent[], */
-        /*                                             int msgRecv[], */
-        /*                                             int msgSendOverflow[], */
-        /*                                             int msgRecvOverflow[], */
-        /*                                             int arrSize,  */
-        /*                                             int& results, */
-        /*                                             bool& gotAll); */
-
-        /*             static void GetObjectStats(Dob::Typesystem::TypeId tid[], int writes[], int& size); */
-
-        /*             static void GetSharedMemoryGeneralInfo(int& numberOfBlockGroups, */
-        /*                                                    int& numberOfMemoryBlocks, */
-        /*                                                    unsigned int& poolSizeInBytes); */
-
-        /*             static void GetSharedMemoryDetailedStats(int blockSize[], */
-        /*                                                      int noBlocks[],                                                 */
-        /*                                                      int noAllocs[], */
-        /*                                                      int noDeallocs[], */
-        /*                                                      int highWaterMark[]); */
-
-        /*             static void GetQueueSize(Dob::Typesystem::Int64 connId, int queue, int& size); */
-
-        /*             static void GetMessageQueueContent( Dob::Typesystem::Int64 connId,  */
-        /*                                                 bool outQ, //true if messageOutQ, false if messageInQ  */
-        /*                                                 Dob::Typesystem::TypeId types[], */
-        /*                                                 Dob::Typesystem::InstanceNumber instances[],                                             */
-        /*                                                 int size,  */
-        /*                                                 int& noResults); */
-
-        /*             static void GetRequestQueueContent( Safir::Dob::Typesystem::Int64 connId,  */
-        /*                                                 bool outQ, //true if requestOut/responseIn, false if requestIn/responseOut                                           */
-        /*                                                 Safir::Dob::Typesystem::TypeId reqTypes[], */
-        /*                                                 Safir::Dob::Typesystem::InstanceNumber reqInstances[],     */
-        /*                                                 Safir::Dob::Typesystem::TypeId respTypes[], */
-        /*                                                 Safir::Dob::Typesystem::InstanceNumber respInstances[], */
-        /*                                                 char typeOfReq[], */
-        /*                                                 bool reqHandled[], */
-        /*                                                 bool hasResponse[], */
-        /*                                                 bool& validContent); */
-
-        /*             static void GetQueueItemDetails(Dob::Typesystem::Int64 connId,  */
-        /*                                             int queue, */
-        /*                                             Dob::Typesystem::Int64& sender, */
-        /*                                             char * & blob); */
-
-        /*             static void GetSimulateFullQueue(Dob::Typesystem::Int64 connId, */
-        /*                                              int queue, */
-        /*                                              bool& simulateFull); */
-
-        /*             static void SetSimulateFullQueue(Dob::Typesystem::Int64 connId, */
-        /*                                              int queue, */
-        /*                                              bool simulateFull); */
-
 
     private:
         void SendRequest(const DistributionData& request,
@@ -473,9 +404,7 @@ namespace Internal
         typedef std::map<DispatchThreadPtr, int> DispatchThreadPtrStopCountMap;
 
         DispatchThreadPtr  m_dispatchThread;
-        DispatchThreadPtrStopCountMap m_dispatchThreadAttic; //This is where dispatch threads go to die if they cannot be stopped.
-        //the int that each thread is mapped to is the number of stop attempts that have been made. If a thread is not successfully stopped
-        //after a few attempts Dispatch will throw an exception.
+
         bool m_exitDispatch;
 
         Postponer m_postponedTypes;

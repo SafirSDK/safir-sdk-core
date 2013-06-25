@@ -91,7 +91,8 @@ template <> struct STATIC_ASSERTION_FAILURE<true> { };
 
 namespace
 {
-    void dummy() {
+    static inline void dummy()  //static inline to avoid warnings about being unused
+    { 
         STATIC_ASSERT(sizeof(dcom_ushort16) == 2);
         STATIC_ASSERT(sizeof(dcom_uchar8) == 1);
         STATIC_ASSERT(sizeof(dcom_ulong32) == 4);

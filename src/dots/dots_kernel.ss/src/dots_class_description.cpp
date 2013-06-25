@@ -36,7 +36,7 @@ namespace Internal
 
     ClassDescription::ClassDescription(const std::string & name,
                                        const TypeId typeId,
-                                       const TypeId baseClassTypeId,
+                                       const TypeId /*baseClassTypeId*/,
                                        const Size initialSize,
                                        const unsigned int thisClassSize,
                                        const Size noInheritedMembers,
@@ -48,7 +48,6 @@ namespace Internal
                                        AllocationHelper & allocHelper):
         m_name(name.begin(),name.end(),allocHelper.GetAllocator<char>()),
         m_baseClass(),
-        m_baseClassTypeId(baseClassTypeId),
         m_typeId(typeId),
         m_initialSize(initialSize),
         m_thisClassSize(thisClassSize),

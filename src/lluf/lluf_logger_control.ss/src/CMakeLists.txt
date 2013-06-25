@@ -9,7 +9,6 @@ FILE(GLOB sources *.cpp)
 ADD_EXECUTABLE(logger_control ${sources})
 
 FIND_PACKAGE(Boost COMPONENTS filesystem program_options system)
-TARGET_LINK_LIBRARIES(logger_control ${COMMON_LIBRARIES})
 
 if(NOT MSVC)
   TARGET_LINK_LIBRARIES(logger_control lluf_utils ${Boost_LIBRARIES})

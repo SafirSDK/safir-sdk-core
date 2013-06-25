@@ -40,60 +40,9 @@ namespace Internal
         AddReference(consumer, m_dispatcherCounters);
     }
 
-    void ConsumerReferences::MoveDispatcherReferencesToAttic(const DispatchThreadPtr& dispatchThread)
-    {
-        m_dispatcherCountersAttic.insert(std::make_pair(dispatchThread, m_dispatcherCounters));
-
-        m_dispatcherCounters.clear();
-    }
-
-    void ConsumerReferences::DropAtticDispatcherReferences(const DispatchThreadPtr& dispatchThread,
-                                                           const DropReferencesFunc&  dropReferencesFunc)
-    {
-        Attic::iterator threadIt = m_dispatcherCountersAttic.find(dispatchThread);
-
-        if (threadIt == m_dispatcherCountersAttic.end())
-        {
-            // No such thread
-            return;
-        }
-
-        // Drop dispather references for each consumer related to this thread.
-        for (CounterMap::iterator consumerIt = threadIt->second.begin();
-             consumerIt != threadIt->second.end();
-             ++ consumerIt)
-        {
-            // make the callback
-            dropReferencesFunc(consumerIt->first,       // ConsumerId
-                               consumerIt->second);     // counter
-
-        }
-
-        // Remove this thread from attic.
-        m_dispatcherCountersAttic.erase(threadIt);
-    }
-
     bool ConsumerReferences::HasDispatcherReference(const ConsumerId& consumer) const
     {
-        if (HasReference(consumer, m_dispatcherCounters))
-        {
-            return true;
-        }
-        else
-        {
-            // Check if there is a reference in the attic.
-            for (Attic::const_iterator it = m_dispatcherCountersAttic.begin();
-                 it != m_dispatcherCountersAttic.end();
-                ++it)
-            {
-                if (HasReference(consumer, it->second))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return HasReference(consumer, m_dispatcherCounters);
     }
 
     void ConsumerReferences::AddStopHandlerReference(const ConsumerId& consumer)

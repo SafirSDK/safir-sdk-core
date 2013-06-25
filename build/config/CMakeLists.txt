@@ -2,6 +2,11 @@ project(build_files NONE)
 
 cmake_minimum_required(VERSION 2.8)
 
+#just use these two variables to avoid some cmake warnings 
+#(they're set in the build script)
+if(SAFIR_ADA_SUPPORT OR SAFIR_JAVA_SUPPORT)
+endif()
+
 FILE(TO_CMAKE_PATH $ENV{SAFIR_SDK} SAFIR_SDK)
 FILE(TO_CMAKE_PATH $ENV{SAFIR_RUNTIME} SAFIR_RUNTIME)
 
