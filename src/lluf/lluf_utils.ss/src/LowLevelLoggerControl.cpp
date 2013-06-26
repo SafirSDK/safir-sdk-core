@@ -57,7 +57,7 @@ namespace //anonymous namespace for internal functions
         return GetLogDirectory()/"logging_on";
     }
 
-    //check for file %SAFIR_RUNTIME%\log\Dob-LowLevelLog\logging_on
+    //check for file logging_on in log directory
     bool LogSettingsFileExists()
     {
         try
