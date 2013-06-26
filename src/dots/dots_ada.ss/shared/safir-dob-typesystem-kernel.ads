@@ -1587,8 +1587,5 @@ package Safir.Dob.Typesystem.Kernel is
 --      DOTS_KERNEL_API void CALLING_CONVENTION DotsC_PeekAtException(DotsC_TypeId & exceptionId);
 --
 --
---      DOTS_KERNEL_API void CALLING_CONVENTION DotsC_BinaryDump(const char * const blob,
---                                                               const char * const filenamePart);
---
 
 end Safir.Dob.Typesystem.Kernel;
