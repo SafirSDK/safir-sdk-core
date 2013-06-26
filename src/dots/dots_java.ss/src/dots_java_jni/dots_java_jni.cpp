@@ -1543,13 +1543,13 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
         exit(1);
     }
     
-    jobjectArray stringArray = env->NewObjectArray(directories.size(),
+    jobjectArray stringArray = env->NewObjectArray(static_cast<jsize>(directories.size()),
                                                    env->FindClass("java/lang/String"),  
                                                    env->NewStringUTF(""));
     for(size_t i = 0; i < directories.size(); ++i) 
     {  
         env->SetObjectArrayElement(stringArray,
-                                   i,
+                                   static_cast<jsize>(i),
                                    env->NewStringUTF(directories[i].c_str()));
     }
     return stringArray;
