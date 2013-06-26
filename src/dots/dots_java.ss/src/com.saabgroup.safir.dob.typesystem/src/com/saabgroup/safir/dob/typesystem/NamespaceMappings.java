@@ -56,13 +56,13 @@ public class NamespaceMappings {
     }
 
     /**
-     * Convert a "dou" namespace to a java namespace, according to the rules set up 
+     * Convert a "dou" namespace to a java namespace, according to the rules set up
      * in the xxx-java.namespace.txt files.
-     * 
+     *
      * For example, calling this function with "Safir.Dob.Entity" will yield
      * "com.saabgroup.safir.dob.Entity" (assuming that there is a file named
      * "Safir-java.namespace.txt" containing "com.saabgroup" in the correct directory).
-     * 
+     *
      * @param douFullClassName Fully qualified "dou" namespace.
      * @return a fully qualified java namespace.
      */
@@ -93,7 +93,7 @@ public class NamespaceMappings {
         try{
             File mappingFile = new File(filename);
             BufferedReader reader = new BufferedReader(new FileReader(mappingFile));
-            
+
             while(reader.ready()) {
                 String line = reader.readLine();
                 if (line.matches("^[a-zA-Z][a-zA-Z\\.]+")) {
@@ -109,31 +109,34 @@ public class NamespaceMappings {
         }
         throw new SoftwareViolationException("Failed to find a valid namespace in " + filename);
     }
-    
+
     private void GetNamespaceFiles(File dir, final List<String> list) {
 
         File[] files = dir.listFiles(new FileFilter() {
 
             public boolean accept(File pathname) {
-                if (pathname.isDirectory()) 
+                if (pathname.isDirectory())
                 {
                     GetNamespaceFiles(pathname, list);
                 }
                     return pathname.getName().endsWith("-java.namespace.txt");
                 }
         });
-        
+
         for (File f: files) {
             list.add(f.getAbsolutePath());
         }
-       
+
     }
 
     private NamespaceMappings() {
-        String dirpath = System.getenv("SAFIR_RUNTIME") + "/data/text/dots/classes/";
-        File dir = new File(dirpath);
+        String[] douDirectories = Kernel.GetDouDirectories();
         List<String> files = new ArrayList<String>();
-        GetNamespaceFiles(dir, files);
+
+        for (String dirpath: douDirectories) {
+            File dir = new File(dirpath);
+            GetNamespaceFiles(dir, files);
+        }
 
         for (String str: files) {
             String javaNamespacePrefix = readNamespacePrefix(str);
