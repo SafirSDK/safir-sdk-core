@@ -55,7 +55,12 @@ LogCreator::~LogCreator()
 {
 }
 
-
+//-----------------------------------------------------------------------------
+std::wstring
+LogCreator::CreateSystemLog(const std::wstring& logMsg) const
+{
+    return GetPrefix() + logMsg;
+}
 
 //-----------------------------------------------------------------------------
 std::wstring

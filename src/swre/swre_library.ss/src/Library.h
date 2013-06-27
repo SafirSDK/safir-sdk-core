@@ -76,6 +76,9 @@ namespace Internal
 
         void TraceFlush();
 
+        void SendSystemLog(const Safir::Utilities::SystemLog::Severity severity,
+                           const std::wstring&                         logMsg);
+
         void SendFatalErrorReport(const std::wstring & errorCode,
                                   const std::wstring & location,
                                   const std::wstring & text);

@@ -225,6 +225,20 @@ SwreC_TracePrefixGetIsEnabledPointer(const Safir::Dob::Typesystem::Int64 id)
 }
 
 
+void SwreC_SendSystemLog(const DotsC_EnumerationValue severity,
+                         const char * const           logMsg,
+                         bool &                       success)
+{
+    success = false;
+
+    try
+    {
+        Library::Instance().SendSystemLog(static_cast<Safir::Utilities::SystemLog::Severity>(severity),
+                                          ToWstring(logMsg));
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS;
+}
 
 void SwreC_SendFatalErrorReport(const char * const errorCode,
                                 const char * const location,

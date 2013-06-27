@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Severity levels that conforms to the ones used by the well known syslog format (RFC 3164)</summary>
+    <name>Safir.Logging.Severity</name>
+    <values>
+        <value>Emergency</value>
+        <value>Alert</value>
+        <value>Critical</value>
+        <value>Error</value>
+        <value>Warning</value>
+        <value>Notice</value>
+        <value>Informational</value>
+        <value>Debug</value>
+    </values>
+</enumeration>

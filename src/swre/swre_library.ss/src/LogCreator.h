@@ -43,6 +43,12 @@ public:
     LogCreator();
     ~LogCreator();
 
+    std::wstring CreateSystemLog(const std::wstring& logMsg) const;
+
+
+
+    // The following methods are related to the now deprecated swre reports
+
     std::wstring CreateFatalErrorLog(const std::wstring& errorCode,
                                      const std::wstring& location,
                                      const std::wstring& text) const;
@@ -66,7 +72,6 @@ private:
 
     std::wstring GetPrefix() const;
 
-    bool m_includeConnection;
     bool m_includeTimestamp;
 
 };

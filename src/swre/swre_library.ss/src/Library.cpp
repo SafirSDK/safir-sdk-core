@@ -540,6 +540,14 @@ namespace Internal
     }
 
     void
+    Library::SendSystemLog(const Safir::Utilities::SystemLog::Severity severity,
+                           const std::wstring&                         logMsg)
+    {
+        m_systemLog.Send(severity,
+                         ToUtf8(m_logCreator.CreateSystemLog(logMsg)));
+    }
+
+    void
     Library::SendFatalErrorReport(const std::wstring& errorCode,
                                   const std::wstring& location,
                                   const std::wstring& text)
