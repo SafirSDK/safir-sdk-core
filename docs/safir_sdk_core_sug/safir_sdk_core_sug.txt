@@ -4,7 +4,7 @@
 Safir SDK Core User's Guide
 ==========================
 :Author: Lars Hagström (main author), Anders Widén and Mikael Wennerberg
-7 Nov 2012
+27 Jun 2013
 
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
@@ -23,7 +23,7 @@ More specifically the database section is written by Jörgen Johansson, the soft
 This document has also been reviewed by a number of people: Henrik Sundberg, Mattias Gålnander and Anders Widén. If I've left someone out, then I apologise and I'll happily add you.
 
 === Versions of this document
-To obtain the latest revision, or the latest approved and reviewed revision, please visit http://www.safirsdk.com/downloads/users_guide[].
+To obtain the latest revision, or the latest approved and reviewed revision, please visit http://safir.sourceforge.net/[].
 
 [[licenses]]
 === Licences and Copying
@@ -31,9 +31,9 @@ This document is licensed under the Creative Commons "Attribution - Share Alike"
 
 For more information about the Creative Commons licenses see http://creativecommons.org/[]
 
-Safir SDK Core itself is available under the GPL v3 (GNU General Public License version 3) license from http://www.safirsdk.com/[] or a commercial license from Saab AB.
+Safir SDK Core itself is available under the GPL v3 (GNU General Public License version 3) license from http://safir.sourceforge.net/[] or a commercial license from Saab AB.
 
-The GPL license means that you are free to try out or modify the software to your hearts content and create your own applications on top of it. But you are not allowed to distribute the modified software or your applications (which will classify as derivative works) without releasing your code under the GPL license too. If you want to do this you need to obtain (and pay for...) a commercial license from Saab AB (contact information at http://www.safirsdk.com[]).
+The GPL license means that you are free to try out or modify the software to your hearts content and create your own applications on top of it. But you are not allowed to distribute the modified software or your applications (which will classify as derivative works) without releasing your code under the GPL license too. If you want to do this you need to obtain (and pay for...) a commercial license from Saab AB (contact information at http://safir.sourceforge.net[]).
 
 For more information on the GPL v3 license, see http://gplv3.fsf.org/[].
 
@@ -41,7 +41,7 @@ For more information on the GPL v3 license, see http://gplv3.fsf.org/[].
 
 This section is meant to contain a high-level overview of what the Safir SDK Core is, what services it provides and what kind of systems it is suitable for, without going too much into the technical details. 
 
-But, we're not there yet. Due to time constraints we haven't been able to get that information in here in a form that we're satisfied with. If you want that kind of information please contact Saab AB (contact information at http://www.safirsdk.com[]).
+But, we're not there yet. Due to time constraints we haven't been able to get that information in here in a form that we're satisfied with. If you want that kind of information please contact Saab AB (contact information at http://safir.sourceforge.net[]).
 
 So for the time being this chapter just contains a collection of background information. 
 
@@ -81,7 +81,7 @@ Saab sells another product Safir SDK, which is not open-source, which consists o
 
 The additional services that Safir SDK provides include Alert handling, Application and Node redundancy control, communication over low-bandwidth and low connectivity media (e.g. radios of different kinds), track handling and correlation etc. 
 
-Contact Saab AB for more information (contact information at http://www.safirsdk.com[]).
+Contact Saab AB for more information (contact information at http://safir.sourceforge.net[]).
 
 === Prerequisites / Dependencies
 Safir SDK Core uses two open-source products to provide low level functionality and operating system independence wrappers.
@@ -290,7 +290,7 @@ This means that there are some limitations to what you should do to a Struct. Do
 
 [[parameters]]
 === Parameters 
-Apart from members a class can also contain constant parameters. These parameters are not compile-time constants, instead they are read from the dou-files by the Dob when it starts and applications can ask for the values by a simple function call. This means that all that is needed to change a parameter is to change its value in the dou file (under $(SAFIR_RUNTIME)/data/text/dots/classes/) and restarting the Dob and all the applications that use the Dob (note that running the code generation, as described in <<code-generation>>, will overwrite these changes).
+Apart from members a class can also contain constant parameters. These parameters are not compile-time constants, instead they are read from the dou-files by the Dob when it starts and applications can ask for the values by a simple function call. This means that all that is needed to change a parameter is to change its value in the dou file (under $(SAFIR_RUNTIME)/data/text/dots/classes/, or in an override directory, as described in <<typesystem_ini>>) and restarting the Dob and all the applications that use the Dob (note that running the code generation, as described in <<code-generation>>, will overwrite these changes).
 
 Parameters are defined by a name, a type and a value. Here is an example of a parameter definition (it is cut out of its context, but it goes in the dou-file at the same level as the _members_-tag).
 
@@ -414,6 +414,8 @@ The syntax for environment variables is +$(ENVIRONMENT_VARIABLE_NAME)+, and ther
 ----------------------------
 
 Remember that all parameters are loaded 'when the first application that uses parameters starts', so any environment variables set after that time will not be seen by the type system environment variable expansion.
+
+On Windows we also support _special variable_ expansion using the same syntax as is described in <<special_variables>>. This can be used to specify operating system paths in parameters.
 
 === Create routines 
 Create routines allow the designer of a Dob class to define custom routines for creating _commonly used_ instances of that class.
@@ -664,7 +666,7 @@ Note that in the code above there is no reference at all to what kind of object 
 
 [[code-generation]]
 === Generating code from Dou-files
-In order to use the classes defined by the Dou-files, interface code has to be generated for the different languages. First, source code will be generated from the dou-files and then this source code is built into loadable libraries suitable for your specific platform (e.g. dlls, shared libraries, or assemblies). All these steps are performed by running a single script, dobmake.py.
+In order to use the classes defined by the Dou-files, interface code has to be generated for the different languages. First, source code will be generated from the dou-files and then this source code is built into loadable libraries suitable for your specific platform (e.g. dlls, shared libraries, or assemblies). All these steps are performed by running a single script, _dobmake.py_.
 
 The code generation tools expect the dou-files to be located under $(SAFIR_SDK)/dots/dots_generated, so this is where you put your own defined dou-files. It is possible to place the files in sub-directories under this directory which can be a good idea for projects with a large number of dou-files. For instance, all dou-files containing parameter values can be placed under a separate sub-directory.
 
@@ -674,7 +676,12 @@ The generated loadable libraries (e.g. dots_generated-cpp.dll) are copied to the
 
 As part of the code generation procedure the original dou-files are copied from $(SAFIR_SDK)/dots/dots_generated to $(SAFIR_RUNTIME}/data/text/dots/classes (the sub-directory structure is preserved). This is the directory used by the Dob at runtime to parse dou-files, including parameters. 
 
-Note that any changes to parameter files under $(SAFIR_RUNTIME}/data/text/dots/classes will be overwritten when dobmake.py is executed. If you want the parameter change to "survive" make the change under $(SAFIR_SDK)/dots/dots_generated.
+All this means that any changes to parameter files under $(SAFIR_RUNTIME}/data/text/dots/classes will be overwritten when dobmake.py is executed. If you want the parameter change to "survive" make the change under $(SAFIR_SDK)/dots/dots_generated or use a parameter override directory, as described in <<typesystem_ini>>.
+
+.Note
+************************************
+In the current version of Safir SDK Core (4.4), the dobmake.py script is not aware of the _typesystem.ini_ configuration (see <<typesystem_ini>>, so dou and dom files will always be copied to $(SAFIR_RUNTIME}/data/text/dots/classes regardless of the contents of that configuration file.
+************************************
 
 ==== Running dobmake.py
 To execute all code generations steps just run dobmake.py (located under $(SAFIR_RUNTIME}/bin) and you're done!
@@ -2492,7 +2499,91 @@ Upon receiving a stop order the application shall shut down gracefully.
 When an application has several connections to the Dob, only one of them should supply a StopHandler. It is the handler of this connections responsibility to tell the other parts of the application to shut down gracefully. If several connections have stop handlers there may be race conditions, since there is no guaranteed order between which stop handler gets called first.
 
 == Configuration
-There are many things in Safir SDK Core that can be configured. This chapter aims to describe the most important ones, but the adventurous can always delve into the parameters in the dou-files of Safir SDK Core.
+Safir SDK Core has two different configuration mechanisms, one for basic system settings, using ini-files, and one for service level settings, using dou-parameters.
+
+The reason that we need two mechanisms is that the dou-parameters are not available for the lower level parts of the Safir SDK Core, and we need some way of configuring these. So we use ini-files for such things as where lock files should be kept, how logging should work, and where to actually look for dou-files.
+
+This chapter aims to describe the most important of all the things that can be configured in Safir SDK Core. There are many more things that can be configured, and you're encouraged to have a look in the parameter dou-files, which should contain descriptions of what the parameters do.
+
+=== Basic system settings
+The basic system settings consist of three ini files: _locations.ini_, _logging.ini_, and _typesystem.ini_. Currently these contain very few settings, but we have plans to use them for more settings (go to http:://safir.sourceforge.net for more information).
+
+ * locations.ini - locations of stuff we need, e.g. lock file and crash dump directories.
+ * logging.ini - logging settings.
+ * typesystem.ini - typesystem configuration.
+
+The system will look for these configuration files in several places, which allows them to be kept separate or together with the rest of the Safir SDK Core files. The following locations are checked, and the first configuration found will be used:
+
+*Linux*::
+
+  1. /etc/safir_sdk_core/ - system wide configuration
+  2. ~/.config/safir_sdk_core/ - user configuration
+  3. $(SAFIR_RUNTIME)/data/core_config/
+
+*Windows*::
+
+  1. _CSIDL_COMMON_APPDATA_\safir_sdk_core\config\ - system wide configuration
+  2. _CSIDL_LOCAL_APPDATA_\safir_sdk_core\config\ - user configuration
+  3. %SAFIR_RUNTIME%\data\core_config\
+
++
+On Windows 7 _CSIDL_COMMON_APPDATA_ is +C:\ProgramData+ and _CSIDL_LOCAL_APPDATA_ is +%USERPROFILE%\AppData\Local+ by default. See http://msdn.microsoft.com/en-us/library/windows/desktop/bb762494%28v=vs.85%29.aspx[MSDN documentation] for more information about CSIDLs. (The reason that we use CSIDLs rather than Windows Known Folders is that it allows us to be backward compatible with Windows XP.)
+
+==== Environment and special variable expansion
+Since the configuration files need to be able to refer to system directories they also support environment variable expansion. E.g. +$(HOME)+ expands to the value of that environment variable.
+
+[[special_variables]]
+On Windows platforms we also support the _CSIDL_ values mentioned above, since Windows does not guarantee that there are always environment variables that correspond to them. For example the %PROGRAMDATA% environment variable is not guaranteed to be set or to point to the same directory as _CSIDL_COMMON_APPDATA_. So the configuration files support _special variables_ as well as environment variables. E.g. +@\{SPECIAL_VARIABLE\}+ will be expanded to the value of that variable (note that the syntax is different from the environment variable syntax).
+
+The supported special variables are listed in <<special_variables_table>>. We also provide aliases that use the Windows Known Folder naming.
+
+[[special_variables_table]]
+.Special Variables on Windows
+[width="70%",options="header",frame="topbot",grid="none"]
+|===========================
+|CSIDL name             |Windows Known Folder "alias"
+|CSIDL_APPDATA          |FOLDERID_RoamingAppData
+|CSIDL_LOCAL_APPDATA    |FOLDERID_LocalAppData
+|CSIDL_COMMON_APPDATA   |FOLDERID_ProgramData
+|CSIDL_MYDOCUMENTS      |FOLDERID_Documents
+|CSIDL_COMMON_DOCUMENTS |FOLDERID_PublicDocuments
+|===========================
+
+Here are two more links that contain useful information about Windows paths, CSIDLs, and Windows Known Folders.: "http://blogs.msdn.com/b/cjacks/archive/2008/02/05/where-should-i-write-program-data-instead-of-program-files.aspx[Where Should I Write Program Data...?]" and "http://blogs.msdn.com/b/patricka/archive/2010/03/18/where-should-i-store-my-data-and-configuration-files-if-i-target-multiple-os-versions.aspx[Where Should I Store my Data and Config...?]".
+
+There are currently no special variables on Linux.
+
+[[ini_contents]]
+==== Contents of the ini files
+_locations.ini_ and _logging.ini_ currently contain three parameters in total (more will be added in a future release, so watch this space):
+
+lock_file_directory (locations.ini)::
+To ensure correct platform independent initialization of some system-wide resources (e.g. shared memory) Safir SDK Core uses lock files. This parameter lets us know where we should keep them.
+
+crash_dump_directory (locations.ini)::
+Controls where the crash reporting library (see <<crash_reporting>>) should write the dump files.
+
+low_level_log_directory (logging.ini)::
+Safir SDK Core contains an internal logging facility that we use for debugging purposes. This parameter controls where these log files are put.
+
+[[typesystem_ini]]
+_typesystem.ini_ is a little bit more involved, so let's start with an example:
+
+.Example typesystem.ini
+------------------------------------------
+[Default]
+dou_directory=$(SAFIR_RUNTIME)/data/text/dots/classes
+
+[Override]
+dou_directory=/path/to/some/other/directory
+
+[AnotherOverride]
+dou_directory=/path/to/yet/another/directory
+------------------------------------------
+
+_typesystem.ini_ can contain any number of _sections_, each specifying one directory where dou/dom files will be loaded from. If a file is found in multiple places, the _last one_ found will be the one used. For example, this can be used to override parameters or string or array lengths without having to change the files that are in SAFIR_RUNTIME, and for keeping project-specific changes separate from the Safir SDK Core defaults.
+
+In the above example there are three sections, one specifying the default place to look for dou/dom files, and two places to look for override files. If, for example, the Override directory contains a Safir.Dob.NodeParameters.dou file (which is also in the Default directory, by default) the file from the Override directory will be used.
 
 === Network config
 A Safir SDK Core system can have two basic configurations, with respect to networking. _Standalone_ or _Multinode_. Standalone means that the system consists of only one node or computer. This is typically used for developer machines or systems that have only one node. Multinode is typically used when a system consists of several nodes, for example a couple of servers (where applications and databases run) and a few operator consoles (where only the HSI runs).
@@ -2636,7 +2727,7 @@ _Safir.Dob.PersistenceParameters.SystemHasPersistence_::
 _Safir.Dob.PersistenceParameters.Backend_::
         Which backend should be used, Odbc database or files.
 _Safir.Dob.PersistenceParameters.FileStoragePath_::
-        The path where files are stored if the file backend is chosen. Obviously dope_main needs write permissions here.
+        The path where files are stored if the file backend is chosen. Obviously dope_main needs write permissions here. Remember that you can use environment variables and special variables here, as described in <<environment_parameters>>.
 _Safir.Dob.PersistenceParameters.OdbcStorageConnectString_::
         The connection string to use to connect to the database.
 _Safir.Dob.PersistenceParameters.StandaloneMode_::
@@ -2860,8 +2951,9 @@ Just instantiate the +AceDispatcher+ passing it your ACE_Reactor, and pass a poi
 === Time 
 Under the namespace +Safir.Time+ there are a few classes that provide functionality for obtaining the current time (both local and UTC) and converting it to and from various formats.
 
-The time library also has support for loading an external library at runtime which could provide a higher accuracy time. The full Safir SDK provides such a library, which provides a much higher accuracy multi-node synchronised clock than NTP can provide on both GNU/Linux or Windows based systems. For more information on this, contact Saab AB (contact information at http://www.safirsdk.com[]).
+The time library also has support for loading an external library at runtime which could provide a higher accuracy time. The full Safir SDK provides such a library, which provides a much higher accuracy multi-node synchronised clock than NTP can provide on both GNU/Linux or Windows based systems. For more information on this, contact Saab AB (contact information at http://safir.sourceforge.net[]).
 
+[[crash_reporting]]
 === Crash Reporting
 Safir SDK Core includes a crash reporting library, google-breakpad (http://code.google.com/p/google-breakpad/[]). The crash reporting library can be used to generate dumps when applications crash (e.g. access violation or segmentation fault). The dumps contain, among other things, general system information, the call stack for each thread and the list of loaded modules. A dump file, together with symbolic debugging information, can be used to identify where in the software the crash occurred.  
 
@@ -2936,7 +3028,7 @@ TODO: write about reporting sdk crashes
 
 ==== Analyzing a crash dump
 
-When an application crashes in a way that is caught by the crash reporter a dump file will be placed under +$(SAFIR_RUNTIME)/data/crash_dumps+ with a rather cryptic name (a lot of digits followed by .dmp). Apart from generating this dump file the crash reporter will attempt to log an error to swre_logger and to standard output that a crash has happened.
+When an application crashes in a way that is caught by the crash reporter a dump file will be placed in the crash dump directory (see <<ini_contents>>) with a rather cryptic name (a lot of digits followed by .dmp). Apart from generating this dump file the crash reporter will attempt to log an error to swre_logger and to standard output that a crash has happened.
 
 If you're using Visual Studio you can just open the .dmp file and if you've got all the debug information and binaries available you will then see the call stack and be able to inspect the state of the application.
 On Linux, you can use gdb to analyze the .dmp files, although you will have to convert the dumps to a core file using the minidump-2-core tool that can be found under src/lluf_crash_reporter.ss/src/google-breakpad/tools/.
@@ -3063,7 +3155,7 @@ This chapter contains information about how to write applications that support _
 
 The Dob itself relies on high reliability and high bandwidth LAN connections for its communication between nodes. Asynchronous injections makes it possible to create an application that links together multiple systems like this using a medium with low connectivity and low bandwidth (e.g. a legacy radio), or a medium with high bandwidth but non-optimal connectivity (e.g. the internet).
 
-A complete description of how to build a system with asynchronous injections, or how to create an _injector_, i.e. an application that performs the injections, is outside the scope if this document, which will concentrate on how to write applications that can handle injections. If you're interested in more information on this than this document provides, please contact Saab AB at http://www.safirsdk.com/[].
+A complete description of how to build a system with asynchronous injections, or how to create an _injector_, i.e. an application that performs the injections, is outside the scope if this document, which will concentrate on how to write applications that can handle injections. If you're interested in more information on this than this document provides, please contact Saab AB at http://safir.sourceforge.net/[].
 
 But, we need a little bit of background to be able to understand the rest of this chapter:
 
@@ -3378,8 +3470,11 @@ The generated doxygen documentation is included in the downloads, and should be 
 
 _Use this documentation! It is the place where interface details are explained!_
 
-=== Forum
-Questions can be posted in the Safir SDK Core forum at http://www.safirsdk.com[].
+=== Forum and Mailing list
+Questions can be posted in the Safir SDK Core forum or the safir-devel mailing list. More info at http://safir.sourceforge.net[].
+
+=== Reporting bugs
+Bug reports can be filed under "Tickets" at at http://safir.sourceforge.net[].
 
 [[appendix_a]]
 == Appendix A: Example applications
@@ -3419,7 +3514,7 @@ Why shouldn't I have an infinite queue in my application to avoid overflows?::
   This is described somewhat in <<overflow_handling>>, and the FAQ entry above.
 
 == Appendix D: Building from source
-Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://www.safirsdk.com/[].
+Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://safir.sourceforge.net/[].
 
 [[glossary]]
 == Glossary
