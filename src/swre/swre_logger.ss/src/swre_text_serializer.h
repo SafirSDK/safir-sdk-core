@@ -56,6 +56,15 @@ private:
     TextSerializer();
     TextSerializer(const TextSerializer& rhs);
 
+    void GetCommonInfo(std::wstring& str,
+                       const Safir::SwReports::Internal::ReportPtr report);
+
+    void GetCommonErrorInfo(std::wstring& str,
+                            const Safir::SwReports::Internal::ErrorPtr errReport);
+
+    void GetText(std::wstring& str,
+                 const Safir::SwReports::Internal::ReportPtr errReport);
+
     bool m_includeTypeSequenceNumber;
 
 };
