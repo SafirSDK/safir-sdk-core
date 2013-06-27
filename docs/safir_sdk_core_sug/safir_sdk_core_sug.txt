@@ -2506,7 +2506,7 @@ The reason that we need two mechanisms is that the dou-parameters are not availa
 This chapter aims to describe the most important of all the things that can be configured in Safir SDK Core. There are many more things that can be configured, and you're encouraged to have a look in the parameter dou-files, which should contain descriptions of what the parameters do.
 
 === Basic system settings
-The basic system settings consist of three ini files: _locations.ini_, _logging.ini_, and _typesystem.ini_. Currently these contain very few settings, but we have plans to use them for more settings (go to http:://safir.sourceforge.net for more information).
+The basic system settings consist of three ini files: _locations.ini_, _logging.ini_, and _typesystem.ini_. Currently these contain very few settings, but we have plans to use them for more settings (go to http://safir.sourceforge.net for more information).
 
  * locations.ini - locations of stuff we need, e.g. lock file and crash dump directories.
  * logging.ini - logging settings.
