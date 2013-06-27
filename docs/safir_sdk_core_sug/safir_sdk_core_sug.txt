@@ -681,6 +681,8 @@ All this means that any changes to parameter files under $(SAFIR_RUNTIME}/data/t
 .Note
 ************************************
 In the current version of Safir SDK Core (4.4), the dobmake.py script is not aware of the _typesystem.ini_ configuration (see <<typesystem_ini>>, so dou and dom files will always be copied to $(SAFIR_RUNTIME}/data/text/dots/classes regardless of the contents of that configuration file.
+
+So, to keep the "expected" behaviour, don't change the Default section in typesystem.ini from pointing to $(SAFIR_RUNTIME}/data/text/dots/classes.
 ************************************
 
 ==== Running dobmake.py
@@ -2529,6 +2531,43 @@ The system will look for these configuration files in several places, which allo
 +
 On Windows 7 _CSIDL_COMMON_APPDATA_ is +C:\ProgramData+ and _CSIDL_LOCAL_APPDATA_ is +%USERPROFILE%\AppData\Local+ by default. See http://msdn.microsoft.com/en-us/library/windows/desktop/bb762494%28v=vs.85%29.aspx[MSDN documentation] for more information about CSIDLs. (The reason that we use CSIDLs rather than Windows Known Folders is that it allows us to be backward compatible with Windows XP.)
 
+[[locations_ini]]
+==== locations.ini
+_locations.ini_ currently contains two parameters:
+
+lock_file_directory::
+To ensure correct platform independent initialization of some system-wide resources (e.g. shared memory) Safir SDK Core uses lock files. This parameter lets us know where we should keep them.
+
+crash_dump_directory::
+Controls where the crash reporting library (see <<crash_reporting>>) should write the dump files.
+
+[[logging_ini]]
+==== logging.ini
+_logging.ini_ currently contains just the one parameter, but more will be added in the next release of Safir SDK Core:
+
+low_level_log_directory (logging.ini)::
+Safir SDK Core contains an internal logging facility that we use for debugging purposes. This parameter controls where these log files are put.
+
+[[typesystem_ini]]
+==== typesystem.ini
+_typesystem.ini_ is a little bit more involved, so let's start with an example:
+
+.Example typesystem.ini
+------------------------------------------
+[Default]
+dou_directory=$(SAFIR_RUNTIME)/data/text/dots/classes
+
+[Override]
+dou_directory=/path/to/some/other/directory
+
+[AnotherOverride]
+dou_directory=/path/to/yet/another/directory
+------------------------------------------
+
+_typesystem.ini_ can contain any number of _sections_ (with arbitrary names), each specifying one directory where dou/dom files will be loaded from. If a file is found in multiple places, the _last one_ found will be the one used. For example, this can be used to override parameters or string or array lengths without having to change the files that are in SAFIR_RUNTIME, and for keeping project-specific changes separate from the Safir SDK Core defaults.
+
+In the above example there are three sections, one specifying the default place to look for dou/dom files, and two places to look for override files. If, for example, the Override directory contains a Safir.Dob.NodeParameters.dou file (which is also in the Default directory, by default) the file from the Override directory will be used.
+
 ==== Environment and special variable expansion
 Since the configuration files need to be able to refer to system directories they also support environment variable expansion. E.g. +$(HOME)+ expands to the value of that environment variable.
 
@@ -2552,38 +2591,6 @@ The supported special variables are listed in <<special_variables_table>>. We al
 Here are two more links that contain useful information about Windows paths, CSIDLs, and Windows Known Folders.: "http://blogs.msdn.com/b/cjacks/archive/2008/02/05/where-should-i-write-program-data-instead-of-program-files.aspx[Where Should I Write Program Data...?]" and "http://blogs.msdn.com/b/patricka/archive/2010/03/18/where-should-i-store-my-data-and-configuration-files-if-i-target-multiple-os-versions.aspx[Where Should I Store my Data and Config...?]".
 
 There are currently no special variables on Linux.
-
-[[ini_contents]]
-==== Contents of the ini files
-_locations.ini_ and _logging.ini_ currently contain three parameters in total (more will be added in a future release, so watch this space):
-
-lock_file_directory (locations.ini)::
-To ensure correct platform independent initialization of some system-wide resources (e.g. shared memory) Safir SDK Core uses lock files. This parameter lets us know where we should keep them.
-
-crash_dump_directory (locations.ini)::
-Controls where the crash reporting library (see <<crash_reporting>>) should write the dump files.
-
-low_level_log_directory (logging.ini)::
-Safir SDK Core contains an internal logging facility that we use for debugging purposes. This parameter controls where these log files are put.
-
-[[typesystem_ini]]
-_typesystem.ini_ is a little bit more involved, so let's start with an example:
-
-.Example typesystem.ini
-------------------------------------------
-[Default]
-dou_directory=$(SAFIR_RUNTIME)/data/text/dots/classes
-
-[Override]
-dou_directory=/path/to/some/other/directory
-
-[AnotherOverride]
-dou_directory=/path/to/yet/another/directory
-------------------------------------------
-
-_typesystem.ini_ can contain any number of _sections_, each specifying one directory where dou/dom files will be loaded from. If a file is found in multiple places, the _last one_ found will be the one used. For example, this can be used to override parameters or string or array lengths without having to change the files that are in SAFIR_RUNTIME, and for keeping project-specific changes separate from the Safir SDK Core defaults.
-
-In the above example there are three sections, one specifying the default place to look for dou/dom files, and two places to look for override files. If, for example, the Override directory contains a Safir.Dob.NodeParameters.dou file (which is also in the Default directory, by default) the file from the Override directory will be used.
 
 === Network config
 A Safir SDK Core system can have two basic configurations, with respect to networking. _Standalone_ or _Multinode_. Standalone means that the system consists of only one node or computer. This is typically used for developer machines or systems that have only one node. Multinode is typically used when a system consists of several nodes, for example a couple of servers (where applications and databases run) and a few operator consoles (where only the HSI runs).
@@ -3028,7 +3035,7 @@ TODO: write about reporting sdk crashes
 
 ==== Analyzing a crash dump
 
-When an application crashes in a way that is caught by the crash reporter a dump file will be placed in the crash dump directory (see <<ini_contents>>) with a rather cryptic name (a lot of digits followed by .dmp). Apart from generating this dump file the crash reporter will attempt to log an error to swre_logger and to standard output that a crash has happened.
+When an application crashes in a way that is caught by the crash reporter a dump file will be placed in the crash dump directory (see <<locations_ini>>) with a rather cryptic name (a lot of digits followed by .dmp). Apart from generating this dump file the crash reporter will attempt to log an error to swre_logger and to standard output that a crash has happened.
 
 If you're using Visual Studio you can just open the .dmp file and if you've got all the debug information and binaries available you will then see the call stack and be able to inspect the state of the application.
 On Linux, you can use gdb to analyze the .dmp files, although you will have to convert the dumps to a core file using the minidump-2-core tool that can be found under src/lluf_crash_reporter.ss/src/google-breakpad/tools/.
