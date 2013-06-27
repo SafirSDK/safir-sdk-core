@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2013 (http://www.safirsdk.com)
 *
-* Created by: Anders Widén
+* Created by: Anders WidÃ©n
 *
 *******************************************************************************
 *
