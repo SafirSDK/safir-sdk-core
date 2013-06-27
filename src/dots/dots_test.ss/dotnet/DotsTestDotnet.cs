@@ -37,7 +37,7 @@ class DotsTestDotnet
     {
         try
         {
-            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.OutputEncoding = new System.Text.UTF8Encoding(false);
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
             Test_Has_Property();

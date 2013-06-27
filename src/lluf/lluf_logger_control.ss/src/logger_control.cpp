@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <iostream>
 #include <Safir/Utilities/Internal/LowLevelLoggerControl.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -59,12 +60,15 @@ public:
         , noFile(false)
     {
         using namespace boost::program_options;
+        Safir::Utilities::Internal::ConfigReader reader;
+        
         options_description general("General Options");
         general.add_options()
             ("help,h", "show help message")
             ("permanent,p", value<bool>(&permanent)->zero_tokens(), "Turn logging on permanently, by writing options to disk.")
             ("clear,c", value<bool>(&clear)->zero_tokens(), "Clear permanent options (does not turn logging off for current session).")
-            ("create-logdir", value<bool>(&createLogdir)->zero_tokens(), "Create the $SAFIR_RUNTIME/log directory.");
+            ("create-logdir", value<bool>(&createLogdir)->zero_tokens(), 
+             ("Create the " + reader.Logging().get<std::string>("low_level_log_directory") + " directory.").c_str());
         
         options_description overhead("Options that reduce logging overhead");
         overhead.add_options()
