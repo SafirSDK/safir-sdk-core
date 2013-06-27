@@ -1931,11 +1931,6 @@ extern "C"
                                                                        bool & wasSet);
 
     DOTS_KERNEL_API void CALLING_CONVENTION DotsC_PeekAtException(DotsC_TypeId & exceptionId);
-
-
-    DOTS_KERNEL_API void CALLING_CONVENTION DotsC_BinaryDump(const char * const blob,
-                                                             const char * const filenamePart);
-
 }
 
 

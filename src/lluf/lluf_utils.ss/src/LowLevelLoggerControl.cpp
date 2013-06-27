@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/LowLevelLoggerControl.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/StartupSynchronizer.h>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -47,16 +48,8 @@ namespace //anonymous namespace for internal functions
 
     const boost::filesystem::path GetLogDirectory()
     {
-        const char * const env = getenv("SAFIR_RUNTIME");
-        if (env == NULL)
-        {
-            throw std::logic_error("SAFIR_RUNTIME environment variable is not set");
-        }
-        boost::filesystem::path filename(env);
-
-        filename /= "log";
-        filename /= "Dob-LowLevelLog";
-        return filename;
+        Safir::Utilities::Internal::ConfigReader reader;
+        return reader.Logging().get<std::string>("low_level_log_directory");
     }
 
     const boost::filesystem::path GetLogSettingsPath()
@@ -64,7 +57,7 @@ namespace //anonymous namespace for internal functions
         return GetLogDirectory()/"logging_on";
     }
 
-    //check for file %SAFIR_RUNTIME%\log\Dob-LowLevelLog\logging_on
+    //check for file logging_on in log directory
     bool LogSettingsFileExists()
     {
         try

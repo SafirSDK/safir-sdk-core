@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2004-2013 (http://www.safirsdk.com)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -24,6 +24,7 @@
 
 #include "dots_file_parser.h"
 #include <Safir/Dob/Typesystem/Internal/Id.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include "dots_basic_types.h" 
 #include "dots_blob_layout.h"
 #include "dots_error_handler.h"
@@ -42,6 +43,147 @@
 #include <iostream>
 #include <cstdio>
 #include <cstring>
+
+namespace
+{
+    //first is file name, second is full path (including file name)
+    typedef std::map<boost::filesystem::path, boost::filesystem::path> FileLocations; 
+
+    //helper class for reading the directories containing dou and dom files
+    //and for checking for illegal duplicates
+    class FileCollection
+    {
+    public:
+        FileCollection()
+        {
+            using namespace Safir::Dob::Typesystem::Internal;
+
+            //TODO: Get rid of this monstrosity! It is only there since dots_configuration_check
+            //is used to check other directories. Instead use new dots_internal and give it a path explicitly
+            const char* const env = getenv("SAFIR_DOTS_CLASSES_DIR");
+            if (env != NULL)
+            {
+                // Read the dou/dom files from a non-standard location
+                boost::filesystem::path filename(env);
+                
+                ENSURE(boost::filesystem::exists(filename) && boost::filesystem::is_directory(filename),
+                       << "The directory for dou and dom files could not be found. $(SAFIR_DOTS_CLASSES_DIR) evaluates to " << filename.string());
+                
+                ReadDirectory(filename, m_douFiles, m_domFiles);
+                return;
+            }
+
+            //Read the config files
+            Safir::Utilities::Internal::ConfigReader reader;
+
+            //loop through all sections in typesystem.ini
+            for (boost::property_tree::ptree::const_iterator it = reader.Typesystem().begin();
+                 it != reader.Typesystem().end(); ++it)
+            {
+                const bool isSection = !it->second.empty();
+
+                if (isSection)
+                {
+                    boost::filesystem::path douDirectory;
+                    try
+                    {
+                        douDirectory = it->second.get<std::string>("dou_directory");
+                    }
+                    catch (const std::exception&)
+                    {
+                        ErrorHandler::Error("Dou/Dom file parsing",
+                                            "Failed to read dou_directory in section " + it->first + " of typesystem.ini",
+                                            "dots_file_parser");
+                        exit(1);
+                    }
+                    
+                    if (!boost::filesystem::exists(douDirectory) || !boost::filesystem::is_directory(douDirectory))
+                    {
+                        ErrorHandler::Error("Dou/Dom file parsing",
+                                            "dou_directory '" + douDirectory.string() + "' in section " + it->first + " of typesystem.ini does not appear to be a directory",
+                                            "dots_file_parser");
+                        exit(1);
+                    }
+
+                    FileLocations douFiles;
+                    FileLocations domFiles;
+                    ReadDirectory(douDirectory,douFiles,domFiles);
+                    
+                    InsertAndOverride(m_douFiles, douFiles);
+                    InsertAndOverride(m_domFiles, domFiles);
+                }
+
+            }
+
+        }
+
+        const FileLocations& DouFiles() const {return m_douFiles;}
+        const FileLocations& DomFiles() const {return m_domFiles;}
+    private:
+        //gets dou and dom files from a directory
+        //throws xxx on duplicate file name.
+        static void ReadDirectory(const boost::filesystem::path& directory, 
+                                  FileLocations& douFiles,
+                                  FileLocations& domFiles)
+        {
+            douFiles.clear();
+            domFiles.clear();
+            using namespace Safir::Dob::Typesystem::Internal;
+
+            const boost::filesystem::recursive_directory_iterator end;
+            for (boost::filesystem::recursive_directory_iterator dir(directory);
+                 dir != end; ++dir)
+            {
+                const boost::filesystem::path path(*dir);
+                const boost::filesystem::path extension = path.extension();
+                const boost::filesystem::path filename = path.filename();
+                
+                if (extension == DOU_FILE_EXTENSION)
+                {
+                    const bool result = douFiles.insert(std::make_pair(filename,path)).second;
+                    
+                    if (!result)
+                    {
+                        lllerr << "Duplicate dou file found: " << path.string().c_str() << std::endl; 
+                        throw std::logic_error("Dupicate class");
+                    }
+                }
+                else if (extension == DOM_FILE_EXTENSION)
+                {
+                    const bool result = domFiles.insert(std::make_pair(filename,path)).second;
+                    
+                    if (!result)
+                    {
+                        lllerr << "Duplicate dom file found: " << path.string().c_str() << std::endl; 
+                        throw std::logic_error("Dupicate property mapping");
+                    }
+                }
+
+            }
+        }
+
+        static void InsertAndOverride(FileLocations& into, const FileLocations& from)
+        {
+            for (FileLocations::const_iterator it = from.begin();
+                 it != from.end(); ++it)
+            {
+                const std::pair<FileLocations::iterator, bool> result = 
+                    into.insert(*it);
+                if (!result.second)
+                {
+                    lllout << "Found override dou file " << it->second.string().c_str() << std::endl;
+                    //replace the old path with the new path in _into_
+                    result.first->second = it->second;
+                }
+            }
+        }
+
+
+        FileLocations m_douFiles;
+        FileLocations m_domFiles;
+    };
+}
+
 
 namespace Safir
 {
@@ -458,233 +600,51 @@ namespace Internal
 
     bool FileParser::ParseFiles()
     {
-        if (!ParseDouFiles())
-            return false;
-        if (!ParseDomFiles())
-            return false;
-        return true;
-    }
-
-    boost::filesystem::path GetDobFileDirectory()
-    {
-        char * env = getenv("SAFIR_DOTS_CLASSES_DIR");
-        
-        if (env == NULL)
+        try
         {
-            // Read the dou/dom files from the standard location 
-            env = getenv(RUNTIME_ENV);
-
-            if (env == NULL)
+            FileCollection files;
+            
+            //parse dou files
+            for (FileLocations::const_iterator it = files.DouFiles().begin();
+                 it != files.DouFiles().end(); ++it)
             {
-                ErrorHandler::Error("Dou/Dom file parsing","Failed to get environment variable SAFIR_RUNTIME","dots_file_parser");
-                exit(1);
-            }
-            boost::filesystem::path filename(env);
-
-            filename /= DOB_CLASSES_DIR;
-            ENSURE(boost::filesystem::exists(filename) && boost::filesystem::is_directory(filename),
-                << "The directory for dou and dom files could not be found. Using $(SAFIR_RUNTIME)/" << DOB_CLASSES_DIR << " it evaluates to " << filename.string());
-
-
-            return filename;
-
-        }
-        else
-        {
-            // Read the dou/dom files from a non-standard location
-            boost::filesystem::path filename(env);
-
-            ENSURE(boost::filesystem::exists(filename) && boost::filesystem::is_directory(filename),
-                << "The directory for dou and dom files could not be found. $(SAFIR_DOTS_CLASSES_DIR) evaluates to " << filename.string());
-
-            return filename;
-
-        }
-    }
-
-    bool FileParser::ParseDouDir(const boost::filesystem::path & dirName)
-    {
-        lllout << "ParseDouDir: Parsing directory " << dirName.string().c_str() << std::endl;
-
-        for (boost::filesystem::directory_iterator dir = boost::filesystem::directory_iterator(dirName);
-             dir != boost::filesystem::directory_iterator(); ++dir)
-        {
-            const boost::filesystem::path path = dir->path();
-            const boost::filesystem::path extension = path.extension();
-
-            if ( boost::filesystem::is_directory(path) )
-            {
-                if (!ParseDouDir(path))
-                    return false;
-                else
-                    continue;
-            }
-
-            if (extension != UNIT_FILE_EXT)
-            {
-                continue;
-            }
-
-            lllout << "ParseDouFiles: Parsing file " << path.string().c_str() << std::endl;
-
-            if (!ParseFile(path))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-
-    bool FileParser::ParseDouFiles()
-    {
-        for (boost::filesystem::directory_iterator dir = boost::filesystem::directory_iterator(GetDobFileDirectory());
-             dir != boost::filesystem::directory_iterator(); ++dir)
-        {
-            const boost::filesystem::path path = dir->path();
-            const boost::filesystem::path extension = path.extension();
-
-            if ( boost::filesystem::is_directory(path) )
-            {
-                if (!ParseDouDir(path))
-                    return false;
-                else
-                    continue;
-            }
-
-            if (extension != UNIT_FILE_EXT)
-            {
-                continue;
-            }
-
-            lllout << "ParseDouFiles: Parsing file " << path.string().c_str() << std::endl;
-
-            if (!ParseFile(path))
-            {
-                return false;
-            }
-        }
-
-
-        // check for class duplicates.
-        bool duplicatesExist = false;
-        DobClasses theClasses = ParsingState::Instance().classParser.Result();
-        for (DobClasses::iterator iter = theClasses.begin(); iter < theClasses.end(); iter++)
-        {
-            int count = 0;
-            for (DobClasses::iterator iter2 = iter; iter2 < theClasses.end(); iter2++)
-            {
-                if (iter->m_typeId == iter2->m_typeId)
+                if (!ParseFile(it->second))
                 {
-                    if (count++ > 0)
-                    {
-                        lllerr << "Duplicate defined class found: " << iter->m_name.c_str() << std::endl; 
-                        duplicatesExist =  true;
-                    }
+                    return false;
                 }
             }
-        }
+            
+            if (!FinalizeClasses()) return false;
+            if (!FinalizeProperties()) return false;
 
-        // check for properties duplicates.
-        DobProperties theProperties = ParsingState::Instance().propertyParser.Result();
-        for (DobProperties::iterator iter = theProperties.begin(); iter < theProperties.end(); iter++)
-        {
-            int count = 0;
-            for (DobProperties::iterator iter2 = iter; iter2 < theProperties.end(); iter2++)
+            //parse dom files
+            for (FileLocations::const_iterator it = files.DomFiles().begin();
+                 it != files.DomFiles().end(); ++it)
             {
-                if (iter->m_typeId == iter2->m_typeId)
+                ParsingState::Instance().mappingParser.SetFileName(it->second);
+                if (!ParseFile(it->second))
                 {
-                    if (count++ > 0)
-                    {
-                        lllerr << "Duplicate defined property found: " << iter->m_name.c_str() << std::endl; 
-                        duplicatesExist =  true;
-                    }
+                    return false;
                 }
             }
+            
+            if (!FinalizePropertyMappings()) return false;
+            ParsingState::Instance().Reset();
         }
-
-
-        if(duplicatesExist) return false;
-        if (!FinalizeClasses()) return false;
-        if (!FinalizeProperties()) return false;
-
-        ParsingState::Instance().Reset();
-        return true;
-    }
-
-    bool FileParser::ParseDomDir(const boost::filesystem::path & dirName)
-    {
-        lllout << "ParseDomDir: Parsing directory " << dirName.string().c_str() << std::endl;
-        for (boost::filesystem::directory_iterator dir = boost::filesystem::directory_iterator(dirName);
-             dir != boost::filesystem::directory_iterator(); ++dir)
+        catch (const std::exception& e)
         {
-            const boost::filesystem::path path = dir->path();
-            const boost::filesystem::path extension = path.extension();
-
-            if ( boost::filesystem::is_directory(path) )
-            {
-                if (!ParseDomDir(path))
-                    return false;
-                else
-                    continue;
-            }
-
-            if (extension != PROPERTY_MAPPING_FILE_EXT)
-            {
-                continue;
-            }
-
-            lllout << "ParseDomFiles: Parsing file " << path.string().c_str() << std::endl;
-
-            ParsingState::Instance().mappingParser.SetFileName(path);
-            if (!ParseFile(path))
-            {
-                return false;
-            }
+            ErrorHandler::Error("Dou/Dom file parsing",
+                                "Caught exception while parsing dou and dom files: " + std::string(e.what()),
+                                "dots_file_parser");
+            return false;
         }
 
-        return true;
-    }
-
-
-    bool FileParser::ParseDomFiles()
-    {
-        for (boost::filesystem::directory_iterator dir = boost::filesystem::directory_iterator(GetDobFileDirectory());
-             dir != boost::filesystem::directory_iterator(); ++dir)
-        {
-            const boost::filesystem::path path = dir->path();
-            const boost::filesystem::path extension = path.extension();
-
-            if ( boost::filesystem::is_directory(path) )
-            {
-                if (!ParseDomDir(path))
-                    return false;
-                else
-                    continue;
-            }
-
-            if (extension != PROPERTY_MAPPING_FILE_EXT)
-            {
-                continue;
-            }
-
-            lllout << "ParseDomFiles: Parsing file " << path.string().c_str() << std::endl;
-
-            ParsingState::Instance().mappingParser.SetFileName(path);
-            if (!ParseFile(path))
-            {
-                return false;
-            }
-        }
-
-        if (!FinalizePropertyMappings()) return false;
-        ParsingState::Instance().Reset();
         return true;
     }
 
     bool FileParser::ParseFile(const boost::filesystem::path & filename)
     {
+        lllout << "Parsing '" << filename.string().c_str() << "'" << std::endl;
         std::vector<char> buf(100000);
         ParsingState::Instance().Reset();
         ParsingState::Instance().parser = XML_ParserCreate(NULL);
@@ -726,7 +686,7 @@ namespace Internal
             {
                 ErrorHandler::Error("File Syntax Error", "Syntax error in dou-file.", filename);
                 std::wcout << "Line number: " << XML_GetCurrentLineNumber(ParsingState::Instance().parser) << std::endl;
-                return !ParsingState::Instance().parseError;
+                return false;
             }
                 
         }
