@@ -249,21 +249,6 @@ namespace Internal
         std::for_each(str.begin(), str.end(), boost::bind(&Library::AddToTraceBuf,this,prefixId,_1));
     }
 
-    /* todo remove
-    void
-    Library::TraceSync()
-    {
-        if (m_flushPending == 0)
-        {
-            m_flushPending = 1;
-            //the functor will keep a reference to this shared_ptr, so we dont need to...
-            boost::shared_ptr<boost::asio::deadline_timer> syncTimer
-                (new boost::asio::deadline_timer(m_ioService,boost::posix_time::milliseconds(500)));
-            syncTimer->async_wait(boost::bind(&Library::HandleTimeout,this,_1,syncTimer));
-        }
-    }
-*/
-
     void
     Library::TraceFlush()
     {
@@ -282,22 +267,6 @@ namespace Internal
 
         m_traceBuffer.clear();
     }
-
-/* todo
-    inline void
-    Library::StartThread()
-    {
-        if (m_thread.get_id() == boost::thread::id())
-        {
-            boost::lock_guard<boost::mutex> lock(m_threadStartingLock);
-            if (m_thread.get_id() == boost::thread::id())
-            {
-                m_thread = boost::thread(boost::bind(&Library::Run,this));
-                m_threadId = m_thread.get_id();
-            }
-        }
-    }
-*/
 
     void Library::CrashFunc(const char* const dumpPath)
     {
@@ -321,75 +290,6 @@ namespace Internal
         Safir::Utilities::CrashReporter::Stop();
     }
 
-/* TODO remove
-    void
-    Library::StopInternal()
-    {
-        //We only let one call to Stop try to do the join. otherwise who knows what will happen...
-        if (m_thread.get_id() != boost::thread::id())
-        {
-            boost::lock_guard<boost::mutex> lock(m_threadStartingLock);
-            if (m_thread.get_id() != boost::thread::id())
-            {
-                m_ioService.stop();
-                m_thread.join();
-                m_thread = boost::thread();
-                m_threadId = boost::thread::id();
-            }
-        }
-    }
-    */
-
-
-/* TODO
-    //The swre library thread uses context 0 to connect to the dob. The strange looking negative number
-    //is a way to indicate that this is a connection with special privileges.
-    const Safir::Dob::Typesystem::Int32 SWRE_LIBRARY_THREAD_CONTEXT = -1000000;
-
-    void
-    Library::Run()
-    {
-        try
-        {
-            m_connection.reset(new Safir::Dob::Connection());
-            Dispatcher dispatcher(*m_connection,m_ioService);
-
-            std::wstring connName = m_programName;
-            if (connName.empty())
-            {
-                Safir::Utilities::ProcessInfo proc(Safir::Utilities::ProcessInfo::GetPid());
-                connName = Safir::Dob::Typesystem::Utilities::ToWstring(proc.GetProcessName());
-            }
-            m_connection->Open(connName,
-                               boost::lexical_cast<std::wstring>(Safir::Utilities::ProcessInfo::GetPid()),
-                               SWRE_LIBRARY_THREAD_CONTEXT,
-                               NULL, 
-                               &dispatcher);
-
-            StartBackdoor();
-            boost::asio::io_service::work keepRunning(m_ioService);
-            m_ioService.run();
-            HandleExit();
-            m_connection->Close();
-            m_connection.reset();
-        }
-        catch (const std::exception & exc)
-        {
-            std::wcout << "SwreLibrary caught an unexpected exception!" <<std::endl
-                       << "Please report this error to the Safir System Kernel team!" <<std::endl
-                       << exc.what() <<std::endl;
-        }
-        catch (...)
-        {
-            std::wcout << "SwreLibrary caught an unexpected ... exception!" <<std::endl
-                       << "Please report this error to the Safir System Kernel team!" <<std::endl;
-        }
-        if (m_crashed != 0)
-        {
-            Safir::Utilities::CrashReporter::Stop();
-        }
-    }
-*/
     void
     Library::OnMessage(const Safir::Dob::MessageProxy messageProxy)
     {
