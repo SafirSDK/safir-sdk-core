@@ -23,14 +23,10 @@
 ******************************************************************************/
 #include <Safir/Utilities/SystemLog.h>
 #include <Safir/Utilities/ProcessInfo.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <boost/weak_ptr.hpp>
 #include <boost/thread/once.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/filesystem/convenience.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/ip/host_name.hpp>
@@ -91,6 +87,7 @@ private:
     SystemLogImpl()
         : m_pid(Safir::Utilities::ProcessInfo::GetPid()),
           m_processName(Safir::Utilities::ProcessInfo(m_pid).GetProcessName()),
+          m_configReader(),
           m_nativeLogging(false),
           m_sendToSyslogServer(false),
           m_syslogServerEndpoint(),
@@ -103,15 +100,10 @@ private:
     {
         try
         {
+            m_configReader.reset(new Safir::Utilities::Internal::ConfigReader);
 
-            using boost::property_tree::ptree;
-
-            ptree root;
-
-            read_ini(GetLogSettingsPath().string(), root);
-
-            m_nativeLogging = root.get<bool>("SYSTEM-LOG.native-logging");
-            m_sendToSyslogServer = root.get<bool>("SYSTEM-LOG.send-to-syslog-server");
+            m_nativeLogging = m_configReader->Logging().get<bool>("SYSTEM-LOG.native-logging");
+            m_sendToSyslogServer = m_configReader->Logging().get<bool>("SYSTEM-LOG.send-to-syslog-server");
 
             if (m_nativeLogging)
             {
@@ -130,8 +122,10 @@ private:
                 m_sock.bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0));
 
                 m_syslogServerEndpoint =
-                        boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(root.get<std::string>("SYSTEM-LOG.syslog-server-address")),
-                                                       root.get<unsigned short>("SYSTEM-LOG.syslog-server-port"));
+                        boost::asio::ip::udp::endpoint
+                            (boost::asio::ip::address::from_string
+                                (m_configReader->Logging().get<std::string>("SYSTEM-LOG.syslog-server-address")),
+                                 m_configReader->Logging().get<unsigned short>("SYSTEM-LOG.syslog-server-port"));
             }
 
         }
@@ -285,24 +279,6 @@ private:
     }
 
     //-------------------------------------------------------------------------
-    const boost::filesystem::path GetLogSettingsPath()
-    {
-        /* AIWI TODO Lars klass istället
-        const char * const env = getenv("SAFIR_RUNTIME");
-        if (env == NULL)
-        {
-            FatalError("SAFIR_RUNTIME environment variable is not set");
-        }
-        boost::filesystem::path filename(env);
-
-        filename /= "data" / "text" / "logging.ini";
-        */
-
-        boost::filesystem::path filename;
-        return filename;
-    }
-
-    //-------------------------------------------------------------------------
     void FatalError(const std::string& errTxt)
     {
         SendNativeLog(SystemLog::Critical, errTxt);
@@ -317,8 +293,10 @@ private:
 
     pid_t                           m_pid;
     std::string                     m_processName;
-    bool                            m_nativeLogging;
-    bool                            m_sendToSyslogServer;
+
+    boost::shared_ptr<Safir::Utilities::Internal::ConfigReader> m_configReader;
+    bool                                                        m_nativeLogging;
+    bool                                                        m_sendToSyslogServer;
 
     boost::asio::ip::udp::endpoint  m_syslogServerEndpoint;
     boost::asio::io_service         m_service;
