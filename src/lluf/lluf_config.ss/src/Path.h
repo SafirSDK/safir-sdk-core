@@ -145,7 +145,10 @@ namespace Internal
             }
             m_path += p;
         }
+
         Path operator/(const std::string& p) const {Path tmp = *this; tmp /= p; return tmp;}
+
+        bool empty() const {return m_path.empty();}
 
         const std::string& str() const {return m_path;}
     private:

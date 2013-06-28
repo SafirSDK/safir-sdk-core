@@ -51,6 +51,11 @@ namespace Internal
         template <class PathFinder>
         void Read()
         {
+            if (TryLoad(PathFinder::SafirTestConfigOverrideDirectory()))
+            {
+                return;
+            }
+
             if (TryLoad(PathFinder::SystemConfigDirectory()))
             {
                 return;
@@ -80,6 +85,11 @@ namespace Internal
          */
         bool TryLoad(const Path& directory)
         {
+            if (directory.empty())
+            {
+                return false;
+            }
+
             if (!directory.IsDirectory())
             {
                 return false;

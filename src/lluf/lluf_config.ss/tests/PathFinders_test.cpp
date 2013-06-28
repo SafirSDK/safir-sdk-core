@@ -88,6 +88,16 @@ int main()
             }
         }
 
+        std::wcout << "test override config" << std::endl;
+        {
+            const Path p = Path("some") / "other" / "path";
+            SetEnv("SAFIR_TEST_CONFIG_OVERRIDE", p.str());
+            if (PathFinder::SafirTestConfigOverrideDirectory().str() != p.str())
+            {
+                return 1;
+            }
+        }
+
         std::wcout << "test system config" << std::endl;
         {
 #ifdef LLUF_CONFIG_READER_USE_LINUX

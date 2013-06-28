@@ -41,7 +41,18 @@ namespace Internal
         {
             throw std::logic_error("Environment variable " + name + " does not appear to be set");
         }
-        return std::string(env);
+        return env;
+    }
+
+    /** Nothrow version of getenv. Returns empty string on failure.*/
+    std::string GetEnv(const std::string& name, std::nothrow_t)
+    {
+        char* env = getenv(name.c_str());
+        if (env == NULL)
+        {
+            return "";
+        }
+        return env;
     }
 
 #ifdef LLUF_CONFIG_READER_USE_WINDOWS
