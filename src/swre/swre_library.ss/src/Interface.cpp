@@ -99,20 +99,6 @@ void SwreC_StopCrashReporting()
     }
 }
 
-#if 0
-void SwreC_TraceAppendString(const char * const /*str*/,
-                             bool & /*success*/)
-{
-    /*success = false;
-    try
-    {
-        const std::wstring wstr = Safir::Dob::Typesystem::Utilities::ToWstring(str);
-        Library::Instance().Trace(wstr);
-        success = true;
-    }
-    CATCH_LIBRARY_EXCEPTIONS*/
-}
-#endif
 
 void 
 SwreC_TraceAppendStringPrefix(const Safir::Dob::Typesystem::Int64 prefixId,
@@ -127,20 +113,6 @@ SwreC_TraceAppendStringPrefix(const Safir::Dob::Typesystem::Int64 prefixId,
     }
     CATCH_LIBRARY_EXCEPTIONS
 }
-
-#if 0
-void SwreC_TraceAppendChar(const char /*ch*/,
-                           bool & /*success*/)
-{/*
- success = false;
- try
- {
- //TODO
- success = true;
- }
- CATCH_LIBRARY_EXCEPTIONS*/
-}
-#endif
 
 void 
 SwreC_TraceAppendCharPrefix(const Safir::Dob::Typesystem::Int64 prefixId,

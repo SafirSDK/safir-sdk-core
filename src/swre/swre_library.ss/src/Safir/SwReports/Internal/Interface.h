@@ -96,18 +96,6 @@ extern "C"
      */
     /** @{ */
 
-#if 0 //not implemented
-    /**
-     * Add characters to trace buffer.
-     *
-     * The string will be added to the output buffer.
-     *
-     * @param str [in] - The string to append to the buffer.
-     * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
-     */
-    SWRE_LIBRARY_API void SwreC_TraceAppendString(const char * const str,
-                                                  bool & success);
-#endif
 
     /**
      * Add characters to trace buffer.
@@ -122,18 +110,6 @@ extern "C"
       SwreC_TraceAppendStringPrefix(const DotsC_Int64 prefixId,
                                     const char * const str,
                                     bool & success);
-#if 0 //not implemented
-    /**
-     * Add character to trace buffer.
-     *
-     * The character will be added to the output buffer.
-     *
-     * @param ch [in] - The character to append to the buffer.
-     * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
-     */
-    SWRE_LIBRARY_API void SwreC_TraceAppendChar(const char ch,
-                                                bool & success);
-#endif
 
     /**
      * Add character to trace buffer.
