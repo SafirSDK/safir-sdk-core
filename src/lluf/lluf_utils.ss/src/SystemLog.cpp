@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <Safir/Utilities/SystemLog.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <boost/weak_ptr.hpp>
@@ -57,6 +57,8 @@
 namespace Safir
 {
 namespace Utilities
+{
+namespace Internal
 {
 
 namespace
@@ -145,20 +147,22 @@ public:
 #endif
     }
 
-    void Send(const SystemLog::Severity severity, const std::string& text)
+    void Send(const SystemLog::Severity severity,
+              const std::string& text)
     {
         switch (severity)
         {
-            // fatal errors are written to std::cerr
+            // fatal errors are written to std::wcerr
             case SystemLog::Emergency:
             {
-                std::cerr << "EMERGENCY: " << text << std::flush;
+                //todo
+                std::cerr << "EMERGENCY: " << text.c_str() << std::flush;
             }
             break;
 
             case SystemLog::Alert:
             {
-                std::cerr << "ALERT: " << text << std::flush;
+                std::cerr << "ALERT: " << text.c_str() << std::flush;
             }
             break;
 
@@ -179,7 +183,7 @@ public:
             case SystemLog::Informational:
             case SystemLog::Debug:
             {
-                // No output to std::cerr in these cases.
+                // No output to std::wcerr in these cases.
                 ;
             }
             break;
@@ -250,7 +254,8 @@ private:
     }
 
     //-------------------------------------------------------------------------
-    void SendToSyslogServer(const SystemLog::Severity severity, const std::string& text)
+    void SendToSyslogServer(const SystemLog::Severity severity,
+                            const std::string& text)
     {
         std::stringstream log;
         log << "<" << (SAFIR_FACILITY | severity) << ">"
@@ -388,6 +393,7 @@ void SystemLog::Send(const Severity severity, const std::string& text)
     m_impl->Send(severity, text);
 }
 
+}
 }
 }
 

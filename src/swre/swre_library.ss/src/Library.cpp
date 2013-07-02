@@ -44,7 +44,6 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/PanicLogging.h>
 #include <Safir/Utilities/ProcessInfo.h>
-#include <Safir/Utilities/SystemLog.h>
 #include <boost/bind.hpp>
 #include <Safir/Utilities/CrashReporter.h>
 #include <boost/regex.hpp>

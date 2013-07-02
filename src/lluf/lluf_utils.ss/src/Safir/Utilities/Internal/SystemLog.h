@@ -32,6 +32,8 @@ namespace Safir
 {
 namespace Utilities
 {
+namespace Internal
+{
 
 /** Forward declaration for pimpl idiom */
 class SystemLogImpl;
@@ -86,6 +88,7 @@ private:
 };
 
 
+}
 }
 }
 
