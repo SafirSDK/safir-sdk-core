@@ -101,13 +101,7 @@ namespace Internal
         Library();
         ~Library();
 
-        // TODO void StopInternal();
-        // TODO static void AtExitFunc();
-        // TODO static void SignalFunc(const int signal);
         static void CrashFunc(const char* const dumpPath);
-        
-        //install signal and atexit functions
-        //TODO void Install();
   
         void GetEnv();
 
