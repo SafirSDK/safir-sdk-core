@@ -1363,7 +1363,7 @@ static dcom_ulong32 Check_IfUniCast_CanBeUsed(dcom_ulong64 BitMap)
     dcom_uchar8   Max = g_pShm->MaxUsedDoseId;
 
 
-    for(jj=0 ; jj<Max ; jj += 8, BitMap = BitMap>>8)
+    for(jj=0 ; jj<=Max ; jj += 8, BitMap = BitMap>>8)
     {
         if((BitMap & 0xFF) == 0) continue;
 
