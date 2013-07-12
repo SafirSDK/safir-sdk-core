@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2013 (http://www.safirsdk.com)
 *
-* Created by: Anders Widén
+* Created by: Anders WidÃ©n
 *
 *******************************************************************************
 *
@@ -40,10 +40,10 @@ namespace Internal
             private boost::noncopyable, public Synchronized
     {
     public:
-        WindowsLogger(const std::string& processName);
+        WindowsLogger(const std::wstring& processName);
         ~WindowsLogger();
 
-        void Send(const WORD eventType, const std::string& log) const;
+        void Send(const WORD eventType, const std::wstring& log) const;
 
         bool RegistryIsInitialized() const;
 
@@ -58,8 +58,8 @@ namespace Internal
 
         Safir::Utilities::StartupSynchronizer m_startupSynchronizer;
         HANDLE                                m_sourceHandle;
-        std::string                           m_processName;
-        std::string                           m_eventMessageFile;
+        std::wstring                          m_processName;
+        std::wstring                          m_eventMessageFile;
     };
 
 }

@@ -24,6 +24,7 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Utilities/Internal/ConfigReader.h>
+#include <Safir/Utilities/Internal/StringEncoding.h>
 #include <boost/weak_ptr.hpp>
 #include <boost/thread/once.hpp>
 #include <boost/thread/mutex.hpp>
@@ -96,7 +97,7 @@ private:
           m_service(),
           m_sock(m_service),
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-          m_eventLog(m_processName),
+          m_eventLog(ToUtf16(m_processName)),
 #endif
           m_lock()
     {
@@ -134,7 +135,7 @@ private:
         catch (const std::exception& e)
         {
             // Something really bad has happened, we have to stop executing
-            FatalError(e.what());
+            FatalError(ToUtf16(e.what()));
         }
     }
 
@@ -148,33 +149,32 @@ public:
     }
 
     void Send(const SystemLog::Severity severity,
-              const std::string& text)
+              const std::wstring& text)
     {
         switch (severity)
         {
             // fatal errors are written to std::wcerr
             case SystemLog::Emergency:
             {
-                //todo
-                std::cerr << "EMERGENCY: " << text.c_str() << std::flush;
+                std::wcerr << L"EMERGENCY: " << text << std::flush;
             }
             break;
 
             case SystemLog::Alert:
             {
-                std::cerr << "ALERT: " << text.c_str() << std::flush;
+                std::wcerr << L"ALERT: " << text << std::flush;
             }
             break;
 
             case SystemLog::Critical:
             {
-                std::cerr << "CRITICAL: " << text << std::flush;
+                std::wcerr << L"CRITICAL: " << text << std::flush;
             }
             break;
 
             case SystemLog::Error:
             {
-                std::cerr << "ERROR: " << text << std::flush;
+                std::wcerr << L"ERROR: " << text << std::flush;
             }
             break;
 
@@ -189,7 +189,7 @@ public:
             break;
 
             default:
-                FatalError("SystemLogImpl::SendNativeLog: Unknown severity!");
+                FatalError(L"SystemLogImpl::SendNativeLog: Unknown severity!");
         }
 
         if (m_nativeLogging)
@@ -199,14 +199,15 @@ public:
 
         if (m_sendToSyslogServer)
         {
-            SendToSyslogServer(severity, text);
+            // Utf-8 is used when sending to a syslog server
+            SendToSyslogServer(severity, ToUtf8(text));
         }
     }
 
 private:
 
     //-------------------------------------------------------------------------
-    void SendNativeLog(const SystemLog::Severity severity, const std::string& text)
+    void SendNativeLog(const SystemLog::Severity severity, const std::wstring& text)
     {
         // To stop compiler warn about unused variables
         severity;
@@ -214,7 +215,7 @@ private:
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
 
-        syslog(SAFIR_FACILITY | severity, "%s", text.c_str());
+        syslog(SAFIR_FACILITY | severity, "%s", ToUtf8(text).c_str());
 
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 
@@ -246,7 +247,7 @@ private:
             break;
 
             default:
-                FatalError("SystemLogImpl::SendNativeLog: Unknown severity!");
+                FatalError(L"SystemLogImpl::SendNativeLog: Unknown severity!");
         }
 
         m_eventLog.Send(eventType, text);
@@ -284,11 +285,11 @@ private:
     }
 
     //-------------------------------------------------------------------------
-    void FatalError(const std::string& errTxt)
+    void FatalError(const std::wstring& errTxt)
     {
         SendNativeLog(SystemLog::Critical, errTxt);
-        std::wcerr << errTxt.c_str() << std::endl;
-        throw std::logic_error(errTxt);
+        std::wcerr << errTxt << std::endl;
+        throw std::logic_error(ToUtf8(errTxt));
     }
 
 #ifdef _MSC_VER
@@ -388,7 +389,7 @@ SystemLog::~SystemLog()
 {
 }
 
-void SystemLog::Send(const Severity severity, const std::string& text)
+void SystemLog::Send(const Severity severity, const std::wstring& text)
 {
     m_impl->Send(severity, text);
 }

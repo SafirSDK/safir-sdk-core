@@ -69,7 +69,7 @@ public:
     * @param [in] text Log text.
     *
     */
-    void Send(const Severity severity, const std::string& text);
+    void Send(const Severity severity, const std::wstring& text);
 
 private:
 
