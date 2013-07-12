@@ -152,6 +152,8 @@ namespace Safir.Dob
         /// Get the number of items currently in the queue.
         /// <para/>
         /// This method returns the number of items that is currently in the specified queue.
+        /// NOTE: This method is only implemented for out-queues (MessageOutQueue, RequestOutQueue)
+        ///       If this method is called for an in-queue, a SoftwareViolationException will be thrown.
         /// </summary>
         /// <param name="queue">The queue to get info for.</param>
         /// <returns>The current size of the queue.</returns>
