@@ -44,10 +44,6 @@ if (MSVC)
    ADD_DEFINITIONS(/wd4503) #decorated name length exceeded
    ADD_DEFINITIONS(/wd4512) #assignment operator could not be generated
 
-   #use multiprocessing 
-   #LAHA turned off to see if that removes the vs2010 internal compiler errors we're seeing.
-   #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-
    #increase warning level
    # Use the highest warning level for visual studio.
    SET(CMAKE_CXX_WARNING_LEVEL 4)
@@ -175,7 +171,9 @@ ENDMACRO()
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SAFIR_SDK}/data/build/)
 
-if (MSVC)
+#MSVC variable is not set when using None as project languages
+#as is done in the dotnet projects.
+if (WIN32)
     SET(COMMON_CS_FLAGS "-warn:4")
 
     #this will make 32 bit builds work on a 64bit machine
@@ -184,7 +182,7 @@ if (MSVC)
     endif()
 else()
     SET(COMMON_CS_FLAGS "-warn:4" "-nowarn:1587")
-endif(MSVC)
+endif()
 
 
 #work out if we've got a configuration on the command line or if 
