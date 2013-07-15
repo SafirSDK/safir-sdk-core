@@ -24,10 +24,11 @@
 #ifndef __SWRE_LOG_CREATOR_H__
 #define __SWRE_LOG_CREATOR_H__
 
+#include <boost/shared_ptr.hpp>
 #include <string>
-//TODO: needed?
-//#include <Safir/Dob/Typesystem/Defs.h>
-#include <Safir/Dob/Connection.h>
+
+// forward declaration
+namespace Safir{namespace Utilities{namespace Internal{class ConfigReader;}}}
 
 namespace Safir
 {
@@ -71,6 +72,8 @@ public:
 private:
 
     std::wstring GetPrefix() const;
+
+    boost::shared_ptr<Safir::Utilities::Internal::ConfigReader> m_configReader;
 
     bool m_includeTimestamp;
 

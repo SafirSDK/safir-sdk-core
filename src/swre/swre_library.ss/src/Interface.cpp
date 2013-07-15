@@ -205,7 +205,7 @@ void SwreC_SendSystemLog(const DotsC_EnumerationValue severity,
 
     try
     {
-        Library::Instance().SendSystemLog(static_cast<Safir::Utilities::SystemLog::Severity>(severity),
+        Library::Instance().SendSystemLog(static_cast<Safir::Utilities::Internal::SystemLog::Severity>(severity),
                                           ToWstring(logMsg));
         success = true;
     }

@@ -261,8 +261,8 @@ namespace Internal
         // traces are always written to std out
         std::wcout << m_traceBuffer << std::flush;
 
-        m_systemLog.Send(Safir::Utilities::SystemLog::Debug,
-                         ToUtf8(m_traceBuffer));
+        m_systemLog.Send(Safir::Utilities::Internal::SystemLog::Debug,
+                         m_traceBuffer);
 
         m_traceBuffer.clear();
     }
@@ -439,11 +439,11 @@ namespace Internal
     }
 
     void
-    Library::SendSystemLog(const Safir::Utilities::SystemLog::Severity severity,
-                           const std::wstring&                         logMsg)
+    Library::SendSystemLog(const Safir::Utilities::Internal::SystemLog::Severity severity,
+                           const std::wstring&                                   logMsg)
     {
         m_systemLog.Send(severity,
-                         ToUtf8(m_logCreator.CreateSystemLog(logMsg)));
+                         m_logCreator.CreateSystemLog(logMsg));
     }
 
     void
@@ -451,10 +451,10 @@ namespace Internal
                                   const std::wstring& location,
                                   const std::wstring& text)
     {
-        m_systemLog.Send(Safir::Utilities::SystemLog::Critical,
-                         ToUtf8(m_logCreator.CreateFatalErrorLog(errorCode,
-                                                                 location,
-                                                                 text)));
+        m_systemLog.Send(Safir::Utilities::Internal::SystemLog::Critical,
+                         m_logCreator.CreateFatalErrorLog(errorCode,
+                                                          location,
+                                                          text));
     }
 
     void
@@ -462,11 +462,10 @@ namespace Internal
                              const std::wstring& location,
                              const std::wstring& text)
     {
-        m_systemLog.Send(Safir::Utilities::SystemLog::Error,
-                         Safir::Dob::Typesystem::Utilities::ToUtf8
-                         (m_logCreator.CreateErrorLog(errorCode,
-                                                      location,
-                                                      text)));
+        m_systemLog.Send(Safir::Utilities::Internal::SystemLog::Error,
+                         m_logCreator.CreateErrorLog(errorCode,
+                                                     location,
+                                                     text));
     }
 
     void
@@ -474,11 +473,10 @@ namespace Internal
                                 const bool          allocated,
                                 const std::wstring& text)
     {
-        m_systemLog.Send(Safir::Utilities::SystemLog::Warning,
-                         Safir::Dob::Typesystem::Utilities::ToUtf8
-                         (m_logCreator.CreateResourceLog(resourceId,
-                                                         allocated,
-                                                         text)));
+        m_systemLog.Send(Safir::Utilities::Internal::SystemLog::Warning,
+                         m_logCreator.CreateResourceLog(resourceId,
+                                                        allocated,
+                                                        text));
     }
 
     void
@@ -486,18 +484,17 @@ namespace Internal
                                         const std::wstring & location,
                                         const std::wstring & text)
     {
-        m_systemLog.Send(Safir::Utilities::SystemLog::Critical,
-                         Safir::Dob::Typesystem::Utilities::ToUtf8
-                         (m_logCreator.CreateProgrammingErrorLog(errorCode,
-                                                                 location,
-                                                                 text)));
+        m_systemLog.Send(Safir::Utilities::Internal::SystemLog::Critical,
+                         m_logCreator.CreateProgrammingErrorLog(errorCode,
+                                                                location,
+                                                                text));
     }
 
     void
     Library::SendProgramInfoReport(const std::wstring & text)
     {
-        m_systemLog.Send(Safir::Utilities::SystemLog::Debug,
-                         ToUtf8(m_logCreator.CreateProgramInfoLog(text)));
+        m_systemLog.Send(Safir::Utilities::Internal::SystemLog::Debug,
+                         m_logCreator.CreateProgramInfoLog(text));
     }
 }
 }

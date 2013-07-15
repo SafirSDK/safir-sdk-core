@@ -76,8 +76,8 @@ namespace Internal
 
         void TraceFlush();
 
-        void SendSystemLog(const Safir::Utilities::SystemLog::Severity severity,
-                           const std::wstring&                         logMsg);
+        void SendSystemLog(const Safir::Utilities::Internal::SystemLog::Severity severity,
+                           const std::wstring&                                   logMsg);
 
         void SendFatalErrorReport(const std::wstring & errorCode,
                                   const std::wstring & location,
@@ -151,7 +151,7 @@ namespace Internal
         LogCreator m_logCreator;
 
         //system logger
-        Safir::Utilities::SystemLog m_systemLog;
+        Safir::Utilities::Internal::SystemLog m_systemLog;
 
         /**
          * This class is here to ensure that only the Instance method can get at the 

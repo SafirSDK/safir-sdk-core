@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include "LogCreator.h"
 #include <Safir/Time/TimeProvider.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 
 namespace Safir
 {
@@ -46,9 +47,9 @@ std::wstring LogCreator::GetPrefix() const
 
 //-----------------------------------------------------------------------------
 LogCreator::LogCreator()
-    : m_includeTimestamp(false)
+    : m_configReader(new Safir::Utilities::Internal::ConfigReader),
+      m_includeTimestamp(m_configReader->Logging().get<bool>("SYSTEM-LOG.include-timestamp"))
 {
-    //TODO: Read ini file
 }
 
 LogCreator::~LogCreator()
