@@ -30,7 +30,7 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/PanicLogging.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/ErrorListResponse.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
@@ -61,7 +61,7 @@ namespace Internal
                    << " ctrl = " << m_ctrl
                    << ", responseId = " << m_responseId << std::endl;
 
-            std::ostringstream ostr;
+            std::wostringstream ostr;
             ostr << "A ResponseSender was destroyed without having been used!" << std::endl
                  << "This is usually due to a programming error in the application:" << std::endl
                  << "Either the application did not send a response to a request, or " << std::endl
@@ -71,7 +71,8 @@ namespace Internal
                  << std::endl << std::endl;
 
             ostr << "NodeNumber = " << Safir::Dob::ThisNodeParameters::NodeNumber();
-            Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+            Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
+                                                         ostr.str());
         }
     }
 

@@ -46,7 +46,6 @@
 #include <Safir/Time/LibraryParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/DynamicLibraryLoader.h>
-#include <Safir/Utilities/Internal/PanicLogging.h>
 
 namespace 
 {

@@ -23,7 +23,7 @@
 ******************************************************************************/
 
 #include "dose_main_app.h"
-#include <Safir/Utilities/Internal/PanicLogging.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/CrashReporter.h>
 
@@ -45,18 +45,20 @@ int main()
     }
     catch (const std::exception & exc)
     {
-        std::ostringstream ostr;
+        std::wostringstream ostr;
         ostr << "dose_main: Caught 'std::exception' exception: "
              << "  '" << exc.what() << "'." << std::endl;
         lllerr << ostr.str().c_str();
-        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
+                                                     ostr.str());
     }
     catch (...)
     {
-        std::ostringstream ostr;
+        std::wostringstream ostr;
         ostr << "dose_main: Caught '...' exception." <<std::endl;
         lllerr << ostr.str().c_str();
-        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
+                                                     ostr.str());
     }
     return 1;
 }

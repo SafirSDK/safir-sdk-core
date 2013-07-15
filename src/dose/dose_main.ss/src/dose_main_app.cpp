@@ -36,7 +36,7 @@
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/PanicLogging.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/CrashReporter.h>
 #include <boost/bind.hpp>
 #include <iostream>
@@ -73,13 +73,14 @@ namespace Internal
 
         void DumpFunc(const char* const dumpPath)
         {
-            std::ostringstream ostr;
+            std::wostringstream ostr;
             ostr << "dose_main has generated a dump to:\n" 
                  << dumpPath << "\n"
                  << "Please send this file to your nearest Dob developer, along with\n"
                  << "relevant information about what version of Safir SDK you are using" << std::endl;
             lllerr << ostr.str().c_str();
-            Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+            Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
+                                                         ostr.str());
         }
     }
 
@@ -129,7 +130,7 @@ namespace Internal
 
         // Start monitoring of this thread (that is, the main thread)
         m_mainThreadId = boost::this_thread::get_id();
-        m_threadMonitor.StartWatchdog(m_mainThreadId, "dose_main main thread");
+        m_threadMonitor.StartWatchdog(m_mainThreadId, L"dose_main main thread");
 
         // Schedule a timer so that the main thread will kick the watchdog.
         TimerInfoPtr timerInfo(new EmptyTimerInfo(TimerHandler::Instance().RegisterTimeoutHandler(L"dose_main watchdog timer", *this)));
@@ -675,22 +676,25 @@ namespace Internal
                         ostr << "Less than " << m_warningPercent << "% of the Dob shared memory is available!" << std::endl
                              << "This probably means that you're close to running out of memory!" << std::endl
                              << "Please increase the parameter Safir.Dob.NodeParameters.SharedMemorySize.";
-                        Safir::Utilities::Internal::PanicLogging::Log(Safir::Dob::Typesystem::Utilities::ToUtf8(ostr.str()));
+                        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
+                                                                     ostr.str());
                         lllerr << ostr.str() << std::endl;
                     }
                 }
                 catch (const std::exception& exc)
                 {
-                    std::ostringstream ostr;
+                    std::wostringstream ostr;
                     ostr << "Got exception in dose_main MemoryMonitor: " << std::endl
                         << exc.what();
-                    Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+                    Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
+                                                                 ostr.str());
                 }
                 catch (...)
                 {
                     std::wostringstream ostr;
                     ostr << "Got ... exception in dose_main MemoryMonitor!";
-                    Safir::Utilities::Internal::PanicLogging::Log(Safir::Dob::Typesystem::Utilities::ToUtf8(ostr.str()));
+                    Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
+                                                                 ostr.str());
                 }
             }
             catch(...)

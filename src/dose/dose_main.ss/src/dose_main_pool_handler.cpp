@@ -225,7 +225,7 @@ namespace Internal
             lllout << "Pool distribution thread started" << std::endl;
             
         m_poolDistributionThreadId = boost::this_thread::get_id();
-        m_threadMonitor->StartWatchdog(m_poolDistributionThreadId, "pool distribution thread");
+        m_threadMonitor->StartWatchdog(m_poolDistributionThreadId, L"pool distribution thread");
 
             // Wait until persistent data is ready.
             if (!m_persistHandler->IsPersistentDataReady())

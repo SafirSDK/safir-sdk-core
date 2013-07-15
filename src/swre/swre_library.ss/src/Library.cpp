@@ -42,7 +42,7 @@
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/PanicLogging.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <boost/bind.hpp>
 #include <Safir/Utilities/CrashReporter.h>
@@ -269,11 +269,12 @@ namespace Internal
 
     void Library::CrashFunc(const char* const dumpPath)
     {
-        std::ostringstream ostr;
+        std::wostringstream ostr;
         ostr << "An application has crashed! A dump was generated to:\n" 
              << dumpPath;
         std::wcerr << ostr.str().c_str() << std::endl;
-        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
+                                                     ostr.str());
     }
 
     void
