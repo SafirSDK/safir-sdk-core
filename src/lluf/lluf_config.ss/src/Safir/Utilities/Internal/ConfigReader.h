@@ -64,6 +64,8 @@ namespace Internal
          * Also expands environment and special variables (see below) in the 
          * property trees. There is no need to do that yourself!
          *
+         * Throws various errors derived from std::exception on failure.
+         * All these errors should be regarded as fatal errors!
          */
         ConfigReader();
 

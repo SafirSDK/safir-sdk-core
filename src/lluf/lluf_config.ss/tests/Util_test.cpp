@@ -91,6 +91,23 @@ int main()
             }
         }
 
+        std::wcout << "test nothrow GetEnv" << std::endl;
+        {
+            if (GetEnv("PATH", std::nothrow).empty())
+            {
+                return 1;
+            } 
+
+            try
+            {
+                GetEnv("PATHLKJSADF",std::nothrow);
+            }
+            catch (const std::logic_error&)
+            {
+                return 1;
+            }
+        }
+
 #ifdef LLUF_CONFIG_READER_USE_WINDOWS
         std::wcout << "test GetFolderPathFromCSIDL" << std::endl;
         {

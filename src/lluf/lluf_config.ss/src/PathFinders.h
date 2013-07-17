@@ -42,6 +42,12 @@ namespace Internal
             return path / "data" / "core_config";
         }
 
+        /** Returns empty path if environment variable is not set*/
+        static Path SafirTestConfigOverrideDirectory()
+        {
+            return Path(GetEnv("SAFIR_TEST_CONFIG_OVERRIDE", std::nothrow));
+        }
+
     };
 
 

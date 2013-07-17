@@ -150,6 +150,21 @@ int main(const int argc, const char* argv[])
             }
         }
 
+        std::wcout << "test empty" << std::endl;
+        {
+            const Path p1("");
+            const Path p2("not empty");
+            if (!p1.empty())
+            {
+                return 1;
+            }
+
+            if (p2.empty())
+            {
+                return 1;
+            }
+
+        }
         
 
     }

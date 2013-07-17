@@ -95,6 +95,8 @@ package Safir.Dob.Connection_Aspect_Miscs is
    -- Get the number of items currently in the queue.
    --
    -- This method returns the number of items that is currently in the specified queue.
+   -- NOTE: This method is only implemented for out-queues (MessageOutQueue, RequestOutQueue)
+   --       If this method is called for an in-queue, a Software_Violation_Exception will be thrown.
    --
    -- Parameters: Queue - The queue to get info for.
    -- Returns: The current size of the queue.
