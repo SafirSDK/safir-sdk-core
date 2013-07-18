@@ -31,6 +31,7 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/ip/host_name.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 #if defined _MSC_VER
   #pragma warning (push)
@@ -74,7 +75,7 @@ std::string GetSyslogTimestamp()
 
     std::stringstream ss;
 
-    ss.imbue(std::locale(ss.getloc(), new time_facet("%b %e %H:%M:%S")));
+    ss.imbue(std::locale(ss.getloc(), new time_facet("%b %d %H:%M:%S")));
     ss << second_clock::local_time();
     return ss.str();
 }
@@ -89,7 +90,7 @@ private:
     //constructor is private, to make sure only SystemLogImplKeeper can create it
     SystemLogImpl()
         : m_pid(Safir::Utilities::ProcessInfo::GetPid()),
-          m_processName(Safir::Utilities::ProcessInfo(m_pid).GetProcessName()),
+          m_processName(),
           m_configReader(),
           m_nativeLogging(false),
           m_sendToSyslogServer(false),
@@ -103,6 +104,9 @@ private:
     {
         try
         {
+            m_processName = Safir::Utilities::ProcessInfo(m_pid).GetProcessName();
+            boost::algorithm::replace_last(m_processName, ".exe", "");
+
             m_configReader.reset(new Safir::Utilities::Internal::ConfigReader);
 
             m_nativeLogging = m_configReader->Logging().get<bool>("SYSTEM-LOG.native-logging");
