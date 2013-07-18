@@ -88,8 +88,25 @@ namespace Internal
         const std::string var=str.substr(start+2, stop-start-2);
 
         Path value;
+        if (var == "TEMP")
+        {
 #ifdef LLUF_CONFIG_READER_USE_WINDOWS
-        if (var == "CSIDL_APPDATA" || var == "FOLDERID_RoamingAppData")
+            std::string env = GetEnv("TEMP", std::nothrow);
+            if (env.empty())
+            {
+                env = GetEnv("TMP", std::nothrow);
+            }
+            if (env.empty())
+            {
+                throw std::logic_error("Special variable TEMP could not be expanded, since neither TEMP or TMP environment variables could be found.");
+            }
+            value = Path(env);
+#else
+            value = Path("/tmp");
+#endif
+        }
+#ifdef LLUF_CONFIG_READER_USE_WINDOWS
+        else if (var == "CSIDL_APPDATA" || var == "FOLDERID_RoamingAppData")
         {
             value = GetFolderPathFromCSIDL(CSIDL_APPDATA);
         }
@@ -109,8 +126,8 @@ namespace Internal
         {
             value = GetFolderPathFromCSIDL(CSIDL_COMMON_DOCUMENTS);
         }
-        else
 #endif
+        else
         {
             throw std::logic_error("Special variable " + var + " could not be found");
         }

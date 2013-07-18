@@ -37,6 +37,7 @@ int main()
     }
     catch (...)
     {
+        std::wcout << "exception" << std::endl;
         return 1;
     }
     std::wcout << "success" << std::endl;
