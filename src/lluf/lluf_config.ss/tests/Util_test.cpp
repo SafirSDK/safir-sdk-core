@@ -156,6 +156,25 @@ int main()
             TestCSIDLExpand(CSIDL_COMMON_DOCUMENTS,"FOLDERID_PublicDocuments");
 #endif
 
+            std::wcout << "expand TEMP" << std::endl;
+            //expand TEMP
+            std::string expected;
+#ifdef LLUF_CONFIG_READER_USE_WINDOWS
+            expected = GetEnv("TEMP",std::nothrow);
+            if (expected.empty())
+            {
+                expected = GetEnv("TMP",std::nothrow);
+            }
+#else
+            expected = "/tmp";
+#endif
+            if (ExpandSpecial("asdf@{TEMP}foobar") != "asdf" + expected + "foobar")
+            {
+                std::wcout << expected.c_str() << std::endl;
+                return 1;
+            }
+            
+
         }
 
         std::wcout << "test ExpandEnvironment" << std::endl;
@@ -191,9 +210,9 @@ int main()
 
 
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        std::wcout << "caught exception" << std::endl;
+        std::wcout << "caught exception: " << e.what() << std::endl;
         return 1;
     }
     std::wcout << "success" << std::endl;
