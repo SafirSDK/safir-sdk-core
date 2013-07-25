@@ -26,10 +26,6 @@
 from __future__ import print_function
 import subprocess, os, time, sys
 
-if sys.version_info[0] != 2:
-    print("This test script only works with python 2.x, exiting as if it was run successfully")
-    sys.exit(0)
-
 if sys.platform == "win32":
     config_type = os.environ.get("CMAKE_CONFIG_TYPE")
     exe_path = config_type if config_type else ""

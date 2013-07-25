@@ -7,3 +7,4 @@ IF (NOT MSVC)
 ENDIF()
 
 ADD_TEST(ProcessInfo ProcessInfo_test)
+SET_TESTS_PROPERTIES(ProcessInfo PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")

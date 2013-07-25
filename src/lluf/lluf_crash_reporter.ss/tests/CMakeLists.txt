@@ -16,8 +16,9 @@ IF (NOT MSVC)
 ENDIF()
 
 
+FIND_SOURCE_ROOT(SOURCE_ROOT)
 ADD_TEST(CrashReporter_start_stop start_stop)
-
+SET_TESTS_PROPERTIES(CrashReporter_start_stop PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")
 
 ADD_SUBDIRECTORY(simple_crash_test)
 ADD_SUBDIRECTORY(external_signals_test)
