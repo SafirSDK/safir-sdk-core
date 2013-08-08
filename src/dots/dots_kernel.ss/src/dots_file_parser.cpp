@@ -58,21 +58,6 @@ namespace
         {
             using namespace Safir::Dob::Typesystem::Internal;
 
-            //TODO: Get rid of this monstrosity! It is only there since dots_configuration_check
-            //is used to check other directories. Instead use new dots_internal and give it a path explicitly
-            const char* const env = getenv("SAFIR_DOTS_CLASSES_DIR");
-            if (env != NULL)
-            {
-                // Read the dou/dom files from a non-standard location
-                boost::filesystem::path filename(env);
-                
-                ENSURE(boost::filesystem::exists(filename) && boost::filesystem::is_directory(filename),
-                       << "The directory for dou and dom files could not be found. $(SAFIR_DOTS_CLASSES_DIR) evaluates to " << filename.string());
-                
-                ReadDirectory(filename, m_douFiles, m_domFiles);
-                return;
-            }
-
             //Read the config files
             Safir::Utilities::Internal::ConfigReader reader;
 
