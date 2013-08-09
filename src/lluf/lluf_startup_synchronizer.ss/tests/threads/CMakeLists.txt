@@ -5,4 +5,5 @@ IF (NOT MSVC)
 ENDIF()
 
 ADD_TEST(StartupSynchronizer_threads ss_threads_test)
-set_tests_properties(StartupSynchronizer_threads PROPERTIES TIMEOUT 120)
+SET_TESTS_PROPERTIES(StartupSynchronizer_threads PROPERTIES TIMEOUT 120)
+SET_TESTS_PROPERTIES(StartupSynchronizer_threads PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")

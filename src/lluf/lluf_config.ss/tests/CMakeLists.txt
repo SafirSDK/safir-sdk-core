@@ -24,3 +24,7 @@ ADD_TEST(ConfigReader_Path Path_test ${lluf_config_test_SOURCE_DIR} ${lluf_confi
 ADD_TEST(ConfigReader_Util Util_test)
 ADD_TEST(ConfigReader_PathFinders PathFinders_test)
 ADD_TEST(ConfigReader_ConfigReaderImpl ConfigReaderImpl_test ${lluf_config_test_SOURCE_DIR}/testconf)
+
+#We only need to set the SAFIR_TEST_CONFIG_OVERRIDE variable for the read_parameter test, since all the other tests will take care of themselves.
+FIND_SOURCE_ROOT(SOURCE_ROOT)
+SET_TESTS_PROPERTIES(ConfigReader_read_parameter PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")

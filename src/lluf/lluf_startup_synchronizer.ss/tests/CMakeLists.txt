@@ -8,7 +8,10 @@ FIND_PACKAGE(Boost COMPONENTS thread system)
 
 FIND_PACKAGE(PythonInterp)
 
+FIND_SOURCE_ROOT(SOURCE_ROOT)
+
 ENABLE_TESTING()
+
 ADD_SUBDIRECTORY(processes)
 ADD_SUBDIRECTORY(threads)
 ADD_SUBDIRECTORY(processes_and_threads)

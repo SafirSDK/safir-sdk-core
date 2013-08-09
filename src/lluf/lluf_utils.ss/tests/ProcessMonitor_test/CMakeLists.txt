@@ -10,3 +10,5 @@ ENDIF()
 
 ADD_TEST(ProcessMonitor_monitor ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 ADD_TEST(ProcessMonitor_stop ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test2.py)
+
+SET_TESTS_PROPERTIES(ProcessMonitor_monitor ProcessMonitor_stop PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")

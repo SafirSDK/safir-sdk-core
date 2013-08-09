@@ -12,3 +12,6 @@ endif()
 
 ENABLE_TESTING()
 ADD_TEST(constants_test constants_test)
+
+FIND_SOURCE_ROOT(SOURCE_ROOT)
+SET_TESTS_PROPERTIES(constants_test PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")

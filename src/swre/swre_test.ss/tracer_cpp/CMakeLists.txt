@@ -6,4 +6,5 @@ endif()
 
 ADD_TEST(tracer_cpp ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
-set_tests_properties(tracer_cpp PROPERTIES TIMEOUT 120)
+SET_TESTS_PROPERTIES(tracer_cpp PROPERTIES TIMEOUT 120)
+SET_TESTS_PROPERTIES(tracer_cpp PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")

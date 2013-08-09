@@ -41,3 +41,7 @@ INSTALL(DIRECTORY output_multinode
 INSTALL(DIRECTORY test_parameters
         DESTINATION ${SAFIR_RUNTIME}/data/text/dose_test
         PATTERN ".svn" EXCLUDE)
+
+INSTALL(DIRECTORY test_config
+        DESTINATION ${SAFIR_RUNTIME}/data/text/dose_test
+        PATTERN ".svn" EXCLUDE)

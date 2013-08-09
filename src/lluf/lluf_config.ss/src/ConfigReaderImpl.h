@@ -51,27 +51,36 @@ namespace Internal
         template <class PathFinder>
         void Read()
         {
-            if (TryLoad(PathFinder::SafirTestConfigOverrideDirectory()))
-            {
-                return;
-            }
-
-            if (TryLoad(PathFinder::SystemConfigDirectory()))
+            const Path dir1 = PathFinder::SafirTestConfigOverrideDirectory();
+            if (TryLoad(dir1))
             {
                 return;
             }
             
-            if (TryLoad(PathFinder::UserConfigDirectory()))
-            {
-                return;
-            }
-
-            if (TryLoad(PathFinder::SafirRuntimeConfigDirectory()))
+            const Path dir2 = PathFinder::SystemConfigDirectory();
+            if (TryLoad(dir2))
             {
                 return;
             }
             
-            throw std::logic_error("Failed to load configuration");
+            const Path dir3 = PathFinder::UserConfigDirectory();
+            if (TryLoad(dir3))
+            {
+                return;
+            }
+
+            const Path dir4 = PathFinder::SafirRuntimeConfigDirectory();
+            if (TryLoad(dir4))
+            {
+                return;
+            }
+            
+            throw std::logic_error("Failed to load configuration.\n"
+                                   "Looked in '" 
+                                   + dir1.str() + "', '" 
+                                   + dir2.str() + "', '" 
+                                   + dir3.str() + "', '" 
+                                   + dir4.str() + "'");
         }
 
         boost::property_tree::ptree m_locations;
@@ -112,7 +121,7 @@ namespace Internal
             }
             else
             {
-                throw std::logic_error("Failed to find all three ini files");
+                throw std::logic_error("Failed to find all three ini files in '" + directory.str() + "'");
             }
         }
 

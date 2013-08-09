@@ -35,9 +35,9 @@ int main()
             return 1;
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        std::wcout << "exception" << std::endl;
+        std::wcout << "exception:" << e.what() <<  std::endl;
         return 1;
     }
     std::wcout << "success" << std::endl;
