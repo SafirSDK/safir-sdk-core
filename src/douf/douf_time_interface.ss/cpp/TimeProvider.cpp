@@ -22,13 +22,14 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Typesystem/Defs.h>
+#include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Time/TimeProvider.h>
 #include <Safir/Time/Internal/Interface.h>
 
 //disable warnings in boost
 #if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4127)
+#  pragma warning (push)
+#  pragma warning (disable : 4127)
 #endif
 
 #include <boost/date_time/time_duration.hpp>
@@ -36,7 +37,7 @@
 
 //and enable the warnings again
 #if defined _MSC_VER
-  #pragma warning (pop)
+#  pragma warning (pop)
 #endif
 
 using namespace boost::date_time;
@@ -46,20 +47,31 @@ namespace Safir
 namespace Time
 {
     const boost::posix_time::ptime _1_JAN_1970 (boost::gregorian::date(1970,Jan,1));
-
+    
     //---------------------------------------------------------------------------
     Safir::Dob::Typesystem::Si64::Second TimeProvider::GetUtcTime()
     {
         Safir::Dob::Typesystem::Si64::Second utcTime;
-        DoufTimeC_GetUtcTime(utcTime);
+        bool success;
+        DoufTimeC_GetUtcTime(utcTime, success);
+        if (!success)
+        {
+            throw Safir::Dob::Typesystem::ConfigurationErrorException(L"Configuration error in TimeProvider, please check your logs!",__WFILE__, __LINE__);
+        }
+
         return utcTime;
     }
-
+    
     //---------------------------------------------------------------------------
     boost::posix_time::ptime TimeProvider::ToLocalTime(const Safir::Dob::Typesystem::Si64::Second utcTime)
     {
         Safir::Dob::Typesystem::Int32 offset;
-        DoufTimeC_GetLocalTimeOffset(offset);
+        bool success;
+        DoufTimeC_GetLocalTimeOffset(offset, success);
+        if (!success)
+        {
+            throw Safir::Dob::Typesystem::ConfigurationErrorException(L"Configuration error in TimeProvider, please check your logs!",__WFILE__, __LINE__);
+        }
 
         // Convert seconds to localtime
         Dob::Typesystem::Si64::Second localTime = utcTime + offset;
@@ -75,7 +87,12 @@ namespace Time
         Dob::Typesystem::Float64 fraction = duration.fractional_seconds() / pow(10.0,duration.num_fractional_digits());
 
         Safir::Dob::Typesystem::Int32 offset;
-        DoufTimeC_GetLocalTimeOffset(offset);
+        bool success;
+        DoufTimeC_GetLocalTimeOffset(offset, success);
+        if (!success)
+        {
+            throw Safir::Dob::Typesystem::ConfigurationErrorException(L"Configuration error in TimeProvider, please check your logs!",__WFILE__, __LINE__);
+        }
 
         return seconds + fraction - offset;
     }

@@ -34,9 +34,9 @@ namespace Safir.Time
     {
 
         [DllImport("douf_time_library.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "DoufTimeC_GetUtcTime")]
-        internal static extern void GetUtcTime(out double utcTime);
+        internal static extern void GetUtcTime(out double utcTime, out byte success);
         [DllImport("douf_time_library.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "DoufTimeC_GetLocalTimeOffset")]
-        internal static extern void GetLocalTimeOffset(out Int32 offset);
+        internal static extern void GetLocalTimeOffset(out Int32 offset, out byte success);
 
         private static System.DateTime _1_JAN_1970 = new DateTime( 1970, 1, 1 );
 
@@ -48,8 +48,12 @@ namespace Safir.Time
         {
             // Get current Utc time
             double utcTime;
-            GetUtcTime(out utcTime);
-
+            byte success;
+            GetUtcTime(out utcTime, out success);
+            if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
+            {
+                throw new Safir.Dob.Typesystem.ConfigurationErrorException("Configuration error in TimeProvider, please check your logs!");
+            }
             return utcTime; 
         }
 
@@ -76,7 +80,12 @@ namespace Safir.Time
         public static double ToUtcTime( System.DateTime localTime )
         {
             int offset;
-            GetLocalTimeOffset(out offset);
+            byte success;
+            GetLocalTimeOffset(out offset, out success);
+            if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
+            {
+                throw new Safir.Dob.Typesystem.ConfigurationErrorException("Configuration error in TimeProvider, please check your logs!");
+            }
 
             // Convert time to seconds since 01-Jan-1970
             System.TimeSpan timeDiff = localTime - _1_JAN_1970;
@@ -109,7 +118,12 @@ namespace Safir.Time
         public static System.DateTime ToLocalTime( double utcTime )
         {
             int offset;
-            GetLocalTimeOffset(out offset);
+            byte success;
+            GetLocalTimeOffset(out offset, out success);
+            if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
+            {
+                throw new Safir.Dob.Typesystem.ConfigurationErrorException("Configuration error in TimeProvider, please check your logs!");
+            }
 
             // Convert seconds to localtime
             double localTime = utcTime + offset;

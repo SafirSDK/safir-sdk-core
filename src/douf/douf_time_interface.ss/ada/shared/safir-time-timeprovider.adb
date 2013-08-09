@@ -21,15 +21,23 @@
 --  along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 --
 -------------------------------------------------------------------------------
+with Ada.Exceptions;
+with Interfaces.C;
+
 package body Safir.Time.TimeProvider is
+
+   package C renames Interfaces.C;
+
+   procedure Throw (E : Ada.Exceptions.Exception_Id; Message : String := "")
+     renames  Ada.Exceptions.Raise_Exception;
 
    use type Safir.Dob.Typesystem.Si_64.Second;
    use type Ada.Calendar.Time;
 
-   procedure GetUtcTime (utcTime : out Safir.Dob.Typesystem.Si_64.Second);
+   procedure GetUtcTime (utcTime : out Safir.Dob.Typesystem.Si_64.Second; Success : out C.char);
    pragma Import (C, GetUtcTime, "DoufTimeC_GetUtcTime");
 
-   procedure GetLocalTimeOffset (offset : out Safir.Dob.Typesystem.Int_32);
+   procedure GetLocalTimeOffset (offset : out Safir.Dob.Typesystem.Int_32; Success : out C.char);
    pragma Import (C, GetLocalTimeOffset, "DoufTimeC_GetLocalTimeOffset");
 
    ADA_1_JAN_1970 : constant Ada.Calendar.Time := Ada.Calendar.Time_Of (
@@ -40,25 +48,46 @@ package body Safir.Time.TimeProvider is
    ----------------------------------------------------------------------------
    function GetUtcTime return Safir.Dob.Typesystem.Si_64.Second is
       UtcTime : Safir.Dob.Typesystem.Si_64.Second;
+      Success : C.char;
    begin
       -- Get current Utc time
-      GetUtcTime (UtcTime);
+      GetUtcTime (UtcTime, Success);
+
+      if C.char'Pos (Success) = 0 then
+         Throw (Safir.Dob.Typesystem.Configuration_Error_Exception'Identity,
+                "Configuration error in TimeProvider, please check your logs!");
+      end if;
+
       return UtcTime;
    end GetUtcTime;
 
    ----------------------------------------------------------------------------
    function ToLocalTime (UtcTime : in Safir.Dob.Typesystem.Si_64.Second) return Ada.Calendar.Time is
       Offset : Safir.Dob.Typesystem.Int_32;
+      Success : C.char;
    begin
-      GetLocalTimeOffset (Offset);
+      GetLocalTimeOffset (Offset, Success);
+
+      if C.char'Pos (Success) = 0 then
+         Throw (Safir.Dob.Typesystem.Configuration_Error_Exception'Identity,
+                "Configuration error in TimeProvider, please check your logs!");
+      end if;
+
       return CalendarTimeOf (UtcTime + Safir.Dob.Typesystem.Float_64 (Offset));
    end ToLocalTime;
 
    ----------------------------------------------------------------------------
    function ToUtcTime (LocalTime : in Ada.Calendar.Time) return Safir.Dob.Typesystem.Si_64.Second is
       Offset    : Safir.Dob.Typesystem.Int_32;
+      Success : C.char;
    begin
-      GetLocalTimeOffset (Offset);
+      GetLocalTimeOffset (Offset, Success);
+
+      if C.char'Pos (Success) = 0 then
+         Throw (Safir.Dob.Typesystem.Configuration_Error_Exception'Identity,
+                "Configuration error in TimeProvider, please check your logs!");
+      end if;
+
       -- Return seconds since 01 Jan 1970
       return Safir.Dob.Typesystem.Float_64 (LocalTime - ADA_1_JAN_1970 - Duration (Offset));
    end ToUtcTime;

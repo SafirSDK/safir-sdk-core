@@ -5,10 +5,11 @@
     <baseClass>Safir.Dob.Parametrization</baseClass>
     <parameters>
       <parameter>
-        <summary>The name of the library that is the time provider in the system.</summary>
+        <summary>The name of the library that is the time provider in the system. 
+                 If this parameter is empty the returned values will be based on boost date_time library.</summary>
         <name>LibraryName</name>
         <type>String</type>
-        <value>TihaDll.dll</value>
+        <value></value>
       </parameter>
       <parameter>
         <summary>The name of the function that returns current UTC time. The named function has to return a
