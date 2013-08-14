@@ -31,7 +31,7 @@ See http://stackoverflow.com/questions/1865069/how-to-compile-a-64-bit-applicati
 
 GNAT
 An Ada compiler capable of generating 64 bit is necessary only if you want to build a 64 bit Ada application.
-The easiest way of getting an open source Ada compiler is to use the GNAT GPL package provided by AdaCore (Unfortunately, it doesn't support 64 bit).
+The easiest way of getting an Ada compiler is to use the GNAT GPL package provided by AdaCore (Unfortunately, it doesn't support 64 bit).
 
 Boost
 64 bit build is mandatory.
@@ -45,12 +45,9 @@ Expat
 Java Platform JDK
 64 bit build is needed if you intend to build 64 bit Java applications.
 
-For the moment the Safir SDK Core build system (build.py and CMake files) has no support for 64 bit Ada and Java. 
-
-
 Visual Studio and utils
 ~~~~~~~~~~~~~~~~~~~~~~~
-You are assumed to already have Visual Studio 2005 SP1 (aka 8.0), 2008 SP1 (aka 9.0) or 2010 (aka 10.0) installed, so we proceed immediately to the more interesting bits.
+You are assumed to already have Visual Studio 2010 (aka MSVC 10.0) installed, so we proceed immediately to the more interesting bits. You should also be able to use later versions of Visual Studio.
 You are also assumed to have some unpacking tool installed that can handle .gz files, like winzip, 7-zip or winrar.
 
 Subversion
@@ -71,20 +68,16 @@ For some boost versions there are some bugs that need to be patched for Safir SD
 
 jom
 ~~~
-
 Jom is an nmake replacement with support for multi-core CPU, which will speed up compilation both of Qt below, and of the Safir SDK Core components. Installing it is optional.
 Download the latest version of jom from http://qt-project.org/wiki/jom, and put the jom executable in a folder that is in your PATH.
 
 Qt
 ~~
-
 32 bit:
 Download the "Qt Library" installer for your compiler from http://qt-project.org/downloads#qt-lib. Run and install.
-Set up environment variable QTDIR to refer the installation directory (for example QTDIR=C:\Qt\4.8.1) and add %QTDIR%\bin to PATH environment variable.
+Set up environment variable QTDIR to refer the installation directory (e.g. QTDIR=C:\Qt\4.8.1) and add %QTDIR%\bin to PATH environment variable.
 
 64 bit:
-Instructions for building with VS2010. This should be able to adapt to VS2005/2008 by starting the appropriate command prompt at step 8.
-
 1. Download the Qt source code from http://qt.nokia.com/downloads, unzip and move the contents to C:\Qt\4.8.1.
 2. Set up environment variable QTDIR=C:\Qt\4.8.1 and add %QTDIR%\bin to PATH environment variable 
 3. Start Visual Studio 2010 Command Prompt (Start > Programs > Microsoft Visual Studio 2010 > Visual Studio Tools > Visual Studio Command Prompt).
@@ -100,14 +93,12 @@ In the "Install Options" step, check the "Add CMake to the system PATH for all u
 
 Expat
 ~~~~~
-The latest release is 2.1.0.
-
 32 bit:
 Go to http://expat.sourceforge.net/ and download and install the binary installer for windows.
 
 64 bit:
-1. Download and unpack http://sourceforge.net/projects/expat/files/expat/2.1.0/expat-2.1.0.tar.gz to a directory of your choice (This directory is just used as build directory)
-2. Add a subdirectory 'build' (For example: C:\tmp\expat-2.1.0\build)
+1. Download and unpack http://sourceforge.net/projects/expat/files/expat/2.1.0/expat-2.1.0.tar.gz or later to a directory of your choice (This directory is just used as build directory)
+2. Add a subdirectory 'build' (e.g. C:\tmp\expat-2.1.0\build)
 3. Open a command window for the 64 bit tool-chain as Administrator. Start -> All Programs -> Microsoft Visual Studio 2010 -> Visual Studio Tools -> Visual Studio x64 Win64 Command Prompt (2010)
    (To be able to install files under "Program Files" you might have to open the command window as Administrator)
 4. cd into c:\tmp\expat-2.1.0\build
@@ -124,8 +115,6 @@ This step is optional, if you don't want Ada interfaces you do not need to insta
 Go to http://libre.adacore.com/ and download the GPL version of GNAT.
 Install GNAT. (and reboot, as the installer says)
 
-Add the lib path (e.g. c:\GNAT\2011\lib) to your PATH.
-
 Java
 ~~~~
 This step is optional, if you don't want Java interfaces you do not need to install Java. You will need to pass --no-java-support to the build script as described below if you do not install Java.
@@ -134,10 +123,9 @@ Go to http://java.sun.com/javase/downloads/index.jsp and download and install a 
 
 Python
 ~~~~~~
-Go to http://www.python.org/ and download and install the python installer. (Please use a version greater than or equal to 2.6)
+Go to http://www.python.org/ and download and install the python installer. (Please use a version greater than or equal to 2.7)
 
-Add C:\Python26 (or equivalent) to your PATH.
-
+Add C:\Python27 (or equivalent) to your PATH.
 
 Doxygen and Graphviz
 ~~~~~~~~~~~~~~~~~~~~
@@ -149,7 +137,6 @@ It appears that Graphviz installs its own version of libexpat.dll which conflict
 (If you don't do this you will get an error message about "The ordinal 63 could not be located in the dynamic link library libexpat.dll" when you build Safir SDK Core.)
 
 Now you can jump to "Building Safir SDK Core"
-
 
 Building Safir SDK Core
 -----------------------
@@ -185,7 +172,7 @@ Building example applications
 The directory named "examples" contains some test applications. The simplest way to build these is to use the build script with a different configuration file (run after the build of the SDK as described above):
     build/build.py -f build/example_apps.txt
 When this is complete you should have a few new applications installed under %SAFIR_RUNTIME%/bin: VehicleAppCpp, VehicleAppCs, VehicleMmiCppQt, VehicleMmiCsWinForms and VehicleAppDb. 
-Note: There is also a build script configuration file dob_tests_windows.txt, which builds the Dob test suite.
+Note: There is also a build script configuration file dob_tests.txt, which builds the Dob test suite.
 
 Setting up library and include paths in Visual Studio
 -----------------------------------------------------
@@ -207,6 +194,6 @@ Add the following under "Library files"
 
 Recreating the downloadable binary
 ----------------------------------
-The Windows binary that is available for download at www.safirsdk.com is created by following the above instructions and then running the create_windows_distributable.py script. The script copies necessary dlls, libs and header files into appropriate parts of SAFIR_RUNTIME and SAFIR_SDK, so that those folders can be moved to another computer where it will not be necessary to install/build all of the above prerequisites to be able to develop against the Safir SDK Core.
-If you want to do that, open a command prompt and cd to the directory where you ran the build script from and run "create_windows_distributable.py".
+The Windows binary that is available for download at http://safir.sourceforge.net is created by following the above instructions and then running the prepare_for_distribution.py script. The script copies necessary dlls, libs and header files into appropriate parts of SAFIR_RUNTIME and SAFIR_SDK, so that those folders can be moved to another computer where it will not be necessary to install/build all of the above prerequisites to be able to develop against the Safir SDK Core.
+If you want to do that, open a command prompt and cd to the directory where you ran the build script from and run "build/prepare_for_distribution.py".
 
