@@ -249,12 +249,6 @@ def windows():
     else:
         logError("Failed to find expat headers!")
     
-    ############
-    log("Copying Ada stuff - GNAT runtime")
-    copy_dll("libgnat-2011.dll")
-    copy_dll("libgnarl-2011.dll")
-    copy_dll("libgcc_s_dw2-1.dll")
-
     ###########
     log("Copying jom.exe")
     copy_exe("jom.exe")
