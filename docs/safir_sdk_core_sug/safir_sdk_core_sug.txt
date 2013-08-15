@@ -90,13 +90,13 @@ Safir SDK Core uses the _Boost_ library to provide low level functionality and o
 Safir SDK Core also uses some other open source libraries, such as Qt for C++ widgets, CMake for building and Expat for xml parsing. See the installation instructions for more information.
 
 === Supported Platforms
-Safir SDK Core supports both the Windows and Linux platforms on the x86 platform. It also supports Linux on 64 bit x86_64 platforms, but this has not been extensively tested. It should work well on 64 bit Windows platforms as well.
+Safir SDK Core supports both the Windows and Linux platforms on the x86 and x86_64 platforms. It also successufully builds and runs on ARM Linux, but we have not tested this extensively.
 
 Obviously it is possible to combine all these platforms into one system and use Safir SDK Core for communication (after all what use is a middleware if it isn't platform independent).
 
 An application should, written correctly using Boost and Safir SDK Core, be portable to all the supported platforms with no or very little effort.
 
-The compilers that we know can be used for the C++ code are GNU gcc (version 4.0 or later), Microsoft Visual Studio (2005 SP1 or later). For C# code we use Visual Studio (2005 SP1 or later) or Mono (version 1.9.1 or later). Any Java 5 compiler should be able to compile the Java code (we've used Sun's), and for Ada we use Adacore's GNAT Pro (6.1.0w) and GNAT GPL (2008 and 2009).
+The compilers that we use for building and testing for the C++ code are GNU gcc (version 4.4 or later), Microsoft Visual Studio (2010 SP1 or later). For C# code we use Visual Studio (2010 SP1 or later) or Mono (version 2.4 or later). Any Java 6 compiler should be able to compile the Java code (we've used Sun's), and for Ada we use Adacore's GNAT GNAT GPL (2013). We strive to make all our code standars compliant, so other versions and compilers _should_ work.
 
 == What is the Dob?
 This chapter describes what the Dob does and a little bit about why it does it the way it does.
