@@ -56,13 +56,14 @@ Safir SDK Core consists of a number of _components_, that have cryptic four-lett
 |=========================================================================
 |Acronym |Full name                       |Provided Service(s)
 
-|Lluf    |Low Level Utility Functions     |Low level functions that are not provided by Boost
-|Dots    |Distributed Objects Type system |The type system used for the distributed objects
-|Dose    |Distributed Objects Service     |Inter-process and inter-computer distribution
-|Douf    |Dob Utility Functions           |Utility functions for applications using the Dob
-|Swre    |Software Reports                |Software error reporting and debug trace logging
+|Lluf    |Low Level Utility Functions     |Low level functions that are not provided by Boost.
+|Dots    |Distributed Objects Type system |The type system used for the distributed objects.
+|Dose    |Distributed Objects Service     |Inter-process and inter-computer distribution.
+|Douf    |Dob Utility Functions           |Utility functions for applications using the Dob.
+|Swre    |Software Reports                |Software error reporting and debug trace logging.
 |Olib    |ODBC Library                    |C++ wrapper classes for Odbc database access.
-|Dope    |Dob Persistence                 |Persistent storage of Dob entities
+|Dope    |Dob Persistence                 |Persistent storage of Dob entities.
+|Foreach |N/A                             |Functionality for operating on multiple entity instances.
 
 |=========================================================================
 
@@ -72,7 +73,7 @@ Component dependencies are illustrated in <<sdk_core_component_dependencies>>.
 
 [[sdk_core_component_dependencies]]
 .Safir SDK Core component dependencies
-image::images/dependencies.png["Component Dependencies", width=350, link="images/dependencies.png"]
+image::block-diagram.png["Component Dependencies", width=440, link="block-diagram.png"]
 
 Again, to be able to use Safir SDK Core you do not need to understand or like these acronyms, but knowing that they are there may make some things in the SDK easier to use.
 

@@ -1,7 +1,7 @@
 .SILENT:
 .PHONY: all clean
 
-DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wildcard images/*.png) Makefile
+DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wildcard images/*.png) Makefile block-diagram.png
 
 default: safir_sdk_core_sug.pdf
 
@@ -13,6 +13,10 @@ help:
 	echo " Check the Makefile for other targets"
 
 all: archives #will build other stuff due to deps
+
+vpath %.dia images
+%.png: %.dia
+	dia --export=$@ -t png-libart $<
 
 archives: safir_sdk_core_sug.pdf.zip \
 	 safir_sdk_core_sug.pdf.bz2 \
@@ -36,6 +40,7 @@ safir_sdk_core_sug.chunked/index.html: $(DEPS)
 	a2x -L -f chunked -d book safir_sdk_core_sug.txt
 	-mkdir -p safir_sdk_core_sug.chunked/images
 	-cp -f images/*.png safir_sdk_core_sug.chunked/images/
+	-cp -f *.png safir_sdk_core_sug.chunked/
 
 safir_sdk_core_sug.chunked_html.zip: safir_sdk_core_sug.chunked/index.html
 	zip -r safir_sdk_core_sug.chunked_html.zip safir_sdk_core_sug.chunked
@@ -50,10 +55,10 @@ safir_sdk_core_sug.html: $(DEPS)
 
 safir_sdk_core_sug.single_html.zip: safir_sdk_core_sug.html 
 	zip safir_sdk_core_sug.single_html.zip safir_sdk_core_sug.html
-	find images -name "*.png" -print | zip safir_sdk_core_sug.single_html.zip -@
+	find . -name "*.png" -print | zip safir_sdk_core_sug.single_html.zip -@
 
 safir_sdk_core_sug.single_html.tar.bz2: safir_sdk_core_sug.html 
-	tar cfvj safir_sdk_core_sug.single_html.tar.bz2 safir_sdk_core_sug.html images/*.png
+	tar cfvj safir_sdk_core_sug.single_html.tar.bz2 safir_sdk_core_sug.html images/*.png *.png
 
 clean:
-	rm -rf *~ *.pdf *.html *.xml *.fo safir_sdk_core_sug.chunked *.zip *.bz2
+	rm -rf *~ *.pdf *.html *.xml *.fo safir_sdk_core_sug.chunked *.zip *.bz2 *.png
