@@ -251,9 +251,9 @@ def windows():
     
 
     log("Copying Ada stuff - GNAT runtime")
-    copy_dll("libgnat-2013.dll", False)
-    copy_dll("libgnarl-2013.dll", False)
-    copy_dll("libgcc_s_dw2-1.dll", False)
+    copy_dll("libgnat-2013.dll", Log_Error = False)
+    copy_dll("libgnarl-2013.dll", Log_Error = False)
+    copy_dll("libgcc_s_dw2-1.dll", Log_Error = False)
 
     ###########
     log("Copying jom.exe")
