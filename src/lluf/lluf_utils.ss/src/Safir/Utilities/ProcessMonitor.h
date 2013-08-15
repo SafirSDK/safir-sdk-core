@@ -27,7 +27,7 @@
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <boost/function.hpp>
-
+#include <boost/shared_ptr.hpp>
 
 namespace Safir
 {
@@ -70,7 +70,7 @@ namespace Utilities
         
     private:
         
-        ProcessMonitorImpl* m_impl;
+        boost::shared_ptr<ProcessMonitorImpl> m_impl;
     };
 
 }

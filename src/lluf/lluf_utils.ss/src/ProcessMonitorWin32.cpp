@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifdef _MSC_VER
-
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 
 #include "ProcessMonitorWin32.h"
 
