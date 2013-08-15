@@ -1,3 +1,14 @@
+2013-xx-xx version x.x:
+
+* Remove all internal dependencies to ACE (use Boost.Asio instead).
+* Add a lot of automatic tests.
+* Support 64 bit Windows installs.
+* Make missing external time provider cause exceptions instead of just silently failing.
+* Rewrite build script and dobmake.py to use jom for parallel builds.
+* Rewrite dots_v in python (removes a lot of Ada dependencies!)
+* TODO: syslog
+* Bug fixes!
+
 2013-06-25 version 4.4:
 
 This release is intended to implement the "First Step" chapter from the paper "Readonly installation of Safir SDK Core" (https://projekt.consoden.se/safir/job/Whitepapers/lastSuccessfulBuild/artifact/readonly_install.html).
