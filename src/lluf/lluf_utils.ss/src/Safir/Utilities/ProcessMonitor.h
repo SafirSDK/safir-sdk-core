@@ -69,8 +69,17 @@ namespace Utilities
         void StopMonitorPid(const pid_t pid);
         
     private:
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4251)
+#endif
         
         boost::shared_ptr<ProcessMonitorImpl> m_impl;
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
     };
 
 }
