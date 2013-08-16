@@ -183,7 +183,7 @@ def copy_boost_libs(dir, libraries):
     file_name_filter = re.compile(r"boost_(.*)-vc.*-mt-.*\.lib")
     dirlist = os.listdir(dir)
     for file in dirlist:
-        match = file_type_filter.match(file)
+        match = file_name_filter.match(file)
         if match is not None and match.group(1) in libraries:
             copy_file(os.path.join(dir,file), SDK_LIB_DESTINATION)
 
@@ -191,7 +191,7 @@ def copy_boost_dlls(dir, libraries):
     file_name_filter = re.compile(r"boost_(.*)-vc.*-mt-.*\.dll")
     dirlist = os.listdir(dir)
     for file in dirlist:
-        match = file_type_filter.match(file)
+        match = file_name_filter.match(file)
         if match is not None and match.group(1) in libraries:
             copy_file(os.path.join(dir,file), DLL_DESTINATION)
 
