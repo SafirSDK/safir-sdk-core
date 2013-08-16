@@ -103,7 +103,7 @@ def mkdir(newdir):
             os.mkdir(newdir)
 
 
-def copy_tree(srcdir, dstdir, include_patterns=None, exclude_regex=None):
+def copy_tree(srcdir, dstdir):
     """Excludes overrule includes"""
     import fnmatch, os
     # dstdir must exist first
@@ -112,7 +112,7 @@ def copy_tree(srcdir, dstdir, include_patterns=None, exclude_regex=None):
         srcfname = os.path.join(srcdir, name)
         dstfname = os.path.join(dstdir, name)
         if os.path.isdir(srcfname):
-            copy_tree(srcfname, dstfname, include_patterns,exclude_regex)
+            copy_tree(srcfname, dstfname)
         else:
             match = False
             if include_patterns is None:
@@ -179,24 +179,28 @@ def copy_lib(name, alternatives = None, Log_Error = True):
        logError("could not find "+ name)
     return False
 
-def copy_libs_from_dir(dir):
+def copy_boost_libs(dir, libraries):
+    file_name_filter = re.compile(r"boost_(.*)-vc.*-mt-.*\.lib")
     dirlist = os.listdir(dir)
     for file in dirlist:
-        if os.path.splitext(file)[1] == ".lib":
-            copy_file(os.path.join(dir,file),SDK_LIB_DESTINATION)
+        match = file_type_filter.match(file)
+        if match is not None and match.group(1) in libraries:
+            copy_file(os.path.join(dir,file), SDK_LIB_DESTINATION)
 
-def copy_dlls_from_dir(dir):
+def copy_boost_dlls(dir, libraries):
+    file_name_filter = re.compile(r"boost_(.*)-vc.*-mt-.*\.dll")
     dirlist = os.listdir(dir)
     for file in dirlist:
-        if os.path.splitext(file)[1] == ".dll":
-            copy_file(os.path.join(dir,file),DLL_DESTINATION)
+        match = file_type_filter.match(file)
+        if match is not None and match.group(1) in libraries:
+            copy_file(os.path.join(dir,file), DLL_DESTINATION)
 
-def copy_header_dir(dir, patterns=None):
+def copy_header_dir(dir):
     if not os.path.isdir(dir):
         logError("ERROR! " + dir + " is not a directory")
         return
     dst = os.path.join(HEADER_DESTINATION,os.path.split(dir)[-1])
-    copy_tree(dir,dst, include_patterns=patterns)
+    copy_tree(dir, dst)
 
 
 def copy_headers(dir,files):
@@ -218,16 +222,19 @@ def windows():
         boost_dir = find_dll(("boost_date_time-vc100-mt-1_41.dll",
                               "boost_date_time-vc100-mt-1_48.dll",
                               "boost_date_time-vc100-mt-1_50.dll",
-                              "boost_date_time-vc100-mt-1_51.dll"))
+                              "boost_date_time-vc100-mt-1_51.dll",
+                              "boost_date_time-vc100-mt-1_54.dll"))
         boost_dir = os.path.join(boost_dir,"..")
 
     # find lib dir    
     boost_lib_dir = os.path.join(boost_dir, "lib");
     if not os.path.isdir(boost_lib_dir):
         boost_lib_dir = os.path.join(boost_dir, "stage", "lib");
-        
-    copy_libs_from_dir(boost_lib_dir)
-    copy_dlls_from_dir(boost_lib_dir)
+
+    boost_libraries = ("date_time", "filesystem", "iostreams", "program_options", "random", "regex", "system", "thread")
+
+    copy_boost_libs(boost_lib_dir, boost_libraries)
+    copy_boost_dlls(boost_lib_dir, boost_libraries)
     copy_header_dir(os.path.join(boost_dir, "boost"))
 
     ############
