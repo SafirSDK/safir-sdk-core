@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import os, shutil, stat, subprocess, sys
+import os, shutil, stat, subprocess, sys, re
 from optparse import OptionParser
 
 errors = 0
