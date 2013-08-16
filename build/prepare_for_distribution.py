@@ -104,7 +104,6 @@ def mkdir(newdir):
 
 
 def copy_tree(srcdir, dstdir):
-    """Excludes overrule includes"""
     import fnmatch, os
     # dstdir must exist first
     srcnames = os.listdir(srcdir)
@@ -114,21 +113,8 @@ def copy_tree(srcdir, dstdir):
         if os.path.isdir(srcfname):
             copy_tree(srcfname, dstfname)
         else:
-            match = False
-            if include_patterns is None:
-                match = True
-            else:
-                for pattern in include_patterns:
-                    if fnmatch.fnmatch(name,pattern):
-                        match = True
-                        break
-            if exclude_regex is not None:
-                if exclude_regex.match(srcfname) is not None:
-                    match = False
-            
-            if match == True:
-                mkdir(dstdir)
-                copy_file(srcfname, dstdir)
+            mkdir(dstdir)
+            copy_file(srcfname, dstdir)
 
 
 def find_dll(names):
