@@ -11,6 +11,7 @@ include($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 find_package(Boost COMPONENTS date_time)
 
 find_package(PythonInterp)
+FIND_SOURCE_ROOT(SOURCE_ROOT)
 
 enable_testing()
 

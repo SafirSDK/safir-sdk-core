@@ -8,6 +8,8 @@ find_package(Boost COMPONENTS thread date_time system)
 
 find_package(PythonInterp)
 
+FIND_SOURCE_ROOT(SOURCE_ROOT)
+
 enable_testing()
 
 add_subdirectory(swreport_send/cpp)

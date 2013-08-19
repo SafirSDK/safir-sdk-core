@@ -63,11 +63,16 @@ def UpdateConfig():
         name = getText(param.getElementsByTagName("name")[0].childNodes)
         value = param.getElementsByTagName("value")[0]
         if name == "LibraryName":
-            value.childNodes[0].data = "external_time_provider_for_test"
+            if len(value.childNodes) == 0:
+                value.appendChild(dom.createTextNode("external_time_provider_for_test"))
+            else:
+                value.childNodes[0].data = "external_time_provider_for_test"
         if name == "UtcTimeFunctionName":
             value.childNodes[0].data = "MyGetTimeUtc"
         if name == "LocalTimeOffsetFunctionName":
             value.childNodes[0].data = "MyGetLocalTimeOffset"
+        print (value.childNodes)
+
     with open(LibraryParameters_path,"w") as file:
        file.write(dom.toxml())
 

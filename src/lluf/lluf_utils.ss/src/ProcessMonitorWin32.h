@@ -24,7 +24,7 @@
 #ifndef __PROCESS_MONITOR_WIN32_H__
 #define __PROCESS_MONITOR_WIN32_H__
 
-#ifdef _MSC_VER
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 
 #include "ProcessMonitorImpl.h"
 #include <Safir/Utilities/ProcessMonitor.h>
@@ -79,7 +79,7 @@ namespace Utilities
     class ProcessMonitorWin32 : public ProcessMonitorImpl
     {
     public:
-        ProcessMonitorWin32(const ProcessMonitor::OnTerminateCb& callback);
+        explicit ProcessMonitorWin32(const ProcessMonitor::OnTerminateCb& callback);
         ~ProcessMonitorWin32();
 
         void StartThread();

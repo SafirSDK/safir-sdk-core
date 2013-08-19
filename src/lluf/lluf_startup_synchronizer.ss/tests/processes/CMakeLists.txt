@@ -7,4 +7,5 @@ IF (NOT MSVC)
 ENDIF()
 
 ADD_TEST(StartupSynchronizer_processes ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
-set_tests_properties(StartupSynchronizer_processes PROPERTIES TIMEOUT 120)
+SET_TESTS_PROPERTIES(StartupSynchronizer_processes PROPERTIES TIMEOUT 120)
+SET_TESTS_PROPERTIES(StartupSynchronizer_processes PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")

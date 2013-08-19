@@ -27,7 +27,7 @@
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <boost/function.hpp>
-
+#include <boost/shared_ptr.hpp>
 
 namespace Safir
 {
@@ -69,8 +69,17 @@ namespace Utilities
         void StopMonitorPid(const pid_t pid);
         
     private:
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4251)
+#endif
         
-        ProcessMonitorImpl* m_impl;
+        boost::shared_ptr<ProcessMonitorImpl> m_impl;
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
     };
 
 }

@@ -24,7 +24,7 @@
 #ifndef __PROCESS_MONITOR_LINUX_H__
 #define __PROCESS_MONITOR_LINUX_H__
 
-#ifdef __GNUC__
+#if defined(linux) || defined(__linux) || defined(__linux__)
 
 #include "ProcessMonitorImpl.h"
 #include "Safir/Utilities/ProcessMonitor.h"
@@ -53,7 +53,7 @@ namespace Utilities
         : public ProcessMonitorImpl
     {
     public:
-        ProcessMonitorLinux(const ProcessMonitor::OnTerminateCb& callback);
+        explicit ProcessMonitorLinux(const ProcessMonitor::OnTerminateCb& callback);
         ~ProcessMonitorLinux();
 
         //StartMonitorPid and StopMonitorPid induces the io_service to call this

@@ -34,10 +34,6 @@
 
 #include "PersistenceHandler.h"
 
-//const long DATA_COLUMNS_SIZE = 10485760; //10M
-
-
-
 /**
  * Storage backend for ODBC databases
  */

@@ -6,4 +6,5 @@ endif()
 
 ADD_TEST(swreport_reception ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
-set_tests_properties(swreport_reception PROPERTIES TIMEOUT 120)
+SET_TESTS_PROPERTIES(swreport_reception PROPERTIES TIMEOUT 120)
+SET_TESTS_PROPERTIES(swreport_reception PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")

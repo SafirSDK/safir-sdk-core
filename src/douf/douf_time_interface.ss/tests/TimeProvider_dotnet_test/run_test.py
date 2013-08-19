@@ -38,7 +38,7 @@ tester_exe = tester_path_base+".exe"
 shutil.copy2(tester_csexe,tester_exe)
 
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
-dependencies = (#"Safir.Dob.Typesystem.dll",
+dependencies = ("Safir.Dob.Typesystem.dll",
                 "Safir.Time.dll",)
 
 for dep in dependencies:

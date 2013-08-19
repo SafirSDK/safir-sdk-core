@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifdef __GNUC__
+#if defined(linux) || defined(__linux) || defined(__linux__)
 
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>

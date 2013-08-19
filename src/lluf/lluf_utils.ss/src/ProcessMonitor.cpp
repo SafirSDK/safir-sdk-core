@@ -21,12 +21,12 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "ProcessMonitorImpl.h"
 #include <Safir/Utilities/ProcessMonitor.h>
-#if defined _MSC_VER
-#include "ProcessMonitorWin32.h"
-#elif defined __GNUC__
-#include "ProcessMonitorLinux.h"
+#include "ProcessMonitorImpl.h"
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+#  include "ProcessMonitorWin32.h"
+#elif defined(linux) || defined(__linux) || defined(__linux__)
+#  include "ProcessMonitorLinux.h"
 #endif
 
 namespace Safir
@@ -35,53 +35,54 @@ namespace Utilities
 {
     
     ProcessMonitor::ProcessMonitor()
-        : m_impl(NULL)
     {
     }
     
     
     ProcessMonitor::~ProcessMonitor()
     {
-        if (m_impl)
-        {
-            m_impl->StopThread();
-            delete m_impl;
-        }
+        m_impl->StopThread();
+        m_impl.reset();
     }
     
     void 
     ProcessMonitor::Init(const OnTerminateCb& callback)
     {
-#if defined _MSC_VER
-        m_impl = new ProcessMonitorWin32(callback);
-#elif defined __GNUC__
-        m_impl = new ProcessMonitorLinux(callback);
+        if (m_impl != NULL)
+        {
+            throw std::logic_error("ProcessMonitor already initialized!");
+        }
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        m_impl.reset(new ProcessMonitorWin32(callback));
+#elif defined(linux) || defined(__linux) || defined(__linux__)
+        m_impl.reset(new ProcessMonitorLinux(callback));
 #endif
 
-        if (m_impl) 
-        {
-            m_impl->StartThread();
-        }
+        m_impl->StartThread();
     }
     
 
     void
     ProcessMonitor::StartMonitorPid(const pid_t pid)
     {
-        if (m_impl)
+        if (m_impl == NULL)
         {
-            m_impl->StartMonitorPid(pid);
+            throw std::logic_error("ProcessMonitor not initialized!");
         }
+        
+        m_impl->StartMonitorPid(pid);
     }
     
     
     void 
     ProcessMonitor::StopMonitorPid(const pid_t pid)
     {
-        if (m_impl)
+        if (m_impl == NULL)
         {
-            m_impl->StopMonitorPid(pid);
+            throw std::logic_error("ProcessMonitor not initialized!");
         }
+
+        m_impl->StopMonitorPid(pid);
     }
 }
 }

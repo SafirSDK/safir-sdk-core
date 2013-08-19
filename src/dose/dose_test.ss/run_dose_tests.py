@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -135,6 +135,9 @@ class Parameters:
         if not self.SAFIR_RUNTIME:
             print "Cannot run without SAFIR_RUNTIME being set. Consider using --jenkins if this is a Jenkins build"
             sys.exit(1)
+
+        #Set up to use our own test configuration
+        os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.SAFIR_RUNTIME,"data","text","dose_test","test_config")
         
         self.dose_main_cmd = (os.path.join(self.SAFIR_RUNTIME,"bin","dose_main"),)
         self.foreach_cmd = (os.path.join(self.SAFIR_RUNTIME,"bin","foreach"),)

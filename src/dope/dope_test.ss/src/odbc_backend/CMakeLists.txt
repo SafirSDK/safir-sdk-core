@@ -51,3 +51,6 @@ ADD_TEST(dope_odbc_backend_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}
 
 #Long timeouts are needed on slow machines.
 set_tests_properties(dope_odbc_backend_test PROPERTIES TIMEOUT 1800)
+
+FIND_SOURCE_ROOT(SOURCE_ROOT)
+SET_TESTS_PROPERTIES(dope_odbc_backend_test PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")

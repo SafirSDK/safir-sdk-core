@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import os, shutil, stat, subprocess, sys
+import os, shutil, stat, subprocess, sys, re
 from optparse import OptionParser
 
 errors = 0
@@ -103,8 +103,7 @@ def mkdir(newdir):
             os.mkdir(newdir)
 
 
-def copy_tree(srcdir, dstdir, include_patterns=None, exclude_regex=None):
-    """Excludes overrule includes"""
+def copy_tree(srcdir, dstdir):
     import fnmatch, os
     # dstdir must exist first
     srcnames = os.listdir(srcdir)
@@ -112,23 +111,10 @@ def copy_tree(srcdir, dstdir, include_patterns=None, exclude_regex=None):
         srcfname = os.path.join(srcdir, name)
         dstfname = os.path.join(dstdir, name)
         if os.path.isdir(srcfname):
-            copy_tree(srcfname, dstfname, include_patterns,exclude_regex)
+            copy_tree(srcfname, dstfname)
         else:
-            match = False
-            if include_patterns is None:
-                match = True
-            else:
-                for pattern in include_patterns:
-                    if fnmatch.fnmatch(name,pattern):
-                        match = True
-                        break
-            if exclude_regex is not None:
-                if exclude_regex.match(srcfname) is not None:
-                    match = False
-            
-            if match == True:
-                mkdir(dstdir)
-                copy_file(srcfname, dstdir)
+            mkdir(dstdir)
+            copy_file(srcfname, dstdir)
 
 
 def find_dll(names):
@@ -179,24 +165,28 @@ def copy_lib(name, alternatives = None, Log_Error = True):
        logError("could not find "+ name)
     return False
 
-def copy_libs_from_dir(dir):
+def copy_boost_libs(dir, libraries):
+    file_name_filter = re.compile(r"boost_(.*)-vc.*-mt-.*\.lib")
     dirlist = os.listdir(dir)
     for file in dirlist:
-        if os.path.splitext(file)[1] == ".lib":
-            copy_file(os.path.join(dir,file),SDK_LIB_DESTINATION)
+        match = file_name_filter.match(file)
+        if match is not None and match.group(1) in libraries:
+            copy_file(os.path.join(dir,file), SDK_LIB_DESTINATION)
 
-def copy_dlls_from_dir(dir):
+def copy_boost_dlls(dir, libraries):
+    file_name_filter = re.compile(r"boost_(.*)-vc.*-mt-.*\.dll")
     dirlist = os.listdir(dir)
     for file in dirlist:
-        if os.path.splitext(file)[1] == ".dll":
-            copy_file(os.path.join(dir,file),DLL_DESTINATION)
+        match = file_name_filter.match(file)
+        if match is not None and match.group(1) in libraries:
+            copy_file(os.path.join(dir,file), DLL_DESTINATION)
 
-def copy_header_dir(dir, patterns=None):
+def copy_header_dir(dir):
     if not os.path.isdir(dir):
         logError("ERROR! " + dir + " is not a directory")
         return
     dst = os.path.join(HEADER_DESTINATION,os.path.split(dir)[-1])
-    copy_tree(dir,dst, include_patterns=patterns)
+    copy_tree(dir, dst)
 
 
 def copy_headers(dir,files):
@@ -218,16 +208,19 @@ def windows():
         boost_dir = find_dll(("boost_date_time-vc100-mt-1_41.dll",
                               "boost_date_time-vc100-mt-1_48.dll",
                               "boost_date_time-vc100-mt-1_50.dll",
-                              "boost_date_time-vc100-mt-1_51.dll"))
+                              "boost_date_time-vc100-mt-1_51.dll",
+                              "boost_date_time-vc100-mt-1_54.dll"))
         boost_dir = os.path.join(boost_dir,"..")
 
     # find lib dir    
     boost_lib_dir = os.path.join(boost_dir, "lib");
     if not os.path.isdir(boost_lib_dir):
         boost_lib_dir = os.path.join(boost_dir, "stage", "lib");
-        
-    copy_libs_from_dir(boost_lib_dir)
-    copy_dlls_from_dir(boost_lib_dir)
+
+    boost_libraries = ("date_time", "filesystem", "iostreams", "program_options", "random", "regex", "system", "thread")
+
+    copy_boost_libs(boost_lib_dir, boost_libraries)
+    copy_boost_dlls(boost_lib_dir, boost_libraries)
     copy_header_dir(os.path.join(boost_dir, "boost"))
 
     ############
@@ -249,11 +242,11 @@ def windows():
     else:
         logError("Failed to find expat headers!")
     
-    ############
+
     log("Copying Ada stuff - GNAT runtime")
-    copy_dll("libgnat-2011.dll")
-    copy_dll("libgnarl-2011.dll")
-    copy_dll("libgcc_s_dw2-1.dll")
+    copy_dll("libgnat-2013.dll", Log_Error = False)
+    copy_dll("libgnarl-2013.dll", Log_Error = False)
+    copy_dll("libgcc_s_dw2-1.dll", Log_Error = False)
 
     ###########
     log("Copying jom.exe")

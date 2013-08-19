@@ -6,4 +6,5 @@ endif()
 
 ADD_TEST(stop_orders_at_exit ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
-set_tests_properties(stop_orders_at_exit PROPERTIES TIMEOUT 240)
+SET_TESTS_PROPERTIES(stop_orders_at_exit PROPERTIES TIMEOUT 240)
+SET_TESTS_PROPERTIES(stop_orders_at_exit PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")

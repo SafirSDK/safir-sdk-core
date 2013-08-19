@@ -33,7 +33,17 @@
 #include <Safir/Databases/Odbc/Exception.h>
 #include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/ConnectionAspectInjector.h>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4913)
+#endif
+
 #include <boost/thread.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 const boost::posix_time::time_duration RECONNECT_EXCEPTION_DELAY = boost::posix_time::milliseconds(100);
 const boost::posix_time::time_duration RETRY_EXCEPTION_DELAY = boost::posix_time::milliseconds(10);

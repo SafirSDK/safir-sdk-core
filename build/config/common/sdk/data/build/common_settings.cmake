@@ -208,3 +208,22 @@ endif()
 #(they're set in the build script)
 if(SAFIR_ADA_SUPPORT OR SAFIR_JAVA_SUPPORT)
 endif()
+
+
+#This function traverses up from PROJECT_SOURCE_DIR to find the root of the 
+#source code tree. It looks for some special files in that directory.
+function (FIND_SOURCE_ROOT RESULT_VARIABLE)
+  set (curdir ${PROJECT_SOURCE_DIR})
+  while (NOT EXISTS "${curdir}/INSTALL.Linux.txt" 
+      OR NOT EXISTS "${curdir}/INSTALL.Windows.txt")
+    get_filename_component(parent ${curdir} PATH)
+    if (parent STREQUAL curdir)
+      set(${RESULT_VARIABLE} "SOURCE_ROOT-NOTFOUND")
+      message (FATAL_ERROR "!!! Failed to find Safir SDK Core source code root.")
+      return()
+    endif()
+    set(curdir ${parent})
+  endwhile()
+  set(${RESULT_VARIABLE} ${curdir} PARENT_SCOPE)
+endfunction()
+
