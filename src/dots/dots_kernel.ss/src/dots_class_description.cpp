@@ -170,14 +170,13 @@ namespace Internal
             }
         }
 
-
         if (BaseClass() == NULL)
         {
             return -1;
         }
         else
         {
-            return NumberOfInheritedParameters() + BaseClass()->GetParameterIndexFromName(name);
+            return BaseClass()->GetParameterIndexFromName(name);
         }
     }
 
