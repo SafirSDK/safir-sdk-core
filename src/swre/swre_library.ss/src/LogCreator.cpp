@@ -48,7 +48,7 @@ std::wstring LogCreator::GetPrefix() const
 //-----------------------------------------------------------------------------
 LogCreator::LogCreator()
     : m_configReader(new Safir::Utilities::Internal::ConfigReader),
-      m_includeTimestamp(m_configReader->Logging().get<bool>("SYSTEM-LOG.include-timestamp"))
+      m_includeTimestamp(m_configReader->Logging().get<bool>("SystemLog.include_safir_timestamp"))
 {
 }
 
