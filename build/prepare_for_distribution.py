@@ -217,7 +217,15 @@ def windows():
     if not os.path.isdir(boost_lib_dir):
         boost_lib_dir = os.path.join(boost_dir, "stage", "lib");
 
-    boost_libraries = ("date_time", "filesystem", "iostreams", "program_options", "random", "regex", "system", "thread")
+    boost_libraries = ("chrono",
+                       "date_time",
+                       "filesystem",
+                       "iostreams",
+                       "program_options",
+                       "random",
+                       "regex",
+                       "system",
+                       "thread")
 
     copy_boost_libs(boost_lib_dir, boost_libraries)
     copy_boost_dlls(boost_lib_dir, boost_libraries)
