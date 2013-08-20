@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <iostream>
 
 int main()
 {

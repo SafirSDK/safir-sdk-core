@@ -27,6 +27,7 @@
 #include <Safir/Utilities/Internal/StringEncoding.h>
 #include <boost/weak_ptr.hpp>
 #include <boost/thread/once.hpp>
+#include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
@@ -213,10 +214,6 @@ private:
     //-------------------------------------------------------------------------
     void SendNativeLog(const SystemLog::Severity severity, const std::wstring& text)
     {
-        // To stop compiler warn about unused variables
-        severity;
-        text;
-
 #if defined(linux) || defined(__linux) || defined(__linux__)
 
         syslog(SAFIR_FACILITY | severity, "%s", ToUtf8(text).c_str());
