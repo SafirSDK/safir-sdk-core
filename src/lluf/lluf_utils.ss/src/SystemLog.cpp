@@ -110,8 +110,8 @@ private:
 
             m_configReader.reset(new Safir::Utilities::Internal::ConfigReader);
 
-            m_nativeLogging = m_configReader->Logging().get<bool>("SYSTEM-LOG.native-logging");
-            m_sendToSyslogServer = m_configReader->Logging().get<bool>("SYSTEM-LOG.send-to-syslog-server");
+            m_nativeLogging = m_configReader->Logging().get<bool>("SystemLog.native_logging");
+            m_sendToSyslogServer = m_configReader->Logging().get<bool>("SystemLog.send_to_syslog_server");
 
             if (m_nativeLogging)
             {
@@ -132,8 +132,8 @@ private:
                 m_syslogServerEndpoint =
                         boost::asio::ip::udp::endpoint
                             (boost::asio::ip::address::from_string
-                                (m_configReader->Logging().get<std::string>("SYSTEM-LOG.syslog-server-address")),
-                                 m_configReader->Logging().get<unsigned short>("SYSTEM-LOG.syslog-server-port"));
+                                (m_configReader->Logging().get<std::string>("SystemLog.syslog_server_address")),
+                                 m_configReader->Logging().get<unsigned short>("SystemLog.syslog_server_port"));
             }
 
         }
