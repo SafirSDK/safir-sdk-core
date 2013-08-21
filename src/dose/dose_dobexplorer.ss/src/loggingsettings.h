@@ -50,9 +50,6 @@ public slots:
     void Timestamps(bool use);
     void Stdout(bool use);
     void File(bool use);
-    void Save();
-    void Clear();
-    void CreateLogDir();
     
     void UpdateWidgets();
 private:
