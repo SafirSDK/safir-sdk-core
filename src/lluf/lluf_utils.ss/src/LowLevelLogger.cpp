@@ -419,7 +419,6 @@ namespace Internal
         }
         catch (const std::exception& e)
         {
-            std::wcout << "FALLBACK " << e.what() << std::endl;
             m_impl.reset(new FallbackImpl(*this));
             //set it to null, just to be extra sure. Should not be needed...
             m_pLogLevel = NULL;
