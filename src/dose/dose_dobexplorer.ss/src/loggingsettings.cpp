@@ -85,6 +85,7 @@ void LoggingSettings::CreateControl()
         {
             levelGroup->setVisible(false);
             optionsGroup->setVisible(false);
+            return;
         }
         else
         {
