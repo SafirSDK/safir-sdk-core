@@ -16,7 +16,7 @@ FIND_SOURCE_ROOT(SOURCE_ROOT)
 
 ENABLE_TESTING()
 ADD_SUBDIRECTORY(DynamicLibraryLoader_test)
-#TODO ADD_SUBDIRECTORY(LowLevelLogger_test)
+ADD_SUBDIRECTORY(LowLevelLogger_test)
 ADD_SUBDIRECTORY(ProcessInfo_test)
 ADD_SUBDIRECTORY(ProcessMonitor_test)
 ADD_SUBDIRECTORY(SystemLog_test)

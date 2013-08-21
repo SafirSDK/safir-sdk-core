@@ -56,13 +56,11 @@ namespace //anonymous namespace for internal functions
     typedef boost::shared_ptr<const Safir::Utilities::Internal::LowLevelLoggerControl> ControlPtr;
 
     //also creates directories and removes files that are in the way
-    const boost::filesystem::path GetLogFilename()
+    const boost::filesystem::path GetLogFilename(const boost::filesystem::path& path)
     {
-        const boost::filesystem::path path = Safir::Utilities::Internal::LowLevelLoggerControl::GetLogDirectory();
-
         try
         {
-            boost::filesystem::create_directory(path);
+            boost::filesystem::create_directories(path);
         }
         catch (const boost::filesystem::filesystem_error)
         {
@@ -340,23 +338,22 @@ namespace Internal
     {
     public:
         explicit LoggingImpl(LowLevelLogger& lll)
-            : m_fileSink(GetLogFilename().string())
-            , m_tee(m_fileSink)
         {
-            if (!m_fileSink.is_open())
-            {
-                //Failed to open file, just return and leave the 
-                //logging enabled pointer set to null.
-                return;
-            }
-
             m_control.reset(new LowLevelLoggerControl(false,false));
-
+            if (m_control->Disabled())
+            {
+                m_control.reset();
+                throw std::runtime_error("LowLevelLogger is disabled!");
+            }
+            
+            m_fileSink.reset(new boost::iostreams::wfile_sink(GetLogFilename(m_control->LogDirectory()).string()));
+            m_tee.reset(new TeeDevice(*m_fileSink));
+            
             m_buffer.SetControl(m_control);
-            m_tee.SetControl(m_control);
+            m_tee->SetControl(m_control);
             DateOutputFilter filter(m_control);
             m_buffer.push(filter);
-            m_buffer.push(m_tee);
+            m_buffer.push(*m_tee);
             lll.rdbuf(&m_buffer);
             
             lll.m_pLogLevel = m_control->GetLogLevelPointer();
@@ -364,8 +361,8 @@ namespace Internal
 
     private:
         boost::shared_ptr<LowLevelLoggerControl> m_control;
-        boost::iostreams::wfile_sink m_fileSink;
-        TeeDevice m_tee;
+        boost::shared_ptr<boost::iostreams::wfile_sink> m_fileSink;
+        boost::shared_ptr<TeeDevice> m_tee;
         FilteringStreambuf m_buffer;
     };
 
@@ -420,8 +417,9 @@ namespace Internal
         {
             m_impl.reset(new LoggingImpl(*this));
         }
-        catch (const std::exception&)
+        catch (const std::exception& e)
         {
+            std::wcout << "FALLBACK " << e.what() << std::endl;
             m_impl.reset(new FallbackImpl(*this));
             //set it to null, just to be extra sure. Should not be needed...
             m_pLogLevel = NULL;

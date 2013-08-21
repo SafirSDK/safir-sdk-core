@@ -26,14 +26,14 @@
 from __future__ import print_function
 import subprocess, os, time, sys, shutil, re
 from threading import Thread
-
+import argparse
 try:
     # 3.x name
     from queue import Queue, Empty
 except ImportError:
     # 2.x name
     from Queue import Queue, Empty
-
+    
 def rmdir(directory):
     if os.path.exists(directory):
         try:
@@ -103,8 +103,18 @@ def call_logger_control(args):
 if sys.platform == "win32":
     config_type = os.environ.get("CMAKE_CONFIG_TYPE")
     exe_path = config_type if config_type else ""
+    temp = os.environ.get("TEMP")
+    if temp is None:
+        temp = os.environ.get("TMP")
+    if temp is None:
+        print ("Failed to find temp dir!")
+        sys.exit(1)
+    logdir = os.path.join(temp, "safir_sdk_core", "log")
 else:
     exe_path = "."
+    logdir = os.path.join("/", "tmp", "safir_sdk_core", "log")
+
+print ("Logdir: ", logdir)
 
 lll_test = os.path.join(exe_path,"lll_test")
 
@@ -112,20 +122,26 @@ SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 
 logger_control = os.path.join(SAFIR_RUNTIME,"bin","logger_control")
 
-logdir = os.path.join(SAFIR_RUNTIME,"log")
-
 def logfilename(proc):
     if sys.platform == "win32":
         fn = "lll_test.exe-" + str(proc.pid) + ".txt"
     else:
         fn = "lll_test-" + str(proc.pid) + ".txt"
 
-    return os.path.join(logdir,"Dob-LowLevelLog",fn)
+    return os.path.join(logdir,fn)
 
+if len(sys.argv) != 2:
+    print ("Expect one argument")
+    sys.exit(1)
+
+configs_dir = sys.argv[1]
+if not os.path.isdir(configs_dir):
+    print ("arg is not a directory")
+    sys.exit(1)
+
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"enabled_off")
 
 rmdir(logdir)
-
-os.mkdir(logdir)
 
 #Run the program that logs
 p = LllProc()
@@ -150,12 +166,11 @@ if data.find("Hello, World!") != -1 or data.find("Goodbye cruel world") != -1:
     p.kill()
     sys.exit(1)
 
-
 #turn logging on
 res = call_logger_control(("5",))
 if res.find("Log level should now be 5") == -1:
     print("failed to turn logging on")
-    proc.kill()
+    p.kill()
     sys.exit(1)
 
 #let it log for a short while
@@ -234,7 +249,7 @@ data = p2.output()
 if len(data) != 0:
     print("Flushing doesnt seem to be possible to turn off")
     print(data)
-    sys.exit(1)    
+    sys.exit(1)
 
 #turn flushing on and stdout off
 call_logger_control(("-s", "0"))
@@ -262,36 +277,67 @@ if len(data) != 0:
 
 p.kill()
 
-time.sleep(0.1)
-rmdir(logdir)
+#check that disabling in inifile works
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"disabled")
 
-#check that we get lllerr output even if no logdir
+#Run the program that logs
 p = LllProc()
-if not p.wait_output(".*1234567890$"):
-    print("lllerr does not work without logdir")
+
+
+#check that we dont have a log file
+try:
+    data = p.logfile()
+    print("have unexpected logfile")
+    sys.exit(1)
+except:
+    pass
+
+
+#try to turn logging on
+res = call_logger_control(("5",))
+if res.find("LowLevelLogger is currently disabled") == -1:
+    print("Doesnt seem to be disabled!")
+    print(res)
+    p.kill()
+    sys.exit(1)
+
+time.sleep(2.0)
+data = p.output()
+if data.find("orld!") != -1:
+    print("there should not be any log output")
+    p.kill()
     sys.exit(1)
 
 p.kill()
 
-#test write permanent settings
-call_logger_control(("--create-logdir","-p","9"))
-p = LllProc()
-if not p.wait_output(".*Hello, World!$") and not p.wait_output(".*Goodbye cruel world!$"):
-    print("logger_control cannot write permanent settings")
-    sys.exit(1)
-p.kill()
+#check that enabling and turning on in inifile works
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"enabled_on")
 
-#test clear permanent settings
-call_logger_control(("-c",))
+#Run the program that logs
 p = LllProc()
-p.wait_output(".*1234567890$")
-p.wait_output(".*1234567890$")
+
+#check that we get some logs
+p.wait_output(".*Goodbye cruel world!$")
+
 data = p.logfile()
-if data.find("Hello, World!") != -1 or data.find("Goodbye cruel world!") != -1:
-    print("logger_control cannot write permanent settings")
+if data.find("Goodbye") == -1 or data.find("Hello") == -1 or data.find("1234567890") == -1:
+    print("failed to find all the expected stuff in the log file")
     sys.exit(1)
-p.kill()
 
+#turn logging off
+res = call_logger_control(("0",))
+if res.find("Log level should now be 0") == -1:
+    print("failed to turn logging off")
+    proc.kill()
+    sys.exit(1)
 
+#clear output and check that new logs are only error logs
+p.output()
+time.sleep(0.5)
+data = p.output()
+if data.find("orld!") != -1:
+    print ("failed to turn off ini enabled")
+    sys.exit(1)
+        
 print("success")
 sys.exit(0)
