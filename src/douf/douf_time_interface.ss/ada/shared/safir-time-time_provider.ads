@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --
---  Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+--  Copyright Saab AB, 2005-2013 (http://www.safirsdk.com)
 --
 --  Created by: Erik Adolfsson / sterad
 --
@@ -24,41 +24,41 @@
 with Ada.Calendar;
 with Safir.Dob.Typesystem.Si_64;
 
-package Safir.Time.TimeProvider is
+package Safir.Time.Time_Provider is
 
    Time_Error : exception renames Ada.Calendar.Time_Error;
    ----------------------------------------------------------------------------
-   -- Get current Utc time.
+   -- Get current UTC time.
    -- Returns seconds and fraction since jan 1 1970 00:00
    ----------------------------------------------------------------------------
-   function GetUtcTime return Safir.Dob.Typesystem.Si_64.Second;
+   function Get_UTC_Time return Safir.Dob.Typesystem.Si_64.Second;
 
    ----------------------------------------------------------------------------
-   -- Converts Utc time to local time
-   -- If UtcTime represents a year ouside Ada.Calendar.Year_Number range
+   -- Converts UTC time to local time
+   -- If UTC_Time represents a year ouside Ada.Calendar.Year_Number range
    -- exception Time_Error is raised.
    ----------------------------------------------------------------------------
-   function ToLocalTime (UtcTime : in Safir.Dob.Typesystem.Si_64.Second) return Ada.Calendar.Time;
+   function To_Local_Time (UTC_Time : in Safir.Dob.Typesystem.Si_64.Second) return Ada.Calendar.Time;
 
    ----------------------------------------------------------------------------
    -- Converts local time to UTC time
    -- Returns seconds and fraction since jan 1 1970 00:00
    ----------------------------------------------------------------------------
-   function ToUtcTime (LocalTime : in Ada.Calendar.Time) return Safir.Dob.Typesystem.Si_64.Second;
+   function To_UTC_Time (Local_Time : in Ada.Calendar.Time) return Safir.Dob.Typesystem.Si_64.Second;
 
    ----------------------------------------------------------------------------
-   -- Gets specified utc time in Calendar representation
-   -- If UtcTime represents a year ouside Ada.Calendar.Year_Number range
+   -- Gets specified UTC time in Calendar representation
+   -- If UTCTime represents a year ouside Ada.Calendar.Year_Number range
    -- exception Time_Error is raised.
    ----------------------------------------------------------------------------
-   function CalendarTimeOf (UtcTime : in Safir.Dob.Typesystem.Si_64.Second) return Ada.Calendar.Time;
+   function Calendar_Time_Of (UTC_Time : in Safir.Dob.Typesystem.Si_64.Second) return Ada.Calendar.Time;
 
    ----------------------------------------------------------------------------
    -- Convert specified UTC time to a Double
    -- Returns seconds and fraction since jan 1 1970 00:00
    ----------------------------------------------------------------------------
-   function DoubleOf (UtcTime : in Ada.Calendar.Time) return Safir.Dob.Typesystem.Si_64.Second;
+   function Seconds_Of (UTC_Time : in Ada.Calendar.Time) return Safir.Dob.Typesystem.Si_64.Second;
 
 
-end Safir.Time.TimeProvider;
+end Safir.Time.Time_Provider;
 

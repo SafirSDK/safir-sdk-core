@@ -13,7 +13,7 @@ project Douf_Time_Ada_Library is
   for Library_Ali_Dir use "ali";
   for Library_Name use "douf_time_ada";
   for Library_Kind use "dynamic";
-  for Library_Interface use ("safir.time.timeprovider");
+  for Library_Interface use ("safir.time.time_provider");
 
   package Builder is
      for Default_Switches ("Ada") use Safir_Defaults.Builder'Default_Switches ("Ada");

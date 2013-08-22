@@ -16,6 +16,10 @@ FIND_SOURCE_ROOT(SOURCE_ROOT)
 enable_testing()
 
 add_subdirectory(AceTimeConverter_test)
-add_subdirectory(TimeProvider_cpp_test)
 add_subdirectory(ExternalTimeProvider_test)
+add_subdirectory(TimeProvider_cpp_test)
 add_subdirectory(TimeProvider_dotnet_test)
+
+if (SAFIR_ADA_SUPPORT)
+  add_subdirectory(TimeProvider_ada_test)
+endif()
