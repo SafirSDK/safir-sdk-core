@@ -79,6 +79,7 @@ build_dir        src/douf/douf_time_library.ss/src         RelWithDebInfo
 build_dir        src/douf/douf_time_interface.ss/cpp       RelWithDebInfo   Debug
 build_dir        src/douf/douf_time_interface.ss/dotnet    RelWithDebInfo
 build_dir        src/douf/douf_time_interface.ss/ada       RelWithDebInfo
+build_dir        src/douf/douf_time_interface.ss/java       RelWithDebInfo
 run_test_suite   src/douf/douf_time_interface.ss/tests     douf_time_tests
 
 #this is really just some header files (a lot of stuff for just two files...),
