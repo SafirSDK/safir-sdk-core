@@ -25,11 +25,9 @@
 #ifndef __LIBRARY_H__
 #define __LIBRARY_H__
 
-#include "LogCreator.h"
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Internal/Atomic.h>
-#include <Safir/Utilities/Internal/SystemLog.h>
 #include <boost/noncopyable.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -76,9 +74,6 @@ namespace Internal
                          const std::wstring & str);
 
         void TraceFlush();
-
-        void SendSystemLog(const Safir::Utilities::Internal::SystemLog::Severity severity,
-                           const std::wstring&                                   logMsg);
 
         void SendFatalErrorReport(const std::wstring & errorCode,
                                   const std::wstring & location,
@@ -149,10 +144,6 @@ namespace Internal
         std::wstring m_traceBuffer;
         bool m_prefixPending;
 
-        LogCreator m_logCreator;
-
-        //system logger
-        Safir::Utilities::Internal::SystemLog m_systemLog;
 
         /**
          * This class is here to ensure that only the Instance method can get at the 

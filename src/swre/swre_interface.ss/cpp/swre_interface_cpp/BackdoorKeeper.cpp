@@ -26,7 +26,6 @@
 
 #include <Safir/Application/BackdoorCommand.h>
 #include <Safir/Logging/Log.h>
-#include <Safir/Logging/Severity.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
@@ -141,7 +140,7 @@ void BackdoorKeeper::OnMessage(const Safir::Dob::MessageProxy messageProxy)
                 // It's a 'ping' command. Answer to it without bothering
                 // the subclass implementator.
 
-                Safir::Logging::SendSystemLog(Safir::Logging::Severity::Debug,
+                Safir::Logging::SendSystemLog(Safir::Logging::Debug,
                                               L"Ping reply");
 
                 return; // *** RETURN ***
@@ -149,7 +148,7 @@ void BackdoorKeeper::OnMessage(const Safir::Dob::MessageProxy messageProxy)
             else if (cmdTokens[0] == helpCmd)
             {
                 // Get help text from subclass implementator.
-                Safir::Logging::SendSystemLog(Safir::Logging::Severity::Debug,
+                Safir::Logging::SendSystemLog(Safir::Logging::Debug,
                                               m_backdoor.GetHelpText());
 
                 return; // *** RETURN ***

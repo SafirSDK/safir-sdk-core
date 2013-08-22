@@ -41,8 +41,8 @@
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
+#include <Safir/Logging/Log.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <boost/bind.hpp>
 #include <Safir/Utilities/CrashReporter.h>
@@ -96,9 +96,7 @@ namespace Internal
           m_backdoorConnection(),
           m_traceBufferLock(),
           m_traceBuffer(),
-          m_prefixPending(true),
-          m_logCreator(),
-          m_systemLog()
+          m_prefixPending(true)
     {
         std::wstring env;
         {
@@ -261,8 +259,8 @@ namespace Internal
         // traces are always written to std out
         std::wcout << m_traceBuffer << std::flush;
 
-        m_systemLog.Send(Safir::Utilities::Internal::SystemLog::Debug,
-                         m_traceBuffer);
+        Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                      m_traceBuffer);
 
         m_traceBuffer.clear();
     }
@@ -273,8 +271,8 @@ namespace Internal
         ostr << "An application has crashed! A dump was generated to:\n" 
              << dumpPath;
         std::wcerr << ostr.str().c_str() << std::endl;
-        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
-                                                     ostr.str());
+        Safir::Logging::SendSystemLog(Safir::Logging::Alert,
+                                      ostr.str());
     }
 
     void
@@ -440,22 +438,12 @@ namespace Internal
     }
 
     void
-    Library::SendSystemLog(const Safir::Utilities::Internal::SystemLog::Severity severity,
-                           const std::wstring&                                   logMsg)
-    {
-        m_systemLog.Send(severity,
-                         m_logCreator.CreateSystemLog(logMsg));
-    }
-
-    void
     Library::SendFatalErrorReport(const std::wstring& errorCode,
                                   const std::wstring& location,
                                   const std::wstring& text)
     {
-        m_systemLog.Send(Safir::Utilities::Internal::SystemLog::Critical,
-                         m_logCreator.CreateFatalErrorLog(errorCode,
-                                                          location,
-                                                          text));
+        Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                         L"FatalError " + errorCode + L"|" + location + L"|" + text);
     }
 
     void
@@ -463,10 +451,8 @@ namespace Internal
                              const std::wstring& location,
                              const std::wstring& text)
     {
-        m_systemLog.Send(Safir::Utilities::Internal::SystemLog::Error,
-                         m_logCreator.CreateErrorLog(errorCode,
-                                                     location,
-                                                     text));
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                      L"Error " + errorCode + L"|" + location + L"|" + text);
     }
 
     void
@@ -474,10 +460,8 @@ namespace Internal
                                 const bool          allocated,
                                 const std::wstring& text)
     {
-        m_systemLog.Send(Safir::Utilities::Internal::SystemLog::Warning,
-                         m_logCreator.CreateResourceLog(resourceId,
-                                                        allocated,
-                                                        text));
+        Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                      L"Resource" + resourceId + L" is " + ((allocated) ? L"" : L"not ") + L"allocated" + L"|" + text);
     }
 
     void
@@ -485,17 +469,15 @@ namespace Internal
                                         const std::wstring & location,
                                         const std::wstring & text)
     {
-        m_systemLog.Send(Safir::Utilities::Internal::SystemLog::Critical,
-                         m_logCreator.CreateProgrammingErrorLog(errorCode,
-                                                                location,
-                                                                text));
+        Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                                      L"ProgrammingError " + errorCode + L"|" + location + L"|" + text);
     }
 
     void
     Library::SendProgramInfoReport(const std::wstring & text)
     {
-        m_systemLog.Send(Safir::Utilities::Internal::SystemLog::Debug,
-                         m_logCreator.CreateProgramInfoLog(text));
+        Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                      text);
     }
 }
 }

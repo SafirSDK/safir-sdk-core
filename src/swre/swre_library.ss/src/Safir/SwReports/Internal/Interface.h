@@ -201,19 +201,6 @@ extern "C"
 
     /** @} */
 
-    /**
-    * Service for sending log messages to the native system logging mechanism.
-    *
-    * The service takes a severity and an arbitrary string.
-    * The severity levels conforms to the ones used by the well known syslog format as specified
-    * in http://www.ietf.org/rfc/rfc3164.txt.
-    *
-    * @param [in] severity Severity according to RFC 3164.
-    * @param [in] logMsg Log text.
-    */
-    SWRE_LIBRARY_API void SwreC_SendSystemLog(const DotsC_EnumerationValue severity,
-                                              const char * const           logMsg,
-                                              bool &                       success);
 
     /**
      * Send a Fatal Error software report.
