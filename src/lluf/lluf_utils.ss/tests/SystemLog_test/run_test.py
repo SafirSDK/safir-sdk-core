@@ -58,8 +58,8 @@ if not config.read(conf_file):
     print("Failed to read file " + conf_file)
     sys.exit(1)
     
-syslog_server_address = config.get('SYSTEM-LOG','syslog-server-address')
-syslog_server_port = config.get('SYSTEM-LOG','syslog-server-port')
+syslog_server_address = config.get('SystemLog','syslog_server_address')
+syslog_server_port = config.get('SystemLog','syslog_server_port')
 
 #Start listen to messages sent to the syslog server port
 sock = socket.socket(socket.AF_INET, # Internet
