@@ -22,6 +22,9 @@ run_test_suite   src/lluf/lluf_crash_reporter.ss/tests         lluf_crash_report
 run_test_suite   src/lluf/lluf_startup_synchronizer.ss/tests   lluf_startup_synchronizer_tests
 run_test_suite   src/lluf/lluf_utils.ss/tests                  lluf_tests
 
+#LOGGING
+build_dir        src/logging/logging_library.ss/src        RelWithDebInfo
+build_dir        src/logging/logging_cpp.ss                RelWithDebInfo   Debug
 
 #DOTS
 build_dir        src/dots/dots_id.ss/src                   RelWithDebInfo
