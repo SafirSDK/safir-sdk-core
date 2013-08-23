@@ -23,3 +23,7 @@ add_subdirectory(TimeProvider_dotnet_test)
 if (SAFIR_ADA_SUPPORT)
   add_subdirectory(TimeProvider_ada_test)
 endif()
+
+if (SAFIR_JAVA_SUPPORT)
+  add_subdirectory(TimeProvider_java_test)
+endif()
