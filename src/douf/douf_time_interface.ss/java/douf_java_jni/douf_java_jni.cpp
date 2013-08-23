@@ -29,7 +29,7 @@
  * Method:    getUtcTime
  * Signature: ()D
  */
-jdouble Java_com_saabgroup_safir_time_Library_getUtcTime (JNIEnv *, jclass)
+jdouble JNICALL Java_com_saabgroup_safir_time_Library_getUtcTime (JNIEnv *, jclass)
 {
     bool success;
     DotsC_Float64 utcTime;
@@ -49,7 +49,7 @@ jdouble Java_com_saabgroup_safir_time_Library_getUtcTime (JNIEnv *, jclass)
  * Method:    getLocalTimeOffset
  * Signature: ()J
  */
-jint Java_com_saabgroup_safir_time_Library_getLocalTimeOffset (JNIEnv *, jclass)
+jint JNICALL Java_com_saabgroup_safir_time_Library_getLocalTimeOffset (JNIEnv *, jclass)
 {
     bool success;
     DotsC_Int32 offset;
