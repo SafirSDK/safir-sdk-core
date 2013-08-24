@@ -1,5 +1,5 @@
 with "safir_defaults";
-with "dots_generated_ada";
+with "dots_ada";
 with "douf_time_ada";
 
 project Douf_Test_Ada is
