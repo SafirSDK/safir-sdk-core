@@ -109,7 +109,7 @@ namespace Internal
                 {
                     isNull = false;
                     const ParameterDescription * const pd=mm->GetParameter();
-                    val=*(pd->Value<T>(index));
+                    val=pd->Value<T>(index);
                 }
                 break;
             }
@@ -336,7 +336,7 @@ namespace Internal
                 {
                     isNull = false;
                     const ParameterDescription * const pd = mm->GetParameter();
-                    val=pd->Value<char>(index).get();
+                    val=pd->ValuePtr<char>(index).get();
                 }
                 break;
             }

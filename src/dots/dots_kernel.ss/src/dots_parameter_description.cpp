@@ -92,10 +92,10 @@ namespace Internal
     }
 
 
-
+    
     template <>
     const boost::interprocess::offset_ptr<const char>
-    ParameterDescription::Value<char>(const ArrayIndex index) const
+    ParameterDescription::ValuePtr<char>(const ArrayIndex index) const
     {
         switch (m_memberType)
         {
