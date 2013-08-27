@@ -117,12 +117,6 @@ void SetJArray(JNIEnv * _env,
     }
 }
 
-void JNICALL Java_com_saabgroup_safir_swreports_Library_Stop
-(JNIEnv *, jclass)
-{
-    SwreC_Stop();
-}
-
 void JNICALL Java_com_saabgroup_safir_swreports_Library_SendFatalErrorReport
 (JNIEnv * _env, jclass, jstring _errorCode, jstring _location, jstring _text, jbooleanArray _success)
 {
@@ -222,16 +216,6 @@ void JNICALL Java_com_saabgroup_safir_application_Library_TraceAppendCharPrefix
 {
     bool success;
     SwreC_TraceAppendCharPrefix(_prefixId,_b,success);
-    SetJArray(_env,_success,success);
-}
-
-
-
-void JNICALL Java_com_saabgroup_safir_application_Library_TraceSyncBuffer
-(JNIEnv * _env, jclass, jbooleanArray _success)
-{
-    bool success;
-    SwreC_TraceSyncBuffer(success);
     SetJArray(_env,_success,success);
 }
 
