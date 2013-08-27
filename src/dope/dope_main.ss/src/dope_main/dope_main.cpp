@@ -23,10 +23,11 @@
 ******************************************************************************/
 #include "DopeApp.h"
 #include <Safir/SwReports/SwReport.h>
+#include <Safir/Application/CrashReporter.h>
 
 int main(int /*argc*/, char * argv[])
 {
-    Safir::SwReports::SwReportStarter starter;
+    Safir::Application::ScopedCrashReporting scopedStartStop;
 
     try
     {

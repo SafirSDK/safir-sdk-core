@@ -28,6 +28,7 @@
 #include <Safir/Dob/ThisNodeParameters.h>
 #include "FilePersistor.h"
 #include <Safir/SwReports/SwReport.h>
+#include <Safir/Application/CrashReporter.h>
 #include <Safir/Dob/NotOpenException.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/PersistentDataStatus.h>
@@ -60,6 +61,7 @@ DopeApp::DopeApp():
     m_instanceId(Safir::Dob::ThisNodeParameters::NodeNumber()),
     m_persistenceStarted(false),
     m_persistenceInitialized(false),
+    m_keeper(m_dobConnection),
     m_debug(L"DopeApp")
 {
     //perform sanity check!
@@ -69,7 +71,7 @@ DopeApp::DopeApp():
         Safir::SwReports::SendFatalErrorReport
             (L"Bad Configuration",L"DopeApp::DopeApp",
              L"DOPE was started even though Safir.Dob.PersistenceParameters.SystemHasPersistence is set to false. Please check your configuration");
-        Safir::SwReports::Stop();
+        Safir::Application::StopCrashReporting();
         exit(1);
     }
 
@@ -84,7 +86,7 @@ DopeApp::DopeApp():
         Safir::SwReports::SendFatalErrorReport
             (L"Failed to connect to DOB.",L"DopeApp::DopeApp",
             L"Maybe DOPE is already started on this node.");
-        Safir::SwReports::Stop();
+        Safir::Application::StopCrashReporting();
         exit(1);
     }
 
@@ -302,26 +304,29 @@ void DopeApp::ConnectionThread()
     }
     catch (Safir::Dob::NotOpenException e)
     {
-        Safir::SwReports::SendErrorReport
+        Safir::SwReports::SendFatalErrorReport
             (L"NotOpenException",L"DopeApp::ConnectionThread",
             L"Connection thread alredy running.");
-        Safir::SwReports::Stop();
+        Safir::Application::StopCrashReporting();
+        exit(1);
     }
     catch (const std::exception & e)
     {
-        Safir::SwReports::SendErrorReport(L"UnhandledException",
+        Safir::SwReports::SendFatalErrorReport(L"UnhandledException",
             L"DopeApp::ConnectionThread",
             Safir::Dob::Typesystem::Utilities::ToWstring(e.what()));
-        Safir::SwReports::Stop();
+        Safir::Application::StopCrashReporting();
+        exit(1);
     }
     catch (...)
     {
-        Safir::SwReports::SendErrorReport(L"UnhandledException",
+        Safir::SwReports::SendFatalErrorReport(L"UnhandledException",
             L"DopeApp::ConnectionThread",
             L"A ... exception occurred in DopeApp::ConnectionThread. "
             L"Since it was not an exception derived from std::exception "
             L"I can't provide any more information, sorry.");
-        Safir::SwReports::Stop();
+        Safir::Application::StopCrashReporting();
+        exit(1);
     }
 }
 
