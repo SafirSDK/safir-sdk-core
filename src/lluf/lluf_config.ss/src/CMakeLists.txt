@@ -11,17 +11,6 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(lluf_config SHARED ${sources} ${headers})
 
-#FIND_PACKAGE(Boost COMPONENTS filesystem date_time)
-
-#TARGET_LINK_LIBRARIES(lluf_utils ${ACE_LIBRARY} ${Boost_LIBRARIES} ${COMMON_LIBRARIES})
-
-#ADD_DEFINITIONS(-DLLUF_UTILS_EXPORTS)
-
-#on windows we need the psapi library
-#if (WIN32)
-#  TARGET_LINK_LIBRARIES(lluf_utils psapi)
-#endif(WIN32)
-
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)
