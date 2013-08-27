@@ -11,7 +11,8 @@
 
 TODO: Interface changes:
  * binaries i blobbar
- * swre-start och stop
+ * tracer start
+ * backdoor keeper
  * ada-factory
  * tiha.dll
 
