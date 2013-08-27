@@ -45,18 +45,19 @@ const wchar_t* pingCmd = L"ping";
 const wchar_t* helpCmd = L"help";
 
 //-----------------------------------------------------------------------------
-BackdoorKeeper::BackdoorKeeper(const Safir::Dob::ConnectionBase&   connection,
-                               Safir::Application::Backdoor& backdoor)
+BackdoorKeeper::BackdoorKeeper(const Safir::Dob::ConnectionBase&   connection)
     : m_connection(connection),
-      m_backdoor(backdoor),
+      m_backdoor(NULL),
       m_started(false)
 {
 }
 
 //-----------------------------------------------------------------------------
-void BackdoorKeeper::Start()
+void BackdoorKeeper::Start(Safir::Application::Backdoor& backdoor)
 {
     Stop();
+
+    m_backdoor = &backdoor;
 
     m_connection.SubscribeMessage(PI_CMD_TYPE_ID, PI_CMD_CHANNEL_ID, this);
     m_started = true;
@@ -78,6 +79,8 @@ void BackdoorKeeper::Stop()
     }
 
     m_connection.UnsubscribeMessage(PI_CMD_TYPE_ID, PI_CMD_CHANNEL_ID, this);
+
+    m_backdoor = NULL;
 
     m_started = false;
 }
@@ -149,14 +152,14 @@ void BackdoorKeeper::OnMessage(const Safir::Dob::MessageProxy messageProxy)
             {
                 // Get help text from subclass implementator.
                 Safir::Logging::SendSystemLog(Safir::Logging::Debug,
-                                              m_backdoor.GetHelpText());
+                                              m_backdoor->GetHelpText());
 
                 return; // *** RETURN ***
             }
         }
 
         // Let the subclass handle the command
-        m_backdoor.HandleCommand(cmdTokens);
+        m_backdoor->HandleCommand(cmdTokens);
     }
     catch (boost::bad_expression& /* e*/ )
     {

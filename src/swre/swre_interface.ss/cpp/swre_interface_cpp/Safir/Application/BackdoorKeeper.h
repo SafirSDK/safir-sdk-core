@@ -49,8 +49,7 @@ public:
     /**
      * Constructor.
      */
-    explicit BackdoorKeeper(const Safir::Dob::ConnectionBase&   connection,
-                            Safir::Application::Backdoor&       backdoor);
+    explicit BackdoorKeeper(const Safir::Dob::ConnectionBase&   connection);
 
     /**
      * Destructor.
@@ -70,7 +69,7 @@ public:
      * @param backdoor [in] - Class that implements the Backdoor interface.
      * @exception Safir::Dob::NotOpenException 'Start' was called before connect to Dob.
      */
-    void Start();
+    void Start(Safir::Application::Backdoor& backdoor);
 
     /**
      * Stops subscription for backdoor commands.
@@ -95,7 +94,7 @@ private:
                   const std::wstring&        delimiters = L" \t\n");
 
     const Safir::Dob::ConnectionBase&   m_connection;
-    Backdoor&                           m_backdoor;
+    Backdoor*                           m_backdoor;
 
     bool m_started;
 };
