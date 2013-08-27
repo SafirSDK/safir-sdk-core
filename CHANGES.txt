@@ -9,6 +9,13 @@
 * TODO: syslog
 * Bug fixes!
 
+TODO: Interface changes:
+ * binaries i blobbar
+ * swre-start och stop
+ * ada-factory
+ * tiha.dll
+
+
 2013-06-25 version 4.4:
 
 This release is intended to implement the "First Step" chapter from the paper "Readonly installation of Safir SDK Core" (https://projekt.consoden.se/safir/job/Whitepapers/lastSuccessfulBuild/artifact/readonly_install.html).
