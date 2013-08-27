@@ -23,7 +23,6 @@
 ******************************************************************************/
 #include <Safir/Application/Tracer.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
-#include <Safir/SwReports/SwReport.h>
 #include <boost/thread.hpp>
 #include <iostream>
 
@@ -41,7 +40,6 @@ int main(int /*argc*/, char* argv[])
     boost::this_thread::sleep(boost::posix_time::seconds(2));
     debug << "blahonga" << std::endl;
 
-    Safir::SwReports::Stop();
     return 0;
 }
 
