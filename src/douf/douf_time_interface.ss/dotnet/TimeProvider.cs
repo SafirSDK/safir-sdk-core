@@ -28,7 +28,6 @@ namespace Safir.Time
 {
     /// <summary>
     /// This helper class contains methods to convert time between DateTime and double format.
-    /// The current time in NTP format is received this class.
     /// </summary>
     public class TimeProvider
     {

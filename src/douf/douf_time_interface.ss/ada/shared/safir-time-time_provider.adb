@@ -24,7 +24,7 @@
 with Ada.Exceptions;
 with Interfaces.C;
 
-package body Safir.Time.TimeProvider is
+package body Safir.Time.Time_Provider is
 
    package C renames Interfaces.C;
 
@@ -34,11 +34,11 @@ package body Safir.Time.TimeProvider is
    use type Safir.Dob.Typesystem.Si_64.Second;
    use type Ada.Calendar.Time;
 
-   procedure GetUtcTime (utcTime : out Safir.Dob.Typesystem.Si_64.Second; Success : out C.char);
-   pragma Import (C, GetUtcTime, "DoufTimeC_GetUtcTime");
+   procedure Get_UTC_Time (UTCTime : out Safir.Dob.Typesystem.Si_64.Second; Success : out C.char);
+   pragma Import (C, Get_UTC_Time, "DoufTimeC_GetUtcTime");
 
-   procedure GetLocalTimeOffset (offset : out Safir.Dob.Typesystem.Int_32; Success : out C.char);
-   pragma Import (C, GetLocalTimeOffset, "DoufTimeC_GetLocalTimeOffset");
+   procedure Get_Local_Time_Offset (offset : out Safir.Dob.Typesystem.Int_32; Success : out C.char);
+   pragma Import (C, Get_Local_Time_Offset, "DoufTimeC_GetLocalTimeOffset");
 
    ADA_1_JAN_1970 : constant Ada.Calendar.Time := Ada.Calendar.Time_Of (
                                                                 Year => 1970,
@@ -46,42 +46,42 @@ package body Safir.Time.TimeProvider is
                                                                 Day   => 1);
 
    ----------------------------------------------------------------------------
-   function GetUtcTime return Safir.Dob.Typesystem.Si_64.Second is
-      UtcTime : Safir.Dob.Typesystem.Si_64.Second;
+   function Get_UTC_Time return Safir.Dob.Typesystem.Si_64.Second is
+      UTC_Time : Safir.Dob.Typesystem.Si_64.Second;
       Success : C.char;
    begin
-      -- Get current Utc time
-      GetUtcTime (UtcTime, Success);
+      -- Get current UTC time
+      Get_UTC_Time (UTC_Time, Success);
 
       if C.char'Pos (Success) = 0 then
          Throw (Safir.Dob.Typesystem.Configuration_Error_Exception'Identity,
                 "Configuration error in TimeProvider, please check your logs!");
       end if;
 
-      return UtcTime;
-   end GetUtcTime;
+      return UTC_Time;
+   end Get_UTC_Time;
 
    ----------------------------------------------------------------------------
-   function ToLocalTime (UtcTime : in Safir.Dob.Typesystem.Si_64.Second) return Ada.Calendar.Time is
+   function To_Local_Time (UTC_Time : in Safir.Dob.Typesystem.Si_64.Second) return Ada.Calendar.Time is
       Offset : Safir.Dob.Typesystem.Int_32;
       Success : C.char;
    begin
-      GetLocalTimeOffset (Offset, Success);
+      Get_Local_Time_Offset (Offset, Success);
 
       if C.char'Pos (Success) = 0 then
          Throw (Safir.Dob.Typesystem.Configuration_Error_Exception'Identity,
                 "Configuration error in TimeProvider, please check your logs!");
       end if;
 
-      return CalendarTimeOf (UtcTime + Safir.Dob.Typesystem.Float_64 (Offset));
-   end ToLocalTime;
+      return Calendar_Time_Of (UTC_Time + Safir.Dob.Typesystem.Float_64 (Offset));
+   end To_Local_Time;
 
    ----------------------------------------------------------------------------
-   function ToUtcTime (LocalTime : in Ada.Calendar.Time) return Safir.Dob.Typesystem.Si_64.Second is
+   function To_UTC_Time (Local_Time : in Ada.Calendar.Time) return Safir.Dob.Typesystem.Si_64.Second is
       Offset    : Safir.Dob.Typesystem.Int_32;
       Success : C.char;
    begin
-      GetLocalTimeOffset (Offset, Success);
+      Get_Local_Time_Offset (Offset, Success);
 
       if C.char'Pos (Success) = 0 then
          Throw (Safir.Dob.Typesystem.Configuration_Error_Exception'Identity,
@@ -89,19 +89,19 @@ package body Safir.Time.TimeProvider is
       end if;
 
       -- Return seconds since 01 Jan 1970
-      return Safir.Dob.Typesystem.Float_64 (LocalTime - ADA_1_JAN_1970 - Duration (Offset));
-   end ToUtcTime;
+      return Safir.Dob.Typesystem.Float_64 (Local_Time - ADA_1_JAN_1970 - Duration (Offset));
+   end To_UTC_Time;
 
    ----------------------------------------------------------------------------
-   function CalendarTimeOf (UtcTime : in Safir.Dob.Typesystem.Si_64.Second) return Ada.Calendar.Time is
+   function Calendar_Time_Of (UTC_Time : in Safir.Dob.Typesystem.Si_64.Second) return Ada.Calendar.Time is
    begin
-      return ADA_1_JAN_1970 + Duration (UtcTime);
-   end CalendarTimeOf;
+      return ADA_1_JAN_1970 + Duration (UTC_Time);
+   end Calendar_Time_Of;
 
    ----------------------------------------------------------------------------
-   function DoubleOf (UtcTime : in Ada.Calendar.Time) return Safir.Dob.Typesystem.Si_64.Second is
+   function Seconds_Of (UTC_Time : in Ada.Calendar.Time) return Safir.Dob.Typesystem.Si_64.Second is
    begin
-      return Safir.Dob.Typesystem.Si_64.Second (UtcTime - ADA_1_JAN_1970);
-   end DoubleOf;
+      return Safir.Dob.Typesystem.Si_64.Second (UTC_Time - ADA_1_JAN_1970);
+   end Seconds_Of;
 
-end Safir.Time.TimeProvider;
+end Safir.Time.Time_Provider;
