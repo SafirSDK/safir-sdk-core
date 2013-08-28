@@ -418,7 +418,7 @@ namespace Internal
         {
             m_impl.reset(new LoggingImpl(*this));
         }
-        catch (const std::exception& e)
+        catch (const std::exception&)
         {
             m_impl.reset(new FallbackImpl(*this));
             //set it to null, just to be extra sure. Should not be needed...
