@@ -92,7 +92,6 @@ private:
     SystemLogImpl()
         : m_pid(Safir::Utilities::ProcessInfo::GetPid()),
           m_processName(),
-          m_configReader(),
           m_nativeLogging(false),
           m_sendToSyslogServer(false),
           m_syslogServerEndpoint(),
@@ -108,10 +107,10 @@ private:
             m_processName = Safir::Utilities::ProcessInfo(m_pid).GetProcessName();
             boost::algorithm::replace_last(m_processName, ".exe", "");
 
-            m_configReader.reset(new Safir::Utilities::Internal::ConfigReader);
+            Safir::Utilities::Internal::ConfigReader configReader;
 
-            m_nativeLogging = m_configReader->Logging().get<bool>("SystemLog.native_logging");
-            m_sendToSyslogServer = m_configReader->Logging().get<bool>("SystemLog.send_to_syslog_server");
+            m_nativeLogging = configReader.Logging().get<bool>("SystemLog.native_logging");
+            m_sendToSyslogServer = configReader.Logging().get<bool>("SystemLog.send_to_syslog_server");
 
             if (m_nativeLogging)
             {
@@ -132,8 +131,8 @@ private:
                 m_syslogServerEndpoint =
                         boost::asio::ip::udp::endpoint
                             (boost::asio::ip::address::from_string
-                                (m_configReader->Logging().get<std::string>("SystemLog.syslog_server_address")),
-                                 m_configReader->Logging().get<unsigned short>("SystemLog.syslog_server_port"));
+                                (configReader.Logging().get<std::string>("SystemLog.syslog_server_address")),
+                                 configReader.Logging().get<unsigned short>("SystemLog.syslog_server_port"));
             }
 
         }
@@ -301,7 +300,6 @@ private:
     pid_t                           m_pid;
     std::string                     m_processName;
 
-    boost::shared_ptr<Safir::Utilities::Internal::ConfigReader> m_configReader;
     bool                                                        m_nativeLogging;
     bool                                                        m_sendToSyslogServer;
 
