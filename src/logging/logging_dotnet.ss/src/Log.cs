@@ -29,6 +29,7 @@ namespace Safir
 {
     public sealed class Logging
     {
+        //TODO: add comments about what to use when
         public enum Severity
         {
             Emergency,
@@ -41,6 +42,15 @@ namespace Safir
             Debug
         };
 
+        ///<summary>
+        /// Service for sending log messages to the native system logging mechanism.
+        /// <para/>
+        /// The service takes a severity and an arbitrary string.
+        /// The severity levels conforms to the ones used by the well known syslog format as specified
+        /// in http://www.ietf.org/rfc/rfc3164.txt.
+        /// </summary>
+        /// <param name="severity">Severity according to RFC 3164.</param>
+        /// <param name="message">Log text.</param>
         public static void SendSystemLog(Severity severity,
                                          String message)
         {

@@ -45,6 +45,7 @@ namespace Safir
 {
 namespace Logging
 {
+    //TODO: add comments about what to use when
     enum Severity
     {
         Emergency = 0,
