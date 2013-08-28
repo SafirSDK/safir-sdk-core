@@ -80,7 +80,7 @@ try:
     log_common_part = r"\D{3} [ |\d]\d \d{2}:\d{2}:\d{2} \S* " + system_log_test_pgm + r"\[\d*\]: "
     for test in range(8):
         data, addr = sock.recvfrom( 10 * 1024 ) # buffer size is 10 k
-        print ("Received data: " + data) 
+        print ("Received data:", data) 
         if test == 0:
             pri = r"<8>"
             text = r"This is an emergency log"
@@ -109,11 +109,11 @@ try:
         p = re.compile(pri + log_common_part + text)
         data = data.decode("utf-8")
         if p.match(data) == None:
-            print ("Unexpected syslog message: " + data)
+            print ("Unexpected syslog message:", data)
             sys.exit(1)
             
 except:
-    print("Timeout")
+    print("Exception!")
     sys.exit(1)
 
 sys.exit(0)
