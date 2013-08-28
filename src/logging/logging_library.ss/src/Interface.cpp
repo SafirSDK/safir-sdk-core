@@ -27,13 +27,13 @@
 #include <iostream>
 
 void LoggingC_SendSystemLog(const boost::int32_t severity,
-                            const char * const   logMsg)
+                            const char * const   message)
 {
     try
     {
-    Safir::Utilities::Internal::SystemLog().Send
+        Safir::Utilities::Internal::SystemLog().Send
             (static_cast<Safir::Utilities::Internal::SystemLog::Severity>(severity),
-             Safir::Utilities::Internal::ToUtf16(logMsg));
+             Safir::Utilities::Internal::ToUtf16(message));
     }
     catch (...)
     {

@@ -23,19 +23,18 @@
 ******************************************************************************/
 #include <boost/cstdint.hpp>
 
-#ifndef __LOGGING_LIBRARY_H__
-#define __LOGGING_LIBRARY_H__
+#ifndef __SAFIR_LOGGING_LIBRARY_H__
+#define __SAFIR_LOGGING_LIBRARY_H__
 
 #if defined _MSC_VER
-    #ifdef LOGGING_LIBRARY_EXPORTS
-        #define LOGGING_LIBRARY_API __declspec(dllexport)
-    #else
-        #define LOGGING_LIBRARY_API __declspec(dllimport)
-        #pragma comment( lib, "logging_library.lib" )
-    #endif
+#  ifdef logging_library_EXPORTS
+#    define LOGGING_LIBRARY_API __declspec(dllexport)
+#  else
+#    define LOGGING_LIBRARY_API __declspec(dllimport)
+#    pragma comment( lib, "logging_library.lib" )
+#  endif
 #elif defined __GNUC__
-    #define LOGGING_LIBRARY_API
-    #define __cdecl
+#  define LOGGING_LIBRARY_API
 #endif
 
 extern "C"
@@ -49,9 +48,9 @@ extern "C"
      * in http://www.ietf.org/rfc/rfc3164.txt.
      *
      * @param [in] severity Severity according to RFC 3164.
-     * @param [in] logMsg Log text.
+     * @param [in] message Log text.
      */
-    LOGGING_LIBRARY_API void LoggingC_SendSystemLog(const boost::int32_t severity,
+     LOGGING_LIBRARY_API void LoggingC_SendSystemLog(const boost::int32_t severity,
                                                     const char * const   logMsg);
 }
 

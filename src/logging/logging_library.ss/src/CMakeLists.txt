@@ -19,8 +19,6 @@ if (NOT MSVC)
     TARGET_LINK_LIBRARIES(logging_library lluf_utils)
 endif()
 
-ADD_DEFINITIONS(-DLOGGING_LIBRARY_EXPORTS)
-
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)

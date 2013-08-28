@@ -34,9 +34,9 @@ namespace Logging
     using Safir::Utilities::Internal::ToUtf8;
 
     void SendSystemLog(const Severity       severity,
-                       const std::wstring&  logMsg)
+                       const std::wstring&  message)
     {
-        LoggingC_SendSystemLog(static_cast<const boost::int32_t>(severity), ToUtf8(logMsg).c_str());
+        LoggingC_SendSystemLog(static_cast<const boost::int32_t>(severity), ToUtf8(message).c_str());
     }
 }
 }

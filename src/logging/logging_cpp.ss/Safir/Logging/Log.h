@@ -21,22 +21,22 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __LOG_H
-#define __LOG_H
+#ifndef __SAFIR_LOGGING_LOG_H__
+#define __SAFIR_LOGGING_LOG_H__
 
 #if defined _MSC_VER
-    #ifdef LOGGING_EXPORTS
-        #define LOGGING_EXPORTS __declspec(dllexport)
-    #else
-        #define LOGGING_EXPORTS __declspec(dllimport)
-        #ifdef NDEBUG
-            #pragma comment( lib, "logging_cpp.lib" )
-        #else
-            #pragma comment( lib, "logging_cppd.lib" )
-       #endif
-    #endif
+#  ifdef logging_cpp_EXPORTS
+#    define LOGGING_EXPORTS __declspec(dllexport)
+#  else
+#    define LOGGING_EXPORTS __declspec(dllimport)
+#    ifdef NDEBUG
+#      pragma comment( lib, "logging_cpp.lib" )
+#    else
+#      pragma comment( lib, "logging_cppd.lib" )
+#    endif
+#  endif
 #elif defined __GNUC__
-    #define LOGGING_EXPORTS
+#  define LOGGING_EXPORTS
 #endif
 
 #include <string>
@@ -66,10 +66,10 @@ namespace Logging
      * in http://www.ietf.org/rfc/rfc3164.txt.
      *
      * @param [in] severity Severity according to RFC 3164.
-     * @param [in] logMsg Log text.
+     * @param [in] message Log text.
      */
     LOGGING_EXPORTS void SendSystemLog(const Severity severity,
-                                       const std::wstring& logMsg);
+                                       const std::wstring& message);
 
 }
 }
