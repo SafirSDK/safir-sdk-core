@@ -144,6 +144,7 @@ namespace Internal
         std::wstring m_traceBuffer;
         bool m_prefixPending;
 
+        bool m_windowsNativeLogging;
 
         /**
          * This class is here to ensure that only the Instance method can get at the 

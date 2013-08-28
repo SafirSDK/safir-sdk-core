@@ -44,6 +44,7 @@
 #include <Safir/Logging/Log.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/ProcessInfo.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <boost/bind.hpp>
 #include <Safir/Utilities/CrashReporter.h>
 #include <boost/regex.hpp>
@@ -96,7 +97,8 @@ namespace Internal
           m_backdoorConnection(),
           m_traceBufferLock(),
           m_traceBuffer(),
-          m_prefixPending(true)
+          m_prefixPending(true),
+          m_windowsNativeLogging(false)
     {
         std::wstring env;
         {
@@ -132,6 +134,14 @@ namespace Internal
             std::wcout << "Error while parsing FORCE_LOG environment variable '" <<
                 env << "'.\nException description is '"<< exc.what() << "'.\nContinuing as if it was not set" << std::endl;
         }
+
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+
+        Safir::Utilities::Internal::ConfigReader configReader;
+
+        m_windowsNativeLogging = configReader.Logging().get<bool>("SystemLog.native_logging");
+#endif
+
     }
 
     Library::~Library() 
@@ -259,8 +269,12 @@ namespace Internal
         // traces are always written to std out
         std::wcout << m_traceBuffer << std::flush;
 
-        Safir::Logging::SendSystemLog(Safir::Logging::Debug,
-                                      m_traceBuffer);
+        // We don't send traces to system log if we are configured for Windows native logging
+        if (!m_windowsNativeLogging)
+        {
+            Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                          m_traceBuffer);
+        }
 
         m_traceBuffer.clear();
     }
