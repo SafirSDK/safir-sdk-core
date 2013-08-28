@@ -11,6 +11,7 @@ build_dir        build/patch_check                         Release
 
 #LLUF
 build_dir        src/lluf/lluf_config.ss/src                Release          Debug
+build_dir        src/lluf/lluf_config_dump.ss/src           Release
 build_dir        src/lluf/lluf_crash_reporter.ss/src        Release
 build_dir        src/lluf/lluf_startup_synchronizer.ss/src  RelWithDebInfo
 build_dir        src/lluf/lluf_utils.ss/src                 RelWithDebInfo   Debug
@@ -24,8 +25,7 @@ run_test_suite   src/lluf/lluf_utils.ss/tests                  lluf_tests
 
 #LOGGING
 build_dir        src/logging/logging_library.ss/src        RelWithDebInfo
-build_dir        src/logging/logging_cpp.ss/src            RelWithDebInfo   Debug
-build_dir        src/logging/logging_dotnet.ss/src         RelWithDebInfo
+build_dir        src/logging/logging_cpp.ss                RelWithDebInfo   Debug
 
 #DOTS
 build_dir        src/dots/dots_id.ss/src                   RelWithDebInfo
@@ -96,6 +96,7 @@ build_dir        src/swre/swre_interface.ss/cpp/swre_interface_cpp         RelWi
 build_dir        src/swre/swre_interface.ss/dotnet/swre_interface_dotnet   RelWithDebInfo
 build_dir        src/swre/swre_interface.ss/java           RelWithDebInfo
 build_dir        src/swre/swre_interface.ss/ada            RelWithDebInfo
+build_dir        src/swre/swre_logger.ss/src               RelWithDebInfo
 build_dir        src/swre/swre_backdoor.ss/src             RelWithDebInfo
 
 #FOREACH
