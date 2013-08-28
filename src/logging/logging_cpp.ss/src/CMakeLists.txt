@@ -12,7 +12,7 @@ FILE(GLOB sources *.cpp)
 ADD_LIBRARY(logging_cpp SHARED ${sources} ${headers})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(logging_cpp lluf_utils)
+    TARGET_LINK_LIBRARIES(logging_cpp logging_library lluf_utils)
 endif()
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
