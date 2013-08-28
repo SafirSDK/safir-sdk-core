@@ -70,7 +70,7 @@ sock.bind((syslog_server_address, int(syslog_server_port)))
 #Run the program that sends system logs
 proc = subprocess.Popen(system_log_test_path, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
 stdout, stderr = proc.communicate()
-print (stdout)
+#print (stdout)
 
 if proc.returncode != 0:
     print("Failed when sending system logs!")
