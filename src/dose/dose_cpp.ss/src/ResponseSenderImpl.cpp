@@ -57,22 +57,9 @@ namespace Internal
     {
         if (m_valid)
         {
-            lllerr << "A ResponseSender was discarded without having been used!"
-                   << " ctrl = " << m_ctrl
-                   << ", responseId = " << m_responseId << std::endl;
-
-            std::wostringstream ostr;
-            ostr << "A ResponseSender was destroyed without having been used!" << std::endl
-                 << "This is usually due to a programming error in the application:" << std::endl
-                 << "Either the application did not send a response to a request, or " << std::endl
-                 << "an exception was thrown inside a Service or Entity request callback, " << std::endl
-                 << "causing the ResponseSender to be destroyed prematurely." << std::endl
-                 << "In either case the application needs to be fixed and the system restarted"
-                 << std::endl << std::endl;
-
-            ostr << "NodeNumber = " << Safir::Dob::ThisNodeParameters::NodeNumber();
-            Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
-                                                         ostr.str());
+            Safir::Utilities::Internal::SystemLog().Send
+                (Safir::Utilities::Internal::SystemLog::Critical,
+                 L"Programming Error! A ResponseSender was destroyed without having been used!");
         }
     }
 
