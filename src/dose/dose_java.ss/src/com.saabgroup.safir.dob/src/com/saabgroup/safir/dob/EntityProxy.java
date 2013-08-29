@@ -466,8 +466,6 @@ public class EntityProxy {
                 com.saabgroup.safir.Logging.sendSystemLog
                     (com.saabgroup.safir.Logging.Severity.CRITICAL,
                      "Programming Error! An EntityProxy was not disposed correctly when the finalizer was called.");
-
-                System.exit(123);
             }
         }
         catch (Exception exc)
