@@ -27,6 +27,8 @@ run_test_suite   src/lluf/lluf_utils.ss/tests                  lluf_tests
 build_dir        src/logging/logging_library.ss/src        RelWithDebInfo
 build_dir        src/logging/logging_cpp.ss/src            RelWithDebInfo   Debug
 build_dir        src/logging/logging_dotnet.ss/src         RelWithDebInfo
+build_dir        src/logging/logging_java.ss/src           RelWithDebInfo
+build_dir        src/logging/logging_ada.ss/src            RelWithDebInfo
 
 #DOTS
 build_dir        src/dots/dots_id.ss/src                   RelWithDebInfo
