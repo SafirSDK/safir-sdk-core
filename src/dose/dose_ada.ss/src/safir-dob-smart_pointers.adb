@@ -22,8 +22,7 @@
 --
 -------------------------------------------------------------------------------
 with Ada.Unchecked_Deallocation;
-with Ada.Text_IO; use Ada.Text_IO;
-with GNAT.OS_Lib;
+with Safir.Logging;
 
 package body Safir.Dob.Smart_Pointers is
 
@@ -82,8 +81,8 @@ package body Safir.Dob.Smart_Pointers is
       if Self.Data_Ptr /= null then
          if Self.Adjust_Limitation then
             if Self.Max_Adjusts < 1 then
-               Put_Line ("You are not allowed to make a copy of the proxy object!");
-               GNAT.OS_Lib.OS_Exit (101010);
+               Safir.Logging.Send_System_Log (Safir.Logging.Critical,
+                                              "You are not allowed to make a copy of the proxy object!");
             else
                Self.Max_Adjusts := Self.Max_Adjusts - 1;
             end if;
