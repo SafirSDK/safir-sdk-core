@@ -24,6 +24,7 @@
 
 #include "dots_exception_keeper.h"
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <sstream>
 #include <iostream>
 
@@ -81,15 +82,13 @@ namespace Internal
         lllog(2) << "ExceptionKeeper::Set: id = " << exceptionId << " description = " << description.c_str() <<std::endl;
         if (exc.isSet)
         {
-            std::wostringstream ostr;
-            ostr << "ExceptionKeeper::Set: Trying to set new exception data over old (and uncleared) exception data" << std::endl
-                << "Old = (" << exc.exceptionId << ", " << exc.description.c_str() << ")" <<std::endl
-                << "New = (" << exceptionId << ", " << description.c_str() << ")" <<std::endl;
-            ostr << "This means that there is something wrong with the exception handling of a library you are using"<< std::endl
-                << "Please contact your nearest DOB developer if you have no idea what this means, otherwise contact the"
-                << " developer of the library you suspect has the error"<<std::endl;
-
-            lllerr << ostr.str();
+            SEND_SYSTEM_LOG(Critical,
+                            << "ExceptionKeeper::Set: Trying to set new exception data over old (and uncleared) exception data");
+            
+            lllog(0) << "ExceptionKeeper::Set: Trying to set new exception data over old (and uncleared) exception data\n"
+                     << "Old = (" << exc.exceptionId << ", " << exc.description.c_str() << ")\n"
+                     << "New = (" << exceptionId << ", " << description.c_str() << ")\n"
+                     << "This means that there is something wrong with the exception handling of a library you are using!"<<std::endl;
         }
         exc.exceptionId = exceptionId;
         exc.description = description;
@@ -103,12 +102,11 @@ namespace Internal
         ExceptionData & exc = GetDataForCurrentThread();
         if (!exc.isSet)
         {
-            std::wostringstream ostr;
-            ostr << "ExceptionKeeper::AppendDescription: Called even though there is no exception set!!!)" <<std::endl;
-            ostr << "This means that there is something wrong with the exception handling of a library you are using"<< std::endl
-                << "Please contact your nearest DOB developer if you have no idea what this means, otherwise contact the"
-                << " developer of the library you suspect has the error"<<std::endl;
-            lllerr << ostr.str();
+            SEND_SYSTEM_LOG(Critical,
+                            << "ExceptionKeeper::AppendDescription: Called even though there is no exception set!!!");
+            
+            lllog(0) << "ExceptionKeeper::AppendDescription: Called even though there is no exception set!!!\n"
+                     << "This means that there is something wrong with the exception handling of a library you are using!"<< std::endl;
         }
         exc.description.append("\n-------------- More Description -------------\n");
         exc.description.append(moreDescription);
@@ -126,7 +124,8 @@ namespace Internal
         ExceptionData & exc = GetDataForCurrentThread();
         if (!exc.isSet)
         {
-            lllerr << "ExceptionKeeper::GetAndClear: when no exception is set!"<<std::endl;
+            SEND_SYSTEM_LOG(Critical,
+                            << "ExceptionKeeper::GetAndClear: when no exception is set!");
             return false;
         }
         else
@@ -146,14 +145,11 @@ namespace Internal
         ExceptionData & exc = GetDataForCurrentThread();
         if (!exc.isSet)
         {
-            lllerr << "ExceptionKeeper::Peek: when no exception is set!"<<std::endl;
+            SEND_SYSTEM_LOG(Critical,
+                            << "ExceptionKeeper::Peek: when no exception is set!");
 
-            std::wostringstream ostr;
-            ostr << "ExceptionKeeper::Peek: Called even though there is no exception set!!!)" <<std::endl;
-            ostr << "This means that there is something wrong with the exception handling of a library you are using"<< std::endl
-                << "Please contact your nearest DOB developer if you have no idea what this means, otherwise contact the"
-                << " developer of the library you suspect has the error"<<std::endl;
-            lllerr << ostr.str();
+            lllog(0) << "ExceptionKeeper::Peek: Called even though there is no exception set!!!\n"
+                     << "This means that there is something wrong with the exception handling of a library you are using"<< std::endl;
             exceptionId = 0;
             description.clear();
         }
@@ -171,12 +167,10 @@ namespace Internal
         ExceptionData & exc = GetDataForCurrentThread();
         if (!exc.isSet)
         {
-            std::wostringstream ostr;
-            ostr << "ExceptionKeeper::Clear: Called even though there is no exception set!!!)" <<std::endl;
-            ostr << "This means that there is something wrong with the exception handling of a library you are using"<< std::endl
-                << "Please contact your nearest DOB developer if you have no idea what this means, otherwise contact the"
-                << " developer of the library you suspect has the error"<<std::endl;
-            lllerr << ostr.str();
+            SEND_SYSTEM_LOG(Critical,
+                            << "ExceptionKeeper::Clear: Called even though there is no exception set!!!");
+            lllog(0) << "ExceptionKeeper::Clear: Called even though there is no exception set!!!\n"
+                     << "This means that there is something wrong with the exception handling of a library you are using"<< std::endl;
         }
         else
         {

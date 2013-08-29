@@ -25,6 +25,7 @@
 #include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/Internal/StringEncoding.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/weak_ptr.hpp>
 #include <boost/thread/once.hpp>
 #include <boost/thread/locks.hpp>
@@ -160,25 +161,29 @@ public:
             // fatal errors are written to std::wcerr
             case SystemLog::Emergency:
             {
-                std::wcerr << L"EMERGENCY: " << text << std::flush;
+                std::wcerr << L"EMERGENCY: " << text << std::endl;
+                lllog(0) << L"EMERGENCY: " << text << std::endl;
             }
             break;
 
             case SystemLog::Alert:
             {
-                std::wcerr << L"ALERT: " << text << std::flush;
+                std::wcerr << L"ALERT: " << text << std::endl;
+                lllog(0) << L"ALERT: " << text << std::endl;
             }
             break;
 
             case SystemLog::Critical:
             {
-                std::wcerr << L"CRITICAL: " << text << std::flush;
+                std::wcerr << L"CRITICAL: " << text << std::endl;
+                lllog(0) << L"CRITICAL: " << text << std::endl;
             }
             break;
 
             case SystemLog::Error:
             {
-                std::wcerr << L"ERROR: " << text << std::flush;
+                std::wcerr << L"ERROR: " << text << std::endl;
+                lllog(0) << L"ERROR: " << text << std::endl;
             }
             break;
 
@@ -187,7 +192,7 @@ public:
             case SystemLog::Informational:
             case SystemLog::Debug:
             {
-                // No output to std::wcerr in these cases.
+                // No output to std::wcerr/lllog in these cases.
                 ;
             }
             break;

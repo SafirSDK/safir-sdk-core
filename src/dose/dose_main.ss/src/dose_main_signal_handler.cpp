@@ -14,6 +14,7 @@
 #include <csignal>
 #include <boost/bind.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 
 #if defined(DOSE_WIN32_SIGNALS)
 #  include <boost/function.hpp>
@@ -154,7 +155,8 @@ namespace Internal
         }
         else
         {
-            lllerr << "Got extra signal " << sig << std::endl;
+            SEND_SYSTEM_LOG(Critical,
+                            << "Got extra signal " << sig);
         }
     }
 

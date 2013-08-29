@@ -45,6 +45,7 @@
 #include <Safir/Time/Internal/Interface.h>
 #include <Safir/Time/LibraryParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/DynamicLibraryLoader.h>
 
 namespace 
@@ -87,8 +88,9 @@ void LoadLibrary()
     }
     catch(const std::logic_error&)
     {
-        lllerr << "Failed to load external time provider library '" 
-               << libraryName.c_str() << std::endl;
+        SEND_SYSTEM_LOG(Critical,
+                        << "Failed to load external time provider library '" 
+                        << libraryName.c_str());
         return;
     }
     
@@ -104,7 +106,8 @@ void LoadLibrary()
     }
     catch (const std::logic_error& e)
     {
-        lllerr << "Failed to load functions in external time provider library: " << e.what() << std::endl;
+        SEND_SYSTEM_LOG(Critical,
+                        << "Failed to load functions in external time provider library: " << e.what());
         GetUtcTime = NULL;
         GetLocalTimeOffset = NULL;
         return;

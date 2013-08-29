@@ -28,6 +28,7 @@
 #include "dots_allocation_helper.h"
 #include <iostream>
 #include <boost/bind.hpp>
+#include <Safir/Utilities/Internal/StringEncoding.h>
 
 namespace Safir
 {
@@ -60,16 +61,20 @@ namespace Internal
         }
         catch (const boost::interprocess::bad_alloc&)
         {
-            lllerr << "Ran out of shared memory while loading types and parameters." <<std::endl
-                   << "Please adjust the parameter Safir.Dob.NodeParameters.TypesystemSharedMemorySize" << std::endl;
+            SEND_SYSTEM_LOG(Critical,
+                            << "Ran out of shared memory while loading types and parameters."
+                            <<" Adjust parameter Safir.Dob.NodeParameters.TypesystemSharedMemorySize");
         }
         catch (const std::exception & exc)
         {
-            lllerr << "Loading of dots_kernel failed with exception description: " << exc.what() << std::endl;
+            SEND_SYSTEM_LOG(Critical,
+                            << "Loading of dots_kernel failed with exception description:" 
+                            << exc.what());
         }
         catch (...)
         {
-            lllerr << "Loading of dots_kernel failed with ... exception." << std::endl;
+            SEND_SYSTEM_LOG(Critical,
+                            << "Loading of dots_kernel failed with ... exception.");
         }
         exit(1);
     }

@@ -118,7 +118,7 @@ namespace Utilities
             }
             else
             {
-                lllerr << "ProcessMonitorWin32Thread::StartMonitorPid() - call to OpenProcess failed." << std::endl;
+                lllog(0) << "ProcessMonitorWin32Thread::StartMonitorPid() - call to OpenProcess failed." << std::endl;
             }
         }
         else
@@ -217,7 +217,7 @@ namespace Utilities
             if (dwRet == WAIT_FAILED)
             {
                 const DWORD error = GetLastError();
-                lllerr << "ProcessMonitorWin32Thread::Run() - WaitForMultipleObjects returned WAIT_FAILED!" << std::endl
+                lllog(0) << "ProcessMonitorWin32Thread::Run() - WaitForMultipleObjects returned WAIT_FAILED!" << std::endl
                     << "   Error code = " << error << std::endl;
 
                 LPVOID lpMsgBuf;
@@ -232,7 +232,7 @@ namespace Utilities
                     (LPTSTR) &lpMsgBuf,
                     0, NULL );
 
-                lllerr << "   Error message: " << (LPTSTR)lpMsgBuf << std::endl;                    
+                lllog(0) << "   Error message: " << (LPTSTR)lpMsgBuf << std::endl;                    
 
                 LocalFree(lpMsgBuf);
             }

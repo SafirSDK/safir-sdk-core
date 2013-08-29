@@ -367,25 +367,6 @@ namespace Internal
         FilteringStreambuf m_buffer;
     };
 
-    /** Fallback is used when we're not able to log to file, so that
-     *  lllerr will still be able to work correctly. */
-    class LowLevelLogger::FallbackImpl
-        : public LowLevelLogger::Impl
-    {
-    public:
-        explicit FallbackImpl(LowLevelLogger& lll)
-        {
-            DateOutputFilter filter = DateOutputFilter(boost::shared_ptr<LowLevelLoggerControl>());
-            m_buffer.push(filter);
-            m_buffer.push(m_wcout);
-            lll.rdbuf(&m_buffer);
-        }
-    private:
-        FlushingWcoutSink m_wcout;
-        boost::iostreams::filtering_wostreambuf m_buffer;
-    };
-
-
     boost::once_flag LowLevelLogger::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
     LowLevelLogger & LowLevelLogger::SingletonHelper::Instance()
@@ -420,7 +401,7 @@ namespace Internal
         }
         catch (const std::exception&)
         {
-            m_impl.reset(new FallbackImpl(*this));
+            m_impl.reset();
             //set it to null, just to be extra sure. Should not be needed...
             m_pLogLevel = NULL;
         }

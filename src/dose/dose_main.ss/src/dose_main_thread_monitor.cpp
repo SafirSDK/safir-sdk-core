@@ -123,17 +123,14 @@ namespace Internal
                             {
                                 // ... and this thread has been hanging for so long time now
                                 // that we actually will kill dose_main itself!!
-                                std::wostringstream ostr;
-                                ostr << it->second.threadName << " (tid " << it->first
-                                    << ") seems to have been hanging for at least "
-                                    << ToUtf16(boost::posix_time::to_simple_string(timeSinceLastKick)) << '\n';
                                 if (Safir::Dob::NodeParameters::TerminateDoseMainWhenUnrecoverableError())
                                 {
-                                    ostr << "Parameter TerminateDoseMainWhenUnrecoverableError is set to true"
-                                        " which means that dose_main will now be terminated!!" << std::endl;
-                                    lllerr << ostr.str().c_str();
-                                    Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
-                                                                                 ostr.str());
+                                    SEND_SYSTEM_LOG(Alert,
+                                                    << it->second.threadName << " (tid " << it->first
+                                                    << ") has been hanging for at least "
+                                                    << ToUtf16(boost::posix_time::to_simple_string(timeSinceLastKick))
+                                                    << ". Safir.Dob.NodeParameters.TerminateDoseMainWhenUnrecoverableError is true"
+                                                    << " so dose_main will be terminated!!");
 
                                     boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(5));
 
@@ -141,11 +138,13 @@ namespace Internal
                                 }
                                 else if (!it->second.errorLogIsGenerated)
                                 {
-                                    ostr << "Parameter TerminateDoseMainWhenUnrecoverableError is set to false"
-                                        " which means that dose_main will not be terminated!!" << std::endl;
-                                    lllerr << ostr.str().c_str();
-                                    Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
-                                                                                 ostr.str());
+                                    SEND_SYSTEM_LOG(Alert,
+                                                    << it->second.threadName << " (tid " << it->first
+                                                    << ") has been hanging for at least "
+                                                    << ToUtf16(boost::posix_time::to_simple_string(timeSinceLastKick))
+                                                    << ". Safir.Dob.NodeParameters.TerminateDoseMainWhenUnrecoverableError is true"
+                                                    << " so dose_main will not be terminated!!");
+
                                     it->second.errorLogIsGenerated = true;
                                 }                           
                             }

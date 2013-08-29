@@ -25,7 +25,8 @@ run_test_suite   src/lluf/lluf_utils.ss/tests                  lluf_tests
 
 #LOGGING
 build_dir        src/logging/logging_library.ss/src        RelWithDebInfo
-build_dir        src/logging/logging_cpp.ss                RelWithDebInfo   Debug
+build_dir        src/logging/logging_cpp.ss/src            RelWithDebInfo   Debug
+build_dir        src/logging/logging_dotnet.ss/src         RelWithDebInfo
 
 #DOTS
 build_dir        src/dots/dots_id.ss/src                   RelWithDebInfo
@@ -96,7 +97,6 @@ build_dir        src/swre/swre_interface.ss/cpp/swre_interface_cpp         RelWi
 build_dir        src/swre/swre_interface.ss/dotnet/swre_interface_dotnet   RelWithDebInfo
 build_dir        src/swre/swre_interface.ss/java           RelWithDebInfo
 build_dir        src/swre/swre_interface.ss/ada            RelWithDebInfo
-build_dir        src/swre/swre_logger.ss/src               RelWithDebInfo
 build_dir        src/swre/swre_backdoor.ss/src             RelWithDebInfo
 
 #FOREACH

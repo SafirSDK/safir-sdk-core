@@ -40,25 +40,19 @@ int main()
             Safir::Dob::Internal::DoseApp theApp;
             theApp.Run();
         }
-        lllerr << "Exiting..." << std::endl;
+        std::wcout << "Exiting..." << std::endl;
         return 0;
     }
     catch (const std::exception & exc)
     {
-        std::wostringstream ostr;
-        ostr << "dose_main: Caught 'std::exception' exception: "
-             << "  '" << exc.what() << "'." << std::endl;
-        lllerr << ostr.str().c_str();
-        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
-                                                     ostr.str());
+        SEND_SYSTEM_LOG(Alert,
+                        << "dose_main: Caught 'std::exception' exception: "
+                        << "  '" << exc.what() << "'.");
     }
     catch (...)
     {
-        std::wostringstream ostr;
-        ostr << "dose_main: Caught '...' exception." <<std::endl;
-        lllerr << ostr.str().c_str();
-        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
-                                                     ostr.str());
+        SEND_SYSTEM_LOG(Alert,
+                        << "dose_main: Caught '...' exception.");
     }
     return 1;
 }

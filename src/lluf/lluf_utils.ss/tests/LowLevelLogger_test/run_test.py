@@ -287,8 +287,8 @@ print ("check that disabling in inifile works")
 os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"disabled")
 
 print ("Run the program that logs")
-p = LllProc()
-
+p = LllProc(False)
+time.sleep(2.0)
 
 print ("check that we dont have a log file")
 try:
