@@ -44,6 +44,7 @@ All methods are thread safe.
 <p>
 @deprecated use com.saabgroup.safir.logging.SendSystemLog() instead.
 */
+@Deprecated
 public class SwReport
 {
     /**
@@ -59,6 +60,7 @@ public class SwReport
      *
      * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
+    @Deprecated
     public static void SendFatalErrorReport(String errorCode,
                                             String location,
                                             String text)
@@ -87,6 +89,7 @@ public class SwReport
      *
      * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
+    @Deprecated
     public static void SendErrorReport(String errorCode,
                                        String location,
                                        String text)
@@ -117,6 +120,7 @@ public class SwReport
      *
      * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
+    @Deprecated
     public static void SendResourceReport(String resourceId,
                                           boolean allocated,
                                           String text)
@@ -147,6 +151,7 @@ public class SwReport
      *
      * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
+    @Deprecated
     public static void SendProgrammingErrorReport(String errorCode,
                                                   String location,
                                                   String text)
@@ -174,6 +179,7 @@ public class SwReport
      *
      * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
+    @Deprecated
     public static void SendProgramInfoReport(String text)
     {
         boolean [] success = new boolean [1];
