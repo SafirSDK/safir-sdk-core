@@ -112,6 +112,7 @@ private:
 
             m_nativeLogging = configReader.Logging().get<bool>("SystemLog.native_logging");
             m_sendToSyslogServer = configReader.Logging().get<bool>("SystemLog.send_to_syslog_server");
+            m_replaceNewlines = configReader.Logging().get<bool>("SystemLog.replace_newline_with_space");
 
             if (m_nativeLogging)
             {
@@ -203,13 +204,13 @@ public:
 
         if (m_nativeLogging)
         {
-            SendNativeLog(severity, text);
+            SendNativeLog(severity, ReplaceNewlines(text));
         }
 
         if (m_sendToSyslogServer)
         {
             // Utf-8 is used when sending to a syslog server
-            SendToSyslogServer(severity, ToUtf8(text));
+            SendToSyslogServer(severity, ToUtf8(ReplaceNewlines(text)));
         }
     }
 
@@ -263,7 +264,7 @@ private:
     void SendToSyslogServer(const SystemLog::Severity severity,
                             const std::string& text)
     {
-        std::stringstream log;
+        std::ostringstream log;
         log << "<" << (SAFIR_FACILITY | severity) << ">"
             << GetSyslogTimestamp() << ' '
             << boost::asio::ip::host_name() << ' '
@@ -290,6 +291,27 @@ private:
     }
 
     //-------------------------------------------------------------------------
+    std::wstring ReplaceNewlines(std::wstring text)
+    {
+        if (!m_replaceNewlines)
+        {
+            return text;
+        }
+        else
+        {
+            for (std::wstring::iterator it = text.begin();
+                 it != text.end(); ++it)
+            {
+                if (*it == '\n')
+                {
+                    *it = ' ';
+                }
+            }
+            return text;
+        }
+    }
+
+    //-------------------------------------------------------------------------
     void FatalError(const std::wstring& errTxt)
     {
         SendNativeLog(SystemLog::Critical, errTxt);
@@ -305,9 +327,10 @@ private:
     pid_t                           m_pid;
     std::string                     m_processName;
 
-    bool                                                        m_nativeLogging;
-    bool                                                        m_sendToSyslogServer;
-
+    bool                            m_nativeLogging;
+    bool                            m_sendToSyslogServer;
+    bool                            m_replaceNewlines;
+    
     boost::asio::ip::udp::endpoint  m_syslogServerEndpoint;
     boost::asio::io_service         m_service;
     boost::asio::ip::udp::socket    m_sock;
