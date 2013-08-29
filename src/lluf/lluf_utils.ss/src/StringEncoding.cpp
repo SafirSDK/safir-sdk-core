@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __LLUF_STRING_ENCODING_H__
-#define __LLUF_STRING_ENCODING_H__
+
+#include <Safir/Utilities/Internal/StringEncoding.h>
 
 #include <string>
 
@@ -135,6 +135,4 @@ const std::wstring ToUtf16(const std::string& str)
 }
 }
 }
-
-#endif
 
