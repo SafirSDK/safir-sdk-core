@@ -60,9 +60,9 @@ namespace Logging
 
 
     /**
-     * Service for sending log messages to the native system logging mechanism.
+     * Send log messages to the system logging mechanism.
      *
-     * The service takes a severity and an arbitrary string.
+     * The function takes a severity and an arbitrary string.
      * The severity levels conforms to the ones used by the well known syslog format as specified
      * in http://www.ietf.org/rfc/rfc3164.txt.
      *

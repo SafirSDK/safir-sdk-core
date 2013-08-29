@@ -27,6 +27,9 @@ using System.Runtime.InteropServices;
 
 namespace Safir
 {
+    /// <summary>
+    /// Class containing types and functions to be used for logging.
+    /// </summary>
     public sealed class Logging
     {
         //TODO: add comments about what to use when
@@ -43,9 +46,9 @@ namespace Safir
         };
 
         ///<summary>
-        /// Service for sending log messages to the native system logging mechanism.
+        /// Send log messages to the system logging mechanism.
         /// <para/>
-        /// The service takes a severity and an arbitrary string.
+        /// The function takes a severity and an arbitrary string.
         /// The severity levels conforms to the ones used by the well known syslog format as specified
         /// in http://www.ietf.org/rfc/rfc3164.txt.
         /// </summary>

@@ -24,21 +24,34 @@
 ******************************************************************************/
 package com.saabgroup.safir;
 
+/** 
+ * Class containing types and functions to be used for logging.
+ */
 public final class Logging
 {
     //TODO: add comments about what to use when
     public enum Severity
     {
-        Emergency,
-        Alert,
-        Critical,
-        Error,
-        Warning,
-        Notice,
-        Informational,
-        Debug
+        EMERGENCY,
+        ALERT,
+        CRITICAL,
+        ERROR,
+        WARNING,
+        NOTICE,
+        INFORMATIONAL,
+        DEBUG
     };
 
+    /**
+     * Send log messages to the system logging mechanism.
+     *
+     * The function takes a severity and an arbitrary string.
+     * The severity levels conforms to the ones used by the well known syslog format as specified
+     * in http://www.ietf.org/rfc/rfc3164.txt.
+     *
+     * @param severity Severity according to RFC 3164.
+     * @param message Log text.
+     */
     public static void sendSystemLog(Severity severity,
                                      String message) {
         sendSystemLogInternal(severity.ordinal(), message);
