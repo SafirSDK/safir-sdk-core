@@ -463,17 +463,9 @@ public class EntityProxy {
 
                 dispose();
 
-                System.out.println("An EntityProxy was not disposed correctly when the finalizer was called.\n" +
-                                   "Make sure you call dispose() on the proxy when you are done with it!\n" +
-                                   "(Use a try/finally clause, or you may get into trouble!)\n" +
-                                   "Entity being processed was " + eid + "\n" +
-                                   "The program will now exit!");
-
-                PanicLogging.log("An EntityProxy was not disposed correctly when the finalizer was called.\n" +
-                                 "Make sure you call dispose() on the proxy when you are done with it!\n" +
-                                 "(Use a try/finally clause, or you may get into trouble!)\n" +
-                                 "Entity being processed was " + eid + "\n" +
-                                 "The program will now exit!");
+                com.saabgroup.safir.Logging.sendSystemLog
+                    (com.saabgroup.safir.Logging.Severity.CRITICAL,
+                     "Programming Error! An EntityProxy was not disposed correctly when the finalizer was called.");
 
                 System.exit(123);
             }
