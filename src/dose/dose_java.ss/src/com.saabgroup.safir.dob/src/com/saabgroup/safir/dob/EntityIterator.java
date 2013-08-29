@@ -163,8 +163,9 @@ public class EntityIterator
             }
         }
         catch (Exception exc) {
-            System.out.println("EntityIterator.finalize: Caught exception: " + exc);
-            System.out.println("Will return as if nothing happened!");
+            com.saabgroup.safir.Logging.sendSystemLog
+                (com.saabgroup.safir.Logging.Severity.CRITICAL,
+                 "EntityIterator.finalize: Caught exception: " + exc);
         }
         finally {
             super.finalize();
