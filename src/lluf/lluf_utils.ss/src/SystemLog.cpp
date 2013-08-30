@@ -336,7 +336,7 @@ private:
     boost::asio::ip::udp::socket    m_sock;
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-    Internal::WindowsLogger         m_eventLog;
+    WindowsLogger                   m_eventLog;
 #endif
 
     boost::mutex                    m_lock;
