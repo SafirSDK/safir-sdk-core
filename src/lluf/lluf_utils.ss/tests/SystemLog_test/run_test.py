@@ -89,19 +89,19 @@ try:
             text = r"This is an alert log"            
         elif test == 2:
             pri = r"<10>"
-            text = r"This is a critical log with \n newline and \t tab"
+            text = r"This is a critical log with   newline and \t tab"
         elif test == 3:
             pri = r"<11>"
             text = r"This is an error log"
         elif test == 4:
             pri = r"<12>"
-            text = r"This is a warning log with \n newline and \t tab"
+            text = r"This is a warning log with   newline and \t tab"
         elif test == 5:
             pri = r"<13>"
             text = r"This is a notice log"
         elif test == 6:
             pri = r"<14>"
-            text = r"This is an informational log with \n newline and \t tab"
+            text = r"This is an informational log with   newline and \t tab"
         elif test == 7:
             pri = r"<15>"
             text = r"This is a debug log"            
@@ -116,4 +116,5 @@ except:
     print("Exception!")
     sys.exit(1)
 
+print ("Success!")
 sys.exit(0)
