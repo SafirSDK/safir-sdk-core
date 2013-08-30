@@ -62,7 +62,10 @@ namespace Internal
 
         template <class T>
         const boost::interprocess::offset_ptr<const T>
-        Value(const ArrayIndex index = 0) const;
+        ValuePtr(const ArrayIndex index = 0) const;
+        
+        template <class T>
+        T Value(const ArrayIndex index = 0) const;
 
         Size ArrayLength() const {return m_arrayLength;}
         MemberType GetMemberType() const {return m_memberType;}
@@ -87,11 +90,8 @@ namespace Internal
     //Collection type for Parameters
     typedef AllocationHelper::Containers<ParameterDescription>::vector ParameterVector;
 
-
-
     template <class T>
-    const boost::interprocess::offset_ptr<const T>
-    ParameterDescription::Value(const ArrayIndex index) const
+    T ParameterDescription::Value(const ArrayIndex index) const
     {
         switch (m_memberType)
         {
@@ -103,13 +103,18 @@ namespace Internal
         case ChannelIdMemberType:
         case HandlerIdMemberType:
             ENSURE(false, << "Someone tried to call the general version of ParameterDescription::Value on parameter of type " << m_memberType);
-            return NULL; //keep compiler happy...
+            throw std::logic_error("never to be thrown, look at ENSURE above"); //keep compiler happy
 
         default:
-            return ParameterOffsetCast<const T>(m_offset + index * BasicTypes::SizeOfType(m_memberType));
+#ifdef NO_UNALIGNED_ACCESS
+            T val;
+            memcpy(&val,ParameterOffsetCast<const T>(m_offset + index * BasicTypes::SizeOfType(m_memberType)).get(), sizeof(T));
+            return val;
+#else
+            return *ParameterOffsetCast<const T>(m_offset + index * BasicTypes::SizeOfType(m_memberType));
+#endif
         }
     }
-
 
     template<class T>
     void ParameterDescription::ValueWithOptionalString(const ArrayIndex index,
@@ -138,10 +143,12 @@ namespace Internal
         }
     }
 
-
     template <>
     const boost::interprocess::offset_ptr<const char>
-    ParameterDescription::Value<char>(const ArrayIndex index) const;
+    ParameterDescription::ValuePtr<char>(const ArrayIndex index) const;
+
+    template <>
+    char ParameterDescription::Value<char>(const ArrayIndex index) const; //illegal!
 }
 }
 }

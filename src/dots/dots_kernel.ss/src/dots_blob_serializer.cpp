@@ -108,7 +108,7 @@ namespace Internal
             param=name;
         }
 
-        return *GetParameterByName(param)->Value<Int32>(index);
+        return GetParameterByName(param)->Value<Int32>(index);
     }
 
     void ResolveParameter(const std::string & text,
@@ -531,7 +531,7 @@ namespace Internal
         {
         case BooleanMemberType:
             {
-                BlobLayout::SetMember<bool>(*(pde->Value<bool>(index)),
+                BlobLayout::SetMember<bool>(pde->Value<bool>(index),
                                             ParsingState::Instance().objects.top().blob,
                                             ParsingState::Instance().objects.top().member,
                                             ParsingState::Instance().objects.top().index);
@@ -540,7 +540,7 @@ namespace Internal
 
         case EnumerationMemberType:
             {
-                BlobLayout::SetMember<EnumInternal>(*(pde->Value<EnumInternal>(index)),
+                BlobLayout::SetMember<EnumInternal>(pde->Value<EnumInternal>(index),
                                                     ParsingState::Instance().objects.top().blob,
                                                     ParsingState::Instance().objects.top().member,
                                                     ParsingState::Instance().objects.top().index);
@@ -549,7 +549,7 @@ namespace Internal
 
         case Int32MemberType:
             {
-                BlobLayout::SetMember<Int32>(*(pde->Value<Int32>(index)),
+                BlobLayout::SetMember<Int32>(pde->Value<Int32>(index),
                                              ParsingState::Instance().objects.top().blob,
                                              ParsingState::Instance().objects.top().member,
                                              ParsingState::Instance().objects.top().index);
@@ -558,7 +558,7 @@ namespace Internal
 
         case Int64MemberType:
             {
-                BlobLayout::SetMember<Int64>(*(pde->Value<Int64>(index)),
+                BlobLayout::SetMember<Int64>(pde->Value<Int64>(index),
                                              ParsingState::Instance().objects.top().blob,
                                              ParsingState::Instance().objects.top().member,
                                              ParsingState::Instance().objects.top().index);
@@ -587,7 +587,7 @@ namespace Internal
         case Volt32MemberType:
         case Watt32MemberType:
             {
-                BlobLayout::SetMember<Float32>(*(pde->Value<Float32>(index)),
+                BlobLayout::SetMember<Float32>(pde->Value<Float32>(index),
                                                ParsingState::Instance().objects.top().blob,
                                                ParsingState::Instance().objects.top().member,
                                                ParsingState::Instance().objects.top().index);
@@ -616,7 +616,7 @@ namespace Internal
         case Volt64MemberType:
         case Watt64MemberType:
             {
-                BlobLayout::SetMember<Float64>(*(pde->Value<Float64>(index)),
+                BlobLayout::SetMember<Float64>(pde->Value<Float64>(index),
                                                ParsingState::Instance().objects.top().blob,
                                                ParsingState::Instance().objects.top().member,
                                                ParsingState::Instance().objects.top().index);
@@ -625,7 +625,7 @@ namespace Internal
 
         case TypeIdMemberType:
             {
-                BlobLayout::SetMember<TypeId>(*(pde->Value<TypeId>(index)),
+                BlobLayout::SetMember<TypeId>(pde->Value<TypeId>(index),
                                               ParsingState::Instance().objects.top().blob,
                                               ParsingState::Instance().objects.top().member,
                                               ParsingState::Instance().objects.top().index);
@@ -661,7 +661,7 @@ namespace Internal
         case StringMemberType:
         case ObjectMemberType:
             {
-                BlobLayout::SetDynamicMember(pde->Value<char>(index).get(), 0,
+                BlobLayout::SetDynamicMember(pde->ValuePtr<char>(index).get(), 0,
                                              ParsingState::Instance().objects.top().blob,
                                              ParsingState::Instance().objects.top().member,
                                              ParsingState::Instance().objects.top().index);
@@ -1003,7 +1003,7 @@ namespace Internal
                 int index;
                 const ParameterDescription * pde;
                 ResolveParameter(ParsingState::Instance().objects.top().ref, pde, index);
-                ParsingState::Instance().objects.top().index=static_cast<int>(*(pde->Value<Int32>(index)));
+                ParsingState::Instance().objects.top().index=static_cast<int>(pde->Value<Int32>(index));
 
                 if (ParsingState::Instance().objects.top().mde->GetMemberType()==EntityIdMemberType)
                     ParsingState::Instance().objects.top().expectedElement=XmlElements::ENTITY_ID;
