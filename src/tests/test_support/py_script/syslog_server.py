@@ -38,9 +38,6 @@ try:
 except ImportError:
     import socketserver as SocketServer
     
-import shutil
-import re
-
 print_to_std_out = False;
 buf = str()
 
