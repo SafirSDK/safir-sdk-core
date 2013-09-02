@@ -80,14 +80,6 @@ void Tracer::StopTraceBackdoor()
     SwreC_StopTraceBackdoor();
 }
 
-void Tracer::flush() const
-{
-    if (IsEnabled())
-    {
-        m_buf.Flush();
-    }
-}
-
 void Tracer::InitializeEnabledHandling() const
 {
     if (m_isEnabled == NULL)
