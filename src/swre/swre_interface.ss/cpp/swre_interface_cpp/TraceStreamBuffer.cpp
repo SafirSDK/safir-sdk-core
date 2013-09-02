@@ -87,7 +87,7 @@ namespace Internal
             AddPrefix();
         }
         bool success;
-        SwreC_TraceAppendStringPrefix(m_prefixId, ToUtf8(s).c_str(), success);
+        SwreC_TraceAppendStringPrefix(m_prefixId, ToUtf8(std::wstring(s, num)).c_str(), success);
         if (!success)
         {
             Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
