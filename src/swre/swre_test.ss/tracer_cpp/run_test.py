@@ -50,7 +50,7 @@ if not env.ReturnCodesOk():
 
 output = env.Syslog()
 
-if output.count("blahonga") == 15:
+if output.count("test: blahonga") == 15:
     print("Found all expected output!")
     sys.exit(0)
 else:

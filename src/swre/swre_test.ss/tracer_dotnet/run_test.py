@@ -65,9 +65,9 @@ if not env.ReturnCodesOk():
     print("Some process exited with an unexpected value")
     sys.exit(1)
 
-output = env.Output("swre_logger")
+output = env.Syslog()
 
-if output.count("blahonga") == 15:
+if output.count("test: blahonga") == 15:
     print("Found all expected output!")
     sys.exit(0)
 else:
