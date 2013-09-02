@@ -13,5 +13,5 @@ FIND_SOURCE_ROOT(SOURCE_ROOT)
 enable_testing()
 
 add_subdirectory(tracer_cpp)
-#add_subdirectory(tracer_dotnet)
+add_subdirectory(tracer_dotnet)
 #add_subdirectory(stop_orders_at_exit)

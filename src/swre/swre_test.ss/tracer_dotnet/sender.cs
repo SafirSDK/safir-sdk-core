@@ -38,7 +38,6 @@ class Sender
         System.Threading.Thread.Sleep(2000);
         debug.WriteLine("blahonga");
         
-        Safir.SwReports.SwReport.Stop();
         return 0;
     }
 }
