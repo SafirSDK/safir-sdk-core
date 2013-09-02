@@ -43,8 +43,13 @@ class SyslogServer(SocketServer.UDPServer):
         
         def handle(self):
             data = self.request[0].decode("utf-8")
-            self.server.output.append(data)
-    
+            if self.server.buf is None:
+                print(data)
+            else:
+                if self.server.buf:
+                    self.server.buf += "\n"
+                self.server.buf += data
+                
     def __init__(self):
         SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 
@@ -75,30 +80,25 @@ class SyslogServer(SocketServer.UDPServer):
 
         #set up some variables that the handler can use
         self.is_timed_out = False
-        self.output = list()
+        self.buf = None
 
     def handle_timeout(self):
         self.is_timed_out = True
 
     def get_data(self, timeout = None, reset = True):
-        if reset:
-            self.output = list()
-
+        self.buf = str()
         self.timeout = timeout
-        if timeout is not None:
-            self.is_timed_out = False
-            while not self.is_timed_out:
-                self.handle_request()
-        else:
+        self.is_timed_out = False
+        while not self.is_timed_out:
             self.handle_request()
-        return "\n".join(self.output)
+
+        return self.buf
         
 if __name__ == "__main__":
     try:
         server = SyslogServer()
         print ("Listening to", server.syslog_server_address, server.syslog_server_port)
-        while True:
-            print (server.get_data(None))
+        server.serve_forever()
     except KeyboardInterrupt:
         pass
     
