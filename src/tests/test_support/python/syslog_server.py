@@ -91,7 +91,7 @@ class SyslogServer(SocketServer.UDPServer):
                 self.handle_request()
         else:
             self.handle_request()
-        return "".join(self.output)
+        return "\n".join(self.output)
         
 if __name__ == "__main__":
     try:
