@@ -121,7 +121,6 @@ namespace Safir.Application
             if (Enabled)
             {
                 base.Flush();
-                ((TraceStream)base.BaseStream).ForceFlush();
             }
         }
         
@@ -547,7 +546,7 @@ namespace Safir.Application
 
         ~TraceStream()
         {
-            ForceFlush();
+
         }
 
         public System.Int64 GetPrefixId()
@@ -585,20 +584,10 @@ namespace Safir.Application
             get { return true; }
         }
 
-        public void ForceFlush()
-        {//this is the same as Flush in c++
-            byte success;
-            Library.SwreC_TraceFlushBuffer(out success);
-            if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
-            {
-                Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
-            }
-        }
-
         public override void Flush()
         { //this is the same as sync in C++
             byte success;
-            Library.SwreC_TraceSyncBuffer(out success);
+            Library.SwreC_TraceFlushBuffer(out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
                 Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();

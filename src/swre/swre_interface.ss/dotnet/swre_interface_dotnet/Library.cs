@@ -70,10 +70,6 @@ namespace Safir.SwReports
                                                                   byte [] str,
                                                                   out byte success);
         
-        //SwreC_TraceSyncBuffer
-        [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void SwreC_TraceSyncBuffer(out byte success);
-        
         
         //SwreC_TraceFlushBuffer
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]

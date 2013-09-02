@@ -100,11 +100,6 @@ namespace Application
         inline bool IsEnabled() const {if (m_isEnabled == NULL) {InitializeEnabledHandling();} return *m_isEnabled;}
 
         /**
-         * Force a flush of the internal buffer.
-         */
-        void flush() const;
-
-        /**
          * Output operator for io manipulators.
          * Checks whether the prefix is enabled before executing the function.
          */
