@@ -37,37 +37,24 @@ try:
     import SocketServer
 except ImportError:
     import socketserver as SocketServer
-    
-print_to_std_out = False;
-buf = str()
-
-class _Handler(SocketServer.DatagramRequestHandler):
-        
-    def handle(self):
-        global buf
-        global print_to_std_out
-
-        data = self.rfile.readline()
-        
-        if print_to_std_out:
-            print (data)
-            
-        if buf:
-           buf = buf + '\n'           
-        buf = buf + data
-
         
 class SyslogServer(SocketServer.UDPServer):
+    class __Handler(SocketServer.DatagramRequestHandler):
+        
+        def handle(self):
+            data = self.request[0].decode("utf-8")
+            self.server.output.append(data)
     
     def __init__(self):
         SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 
         #Run the program that writes the ini file configuration to standard output
-        proc = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","safir_show_config"), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
-        stdout, stderr = proc.communicate()
-
+        proc = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","safir_show_config"),
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                universal_newlines=True)
         # ConfigParser wants a section header so add a dummy one.
-        conf_str = '[root]\n' + stdout
+        conf_str = '[root]\n' + proc.communicate()[0]
 
         config = ConfigParser.ConfigParser()
         config.readfp(StringIO(conf_str))
@@ -75,32 +62,45 @@ class SyslogServer(SocketServer.UDPServer):
         send_to_syslog_server = config.getboolean('SystemLog','send_to_syslog_server')
         
         if not send_to_syslog_server:
+            print (conf_str)
             raise Exception("Safir is not configured to send logs to a syslog_server!")
         
-        syslog_server_address = config.get('SystemLog','syslog_server_address')
-        syslog_server_port = config.get('SystemLog','syslog_server_port')
+        self.syslog_server_address = config.get('SystemLog','syslog_server_address')
+        self.syslog_server_port = config.getint('SystemLog','syslog_server_port')
 
-        SocketServer.UDPServer.__init__(self, (syslog_server_address, int(syslog_server_port)), _Handler)
+        SocketServer.UDPServer.__init__(self,
+                                        (self.syslog_server_address,
+                                         self.syslog_server_port),
+                                        SyslogServer.__Handler)
 
+        #set up some variables that the handler can use
         self.is_timed_out = False
-        
+        self.output = list()
+
     def handle_timeout(self):
         self.is_timed_out = True
 
-    def get_data(self, timeout):
-        global buf
-        buf = str()
-        self.timeout = timeout
-        self.is_timed_out = False
-        while not self.is_timed_out:
-            self.handle_request()
+    def get_data(self, timeout = None, reset = True):
+        if reset:
+            self.output = list()
 
-        return buf
+        self.timeout = timeout
+        if timeout is not None:
+            self.is_timed_out = False
+            while not self.is_timed_out:
+                self.handle_request()
+        else:
+            self.handle_request()
+        return "".join(self.output)
         
 if __name__ == "__main__":
-    server = SyslogServer()
-    print_to_std_out = True
-    server.serve_forever()
+    try:
+        server = SyslogServer()
+        print ("Listening to", server.syslog_server_address, server.syslog_server_port)
+        while True:
+            print (server.get_data(None))
+    except KeyboardInterrupt:
+        pass
     
 
 

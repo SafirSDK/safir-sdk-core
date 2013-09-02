@@ -25,7 +25,7 @@
 ###############################################################################
 from __future__ import print_function
 import os, subprocess, sys, threading, time, signal
-
+import syslog_server
 from threading import Thread
 
 try:
@@ -38,7 +38,6 @@ except ImportError:
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 dose_main_cmd = (os.path.join(SAFIR_RUNTIME,"bin","dose_main"),)
 dope_main_cmd = (os.path.join(SAFIR_RUNTIME,"bin","dope_main"),)
-swre_logger_cmd = (os.path.join(SAFIR_RUNTIME,"bin","swre_logger"),"-logwhenstarted")
 
 def enqueue_output(out, queue):
     while True:
@@ -69,32 +68,20 @@ class TestEnv:
         self.outputlock = threading.Lock()
         self.dose_main = self.launchProcess("dose_main", dose_main_cmd)
         self.launchProcess("dope_main", dope_main_cmd)
-        self.swre_logger = self.launchProcess("swre_logger", swre_logger_cmd)
-
+        self.syslog = syslog_server.SyslogServer()
+        self.syslog_output = list()
+        
         start_time = time.time()
         print("Waiting for dose_main to be ready")
-        dose_started = False
-        swre_started = False
         while True:
             time.sleep(0.2)
             if self.Output("dose_main").find("persistence data is ready") != -1:
                 print(" dose_main seems to be ready")
-                dose_started = True
-            if self.Output("swre_logger").find("Subscriptions have been set up") != -1:
-                print(" swre_logger seems to be ready")
-                self.fix_swre_output()
-                swre_started = True
-            if swre_started and dose_started:
                 break
             if self.dose_main.poll() is not None:
                 raise Exception(" dose_main appears to have failed to start!\n" +
                                 "----- Output so far ----\n" + 
                                 self.Output("dose_main") +
-                                "\n---------------------")
-            if self.swre_logger.poll() is not None:
-                raise Exception(" swre_logger appears to have failed to start!\n" +
-                                "----- Output so far ----\n" + 
-                                self.Output("swre_logger") +
                                 "\n---------------------")
             if time.time() - start_time > 90:
                 start_time = time.time()
@@ -103,8 +90,8 @@ class TestEnv:
                 print(self.Output("dose_main"))
                 print("----- dope_main output -----")
                 print(self.Output("dope_main"))
-                print("---- swre_logger output ----")
-                print(self.Output("swre_logger"))
+                print("---- syslog output ----")
+                print(self.syslog.get_data())
                 print("----------------------------")
                 print("Will keep waiting")
 
@@ -157,6 +144,11 @@ class TestEnv:
             if proc.returncode != 0:
                 print(" ", name, "returncode is", proc.returncode)
 
+    def Syslog(self):
+        data = self.syslog.get_data(0)
+        self.syslog_output.append(data)
+        return "".join(self.syslog_output)
+    
     def Output(self,name):
         (proc,queue,output) = self.__procs[name]
         try:
@@ -165,15 +157,6 @@ class TestEnv:
         except Empty:
             pass
         return "\n".join(output) + "\n"
-
-    def fix_swre_output(self):
-        (proc,queue,output) = self.__procs["swre_logger"]
-        if output[0] != "Subscriptions have been set up. Logging started.":
-            raise Exception("Unexpected first line in swre logger window!\n" + 
-                            "----- Output so far ----\n" + 
-                            self.Output("swre_logger") +
-                            "\n---------------------")
-        output.pop(0)
 
     def ReturnCodesOk(self):
         ok = True

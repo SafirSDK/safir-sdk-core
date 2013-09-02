@@ -9,4 +9,8 @@ ADD_CS_EXECUTABLE(tracer_sender_dotnet sender.cs ALL)
 ADD_TEST(tracer_dotnet ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
 SET_TESTS_PROPERTIES(tracer_dotnet PROPERTIES TIMEOUT 120)
-SET_TESTS_PROPERTIES(tracer_dotnet PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")
+SET_PROPERTY(TEST tracer_dotnet
+  PROPERTY ENVIRONMENT 
+  "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config"
+  "PYTHONPATH=$ENV{PYTHONPATH}:${SOURCE_ROOT}/src/tests/test_support/python")
+

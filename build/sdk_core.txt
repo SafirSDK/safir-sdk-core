@@ -111,7 +111,7 @@ build_dir        src/olib/olib_code.ss/olib                RelWithDebInfo   Debu
 build_dir        src/dope/dope_main.ss/src                 RelWithDebInfo
 
 #swre tests need dope..
-#TODO: run_test_suite   src/swre/swre_test.ss                     swre_test
+run_test_suite   src/swre/swre_test.ss                     swre_test
 
 #Run static header checks to ensure only "good" headers have been included
 run_test_suite   src/tests/header_check                    header_check
