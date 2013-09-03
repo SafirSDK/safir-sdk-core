@@ -21,62 +21,63 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __CRASH_REPORTER_H
-#define __CRASH_REPORTER_H
+#ifndef __SAFIR_CRASH_REPORTER_H__
+#define __SAFIR_CRASH_REPORTER_H__
 
 #include <Safir/Application/Internal/SwReportExportDefs.h>
 
-
 namespace Safir
 {
-
-/**
-Provides methods to start and stop the crash reporting functionality.
-*/
 namespace Application
 {
     /**
-     * Start crash reporting.
-     *
-     * Calling this function will cause google breakpad to be enabled for the current process.
-     * This function should be called as early as is humanly possible!
-     * Note that StopCrashReporting() must be called before the process exits.
-     *
-     * You can also use the SwReportStarter RAII class below to get the StartCrashReporting
-     * and StopCrashReporting functions to be called automatically.
+     * Provides methods to start and stop the crash reporting functionality.
      */
-    SWRE_API void StartCrashReporting();
+    class SWRE_API CrashReporter
+    {
+    public:
+        /**
+         * Start crash reporter.
+         *
+         * Calling this function will cause google breakpad to be enabled for the current process.
+         * This function should be called as early as is humanly possible!
+         * Note that Stop() must be called before the process exits.
+         *
+         * You can also use the ScopedCrashReporter RAII class below to get the CrashReporter::Start
+         * and CrashReporter::Stop functions to be called automatically, even in case of exceptions.
+         */
+        static void Start();
+        
+        /**
+         * Stop crash reporting
+         *
+         * This needs to be called before exiting an application to stop crash reporter if
+         * it has been started.
+         *
+         * You can also use the ScopedCrashReporter RAII class below to get the CrashReporter::Start
+         * and CrashReporter::Stop functions to be called automatically, even in case of exceptions.
+         */
+        static void Stop();
+    };
 
     /**
-     * Stop crash reporting
+     * RAII class to call StartCrashReporter and StopCrashReporter automatically.
      *
-     * This needs to be called before exiting an application to stop crash reporting if
-     * it has been started.
-     *
-     * You can also use the SwReportStarter RAII class below to get the EnableCrashReporting
-     * and Stop functions to be called automatically.
-     */
-    SWRE_API void StopCrashReporting();
-
-
-    /**
-     * RAII class to call StartCrashReporting and StopCrashReporting automatically.
-     *
-     * Use this class at "program scope" in order to start the crash reporting functionality
+     * Use this class at "program scope" in order to start the crash reporter functionality
      * as early as possible in your program.
      */
-    class ScopedCrashReporting
+    class ScopedCrashReporter
     {
     public:
 
-        ScopedCrashReporting()
+        ScopedCrashReporter()
         {
-            StartCrashReporting();
+            CrashReporter::Start();
         }
 
-        ~ScopedCrashReporting()
+        ~ScopedCrashReporter()
         {
-            StopCrashReporting();
+            CrashReporter::Stop();
         }
     };
 

@@ -35,12 +35,9 @@ namespace Safir.Application
         /// <para/>
         /// Calling this function will cause google breakpad to be enabled for the current process.
         /// This function should be called as early as is humanly possible!
-        /// Note that StopCrashReporting() must be called before the process exits.
-        /// <para/>
-        /// You can also use the SwReportStarter RAII class below to get the StartCrashReporting
-        /// and StopCrashReporting functions to be called automatically.
+        /// Note that Stop() must be called before the process exits.
         /// <summary>
-        public static void StartCrashReporting()
+        public static void Start()
         {
             byte success;
             Safir.SwReports.Library.SwreC_StartCrashReporting(out success);
@@ -55,11 +52,8 @@ namespace Safir.Application
         /// <para/>
         /// This needs to be called before exiting an application to stop crash reporting if
         /// it has been started.
-        /// <para/>
-        /// You can also use the SwReportStarter RAII class below to get the EnableCrashReporting
-        /// and Stop functions to be called automatically.
         /// </summary>
-        static void StopCrashReporting()
+        static void Stop()
         {
             Safir.SwReports.Library.SwreC_StopCrashReporting();
         }

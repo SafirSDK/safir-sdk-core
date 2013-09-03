@@ -27,11 +27,11 @@ using Safir.SwReports;
 namespace Safir.Application
 {
     /// <summary>
-    /// A class for trace logging.
+    /// This class just contains two static methods, for starting and stopping the tracers backdoor.
     /// </summary>
-    public class Tracer : System.IO.StreamWriter
+    public sealed class TracerBackdoor
     {
-        ///<summary>
+        /// <summary>
         /// Start reception of trace on/off commands
         /// <para/>
         /// The given connection must be opened before this method is called.
@@ -45,11 +45,19 @@ namespace Safir.Application
         /// </summary>
         /// <param name="connection">The connection used for setting up a subscription for
         ///                          backdoor commands.</param>
-        public static void StartTraceBackdoor(Safir.Dob.ConnectionBase connection)
+        public static void Start(Safir.Dob.ConnectionBase connection)
         {
+            byte success;
+            Library.SwreC_SetProgramName(System.Text.Encoding.UTF8.GetBytes
+                                         (System.Diagnostics.Process.GetCurrentProcess().ProcessName),
+                                         out success);
+            if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
+            {
+                Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
+            }
+
             Safir.Dob.ConnectionAspectMisc misc = new Safir.Dob.ConnectionAspectMisc(connection);
 
-            byte success;
             Library.SwreC_StartTraceBackdoor(System.Text.Encoding.UTF8.GetBytes(misc.GetConnectionNameCommonPart()),
                                              System.Text.Encoding.UTF8.GetBytes(misc.GetConnectionNameInstancePart()),
                                              out success);
@@ -62,12 +70,17 @@ namespace Safir.Application
         ///<summary>
         /// Stop reception of trace on/off commands
         ///</summary>
-        static void StopTraceBackdoor()
+        static void Stop()
         {
             Library.SwreC_StopTraceBackdoor();
         }
+    }
 
-
+    /// <summary>
+    /// A class for trace logging.
+    /// </summary>
+    public class Tracer : System.IO.StreamWriter
+    {
         /// <summary>
         /// Create a logger with a certain prefix.
         /// </summary>
@@ -75,15 +88,6 @@ namespace Safir.Application
         public Tracer(string prefix)
             : base(new TraceStream(prefix),new System.Text.UTF8Encoding(false)) //Omit BOM
         {
-            byte success;
-            Library.SwreC_SetProgramName(System.Text.Encoding.UTF8.GetBytes
-                                         (System.Diagnostics.Process.GetCurrentProcess().ProcessName),
-                                         out success);
-            if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
-            {
-                Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
-            }
-
             //set autoflush last or things will get strange
             AutoFlush = true;
         }

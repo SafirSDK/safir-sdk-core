@@ -26,7 +26,7 @@
 
 int main(int /*argc*/, char* /*argv*/[])
 {
-    Safir::Application::ScopedCrashReporting scopedStartStop;
+    Safir::Application::ScopedCrashReporter scopedStartStop;
 
     // Start the application.
     Safir::Utilities::ForEach::ForEachApp app;

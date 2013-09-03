@@ -28,7 +28,6 @@
 
 int main(int /*argc*/, char* argv[])
 {
-    Safir::Application::Tracer::SetProgramName(Safir::Dob::Typesystem::Utilities::ToWstring(argv[0]));
     Safir::Application::Tracer debug(L"test");
     debug.Enable(true);
     debug << "blahonga" << std::endl;

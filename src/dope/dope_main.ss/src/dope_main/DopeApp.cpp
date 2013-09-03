@@ -71,7 +71,7 @@ DopeApp::DopeApp():
         Safir::SwReports::SendFatalErrorReport
             (L"Bad Configuration",L"DopeApp::DopeApp",
              L"DOPE was started even though Safir.Dob.PersistenceParameters.SystemHasPersistence is set to false. Please check your configuration");
-        Safir::Application::StopCrashReporting();
+        Safir::Application::CrashReporter::Stop();
         exit(1);
     }
 
@@ -86,10 +86,11 @@ DopeApp::DopeApp():
         Safir::SwReports::SendFatalErrorReport
             (L"Failed to connect to DOB.",L"DopeApp::DopeApp",
             L"Maybe DOPE is already started on this node.");
-        Safir::Application::StopCrashReporting();
+        Safir::Application::CrashReporter::Stop();
         exit(1);
     }
 
+    Safir::Application::TracerBackdoor::Start(m_dobConnection);
     m_keeper.Start(*this);
     m_debug << "Started keeper"<<std::endl;
 
@@ -108,7 +109,7 @@ DopeApp::DopeApp():
 //-------------------------------------------------------
 DopeApp::~DopeApp()
 {
-
+    Safir::Application::TracerBackdoor::Stop();
 }
 
 
@@ -307,7 +308,7 @@ void DopeApp::ConnectionThread()
         Safir::SwReports::SendFatalErrorReport
             (L"NotOpenException",L"DopeApp::ConnectionThread",
             L"Connection thread alredy running.");
-        Safir::Application::StopCrashReporting();
+        Safir::Application::CrashReporter::Stop();
         exit(1);
     }
     catch (const std::exception & e)
@@ -315,7 +316,7 @@ void DopeApp::ConnectionThread()
         Safir::SwReports::SendFatalErrorReport(L"UnhandledException",
             L"DopeApp::ConnectionThread",
             Safir::Dob::Typesystem::Utilities::ToWstring(e.what()));
-        Safir::Application::StopCrashReporting();
+        Safir::Application::CrashReporter::Stop();
         exit(1);
     }
     catch (...)
@@ -325,7 +326,7 @@ void DopeApp::ConnectionThread()
             L"A ... exception occurred in DopeApp::ConnectionThread. "
             L"Since it was not an exception derived from std::exception "
             L"I can't provide any more information, sorry.");
-        Safir::Application::StopCrashReporting();
+        Safir::Application::CrashReporter::Stop();
         exit(1);
     }
 }

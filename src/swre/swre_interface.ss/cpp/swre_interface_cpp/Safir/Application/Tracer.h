@@ -34,23 +34,11 @@ namespace Safir
 namespace Application
 {
     /**
-     * A class for trace logging.
+     * This class just contains two static methods, for starting and stopping the tracers backdoor.
      */
-    class SWRE_API Tracer
+    class SWRE_API TracerBackdoor
     {
-    private:
-        typedef std::basic_ios<wchar_t, std::char_traits<wchar_t> > ios_type;
     public:
-        typedef std::basic_ostream<wchar_t, std::char_traits<wchar_t> > stream_type;
-
-        /**
-         * Set the program name of the current executable.
-         * This should be set to argv[0] in the main program.
-         *
-         * @param programName [in] The name of the executable
-         */
-        static void SetProgramName(const std::wstring& programName);
-
         /**
          * Start reception of trace on/off commands
          *
@@ -66,12 +54,24 @@ namespace Application
          * @param connection [in] The connection used for setting up a subscription for
          *                        backdoor commands.
          */
-        static void StartTraceBackdoor(const Safir::Dob::ConnectionBase& connection);
+        static void Start(const Safir::Dob::ConnectionBase& connection);
 
         /**
          * Stop reception of trace on/off commands
          */
-        static void StopTraceBackdoor();
+        static void Stop();
+    };
+
+
+    /**
+     * A class for trace logging.
+     */
+    class SWRE_API Tracer
+    {
+    private:
+        typedef std::basic_ios<wchar_t, std::char_traits<wchar_t> > ios_type;
+    public:
+        typedef std::basic_ostream<wchar_t, std::char_traits<wchar_t> > stream_type;
 
         /**
          * Constructor.

@@ -27,11 +27,10 @@
 
 int main(int /*argc*/, char * argv[])
 {
-    Safir::Application::ScopedCrashReporting scopedStartStop;
+    Safir::Application::ScopedCrashReporter scopedStartStop;
 
     try
     {
-        Safir::Application::Tracer::SetProgramName(Safir::Dob::Typesystem::Utilities::ToWstring(argv[0]));
         DopeApp app;
         app.Run();
     }

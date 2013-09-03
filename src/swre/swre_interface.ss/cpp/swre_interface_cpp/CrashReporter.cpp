@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "Safir/Application/CrashReporter.h"
+ #include "Safir/Application/CrashReporter.h"
 
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/SwReports/Internal/Interface.h>
@@ -30,7 +30,7 @@ namespace Safir
 { 
 namespace Application
 {
-    void StartCrashReporting()
+    void CrashReporter::Start()
     {
         bool success;
         SwreC_StartCrashReporting(success);
@@ -40,7 +40,7 @@ namespace Application
         }
     }
 
-    void StopCrashReporting()
+    void CrashReporter::Stop()
     {
         SwreC_StopCrashReporting();
     }
