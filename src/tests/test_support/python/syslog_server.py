@@ -46,9 +46,7 @@ class SyslogServer(SocketServer.UDPServer):
             if self.server.buf is None:
                 print(data)
             else:
-                if self.server.buf:
-                    self.server.buf += "\n"
-                self.server.buf += data
+                self.server.buf += data + '\n'
                 
     def __init__(self):
         SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
