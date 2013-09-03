@@ -85,7 +85,7 @@ class SyslogServer(SocketServer.UDPServer):
     def handle_timeout(self):
         self.is_timed_out = True
 
-    def get_data(self, timeout = None, reset = True):
+    def get_data(self, timeout):
         self.buf = str()
         self.timeout = timeout
         self.is_timed_out = False
