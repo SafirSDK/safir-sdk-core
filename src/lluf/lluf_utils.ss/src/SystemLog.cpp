@@ -293,6 +293,12 @@ private:
     //-------------------------------------------------------------------------
     std::wstring ReplaceNewlines(std::wstring text)
     {
+        //remove any trailing newlines. RFC3164 does not require newlines at end of message.
+        while (text.find_last_of(L"\n\r") == text.size())
+        {
+            text.erase(text.size() - 1);
+        }
+
         if (!m_replaceNewlines)
         {
             return text;
@@ -302,9 +308,9 @@ private:
             for (std::wstring::iterator it = text.begin();
                  it != text.end(); ++it)
             {
-                if (*it == '\n')
-                {
-                    *it = ' ';
+                if (*it == '\n' || *it == '\r') //may produce two spaces on CRLF, but that
+                {                               //would only happen if the error message is 
+                    *it = ' ';                  //read from a file with CRLF line endings.
                 }
             }
             return text;
