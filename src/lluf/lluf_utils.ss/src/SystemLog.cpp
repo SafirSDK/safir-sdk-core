@@ -294,7 +294,7 @@ private:
     std::wstring ReplaceNewlines(std::wstring text)
     {
         //remove any trailing newlines. RFC3164 does not require newlines at end of message.
-        while (text.find_last_of(L"\n\r") == text.size())
+        while (text.find_last_of(L"\n\r") == text.size() - 1)
         {
             text.erase(text.size() - 1);
         }
