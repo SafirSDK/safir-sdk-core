@@ -37,7 +37,8 @@ void LoggingC_SendSystemLog(const boost::int32_t severity,
     }
     catch (...)
     {
-        std::wcerr << "Got an unexpected exception when generating a log. Please tell your nearest Safir System Kernel developer" << std::endl;
+        std::wcerr << "Got an unexpected exception when generating a log. "
+                   << "Please tell your nearest Safir SDK Core developer" << std::endl;
     }
 }
 
