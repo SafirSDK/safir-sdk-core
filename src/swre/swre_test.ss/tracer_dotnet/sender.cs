@@ -27,17 +27,19 @@ class Sender
 {
     static int Main(String[] args)
     {
-        Safir.Application.Tracer debug = new Safir.Application.Tracer("test");
-        debug.Enabled = true;
-        debug.WriteLine("blahonga");
-        debug.WriteLine("blahonga");
-        debug.WriteLine("blahonga");
-        
-        System.Threading.Thread.Sleep(100);
-        debug.WriteLine("blahonga");
-        System.Threading.Thread.Sleep(2000);
-        debug.WriteLine("blahonga");
-        
+        Safir.Application.Tracer razor = new Safir.Application.Tracer("Razor");
+        Safir.Application.Tracer rb = new Safir.Application.Tracer("Rymd-Börje");
+        razor.Enabled = true;
+        rb.Enabled = true;
+        rb.WriteLine("blahonga");
+        rb.WriteLine("blahong®a");
+        rb.WriteLine("blahongaåäö");
+        razor.WriteLine("brynanuppafjässasponken");
+        razor.WriteLine("{0}{1}{2}",1,2,3.1);
+        razor.Write("foo");
+        razor.WriteLine("bar");
+        razor.WriteLine("this is the end\nmy only friend");
+
         return 0;
     }
 }

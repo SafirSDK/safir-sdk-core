@@ -24,6 +24,7 @@
 #include <Safir/SwReports/Internal/Interface.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
+#include <Safir/Logging/Log.h>
 #include "Library.h"
 #include <iostream>
 
@@ -72,7 +73,10 @@ void SwreC_StopTraceBackdoor()
     }
     catch (...)
     {
-        std::wcerr << "Got an exception in SwreC_StopTraceBackdoor. Please tell your nearest Safir System Kernel developer" << std::endl;
+        Safir::Logging::SendSystemLog
+            (Safir::Logging::Error,
+             L"Got an exception in SwreC_StopTraceBackdoor. "
+             L"Please tell your nearest Safir SDK Core developer!");
     }
 }
 
@@ -96,57 +100,55 @@ void SwreC_StopCrashReporting()
     }
     catch (...)
     {
-        std::wcerr << "Got an exception in SwreC_StopCrashReporting. Please tell your nearest Safir System Kernel developer" << std::endl;
+        Safir::Logging::SendSystemLog
+            (Safir::Logging::Error,
+             L"Got an exception in SwreC_StopCrashReporting. "
+             L"Please tell your nearest Safir SDK Core developer!");
     }
 }
 
 
-void 
-SwreC_TraceAppendStringPrefix(const Safir::Dob::Typesystem::Int64 prefixId,
-                              const char * const str,
-                              bool & success)
-{
-    success = false;
-    try
-    { 
-        Library::Instance().TraceString(prefixId, Safir::Dob::Typesystem::Utilities::ToWstring(str));
-        success = true;
-    }
-    CATCH_LIBRARY_EXCEPTIONS
-}
-
-void 
-SwreC_TraceAppendCharPrefix(const Safir::Dob::Typesystem::Int64 prefixId,
-                            const char ch,
-                            bool & success)
-{
-    success = false;
-    try
-    { 
-        std::string str;
-        str.push_back(ch);
-        Library::Instance().TraceString(prefixId, Safir::Dob::Typesystem::Utilities::ToWstring(str));
-        success = true;
-    }
-    CATCH_LIBRARY_EXCEPTIONS
-}
-
-
-void 
-SwreC_TraceAppendWcharPrefix(const Safir::Dob::Typesystem::Int64 prefixId,
-                             const wchar_t ch,
+void SwreC_TraceAppendString(const Safir::Dob::Typesystem::Int64 prefixId,
+                             const char * const str,
                              bool & success)
 {
     success = false;
     try
-    {
-        Library::Instance().Trace(prefixId,ch);
+    { 
+        Library::Instance().TraceString(prefixId, str);
         success = true;
     }
-    CATCH_LIBRARY_EXCEPTIONS;
+    CATCH_LIBRARY_EXCEPTIONS
 }
 
-void SwreC_TraceFlushBuffer(bool & success)
+void SwreC_TraceAppendChar(const Safir::Dob::Typesystem::Int64 prefixId,
+                           const char ch,
+                           bool & success)
+{
+    success = false;
+    try
+    {
+        Library::Instance().TraceChar(prefixId, ch);
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS
+}
+
+void SwreC_TraceAppendWChar(const Safir::Dob::Typesystem::Int64 prefixId,
+                            const wchar_t ch,
+                            bool & success)
+{
+    success = false;
+    try
+    {
+        Library::Instance().TraceWChar(prefixId, ch);
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS
+}
+
+
+void SwreC_TraceFlush(bool & success)
 {
     success = false;
     try

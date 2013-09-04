@@ -59,21 +59,17 @@ namespace Safir.SwReports
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SwreC_StopCrashReporting();
 
-        //SwreC_TraceAppendString
-        //[DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
-        //internal static extern void SwreC_TraceAppendString(byte [] str,
-        //                                                    out byte success);
 
-        //SwreC_TraceAppendStringPrefix
+        //SwreC_TraceAppendString
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void SwreC_TraceAppendStringPrefix(System.Int64 prefixId,
-                                                                  byte [] str,
-                                                                  out byte success);
+        internal static extern void SwreC_TraceAppendString(System.Int64 prefixId,
+                                                            byte [] str,
+                                                            out byte success);
         
         
-        //SwreC_TraceFlushBuffer
+        //SwreC_TraceFlush
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void SwreC_TraceFlushBuffer(out byte success);
+        internal static extern void SwreC_TraceFlush(out byte success);
 
         
         //SwreC_TracePrefixAdd

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://www.safirsdk.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -25,7 +25,7 @@
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Application/Internal/TraceStreamBuffer.h>
 #include <Safir/SwReports/Internal/Interface.h>
-
+#include <iostream>
 namespace Safir
 {
 namespace Application
@@ -37,13 +37,13 @@ namespace Internal
         m_prefix(prefix),
         m_prefixId(0)
     {
-        
+
     }
 
     //-------------------------------------------------------
     TraceStreamBuffer::~TraceStreamBuffer()
     {
-        Flush();
+        sync();
     }
 
     //-------------------------------------------------------
@@ -68,26 +68,33 @@ namespace Internal
         {
             AddPrefix();
         }
-        bool success;
-        SwreC_TraceAppendWcharPrefix(m_prefixId,_Tr::to_char_type(c),success);
+
+        bool success;        
+        SwreC_TraceAppendWChar(m_prefixId,
+                               _Tr::to_char_type(c),
+                               success);
+
         if (!success)
         {
             Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
         }
-        return _Tr::not_eof(c);
-    }
 
-    using Safir::Dob::Typesystem::Utilities::ToUtf8;
+        //always return success, strange characters etc are handled by the library
+        return _Tr::not_eof('a');
+    }
 
     //-------------------------------------------------------
     std::streamsize TraceStreamBuffer::xsputn(const wchar_t* s, std::streamsize num)
     {
+        using Safir::Dob::Typesystem::Utilities::ToUtf8;
+
         if (m_prefixId == 0)
         {
             AddPrefix();
         }
+
         bool success;
-        SwreC_TraceAppendStringPrefix(m_prefixId, ToUtf8(std::wstring(s, num)).c_str(), success);
+        SwreC_TraceAppendString(m_prefixId, ToUtf8(std::wstring(s, num)).c_str(), success);
         if (!success)
         {
             Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
@@ -99,21 +106,17 @@ namespace Internal
     int 
     TraceStreamBuffer::sync()
     {
-        Flush();
-        return 0;
-    }
-
-    void
-    TraceStreamBuffer::Flush()
-    {
         bool success;
-        SwreC_TraceFlushBuffer(success);
+        SwreC_TraceFlush(success);
         if (!success)
         {
             Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
         }
+
+        return 0;
     }
 
+    //-------------------------------------------------------
     Safir::Dob::Typesystem::Int64 TraceStreamBuffer::GetPrefixId() const 
     {
         if (m_prefixId == 0)
@@ -124,9 +127,12 @@ namespace Internal
         return m_prefixId;
     }
 
+    //-------------------------------------------------------
     void
     TraceStreamBuffer::AddPrefix() const
     {
+        using Safir::Dob::Typesystem::Utilities::ToUtf8;
+
         if (m_prefixId == 0)
         { 
             bool success;

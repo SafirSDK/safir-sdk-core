@@ -68,11 +68,15 @@ namespace Internal
         bool IsEnabledPrefix(const PrefixId prefixId) const;
         void EnablePrefix(const PrefixId prefixId, const bool enabled);
 
-        void Trace(const PrefixId prefixId,
-                   const wchar_t ch);
+        void TraceChar(const PrefixId prefixId,
+                       char ch);
+        void TraceWChar(const PrefixId prefixId,
+                        const wchar_t ch);
         void TraceString(const PrefixId prefixId,
-                         const std::wstring & str);
-
+                         const char* str);
+        void TraceString(const PrefixId prefixId,
+                         const std::wstring& str);
+        
         void TraceFlush();
 
         void SendFatalErrorReport(const std::wstring & errorCode,
@@ -108,11 +112,11 @@ namespace Internal
         struct PrefixState
         {
             PrefixState():m_prefix(),m_isEnabled(false) {}
-            PrefixState(const std::wstring & prefix, const bool enabled):m_prefix(prefix),m_isEnabled(enabled) {}
-            //   bool operator==(const PrefixState & other) const {return m_prefix == other.m_prefix;}
+            PrefixState(const std::wstring & prefix, const bool enabled);
             bool operator==(const std::wstring & str) const {return m_prefix == str;}
 
             std::wstring m_prefix;
+            std::wstring m_prefixAscii;
             bool m_isEnabled;
         };
         BOOST_STATIC_ASSERT(sizeof(Library::PrefixId) >= sizeof(Library::PrefixState*));
@@ -136,12 +140,13 @@ namespace Internal
         // the connection given by the user.
         Safir::Dob::SecondaryConnection m_backdoorConnection;
 
-        void AddToTraceBuf(const PrefixId   prefixId,
-                           const wchar_t    ch);
+        void TraceInternal(const PrefixId prefixId,
+                           const wchar_t ch);
 
         //trace buffer and the associated lock
         boost::mutex m_traceBufferLock;
-        std::wstring m_traceBuffer;
+        std::wstring m_traceStdoutBuffer;
+        std::wstring m_traceSyslogBuffer;
         bool m_prefixPending;
 
         bool m_windowsNativeLogging;

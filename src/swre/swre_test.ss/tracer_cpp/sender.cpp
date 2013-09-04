@@ -28,17 +28,17 @@
 
 int main(int /*argc*/, char* argv[])
 {
-    Safir::Application::Tracer debug(L"test");
-    debug.Enable(true);
-    debug << "blahonga" << std::endl;
-    debug << "blahonga" << std::endl;
-    debug << "blahonga" << std::endl;
-
-    boost::this_thread::sleep(boost::posix_time::milliseconds(100));
-    debug << "blahonga" << std::endl;
-    boost::this_thread::sleep(boost::posix_time::seconds(2));
-    debug << "blahonga" << std::endl;
-
+    Safir::Application::Tracer razor(L"Razor");
+    Safir::Application::Tracer rb(L"Rymd-Börje");
+    razor.Enable(true);
+    rb.Enable(true);
+    rb << L"blahonga" << std::endl;
+    rb << L"blahong®a" << std::endl;
+    rb << L"blahongaåäö" << std::endl;
+    razor << L"brynanuppafjässasponken" << std::endl;
+    razor << 1 << 2 << 3.1 << std::endl;
+    razor << "foo" << std::flush << "bar" << std::endl;
+    razor << "this is the end\nmy only friend" << std::endl;
     return 0;
 }
 

@@ -25,10 +25,7 @@
 ###############################################################################
 from __future__ import print_function
 import subprocess, os, time, sys, signal, re
-
-sys.path.append("../testutil")
-from testenv import TestEnv, TestEnvStopper
-
+import syslog_server
 
 if sys.platform == "win32":
     config_type = os.environ.get("CMAKE_CONFIG_TYPE")
@@ -38,26 +35,53 @@ else:
     
 sender_path = os.path.join(exe_path,"tracer_sender")
 
-env = TestEnv()
-with TestEnvStopper(env):
-    subprocess.call(sender_path)
-    subprocess.call(sender_path)
-    subprocess.call(sender_path)
+syslog = syslog_server.SyslogServer()
 
-if not env.ReturnCodesOk():
-    print("Some process exited with an unexpected value")
+o1 = subprocess.check_output(sender_path)
+o2 = subprocess.check_output(sender_path)
+o3 = subprocess.check_output(sender_path)
+
+stdout_output = o1.decode("utf-8") + o2.decode("utf-8") + o3.decode("utf-8")
+syslog_output = syslog.get_data(1)
+
+def fail(message):
+    print ("STDOUT OUTPUT:")
+    print(stdout_output)
+    print ("SYSLOG OUTPUT:")
+    print(syslog_output)
+    print("Failed! Wrong number of",message)
     sys.exit(1)
 
-output = env.Syslog()
+if stdout_output.count("\n") != 24 or syslog_output.count("\n") != 24:
+    fail("lines")
 
-if output.count("test: blahonga") == 15:
-    print("Found all expected output!")
-    sys.exit(0)
-else:
-    print("no match! (Received output written failed_test_output.txt.)")
-    with open("failed_test_output.txt","w") as expected:
-        expected.write(output)
+if stdout_output.count("Rymd-B@rje: blahonga") != 6 or syslog_output.count("Rymd-Börje: blahonga") != 6:
+    fail("blahonga")
 
-    print(output)
-    sys.exit(1)
+if stdout_output.count("Rymd-B@rje: blahonga\n") != 3 or syslog_output.count("Rymd-Börje: blahonga\n") != 3:
+    fail("blahonga newlines")
 
+if stdout_output.count("Razor: brynanuppafj@ssasponken\n") != 3 or syslog_output.count("Razor: brynanuppafjässasponken\n") != 3:
+    fail("brynanuppa")
+
+if stdout_output.count("Rymd-B@rje: blahong@a\n") != 3 or syslog_output.count("Rymd-Börje: blahong®a\n") != 3:
+    fail("blahong®a")
+
+if stdout_output.count("Rymd-B@rje: blahonga@@@\n") != 3 or syslog_output.count("Rymd-Börje: blahongaåäö\n") != 3:
+    fail("åäö")
+
+if stdout_output.count("Razor: 123.1\n") != 3 or syslog_output.count("Razor: 123.1\n") != 3:
+    fail("123.1")
+
+if stdout_output.count("Razor: foobar\n") != 3 or syslog_output.count("Razor: foobar\n") != 3:
+    fail("foobar")
+    
+if stdout_output.count("Razor: this is the end\n") != 3 or syslog_output.count("Razor: this is the end\n") != 3:
+    fail("this is the end")
+
+if stdout_output.count("Razor: my only friend\n") != 3 or syslog_output.count("Razor: my only friend\n") != 3:
+    fail("my only friend")
+    
+
+print("success")
+sys.exit(0)

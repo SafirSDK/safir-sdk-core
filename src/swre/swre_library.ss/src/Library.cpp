@@ -64,6 +64,7 @@ namespace SwReports
 namespace Internal
 {
     using Safir::Dob::Typesystem::Utilities::ToUtf8;
+    using Safir::Dob::Typesystem::Utilities::ToWstring;
 
     static const wchar_t* pingCmd = L"ping";
     static const wchar_t* helpCmd = L"help";
@@ -96,7 +97,6 @@ namespace Internal
           m_prefixSearchLock(),
           m_backdoorConnection(),
           m_traceBufferLock(),
-          m_traceBuffer(),
           m_prefixPending(true),
           m_windowsNativeLogging(false)
     {
@@ -105,7 +105,7 @@ namespace Internal
             char * cenv = getenv("FORCE_LOG");
             if (cenv != NULL)
             {
-                env = Safir::Dob::Typesystem::Utilities::ToWstring(cenv);
+                env = ToWstring(cenv);
             }
         }
         try
@@ -131,8 +131,10 @@ namespace Internal
         }
         catch (const std::exception & exc)
         {
-            std::wcout << "Error while parsing FORCE_LOG environment variable '" <<
-                env << "'.\nException description is '"<< exc.what() << "'.\nContinuing as if it was not set" << std::endl;
+            std::wostringstream ostr;
+            ostr << "Failed to parse FORCE_LOG env (" << env << "): "<< exc.what();
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          ostr.str());
         }
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
@@ -224,36 +226,53 @@ namespace Internal
 
     // Private method that assumes the buffer lock is already taken.
     void
-    Library::AddToTraceBuf(const PrefixId prefixId,
-                           const wchar_t  ch)
+    Library::TraceInternal(const PrefixId prefixId,
+                           const wchar_t ch)
     {
         if (m_prefixPending)
         {
-            m_traceBuffer.append(ToPrefix(prefixId).m_prefix);
-            m_traceBuffer.append(L": ");
+            //no syslog when using windows native logging
+            if (!m_windowsNativeLogging)
+            {
+                m_traceSyslogBuffer.append(ToPrefix(prefixId).m_prefix);
+                m_traceSyslogBuffer.append(L": ");
+            }
+
+            m_traceStdoutBuffer.append(ToPrefix(prefixId).m_prefixAscii);
+            m_traceStdoutBuffer.append(L": ");
             m_prefixPending = false;
         }
+
+        //since we dont know the locale of wcout we strip off all non-ascii chars
+        if ((ch & ~0x7F) == 0)
+        {
+            m_traceStdoutBuffer.push_back(ch);
+        }
+        else
+        {
+            m_traceStdoutBuffer.push_back('@');
+        }
+        
+        //no syslog when using windows native logging
+        if (!m_windowsNativeLogging)
+        {
+            //Syslogs are flushed on newlines instead of flushes
+            if (ch == '\n')
+            {
+                Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                              m_traceSyslogBuffer);
+                m_traceSyslogBuffer.clear();
+            }
+            else
+            {
+                m_traceSyslogBuffer.push_back(ch);
+            }
+        }
+
         if (ch == '\n')
         {
             m_prefixPending = true;
         }
-        m_traceBuffer.push_back(ch);
-    }
-
-    void
-    Library::Trace(const PrefixId prefixId,
-                   const wchar_t ch)
-    {
-        boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
-        AddToTraceBuf(prefixId, ch);
-    }
-
-    void
-    Library::TraceString(const PrefixId prefixId,
-                         const std::wstring & str)
-    {
-        boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
-        std::for_each(str.begin(), str.end(), boost::bind(&Library::AddToTraceBuf,this,prefixId,_1));
     }
 
     void
@@ -261,23 +280,49 @@ namespace Internal
     {
         boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
 
-        if (m_traceBuffer.empty())
+        if (!m_traceStdoutBuffer.empty())
         {
-            return;
+            std::wcout << m_traceStdoutBuffer << std::flush;
+            m_traceStdoutBuffer.clear();
         }
-
-        // traces are always written to std out
-        std::wcout << m_traceBuffer << std::flush;
-
-        // We don't send traces to system log if we are configured for Windows native logging
-        if (!m_windowsNativeLogging)
-        {
-            Safir::Logging::SendSystemLog(Safir::Logging::Debug,
-                                          m_traceBuffer);
-        }
-
-        m_traceBuffer.clear();
     }
+
+    void
+    Library::TraceChar(const PrefixId prefixId,
+                       char ch)
+    {
+        if ((ch & ~0x7F) != 0)
+        {
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"TraceChar got non ascii character");
+            ch = '@';
+        }
+        TraceWChar(prefixId,ch);
+    }
+
+    void
+    Library::TraceWChar(const PrefixId prefixId,
+                        const wchar_t ch)
+    {
+        boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
+        TraceInternal(prefixId, ch);
+    }
+
+    void
+    Library::TraceString(const PrefixId prefixId,
+                         const char* str)
+    {
+        TraceString(prefixId, ToWstring(str));
+    }
+
+    void
+    Library::TraceString(const PrefixId prefixId,
+                         const std::wstring& str)
+    {
+        boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
+        std::for_each(str.begin(), str.end(), boost::bind(&Library::TraceInternal,this,prefixId,_1));
+    }
+
 
     void Library::CrashFunc(const char* const dumpPath)
     {
@@ -449,6 +494,22 @@ namespace Internal
     Library::ToPrefixId(PrefixState & prefix)
     {
         return reinterpret_cast<PrefixId>(&prefix);
+    }
+
+    Library::PrefixState::PrefixState(const std::wstring & prefix, const bool enabled)
+        : m_prefix(prefix)
+        , m_prefixAscii(prefix)
+        , m_isEnabled(enabled) 
+    {
+        //replace non-ascii chars
+        for(std::wstring::iterator it = m_prefixAscii.begin();
+            it != m_prefixAscii.end(); ++it)
+        {
+            if ((*it & ~0x7F) != 0)
+            {
+                *it = '@';
+            }
+        }
     }
 
     void

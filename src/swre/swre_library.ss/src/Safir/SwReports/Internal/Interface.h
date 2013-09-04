@@ -96,7 +96,6 @@ extern "C"
      */
     /** @{ */
 
-
     /**
      * Add characters to trace buffer.
      *
@@ -107,9 +106,9 @@ extern "C"
      * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
      */
     SWRE_LIBRARY_API void
-      SwreC_TraceAppendStringPrefix(const DotsC_Int64 prefixId,
-                                    const char * const str,
-                                    bool & success);
+    SwreC_TraceAppendString(const DotsC_Int64 prefixId,
+                            const char * const str,
+                            bool & success);
 
     /**
      * Add character to trace buffer.
@@ -121,12 +120,12 @@ extern "C"
      * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
      */
     SWRE_LIBRARY_API void
-      SwreC_TraceAppendCharPrefix(const DotsC_Int64 prefixId,
-                                  const char ch,
-                                  bool & success);
+    SwreC_TraceAppendChar(const DotsC_Int64 prefixId,
+                          const char ch,
+                          bool & success);
 
     /**
-     * Add character to trace buffer.
+     * Add wide character to trace buffer.
      *
      * The character will be added to the output buffer.
      *
@@ -135,16 +134,16 @@ extern "C"
      * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
      */
     SWRE_LIBRARY_API void
-      SwreC_TraceAppendWcharPrefix(const DotsC_Int64 prefixId,
-                                   const wchar_t ch,
-                                   bool & success);
-
+    SwreC_TraceAppendWChar(const DotsC_Int64 prefixId,
+                           const wchar_t ch,
+                           bool & success);
+    
     /**
      * Flush the buffer to output.
      *
      * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
      */
-    SWRE_LIBRARY_API void SwreC_TraceFlushBuffer(bool & success);
+    SWRE_LIBRARY_API void SwreC_TraceFlush(bool & success);
 
     /** @} */
 
@@ -163,10 +162,10 @@ extern "C"
      * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
      */
     SWRE_LIBRARY_API void
-      SwreC_TracePrefixAdd(const char * const prefix,
-                           DotsC_Int64 & prefixId,
-                           bool & success);
-
+    SwreC_TracePrefixAdd(const char * const prefix,
+                         DotsC_Int64 & prefixId,
+                         bool & success);
+    
     /**
      * Set whether a prefix is enabled or not.
      *
@@ -175,9 +174,9 @@ extern "C"
      * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
      */
     SWRE_LIBRARY_API void
-      SwreC_TracePrefixSetEnabled(const DotsC_Int64 id,
-                                  const bool enabled,
-                                  bool & success);
+    SwreC_TracePrefixSetEnabled(const DotsC_Int64 id,
+                                const bool enabled,
+                                bool & success);
 
     /**
      * Check the state of a prefix.
@@ -186,7 +185,7 @@ extern "C"
      * @return The state of the prefix.
      */
     SWRE_LIBRARY_API bool
-      SwreC_TracePrefixIsEnabled(const DotsC_Int64 id);
+    SwreC_TracePrefixIsEnabled(const DotsC_Int64 id);
 
     /**
      * Get a direct pointer to the state of a prefix.
@@ -197,7 +196,7 @@ extern "C"
      * @return A pointer to the boolean that describes the state of the prefix.
      */
     SWRE_LIBRARY_API volatile bool *
-      SwreC_TracePrefixGetIsEnabledPointer(const DotsC_Int64 id);
+    SwreC_TracePrefixGetIsEnabledPointer(const DotsC_Int64 id);
 
     /** @} */
 

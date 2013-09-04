@@ -49,12 +49,11 @@ namespace Internal
         virtual ~TraceStreamBuffer();
 
         Safir::Dob::Typesystem::Int64 GetPrefixId() const;
-
-        void Flush();
     private:
         virtual _Tr::int_type uflow();
         virtual _Tr::int_type underflow();
         virtual _Tr::int_type overflow(_Tr::int_type c = _Tr::eof());
+
         // Take care of character sequences
         virtual std::streamsize xsputn(const wchar_t* s, std::streamsize num);
         virtual int sync();

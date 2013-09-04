@@ -88,7 +88,6 @@ namespace Safir.Application
         public Tracer(string prefix)
             : base(new TraceStream(prefix),new System.Text.UTF8Encoding(false)) //Omit BOM
         {
-            //set autoflush last or things will get strange
             AutoFlush = true;
         }
      
@@ -561,6 +560,7 @@ namespace Safir.Application
             }
             return m_prefixId;
         }
+
         private void AddPrefix()
         {
             byte success;
@@ -591,7 +591,7 @@ namespace Safir.Application
         public override void Flush()
         { //this is the same as sync in C++
             byte success;
-            Library.SwreC_TraceFlushBuffer(out success);
+            Library.SwreC_TraceFlush(out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
                 Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
@@ -636,7 +636,7 @@ namespace Safir.Application
             byte[] str = new byte[count + 1];
             Array.Copy(buffer, offset, str, 0, count);
             str[count] = 0; //add null termination
-            Library.SwreC_TraceAppendStringPrefix(m_prefixId, str, out success);
+            Library.SwreC_TraceAppendString(m_prefixId, str, out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
                 Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
