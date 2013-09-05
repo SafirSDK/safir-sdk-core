@@ -33,41 +33,32 @@ final class Library
     }
 
 
-    //SwreC_SetCommandLineArguments
     static native void SetProgramName(String programName,
                                       boolean [] success);
 
-    //SwreC_TraceAppendStringPrefix
-    static native void TraceAppendStringPrefix(long prefixId,
-                                               byte [] str,
-                                               boolean [] success);
+    static native void TraceAppendString(long prefixId,
+                                         byte [] str,
+                                         int offset,
+                                         int length,
+                                         boolean [] success);
 
-    //SwreC_TraceAppendCharPrefix
-    static native void TraceAppendCharPrefix(long prefixId,
-                                             byte b,
-                                             boolean [] success);
-
-
-    //SwreC_TraceSyncBuffer
-    static native void TraceSyncBuffer(boolean [] success);
+    static native void TraceAppendChar(long prefixId,
+                                       byte b,
+                                       boolean [] success);
 
 
-    //SwreC_TraceFlushBuffer
-    static native void TraceFlushBuffer(boolean [] success);
+    static native void TraceFlush(boolean [] success);
 
 
-    //SwreC_TracePrefixAdd
     static native void TracePrefixAdd(String prefix,
                                       long [] prefixId,
                                       boolean [] success);
 
 
-    //SwreC_TracePrefixSetEnabled
     static native void TracePrefixSetEnabled(long id,
                                              boolean enabled,
                                              boolean [] success);
 
-    //SwreC_TracePrefixIsEnabled
     static native boolean TracePrefixIsEnabled(long id);
 
 }

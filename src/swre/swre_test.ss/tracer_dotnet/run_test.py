@@ -67,7 +67,7 @@ def fail(message):
     print("Failed! Wrong number of",message)
     sys.exit(1)
 
-if stdout_output.count("\n") != 24 or syslog_output.count("\n") != 24:
+if stdout_output.count("\n") != 36 or syslog_output.count("\n") != 36:
     fail("lines")
 
 if stdout_output.count("Rymd-B@rje: blahonga") != 6 or syslog_output.count("Rymd-Börje: blahonga") != 6:
@@ -94,8 +94,20 @@ if stdout_output.count("Razor: foobar\n") != 3 or syslog_output.count("Razor: fo
 if stdout_output.count("Razor: this is the end\n") != 3 or syslog_output.count("Razor: this is the end\n") != 3:
     fail("this is the end")
 
-if stdout_output.count("Razor: my only friend\n") != 3 or syslog_output.count("Razor: my only friend\n") != 3:
-    fail("my only friend")
+if stdout_output.count("Razor: my only friend, the end\n") != 3 or syslog_output.count("Razor: my only friend, the end\n") != 3:
+    fail("my only friend, the end")
+
+if stdout_output.count("the end\nRymd-B@rje: of our elaborate plans\n") != 3:
+    fail("elaborate plans")
+
+if stdout_output.count("crossbones: @\n") != 3 or syslog_output.count("crossbones: \u2620\n") != 3:
+    fail("crossbones")
+
+if stdout_output.count("interrobang: @\n") != 3 or syslog_output.count("interrobang: \u203d\n") != 3:
+    fail("interrobang")
+
+if stdout_output.count("@reversed\n") != 3 or syslog_output.count("\u202ereversed\n") != 3:
+    fail("reversed")
     
 print("success")
 sys.exit(0)

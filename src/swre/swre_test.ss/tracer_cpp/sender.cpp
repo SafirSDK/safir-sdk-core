@@ -36,9 +36,13 @@ int main(int /*argc*/, char* argv[])
     rb << L"blahong®a" << std::endl;
     rb << L"blahongaåäö" << std::endl;
     razor << L"brynanuppafjässasponken" << std::endl;
+    razor << L"\u202ereversed" << std::endl;
+    rb << L"skull and crossbones: \u2620" << std::endl;
+    rb << L"interrobang: \u203d" << std::endl;
     razor << 1 << 2 << 3.1 << std::endl;
     razor << "foo" << std::flush << "bar" << std::endl;
-    razor << "this is the end\nmy only friend" << std::endl;
+    razor << "this is the end\nmy only friend, the end" << std::endl;
+    rb << "of our elaborate plans" << std::endl;
     return 0;
 }
 

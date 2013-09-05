@@ -27,15 +27,14 @@
 #include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 
 #if defined _MSC_VER
-    #ifdef SWRE_LIBRARY_EXPORTS
-        #define SWRE_LIBRARY_API __declspec(dllexport)
-    #else
-        #define SWRE_LIBRARY_API __declspec(dllimport)
-        #pragma comment( lib, "swre_library.lib" )
-    #endif
+#  ifdef SWRE_LIBRARY_EXPORTS
+#    define SWRE_LIBRARY_API __declspec(dllexport)
+#  else
+#    define SWRE_LIBRARY_API __declspec(dllimport)
+#    pragma comment( lib, "swre_library.lib" )
+#  endif
 #elif defined __GNUC__
-    #define SWRE_LIBRARY_API
-    #define __cdecl
+#  define SWRE_LIBRARY_API
 #endif
 
 extern "C"
@@ -109,6 +108,22 @@ extern "C"
     SwreC_TraceAppendString(const DotsC_Int64 prefixId,
                             const char * const str,
                             bool & success);
+
+    /**
+     * Add characters to trace buffer.
+     *
+     * The characters str[offset] to str[offset + length - 1] will be added to the output buffer.
+     *
+     * @param prefixId [in] - Identity of the prefix to put at the start of the line.
+     * @param str [in] - The string to append to the buffer.
+     * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
+     */
+    SWRE_LIBRARY_API void
+    SwreC_TraceAppendSubstring(const DotsC_Int64 prefixId,
+                               const char * const str,
+                               const DotsC_Int32 offset,
+                               const DotsC_Int32 length,
+                               bool & success);
 
     /**
      * Add character to trace buffer.

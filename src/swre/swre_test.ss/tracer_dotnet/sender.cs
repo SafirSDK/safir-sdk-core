@@ -35,10 +35,14 @@ class Sender
         rb.WriteLine("blahong®a");
         rb.WriteLine("blahongaåäö");
         razor.WriteLine("brynanuppafjässasponken");
+        razor.WriteLine("\u202ereversed");
+        rb.WriteLine("skull and crossbones: \u2620");
+        rb.WriteLine("interrobang: \u203d");
         razor.WriteLine("{0}{1}{2}",1,2,3.1);
         razor.Write("foo");
         razor.WriteLine("bar");
-        razor.WriteLine("this is the end\nmy only friend");
+        razor.WriteLine("this is the end\nmy only friend, the end");
+        rb.WriteLine("of our elaborate plans");
 
         return 0;
     }

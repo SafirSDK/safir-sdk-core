@@ -107,6 +107,7 @@ public class BackdoorKeeper
         return m_started;
     }
 
+    @SuppressWarnings( "deprecation" )
     public void onMessage(com.saabgroup.safir.dob.MessageProxy messageProxy)
     {
         com.saabgroup.safir.application.BackdoorCommand cmd =

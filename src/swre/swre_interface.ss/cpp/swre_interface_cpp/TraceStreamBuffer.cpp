@@ -37,7 +37,7 @@ namespace Internal
         m_prefix(prefix),
         m_prefixId(0)
     {
-
+        AddPrefix();
     }
 
     //-------------------------------------------------------
@@ -64,11 +64,6 @@ namespace Internal
     TraceStreamBuffer::_Tr::int_type 
     TraceStreamBuffer::overflow(_Tr::int_type c)
     {
-        if (m_prefixId == 0)
-        {
-            AddPrefix();
-        }
-
         bool success;        
         SwreC_TraceAppendWChar(m_prefixId,
                                _Tr::to_char_type(c),
@@ -87,11 +82,6 @@ namespace Internal
     std::streamsize TraceStreamBuffer::xsputn(const wchar_t* s, std::streamsize num)
     {
         using Safir::Dob::Typesystem::Utilities::ToUtf8;
-
-        if (m_prefixId == 0)
-        {
-            AddPrefix();
-        }
 
         bool success;
         SwreC_TraceAppendString(m_prefixId, ToUtf8(std::wstring(s, num)).c_str(), success);
@@ -119,11 +109,6 @@ namespace Internal
     //-------------------------------------------------------
     Safir::Dob::Typesystem::Int64 TraceStreamBuffer::GetPrefixId() const 
     {
-        if (m_prefixId == 0)
-        {
-            AddPrefix();
-        } 
-        
         return m_prefixId;
     }
 

@@ -183,11 +183,9 @@ namespace Internal
                                                 this);
     }
 
-
     Library::PrefixId
     Library::AddPrefix(const std::wstring & prefix)
     {
-
         boost::lock_guard<boost::recursive_mutex> lck(m_prefixSearchLock);
         Prefixes::iterator findIt = std::find(m_prefixes.begin(), m_prefixes.end(), prefix);
         if (findIt != m_prefixes.end())
@@ -295,7 +293,7 @@ namespace Internal
         {
             Safir::Logging::SendSystemLog(Safir::Logging::Error,
                                           L"TraceChar got non ascii character");
-            ch = '@';
+            ch = '#';
         }
         TraceWChar(prefixId,ch);
     }
@@ -313,6 +311,15 @@ namespace Internal
                          const char* str)
     {
         TraceString(prefixId, ToWstring(str));
+    }
+
+    void
+    Library::TraceString(const PrefixId prefixId,
+                         const char* str,
+                         const size_t offset,
+                         const size_t length)
+    {
+        TraceString(prefixId, ToWstring(std::string(str + offset, str + offset + length)));
     }
 
     void

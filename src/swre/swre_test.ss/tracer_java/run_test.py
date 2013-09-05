@@ -27,19 +27,22 @@ from __future__ import print_function
 import subprocess, os, time, sys, signal, re
 import syslog_server
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
-    exe_path = "."
-    
-sender_path = os.path.join(exe_path,"tracer_sender")
+SAFIR_RUNTIME = os.environ["SAFIR_RUNTIME"]
+
+sender_cmd = ("java",
+              "-Xcheck:jni",
+              "-Xfuture",
+              "-cp", 
+              os.path.join(SAFIR_RUNTIME, "bin", "swre_application_java.jar") +
+              os.pathsep +
+              "swre_test_java.jar",
+              "Sender")
 
 syslog = syslog_server.SyslogServer()
 
-o1 = subprocess.check_output(sender_path)
-o2 = subprocess.check_output(sender_path)
-o3 = subprocess.check_output(sender_path)
+o1 = subprocess.check_output(sender_cmd)
+o2 = subprocess.check_output(sender_cmd)
+o3 = subprocess.check_output(sender_cmd)
 
 stdout_output = o1.decode("utf-8") + o2.decode("utf-8") + o3.decode("utf-8")
 syslog_output = syslog.get_data(1)
@@ -93,7 +96,6 @@ if stdout_output.count("interrobang: @\n") != 3 or syslog_output.count("interrob
 
 if stdout_output.count("@reversed\n") != 3 or syslog_output.count("\u202ereversed\n") != 3:
     fail("reversed")
-    
 
 print("success")
 sys.exit(0)

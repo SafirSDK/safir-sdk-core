@@ -545,6 +545,7 @@ namespace Safir.Application
         public TraceStream(string prefix)
         {
             m_prefix = prefix;
+            AddPrefix();
         }
 
         ~TraceStream()
@@ -554,10 +555,6 @@ namespace Safir.Application
 
         public System.Int64 GetPrefixId()
         {
-            if (m_prefixId == 0)
-            {
-                AddPrefix();
-            }
             return m_prefixId;
         }
 
@@ -633,10 +630,10 @@ namespace Safir.Application
         public override void Write(byte[] buffer, int offset, int count)
         {
             byte success;
-            byte[] str = new byte[count + 1];
-            Array.Copy(buffer, offset, str, 0, count);
-            str[count] = 0; //add null termination
-            Library.SwreC_TraceAppendString(m_prefixId, str, out success);
+            //byte[] str = new byte[count + 1];
+            //Array.Copy(buffer, offset, str, 0, count);
+            //str[count] = 0; //add null termination
+            Library.SwreC_TraceAppendSubstring(m_prefixId, buffer, offset, count, out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
                 Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();

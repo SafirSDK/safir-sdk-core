@@ -74,6 +74,12 @@ namespace Internal
                         const wchar_t ch);
         void TraceString(const PrefixId prefixId,
                          const char* str);
+
+        void TraceString(const PrefixId prefixId,
+                         const char* str,
+                         const size_t offset,
+                         const size_t length);
+
         void TraceString(const PrefixId prefixId,
                          const std::wstring& str);
         

@@ -107,7 +107,6 @@ void SwreC_StopCrashReporting()
     }
 }
 
-
 void SwreC_TraceAppendString(const Safir::Dob::Typesystem::Int64 prefixId,
                              const char * const str,
                              bool & success)
@@ -120,6 +119,25 @@ void SwreC_TraceAppendString(const Safir::Dob::Typesystem::Int64 prefixId,
     }
     CATCH_LIBRARY_EXCEPTIONS
 }
+
+void SwreC_TraceAppendSubstring(const Safir::Dob::Typesystem::Int64 prefixId,
+                                const char * const str,
+                                const Safir::Dob::Typesystem::Int32 offset,
+                                const Safir::Dob::Typesystem::Int32 length,
+                                bool & success)
+{
+    success = false;
+    try
+    { 
+        Library::Instance().TraceString(prefixId, 
+                                        str, 
+                                        static_cast<size_t>(offset), 
+                                        static_cast<size_t>(length));
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS
+}
+
 
 void SwreC_TraceAppendChar(const Safir::Dob::Typesystem::Int64 prefixId,
                            const char ch,

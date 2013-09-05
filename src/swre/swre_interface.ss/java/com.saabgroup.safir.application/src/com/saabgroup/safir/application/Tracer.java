@@ -98,28 +98,20 @@ public class Tracer
         }
         return this;
     }
-    /*
-      public void close()
-      {
-      if (isEnabled())
-      {
 
-      }
-      }*/
-
-      public void flush()
-      {
-          if (isEnabled())
-          {
-              boolean [] success = new boolean [1];
-              Library.TraceFlushBuffer(success);
-              if (!success[0])
-              {
-                  com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-                  com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
-              }
-          }
-      }
+    public void flush()
+    {
+        if (isEnabled())
+        {
+            boolean [] success = new boolean [1];
+            Library.TraceFlush(success);
+            if (!success[0])
+            {
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            }
+        }
+    }
 
     public java.io.PrintWriter format(java.util.Locale l, String format, Object... args)
     {
@@ -391,7 +383,7 @@ class TraceStream
     public void close() throws java.io.IOException
     {
         boolean [] success = new boolean [1];
-        Library.TraceFlushBuffer(success);
+        Library.TraceFlush(success);
         if (!success[0])
         {
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
@@ -404,17 +396,7 @@ class TraceStream
     {
         super.flush();
         boolean [] success = new boolean [1];
-        Library.TraceSyncBuffer(success);
-        if (!success[0])
-        {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
-        }
-    }
-    public void write(byte[] b)
-    {
-        boolean [] success = new boolean [1];
-        Library.TraceAppendStringPrefix(m_prefixId,b,success);
+        Library.TraceFlush(success);
         if (!success[0])
         {
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
@@ -422,17 +404,61 @@ class TraceStream
         }
     }
 
-    public void write(int b)
+    public void write(byte[] b)
+    {
+        write(b,0,b.length);
+    }
+
+    public void write(byte[] b, int off, int len)
     {
         boolean [] success = new boolean [1];
-        Library.TraceAppendCharPrefix(m_prefixId,(byte)(b & 0xFF),success);
+        Library.TraceAppendString(m_prefixId, b, off, len, success);
         if (!success[0])
         {
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+        }
+    }
+
+
+    public void write(int b)
+    {
+        if ((b & ~0x7F) == 0) {
+            boolean [] success = new boolean [1];
+            Library.TraceAppendChar(m_prefixId,(byte)(b & 0xFF),success);
+            if (!success[0])
+            {
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
+                com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+            }
+        }
+        else { //multibyte
+            m_singleByteWriter.write(b & 0xFF);
+            if (m_expectBytes == 0)
+            {
+                if ((b & 0xE0) == 0xC0){
+                    m_expectBytes = 2;
+                }
+                else if ((b & 0xF0) == 0xE0){
+                    m_expectBytes = 3;
+                }
+                else if ((b & 0xF8) == 0xF0){
+                    m_expectBytes = 4;
+                }
+            }
+            else if (m_expectBytes == m_singleByteWriter.size())
+            {
+                m_expectBytes = 0;
+                m_singleByteWriter.write(0); //null terminate
+
+                write(m_singleByteWriter.toByteArray());
+                m_singleByteWriter.reset();
+            }
         }
     }
 
     private String m_prefix;
     private long m_prefixId = 0;
+    private int m_expectBytes;
+    private java.io.ByteArrayOutputStream m_singleByteWriter = new java.io.ByteArrayOutputStream();
 }
