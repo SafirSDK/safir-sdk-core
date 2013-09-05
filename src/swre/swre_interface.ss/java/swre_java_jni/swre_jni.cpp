@@ -192,6 +192,21 @@ void JNICALL Java_com_saabgroup_safir_application_Library_SetProgramName
     SetJArray(_env,_success,success);
 }
 
+void JNICALL Java_com_saabgroup_safir_application_Library_StartTraceBackdoor
+  (JNIEnv * _env, jclass, jstring _common, jstring _instance, jbooleanArray _success)
+{
+    bool success;
+    SwreC_StartTraceBackdoor(StringConverter(_env,_common),
+                             StringConverter(_env,_instance),
+                             success);
+    SetJArray(_env,_success,success);
+}
+
+void JNICALL Java_com_saabgroup_safir_application_Library_StopTraceBackdoor
+  (JNIEnv * _env, jclass)
+{
+    SwreC_StopTraceBackdoor();
+}
 
 
 void JNICALL Java_com_saabgroup_safir_application_Library_TraceAppendString
