@@ -36,33 +36,6 @@ package body Safir.Sw_Reports.Sw_Report is
       return Interfaces.C.To_C (ToUtf8 (To_Unbounded_Wide_String (Str)));
    end Convert;
 
-
-   ----------------------------------------------------------------------------
-   -- Stop
-   ----------------------------------------------------------------------------
-   procedure Stop is
-      procedure SwreC_Stop;
-      pragma Import (C, SwreC_Stop, "SwreC_Stop");
-   begin
-      SwreC_Stop;
-   end Stop;
-
-   ----------------------------------------------------------------------------
-   -- Enable_Crash_Reporting
-   ----------------------------------------------------------------------------
-   procedure Enable_Crash_Reporting is
-
-      procedure SwreC_EnableCrashReporting (C_Success : out C.char);
-      pragma Import (C, SwreC_EnableCrashReporting, "SwreC_EnableCrashReporting");
-
-      L_Success : C.char;
-   begin
-      SwreC_EnableCrashReporting (C_Success => L_Success);
-      if not (C.char'Pos (L_Success) /= 0) then
-         Safir.Dob.Typesystem.Library_Exceptions.Throw;
-      end if;
-   end Enable_Crash_Reporting;
-
    ----------------------------------------------------------------------------
    -- Send_Fatal_Error_Report
    ----------------------------------------------------------------------------

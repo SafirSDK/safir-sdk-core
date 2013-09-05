@@ -50,14 +50,12 @@ package Safir.Application.Tracers is
 
    procedure New_Line (Self : in out Tracer);
 
-   procedure Flush (Self : in out Tracer);
-
 private
    type Tracer is tagged record
       Prefix : Ada.Strings.Wide_Unbounded.Unbounded_Wide_String;
       PrefixId : Safir.Dob.Typesystem.Int_64;
    end record;
 
-   procedure AddPrefix (Self : in out Tracer);
+   procedure Add_Prefix (Self : in out Tracer);
 
 end Safir.Application.Tracers;
