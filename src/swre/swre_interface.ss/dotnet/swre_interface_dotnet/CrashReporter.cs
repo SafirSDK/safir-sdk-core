@@ -53,7 +53,7 @@ namespace Safir.Application
         /// This needs to be called before exiting an application to stop crash reporting if
         /// it has been started.
         /// </summary>
-        static void Stop()
+        public static void Stop()
         {
             Safir.SwReports.Library.SwreC_StopCrashReporting();
         }
