@@ -13,4 +13,5 @@ FIND_SOURCE_ROOT(SOURCE_ROOT)
 enable_testing()
 
 add_subdirectory(logging_cpp)
+add_subdirectory(logging_dotnet)
 
