@@ -7,7 +7,7 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 FIND_PACKAGE(PythonInterp)
 
 SET(dod_directory ${SAFIR_RUNTIME}/data/text/dots/config/)
-SET(dots_v_command ${PYTHON_EXECUTABLE} "${SAFIR_RUNTIME}/bin/dots_v.py" ARGS -dod=${dod_directory} -xdir=${dots_generated-code_SOURCE_DIR}/..)
+SET(dots_v_command ${PYTHON_EXECUTABLE} "${SAFIR_RUNTIME}/bin/dots_v.py" ARGS -dod=${dod_directory} -xdir=${dots_generated-code_SOURCE_DIR}/.. -j)
 
 FILE(GLOB dod_files ${dod_directory} *.dod)
 
