@@ -117,6 +117,12 @@ package body Safir.Dob.Secondary_Connections is
       return C.char'Pos (Is_Connected) /= 0;
    end Is_Attached;
 
+   function Is_Open
+     (Self : in Secondary_Connection) return Boolean is
+   begin
+      return Self.Is_Attached;
+   end Is_Open;
+
    function Get_Controller_Id (Self : in Secondary_Connection)
                                return Safir.Dob.Defs.Controller_Id is
    begin

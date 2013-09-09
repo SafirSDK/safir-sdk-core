@@ -172,7 +172,7 @@ namespace Safir.Dob
         /// Check if this Connection instance is open.
         /// </summary>
         /// <returns>True if the connection is open, otherwise false.</returns>
-        public bool IsOpen()
+        public override bool IsOpen()
         {
             byte isConn;
             byte success;
