@@ -30,6 +30,10 @@ build_dir        src/logging/logging_dotnet.ss/src         RelWithDebInfo
 build_dir        src/logging/logging_java.ss/src           RelWithDebInfo
 build_dir        src/logging/logging_ada.ss/src            RelWithDebInfo
 
+#LOGGING unit tests
+run_test_suite   src/logging/logging_test.ss               logging_tests
+ 
+
 #DOTS
 build_dir        src/dots/dots_id.ss/src                   RelWithDebInfo
 run_test_suite   src/dots/dots_id.ss/tests                 dots_id_tests
