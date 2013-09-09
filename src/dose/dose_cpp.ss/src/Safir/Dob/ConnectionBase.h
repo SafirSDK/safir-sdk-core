@@ -53,16 +53,20 @@ namespace Dob
     {
     public:
 
-        /** Constructor
+        /** 
+         * Constructor
          */
         ConnectionBase();
 
-        /** Destructor.
+        /** 
+         * Destructor.
          */
         virtual ~ConnectionBase();
 
         /**
          * Tells if the connection is opened.
+         *
+         * @return True if the connection is open, otherwise false.
          */
         virtual bool IsOpen() const = 0;
 
