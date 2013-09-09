@@ -22,6 +22,7 @@
 --
 -------------------------------------------------------------------------------
 package Safir.Sw_Reports.Sw_Report is
+   pragma Obsolescent ("Use Safir.Logging.Send_System_Log instead");
 
    procedure Send_Fatal_Error_Report (Error_Code : in Wide_String;
                                       Location   : in Wide_String;

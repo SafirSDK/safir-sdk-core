@@ -48,6 +48,9 @@ public:
 
     /**
      * Constructor.
+     *
+     * @param connection [in] The connection on which the keeper will subscribe
+     *                        to backdoor messages.
      */
     explicit BackdoorKeeper(const Safir::Dob::ConnectionBase& connection);
 
@@ -57,9 +60,9 @@ public:
     virtual ~BackdoorKeeper(){}
 
     /**
-     * Starts subscription for backdoor commands.
+     * Starts subscription for backdoor commands to be sent to the Backdoor.
      *
-     * The connection must be opened before Start is called.
+     * The connection that was passed in the constructor must be opened before Start is called.
      *
      * If the connection is closed and opened again (maybe in a different context)
      * this method must be called again to establish the subscription.

@@ -79,6 +79,7 @@ namespace Safir.SwReports
     /// <para>All methods are thread safe.</para>
     /// <para>All methods in this namespace are deprecated. Use Safir.Logging.SendSystemLog(...) instead.</para>
     /// </summary>
+    /// TODO: [Obsolete("All methods in this class are obsolete! Use Safir.Logging.SendSystemLog(...) instead.")]
     public sealed class SwReport
     {
         /// <summary>
