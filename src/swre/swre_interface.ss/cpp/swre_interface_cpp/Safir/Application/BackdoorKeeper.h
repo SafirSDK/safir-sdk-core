@@ -49,12 +49,12 @@ public:
     /**
      * Constructor.
      */
-    explicit BackdoorKeeper(const Safir::Dob::ConnectionBase&   connection);
+    explicit BackdoorKeeper(const Safir::Dob::ConnectionBase& connection);
 
     /**
      * Destructor.
      */
-    virtual ~BackdoorKeeper(){};
+    virtual ~BackdoorKeeper(){}
 
     /**
      * Starts subscription for backdoor commands.
