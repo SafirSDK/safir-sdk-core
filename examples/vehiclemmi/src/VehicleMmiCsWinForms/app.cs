@@ -84,7 +84,7 @@ namespace VehicleMmiCsWinForms
         /// </summary>
         static void Main()
         {
-            Safir.SwReports.SwReport.EnableCrashReporting();
+            Safir.Application.CrashReporter.Start();
             try
             {
                 App app = new App();
@@ -98,7 +98,7 @@ namespace VehicleMmiCsWinForms
             }
             finally
             {
-                Safir.SwReports.SwReport.Stop();
+                Safir.Application.CrashReporter.Stop();
             }
         }
 

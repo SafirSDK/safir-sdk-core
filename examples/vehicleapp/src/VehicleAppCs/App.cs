@@ -121,7 +121,7 @@ namespace VehicleAppCs
         /// </summary>
         public void Startup()
         {
-            Safir.SwReports.SwReport.EnableCrashReporting();
+            Safir.Application.CrashReporter.Start();
             try
             {
                 // Open the Dob connection.
@@ -136,7 +136,7 @@ namespace VehicleAppCs
             }
             finally
             {
-                Safir.SwReports.SwReport.Stop();
+                Safir.Application.CrashReporter.Stop();
             }
         }
 

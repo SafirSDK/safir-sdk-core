@@ -24,10 +24,11 @@
 #include "app.h"
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/SwReports/SwReport.h>
+#include <Safir/Application/CrashReporter.h>
 
 int main(int argc, char *argv[])
 {
-    Safir::SwReports::SwReportStarter swreports;
+    Safir::Application::ScopedCrashReporter crashReporter;
 
     try
     {
