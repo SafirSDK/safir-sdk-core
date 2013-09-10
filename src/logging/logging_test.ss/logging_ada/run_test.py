@@ -33,7 +33,7 @@ if sys.platform == "win32":
 else:
     exe_path = "."
     
-sender_path = os.path.join(exe_path, "log_sender")
+sender_path = os.path.join(exe_path, "sender")
 
 log_server = syslog_server.SyslogServer()
 
@@ -44,14 +44,14 @@ time.sleep(1)
 
 output = log_server.get_data(1)
 
-if "This is an emergency log" in output:
-##   "This is an alert log" in output and \
-##   "This is a critical log" in output and \
-##   "This is an error log" in output and \
-##   "This is a warning log" in output and \
-##   "This is a notice log" in output and \
-##   "This is an informational log" in output and \
-##   "This is a debug log" in output:   
+if "This is an emergency log" in output \
+   "This is an alert log" in output and \
+   "This is a critical log" in output and \
+   "This is an error log" in output and \
+   "This is a warning log" in output and \
+   "This is a notice log" in output and \
+   "This is an informational log" in output and \
+   "This is a debug log" in output:   
     print("Found all expected output!")
     sys.exit(0)
 else:
