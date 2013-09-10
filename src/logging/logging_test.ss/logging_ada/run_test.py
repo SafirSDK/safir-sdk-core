@@ -44,7 +44,7 @@ time.sleep(1)
 
 output = log_server.get_data(1)
 
-if "This is an emergency log" in output \
+if "This is an emergency log" in output and \
    "This is an alert log" in output and \
    "This is a critical log" in output and \
    "This is an error log" in output and \
