@@ -1,5 +1,5 @@
 with "safir_defaults";
-with "logging_library";
+with "logging_ada";
 
 project Sender is
 
