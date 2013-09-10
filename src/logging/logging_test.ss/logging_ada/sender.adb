@@ -1,4 +1,4 @@
-﻿-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 --
 --  Copyright Saab AB, 2013 (http://www.safirsdk.com)
 --
@@ -27,18 +27,22 @@ pragma Wide_Character_Encoding (UTF8);
 
 procedure Sender is
 begin
-   Safir.Logging.Send_System_Log(Severity=>Safir.Logging.Emergency,
-                                 Message=>"This is an emergency log!");
-
---   Rb.Put_Line ("skull and crossbones: " & Wide_Character'Val (16#2620#));
---   Rb.Put_Line ("interrobang: " & Wide_Character'Val (16#203d#));
---   Razor.Put_Line (Integer'Wide_Image (1) &
---                   Integer'Wide_Image (2) &
---                   Float'Wide_Image (3.1));
---   Razor.Put ("foo");
---   Razor.Put_Line ("bar");
---   Razor.Put_Line ("this is the end" & Wide_Character'Val (10) & "my only friend, the end");
---   Rb.Put_Line ("of our elaborate plans");
+   Safir.Logging.Send_System_Log (Severity=>Safir.Logging.Emergency,
+                                  Message=>"This is an emergency log!");
+   Safir.Logging.Send_System_Log (Severity=>Safir.Logging.Alert,
+                                  Message=>"This is an alert log!");
+   Safir.Logging.Send_System_Log (Severity=>Safir.Logging.Critical,
+                                  Message=>"This is a critical log!");
+   Safir.Logging.Send_System_Log (Severity=>Safir.Logging.Error,
+                                  Message=>"This is an error log!");
+   Safir.Logging.Send_System_Log (Severity=>Safir.Logging.Warning,
+                                  Message=>"This is a warning log!");
+   Safir.Logging.Send_System_Log (Severity=>Safir.Logging.Notice,
+                                  Message=>"This is a notice log!");
+   Safir.Logging.Send_System_Log (Severity=>Safir.Logging.Informational,
+                                  Message=>"This is an informational log!");
+   Safir.Logging.Send_System_Log (Severity=>Safir.Logging.Debug,
+                                  Message=>"This is a debug log!");
 
    Ada.Command_Line.Set_Exit_Status (0);
 end Sender;
