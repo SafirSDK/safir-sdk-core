@@ -143,7 +143,8 @@ class TestEnv:
 
             if proc.returncode != 0:
                 print(" ", name, "returncode is", proc.returncode)
-
+        self.syslog.server_close()
+        
     def Syslog(self):
         data = self.syslog.get_data(0)
         self.syslog_output.append(data)
