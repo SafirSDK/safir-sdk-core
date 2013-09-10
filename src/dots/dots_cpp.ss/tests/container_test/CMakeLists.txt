@@ -18,5 +18,4 @@ endif()
 ENABLE_TESTING()
 ADD_TEST(container_test container_test)
 
-FIND_SOURCE_ROOT(SOURCE_ROOT)
-SET_TESTS_PROPERTIES(container_test PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")
+SET_SAFIR_TEST_PROPERTIES(container_test)

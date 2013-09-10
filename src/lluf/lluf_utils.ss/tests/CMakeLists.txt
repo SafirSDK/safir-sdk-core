@@ -12,8 +12,6 @@ FIND_PACKAGE(Boost COMPONENTS thread date_time system)
 
 FIND_PACKAGE(PythonInterp)
 
-FIND_SOURCE_ROOT(SOURCE_ROOT)
-
 ENABLE_TESTING()
 ADD_SUBDIRECTORY(DynamicLibraryLoader_test)
 ADD_SUBDIRECTORY(LowLevelLogger_test)

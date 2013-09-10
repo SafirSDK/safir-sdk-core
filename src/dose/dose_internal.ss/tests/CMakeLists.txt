@@ -6,8 +6,6 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 FIND_PACKAGE(Boost COMPONENTS system thread)
 
-FIND_SOURCE_ROOT(SOURCE_ROOT)
-
 ADD_SUBDIRECTORY(signals_test)
 
 ADD_EXECUTABLE(distribution_data_test distribution_data_test.cpp)
@@ -28,11 +26,7 @@ ADD_TEST(MessageQueue dose_message_queue_test)
 ADD_TEST(DistributionData distribution_data_test)
 ADD_TEST(LamportClocks lamport_clock_test)
 
-SET_TESTS_PROPERTIES(Semaphore PROPERTIES TIMEOUT 60)
-SET_TESTS_PROPERTIES(MessageQueue PROPERTIES TIMEOUT 360)
-SET_TESTS_PROPERTIES(LamportClocks PROPERTIES TIMEOUT 2400)
-
-SET_TESTS_PROPERTIES(Semaphore PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")
-SET_TESTS_PROPERTIES(MessageQueue PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")
-SET_TESTS_PROPERTIES(DistributionData PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")
-SET_TESTS_PROPERTIES(LamportClocks PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")
+SET_SAFIR_TEST_PROPERTIES(Semaphore 60)
+SET_SAFIR_TEST_PROPERTIES(MessageQueue 360)
+SET_SAFIR_TEST_PROPERTIES(DistributionData)
+SET_SAFIR_TEST_PROPERTIES(LamportClocks 2400)

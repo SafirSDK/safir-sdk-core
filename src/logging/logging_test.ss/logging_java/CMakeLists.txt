@@ -12,8 +12,4 @@ ADD_JAR(log_sender_java "${sources}" ALL)
 
 ADD_TEST(logging_java ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
-SET_TESTS_PROPERTIES(logging_java PROPERTIES TIMEOUT 120)
-SET_PROPERTY(TEST logging_java
-  PROPERTY ENVIRONMENT 
-  "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config"
-  "PYTHONPATH=$ENV{PYTHONPATH}:${SOURCE_ROOT}/src/tests/test_support/python")
+SET_SAFIR_TEST_PROPERTIES(logging_java 120)

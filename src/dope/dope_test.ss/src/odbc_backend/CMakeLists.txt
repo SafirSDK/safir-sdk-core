@@ -50,10 +50,4 @@ endif()
 ADD_TEST(dope_odbc_backend_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_odbc_backend_test.py --driver $ENV{Driver} --database $ENV{DATABASE_NAME} --hostname $ENV{DATABASE_SERVER})
 
 #Long timeouts are needed on slow machines.
-set_tests_properties(dope_odbc_backend_test PROPERTIES TIMEOUT 1800)
-
-FIND_SOURCE_ROOT(SOURCE_ROOT)
-SET_PROPERTY(TEST dope_odbc_backend_test
-  PROPERTY ENVIRONMENT 
-  "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config"
-  "PYTHONPATH=$ENV{PYTHONPATH}:${SOURCE_ROOT}/src/tests/test_support/python")
+SET_SAFIR_TEST_PROPERTIES(dope_odbc_backend_test 1800)
