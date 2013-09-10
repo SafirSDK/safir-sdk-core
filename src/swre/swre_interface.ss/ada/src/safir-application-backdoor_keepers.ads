@@ -47,7 +47,7 @@ package Safir.Application.Backdoor_Keepers is
    -- Exceptions: Not_Open_Exception - 'Start' was called before connect to Dob.
    --
    procedure Start (Self       : in out Backdoor_Keeper;
-                    Connection : in     Safir.Dob.Connection_Bases.Connection_Base;
+                    Connection : in     Safir.Dob.Connection_Bases.Connection_Base'Class;
                     Backdoor   : in     not null Safir.Application.Backdoors.Backdoor_Access);
 
    procedure Stop (Self : in out Backdoor_Keeper);

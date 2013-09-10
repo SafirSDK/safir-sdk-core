@@ -94,7 +94,7 @@ package body Safir.Application.Backdoor_Keepers is
    -- Start
    ----------------------------------------------------------------------------
    procedure Start (Self       : in out Backdoor_Keeper;
-                    Connection : in     Safir.Dob.Connection_Bases.Connection_Base;
+                    Connection : in     Safir.Dob.Connection_Bases.Connection_Base'Class;
                     Backdoor   : in     not null Safir.Application.Backdoors.Backdoor_Access) is
       Misc : constant Safir.Dob.Connection_Aspect_Miscs.Connection_Aspect_Misc :=
         Safir.Dob.Connection_Aspect_Miscs.Create (Connection);
