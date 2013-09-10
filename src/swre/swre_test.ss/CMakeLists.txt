@@ -14,6 +14,13 @@ enable_testing()
 
 add_subdirectory(tracer_cpp)
 add_subdirectory(tracer_dotnet)
-add_subdirectory(tracer_java)
-add_subdirectory(tracer_ada)
+
+if (SAFIR_ADA_SUPPORT)
+   add_subdirectory(tracer_ada)
+endif()
+
+if (SAFIR_JAVA_SUPPORT)
+   add_subdirectory(tracer_java)
+endif()
+
 #add_subdirectory(stop_orders_at_exit)
