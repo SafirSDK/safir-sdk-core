@@ -31,7 +31,6 @@ import xml.etree.ElementTree as ET
 from glob import glob
 import codecs
 
-dou_file_root = ""
 dod_parameter_names = [\
         "File_Suffix", "Filename_Separator", "Output_Directory", "Namespace_Separator", \
         "Namespace_Prefix_File_Suffix", "Parent_Filename", "Namespace_Underscore_Style", "Filename_Underscore_Style", \
@@ -119,19 +118,8 @@ def dou_uniform_translate(typename):
     if typename == "Class" : typename = "Object"
     return typename
 
-# We don't need to clear this between the dou or dod files, since the result is the same for all
-# We use this class to encapsulate the huge dictionaries to avoid copying them between all processes
-#class DoNotCopy(object):
-#    def __init__(self):
-#        self.dou_uniform_lookup_cache = {}    
-#        self.dou_file_lookup_cache = {}    
-#        self.dou_xml_lookup_cache = {}  
 
-def dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache):
-    #global dou_uniform_lookup_cache
-    #global dou_file_lookup_cache
-    #global dou_xml_lookup_cache
-
+def dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dou_file_root):
     for path, dirs, files in os.walk(dou_file_root): # Walk directory tree
         for file in files:
             if file.endswith(".dou"):
@@ -143,10 +131,6 @@ def dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou
                 dou_uniform_lookup_cache[os.path.splitext(file)[0]] = dou_type
                 dou_file_lookup_cache[file] = os.path.join(path, file)
                 dou_xml_lookup_cache[os.path.join(path, file)] = dou_xml
-
-    ##print("Size of caches")
-    ##print("dou_uniform_lookup_cache", dou_uniform_lookup_cache.__sizeof__())
-    ##print("dou_xml_lookup_cache", dou_xml_lookup_cache.__sizeof__())
 
 
 def dou_uniform_lookup(gSession, typename):
@@ -171,7 +155,7 @@ def namespace_prefix_init(gSession):
     gSession.namespace_prefixes.clear()
     gSession.namespace_prefixes["¤¤Namespace_Prefix_File_Suffix¤¤"] = file_suffix
     
-    for path, dirs, files in os.walk(dou_file_root): # Walk directory tree
+    for path, dirs, files in os.walk(gSession.dou_file_root): # Walk directory tree
         for file in files:
             if file.endswith(file_suffix):
                 prefix_file = codecs.open(os.path.join(path, file), "r", encoding="utf-8")
@@ -189,6 +173,8 @@ def namespace_prefixer(gSession, typename):
     bestmatch_prefix = ""
     
     if gSession.dod_parameters['Namespace_Prefix_File_Suffix'] == "": return typename
+
+    print("Wohooo! someone asks for namespace prefix for: ", typename, file=sys.stderr)
     
     ts = typename.split(".")
     if gSession.namespace_prefixes is not None:
@@ -1441,8 +1427,9 @@ class GeneratorSession(object):
         self.dou_uniform_lookup_cache = None
         self.dou_file_lookup_cache = None
         self.dou_xml_lookup_cache = None
+        self.dou_file_root = None
 
-def dod_thread_main(dod_filename, dou_files, gen_src_output_path, show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache):
+def dod_thread_main(dod_filename, dou_files, gen_src_output_path, show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dou_file_root):
     t1 = os.times()[4]
     global loglevel
 
@@ -1450,6 +1437,7 @@ def dod_thread_main(dod_filename, dou_files, gen_src_output_path, show_files, do
     gSession.dou_uniform_lookup_cache = dou_uniform_lookup_cache
     gSession.dou_file_lookup_cache = dou_file_lookup_cache
     gSession.dou_xml_lookup_cache = dou_xml_lookup_cache
+    gSession.dou_file_root = dou_file_root
 
     dod_file = dod_init(gSession, dod_filename)
     output_dir = os.path.join(gen_src_output_path, gSession.dod_parameters["Output_Directory"])
@@ -1465,7 +1453,6 @@ def dod_thread_main(dod_filename, dou_files, gen_src_output_path, show_files, do
     if loglevel >=4: print(".dod process duration", t2-t1, os.path.split(dod_filename)[1])
         
 def main():
-    global dou_file_root
     global loglevel
     
     # Argument parsing is Python version dependent
@@ -1509,8 +1496,8 @@ def main():
         
         parser = optparse.OptionParser(usage='usage: %prog [options] DOU_FILE(S)', description='Source code generator tool for Safir SDK Core. Processes .dou files into source code for all supported languages. Files are generated in language specific subdirectories of root path of processed dou files. DOU_FILE(S): .dou file(s) to process. Accepts wildcards (*). If a directory is specified, all .dou files in the directory are processed (recursive)')
     
-        parser.add_option('--dod', '--dod_files', dest='dod_files', metavar='DOD_FILE(S)', default='-', help='Specifies .dod files to use as templates for the processing. Accepts wildcards (*). If it is a directory, all .dod files in that directory are used.')
-        parser.add_option('--xdir', '--dou_root', dest='dou_root', metavar='DOU_ROOT', default='-', help='Path to the top directory containing the .dou files')
+        parser.add_option('--dod', '--dod_files', dest='dod_files', metavar='DOD_FILE(S)', default='', help='Specifies .dod files to use as templates for the processing. Accepts wildcards (*). If it is a directory, all .dod files in that directory are used.')
+        parser.add_option('--xdir', '--dou_root', dest='dou_root', metavar='DOU_ROOT', default='', help='Path to the top directory containing the .dou files')
         parser.add_option('--output_path', '-o', dest='output_path', metavar='OUTPUT_PATH', default='', help='Directory where the generated file structure starts. Defaults to current working directory.')
         parser.add_option( '-i', '--info', '--show_files', dest='show_files', default=False, action='store_true', help='Prints out the dod and dou filenames for each parsing')
         parser.add_option('-v', '--verbose', '--show_parsing', dest='show_parsing', default=False, action='store_true', help='Prints debugging info from the parsing to stderr')
@@ -1538,10 +1525,11 @@ def main():
         print("Invalid argument for dod files.", file=sys.stderr)
         sys.exit(1)
     
-    dou_file_root = os.path.abspath(arguments.dou_root) + os.sep
+    dou_file_root = os.path.abspath(arguments.dou_root)
     if not os.path.isdir(dou_file_root):
         print("Invalid argument for dou root.", file=sys.stderr)
         sys.exit(1)
+    dou_file_root = dou_file_root + os.sep
 
     gen_src_output_path = arguments.output_path
     if gen_src_output_path == "":
@@ -1583,12 +1571,12 @@ def main():
         dou_uniform_lookup_cache = shared_mem_manager.dict()    
         dou_file_lookup_cache = shared_mem_manager.dict()
         dou_xml_lookup_cache = shared_mem_manager.dict()
-        dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache)
+        dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dou_file_root)
 
         pool = multiprocessing.Pool() # Defaults number of worker processes to number of CPUs
 
         for dod_filename in dod_files:
-            pool.apply_async(dod_thread_main, args = (dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache))
+            pool.apply_async(dod_thread_main, args = (dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dou_file_root))
 
         pool.close()
         pool.join()
@@ -1599,10 +1587,10 @@ def main():
         dou_uniform_lookup_cache = {}
         dou_file_lookup_cache = {}
         dou_xml_lookup_cache = {}
-        dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache)
+        dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dou_file_root)
 
         for dod_filename in dod_files:
-            dod_thread_main(dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache)
+            dod_thread_main(dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dou_file_root)
     
     return 0
 
