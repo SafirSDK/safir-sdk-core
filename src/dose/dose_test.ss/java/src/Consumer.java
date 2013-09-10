@@ -708,7 +708,7 @@ class Consumer implements
                         {
                             Logger.instance().println(PREFIX + m_consumerNumber + ": StartBackdoor");
 
-                            m_backdoorKeeper.start(this, m_connectionName, m_connectionInstance);
+                            m_backdoorKeeper.start(this);
                         }
                         break;
 
@@ -1383,7 +1383,7 @@ class Consumer implements
 
     private com.saabgroup.safir.dob.SecondaryConnection m_connection = new com.saabgroup.safir.dob.SecondaryConnection();
 
-    private com.saabgroup.safir.application.BackdoorKeeper m_backdoorKeeper = new com.saabgroup.safir.application.BackdoorKeeper();
+    private com.saabgroup.safir.application.BackdoorKeeper m_backdoorKeeper = new com.saabgroup.safir.application.BackdoorKeeper(m_connection);
     private final int m_consumerNumber;
     private final String m_connectionName;
     private final String m_connectionInstance;
