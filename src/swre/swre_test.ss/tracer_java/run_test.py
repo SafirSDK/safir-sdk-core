@@ -26,6 +26,7 @@
 from __future__ import print_function
 import subprocess, os, time, sys, signal, re
 import syslog_server
+from safe_print import *
 
 #TODO remove this when we drop python 2.6 support
 if "check_output" not in dir( subprocess ): # duck punch it in!
@@ -64,11 +65,11 @@ stdout_output = o1.decode("utf-8") + o2.decode("utf-8") + o3.decode("utf-8")
 syslog_output = syslog.get_data(1)
 
 def fail(message):
-    print ("STDOUT OUTPUT:")
-    print(stdout_output)
-    print ("SYSLOG OUTPUT:")
-    print(syslog_output)
     print("Failed! Wrong number of",message)
+    print ("STDOUT OUTPUT:")
+    safe_print(stdout_output)
+    print ("SYSLOG OUTPUT:")
+    safe_print(syslog_output)
     sys.exit(1)
 
 if stdout_output.count("\n") != 36 or syslog_output.count("\n") != 36:
