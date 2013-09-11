@@ -243,15 +243,12 @@ function (SET_SAFIR_TEST_PROPERTIES TEST_NAME)
   if (ARGV1)
     SET_TESTS_PROPERTIES(${TEST_NAME} PROPERTIES TIMEOUT ${ARGV1})
   endif()
-  #convert slashes. At least python seems to be picky.
-  file(TO_NATIVE_PATH "${SAFIR_SOURCE_ROOT}/src/tests/test_support/test_config" config)
-  file(TO_NATIVE_PATH "${SAFIR_SOURCE_ROOT}/src/tests/test_support/python" pysupp)
 
-  set (pypath "$ENV{PYTHONPATH}${PATH_SEPARATOR}${pysupp}")
+  set (pypath "$ENV{PYTHONPATH}${PATH_SEPARATOR}${SAFIR_SOURCE_ROOT}/src/tests/test_support/python")
   string(REGEX REPLACE "^${PATH_SEPARATOR}+" "" pypath ${pypath}) # remove any leading path separators
 
   SET_PROPERTY(TEST ${TEST_NAME}
     PROPERTY ENVIRONMENT 
-    "SAFIR_TEST_CONFIG_OVERRIDE=${config}"
+    "SAFIR_TEST_CONFIG_OVERRIDE=${SAFIR_SOURCE_ROOT}/src/tests/test_support/test_config"
     "PYTHONPATH=${pypath}")
 endfunction()
