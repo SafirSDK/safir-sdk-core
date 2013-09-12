@@ -61,7 +61,12 @@ o1 = subprocess.check_output(sender_cmd)
 o2 = subprocess.check_output(sender_cmd)
 o3 = subprocess.check_output(sender_cmd)
 
-stdout_output = (o1 + o2 + o3).decode("utf-8").replace("\r","")
+#on windows it appears that java outputs in utf16...
+encoding = "utf-8"
+if sys.platform == "win32":
+    encoding = "utf-16"
+
+stdout_output = (o1 + o2 + o3).decode(encoding).replace("\r","")
 syslog_output = syslog.get_data(1)
 
 def fail(message):
