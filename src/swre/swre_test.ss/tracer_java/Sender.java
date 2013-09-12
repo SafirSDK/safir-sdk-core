@@ -23,7 +23,7 @@
 ******************************************************************************/
 
 /**
- * Mait test class
+ * Main test class
  */
 public class Sender {
     public static void main(String[] args) {
@@ -47,4 +47,3 @@ public class Sender {
         System.exit(0);
     }
 }
-
