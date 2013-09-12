@@ -28,10 +28,10 @@
 
 //disable stupid incorrect microsoft warning.
 #ifdef _MSC_VER
-#pragma warning (disable : 4244)
+#pragma warning (disable : 4428)
 #endif
 
-int main(int /*argc*/, char* argv[])
+int main()
 {
     Safir::Application::Tracer razor(L"Razor");
     Safir::Application::Tracer rb(L"Rymd-Börje");
