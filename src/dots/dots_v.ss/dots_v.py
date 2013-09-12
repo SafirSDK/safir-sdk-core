@@ -31,6 +31,15 @@ import xml.etree.ElementTree as ET
 from glob import glob
 import codecs
 
+## Fix for unicode cross compatibility
+if sys.version < '3':
+    import codecs
+    def u(x):
+        return codecs.unicode_escape_decode(x)[0]
+else:
+    def u(x):
+        return x
+
 dod_parameter_names = [\
         "File_Suffix", "Filename_Separator", "Output_Directory", "Namespace_Separator", \
         "Namespace_Prefix_File_Suffix", "Parent_Filename", "Namespace_Underscore_Style", "Filename_Underscore_Style", \
@@ -174,8 +183,6 @@ def namespace_prefixer(gSession, typename):
     
     if gSession.dod_parameters['Namespace_Prefix_File_Suffix'] == "": return typename
 
-    print("Wohooo! someone asks for namespace prefix for: ", typename, file=sys.stderr)
-    
     ts = typename.split(".")
     if gSession.namespace_prefixes is not None:
         # check for namespace prefix files, best match is longest match
@@ -539,7 +546,7 @@ def underscore_formatter(name, style):
         #    - number preceeded by capital or small letter
         #    - small letter preceeded by a number
         #    - last capital letter in a sequence of capital letters, if followed by small letter or number
-        s1 = re.sub(u'([^\._:\u00A4])([A-Z][a-z]+)', r'\1_\2', name)
+        s1 = re.sub(u("([^\._:\u00A4])([A-Z][a-z]+)"), r'\1_\2', name)
         s2 = re.sub('([a-z])([A-Z])', r'\1_\2', s1)
         s3 = re.sub('([0-9])([A-Za-z])', r'\1_\2', s2)
         s4 = re.sub('([A-Za-z])([0-9])', r'\1_\2', s3)
@@ -688,7 +695,7 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
     elif var == "DEPENDENCY": 
         # Special case - the ADA dod file uses an uniterated MATCH(..):DEPENDENCY, which means match to all strings in the iterator
         if index < 0: 
-            return dependency_formatter(gSession, u"\u00A4".join(dou.unique_dependencies))
+            return dependency_formatter(gSession, u("\u00A4").join(dou.unique_dependencies))
         return dou.unique_dependencies[index]
     elif var == "DEPENDENCYBASE": return dou.dependency_base[index]
     elif var == "TABLE_LINE": return table_line
@@ -956,12 +963,12 @@ def process_at_str(gSession, at_string, dou, table_line, parent_table_line, stri
                 # there are any in the expression
                 rc1 = command[command.find("(")+1:-1]
                 # first replace all escaped slashes with something else (¤)
-                rc1 = rc1.replace("\/", u"\u00A4")
+                rc1 = rc1.replace("\/", u("\u00A4"))
                 # Then split on the non-espaced slash
                 ptn, repl = rc1.split("/",1)
                 # now put the slashes back, unescaped
-                ptn = ptn.replace(u"\u00A4", "/")
-                repl = repl.replace(u"\u00A4", "/")
+                ptn = ptn.replace(u("\u00A4"), "/")
+                repl = repl.replace(u("\u00A4"), "/")
                 result = re.sub(ptn, repl, result, 1)
                 
             elif command.startswith("REPLACE_ALL("):
@@ -969,12 +976,12 @@ def process_at_str(gSession, at_string, dou, table_line, parent_table_line, stri
                 # there are any in the expression
                 rc1 = command[command.find("(")+1:-1]
                 # first replace all escaped slashes with something else
-                rc1 = rc1.replace("\/", u"\u00A4")
+                rc1 = rc1.replace("\/", u("\u00A4"))
                 # Then split on the non-espaced slash
                 ptn, repl = rc1.split("/",1)
                 # now put the slashes back, unescaped
-                ptn = ptn.replace(u"\u00A4", "/")
-                repl = repl.replace(u"\u00A4", "/")
+                ptn = ptn.replace(u("\u00A4"), "/")
+                repl = repl.replace(u("\u00A4"), "/")
                 result = re.sub(ptn, repl, result)
                 
             else:
@@ -1457,15 +1464,23 @@ def main():
     
     # Argument parsing is Python version dependent
     use_argparse = False
+    support_multicpu = True
     if sys.version_info[0] == 2 and sys.version_info[1] >= 7:
         # Was added in 2.7
         use_argparse = True
     elif sys.version_info[0] <= 2 and sys.version_info[1] < 6:
         print("Update your Python version, 2.6 or higher required by this module", file=sys.stderr)
         sys.exit(1)
-    elif sys.version_info[0] == 3 and sys.version_info[1] >= 2:
-        # Was added in 3.2, all 3.x version support optparse
-        use_argparse = True
+    elif sys.version_info[0] == 3:
+        support_multicpu = False
+
+        if sys.version_info[1] >= 2:
+            # Was added in 3.2, all 3.x version support optparse
+            use_argparse = True
+
+        # if ((sys.version_info[1] == 3 and sys.version_info[2] >= 2)) or (sys.version_info[1] > 3) or (sys.version_info[1] == 2 and sys.version_info[2] >= 5):
+        #    # This was introduced due to http://bugs.python.org/issue16076, which was resolved in 3.3.2
+        #    support_multicpu = True
     
     arguments = None
     if use_argparse:
@@ -1563,7 +1578,7 @@ def main():
 
     if arguments.show_parsing: loglevel = 4
     
-    if arguments.multiprocess:
+    if support_multicpu and arguments.multiprocess:
         # Prepare dou lookup tables
         # We don't need to clear this between the dou or dod files, since the result is the same for all
         # Used shared memory dictionaries to avoid copying huge amounts of data for each process
