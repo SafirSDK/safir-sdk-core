@@ -272,7 +272,7 @@ private:
 
         std::string logStr = log.str();
 
-        const int LOG_MAX_SIZE = 1024;
+        const size_t LOG_MAX_SIZE = 1024;
 
         // RFC 3164 says that we must not send messages larger that 1024 bytes.
         if (logStr.size() > LOG_MAX_SIZE)
