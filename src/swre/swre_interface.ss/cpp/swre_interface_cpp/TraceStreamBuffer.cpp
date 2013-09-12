@@ -84,7 +84,7 @@ namespace Internal
         using Safir::Dob::Typesystem::Utilities::ToUtf8;
 
         bool success;
-        SwreC_TraceAppendString(m_prefixId, ToUtf8(std::wstring(s, num)).c_str(), success);
+        SwreC_TraceAppendString(m_prefixId, ToUtf8(std::wstring(s, static_cast<size_t>(num))).c_str(), success);
         if (!success)
         {
             Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
