@@ -55,9 +55,9 @@ sender_path = os.path.join(exe_path,"tracer_sender")
 
 syslog = syslog_server.SyslogServer()
 
-o1 = subprocess.check_output(sender_path)
-o2 = subprocess.check_output(sender_path)
-o3 = subprocess.check_output(sender_path)
+o1 = subprocess.check_output(sender_path, universal_newlines=True)
+o2 = subprocess.check_output(sender_path, universal_newlines=True)
+o3 = subprocess.check_output(sender_path, universal_newlines=True)
 
 stdout_output = o1.decode("utf-8") + o2.decode("utf-8") + o3.decode("utf-8")
 syslog_output = syslog.get_data(1)

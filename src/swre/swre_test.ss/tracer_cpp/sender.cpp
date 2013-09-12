@@ -34,13 +34,13 @@
 int main()
 {
     Safir::Application::Tracer razor(L"Razor");
-    Safir::Application::Tracer rb(L"Rymd-Börje");
+    Safir::Application::Tracer rb(L"Rymd-B\u00f6rje"); //ö
     razor.Enable(true);
     rb.Enable(true);
     rb << L"blahonga" << std::endl;
-    rb << L"blahong®a" << std::endl;
-    rb << L"blahongaåäö" << std::endl;
-    razor << L"brynanuppafjässasponken" << std::endl;
+    rb << L"blahong\u00aea" << std::endl; //registered sign
+    rb << L"blahonga\u00e5\u00e4\u00f6" << std::endl; //åäö
+    razor << L"brynanuppafj\u00e4ssasponken" << std::endl; //ä
     razor << L"\u202ereversed" << std::endl;
     rb << L"skull and crossbones: \u2620" << std::endl;
     rb << L"interrobang: \u203d" << std::endl;
