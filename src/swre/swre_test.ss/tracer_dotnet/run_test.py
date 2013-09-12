@@ -65,16 +65,20 @@ for dep in dependencies:
 
 syslog = syslog_server.SyslogServer()
 
-o1 = subprocess.check_output(sender_exe)
-o2 = subprocess.check_output(sender_exe)
-o3 = subprocess.check_output(sender_exe)
+o1 = subprocess.check_output(sender_exe).replace("\r","")
+o2 = subprocess.check_output(sender_exe).replace("\r","")
+o3 = subprocess.check_output(sender_exe).replace("\r","")
 
 os.remove(sender_exe)
 for dep in dependencies:
     os.remove(dep)
 
-stdout_output = o1.decode("utf-8") + o2.decode("utf-8") + o3.decode("utf-8")
+stdout_output = (o1 + o2 + o3).decode("utf-8").replace("\r","")
 syslog_output = syslog.get_data(1)
+
+#fix unexpected locale
+stdout_output = stdout_output.replace("123,1","123.1")
+syslog_output = syslog_output.replace("123,1","123.1")
 
 def fail(message):
     print("Failed! Wrong number of",message)
