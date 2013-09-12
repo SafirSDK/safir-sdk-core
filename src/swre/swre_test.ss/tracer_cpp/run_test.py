@@ -59,7 +59,7 @@ o1 = subprocess.check_output(sender_path, universal_newlines=True)
 o2 = subprocess.check_output(sender_path, universal_newlines=True)
 o3 = subprocess.check_output(sender_path, universal_newlines=True)
 
-stdout_output = o1.decode("utf-8") + o2.decode("utf-8") + o3.decode("utf-8")
+stdout_output = o1 + o2 + o3
 syslog_output = syslog.get_data(1)
 
 def fail(message):
