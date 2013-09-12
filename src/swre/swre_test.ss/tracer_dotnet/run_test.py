@@ -65,9 +65,9 @@ for dep in dependencies:
 
 syslog = syslog_server.SyslogServer()
 
-o1 = subprocess.check_output(sender_exe).replace("\r","")
-o2 = subprocess.check_output(sender_exe).replace("\r","")
-o3 = subprocess.check_output(sender_exe).replace("\r","")
+o1 = subprocess.check_output(sender_exe)
+o2 = subprocess.check_output(sender_exe)
+o3 = subprocess.check_output(sender_exe)
 
 os.remove(sender_exe)
 for dep in dependencies:
