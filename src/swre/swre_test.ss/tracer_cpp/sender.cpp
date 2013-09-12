@@ -26,6 +26,11 @@
 #include <boost/thread.hpp>
 #include <iostream>
 
+//disable stupid incorrect microsoft warning.
+#ifdef _MSC_VER
+#pragma warning (disable : 4244)
+#endif
+
 int main(int /*argc*/, char* argv[])
 {
     Safir::Application::Tracer razor(L"Razor");
