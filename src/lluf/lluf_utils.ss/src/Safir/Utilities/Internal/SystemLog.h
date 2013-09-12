@@ -31,7 +31,7 @@
 
 
 #define SEND_SYSTEM_LOG(severity, comment) \
-    if (true); else {std::wostringstream ostr; ostr comment; Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::severity, ostr.str());}
+    {std::wostringstream ostr; ostr comment; Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::severity, ostr.str());}
 
 namespace Safir
 {

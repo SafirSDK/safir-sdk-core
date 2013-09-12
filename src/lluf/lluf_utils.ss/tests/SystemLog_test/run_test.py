@@ -78,7 +78,7 @@ if proc.returncode != 0:
 
 try:
     log_common_part = r"\D{3} [ |\d]\d \d{2}:\d{2}:\d{2} \S* " + system_log_test_pgm + r"\[\d*\]: "
-    for test in range(8):
+    for test in range(9):
         data, addr = sock.recvfrom( 10 * 1024 ) # buffer size is 10 k
         print ("Received data:", data) 
         if test == 0:
@@ -105,7 +105,10 @@ try:
         elif test == 7:
             pri = r"<15>"
             text = r"This is a debug log"            
-
+        elif test == 8:
+            pri = r"<11>"
+            text = r"This is another error log"
+            
         p = re.compile(pri + log_common_part + text)
         data = data.decode("utf-8")
         if p.match(data) == None:

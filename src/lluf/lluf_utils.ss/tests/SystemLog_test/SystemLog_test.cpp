@@ -39,6 +39,8 @@ int main()
         logger.Send(Safir::Utilities::Internal::SystemLog::Notice, L"This is a notice log");
         logger.Send(Safir::Utilities::Internal::SystemLog::Informational, L"This is an informational log with \n newline and \t tab");
         logger.Send(Safir::Utilities::Internal::SystemLog::Debug, L"This is a debug log with \n newline and \t tab");
+
+        SEND_SYSTEM_LOG(Error, << L"This is another error log");
     }
     catch (const std::exception& e)
     {
