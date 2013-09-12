@@ -203,7 +203,7 @@ void JNICALL Java_com_saabgroup_safir_application_Library_StartTraceBackdoor
 }
 
 void JNICALL Java_com_saabgroup_safir_application_Library_StopTraceBackdoor
-  (JNIEnv * _env, jclass)
+  (JNIEnv *, jclass)
 {
     SwreC_StopTraceBackdoor();
 }

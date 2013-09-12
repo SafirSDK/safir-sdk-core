@@ -25,7 +25,7 @@
 #include <Safir/SwReports/SwReport.h>
 #include <Safir/Application/CrashReporter.h>
 
-int main(int /*argc*/, char * argv[])
+int main()
 {
     Safir::Application::ScopedCrashReporter scopedStartStop;
 
