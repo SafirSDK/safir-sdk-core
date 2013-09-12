@@ -46,16 +46,18 @@
 #include <boost/algorithm/string/split.hpp>
 #endif
 
+namespace bfs = boost::filesystem;
+
 namespace
 {
 #if defined(linux) || defined(__linux) || defined(__linux__)
     const std::vector<std::string> GetCommandLine(const pid_t pid)
     {
         const std::string pidString = boost::lexical_cast<std::string>(pid);
-        const boost::filesystem::path filename = boost::filesystem::path("/proc")
+        const bfs::path filename = bfs::path("/proc")
             / pidString / "cmdline";
 
-        boost::filesystem::ifstream cmdline(filename);
+        bfs::ifstream cmdline(filename);
         if (!cmdline.good())
         {
             return std::vector<std::string>(1,pidString);
@@ -136,7 +138,7 @@ namespace Utilities
             return boost::lexical_cast<std::string>(m_pid);
         }
 
-        const boost::filesystem::path filename = boost::filesystem::path(cmdline[0]).filename();
+        const bfs::path filename = bfs::path(cmdline[0]).filename();
         
         //try to find the name of the jar file
         if (filename == "java" || filename == "java.exe")
@@ -146,7 +148,7 @@ namespace Utilities
             {
                 if (*it == "-jar" && it+1 != cmdline.end())
                 {
-                    return boost::filesystem::path(*(it+1)).filename().string();
+                    return bfs::path(bfs::path(*(it+1)).filename()).string();
                 }
             }
         }
@@ -159,12 +161,12 @@ namespace Utilities
             {
                 if (boost::algorithm::ends_with(*it,".exe") || boost::algorithm::ends_with(*it,".csexe"))
                 {
-                    return boost::filesystem::path(*it).filename().string();
+                    return bfs::path(bfs::path(*it).filename()).string();
                 }
             }
         }
 
-        return boost::filesystem::path(*cmdline.begin()).filename().string();
+        return bfs::path(bfs::path(*cmdline.begin()).filename()).string();
     }
 
     pid_t ProcessInfo::GetPid()
