@@ -36,6 +36,8 @@ namespace Typesystem
 {
 namespace Internal
 {
+    template <class T> struct TypeRepositoryTraits;
+
     //forward declarations
     class ClassDescription;
     class MemberDescription;
@@ -81,7 +83,7 @@ namespace Internal
         virtual double GetFloat64Value(int index) const=0; //float64, si64
         virtual bool GetBoolValue(int index) const=0;
         virtual const char* GetStringValue(int index) const=0;
-        virtual const char* GetObjectValue(int index) const=0;
+        virtual std::pair<const char*, size_t> GetObjectValue(int index) const=0;
         virtual std::pair<const char*, size_t> GetBinaryValue(int index) const=0;
         virtual std::pair<boost::int64_t, const char*> GetHashedValue(int index) const=0; //instanceId, channelId, handlerId
     };
@@ -96,7 +98,7 @@ namespace Internal
         virtual DotsC_TypeId GetCheckSum() const=0;
         virtual int GetNumberOfValues() const=0;
         virtual const char* GetValueName(DotsC_EnumerationValue val) const=0;
-        virtual int GetIndexOfValue(const std::string& valueName) const=0;
+        virtual int GetIndexOfValue(const std::string& valueName) const=0; //Supports short name and fully qualified name. Ex: 'Monday' and 'MyEnumType.Monday'
     };
 
     class MemberDescription
@@ -199,6 +201,69 @@ namespace Internal
         virtual size_t GetNumberOfExceptions() const=0;
         virtual void GetAllExceptionTypeIds(std::vector<DotsC_TypeId>& typeIds) const=0;
     };
+
+    template<> struct TypeRepositoryTraits<TypeRepository>
+    {
+        typedef TypeRepository RepositoryType;
+        typedef ClassDescription ClassDescriptionType;
+        typedef MemberDescription MemberDescriptionType;
+        typedef PropertyDescription PropertyDescriptionType;
+        typedef ExceptionDescription ExceptionDescriptionType;
+        typedef ParameterDescription ParameterDescriptionType;
+        typedef EnumDescription EnumDescriptionType;
+        typedef MemberMappingDescription MemberMappingDescriptionType;
+        typedef PropertyMappingDescription PropertyMappingDescriptionType;
+        typedef CreateRoutineDescription CreateRoutineDescriptionType;
+    };
+
+    /**
+      * Type description helper functions. Useful functionsa that could be part of the description classes
+      * but is too complex to re-implement in different implementations since.
+      */
+    namespace TypeDescriptionHelpers
+    {
+        template <class EnumDescriptionT>
+        int GetIndexOfEnumValue(const EnumDescriptionT* description, const std::string& valueName) //Supports short name and fully qualified name. Ex: 'Monday' and 'MyEnumType.Monday'
+        {
+            size_t pos=valueName.rfind('.');
+            if (pos==std::string::npos)
+            {
+                for (int i=0; i<description->GetNumberOfValues(); ++i)
+                {
+                    if (valueName==description->GetValueName(i))
+                    {
+                        return i;
+                    }
+                }
+            }
+            else
+            {
+                std::string strippedValueName=valueName.substr(pos+1);
+                for (int i=0; i<description->GetNumberOfValues(); ++i)
+                {
+                    if (strippedValueName==description->GetValueName(i))
+                    {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        template <class PropertyDescriptionT, class MemberDescriptionT>
+        DotsC_MemberIndex GetPropertyMemberIndex(const PropertyDescriptionT* pd, const std::string& memberName)
+        {
+            for (int i=0; i<pd->GetNumberOfMembers(); ++i)
+            {
+                const MemberDescriptionT* md=pd->GetMember(i);
+                if (memberName==md->GetName())
+                {
+                    return static_cast<DotsC_MemberIndex>(i);
+                }
+            }
+            return -1;
+        }
+    }
 }
 }
 }

@@ -22,28 +22,13 @@
 *
 ******************************************************************************/
 
-#ifndef __DOTS_INTERNAL_DEFS__
-#define __DOTS_INTERNAL_DEFS__
+#ifndef __DOTS_INTERNAL_DETAIL_DEFS__
+#define __DOTS_INTERNAL_DETAIL_DEFS__
 
 #include <sstream>
-
-#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <iostream>
-
-////Make a hash_map available even though their locations are different
-////call it unordered_map, as it will be called in tr1
-//#if defined _MSC_VER
-//    #include <hash_map>
-//    #define unordered_map stdext::hash_map
-//#elif defined __GNUC__
-//    #include <tr1/unordered_map>
-//    using std::tr1::unordered_map;
-//#else
-//#error We need a definition of unordered_map
-//#endif
-
-#include <Safir/Dob/Typesystem/Internal/KernelDefs2.h>
 #include <vector>
+#include <Safir/Dob/Typesystem/Internal/KernelDefs2.h>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -66,6 +51,8 @@ namespace Typesystem
 {
 namespace Internal
 {
+namespace detail
+{
     typedef std::vector<std::string> StringVector;
 
     typedef DotsC_Int32 Int32;
@@ -73,7 +60,6 @@ namespace Internal
     typedef DotsC_Float32 Float32;
     typedef DotsC_Float64 Float64;
     typedef DotsC_TypeId TypeId;
-    //typedef DotsC_InstanceId InstanceId;
     typedef DotsC_MemberIndex MemberIndex;
     typedef DotsC_ParameterIndex ParameterIndex;
     typedef DotsC_ArrayIndex ArrayIndex;
@@ -94,34 +80,10 @@ namespace Internal
     static const Size OFFSET_MEMBER_LENGTH         =  sizeof(Offset); //4
     static const Size DYNAMIC_MEMBER_SIZE          =  sizeof(Offset) + sizeof(Size); //8
 
-
     BOOST_STATIC_ASSERT(sizeof(char) == 1);
     BOOST_STATIC_ASSERT(sizeof(Offset) == 4);
     BOOST_STATIC_ASSERT(sizeof(Size) == 4);
     BOOST_STATIC_ASSERT(sizeof(Offset) <= sizeof(Int64)); //this is to ensure that an offset can fit into a hashedId member.
-
-    /**
-     * Definition of a value. Used in parameters, createRoutines and propertyMappings.
-     */
-    enum ValueDefinitionKind {ValueKind, NullKind, RefKind};
-    struct ValueDefinition
-    {
-        ValueDefinitionKind kind;
-        std::string stringVal;
-        std::vector<char> binaryVal; //object and binary
-        DotsC_Int64 hashedVal;
-        union
-        {
-            DotsC_Int32 int32Val;
-            DotsC_Int64 int64Val;
-            DotsC_Float32 float32Val;
-            DotsC_Float64 float64Val;
-            bool boolVal;
-        };
-
-        ValueDefinition() : kind(ValueKind){}
-        ValueDefinition(ValueDefinitionKind k) : kind(k){}
-    };
 
     inline bool operator ==(const DotsC_EntityId& left, const DotsC_EntityId& right)
     {
@@ -132,60 +94,7 @@ namespace Internal
     {
         return !(left==right);
     }
-
-
-    class InternalException :
-        public std::exception
-    {
-    public:
-        InternalException(const std::string & description,
-                          const std::string & filename,
-                          const long lineNumber)
-        {
-            std::ostringstream msgWriter;
-            msgWriter << "Description: " << description  << std::endl
-                  << "Occurred at: " << filename << ": " << lineNumber;
-            m_msg=msgWriter.str();
-        }
-
-        virtual ~InternalException() throw()
-        {
-
-        }
-
-        virtual const char * what() const throw()
-        {
-            try
-            {
-                return m_msg.c_str();
-            }
-            catch (...)
-            {
-                return "Exception while creating exception message!!!";
-            }
-
-        }
-
-    private:
-        std::string m_msg;
-    };
-
-#define ENSURE(expr, comment) \
-    if (Safir::Dob::Typesystem::Internal::EnsureHelper(expr)); else {std::ostringstream ostr; ostr comment; Safir::Dob::Typesystem::Internal::EnsureFailed(ostr.str());}
-
-    static inline void EnsureFailed (const std::string & str)
-    {
-        lllerr << "ENSURE failed: '"<< str.c_str() << "'" << std::endl;
-        //Safir::Utilities::Internal::Internal::LowLevelLoggerBackend::Instance().FlushBuffer();
-        std::wcout << "Please contact your nearest DOB developer!" << std::endl;
-
-        throw InternalException(str, __FILE__,__LINE__);
-    }
-
-    static inline bool EnsureHelper(const bool expr)
-    {
-        return expr;
-    }
+}
 }
 }
 }

@@ -26,19 +26,6 @@
 
 #include <sstream>
 
-#if defined _MSC_VER
-    #if defined DOTS_INTERNAL_EXPORTS
-        #define DOTS_API __declspec(dllexport)
-    #else
-        #define DOTS_API __declspec(dllimport)
-        #define SAFIR_LIBRARY_NAME "dots_internal"
-        #include <Safir/Utilities/Internal/AutoLink.h>
-    #endif
-#elif defined __GNUC__
-    #define DOTS_API
-    #define __cdecl
-#endif
-
 namespace Safir
 {
 namespace Dob
@@ -57,7 +44,7 @@ namespace Internal
     /**
      * Exception used to report errors in dou- and dom- files.
      */
-    class DOTS_API ParseError : public std::exception
+    class ParseError : public std::exception
     {
     public:
 

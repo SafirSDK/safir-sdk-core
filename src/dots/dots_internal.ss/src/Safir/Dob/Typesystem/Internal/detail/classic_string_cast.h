@@ -5,8 +5,8 @@
 * Created by: Joel Ottosson / joot
 *
 *******************************************************************************/
-#ifndef __CLASSIC_STRING_CAST_H__
-#define __CLASSIC_STRING_CAST_H__
+#ifndef __SAFIR_CLASSIC_STRING_CAST_H__
+#define __SAFIR_CLASSIC_STRING_CAST_H__
 
 #include <iomanip>
 #include <sstream>
@@ -22,6 +22,8 @@ namespace Dob
 namespace Typesystem
 {
 namespace Internal
+{
+namespace detail
 {
 /**
   * The function 'classic_string_cast' is to be used the same way as boost::lexical_cast. The
@@ -117,6 +119,6 @@ template<typename Target> inline Target classic_string_cast(const wchar_t* src)
     return classic_string_cast< Target, std::wstring>(src);
 }
 
-}}}} //Safir::Dob::Typesystem::Internal
+}}}}} //Safir::Dob::Typesystem::Internal
 
 #endif // CLASSIC_STRING_CAST_H

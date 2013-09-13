@@ -28,6 +28,12 @@
 #include <vector>
 #include <sstream>
 #include <Safir/Dob/Typesystem/Internal/ParseError.h>
+#include <Safir/Dob/Typesystem/Internal/detail/BasicTypeOperations.h>
+#include <Safir/Dob/Typesystem/Internal/detail/BlobToXmlSerializer.h>
+#include <Safir/Dob/Typesystem/Internal/detail/BlobToJsonSerializer.h>
+#include <Safir/Dob/Typesystem/Internal/detail/XmlToBlobSerializer.h>
+#include <Safir/Dob/Typesystem/Internal/detail/JsonToBlobSerializer.h>
+#include <Safir/Dob/Typesystem/Internal/detail/RepositoryToStringHelper.h>
 
 namespace Safir
 {
@@ -47,7 +53,11 @@ namespace Internal
      * @param base64 [out] - Base64 encoded result.
      * @throws Safir::Dob::Typesystem::Parser:ParseError if anything goes wrong.
      */
-    DOTS_API void BinaryToBase64(const char* binary, size_t size, std::ostringstream& base64);
+    void BinaryToBase64(const char* binary, size_t size, std::ostringstream& base64)
+    {
+        std::string bin(binary, size); //Improvement: fix implementation to accept 'const char*' and avoid this copying
+        base64<<detail::BasicTypes::ToBase64(bin);
+    }
 
     /**
      * Decodes base64 data into binary data.
@@ -56,7 +66,12 @@ namespace Internal
      * @param binary [out] - Binary result of conversion.
      * @throws Safir::Dob::Typesystem::Parser:ParseError if anything goes wrong. For example if base64Str is not well-formed.
      */
-    DOTS_API void Base64ToBinary(const std::string& base64Str, std::vector<char>& binary);
+    void Base64ToBinary(const std::string& base64Str, std::vector<char>& binary)
+    {
+        std::string bin;
+        detail::BasicTypes::FromBase64(base64Str, bin); //Improvement: fix implementation to accept vector and avoid this copying
+        binary.insert(binary.begin(), bin.begin(), bin.end());
+    }
 
     /**
      * Serializes binary representation of an object to xml.
@@ -66,7 +81,11 @@ namespace Internal
      * @param xml [out] - Xml result of conversion.
      * @throws Safir::Dob::Typesystem::Parser:ParseError if binary can't be serialized to xml.
      */
-    DOTS_API void BinaryToXml(const TypeRepository* repository, const char* binary, std::ostringstream& xml);
+    template <class RepositoryT>
+    void BinaryToXml(const RepositoryT* repository, const char* blob, std::ostringstream& xml)
+    {
+        (detail::BlobToXmlSerializer<RepositoryT>(repository))(blob, xml);
+    }
 
     /**
      * Converts a xml representation of an object to binary form.
@@ -76,7 +95,11 @@ namespace Internal
      * @param blob [out] - Resulting binary data.
      * @throws Safir::Dob::Typesystem::Parser:ParseError if xml can't be serialized to a binary.
      */
-    DOTS_API void XmlToBinary(const TypeRepository* repository, const char* xml, std::vector<char>& blob);
+    template <class RepositoryT>
+    void XmlToBinary(const RepositoryT* repository, const char* xml, std::vector<char>& blob)
+    {
+        (detail::XmlToBlobSerializer<RepositoryT>(repository))(xml, blob);
+    }
 
     /**
      * Serializes binary representation of an object to json.
@@ -86,7 +109,11 @@ namespace Internal
      * @param xml [out] - Json result of conversion.
      * @throws Safir::Dob::Typesystem::Parser:ParseError if binary can't be serialized to json.
      */
-    DOTS_API void BinaryToJson(const TypeRepository* repository, const char* binary, std::ostringstream& json);
+    template <class RepositoryT>
+    void BinaryToJson(const RepositoryT* repository, const char* blob, std::ostringstream& json)
+    {
+        (detail::BlobToJsonSerializer<RepositoryT>(repository))(blob, json);
+    }
 
     /**
      * Converts a json representation of an object to binary form.
@@ -96,7 +123,24 @@ namespace Internal
      * @param binary [out] - Resulting binary data.
      * @throws Safir::Dob::Typesystem::Parser:ParseError if json can't be serialized to a binary.
      */
-    DOTS_API void JsonToBinary(const TypeRepository* repository, const char* json, std::vector<char>& binary);
+    template <class RepositoryT>
+    void JsonToBinary(const RepositoryT* repository, const char* json, std::vector<char>& blob)
+    {
+        (detail::JsonToBlobSerializer<RepositoryT>(repository))(json, blob);
+    }
+
+    /**
+     * Writes a complete text description of a type repository and all of its content.
+     * This function is primarily intended for debugging.
+     *
+     * @param repository [in] - Type repository to convert to text.
+     * @param os [out] - Output stream. For example a ostringstream or cout.
+     */
+    template <class RepositoryT>
+    void RepositoryToString(const RepositoryT* repository, std::ostream &os)
+    {
+        (detail::ToStringHelper<RepositoryT>(repository))(os);
+    }
 
 }
 }

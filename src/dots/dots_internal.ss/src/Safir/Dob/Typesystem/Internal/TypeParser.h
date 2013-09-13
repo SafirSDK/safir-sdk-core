@@ -29,6 +29,19 @@
 #include <Safir/Dob/Typesystem/Internal/ParseError.h>
 #include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
 
+#if defined _MSC_VER
+    #if defined DOTS_INTERNAL_EXPORTS
+        #define DOTS_API __declspec(dllexport)
+    #else
+        #define DOTS_API __declspec(dllimport)
+        #define SAFIR_LIBRARY_NAME "dots_internal"
+        #include <Safir/Utilities/Internal/AutoLink.h>
+    #endif
+#elif defined __GNUC__
+    #define DOTS_API
+    #define __cdecl
+#endif
+
 namespace Safir
 {
 namespace Dob
@@ -53,21 +66,6 @@ namespace Internal
      * @throws Safir::Dob::Typesystem::Parser:ParseError The dou- or dom- files at the specified path contains errors.
      */
     DOTS_API boost::shared_ptr<const TypeRepository> ParseTypeDefinitions(const boost::filesystem::path& definitions);
-
-    /**
-     * Prints entire content of a repository to an out stream.
-     *
-     * @param repository [in] - Pointer or shared_ptr to a TypeRepository.
-     * @param os [in] - Output stream.
-     * @return Same stream that was passed as in argument.
-     */
-    DOTS_API std::ostream& operator<<(std::ostream &os, const TypeRepository* repository);
-    DOTS_API std::ostream& operator<<(std::ostream &os, const boost::shared_ptr<const TypeRepository>& repository);
-
-    /**
-     * TODO: Compare two repositories
-     */
-    //DOTS_API bool operator==(rep a, rep b);
 
 #ifdef _MSC_VER
 #pragma warning (pop)

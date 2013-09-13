@@ -26,7 +26,9 @@
 
 #include <set>
 #include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
-#include "BasicTypes.h"
+#include <Safir/Dob/Typesystem/Internal/detail/BasicTypeOperations.h>
+
+using namespace Safir::Dob::Typesystem::Internal::detail;
 
 //----------------------------------------------------------------------------------------
 // A local memeory (not shared memory) implementation of the TypeRespository interface
@@ -43,6 +45,39 @@ namespace Typesystem
 {
 namespace Internal
 {
+    /**
+     * Definition of a value. Used in parameters, createRoutines and propertyMappings.
+     */
+    enum ValueDefinitionKind {ValueKind, NullKind, RefKind};
+    struct ValueDefinition
+    {
+        ValueDefinitionKind kind;
+        std::string stringVal;
+        std::vector<char> binaryVal; //object and binary
+        DotsC_Int64 hashedVal;
+        union
+        {
+            ValueDefinition* referenced; //if value is a reference to another value
+            DotsC_Int32 int32Val;
+            DotsC_Int64 int64Val;
+            DotsC_Float32 float32Val;
+            DotsC_Float64 float64Val;
+            bool boolVal;
+        };
+
+        ValueDefinition()
+            :kind(ValueKind)
+            ,referenced(NULL)
+        {
+        }
+
+        ValueDefinition(ValueDefinitionKind k)
+            :kind(k)
+            ,referenced(NULL)
+        {
+        }
+    };
+
     typedef std::vector<ValueDefinition> ParameterValues;
     typedef std::pair<std::string, int> MemberReference; //pair<Member, Index> or pair<Parameter, Index>
     typedef std::vector<MemberReference> MemberReferenceVector;
@@ -153,22 +188,42 @@ namespace Internal
         virtual bool IsHidden() const {return hidden;}
 
         //GetValues
-        virtual boost::int32_t GetInt32Value(int index) const {return values[static_cast<size_t>(index)].int32Val;}
-        virtual boost::int64_t GetInt64Value(int index) const {return values[static_cast<size_t>(index)].int64Val;}
-        virtual float GetFloat32Value(int index) const {return values[static_cast<size_t>(index)].float32Val;}
-        virtual double GetFloat64Value(int index) const {return values[static_cast<size_t>(index)].float64Val;}
-        virtual bool GetBoolValue(int index) const {return values[static_cast<size_t>(index)].boolVal;}
-        virtual const char* GetStringValue(int index) const {return values[static_cast<size_t>(index)].stringVal.c_str();}
-        virtual const char* GetObjectValue(int index) const {return &values[static_cast<size_t>(index)].binaryVal[0];}
+        virtual boost::int32_t GetInt32Value(int index) const {return Value(static_cast<size_t>(index)).int32Val;}
+        virtual boost::int64_t GetInt64Value(int index) const {return Value(static_cast<size_t>(index)).int64Val;}
+        virtual float GetFloat32Value(int index) const {return Value(static_cast<size_t>(index)).float32Val;}
+        virtual double GetFloat64Value(int index) const {return Value(static_cast<size_t>(index)).float64Val;}
+        virtual bool GetBoolValue(int index) const {return Value(static_cast<size_t>(index)).boolVal;}
+        virtual const char* GetStringValue(int index) const {return Value(static_cast<size_t>(index)).stringVal.c_str();}
+        virtual std::pair<const char*, size_t> GetObjectValue(int index) const
+        {
+            const ValueDefinition& v=Value(static_cast<size_t>(index));
+            return std::make_pair(&v.binaryVal[0], v.binaryVal.size());
+        }
         virtual std::pair<const char*, size_t> GetBinaryValue(int index) const
         {
-            return std::make_pair(  values[static_cast<size_t>(index)].stringVal.c_str(),
-                                    values[static_cast<size_t>(index)].stringVal.size());
+            const ValueDefinition& v=Value(static_cast<size_t>(index));
+            return std::make_pair(v.stringVal.c_str(), v.stringVal.size());
         }
         virtual std::pair<boost::int64_t, const char*> GetHashedValue(int index) const
         {
-            const ValueDefinition& val=values[static_cast<size_t>(index)];
+            const ValueDefinition& val=Value(static_cast<size_t>(index));
             return std::make_pair(val.hashedVal, val.stringVal.empty() ? NULL : val.stringVal.c_str());
+        }
+
+        const ValueDefinition& Value(size_t index) const
+        {
+            const ValueDefinition* val=&values[index];
+            while (val->kind==RefKind)
+            {
+                val=val->referenced;
+            }
+            return *val;
+        }
+
+        ValueDefinition& MutableValue(size_t index)
+        {
+            const ValueDefinition& val=Value(index);
+            return *const_cast<ValueDefinition*>(&val);
         }
 
         //Fields
@@ -209,7 +264,7 @@ namespace Internal
         std::string name;
         StringVector enumerationValues;
 
-        DotsC_TypeId checksum;
+        TypeId checksum;
     };
     typedef boost::shared_ptr<EnumDescriptionBasic> EnumDescriptionBasicPtr;
 

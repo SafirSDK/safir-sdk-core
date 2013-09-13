@@ -24,7 +24,7 @@
 #ifndef __DOTS_INTERNAL_BLOB_LAYOUT_H__
 #define __DOTS_INTERNAL_BLOB_LAYOUT_H__
 
-#include <Safir/Dob/Typesystem/Internal/KernelDefs2.h>
+#include <Safir/Dob/Typesystem/Internal/detail/BlobLayoutImpl.h>
 #include <boost/shared_ptr.hpp>
 
 #if defined _MSC_VER
@@ -48,9 +48,6 @@ namespace Typesystem
 {
 namespace Internal
 {
-    class TypeRepository;
-    class BlobLayoutImpl;
-
     /**
      * @brief Operations on blobs. Creation of blobs and insertion/update of data in blobs.
      */
@@ -58,81 +55,139 @@ namespace Internal
     {
     public:
         //ctor
-        BlobLayout(const TypeRepository* repository);
+        BlobLayout(const TypeRepository* repository)
+            :m_impl(new detail::BlobLayoutImpl<TypeRepository>(repository))
+        {
+        }
 
         //---------------------
         // Blob operations
         //---------------------
         //Create a blob
-        void CreateBlob(const DotsC_TypeId typeId, char * & blob) const;
+        void CreateBlob(const DotsC_TypeId typeId, char * & blob) const
+        {
+            m_impl->CreateBlob(typeId, blob);
+        }
 
         //Delete a blob created with create blob
-        void DeleteBlob(char * & blob) const;
+        void DeleteBlob(char * & blob) const
+        {
+            m_impl->DeleteBlob(blob);
+
+        }
 
         //format a piece of blank memory to be a blob of a desired type
         //does not check that the size of the blob is correct.
         void FormatBlob(char * const blob,
                         const DotsC_Int32 blobSize,
                         const DotsC_TypeId typeId,
-                        char * & beginningOfUnused) const; //points to the beginning of the unused space
+                        char * & beginningOfUnused) const
+        {
+            m_impl->FormatBlob(blob, blobSize, typeId, beginningOfUnused);
+        }
 
-        DotsC_Int32 GetSize(const char * const blob) const;
+        DotsC_Int32 GetSize(const char * const blob) const
+        {
+            return m_impl->GetSize(blob);
+        }
 
-        DotsC_TypeId GetTypeId(const char * const blob) const;
+        DotsC_TypeId GetTypeId(const char * const blob) const
+        {
+            return m_impl->GetTypeId(blob);
+        }
 
-        bool IsAnythingChanged(const char * const blob) const;
+        bool IsAnythingChanged(const char * const blob) const
+        {
+            return m_impl->IsAnythingChanged(blob);
+        }
 
-        void SetChanged(char * const blob, const bool changed) const;
+        void SetChanged(char * const blob, const bool changed) const
+        {
+            m_impl->SetChanged(blob, changed);
+        }
 
-        void ResetChanged(char * const blob) const;
+        void ResetChanged(char * const blob) const
+        {
+            m_impl->ResetChanged(blob);
+        }
 
-        void MergeChanges(const char * const val, char * & blob) const;
+        void MergeChanges(const char * const val, char * & blob) const
+        {
+            m_impl->MergeChanges(val, blob);
+        }
 
-        bool SetChangedSinceLastRead(const char * const lastRead, char * const current) const;
+        bool SetChangedSinceLastRead(const char * const lastRead, char * const current) const
+        {
+            return m_impl->SetChangedSinceLastRead(lastRead, current);
+        }
 
         //---------------------
         // Get members
         //---------------------
         DotsC_MemberStatus GetMemberStatus(const char * const blob,
                                        const DotsC_MemberIndex member,
-                                       const DotsC_ArrayIndex index) const;
+                                       const DotsC_ArrayIndex index) const
+        {
+            return m_impl->GetStatus(blob, member, index);
+        }
 
         DotsC_MemberStatus GetBoolMember(const char * const blob,
                                        const DotsC_MemberIndex member,
                                        const DotsC_ArrayIndex index,
-                                       bool & val) const;
+                                       bool & val) const
+        {
+            return m_impl->GetMember<bool>(blob, member, index, val);
+        }
 
         DotsC_MemberStatus GetInt32Member(const char * const blob,
                                        const DotsC_MemberIndex member,
                                        const DotsC_ArrayIndex index,
-                                       DotsC_Int32& val) const;
+                                       DotsC_Int32& val) const
+        {
+            return m_impl->GetMember<DotsC_Int32>(blob, member, index, val);
+        }
 
         DotsC_MemberStatus GetInt64Member(const char * const blob,
                                        const DotsC_MemberIndex member,
                                        const DotsC_ArrayIndex index,
-                                       DotsC_Int64& val) const;
+                                       DotsC_Int64& val) const
+        {
+            return m_impl->GetMember<DotsC_Int64>(blob, member, index, val);
+        }
 
         DotsC_MemberStatus GetFloat32Member(const char * const blob,
                                        const DotsC_MemberIndex member,
                                        const DotsC_ArrayIndex index,
-                                       DotsC_Float32& val) const;
+                                       DotsC_Float32& val) const
+        {
+            return m_impl->GetMember<DotsC_Float32>(blob, member, index, val);
+        }
 
         DotsC_MemberStatus GetFloat64Member(const char * const blob,
                                        const DotsC_MemberIndex member,
                                        const DotsC_ArrayIndex index,
-                                       DotsC_Float64& val) const;
+                                       DotsC_Float64& val) const
+        {
+            return m_impl->GetMember<DotsC_Float64>(blob, member, index, val);
+        }
 
         DotsC_MemberStatus GetHashedMember(const char * const blob,
                                            const DotsC_MemberIndex member,
                                            const DotsC_ArrayIndex index,
                                            DotsC_Int64 & hashVal,
-                                           const char * & strVal) const;
+                                           const char * & strVal) const
+        {
+            return m_impl->GetMemberWithOptionalString(blob, member, index, hashVal, strVal);
+        }
 
         DotsC_MemberStatus GetDynamicMember(const char * const blob,
                                               const DotsC_MemberIndex member,
                                               const DotsC_ArrayIndex index,
                                               const char * & val, //out
-                                              DotsC_Int32 & binarySize) const;
+                                              DotsC_Int32 & binarySize) const
+        {
+            return m_impl->GetDynamicMember(blob, member, index, val, binarySize);
+        }
 
 
         ///---------------------
@@ -142,44 +197,68 @@ namespace Internal
                        const bool isChanged,
                        char * const blob,
                        const DotsC_MemberIndex member,
-                       const DotsC_ArrayIndex index) const;
+                       const DotsC_ArrayIndex index) const
+        {
+            m_impl->SetStatus(isNull, isChanged, blob, member, index);
+        }
 
         void SetBoolMember(const bool val,
                        char * blob,
                        const DotsC_MemberIndex member,
-                       const DotsC_ArrayIndex index) const;
+                       const DotsC_ArrayIndex index) const
+        {
+            m_impl->SetMember<bool>(val, blob, member, index);
+        }
 
         void SetInt32Member(const DotsC_Int32 val,
                        char * blob,
                        const DotsC_MemberIndex member,
-                       const DotsC_ArrayIndex index) const;
+                       const DotsC_ArrayIndex index) const
+        {
+            m_impl->SetMember<DotsC_Int32>(val, blob, member, index);
+        }
 
         void SetInt64Member(const DotsC_Int64 val,
                        char * blob,
                        const DotsC_MemberIndex member,
-                       const DotsC_ArrayIndex index) const;
+                       const DotsC_ArrayIndex index) const
+        {
+            m_impl->SetMember<DotsC_Int64>(val, blob, member, index);
+        }
 
         void SetFloat32Member(const DotsC_Float32 val,
                        char * blob,
                        const DotsC_MemberIndex member,
-                       const DotsC_ArrayIndex index) const;
+                       const DotsC_ArrayIndex index) const
+        {
+            m_impl->SetMember<DotsC_Float32>(val, blob, member, index);
+        }
 
         void SetFloat64Member(const DotsC_Float64 val,
                        char * blob,
                        const DotsC_MemberIndex member,
-                       const DotsC_ArrayIndex index) const;
+                       const DotsC_ArrayIndex index) const
+        {
+            m_impl->SetMember<DotsC_Float64>(val, blob, member, index);
+        }
 
         void SetMemberWithOptionalString(const DotsC_Int64 hashVal,
                                          const char * const strVal,
                                          char * & blob,
                                          const DotsC_MemberIndex member,
-                                         const DotsC_ArrayIndex index) const;
+                                         const DotsC_ArrayIndex index) const
+        {
+            m_impl->SetMemberWithOptionalString(hashVal, strVal, blob, member, index);
+        }
 
         void SetDynamicMember(const char * const val,
                               const DotsC_Int32 binarySize, //only used if type is Binary
                               char * & blob,
                               const DotsC_MemberIndex member,
-                              const DotsC_ArrayIndex index) const;
+                              const DotsC_ArrayIndex index) const
+        {
+            m_impl->SetDynamicMember(val, binarySize, blob, member, index);
+        }
 
         //-------------------------
         // Create dynamic members
@@ -193,7 +272,10 @@ namespace Internal
                                 const DotsC_MemberIndex member,
                                 const DotsC_ArrayIndex index,
                                 const bool isChanged,
-                                char * & beginningOfUnused) const;
+                                char * & beginningOfUnused) const
+        {
+            m_impl->CreateObjectMember(insideBlob, size, typeId, member, index, isChanged, beginningOfUnused);
+        }
 
         //the new string will be placed at the position that beginningOfUnused points to _before_ the call
         //after the call beginningOfUnused will be updated to point past the newly created string
@@ -202,7 +284,10 @@ namespace Internal
                                 const DotsC_MemberIndex member,
                                 const DotsC_ArrayIndex index,
                                 const bool isChanged,
-                                char * & beginningOfUnused) const;
+                                char * & beginningOfUnused) const
+        {
+            m_impl->CreateStringMember(insideBlob, stringLength, member, index, isChanged, beginningOfUnused);
+        }
 
         //the new binary will be placed at the position that beginningOfUnused points to _before_ the call
         //after the call beginningOfUnused will be updated to point past the newly created binary
@@ -211,7 +296,10 @@ namespace Internal
                                 const DotsC_MemberIndex member,
                                 const DotsC_ArrayIndex index,
                                 const bool isChanged,
-                                char * & beginningOfUnused) const;
+                                char * & beginningOfUnused) const
+        {
+            m_impl->CreateBinaryMember(insideBlob, binarySize, member, index, isChanged, beginningOfUnused);
+        }
 
         //if the string is non-null the new hash and string will be placed at the position that beginningOfUnused
         //if the string is null the dynamic part of the blob will be untouched.
@@ -223,14 +311,17 @@ namespace Internal
                                                   const DotsC_MemberIndex member,
                                                   const DotsC_ArrayIndex index,
                                                   const bool isChanged,
-                                                  char * & beginningOfUnused) const;
+                                                  char * & beginningOfUnused) const
+        {
+            m_impl->CreateAndSetMemberWithOptionalString(blob, hashVal, strVal, stringLength, member, index, isChanged, beginningOfUnused);
+        }
 
     private:
 
 #ifdef _MSC_VER
 #pragma warning(disable:4251) //waring shared_ptr needs dll-interface
 #endif
-        boost::shared_ptr<const BlobLayoutImpl> m_impl;
+        boost::shared_ptr<const detail::BlobLayoutImpl<TypeRepository> > m_impl;
 #ifdef _MSC_VER
 #pragma warning(default:4251)
 #endif

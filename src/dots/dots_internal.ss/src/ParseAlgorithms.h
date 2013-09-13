@@ -24,16 +24,14 @@
 #ifndef __DOTS_INTERNAL_PARSE_ALGORITHMS_H__
 #define __DOTS_INTERNAL_PARSE_ALGORITHMS_H__
 
-#include <assert.h>
 #include <iostream>
 #include <set>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/lexical_cast.hpp>
+#include <Safir/Dob/Typesystem/Internal/detail/XmlToBlobSerializer.h>
 #include "ParseState.h"
 #include "ElementNames.h"
-#include "RepositoryBasic.h"
-
 
 //--------------------------------------------------------------------------------------------------------------
 //This file contains all algoritms that is performed during the xml-parsing. Work done here must be fully
@@ -48,19 +46,16 @@ namespace Typesystem
 {
 namespace Internal
 {
-
-//------------------------------------------
-// Helper functions
-//------------------------------------------
-
+    //------------------------------------------
+    // Helper functions
+    //------------------------------------------
     bool ValidName(const std::string& name);
     void CheckNameAndFilenameConsistency(const std::string& filename, const std::string name);
-    bool IsOfType(const TypeRepository* repository, MemberType mt, TypeId tid, MemberType ofMt, TypeId ofTid);
-    bool ValidTypeId(const TypeRepository* repository, TypeId tid);
     //Resolves references on the form <...><name>param</name>123<index></index></...>
     void GetReferencedParameter(boost::property_tree::ptree& pt, std::string& paramName, int& paramIndex);
     std::string GetEntityIdParameterAsString(boost::property_tree::ptree& pt);
     std::string ExpandEnvironmentVariables(const std::string& str);
+    bool ParseValue(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
 
     template <class Ptr>
     bool NameComparerPtr(const Ptr& obj, const std::string& name) {return obj->name==name;}
@@ -104,20 +99,6 @@ namespace Internal
     //-----------------------------------------------
     // DOU file algorithms
     //-----------------------------------------------
-//    struct ObjectParameterHandler
-//    {
-//        void GetVal(boost::property_tree::ptree& pt, std::ostringstream val) const
-//        {
-//            //Here we can save quite much time by not calling write_xml, but instead copy or even better store a ref to pt for later parsing.
-//            //Haven't found a better way to get rid of the xml version than brute force.
-//            std::ostringstream ss;
-//            boost::property_tree::write_xml(ss, pt);
-//            val << "<" << ElementNames::Instance().String(ElementNames::ParameterObject)<< ">"  //add start element <object>
-//                << ss.str().substr(ss.str().find_first_of('>')+1)  //remove <? xml version... ?>
-//                << "</" << ElementNames::Instance().String(ElementNames::ParameterObject)<< ">"; //add end element </object>
-//        }
-//    };
-
     //Default for non specialized elements, still needed since occurrance checks will be done by calling this for empty elements
     template <int ElemName> struct ParseAlgorithm
     {
@@ -156,7 +137,7 @@ namespace Internal
             try
             {
                 ValueDefinition val;
-                if (BasicTypes::Instance().ParseValue(def->memberType, GetEntityIdParameterAsString(pt), val))
+                if (ParseValue(def->memberType, GetEntityIdParameterAsString(pt), val))
                 {
                     def->values.push_back(val);
                 }
@@ -515,7 +496,7 @@ namespace Internal
             val.kind=ValueKind;
             try
             {
-                if (!BasicTypes::Instance().ParseValue(EntityIdMemberType,
+                if (!ParseValue(EntityIdMemberType,
                                                        GetEntityIdParameterAsString(pt),
                                                        val))
                 {
@@ -560,7 +541,7 @@ namespace Internal
             par->isArray=false;
             par->memberType=ObjectMemberType;
             ValueDefinition val;
-            val.kind=RefKind;
+            val.kind=ValueKind;
             val.stringVal=pt.data();
             par->values.push_back(val);
             state.lastInsertedClass->ownParameters.push_back(par);
@@ -569,6 +550,13 @@ namespace Internal
                                                                          par->values.size()-1,
                                                                          &pt, state.propertyTree));
             state.repository->InsertParameter(par);
+
+            //type is still missing, add for later processing
+            ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
+                                                                              def,
+                                                                              def->memberValues.size()-1,
+                                                                              par->GetName(), 0);
+            state.createRoutineIncompleteHiddenParameters.push_back(ref);
         }
     };
 
@@ -646,7 +634,7 @@ namespace Internal
                 val.stringVal=ExpandEnvironmentVariables(pt.data());
                 def->values.push_back(val);
             }
-            else if (BasicTypes::Instance().ParseValue(def->memberType, ExpandEnvironmentVariables(pt.data()), val))
+            else if (ParseValue(def->memberType, ExpandEnvironmentVariables(pt.data()), val))
             {
                 def->values.push_back(val);
             }
@@ -826,7 +814,7 @@ namespace Internal
     //-----------------------------------------------
     template<> struct ParseAlgorithm<ElementNames::MapObject>
     {
-        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedMemberMapping->kind=MappedToParameter;
             const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
@@ -856,59 +844,48 @@ namespace Internal
             param->typeId=propMem->typeId;
             param->typeName=propMem->typeName;
 
-            ValueDefinition vd;
-            vd.kind=ValueKind;
-            vd.stringVal="<object></object>";
-            param->values.push_back(vd);
-
             state.lastInsertedMemberMapping->paramRef=param.get();
             state.lastInsertedMemberMapping->paramIndex=0;
             state.notInsertedParameters.push_back(std::make_pair(state.lastInsertedPropertyMapping->class_, param));
 
-           /*ValueDefinition vd;
-            vd.kind=ValueKind;
-            if (BasicTypes::Instance().ParseValue(param->memberType, pt.data(), vd))
+            //Get the correct type name of the serialized object
+            boost::optional<std::string> typeAttr=pt.get_optional<std::string>("<xmlattr>.type");
+            std::string typeName;
+            if (typeAttr)
             {
-                param->values.push_back(vd);
+                //if type has an explicit type-attribute, check type compliance
+                typeName=*typeAttr;
+                TypeId tid=DotsId_Generate64(typeName.c_str());
+                if (!BasicTypes::Instance().IsOfType(state.repository.get(), ObjectMemberType, tid, ObjectMemberType, param->GetTypeId()))
+                {
+                    std::ostringstream os;
+                    os<<"PropertyMapping with object of incorrect type. The object specified for propertyMember '"<<pd->GetName()<<"."<<propMem->GetName()<<"' in class '"<<state.lastInsertedPropertyMapping->class_->GetName()
+                     <<"' is not compatible with the expected type "<<propMem->typeName;
+                    throw ParseError("Type missmatch", os.str(), state.currentPath, 150);
+                }
             }
             else
             {
-                std::ostringstream os;
-                os<<"The value '"<<pt.data()<<"' doesn't match the type "<<param->typeName<<" for property mapping of member "<<propMem->name;
-                throw ParseError("Invalid value", os.str(), state.currentPath, 97);
+                //type defaults to dou declaration
+                typeName=param->typeName;
             }
 
-            state.lastInsertedMemberMapping->paramRef=param.get();
-            state.lastInsertedMemberMapping->paramIndex=0;
-            state.notInsertedParameters.push_back(std::make_pair(state.lastInsertedPropertyMapping->class_, param));*/
-
-                    //-----
-//            MappedMemberDefinition& md=state.lastInsertedPropertyMapping->mappedMembers.back();
-
-//            //Add hidden parameter
-//            //Naming: //property.member@className#pm - ex: namespace.MyProp.PropMember@namespace.MyClass.MyMember#pm
-//            std::ostringstream paramName;
-//            paramName<<state.lastInsertedPropertyMapping->propertyName<<"."<<md.name<<"@"<<state.lastInsertedPropertyMapping->className<<"#pm";
-
-//            ParameterDefinition& par=state.mappedHiddenParameters.insert(
-//                        state.mappedHiddenParameters.end(),
-//                        std::make_pair(DotsId_Generate64(state.lastInsertedPropertyMapping->className.c_str()),
-//                                       ParameterDefinition()))->second;
-//            par.name=paramName.str();
-//            par.hidden=true;
-//            par.isArray=false;
-//            par.memberType=ObjectMemberType;
-//            ValueDefinition val;
-//            val.kind=RefKind;
-//            par.values.push_back(val);
-
-//            state.objectMappedtHiddenParameterTypeChecks.push_back(ParseState::ObjectParameterTypeCheck(
-//                                                                       0,
-//                                                                       state.mappedHiddenParameters.size()-1,
-//                                                                       0,
-//                                                                       &pt, state.propertyTree));
-
-//            md.memberReferences.push_back(std::make_pair(paramName.str(), 0));
+            //do the serialization to the expected type
+            ValueDefinition vd;
+            vd.kind=ValueKind;
+            try
+            {
+                XmlToBlobSerializer<TypeRepository> serializer(state.repository.get());
+                serializer.SerializeObjectContent(typeName, vd.binaryVal, pt); //since pt does not include the root element we have to use method SerializeObjectContent
+            }
+            catch (const ParseError& err)
+            {
+                std::ostringstream os;
+                os<<"Failed to deserialize object in propertyMapping. The object specified for propertyMember '"<<pd->GetName()<<"."<<propMem->GetName()<<"' in class '"<<state.lastInsertedPropertyMapping->class_->GetName()
+                 <<"' cant be deserialized. "<<err.Description();
+                throw ParseError("Invalid Object", os.str(), state.currentPath, err.ErrorId());
+            }
+            param->values.push_back(vd);
         }
     };
 
@@ -948,7 +925,7 @@ namespace Internal
             {
                 ValueDefinition vd;
                 vd.kind=ValueKind;
-                if (BasicTypes::Instance().ParseValue(param->memberType, GetEntityIdParameterAsString(pt), vd))
+                if (ParseValue(param->memberType, GetEntityIdParameterAsString(pt), vd))
                 {
                     param->values.push_back(vd);
                 }
@@ -1013,7 +990,7 @@ namespace Internal
             }
             else
             {
-                if (BasicTypes::Instance().ParseValue(param->memberType, pt.data(), vd))
+                if (ParseValue(param->memberType, pt.data(), vd))
                 {
                     param->values.push_back(vd);
                 }
@@ -1101,7 +1078,7 @@ namespace Internal
                 }
             }
 
-            if (!IsOfType(state.repository.get(), param->GetMemberType(), param->GetTypeId(), propMem->GetMemberType(), propMem->GetTypeId()))
+            if (!BasicTypes::Instance().IsOfType(state.repository.get(), param->GetMemberType(), param->GetTypeId(), propMem->GetMemberType(), propMem->GetTypeId()))
             {
                 //Types does not match
                 std::ostringstream os;
@@ -1132,7 +1109,7 @@ namespace Internal
             {
                 TypeId tid=cd->GetMember(it->first)->GetTypeId();
                 cd=state.repository->GetClassBasic(tid);
-                ENSURE(cd!=NULL, <<"Nested class member ref, type id does not exist" );
+                //ENSURE(cd!=NULL, <<"Nested class member ref, type id does not exist" );
             }
 
             //Get class description
@@ -1259,7 +1236,7 @@ namespace Internal
                 }
 
                 //When we get here array/non-array issues are handled, now compare types
-                if (!IsOfType(state.repository.get(), classMem->GetMemberType(), classMem->GetTypeId(), propMem->GetMemberType(), propMem->GetTypeId()))
+                if (!BasicTypes::Instance().IsOfType(state.repository.get(), classMem->GetMemberType(), classMem->GetTypeId(), propMem->GetMemberType(), propMem->GetTypeId()))
                 {
                     //Types does not match
                     std::ostringstream os;

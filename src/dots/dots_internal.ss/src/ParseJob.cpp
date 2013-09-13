@@ -106,7 +106,7 @@ namespace Internal
                     boost::shared_ptr<boost::property_tree::ptree> pt(new boost::property_tree::ptree);
                     try
                     {
-                        boost::property_tree::read_xml(it->path().string(), *pt/*, boost::property_tree::xml_parser::trim_whitespace*/);
+                        boost::property_tree::read_xml(it->path().string(), *pt, boost::property_tree::xml_parser::trim_whitespace);
                     }
                     catch (boost::property_tree::xml_parser_error& err) //cant catch as const-ref due to bug in early boost versions.
                     {

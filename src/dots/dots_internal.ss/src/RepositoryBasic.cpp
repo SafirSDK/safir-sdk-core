@@ -24,8 +24,8 @@
 #include <sstream>
 #include <algorithm>
 #include <set>
+#include <Safir/Dob/Typesystem/Internal/detail/InternalDefs.h>
 #include "RepositoryBasic.h"
-#include "InternalDefs.h"
 
 namespace Safir
 {
@@ -129,26 +129,14 @@ namespace Internal
     //-----------
     DotsC_MemberIndex PropertyDescriptionBasic::GetMemberIndex(const std::string& memberName) const
     {
-        for (std::vector<MemberDescriptionBasicPtr>::const_iterator it=members.begin(); it!=members.end(); ++it)
-        {
-            if ((*it)->GetName()==memberName)
-            {
-                return static_cast<DotsC_MemberIndex>(std::distance(members.begin(), it));
-            }
-        }
-        return -1;
+        return TypeDescriptionHelpers::GetPropertyMemberIndex<PropertyDescription, MemberDescription>(this, memberName);
     }
 
     //enumerations
     //-------------
     int EnumDescriptionBasic::GetIndexOfValue(const std::string& valueName) const
     {
-        for (int i=0; i<static_cast<int>(enumerationValues.size()); ++i)
-        {
-            if (enumerationValues[i]==valueName)
-                return i;
-        }
-        return -1;
+        return TypeDescriptionHelpers::GetIndexOfEnumValue(this, valueName);
     }
 
     //CreateRoutines
