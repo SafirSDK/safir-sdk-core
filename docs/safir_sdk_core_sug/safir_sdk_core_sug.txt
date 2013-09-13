@@ -149,15 +149,16 @@ No record is kept of messages, i.e. they are not stored in the Dob in any way. S
 
 Messages do not have guaranteed delivery. If some application cannot keep up with the rate of messages it will miss messages. If you need guaranteed delivery, messages are not what you are looking for.
 
+[[service_overview]]
 ==== Services
-A Service has one or more handlers (known as a Service Handler) to which any application (known as a Requestor) can send service requests. For each service request that is sent, a response is received. The response is sent by the Service Handler, and should indicate the result of the operation (i.e. success or failure, with or without result data). If the service handler does not send a response within a reasonable amount of time (configurable, see <<request_timeouts>>), the Dob will send a timeout response to the requestor.
+A Service has one or more handlers (known as a Service Handler) to which any application (known as a Requestor) can send service requests. For each service request that is sent, a response is received. The response is sent by the Service Handler, and should indicate the result of the operation (i.e. success or failure, with or without result data). If the service handler does not send a response within a reasonable amount of time (configurable, see <<request_timeout_config>>), the Dob will send a timeout response to the requestor.
 
 Service requests and responses are guaranteed to be delivered. And you are guaranteed a response if you have sent a request.
 
 ==== Entities
 An entity is a _class_ of which there can be objects (known as instances) that are stored in the Dob and has one (and only one) owner. Only the owner is allowed to modify the object. Any application can subscribe for a entity instances, which means that it will receive updates whenever the instances are changed. Applications can also send requests (very similar to the service requests above) to the entity owner asking it to change something in the object.
 
-Entity requests and responses are guaranteed to be delivered. And you are guaranteed a response if you have sent a request. Entity updates are guaranteed to reach all subscribers, with one important caveat; subscribers are not guaranteed to see all intermediate states of an entity. E.g. if an application misses one update the next update will look as if both things changed at once.
+Entity requests and responses are guaranteed to be delivered. And you are guaranteed a response if you have sent a request (this may be a timeout response, just as for service requests, as described above). Entity updates are guaranteed to reach all subscribers, with one important caveat; subscribers are not guaranteed to see all intermediate states of an entity. E.g. if an application misses one update the next update will look as if both things changed at once.
 
 ==== Defining the information model
 The Dob allows each application/component that wants to provide a Dob interface (as in a Service, Message or Entity that other applications/components can use) to contribute to the information model by specifying its objects in xml files, which are built into the information model.
@@ -2752,9 +2753,9 @@ _Safir.Dob.PersistenceParameters.StandaloneMode_::
 
 There is more information about the persistence service in <<persistence_service>>.
 
-[[request_timeouts]]
+[[request_timeout_config]]
 === Request timeouts config
-Timeouts are defined using the properties Safir.Dob.RequestTimeoutProperty and Safir.Dob.RequestTimeoutOverrideProperty. If no response have been received when the timeout occurs, the Dob itself sends a timeout response to the Requestor. If the missing response arrives after this, it is just ignored. I.e., the Dob guarantees that the requestor will receive one, and only one, response.
+Timeouts are defined using the properties Safir.Dob.RequestTimeoutProperty and Safir.Dob.RequestTimeoutOverrideProperty. If no response have been received when the timeout occurs, the Dob itself sends a timeout response to the Requestor. If the missing response arrives after this, it is just ignored. I.e., the Dob guarantees that the requestor will receive one, and only one, response. See also <<request_timeouts>>.
 
 The default timeout for service requests is 7 seconds and for entity requests 2 seconds, and these can be changed by changing the timeout properties on the +Safir.Dob.Entity+ and +Safir.Dob.Service+ classes.
 
@@ -2833,7 +2834,7 @@ Here are some example connection names and their resulting queue lengths:
 
 |================================================================
 
-WARNING: Before deciding to change the queue lengths you should have read and understood <<overflow_handling>>, and the two items on overflows in <<faq>>. It is important to understand what effects, other than just increasing memory use, this may have on your system.
+WARNING: Before deciding to change the queue lengths you should have read and understood <<overflow_handling>>, <<request_timeouts>>, and the two items on overflows in <<faq>>. It is important to understand what effects, other than just increasing memory use, this may have on your system.
 
 [[memory_config]]
 === Shared Memory config
@@ -3047,8 +3048,8 @@ If you're using Visual Studio you can just open the .dmp file and if you've got 
 On Linux, you can use gdb to analyze the .dmp files, although you will have to convert the dumps to a core file using the minidump-2-core tool that can be found under src/lluf_crash_reporter.ss/src/google-breakpad/tools/.
 For more information about how to use the dump files please see the Google Breakpad website at http://code.google.com/p/google-breakpad/[].
 
-== Tips and Tricks
-This section discusses some good design strategies for applications
+== Application Design Considerations
+This section discusses some things that you need to be aware of when designing systems and applications.
 
 [[overflow_handling]]
 === Overflow handling
@@ -3097,6 +3098,15 @@ Another way to handle overflows, which applies if the message or request is sent
 
 There is a little bit more info on this in <<faq>>.
 
+[[request_timeouts]]
+=== Request timeouts
+As has been mentioned in <<request_timeout_config>> and <<service_overview>> a request can result in a timeout response if the handler does not manage to handle the request in a timely fashion. It is very important to note that a timeout means that a request _may still be processed_!
+
+The reason for this is that the handler may have started to process the request, but while it is being processed the timeout expires, so a timeout response is sent to the request sender. The response that the handler sends is discarded.
+
+This means that a sender may retry sending the request, so handlers should be prepared to receive duplicate requests.
+
+Note that this behaviour applies to both service requests and entity requests.
 === Type system freedoms
 Since Messages, Entities, Items, and Services all inherits from Object, and it is possible to have members of the type Object, it is also possible to have Services as members in Items. And Entities as Service members etc.
 

@@ -1144,7 +1144,7 @@ void DotsC_GetBooleanParameter(const TypeId typeId, const ParameterIndex paramet
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=*(pd->Value<bool>(index));
+    val=pd->Value<bool>(index);
 }
 
 void DotsC_GetEnumerationParameter(const TypeId typeId,
@@ -1154,49 +1154,49 @@ void DotsC_GetEnumerationParameter(const TypeId typeId,
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=*(pd->Value<Safir::Dob::Typesystem::Internal::EnumInternal>(index));
+    val=pd->Value<Safir::Dob::Typesystem::Internal::EnumInternal>(index);
 }
 
 void DotsC_GetInt32Parameter(const TypeId typeId, const ParameterIndex parameter, const ArrayIndex index, Int32& val)
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=*(pd->Value<Int32>(index));
+    val=pd->Value<Int32>(index);
 }
 
 void DotsC_GetInt64Parameter(const TypeId typeId, const ParameterIndex parameter, const ArrayIndex index, Int64& val)
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=*(pd->Value<Int64>(index));
+    val=pd->Value<Int64>(index);
 }
 
 void DotsC_GetFloat32Parameter(const TypeId typeId, const ParameterIndex parameter, const ArrayIndex index, Float32& val)
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=*(pd->Value<Float32>(index));
+    val=pd->Value<Float32>(index);
 }
 
 void DotsC_GetFloat64Parameter(const TypeId typeId, const ParameterIndex parameter, const ArrayIndex index, Float64& val)
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=*(pd->Value<Float64>(index));
+    val=pd->Value<Float64>(index);
 }
 
 void DotsC_GetStringParameter(const TypeId typeId, const ParameterIndex parameter, const ArrayIndex index, const char* &val)
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=pd->Value<char>(index).get();
+    val=pd->ValuePtr<char>(index).get();
 }
 
 void DotsC_GetTypeIdParameter(const TypeId typeId, const ParameterIndex parameter, const ArrayIndex index, TypeId& val)
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=*(pd->Value<TypeId>(index));
+    val=pd->Value<TypeId>(index);
 }
 
 void DotsC_GetHashedIdParameter(const TypeId typeId,
@@ -1228,7 +1228,7 @@ void DotsC_GetObjectParameter(const TypeId typeId,
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=pd->Value<char>(index).get();
+    val=pd->ValuePtr<char>(index).get();
 }
 
 void DotsC_GetBinaryParameter(const DotsC_TypeId typeId,
@@ -1948,7 +1948,7 @@ void DotsC_GetBooleanPropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=*(pd->Value<bool>(index));
+    val=pd->Value<bool>(index);
 }
 
 void DotsC_GetEnumerationPropertyParameter( const DotsC_TypeId typeId,
@@ -1973,7 +1973,7 @@ void DotsC_GetEnumerationPropertyParameter( const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=*(pd->Value<DotsC_EnumerationValue>(index));
+    val=pd->Value<DotsC_EnumerationValue>(index);
 }
 
 void DotsC_GetInt32PropertyParameter(const DotsC_TypeId typeId,
@@ -1998,7 +1998,7 @@ void DotsC_GetInt32PropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=*(pd->Value<DotsC_Int32>(index));
+    val=pd->Value<DotsC_Int32>(index);
 }
 
 void DotsC_GetInt64PropertyParameter(const DotsC_TypeId typeId,
@@ -2023,7 +2023,7 @@ void DotsC_GetInt64PropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=*(pd->Value<DotsC_Int64>(index));
+    val=pd->Value<DotsC_Int64>(index);
 }
 
 void DotsC_GetFloat32PropertyParameter(const DotsC_TypeId typeId,
@@ -2048,7 +2048,7 @@ void DotsC_GetFloat32PropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=*(pd->Value<DotsC_Float32>(index));
+    val=pd->Value<DotsC_Float32>(index);
 }
 
 void DotsC_GetFloat64PropertyParameter(const DotsC_TypeId typeId,
@@ -2073,7 +2073,7 @@ void DotsC_GetFloat64PropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=*(pd->Value<DotsC_Float64>(index));
+    val=pd->Value<DotsC_Float64>(index);
 }
 
 void DotsC_GetStringPropertyParameter(const DotsC_TypeId typeId,
@@ -2098,7 +2098,7 @@ void DotsC_GetStringPropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=pd->Value<char>(index).get();
+    val=pd->ValuePtr<char>(index).get();
 }
 
 void DotsC_GetTypeIdPropertyParameter(const DotsC_TypeId typeId,
@@ -2123,7 +2123,7 @@ void DotsC_GetTypeIdPropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=*(pd->Value<DotsC_TypeId>(index));
+    val=pd->Value<DotsC_TypeId>(index);
 }
 
 void DotsC_GetHashedIdPropertyParameter(const DotsC_TypeId typeId,
@@ -2201,7 +2201,7 @@ void DotsC_GetObjectPropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=pd->Value<char>(index).get();
+    val=pd->ValuePtr<char>(index).get();
 }
 
 void DotsC_GetBinaryPropertyParameter(const DotsC_TypeId typeId,

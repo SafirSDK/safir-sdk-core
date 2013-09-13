@@ -10,4 +10,4 @@ endif()
 ENABLE_TESTING()
 ADD_TEST(Signals signals_test)
 
-SET_SAFIR_TEST_PROPERTIES(Signals 60)
+SET_SAFIR_TEST_PROPERTIES(Signals 180)

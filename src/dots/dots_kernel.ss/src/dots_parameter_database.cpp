@@ -32,7 +32,6 @@
 #include <iostream>
 #include <Safir/Dob/Typesystem/Internal/Id.h>
 
-
 namespace Safir
 {
 namespace Dob
@@ -42,6 +41,16 @@ namespace Typesystem
 namespace Internal
 {
     static const char* PARAMETERS_DICTIONARY_NAME = "PARAMETER_BLOB";
+
+    template <class T>
+    void Write(T& dest, const T source)
+    {
+#ifdef NO_UNALIGNED_ACCESS
+        memcpy(&dest, &source, sizeof(T));
+#else
+        dest = source;
+#endif
+    }
 
     /*
     void ParameterDatabase::PrintOffset(const std::string & desc, const ParameterOffset & offset) const
@@ -231,8 +240,8 @@ namespace Internal
                 Error(val, ix, descr);
 
             }
-            boost::interprocess::offset_ptr<Int32> i = ParameterOffsetCast<Int32>(m_firstFree);
-            *i=enumVal;
+
+            Write(*ParameterOffsetCast<Int32>(m_firstFree),enumVal);
             m_firstFree+=size;
         }
     }
@@ -244,8 +253,8 @@ namespace Internal
         {
             try
             {
-                boost::interprocess::offset_ptr<Int32> i = ParameterOffsetCast<Int32>(m_firstFree);
-                *i=boost::lexical_cast<Int32>(val.m_values[ix].m_value.c_str());
+                Write(*ParameterOffsetCast<Int32>(m_firstFree), 
+                      boost::lexical_cast<Int32>(val.m_values[ix].m_value.c_str()));
                 m_firstFree += size;
             }
             catch (boost::bad_lexical_cast &)
@@ -264,8 +273,8 @@ namespace Internal
         {
             try
             {
-                boost::interprocess::offset_ptr<Int64> i = ParameterOffsetCast<Int64>(m_firstFree);
-                *i=boost::lexical_cast<Int64>(val.m_values[ix].m_value.c_str());
+                Write(*ParameterOffsetCast<Int64>(m_firstFree),
+                      boost::lexical_cast<Int64>(val.m_values[ix].m_value.c_str()));
                 m_firstFree += size;
             }
             catch (boost::bad_lexical_cast &)
@@ -284,8 +293,8 @@ namespace Internal
         {
             try
             {
-                boost::interprocess::offset_ptr<Float32> i = ParameterOffsetCast<Float32>(m_firstFree);
-                *i=boost::lexical_cast<Float32>(val.m_values[ix].m_value.c_str());
+                Write(*ParameterOffsetCast<Float32>(m_firstFree), 
+                      boost::lexical_cast<Float32>(val.m_values[ix].m_value.c_str()));
                 m_firstFree += size;
             }
             catch (boost::bad_lexical_cast &)
@@ -304,8 +313,8 @@ namespace Internal
         {
             try
             {
-                boost::interprocess::offset_ptr<Float64> i = ParameterOffsetCast<Float64>(m_firstFree);
-                *i=boost::lexical_cast<Float64>(val.m_values[ix].m_value.c_str());
+                Write (*ParameterOffsetCast<Float64>(m_firstFree),
+                       boost::lexical_cast<Float64>(val.m_values[ix].m_value.c_str()));
                 m_firstFree += size;
             }
             catch (boost::bad_lexical_cast &)
@@ -330,8 +339,7 @@ namespace Internal
                 Error(val, ix, desc.c_str());
 
             }
-            boost::interprocess::offset_ptr<TypeId> i = ParameterOffsetCast<TypeId>(m_firstFree);
-            *i=tid;
+            Write(*ParameterOffsetCast<TypeId>(m_firstFree),tid);
             m_firstFree += size;
         }
     }
@@ -358,7 +366,7 @@ namespace Internal
                 strVal = val.m_values[ix].m_value;
             }
 
-            *ParameterOffsetCast<Int64>(nextString) = hashVal;
+            Write(*ParameterOffsetCast<Int64>(nextString), hashVal);
             strcpy(nextString.get() + sizeof(Int64), strVal.c_str());
             nextString += strVal.size() + 1 + sizeof(Int64);
             m_firstFree += sizeof(ParameterOffset);
@@ -383,7 +391,7 @@ namespace Internal
                 Error(val, ix, "EntityId contains undefined type");
                 throw "No such type";
             }
-            *ParameterOffsetCast<DotsC_EntityId>(nextString) = entityId;
+            Write(*ParameterOffsetCast<DotsC_EntityId>(nextString), entityId);
             strcpy(nextString.get() + sizeof(DotsC_EntityId), instanceIdStr.c_str());
             nextString += instanceIdStr.size() + 1 + sizeof(DotsC_EntityId);
             m_firstFree += sizeof(ParameterOffset);
@@ -469,7 +477,7 @@ namespace Internal
             //            std::wcout << "ABAQ   Writing (index = " << ix << ") " << size << " bytes to address " << (const void*)(writeHere.get()) << std::endl;
             //            std::wcout << "ABAQ      Location in parameter blob = " << (const void *)(m_firstFree.get()) << std::endl;
             //write the size:
-            *ParameterOffsetCast<Size>(writeHere) = size;
+            Write(*ParameterOffsetCast<Size>(writeHere), static_cast<Size>(size));
 
             if (bin.size() != 0)
             {
