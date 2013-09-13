@@ -15,7 +15,9 @@ TODO: Interface changes:
  * backdoor keeper
  * ada-factory
  * tiha.dll
-
+ * crash reporter start/stop
+ * tracer flush
+ * SetProgramName
 
 2013-06-25 version 4.4:
 
