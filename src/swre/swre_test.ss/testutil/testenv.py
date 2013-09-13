@@ -91,7 +91,7 @@ class TestEnv:
                 print("----- dope_main output -----")
                 print(self.Output("dope_main"))
                 print("---- syslog output ----")
-                print(self.syslog.get_data())
+                print(self.syslog.get_data(0))
                 print("----------------------------")
                 print("Will keep waiting")
 
