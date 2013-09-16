@@ -40,7 +40,7 @@
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/RequestTimeoutProperty.h>
 #include <Safir/Dob/NotFoundException.h>
-#include <Safir/SwReports/SwReport.h>
+#include <Safir/Logging/Log.h>
 #include <Safir/Time/TimeProvider.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
@@ -102,16 +102,10 @@ namespace ForEach
         m_debug << "**** Services::OnRevokedRegistration() ****"<<std::endl;
     }
      
-    void Services::OnServiceRequest(
-                                    const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
+    void Services::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
                                     Safir::Dob::ResponseSenderPtr replySender)
     {
         m_debug << "**** Services::OnServiceRequest() ****" << std::endl;
-
-        /*
-          boost::posix_time::ptime pt = Safir::Time::TimeProvider::ToLocalTime(Safir::Time::TimeProvider::GetUtcTime());
-          m_debug << boost::posix_time::to_simple_wstring(pt) << std::endl;
-        */
 
         /* data for an invalid request should not be stored */
         bool errorMessageSent = false;
@@ -154,7 +148,8 @@ namespace ForEach
                 replySender->Send(errorList);
                 errorMessageSent = true;
                 m_debug << "ResponseType is NULL - sending error response" << std::endl;
-                Safir::SwReports::SendProgramInfoReport(L"ResponseType is NULL - sending error response");
+                Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                              L"ResponseType in Delete request is NULL - sending error response");
             }
             else
             {
@@ -190,7 +185,8 @@ namespace ForEach
                        send out response manually */
                     if (requestSpecificData->NumberOfObjects() == 0)
                     {
-                        Safir::SwReports::SendProgramInfoReport(L"Operating on 0 objects, i.e. NULL operation. Sending empty response.");
+                        Safir::Logging::SendSystemLog(Safir::Logging::Informational,
+                                                      L"Delete reuest on 0 objects! Sending empty response.");
                         // save response type
                         requestSpecificData->ResponseType() = deleteService->ResponseType().GetVal();
                         SendEmptyResponse(requestSpecificData, replySender);
@@ -246,13 +242,15 @@ namespace ForEach
                 replySender->Send(errorList);
                 errorMessageSent = true;
                 m_debug << "ResponseType is NULL - sending error response" << std::endl;
-                Safir::SwReports::SendProgramInfoReport(L"ResponseType is NULL - sending error response");
+                Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                                              L"ResponseType in DeleteAll request is NULL - sending error response");
             }
             else if (deleteAllService->TypeId().IsNull())
             {
                 /* handle case of no typeId is specifed. Normal reponse handling in OnResponse() will not be applicable.
                    send out response manually */
-                Safir::SwReports::SendProgramInfoReport(L"No typeId specified. Sending empty response.");
+                Safir::Logging::SendSystemLog(Safir::Logging::Informational,
+                                              L"No typeId specified in DeleteAll request. Sending empty response.");
                 // save response type
                 requestSpecificData->ResponseType() = deleteAllService->ResponseType().GetVal();
                 SendEmptyResponse(requestSpecificData, replySender);
@@ -313,7 +311,8 @@ namespace ForEach
                    send out response manually */
                 if (requestSpecificData->NumberOfObjects() == 0)
                 {
-                    Safir::SwReports::SendProgramInfoReport(L"Operating on 0 objects, i.e. NULL operation. Sending empty response.");
+                    Safir::Logging::SendSystemLog(Safir::Logging::Informational,
+                                                  L"DeleteAll request operating on 0 objects. Sending empty response.");
                     // save response type
                     requestSpecificData->ResponseType() = deleteAllService->ResponseType().GetVal();
                     SendEmptyResponse(requestSpecificData, replySender);
@@ -373,7 +372,8 @@ namespace ForEach
             else if (updateService->TemplateEntityRequest().IsNull())
             {
                 m_debug << "TemplateEntityRequest is NULL - handling as an error!" << std::endl;
-                Safir::SwReports::SendProgramInfoReport(L"TemplateEntityRequest is NULL");
+                Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                              L"TemplateEntityRequest in UpdateRequest is NULL!");
 
                 error -> Code().SetVal(Safir::Dob::ResponseGeneralErrorCodes::SafirNullMember());
                 error -> Member().SetVal(Safir::Utilities::ForEach::UpdateRequest::TemplateEntityRequestMemberIndex());
@@ -414,7 +414,8 @@ namespace ForEach
                 /* if request on an empty array of object ids */
                 if (requestSpecificData->NumberOfObjects() == 0)
                 {
-                    Safir::SwReports::SendProgramInfoReport(L"Operating on 0 objects, i.e. NULL operation. Sending empty response.");
+                    Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                                  L"UpdateRequest Operating on 0 objects! Sending empty response.");
                     SendEmptyResponse(requestSpecificData, replySender);
                     return;
                 }
