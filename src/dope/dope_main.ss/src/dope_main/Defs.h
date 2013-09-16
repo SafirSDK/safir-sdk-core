@@ -31,5 +31,13 @@
 typedef std::set<Safir::Dob::Typesystem::TypeId> TypeIdSet;
 typedef std::set<Safir::Dob::Typesystem::EntityId> EntityIdSet;
 
+
+class StartupError
+    : public std::logic_error 
+{
+public:
+    StartupError() : std::logic_error("StartupError") {}
+};
+
 #endif
 
