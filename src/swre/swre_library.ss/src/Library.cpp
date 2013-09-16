@@ -413,7 +413,8 @@ namespace Internal
 
                     std::wcout << L"Tracer Ping reply" << std::endl;
 
-                    SendProgramInfoReport(L"Tracer Ping reply");
+                    Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                                  L"Tracer Ping reply");
 
                     return; // *** RETURN ***
                 }
@@ -423,8 +424,8 @@ namespace Internal
 
                     std::wcout << help << std::endl;
 
-                    SendProgramInfoReport(help);
-
+                    Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                                  help);
                     return; // *** RETURN ***
                 }
             }
