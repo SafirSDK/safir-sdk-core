@@ -33,7 +33,7 @@
 #include <boost/noncopyable.hpp>
 
 /**
- * Abstract base class for all persistence backends.
+ * Abstract base class for all persistance backends.
  */
 class PersistenceHandler :
     public Safir::Dob::EntitySubscriber,
@@ -99,7 +99,7 @@ private:
 
     void HandleEntity(const Safir::Dob::EntityProxy & entityProxy, const bool update);
 
-    //This is set up by the constructor of the persistence handler
+    //This is set up by the constructor of the persistance handler
     //and can be used in any way by the derived class.
     //It should be cleared after allocation though...
     //It is used by the StartSubscriptions call to know which classes to subscribe to.

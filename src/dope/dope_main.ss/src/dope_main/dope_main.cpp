@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 #include "DopeApp.h"
-#include <Safir/Logging/Log.h>
+#include <Safir/SwReports/SwReport.h>
 #include <Safir/Application/CrashReporter.h>
 
 int main()
@@ -33,24 +33,22 @@ int main()
     {
         DopeApp app;
         app.Run();
-        return 0;
     }
-    catch (const StartupError& e)
+    catch (const std::exception & e)
     {
-        //errors should already have been reported
-    }
-    catch (const std::exception& e)
-    {
-        Safir::Logging::SendSystemLog(Safir::Logging::Critical,
-                                      L"Unhandled exception in main: " +
-                                      Safir::Dob::Typesystem::Utilities::ToWstring(e.what()));
+        Safir::SwReports::SendFatalErrorReport(L"UnhandledException",
+                                               L"main",
+                                               Safir::Dob::Typesystem::Utilities::ToWstring(e.what()));
     }
     catch (...)
     {
-        Safir::Logging::SendSystemLog(Safir::Logging::Critical,
-                                      L"Unhandled '...' exception in main");
+        Safir::SwReports::SendFatalErrorReport(L"UnhandledException",
+                                               L"main",
+                                               L"A ... exception occurred somewhere in Dope. "
+                                               L"Since it was not an exception derived from std::exception "
+                                               L"I can't provide any more information, sorry.");
     }
 
-    return 1;
+    return 0;
 }
 

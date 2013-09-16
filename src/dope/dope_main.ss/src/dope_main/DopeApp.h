@@ -34,7 +34,6 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <Safir/Utilities/AsioDispatcher.h>
-#include <stdexcept>
 
 class DopeApp :
     public Safir::Dob::StopHandler,
@@ -106,7 +105,7 @@ private:
     */
     void ConnectionThread();
     //Handler when ok to connect for applications.
-    void SignalOkToConnect(bool ok);
+    void SignalOkToConnect();
     
     boost::asio::io_service m_ioService;
     boost::thread m_thread;
