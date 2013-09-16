@@ -23,7 +23,7 @@
 ******************************************************************************/
 #include "app.h"
 #include <Safir/Dob/Typesystem/Exceptions.h>
-#include <Safir/SwReports/SwReport.h>
+#include <Safir/Logging/Log.h>
 #include <Safir/Application/CrashReporter.h>
 
 int main(int argc, char *argv[])
@@ -44,11 +44,17 @@ int main(int argc, char *argv[])
     catch (const std::exception & e)
     {
         std::string str(e.what());
-        Safir::SwReports::SendFatalErrorReport(L"0",L"main", Safir::Dob::Typesystem::Utilities::ToWstring(str));
+        Safir::Logging::SendSystemLog(
+                    Safir::Logging::Critical,
+                    L"Unexpected exception " +
+                    Safir::Dob::Typesystem::Utilities::ToWstring(str) +
+                    L" in VehicleMmiCppQt");
     }
     catch (...)
     {
-        Safir::SwReports::SendFatalErrorReport(L"0",L"main", L"Unhandled Exception");
+        Safir::Logging::SendSystemLog(
+                    Safir::Logging::Critical,
+                    L"catch(...) exception in VehicleMmiCppQt");
     }
     return 1;
 }
