@@ -121,7 +121,7 @@ package body Safir.Sw_Reports.Sw_Report is
                                                   C_Location   : in     Interfaces.C.char_array;
                                                   C_Text       : in     Interfaces.C.char_array;
                                                   C_Success    :    out C.char);
-      pragma Import (C, SwreC_SendProgrammingErrorReport, "SwreC_SendErrorReport");
+      pragma Import (C, SwreC_SendProgrammingErrorReport, "SwreC_SendProgrammingErrorReport");
 
       L_Success : C.char;
    begin
