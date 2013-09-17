@@ -543,8 +543,10 @@ namespace Internal
                                 const bool          allocated,
                                 const std::wstring& text)
     {
-        Safir::Logging::SendSystemLog(Safir::Logging::Warning,
-                                      L"Resource" + resourceId + L" is " + ((allocated) ? L"" : L"not ") + L"allocated" + L"|" + text);
+        Safir::Logging::SendSystemLog(allocated ? Safir::Logging::Informational : Safir::Logging::Error,
+                                      L"Resource " + resourceId + L" is " 
+                                      + ((allocated) ? L"" : L"not ") 
+                                      + L"allocated" + L"|" + text);
     }
 
     void
