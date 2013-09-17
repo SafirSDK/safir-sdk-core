@@ -58,7 +58,7 @@ namespace Safir
                                          String message)
         {
             LoggingC_SendSystemLog((System.Int32)severity,
-                                   Encoding.UTF8.GetBytes(message));
+                                   Encoding.UTF8.GetBytes(message + char.MinValue));
         }
 
 

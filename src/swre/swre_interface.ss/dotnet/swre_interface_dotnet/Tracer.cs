@@ -49,7 +49,7 @@ namespace Safir.Application
         {
             byte success;
             Library.SwreC_SetProgramName(System.Text.Encoding.UTF8.GetBytes
-                                         (System.Diagnostics.Process.GetCurrentProcess().ProcessName),
+                                         (System.Diagnostics.Process.GetCurrentProcess().ProcessName) + char.MinValue,
                                          out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
@@ -58,8 +58,8 @@ namespace Safir.Application
 
             Safir.Dob.ConnectionAspectMisc misc = new Safir.Dob.ConnectionAspectMisc(connection);
 
-            Library.SwreC_StartTraceBackdoor(System.Text.Encoding.UTF8.GetBytes(misc.GetConnectionNameCommonPart()),
-                                             System.Text.Encoding.UTF8.GetBytes(misc.GetConnectionNameInstancePart()),
+            Library.SwreC_StartTraceBackdoor(System.Text.Encoding.UTF8.GetBytes(misc.GetConnectionNameCommonPart() + char.MinValue),
+                                             System.Text.Encoding.UTF8.GetBytes(misc.GetConnectionNameInstancePart() + char.MinValue),
                                              out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
@@ -562,7 +562,7 @@ namespace Safir.Application
         {
             byte success;
             
-            Library.SwreC_TracePrefixAdd(System.Text.Encoding.UTF8.GetBytes(m_prefix), out m_prefixId, out success);
+            Library.SwreC_TracePrefixAdd(System.Text.Encoding.UTF8.GetBytes(m_prefix + char.MinValue), out m_prefixId, out success);
 
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {

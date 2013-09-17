@@ -96,9 +96,9 @@ namespace Safir.SwReports
                                                 string text)
         {
             byte success;
-            Library.SwreC_SendFatalErrorReport(Encoding.UTF8.GetBytes(errorCode),
-                                               Encoding.UTF8.GetBytes(location),
-                                               Encoding.UTF8.GetBytes(text),
+            Library.SwreC_SendFatalErrorReport(Encoding.UTF8.GetBytes(errorCode + char.MinValue),
+                                               Encoding.UTF8.GetBytes(location + char.MinValue),
+                                               Encoding.UTF8.GetBytes(text + char.MinValue),
                                                out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
@@ -119,9 +119,9 @@ namespace Safir.SwReports
                                            string text)
         {
             byte success;
-            Library.SwreC_SendErrorReport(Encoding.UTF8.GetBytes(errorCode),
-                                          Encoding.UTF8.GetBytes(location),
-                                          Encoding.UTF8.GetBytes(text),
+            Library.SwreC_SendErrorReport(Encoding.UTF8.GetBytes(errorCode + char.MinValue),
+                                          Encoding.UTF8.GetBytes(location + char.MinValue),
+                                          Encoding.UTF8.GetBytes(text + char.MinValue),
                                           out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
@@ -144,9 +144,9 @@ namespace Safir.SwReports
                                               string text)
         {
             byte success;
-            Library.SwreC_SendResourceReport(Encoding.UTF8.GetBytes(resourceId),
+            Library.SwreC_SendResourceReport(Encoding.UTF8.GetBytes(resourceId + char.MinValue),
                                              Safir.Dob.Typesystem.Internal.InternalOperations.ByteOf(allocated),
-                                             Encoding.UTF8.GetBytes(text),
+                                             Encoding.UTF8.GetBytes(text + char.MinValue),
                                              out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
@@ -169,9 +169,9 @@ namespace Safir.SwReports
                                                       string text)
         {
             byte success;
-            Library.SwreC_SendProgrammingErrorReport(Encoding.UTF8.GetBytes(errorCode),
-                                                     Encoding.UTF8.GetBytes(location),
-                                                     Encoding.UTF8.GetBytes(text),
+            Library.SwreC_SendProgrammingErrorReport(Encoding.UTF8.GetBytes(errorCode + char.MinValue),
+                                                     Encoding.UTF8.GetBytes(location + char.MinValue),
+                                                     Encoding.UTF8.GetBytes(text + char.MinValue),
                                                      out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
@@ -189,7 +189,7 @@ namespace Safir.SwReports
         public static void SendProgramInfoReport(string text)
         {
             byte success;
-            Library.SwreC_SendProgramInfoReport(Encoding.UTF8.GetBytes(text),
+            Library.SwreC_SendProgramInfoReport(Encoding.UTF8.GetBytes(text + char.MinValue),
                                                 out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
