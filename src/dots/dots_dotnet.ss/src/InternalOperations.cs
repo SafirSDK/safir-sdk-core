@@ -109,12 +109,13 @@ namespace Safir.Dob.Typesystem.Internal
         /// <returns>UTF-8 encoded CString.</returns>
         public static System.IntPtr CStringOf(string s)
         {
-            byte[] utf8Bytes=System.Text.Encoding.UTF8.GetBytes(s + char.MinValue);
-            System.IntPtr p=Marshal.AllocHGlobal(utf8Bytes.Length);
+            byte[] utf8Bytes=System.Text.Encoding.UTF8.GetBytes(s);
+            System.IntPtr p=Marshal.AllocHGlobal(utf8Bytes.Length+1); //one extra for '\0'
             for (int i=0; i<utf8Bytes.Length; i++)
             {
                 Marshal.WriteByte(p, i, utf8Bytes[i]);
             }
+            Marshal.WriteByte(p, utf8Bytes.Length, 0); //add '\0'
             return p;
         }
 
