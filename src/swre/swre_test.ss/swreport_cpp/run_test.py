@@ -88,7 +88,7 @@ if stdout_output.count(u"Resource ResourceReport is allocated") != 0 or syslog_o
 if stdout_output.count(u"Resource ResourceReport is not allocated") != 3 or syslog_output.count(u"Resource ResourceReport is not allocated") != 3:
     fail("Resource ResourceReport is not allocated")
 
-if stdout_output.count(u"SendProgrammingErrorReport") != 3 or syslog_output.count(u"SendProgrammingErrorReport") != 3:
+if stdout_output.count(u"CRITICAL: ProgrammingError ProgrammingError|everywhere|Testing SendProgrammingErrorReport") != 3 or syslog_output.count(u"ProgrammingError ProgrammingError|everywhere|Testing SendProgrammingErrorReport") != 3:
     fail("SendProgrammingErrorReport")
 
 if stdout_output.count(u"SendProgramInfoReport") != 0 or syslog_output.count(u"SendProgramInfoReport") != 3:

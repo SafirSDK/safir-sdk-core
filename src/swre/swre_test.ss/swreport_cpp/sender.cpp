@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2011 (http://www.safirsdk.com)
+* Copyright Saab AB, 2013 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagstrom
+* Created by: Lars Hagstrom / lars.hagstrom@consoden.se
 *
 *******************************************************************************
 *
