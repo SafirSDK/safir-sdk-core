@@ -49,7 +49,7 @@ namespace Safir.Application
         {
             byte success;
             Library.SwreC_SetProgramName(System.Text.Encoding.UTF8.GetBytes
-                                         (System.Diagnostics.Process.GetCurrentProcess().ProcessName) + char.MinValue,
+                                         (System.Diagnostics.Process.GetCurrentProcess().ProcessName + char.MinValue),
                                          out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
