@@ -52,7 +52,7 @@ sender_cmd = ("java",
               "-cp", 
               os.path.join(SAFIR_RUNTIME, "bin", "swre_application_java.jar") +
               os.pathsep +
-              "swre_test_java.jar",
+              "tracer_sender_java.jar",
               "Sender")
 
 syslog = syslog_server.SyslogServer()
