@@ -17,10 +17,12 @@ add_subdirectory(swreport_dotnet)
 
 if (SAFIR_ADA_SUPPORT)
    add_subdirectory(tracer_ada)
+   add_subdirectory(swreport_ada)
 endif()
 
 if (SAFIR_JAVA_SUPPORT)
    add_subdirectory(tracer_java)
+   add_subdirectory(swreport_java)
 endif()
 
 #add_subdirectory(stop_orders_at_exit)
