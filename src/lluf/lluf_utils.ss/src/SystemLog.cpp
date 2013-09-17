@@ -157,34 +157,45 @@ public:
     void Send(const SystemLog::Severity severity,
               const std::wstring& text)
     {
+        std::wstring textAscii = text;
+        //replace non-ascii chars
+        for(std::wstring::iterator it = textAscii.begin();
+            it != textAscii.end(); ++it)
+        {
+            if ((*it & ~0x7F) != 0)
+            {
+                *it = L'@';
+            }
+        }
+
         switch (severity)
         {
             // fatal errors are written to std::wcerr
             case SystemLog::Emergency:
             {
-                std::wcerr << L"EMERGENCY: " << text << std::endl;
-                lllog(0) << L"EMERGENCY: " << text << std::endl;
+                std::wcerr << L"EMERGENCY: " << textAscii << std::endl;
+                lllog(0) << L"EMERGENCY: " << textAscii << std::endl;
             }
             break;
 
             case SystemLog::Alert:
             {
-                std::wcerr << L"ALERT: " << text << std::endl;
-                lllog(0) << L"ALERT: " << text << std::endl;
+                std::wcerr << L"ALERT: " << textAscii << std::endl;
+                lllog(0) << L"ALERT: " << textAscii << std::endl;
             }
             break;
 
             case SystemLog::Critical:
             {
-                std::wcerr << L"CRITICAL: " << text << std::endl;
-                lllog(0) << L"CRITICAL: " << text << std::endl;
+                std::wcerr << L"CRITICAL: " << textAscii << std::endl;
+                lllog(0) << L"CRITICAL: " << textAscii << std::endl;
             }
             break;
 
             case SystemLog::Error:
             {
-                std::wcerr << L"ERROR: " << text << std::endl;
-                lllog(0) << L"ERROR: " << text << std::endl;
+                std::wcerr << L"ERROR: " << textAscii << std::endl;
+                lllog(0) << L"ERROR: " << textAscii << std::endl;
             }
             break;
 
