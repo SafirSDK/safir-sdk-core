@@ -73,10 +73,10 @@ def fail(message):
 if stdout_output.count("\n") != 18 or syslog_output.count("\n") != 24:
     fail("lines")
 
-if stdout_output.count(u"SendFatalErrorReport") != 3 or syslog_output.count(u"SendFatalErrorReport") != 3:
+if stdout_output.count(u"CRITICAL: FatalError FatalError|here|Testing SendFatalErrorReport") != 3 or syslog_output.count(u"FatalError FatalError|here|Testing SendFatalErrorReport") != 3:
     fail("SendFatalErrorReport")
 
-if stdout_output.count(u"SendErrorReport") != 3 or syslog_output.count(u"SendErrorReport") != 3:
+if stdout_output.count(u"ERROR: Error Error|there|Testing SendErrorReport") != 3 or syslog_output.count(u"Error Error|there|Testing SendErrorReport") != 3:
     fail("SendErrorReport")
 
 if stdout_output.count(u"SendResourceReport") != 3 or syslog_output.count(u"SendResourceReport") != 6:
