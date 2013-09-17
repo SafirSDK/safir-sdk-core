@@ -219,7 +219,6 @@ namespace Safir.Application
                     // Get help text from subclass implementator.
                     Safir.Logging.SendSystemLog(Safir.Logging.Severity.Debug,
                                                 m_backdoor.GetHelpText());
-                    Safir.SwReports.SwReport.SendProgramInfoReport("asdf");
 
                     return; // *** RETURN ***
                 }
