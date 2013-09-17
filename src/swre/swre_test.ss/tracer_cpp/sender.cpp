@@ -22,9 +22,6 @@
 *
 ******************************************************************************/
 #include <Safir/Application/Tracer.h>
-#include <Safir/Dob/Typesystem/Utilities.h>
-#include <boost/thread.hpp>
-#include <iostream>
 
 //disable stupid incorrect microsoft warning.
 #ifdef _MSC_VER
