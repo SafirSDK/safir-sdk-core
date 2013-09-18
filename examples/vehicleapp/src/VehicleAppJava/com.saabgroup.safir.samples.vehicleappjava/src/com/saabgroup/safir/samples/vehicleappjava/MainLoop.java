@@ -24,7 +24,7 @@ package com.saabgroup.safir.samples.vehicleappjava;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.saabgroup.safir.swreports.SwReport;
+import com.saabgroup.safir.Logging;
 
 
 public class MainLoop implements IMainLoop {
@@ -60,9 +60,14 @@ public class MainLoop implements IMainLoop {
                 IMainLoop.Callback method = methods.take();
                 method.onInvoke();
             } catch (InterruptedException e) {
-                SwReport.SendErrorReport("Error when taking method to from the queue", "Safir.Application", "com.saabgroup.safir.application.MainLoopImpl");
+                com.saabgroup.safir.Logging.sendSystemLog
+                    (com.saabgroup.safir.Logging.Severity.ERROR,
+                     "Error in MainLoop when taking method from the queue");
+
             } catch (Exception e) {
-                SwReport.SendErrorReport("Unhandled exception when invoking method", "Safir.Application",  e.getMessage());
+                com.saabgroup.safir.Logging.sendSystemLog
+                    (com.saabgroup.safir.Logging.Severity.CRITICAL,
+                     "Unhandled exception in MainLoop when invoking method. " + e.getMessage());
             }
         }
     }
@@ -92,7 +97,9 @@ public class MainLoop implements IMainLoop {
         try {
             methods.put(callback);
         } catch (InterruptedException e) {
-            SwReport.SendErrorReport("Error when adding method to the queue", "Safir.Application", "com.saabgroup.safir.application.MainLoopImpl");
+           com.saabgroup.safir.Logging.sendSystemLog
+               (com.saabgroup.safir.Logging.Severity.ERROR,
+                "Error in MainLoop when adding method to the queue ");
         }
     }
     
