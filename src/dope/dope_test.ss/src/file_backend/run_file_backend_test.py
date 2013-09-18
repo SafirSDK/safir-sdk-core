@@ -25,13 +25,11 @@
 ###############################################################################
 from __future__ import print_function
 import subprocess, os, time, sys, shutil, glob
+from testenv import TestEnv, TestEnvStopper
 
 def log(data):
     print(data)
     sys.stdout.flush()
-
-sys.path.append("../../../../swre/swre_test.ss/testutil")
-from testenv import TestEnv, TestEnvStopper
 
 def remove(filename):
     for i in range (10):

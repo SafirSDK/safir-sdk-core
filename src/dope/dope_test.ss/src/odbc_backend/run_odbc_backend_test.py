@@ -23,10 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-#import subprocess, os, time, sys, shutil, glob, xml.dom.minidom
 import sys, os, shutil, xml.dom.minidom, glob, time, subprocess, re
-
-sys.path.append("../../../../swre/swre_test.ss/testutil")
 from testenv import TestEnv, TestEnvStopper
 
 def rmdir(directory):
