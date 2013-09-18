@@ -165,7 +165,6 @@ namespace VehicleAppCs
                 String msg = e.Message + " " + e.InnerException + " " + e.StackTrace;
                 Safir.Logging.SendSystemLog(Safir.Logging.Severity.Critical,
                                             "Unhandled Exception in OnDoDispatch: " + msg);
-                Console.WriteLine(msg);
             }
         }
     }
