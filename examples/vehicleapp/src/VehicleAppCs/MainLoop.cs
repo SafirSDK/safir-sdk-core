@@ -82,9 +82,8 @@ namespace VehicleAppCs
                         String msg = e.Message + " " + e.InnerException + " " + e.StackTrace;
 
                         // Send event
-                        Safir.SwReports.SwReport.SendFatalErrorReport(
-                            "Unhandled Exception", "Safir.Application.MainLoop", msg );
-                        Console.WriteLine( msg );
+                        Safir.Logging.SendSystemLog(Safir.Logging.Severity.Critical,
+                                                    "Unhandled Exception in MainLoop: " + msg);
 
                         // Terminate the application
                         //Instances.SelfInstance.MainModule.FatalError();
