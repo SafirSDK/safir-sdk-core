@@ -79,18 +79,29 @@ class SyslogServer(SocketServer.UDPServer):
         #set up some variables that the handler can use
         self.is_timed_out = False
         self.buf = None
+        self.stopped = False
 
     def handle_timeout(self):
         self.is_timed_out = True
 
     def get_data(self, timeout):
         self.buf = str()
-        self.timeout = timeout
-        self.is_timed_out = False
-        while not self.is_timed_out:
-            self.handle_request()
+
+        if not self.stopped:
+            self.timeout = timeout
+            self.is_timed_out = False
+            while not self.is_timed_out:
+                self.handle_request()
 
         return self.buf
+
+    def stop(self, timeout = 0.5):
+        """timeout can be used to collect data for a while before stopping the
+        syslog server. Uncollected data will be returned"""
+        data = self.get_data(timeout)
+        self.server_close()
+        self.stopped = True
+        return data
         
 if __name__ == "__main__":
     try:
