@@ -96,11 +96,7 @@ public class MainLoop implements IMainLoop {
     public void invokeLater(IMainLoop.Callback callback) {
         try {
             methods.put(callback);
-        } catch (InterruptedException e) {
-           com.saabgroup.safir.Logging.sendSystemLog
-               (com.saabgroup.safir.Logging.Severity.ERROR,
-                "Error in MainLoop when adding method to the queue ");
-        }
+        } catch (InterruptedException e) {}
     }
     
     /*
