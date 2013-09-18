@@ -93,8 +93,8 @@ namespace VehicleMmiCsWinForms
             catch (Exception e)
             {
                 String msg = e.Message + " " + e.InnerException + " " + e.StackTrace;
-                Safir.SwReports.SwReport.SendFatalErrorReport("Unhandled Exception", "Main", msg);
-                Console.WriteLine(msg);           
+                Safir.Logging.SendSystemLog(Safir.Logging.Severity.Critical,
+                                            "Unhandled Exception in Main: " + msg);
             }
             finally
             {
@@ -153,8 +153,8 @@ namespace VehicleMmiCsWinForms
             catch (Exception e)
             {
                 String msg = e.Message + " " + e.InnerException + " " + e.StackTrace;
-                Safir.SwReports.SwReport.SendFatalErrorReport("Unhandled Exception", "OnDoDispatch", msg);
-                Console.WriteLine(msg);
+                Safir.Logging.SendSystemLog(Safir.Logging.Severity.Critical,
+                                            "Unhandled Exception in OnDoDispatch: " + msg);
             }
         }
     }
