@@ -35,7 +35,7 @@ endif()
 TARGET_LINK_LIBRARIES(VehicleAppDb ${ODBC_LIBRARIES})
   
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(VehicleAppDb olib swre_interface_cpp dose_cpp dots_generated-Capabilities-cpp dots_generated-Safir-cpp dots_cpp lluf_utils)
+  TARGET_LINK_LIBRARIES(VehicleAppDb olib swre_interface_cpp dose_cpp dots_generated-Capabilities-cpp dots_generated-Safir-cpp dots_cpp lluf_utils logging_cpp)
 endif()
   
 INSTALL(TARGETS VehicleAppDb
