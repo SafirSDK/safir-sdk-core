@@ -37,35 +37,35 @@ public class Sender {
 
         com.saabgroup.safir.Logging.sendSystemLog
             (com.saabgroup.safir.Logging.Severity.EMERGENCY,
-             "This is an emergency log!");
+             "This is an emergency log. Bryn\u00e4s \u00e4r b\u00e4st!\u2620");
 
         com.saabgroup.safir.Logging.sendSystemLog
             (com.saabgroup.safir.Logging.Severity.ALERT,
-             "This is an alert log!");
+             "This is an alert log");
 
         com.saabgroup.safir.Logging.sendSystemLog
             (com.saabgroup.safir.Logging.Severity.CRITICAL,
-             "This is a critical log!");
+             "This is a critical log");
 
         com.saabgroup.safir.Logging.sendSystemLog
             (com.saabgroup.safir.Logging.Severity.ERROR,
-             "This is an error log!");
+             "This is an error log");
 
         com.saabgroup.safir.Logging.sendSystemLog
             (com.saabgroup.safir.Logging.Severity.WARNING,
-             "This is a warning log!");
+             "This is a warning log");
 
         com.saabgroup.safir.Logging.sendSystemLog
             (com.saabgroup.safir.Logging.Severity.NOTICE,
-             "This is a notice log!");
+             "This is a notice log");
 
         com.saabgroup.safir.Logging.sendSystemLog
             (com.saabgroup.safir.Logging.Severity.INFORMATIONAL,
-             "This is an informational log!");
+             "This is an informational log");
 
         com.saabgroup.safir.Logging.sendSystemLog
             (com.saabgroup.safir.Logging.Severity.DEBUG,
-             "This is a debug log!");
+             "This is a debug log");
 
     }
 }
