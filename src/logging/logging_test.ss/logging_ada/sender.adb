@@ -28,7 +28,7 @@ pragma Wide_Character_Encoding (UTF8);
 procedure Sender is
 begin
    Safir.Logging.Send_System_Log (Severity => Safir.Logging.Emergency,
-                                  Message => "This is an emergency log!");
+                                  Message => "This is an emergency log! Bryn" & Wide_Character'Val (16#00e4#) & "s " & Wide_Character'Val (16#00e4#) & "r b" & Wide_Character'Val (16#00e4#) & "st!" &  Wide_Character'Val (16#2620#));
    Safir.Logging.Send_System_Log (Severity => Safir.Logging.Alert,
                                   Message => "This is an alert log!");
    Safir.Logging.Send_System_Log (Severity => Safir.Logging.Critical,
