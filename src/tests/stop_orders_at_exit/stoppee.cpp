@@ -25,17 +25,7 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/NotOpenException.h>
 #include <boost/lexical_cast.hpp>
-
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4244)
-#endif
-
-#include <boost/thread.hpp>
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
+#include <iostream>
 
 class App
     : public Safir::Dob::StopHandler
