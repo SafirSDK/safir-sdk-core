@@ -137,7 +137,7 @@ syslog_output = syslog.get_data(1)
 if stdout_output.count("\n") != 6 or syslog_output.count("\n") != 6:
     fail("Razor lines")
 
-if stdout_output.count("Razor: ") != 6 or syslog_output.count("Razor: ") != 6:
+if stdout_output.count(u"Razor: ") != 6 or syslog_output.count(u"Razor: ") != 6:
     fail("Razor")
 
 
@@ -149,7 +149,7 @@ syslog_output = syslog.get_data(1)
 if stdout_output.count("\n") != 6 or syslog_output.count("\n") != 6:
     fail("Rymd-Borje lines")
 
-if stdout_output.count("Rymd-B@rje: ") != 6 or syslog_output.count("Rymd-Börje: ") != 6:
+if stdout_output.count(u"Rymd-B@rje: ") != 6 or syslog_output.count(u"Rymd-Börje: ") != 6:
     fail("Rymd-Borje")
 
 print("success")
