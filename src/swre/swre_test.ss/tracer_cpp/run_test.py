@@ -51,7 +51,7 @@ if sys.platform == "win32":
 else:
     exe_path = "."
     
-sender_path = os.path.join(exe_path,"tracer_sender")
+sender_path = os.path.join(exe_path,"tracer_sender_cpp")
 
 syslog = syslog_server.SyslogServer()
 
