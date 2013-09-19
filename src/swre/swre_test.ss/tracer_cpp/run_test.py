@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2011 (http://www.safirsdk.com)
+# Copyright Saab AB, 2013 (http://www.safirsdk.com)
 #
-# Created by: Lars Hagstrom (lars@foldspace.nu)
+# Created by: Lars Hagström / lars.hagstrom@consoden.se
 #
 ###############################################################################
 #

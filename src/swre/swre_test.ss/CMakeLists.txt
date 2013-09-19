@@ -26,5 +26,3 @@ if (SAFIR_JAVA_SUPPORT)
    add_subdirectory(tracer_java)
    add_subdirectory(swreport_java)
 endif()
-
-#add_subdirectory(stop_orders_at_exit)
