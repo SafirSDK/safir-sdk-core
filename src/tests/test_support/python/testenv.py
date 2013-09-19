@@ -159,6 +159,18 @@ class TestEnv:
             pass
         return "\n".join(output) + "\n"
 
+    def WaitForOutput(self, name, expected_output):
+        while True:
+            output = self.Output(name)
+            if output.find(expected_output) != -1:
+                return output
+            time.sleep(1)
+
+
+    def ResetOutput(self, name):
+        (proc,queue,output) = self.__procs[name]
+        del output[:] #clear the list
+        
     def ReturnCodesOk(self):
         ok = True
         for name, (proc,queue,output) in self.__procs.items():
