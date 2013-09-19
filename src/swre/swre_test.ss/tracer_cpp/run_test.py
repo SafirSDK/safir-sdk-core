@@ -55,9 +55,9 @@ sender_path = os.path.join(exe_path,"tracer_sender_cpp")
 
 syslog = syslog_server.SyslogServer()
 
-o1 = subprocess.check_output(sender_path)
-o2 = subprocess.check_output(sender_path)
-o3 = subprocess.check_output(sender_path)
+o1 = subprocess.check_output((sender_path, "enable"))
+o2 = subprocess.check_output((sender_path, "enable"))
+o3 = subprocess.check_output((sender_path, "enable"))
 
 stdout_output = (o1 + o2 + o3).decode("utf-8").replace("\r","")
 syslog_output = syslog.get_data(1)
@@ -111,7 +111,46 @@ if stdout_output.count(u"interrobang: @\n") != 3 or syslog_output.count(u"interr
 
 if stdout_output.count(u"@reversed\n") != 3 or syslog_output.count(u"\u202ereversed\n") != 3:
     fail("reversed")
-    
+
+
+#check that there is no output when we don't "enable"
+stdout_output = subprocess.check_output(sender_path).decode("utf-8").replace("\r","")
+syslog_output = syslog.get_data(1)
+
+if stdout_output.count("\n") != 0 or syslog_output.count("\n") != 0:
+    fail("empty")
+
+#check that FORCE_LOG all works    
+os.environ["FORCE_LOG"] = "all"
+stdout_output = subprocess.check_output(sender_path).decode("utf-8").replace("\r","")
+syslog_output = syslog.get_data(1)
+
+if stdout_output.count("\n") != 12 or syslog_output.count("\n") != 12:
+    fail("all lines")
+
+#check that FORCE_LOG works
+os.environ["FORCE_LOG"] = "Razor"
+#check that there is no output when we don't "enable"
+stdout_output = subprocess.check_output(sender_path).decode("utf-8").replace("\r","")
+syslog_output = syslog.get_data(1)
+
+if stdout_output.count("\n") != 6 or syslog_output.count("\n") != 6:
+    fail("Razor lines")
+
+if stdout_output.count("Razor: ") != 6 or syslog_output.count("Razor: ") != 6:
+    fail("Razor")
+
+
+#check that FORCE_LOG can take non-ascii characters.
+os.environ["FORCE_LOG"] = "Rymd-Börje"
+stdout_output = subprocess.check_output(sender_path).decode("utf-8").replace("\r","")
+syslog_output = syslog.get_data(1)
+
+if stdout_output.count("\n") != 6 or syslog_output.count("\n") != 6:
+    fail("Rymd-Borje lines")
+
+if stdout_output.count("Rymd-B@rje: ") != 6 or syslog_output.count("Rymd-Börje: ") != 6:
+    fail("Rymd-Borje")
 
 print("success")
 sys.exit(0)

@@ -28,12 +28,21 @@
 #pragma warning (disable : 4428)
 #endif
 
-int main()
+int main(int argc, char ** argv)
 {
+    bool enable = false;
+    if (argc == 2 && std::string(argv[1]) == "enable")
+    {
+        enable = true;
+    }
+
     Safir::Application::Tracer razor(L"Razor");
     Safir::Application::Tracer rb(L"Rymd-B\u00f6rje"); //ö
-    razor.Enable(true);
-    rb.Enable(true);
+    if (enable)
+    {
+        razor.Enable(true);
+        rb.Enable(true);
+    }
     rb << L"blahonga" << std::endl;
     rb << L"blahong\u00aea" << std::endl; //registered sign
     rb << L"blahonga\u00e5\u00e4\u00f6" << std::endl; //åäö
