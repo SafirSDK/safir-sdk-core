@@ -28,21 +28,21 @@ pragma Wide_Character_Encoding (UTF8);
 procedure Sender is
 begin
    Safir.Logging.Send_System_Log (Severity => Safir.Logging.Emergency,
-                                  Message => "This is an emergency log! Bryn" & Wide_Character'Val (16#00e4#) & "s " & Wide_Character'Val (16#00e4#) & "r b" & Wide_Character'Val (16#00e4#) & "st!" &  Wide_Character'Val (16#2620#));
+                                  Message => "This is an emergency log. Bryn" & Wide_Character'Val (16#00e4#) & "s " & Wide_Character'Val (16#00e4#) & "r b" & Wide_Character'Val (16#00e4#) & "st!" &  Wide_Character'Val (16#2620#));
    Safir.Logging.Send_System_Log (Severity => Safir.Logging.Alert,
-                                  Message => "This is an alert log!");
+                                  Message => "This is an alert log");
    Safir.Logging.Send_System_Log (Severity => Safir.Logging.Critical,
-                                  Message => "This is a critical log!");
+                                  Message => "This is a critical log");
    Safir.Logging.Send_System_Log (Severity => Safir.Logging.Error,
-                                  Message => "This is an error log!");
+                                  Message => "This is an error log");
    Safir.Logging.Send_System_Log (Severity => Safir.Logging.Warning,
-                                  Message => "This is a warning log!");
+                                  Message => "This is a warning log");
    Safir.Logging.Send_System_Log (Severity => Safir.Logging.Notice,
-                                  Message => "This is a notice log!");
+                                  Message => "This is a notice log");
    Safir.Logging.Send_System_Log (Severity => Safir.Logging.Informational,
-                                  Message => "This is an informational log!");
+                                  Message => "This is an informational log");
    Safir.Logging.Send_System_Log (Severity => Safir.Logging.Debug,
-                                  Message => "This is a debug log!");
+                                  Message => "This is a debug log");
 
    Ada.Command_Line.Set_Exit_Status (0);
 end Sender;
