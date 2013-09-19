@@ -65,7 +65,7 @@ o3 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
 #We expect first char to be an E, if it isnt we try to decode it differently...
 #this is due to strange windows/java behaviour
 encoding = "utf-8"
-if o1[0] != ord('E'):
+if bytearray(o1)[0] != ord('E'):
     encoding = "utf-16"
 
     

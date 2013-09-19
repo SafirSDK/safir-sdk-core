@@ -64,7 +64,7 @@ o3 = subprocess.check_output(sender_cmd)
 #We expect first char to be an R, if it isnt we try to decode it differently...
 #this is due to strange windows/java behaviour
 encoding = "utf-8"
-if o1[0] != ord('R'):
+if bytearray(o1)[0] != ord('R'):
     encoding = "utf-16"
 
 stdout_output = (o1 + o2 + o3).decode(encoding).replace("\r","")
