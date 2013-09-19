@@ -37,6 +37,11 @@ else:
     
 sender_path = os.path.join(exe_path,"tracer_backdoor_sender")
 
+SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
+
+backdoor = os.path.join(SAFIR_RUNTIME,"bin","backdoor")
+
+
 #in this test we dont check syslog output at all, we trust that it works, since we've tested
 #that elsewhere.
 
@@ -55,13 +60,13 @@ with TestEnvStopper(env):
         fail("Unexpected logs before enabling prefixes", output)
 
     #turn the prefixes on
-    subprocess.call(("backdoor", "all", "on"))
+    subprocess.call((backdoor, "all", "on"))
     env.WaitForOutput("sender", "blahonga, blahonga, blahonga")
     env.WaitForOutput("sender", "foobar")
     #if these outputs don't arrive we'll time out.
 
     
-    subprocess.call(("backdoor", "all", "off"))
+    subprocess.call((backdoor, "all", "off"))
 
     #reset the output so we don't trigger on the output from the start of the test
     env.ResetOutput("sender")
@@ -78,7 +83,7 @@ with TestEnvStopper(env):
         fail("Unexpected logs before enabling prefixes", output)
 
     #turn the prefixes on
-    subprocess.call(("backdoor", "Razor", "on"))
+    subprocess.call((backdoor, "Razor", "on"))
 
     #wait for (at least) two razor outputs
     output = env.WaitForOutput("sender", "foobar")
@@ -89,7 +94,7 @@ with TestEnvStopper(env):
     if output.count("blahonga") != 0:
         fail("unexpected got logs that should not be on", output)
     
-    subprocess.call(("backdoor", "Razor", "off"))
+    subprocess.call((backdoor, "Razor", "off"))
 
     #no need to reset, since we did it already.
     #this is two of the wcout logs in a row, meaning the tracers are off
