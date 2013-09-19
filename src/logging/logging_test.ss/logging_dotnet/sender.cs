@@ -27,7 +27,7 @@ class Sender
 {
     static int Main(String[] args)
     {
-        Safir.Logging.SendSystemLog(Safir.Logging.Severity.Emergency, "This is an emergency log");
+        Safir.Logging.SendSystemLog(Safir.Logging.Severity.Emergency, "This is an emergency log. Bryn\u00e4s \u00e4r b\u00e4st!\u2620");
         Safir.Logging.SendSystemLog(Safir.Logging.Severity.Alert, "This is an alert log");
         Safir.Logging.SendSystemLog(Safir.Logging.Severity.Critical, "This is a critical log");
         Safir.Logging.SendSystemLog(Safir.Logging.Severity.Error, "This is an error log");

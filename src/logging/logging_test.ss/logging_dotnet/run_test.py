@@ -47,30 +47,50 @@ for dep in dependencies:
 
 log_server = syslog_server.SyslogServer()
 
-#Run the program that sends system logs
-proc = subprocess.Popen(sender_exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
-proc.communicate() # wait until sender program exits
-time.sleep(1)
+o1 = subprocess.check_output(sender_exe, stderr=subprocess.STDOUT)
+o2 = subprocess.check_output(sender_exe, stderr=subprocess.STDOUT)
+o3 = subprocess.check_output(sender_exe, stderr=subprocess.STDOUT)
 
 os.remove(sender_exe)
 for dep in dependencies:
     os.remove(dep)
 
-output = log_server.get_data(1)
+syslog_output = log_server.get_data(1)
+stdout_output = (o1 + o2 + o3).decode("utf-8").replace("\r","")
 
-if "This is an emergency log" in output and \
-   "This is an alert log" in output and \
-   "This is a critical log" in output and \
-   "This is an error log" in output and \
-   "This is a warning log" in output and \
-   "This is a notice log" in output and \
-   "This is an informational log" in output and \
-   "This is a debug log" in output:   
-    print("Found all expected output!")
-    sys.exit(0)
-else:
-    print("Did not found all expected output!")
-    print(output)
+def fail(message):
+    print("Failed! Wrong number of ",message)
+    print ("STDOUT OUTPUT:")
+    safe_print(stdout_output)
+    print ("SYSLOG OUTPUT:")
+    safe_print(syslog_output)
     sys.exit(1)
+
+if stdout_output.count(u"This is an emergency log. Bryn@s @r b@st!@") != 3 or syslog_output.count(u"This is an emergency log. Bryn\u00e4s \u00e4r b\u00e4st!\u2620") != 3:
+    fail("Brynas ar bast")
+                                                                                               
+if stdout_output.count(u"This is an alert log") != 3 or syslog_output.count(u"This is an alert log") != 3:
+    fail("Alert log")
+
+if stdout_output.count(u"This is a critical log") != 3 or syslog_output.count(u"This is a critical log") != 3:
+    fail("Critical log")
+
+if stdout_output.count(u"This is an error log") != 3 or syslog_output.count(u"This is an error log") != 3:
+    fail("Error log")
+
+if stdout_output.count(u"This is a warning log") != 0 or syslog_output.count(u"This is a warning log") != 3:
+    fail("Warning log")
+
+if stdout_output.count(u"This is a notice log") != 0 or syslog_output.count(u"This is a notice log") != 3:
+    fail("Notice log")
+
+if stdout_output.count(u"This is an informational log") != 0 or syslog_output.count(u"This is an informational log") != 3:
+    fail("Informational log")
+
+if stdout_output.count(u"This is a debug log") != 0 or syslog_output.count(u"This is a debug log") != 3:
+    fail("Debug log")                                                                                  
+                                                                         
+print("Found all expected output!")
+sys.exit(0)
 
 
