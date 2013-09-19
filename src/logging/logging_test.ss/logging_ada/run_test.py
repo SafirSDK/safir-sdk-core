@@ -26,6 +26,7 @@
 from __future__ import print_function
 import subprocess, os, time, sys
 import syslog_server
+from safe_print import *
 
 if sys.platform == "win32":
     config_type = os.environ.get("CMAKE_CONFIG_TYPE")
