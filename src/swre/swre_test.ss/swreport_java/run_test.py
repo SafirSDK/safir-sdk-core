@@ -78,7 +78,7 @@ def fail(message):
     safe_print(syslog_output)
     sys.exit(1)
 
-if stdout_output.count("\n") != 180 or syslog_output.count("\n") != 24:
+if stdout_output.count("\n") != 18 or syslog_output.count("\n") != 24:
     fail("lines")
 
 if stdout_output.count(u"CRITICAL: FatalError FatalError|here|Testing SendFatalErrorReport") != 3 or syslog_output.count(u"FatalError FatalError|here|Testing SendFatalErrorReport") != 3:
