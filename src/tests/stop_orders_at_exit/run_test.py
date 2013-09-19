@@ -25,9 +25,7 @@
 ###############################################################################
 from __future__ import print_function
 import subprocess, os, time, sys, signal, re
-
-sys.path.append("../testutil")
-from testenv import TestEnv, TestEnvStopper, swre_logger_cmd
+from testenv import TestEnv, TestEnvStopper
 
 if sys.platform == "win32":
     config_type = os.environ.get("CMAKE_CONFIG_TYPE")
@@ -35,20 +33,19 @@ if sys.platform == "win32":
 else:
     exe_path = "."
     
-sender_path = os.path.join(exe_path,"send_something")
+stoppee_path = os.path.join(exe_path,"stoppee")
 
 
 env = TestEnv()
 with TestEnvStopper(env):
     for i in range(95):
-        env.launchProcess("swre_logger_" + str(i),swre_logger_cmd)
+        env.launchProcess("stoppee_" + str(i),stoppee_path)
     while True:
         print("checking if all have started yet")
-        subprocess.call(sender_path)
         done = True
         for i in range(95):
-            if env.Output("swre_logger_" + str(i)).find("Fatal") == -1:
-                print("Found one that has not started yet (" + str(i) + ")")
+            if env.Output("stoppee_" + str(i)).find("Connected") == -1:
+                print("Found one that has not started yet (" + str(i) + "), will keep checking")
                 done = False
                 break
         if done:
