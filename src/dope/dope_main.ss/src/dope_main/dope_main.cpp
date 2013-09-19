@@ -35,7 +35,7 @@ int main()
         app.Run();
         return 0;
     }
-    catch (const StartupError& e)
+    catch (const StartupError&)
     {
         //errors should already have been reported
     }
