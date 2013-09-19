@@ -24,11 +24,16 @@
 #include <Safir/Logging/Log.h>
 #include <iostream>
 
+//disable stupid incorrect microsoft warning.
+#ifdef _MSC_VER
+#pragma warning (disable : 4428)
+#endif
+
 int main()
 {
     try
     {
-        Safir::Logging::SendSystemLog(Safir::Logging::Emergency, L"This is an emergency log");
+        Safir::Logging::SendSystemLog(Safir::Logging::Emergency, L"This is an emergency log. Bryn\u00e4s \u00e4r b\u00e4st!\u2620");
         Safir::Logging::SendSystemLog(Safir::Logging::Alert, L"This is an alert log");
         Safir::Logging::SendSystemLog(Safir::Logging::Critical, L"This is a critical log");
         Safir::Logging::SendSystemLog(Safir::Logging::Error, L"This is an error log");
