@@ -29,6 +29,11 @@
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 
+//disable stupid incorrect microsoft warning.
+#ifdef _MSC_VER
+#pragma warning (disable : 4428)
+#endif
+
 class App
     : public Safir::Dob::StopHandler
 {
