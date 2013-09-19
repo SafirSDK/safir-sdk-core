@@ -45,10 +45,12 @@ o1 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
 o2 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
 o3 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
 
-#on windows it appears that java outputs in utf16...
+#We expect first char to be an E, if it isnt we try to decode it differently...
+#this is due to strange windows/java behaviour
 encoding = "utf-8"
-if sys.platform == "win32":
+if o1[0] != 'E':
     encoding = "utf-16"
+
     
 syslog_output = log_server.get_data(1)
 stdout_output = (o1 + o2 + o3).decode(encoding).replace("\r","")

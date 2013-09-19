@@ -61,9 +61,10 @@ o1 = subprocess.check_output(sender_cmd)
 o2 = subprocess.check_output(sender_cmd)
 o3 = subprocess.check_output(sender_cmd)
 
-#on windows it appears that java outputs in utf16...
+#We expect first char to be an R, if it isnt we try to decode it differently...
+#this is due to strange windows/java behaviour
 encoding = "utf-8"
-if sys.platform == "win32":
+if o1[0] != 'R':
     encoding = "utf-16"
 
 stdout_output = (o1 + o2 + o3).decode(encoding).replace("\r","")
