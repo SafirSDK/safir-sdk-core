@@ -61,10 +61,10 @@ o1 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
 o2 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
 o3 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
 
-#We expect first char to be an R, if it isnt we try to decode it differently...
+#We expect first char to be an C, if it isnt we try to decode it differently...
 #this is due to strange windows/java behaviour
 encoding = "utf-8"
-if o1[0] != 'R':
+if o1[0] != ord('C'):
     encoding = "utf-16"
 
 stdout_output = (o1 + o2 + o3).decode(encoding).replace("\r","")
@@ -78,7 +78,7 @@ def fail(message):
     safe_print(syslog_output)
     sys.exit(1)
 
-if stdout_output.count("\n") != 18 or syslog_output.count("\n") != 24:
+if stdout_output.count("\n") != 180 or syslog_output.count("\n") != 24:
     fail("lines")
 
 if stdout_output.count(u"CRITICAL: FatalError FatalError|here|Testing SendFatalErrorReport") != 3 or syslog_output.count(u"FatalError FatalError|here|Testing SendFatalErrorReport") != 3:
