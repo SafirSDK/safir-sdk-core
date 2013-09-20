@@ -70,7 +70,7 @@ namespace Safir.Application
         ///<summary>
         /// Stop reception of trace on/off commands
         ///</summary>
-        static void Stop()
+        public static void Stop()
         {
             Library.SwreC_StopTraceBackdoor();
         }
