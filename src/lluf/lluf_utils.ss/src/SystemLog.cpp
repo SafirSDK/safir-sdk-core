@@ -103,6 +103,10 @@ private:
 #endif
           m_lock()
     {
+        //this will allow wcout to coexist with cout and with printf/wprintf
+        //which appears to be needed for java and dotnet.
+        std::ios_base::sync_with_stdio(false);
+
         try
         {
             m_processName = Safir::Utilities::ProcessInfo(m_pid).GetProcessName();
