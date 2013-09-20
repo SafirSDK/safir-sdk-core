@@ -40,10 +40,12 @@
   #define _WIN32_WINNT 0x0501
 #endif
 #include <windows.h>
+#include <shellapi.h>
 #include <psapi.h>
 #include <process.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <Safir/Utilities/Internal/StringEncoding.h>
 #endif
 
 namespace bfs = boost::filesystem;
@@ -83,11 +85,25 @@ namespace
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
     const std::vector<std::string> GetCmdLine()
     {
+        using Safir::Utilities::Internal::ToUtf8;
+
         std::vector<std::string> res;
-        std::string cmd = GetCommandLineA();
 
+        LPWSTR *szArglist;
+        int nArgs;
+        int i;
 
-        boost::split(res, cmd, boost::is_any_of(" \r\n\t"), boost::token_compress_on);
+        szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
+        if (szArglist != NULL)
+        {
+            for (i = 0; i < nArgs; ++i)
+            {
+                res.push_back(ToUtf8(szArglist[i]));
+            }
+        }
+
+        // Free memory allocated for CommandLineToArgvW arguments.
+        LocalFree(szArglist);
 
         return res;
     }
