@@ -62,7 +62,7 @@ namespace Safir
         }
 
 
-        [DllImport("logging_library", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "LoggingC_SendSystemLog")]
+        [DllImport("logging_library", CallingConvention = CallingConvention.Cdecl, EntryPoint = "LoggingC_SendSystemLog")]
         private static extern void LoggingC_SendSystemLog(System.Int32 severity,
                                                           byte [] logMsg);
     }
