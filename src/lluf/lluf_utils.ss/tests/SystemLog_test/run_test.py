@@ -47,7 +47,7 @@ else:
 system_log_test_pgm = "SystemLog_test"  
 system_log_test_path = os.path.join(exe_path, system_log_test_pgm)
 
-conf_dir = os.path.join(args.test_conf_dir, "syslog_and_native_logging")
+conf_dir = os.path.join(args.test_conf_dir, "syslog_logging")
 conf_file = os.path.join(conf_dir, "logging.ini")
 
 os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = conf_dir
