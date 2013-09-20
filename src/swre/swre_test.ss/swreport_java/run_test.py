@@ -61,10 +61,10 @@ o1 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
 o2 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
 o3 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
 
-#We expect first char to be an C, if it isnt we try to decode it differently...
+#We expect first chars to be CR, if they arent we try to decode it differently...
 #this is due to strange windows/java behaviour
 encoding = "utf-8"
-if bytearray(o1)[0] != ord('C'):
+if bytearray(o1)[0] != ord('C') or bytearray(o1)[1] != ord('R'):
     encoding = "utf-16"
 
 stdout_output = (o1 + o2 + o3).decode(encoding).replace("\r","")
