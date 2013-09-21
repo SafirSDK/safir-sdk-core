@@ -8,12 +8,21 @@ find_package(Boost COMPONENTS thread date_time system)
 
 find_package(PythonInterp)
 
-FIND_SOURCE_ROOT(SOURCE_ROOT)
-
 enable_testing()
 
-add_subdirectory(panic_log_reception)
-add_subdirectory(swreport_reception)
 add_subdirectory(tracer_cpp)
+add_subdirectory(tracer_backdoor)
+add_subdirectory(swreport_cpp)
+
 add_subdirectory(tracer_dotnet)
-add_subdirectory(stop_orders_at_exit)
+add_subdirectory(swreport_dotnet)
+
+if (SAFIR_ADA_SUPPORT)
+   add_subdirectory(tracer_ada)
+   add_subdirectory(swreport_ada)
+endif()
+
+if (SAFIR_JAVA_SUPPORT)
+   add_subdirectory(tracer_java)
+   add_subdirectory(swreport_java)
+endif()

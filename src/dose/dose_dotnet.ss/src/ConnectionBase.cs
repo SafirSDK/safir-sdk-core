@@ -43,6 +43,13 @@ namespace Safir.Dob
 
         }
 
+        /// <summary>
+        /// Tells if the connection is opened.
+        /// </summary>
+        /// <returns>True if the connection is open, otherwise false.</returns>
+        public abstract bool IsOpen();
+
+
         #region Non-pending (synchronous) registration of entity handler.
         /// <summary>
         /// Registration of an entity handler for a given type.

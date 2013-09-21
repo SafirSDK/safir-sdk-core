@@ -29,32 +29,36 @@ package com.saabgroup.safir.application;
 public class BackdoorKeeper
     implements  com.saabgroup.safir.dob.MessageSubscriber
 {
-    public BackdoorKeeper() { }
+    /**
+     * Constructor.
+     *
+     * @param connection The connection on which the keeper will subscribe
+     *                   to backdoor messages.
+     */
+    public BackdoorKeeper(com.saabgroup.safir.dob.ConnectionBase connection) 
+    {
+        if (connection == null)
+        {
+            throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("You must pass a valid connection");
+        }
+
+        m_connection = connection;
+    }
 
     /**
-     * Starts subscription for Program Information commands to be sent to the Backdoor.
+     * Starts subscription for backdoor commands to be sent to the Backdoor.
      *
-     * A backdoor will be established for the "first" connection that is opened in
-     * the thread that calls this method. (That is, a secondary connection Attach is used
-     * internally)
+     * The connection that was passed in the constructor must be opened before Start is called.
      *
-     * If the main connection is closed and opened again (maybe in a different context),
-     * this method must be called again
+     * If the connection is closed and opened again (maybe in a different context)
+     * this method must be called again to establish the subscription.
      *
      * The class supports restarting/pausing by calling stop and then start again.
      *
-     * @param backdoor Class that implements the Backdoor interface.
-     *
-     * @throws NotOpenException 'Start' was called before connect to Dob.
+     * @param backdoor [in] - Class that implements the Backdoor interface.
+     * @exception Safir::Dob::NotOpenException 'Start' was called before connect to Dob.
      */
     public void start(Backdoor backdoor)
-    {
-        start(backdoor, "", "");
-    }
-
-    public void start(Backdoor backdoor,
-                      String connectionNameCommonPart,
-                      String connectionNameInstancePart)
     {
         if (backdoor == null)
         {
@@ -62,15 +66,6 @@ public class BackdoorKeeper
         }
 
         stop();
-
-        if (connectionNameCommonPart.isEmpty() && connectionNameInstancePart.isEmpty())
-        {
-            m_connection.attach();
-        }
-        else
-        {
-            m_connection.attach(connectionNameCommonPart, connectionNameInstancePart);
-        }
 
         m_backdoor = backdoor;
 
@@ -88,7 +83,7 @@ public class BackdoorKeeper
             return; // *** RETURN ***
         }
 
-        if (!m_connection.isAttached())
+        if (!m_connection.isOpen())
         {
             // Connection has been closed.
             return;
@@ -97,7 +92,6 @@ public class BackdoorKeeper
         m_connection.unsubscribeMessage(com.saabgroup.safir.application.BackdoorCommand.ClassTypeId,
                                         com.saabgroup.safir.dob.typesystem.ChannelId.ALL_CHANNELS,
                                         this);
-        m_connection.detach();
         m_backdoor = null;
         m_started = false;
     }
@@ -163,15 +157,15 @@ public class BackdoorKeeper
             {
                 // It's a 'ping' command. Answer to it without bothering
                 // the subclass implementator.
-
-                com.saabgroup.safir.swreports.SwReport.SendProgramInfoReport("Ping reply");
-
+                com.saabgroup.safir.Logging.sendSystemLog(com.saabgroup.safir.Logging.Severity.DEBUG,
+                                                          "Ping reply");
                 return; // *** RETURN ***
             }
             else if (cmdTokens[0].compareToIgnoreCase("help") == 0)
             {
                 // Get help text from subclass implementator.
-                com.saabgroup.safir.swreports.SwReport.SendProgramInfoReport(m_backdoor.getHelpText());
+                com.saabgroup.safir.Logging.sendSystemLog(com.saabgroup.safir.Logging.Severity.DEBUG,
+                                                          m_backdoor.getHelpText());
 
                 return; // *** RETURN ***
             }
@@ -181,10 +175,7 @@ public class BackdoorKeeper
         m_backdoor.handleCommand(cmdTokens);
     }
 
-    /*    private final com.saabgroup.safir.dob.typesystem.ObjectId m_piCmdObjId =
-        new com.saabgroup.safir.dob.typesystem.ObjectId(com.saabgroup.safir.application.BackdoorCommand.ClassTypeId, com.saabgroup.safir.dob.typesystem.Constants.WHOLE_CLASS);
-    */
-    private com.saabgroup.safir.dob.SecondaryConnection m_connection = new com.saabgroup.safir.dob.SecondaryConnection();
+    private com.saabgroup.safir.dob.ConnectionBase m_connection;
     private Backdoor m_backdoor = null;
 
     private boolean m_started = false;

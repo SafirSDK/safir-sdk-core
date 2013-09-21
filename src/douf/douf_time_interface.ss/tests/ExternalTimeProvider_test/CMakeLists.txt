@@ -7,6 +7,4 @@ if (NOT MSVC)
 endif()
 
 ADD_TEST(ExternalTimeProvider_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
-SET_TESTS_PROPERTIES(ExternalTimeProvider_test PROPERTIES TIMEOUT 60)
-
-SET_TESTS_PROPERTIES(ExternalTimeProvider_test PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")
+SET_SAFIR_TEST_PROPERTIES(ExternalTimeProvider_test 60)

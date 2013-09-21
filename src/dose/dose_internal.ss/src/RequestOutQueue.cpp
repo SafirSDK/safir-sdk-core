@@ -296,7 +296,7 @@ namespace Internal
 
         if (findIt == m_unhandledRequests.end())
         {
-            lllerr << "RequestInQueue::RequestTimeout: There was no request with requestId "
+            lllog(1) << "RequestInQueue::RequestTimeout: There was no request with requestId "
                 << requestId << " to time out. Ignoring this call." << std::endl;
             return;
         }

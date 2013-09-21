@@ -22,26 +22,38 @@
 *
 ******************************************************************************/
 #include <Safir/Application/Tracer.h>
-#include <Safir/Dob/Typesystem/Utilities.h>
-#include <Safir/SwReports/SwReport.h>
-#include <boost/thread.hpp>
-#include <iostream>
 
-int main(int /*argc*/, char* argv[])
+//disable stupid incorrect microsoft warning.
+#ifdef _MSC_VER
+#pragma warning (disable : 4428)
+#endif
+
+int main(int argc, char ** argv)
 {
-    Safir::Application::Tracer::SetProgramName(Safir::Dob::Typesystem::Utilities::ToWstring(argv[0]));
-    Safir::Application::Tracer debug(L"test");
-    debug.Enable(true);
-    debug << "blahonga" << std::endl;
-    debug << "blahonga" << std::endl;
-    debug << "blahonga" << std::endl;
+    bool enable = false;
+    if (argc == 2 && std::string(argv[1]) == "enable")
+    {
+        enable = true;
+    }
 
-    boost::this_thread::sleep(boost::posix_time::milliseconds(100));
-    debug << "blahonga" << std::endl;
-    boost::this_thread::sleep(boost::posix_time::seconds(2));
-    debug << "blahonga" << std::endl;
-
-    Safir::SwReports::Stop();
+    Safir::Application::Tracer razor(L"Razor");
+    Safir::Application::Tracer rb(L"Rymd-B\u00f6rje"); //ö
+    if (enable)
+    {
+        razor.Enable(true);
+        rb.Enable(true);
+    }
+    rb << L"blahonga" << std::endl;
+    rb << L"blahong\u00aea" << std::endl; //registered sign
+    rb << L"blahonga\u00e5\u00e4\u00f6" << std::endl; //åäö
+    razor << L"brynanuppafj\u00e4ssasponken" << std::endl; //ä
+    razor << L"\u202ereversed" << std::endl;
+    rb << L"skull and crossbones: \u2620" << std::endl;
+    rb << L"interrobang: \u203d" << std::endl;
+    razor << 1 << 2 << 3.1 << std::endl;
+    razor << "foo" << std::flush << "bar" << std::endl;
+    razor << "this is the end\nmy only friend, the end" << std::endl;
+    rb << "of our elaborate plans" << std::endl;
     return 0;
 }
 

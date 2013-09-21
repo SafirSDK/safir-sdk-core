@@ -22,11 +22,11 @@
 *
 ******************************************************************************/
 #include "foreach_app.h"
-#include <Safir/SwReports/SwReport.h>
+#include <Safir/Application/CrashReporter.h>
 
 int main(int /*argc*/, char* /*argv*/[])
 {
-    Safir::SwReports::SwReportStarter starter;
+    Safir::Application::ScopedCrashReporter scopedStartStop;
 
     // Start the application.
     Safir::Utilities::ForEach::ForEachApp app;

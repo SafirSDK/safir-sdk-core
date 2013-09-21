@@ -41,6 +41,13 @@ public abstract class ConnectionBase
     }
 
 
+    /**
+     * Tells if the connection is opened.
+     *
+     * @return True if the connection is open, otherwise false.
+     */
+    public abstract boolean isOpen();
+
     //
     // Non-pending (synchronous) registration of entity handler.
     //

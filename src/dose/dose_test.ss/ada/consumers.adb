@@ -1448,7 +1448,7 @@ package body Consumers is
 
                when Dose_Test.Action_Enum.Start_Backdoor =>
                   Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": StartBackdoor");
-                  Self.Backdoor_Keeper.Start (Self'Unchecked_Access, Self.Connection_Name, Self.Connection_Instance);
+                  Self.Backdoor_Keeper.Start (Self.Connection, Self'Unchecked_Access);
 
                when Dose_Test.Action_Enum.Stop_Backdoor =>
                   Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": StopBackdoor");

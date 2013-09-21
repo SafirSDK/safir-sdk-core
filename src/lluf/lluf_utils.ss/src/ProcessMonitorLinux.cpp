@@ -89,7 +89,7 @@ namespace Utilities
         
         if (ec) 
         {
-            lllerr << "ProcessMonitorLinux::HandleInotifyEvent() - Error from boost::asio " << ec << std::endl;
+            lllog(0) << "ProcessMonitorLinux::HandleInotifyEvent() - Error from boost::asio " << ec << std::endl;
             return;
         }
 
@@ -185,7 +185,7 @@ namespace Utilities
                     }
                     else
                     {
-                        lllerr << "ProcessMonitorLinux::ChangeMonitoredPids() - problem calling inotify_add_watch(). path: " 
+                        lllog(0) << "ProcessMonitorLinux::ChangeMonitoredPids() - problem calling inotify_add_watch(). path: " 
                                << path.c_str()
                                << ". errno: " << errno << std::endl;
                     }
@@ -193,7 +193,7 @@ namespace Utilities
             }
             else
             {
-                lllerr << "ProcessMonitorLinux::ChangeMonitoredPids() - problem finding bin path for pid: " << pid << std::endl;
+                lllog(0) << "ProcessMonitorLinux::ChangeMonitoredPids() - problem finding bin path for pid: " << pid << std::endl;
             }
         }
 
@@ -229,7 +229,7 @@ namespace Utilities
 
                         if (result == -1)
                         {
-                            lllerr << "ProcessMonitorLinux::ChangeMonitoredPids - problem with inotify_rm_watch() wd: " 
+                            lllog(0) << "ProcessMonitorLinux::ChangeMonitoredPids - problem with inotify_rm_watch() wd: " 
                                    << (*wdIt).first << ". errno: " << errno << std::endl;
                         }
                     
@@ -302,7 +302,7 @@ namespace Utilities
                     
                     if (result == -1)
                     {
-                        lllerr << "ProcessMonitorLinux::HandleTimeout - problem with inotify_rm_watch() wd: " << (*wdIt).first 
+                        lllog(0) << "ProcessMonitorLinux::HandleTimeout - problem with inotify_rm_watch() wd: " << (*wdIt).first 
                                << ". errno: " << errno << std::endl;
                     }
 
@@ -416,7 +416,7 @@ namespace Utilities
 
         if (fd == -1) 
         {
-            lllerr << "ProcessMonitorLinux::Run() - Problem with inotify_init()...." << std::endl;
+            lllog(0) << "ProcessMonitorLinux::Run() - Problem with inotify_init()...." << std::endl;
             
             return;
         }
@@ -445,7 +445,7 @@ namespace Utilities
                     
             if (result == -1)
             {
-                lllerr << "ProcessMonitorLinux::Run() - problem with inotify_rm_watch() wd: " << (*it).first 
+                lllog(0) << "ProcessMonitorLinux::Run() - problem with inotify_rm_watch() wd: " << (*it).first 
                        << ". errno: " << errno << std::endl;
             }
         }

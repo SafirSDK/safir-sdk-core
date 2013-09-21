@@ -26,43 +26,34 @@ with Interfaces.C;
 with Safir.Dob.Typesystem.Utilities;
 with Safir.Dob.Typesystem.Library_Exceptions;
 with Ada.Characters.Latin_1;
-with Ada.Command_Line;
+
 package body Safir.Application.Tracers is
    package C renames Interfaces.C;
 
    function Create (Prefix : in Wide_String) return Tracer is
-      procedure SwreC_SetProgramName (ProgramName : in     Interfaces.C.char_array;
-                                      Success     :    out C.char);
-      pragma Import (C, SwreC_SetProgramName, "SwreC_SetProgramName");
-
-      L_Success : C.char;
+      A_Tracer : Tracer := (Prefix => Ada.Strings.Wide_Unbounded.To_Unbounded_Wide_String (Prefix),
+                            PrefixId => 0);
    begin
-      SwreC_SetProgramName (Interfaces.C.To_C (Ada.Command_Line.Command_Name), L_Success);
-      if not (C.char'Pos (L_Success) /= 0) then
-         Safir.Dob.Typesystem.Library_Exceptions.Throw;
-      end if;
-
-      return (Prefix => Ada.Strings.Wide_Unbounded.To_Unbounded_Wide_String (Prefix),
-              PrefixId => 0);
+      A_Tracer.Add_Prefix;
+      return A_Tracer;
    end Create;
 
    procedure Put (Self : in out Tracer;
                   Item : in     Ada.Strings.Wide_Unbounded.Unbounded_Wide_String) is
 
-      procedure SwreC_TraceAppendStringPrefix (PrefixId : in     Safir.Dob.Typesystem.Int_64;
-                                               Str      : in     Interfaces.C.char_array;
-                                               Success  :    out C.char);
+      procedure SwreC_TraceAppendString (PrefixId : in     Safir.Dob.Typesystem.Int_64;
+                                         Str      : in     Interfaces.C.char_array;
+                                         Success  :    out C.char);
 
-      pragma Import (C, SwreC_TraceAppendStringPrefix, "SwreC_TraceAppendStringPrefix");
+      pragma Import (C, SwreC_TraceAppendString, "SwreC_TraceAppendString");
 
       Str : constant String := Safir.Dob.Typesystem.Utilities.To_Utf_8 (Item);
       L_Success : C.char;
    begin
-      Self.AddPrefix;
       if Self.Is_Enabled then
-         SwreC_TraceAppendStringPrefix (PrefixId => Self.PrefixId,
-                                        Str => Interfaces.C.To_C (Str),
-                                        Success => L_Success);
+         SwreC_TraceAppendString (PrefixId => Self.PrefixId,
+                                  Str => Interfaces.C.To_C (Str),
+                                  Success => L_Success);
          if not (C.char'Pos (L_Success) /= 0) then
             Safir.Dob.Typesystem.Library_Exceptions.Throw;
          end if;
@@ -97,27 +88,26 @@ package body Safir.Application.Tracers is
 
    procedure New_Line (Self : in out Tracer) is
 
-      procedure SwreC_TraceAppendCharPrefix (PrefixId : in     Safir.Dob.Typesystem.Int_64;
-                                             Item     : in     Interfaces.C.char;
-                                             Success  :    out C.char);
+      procedure SwreC_TraceAppendChar (PrefixId : in     Safir.Dob.Typesystem.Int_64;
+                                       Item     : in     Interfaces.C.char;
+                                       Success  :    out C.char);
 
-      pragma Import (C, SwreC_TraceAppendCharPrefix, "SwreC_TraceAppendCharPrefix");
+      pragma Import (C, SwreC_TraceAppendChar, "SwreC_TraceAppendChar");
 
-      procedure SwreC_TraceSyncBuffer (Success : out C.char);
+      procedure SwreC_TraceFlush (Success : out C.char);
 
-      pragma Import (C, SwreC_TraceSyncBuffer, "SwreC_TraceSyncBuffer");
+      pragma Import (C, SwreC_TraceFlush, "SwreC_TraceFlush");
 
       L_Success : C.char;
    begin
-      Self.AddPrefix;
-      SwreC_TraceAppendCharPrefix (PrefixId => Self.PrefixId,
-                                   Item => Interfaces.C.To_C (Ada.Characters.Latin_1.LF),
-                                   Success => L_Success);
+      SwreC_TraceAppendChar (PrefixId => Self.PrefixId,
+                             Item => Interfaces.C.To_C (Ada.Characters.Latin_1.LF),
+                             Success => L_Success);
       if not (C.char'Pos (L_Success) /= 0) then
          Safir.Dob.Typesystem.Library_Exceptions.Throw;
       end if;
 
-      SwreC_TraceSyncBuffer (Success => L_Success);
+      SwreC_TraceFlush (Success => L_Success);
 
       if not (C.char'Pos (L_Success) /= 0) then
          Safir.Dob.Typesystem.Library_Exceptions.Throw;
@@ -148,7 +138,6 @@ package body Safir.Application.Tracers is
       L_Success : C.char;
       L_Enabled : constant C.char := C.char'Val (Boolean'Pos (Enabled));
    begin
-      Self.AddPrefix;
       SwreC_TracePrefixSetEnabled (PrefixId => Self.PrefixId,
                                    SetEnabled => L_Enabled,
                                    Success => L_Success);
@@ -157,23 +146,7 @@ package body Safir.Application.Tracers is
       end if;
    end Enable;
 
-
-   procedure Flush (Self : in out Tracer) is
-      procedure SwreC_TraceFlushBuffer (Success  :    out C.char);
-      pragma Import (C, SwreC_TraceFlushBuffer, "SwreC_TraceFlushBuffer");
-      L_Success : C.char;
-   begin
-      if Self.Is_Enabled then
-         SwreC_TraceFlushBuffer (Success => L_Success);
-         if not (C.char'Pos (L_Success) /= 0) then
-            Safir.Dob.Typesystem.Library_Exceptions.Throw;
-         end if;
-      end if;
-   end Flush;
-
-
-
-   procedure AddPrefix (Self : in out Tracer) is
+   procedure Add_Prefix (Self : in out Tracer) is
       procedure SwreC_TracePrefixAdd (Prefix   : in     Interfaces.C.char_array;
                                       PrefixId :    out Safir.Dob.Typesystem.Int_64;
                                       Success  :    out C.char);
@@ -194,7 +167,7 @@ package body Safir.Application.Tracers is
       end if;
 
       return;
-   end AddPrefix;
+   end Add_Prefix;
 
 
 end Safir.Application.Tracers;

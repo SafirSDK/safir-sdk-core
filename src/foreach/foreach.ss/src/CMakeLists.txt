@@ -11,7 +11,7 @@ ADD_EXECUTABLE(foreach ${sources} ${headers})
 
 FIND_PACKAGE(Boost COMPONENTS system)
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(foreach dots_cpp dots_generated-Safir-cpp dots_generated-cpp dose_cpp swre_interface_cpp ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(foreach swre_interface_cpp dose_cpp dots_generated-Safir-cpp dots_generated-cpp dots_cpp logging_cpp ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS foreach

@@ -129,7 +129,9 @@ namespace
                     
                     if (!result)
                     {
-                        lllerr << "Duplicate dou file found: " << path.string().c_str() << std::endl; 
+                        SEND_SYSTEM_LOG(Critical,
+                                        << "Duplicate dou file found: " << path.string().c_str());
+
                         throw std::logic_error("Dupicate class");
                     }
                 }
@@ -139,7 +141,9 @@ namespace
                     
                     if (!result)
                     {
-                        lllerr << "Duplicate dom file found: " << path.string().c_str() << std::endl; 
+                        SEND_SYSTEM_LOG(Critical,
+                                        << "Duplicate dom file found: " << path.string().c_str());
+
                         throw std::logic_error("Dupicate property mapping");
                     }
                 }

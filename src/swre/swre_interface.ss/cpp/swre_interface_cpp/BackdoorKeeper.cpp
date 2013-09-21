@@ -22,11 +22,10 @@
 *
 ******************************************************************************/
 #include "Safir/Application/BackdoorKeeper.h"
-#include "Safir/SwReports/SwReport.h"
 #include <boost/regex.hpp>
 
 #include <Safir/Application/BackdoorCommand.h>
-
+#include <Safir/Logging/Log.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
@@ -41,183 +40,167 @@ namespace Safir
 namespace Application
 {
 
-    const wchar_t* delimiters = L" \t\n\r";
-    const wchar_t* pingCmd = L"ping";
-    const wchar_t* helpCmd = L"help";
+const wchar_t* delimiters = L" \t\n\r";
+const wchar_t* pingCmd = L"ping";
+const wchar_t* helpCmd = L"help";
 
-    //-----------------------------------------------------------------------------
-    BackdoorKeeper::BackdoorKeeper():
-        m_backdoor(NULL),
-        m_started(false)
+//-----------------------------------------------------------------------------
+BackdoorKeeper::BackdoorKeeper(const Safir::Dob::ConnectionBase&   connection)
+    : m_connection(connection),
+      m_backdoor(NULL),
+      m_started(false)
+{
+}
+
+//-----------------------------------------------------------------------------
+void BackdoorKeeper::Start(Safir::Application::Backdoor& backdoor)
+{
+    Stop();
+
+    m_backdoor = &backdoor;
+
+    m_connection.SubscribeMessage(PI_CMD_TYPE_ID, PI_CMD_CHANNEL_ID, this);
+    m_started = true;
+}
+
+//-----------------------------------------------------------------------------
+void BackdoorKeeper::Stop()
+{
+    if (!m_started)
     {
-
+        // Never started, just return
+        return; // *** RETURN ***
     }
 
-    //-----------------------------------------------------------------------------
-    void BackdoorKeeper::Start(Safir::Application::Backdoor & backdoor)
+    if (!m_connection.IsOpen())
     {
-        Start(backdoor,L"",L"");
+        // Connection has been closed.
+        return; // *** RETURN ***
     }
 
-    void BackdoorKeeper::Start(Safir::Application::Backdoor & backdoor,
-                               const std::wstring& connectionNameCommonPart,
-                               const std::wstring& connectionNameInstancePart)
+    m_connection.UnsubscribeMessage(PI_CMD_TYPE_ID, PI_CMD_CHANNEL_ID, this);
+
+    m_backdoor = NULL;
+
+    m_started = false;
+}
+
+//-----------------------------------------------------------------------------
+void BackdoorKeeper::OnMessage(const Safir::Dob::MessageProxy messageProxy)
+{
+    try
     {
-        Stop();
+        const boost::wregex::flag_type regExpFlags = boost::regex::perl | boost::regex::icase;
 
-        if (connectionNameCommonPart.empty() && connectionNameInstancePart.empty())
-        {
-            m_connection.Attach();
-        }
-        else
-        {
-            m_connection.Attach(connectionNameCommonPart, connectionNameInstancePart);
-        }
+        const Safir::Dob::MessagePtr message = messageProxy.GetMessage();
 
-        // Save pointer to Dose interface and handler
-        m_backdoor = &backdoor;
-
-        m_connection.SubscribeMessage(PI_CMD_TYPE_ID, PI_CMD_CHANNEL_ID, this);
-        m_started = true;
-    }
-
-    //-----------------------------------------------------------------------------
-    void BackdoorKeeper::Stop()
-    {
-        if (!m_started)
-        {
-            // Never started, just return
-            return; // *** RETURN ***
-        }
-
-        if (!m_connection.IsAttached())
-        {
-            // Connection has been closed.
-            return;
-        }
-
-        m_connection.UnsubscribeMessage(PI_CMD_TYPE_ID, PI_CMD_CHANNEL_ID, this);
-        m_connection.Detach();
-        m_backdoor = NULL;
-        m_started = false;
-    }
-
-    //-----------------------------------------------------------------------------
-    void BackdoorKeeper::OnMessage(const Safir::Dob::MessageProxy messageProxy)
-    {
-        try
-        {
-            const boost::wregex::flag_type regExpFlags = boost::regex::perl | boost::regex::icase;
-
-            const Safir::Dob::MessagePtr message = messageProxy.GetMessage();
-
-            const Safir::Application::BackdoorCommandPtr cmd =
+        const Safir::Application::BackdoorCommandPtr cmd =
                 boost::dynamic_pointer_cast<Safir::Application::BackdoorCommand>(message);
 
-            if (cmd == NULL)
-            {
-                // Unexpected message
-                return;   // *** RETURN ***
-            }
+        if (cmd == NULL)
+        {
+            // Unexpected message
+            return;   // *** RETURN ***
+        }
 
-            if (!cmd->NodeName().IsNull())
+        if (!cmd->NodeName().IsNull())
+        {
+            if (!boost::regex_search(Safir::Dob::NodeParameters::Nodes(Safir::Dob::ThisNodeParameters::NodeNumber())->NodeName().GetVal(),
+                                     boost::wregex(cmd->NodeName().GetVal(), regExpFlags)))
             {
-                if (!boost::regex_search(Safir::Dob::NodeParameters::Nodes(Safir::Dob::ThisNodeParameters::NodeNumber())->NodeName().GetVal(),
-                                         boost::wregex(cmd->NodeName().GetVal(), regExpFlags)))
-                {
-                    // Node name doesn't match
-                    return;  // *** RETURN ***
-                }
-            }
-
-            Safir::Dob::ConnectionAspectMisc connectionAspectMisc(m_connection);
-            if (!cmd->ConnectionName().IsNull())
-            {
-                if (!boost::regex_search(connectionAspectMisc.GetConnectionName(),
-                                         boost::wregex(cmd->ConnectionName().GetVal(), regExpFlags)))
-                {
-                    // Connection name doesn't match
-                    return;  // *** RETURN ***
-                }
-            }
-
-            if (cmd->Command().IsNull())
-            {
-                // No command given
+                // Node name doesn't match
                 return;  // *** RETURN ***
             }
-
-            // Ok, it seems that this PI-command is for this application
-
-            std::vector<std::wstring> cmdTokens;
-
-            Tokenize(cmd->Command().GetVal(), cmdTokens, delimiters);
-
-            if (!cmdTokens.empty())
-            {
-                if (cmdTokens[0] == pingCmd)
-                {
-                    // It's a 'ping' command. Answer to it without bothering
-                    // the subclass implementator.
-
-                    Safir::SwReports::SendProgramInfoReport(L"Ping reply");
-
-                    return; // *** RETURN ***
-                }
-                else if (cmdTokens[0] == helpCmd)
-                {
-                    // Get help text from subclass implementator.
-                    Safir::SwReports::SendProgramInfoReport(m_backdoor->GetHelpText());
-
-                    return; // *** RETURN ***
-                }
-            }
-
-            // Let the subclass handle the command
-            m_backdoor->HandleCommand(cmdTokens);
         }
-        catch (boost::bad_expression& /* e*/ )
+
+        Safir::Dob::ConnectionAspectMisc connectionAspectMisc(m_connection);
+        if (!cmd->ConnectionName().IsNull())
         {
-            // An invalid regular expression was used, skip this command
+            if (!boost::regex_search(connectionAspectMisc.GetConnectionName(),
+                                     boost::wregex(cmd->ConnectionName().GetVal(), regExpFlags)))
+            {
+                // Connection name doesn't match
+                return;  // *** RETURN ***
+            }
+        }
+
+        if (cmd->Command().IsNull())
+        {
+            // No command given
             return;  // *** RETURN ***
         }
 
+        // Ok, it seems that this PI-command is for this application
 
-    }
+        std::vector<std::wstring> cmdTokens;
 
-    //-----------------------------------------------------------------------------
-    void BackdoorKeeper::Tokenize(const std::wstring&        str,
-                                   std::vector<std::wstring>& tokens,
-                                   const std::wstring&        delimiters)
-    {
-        using namespace std;
+        Tokenize(cmd->Command().GetVal(), cmdTokens, delimiters);
 
-        tokens.clear();
-
-        // Skip delimiters at beginning.
-        wstring::size_type currPos = str.find_first_not_of(delimiters, 0);
-
-        while (currPos != string::npos)
+        if (!cmdTokens.empty())
         {
-            wstring::size_type lastPos = str.find_first_of(delimiters, currPos);
-
-            wstring::size_type count;
-
-            if (lastPos == wstring::npos)
+            if (cmdTokens[0] == pingCmd)
             {
-                count = lastPos;
+                // It's a 'ping' command. Answer to it without bothering
+                // the subclass implementator.
+
+                Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                              L"Ping reply");
+
+                return; // *** RETURN ***
             }
-            else
+            else if (cmdTokens[0] == helpCmd)
             {
-                count = lastPos - currPos;
+                // Get help text from subclass implementator.
+                Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                              m_backdoor->GetHelpText());
+
+                return; // *** RETURN ***
             }
-
-            tokens.push_back(str.substr(currPos, count));
-
-            currPos = str.find_first_not_of(delimiters, lastPos);
         }
-    }
 
-};
-};
+        // Let the subclass handle the command
+        m_backdoor->HandleCommand(cmdTokens);
+    }
+    catch (boost::bad_expression& /* e*/ )
+    {
+        // An invalid regular expression was used, skip this command
+        return;  // *** RETURN ***
+    }
+}
+
+//-----------------------------------------------------------------------------
+void BackdoorKeeper::Tokenize(const std::wstring&        str,
+                              std::vector<std::wstring>& tokens,
+                              const std::wstring&        delimiters)
+{
+    using namespace std;
+
+    tokens.clear();
+
+    // Skip delimiters at beginning.
+    wstring::size_type currPos = str.find_first_not_of(delimiters, 0);
+
+    while (currPos != string::npos)
+    {
+        wstring::size_type lastPos = str.find_first_of(delimiters, currPos);
+
+        wstring::size_type count;
+
+        if (lastPos == wstring::npos)
+        {
+            count = lastPos;
+        }
+        else
+        {
+            count = lastPos - currPos;
+        }
+
+        tokens.push_back(str.substr(currPos, count));
+
+        currPos = str.find_first_not_of(delimiters, lastPos);
+    }
+}
+
+}
+}
 

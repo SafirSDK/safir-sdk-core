@@ -62,7 +62,11 @@ endif ()
 
 #Add some more boost library versions that we want to be able to use,
 # just to try to be "future safe"
-set (Boost_ADDITIONAL_VERSIONS "1.40" "1.40.0" "1.41" "1.41.0" "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0" "1.52" "1.52.0")
+set (Boost_ADDITIONAL_VERSIONS 
+  "1.40" "1.40.0" "1.41" "1.41.0" "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" 
+  "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0" 
+  "1.50" "1.50.0" "1.51" "1.51.0" "1.52" "1.52.0" "1.53" "1.53.0" "1.54" "1.54.0" 
+  "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0" "1.58" "1.58.0" "1.59" "1.59.0") 
 
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED ON)
@@ -209,10 +213,15 @@ endif()
 if(SAFIR_ADA_SUPPORT OR SAFIR_JAVA_SUPPORT)
 endif()
 
+if (UNIX)
+  set(PATH_SEPARATOR ":")
+else()
+  set(PATH_SEPARATOR ";")
+endif()
 
 #This function traverses up from PROJECT_SOURCE_DIR to find the root of the 
 #source code tree. It looks for some special files in that directory.
-function (FIND_SOURCE_ROOT RESULT_VARIABLE)
+function (FIND_SAFIR_SDK_SOURCE_ROOT RESULT_VARIABLE)
   set (curdir ${PROJECT_SOURCE_DIR})
   while (NOT EXISTS "${curdir}/INSTALL.Linux.txt" 
       OR NOT EXISTS "${curdir}/INSTALL.Windows.txt")
@@ -227,3 +236,19 @@ function (FIND_SOURCE_ROOT RESULT_VARIABLE)
   set(${RESULT_VARIABLE} ${curdir} PARENT_SCOPE)
 endfunction()
 
+#also accepts an optional second argument TIMEOUT which will set test timeout
+#in seconds
+function (SET_SAFIR_TEST_PROPERTIES TEST_NAME) 
+  FIND_SAFIR_SDK_SOURCE_ROOT(SAFIR_SOURCE_ROOT)
+  if (ARGV1)
+    SET_TESTS_PROPERTIES(${TEST_NAME} PROPERTIES TIMEOUT ${ARGV1})
+  endif()
+
+  set (pypath "$ENV{PYTHONPATH}${PATH_SEPARATOR}${SAFIR_SOURCE_ROOT}/src/tests/test_support/python")
+  string(REGEX REPLACE "^${PATH_SEPARATOR}+" "" pypath ${pypath}) # remove any leading path separators
+
+  SET_PROPERTY(TEST ${TEST_NAME}
+    PROPERTY ENVIRONMENT 
+    "SAFIR_TEST_CONFIG_OVERRIDE=${SAFIR_SOURCE_ROOT}/src/tests/test_support/test_config"
+    "PYTHONPATH=${pypath}")
+endfunction()

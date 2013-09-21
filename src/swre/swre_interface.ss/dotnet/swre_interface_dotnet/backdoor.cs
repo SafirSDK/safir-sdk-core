@@ -64,24 +64,43 @@ namespace Safir.Application
         /// <summary>
         /// Constructor
         /// </summary>
-        public BackdoorKeeper() { }
+        /// <param name="connection">The connection on which the keeper will subscribe
+        /// to backdoor messages.</param>
+        public BackdoorKeeper(Safir.Dob.ConnectionBase connection) 
+        {
+            if (connection == null)
+            {
+                throw new Dob.Typesystem.SoftwareViolationException("You must pass a valid connection");
+            }
+             
+            m_connection = connection;
+        }
 
         /// <summary>
-        /// Starts subscription for Program Information commands to be sent to the Backdoor.
-        /// <para>A backdoor will be established for the "first" connection that is opened in
-        /// the thread that calls this method. (That is, a secondary connection Attach is used
-        /// internally</para>
-        /// <para>If the main connection is closed and opened again (maybe in a different context),
-        /// this method must be called again</para>
-        /// <para>The class supports restarting/pausing by calling stop and then start again.</para>
+        /// Starts subscription for backdoor commands to be sent to the Backdoor.
+        /// <para/>
+        /// The connection that was passed in the constructor must be opened before Start is called.
+        /// <para/>
+        /// If the main connection is closed and opened again (maybe in a different context),
+        /// this method must be called again to establish the subscription
+        /// <para/>
+        /// The class supports restarting/pausing by calling stop and then start again.
         /// </summary>
-        /// <param name="backdoor">PI command backdoor</param>
-        /// <exception cref=" Safir.Dob.NotOpenException">
-        /// 'Start' called before connect to Dose
-        /// </exception>
+        /// <param name="backdoor">Class that implements the Backdoor interface.</param>
+        /// <exception cref="Safir.Dob.NotOpenException">'Start' called before connect to Dob</exception>
         public void Start(Backdoor backdoor)
         {
-            Start(backdoor, "", "");
+            if (backdoor == null)
+            {
+                throw new Dob.Typesystem.SoftwareViolationException("You must pass a valid backdoor");
+            }
+
+            Stop();
+
+            m_backdoor = backdoor;
+            m_connection.SubscribeMessage(m_piCmdTypeId, m_piCmdChannelId, this);
+
+            m_started = true;
         }
 
         /// <summary>
@@ -100,31 +119,6 @@ namespace Safir.Application
         /// <exception cref=" Safir.Dob.NotOpenException">
         /// 'Start' called before connect to Dose
         /// </exception>
-        public void Start(Backdoor backdoor,
-                          string connectionNameCommonPart,
-                          string connectionNameInstancePart)
-        {
-            if (backdoor == null)
-            {
-                throw new Dob.Typesystem.SoftwareViolationException("You must pass a valid backdoor");
-            }
-
-            Stop();
-
-            m_backdoor = backdoor;
-
-            if (connectionNameCommonPart.Length == 0 && connectionNameInstancePart.Length == 0)
-            {
-                m_connection.Attach();
-            }
-            else
-            {
-                m_connection.Attach(connectionNameCommonPart, connectionNameInstancePart);
-            }
-
-            m_connection.SubscribeMessage(m_piCmdTypeId, m_piCmdChannelId, this);
-            m_started = true;
-        }
 
         /// <summary>
         /// Stops subscription for Program Information commands.
@@ -138,14 +132,13 @@ namespace Safir.Application
                 return; // *** RETURN ***
             }
 
-            if (!m_connection.IsAttached())
+            if (!m_connection.IsOpen())
             {
                 // Connection has been closed.
                 return;
             }
 
             m_connection.UnsubscribeMessage(m_piCmdTypeId, m_piCmdChannelId, this);
-            m_connection.Detach();
             m_backdoor = null;
             m_started = false;
         }
@@ -216,14 +209,16 @@ namespace Safir.Application
                     // It's a 'ping' command. Answer to it without bothering
                     // the subclass implementator.
 
-                    Safir.SwReports.SwReport.SendProgramInfoReport("Ping reply");
+                    Safir.Logging.SendSystemLog(Safir.Logging.Severity.Debug,
+                                                "Ping reply");
 
                     return; // *** RETURN ***
                 }
                 else if (cmdTokens[0].Equals("help", StringComparison.OrdinalIgnoreCase))
                 {
                     // Get help text from subclass implementator.
-                    Safir.SwReports.SwReport.SendProgramInfoReport(m_backdoor.GetHelpText());
+                    Safir.Logging.SendSystemLog(Safir.Logging.Severity.Debug,
+                                                m_backdoor.GetHelpText());
 
                     return; // *** RETURN ***
                 }
@@ -235,7 +230,7 @@ namespace Safir.Application
 
         private readonly Int64 m_piCmdTypeId = Safir.Application.BackdoorCommand.ClassTypeId;
         private readonly Safir.Dob.Typesystem.ChannelId m_piCmdChannelId = new Safir.Dob.Typesystem.ChannelId();
-        private Safir.Dob.SecondaryConnection m_connection = new Safir.Dob.SecondaryConnection();
+        private Safir.Dob.ConnectionBase m_connection;
         private Backdoor m_backdoor = null;
 
         private bool m_started = false;

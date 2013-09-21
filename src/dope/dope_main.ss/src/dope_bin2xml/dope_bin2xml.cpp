@@ -42,7 +42,6 @@
 
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
-#include <Safir/SwReports/SwReport.h>
 #include <Safir/Databases/Odbc/Connection.h>
 #include <Safir/Databases/Odbc/Environment.h>
 #include <Safir/Databases/Odbc/InputParameter.h>

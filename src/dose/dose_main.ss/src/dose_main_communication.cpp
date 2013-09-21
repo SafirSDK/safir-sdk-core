@@ -37,6 +37,7 @@
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -98,17 +99,19 @@ namespace Internal
     {
         if (Safir::Dob::NodeParameters::NumberOfContexts() < 1)
         {
-            lllerr << "The parameter Safir.Dob.NodeParameters.NumberOfContexts must be > 0" << std::endl
-                   << "Please correct this and try again!" << std::endl;
-            exit(-1);            
+            SEND_SYSTEM_LOG(Critical, 
+                            << "The parameter Safir.Dob.NodeParameters.NumberOfContexts must be > 0. "
+                            << "Please correct this and try again!");
+            exit(1);
         }
         else if (Safir::Dob::NodeParameters::LocalContextsArraySize() != Safir::Dob::NodeParameters::NumberOfContexts())
         {
-            lllerr << "The parameter Safir.Dob.NodeParameters.NumberOfContexts" << std::endl
-                   << "does not correspond to the size of the parameter array" << std::endl
-                   << "Safir.Dob.NodeParameters.LocalContexts." << std::endl
-                   << "Please correct this and try again!" << std::endl;
-            exit(-1);
+            SEND_SYSTEM_LOG(Critical,
+                            << "Safir.Dob.NodeParameters.NumberOfContexts "
+                            << "does not correspond to the size of "
+                            << "Safir.Dob.NodeParameters.LocalContexts."
+                            << "Please correct this and try again!");
+            exit(1);
         }
     }
 
@@ -148,11 +151,13 @@ namespace Internal
 
         if (m_QualityOfServiceData.IsStandalone())
         {
-            lllerr << "Running in Standalone mode" <<std::endl;
+            lllog(0) << "Running in Standalone mode" <<std::endl;
+            std::wcout << "Running in Standalone mode" <<std::endl;
             return false;
         }
 
-        lllerr << "Running in multi node mode. Configuration is expected to contain " << NodeParameters::NumberOfNodes() << " nodes." <<std::endl;
+        std::wcout << "Running in multi node mode. Configuration is expected to contain " << NodeParameters::NumberOfNodes() << " nodes." <<std::endl;
+        lllog(0) << "Running in multi node mode. Configuration is expected to contain " << NodeParameters::NumberOfNodes() << " nodes." <<std::endl;
 
         for (DistributionChannelTable::const_iterator it = m_QualityOfServiceData.GetDistributionChannelTable().begin();
              it != m_QualityOfServiceData.GetDistributionChannelTable().end(); ++it)

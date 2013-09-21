@@ -85,6 +85,12 @@ namespace ForEach
                     ++inst;
                 }
             }
+            
+            if (context == 0)
+            {
+                Safir::Application::TracerBackdoor::Start(m_context[0]->m_connection);
+            }
+
             // Send something to the tracer to open the connection.
             m_context[context]->m_debug << "Starting ForEach in context " << context << std::endl;
 
@@ -105,6 +111,7 @@ namespace ForEach
 
     void ForEachApp::OnStopOrder()
     {
+        Safir::Application::TracerBackdoor::Stop();
         m_ioService.stop();
     } 
 }

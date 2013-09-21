@@ -12,7 +12,7 @@ FILE(GLOB sources *.cpp)
 ADD_LIBRARY(swre_interface_cpp SHARED ${sources} ${headers})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(swre_interface_cpp dose_cpp swre_library douf_time_cpp)
+    TARGET_LINK_LIBRARIES(swre_interface_cpp dose_cpp swre_library douf_time_cpp logging_cpp)
 endif()
 
 ADD_DEFINITIONS(-DSWRE_EXPORTS)

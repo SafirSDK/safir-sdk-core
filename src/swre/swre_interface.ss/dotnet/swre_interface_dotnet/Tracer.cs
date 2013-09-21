@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://www.safirsdk.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -27,6 +27,56 @@ using Safir.SwReports;
 namespace Safir.Application
 {
     /// <summary>
+    /// This class just contains two static methods, for starting and stopping the tracers backdoor.
+    /// </summary>
+    public sealed class TracerBackdoor
+    {
+        /// <summary>
+        /// Start reception of trace on/off commands
+        /// <para/>
+        /// The given connection must be opened before this method is called.
+        /// If the connection is closed the reception of backdoor commands is
+        /// stopped. If a new connection is opened this method needs to be called
+        /// in order to start reception of backdoor commands.
+        /// <para/>
+        /// In situations when a connection is regularly closed and reopened,
+        /// for instance in the case of context switches, you should consider
+        /// using a dedicated connection as parameter.
+        /// </summary>
+        /// <param name="connection">The connection used for setting up a subscription for
+        ///                          backdoor commands.</param>
+        public static void Start(Safir.Dob.ConnectionBase connection)
+        {
+            byte success;
+            Library.SwreC_SetProgramName(System.Text.Encoding.UTF8.GetBytes
+                                         (System.Diagnostics.Process.GetCurrentProcess().ProcessName + char.MinValue),
+                                         out success);
+            if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
+            {
+                Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
+            }
+
+            Safir.Dob.ConnectionAspectMisc misc = new Safir.Dob.ConnectionAspectMisc(connection);
+
+            Library.SwreC_StartTraceBackdoor(System.Text.Encoding.UTF8.GetBytes(misc.GetConnectionNameCommonPart() + char.MinValue),
+                                             System.Text.Encoding.UTF8.GetBytes(misc.GetConnectionNameInstancePart() + char.MinValue),
+                                             out success);
+            if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
+            {
+                Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
+            }
+        }
+
+        ///<summary>
+        /// Stop reception of trace on/off commands
+        ///</summary>
+        public static void Stop()
+        {
+            Library.SwreC_StopTraceBackdoor();
+        }
+    }
+
+    /// <summary>
     /// A class for trace logging.
     /// </summary>
     public class Tracer : System.IO.StreamWriter
@@ -38,14 +88,6 @@ namespace Safir.Application
         public Tracer(string prefix)
             : base(new TraceStream(prefix),new System.Text.UTF8Encoding(false)) //Omit BOM
         {
-            byte success;
-            Library.SwreC_SetProgramName(System.Diagnostics.Process.GetCurrentProcess().ProcessName, out success);
-            if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
-            {
-                Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
-            }
-
-            //set autoflush last or things will get strange
             AutoFlush = true;
         }
      
@@ -82,7 +124,6 @@ namespace Safir.Application
             if (Enabled)
             {
                 base.Flush();
-                ((TraceStream)base.BaseStream).ForceFlush();
             }
         }
         
@@ -504,26 +545,24 @@ namespace Safir.Application
         public TraceStream(string prefix)
         {
             m_prefix = prefix;
+            AddPrefix();
         }
 
         ~TraceStream()
         {
-            ForceFlush();
+
         }
 
         public System.Int64 GetPrefixId()
         {
-            if (m_prefixId == 0)
-            {
-                AddPrefix();
-            }
             return m_prefixId;
         }
+
         private void AddPrefix()
         {
             byte success;
             
-            Library.SwreC_TracePrefixAdd(System.Text.Encoding.UTF8.GetBytes(m_prefix), out m_prefixId, out success);
+            Library.SwreC_TracePrefixAdd(System.Text.Encoding.UTF8.GetBytes(m_prefix + char.MinValue), out m_prefixId, out success);
 
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
@@ -546,20 +585,10 @@ namespace Safir.Application
             get { return true; }
         }
 
-        public void ForceFlush()
-        {//this is the same as Flush in c++
-            byte success;
-            Library.SwreC_TraceFlushBuffer(out success);
-            if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
-            {
-                Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
-            }
-        }
-
         public override void Flush()
         { //this is the same as sync in C++
             byte success;
-            Library.SwreC_TraceSyncBuffer(out success);
+            Library.SwreC_TraceFlush(out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
                 Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
@@ -601,10 +630,10 @@ namespace Safir.Application
         public override void Write(byte[] buffer, int offset, int count)
         {
             byte success;
-            byte[] str = new byte[count + 1];
-            Array.Copy(buffer, offset, str, 0, count);
-            str[count] = 0; //add null termination
-            Library.SwreC_TraceAppendStringPrefix(m_prefixId, str, out success);
+            //byte[] str = new byte[count + 1];
+            //Array.Copy(buffer, offset, str, 0, count);
+            //str[count] = 0; //add null termination
+            Library.SwreC_TraceAppendSubstring(m_prefixId, buffer, offset, count, out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
                 Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();

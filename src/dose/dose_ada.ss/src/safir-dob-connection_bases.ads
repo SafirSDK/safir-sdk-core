@@ -41,8 +41,12 @@ package Safir.Dob.Connection_Bases is
    type Connection_Base is abstract new
      Ada.Finalization.Limited_Controlled with null record;
 
-   --type ClassAccess is access all Class'Class;
-
+   -- Check if this Connection instance is open.
+   --
+   -- Returns: True if the connection is open.
+   --
+   function Is_Open
+     (Self : in Connection_Base) return Boolean is abstract;
 
    ---------------------------------------------------------------
    -- Non-pending (synchronous) registration of entity handler. --

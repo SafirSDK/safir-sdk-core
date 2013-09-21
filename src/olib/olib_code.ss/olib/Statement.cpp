@@ -27,7 +27,7 @@
 #include <Safir/Databases/Odbc/RetryException.h>
 #include <Safir/Databases/Odbc/TimeoutException.h>
 #include <Safir/Databases/Odbc/ReconnectException.h>
-#include <Safir/SwReports/SwReport.h>
+#include <Safir/Logging/Log.h>
 #include "StringConversion.h"
 #include "Diagnostics.h"
 
@@ -417,34 +417,39 @@ void Statement::ThrowException(SQLSMALLINT HandleType,
     else if (rec.first == L"01000")
     {
         // This is a warning from the rdbms driver and its not specified as an error.
-        Safir::SwReports::SendProgramInfoReport(std::wstring(L"Non Odbc Error caught:: ") +
-                                                rec.second);
+        Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                      L"Olib: Non Odbc Error caught:: " + rec.second);
     }
     else if (rec.first == L"01004")
     {
         // This is a warning from the rdbms driver and its not specified as an error.
-        Safir::SwReports::SendProgramInfoReport(L"String data, right truncated");
+        Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                      L"Olib: String data, right truncated");
     }
     else if (rec.first == L"01002")
     {
-        Safir::SwReports::SendProgramInfoReport(L"Cursor operation conflict");
+        Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                      L"Olib: Cursor operation conflict");
     }
     else if (rec.first == L"01003")
     {
-        Safir::SwReports::SendProgramInfoReport(L"NULL value eliminated in set function");
+        Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                      L"Olib: NULL value eliminated in set function");
     }
     else if (rec.first == L"01S01")
     {
-        Safir::SwReports::SendProgramInfoReport(L"Error in row");
+        Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                      L"Olib: Error in row");
     }
     else if (rec.first == L"01S02")
     {
-        Safir::SwReports::SendProgramInfoReport(
-            L"Statement attribute not supported. A similiar attribute used instead");
+        Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                      L"Olib: Statement attribute not supported. A similiar attribute used instead");
     }
     else if (rec.first == L"01S08")
     {
-        Safir::SwReports::SendProgramInfoReport(L"Error saving file dsn.");
+        Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                      L"Olib: Error saving file dsn.");
     }
     else
     {

@@ -24,7 +24,7 @@
 #include "Safir/Databases/Odbc/Environment.h"
 
 #include <Safir/Databases/Odbc/ReconnectException.h>
-#include <Safir/SwReports/SwReport.h>
+#include <Safir/Logging/Log.h>
 #include "StringConversion.h"
 #include "Diagnostics.h"
 
@@ -99,9 +99,8 @@ void Environment::Alloc()
         {
             const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
                                                                             m_hEnv);
-            Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
-                                                L"Safir::Databases::Odbc::Environment::Alloc()",
-                                                rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Olib: Non Odbc Error in Environment::Alloc " + rec.second);
         }
     }
 
@@ -145,11 +144,13 @@ void Environment::Free()
         }
         else if (rec.first == L"HY000")    // General error
         {
-            Safir::SwReports::SendProgramInfoReport(rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                          L"Olib: Error in Environment::Free()" + rec.second);
         }
         else if (rec.first == L"HYT01")    // Connection timeout expired.
         {
-            Safir::SwReports::SendProgramInfoReport(rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                          L"Olib: Error in Environment::Free()" + rec.second);
         }
     }
     // Cant return SQL_SUCCESS_WITH_INFO
@@ -210,13 +211,13 @@ void Environment::SetEnvAttr(long lAttribute, long lValue)
         {
             const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
                                                                             m_hEnv);
-            Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
-                                                L"Safir::Databases::Odbc::Environment::SetEnvAttr()",
-                                                rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Olib: Non Odbc Error in Environment::SetEnvAttr" + rec.second);
         }
         if (rec.first == L"01S02")
         {
-            Safir::SwReports::SendProgramInfoReport(L"Environment attribute not supported. A similiar attribute used instead");
+            Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                          L"Olib: Environment attribute not supported. A similiar attribute used instead");
         }
     }
 }
@@ -274,13 +275,13 @@ void Environment::SetEnvAttr(long lAttribute, const std::wstring & wszValue, uns
         {
             const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
                                                                             m_hEnv);
-            Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
-                                                L"Safir::Databases::Odbc::Environment::SetEnvAttr()",
-                                                rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Olib: Non Odbc Error in Environment::SetEnvAttr" + rec.second);
         }
         if (rec.first == L"01S02")
         {
-            Safir::SwReports::SendProgramInfoReport(L"Environment attribute not supported. A similiar attribute used instead");
+            Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                          L"Olib: Environment attribute not supported. A similiar attribute used instead");
         }
     }
 }
@@ -328,9 +329,8 @@ void Environment::GetEnvAttr(long lAttribute, long & lValue) const
         {
             const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
                                                                             m_hEnv);
-            Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
-                                                L"Safir::Databases::Odbc::Environment::GetEnvAttr()",
-                                                rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Olib: Non Odbc Error in Environment::GetEnvAttr" + rec.second);
         }
         if (rec.first == L"01004")
         {
@@ -383,9 +383,8 @@ void Environment::GetEnvAttr(long lAttribute, wchar_t * wszValue, unsigned long 
         {
             const StateMessagePair rec = Safir::Databases::Odbc::GetDiagRec(SQL_HANDLE_ENV,
                                                                             m_hEnv);
-            Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
-                                                L"Safir::Databases::Odbc::Environment::GetEnvAttr()",
-                                                rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Olib: Non Odbc Error in Environment::GetEnvAttr" + rec.second);
         }
         if (rec.first == L"01004")
         {

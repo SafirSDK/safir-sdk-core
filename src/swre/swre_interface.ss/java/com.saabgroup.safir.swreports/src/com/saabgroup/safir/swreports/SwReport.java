@@ -41,21 +41,12 @@ From the location parameter string it should be easy to identify the exact code 
 where the report is generated.
 <p>
 All methods are thread safe.
+<p>
+@deprecated use com.saabgroup.safir.logging.SendSystemLog() instead.
 */
+@Deprecated
 public class SwReport
 {
-    /**
-     * Stop the SwReports background thread.
-     *
-     * This needs to be called before exiting an application to let SwReports stop
-     * its background thread. Failure to do this may cause problems if the
-     * thread is currently using its dob connection when it gets killed.
-     */
-    public static void Stop()
-    {
-        Library.Stop();
-    }
-
     /**
      * Sends a Fatal Error report.
      *
@@ -66,7 +57,10 @@ public class SwReport
      * @param errorCode Application defined error code (mnemonic).
      * @param location  Source code location.
      * @param text      Application defined text.
+     *
+     * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
+    @Deprecated
     public static void SendFatalErrorReport(String errorCode,
                                             String location,
                                             String text)
@@ -92,7 +86,10 @@ public class SwReport
      * @param errorCode Application defined error code (mnemonic).
      * @param location  Source code location.
      * @param text      Application defined text.
+     *
+     * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
+    @Deprecated
     public static void SendErrorReport(String errorCode,
                                        String location,
                                        String text)
@@ -120,7 +117,10 @@ public class SwReport
      * @param resourceId Application defined resource id (mnemonic).
      * @param allocated  True if the resource is allocated, otherwise false.
      * @param text       Application defined text.
+     *
+     * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
+    @Deprecated
     public static void SendResourceReport(String resourceId,
                                           boolean allocated,
                                           String text)
@@ -148,7 +148,10 @@ public class SwReport
      * @param errorCode Application defined error code (mnemonic).
      * @param location  Source code location.
      * @param text      Application defined text.
+     *
+     * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
+    @Deprecated
     public static void SendProgrammingErrorReport(String errorCode,
                                                   String location,
                                                   String text)
@@ -173,7 +176,10 @@ public class SwReport
      * that are set by sending backdoor commands to the program.
      *
      * @param text Application defined text.
+     *
+     * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
+    @Deprecated
     public static void SendProgramInfoReport(String text)
     {
         boolean [] success = new boolean [1];

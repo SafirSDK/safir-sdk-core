@@ -107,7 +107,7 @@ namespace Dob
          *
          * @return True if the connection is open, otherwise false.
          */
-        bool IsOpen();
+        virtual bool IsOpen() const;
 
         /**
          * When the dispatch event or callback is signalled, the application MUST call

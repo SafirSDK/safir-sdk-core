@@ -138,10 +138,9 @@ class Parameters:
 
         #Set up to use our own test configuration
         os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.SAFIR_RUNTIME,"data","text","dose_test","test_config")
-        
+                
         self.dose_main_cmd = (os.path.join(self.SAFIR_RUNTIME,"bin","dose_main"),)
         self.foreach_cmd = (os.path.join(self.SAFIR_RUNTIME,"bin","foreach"),)
-        self.swre_logger_cmd = (os.path.join(self.SAFIR_RUNTIME,"bin","swre_logger"),)
         
         self.dose_test_cpp_cmd = (os.path.join(self.SAFIR_RUNTIME, "bin", "dose_test_cpp"),)
         self.dose_test_ada_cmd = (os.path.join(self.SAFIR_RUNTIME, "bin", "dose_test_ada", ),)
@@ -367,22 +366,6 @@ class Results:
             diff2 = list(difflib.unified_diff(expected_output[2][tc],output[2][tc]))
             self.write_diff(tcnames[tc], tc, diff0, diff1, diff2)
             self.num_tc_performed += 1
-
-        self.check_swre_output()
-
-
-    def check_swre_output(self):
-        files = glob.glob("swre_logger.*output.txt")
-        if len(files) != 1:
-            self.write_test_result(False,
-                                   "swre_logger_output",
-                                   "Could not find swre_logger_output (files = " + str(files) + ")")
-            return
-        with open(files[0]) as file:
-            data = file.read()
-        self.write_test_result(len(data.strip()) == 0,
-                               "swre_logger_output",
-                               "swre_logger output is not empty:\n" + data.replace("\r",""))
             
 
 def preexec(): # Don't forward signals.
@@ -413,6 +396,11 @@ class Runner:
         return proc
 
     def initialize(self,parameters):
+        #load and start syslog server
+        sys.path.append(os.path.join(parameters.SAFIR_RUNTIME,"data","test_support","python"))
+        from syslog_server import SyslogServer
+        self.syslog = SyslogServer()
+        
         if parameters.standalone:
             partners = (0,1,2)
         elif parameters.multinode:
@@ -428,8 +416,6 @@ class Runner:
 
         if not parameters.slave:
             self.__launchProcess("foreach", parameters.foreach_cmd)
-
-        self.__launchProcess("swre_logger", parameters.swre_logger_cmd)
 
         for i in partners:
             self.__launchProcess("dose_test_cpp." + str(i), parameters.dose_test_cpp_cmd + (str(i),))
@@ -483,7 +469,13 @@ class Runner:
                 print "", name, "exited with returncode", proc.returncode
             if output is not None:
                 output.close()
-
+                
+        #check that syslog output is empty
+        syslog_data = self.syslog.get_data(10) # wait for 10 seconds to collect any output
+        results.write_test_result(len(syslog_data) == 0,
+                                  "syslog_output",
+                                  "syslog is not empty:\n" + syslog_data)
+        
     def run_sequencer(self,parameters):
         print "** Running test sequencer with languages set to", parameters.lang0, parameters.lang1, parameters.lang2
         print "---- Output from dose_test_sequencer: ----"

@@ -8,4 +8,4 @@ ADD_CUSTOM_TARGET(douf_test_ada ALL
                   VERBATIM)
 
 ADD_TEST(TimeProvider_ada_test obj/douf_test_ada)
-SET_TESTS_PROPERTIES(TimeProvider_ada_test PROPERTIES ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${SOURCE_ROOT}/src/tests/test_support/test_config")
+SET_SAFIR_TEST_PROPERTIES(TimeProvider_ada_test)

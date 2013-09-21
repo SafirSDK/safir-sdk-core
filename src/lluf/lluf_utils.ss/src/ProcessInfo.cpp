@@ -25,11 +25,10 @@
 #include <vector>
 
 #include <boost/lexical_cast.hpp>
-
+#include <boost/filesystem/path.hpp>
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
 
-#include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -41,20 +40,26 @@
   #define _WIN32_WINNT 0x0501
 #endif
 #include <windows.h>
+#include <shellapi.h>
 #include <psapi.h>
 #include <process.h>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <Safir/Utilities/Internal/StringEncoding.h>
 #endif
 
-#if defined(linux) || defined(__linux) || defined(__linux__)
+namespace bfs = boost::filesystem;
+
 namespace
 {
+#if defined(linux) || defined(__linux) || defined(__linux__)
     const std::vector<std::string> GetCommandLine(const pid_t pid)
     {
         const std::string pidString = boost::lexical_cast<std::string>(pid);
-        const boost::filesystem::path filename = boost::filesystem::path("/proc")
+        const bfs::path filename = bfs::path("/proc")
             / pidString / "cmdline";
 
-        boost::filesystem::ifstream cmdline(filename);
+        bfs::ifstream cmdline(filename);
         if (!cmdline.good())
         {
             return std::vector<std::string>(1,pidString);
@@ -77,8 +82,36 @@ namespace
         }
         return result;
     }
-}
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+    const std::vector<std::string> GetCmdLine()
+    {
+        using Safir::Utilities::Internal::ToUtf8;
+
+        std::vector<std::string> res;
+
+        LPWSTR *szArglist;
+        int nArgs;
+        int i;
+
+        szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
+        if (szArglist != NULL)
+        {
+            for (i = 0; i < nArgs; ++i)
+            {
+                res.push_back(ToUtf8(szArglist[i]));
+            }
+        }
+
+        // Free memory allocated for CommandLineToArgvW arguments.
+        LocalFree(szArglist);
+
+        return res;
+    }
+#else
+#  error You need to implement GetCmdLine for this platform!
 #endif
+}
+
 
 namespace Safir
 {
@@ -110,13 +143,18 @@ namespace Utilities
     {
 #if defined(linux) || defined(__linux) || defined(__linux__)
         const std::vector<std::string> cmdline = GetCommandLine(m_pid);
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        const std::vector<std::string> cmdline = GetCmdLine();
+#else
+#  error You need to implement GetCommandLine for this platform!
+#endif
 
         if (cmdline.size() == 0)
         {
             return boost::lexical_cast<std::string>(m_pid);
         }
 
-        const boost::filesystem::path filename = boost::filesystem::path(cmdline[0]).filename();
+        const bfs::path filename = bfs::path(cmdline[0]).filename();
         
         //try to find the name of the jar file
         if (filename == "java" || filename == "java.exe")
@@ -126,8 +164,7 @@ namespace Utilities
             {
                 if (*it == "-jar" && it+1 != cmdline.end())
                 {
-                    return boost::filesystem::path(*(it+1)).filename().c_str();
-                    //use c_str() to support both fs v2 and v3
+                    return bfs::path(bfs::path(*(it+1)).filename()).string();
                 }
             }
         }
@@ -140,44 +177,12 @@ namespace Utilities
             {
                 if (boost::algorithm::ends_with(*it,".exe") || boost::algorithm::ends_with(*it,".csexe"))
                 {
-                    return boost::filesystem::path(*it).filename().c_str();
-                    //use c_str() to support both fs v2 and v3
+                    return bfs::path(bfs::path(*it).filename()).string();
                 }
             }
         }
 
-        return boost::filesystem::path(*cmdline.begin()).filename().c_str();
-        //use c_str() to support both fs v2 and v3
-
-#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-        HANDLE hProcess = ::OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
-                                        FALSE,
-                                        m_pid);
-        if (hProcess == NULL)
-        {
-            return boost::lexical_cast<std::string>(m_pid);
-        }
-
-        // Get the process name.
-        char szProcessName[MAX_PATH];
-        strncpy(szProcessName,boost::lexical_cast<std::string>(m_pid).c_str(), MAX_PATH);
-        
-        HMODULE hMod;
-        DWORD cbNeededMBN;
-
-        if ( EnumProcessModules( hProcess, &hMod, sizeof(hMod), 
-            &cbNeededMBN) )
-        {
-            GetModuleBaseNameA( hProcess, hMod, szProcessName, MAX_PATH );
-        }
-
-        CloseHandle(hProcess);
-        
-        return szProcessName;
-#else
-#  error You need to implement GetProcessName for this platform!
-#endif
-
+        return bfs::path(bfs::path(*cmdline.begin()).filename()).string();
     }
 
     pid_t ProcessInfo::GetPid()

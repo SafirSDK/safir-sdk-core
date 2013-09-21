@@ -434,8 +434,7 @@ namespace Safir.Dob
         }
 
         /// <summary>
-        /// Check that the object was Disposed correctly and, if it wasn't, show
-        /// a dialog and kill the application.
+        /// Check that the object was Disposed correctly and, if it wasn't, emit a log.
         /// </summary>
         ~EntityProxy()
         {
@@ -443,19 +442,8 @@ namespace Safir.Dob
             {
                 Dispose();
 
-                System.Console.WriteLine("An EntityProxy was not disposed correctly when destructor was called.\n" +
-                                         "Make sure you call Dispose on the proxy when you are done with it (you can also do this with a 'using' construct).\n" +
-                                         "The program will now exit!");
-
-                System.Windows.Forms.MessageBox.Show("An EntityProxy was not disposed correctly when destructor was called.\n" +
-                                                     "Make sure you call Dispose on the proxy when you are done with it (you can also do this with a 'using' construct).\n" +
-                                                     "The program will now exit!",
-                                                     "Fatal Error",
-                                                     System.Windows.Forms.MessageBoxButtons.OK,
-                                                     System.Windows.Forms.MessageBoxIcon.Stop,
-                                                     System.Windows.Forms.MessageBoxDefaultButton.Button1,
-                                                     System.Windows.Forms.MessageBoxOptions.ServiceNotification);
-                System.Environment.Exit(123);
+                Safir.Logging.SendSystemLog(Safir.Logging.Severity.Critical,
+                                            "Programming Error! An EntityProxy was not disposed correctly when destructor was called!");
             }
         }
 

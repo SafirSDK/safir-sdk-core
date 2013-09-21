@@ -22,33 +22,35 @@
 *
 ******************************************************************************/
 #include "DopeApp.h"
-#include <Safir/SwReports/SwReport.h>
+#include <Safir/Logging/Log.h>
+#include <Safir/Application/CrashReporter.h>
 
-int main(int /*argc*/, char * argv[])
+int main()
 {
-    Safir::SwReports::SwReportStarter starter;
+    Safir::Application::ScopedCrashReporter scopedStartStop;
 
     try
     {
-        Safir::Application::Tracer::SetProgramName(Safir::Dob::Typesystem::Utilities::ToWstring(argv[0]));
         DopeApp app;
         app.Run();
+        return 0;
     }
-    catch (const std::exception & e)
+    catch (const StartupError&)
     {
-        Safir::SwReports::SendFatalErrorReport(L"UnhandledException",
-                                               L"main",
-                                               Safir::Dob::Typesystem::Utilities::ToWstring(e.what()));
+        //errors should already have been reported
+    }
+    catch (const std::exception& e)
+    {
+        Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                                      L"Unhandled exception in main: " +
+                                      Safir::Dob::Typesystem::Utilities::ToWstring(e.what()));
     }
     catch (...)
     {
-        Safir::SwReports::SendFatalErrorReport(L"UnhandledException",
-                                               L"main",
-                                               L"A ... exception occurred somewhere in Dope. "
-                                               L"Since it was not an exception derived from std::exception "
-                                               L"I can't provide any more information, sorry.");
+        Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                                      L"Unhandled '...' exception in main");
     }
 
-    return 0;
+    return 1;
 }
 

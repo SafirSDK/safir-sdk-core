@@ -25,6 +25,9 @@
 #include <Safir/SwReports/Internal/Interface.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
+#include <Safir/Dob/ConnectionAspectMisc.h>
+#include <Safir/Utilities/ProcessInfo.h>
+
 namespace Safir
 {
 namespace Application
@@ -45,29 +48,35 @@ Tracer::~Tracer()
 
 }
 
-void Tracer::SetProgramName(const std::wstring & programName)
+void TracerBackdoor::Start(const Safir::Dob::ConnectionBase& connection)
 {
     using namespace Safir::Dob::Typesystem::Utilities;
 
+    Safir::Utilities::ProcessInfo proc(Safir::Utilities::ProcessInfo::GetPid());
     bool success;
-    SwreC_SetProgramName(ToUtf8(programName).c_str(), success);
+    SwreC_SetProgramName(proc.GetProcessName().c_str(), success);
+    if (!success)
+    {
+        Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
+    }
+
+    Safir::Dob::ConnectionAspectMisc conn(connection);
+
+    SwreC_StartTraceBackdoor(ToUtf8(conn.GetConnectionNameCommonPart()).c_str(),
+                             ToUtf8(conn.GetConnectionNameInstancePart()).c_str(),
+                             success);
     if (!success)
     {
         Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
     }
 }
 
-void
-Tracer::flush() const
+void TracerBackdoor::Stop()
 {
-    if (IsEnabled())
-    {
-        m_buf.Flush();
-    }
+    SwreC_StopTraceBackdoor();
 }
 
-void
-Tracer::InitializeEnabledHandling() const
+void Tracer::InitializeEnabledHandling() const
 {
     if (m_isEnabled == NULL)
     {

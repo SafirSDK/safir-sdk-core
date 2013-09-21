@@ -24,7 +24,9 @@
 #include "dose_main_waiting_states.h"
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Dob/Internal/Connections.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <boost/bind.hpp>
 
 
@@ -244,23 +246,24 @@ namespace Internal
         const size_t size = m_waitingStateTable.size();
         if (size != 0 && size == m_lastSize)
         {
-            std::wostringstream ostr;
-            ostr << "The number of items in the WaitingStates structure has not changed for 5 minutes!" << std::endl
-                << "This is probably due to a lost connection to one or more nodes (node split/join)" << std::endl
-                 << "Contents of the WaitingStates structure" << std::endl;
+            SEND_SYSTEM_LOG(Alert,
+                            << "The number of items in the WaitingStates structure has not changed for 5 minutes!"
+                            << "This is probably due to a lost connection to one or more nodes (node split/join)");
+
+            SEND_SYSTEM_LOG(Alert,
+                            << "Contents of the WaitingStates structure:");
 
             for (WaitingStateTable::iterator it = m_waitingStateTable.begin();
                  it != m_waitingStateTable.end(); ++it)
             {
-                ostr << " " << Typesystem::Operations::GetName(it->first.typeId)
-                     << ", " << it->first.handlerId
-                     << ", " << it->first.registrationTime
-                     << ", conn = " << it->second.connectionId
-                     << ", hasRegstate = " << std::boolalpha << !it->second.registrationState.IsNoState()
-                     << ", #inst = " << it->second.instances.size() <<std::endl;
+                SEND_SYSTEM_LOG(Alert,
+                                << " " << Typesystem::Operations::GetName(it->first.typeId)
+                                << ", " << it->first.handlerId
+                                << ", " << it->first.registrationTime
+                                << ", conn = " << it->second.connectionId
+                                << ", hasRegstate = " << std::boolalpha << !it->second.registrationState.IsNoState()
+                                << ", #inst = " << it->second.instances.size());
             }
-
-            lllerr << ostr.str() << std::endl;
 
             // Remove all entries
             m_waitingStateTable.clear();

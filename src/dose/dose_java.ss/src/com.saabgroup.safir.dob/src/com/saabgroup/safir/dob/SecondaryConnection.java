@@ -137,6 +137,15 @@ public class SecondaryConnection extends ConnectionBase
         return isConn[0];
     }
 
+    /**
+     * For a secondary connection this is the same as the IsAttached check.
+     *
+     * @return True if the SecondaryConnection is attached to a Connection and that Connection is open.
+     */
+    public boolean isOpen() {
+        return isAttached();
+    }
+
 
 
     //-------------------------------------

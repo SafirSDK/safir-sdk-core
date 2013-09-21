@@ -398,8 +398,9 @@ public class PreviousEntityProxy {
         }
         catch (Exception exc)
         {
-            System.out.println("PreviousEntityProxy.finalize: Caught exception: " + exc);
-            System.out.println("Will return as if nothing happened!");
+            com.saabgroup.safir.Logging.sendSystemLog
+                (com.saabgroup.safir.Logging.Severity.CRITICAL,
+                 "PreviousEntityProxy.finalize: Caught exception: " + exc);
         }
         finally
         {

@@ -122,6 +122,10 @@ namespace Dob
         return isConn;
     }
 
+    bool SecondaryConnection::IsOpen() const
+    {
+        return IsAttached();
+    }
     long SecondaryConnection::GetControllerId() const
     {
         if (!IsAttached())

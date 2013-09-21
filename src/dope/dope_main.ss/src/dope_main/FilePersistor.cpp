@@ -25,7 +25,7 @@
 
 #include <Safir/Dob/PersistenceParameters.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
-#include <Safir/SwReports/SwReport.h>
+#include <Safir/Logging/Log.h>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/exception.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -68,12 +68,10 @@ void FilePersistor::RemoveFile(const boost::filesystem::path& path) const
     }
     catch (const boost::filesystem::filesystem_error &)
     {
-        Safir::SwReports::SendErrorReport
-            (L"Storage error",
-            L"FilePersistor::RemoveFile",
-            std::wstring(L"Could not remove ")
-            + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
-            + L", maybe it is read-only!.");
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                      L"Failed to remove persistence file " +
+                                      Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
+                                      + L", maybe it is read-only?");
     }    
 }
 
@@ -105,7 +103,7 @@ const boost::filesystem::path GetStorageDirectory()
     catch (const boost::filesystem::filesystem_error & e)
     {
         throw Safir::Dob::Typesystem::SoftwareViolationException
-            (L"Failed to get hold of the directory for file persistance. Got this info from boost::filesystem::filesystem_error" +
+            (L"Failed to get hold of the directory for file persistence. Got this info from boost::filesystem::filesystem_error" +
             Safir::Dob::Typesystem::Utilities::ToWstring(e.what()),__WFILE__,__LINE__);
     }
 }
@@ -221,21 +219,20 @@ FilePersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
         }
         else
         {
-            Safir::SwReports::SendErrorReport
-                (L"Storage error",
-                 L"FilePersistor::Store",
-                 std::wstring(L"Failed to store object (")
-                 + Safir::Dob::Typesystem::Operations::GetName(entityId.GetTypeId())
-                 + L", " + entityId.GetInstanceId().ToString()
-                 + L") since it's serialization was larger than "
-                 + boost::lexical_cast<std::wstring>(boost::integer_traits<std::streamsize>::const_max));
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Failed to store object "
+                                          + entityId.ToString()
+                                          + L") since it's serialization was larger than "
+                                          + boost::lexical_cast<std::wstring>(boost::integer_traits<std::streamsize>::const_max));
         }
     }
     else
     {
-        Safir::SwReports::SendErrorReport(L"Not open",
-                                          L"FilePersistor::Store",
-                                          std::wstring(L"Failed to open file ") + Safir::Dob::Typesystem::Utilities::ToWstring(path.string()) + L" for writing");
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                      L"Failed to open file "
+                                      + Safir::Dob::Typesystem::Utilities::ToWstring(path.string()) 
+                                      + L" for writing, cannot persist entity " 
+                                      + entityId.ToString());
     }
 }
 
@@ -262,12 +259,10 @@ FilePersistor::RemoveAll()
         }
         catch (const boost::filesystem::filesystem_error &)
         {
-            Safir::SwReports::SendErrorReport
-                (L"Storage error",
-                L"FilePersistor::RemoveFile",
-                std::wstring(L"Could not remove ")
-                + Safir::Dob::Typesystem::Utilities::ToWstring((path).string())
-                + L", maybe it is read-only!.");
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Failed to remove persistence file "
+                                          + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
+                                          + L", maybe it is read-only?");
         }    
     }
 }
@@ -276,17 +271,14 @@ FilePersistor::RemoveAll()
 Safir::Dob::EntityPtr
 FilePersistor::RestoreBinary(const boost::filesystem::path & path) const
 {
-    //TODO: use the same vector for all restores to save on allocation...
     Safir::Dob::Typesystem::BinarySerialization bin;
     const size_t fileSize = static_cast<size_t>(boost::filesystem::file_size(path));
     if (fileSize == 0)
     {
-        Safir::SwReports::SendErrorReport
-            (L"Storage error",
-            L"FilePersistor::RestoreAll",
-            std::wstring(L"File ")
-            + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
-            + L" is empty, removing it.");
+        Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                      L"Persistence file "
+                                      + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
+                                      + L" is empty, removing it.");
         RemoveFile(path);
         return Safir::Dob::EntityPtr(); //NULL
     }
@@ -313,17 +305,14 @@ FilePersistor::RestoreBinary(const boost::filesystem::path & path) const
 Safir::Dob::EntityPtr
 FilePersistor::RestoreXml(const boost::filesystem::path & path) const
 {
-    //TODO: use the same string for all restores to save on allocation...
     std::wstring xml;
     const size_t fileSize = static_cast<size_t>(boost::filesystem::file_size(path));
     if (fileSize == 0)
     {
-        Safir::SwReports::SendErrorReport
-            (L"Storage error",
-            L"FilePersistor::RestoreXml",
-            std::wstring(L"File ")
-            + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
-            + L" is empty, removing it.");
+        Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                      L"File "
+                                      + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
+                                      + L" is empty, removing it.");
         RemoveFile(path);
         return Safir::Dob::EntityPtr(); //NULL
     }
@@ -352,12 +341,10 @@ FilePersistor::RestoreXml(const boost::filesystem::path & path) const
     }
     catch(const Safir::Dob::Typesystem::IllegalValueException &)
     {
-        Safir::SwReports::SendErrorReport
-            (L"Storage error",
-            L"FilePersistor::RestoreXml",
-            std::wstring(L"Could not restore file ")
-            + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
-            + L", removing it. The corresponding bin file is also removed if it exists");
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                      L"Could not restore entity from file "
+                                      + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
+                                      + L", removing it and any corresponding bin file");
         
         RemoveFile(path);
 
@@ -391,12 +378,11 @@ FilePersistor::RestoreAll()
 
                 m_debug << "File " << path.string().c_str() << " is not persistent in this configuration, removing" << std::endl;
 
-                Safir::SwReports::SendErrorReport
-                        (L"Storage error",
-                         L"FilePersistor::RestoreAll",
-                         L"Type " + tuple.get<2>()
-                         + L" is not persistent in this configuration, removing the corresponding xml and bin files"); 
-                
+                Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                              L"Type " 
+                                              + tuple.get<2>()
+                                              + L" is not persistent in this configuration, removing the corresponding xml and bin files");
+
                 RemoveFile(replace_extension(path,".xml"));
                 RemoveFile(replace_extension(path,".bin"));
             }
@@ -445,23 +431,19 @@ FilePersistor::RestoreAll()
         }
         catch(const Safir::Dob::Typesystem::IllegalValueException &)
         {
-            Safir::SwReports::SendErrorReport
-                        (L"Storage error",
-                        L"FilePersistor::RestoreAll",
-                        std::wstring(L"Could not restore file ")
-                        + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
-                        + L" removing it.");
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Could not restore persistent entity from file "
+                                          + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
+                                          + L", removing it.");
             RemoveFile(path);
         }
         catch (const boost::filesystem::filesystem_error & e)
         {
-            Safir::SwReports::SendErrorReport
-                (L"Storage error",
-                L"FilePersistor::RestoreAll",
-                std::wstring(L"Could not operate on file ")
-                + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
-                + L". This is the exception from boost::filesystem: "
-                + Safir::Dob::Typesystem::Utilities::ToWstring(e.what()));
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Filesystem operation failed on file "
+                                          + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
+                                          + L". Exception: "
+                                          + Safir::Dob::Typesystem::Utilities::ToWstring(e.what()));
         }
     }
 }

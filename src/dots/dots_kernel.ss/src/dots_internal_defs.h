@@ -29,6 +29,7 @@
 
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/CrashReporter.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/UnorderedMap.h>
 #include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 #include <iostream>
@@ -243,14 +244,18 @@ namespace Internal
 
     static inline void EnsureFailed (const std::string & str)
     {
-        lllerr << "ENSURE failed: '"<< str.c_str() << "'" << std::endl;
-        std::wcout << "Please contact your nearest DOB developer!" << std::endl;
+        std::wostringstream ostr;
+        ostr << "ENSURE Failed: " << str.c_str();
+        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Critical,
+                                                     ostr.str());
         
         const bool success = Safir::Utilities::CrashReporter::Dump();
         
         if (!success)
         {
-            lllerr << "ENSURE failed to generate a dump! It looks like CrashReporter is not started." << std::endl;
+            Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Critical,
+                                                         L"ENSURE failed to generate a dump! It looks like CrashReporter is not started.");
+            
         }
 
         throw InternalException(str, __FILE__,__LINE__);

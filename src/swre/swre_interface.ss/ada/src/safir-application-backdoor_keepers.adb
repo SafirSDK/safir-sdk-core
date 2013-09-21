@@ -27,24 +27,16 @@ with Ada.Containers;
 with Ada.Strings.Fixed;
 with GNAT.Regexp;
 with GNAT.Wide_String_Split;
-
 with Safir.Application.Backdoor_Command;
+with Safir.Dob.Connection_Aspect_Miscs;
 with Safir.Dob.Node_Parameters;
 with Safir.Dob.This_Node_Parameters;
-with Safir.Dob.Typesystem;
-with Safir.Dob.Connection_Aspect_Miscs;
 with Safir.Dob.Typesystem.Channel_Id;
-with Safir.Sw_Reports.Sw_Report; use Safir.Sw_Reports.Sw_Report;
+with Safir.Dob.Typesystem;
+with Safir.Logging;
 
 package body Safir.Application.Backdoor_Keepers is
 
-   --package Strings is new Ada.Containers.Vectors
-   --   (Index_Type => Natural,
-   --    Element_Type => Unbounded_Wide_String);
-
---   Pi_Cmd_Object_Id : constant Safir.Dob.Typesystem.ObjectId :=
---     (Safir.Application.Backdoor_Command.ClassId,
---      Safir.Dob.Typesystem.WHOLE_CLASS);
 
    function To_String
       (Text   : in Unbounded_Wide_String;
@@ -101,28 +93,16 @@ package body Safir.Application.Backdoor_Keepers is
    ----------------------------------------------------------------------------
    -- Start
    ----------------------------------------------------------------------------
-   procedure Start (Self     : in out Backdoor_Keeper;
-                    Backdoor : in     not null Safir.Application.Backdoors.Backdoor_Access) is
-   begin
-      Start (Self,
-             Backdoor,
-             To_Unbounded_Wide_String (""),
-             To_Unbounded_Wide_String (""));
-
-   end Start;
-
    procedure Start (Self       : in out Backdoor_Keeper;
-                    Backdoor   : in     not null Safir.Application.Backdoors.Backdoor_Access;
-                    Connection_Name_Common_Part   : in Unbounded_Wide_String;
-                    Connection_Name_Instance_Part : in Unbounded_Wide_String) is
+                    Connection : in     Safir.Dob.Connection_Bases.Connection_Base'Class;
+                    Backdoor   : in     not null Safir.Application.Backdoors.Backdoor_Access) is
+      Misc : constant Safir.Dob.Connection_Aspect_Miscs.Connection_Aspect_Misc :=
+        Safir.Dob.Connection_Aspect_Miscs.Create (Connection);
    begin
       Stop (Self);
 
-      if Length (Connection_Name_Common_Part) = 0 and Length (Connection_Name_Instance_Part) = 0 then
-         Self.Connection.Attach;
-      else
-         Self.Connection.Attach (Connection_Name_Common_Part, Connection_Name_Instance_Part);
-      end if;
+      Self.Connection.Attach (Misc.Get_Connection_Name_Common_Part,
+                              Misc.Get_Connection_Name_Instance_Part);
 
       Self.Backdoor := Backdoor;
       Self.Connection.Subscribe_Message
@@ -216,12 +196,14 @@ package body Safir.Application.Backdoor_Keepers is
          if To_String (Cmd_Tokens.First_Element) = "ping" then
             -- It's a 'ping' command. Answer to it without bothering
             -- the subclass implementator.
-            Send_Program_Info_Report ("Ping reply");
+            Safir.Logging.Send_System_Log (Safir.Logging.Debug,
+                                           "Ping reply");
             return; -- *** RETURN ***
 
          elsif To_String (Cmd_Tokens.First_Element) = "help" then
             -- Get help text from subclass implementator.
-            Send_Program_Info_Report (Self.Backdoor.all.Get_Help_Text);
+            Safir.Logging.Send_System_Log (Safir.Logging.Debug,
+                                           Self.Backdoor.all.Get_Help_Text);
             return; -- *** RETURN ***
 
          end if;

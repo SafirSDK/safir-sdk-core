@@ -26,12 +26,43 @@
 
 #include <Safir/Application/Internal/SwReportExportDefs.h>
 #include <Safir/Application/Internal/TraceStreamBuffer.h>
+#include <Safir/Dob/ConnectionBase.h>
 #include <iostream>
 
 namespace Safir
 {
 namespace Application
 {
+    /**
+     * This class just contains two static methods, for starting and stopping the tracers backdoor.
+     */
+    class SWRE_API TracerBackdoor
+    {
+    public:
+        /**
+         * Start reception of trace on/off commands
+         *
+         * The given connection must be opened before this method is called.
+         * If the connection is closed the reception of backdoor commands is
+         * stopped. If a new connection is opened this method needs to be called
+         * in order to start reception of backdoor commands.
+         *
+         * In situations when a connection is regularly closed and reopened,
+         * for instance in the case of context switches, you should consider
+         * using a dedicated connection as parameter.
+         *
+         * @param connection [in] The connection used for setting up a subscription for
+         *                        backdoor commands.
+         */
+        static void Start(const Safir::Dob::ConnectionBase& connection);
+
+        /**
+         * Stop reception of trace on/off commands
+         */
+        static void Stop();
+    };
+
+
     /**
      * A class for trace logging.
      */
@@ -41,14 +72,6 @@ namespace Application
         typedef std::basic_ios<wchar_t, std::char_traits<wchar_t> > ios_type;
     public:
         typedef std::basic_ostream<wchar_t, std::char_traits<wchar_t> > stream_type;
-
-        /**
-         * Set the program name of the current executable.
-         * This should be set to argv[0] in the main program.
-         *
-         * @param programName [in] The name of the executable
-         */
-        static void SetProgramName(const std::wstring & programName);
 
         /**
          * Constructor.
@@ -75,11 +98,6 @@ namespace Application
          * @return True if logging of this prefix is enabled.
          */
         inline bool IsEnabled() const {if (m_isEnabled == NULL) {InitializeEnabledHandling();} return *m_isEnabled;}
-
-        /**
-         * Force a flush of the internal buffer.
-         */
-        void flush() const;
 
         /**
          * Output operator for io manipulators.

@@ -35,7 +35,6 @@
     #endif
 #elif defined __GNUC__
     #define LLUF_UTILS_API
-    #define __cdecl
 #endif
 
 #endif

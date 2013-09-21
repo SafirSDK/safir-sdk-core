@@ -32,6 +32,7 @@
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Dob/Typesystem/Members.h>
 
 namespace Safir
@@ -85,10 +86,11 @@ namespace Internal
 
             if (!fromIsChanged)
             {
-                lllerr << "There was an unexpected timestamp on member "
-                    << memberName << ". The into timestamp is " << intoTimestamp
-                    << " and the from timestamp is " << fromTimestamp
-                    << ", but the changeflag is not set!" << std::endl;
+                SEND_SYSTEM_LOG(Critical,
+                                << "There was an unexpected timestamp on member "
+                                << memberName << ". The into timestamp is " << intoTimestamp
+                                << " and the from timestamp is " << fromTimestamp
+                                << ", but the changeflag is not set!");
             }
 
             for (int index = 0; index < arrayLength;++index)

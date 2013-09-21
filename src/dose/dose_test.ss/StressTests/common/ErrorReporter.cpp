@@ -24,45 +24,10 @@
 #include "ErrorReporter.h"
 #include "../common/CommonIncludes.h"
 #include <Safir/Utilities/ProcessInfo.h>
+#include <Safir/Utilities/Internal/Logging.h>
 #include <sstream>
 void ErrorReporter::Log(const std::string& text)
 {
-    try
-    {
-        std::ostringstream ostr;
-        const pid_t pid = Safir::Utilities::ProcessInfo::GetPid();
-        Safir::Utilities::ProcessInfo proc(pid);
-        ostr << "== DOSE STRESSTEST LOG ========================================================" << std::endl
-             << "This is an error message from one of the dose stress test programs. These logs " << std::endl
-             << "are sent using UDP broadcast. If you didnt expect this message it probably" << std::endl
-             << "means that someone is running dose stresstests on your LAN." << std::endl
-             << "Pid = " << pid << std::endl
-             << "Process Name = " << proc.GetProcessName() << std::endl
-             << "Process Description = " << Safir::Utilities::ProcessInfo::GetProcessDescription() << std::endl
-             << "Error Message:" << std::endl
-             << text
-             << std::endl
-             << "===============================================================================" << std::endl;
-        
-        //Set up address
-        const boost::asio::ip::address addr = 
-            boost::asio::ip::address::from_string("255.255.255.255");
-        const unsigned short port = 31221;
-        const boost::asio::ip::udp::endpoint endpoint(addr, port);
-        
-        //Create socket and send            
-        boost::asio::io_service service;
-        boost::asio::ip::udp::socket sock(service, 
-                                          boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::broadcast(), 0));
-        sock.set_option(boost::asio::socket_base::broadcast(true));
-        sock.send_to(boost::asio::buffer(ostr.str().c_str(),
-                                         ostr.str().size()),
-                     endpoint);
-        
-
-    }
-    catch (...)
-    {
-
-    }
+    SEND_SYSTEM_LOG(Alert,
+                    << "StressTest Error: " << text);        
 }

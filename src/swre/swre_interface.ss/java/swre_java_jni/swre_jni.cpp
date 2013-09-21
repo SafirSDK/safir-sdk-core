@@ -117,12 +117,6 @@ void SetJArray(JNIEnv * _env,
     }
 }
 
-void JNICALL Java_com_saabgroup_safir_swreports_Library_Stop
-(JNIEnv *, jclass)
-{
-    SwreC_Stop();
-}
-
 void JNICALL Java_com_saabgroup_safir_swreports_Library_SendFatalErrorReport
 (JNIEnv * _env, jclass, jstring _errorCode, jstring _location, jstring _text, jbooleanArray _success)
 {
@@ -198,15 +192,30 @@ void JNICALL Java_com_saabgroup_safir_application_Library_SetProgramName
     SetJArray(_env,_success,success);
 }
 
+void JNICALL Java_com_saabgroup_safir_application_Library_StartTraceBackdoor
+  (JNIEnv * _env, jclass, jstring _common, jstring _instance, jbooleanArray _success)
+{
+    bool success;
+    SwreC_StartTraceBackdoor(StringConverter(_env,_common),
+                             StringConverter(_env,_instance),
+                             success);
+    SetJArray(_env,_success,success);
+}
+
+void JNICALL Java_com_saabgroup_safir_application_Library_StopTraceBackdoor
+  (JNIEnv *, jclass)
+{
+    SwreC_StopTraceBackdoor();
+}
 
 
-void JNICALL Java_com_saabgroup_safir_application_Library_TraceAppendStringPrefix
-(JNIEnv * _env, jclass, jlong _prefixId, jbyteArray _str, jbooleanArray _success)
+void JNICALL Java_com_saabgroup_safir_application_Library_TraceAppendString
+(JNIEnv * _env, jclass, jlong _prefixId, jbyteArray _str, jint _offset, jint _length, jbooleanArray _success)
 {
     bool success;
     jboolean isCopy;
     jbyte * bytes = _env->GetByteArrayElements(_str,&isCopy);
-    SwreC_TraceAppendStringPrefix(_prefixId,reinterpret_cast<char*>(bytes),success);
+    SwreC_TraceAppendSubstring(_prefixId,reinterpret_cast<char*>(bytes), _offset, _length, success);
     if (isCopy == JNI_TRUE)
     {
         _env->ReleaseByteArrayElements(_str,bytes, 0);
@@ -217,31 +226,21 @@ void JNICALL Java_com_saabgroup_safir_application_Library_TraceAppendStringPrefi
 
 
 
-void JNICALL Java_com_saabgroup_safir_application_Library_TraceAppendCharPrefix
+void JNICALL Java_com_saabgroup_safir_application_Library_TraceAppendChar
 (JNIEnv * _env, jclass, jlong _prefixId, jbyte _b, jbooleanArray _success)
 {
     bool success;
-    SwreC_TraceAppendCharPrefix(_prefixId,_b,success);
+    SwreC_TraceAppendChar(_prefixId,_b,success);
     SetJArray(_env,_success,success);
 }
 
 
 
-void JNICALL Java_com_saabgroup_safir_application_Library_TraceSyncBuffer
+void JNICALL Java_com_saabgroup_safir_application_Library_TraceFlush
 (JNIEnv * _env, jclass, jbooleanArray _success)
 {
     bool success;
-    SwreC_TraceSyncBuffer(success);
-    SetJArray(_env,_success,success);
-}
-
-
-
-void JNICALL Java_com_saabgroup_safir_application_Library_TraceFlushBuffer
-(JNIEnv * _env, jclass, jbooleanArray _success)
-{
-    bool success;
-    SwreC_TraceFlushBuffer(success);
+    SwreC_TraceFlush(success);
     SetJArray(_env,_success,success);
 }
 

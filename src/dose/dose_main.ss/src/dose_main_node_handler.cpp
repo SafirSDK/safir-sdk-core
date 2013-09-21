@@ -43,6 +43,7 @@
 #include <boost/bind.hpp>
 #include <Safir/Dob/Internal/DoseCom_Interface.h>
 #include <Safir/Dob/Internal/NodeStatuses.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 
 
 namespace Safir
@@ -156,7 +157,8 @@ namespace Internal
         {
             if (ns == 0) //spurious node status from dose_com
             {
-                lllerr << "Got a spurious node status from dose_com for node " << ni << ", ignoring." <<std::endl;
+                SEND_SYSTEM_LOG(Error,
+                                << "Got a spurious node status from dose_com for node " << ni << ", ignoring.");
                 continue;
             }
 
@@ -167,7 +169,8 @@ namespace Internal
             {
             case NODESTATUS_NEW:
                 {
-                    lllerr << "NodeNew: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
+                    lllog(0) << "NodeNew: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
+                    std::wcout << "NodeNew: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
 
                     ni->Status() = Dob::NodeStatus::Starting;
                     NodeStatuses::Instance().SetNodeStatus(id, Dob::NodeStatus::Starting);
@@ -175,7 +178,8 @@ namespace Internal
                 break;
             case NODESTATUS_UP:
                 {
-                    lllerr << "NodeUp: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
+                    lllog(0) << "NodeUp: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
+                    std::wcout << "NodeUp: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
 
                     ni->Status() = Dob::NodeStatus::Started;
                     NodeStatuses::Instance().SetNodeStatus(id, Dob::NodeStatus::Started);
@@ -183,7 +187,8 @@ namespace Internal
                 break;
             case NODESTATUS_DOWN:
                 {
-                    lllerr << "NodeDown: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
+                    lllog(0) << "NodeDown: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
+                    std::wcout << "NodeDown: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
 
                     ni->Status() = Dob::NodeStatus::Failed;
                     NodeStatuses::Instance().SetNodeStatus(id, Dob::NodeStatus::Failed);
@@ -227,8 +232,9 @@ namespace Internal
     void NodeHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    /*typeId*/,
                                             const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
     {
-        lllerr << "Someone overregistered Safir::Dob::NodeStatus, so I'm not "
-            << "going to be able to update this entity any longer!" << std::endl;
+        SEND_SYSTEM_LOG(Error,
+                        << "Someone overregistered Safir::Dob::NodeStatus, so I'm not "
+                        << "going to be able to update this entity any longer!");
     }
 
 

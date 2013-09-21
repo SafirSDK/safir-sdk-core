@@ -25,15 +25,16 @@
 #ifndef __LIBRARY_H__
 #define __LIBRARY_H__
 
-#include "ReportCreator.h"
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Internal/Atomic.h>
-#include <boost/asio.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/thread.hpp>
+#include <boost/thread/recursive_mutex.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/locks.hpp>
+#include <boost/thread/once.hpp>
 #include <list>
 #include <queue>
 
@@ -46,7 +47,6 @@ namespace Internal
 
     class Library:
         public Safir::Dob::MessageSubscriber,
-        public Safir::Dob::MessageSender,
         private boost::noncopyable
     {
     public:
@@ -54,23 +54,35 @@ namespace Internal
 
         static Library & Instance();
 
-        void StartCrashReporting();
-        void Stop();
-
         void SetProgramName(const std::wstring & programName);
+
+        void StartTraceBackdoor(const std::wstring& connectionNameCommonPart,
+                                const std::wstring& connectionNameInstancePart);
+        void StopTraceBackdoor();
+
+        void StartCrashReporting();
+        void StopCrashReporting();
 
         PrefixId AddPrefix(const std::wstring & prefix);
         volatile bool * GetPrefixStatePointer(const PrefixId prefixId);
         bool IsEnabledPrefix(const PrefixId prefixId) const;
         void EnablePrefix(const PrefixId prefixId, const bool enabled);
 
-        void Trace(const PrefixId prefixId,
-                   const wchar_t ch,
-                   const bool dontLock = false);
+        void TraceChar(const PrefixId prefixId,
+                       char ch);
+        void TraceWChar(const PrefixId prefixId,
+                        const wchar_t ch);
         void TraceString(const PrefixId prefixId,
-                         const std::wstring & str);
+                         const char* str);
 
-        void TraceSync();
+        void TraceString(const PrefixId prefixId,
+                         const char* str,
+                         const size_t offset,
+                         const size_t length);
+
+        void TraceString(const PrefixId prefixId,
+                         const std::wstring& str);
+        
         void TraceFlush();
 
         void SendFatalErrorReport(const std::wstring & errorCode,
@@ -95,98 +107,55 @@ namespace Internal
         Library();
         ~Library();
 
-        void StopInternal();
-        static void AtExitFunc();
-        static void SignalFunc(const int signal);
         static void CrashFunc(const char* const dumpPath);
-        
-        //install signal and atexit functions
-        void Install();
   
-        //This is called when the thread is exiting (NOT atexit)
-        void HandleExit();
-
         void GetEnv();
 
-        void StartThread();
-        void Run();
-
-        void HandleTimeout(const boost::system::error_code& error, 
-                           const boost::shared_ptr<boost::asio::deadline_timer>& theTimer);
-        void SendQueuedReports();
-
-        void StartBackdoor();
         virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy);
         void HandleCommand(const std::vector<std::wstring>& cmdTokens);
         std::wstring GetHelpText();
 
-        void OnNotMessageOverflow();
-
         struct PrefixState
         {
             PrefixState():m_prefix(),m_isEnabled(false) {}
-            PrefixState(const std::wstring & prefix, const bool enabled):m_prefix(prefix),m_isEnabled(enabled) {}
-            //   bool operator==(const PrefixState & other) const {return m_prefix == other.m_prefix;}
+            PrefixState(const std::wstring & prefix, const bool enabled);
             bool operator==(const std::wstring & str) const {return m_prefix == str;}
 
             std::wstring m_prefix;
+            std::wstring m_prefixAscii;
             bool m_isEnabled;
         };
         BOOST_STATIC_ASSERT(sizeof(Library::PrefixId) >= sizeof(Library::PrefixState*));
 
         static PrefixState & ToPrefix(const PrefixId prefixId);
         static PrefixId ToPrefixId(PrefixState & prefix);
-
-
-        void SendReports(); //only callable from the internal thread
-
-        bool TrySend(ReportPtr report);
-        class TryMessageSender:
-            public Safir::Dob::MessageSender
-        {
-            virtual void OnNotMessageOverflow(){};
-        };
-        TryMessageSender m_tryMessageSender;
         
         typedef std::list<PrefixState> Prefixes;
         typedef std::vector<std::wstring> Arguments;
 
         std::wstring m_programName;
-        Arguments m_arguments;
 
-        boost::asio::io_service m_ioService;
+        Arguments m_arguments;
 
         //contains all the prefixes. Pointers into this structure are returned as handles
         //the language bindings. NEVER remove anything from this list!
         Prefixes m_prefixes;
         boost::recursive_mutex m_prefixSearchLock; //lock for anyone that loops through the prefixes or adds elements to it.
 
-        //a secondary connection for the backdoor handling. This will be attached to
-        // the own thread connection.
+        // A secondary connection for the trace backdoor handling. This will be attached to
+        // the connection given by the user.
         Safir::Dob::SecondaryConnection m_backdoorConnection;
-        volatile bool m_isBackdoorStarted;
+
+        void TraceInternal(const PrefixId prefixId,
+                           const wchar_t ch);
 
         //trace buffer and the associated lock
         boost::mutex m_traceBufferLock;
-        std::wstring m_traceBuffer;
+        std::wstring m_traceStdoutBuffer;
+        std::wstring m_traceSyslogBuffer;
         bool m_prefixPending;
 
-        //reports stuff
-        ReportCreator m_reportCreator;
-        boost::mutex m_reportQueueLock;
-        std::deque<ReportPtr> m_reportQueue;
-
-        //thread stuff
-        boost::mutex m_threadStartingLock; //make sure that only one thread starts the logger thread...
-        boost::shared_ptr<Safir::Dob::Connection> m_connection;
-
-        boost::thread m_thread;
-        boost::thread::id m_threadId;
-        
-        Safir::Dob::Internal::AtomicUint32 m_sendReportsPending;
-        Safir::Dob::Internal::AtomicUint32 m_flushPending;
-
-        Safir::Dob::Internal::AtomicUint32 m_crashed;
+        bool m_windowsNativeLogging;
 
         /**
          * This class is here to ensure that only the Instance method can get at the 

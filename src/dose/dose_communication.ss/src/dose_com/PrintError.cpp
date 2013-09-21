@@ -446,7 +446,7 @@ void PrintErr(int ErrorCode, const char *format, ... )
     else
     if(g_OutPutMode == 'R') PrintRam(Buf2);
     else
-    if (g_OutPutMode == 'L') lllerr << ToWstring(Buf2) << std::flush;
+    if (g_OutPutMode == 'L') lllog(0) << ToWstring(Buf2) << std::flush;
     else
     {
         std::wcout << ToWstring(Buf2) << std::flush;

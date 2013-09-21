@@ -21,7 +21,7 @@ else()
 endif()
   
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(VehicleAppCpp swre_interface_cpp dose_cpp dots_generated-Capabilities-cpp dots_generated-Safir-cpp dots_cpp lluf_utils)
+  TARGET_LINK_LIBRARIES(VehicleAppCpp swre_interface_cpp dose_cpp dots_generated-Capabilities-cpp dots_generated-Safir-cpp dots_cpp logging_cpp lluf_utils)
 endif()
 
 INSTALL(TARGETS VehicleAppCpp

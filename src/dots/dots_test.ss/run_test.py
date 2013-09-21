@@ -25,6 +25,9 @@
 ###############################################################################
 from __future__ import print_function
 import sys, subprocess, os, shutil, difflib
+from syslog_server import SyslogServer
+
+syslog = SyslogServer()
 
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 
@@ -66,6 +69,10 @@ if len(diff) != 0:
     print("".join(diff))
     sys.exit(1)
 
-
+logs = syslog.get_data(0.5) #we wait for a very short while for any logs to propagate.
+if len(logs) > 0:
+    print("Unexpected logs in system log!")
+    print(logs)
+    
 print("Expected output achieved")
 sys.exit(0)

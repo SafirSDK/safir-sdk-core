@@ -32,7 +32,7 @@
 #include <Safir/Dob/ErrorListResponse.h>
 #include <Safir/Dob/Response.h>
 #include <Safir/Dob/SuccessResponse.h>
-#include <Safir/SwReports/SwReport.h>
+#include <Safir/Logging/Log.h>
 
 namespace VehicleDatabaseCpp
 {
@@ -73,10 +73,10 @@ namespace VehicleDatabaseCpp
         const Safir::Dob::Typesystem::HandlerId& handlerId)
     {
         // No longer registered for given type.
-       Safir::SwReports::SendErrorReport(
-           L"Unexpected revoked registration", L"ServiceHandler::OnRevokedRegistration",
-           L"The handler " + handlerId.ToString() +  L" is no longer registered for type " +
-           Safir::Dob::Typesystem::Operations::GetName(typeId));
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                      L"Unexpected revoked registration" +
+                                      handlerId.ToString() +  L" is no longer registered for type " +
+                                      Safir::Dob::Typesystem::Operations::GetName(typeId));
     }
 
     //--------------------------------------------------------------------------

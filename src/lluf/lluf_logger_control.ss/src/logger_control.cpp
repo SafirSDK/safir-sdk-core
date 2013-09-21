@@ -51,9 +51,6 @@ public:
     ProgramOptions(int argc, char* argv[])
         : parseOk(false)
         , logLevel(false)
-        , permanent(false)
-        , clear(false)
-        , createLogdir(false)
         , ignoreFlush(false)
         , noTimestamps(false)
         , noStdout(false)
@@ -64,11 +61,7 @@ public:
         
         options_description general("General Options");
         general.add_options()
-            ("help,h", "show help message")
-            ("permanent,p", value<bool>(&permanent)->zero_tokens(), "Turn logging on permanently, by writing options to disk.")
-            ("clear,c", value<bool>(&clear)->zero_tokens(), "Clear permanent options (does not turn logging off for current session).")
-            ("create-logdir", value<bool>(&createLogdir)->zero_tokens(), 
-             ("Create the " + reader.Logging().get<std::string>("low_level_log_directory") + " directory.").c_str());
+            ("help,h", "show help message");
         
         options_description overhead("Options that reduce logging overhead");
         overhead.add_options()
@@ -77,7 +70,7 @@ public:
             ("no-stdout,s", value<bool>(&noStdout)->zero_tokens(), "Don't log to stdout.")
             ("no-file,f", value<bool>(&noFile)->zero_tokens(), "Don't log to file.");
 
-        options_description hidden("Options that reduce logging overhead");
+        options_description hidden("Hidden options");
         hidden.add_options()
             ("log-level", value<int>(&logLevel));
 
@@ -111,16 +104,9 @@ public:
             return;
         }
 
-        if (!clear && (vm.count("log-level") == 0 || logLevel < 0 || logLevel >9))
+        if (vm.count("log-level") == 0 || logLevel < 0 || logLevel >9)
         {
             std::wcout << "Logging level has to be between 0 and 9.\n" << std::endl;
-            ShowHelp(visible_options);
-            return;
-        }
-
-        if (clear && permanent)
-        {
-            std::wcout << "The 'permanent' and 'clear' options are mutually exclusive\n" << std::endl;
             ShowHelp(visible_options);
             return;
         }
@@ -131,10 +117,6 @@ public:
     
     int logLevel;
     
-    bool permanent;
-    bool clear;
-    bool createLogdir;
-
     bool ignoreFlush;
     bool noTimestamps;
     bool noStdout;
@@ -164,18 +146,6 @@ private:
 
 };
 
-bool CheckLogdir()
-{
-    const char * const env = getenv("SAFIR_RUNTIME");
-    if (env == NULL)
-    {
-        std::wcerr << "SAFIR_RUNTIME environment variable is not set" << std::endl;
-        return false;
-    }
-    const boost::filesystem::path dir = boost::filesystem::path(env) / "log";
-    
-    return boost::filesystem::exists(dir) && boost::filesystem::is_directory(dir);
-}
 
 int main(int argc, char * argv[])
 {
@@ -186,37 +156,14 @@ int main(int argc, char * argv[])
         return 1;
     }
 
-    if (options.clear)
-    {
-        Safir::Utilities::Internal::LowLevelLoggerControl::RemoveIniFile();
-        return 0;
-    }
-
-    if (options.createLogdir)
-    {
-        boost::filesystem::create_directories(Safir::Utilities::Internal::LowLevelLoggerControl::GetLogDirectory());
-    }
-
-    if (!CheckLogdir())
-    {
-        std::wcerr << "$SAFIR_RUNTIME/log/ directory does not exist, use the --create-logdir option \n"
-                   << "to create it.\nWithout this directory it is not possible to do any kind of logging."
-                   << std::endl;
-        return 1;
-    }
-
-    if (options.permanent)
-    {
-        Safir::Utilities::Internal::LowLevelLoggerControl::WriteIniFile(options.logLevel,
-                                                                        !options.noTimestamps,
-                                                                        !options.noStdout,
-                                                                        !options.noFile,
-                                                                        options.ignoreFlush);
-    }
-
     try
     {
         Safir::Utilities::Internal::LowLevelLoggerControl control(true, true);
+        if (control.Disabled())
+        {
+            std::wcout << "LowLevelLogger is currently disabled, please enabled it in your logging.ini file." << std::endl;
+            return 1;
+        }
         control.LogLevel(options.logLevel);
         std::wcout << "Log level should now be " << options.logLevel << std::endl;
         control.UseTimestamps(!options.noTimestamps);
@@ -226,11 +173,8 @@ int main(int argc, char * argv[])
     }
     catch (const std::exception &)
     {
-        if (!options.permanent)
-        {
-            std::wcout << "Failed to change logging options for current session. Is any app using the logger running?" << std::endl;
-            return 1;
-        }
+        std::wcout << "Failed to change logging options for current session. Is any app using the logger running?" << std::endl;
+        return 1;
     }
     return 0;
 }

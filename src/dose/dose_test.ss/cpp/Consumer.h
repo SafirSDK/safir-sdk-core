@@ -105,13 +105,11 @@ private:
     // Backdoor functions
     virtual void HandleCommand(const std::vector<std::wstring>& cmdTokens);
     virtual std::wstring GetHelpText();
-    Safir::Application::BackdoorKeeper m_backdoorKeeper;
-
 
     const std::wstring CallbackId() const;
 
     Safir::Dob::SecondaryConnection     m_connection;
-
+    Safir::Application::BackdoorKeeper m_backdoorKeeper;
 
     const int                           m_consumerNumber;
     const std::wstring                  m_connectionName;

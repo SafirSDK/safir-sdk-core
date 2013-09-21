@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <name>Safir.SwReports.Internal.FatalErrorReport</name>
-  <baseClass>Safir.SwReports.Internal.Error</baseClass>
-</class>

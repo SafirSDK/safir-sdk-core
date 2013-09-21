@@ -90,6 +90,14 @@ package Safir.Dob.Secondary_Connections is
    function Is_Attached
      (Self : in Secondary_Connection) return Boolean;
 
+   -- For a secondary connection this is the same as the IsAttached check.
+   --
+   -- Returns : True if the SecondaryConnection is attached to a Connection
+   --           and that Connection is open virtual bool IsOpen() const;
+   --
+   function Is_Open
+     (Self : in Secondary_Connection) return Boolean;
+
    -----------------------
    -- Get_Controller_Id --
    -----------------------

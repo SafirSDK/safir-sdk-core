@@ -31,9 +31,6 @@ final class Library
         System.loadLibrary("swre_java_jni");
     }
 
-    //SwreC_Stop
-    static native void Stop();
-
     //SwreC_SendFatalErrorReport
     static native void SendFatalErrorReport(String errorCode,
                                             String location,

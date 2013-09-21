@@ -32,25 +32,11 @@
 #endif
 
 #include <boost/program_options.hpp>
-#include <boost/filesystem/convenience.hpp>
-#include <boost/filesystem/operations.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
 
-
-bool CheckLogdir()
-{
-    const char * const env = getenv("SAFIR_RUNTIME");
-    if (env == NULL)
-    {
-        return false;
-    }
-    const boost::filesystem::path dir = boost::filesystem::path(env) / "log";
-    
-    return boost::filesystem::exists(dir) && boost::filesystem::is_directory(dir);
-}
 
 
 LoggingSettings::LoggingSettings(QWidget* /*parent*/):
@@ -58,21 +44,7 @@ LoggingSettings::LoggingSettings(QWidget* /*parent*/):
 {
     setupUi(this);
     
-    connect(save , SIGNAL(clicked()), this, SLOT(Save()));
-    connect(clear , SIGNAL(clicked()), this, SLOT(Clear()));
-    connect(createLogdir, SIGNAL(clicked()), this, SLOT(CreateLogDir()));
-
-    if (CheckLogdir())
-    {
-        dirGroup->setVisible(false);
-        CreateControl();
-    }
-    else
-    {
-        levelGroup->setVisible(false);
-        optionsGroup->setVisible(false);
-        permanentGroup->setVisible(false);
-    }
+    CreateControl();
 }
 
 
@@ -101,31 +73,6 @@ void LoggingSettings::File(bool use)
     m_control->LogToFile(use);
 }
 
-void LoggingSettings::Save()
-{
-    Safir::Utilities::Internal::LowLevelLoggerControl::WriteIniFile(logLevelSlider->value(),
-                                                                    timestamps->isChecked(),
-                                                                    toStdout->isChecked(),
-                                                                    toFile->isChecked(),
-                                                                    ignoreFlush->isChecked());
-}
-
-void LoggingSettings::Clear()
-{
-    Safir::Utilities::Internal::LowLevelLoggerControl::RemoveIniFile();
-}
-
-void LoggingSettings::CreateLogDir()
-{
-    levelGroup->setVisible(true);
-    optionsGroup->setVisible(true);
-    permanentGroup->setVisible(true);
-
-    dirGroup->setVisible(false);
-
-    boost::filesystem::create_directories(Safir::Utilities::Internal::LowLevelLoggerControl::GetLogDirectory());
-    CreateControl();
-}
 
 
 void LoggingSettings::CreateControl()
@@ -134,6 +81,17 @@ void LoggingSettings::CreateControl()
     {
         m_control.reset(new Safir::Utilities::Internal::LowLevelLoggerControl(true,true));
         
+        if (m_control->Disabled())
+        {
+            levelGroup->setVisible(false);
+            optionsGroup->setVisible(false);
+            return;
+        }
+        else
+        {
+            disabledGroup->setVisible(false);
+        }
+
         //only connect these if we have a session to affect immediately
         connect(logLevelSlider, SIGNAL(valueChanged(int)), this, SLOT(LevelChanged(int)));
         connect(ignoreFlush , SIGNAL(toggled(bool)), this, SLOT(IgnoreFlush(bool)));
@@ -150,9 +108,6 @@ void LoggingSettings::CreateControl()
         QMessageBox::critical(this,"Exception",QString("Got exception from LowLevelLoggerControl:\n") + e.what());
         levelGroup->setEnabled(false);
         optionsGroup->setEnabled(false);
-        permanentGroup->setEnabled(false);
-        dirGroup->setEnabled(false);
-        
     }
 }
 

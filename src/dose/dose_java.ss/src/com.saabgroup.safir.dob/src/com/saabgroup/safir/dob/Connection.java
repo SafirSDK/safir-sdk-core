@@ -199,8 +199,9 @@ public final class Connection extends ConnectionBase
             }
             catch (Exception exc)
             {
-                System.out.println("Connection.finalize: Caught exception: " + exc);
-                System.out.println("Will return as if nothing happened!");
+                com.saabgroup.safir.Logging.sendSystemLog
+                    (com.saabgroup.safir.Logging.Severity.CRITICAL,
+                     "Connection.finalize: Caught exception: " + exc);
             }
             Interface.Destructor(getControllerId());
         }

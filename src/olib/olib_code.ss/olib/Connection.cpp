@@ -27,7 +27,7 @@
 
 #include <Safir/Databases/Odbc/ReconnectException.h>
 #include <Safir/Databases/Odbc/TimeoutException.h>
-#include <Safir/SwReports/SwReport.h>
+#include <Safir/Logging/Log.h>
 #include "StringConversion.h"
 #include "Diagnostics.h"
     
@@ -76,9 +76,8 @@ void Connection::Alloc(const Environment & environment)
     {
         const StateMessagePair rec = GetDiagRec();
 
-        Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
-                                            L"Safir::Databases::Odbc::Connection::Alloc()",
-                                            rec.second);
+        Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                      L"Olib: Non Odbc Error in Connection::Alloc " + rec.second);
     }
 }
 
@@ -116,11 +115,14 @@ void Connection::Free()
         }
         else if (rec.first == L"HY000")    // General error
         {
-            Safir::SwReports::SendProgramInfoReport(rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                          L"Olib: Error in Connection::Free()" + rec.second);
+
         }
         else if (rec.first == L"HYT01")    // Connection timeout expired.
         {
-            Safir::SwReports::SendProgramInfoReport(rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                          L"Olib: Error in Connection::Free() " + rec.second);
         }
     }
 
@@ -149,13 +151,13 @@ void Connection::SetConnectAttr(long lAttribute, long lValue)
         const StateMessagePair rec = GetDiagRec();
         if (rec.first == L"01000")
         {
-            Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
-                                                L"Safir::Databases::Odbc::Connection::SetConnectAttr()",
-                                                rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Olib: Non Odbc Error in Connection::SetConnectAttr " + rec.second);
         }
         if (rec.first == L"01S02")
         {
-            Safir::SwReports::SendProgramInfoReport(L"Connection attribute not supported. A similiar attribute used instead");
+            Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                          L"Olib: Connection attribute not supported. A similiar attribute used instead");
         }
     }
 }
@@ -181,13 +183,13 @@ void Connection::SetConnectAttr(long lAttribute, const std::wstring & wszValue)
 
         if (rec.first == L"01000")
         {
-            Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
-                                                L"Safir::Databases::Odbc::Connection::SetConnectAttr()",
-                                                rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Olib: Non Odbc Error in Connection::SetConnectAttr " + rec.second);
         }
         if (rec.first == L"01S02")
         {
-            Safir::SwReports::SendProgramInfoReport(L"Connection attribute not supported. A similiar attribute used instead");
+            Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                          L"Olib: Connection attribute not supported. A similiar attribute used instead");
         }
     }
 }
@@ -213,9 +215,8 @@ void Connection::GetConnectAttr(long lAttribute, long & lValue) const
         const StateMessagePair rec = GetDiagRec();
         if (rec.first == L"01000")
         {
-            Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
-                                                L"Safir::Databases::Odbc::Connection::GetConnectAttr()",
-                                                rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Olib: Non Odbc Error in Connection::GetConnectAttr " + rec.second);
         }
         if (rec.first == L"01004")
         {
@@ -246,9 +247,8 @@ void Connection::GetConnectAttr(long lAttribute, wchar_t * wszValue, unsigned lo
 
         if (rec.first == L"01000")
         {
-            Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
-                                                L"Safir::Databases::Odbc::Connection::GetConnectAttr()",
-                                                rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Olib: Non Odbc Error in Connection::GetConnectAttr " + rec.second);
         }
         if (rec.first == L"01004")
         {
@@ -291,17 +291,18 @@ void Connection::Connect(const std::wstring & wszConnectionString)
         }
         else if (rec.first == L"01000")
         {
-            Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
-                                                L"Safir::Databases::Odbc::Connection::Connect()",
-                                                rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Olib: Non Odbc Error in Connection::Connect " + rec.second);
         }
         else if (rec.first == L"01S02")
         {
-            Safir::SwReports::SendProgramInfoReport(L"Connection attribute not supported. A similiar attribute used instead");
+            Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                          L"Olib: Connection attribute not supported. A similiar attribute used instead");
         }
         else if (rec.first == L"01S08")
         {
-            Safir::SwReports::SendProgramInfoReport(L"Error saving file dsn.");
+            Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                          L"Olib: Error saving file dsn.");
         }
     }
     m_bIsConnected = true;
@@ -341,17 +342,18 @@ void Connection::Connect(char * cszConnectionString)
         }
         else if (rec.first == L"01000")
         {
-            Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
-                                                L"Safir::Databases::Odbc::Connection::Connect()",
-                                                rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Olib: Non Odbc Error in Connection::Connect: " + rec.second);
         }
         else if (rec.first == L"01S02")
         {
-            Safir::SwReports::SendProgramInfoReport(L"Connection attribute not supported. A similiar attribute used instead");
+            Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                          L"Olib: Connection attribute not supported. A similiar attribute used instead");
         }
         else if (rec.first == L"01S08")
         {
-            Safir::SwReports::SendProgramInfoReport(L"Error saving file dsn.");
+            Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                          L"Olib: Error saving file dsn.");
         }
     }
     m_bIsConnected = true;
@@ -408,7 +410,8 @@ void Connection::Disconnect()
         }
         else if (rec.first == L"IM001")    // Driver not implemented function
         {
-            Safir::SwReports::SendProgramInfoReport(rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                          L"Olib: Driver not implemented function");
         }
         else if (rec.first == L"HYT01")      // Connection timeout
         {
@@ -421,13 +424,13 @@ void Connection::Disconnect()
 
         if (rec.first == L"01000")
         {
-            Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
-                                                L"Safir::Databases::Odbc::Connection::Disconnect()",
-                                                rec.second);
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Olib: Non Odbc Error in Connection::Disconnect " + rec.second);
         }
         if (rec.first == L"01S02")
         {
-            Safir::SwReports::SendProgramInfoReport(L"An error occurred during the disconnect. However, the disconnect succeeded.");
+            Safir::Logging::SendSystemLog(Safir::Logging::Warning,
+                                          L"Olib: An error occurred during the disconnect. However, the disconnect succeeded..");
         }
     }
 
@@ -485,9 +488,8 @@ void Connection::EndTran(short sCompletionType)
     {
         const StateMessagePair rec = GetDiagRec();
 
-        Safir::SwReports::SendErrorReport(  L"Non Odbc Error",
-                                            L"Safir::Databases::Odbc::Connection::EndTran()",
-                                            rec.second);
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                      L"Olib: Non Odbc Error in Connection::EndTran " + rec.second);
     }
 }
 
