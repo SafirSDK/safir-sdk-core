@@ -8,6 +8,12 @@
 * Rewrite dots_v in python (removes a lot of Ada dependencies!)
 * TODO: syslog
 * Bug fixes!
+* update lowlevellogger to use ini files
+* panic logging replaced with syslog
+* processinfo updated wrt windows and java
+* make core components report errors to syslog (instead of stdout/lllerr).
+* ResponseSender/Proxy usage errors are now reported to syslog, instead of crashing the app.
+* Tracer rewritten to use syslog
 
 TODO: Interface changes:
  * binaries i blobbar
