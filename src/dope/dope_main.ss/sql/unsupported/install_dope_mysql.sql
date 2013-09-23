@@ -1,6 +1,6 @@
 #==============================================================
 #
-# Copyright:      Saab Systems 2010
+# Copyright:      Saab AB 2010
 # Author:         Mikael Wennerberg
 #
 # Purpose:        MYSQL DOPE database sql script.
