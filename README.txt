@@ -7,4 +7,4 @@ It is most likely possible to adapt these instructions for other compiler and op
 
 Please read the INSTALL.Linux.txt document for linux build instructions, and INSTALL.Windows.txt for Windows instructions.
 
-Please post in the forum on http://www.safirsdk.com/ if you're having any trouble following any of the instructions, or with any other questions.
+Please post in the forum on http://safir.sourceforge.net/ if you're having any trouble following any of the instructions, or with any other questions.
