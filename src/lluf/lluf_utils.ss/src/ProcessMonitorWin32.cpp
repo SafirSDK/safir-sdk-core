@@ -26,6 +26,7 @@
 #include "ProcessMonitorWin32.h"
 
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 
 #include <vector>
 
@@ -118,7 +119,8 @@ namespace Utilities
             }
             else
             {
-                lllog(0) << "ProcessMonitorWin32Thread::StartMonitorPid() - call to OpenProcess failed." << std::endl;
+                SEND_SYSTEM_LOG(Critical,
+                                << "ProcessMonitorWin32Thread::StartMonitorPid() - call to OpenProcess failed.");
             }
         }
         else
@@ -217,8 +219,9 @@ namespace Utilities
             if (dwRet == WAIT_FAILED)
             {
                 const DWORD error = GetLastError();
-                lllog(0) << "ProcessMonitorWin32Thread::Run() - WaitForMultipleObjects returned WAIT_FAILED!" << std::endl
-                    << "   Error code = " << error << std::endl;
+                SEND_SYSTEM_LOG(Critical,
+                                << "ProcessMonitorWin32Thread::Run() - WaitForMultipleObjects returned WAIT_FAILED!"
+                                << " Error code = " << error);
 
                 LPVOID lpMsgBuf;
                 DWORD dw = GetLastError(); 
@@ -232,7 +235,8 @@ namespace Utilities
                     (LPTSTR) &lpMsgBuf,
                     0, NULL );
 
-                lllog(0) << "   Error message: " << (LPTSTR)lpMsgBuf << std::endl;                    
+                SEND_SYSTEM_LOG(Critical,
+                                << " - Error message: " << (LPTSTR)lpMsgBuf);
 
                 LocalFree(lpMsgBuf);
             }
