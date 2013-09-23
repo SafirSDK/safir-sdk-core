@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 2.8)
 project(douf_test CXX)
 
 #this project contains a library that has a C interface, so we don't want the "d" suffix on debug builds on windows
-#Must be set before including cmake_settings.txt
+#Must be set before including safir_sdk_core_config.cmake
 SET(NO_LIBRARY_POSTFIXES 1) 
 
-include($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+include($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 find_package(Boost COMPONENTS date_time)
 

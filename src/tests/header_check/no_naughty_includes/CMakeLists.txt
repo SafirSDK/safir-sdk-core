@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(no_naughty_includes CXX)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 add_custom_command(
   OUTPUT all_headers_included.cpp 

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(SplitJoinTest CXX)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 find_package(ACE)
 

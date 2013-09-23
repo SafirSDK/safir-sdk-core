@@ -5,10 +5,10 @@ project(dots_id C CXX)
 INCLUDE_DIRECTORIES(.)
 
 #this library has a C interface, so we don't want the "d" suffix on debug builds on windows
-#Must be set before including cmake_settings.txt
+#Must be set before including safir_sdk_core_config.cmake
 SET(NO_LIBRARY_POSTFIXES 1) 
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 ADD_LIBRARY(dots_id SHARED dots_id.cpp md5.c md5.h Safir/Dob/Typesystem/Internal/Id.h)
 

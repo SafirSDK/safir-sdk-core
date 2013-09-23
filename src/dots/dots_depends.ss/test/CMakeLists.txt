@@ -4,7 +4,7 @@ project(dots_depends_test CXX)
 
 add_subdirectory(generate_max_dots)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 INSTALL(FILES 
         data/DotsMax.Entity.dou

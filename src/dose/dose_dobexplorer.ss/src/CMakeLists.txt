@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(dobexplorer C CXX) #FindQt needs C
 
-INCLUDE("$ENV{SAFIR_SDK}/data/build/cmake_settings.txt")
+INCLUDE("$ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake")
 
 # find and setup Qt4 for this project
 SET(QT_USE_QTMAIN TRUE)

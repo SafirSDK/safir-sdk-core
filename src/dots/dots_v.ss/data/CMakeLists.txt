@@ -6,11 +6,11 @@ endif()
 
 PROJECT (dots_generated CXX ${PROJ_JAVA})
 
-#we need to set up include dirs before including cmake_settings.txt
+#we need to set up include dirs before including safir_sdk_core_config.cmake
 #since otherwise sdk/include will be before cpp/include in the include path.
 INCLUDE_DIRECTORIES(. cpp/include)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 INCLUDE(cmake_depend.txt)
 INCLUDE(PrecompiledHeader)
 

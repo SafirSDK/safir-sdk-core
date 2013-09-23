@@ -9,7 +9,7 @@ if (NOT SAFIR_ADA_SUPPORT)
      return()
 endif ()
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 SET(build_directories
       src/lib

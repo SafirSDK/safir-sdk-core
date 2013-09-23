@@ -4,7 +4,7 @@ project(olib CXX)
 
 INCLUDE_DIRECTORIES(.)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 if (UNIX)
     FIND_PACKAGE(IODBC)

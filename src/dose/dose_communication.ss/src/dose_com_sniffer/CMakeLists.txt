@@ -1,6 +1,6 @@
 project(dose_com_sniffer CXX)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 SET(CMAKE_CXX_FLAGS "-D_LINUX")
 

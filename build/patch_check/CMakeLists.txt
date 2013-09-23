@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(patch_check CXX)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 FIND_PACKAGE(Boost COMPONENTS date_time thread system REQUIRED)
 set(CMAKE_REQUIRED_LIBRARIES ${Boost_LIBRARIES})
