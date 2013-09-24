@@ -24,7 +24,6 @@
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
-//#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -53,8 +52,8 @@ public:
         options_description desc("Allowed options");
         desc.add_options()
             ("help,h", "show help message")
-            ("max-dump-files,i", value<size_t>(&maxDumpFiles)->default_value(25), "Max number of crash dumpfiles.")
-            ("check-interval,c", value<int>(&checkInterval)->default_value(1), "Check interval in seconds.")
+            ("max-dump-files,i", value<size_t>(&maxDumpFiles)->default_value(1000), "Max number of crash dumpfiles.")
+            ("check-interval,c", value<int>(&checkInterval)->default_value(30), "Check interval in seconds.")
             ;
         
         variables_map vm;
@@ -132,11 +131,6 @@ int main(int argc, char * argv[])
                 }
 
                 const size_t tooMany = (dumpFiles.size() - options.maxDumpFiles) + 10; //remove a few more...
-
-                std::cout << "Nbr of files: " << dumpFiles.size() << std::endl;
-                std::cout << "maxDumpFiles:" << options.maxDumpFiles << std::endl;
-
-                std::cout << "Removing " << tooMany << " files!!" << std::endl;
 
                 std::multimap<std::time_t, bfs::path>::iterator it = sorted.begin();
                 for (size_t i = 0; i < tooMany; ++i)
