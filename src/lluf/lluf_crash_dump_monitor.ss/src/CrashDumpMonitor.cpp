@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/ConfigReader.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 
@@ -136,6 +137,8 @@ int main(int argc, char * argv[])
                 for (size_t i = 0; i < tooMany; ++i)
                 {
                     bfs::remove(it->second);
+                    SEND_SYSTEM_LOG(Notice,
+                                    << "Removed file " << it->second);
                     ++it;
                 }
             }
