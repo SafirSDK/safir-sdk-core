@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Utilities/Internal/StringEncoding.h>
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 #include <iostream>
@@ -119,6 +120,8 @@ int main(int argc, char * argv[])
         {
             namespace bfs = boost::filesystem;
 
+            using Safir::Utilities::Internal::ToUtf16;
+
             const std::vector<bfs::path> dumpFiles =
                     std::vector<bfs::path>(bfs::directory_iterator(GetDumpDirectory()),
                                            bfs::directory_iterator());
@@ -139,7 +142,7 @@ int main(int argc, char * argv[])
                 {
                     bfs::remove(it->second);
                     SEND_SYSTEM_LOG(Notice,
-                                    << L"Removed file " << (it->second).wstring());
+                                    << L"Removed file " << ToUtf16((it->second).string()));
                     ++it;
                 }
             }
