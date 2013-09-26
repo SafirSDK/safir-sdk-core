@@ -25,6 +25,7 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
+#include <iostream>
 
 #ifdef _MSC_VER
 #pragma warning (push)
