@@ -139,7 +139,7 @@ int main(int argc, char * argv[])
                 {
                     bfs::remove(it->second);
                     SEND_SYSTEM_LOG(Notice,
-                                    << "Removed file " << it->second);
+                                    << L"Removed file " << (it->second).wstring());
                     ++it;
                 }
             }
