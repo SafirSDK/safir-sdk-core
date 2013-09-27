@@ -2880,25 +2880,25 @@ It is possible to set various filter conditions for swre_logger. Type "swre_logg
 
 Swre_logger can be started in any number of instances in one or several nodes, each with its own filter conditions. For instance, it is possible to start an instance that logs only program information (PI) reports from a particular application.
 
-[[program_information]]
-== Software program information
+[[debugging_support]]
+== Debugging support
 Safir SDK Core provides support for applications to have a "back door" to make it possible to interactively enquire about the status of an application or to turn on and off debug logging. It also provides an interface that makes it easy to add debug trace logging to applications.
 
 === The backdoor command
-Software Reporting defines a Dob message (Safir.Application.Backdoor) to be used to send program information commands to applications. Backdoor commands can either be sent using Sate (see <<sate>>), or by the command-line program "backdoor" (use "+backdoor -h+" to get info on usage).
+The SDK defines a Dob message, Safir.Application.Backdoor to be used to send debugging commands to applications. Backdoor commands can either be sent using Sate (see <<sate>>), or by the command-line program "backdoor" (use "+backdoor -h+" to get info on usage).
 
 There are some predefined backdoor commands that applications should handle:
 
-- *Ping:* When receiving this command the application should send a Program Info Report as an indication that it is alive.
-- *Help:* When receiving this command the application should send a Program Info Report that contains a listing of the supported backdoor commands.
+- *Ping:* When receiving this command the application should send a Safir Log (at Debug severity) that indicates that it is alive.
+- *Help:* When receiving this command the application should send a Safir Log (at Debug severity) that contains a listing of the supported backdoor commands.
 
-Backdoor commands are defined as Dob messages and therefore sent to all subscribers. This means that applications have to check whether or not a backdoor message is addressed to the own application. Software Reporting provides classes (Safir.Application.BackdoorKeeper and Safir.Application.Backdoor) that simplifies the reception of backdoor commands. The classes provide this functionality:
+Backdoor commands are Dob messages and are therefore sent to all subscribers. This means that applications have to check whether or not a backdoor message is addressed to them before acting on them. The SDK provides two classes, +Safir.Application.BackdoorKeeper+ and +Safir.Application.Backdoor+, that simplifies the handling of backdoor commands. The classes provide this functionality:
 
-- Setup of subscriptions for PI command messages.
-- Checking of whether or not a PI command is to be handled by own application.
+- Setup of subscriptions for backdoor command messages.
+- Checking of whether or not a backdoor command is to be handled by this application.
 - Automatic answers to Ping commands.
 
-Output from an application as a response to a backdoor command should be through Program Information Reports (see <<software_reports>>).
+Output from an application as a response to a backdoor command should be through a system log, preferrably at Debug level (see <<safir_logging>>).
 
 === Tracer
 ////
@@ -3436,7 +3436,8 @@ When the PRS gets notified that the console is switching context it:
 * Tells all its "parts" to restart, i.e
 ** Clear all internal state information.
 ** Attach to the connection.
-** Set up subscriptions again (A PRS normally does not own entities, but if it does, registrations and creation of entities must be done again.) 
+** Set up subscriptions again (A PRS normally does not own entities, but if it does, registrations and creation of entities must be done again.)
+** Restart TracerBackdoor and any BackdoorKeepers (these use message subscriptions internally which are lost in connection Close).
 
 The attach and subscription are the same actions that the PRS must take when it starts up the first time. What is very important when changing context (but not when starting for the first time) is the clearing of internal state information. Leaving any internal state information is a serious safety risk!
 
