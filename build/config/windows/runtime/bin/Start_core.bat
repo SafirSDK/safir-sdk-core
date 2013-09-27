@@ -9,4 +9,4 @@ setlocal
 start /MIN dose_main
 start /MIN dope_main
 start /MIN foreach
-start /MIN swre_logger
+start /MIN crash_dump_monitor
