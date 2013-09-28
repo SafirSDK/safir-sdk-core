@@ -164,7 +164,7 @@ The build.py command will build the Safir SDK Core components in the correct ord
 
 With a bit of luck you should now have a working Safir SDK Core installed on your computer.
 
-Try running start_core.bat (in C:\safir\runtime\bin) to see if everything is working. You should get a dose_main, dope_main and a swre_logger started for you. Try starting sate.exe, and you can start playing around with Safir SDK Core.
+Try running start_core.bat (in C:\safir\runtime\bin) to see if everything is working. You should get a dose_main, dope_main, foreach, and lluf_crash_dump_monitor started for you. Try starting sate.exe, and you can start playing around with Safir SDK Core.
 
 
 Building example applications
