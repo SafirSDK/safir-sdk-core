@@ -165,12 +165,6 @@ The Dob allows each application/component that wants to provide a Dob interface 
 
 The xml files are used to generate language interfaces, that any application that wishes to use an object can include and use.
 
-[[information_model]]
-.Defining the information model
-image::images/typesystem_information_model.png["Defining the information model", width=400, link="images/typesystem_information_model.png"]
-
-The figure <<information_model>> attempts to show how applications contribute to, or partake of, the information model. 
-
 ===== Defining objects
 New types are defined by inheritance from a number of predefined classes. The classes for the distribution mechanisms are Safir.Dob.Message, Safir.Dob.Service, Safir.Dob.Entity, Safir.Dob.SuccessResponse and Safir.Dob.ErrorResponse.
 
