@@ -101,10 +101,10 @@ build_dir        src/douf/douf_utilities.ss/src            RelWithDebInfo
 
 #SWRE
 build_dir        src/swre/swre_library.ss/src              RelWithDebInfo
-build_dir        src/swre/swre_interface.ss/cpp/swre_interface_cpp         RelWithDebInfo   Debug
-build_dir        src/swre/swre_interface.ss/dotnet/swre_interface_dotnet   RelWithDebInfo
-build_dir        src/swre/swre_interface.ss/java           RelWithDebInfo
-build_dir        src/swre/swre_interface.ss/ada            RelWithDebInfo
+build_dir        src/swre/swre_cpp.ss/src                  RelWithDebInfo   Debug
+build_dir        src/swre/swre_dotnet.ss/src               RelWithDebInfo
+build_dir        src/swre/swre_java.ss/src                 RelWithDebInfo
+build_dir        src/swre/swre_ada.ss/                     RelWithDebInfo
 build_dir        src/swre/swre_backdoor.ss/src             RelWithDebInfo
 
 #FOREACH
