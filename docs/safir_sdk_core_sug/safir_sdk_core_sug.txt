@@ -675,7 +675,7 @@ All this means that any changes to parameter files under $(SAFIR_RUNTIME}/data/t
 
 .Note
 ************************************
-In the current version of Safir SDK Core (4.5), the dobmake.py script is not aware of the _typesystem.ini_ configuration (see <<typesystem_ini>>, so dou and dom files will always be copied to $(SAFIR_RUNTIME}/data/text/dots/classes regardless of the contents of that configuration file.
+In the current version of Safir SDK Core (4.4), the dobmake.py script is not aware of the _typesystem.ini_ configuration (see <<typesystem_ini>>, so dou and dom files will always be copied to $(SAFIR_RUNTIME}/data/text/dots/classes regardless of the contents of that configuration file.
 
 So, to keep the "expected" behaviour, don't change the Default section in typesystem.ini from pointing to $(SAFIR_RUNTIME}/data/text/dots/classes.
 ************************************
@@ -2564,7 +2564,7 @@ Port for the syslog server.
 replace_newline_with_space::
 Controls whether or not a newline in the log message is replaced with a space.
 
-See <<logging>> for more information on how to use and configure the logging functionality.
+See <<safir_logging>> for more information on how to use and configure the logging functionality.
 
 ===== LowLevelLog
 *Lars: This is for you*
@@ -2590,14 +2590,14 @@ _typesystem.ini_ can contain any number of _sections_ (with arbitrary names), ea
 In the above example there are three sections, one specifying the default place to look for dou/dom files, and two places to look for override files. If, for example, the Override directory contains a Safir.Dob.NodeParameters.dou file (which is also in the Default directory, by default) the file from the Override directory will be used.
 
 ==== Environment and special variable expansion
-Since the configuration files need to be able to refer to system directories they also support environment variable expansion. E.g. +$(HOME)+ expands to the value of the +HOME+ environment variable.
+Since the configuration files need to be able to refer to system directories they also support environment variable expansion. E.g. +$(HOME)+ expands to the value of that environment variable.
 
 [[special_variables]]
 On Windows platforms we also support the _CSIDL_ values mentioned above, since Windows does not guarantee that there are always environment variables that correspond to them. For example the %PROGRAMDATA% environment variable is not guaranteed to be set or to point to the same directory as _CSIDL_COMMON_APPDATA_. So the configuration files support _special variables_ as well as environment variables. E.g. +@\{SPECIAL_VARIABLE\}+ will be expanded to the value of that variable (note that the syntax is different from the environment variable syntax).
 
-The supported special variables are listed in <<windows_special_variables>>. We also provide aliases that use the Windows Known Folder naming.
+The supported special variables are listed in <<special_variables_table>>. We also provide aliases that use the Windows Known Folder naming.
 
-[[windows_special_variables]]
+[[special_variables_table]]
 .Special Variables on Windows
 [width="70%",options="header",frame="topbot",grid="none"]
 |===========================
@@ -2611,16 +2611,7 @@ The supported special variables are listed in <<windows_special_variables>>. We 
 
 Here are two more links that contain useful information about Windows paths, CSIDLs, and Windows Known Folders.: "http://blogs.msdn.com/b/cjacks/archive/2008/02/05/where-should-i-write-program-data-instead-of-program-files.aspx[Where Should I Write Program Data...?]" and "http://blogs.msdn.com/b/patricka/archive/2010/03/18/where-should-i-store-my-data-and-configuration-files-if-i-target-multiple-os-versions.aspx[Where Should I Store my Data and Config...?]".
 
-There is currently one special variable that is available on both Linux and Windows. It is described in <<common_special_variables>>, below.
-
-[[common_special_variables]]
-.Common Special Variables
-[width="70%",options="header",frame="topbot",grid="none"]
-|===========================
-|Special Variable  |Meaning
-|TEMP              | /tmp on Linux and TEMP or TMP environment variable on Windows.
-|===========================
-
+There are currently no special variables on Linux.
 
 === Network config
 A Safir SDK Core system can have two basic configurations, with respect to networking. _Standalone_ or _Multinode_. Standalone means that the system consists of only one node or computer. This is typically used for developer machines or systems that have only one node. Multinode is typically used when a system consists of several nodes, for example a couple of servers (where applications and databases run) and a few operator consoles (where only the HSI runs).
@@ -2871,7 +2862,7 @@ Knowing what value to set +SharedMemorySize+ to is trickier, but one approach is
 == Safir Logging
 Safir SDK Core has a mechanism, Safir Log, designed to simplify for applications to generate and send log messages according to the well known and widely adopted syslog protocol (RFC 3164).
 
-Safir Log provides a simple interface (currently available for C++, C#, Java and Ada) so that an application only has to give a severity code and the message itself. The framework will do the neccessary formatting according to RFC 3164. Safir Log will use Facility code 1 (user-level messages) for all syslog messages.
+Safir Log provides a simple interface (currently available for C++, C#, Java and Ada) so that an application only has to give a severity code and the log message itself. The framework will do the neccessary formatting according to RFC 3164. Safir Log will use Facility code 1 (user-level messages) for all syslog messages.
 
 It is also possible to configure Safir Log so that the logs are sent to a native, plattform specific, logging mechanism. In practice, this could be of use on the Windows plattform to send logs to the Windows Event Log.  
 
@@ -2883,9 +2874,9 @@ It is also possible to configure Safir Log so that the logs are sent to a native
 Safir::Logging::SendSystemLog(Safir::Logging::Error, L"This is an error log!");
 ----------------------------
  
-Note that Safir SDK Core only provides the functionality related to the sending side for syslog messages. In order to collect and view the log messages a syslog server is needed. Such a server can range from a simple program listening for UDP packets and dumping the result on standard output, to more sophisticated solutions that support filtering, writing logs do disk, search functions etc. A syslog deamon is included in most Linux distributions and for Windows there are third-party syslog servers. See below.
+Note that Safir SDK Core only provides the functionality related to the sending side for syslog messages. In order to collect and view the log messages a syslog server is needed. Such a server can range from a simple program listening for UDP packets and dumping the result on standard output, to more sophisticated solutions that support filtering, writing logs do disk, search functions etc. A syslog deamon is included in most Linux distributions and for Windows there are third-party syslog servers.
 
-Also, keep in mind that syslog servers handle messages differently regarding new lines. For example, there are implementations that replace newline characters with spaces. Therefore, for maximum portability and clearity, try to make your logs one-liners.  
+Syslog is a "one-liners" oriented protocol. This, and the fact that syslog servers are known to handle messages differently regarding new lines, means that we recommend that you try to make your logs one-liners.  
 
 === Safir Logging configuration
 The section SystemLog in the configuration file logging.ini (see <<configuration>>) contains parameters that determine where the log messages are directed. There is also a parameter that determines how newlines in the log message should be handled.
@@ -2907,14 +2898,14 @@ Controls whether or not a newline in the log message is replaced with a space.
 
 
 === Safir Logging on Windows
-Windows doesn't have built-in support for receiving syslog messages. However, you can find third-party syslog servers that targets the Windows plattform, both commercial and freely distributed. One example is Kiwi Syslog Server (http://www.kiwisyslog.com[])
+Windows doesn't have built-in support for receiving syslog messages. However, you can find third-party syslog servers that target the Windows plattform, both commercial and freely distributed. One example is Kiwi Syslog Server (http://www.kiwisyslog.com[])
 
-To enable logging using syslog on Windows, the parameter send_to_syslog_server shall be set to true and the parameters for server address and server port shall be set to appropriate values.
+To enable logging using syslog on Windows, the parameter +send_to_syslog_server+ shall be set to true and the parameters +syslog_server_address+ and +syslog_server_port+ shall be set to appropriate values.
 
 ==== Windows Event Log
-Safir Log also provides a way of writing syslog messages to the Windows Event Log. To enable this, set the parameter native_logging to true.
+Safir Log also provides a way of writing syslog messages to the Windows Event Log. To enable this, set the parameter +native_logging+ to true.
 
-For native logging the event source will be set to 'Safir' and the severity level parameter is mapped to a corresponding Windows event log type according to:
+For native logging the event source will be set to 'Safir' and the severity level parameter is mapped to a corresponding Windows Event Log Type according to:
 
 .Mapping severity level to Windows event type
 [width="70%", cols="50%,50%",options="header",frame="topbot",grid="none"]
@@ -2928,13 +2919,14 @@ For native logging the event source will be set to 'Safir' and the severity leve
 |=========================================================================
 
 === Safir Logging on Linux
+The recommended configuration on Linux is to have the system configured for native logging which means that Safir Log will use the Linux system call 'syslog()'.
+
 Most Linux distributions come with a built-in syslog deamon capable of receiving and handling syslog messages. As is usually the case in the Linux world you have more than one alternative, if it would be that you are not satisfied with the default deamon.
 
 Some examples of syslog deamons:
-- syslog-ng (http://www.balabit.com/network-security/syslog-ng)
-- rsyslog (http://www.rsyslog.com).
 
-The recommended configuration on Linux is to have the system configured for native logging which means that Safir Log will use the Linux system call 'syslog()'.   
+- syslog-ng (http://www.balabit.com/network-security/syslog-ng[])
+- rsyslog (http://www.rsyslog.com[]).
 
 === Porting guidelines
 The logging interface provided by Safir SDK Core before version 4.5 (Software Reporting) is now deprecated. This section provides some guidelines when porting old code to use the new interface provided by Safir Log.
@@ -3198,7 +3190,7 @@ So catch all "expected" exceptions in the callbacks, but let all programming-err
 === Handling OnRevokedRegistration
 For most applications a call to +OnRevokedRegistration+ is completely unexpected. Unless your system uses overregistration as a feature getting this callback is a sign of an error, and the following is a recommendation on what to do in this case: 
 
-Send a _FatalErrorReport_ (see <<software_reports>>) that you have lost the registration. Make the report state clearly that a registration was lost, along with the type and the handler id. Then terminate the application.
+Send a Safir Log (severity Critical) that you have lost the registration. Make the report state clearly that a registration was lost, along with the type and the handler id. Then terminate the application.
 
 The Rationale for this is that this probably happened due to a configuration error, or because someone is playing around with Sate (see <<sate>>), so you want to tell whoever may be interested that the system is probably not working correctly now.
 
