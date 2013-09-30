@@ -2966,7 +2966,7 @@ The time library also has support for loading an external library at runtime whi
 Safir SDK Core includes a crash reporting library, google-breakpad (http://code.google.com/p/google-breakpad/[]). The crash reporting library can be used to generate dumps when applications crash (e.g. access violation or segmentation fault). The dumps contain, among other things, general system information, the call stack for each thread and the list of loaded modules. A dump file, together with symbolic debugging information, can be used to identify where in the software the crash occurred.  
 
 ==== Enabling the Crash Reporter
-To use the crash reporter you need to initiate it in your application. The initiation should occur as early as is at all possible.
+To use the crash reporter you need to initiate it in your application. The initiation should occur as early in your program as possible.
 
 For example, in C++ you would do something like this:
 
@@ -2975,19 +2975,19 @@ For example, in C++ you would do something like this:
 ----------------------------
 int main(int argc, char* argv[])
 {
-    Safir::SwReports::SwReportStarter swreports;
+    Safir::Application::ScopedCrashReporter crashReporter;
     ... run your application ...
 }
 ----------------------------
 
-Since the +SwReportStarter+ class is an RAII object this is the same as doing the following
+The +CrashReporterStarter+ class is an RAII class, which means that it is equivalent to doing the following:
 
 .Initializing and stopping crash reporter in C++ manually
 [source,{cpp}]
 ----------------------------
 int main(int argc, char* argv[])
 {
-    Safir::SwReports::SwReport::EnableCrashReporting();
+    Safir::Application::CrashReporter::Start();
     try
     {
         ... run your application ...
@@ -2996,18 +2996,16 @@ int main(int argc, char* argv[])
     {
         ... handle your exceptions ...
     }
-    Safir::SwReports::SwReport::Stop()
+    Safir::Application::CrashReporter::Stop()
 }
 ----------------------------
-
-So if you already have calls to +SwReport::Stop()+ in your main function and want the crash reporter you should use the RAII object and remove the +Stop+ call. This way is much easier to get to be exception safe.
 
 .Initializing and stopping crash reporting in C#
 [source,{csharp}]
 ----------------------------
 static void Main()
 {
-    Safir.SwReports.SwReport.EnableCrashReporting();
+    Safir.Application.CrashReporter.Start();
     try
     {
         ... run your application ...
@@ -3018,15 +3016,13 @@ static void Main()
     }
     finally
     {
-        Safir.SwReports.SwReport.Stop();
+        Safir.Application.CrashReporter.Stop();
     }
 }
 ----------------------------
 
-In Ada you need to call +Enable_Crash_Reporting+ at the start of the program, and +Stop+ at the end of the program.
+In Ada you need to call +Safir.Application.Crash_Reporter.Start+ at the start of the program, and +Safir.Application.Crash_Reporter.Stop+ at the end of the program.
 Java has its own crash handler, so the Crash Reporter should not be used there, and there is no interface to start it.
-
-See <<stop_tracer>> for a bit more info on the Stop function.
 
 You also need to make sure that you build your application with debug information enabled. For example in CMake you could use the RelWithDebInfo, which produces release binaries but with debug information. When using Visual Studio you would then get a .pdb file for every .dll or .exe. Make sure to keep these .pdb files, since they are required when you're analyzing a crash dump.
 
@@ -3036,7 +3032,7 @@ TODO: write about reporting sdk crashes
 
 ==== Analyzing a crash dump
 
-When an application crashes in a way that is caught by the crash reporter a dump file will be placed in the crash dump directory (see <<locations_ini>>) with a rather cryptic name (a lot of digits followed by .dmp). Apart from generating this dump file the crash reporter will attempt to log an error to swre_logger and to standard output that a crash has happened.
+When an application crashes in a way that is caught by the crash reporter a dump file will be placed in the crash dump directory (see <<locations_ini>>) with a rather cryptic name (a lot of digits followed by .dmp). Apart from generating this dump file the crash reporter will attempt to log an error to the Safir Log and to standard output that a crash has happened.
 
 If you're using Visual Studio you can just open the .dmp file and if you've got all the debug information and binaries available you will then see the call stack and be able to inspect the state of the application.
 On Linux, you can use gdb to analyze the .dmp files, although you will have to convert the dumps to a core file using the minidump-2-core tool that can be found under src/lluf_crash_reporter.ss/src/google-breakpad/tools/.
@@ -3357,7 +3353,7 @@ In a system that supports Replay there must be at least some data that is contro
 Forcing applications to have multiple Dob connections, one in context 0 for the control data, and one in the Replay context, and then dynamically working out which kind of data goes where, is considered a potential security risk. Therefore, Safir SDK Core has a concept of ContextShared types which eliminates the need to have parallel connections to different contexts.
 
 === ContextShared types
-A type could be marked as being visible in all contexts by mapping the ContextShared property to it. ContextShared types are typically control types, e.g. types used to control the system mode, or types used for logging purposes, e.g. Swre reports.
+A type could be marked as being visible in all contexts by mapping the ContextShared property to it. ContextShared types are typically control types, e.g. types used to control the system mode.
 
 For example, an APP or PRS that is connected to context 0 can "see" all that goes on in context 0 and the ContextShared types. An APP or PRS that is connected to context 1 can "see" all that goes on in context 1 and the ContextShared types.
 
@@ -3573,6 +3569,6 @@ SDK::
     Software Development Kit.
 
 Swre::
-    A Safir SDK Core component that provides Software Reporting and Trace logging functionality.
+    A Safir SDK Core component that provides Crash Reporting, Error/Event Logging and Trace logging functionality.
 
 
