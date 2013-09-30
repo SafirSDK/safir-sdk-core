@@ -674,7 +674,7 @@ All this means that any changes to parameter files under $(SAFIR_RUNTIME}/data/t
 
 .Note
 ************************************
-In the current version of Safir SDK Core (4.4), the dobmake.py script is not aware of the _typesystem.ini_ configuration (see <<typesystem_ini>>, so dou and dom files will always be copied to $(SAFIR_RUNTIME}/data/text/dots/classes regardless of the contents of that configuration file.
+In the current version of Safir SDK Core (4.5), the dobmake.py script is not aware of the _typesystem.ini_ configuration (see <<typesystem_ini>>, so dou and dom files will always be copied to $(SAFIR_RUNTIME}/data/text/dots/classes regardless of the contents of that configuration file.
 
 So, to keep the "expected" behaviour, don't change the Default section in typesystem.ini from pointing to $(SAFIR_RUNTIME}/data/text/dots/classes.
 ************************************
@@ -2570,14 +2570,14 @@ _typesystem.ini_ can contain any number of _sections_ (with arbitrary names), ea
 In the above example there are three sections, one specifying the default place to look for dou/dom files, and two places to look for override files. If, for example, the Override directory contains a Safir.Dob.NodeParameters.dou file (which is also in the Default directory, by default) the file from the Override directory will be used.
 
 ==== Environment and special variable expansion
-Since the configuration files need to be able to refer to system directories they also support environment variable expansion. E.g. +$(HOME)+ expands to the value of that environment variable.
+Since the configuration files need to be able to refer to system directories they also support environment variable expansion. E.g. +$(HOME)+ expands to the value of the +HOME+ environment variable.
 
 [[special_variables]]
 On Windows platforms we also support the _CSIDL_ values mentioned above, since Windows does not guarantee that there are always environment variables that correspond to them. For example the %PROGRAMDATA% environment variable is not guaranteed to be set or to point to the same directory as _CSIDL_COMMON_APPDATA_. So the configuration files support _special variables_ as well as environment variables. E.g. +@\{SPECIAL_VARIABLE\}+ will be expanded to the value of that variable (note that the syntax is different from the environment variable syntax).
 
-The supported special variables are listed in <<special_variables_table>>. We also provide aliases that use the Windows Known Folder naming.
+The supported special variables are listed in <<windows_special_variables>>. We also provide aliases that use the Windows Known Folder naming.
 
-[[special_variables_table]]
+[[windows_special_variables]]
 .Special Variables on Windows
 [width="70%",options="header",frame="topbot",grid="none"]
 |===========================
@@ -2591,7 +2591,16 @@ The supported special variables are listed in <<special_variables_table>>. We al
 
 Here are two more links that contain useful information about Windows paths, CSIDLs, and Windows Known Folders.: "http://blogs.msdn.com/b/cjacks/archive/2008/02/05/where-should-i-write-program-data-instead-of-program-files.aspx[Where Should I Write Program Data...?]" and "http://blogs.msdn.com/b/patricka/archive/2010/03/18/where-should-i-store-my-data-and-configuration-files-if-i-target-multiple-os-versions.aspx[Where Should I Store my Data and Config...?]".
 
-There are currently no special variables on Linux.
+There is currently one special variable that is available on both Linux and Windows. It is described in <<common_special_variables>>, below.
+
+[[common_special_variables]]
+.Common Special Variables
+[width="70%",options="header",frame="topbot",grid="none"]
+|===========================
+|Special Variable  |Meaning
+|TEMP              | /tmp on Linux and TEMP or TMP environment variable on Windows.
+|===========================
+
 
 === Network config
 A Safir SDK Core system can have two basic configurations, with respect to networking. _Standalone_ or _Multinode_. Standalone means that the system consists of only one node or computer. This is typically used for developer machines or systems that have only one node. Multinode is typically used when a system consists of several nodes, for example a couple of servers (where applications and databases run) and a few operator consoles (where only the HSI runs).
