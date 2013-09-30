@@ -120,7 +120,7 @@ How does flushing work?::
   The Tracer logs to both standard output and to Safir Logging. Flushing is handled differently in these two mechanisms, which means that they will behave slightly differently. Standard output is flushed as it is normally done in each language, e.g. on ++std::flush++ and ++std::endl++ in C++, and Safir Logging is flushed on each newline.
 
 How does the Tracer use Windows Native Logging?::
-  When Native logging is enabled (see <<native_logging>>) on Windows systems the Tracer will _only_ log to standard output, and not to Safir Logging. This is by design, since the Windows Event Log is not suited for tracer-style logs.
+  When Native logging is enabled on Windows systems (see <<windows_native_logging>>) the Tracer will _only_ log to standard output, and not to Safir Logging. This is by design, since the Windows Event Log is not suited for tracer-style logs.
 
 ==== Changes from previous Tracer versions
 
