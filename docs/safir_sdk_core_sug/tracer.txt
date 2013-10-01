@@ -127,13 +127,13 @@ How does the Tracer use Windows Native Logging?::
 The way that the Tracer works changed quite a lot with the introduction of the Safir Logging mechanism in Safir SDK Core version 4.5. The interface has only minor changes, but the behaviour behind the scenes has changed quite a lot.
 
 Starting the TracerBackdoor::
-  Previously the TracerBackdoor was started automatically with a separate thread and connection, but now the TracerBackdoor has to be started explicitly, and on an existing connection. 
+  Previously the TracerBackdoor was started automatically with a separate thread and connection, but now the TracerBackdoor has to be started explicitly, and on an existing connection. This means that you have to add Start and Stop calls in your applications.
 
 Buffering and flushing::
-  Previously logged data was flushed to the old logging mechanism after 0.5 seconds. The new flushing behaviour is described above.
+  Previously logged data was flushed to the old logging mechanism after 0.5 seconds. The new flushing behaviour is described above. You don't have to change your application in any way, just expect the new behaviour when using the Tracer.
 
 Prefixes and when to start logging::
   Previously there were some rules on how and when to instantiate and use Tracers and prefixes. This is now much more straightforward: Instantiate the Tracers when and where you want to, and use them when and where you want to.
 
 Extra threads and connections::
-  Old versions of the Tracer would start a background thread and open a connection in that thread. This led to some sometimes unwanted side-effects. The Tracer no longer has this background thread (instead you have to start the TracerBackdoor on one of your connections).
+  Old versions of the Tracer would start a background thread and open a connection in that thread. This led to some sometimes unwanted side-effects. The Tracer no longer has this background thread (instead you have to start the TracerBackdoor on one of your connections). No changes are needed to your applications.
