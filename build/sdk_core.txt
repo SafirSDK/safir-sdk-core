@@ -104,7 +104,7 @@ build_dir        src/swre/swre_backdoor.ss/src             RelWithDebInfo
 build_dir        src/foreach/foreach.ss/src                RelWithDebInfo
 
 #OLIB
-build_dir        src/olib/olib_code.ss/olib                RelWithDebInfo   Debug
+build_dir        src/olib/olib_code.ss/src                 RelWithDebInfo   Debug
 
 #DOPE
 build_dir        src/dope/dope_main.ss/src                 RelWithDebInfo
