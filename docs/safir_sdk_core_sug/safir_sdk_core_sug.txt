@@ -2552,13 +2552,13 @@ native_logging::
 Controls whether or not logs are sent to the native, plattform specific, logging mechanism.
 
 send_to_syslog_server::
-Controls whether or not logs are sent to a syslog server.
+Controls whether or not logs are sent to a syslog server using UDP datagrams.
 
 syslog_server_address::
 IP address for the syslog server.
 
 syslog_server_port::
-Port for the syslog server.
+UDP Port for the syslog server.
 
 replace_newline_with_space::
 Controls whether or not a newline in the log message is replaced with a space.
