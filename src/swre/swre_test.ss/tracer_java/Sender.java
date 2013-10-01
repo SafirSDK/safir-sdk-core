@@ -27,7 +27,6 @@
  */
 public class Sender {
     public static void main(String[] args) {
-        com.saabgroup.safir.application.TracerBackdoor.setProgramName("tracer_sender_java");
         com.saabgroup.safir.application.Tracer razor = new com.saabgroup.safir.application.Tracer("Razor");
         com.saabgroup.safir.application.Tracer rb = new com.saabgroup.safir.application.Tracer("Rymd-Börje");
         razor.setEnabled(true);

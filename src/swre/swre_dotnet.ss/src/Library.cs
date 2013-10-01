@@ -30,15 +30,6 @@ namespace Safir.SwReports
     {
         internal const string SWRE_LIBRARY_NAME = "swre_library.dll";
 
-        //--------------------------------------------------------------------
-        // Exported interface from swre_library interface.h (unmanaged code)
-        //--------------------------------------------------------------------
-        //SwreC_SetProgramName
-        [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        internal static extern void SwreC_SetProgramName(byte [] programName,
-                                                         out byte success);
-
-
         //SwreC_StartTraceBackdoory
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         internal static extern void SwreC_StartTraceBackdoor(byte [] connectionNameCommonPart,

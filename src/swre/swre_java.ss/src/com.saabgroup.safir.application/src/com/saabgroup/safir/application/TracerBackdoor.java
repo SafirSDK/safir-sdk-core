@@ -27,18 +27,6 @@ package com.saabgroup.safir.application;
 
 public final class TracerBackdoor
 {
-    static public void setProgramName(String programName)
-    {
-        boolean [] success = new boolean [1];
-
-        Library.SetProgramName(programName, success);
-        if (!success[0])
-        {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
-        }
-    }
-
     public static void start(com.saabgroup.safir.dob.ConnectionBase connection)
     {
         com.saabgroup.safir.dob.ConnectionAspectMisc misc = new com.saabgroup.safir.dob.ConnectionAspectMisc(connection);

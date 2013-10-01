@@ -38,10 +38,6 @@ package body Safir.Application.Tracer_Backdoor is
    end Convert;
 
    procedure Start (Connection : in Safir.Dob.Connection_Bases.Connection_Base) is
-      procedure SwreC_SetProgramName (ProgramName : in     Interfaces.C.char_array;
-                                      Success     :    out C.char);
-      pragma Import (C, SwreC_SetProgramName, "SwreC_SetProgramName");
-
       procedure SwreC_StartTraceBackdoor (Connection_Name_Common_Part   : in     C.char_array;
                                           Connection_Name_Instance_Part : in     C.char_array;
                                           C_Success                     :    out C.char);
@@ -51,11 +47,6 @@ package body Safir.Application.Tracer_Backdoor is
         Safir.Dob.Connection_Aspect_Miscs.Create (Connection);
       L_Success : C.char;
    begin
-      SwreC_SetProgramName (Interfaces.C.To_C (Ada.Command_Line.Command_Name), L_Success);
-      if not (C.char'Pos (L_Success) /= 0) then
-         Safir.Dob.Typesystem.Library_Exceptions.Throw;
-      end if;
-
       SwreC_StartTraceBackdoor (Convert (Misc.Get_Connection_Name_Common_Part),
                                 Convert (Misc.Get_Connection_Name_Instance_Part),
                                 C_Success => L_Success);

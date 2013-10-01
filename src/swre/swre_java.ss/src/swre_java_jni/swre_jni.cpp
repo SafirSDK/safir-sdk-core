@@ -182,16 +182,6 @@ void JNICALL Java_com_saabgroup_safir_swreports_Library_SendProgramInfoReport
 
 
 
-
-void JNICALL Java_com_saabgroup_safir_application_Library_SetProgramName
-(JNIEnv * _env, jclass, jstring _programName, jbooleanArray _success)
-{
-    bool success;
-    SwreC_SetProgramName(StringConverter(_env,_programName),
-                         success);
-    SetJArray(_env,_success,success);
-}
-
 void JNICALL Java_com_saabgroup_safir_application_Library_StartTraceBackdoor
   (JNIEnv * _env, jclass, jstring _common, jstring _instance, jbooleanArray _success)
 {

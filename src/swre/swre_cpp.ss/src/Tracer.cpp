@@ -26,7 +26,6 @@
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
-#include <Safir/Utilities/ProcessInfo.h>
 
 namespace Safir
 {
@@ -52,16 +51,8 @@ void TracerBackdoor::Start(const Safir::Dob::ConnectionBase& connection)
 {
     using namespace Safir::Dob::Typesystem::Utilities;
 
-    Safir::Utilities::ProcessInfo proc(Safir::Utilities::ProcessInfo::GetPid());
-    bool success;
-    SwreC_SetProgramName(proc.GetProcessName().c_str(), success);
-    if (!success)
-    {
-        Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
-    }
-
     Safir::Dob::ConnectionAspectMisc conn(connection);
-
+    bool success;
     SwreC_StartTraceBackdoor(ToUtf8(conn.GetConnectionNameCommonPart()).c_str(),
                              ToUtf8(conn.GetConnectionNameInstancePart()).c_str(),
                              success);

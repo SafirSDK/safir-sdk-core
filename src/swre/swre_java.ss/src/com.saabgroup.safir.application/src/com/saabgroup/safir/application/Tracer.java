@@ -42,18 +42,6 @@ public class Tracer
         }
     }
 
-    static public void setProgramName(String programName)
-    {
-        boolean [] success = new boolean [1];
-
-        Library.SetProgramName(programName, success);
-        if (!success[0])
-        {
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
-            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
-        }
-    }
-
     public boolean isEnabled()
     {
         return Library.TracePrefixIsEnabled(m_traceStream.getPrefixId());

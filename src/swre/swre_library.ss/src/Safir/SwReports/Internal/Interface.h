@@ -39,25 +39,6 @@
 
 extern "C"
 {
-
-    /**
-     * Initialize the SWRE library with the program name.
-     *
-     * Initializing the SWRE library with the program name makes it possible
-     * to use this name instead of the potentially more obsure connection name
-     * when sending a backdoor command.
-     *
-     * Setting the program name is optionally, if not set everything else will
-     * still function correctly.
-     *
-     * @param programName [in] - The name of the program. In C++ and C# this will likely be argv[0]
-     *                           and in Java it will be the name of the main class.
-     * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
-     */
-    SWRE_LIBRARY_API void SwreC_SetProgramName(const char * const programName,
-                                               bool & success);
-
-
     /**
      * Start reception of trace on/off commands
      *

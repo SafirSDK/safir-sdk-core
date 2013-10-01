@@ -48,13 +48,6 @@ namespace Safir.Application
         public static void Start(Safir.Dob.ConnectionBase connection)
         {
             byte success;
-            Library.SwreC_SetProgramName(System.Text.Encoding.UTF8.GetBytes
-                                         (System.Diagnostics.Process.GetCurrentProcess().ProcessName + char.MinValue),
-                                         out success);
-            if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
-            {
-                Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
-            }
 
             Safir.Dob.ConnectionAspectMisc misc = new Safir.Dob.ConnectionAspectMisc(connection);
 
