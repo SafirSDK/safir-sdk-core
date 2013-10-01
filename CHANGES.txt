@@ -8,9 +8,9 @@ This release introduces the following changes:
 * SwReports have been replaced with Safir Logging. Safir Logging is an interface to Syslog (as defined by RFC3164),
   which allows Safir SDK Core to log to a syslog daemon, instead of using the non-standard SwReport mechanism.
   - Add functionality under Safir.Logging for logging (see User's Guide for more info).
-  - The "old" functions under Safir.SwReports are now deprecated and will be removed some time in the future.
+  - The "old" functions under Safir.SwReports are now deprecated but they have been changed to log to Safir Logging.
   - All Core components now report errors to Safir Log (instead of stdout/lllerr/panic log).
-  - ResponseSender/Proxy usage errors are now reported to syslog, instead of crashing the app.
+  - ResponseSender/Proxy usage errors are now reported to Safir Log, instead of crashing the app.
   - Tracer rewritten to use Safir Logging.
 * Add a lot of automatic tests.
 * Support 64 bit Windows installs.
