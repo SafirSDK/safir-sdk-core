@@ -1,48 +1,77 @@
-2013-xx-xx version x.x:
+-----------------------------------------------------------------------------------------------------------------------
+2013-10-0x version 4.5:
+-----------------------------------------------------------------------------------------------------------------------
+
+This release introduces the following changes:
 
 * Remove all internal dependencies to ACE (use Boost.Asio instead).
+* SwReports have been replaced with Safir Logging. Safir Logging is an interface to Syslog (as defined by RFC3164),
+  which allows Safir SDK Core to log to a syslog daemon, instead of using the non-standard SwReport mechanism.
+  - Add functionality under Safir.Logging for logging (see User's Guide for more info).
+  - The "old" functions under Safir.SwReports are now deprecated and will be removed some time in the future.
+  - All Core components now report errors to Safir Log (instead of stdout/lllerr/panic log).
+  - ResponseSender/Proxy usage errors are now reported to syslog, instead of crashing the app.
+  - Tracer rewritten to use Safir Logging.
 * Add a lot of automatic tests.
 * Support 64 bit Windows installs.
 * Make missing external time provider cause exceptions instead of just silently failing.
 * Rewrite build script and dobmake.py to use jom for parallel builds.
 * Rewrite dots_v in python (removes a lot of Ada dependencies!)
-* TODO: syslog
-* Bug fixes!
-* update lowlevellogger to use ini files
-* panic logging replaced with syslog
-* processinfo updated wrt windows and java
-* make core components report errors to syslog (instead of stdout/lllerr).
-* ResponseSender/Proxy usage errors are now reported to syslog, instead of crashing the app.
-* Tracer rewritten to use syslog
+* Numerous minor bug fixes!
 
-TODO: Interface changes:
- * binaries i blobbar
- * tracer start
- * backdoor keeper
- * ada-factory
- * tiha.dll
- * crash reporter start/stop
- * tracer flush
- * SetProgramName
+This release is 99% backwards compatible, but due to a couple of bug fixes and especially the introduction of Safir
+Logging (the syslog interface) some interfaces have had to be changed or adjusted. Below is a summary of the interface
+changes. You can find more information about the changes introduced due to the introduction of Safir Logging in the
+Safir User's Guide.
 
+ * The representation of binaries in blobs has changed slightly (there was a redundant field, that has been removed). 
+   This means that blobs containing binaries produced by previous SDK versions will not be readable by this version.
+   So make sure to convert any blobs that you wish to bring along to xml before upgrade and then back to blob after 
+   the upgrade.
+   For blobs stored in the persistent storage you can use dobe_bin2xml to do this. See User's Guide for more info.
+
+ * The Object Factory in Ada has been renamed. It is now found under Safir.Dob.Typesystem.Object.Factory.
+
+ * The loading of an External Time Provider (configured in in Safir.Time.LibraryParameters.dou) has changed so that an
+   exception will be thrown if the library cannot be found. Previously the failure would be ignored silently.
+   The default configuration has changed from trying to load a library called 'tiha.dll' to not try to load any library
+   at all. So if you want to continue using a library by that name you will have to make changes to 
+   Safir.Time.LibraryParameters.dou, to make sure the correct library is loaded and that the correct functions
+   within that library are used.
+
+ * Safir Logging / Syslog related changes (See Safir SDK Core User's Guide for details):
+   - Tracer needs to be started explicitly.
+   - Tracer flushes its data differently.
+   - Tracer.SetProgramName has been removed.
+   - Crash Reporter start and stop functions have been renamed.
+
+ * The BackdoorKeeper interface has been changed to keep it in line with how the TracerBackdoor interface looks.
+   It now takes a connection as argument to the constructor, and it is that connection that the backdoor will 
+   use to subscribe to the backdoor commands. 
+
+-----------------------------------------------------------------------------------------------------------------------
 2013-06-25 version 4.4:
+-----------------------------------------------------------------------------------------------------------------------
 
-This release is intended to implement the "First Step" chapter from the paper "Readonly installation of Safir SDK Core" (https://projekt.consoden.se/safir/job/Whitepapers/lastSuccessfulBuild/artifact/readonly_install.html).
+This release is intended to implement the "First Step" chapter from the paper "Readonly installation of Safir
+SDK Core" (https://projekt.consoden.se/safir/job/Whitepapers/lastSuccessfulBuild/artifact/readonly_install.html).
 
-Add use of configuration (ini) files that allow for configuring some directories that the SDK Core uses to store temporary files during runtime:
-  * lock files
-  * crash dumps
-  * low level logs
-Ini file parser supports environment variable and "special variable" (e.g. Windows Known Folders) expansion.
-Default configuration puts all files in the "old" locations.
+ * Add use of configuration (ini) files that allow for configuring some directories that the SDK Core uses to store
+temporary files during runtime:
+    - lock files
+    - crash dumps
+    - low level logs
+   Ini file parser supports environment variable and "special variable" (e.g. Windows Known Folders) expansion.
+   Default configuration puts all files in the "old" locations.
 
-Add "special variable" expansion to dou/dom file parser.
+ * Add "special variable" expansion to dou/dom file parser.
 
-Add ability to specify where dou/dom files should be found (also configured in ini file), which allows for "parameter overlays".
+ * Add ability to specify where dou/dom files should be found (also configured in ini file), which allows for
+   "parameter overlays".
 
-Bugfixes:
-  * Ada warning in dots_generated
-  * dots_generated shared library loading on Linux
-  * static evaluation order bugfix in dots_cpp
-  * remove unused function DotsC_BinaryDump
+ * Bugfixes:
+    - Ada warning in dots_generated
+    - dots_generated shared library loading on Linux
+    - static evaluation order bugfix in dots_cpp
+    - remove unused function DotsC_BinaryDump
 
