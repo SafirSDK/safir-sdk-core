@@ -3098,6 +3098,8 @@ Java has its own crash handler, so the Crash Reporter should not be used there, 
 
 You also need to make sure that you build your application with debug information enabled. For example in CMake you could use the RelWithDebInfo, which produces release binaries but with debug information. When using Visual Studio you would then get a .pdb file for every .dll or .exe. Make sure to keep these .pdb files, since they are required when you're analyzing a crash dump.
 
+NOTE: In previous versions (< 4.5) of Safir SDK Core the Crash Reporter was started with a call to +Safir::SwReports::SwReport::EnableCrashReporting()+ and stopped with a call to +Safir::SwReports::SwReport::Stop()+. This was changed due to the introduction of Safir Logging and the changes in the Tracer.
+
 ////
 TODO: write about reporting sdk crashes
 ////
