@@ -28,7 +28,7 @@ Safir User's Guide.
    This means that blobs containing binaries produced by previous SDK versions will not be readable by this version.
    So make sure to convert any blobs that you wish to bring along to xml before upgrade and then back to blob after 
    the upgrade.
-   For blobs stored in the persistent storage you can use dobe_bin2xml to do this. See User's Guide for more info.
+   For blobs stored in the persistent storage you can use dope_bin2xml to do this. See User's Guide for more info.
 
  * The Object Factory in Ada has been renamed. It is now found under Safir.Dob.Typesystem.Object.Factory.
 
