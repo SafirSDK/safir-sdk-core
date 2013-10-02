@@ -21,7 +21,6 @@
 --  along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 --
 -------------------------------------------------------------------------------
-with Ada.Command_Line;
 with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 with Interfaces.C;
 with Safir.Dob.Connection_Aspect_Miscs;
