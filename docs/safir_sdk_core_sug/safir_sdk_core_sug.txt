@@ -2866,7 +2866,7 @@ Safir Log provides a simple interface (currently available for C++, C#, Java and
 
 It is also possible to configure Safir Log so that the logs are sent to a native, plattform specific, logging mechanism. In practice, this could be of use on the Windows plattform to send logs to the Windows Event Log.  
 
-.Example, sending a log message using c++
+.Example, sending a log message using C++
 [source,{cpp}]
 ----------------------------
 #include <Safir/Logging/Log.h>
@@ -2877,15 +2877,15 @@ Safir::Logging::SendSystemLog(Safir::Logging::Error, L"This is an error log!");
 Note that Safir SDK Core only provides the functionality related to the sending side for syslog messages. In order to collect and view the log messages a syslog server is needed. Such a server can range from a simple program listening for UDP packets and dumping the result on standard output, to more sophisticated solutions that support filtering, writing logs do disk, search functions etc. A syslog deamon is included in most Linux distributions and for Windows there are third-party syslog servers.
 
 === Logging guidelines
-This section provides some guidelines that, when applied, will help you make your application behave like a "good citizen" in the syslog echosystem.
+This section provides some guidelines that, when applied, will help you make your application behave like a "good citizen" in the syslog ecosystem.
 
 First of all we recommend that you establish project/product specific logging guidelines so that the separate parts that forms your system exhibit a consistent logging behaviour.  
 
-Syslog is a "one-liners" oriented protocol. This, and the fact that syslog servers are known to handle messages differently regarding new lines, means that we recommend that you try to make your logs one-liners. When put together the one-liner logs from your application should form kind of a "story". 
+Syslog is a "one-liner" oriented protocol. This, and the fact that syslog servers are known to handle messages differently regarding new lines, means that we recommend that you try to make your logs one-liners. When put together the one-liner logs from your application should form kind of a "story". 
 
-The severity level is used by syslog deamons to filter and redirect logs but is normally not shown in the log output. Therefor, compose the log message text so that it is clear and understandable without the severity level context.
+The severity level is used by syslog deamons to filter and redirect logs but is normally not shown in the log output. Therefore, compose the log message text so that it is clear and understandable without the severity level context.
 
-RFC 3164 has a brief description of the interpretation of the severity level but doesn't really give any detailed advices. In summary, the higher the severity level, the faster action by support/tech staff is necessary. The system design in terms of redundancy might also affect the choosen severity level. For example, it might be appropriate for a system built and configured so that there is a standby application/node "taking over" in case of failure, to use severity level Error instead of Emergency for a given event.
+RFC 3164 has a brief description of the interpretation of the severity level but doesn't really give any detailed advice. In summary, the higher the severity level, the faster action by support/tech staff is necessary. The system design in terms of redundancy might also affect the choosen severity level. For example, it might be appropriate for a system built and configured so that there is a standby application/node "taking over" in case of failure, to use severity level Error instead of Emergency for a given event.
 
 .Interpretation of severity levels
 [width="70%", cols="20%,30%,50%",options="header",frame="topbot",grid="none"]
