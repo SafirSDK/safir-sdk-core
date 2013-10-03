@@ -34,7 +34,6 @@
 #Set SAFIR_RUNTIME and SAFIR_SDK variables to paths that cmake likes.
 FILE(TO_CMAKE_PATH "$ENV{SAFIR_SDK}" SAFIR_SDK)
 FILE(TO_CMAKE_PATH "$ENV{SAFIR_RUNTIME}" SAFIR_RUNTIME)
-file(TO_CMAKE_PATH "$ENV{SAFIR_USER}" SAFIR_USER)
 
 #Default build release
 if (NOT CMAKE_BUILD_TYPE)
@@ -43,17 +42,11 @@ endif()
 
 #add include path
 INCLUDE_DIRECTORIES(${SAFIR_SDK}/include)
-if (SAFIR_USER)
-   INCLUDE_DIRECTORIES(${SAFIR_USER}/sdk/include)
-endif()
 
 #if we're using gcc we need to set up some things
 if (UNIX)
    #link directory for libraries (will this work with gcc under windows?)
    LINK_DIRECTORIES(${SAFIR_RUNTIME}/lib)
-   if (SAFIR_USER)
-      LINK_DIRECTORIES(${SAFIR_USER}/runtime/lib)
-   endif()
 
    #turn on more warnings and set up use of threads etc
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread")
@@ -66,9 +59,6 @@ endif ()
 
 if (MSVC)
    LINK_DIRECTORIES(${SAFIR_SDK}/lib)
-   if (SAFIR_USER)
-      LINK_DIRECTORIES(${SAFIR_USER}/sdk/lib)
-   endif()
    ADD_DEFINITIONS(-DNOMINMAX)
    ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
    ADD_DEFINITIONS(-D_UNICODE -DUNICODE)
@@ -161,11 +151,7 @@ MACRO(INSTALL_DEBUG_INFO target)
     STRING(REPLACE .dll ${CMAKE_DEBUG_POSTFIX}.pdb location ${location})
     STRING(REPLACE .exe .pdb location ${location})
     
-    if (SAFIR_USER)
-      INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/bin CONFIGURATIONS Debug)
-    else()
-      INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
-    endif()
+    INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
 
     GET_TARGET_PROPERTY(location ${target} LOCATION)
     # fix for vs2010
@@ -178,11 +164,7 @@ MACRO(INSTALL_DEBUG_INFO target)
     STRING(REPLACE .dll ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
     STRING(REPLACE .exe ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
 
-    if (SAFIR_USER)
-      INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/bin CONFIGURATIONS RelWithDebInfo)
-    else()
-      INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
-    endif()
+    INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
 
     if (EXPORT_SYMBOLS)
       GET_TARGET_PROPERTY(location ${target} LOCATION)
@@ -196,11 +178,7 @@ MACRO(INSTALL_DEBUG_INFO target)
       STRING(REPLACE .dll ${CMAKE_RELEASE_POSTFIX}.pdb location ${location})
       STRING(REPLACE .exe ${CMAKE_RELEASE_POSTFIX}.pdb location ${location})
       
-      if (SAFIR_USER)
-        INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/dump/Symbols CONFIGURATIONS Release)
-      else()
-        INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/dump/Symbols CONFIGURATIONS Release)
-      endif()
+      INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/dump/Symbols CONFIGURATIONS Release)
     endif(EXPORT_SYMBOLS)
 
   endif()
