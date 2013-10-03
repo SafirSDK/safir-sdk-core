@@ -1170,5 +1170,12 @@ namespace Safir.Dob.Typesystem.Internal
         //DotsC_PeekAtException
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DotsC_PeekAtException(out System.Int64 exceptionId);
+
+        //DotsC_GetDouFilePathForType
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DotsC_GetDouFilePathForType(System.Int64 typeId,
+                                                                System.IntPtr buf,
+                                                                System.Int32 bufSize,
+                                                                out System.Int32 resultSize);
     }
 }

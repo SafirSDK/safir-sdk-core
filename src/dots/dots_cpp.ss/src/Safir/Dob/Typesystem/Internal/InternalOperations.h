@@ -100,6 +100,18 @@ namespace Internal
      */
     DOTS_API Int64 GenerateRandom64Bit();
 
+    /**
+     * Get the full path to the dou file that the type id represents
+     *
+     * Note that this function looks at the disk every time it is called. No caching
+     * is performed at all. Not meant to be used in "real" code, but useful for debugging
+     * tools, such as sate or dobexplorer.
+     * 
+     * @param typeId Type id
+     * @returns The full path to the dou file
+     */
+    DOTS_API std::wstring GetDouFilePath(const Dob::Typesystem::TypeId typeId);
+        
 
     //These constants used to be calculated from the strings, but that caused some
     //strange elaboration errors, so they were changed to hard-coded constants.
