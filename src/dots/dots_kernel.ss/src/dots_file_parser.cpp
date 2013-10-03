@@ -23,8 +23,8 @@
 ******************************************************************************/
 
 #include "dots_file_parser.h"
+#include "dots_file_collection.h"
 #include <Safir/Dob/Typesystem/Internal/Id.h>
-#include <Safir/Utilities/Internal/ConfigReader.h>
 #include "dots_basic_types.h" 
 #include "dots_blob_layout.h"
 #include "dots_error_handler.h"
@@ -35,7 +35,6 @@
 #include "dots_property_mapping_parser.h"
 #include "dots_enum_parser.h"
 
-#include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -44,134 +43,6 @@
 #include <cstdio>
 #include <cstring>
 
-namespace
-{
-    //first is file name, second is full path (including file name)
-    typedef std::map<boost::filesystem::path, boost::filesystem::path> FileLocations; 
-
-    //helper class for reading the directories containing dou and dom files
-    //and for checking for illegal duplicates
-    class FileCollection
-    {
-    public:
-        FileCollection()
-        {
-            using namespace Safir::Dob::Typesystem::Internal;
-
-            //Read the config files
-            Safir::Utilities::Internal::ConfigReader reader;
-
-            //loop through all sections in typesystem.ini
-            for (boost::property_tree::ptree::const_iterator it = reader.Typesystem().begin();
-                 it != reader.Typesystem().end(); ++it)
-            {
-                const bool isSection = !it->second.empty();
-
-                if (isSection)
-                {
-                    boost::filesystem::path douDirectory;
-                    try
-                    {
-                        douDirectory = it->second.get<std::string>("dou_directory");
-                    }
-                    catch (const std::exception&)
-                    {
-                        ErrorHandler::Error("Dou/Dom file parsing",
-                                            "Failed to read dou_directory in section " + it->first + " of typesystem.ini",
-                                            "dots_file_parser");
-                        exit(1);
-                    }
-                    
-                    if (!boost::filesystem::exists(douDirectory) || !boost::filesystem::is_directory(douDirectory))
-                    {
-                        ErrorHandler::Error("Dou/Dom file parsing",
-                                            "dou_directory '" + douDirectory.string() + "' in section " + it->first + " of typesystem.ini does not appear to be a directory",
-                                            "dots_file_parser");
-                        exit(1);
-                    }
-
-                    FileLocations douFiles;
-                    FileLocations domFiles;
-                    ReadDirectory(douDirectory,douFiles,domFiles);
-                    
-                    InsertAndOverride(m_douFiles, douFiles);
-                    InsertAndOverride(m_domFiles, domFiles);
-                }
-
-            }
-
-        }
-
-        const FileLocations& DouFiles() const {return m_douFiles;}
-        const FileLocations& DomFiles() const {return m_domFiles;}
-    private:
-        //gets dou and dom files from a directory
-        //throws xxx on duplicate file name.
-        static void ReadDirectory(const boost::filesystem::path& directory, 
-                                  FileLocations& douFiles,
-                                  FileLocations& domFiles)
-        {
-            douFiles.clear();
-            domFiles.clear();
-            using namespace Safir::Dob::Typesystem::Internal;
-
-            const boost::filesystem::recursive_directory_iterator end;
-            for (boost::filesystem::recursive_directory_iterator dir(directory);
-                 dir != end; ++dir)
-            {
-                const boost::filesystem::path path(*dir);
-                const boost::filesystem::path extension = path.extension();
-                const boost::filesystem::path filename = path.filename();
-                
-                if (extension == DOU_FILE_EXTENSION)
-                {
-                    const bool result = douFiles.insert(std::make_pair(filename,path)).second;
-                    
-                    if (!result)
-                    {
-                        SEND_SYSTEM_LOG(Critical,
-                                        << "Duplicate dou file found: " << path.string().c_str());
-
-                        throw std::logic_error("Dupicate class");
-                    }
-                }
-                else if (extension == DOM_FILE_EXTENSION)
-                {
-                    const bool result = domFiles.insert(std::make_pair(filename,path)).second;
-                    
-                    if (!result)
-                    {
-                        SEND_SYSTEM_LOG(Critical,
-                                        << "Duplicate dom file found: " << path.string().c_str());
-
-                        throw std::logic_error("Dupicate property mapping");
-                    }
-                }
-
-            }
-        }
-
-        static void InsertAndOverride(FileLocations& into, const FileLocations& from)
-        {
-            for (FileLocations::const_iterator it = from.begin();
-                 it != from.end(); ++it)
-            {
-                const std::pair<FileLocations::iterator, bool> result = 
-                    into.insert(*it);
-                if (!result.second)
-                {
-                    lllout << "Found override dou file " << it->second.string().c_str() << std::endl;
-                    //replace the old path with the new path in _into_
-                    result.first->second = it->second;
-                }
-            }
-        }
-
-
-        FileLocations m_douFiles;
-        FileLocations m_domFiles;
-    };
-}
 
 
 namespace Safir
@@ -591,7 +462,7 @@ namespace Internal
     {
         try
         {
-            FileCollection files;
+            const FileCollection files;
             
             //parse dou files
             for (FileLocations::const_iterator it = files.DouFiles().begin();
