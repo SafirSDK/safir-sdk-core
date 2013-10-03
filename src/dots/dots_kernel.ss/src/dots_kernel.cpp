@@ -26,6 +26,7 @@
 #include <Safir/Dob/Typesystem/Internal/Id.h>
 #include "dots_blob_layout.h"
 #include "dots_repository.h"
+#include "dots_file_collection.h"
 #include "dots_basic_types.h"
 #include "dots_xml_serializer.h"
 #include "dots_blob_serializer.h"
@@ -1068,22 +1069,16 @@ void DotsC_HasProperty(const TypeId classTypeId, const TypeId propertyTypeId, bo
 //************************************************************************************
 //* Serialization
 //************************************************************************************
-/*void DotsC_BlobToXml(char* xmlDest, const char * const blobSource, const Int32& bufSize)
-  {
-    Init();
-  BlobToXmlSerializer ser;
-  strncpy(xmlDest,ser.Serialize(blobSource).c_str(), bufSize);
-  }*/
-
 void DotsC_BetterBlobToXml(char * const xmlDest, const char * const blobSource, const Int32 bufSize, Int32 & resultSize)
 {
     Init();
     BlobToXmlSerializer ser;
     std::string xml = ser.Serialize(blobSource);
-    resultSize = static_cast<Int32>(xml.length());
+    resultSize = static_cast<Int32>(xml.length()) + 1; //add one for null termination
     if (resultSize <= bufSize)
     {
-        strncpy(xmlDest,xml.c_str(), bufSize);
+        strncpy(xmlDest, xml.c_str(), resultSize);
+        xmlDest[resultSize - 1] = 0;
     }
 }
 
@@ -2267,4 +2262,38 @@ void DotsC_PeekAtException(DotsC_TypeId & exceptionId)
     Init();
     std::string desc;
     ExceptionKeeper::Instance().Peek(exceptionId,desc);
+}
+
+
+void DotsC_GetDouFilePathForType(const DotsC_TypeId typeId,
+                                 char * const buf, 
+                                 const Int32 bufSize, 
+                                 Int32 & resultSize)
+{
+    Init();
+
+    const char* const name =  DotsC_GetTypeName(typeId);
+    if (name == NULL)
+    {
+        resultSize = -1;
+        return;
+    }
+    const std::string douName = std::string(name) + DOU_FILE_EXTENSION;
+
+    const FileCollection files;
+    FileLocations::const_iterator douFindIt = files.DouFiles().find(douName);
+    if (douFindIt == files.DouFiles().end())
+    {
+        resultSize = -1;
+        return;
+    }
+
+    const std::string path = douFindIt->second.string();
+
+    resultSize = static_cast<Int32>(path.length()) + 1; //add one for null termination
+    if (resultSize <= bufSize)
+    {
+        strncpy(buf, path.c_str(), resultSize);
+        buf[resultSize -1] = 0;
+    }
 }

@@ -30,23 +30,21 @@
 #define _dots_kernel_h
 
 #if defined _MSC_VER
-    #if defined DOTSKERNEL_EXPORTS
-        #define DOTS_KERNEL_API __declspec(dllexport)
-    #else
-        #define DOTS_KERNEL_API __declspec(dllimport)
-        #pragma comment( lib, "dots_kernel.lib" )
-    #endif
-    #define CALLING_CONVENTION __cdecl
+#  if defined DOTSKERNEL_EXPORTS
+#    define DOTS_KERNEL_API __declspec(dllexport)
+#  else
+#    define DOTS_KERNEL_API __declspec(dllimport)
+#    pragma comment( lib, "dots_kernel.lib" )
+#  endif
+#  define CALLING_CONVENTION __cdecl
 #elif defined __GNUC__
-    #define DOTS_KERNEL_API
-    #if defined (__i386)
-        #define CALLING_CONVENTION __attribute__((cdecl))
-    #else
-        #define CALLING_CONVENTION
-    #endif
+#  define DOTS_KERNEL_API
+#  if defined (__i386)
+#    define CALLING_CONVENTION __attribute__((cdecl))
+#  else
+#    define CALLING_CONVENTION
+#  endif
 #endif
-
-
 
 
 #include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
@@ -488,16 +486,7 @@ extern "C"
     //************************************************************************************
     //* Serialization
     //************************************************************************************
-    // Function:    DotsC_BlobToXml
-    // Parameters:  xmlDest     -   result of serialization, will be a xml string. Out parameter
-    //              blobSource  -   blob to serialize
-    //              bufSize     -   size of xmlDest, should be big enough.
-    // Returns:     -
-    // Comments:    Serializes a blob to a xml string.
-    /*    DOTS_KERNEL_API void CALLING_CONVENTION DotsC_BlobToXml(char* xmlDest,
-          const char * & blobSource,
-          const DotsC_Int32& bufSize);
-    */
+
     // Function:    DotsC_BetterBlobToXml
     // Parameters:  xmlDest     -   result of serialization, will be a xml string. Out parameter
     //              blobSource  -   blob to serialize
@@ -1931,6 +1920,24 @@ extern "C"
                                                                        bool & wasSet);
 
     DOTS_KERNEL_API void CALLING_CONVENTION DotsC_PeekAtException(DotsC_TypeId & exceptionId);
+
+    // Function:    DotsC_GetDouFilePathForType
+    // Parameters:  typeId      -   Type to find path for
+    //              buf         -   Buffer where file path will be put
+    //              bufSize     -   size of buf.
+    //              resultSize  -   if the buffer was big enough for the xml this holds the number
+    //                              of bytes written
+    //                              if it was too small it holds the size that was needed
+    //                              (so resultSize > bufSize ==> try again with bigger buffer)
+    //                              -1 on failure to find type or dou file.
+    // Returns:     -
+    // Comments:    Get the full path to the dou file that the type id represents
+    //              Note that this function looks at the disk every time it is called. No caching
+    //              is performed at all. Not meant to be used in "real" code.
+    DOTS_KERNEL_API void CALLING_CONVENTION DotsC_GetDouFilePathForType(const DotsC_TypeId typeId,
+                                                                        char * const buf, 
+                                                                        const DotsC_Int32 bufSize, 
+                                                                        DotsC_Int32 & resultSize);
 }
 
 
