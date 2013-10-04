@@ -42,6 +42,7 @@
 #include <Safir/Dob/Typesystem/Parameters.h>
 #include <Safir/Dob/Typesystem/Members.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
+#include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <boost/algorithm/string/predicate.hpp>
 
 
@@ -8573,6 +8574,31 @@ void Test_IsException()
         }   
 }
 
+void Test_GetDouFilePath()
+{
+    using namespace Safir::Dob::Typesystem::Internal;
+    if (!boost::ends_with
+        (GetDouFilePath(DotsTest::MemberTypes::ClassTypeId),
+         "runtime/data/text/dots/classes/safir_dob_tests/DotsTest.MemberTypes.dou"))
+    {
+        std::wcout << "Failed to find DotsTest.MemberTypes.dou" << std::endl;
+    }
+
+    if (!boost::ends_with
+        (GetDouFilePath(DotsTest::TestException::ExceptionTypeId),
+         "runtime/data/text/dots/classes/safir_dob_tests/DotsTest.TestException.dou"))
+    {
+        std::wcout << "Failed to find DotsTest.TestException.dou" << std::endl;
+    }
+
+    if (!boost::ends_with
+        (GetDouFilePath(DotsTest::MemberTypesProperty::ClassTypeId),
+         "runtime/data/text/dots/classes/safir_dob_tests/DotsTest.MemberTypesProperty.dou"))
+    {
+        std::wcout << "Failed to find DotsTest.MemberTypesProperty.dou" << std::endl;
+    } 
+}
+
 int main(int /*argc*/, char* /*argv*/[])
 {
     std::wcout << std::boolalpha;
@@ -8650,7 +8676,7 @@ int main(int /*argc*/, char* /*argv*/[])
         Test_IsProperty();
         Test_IsEnumeration();
         Test_IsException();
-
+        Test_GetDouFilePath();
     }
     catch (const Safir::Dob::Typesystem::FundamentalException & e)
     {

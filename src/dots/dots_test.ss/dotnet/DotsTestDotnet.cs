@@ -103,6 +103,7 @@ class DotsTestDotnet
             Test_IsProperty();
             Test_IsEnumeration();
             Test_IsException();
+            Test_GetDouFilePath();
         }
         finally
         {
@@ -7690,5 +7691,27 @@ class DotsTestDotnet
             Console.WriteLine("Caught native exception");
         }
     }
+
+    private static void Test_GetDouFilePath()
+    {
+        if (!Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath(DotsTest.MemberTypes.ClassTypeId).EndsWith
+            ("runtime/data/text/dots/classes/safir_dob_tests/DotsTest.MemberTypes.dou"))
+        {
+            Console.WriteLine("Failed to find DotsTest.MemberTypes.dou");
+        }
+
+        if (!Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath(DotsTest.TestException.ExceptionTypeId).EndsWith
+            ("runtime/data/text/dots/classes/safir_dob_tests/DotsTest.TestException.dou"))
+        {
+            Console.WriteLine("Failed to find DotsTest.TestException.dou");
+        }
+
+        if (!Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath(DotsTest.MemberTypesProperty.ClassTypeId).EndsWith
+            ("runtime/data/text/dots/classes/safir_dob_tests/DotsTest.MemberTypesProperty.dou"))
+        {
+            Console.WriteLine("Failed to find DotsTest.MemberTypesProperty.dou");
+        }
+    }
+
 
 }
