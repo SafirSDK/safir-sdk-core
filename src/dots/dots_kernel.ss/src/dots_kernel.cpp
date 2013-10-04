@@ -1074,11 +1074,10 @@ void DotsC_BetterBlobToXml(char * const xmlDest, const char * const blobSource, 
     Init();
     BlobToXmlSerializer ser;
     std::string xml = ser.Serialize(blobSource);
-    resultSize = static_cast<Int32>(xml.length()) + 1; //add one for null termination
+    resultSize = static_cast<Int32>(xml.length()) + 1; //add one char for null termination
     if (resultSize <= bufSize)
     {
         strncpy(xmlDest, xml.c_str(), resultSize);
-        xmlDest[resultSize - 1] = 0;
     }
 }
 
@@ -1090,7 +1089,7 @@ void DotsC_XmlToBlob(char * & blobDest,
 {
     Init();
     boost::call_once(createXmlToBlobLockFlag,boost::bind(getXmlToBlobLock));
-    // XmlToBlobSerializer holds data in global variabels while parsing
+    // XmlToBlobSerializer holds data in global variables while parsing
     // so we can't allow more than one thread at a time to execute.
 
     boost::lock_guard<boost::mutex> lck(getXmlToBlobLock());
@@ -2294,6 +2293,5 @@ void DotsC_GetDouFilePathForType(const DotsC_TypeId typeId,
     if (resultSize <= bufSize)
     {
         strncpy(buf, path.c_str(), resultSize);
-        buf[resultSize -1] = 0;
     }
 }

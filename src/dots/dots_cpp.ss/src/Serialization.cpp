@@ -63,7 +63,8 @@ namespace Typesystem
                 throw SoftwareViolationException(L"Error in serialization buffer sizes",__WFILE__,__LINE__);
             }
         }
-        return Utilities::ToWstring(std::string(xml8.begin(),xml8.begin() + resultSize));
+        return Utilities::ToWstring(std::string(xml8.begin(),
+                                                xml8.begin() + resultSize - 1)); //remove null
     }
 
     const std::wstring 
@@ -89,7 +90,8 @@ namespace Typesystem
                 throw SoftwareViolationException(L"Error in serialization buffer sizes",__WFILE__,__LINE__);
             }
         }
-        return Utilities::ToWstring(std::string(xml8.begin(),xml8.begin() + resultSize));
+        return Utilities::ToWstring(std::string(xml8.begin(),
+                                                xml8.begin() + resultSize - 1)); //remove null.
     }
         
 

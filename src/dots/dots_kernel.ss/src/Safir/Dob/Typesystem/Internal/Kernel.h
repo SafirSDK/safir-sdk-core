@@ -490,9 +490,9 @@ extern "C"
     // Function:    DotsC_BetterBlobToXml
     // Parameters:  xmlDest     -   result of serialization, will be a xml string. Out parameter
     //              blobSource  -   blob to serialize
-    //              bufSize     -   size of xmlDest.
+    //              bufSize     -   size of xmlDest. string is null terminated.
     //              resultSize  -   if the buffer was big enough for the xml this holds the number
-    //                              of bytes written
+    //                              of bytes written (including null termination)
     //                              if it was too small it holds the size that was needed
     //                              (so resultSize > bufSize ==> try again with bigger buffer)
     // Returns:     -
@@ -1923,13 +1923,14 @@ extern "C"
 
     // Function:    DotsC_GetDouFilePathForType
     // Parameters:  typeId      -   Type to find path for
-    //              buf         -   Buffer where file path will be put
+    //              buf         -   Buffer where file path will be put, will be null terminated
     //              bufSize     -   size of buf.
     //              resultSize  -   if the buffer was big enough for the xml this holds the number
     //                              of bytes written
     //                              if it was too small it holds the size that was needed
     //                              (so resultSize > bufSize ==> try again with bigger buffer)
     //                              -1 on failure to find type or dou file.
+    //                              Includes the null termination at the end.
     // Returns:     -
     // Comments:    Get the full path to the dou file that the type id represents
     //              Note that this function looks at the disk every time it is called. No caching

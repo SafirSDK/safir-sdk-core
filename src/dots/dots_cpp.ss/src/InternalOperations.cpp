@@ -108,7 +108,7 @@ namespace Internal
                 throw SoftwareViolationException(L"Error in GetDouFilePathForType",__WFILE__,__LINE__);
             }
         }
-        return Utilities::ToWstring(std::string(buf.begin(),buf.begin() + resultSize));
+        return Utilities::ToWstring(std::string(buf.begin(),buf.begin() + resultSize - 1)); //remove null char
     }
 }
 }
