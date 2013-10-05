@@ -37,7 +37,7 @@ if (WIN32)
     INCLUDE_DIRECTORIES(${EXPAT_HEADER})
 endif()
 
-FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time)
+FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time system)
 
 TARGET_LINK_LIBRARIES(dots_kernel ${EXPAT_LIBRARY})
 
