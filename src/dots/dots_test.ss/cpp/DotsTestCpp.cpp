@@ -44,7 +44,7 @@
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <boost/algorithm/string/predicate.hpp>
-
+#include <boost/filesystem/operations.hpp>
 
 std::wstring utf8_to_wstr( const std::string& str )
 {
@@ -8574,29 +8574,31 @@ void Test_IsException()
         }   
 }
 
+void FileCheck(const std::wstring& path, const std::wstring& expectedName)
+{
+    if (!boost::ends_with
+        (path,
+         expectedName))
+    {
+        std::wcout << "Failed to find " << expectedName << std::endl;
+    }
+
+    if (!boost::filesystem::exists(path))
+    {
+        std::wcout << "Dou file does not exist: " << path << std::endl;
+    }
+}
 void Test_GetDouFilePath()
 {
     using namespace Safir::Dob::Typesystem::Internal;
-    if (!boost::ends_with
-        (GetDouFilePath(DotsTest::MemberTypes::ClassTypeId),
-         "runtime/data/text/dots/classes/safir_dob_tests/DotsTest.MemberTypes.dou"))
-    {
-        std::wcout << "Failed to find DotsTest.MemberTypes.dou" << std::endl;
-    }
+    FileCheck(GetDouFilePath(DotsTest::MemberTypes::ClassTypeId),
+              L"DotsTest.MemberTypes.dou");
 
-    if (!boost::ends_with
-        (GetDouFilePath(DotsTest::TestException::ExceptionTypeId),
-         "runtime/data/text/dots/classes/safir_dob_tests/DotsTest.TestException.dou"))
-    {
-        std::wcout << "Failed to find DotsTest.TestException.dou" << std::endl;
-    }
+    FileCheck(GetDouFilePath(DotsTest::TestException::ExceptionTypeId),
+              L"DotsTest.TestException.dou");
 
-    if (!boost::ends_with
-        (GetDouFilePath(DotsTest::MemberTypesProperty::ClassTypeId),
-         "runtime/data/text/dots/classes/safir_dob_tests/DotsTest.MemberTypesProperty.dou"))
-    {
-        std::wcout << "Failed to find DotsTest.MemberTypesProperty.dou" << std::endl;
-    } 
+    FileCheck(GetDouFilePath(DotsTest::MemberTypesProperty::ClassTypeId),
+              L"DotsTest.MemberTypesProperty.dou");
 }
 
 int main(int /*argc*/, char* /*argv*/[])
