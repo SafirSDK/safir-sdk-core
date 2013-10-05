@@ -7692,25 +7692,33 @@ class DotsTestDotnet
         }
     }
 
+    private static void FileCheck(string path, string expectedName)
+    {
+        if (!path.EndsWith(expectedName))
+        {
+            Console.WriteLine("Failed to find {0}", expectedName);
+        }
+        
+        if (!System.IO.File.Exists(path))
+        {
+            Console.WriteLine("Dou file does not exist: {0}", path);
+        }
+    }
+
+
     private static void Test_GetDouFilePath()
     {
-        if (!Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath(DotsTest.MemberTypes.ClassTypeId).EndsWith
-            ("runtime/data/text/dots/classes/safir_dob_tests/DotsTest.MemberTypes.dou"))
-        {
-            Console.WriteLine("Failed to find DotsTest.MemberTypes.dou");
-        }
-
-        if (!Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath(DotsTest.TestException.ExceptionTypeId).EndsWith
-            ("runtime/data/text/dots/classes/safir_dob_tests/DotsTest.TestException.dou"))
-        {
-            Console.WriteLine("Failed to find DotsTest.TestException.dou");
-        }
-
-        if (!Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath(DotsTest.MemberTypesProperty.ClassTypeId).EndsWith
-            ("runtime/data/text/dots/classes/safir_dob_tests/DotsTest.MemberTypesProperty.dou"))
-        {
-            Console.WriteLine("Failed to find DotsTest.MemberTypesProperty.dou");
-        }
+        FileCheck(Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath
+                  (DotsTest.MemberTypes.ClassTypeId),
+                  "DotsTest.MemberTypes.dou");
+        
+        FileCheck(Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath
+                  (DotsTest.TestException.ExceptionTypeId),
+                  "DotsTest.TestException.dou");
+        
+        FileCheck(Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath
+                  (DotsTest.MemberTypesProperty.ClassTypeId),
+                  "DotsTest.MemberTypesProperty.dou");
     }
 
 
