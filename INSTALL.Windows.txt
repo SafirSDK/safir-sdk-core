@@ -9,15 +9,18 @@ Here is a summary of what you need, and below are instructions on where to get t
 
 Visual Studio 2010 SP1 or later (express or paid versions work)
 Subversion
-GNAT
-Boost (1.50 or later)
-Qt (>=4.4)
+Boost (>=1.50)
+Python (>= 2.6)
 CMake (>=2.8)
 Expat
-Java Platform (JDK) 
-Python (>= 2.6)
-doxygen
-graphviz
+Jom *
+Qt (>=4.4) *
+GNAT Ada compiler *
+Java Platform (JDK) *
+Doxygen *
+Graphviz *
+
+Items marked with an asterisk (*) are optional.
 
 64 bit builds
 ~~~~~~~~~~~~~
@@ -64,7 +67,7 @@ Run the installer and let it install to a suitable directory. Go to that directo
 Set the BOOST_ROOT environment variable to point to the installation directory, e.g. C:\local\boost_1_54_0
 Add the lib of the boost installation (e.g. %BOOST_ROOT%\lib) to your PATH.
 
-For some boost versions there are some bugs that need to be patched for Safir SDK to work correctly. The easisest way to install the patches that is needed for your version is to use the CMake file in the build/patches directory, run "cmake . -G 'NMake Makefiles'", "nmake install" once you have installed cmake, which will install the correct patches automatically.
+For some boost versions there are some bugs that need to be patched for Safir SDK to work correctly. The easisest way to install the patches that is needed for your version is to use the CMake file in the build/patches directory, run 'cmake . -G "NMake Makefiles"', 'nmake install' once you have installed cmake, which will install the correct patches automatically.
 
 jom
 ~~~
@@ -129,21 +132,21 @@ Add C:\Python27 (or equivalent) to your PATH.
 
 Doxygen and Graphviz
 ~~~~~~~~~~~~~~~~~~~~
-These tools are used to build the interface documentation from the C++ source code. 
+These tools are used to build the interface documentation from the C++ source code. If you do not require this documentation you can skip this step.
 Go to http://www.doxygen.org/ and download and install the windows installer 
 Go to http://www.graphviz.org/ and download and install the windows installer
 
 It appears that Graphviz installs its own version of libexpat.dll which conflicts with the one we installed above (part of Expat). You have to make sure that the libexpat.dll that we installed above is before the graphviz one in your PATH. 
 (If you don't do this you will get an error message about "The ordinal 63 could not be located in the dynamic link library libexpat.dll" when you build Safir SDK Core.)
 
-Now you can jump to "Building Safir SDK Core"
+Now you can continue to "Building Safir SDK Core"
 
 Building Safir SDK Core
 -----------------------
 First of all you should decide where you want the SDK installed. You have to specify two environment variables, SAFIR_RUNTIME and SAFIR_SDK. For example you can create a directory "C:\safir", and set the variables to point to "C:\safir\runtime" and "C:\safir\sdk" respectively.
 
 Add %SAFIR_RUNTIME%\bin to your PATH.
-Add an environment variable ADA_PROJECT_PATH containing %SAFIR_SDK%\ada
+If you're going to be using the Ada interfaces, add an environment variable ADA_PROJECT_PATH containing %SAFIR_SDK%\ada.
 
 The building of C# applications require one more thing, the creation of a K: drive that points to %SAFIR_RUNTIME%\bin. The reason for this is that Visual Studio does not support the use of environment variables for locating dependent assemblies, and since we don't add the assemblies to the GAC we have to provide some other way of locating them. So create the folder "C:\safir\runtime\bin" (assuming that is where you put your tower), and open a command prompt and run "subst k: %SAFIR_RUNTIME%\bin". (This creates a K: drive that is mapped to C:\safir\runtime\bin. The mapping will disappear when you restart your computer, so if you want it to be persistent put that command in a .bat file and place it in your Startup folder.)
 
@@ -157,6 +160,9 @@ To build a 32 bit Safir SDK Core on 64 bit windows with support for all language
 
 To build Safir SDK Core without support for Ada and Java:
     build\build.py -f build\sdk_core.txt --no-ada-support --no-java-support
+
+To build Safir SDK Core without dobexplorer and without the doxygen documentation:
+    build\build.py -f build\sdk_core.txt --skip-list="dobexplorer doxygen"
 
 Type build/build.py --help to get a complete list of all command line switches.
 
