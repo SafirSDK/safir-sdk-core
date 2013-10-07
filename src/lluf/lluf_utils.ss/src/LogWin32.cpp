@@ -46,8 +46,12 @@ namespace
 const DWORD maxStringSize = 64u * 1024u;
 const std::wstring regKey =
         L"SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\Safir";
-const std::wstring eventMessageFile32 = L"C:\\Windows\\Microsoft.NET\\Framework\\v2.0.50727\\EventLogMessages.dll";
-const std::wstring eventMessageFile64 = L"C:\\Windows\\Microsoft.NET\\Framework64\\v2.0.50727\\EventLogMessages.dll";
+
+// In order not to complicate our own build process (for example, we don't want to mess
+// with the MessageCompiler) we use the resources provided by EventLogMessages.dll from the
+// .Net framework.
+const std::wstring eventMessageFile = L"C:\\Windows\\Microsoft.NET\\Framework\\v2.0.50727\\EventLogMessages.dll";
+
 const wchar_t* eventMessageFileParamName = L"EventMessageFile";
 const wchar_t* typesSupportedParamName = L"TypesSupported";
 const DWORD typesSupported = (EVENTLOG_SUCCESS |
@@ -56,20 +60,6 @@ const DWORD typesSupported = (EVENTLOG_SUCCESS |
                               EVENTLOG_ERROR_TYPE);
 const wchar_t* logSourceName = L"Safir";
 
-bool Is64Bit()
-{
-#pragma warning(disable:4127) //Get rid of warning that this if-expression is constant (comparing two constants)
-
-    if (sizeof(void*) > 4)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-#pragma warning(default:4127)
-}
 
 //------------------------------------------
 LSTATUS GetRegistryValue(HKEY hKey, const wchar_t* lpValueName, std::wstring& value)
@@ -115,21 +105,8 @@ LSTATUS GetRegistryValue(HKEY hKey, const wchar_t* lpValueName, DWORD& value)
 WindowsLogger::WindowsLogger(const std::wstring& processName)
     : m_startupSynchronizer("LLUF_WINDOWS_LOGGING_INITIALIZATION"),
       m_sourceHandle(0),
-      m_processName(processName),
-      m_eventMessageFile()
+      m_processName(processName)
 {
-    // In order not to complicate our own build process (for example, we don't want to mess
-    // with the MessageCompiler) we use the resources provided by EventLogMessages.dll from the
-    // .Net framework.
-    if (Is64Bit())
-    {
-        m_eventMessageFile = eventMessageFile64;
-    }
-    else
-    {
-        m_eventMessageFile = eventMessageFile64;
-    }
-
     m_sourceHandle = RegisterEventSourceW(NULL, L"Safir");
     if (!m_sourceHandle)
     {
@@ -208,8 +185,8 @@ bool WindowsLogger::AddRegistryEntries() const
                          eventMessageFileParamName,
                          0,
                          REG_EXPAND_SZ,
-                         reinterpret_cast<const BYTE*>(m_eventMessageFile.c_str()),
-                         static_cast<DWORD>((m_eventMessageFile.length() + 1) * sizeof(wchar_t)));
+                         reinterpret_cast<const BYTE*>(eventMessageFile.c_str()),
+                         static_cast<DWORD>((eventMessageFile.length() + 1) * sizeof(wchar_t)));
     if (res != ERROR_SUCCESS)
     {
         Send(EVENTLOG_INFORMATION_TYPE,
@@ -269,14 +246,14 @@ bool WindowsLogger::RegistryIsInitialized() const
 
     std::wstring msgFile;
     res = GetRegistryValue(hKey, eventMessageFileParamName, msgFile);
-    if (res != ERROR_SUCCESS || msgFile != m_eventMessageFile)
+    if (res != ERROR_SUCCESS)
     {
         return false;
     }
 
     DWORD eventTypes = 0;
     res = GetRegistryValue(hKey, typesSupportedParamName, eventTypes);
-    if (res != ERROR_SUCCESS || eventTypes != typesSupported)
+    if (res != ERROR_SUCCESS)
     {
         return false;
     }
