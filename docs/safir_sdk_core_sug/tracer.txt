@@ -2,9 +2,9 @@
 This file is included into the main SUG document, and is located under header level "==="
 ///////
 
-The Tracer is intended to be used for developer/integration logging inside applications. It should never be used as the sole target for logging errors, since the output can only be viewed by developers. A common way to use trace logging is to log "significant events" or other points of interest, so that the developer can find out what his component is doing when running in a reference site or when running in a situation when it is not desirable or possible to halt execution with a debugger.
+The Tracer is intended to be used for developer/integration logging inside applications. It should never be used as the sole target for logging errors, since the output can only be viewed by developers. A common way to use trace logging is to log "significant events" or other points of interest, so that the developer can find out what his component is doing when running on a test system or when running in a situation when it is not desirable or possible to halt execution with a debugger.
 
-The functionality is supported in C++, C#, Ada and Java. The interface to the trace logging functionality is a class named +Safir.Application.Tracer+ and a class named +Safir.Application.TracerBackdoor+.
+The interface to the trace logging functionality is a class named +Safir.Application.Tracer+ and a class named +Safir.Application.TracerBackdoor+.
 
 Tracer objects are used to send logs to the Safir Log, and the TracerBackdoor is used to turn the different Tracers on and off. The Tracer class has no Dob dependencies itself, but the TracerBackdoor uses the Backdoor functionality, as described above.
 
@@ -124,7 +124,7 @@ How does the Tracer use Windows Native Logging?::
 
 ==== Changes from previous Tracer versions
 
-The way that the Tracer works changed quite a lot with the introduction of the Safir Logging mechanism in Safir SDK Core version 4.5. The interface has only minor changes, but the behaviour behind the scenes has changed quite a lot.
+The way that the Tracer works changed quite a lot with the introduction of the Safir Logging mechanism in Safir SDK Core version 4.5. The interface has only minor changes, but the behaviour behind the scenes has changed significantly.
 
 Starting the TracerBackdoor::
   Previously the TracerBackdoor was started automatically with a separate thread and connection, but now the TracerBackdoor has to be started explicitly, and on an existing connection. This means that you have to add Start and Stop calls in your applications.
