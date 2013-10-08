@@ -2862,11 +2862,11 @@ Knowing what value to set +SharedMemorySize+ to is trickier, but one approach is
 
 [[safir_logging]]
 == Safir Logging
-Safir SDK Core has a mechanism, Safir Log, designed to simplify for applications to generate and send log messages according to the well known and widely adopted syslog protocol (RFC 3164).
+Safir SDK Core has a mechanism, Safir Log, designed to make it simpler for applications to generate and send log messages according to the widely adopted _Syslog_ protocol http://www.ietf.org/rfc/rfc3164.txt[RFC 3164].
 
-Safir Log provides a simple interface (currently available for C++, C#, Java and Ada) so that an application only has to give a severity level and the log message itself. The framework will do the neccessary formatting according to RFC 3164.
+Safir Log provides a simple interface that an application only has to give a severity level and the log message itself to send a syslog message. The framework will do the neccessary formatting and transmission over UDP as is specified in RFC 3164.
 
-It is also possible to configure Safir Log so that the logs are sent to a native, plattform specific, logging mechanism. In practice, this could be of use on the Windows plattform to send logs to the Windows Event Log.  
+It is also possible to configure Safir Log so that the logs are sent to a native, plattform specific, logging mechanism. In practice, this could be of use on the Windows plattform to send logs to the Windows Event Log and on Linux to send the logs directly to the +syslog(...)+ interface instead of using UDP messages.
 
 .Example, sending a log message using C++
 [source,{cpp}]
@@ -2876,21 +2876,21 @@ It is also possible to configure Safir Log so that the logs are sent to a native
 Safir::Logging::SendSystemLog(Safir::Logging::Error, L"This is an error log!");
 ----------------------------
  
-Note that Safir SDK Core only provides the functionality related to the sending side for syslog messages. In order to collect and view the log messages a syslog server is needed. Such a server can range from a simple program listening for UDP packets and dumping the result on standard output, to more sophisticated solutions that support filtering, writing logs do disk, search functions etc. A syslog deamon is included in most Linux distributions and for Windows there are third-party syslog servers.
+Note that Safir SDK Core only provides the functionality related to the sending side for syslog messages. In order to collect and view the log messages a syslog server is needed. Such a server can range from a simple program listening for UDP packets and dumping the result on standard output, to more sophisticated solutions that support filtering, writing logs do disk or database and provide advanced search and report generation functionality. A syslog daemon is included in most Linux distributions and for Windows there are several third-party syslog servers.
 
 === Logging guidelines
 This section provides some guidelines that, when applied, will help you make your application behave like a "good citizen" in the syslog ecosystem.
 
-First of all we recommend that you establish project/product specific logging guidelines so that the separate parts that forms your system exhibit a consistent logging behaviour.  
+First of all we recommend that you establish project/product specific logging guidelines so that the separate parts that form your system exhibit a consistent logging behaviour.  
 
-Syslog is a "one-liner" oriented protocol. This, and the fact that syslog servers are known to handle messages differently regarding new lines, means that we recommend that you try to make your logs one-liners. When put together the one-liner logs from your application should form kind of a "story". 
+Syslog is a "one-liner" oriented protocol. This, and the fact that syslog servers are known to handle messages differently regarding new lines, means that we recommend that you try to make your logs one-liners. When put together, the one-liner logs from your application should form a coherent narrative. 
 
 ==== Facility and Severity
 A syslog message has a Priority value (PRI) that is a representation of both the Facility and the Severity of the message. PRI is used by syslog deamons to filter and redirect logs but is normally not shown in the log output. Therefore, compose the log message text so that it is clear and understandable without the facility and severity context.
 
 The Safir Log mechanism uses facility code 1 (user-level messages) for all syslog messages and it is not a parameter visible in the interface.
 
-The severity level must be set by the application. RFC 3164 has a brief description of the interpretation of the severity level but doesn't really give any detailed advice. In summary, the higher the severity level, the faster action by support/tech staff is necessary. In practice it isn't always obvious what severity level to use. This is especially true for code in libraries/platforms where there usually is no knowledge of the characteristics of the using application. One could argue that libraries should not generate logs at all but instead inform the using application, for instance via an exception, but nevertheless, there are many designs where logs are generated by library code.
+The severity level must be set by the application. RFC 3164 has a brief description of the interpretation of the severity level but doesn't really give any detailed advice. To summarize: the higher the severity level, the more urgent action from support/tech staff is. In practice it isn't always obvious what severity level to use. This is especially true for code in libraries/platforms where there usually is no knowledge of the characteristics of the calling application. One could argue that libraries should refrain from generating logs at all and instead inform the using application that an error has occurred, so that it can take appropriate action. Since Safir SDK Core does not adhere to this rule itself we leave this as something to consider during library design.
 
 The system design in terms of redundancy might also affect the choosen severity level. For example, it might be appropriate for a system built and configured so that there is a standby application/node "taking over" in case of failure, to use severity level Error instead of Emergency for a given event.
 
@@ -2899,36 +2899,36 @@ The system design in terms of redundancy might also affect the choosen severity 
 |=========================================================================
 |RFC 3164 Severity Level |RFC 3164 Description
 
-|Emergency               |system is unusable 
-|Alert                   |action must be taken immediately
-|Critical                |critical conditions
-|Error                   |error conditions
-|Warning                 |warning conditions
-|Notice                  |normal but significant condition
-|Informational           |informational messages
-|Debug                   |debug-level messages
+|Emergency               |System is unusable .
+|Alert                   |Action must be taken immediately.
+|Critical                |Critical conditions.
+|Error                   |Error conditions.
+|Warning                 |Warning conditions.
+|Notice                  |Normal but significant condition.
+|Informational           |Informational messages.
+|Debug                   |Debug-level messages.
 
 |=========================================================================
 
-Here are some recommendations regarding wich severity level to use for some typical classes of errors/events found in a Safir system.
+Here are some recommendations regarding wich severity level to use for some typical classes of errors and events found in Safir systems.
 
 Fatal error::
-This type of error includes static conditions that must be fulfilled to be able to start/continue executing the program, for example missing static resources or invalid configuration. It also includes programming errors, that is, errors of assert-type. In these cases send a Safir Log with severity in the range Critical - Emergency and then abort execution of the program.
+This type of error includes static conditions that must be fulfilled to be able to start/continue executing the program, for example missing static resources or invalid configuration. It also includes programming errors, that is, errors of assert-type. In these cases send a Safir Log with severity in the range Critical to Emergency and then exit the program with an error code (i.e. a non-zero exit code).
 
 Non-fatal error::
 This type of error indicates that an error is detected but the program can continue to execute. An example would be the reception of a message from an external system in an invalid format. In this case send a Safir Log with severity Error. Normally the program continues to execute, possibly in a degraded state.
 
 Dynamic Resource::
-A dynamic resource is defined as a resource that is not guaranteed to be available at the time the program starts and/or a resource that can "come and go" during program execution. Send a Safir Log with severity Error to report that the resource is missing. When the resource has been acquired a Safir Log with severity Informational should be sent. Note that since it is "ok" for a dynamic resource to be temporary missing, an Error log should be sent only after a reasonably number of retries to acquire it.
+A dynamic resource is defined as a resource that is not guaranteed to be available at the time the program starts and/or a resource that can "come and go" during program execution. Send a Safir Log with severity Error to report that the resource is missing. When the resource has been acquired a Safir Log with severity Informational should be sent. Note that since it is "ok" for a dynamic resource to be temporarily missing, an Error log should be sent only after a reasonably number of retries to acquire it.
 
 Warning log::
-Use severity Warning for events that indicates that an error will occur if action is not taken, e.g. file system is about to become full.
+Use severity Warning for events that indicates that an error will occur if action is not taken, e.g. a disk is almost full.
 
 Informational/Debug log::
-For events of type informational use the most appropriate of the severity Notice or Informational. Although it is possible to send debug logs using the Safir Log mechanism directly, we recommend that, in this case, you use the Tracer and Backdoor functionality instead (see <<debugging_support>>).
+For events of type Informational use the most appropriate of the severity Notice or Informational. Although it is possible to send debug logs using the Safir Log mechanism directly have a look Tracer and Backdoor functionality (see <<debugging_support>>) for a more powerful interface for debug logging.
  
 === Safir Logging configuration
-The section SystemLog in the configuration file logging.ini (see <<configuration>>) contains parameters that determine where the log messages are directed. There is also a parameter that determines how newlines in the log message should be handled.
+The configuration of Safir Logging is located in the file +logging.ini+ (see <<configuration>>) and contains parameters that determine where the log messages are sent and how newlines in log messages should be handled.
 
 native_logging::
 Controls whether or not logs are sent to the native, plattform specific, logging mechanism.
@@ -2947,14 +2947,14 @@ Controls whether or not a newline in the log message is replaced with a space.
 
 
 === Safir Logging on Windows
-Windows doesn't have built-in support for receiving syslog messages. However, you can find third-party syslog servers that target the Windows plattform, both commercial and freely distributed. One example is Kiwi Syslog Server (http://www.kiwisyslog.com[])
+Windows doesn't have built-in support for receiving syslog messages. However, you can find third-party syslog servers that target the Windows plattform, both commercial and freely distributed. One example is Kiwi Syslog Server (http://www.kiwisyslog.com[]), but others are available.
 
 To enable logging using syslog on Windows, the parameter +send_to_syslog_server+ shall be set to true and the parameters +syslog_server_address+ and +syslog_server_port+ shall be set to appropriate values.
 
 ==== Windows Event Log
 Safir Log also provides a way of writing syslog messages to the Windows Event Log. To enable this, set the parameter +native_logging+ to true.
 
-For native logging the event source will be set to 'Safir' and the severity level parameter is mapped to a corresponding Windows Event Log Type according to:
+For native logging the event source will be set to "Safir" and the severity level parameter is mapped to a corresponding Windows Event Log Type according to:
 
 .Mapping severity level to Windows event type
 [width="70%", cols="50%,50%",options="header",frame="topbot",grid="none"]
@@ -2968,17 +2968,12 @@ For native logging the event source will be set to 'Safir' and the severity leve
 |=========================================================================
 
 === Safir Logging on Linux
-The recommended configuration on Linux is to have the system configured for native logging which means that Safir Log will use the Linux system call 'syslog()'.
+The recommended configuration on Linux is to have the system configured for native logging which means that Safir Log will use the Linux system call +syslog(...)+ for generating logs. If you want the logs sent to a remote syslog server you can configure your local sysloc daemon to forward the logs.
 
-Most Linux distributions come with a built-in syslog deamon capable of receiving and handling syslog messages. As is usually the case in the Linux world you have more than one alternative, if it would be that you are not satisfied with the default deamon.
-
-Some examples of syslog deamons:
-
-- syslog-ng (http://www.balabit.com/network-security/syslog-ng[])
-- rsyslog (http://www.rsyslog.com[]).
+Most Linux distributions come with a built-in syslog deamon capable of receiving and handling syslog messages, and many distributions make it possible to switch syslog daemon, in case you are not happy with the default. Refer to the documentation of your distribution for more information.
 
 === Porting guidelines
-The logging interface provided by Safir SDK Core before version 4.5 (Software Reporting) is now deprecated. This section provides some guidelines when porting old code to use the new interface provided by Safir Log.
+The logging interface provided by Safir SDK Core before version 4.5 (Software Reporting) is now deprecated and will be removed in some future version of the SDK. This section provides some guidelines when porting old code to use the new interface provided by Safir Log.
 
 As already mentioned, syslog has a bias towards one-liner messages which means that it could be a good idea to try to reduce the message text to contain just the most essential information.
 
