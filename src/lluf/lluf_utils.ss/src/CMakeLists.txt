@@ -33,4 +33,10 @@ INSTALL(TARGETS lluf_utils
         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
+
 INSTALL_DEBUG_INFO(lluf_utils)
+
+if (WIN32)
+INSTALL(FILES ../data/safir_event_log_registration.reg
+        DESTINATION ${SAFIR_RUNTIME}/data/text/)
+endif()
