@@ -1066,6 +1066,7 @@ public abstract class ConnectionBase
      * @param handlerId Handler id.
      *
      * @throws AccessDeniedException The instance is owned by another handler.
+     * @throws GhostExistsException There is a ghost instance that hasn't been injected.
      */
     public void setChanges(Entity entity,
                            com.saabgroup.safir.dob.typesystem.InstanceId instanceId,
@@ -1117,6 +1118,7 @@ public abstract class ConnectionBase
      * @param handlerId Handler id.
      *
      * @throws AccessDeniedException The instance is owned by another handler.
+     * @throws GhostExistsException There is a ghost instance that hasn't been injected.
      */
     public void setAll(Entity entity,
                        com.saabgroup.safir.dob.typesystem.InstanceId instanceId,
@@ -1167,6 +1169,7 @@ public abstract class ConnectionBase
      * @param handlerId Handler id.
      *
      * @throws AccessDeniedException The instance is owned by another handler.
+     * @throws GhostExistsException There is a ghost instance that hasn't been injected.
      */
     public void delete(com.saabgroup.safir.dob.typesystem.EntityId entityId,
                        com.saabgroup.safir.dob.typesystem.HandlerId handlerId)

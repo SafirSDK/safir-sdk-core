@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<exception xmlns="urn:safir-dots-unit">
+    <summary>Thrown when an injection handler tries to set/delete an entity for which there is a ghost instance that has not yet been injected</summary>
+    <name>Safir.Dob.GhostExistsException</name>
+    <baseClass>FundamentalException</baseClass>
+</exception>

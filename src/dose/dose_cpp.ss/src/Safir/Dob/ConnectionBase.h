@@ -642,6 +642,7 @@ namespace Dob
          * @param [in] handlerId Handler id.
          *
          * @throws Safir::Dob::AccessDeniedException The instance is owned by another handler.
+         * @throws Safir::Dob::GhostExistsException There is a ghost instance that hasn't been injected.
          */
         void SetChanges(const Dob::EntityPtr&              entity,
                         const Dob::Typesystem::InstanceId& instanceId,
@@ -664,6 +665,7 @@ namespace Dob
          * @param [in] handlerId Handler id.
          *
          * @throws Safir::Dob::AccessDeniedException The instance is owned by another handler.
+         * @throws Safir::Dob::GhostExistsException There is a ghost instance that hasn't been injected.
          */
         void SetAll(const Dob::EntityPtr&              entity,
                     const Dob::Typesystem::InstanceId& instanceId,
@@ -678,6 +680,7 @@ namespace Dob
          * @param [in] handlerId Handler id.
          *
          * @throws Safir::Dob::AccessDeniedException The instance is owned by another handler.
+         * @throws Safir::Dob::GhostExistsException There is a ghost instance that hasn't been injected.
          */
         void Delete(const Dob::Typesystem::EntityId&    entityId,
                     const Dob::Typesystem::HandlerId&   handlerId) const;
