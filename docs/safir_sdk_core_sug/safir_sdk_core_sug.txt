@@ -2869,7 +2869,7 @@ Knowing what value to set +SharedMemorySize+ to is trickier, but one approach is
 == Safir Logging
 Safir SDK Core has a mechanism, Safir Log, designed to make it simpler for applications to generate and send log messages according to the widely adopted _Syslog_ protocol http://www.ietf.org/rfc/rfc3164.txt[RFC 3164].
 
-Safir Log provides a simple interface that an application only has to give a severity level and the log message itself to send a syslog message. The framework will do the neccessary formatting and transmission over UDP as is specified in RFC 3164.
+Safir Log provides an easy-to-use interface that allows an application to create and send logs by a simple function call, specifying a severity and a message. The framework will do the neccessary formatting and transmission over UDP as is specified in RFC 3164.
 
 It is also possible to configure Safir Log so that the logs are sent to a native, plattform specific, logging mechanism. In practice, this could be of use on the Windows plattform to send logs to the Windows Event Log and on Linux to send the logs directly to the +syslog(...)+ interface instead of using UDP messages.
 
@@ -2895,7 +2895,7 @@ A syslog message has a Priority value (PRI) that is a representation of both the
 
 The Safir Log mechanism uses facility code 1 (user-level messages) for all syslog messages and it is not a parameter visible in the interface.
 
-The severity level must be set by the application. RFC 3164 has a brief description of the interpretation of the severity level but doesn't really give any detailed advice. To summarize: the higher the severity level, the more urgent action from support/tech staff is. In practice it isn't always obvious what severity level to use. This is especially true for code in libraries/platforms where there usually is no knowledge of the characteristics of the calling application. One could argue that libraries should refrain from generating logs at all and instead inform the using application that an error has occurred, so that it can take appropriate action. Since Safir SDK Core does not adhere to this rule itself we leave this as something to consider during library design.
+The severity level must be set by the application. RFC 3164 has a brief description of the interpretation of the severity level but doesn't really give any detailed advice. To summarize: higher severity levels imply that action from support/tech staff is more urgent, than for lower levels. In practice it isn't always obvious what severity level to use. This is especially true for code in libraries/platforms where there usually is no knowledge of the characteristics of the calling application. One could argue that libraries should refrain from generating logs at all and instead inform the using application that an error has occurred, so that it can take appropriate action. Since Safir SDK Core does not adhere to this rule itself we leave this as something to consider during library design.
 
 The system design in terms of redundancy might also affect the choosen severity level. For example, it might be appropriate for a system built and configured so that there is a standby application/node "taking over" in case of failure, to use severity level Error instead of Emergency for a given event.
 
