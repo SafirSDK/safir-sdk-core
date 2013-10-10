@@ -104,11 +104,11 @@ This applies to all languages, even if this example was in C++.
 ==== The FORCE_LOG environment variable
 There are a few different ways that the FORCE_LOG environment variable can be used.
 
-The first is, naturally, to set the environment variable in the System Properties --> Environment Variables dialog (in Windows), or in your .bashrc file (for Unix bash shell users). This has the sometimes unfortunate side effect of turning on the selected prefixes for all applications, which can be a problem if several applications use the same prefix, or if you set FORCE_LOG to "all" which will mean that all applications will log everything.
+The first is, naturally, to set the environment variable in the System Properties -> Environment Variables dialog (in Windows), or in your .bashrc file (for Unix bash shell users). This has the sometimes unfortunate side effect of turning on the selected prefixes for all applications, which can be a problem if several applications use the same prefix, or if you set FORCE_LOG to "all" which will mean that all applications will log everything.
 
 The second way is to start your program from the command line: First run +set FORCE_LOG="something somethingelse"+ (Windows again, unix bash shell users do +export FORCE_LOG=...+), and then run your application from the command line. Now only your application will be run with those settings. This same way can of course be used in a script.
 
-Lastly, if you want to run your program from the Visual Studio debugger with trace logging on by default, there is support for that too. Under Project Settings --> Debugging --> Environment it is possible to set environment variables. So set FORCE_LOG="all" there to get your program to start with all logging enabled. Also make sure that "Merge Environment" is set to Yes, or your program (and the libraries it depends on) will not be able to read other environment variables.
+Lastly, if you want to run your program from the Visual Studio debugger with trace logging on by default, there is support for that too. Under Project Settings -> Debugging -> Environment it is possible to set environment variables. So set FORCE_LOG="all" there to get your program to start with all logging enabled. Also make sure that "Merge Environment" is set to Yes, or your program (and the libraries it depends on) will not be able to read other environment variables.
 
 ==== Using the Tracer without a Dob connection
 

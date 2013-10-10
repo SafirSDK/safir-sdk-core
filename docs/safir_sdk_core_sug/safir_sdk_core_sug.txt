@@ -1,4 +1,4 @@
-﻿// -*- coding: utf-8 -*-
+// -*- coding: utf-8 -*-
 :encoding: UTF-8
 
 Safir SDK Core User's Guide
@@ -9,11 +9,12 @@ Safir SDK Core User's Guide
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
 
+:numbered!:
 == Preface
 The purpose of this document is to provide a comprehensive guide to using the services in Safir SDK Core. The reader should have general knowledge about object-oriented programming. Some knowledge of distributed real-time systems programming is also desirable, but not essential.
 
 === How to read
-This document is intended to be used both as an introduction to new users of the Safir SDK Core, and as a reference for those who have used the SDK for a long time. Because of this the level of the different sections vary quite a lot. Some sections are marked as advanced (with an ^adv^ tag to them), to signal that they cover advanced topics that can be skipped by "beginners".
+This document is intended to be used both as an introduction to new users of the Safir SDK Core, and as a reference for those who have used the SDK for a long time. Because of this the level of the different sections vary quite a lot. Some sections are marked as advanced (with an ^adv^ tag to them), to signal that they cover advanced topics that can be skipped by newcomers.
 
 === Acknowledgements
 This document is a combination of several other documents, so some parts of the text have different authors, or is based on texts authored by other people. 
@@ -21,7 +22,7 @@ This document is a combination of several other documents, so some parts of the 
 More specifically the database section is written by Jörgen Johansson, the section on Safir.Utilities.Foreach was written by Stefan Lindström, and the appendix about the example applications was written by Petter Lönnstedt. Most of the text on the basic Dob services is based on the original Dob Software User's Guide written by Jörgen Johansson. Mikael Wennerberg wrote the section on redundant persistency.
 
 === Versions of this document
-To obtain the latest revision, or the latest approved and reviewed revision, please visit http://safir.sourceforge.net/[].
+To obtain the latest version, please visit http://safir.sourceforge.net/[].
 
 [[licenses]]
 === Licences and Copying
@@ -29,24 +30,25 @@ This document is licensed under the Creative Commons "Attribution - Share Alike"
 
 For more information about the Creative Commons licenses see http://creativecommons.org/[]
 
-Safir SDK Core itself is available under the GPL v3 (GNU General Public License version 3) license from http://safir.sourceforge.net/[] or a commercial license from Saab AB.
+Safir SDK Core itself is available under the GPL v3 (GNU General Public License version 3) license from http://safir.sourceforge.net[] or a commercial license from Saab AB.
 
 The GPL license means that you are free to try out or modify the software to your hearts content and create your own applications on top of it. But you are not allowed to distribute the modified software or your applications (which will classify as derivative works) without releasing your code under the GPL license too. If you want to do this you need to obtain (and pay for...) a commercial license from Saab AB (contact information at http://www.saabgroup.com[]).
 
 For more information on the GPL v3 license, see http://gplv3.fsf.org/[].
 
+:numbered:
 == What is Safir SDK Core?
 
 This section is meant to contain a high-level overview of what the Safir SDK Core is, what services it provides and what kind of systems it is suitable for, without going too much into the technical details. 
 
-But, we're not there yet. Due to time constraints we haven't been able to get that information in here in a form that we're satisfied with. If you want that kind of information please contact Saab AB (contact information at http://safir.sourceforge.net[]).
+But, we're not there yet. We haven't been able to get that information in here in a form that we're satisfied with. If you want that kind of information please contact Saab AB (contact information at http://www.saabgroup.com[]).
 
 So for the time being this chapter just contains a collection of background information. 
 
 === Provided services
-Safir SDK Core is mainly aimed at providing a data distribution for distributed real-time systems and information systems, but there are a few other services included in Safir SDK Core, mostly because they are needed internally. <<sdk_service_summary>> contains a summary of the services provided by Safir SDK Core.
+Safir SDK Core is mainly aimed at providing data distribution for distributed real-time systems and information systems, but there are a few other services included in Safir SDK Core, mostly because they are needed internally. <<sdk_service_summary>> contains a summary of the services provided by Safir SDK Core.
 
-Safir SDK Core consists of a number of _components_, that have cryptic four-letter acronyms as names. Each component provides one or more services. This document tries not to use the cryptic acronyms, but rather talks about the services provided, but it is good to know about them.
+Safir SDK Core consists of a number of _components_, some of which have cryptic four-letter acronyms as names. Each component provides one or more services. This document tries not to use the cryptic acronyms, but rather talks about the services provided, but it is good to know about them.
 
 [[sdk_service_summary]]
 .Components and Services in Safir SDK Core
@@ -68,11 +70,11 @@ Safir SDK Core consists of a number of _components_, that have cryptic four-lett
 
 When we talk about _the Dob_ what is really meant is the services provided by Dots, Dose and Dope, i.e. distributed objects with optional persistence.
 
-Component dependencies are illustrated in <<sdk_core_component_dependencies>>.
+Component dependencies and the layered architecture of Safir SDK Core is illustrated in <<sdk_core_component_dependencies>>.
 
 [[sdk_core_component_dependencies]]
 .Safir SDK Core component dependencies
-image::block-diagram.png["Component Dependencies", width=440, link="block-diagram.png"]
+image::block-diagram.png["Component Dependencies", width="50%", link="block-diagram.png"]
 
 Again, to be able to use Safir SDK Core you do not need to understand or like these acronyms, but knowing that they are there may make some things in the SDK easier to use.
 
@@ -110,9 +112,9 @@ The main ``selling points'' include:
 - Completely transparent addressing on single or multi-node systems.
 - Supports _both_ request/response and publish/subscribe idioms.
 - Easy-to-use Persistency.
-- Redundancy and hot-standby.
-- Language independent inter-process/inter-computer communication.
-- Allows modular information model.
+- Support for redundancy and hot-standby.
+- Language independent inter-process and inter-computer communication.
+- Supports use of a modular information model.
 
 ==== A bit about the Dob architecture
 
@@ -131,7 +133,7 @@ The Dob is appropriate for distribution of data between applications (in the sam
 - Has no infinite queues.
 - Is event driven (no polling).
 - Is asynchronous (no RPC, no blocking calls).
-- Has a bounded latency.
+- Has bounded latency.
 
 The Dob implements a distributed object cache, making it possible to either read object information synchronously from shared memory, or to subscribe to object changes.
 
@@ -154,7 +156,7 @@ Messages do not have guaranteed delivery. If some application cannot keep up wit
 ==== Services
 A Service has one or more handlers (known as a Service Handler) to which any application (known as a Requestor) can send service requests. For each service request that is sent, a response is received. The response is sent by the Service Handler, and should indicate the result of the operation (i.e. success or failure, with or without result data). If the service handler does not send a response within a reasonable amount of time (configurable, see <<request_timeout_config>>), the Dob will send a timeout response to the requestor.
 
-Service requests and responses are guaranteed to be delivered. And you are guaranteed a response if you have sent a request.
+Service requests and responses are guaranteed to be delivered. And you are guaranteed a response if you have sent a request, even if it may be a timeout response if the handler is overloaded.
 
 ==== Entities
 An entity is a _class_ of which there can be objects (known as instances) that are stored in the Dob and has one (and only one) owner. Only the owner is allowed to modify the object. Any application can subscribe for a entity instances, which means that it will receive updates whenever the instances are changed. Applications can also send requests (very similar to the service requests above) to the entity owner asking it to change something in the object.
@@ -260,7 +262,7 @@ The SI unit types are all based on Float32 or Float64 respectively:
 
 [[hashed_types]]
 ==== Hashed types
-The InstanceId, ChannelId and HandlerId types are hashed types. They can be defined either as a string or as a number. If defined as a number the number will be used as the value, but if defined by a string, the string is hashed and the hash is used as the value. 
+The InstanceId, ChannelId and HandlerId types are _hashed types_. They can be defined either as a string or as a number. If defined as a number the number will be used as the value, but if defined by a string, the string is hashed and the hash is used as the value. 
 
 If a string is used to define hashed type, the string will be included in the type, but is only meant to be used for reference (the hash value is used for all built-in operations). There is a method on all the hashed types, +RemoveString+, that removes the string to save space/bandwidth.
 
@@ -281,7 +283,7 @@ An Item works exactly the same way as any other Dob class apart from the fact th
 
 All these flags mean that there is a certain overhead to items, which in many cases is undesirable. And also, it doesn't always make sense to have null and change flags on all members of items. For example, in a Position type, there is no point in setting the Latitude member to null. Either the position as a whole is null or it is a valid position. For this purpose _Structs_ (inheriting from Safir.Dob.Struct) were introduced. Currently they behave exactly like an Item, but in a future Dob version they will be optimised so as to remove all the flags and overhead. 
 
-This means that there are some limitations to what you should do to a Struct. Do not use IsChanged or IsNull on any struct members. Do not inherit from a user-defined struct (structs will not support inheritance). In the current Dob this will of course work, but once the optimisation is introduced your code will break.
+This means that there are some limitations to what you should do to a Struct. Do not use IsChanged or IsNull on any members of a struct. Instead check IsNull and IsChanged on the whole struct. Do not inherit from a user-defined struct (structs will not support inheritance). In the current Dob this will of course work, but once the optimisation is introduced your code will break.
 
 [[parameters]]
 === Parameters 
@@ -410,7 +412,7 @@ The syntax for environment variables is +$(ENVIRONMENT_VARIABLE_NAME)+, and ther
 
 Remember that all parameters are loaded 'when the first application that uses parameters starts', so any environment variables set after that time will not be seen by the type system environment variable expansion.
 
-On Windows we also support _special variable_ expansion using the same syntax as is described in <<special_variables>>. This can be used to specify operating system paths in parameters.
+There is also support for _special variable_ expansion using the same syntax as is described in <<special_variables>>. This can be used to specify operating system paths in parameters.
 
 === Create routines 
 Create routines allow the designer of a Dob class to define custom routines for creating _commonly used_ instances of that class.
@@ -540,7 +542,7 @@ The string lengths and array sizes can be specified with parameters as well. The
 ----------------------------
 Of course, as mentioned in <<parameters>> it is recommended that parameters are placed in separate parameter classes.
 
-It is possible - indeed it is even recommended - to add comments to most fields in dou-files since these comments will be put into the generated code in a style that is appropriate for the specific language. (For C++/Java they will be made into _doxygen_/_javadoc_ comments.)
+It is possible - indeed it is even recommended - to add comments to most fields in dou-files since these comments will be put into the generated code in a style that is appropriate for the specific language.
 
 .A commented member
 [source,xml]
@@ -663,27 +665,27 @@ Note that in the code above there is no reference at all to what kind of object 
 === Generating code from Dou-files
 In order to use the classes defined by the Dou-files, interface code has to be generated for the different languages. First, source code will be generated from the dou-files and then this source code is built into loadable libraries suitable for your specific platform (e.g. dlls, shared libraries, or assemblies). All these steps are performed by running a single script, _dobmake.py_.
 
-The code generation tools expect the dou-files to be located under $(SAFIR_SDK)/dots/dots_generated, so this is where you put your own defined dou-files. It is possible to place the files in sub-directories under this directory which can be a good idea for projects with a large number of dou-files. For instance, all dou-files containing parameter values can be placed under a separate sub-directory.
+The code generation tools expect the dou-files to be located under +$(SAFIR_SDK)/dots/dots_generated+, so this is where you put your own defined dou-files. It is possible to place the files in sub-directories under this directory which can be a good idea for projects with a large number of dou-files. For instance, all dou-files containing parameter values can be placed under a separate sub-directory.
 
-The generated source code gets put in subdirectories under $(SAFIR_SDK)/dots/dots_generated (e.g. cpp/ dotnet/ etc). The C++ and Ada header files are also copied to the $(SAFIR_SDK)/include and $(SAFIR_SDK)/ada directories so that they are available to include into your code.
+The generated source code gets put in subdirectories under +$(SAFIR_SDK)/dots/dots_generated+ (e.g. +cpp/+ and +dotnet/+). The C++ and Ada header files are also copied to the +$(SAFIR_SDK)/include+ and +$(SAFIR_SDK)/ada+ directories so that they are available to include into your code.
 
-The generated loadable libraries (e.g. dots_generated-cpp.dll) are copied to the $(SAFIR_RUNTIME)/bin or lib directory.
+The generated loadable libraries (e.g. dots_generated-cpp.dll) are copied to the +$(SAFIR_RUNTIME)/bin+ or +lib+ directory.
 
-As part of the code generation procedure the original dou-files are copied from $(SAFIR_SDK)/dots/dots_generated to $(SAFIR_RUNTIME}/data/text/dots/classes (the sub-directory structure is preserved). This is the directory used by the Dob at runtime to parse dou-files, including parameters. 
+As part of the code generation procedure the original dou-files are copied from +$(SAFIR_SDK)/dots/dots_generated+ to +$(SAFIR_RUNTIME}/data/text/dots/classes+ (the sub-directory structure is preserved). This is the directory used by the Dob at runtime to parse dou-files, including parameters. 
 
-All this means that any changes to parameter files under $(SAFIR_RUNTIME}/data/text/dots/classes will be overwritten when dobmake.py is executed. If you want the parameter change to "survive" make the change under $(SAFIR_SDK)/dots/dots_generated or use a parameter override directory, as described in <<typesystem_ini>>.
+All this means that any changes to parameter files under +$(SAFIR_RUNTIME}/data/text/dots/classes+ will be overwritten when dobmake.py is executed. If you want the parameter change to "survive" make the change under +$(SAFIR_SDK)/dots/dots_generated+ _or use a parameter override directory, as described in <<typesystem_ini>>_.
 
 .Note
 ************************************
-In the current version of Safir SDK Core (4.5), the dobmake.py script is not aware of the _typesystem.ini_ configuration (see <<typesystem_ini>>, so dou and dom files will always be copied to $(SAFIR_RUNTIME}/data/text/dots/classes regardless of the contents of that configuration file.
+In the current version of Safir SDK Core (4.5), the dobmake.py script is not aware of the _typesystem.ini_ configuration (see <<typesystem_ini>>, so dou and dom files will always be copied to +$(SAFIR_RUNTIME}/data/text/dots/classes+ regardless of the contents of that configuration file.
 
-So, to keep the "expected" behaviour, don't change the Default section in typesystem.ini from pointing to $(SAFIR_RUNTIME}/data/text/dots/classes.
+So, to keep the "expected" behaviour, don't change the Default section in typesystem.ini from pointing to +$(SAFIR_RUNTIME}/data/text/dots/classes+.
 ************************************
 
 ==== Running dobmake.py
-To execute all code generations steps just run dobmake.py (located under $(SAFIR_RUNTIME}/bin) and you're done!
+To execute all code generation steps just run dobmake.py (located under +$(SAFIR_RUNTIME}/bin+) and you're done!
 
-The script requires that Python (at least version 2.4, from http://www.python.org) and CMake (at least version 2.6 from http://www.cmake.org) are installed.
+The script requires that Python 2.7 or later and CMake version 2.8 or later are installed. See http://www.python.org[] and http://www.cmake.org[].
 
 A GUI will open, and you will be able to choose between some different actions and to disable build of some languages. To get the fastest possible build time, select 'Rebuild' (radio button) if you are building for the first time or if you have changed a lot of dou-files, otherwise select 'Build'.
 
@@ -700,7 +702,7 @@ So an A object (myA) could look like in <<example_object>>.
 
 [[example_object]]
 .Example object
-image::images/rc_example_object.png["Example object", width=158]
+image::images/rc_example_object.png["Example object", width="50%"]
 
 ==== Syntax in the different languages
 The design approach is that the generated code should make use of the language's own features in the best possible way. Languages that support operator overloading should use them if it makes the interface ``better'', and languages that support properties should use them. This makes each language interface ``as good as it can possibly be'', but it has one obvious side effect, i.e. the interfaces are _not identical_.
@@ -967,7 +969,7 @@ Smart pointers are objects which store pointers to dynamically allocated (heap) 
 Conceptually, smart pointers are seen as owning the object pointed to, and thus responsible for deletion of the object when it is no longer needed.
 *********************************************
 
-The boost::shared_ptr type is going to be included in the next C++ standard (TR1).
+The boost::shared_ptr type is included in C++ since 2007 (ISO/IEC TR 19768:2007 aka C++TR1) under the name std::shared_ptr. Safir SDK Core will continue to use the boost version so as not to break backward compatibility.
 
 See <<cpp_type_casting>> for more information on how to cast smart pointers in C++.
 
@@ -1030,7 +1032,7 @@ For the discussion in this section the object hierarchy in <<example_object_hier
 
 [[example_object_hierarchy]]
 .Example object hierarchy
-image::images/object_hierarchy.png["Example object hierarchy", width=350, link="images/object_hierarchy.png"]
+image::images/object_hierarchy.png["Example object hierarchy", width="50%", link="images/object_hierarchy.png"]
 
 [[cpp_type_casting]]
 ===== C++ type casting
@@ -1346,7 +1348,7 @@ But here are some hints:
 - All Dob objects have GetMember(...) routines that return a ContainerBase for a specified member and array index. This can be casted to a container of the correct type, and thereafter manipulated.
 - Very few of the routines in the reflection interface check for errors. If you call them with incorrect arguments the results are usually undefined. E.g. If you try to get the type of the 4th member of a type that has only 3 members you will probably get an undefined value as the type.
 
-_Use with care!_ or even better: ``With great power comes great responsibility!''
+_Use with care!_ or even better: _With great power comes great responsibility!_
 
 == The distribution mechanisms
 
@@ -1369,7 +1371,7 @@ First we'll describe primary connections, and we'll cover secondary connections 
 To create a primary connection the application must create a Connection object and then call +Open+ on it. The +Open+ method takes a number of parameters:
 
 - A connection name and a connection instance. These are used to uniquely identify the connection in the system. No two connections can have the same name and instance.
-- A context, which specify the data "universe" that the connection will operate in. A normal application that is not concerned with Replay should connect with context 0. See <<contexts>> for further details.
+- A context, which specifies the data "universe" that the connection will operate in. A normal application that is not concerned with Replay should connect with context 0. See <<contexts>> for further details.
 - A +StopHandler+ consumer, which the Dob uses to tell the application to stop executing. Stop orders are described in <<stop_orders>>.
 - A +Dispatcher+ consumer, which the Dob uses to tell the application that there is data available to it, which it will receive if it calls the +Dispatch+ method. Dispatching is discussed in the next section.
 
@@ -1392,7 +1394,7 @@ The upshot is that all callbacks (except, of course, the +OnDoDispatch+ one) are
 
 [[dispatching_sequence_diagram]]
 .Dispatching sequence diagram
-image::images/dispatching_sequence_diagram.png["Dispatching Sequence Diagram", width=450, link="images/dispatching_sequence_diagram.png"]
+image::images/dispatching_sequence_diagram.png["Dispatching Sequence Diagram", width="50%", link="images/dispatching_sequence_diagram.png"]
 
 If you're using C++ and Boost.Asio or ACE the SDK provides Dispatcher classes that do the thread switch and calls Dispatch, see <<dispatcher_classes>>.
 
@@ -1409,11 +1411,9 @@ Whereas a primary connection is a real connection to the Dob, a secondary connec
 
 Each application needs one primary connection (at least, see <<multithreading>>). This connection is the one that the Dob knows about and through which data is dispatched. A secondary connection is used by other parts of the application to "attach" to the primary connection.
 
-The reason for providing this functionality is so that different modules of an application can use the same connection without passing around the primary connection object, something that is not even possible if the parts are written in different languages (like a C# plugin to a C++ application). Instead the modules attach to the main program's connection using a secondary connection.
+The reason for providing this functionality is so that for example a C++ library used by a C# application can use the main programs connection. This would otherwise be impossible, since passing the connecton object over the C# to C++ interface is not possible. Instead modules can attach to the main program's connection using a secondary connection.
 
 When creating a secondary connection you can either specify a connection name and instance to get a specific connection instance, or not specify anything at all, in which case you will be given the first connection that was created in the current thread.
-
-
 
 === Using the mechanisms
 The three different distribution mechanisms of the Dob are used in different ways and require different things from the user application.
@@ -1449,7 +1449,7 @@ Of course it is possible to pass proxies to other methods, as long as the proxy 
 
 [[messages_sequence_diagram]]
 .Sequence diagram for messages
-image::images/messages_sequence_diagram.png["Messages Sequence Diagram", width=350, link="images/messages_sequence_diagram.png"]
+image::images/messages_sequence_diagram.png["Messages Sequence Diagram", width="50%", link="images/messages_sequence_diagram.png"]
 
 For messages there are two different roles involved. The Message Sender sends messages and the Message Subscriber receives messages. The subscriber needs to set up the subscription, and subsequently it will receive messages in its +OnMessage+ callback function whenever a Message Sender sends a message.
 
@@ -1559,7 +1559,7 @@ catch (const Safir::Dob::OverflowException &)
 
 [[services_sequence_diagram]]
 .Sequence diagram for services
-image::images/services_sequence_diagram.png["Services Sequence Diagram", width=350, link="images/services_sequence_diagram.png"]
+image::images/services_sequence_diagram.png["Services Sequence Diagram", width="50%", link="images/services_sequence_diagram.png"]
 
 
 For services there are two different roles involved. The ServiceHandler is the component implementing the service and the Requestor is the component using the service. The Handler needs to register the service and then the Requestor can send requests to it.
@@ -1721,7 +1721,7 @@ When handling entities there are three roles involved. _Entity Handler_ is an ap
 
 [[entities_sequence_diagram]]
 .Sequence diagram for entities
-image::images/entities_sequence_diagram.png["Entities Sequence Diagram", width=350, link="images/entities_sequence_diagram.png"]
+image::images/entities_sequence_diagram.png["Entities Sequence Diagram", width="50%", link="images/entities_sequence_diagram.png"]
 
 
 This section will first describe "simple" entity handling, such as is shown in <<entities_sequence_diagram>>, and later go on to describe more advanced concepts, such as _persistence_ and _injections_.
@@ -2359,7 +2359,7 @@ Now you need to create a dom file as described in <<simple_persistence>>, and th
 
 [[persistence_sequence_diagram]]
 .Sequence diagram for persistent entity
-image::images/persistence_sequence_diagram.png["Persistence Sequence Diagram", width=350, link="images/persistence_sequence_diagram.png"]
+image::images/persistence_sequence_diagram.png["Persistence Sequence Diagram", width="50%", link="images/persistence_sequence_diagram.png"]
 
 
 [[handler_registration_subscription]]
@@ -2552,7 +2552,7 @@ native_logging::
 Controls whether or not logs are sent to the native, plattform specific, logging mechanism.
 
 send_to_syslog_server::
-Controls whether or not logs are sent to a syslog server using UDP datagrams.
+Controls whether or not logs are formatted by the Safir Log mechanism and sent to a syslog server using UDP datagrams.
 
 syslog_server_address::
 IP address for the syslog server.
@@ -2585,10 +2585,10 @@ _typesystem.ini_ can contain any number of _sections_ (with arbitrary names), ea
 
 In the above example there are three sections, one specifying the default place to look for dou/dom files, and two places to look for override files. If, for example, the Override directory contains a Safir.Dob.NodeParameters.dou file (which is also in the Default directory, by default) the file from the Override directory will be used.
 
+[[special_variables]]
 ==== Environment and special variable expansion
 Since the configuration files need to be able to refer to system directories they also support environment variable expansion. E.g. +$(HOME)+ expands to the value of the +HOME+ environment variable.
 
-[[special_variables]]
 On Windows platforms we also support the _CSIDL_ values mentioned above, since Windows does not guarantee that there are always environment variables that correspond to them. For example the %PROGRAMDATA% environment variable is not guaranteed to be set or to point to the same directory as _CSIDL_COMMON_APPDATA_. So the configuration files support _special variables_ as well as environment variables. E.g. +@\{SPECIAL_VARIABLE\}+ will be expanded to the value of that variable (note that the syntax is different from the environment variable syntax).
 
 The supported special variables are listed in <<windows_special_variables>>. We also provide aliases that use the Windows Known Folder naming.
@@ -2619,7 +2619,7 @@ There is currently one special variable that is available on both Linux and Wind
 
 
 === Network config
-A Safir SDK Core system can have two basic configurations, with respect to networking. _Standalone_ or _Multinode_. Standalone means that the system consists of only one node or computer. This is typically used for developer machines or systems that have only one node. Multinode is typically used when a system consists of several nodes, for example a couple of servers (where applications and databases run) and a few operator consoles (where only the HSI runs).
+A Safir SDK Core system can have two basic configurations, with respect to networking. _Standalone_ or _Multinode_. Standalone means that the system consists of only one node or computer. This is typically used for developer machines or systems that have only one node. Multinode is typically used when a system consists of several nodes, for example a couple of servers (where applications and databases run) and a few operator consoles (where only the HMI runs).
 
 [[standalone_config]]
 ==== Standalone
@@ -2655,7 +2655,7 @@ First of all you should specify the number of nodes that are part of your system
 
 Each node has to be configured to know which node number it is, which is done in the parameter +Safir.Dob.ThisNodeParameters.NodeNumber+. Change this to contain the node number of each node (yes, this means having different contents in that file on each node in the system, unless you use an environment variable in the parameter, as described in <<environment_parameters>>).
 
-If your nodes have multiple network cards the Dob needs to be told which network card it should use, and this is done by specifying a network address in +Safir.Dob.NodeParameters.NetworkAddress+ (you only have to specify enough to uniquely identify the subnet that the card has, so if all your nodes are on the 192.168.123.\* network you only need to specify 192.168.123.0).
+If your nodes have multiple network cards the Dob needs to be told which network card it should use, and this is done by specifying a network address in +Safir.Dob.NodeParameters.NetworkAddress+ (you only have to specify enough to uniquely identify the subnet that the card has, so if all your nodes are on the 192.168.123.* network you only need to specify 192.168.123.0).
 
 The last step to get a working multinode configuration is to change the Safir.Dob.DistributionChannelParameters dou file. What this file actually does is described below, but for now you just need to know that it specifies which multicast addresses the Dob uses. You need two +DistributionChannels+ defined, the +System+ and +PoolDistribution+ ones, which must be the first two distribution channels in the array.
 Set the MulticastAddress members to be valid multicast addresses, that are not used for something else on your network (e.g. 224.10.10.127 and 224.10.10.128).
@@ -2743,11 +2743,10 @@ The Dob uses the following ports:
 |6970          |KeepAlive messages, to know which nodes are running.
 |6971          |Acknowledgements
 |6972-6977     |Data (one port for every priority level)
-|31221         |Low level error logs (from components that can't use Software Reports)
 
 |==================
 
-If the system is configured to be StandAlone (as described in <<standalone_config>>) only the 31221 port is used, the others are not opened or used.
+If the system is configured to be StandAlone (as described in <<standalone_config>>) none of the ports will be opened or used.
 
 [[persistence_config]]
 === Persistence config
@@ -2933,22 +2932,6 @@ For events of type Informational use the most appropriate of the severity Notice
 === Safir Logging configuration
 The configuration of Safir Logging is located in the file +logging.ini+ (see <<configuration>>) and contains parameters that determine where the log messages are sent and how newlines in log messages should be handled.
 
-native_logging::
-Controls whether or not logs are sent to the native, plattform specific, logging mechanism.
-
-send_to_syslog_server::
-Controls whether or not logs are formatted by the Safir Log mechanism and sent to the given IP address and port.
-
-syslog_server_address::
-IP address for the syslog server.
-
-syslog_server_port::
-Port for the syslog server.
-
-replace_newline_with_space::
-Controls whether or not a newline in the log message is replaced with a space.
-
-
 === Safir Logging on Windows
 Windows doesn't have built-in support for receiving syslog messages. However, you can find third-party syslog servers that target the Windows plattform, both commercial and freely distributed. One example is Kiwi Syslog Server (http://www.kiwisyslog.com[]), but others are available.
 
@@ -3082,7 +3065,7 @@ Just instantiate the +AsioDispatcher+ or +AceDispatcher+ passing it your io_serv
 === Time 
 Under the namespace +Safir.Time+ there are a few classes that provide functionality for obtaining the current time (both local and UTC) and converting it to and from various formats.
 
-The time library also has support for loading an external library at runtime which could provide a higher accuracy time. The full Safir SDK provides such a library, which provides a much higher accuracy multi-node synchronised clock than NTP can provide on both GNU/Linux or Windows based systems. For more information on this, contact Saab AB (contact information at http://safir.sourceforge.net[]).
+The time library also has support for loading an external library at runtime which could provide a higher accuracy time. The full Safir SDK provides such a library, which provides a much higher accuracy multi-node synchronised clock than NTP can provide on both GNU/Linux or Windows based systems. For more information on this, contact Saab AB (contact information at http://www.saabgroup.com[]).
 
 [[crash_reporting]]
 === Crash Reporting
@@ -3149,7 +3132,7 @@ Java has its own crash handler, so the Crash Reporter should not be used there, 
 
 You also need to make sure that you build your application with debug information enabled. For example in CMake you could use the RelWithDebInfo, which produces release binaries but with debug information. When using Visual Studio you would then get a .pdb file for every .dll or .exe. Make sure to keep these .pdb files, since they are required when you're analyzing a crash dump.
 
-NOTE: In previous versions (< 4.5) of Safir SDK Core the Crash Reporter was started with a call to +Safir::SwReports::SwReport::EnableCrashReporting()+ and stopped with a call to +Safir::SwReports::SwReport::Stop()+. This was changed due to the introduction of Safir Logging and the changes in the Tracer.
+NOTE: In previous versions (older than 4.5) of Safir SDK Core the Crash Reporter was started with a call to +Safir::SwReports::SwReport::EnableCrashReporting()+ and stopped with a call to +Safir::SwReports::SwReport::Stop()+. This was changed due to the introduction of Safir Logging and the changes in the Tracer.
 
 ////
 TODO: write about reporting sdk crashes
@@ -3222,9 +3205,9 @@ The reason for this is that the handler may have started to process the request,
 This means that a sender may retry sending the request, so handlers should be prepared to receive duplicate requests.
 
 Note that this behaviour applies to both service requests and entity requests.
+
 === Type system freedoms
 Since Messages, Entities, Items, and Services all inherits from Object, and it is possible to have members of the type Object, it is also possible to have Services as members in Items. And Entities as Service members etc.
-
 
 === Handling exceptions
 There are two base classes for exceptions. +Safir.Dob.Typesystem.FundamentalException+ and +Safir.Dob.Typesystem.Exception+.
@@ -3267,7 +3250,7 @@ The first time the application instances start, one of the instances will be giv
 
 [[redundancy_sequence_diagram]]
 .Sequence diagram for redundant entity handlers
-image::images/redundancy_sequence_diagram.png["Redundancy Sequence Diagram", width=350, link="images/redundancy_sequence_diagram.png"]
+image::images/redundancy_sequence_diagram.png["Redundancy Sequence Diagram", width="50%", link="images/redundancy_sequence_diagram.png"]
 
 Note that applications subscribing to the entities that are redundancy-handled _may_ see the entity instances as deleted for a short while, since in reality the handler was unregistered for a short while.
 
@@ -3278,7 +3261,7 @@ Applications that own the entities must make sure that no _orphans_ are left beh
 
 [[orphan_example]]
 .Entities that may cause orphans.
-image::images/orphan_object.png["Entities that may cause orphans", width=210]
+image::images/orphan_object.png["Entities that may cause orphans", width="50%"]
 
 For applications that use the entities that contain associations you need to be aware that the Dob does not guarantee the order in which entities are delivered to subscribers, and that while you're handling a subscription an associated entity may be removed, before you've managed to Read it.
 
@@ -3293,7 +3276,7 @@ This chapter contains information about how to write applications that support _
 
 The Dob itself relies on high reliability and high bandwidth LAN connections for its communication between nodes. Asynchronous injections makes it possible to create an application that links together multiple systems like this using a medium with low connectivity and low bandwidth (e.g. a legacy radio), or a medium with high bandwidth but non-optimal connectivity (e.g. the internet).
 
-A complete description of how to build a system with asynchronous injections, or how to create an _injector_, i.e. an application that performs the injections, is outside the scope if this document, which will concentrate on how to write applications that can handle injections. If you're interested in more information on this than this document provides, please contact Saab AB at http://safir.sourceforge.net/[].
+A complete description of how to build a system with asynchronous injections, or how to create an _injector_, i.e. an application that performs the injections, is outside the scope if this document, which will concentrate on how to write applications that can handle injections. If you're interested in more information on this than this document provides, please get in touch with us.
 
 But, we need a little bit of background to be able to understand the rest of this chapter:
 
@@ -3328,7 +3311,7 @@ The +EntityHandlerInjection+ consumer interface has, as described in <<advanced_
 
 [[injection_sequence_diagram]]
 .Injection sequence diagram
-image::images/injection_sequence_diagram.png["Injection Sequence Diagram", width=350, link="images/injection_sequence_diagram.png"]
+image::images/injection_sequence_diagram.png["Injection Sequence Diagram", width="50%", link="images/injection_sequence_diagram.png"]
 
 
 Note that it is not possible to tell the difference between the two kinds of calls to +OnInjectedNewEntity+, and in fact both new and old (i.e. persisted and injected) data can be mixed (i.e. timestamp merged) in a call to +OnInjectedNewEntity+.
@@ -3366,7 +3349,7 @@ On another system (at time 110) the application does a +SetChanges+ with Member 
 
 [[ts_merge_2]]
 .Timestamp merge, first injection
-[width="40%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
+[width="50%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
 |==============================================
 |Member    |IsChanged     |Timestamp     |Value
 
@@ -3381,7 +3364,7 @@ This will be merged with the current entity (again, on "our" system) into the ob
 
 [[ts_merge_3]]
 .Timestamp merge, merged object
-[width="40%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
+[width="50%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
 |==============================================
 |Member    |IsChanged     |Timestamp     |Value
 
@@ -3412,7 +3395,7 @@ While all this was happening, a third system (at time 105) the application did a
 
 [[ts_merge_5]]
 .Timestamp merge, another injection
-[width="40%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
+[width="50%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
 |==============================================
 |Member    |IsChanged     |Timestamp     |Value
 
@@ -3428,7 +3411,7 @@ Which will be merged with the current entity to become the object shown in <<ts_
 
 [[ts_merge_6]]
 .Timestamp merge, second merge result
-[width="40%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
+[width="50%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
 |==============================================
 |Member    |IsChanged     |Timestamp     |Value
 
@@ -3453,7 +3436,7 @@ The Dob makes it possible to have several "data universes" side by side. Such a 
 
 The main principle is that there is no mixing of data (entities, messages etc) between different contexts.
 
-It is possible to override the default no-mixing behaviour by marking a type as ContextShared, thereby making it visible in all contexts. (See below for a motivation and explanation of the ContextShared mechanism.)
+It is possible to override the default no-mixing behaviour by marking a type as _ContextShared_, thereby making it visible in all contexts. (See below for a motivation and explanation of the ContextShared mechanism.)
 
 === What contexts can be used for
 This description presumes that the context functionality is used to support different system modes (changing either the whole system mode, or just one operator console). However, note that from a Safir SDK perspective the context functionality is a general mechanism which can be used for any purpose.
@@ -3565,13 +3548,13 @@ Safir SDK Core contains some tools that are useful for, among other things, appl
 === Sate
 There is an application in Safir SDK Core, Sate (stands for _Safir Application Tester_), which is very useful for testing applications that use the Dob. In short it is a GUI application that allows you to perform most operations that the Dob provides interactively.
 
-For example, you can set up a subscription to an entity, register entity handlers and set entity instances. You can subscribe to and send messages etc. This can be very useful for interacting with an application, for example before the real HSI is implemented fully, or pretending to be another application that your application communicates with.
+For example, you can set up a subscription to an entity, register entity handlers and set entity instances. You can subscribe to and send messages etc. This can be very useful for interacting with an application, for example before the real HMI is implemented fully, or pretending to be another application that your application communicates with.
 
 <<sate_overview>> shows Sate with the Safir.Application.BackdoorCommandMessage opened. All the Dob classes are listed in the left sidebar, where you can right-click to get operations you can do on the types. The right sidebar contains operations you can do on the object opened.
 
 [[sate_overview]]
 .Sate screen shot
-image::images/sate_overview.png["Sate Screen shot", width=400, link="images/sate_overview.png"]
+image::images/sate_overview.png["Sate Screen shot", width="50%", link="images/sate_overview.png"]
 
 The lower left part is an "inbox", containing the most recent entity updates and requests, service requests and messages received. The lower right hand part shows a history of what "has happened", e.g. showing if a request has been successfully sent, etc.
 
@@ -3583,13 +3566,13 @@ Dobexplorer is a tool that is primarily meant for the developers of the Dob, but
 
 [[dobexplorer_memory]]
 .Dobexplorer showing a graph of memory usage.
-image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", width=400, link="images/dobexplorer_memory.png"]
+image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", width="50%", link="images/dobexplorer_memory.png"]
 
 <<dobexplorer_nodes>> shows dobexplorer displaying a table of the node statuses of a multinode system.
 
 [[dobexplorer_nodes]]
 .Dobexplorer showing node statuses.
-image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", width=400, link="images/dobexplorer_nodes.png"]
+image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", width="50%", link="images/dobexplorer_nodes.png"]
 
 [[olib]]
 == C++ ODBC database wrapper
@@ -3678,8 +3661,8 @@ Dots::
 Dou::
     Distributed Objects Unit. File type for defining Dob classes (in Xml).
 
-HSI::
-    Human - System Interface.
+HMI::
+    Human-Machine Interface.
 
 Safir::
     Software Architecture For Information And Real-time systems.
