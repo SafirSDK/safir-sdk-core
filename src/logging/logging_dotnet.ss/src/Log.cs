@@ -32,16 +32,35 @@ namespace Safir
     /// </summary>
     public sealed class Logging
     {
-        //TODO: add comments about what to use when
+        /// <summary>
+        /// Severity level according to RFC 3164. Please read the section on Safir Logging 
+        /// in the Safir SDK Core User's Guide for some recommendations on when to use the
+        /// various severity levels.
+        /// </summary>
         public enum Severity
         {
+            /// <summary>RFC 3164 Description: System is unusable.</summary>
             Emergency,
+
+            /// <summary>RFC 3164 Description: Action must be taken immediately.</summary>
             Alert,
+
+            /// <summary>RFC 3164 Description: Critical conditions.</summary>
             Critical,
+
+            /// <summary>RFC 3164 Description: Error conditions.</summary>
             Error,
+
+            /// <summary>RFC 3164 Description: Warning conditions.</summary>
             Warning,
+
+            /// <summary>RFC 3164 Description: Normal but significant condition.</summary>
             Notice,
+
+            /// <summary>RFC 3164 Description: Informational messages.</summary>
             Informational,
+
+            /// <summary>RFC 3164 Description: Debug-level messages.</summary>
             Debug
         };
 

@@ -45,16 +45,35 @@ namespace Safir
 {
 namespace Logging
 {
-    //TODO: add comments about what to use when
+    /** 
+     * Severity level according to RFC 3164. Please read the section on Safir Logging 
+     * in the Safir SDK Core User's Guide for some recommendations on when to use the
+     * various severity levels.
+     **/
     enum Severity
     {
+        /** RFC 3164 Description: System is unusable. */
         Emergency = 0,
+
+        /** RFC 3164 Description: Action must be taken immediately. */
         Alert,
+
+        /** RFC 3164 Description: Critical conditions. */
         Critical,
+
+        /** RFC 3164 Description: Error conditions. */
         Error,
+
+        /** RFC 3164 Description: Warning conditions. */
         Warning,
+
+        /** RFC 3164 Description: Normal but significant condition. */
         Notice,
+
+        /** RFC 3164 Description: Informational messages. */
         Informational,
+
+        /** RFC 3164 Description: Debug-level messages. */
         Debug
     };
 

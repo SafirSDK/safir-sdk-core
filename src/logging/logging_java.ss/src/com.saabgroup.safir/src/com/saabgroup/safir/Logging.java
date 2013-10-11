@@ -29,16 +29,35 @@ package com.saabgroup.safir;
  */
 public final class Logging
 {
-    //TODO: add comments about what to use when
+    /** 
+     * Severity level according to RFC 3164. Please read the section on Safir Logging 
+     * in the Safir SDK Core User's Guide for some recommendations on when to use the
+     * various severity levels.
+     **/
     public enum Severity
     {
+        /** RFC 3164 Description: System is unusable. */
         EMERGENCY,
+
+        /** RFC 3164 Description: Action must be taken immediately. */
         ALERT,
+
+        /** RFC 3164 Description: Critical conditions. */
         CRITICAL,
+
+        /** RFC 3164 Description: Error conditions. */
         ERROR,
+
+        /** RFC 3164 Description: Warning conditions. */
         WARNING,
+
+        /** RFC 3164 Description: Normal but significant condition. */
         NOTICE,
+
+        /** RFC 3164 Description: Informational messages. */
         INFORMATIONAL,
+
+        /** RFC 3164 Description: Debug-level messages. */
         DEBUG
     };
 
