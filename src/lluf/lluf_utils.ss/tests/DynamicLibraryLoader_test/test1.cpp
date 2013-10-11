@@ -44,6 +44,9 @@
 #elif defined __GNUC__
 #  if defined (__i386)
 #    define ANOTHER_CC __attribute__((stdcall))
+#  elif defined (__clang__) && defined (__x86_64)
+     //clang doesnt support ms_abi on linux
+#    define ANOTHER_CC
 #  elif defined (__x86_64)
 #    define ANOTHER_CC __attribute__((ms_abi))
 #  elif defined (__arm__)

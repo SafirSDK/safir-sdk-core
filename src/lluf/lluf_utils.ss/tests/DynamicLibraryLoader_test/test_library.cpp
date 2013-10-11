@@ -37,6 +37,10 @@
 #  if defined (__i386)
 #    define STANDARD_CALLING_CONVENTION __attribute__((cdecl))
 #    define ANOTHER_CALLING_CONVENTION __attribute__((stdcall))
+#  elif defined (__x86_64) && defined __clang__
+     //clang doesnt support ms_abi on linux
+#    define STANDARD_CALLING_CONVENTION
+#    define ANOTHER_CALLING_CONVENTION
 #  elif defined (__x86_64)
 #    define STANDARD_CALLING_CONVENTION __attribute__((sysv_abi))
 #    define ANOTHER_CALLING_CONVENTION __attribute__((ms_abi))
