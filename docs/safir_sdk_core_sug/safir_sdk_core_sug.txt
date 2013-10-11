@@ -3211,14 +3211,16 @@ Since Messages, Entities, Items, and Services all inherits from Object, and it i
 
 === Handling exceptions
 There are two base classes for exceptions. +Safir.Dob.Typesystem.FundamentalException+ and +Safir.Dob.Typesystem.Exception+.
-+Exceptions+ should be handled by the caller, but not +FundamentalExceptions+.
++Exceptions+ should be handled by the caller, but in most situations, +FundamentalExceptions+ should *not*.
 
-+FundamentalExceptions+ are programming errors that can be avoided. You should never add code that tries to handle your own programming errors. It is better if the application just dies, instead of limping along, better to detect the crash and restart the application (maybe after fixing it...)
+In most cases a +FundamentalException+ is to be treated as an indication that there is a programming error in your application. You should never add code that tries to handle your own programming errors. It is better if the application just dies, instead of limping along, better to detect the crash and restart the application (maybe after fixing it...)
+
+In some rare cases it could be motivated to actually catch a +FundamentalException+. However, A +FundamentalException+ of type +SoftwareViolationException+ should never be handled by an application. Let it propagate up to your main loop where you report the error and exit the program.   
 
 ==== Exceptions in callbacks
 Letting an exception propagate out of a callback may cause your connection to the Dob to be corrupted in strange ways. You may loose messages, requests and entity subscription responses if you try to continue execution after this has occurred.
 
-So catch all "expected" exceptions in the callbacks, but let all programming-error type exceptions propagate up to your main loop where you report the error and exit the program.
+So catch all "expected" exceptions in the callbacks.
 
 === Handling OnRevokedRegistration
 For most applications a call to +OnRevokedRegistration+ is completely unexpected. Unless your system uses overregistration as a feature getting this callback is a sign of an error, and the following is a recommendation on what to do in this case: 
@@ -3228,6 +3230,9 @@ Send a Safir Log (severity Critical) that you have lost the registration. Make t
 The Rationale for this is that this probably happened due to a configuration error, or because someone is playing around with Sate (see <<sate>>), so you want to tell whoever may be interested that the system is probably not working correctly now.
 
 The application should terminate, since it is no longer functioning correctly.
+
+=== Set or Delete an entity before OnInitialInjectionsDone is received
+The basic rule is that an application that handles persistent entity types should wait for the callback OnIntialInjectonsDone before trying to set or delete any entity. (This callback signals that all ghosts have been injected). To get this to work the application has to distribute the "ok-to-set-entity" status to its different parts which, for some application designs, could be a hassle. An alternative in this case is to actually catch the GhostExistsException. (This is the exception you get when trying to set or delete an entity instance for which there is a ghost that hasn't been delivered yet).
 
 [[multithreading]]
 === Multithreading
