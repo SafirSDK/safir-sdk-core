@@ -3211,11 +3211,11 @@ Since Messages, Entities, Items, and Services all inherits from Object, and it i
 
 === Handling exceptions
 There are two base classes for exceptions. +Safir.Dob.Typesystem.FundamentalException+ and +Safir.Dob.Typesystem.Exception+.
-+Exceptions+ should be handled by the caller, but in most situations, +FundamentalExceptions+ should *not*.
+Exceptions should be handled by the caller, but in most situations, FundamentalExceptions should not.
 
-In most cases a +FundamentalException+ is to be treated as an indication that there is a programming error in your application. You should never add code that tries to handle your own programming errors. It is better if the application just dies, instead of limping along, better to detect the crash and restart the application (maybe after fixing it...)
+In most cases a FundamentalException is to be treated as an indication that there is a programming error in your application. You should never add code that tries to handle your own programming errors. It is better if the application just dies, instead of limping along, better to detect the crash, fix and restart the application.
 
-In some rare cases it could be motivated to actually catch a +FundamentalException+. However, A +FundamentalException+ of type +SoftwareViolationException+ should never be handled by an application. Let it propagate up to your main loop where you report the error and exit the program.   
+In some rare cases catching a FundamentalException could be justified. However, a FundamentalException of type +Safir.Dob.Typesystem.SoftwareViolationException+ should never be handled by an application. Let it propagate up to your main loop where you report the error and exit the program.   
 
 ==== Exceptions in callbacks
 Letting an exception propagate out of a callback may cause your connection to the Dob to be corrupted in strange ways. You may loose messages, requests and entity subscription responses if you try to continue execution after this has occurred.
