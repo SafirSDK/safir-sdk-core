@@ -1490,6 +1490,8 @@ package body Consumers is
          Logger.Put_Line ("Caught FundamentalException in ExecuteAction: Safir.Dob.AccessDeniedException");
       when Safir.Dob.Not_Found_Exception.Xception =>
          Logger.Put_Line ("Caught Exception in ExecuteAction: Safir.Dob.NotFoundException");
+      when Safir.Dob.Ghost_Exists_Exception.Xception =>
+         Logger.Put_Line ("Caught FundamentalException in ExecuteAction: Safir.Dob.GhostExistsException");
       when Safir.Dob.Typesystem.Software_Violation_Exception =>
          Logger.Put_Line ("Caught FundamentalException in ExecuteAction: Safir.Dob.Typesystem.SoftwareViolationException");
       when E : others =>
