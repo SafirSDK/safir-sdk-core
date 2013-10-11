@@ -41,6 +41,7 @@ with Dose_Test.Successful_Service;
 with Dose_Test.Successful_Update;
 with Logger;
 with Safir.Dob.Access_Denied_Exception;
+with Safir.Dob.Ghost_Exists_Exception;
 with Safir.Dob.Connection_Aspect_Injectors;
 with Safir.Dob.Connection_Aspect_Miscs;
 with Safir.Dob.Connection_Aspect_Postpones;
