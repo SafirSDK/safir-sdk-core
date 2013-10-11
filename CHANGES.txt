@@ -4,23 +4,23 @@
 
 This release introduces the following changes:
 
-* Remove all internal dependencies to ACE (use Boost.Asio instead).
+* Removed all internal dependencies to ACE (use Boost.Asio instead).
 * SwReports have been replaced with Safir Logging. Safir Logging is an interface to Syslog (as defined by RFC3164),
   which allows Safir SDK Core to log to a syslog daemon, instead of using the non-standard SwReport mechanism.
-  - Add functionality under Safir.Logging for logging (see User's Guide for more info).
+  - Added functionality under Safir.Logging for logging (see User's Guide for more info).
   - The "old" functions under Safir.SwReports are now deprecated but they have been changed to log to Safir Logging.
   - All Core components now report errors to Safir Log (instead of stdout/lllerr/panic log).
   - ResponseSender/Proxy usage errors are now reported to Safir Log, instead of crashing the app.
   - Tracer rewritten to use Safir Logging.
-* Add a lot of automatic tests.
-* Support 64 bit Windows installs.
-* Make missing external time provider cause exceptions instead of just silently failing.
-* Rewrite build script and dobmake.py to use jom for parallel builds.
-* Rewrite dots_v in python (removes a lot of Ada dependencies!)
+* Added a lot of automatic tests.
+* Support for 64 bit Windows installs added.
+* Made missing external time provider cause exceptions instead of just silently failing.
+* Rewrote build script and dobmake.py to use jom for parallel builds.
+* Rewrote dots_v in python (removes a lot of Ada dependencies!)
 * Numerous minor bug fixes!
 
 This release is 99% backwards compatible, but due to a couple of bug fixes and especially the introduction of Safir
-Logging (the syslog interface) some interfaces have had to be changed or adjusted. Below is a summary of the interface
+Logging (the Syslog interface) some interfaces have had to be changed or adjusted. Below is a summary of the interface
 changes. You can find more information about the changes introduced due to the introduction of Safir Logging in the
 Safir User's Guide.
 
