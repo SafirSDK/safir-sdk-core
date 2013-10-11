@@ -62,9 +62,9 @@ if (NOT NO_CXX)
     ADD_DEFINITIONS(-DDOTS_GENERATED_CPP_EXPORTS)
 
 
-    if (MSVC)
-      TARGET_LINK_LIBRARIES(dots_generated-${prefix}-cpp dots_generated-cpp)    
-    else()
+    TARGET_LINK_LIBRARIES(dots_generated-${prefix}-cpp dots_generated-cpp)    
+
+    if (NOT MSVC)
       TARGET_LINK_LIBRARIES(dots_generated-${prefix}-cpp dots_cpp)
     endif()
 
@@ -84,11 +84,6 @@ if (NOT NO_CXX)
 
   if (NOT MSVC)
     TARGET_LINK_LIBRARIES(dots_generated-cpp dots_cpp dl)
-    
-    FOREACH(prefix ${DOTS_NS})
-      TARGET_LINK_LIBRARIES(dots_generated-cpp dots_generated-${prefix}-cpp)
-    ENDFOREACH()
-
   endif()
 
   INSTALL(DIRECTORY cpp/include DESTINATION ${SAFIR_SDK}
