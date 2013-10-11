@@ -32,13 +32,11 @@ package Safir.Logging is
                        Informational, -- RFC 3164 Description: Informational messages.
                        Debug);        -- RFC 3164 Description: Debug-level messages.
    --
-   -- Severity level according to RFC 3164. Please read the section on Safir Logging 
+   -- Severity level according to RFC 3164. Please read the section on Safir Logging
    -- in the Safir SDK Core User's Guide for some recommendations on when to use the
    -- various severity levels.
    --
 
-   
-   
    procedure Send_System_Log (Severity : in Severity_T;
                               Message  : in Wide_String);
    --
