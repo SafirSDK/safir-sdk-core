@@ -1,4 +1,4 @@
-Welcome to the snapshot of Safir SDK Core trunk.
+Welcome to version 4.5 of Safir SDK Core.
 
 Safir SDK Core is released under the GPL v3 license, a copy of which can be found in COPYING.txt.
 
@@ -7,4 +7,4 @@ It is most likely possible to adapt these instructions for other compiler and op
 
 Please read the INSTALL.Linux.txt document for linux build instructions, and INSTALL.Windows.txt for Windows instructions.
 
-Please post in the forum on http://safir.sourceforge.net/ if you're having any trouble following any of the instructions, or with any other questions.
+Please see contact information at http://safir.sourceforge.net/ if you're having any trouble following any of the instructions, or with any other questions.
