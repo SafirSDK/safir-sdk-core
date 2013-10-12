@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <property>ParserTest.MyProperty</property>
+    <class>ParserTest.MyEntity</class>
+    <memberMapping>
+        
+        <member>
+            <propertyMember>Int32PropertyValue</propertyMember>
+            <classMemberReference>
+                <classMember>MyInt32</classMember>
+            </classMemberReference>
+        </member>
+        
+        <member>
+            <propertyMember>EntityIdPropertyValue</propertyMember>
+            <classMemberReference>
+                <classMember>MyEntityId</classMember>
+            </classMemberReference>
+        </member>
+        
+        <member>
+            <propertyMember>ChannelIdPropertyValue</propertyMember>
+            <classMemberReference>
+                <classMember>MyChannelId</classMember>
+            </classMemberReference>
+        </member>
+        
+        <member>
+            <propertyMember>MyItemPropertyValue</propertyMember>
+            <classMemberReference>
+                <classMember>MyObj</classMember>
+            </classMemberReference>
+        </member>                
+        
+        <member>
+            <propertyMember>MyStringPropertyValue</propertyMember>
+            <classMemberReference>
+                <classMember>MyObj</classMember>
+                <index>2</index>
+                <classMemberReference>
+                    <classMember>MyStrings</classMember>
+                    <index>2</index>
+                </classMemberReference>
+            </classMemberReference>
+        </member>
+        
+    </memberMapping>
+</propertyMapping>

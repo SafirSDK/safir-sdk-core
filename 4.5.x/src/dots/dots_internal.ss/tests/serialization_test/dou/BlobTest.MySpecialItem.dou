@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Test item.</summary>
+    <name>BlobTest.MySpecialItem</name>
+    <baseClass>BlobTest.MyItem</baseClass>
+    <members>
+        <member>
+            <name>Child</name>
+            <type>BlobTest.MyItem</type>
+        </member>
+        <member>            
+            <name>ChildName</name>
+            <type>String</type>
+            <maxLength>20</maxLength>
+        </member>
+    </members>
+</class>

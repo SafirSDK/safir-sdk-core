@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--//StartRemoveInExercise-->
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <property>Safir.Dob.InjectionProperty</property>
+    <class>Capabilities.Vehicles.Vehicle</class>
+    <memberMapping>
+        <member>
+            <propertyMember>Injection</propertyMember>
+            <value>SynchronousVolatile</value>
+        </member>
+    </memberMapping>
+</propertyMapping>
+<!--//StopRemoveInExercise-->

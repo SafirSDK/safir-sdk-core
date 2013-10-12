@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit">
+    <name>DotsTest.MemberItemsArray</name>
+    <baseClass>Object</baseClass>
+    <parameters>
+        <parameter>
+            <name>ArrayIndexReference</name>
+            <type>Int32</type>
+            <value>1</value>
+        </parameter>
+    </parameters>
+    <members>
+        <member>
+            <name>TypesItemArray</name>
+            <arraySize>2</arraySize>
+            <type>DotsTest.TypesItem</type>
+        </member>
+        <member>
+            <name>ArraysItemArray</name>
+            <arraySize>2</arraySize>
+            <type>DotsTest.ArraysItem</type>
+        </member>
+    </members>
+</class>

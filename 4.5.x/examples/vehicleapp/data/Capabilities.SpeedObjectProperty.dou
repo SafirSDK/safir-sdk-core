@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<property xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Classes mapped to this property must have a speed member. The speed can be read by the property.</summary>
+    <name>Capabilities.SpeedObjectProperty</name>
+    <members>
+
+        <member>
+            <name>SpeedMember</name>
+            <type>MeterPerSecond32</type>
+        </member>
+
+    </members>
+</property>

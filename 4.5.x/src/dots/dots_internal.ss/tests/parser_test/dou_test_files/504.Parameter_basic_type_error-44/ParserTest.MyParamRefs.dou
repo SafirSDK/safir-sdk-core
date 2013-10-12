@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>ParserTest.MyParamRefs</name>
+    <baseClass>Object</baseClass>
+    <parameters>
+        <parameter>
+            <summary>EntityId param</summary>
+            <name>Eid</name>
+            <type>EntityId</type>
+            <valueRef>
+                <name>ParserTest.MyParam1.Eid</name>
+            </valueRef>        
+        </parameter>
+
+        <parameter>
+            <name>Tid</name>
+            <type>TypeId</type>
+            <valueRef>
+                <name>ParserTest.MyParam1.Tid</name>
+            </valueRef>  
+        </parameter>    
+
+        <parameter>
+            <name>Iid</name>
+            <type>InstanceId</type>
+            <valueRef>
+                <name>ParserTest.MyParam1.Iid</name>
+            </valueRef> 
+        </parameter>
+
+        <parameter>
+            <name>Two</name>
+            <type>Int32</type>
+            <valueRef>
+                <name>ParserTest.MyParam1.Two</name>
+            </valueRef>
+        </parameter>
+
+        <parameter>
+            <name>Three</name>
+            <type>Int32</type>
+            <valueRef>
+                <name>ParserTest.MyParam1.Three</name>
+            </valueRef>
+        </parameter>
+
+    <parameter>
+            <name>MyFloat</name>
+            <type>Float64</type>
+            <valueRef>
+                <name>ParserTest.MyParam1.MyFloat</name>
+            </valueRef>
+        </parameter>
+        
+        <parameter>
+         <summary>Weather Feature Type</summary>
+         <name>MyBigValue</name>
+         <type>Int64</type>
+         <valueRef>
+                <name>ParserTest.MyParam1.MyBigValue</name>
+          </valueRef>
+      </parameter>
+      
+      <parameter>
+            <name>Color</name>
+            <type>ParserTest.MyColorEnum</type>
+            <valueRef>
+                <name>ParserTest.MyParam1.Color</name>
+            </valueRef>
+        </parameter>
+        
+        <parameter>
+            <name>MyObjectParam</name>
+            <type>Test.MyClass1</type>
+            <valueRef>
+                <name>ParserTest.MyParam1.MyObjectParam</name>
+            </valueRef>
+        </parameter>
+
+        <parameter>
+            <name>IntArray</name>
+            <type>Int32</type>
+            <arrayElements>
+                <arrayElement>
+                    <valueRef>
+                        <name>ParserTest.MyParam1.Two</name>
+                    </valueRef>
+                </arrayElement>
+                <arrayElement>
+                    <valueRef>
+                        <name>ParserTest.MyParamRefs.Three</name>
+                    </valueRef>
+                </arrayElement>
+                <arrayElement>
+                    <valueRef>
+                        <name>ParserTest.MyParamRefs.Three</name>
+                    </valueRef>
+                </arrayElement>
+                <arrayElement>
+                    <valueRef>
+                        <name>ParserTest.MyParam1.IntArray</name>
+                        <index>3</index>                        
+                    </valueRef>
+                </arrayElement>
+                <arrayElement>
+                    <valueRef>
+                        <name>ParserTest.MyParamRefs.MyBigValue</name>                       
+                    </valueRef>
+                </arrayElement>
+                <arrayElement>
+                    <valueRef>
+                        <name>ParserTest.MyParam1.IntArray</name>
+                        <index>7</index>                        
+                    </valueRef>
+                </arrayElement>
+            </arrayElements>            
+        </parameter>
+
+    </parameters>
+
+</class>

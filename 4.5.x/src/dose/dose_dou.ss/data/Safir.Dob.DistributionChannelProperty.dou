@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<property xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Defines the distribution channel used for transmission of classes. This value is
+             inherited by child classes.</summary>
+    <name>Safir.Dob.DistributionChannelProperty</name>
+    <members>
+        <member>
+            <summary>The distribution channel to use for classes mapped to this property.</summary>
+            <name>DistributionChannel</name>
+            <type>String</type>
+        </member>
+    </members>
+</property>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Standard response for handlers registered as HandlerDecidesInstanceId, containing the instance that the handler will attempt to create.</summary>
+    <name>Safir.Dob.EntityIdResponse</name>
+    <baseClass>Safir.Dob.SuccessResponse</baseClass>
+    <members>
+        <member>
+            <summary>The entity id assigned by the handler. This id will be used by the handler when creating the entity.</summary>
+            <name>Assigned</name>
+            <type>EntityId</type>
+        </member>
+    </members>
+    <createRoutines>
+        <createRoutine>
+            <summary>Create a InstanceIdResponse.</summary>
+            <name>Response</name>
+            <parameters>
+                <member>Assigned</member>
+            </parameters>
+        </createRoutine>
+    </createRoutines>
+</class>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Representation of one queue capacity parameter rule. See Safir.Dob.QueueParameters and the Safir SDK Core Users Guide for usage information.</summary>
+    <name>Safir.Dob.QueueRule</name>
+    <baseClass>Safir.Dob.Item</baseClass>
+    <members>
+      <member>
+        <summary>Case sensitive regular expression to match to connection name. Null means the same as an empty pattern, i.e. match everything.</summary>
+        <name>ConnectionNameRegex</name>
+        <type>String</type>
+        <maxLength>512</maxLength>
+      </member>
+      <member>
+        <summary>Specifies the capacity of message in queues. Null means that this rule does not affect the message in queue.</summary>
+        <name>MessageInQueueCapacity</name>
+        <type>Int32</type>
+      </member>
+      <member>
+        <summary>Specifies the capacity of message out queues. Null means that this rule does not affect the message out queue.</summary>
+        <name>MessageOutQueueCapacity</name>
+        <type>Int32</type>
+      </member>
+      <member>
+        <summary>Specifies the capacity of request in queues. Null means that this rule does not affect the request in queue.</summary>
+        <name>RequestInQueueCapacity</name>
+        <type>Int32</type>
+      </member>
+      <member>
+        <summary>Specifies the capacity of request out queues. Null means that this rule does not affect the request out queue.</summary>
+        <name>RequestOutQueueCapacity</name>
+        <type>Int32</type>
+      </member>
+    </members>
+</class>

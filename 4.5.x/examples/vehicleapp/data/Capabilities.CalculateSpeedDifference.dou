@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--//StartRemoveInExercise-->
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>
+      This service calculates the difference between two speeds (ObjectWithSpeed - Speed).
+      The result is provided in Capabilities.CalculateSpeedDifferenceResponse.
+    </summary>
+    <name>Capabilities.CalculateSpeedDifference</name>
+    <baseClass>Safir.Dob.Service</baseClass>
+    <members>
+
+        <member>
+            <summary>First speed from object with speed property</summary>
+            <name>ObjectWithSpeed</name>
+            <type>Safir.Dob.Entity</type>
+        </member>
+        <member>
+            <summary>Second speed a value given by operator.</summary>
+            <name>Speed</name>
+            <type>MeterPerSecond32</type>
+        </member>
+
+    </members>
+</class>
+<!--//StopRemoveInExercise-->

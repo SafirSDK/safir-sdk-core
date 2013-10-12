@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--//StartRemoveInExercise-->
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Information about a vehicle.</summary>   
+    <name>Capabilities.Vehicles.Vehicle</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <members>
+
+        <member>
+            <summary>The unique vehicle identification. Mandatory and unique.</summary>
+            <name>Identification</name>
+            <type>String</type>
+            <maxLength>10</maxLength>
+        </member>
+        <!--//StartSDK-->
+        <member>
+          <summary>The vehicle position. Optional</summary>
+          <name>Position</name>
+          <type>Safir.Geodesy.Position</type>
+        </member>
+        <!--//EndSDK-->
+        <member>
+            <summary>The vehicle speed. Optional</summary>
+            <name>Speed</name>
+            <type>MeterPerSecond32</type>
+        </member>
+        <member>
+            <summary>The vehicle category. Optional</summary>
+            <name>VehicleCategory</name>
+            <type>Capabilities.Vehicles.VehicleCategoryCode</type>
+        </member>
+
+    </members>
+</class>
+<!--//StopRemoveInExercise-->

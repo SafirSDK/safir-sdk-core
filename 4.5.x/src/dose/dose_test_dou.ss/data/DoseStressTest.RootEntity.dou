@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>DoseStressTest.RootEntity</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <parameters>
+        <parameter>
+            <name>NumberOfInstances</name>
+            <type>Int32</type>
+            <value>5000</value>
+        </parameter>
+        <parameter>
+            <name>DefaultPayload</name>
+            <type>Object</type>
+            <object>
+              <name>Object</name>
+<!--                 <name>Safir.TrackManagement.SourceTrack</name> -->
+<!--                 <members> -->
+<!--                      <member> -->
+<!--                           <name>Label</name> -->
+<!--                           <value>Foo!!!</value> -->
+<!--                      </member> -->
+<!--                      <member> -->
+<!--                           <name>PreviousLabel</name> -->
+<!--                           <value>Gobbelgobbel</value> -->
+<!--                      </member> -->
+<!--                      <member> -->
+<!--                           <name>CreationTime</name> -->
+<!--                           <value>1</value> -->
+<!--                      </member> -->
+<!--                      <member> -->
+<!--                           <name>TransientCreationTime</name> -->
+<!--                           <value>1</value> -->
+<!--                      </member> -->
+<!--                      <member> -->
+<!--                           <name>MesurementTimeError</name> -->
+<!--                           <value>1</value> -->
+<!--                      </member> -->
+<!--                      <member> -->
+<!--                           <name>PositionError</name> -->
+<!--                           <value>1</value> -->
+<!--                      </member> -->
+<!--                      <member> -->
+<!--                           <name>SpeedError</name> -->
+<!--                           <value>1</value> -->
+<!--                      </member> -->
+<!--                      <member> -->
+<!--                           <name>CourseError</name> -->
+<!--                           <value>1</value> -->
+<!--                      </member> -->
+<!--                      <member> -->
+<!--                           <name>AltitudeError</name> -->
+<!--                           <value>1</value> -->
+<!--                      </member> -->
+<!--                      <member> -->
+<!--                           <name>TransientPart</name> -->
+<!--                           <objectId> -->
+<!--                               <name>Safir.TrackManagement.FusedTrack</name> -->
+<!--                               <instance>0</instance> -->
+<!--                           </objectId> -->
+<!--                      </member> -->
+<!--                      <member> -->
+<!--                           <name>Correlation</name> -->
+<!--                           <object> -->
+<!--                                <name>Safir.TrackManagement.CorrelationInformation</name> -->
+<!--                                <members> -->
+<!--                                     <member> -->
+<!--                                         <name>FusedTrack</name> -->
+<!--                                         <objectId> -->
+<!--                                             <name>Safir.TrackManagement.FusedTrack</name> -->
+<!--                                             <instance>0</instance> -->
+<!--                                         </objectId> -->
+<!--                                     </member> -->
+<!--                                     <member> -->
+<!--                                          <name>UpdateTime</name> -->
+<!--                                          <value>1</value> -->
+<!--                                     </member> -->
+<!--                                     <member> -->
+<!--                                          <name>IsManual</name> -->
+<!--                                          <value>false</value> -->
+<!--                                     </member> -->
+<!--                                </members> -->
+<!--                           </object> -->
+<!--                      </member> -->
+<!--                 </members> -->
+            </object>
+        </parameter>
+    </parameters>
+    <members>
+        <member>
+            <name>SequenceNumber</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>Payload</name>
+            <type>Object</type>
+        </member>
+    </members>
+</class>

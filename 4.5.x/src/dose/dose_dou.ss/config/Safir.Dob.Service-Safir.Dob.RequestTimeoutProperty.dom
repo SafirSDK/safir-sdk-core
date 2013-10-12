@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <property>Safir.Dob.RequestTimeoutProperty</property>
+    <class>Safir.Dob.Service</class>
+    <memberMapping>
+        <member>
+            <propertyMember>Timeout</propertyMember>
+            <value>7.0</value>
+        </member>
+    </memberMapping>
+</propertyMapping>

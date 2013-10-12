@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>Capabilities.Vehicles.VehicleParameters</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters>
+
+    <parameter>
+      <summary>
+        Limit for number of vehicles. When the number of vehicles has reached this limit,
+        the VehicleApp application will send a Capabilities.Vehicles.VehicleMsg message.
+      </summary>
+      <name>VehicleLimit</name>
+      <type>Int32</type>
+      <value>5</value>
+    </parameter>
+
+  </parameters>
+</class>

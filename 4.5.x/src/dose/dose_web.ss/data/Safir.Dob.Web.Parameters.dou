@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Parameters for Dob Web Server.</summary>
+    <name>Safir.Dob.Web.Parameters</name>
+    <baseClass>Safir.Dob.Parametrization</baseClass>
+    <parameters>
+        <parameter>
+            <summary>Port to use.</summary>
+            <name>Port</name>
+            <type>Int32</type>
+            <value>8000</value>
+        </parameter>
+        <parameter>
+            <summary>Custom dir for html files. Relative SAFIR_RUNTIME.</summary>
+            <name>HtmlDir</name>
+            <type>String</type>
+            <value>/data/text/web</value>
+        </parameter>
+    </parameters>
+</class>

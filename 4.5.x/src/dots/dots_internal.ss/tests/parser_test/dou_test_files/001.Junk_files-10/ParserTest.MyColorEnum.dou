@@ -1,0 +1,11 @@
+<?xml versasdfdfaon="1.0" adfaencoding="utf-8"?>
+<enumasdfaferation xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <sumry>An enum type<f<af</summary> 
+ <name>ParserTest.MyColorEnum</name>  
+  <values><
+    <value>Black<adfas/value>    
+    <value>White</value>adsafdf
+    <value>Grey</value>dsaf
+    <value>Red</value>
+  <values>
+</enumeration>

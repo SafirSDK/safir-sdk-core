@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Test.MyClass1</name>
+    <baseClass>Object</baseClass>
+    
+    <members>
+        <member>
+            <summary>An entity id</summary>
+            <name>MyEid</name>
+            <type>EntityId</type>            
+        </member>
+        <member>
+            <summary>A type id</summary>
+            <name>MyTid</name>
+            <type>TypeId</type>
+        </member>
+
+        <member>
+            <name>MyIid</name>
+            <type>InstanceId</type>
+        </member>
+        <member>
+            <name>MyHandler</name>
+            <type>HandlerId</type>
+        </member>
+        <member>
+            <name>MyChannel</name>
+            <type>ChannelId</type>
+        </member>
+        <member>
+            <name>MyInt32</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>MyInt64</name>
+            <type>Int64</type>
+        </member>
+        <member>
+            <name>MyFloat32</name>
+            <type>Float32</type>
+        </member>
+        <member>
+            <name>MyFloat64</name>
+            <type>Float64</type>
+        </member>
+        <member>
+            <name>MyBinary</name>
+            <type>Binary</type>
+        </member>
+        <member>
+            <summary>A String of 64 characters.</summary>
+            <name>MyString</name>            
+            <type>String</type>
+            <maxLengthRef>
+                <name>Test.MyClass2.MyInt32Param</name>
+            </maxLengthRef>
+        </member>
+    </members>
+
+    <createRoutines>
+    <createRoutine>
+        <summary>A create routine</createRoutine>
+        <name>MyCreateRoutine1</name>
+        <parameters>
+            <member>MyEid</member>
+            <member>MyIid</member>
+            <member>MyChannel</member>
+            <member>MyInt64</member>
+            <member>MyFloat64</member>
+        </parameters>
+        <values>
+            <value>
+                <member>MyTid</member>
+                <parameter><name>Test.MyClass1.MyTidParam</name></parameter>
+            </value>
+            <value>
+                <member>MyHandler</member>
+                <parameter><name>Test.MyClass2.MyHandlerParam</name></parameter>
+            </value>
+            <value>
+                <member>MyInt32</member>
+                <parameter><name>Test.MyClass1.MyInt32Param</name></parameter>
+            </value>
+            <value>
+                <member>MyFloat32</member>
+                <parameter><name>Test.MyClass2.MyFloat32Param</name></parameter>
+            </value>
+            <value>
+                <member>MyString</member>
+                <parameter><name>Test.MyClass2.MyStringRefParam</name></parameter>
+            </value>
+        </values>
+    </createRoutine>
+
+    <createRoutine>
+        <summary>Create routine with values that generates hidden parameters</summary>
+        <name>MyCreateRoutine2</name>
+        <parameters>
+            <member>MyInt32</member>
+        </parameters>
+        <values>
+            <value>
+                <member>MyInt64</member>
+                <value>5</value>
+            </value>
+            <value>
+                <member>MyBinary</member>
+                <value>U28geW91IGxpa2UgdG8gRE9CPw==</value> <!--So you like to DOB? -->
+            </value>
+            <value>
+                <member>MyString</member>
+                <value>Sure I like to DOB!</value>
+            </value>
+            <value>
+                <member>MyEid</member>
+                <entityId>
+                <name>Test.MyClass1</name>
+                <instanceId>123</instanceId>
+            </entityId>
+            </value>
+        </values>
+    </createRoutine>
+
+    </createRoutines>
+
+    <parameters>
+        <parameter>
+            <summary>An entity id</summary>
+            <name>MyEidParam</name>
+            <type>EntityId</type>
+            <entityId>
+                <name>Test.MyClass1</name>
+                <instanceId>123</instanceId>
+            </entityId>
+        </parameter>
+
+        <parameter>
+            <summary>A type id</summary>
+            <name>MyTidParam</name>
+            <type>TypeId</type>
+            <value>Test.MyClass2</value>
+        </parameter>
+
+        <parameter>
+            <name>MyIidParam</name>
+            <type>InstanceId</type>
+            <value>123</value>
+        </parameter>
+
+    <parameter>
+            <name>MyHandlerParam</name>
+            <type>HandlerId</type>
+            <value>123</value>
+        </parameter>
+
+    <parameter>
+            <name>MyChannelParam</name>
+            <type>ChannelId</type>
+            <value>123</value>
+        </parameter>
+
+        <parameter>
+            <name>MyInt32Param</name>
+            <type>Int32</type>
+            <value>5</value>
+        </parameter>
+
+        <parameter>
+            <name>MyInt64Param</name>
+            <type>Int64</type>
+            <value>3</value>
+        </parameter>
+
+    <parameter>
+            <name>MyFloat32Param</name>
+            <type>Float32</type>
+            <value>32.3</value>
+        </parameter>
+
+        <parameter>
+            <name>MyFloat64Param</name>
+            <type>Float64</type>
+            <value>33.123456</value>
+        </parameter>
+
+        <parameter>
+            <name>MyStringArrayParam</name>
+            <type>String</type>
+            <arrayElements>
+                <arrayElement>
+                    <value>aaa</value>
+                </arrayElement>
+                <arrayElement>
+                    <value>bbb</value>
+                </arrayElement>
+                <arrayElement>
+                    <value>ccc</value>
+                </arrayElement>
+                <arrayElement>
+                    <valueRef>
+                        <name>Test.MyClass2.MyStringArrayParam</name>
+                        <index>2</index>
+                    </valueRef>
+                </arrayElement>
+                <arrayElement>
+                    <value>ddd</value>
+                </arrayElement>
+            </arrayElements>            
+        </parameter>
+    </parameters>
+
+</class>

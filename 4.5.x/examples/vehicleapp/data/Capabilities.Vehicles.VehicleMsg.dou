@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>
+    Sends a message to denote that the number of vehicles has reached the limit
+    specified in Capabilities.Vehicles.VehicleParameters.
+  </summary>
+    <name>Capabilities.Vehicles.VehicleMsg</name>
+    <baseClass>Safir.Dob.Message</baseClass>
+    <members>
+
+        <member>
+            <summary>The message text.</summary>
+            <name>MessageText</name>
+            <type>String</type>
+            <maxLength>50</maxLength>
+        </member>
+
+    </members>  
+</class>

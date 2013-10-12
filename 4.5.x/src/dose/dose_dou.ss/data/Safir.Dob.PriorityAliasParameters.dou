@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Contains the definitions of the aliases for the priority channel names.</summary>
+    <name>Safir.Dob.PriorityAliasParameters</name>
+    <baseClass>Safir.Dob.Parametrization</baseClass>
+    <parameters>
+        <parameter>
+            <summary>The definitions of the aliases for the priority channel names.</summary>
+            <name>Aliases</name>
+            <type>Safir.Dob.Alias</type>
+            <arrayElements>
+                <arrayElement>
+                    <object>
+                        <name>Safir.Dob.Alias</name>
+                        <members>
+                            <member>
+                                <name>AliasName</name>
+                                <value>PrioAlias1</value>
+                            </member>
+                            <member>
+                                <name>RealName</name>
+                                <value>High</value>
+                            </member>
+                        </members>
+                    </object>
+                </arrayElement>
+                <arrayElement>
+                    <object>
+                        <name>Safir.Dob.Alias</name>
+                        <members>
+                            <member>
+                                <name>AliasName</name>
+                                <value>AnotherAlias</value>
+                            </member>
+                            <member>
+                                <name>RealName</name>
+                                <value>Normal</value>
+                            </member>
+                        </members>
+                    </object>
+                </arrayElement>
+                <arrayElement>
+                    <object>
+                        <name>Safir.Dob.Alias</name>
+                        <members>
+                            <member>
+                                <name>AliasName</name>
+                                <value>Plots</value>
+                            </member>
+                            <member>
+                                <name>RealName</name>
+                                <value>High No Ack</value>
+                            </member>
+                        </members>
+                    </object>
+                </arrayElement>
+            </arrayElements>
+        </parameter>
+    </parameters>
+</class>

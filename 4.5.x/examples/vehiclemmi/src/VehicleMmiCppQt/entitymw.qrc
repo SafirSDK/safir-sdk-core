@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/EntityMw" >
+        <file>Resources/calculator.png</file>
+        <file>Resources/delete.png</file>
+        <file>Resources/new.png</file>
+        <file>Resources/open.png</file>
+        <file>Resources/open_form.png</file>
+        <file>Resources/safir.png</file>
+    </qresource>
+</RCC>

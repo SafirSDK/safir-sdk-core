@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <summary>An enum type</summary> 
+ <name>ParserTest.MyWeekdayEnum</name>  
+  <values>
+    <value>Monday</value>    
+    <value>Tuesday</value>
+    <value>Wednesday</value>
+    <value>Thursday</value>
+    <value>Friday</value>
+    <value>Saturday</value>
+    <value>Sunday</value>
+  </values>
+</enumeration>

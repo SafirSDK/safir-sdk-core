@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Contains information about one of the errors found when handling a request.</summary>
+    <name>Safir.Dob.ResponseErrorInfo</name>
+    <baseClass>Safir.Dob.Item</baseClass>
+    <members>
+        <member>
+            <summary>The id of the erroneous member (when applicable).</summary>
+            <name>Member</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>The index of the erroneous member (when applicable).</summary>
+            <name>Index</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>The error code. Should be a mnemonic defined by a parameter, eg Safir.Dob.ResponseGeneralErrorCodes.SafirNullMember</summary>
+            <name>Code</name>
+            <type>String</type>
+            <maxLength>50</maxLength>
+        </member>
+        <member>
+            <summary>Extra information when applicable. Expected to be handled similar to alert parameters in the future.</summary>
+            <name>Parameters</name>
+            <type>String</type>
+            <maxLength>200</maxLength>
+        </member>
+    </members>
+    <createRoutines>
+        <createRoutine>
+            <summary>Create a ResponseErrorInfo with one parameter.</summary>
+            <name>ResponseErrorInfo</name>
+            <parameters>
+                <member>Code</member>
+                <member>Parameters</member>
+            </parameters>
+        </createRoutine>
+        <createRoutine>
+            <summary>Create a ResponseErrorInfo for a specified member, with one parameter.</summary>
+            <name>ResponseErrorInfo</name>
+            <parameters>
+                <member>Code</member>
+                <member>Member</member>
+                <member>Parameters</member>
+            </parameters>
+        </createRoutine>
+        <createRoutine>
+            <summary>Create a ResponseErrorInfo for a specified member index, with one parameter.</summary>
+            <name>ResponseErrorInfo</name>
+            <parameters>
+                <member>Code</member>
+                <member>Member</member>
+                <member>Index</member>
+                <member>Parameters</member>
+            </parameters>
+        </createRoutine>
+    </createRoutines>
+</class>

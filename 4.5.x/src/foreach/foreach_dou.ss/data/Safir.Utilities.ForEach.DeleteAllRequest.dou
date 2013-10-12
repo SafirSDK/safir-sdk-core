@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Definition of deleting all instances of a given type</summary>
+  <name>Safir.Utilities.ForEach.DeleteAllRequest</name>
+  <baseClass>Safir.Dob.Service</baseClass>
+  <members>
+    <member>
+      <summary>The type of response wanted</summary>
+      <name>ResponseType</name>
+      <type>Safir.Utilities.ForEach.ResponseType</type>
+    </member>
+    <member>
+      <summary>The typeId to delete all instances of</summary>
+      <name>TypeId</name>
+      <type>TypeId</type>
+    </member>
+    <member>
+      <summary>Include subclasses in delete all operation (default: true)</summary>
+      <name>IncludeSubClasses</name>
+      <type>Boolean</type>
+    </member>
+    <member>
+      <summary>The handlerId to delete all instances of (default: ALL_HANDLERS)</summary>
+      <name>HandlerId</name>
+      <type>HandlerId</type>
+    </member>
+  </members>
+</class>

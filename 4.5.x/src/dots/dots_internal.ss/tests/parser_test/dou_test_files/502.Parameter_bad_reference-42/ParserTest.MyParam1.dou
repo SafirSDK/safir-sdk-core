@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>ParserTest.MyParam1</name>
+    <baseClass>Object</baseClass>
+    <parameters>
+        <parameter>
+            <summary>EntityId param</summary>
+            <name>Eid</name>
+            <type>EntityId</type>
+            <entityId>
+                <name>Safir.Dob.Entity</name>
+                <instanceId>123</instanceId>
+            </entityId>
+        </parameter>
+
+        <parameter>
+            <name>Tid</name>
+            <type>TypeId</type>
+            <value>Safir.Dob.Entity</value>
+        </parameter>    
+
+        <parameter>
+            <name>Iid</name>
+            <type>InstanceId</type>
+            <value>123</value>
+        </parameter>
+
+        <parameter>
+            <name>Two</name>
+            <type>Int32</type>
+            <value>2</value>
+        </parameter>
+
+        <parameter>
+            <name>Three</name>
+            <type>Int32</type>
+            <value>3</value>
+        </parameter>
+
+    <parameter>
+            <name>MyFloat</name>
+            <type>Float64</type>
+            <value>32.3</value>
+        </parameter>
+        
+        <parameter>
+         <summary>Weather Feature Type</summary>
+         <name>MyBigValue</name>
+         <type>Int64</type>
+         <value>9000006300000000010</value>
+      </parameter>
+      
+      <parameter>
+            <name>Color</name>
+            <type>ParserTest.MyColorEnum</type>
+            <value>Grey</value>
+        </parameter>
+        
+        <parameter>
+            <name>MyObjectParam</name>
+            <type>Test.MyClass2</type>
+            <object></object>
+        </parameter>
+
+        <parameter>
+            <name>IntArray</name>
+            <type>Int32</type>
+            <arrayElements>
+                <arrayElement>
+                    <value>1</value>
+                </arrayElement>
+                <arrayElement>
+                    <value>2</value>
+                </arrayElement>
+                <arrayElement>
+                    <value>3</value>
+                </arrayElement>
+                <arrayElement>
+                    <valueRef>
+                        <name>ParserTest.MyParam1.Two</name>
+                    </valueRef>
+                </arrayElement>
+                <arrayElement>
+                    <value>4</value>
+                </arrayElement>
+            </arrayElements>            
+        </parameter>
+
+    </parameters>
+
+</class>

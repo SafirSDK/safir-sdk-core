@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit">
+    <name>OtherCompany.Nested.TestItem</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <member>
+            <name>MyInt</name>
+            <type>Int32</type>
+        </member>
+    </members>
+</class>

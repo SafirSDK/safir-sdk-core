@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>
+    Deletes the vehicle category from the database. On success, a SuccussResponse is returned
+    (no matter if the category already existed or not). If any kind of error occurs, an
+    ErrorResponse is returned.
+  </summary>
+  <name>Capabilities.Vehicles.DeleteVehicleCategoryService</name>
+  <baseClass>Safir.Dob.Service</baseClass>
+  <members>
+
+    <member>
+      <summary>The vehicle category.</summary>
+      <name>VehicleCategory</name>
+      <type>Capabilities.Vehicles.VehicleCategoryCode</type>
+    </member>
+
+  </members>
+</class>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Declares error codes that are of general interest. Error codes shall be parameters, to ensure that they are spelled consitently.</summary>
+    <name>Safir.Dob.ResponseGeneralErrorCodes</name>
+    <baseClass>Safir.Dob.Parametrization</baseClass>
+    <parameters>
+        <parameter>
+            <summary>An erroneous request</summary>
+            <name>SafirReqErr</name>
+            <type>String</type>
+            <value>SafirReqErr</value>
+        </parameter>
+        <parameter>
+            <summary>Illegal combination of members</summary>
+            <name>SafirIllCombination</name>
+            <type>String</type>
+            <value>SafirIllCombination</value>
+        </parameter>
+        <parameter>
+            <summary>A mandatory member is missing</summary>
+            <name>SafirMissingMember</name>
+            <type>String</type>
+            <value>SafirMissingMember</value>
+        </parameter>
+        <parameter>
+            <summary>A present member is not allowed to be present</summary>
+            <name>SafirPresentMember</name>
+            <type>String</type>
+            <value>SafirPresentMember</value>
+        </parameter>
+        <parameter>
+            <summary>A member is null, but is not allowed to be null</summary>
+            <name>SafirNullMember</name>
+            <type>String</type>
+            <value>SafirNullMember</value>
+        </parameter>
+        <parameter>
+            <summary>An internal error occurred</summary>
+            <name>SafirInternalErr</name>
+            <type>String</type>
+            <value>SafirInternalErr</value>
+        </parameter>
+        <parameter>
+            <summary>A request is send from someone without permission</summary>
+            <name>SafirNoPermission</name>
+            <type>String</type>
+            <value>SafirNoPermission</value>
+        </parameter>
+        <parameter>
+            <summary>Value out of range</summary>
+            <name>SafirRangeErr</name>
+            <type>String</type>
+            <value>SafirRangeErr</value>
+        </parameter>
+        <parameter>
+            <summary>Instance out of range</summary>
+            <name>SafirInstanceErr</name>
+            <type>String</type>
+            <value>SafirInstanceErr</value>
+        </parameter>
+        <parameter>
+            <summary>No free instance exists, create request failed</summary>
+            <name>SafirNoFreeInstance</name>
+            <type>String</type>
+            <value>SafirNoFreeInstance</value>
+        </parameter>
+        <parameter>
+            <summary>The owner did not respond in due time</summary>
+            <name>SafirTimeout</name>
+            <type>String</type>
+            <value>SafirTimeout</value>
+        </parameter>
+        <parameter>
+            <summary>No one is registerd to handle the request</summary>
+            <name>SafirNotRegistered</name>
+            <type>String</type>
+            <value>SafirNotRegistered</value>
+        </parameter>
+        <parameter>
+            <summary>The format of the supplied value is erroneous</summary>
+            <name>SafirFormatErr</name>
+            <type>String</type>
+            <value>SafirFormatErr</value>
+        </parameter>
+    </parameters>
+</class>

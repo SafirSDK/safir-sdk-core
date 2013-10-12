@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>Capabilities.Vehicles.DatabaseParameters</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters>
+
+    <parameter>
+      <summary>Connection string for the database.</summary>
+      <name>ConnectionString</name>
+      <type>String</type>
+      <value>DSN=SafirDb;PWD=vehicledbuser;UID=vehicledbuser;</value>
+    </parameter>
+
+  </parameters>
+</class>

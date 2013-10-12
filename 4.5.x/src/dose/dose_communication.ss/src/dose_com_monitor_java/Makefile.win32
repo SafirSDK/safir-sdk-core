@@ -1,0 +1,40 @@
+###################################################################################################
+#
+# Makefile
+#
+# These targets are defined:
+#   all: (default) same as build install.
+#   build: compiles and creates a jar file.
+#   install: copies the jar-file to the target directory.
+#   clean: removes all generated files.
+#
+# 080702/AWI: Created. (Stolen from dots)
+#
+###################################################################################################
+
+.SILENT:
+
+all: build install
+
+sources = $(wildcard *.java)
+
+goal = dose_com_monitor.jar
+igoal = $(SAFIR_RUNTIME)\bin\$(goal)
+
+dirs:
+	-mkdir bin >\nul 2>\nul
+
+build: dirs $(goal)
+
+$(goal) : $(sources)
+	javac -classpath . -d bin $(sources)
+	jar cfm $(goal) manifest.txt -C bin . >\nul
+
+install: $(igoal)
+
+$(igoal) : $(goal)
+	copy $(goal) $(igoal) >\nul
+
+clean:
+	-rm -f -r $(goal) bin/*
+

@@ -1,0 +1,149 @@
+<ui version="4.0" >
+ <class>ServiceDialogClass</class>
+ <widget class="QDialog" name="ServiceDialogClass" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>265</width>
+    <height>176</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Calculate Speed</string>
+  </property>
+  <property name="windowIcon" >
+   <iconset resource="entitymw.qrc" >:/EntityMw/Resources/safir.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <layout class="QGridLayout" >
+     <item row="0" column="0" >
+      <widget class="QLabel" name="labelIdentification" >
+       <property name="text" >
+        <string>Identification</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" >
+      <widget class="QLineEdit" name="lineEditIdentification" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" >
+      <widget class="QLabel" name="labelCurrentSpeed" >
+       <property name="text" >
+        <string>Current speed</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" >
+      <widget class="QLineEdit" name="lineEditCurrentSpeed" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" >
+      <widget class="QLabel" name="labelNewSpeed" >
+       <property name="text" >
+        <string>New Speed</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1" >
+      <widget class="QLineEdit" name="lineEditNewSpeed" />
+     </item>
+     <item row="3" column="0" >
+      <widget class="QLabel" name="labelSpeedDiff" >
+       <property name="text" >
+        <string>Speed Difference</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1" >
+      <widget class="QLineEdit" name="lineEditSpeedDiff" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer>
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" >
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonClose" >
+       <property name="text" >
+        <string>Close</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonApply" >
+       <property name="text" >
+        <string>Apply</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="lineEditStatusBar" >
+     <property name="enabled" >
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="entitymw.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>pushButtonClose</sender>
+   <signal>clicked()</signal>
+   <receiver>ServiceDialogClass</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>101</x>
+     <y>136</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>240</x>
+     <y>92</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

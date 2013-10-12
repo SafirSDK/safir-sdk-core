@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright (c) 2004 Saab AB, Sweden
+
+Abstract
+The schema defining the unit definitions.
+
+Log
+2004-12-25 HESU Created. 
+2005-01-14 HESU Removed <dependencies> and <lib>
+            moved <class> and <property> to root level.
+2005-04-25 HESU Added enumeration, constantArray and constants of any type.
+2005-10-23 HESU Changed Element -> Member, Constant -> Parameter, removed stTypeId (replaced by stFullClassName),
+            added full parameter definition, made instances optional, made parameter values optional (signalling NULL), defined
+            parameter references (recursively).
+            Added the Exception element.
+            Added the propertyMapping element.
+2005-12-01 STLRHA Removed 'minOccurs="0" maxOccurs="unbounded"' propertyMember element in ctMappingMember, since that element 
+            should be in there once only.
+-->
+<xsd:schema targetNamespace="urn:safir-dots-unit" elementFormDefault="qualified"
+    xmlns:tns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <!-- 
+    
+    Overview:
+        <class>, <property> <enumeration> <object> and <exception> are the root elements.
+            
+-->
+    <xsd:simpleType name="stUnitName">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1" />
+            <xsd:maxLength value="100" />
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="stClassName">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1" />
+            <xsd:maxLength value="100" />
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="stFullClassName">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1" />
+            <xsd:maxLength value="100" /><!--aer inte detta lite kort?! -->
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="stFullParameterName">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1" />
+            <xsd:maxLength value="100" /><!-- aer inte detta lite kort?! -->
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="stMemberName">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1" />
+            <xsd:maxLength value="100" />
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="stParameterName">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1" />
+            <xsd:maxLength value="100" /><!-- aer inte detta lite kort?! -->
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="stEnumerationValue">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1" />
+            <xsd:maxLength value="100" />
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="stType">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1" />
+            <xsd:maxLength value="100" />
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="stArraySize">
+        <xsd:restriction base="xsd:nonNegativeInteger">
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="stArray">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="0" />
+            <xsd:maxLength value="0" />
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="stStringLength">
+        <xsd:restriction base="xsd:nonNegativeInteger">
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:complexType name="ctEntityId">
+        <xsd:sequence>
+            <xsd:element name="name" type="tns:stFullClassName" /><!-- Boer inte denna kunna vara en int64 ocksaa? Foer att i framtiden kunna skicka runt typer som en viss nod inte kaenner till? -->
+            <xsd:choice minOccurs="1"> <!-- Maaste alltid vara satt numera, eller hur? -->
+               <xsd:element name="instanceId" type="xsd:string" />
+               <xsd:element name="instanceIdRef" type="tns:ctReference" />
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctParameterArrayElement">
+        <xsd:sequence>
+            <xsd:choice minOccurs="0" >
+               <xsd:element name="index" type="xsd:integer" />
+               <xsd:element name="indexRef" type="tns:ctReference" />
+            </xsd:choice>
+            <xsd:choice minOccurs="0">
+                <xsd:element name="value" type="xsd:string" />
+                <xsd:element name="valueRef" type="tns:ctReference" />
+                <xsd:element name="object" type="tns:ctObject" />
+                <xsd:element name="entityId" type="tns:ctEntityId" />
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctParameterArray">
+        <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+                <xsd:element name="arrayElement" type="tns:ctParameterArrayElement" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctReference">
+        <xsd:sequence>
+            <xsd:element name="name" type="tns:stFullParameterName" />
+            <xsd:choice minOccurs="0" >
+               <xsd:element name="index" type="xsd:integer" />
+               <xsd:element name="indexRef" type="tns:ctReference" />
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctObjectMember">
+        <xsd:sequence>
+            <xsd:element name="name" type="tns:stMemberName" />
+            <xsd:choice minOccurs="0">
+                <xsd:element name="value" type="xsd:string" />
+                <xsd:element name="valueRef" type="tns:ctReference" />
+                <xsd:element name="object" type="tns:ctObject" />
+                <xsd:element name="entityId" type="tns:ctEntityId" />
+                <xsd:element name="arrayElements" type="tns:ctParameterArray" />
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctObjectMembers">
+        <xsd:sequence>
+            <xsd:element name="member" type="tns:ctObjectMember" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctObject">
+        <xsd:sequence>
+            <xsd:element name="name" type="tns:stFullClassName" />
+            <xsd:element name="members" type="tns:ctObjectMembers" minOccurs="0" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctParameter">
+        <xsd:sequence>
+            <xsd:element name="summary" type="xsd:string" minOccurs="0"  />
+            <xsd:element name="name" type="tns:stMemberName" />
+            <xsd:element name="type" type="tns:stType" />
+            <xsd:choice minOccurs="0">
+                <xsd:element name="value" type="xsd:string" />
+                <xsd:element name="valueRef" type="tns:ctReference" />
+                <xsd:element name="object" type="tns:ctObject" />
+                <xsd:element name="entityId" type="tns:ctEntityId" />
+                <xsd:element name="arrayElements" type="tns:ctParameterArray" />
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctParameters">
+        <xsd:sequence>
+            <xsd:element name="parameter" type="tns:ctParameter" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctMember">
+        <xsd:sequence>
+            <xsd:element name="summary" type="xsd:string" minOccurs="0"  />
+            <xsd:element name="name" type="tns:stMemberName" />
+            <xsd:choice  minOccurs="0" >
+                 <xsd:element name="arraySize" type="tns:stArraySize" />
+                 <xsd:element name="arraySizeRef" type="tns:ctReference" />
+                 <xsd:element name="array" type="tns:stArray" />
+            </xsd:choice>
+            <xsd:element name="type" type="tns:stType" />
+            <xsd:choice  minOccurs="0" >
+                <xsd:element name="maxLength" type="tns:stStringLength" />
+                <xsd:element name="maxLengthRef" type="tns:ctReference" />
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctMembers">
+        <xsd:sequence>
+            <xsd:element name="member" type="tns:ctMember" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctCreateParameters">
+        <xsd:sequence>
+            <xsd:element name="member" type="tns:stMemberName" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctCreateValue">
+        <xsd:sequence>
+            <xsd:element name="member" type="tns:stMemberName" />
+            <xsd:element name="parameter" type="tns:stFullParameterName" />
+            <xsd:element name="index" type="xsd:integer" minOccurs="0" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctCreateValues">
+        <xsd:sequence>
+            <xsd:element name="value" type="tns:ctCreateValue" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctCreateRoutine">
+        <xsd:sequence>
+            <xsd:element name="summary" type="xsd:string" minOccurs="0"  />
+            <xsd:element name="name" type="tns:stMemberName" />
+            <xsd:element name="parameters" type="tns:ctCreateParameters" minOccurs="0"  />
+            <xsd:element name="values" type="tns:ctCreateValues" minOccurs="0"  />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctCreateRoutines">
+        <xsd:sequence>
+            <xsd:element name="createRoutine" type="tns:ctCreateRoutine" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctEnumerationValues">
+        <xsd:sequence>
+            <xsd:element name="value" type="tns:stEnumerationValue" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctClass">
+        <xsd:sequence>
+            <xsd:element name="summary" type="xsd:string" minOccurs="0"  />
+            <xsd:element name="name" type="tns:stUnitName" />
+            <xsd:element name="baseClass" type="tns:stFullClassName" />
+            <xsd:element name="parameters" type="tns:ctParameters" minOccurs="0" />
+            <xsd:element name="members" type="tns:ctMembers" minOccurs="0" />
+            <xsd:element name="createRoutines" type="tns:ctCreateRoutines" minOccurs="0" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctException">
+        <xsd:sequence>
+            <xsd:element name="summary" type="xsd:string" minOccurs="0"  />
+            <xsd:element name="name" type="tns:stUnitName" />
+            <xsd:element name="baseClass" type="tns:stFullClassName" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctProperty">
+        <xsd:sequence>
+            <xsd:element name="summary" type="xsd:string" minOccurs="0"  />
+            <xsd:element name="name" type="tns:stUnitName" />
+            <xsd:element name="members" type="tns:ctMembers" minOccurs="0" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctEnumeration">
+        <xsd:sequence>
+            <xsd:element name="summary" type="xsd:string" minOccurs="0"  />
+            <xsd:element name="name" type="tns:stUnitName" />
+            <xsd:element name="values" type="tns:ctEnumerationValues" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctMappingReference">
+        <xsd:sequence>
+            <xsd:element name="classMember" type="tns:stMemberName" />
+            <xsd:choice minOccurs="0" >
+               <xsd:element name="index" type="xsd:integer" />
+               <xsd:element name="indexRef" type="tns:ctReference" />
+            </xsd:choice>
+            <xsd:element name="classMemberReference" type="tns:ctMappingReference" minOccurs="0"  />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctMappingMember">
+        <xsd:sequence>
+            <xsd:element name="propertyMember" type="tns:stMemberName" />
+            <xsd:choice minOccurs="0">
+                <xsd:element name="classMemberReference" type="tns:ctMappingReference" />
+                <xsd:element name="value" type="xsd:string" />
+                <xsd:element name="valueRef" type="tns:ctReference" />
+                <xsd:element name="object" type="tns:ctObject" />
+                <xsd:element name="entityId" type="tns:ctEntityId" />
+                <xsd:element name="arrayElements" type="tns:ctParameterArray" />
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctMappingMembers">
+        <xsd:sequence>
+            <xsd:element name="member" type="tns:ctMappingMember" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ctPropertyMapping">
+        <xsd:sequence>
+            <xsd:element name="summary" type="xsd:string" minOccurs="0"  />
+            <xsd:element name="property" type="tns:stFullClassName" />
+            <xsd:element name="class" type="tns:stFullClassName" />
+            <xsd:element name="memberMapping" type="tns:ctMappingMembers" minOccurs="0" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:element name="class" type="tns:ctClass">
+        <!--
+        The root element defining a Class.
+    --></xsd:element>
+    <xsd:element name="exception" type="tns:ctException">
+        <!--
+        The root element defining a Class.
+    --></xsd:element>
+    <xsd:element name="property" type="tns:ctProperty">
+        <!--
+        The root element defining a Property.
+    --></xsd:element>
+    <xsd:element name="enumeration" type="tns:ctEnumeration">
+        <!--
+        The root element defining an Enumeration.
+    --></xsd:element>
+    <xsd:element name="object" type="tns:ctObject">
+        <!--
+        The root element defining an Object. This is used for serialized objects.
+        It is not to be used as root element in dou-files.
+    --></xsd:element>
+    <xsd:element name="propertyMapping" type="tns:ctPropertyMapping">
+        <!--
+        The root element defining a PropertyMapping, this is to be used in .dom files
+    --></xsd:element>
+</xsd:schema>

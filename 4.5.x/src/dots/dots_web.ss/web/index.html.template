@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>DOB Typesystem Explorer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="description" content="DOB typesystem explorer" />
+<meta name="keywords" content="DOB, XML, dou, typesystem" />
+<link rel="stylesheet" type="text/css" href="../ddincludes/mainstyle.css" />
+<script type="text/javascript" src="simpletreemenu.js">
+
+/***********************************************
+* Simple Tree Menu- © Dynamic Drive DHTML code library (www.dynamicdrive.com)
+* This notice MUST stay intact for legal use
+* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code
+***********************************************/
+
+</script>
+
+<link rel="stylesheet" type="text/css" href="simpletree.css" />
+
+</head>
+
+<body>
+
+
+<h4>DOB TYPESYSTEM</h4>
+
+<a href="javascript:ddtreemenu.flatten('treemenu1', 'expand')">Expand All</a> | <a href="javascript:ddtreemenu.flatten('treemenu1', 'contact')">Contact All</a>
+
+<ul id="treemenu1" class="treeview">
+<li>Entities
+</li>
+<li>Messages
+</li>
+<li>Services
+</li>
+<li>Responses
+</li>
+<li>Parameters
+</li>
+<li>Items
+</li>
+<li>Structs
+</li>
+<li>Properties
+</li>
+<li>Property mappings
+</li>
+<li>Exceptions
+</li>
+<li>Enumerations
+</li>
+</BR>
+<li>All
+</li>
+
+<!--
+<li>Folder 2
+    <ul>
+ 	<li>Sub Item 2.1</li>
+ 	<li>Folder 2.1
+ 		<ul>
+ 		<li>Sub Item 2.1.1</li>
+ 		<li>Sub Item 2.1.2</li>
+ 		</ul>
+ 	</li>
+    </ul>
+</li>
+
+--!>
+
+<script type="text/javascript">
+
+
+ddtreemenu.createTree("treemenu1", true)
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,2 @@
+Main-Class: Sender
+Class-Path: swre_application_java.jar

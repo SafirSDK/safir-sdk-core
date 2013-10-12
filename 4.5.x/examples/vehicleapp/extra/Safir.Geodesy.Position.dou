@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>The definition of the Position class used throughout the system.
+Do not Set/Get Null/Changed-information. Those routines may disappear in the future.
+Do not inherit from this class. Inheritance may be prohibited in the future.</summary>
+    <name>Safir.Geodesy.Position</name>
+    <baseClass>Safir.Dob.Struct</baseClass>
+    <parameters>
+        <parameter>
+            <summary>A dummy value for altitudes. Needed since IsNull must not be used.</summary>
+            <name>DummyAltitude</name>
+            <type>Meter32</type>
+            <value>-0.0078125</value> <!-- 1/128  -->
+        </parameter>
+       </parameters>
+    <members>
+        <member>
+            <name>Latitude</name>
+            <type>Radian64</type>
+        </member>
+        <member>
+            <name>Longitude</name>
+            <type>Radian64</type>
+        </member>
+        <member>
+            <summary>Altitude above the geoid </summary>
+            <name>Altitude</name>
+            <type>Meter32</type>
+        </member>
+    </members>
+    <createRoutines>
+        <createRoutine>
+            <summary>Create a position with dummy altitude.</summary>
+            <name>Position</name>
+            <parameters>
+                <member>Latitude</member>
+                <member>Longitude</member>
+            </parameters>
+            <values>
+                <value>
+                    <member>Altitude</member>
+                    <parameter>Safir.Geodesy.Position.DummyAltitude</parameter>
+                </value>
+            </values>
+        </createRoutine>
+        <createRoutine>
+            <summary>Create a position.</summary>
+            <name>Position</name>
+            <parameters>
+                <member>Latitude</member>
+                <member>Longitude</member>
+                <member>Altitude</member>
+            </parameters>
+        </createRoutine>
+    </createRoutines>
+</class>

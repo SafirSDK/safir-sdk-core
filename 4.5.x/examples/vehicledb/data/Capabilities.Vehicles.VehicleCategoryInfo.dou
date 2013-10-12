@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Information about a vehicle category.</summary>
+  <name>Capabilities.Vehicles.VehicleCategoryInfo</name>
+  <baseClass>Safir.Dob.Item</baseClass>
+  <members>
+
+    <member>
+      <summary>The vehicle category.</summary>
+      <name>VehicleCategory</name>
+      <type>Capabilities.Vehicles.VehicleCategoryCode</type>
+    </member>
+    <member>
+      <summary>The category maximum speed.</summary>
+      <name>MaxSpeed</name>
+      <type>MeterPerSecond32</type>
+    </member>
+    <member>
+      <summary>If a driving license is required for this vehicle category.</summary>
+      <name>IsDrivingLicenceRequired</name>
+      <type>Boolean</type>
+    </member>
+    <member>
+      <summary>Additional remark.</summary>
+      <name>Remark</name>
+      <type>String</type>
+      <maxLength>100</maxLength>
+    </member>
+
+  </members>
+</class>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<enumeration xmlns="urn:safir-dots-unit">
+    <name>DoseTest.TestEnum</name>
+    <values>
+        <value>MyFirst</value>
+        <value>MySecond</value>
+        <value>MyThird</value>
+    </values>
+</enumeration>

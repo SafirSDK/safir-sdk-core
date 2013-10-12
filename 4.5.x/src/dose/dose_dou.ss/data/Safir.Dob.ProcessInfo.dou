@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<class xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="urn:safir-dots-unit">
+  <summary>Displays one entity per process that is connected to the DOB.</summary>
+  <name>Safir.Dob.ProcessInfo</name>
+  <baseClass>Safir.Dob.Entity</baseClass>
+  <parameters>       
+    <parameter>          
+      <name>MaxNumberOfInstances</name>          
+      <type>Int32</type>         
+      <value>100</value>         
+    </parameter>         
+  </parameters>
+  <members>
+    <member>
+      <summary>The process name.</summary>
+      <name>Name</name>
+      <type>String</type>
+      <maxLength>255</maxLength>
+    </member>
+    <member>
+      <summary>The process id.</summary>
+      <name>Pid</name>
+      <type>Int32</type>
+    </member>
+    <member>
+      <summary>The names of all Dob connections opened by the process.</summary>
+      <name>ConnectionNames</name>
+      <arraySize>20</arraySize>
+      <type>String</type>
+      <maxLength>255</maxLength>
+    </member>
+  </members>
+</class>

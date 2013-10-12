@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Contains the name, status, and Ip address for all nodes in the system. The inctance corresponds to the node number.</summary>
+    <name>Safir.Dob.NodeInfo</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <members>
+        <member>
+            <summary>The name of the node.</summary>
+            <name>NodeName</name>
+            <type>String</type>
+            <maxLength>25</maxLength>
+        </member>
+        <member>
+            <summary>The status of the node.</summary>
+            <name>Status</name>
+            <type>Safir.Dob.NodeStatus</type>
+        </member>
+        <member>
+            <summary>The Ip address used by the node.</summary>
+            <name>IpAddress</name>
+            <type>String</type>
+            <maxLength>15</maxLength>
+        </member>
+    </members>
+</class>

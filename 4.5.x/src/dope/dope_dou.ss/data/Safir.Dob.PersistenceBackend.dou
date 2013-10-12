@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Enumerates the different backends that DOPE can use for persistence.</summary>
+  <name>Safir.Dob.PersistenceBackend</name>
+  <values>
+    <value>File</value>
+    <value>Odbc</value>
+  </values>
+</enumeration>    
