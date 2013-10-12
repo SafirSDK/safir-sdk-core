@@ -1,2 +1,0 @@
-Main-Class: Sender
-Class-Path: logging_java.jar

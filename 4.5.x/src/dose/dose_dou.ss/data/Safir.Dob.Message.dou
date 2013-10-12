@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <summary>The baseclass for all messages.</summary>
-    <name>Safir.Dob.Message</name>
-    <baseClass>Object</baseClass>
-</class>

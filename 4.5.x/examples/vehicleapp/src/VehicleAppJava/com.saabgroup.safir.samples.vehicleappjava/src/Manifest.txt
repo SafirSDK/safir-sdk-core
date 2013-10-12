@@ -1,1 +1,0 @@
-Class-Path: dose_java.jar logging_java.jar

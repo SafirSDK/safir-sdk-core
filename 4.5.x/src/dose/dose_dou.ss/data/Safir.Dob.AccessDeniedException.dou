@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<exception xmlns="urn:safir-dots-unit">
-    <summary>Thrown when not owner tries to set/delete an entity</summary>
-    <name>Safir.Dob.AccessDeniedException</name>
-    <baseClass>FundamentalException</baseClass>
-</exception>

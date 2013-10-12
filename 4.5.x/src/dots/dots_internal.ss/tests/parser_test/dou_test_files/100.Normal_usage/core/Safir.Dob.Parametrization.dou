@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <summary>This class is intended to be used as baseclass for classes that only contains parameters. Inheritance directly from Object shall be avoided.</summary>
-    <name>Safir.Dob.Parametrization</name>
-    <baseClass>Object</baseClass>
-</class>
