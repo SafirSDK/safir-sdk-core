@@ -932,7 +932,7 @@ namespace Internal
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", instanceId = " << instanceId
                      << ", handlerId = " << handlerId << ")";
-                throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+                throw Safir::Dob::GhostExistsException(ostr.str(),__WFILE__,__LINE__);
 
             }
             break;
