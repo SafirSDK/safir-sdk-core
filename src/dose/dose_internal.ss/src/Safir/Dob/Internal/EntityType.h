@@ -339,8 +339,7 @@ namespace Internal
                                const ContextId                      context,
                                const Dob::Typesystem::HandlerId&    handlerId,
                                const Dob::Typesystem::InstanceId&   instanceId,
-                               const DistributionData&              injectionState,
-                               const bool                           explicitlyDeleted = true);
+                               const DistributionData&              injectionState);
 
         // A state always has an owner. (Checks any real or injected state for a handler id.)
         void GetOwner(const StateSharedPtr&       statePtr,

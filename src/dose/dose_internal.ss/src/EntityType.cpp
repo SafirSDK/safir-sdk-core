@@ -1407,8 +1407,7 @@ namespace Internal
                           connection->Id().m_contextId,
                           handlerId,
                           instanceId,
-                          originalInjectionState,
-                          false);   // is used to get correct top timestamps
+                          originalInjectionState); // is used to get correct top timestamps
     }
 
     void EntityType::RemoteSetInjectionEntityStateInternal(const DistributionData&        remoteEntity,
@@ -1767,9 +1766,7 @@ namespace Internal
                                        const ContextId                      context,
                                        const Dob::Typesystem::HandlerId&    handlerId,
                                        const Dob::Typesystem::InstanceId&   instanceId,
-                                       const DistributionData&              injectionState,
-                                       const bool                           explicitlyDeleted // = true
-                                       )
+                                       const DistributionData&              injectionState)
     {
         statePtr->SetReleased(true);
 
@@ -1801,7 +1798,7 @@ namespace Internal
                                             instanceId,
                                             m_clock.GetNewTimestamp(),      // creation time
                                             DistributionData::Real,
-                                            explicitlyDeleted,
+                                            true,                          // deleted by owner
                                             false,                         // false => source is not permanent store
                                             NULL);                         // no blob
         }
