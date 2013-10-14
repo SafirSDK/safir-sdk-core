@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Jonas Thor / stjth
 *
@@ -21,12 +21,12 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifdef _MSC_VER
-
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 
 #include "ProcessMonitorWin32.h"
 
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 
 #include <vector>
 
@@ -119,7 +119,8 @@ namespace Utilities
             }
             else
             {
-                lllerr << "ProcessMonitorWin32Thread::StartMonitorPid() - call to OpenProcess failed." << std::endl;
+                SEND_SYSTEM_LOG(Critical,
+                                << "ProcessMonitorWin32Thread::StartMonitorPid() - call to OpenProcess failed.");
             }
         }
         else
@@ -218,8 +219,9 @@ namespace Utilities
             if (dwRet == WAIT_FAILED)
             {
                 const DWORD error = GetLastError();
-                lllerr << "ProcessMonitorWin32Thread::Run() - WaitForMultipleObjects returned WAIT_FAILED!" << std::endl
-                    << "   Error code = " << error << std::endl;
+                SEND_SYSTEM_LOG(Critical,
+                                << "ProcessMonitorWin32Thread::Run() - WaitForMultipleObjects returned WAIT_FAILED!"
+                                << " Error code = " << error);
 
                 LPVOID lpMsgBuf;
                 DWORD dw = GetLastError(); 
@@ -233,7 +235,8 @@ namespace Utilities
                     (LPTSTR) &lpMsgBuf,
                     0, NULL );
 
-                lllerr << "   Error message: " << (LPTSTR)lpMsgBuf << std::endl;                    
+                SEND_SYSTEM_LOG(Critical,
+                                << " - Error message: " << (LPTSTR)lpMsgBuf);
 
                 LocalFree(lpMsgBuf);
             }

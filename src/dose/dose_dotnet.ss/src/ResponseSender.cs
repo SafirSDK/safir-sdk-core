@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -23,8 +23,6 @@
 ******************************************************************************/
 
 using System;
-//using System.Collections.Generic;
-//using System.Text;
 using System.Runtime.InteropServices;
 
 namespace Safir.Dob
@@ -100,7 +98,7 @@ namespace Safir.Dob
         /// Discard this ResponseSender.
         /// <para/>
         /// Calling this function means that you forfeit your chance to send a response
-        /// to the request. It will disable the checks in the destructor (see above).
+        /// to the request. It will disable the checks in the destructor (see below).
         /// <para/>
         /// The typical case when you must discard the ResponseSender is when calling
         /// Postpone with redispatchCurrent set to True. In this case you will get
@@ -119,8 +117,7 @@ namespace Safir.Dob
         /// <summary>
         /// Destructor.
         /// <para/>
-        /// Will check that the ResponseSender has been used, and if it hasn't a dialog
-        /// will be shown and the program terminated.<para/>
+        /// Will check that the ResponseSender has been used, and if it hasn't a log will be emitted.<para/>
         /// Since the destructor is called by the Garbage Collector this may happen 
         /// "long after" you've dropped your reference to the response sender.
         /// <para/>
@@ -130,8 +127,8 @@ namespace Safir.Dob
         {
             if (m_valid)
             {
-                System.Windows.Forms.MessageBox.Show("Programming Error! A ResponseSender was discarded without having been used! (A timeout response was automatically sent).\nThe program will now exit!");
-                System.Environment.Exit(101010);
+                Safir.Logging.SendSystemLog(Safir.Logging.Severity.Critical,
+                                            "Programming Error! A ResponseSender was discarded without having been used!");
             }
         }
 

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -24,8 +24,10 @@
 #include <Safir/SwReports/Internal/Interface.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
+#include <Safir/Logging/Log.h>
 #include "Library.h"
 #include <iostream>
+
 
 using namespace Safir::SwReports::Internal;
 
@@ -35,19 +37,38 @@ std::wstring ToWstring(const char * const str)
     return Safir::Dob::Typesystem::Utilities::ToWstring(str);
 }
 
-void SwreC_SetProgramName(const char * const programName,
-                          bool & success)
+void SwreC_StartTraceBackdoor(const char * const connectionNameCommonPart,
+                              const char * const connectionNameInstancePart,
+                              bool & success)
 {
+    using Safir::Dob::Typesystem::Utilities::ToWstring;
+
     success = false;
     try
     {
-        Library::Instance().SetProgramName(ToWstring(programName));
+        Library::Instance().StartTraceBackdoor(ToWstring(connectionNameCommonPart),
+                                               ToWstring(connectionNameInstancePart));
         success = true;
     }
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void SwreC_EnableCrashReporting(bool & success)
+void SwreC_StopTraceBackdoor()
+{
+    try
+    {
+        Library::Instance().StopTraceBackdoor();
+    }
+    catch (...)
+    {
+        Safir::Logging::SendSystemLog
+            (Safir::Logging::Error,
+             L"Got an exception in SwreC_StopTraceBackdoor. "
+             L"Please tell your nearest Safir SDK Core developer!");
+    }
+}
+
+void SwreC_StartCrashReporting(bool & success)
 {
     success = false;
     try
@@ -59,104 +80,81 @@ void SwreC_EnableCrashReporting(bool & success)
 }
 
 
-void SwreC_Stop()
+void SwreC_StopCrashReporting()
 {
     try
     {
-        Library::Instance().Stop();
+        Library::Instance().StopCrashReporting();
     }
     catch (...)
     {
-        std::wcerr << "Got an exception in SwreC_Stop. Please tell your nearest Safir System Kernel developer" << std::endl;
+        Safir::Logging::SendSystemLog
+            (Safir::Logging::Error,
+             L"Got an exception in SwreC_StopCrashReporting. "
+             L"Please tell your nearest Safir SDK Core developer!");
     }
 }
 
-#if 0
-void SwreC_TraceAppendString(const char * const /*str*/,
-                             bool & /*success*/)
-{
-    /*success = false;
-    try
-    {
-        const std::wstring wstr = Safir::Dob::Typesystem::Utilities::ToWstring(str);
-        Library::Instance().Trace(wstr);
-        success = true;
-    }
-    CATCH_LIBRARY_EXCEPTIONS*/
-}
-#endif
-
-void 
-SwreC_TraceAppendStringPrefix(const Safir::Dob::Typesystem::Int64 prefixId,
-                              const char * const str,
-                              bool & success)
-{
-    success = false;
-    try
-    { 
-        Library::Instance().TraceString(prefixId, Safir::Dob::Typesystem::Utilities::ToWstring(str));
-        success = true;
-    }
-    CATCH_LIBRARY_EXCEPTIONS
-}
-
-#if 0
-void SwreC_TraceAppendChar(const char /*ch*/,
-                           bool & /*success*/)
-{/*
- success = false;
- try
- {
- //TODO
- success = true;
- }
- CATCH_LIBRARY_EXCEPTIONS*/
-}
-#endif
-
-void 
-SwreC_TraceAppendCharPrefix(const Safir::Dob::Typesystem::Int64 prefixId,
-                            const char ch,
-                            bool & success)
-{
-    success = false;
-    try
-    { 
-        std::string str;
-        str.push_back(ch);
-        Library::Instance().TraceString(prefixId, Safir::Dob::Typesystem::Utilities::ToWstring(str));
-        success = true;
-    }
-    CATCH_LIBRARY_EXCEPTIONS
-}
-
-
-void 
-SwreC_TraceAppendWcharPrefix(const Safir::Dob::Typesystem::Int64 prefixId,
-                             const wchar_t ch,
+void SwreC_TraceAppendString(const Safir::Dob::Typesystem::Int64 prefixId,
+                             const char * const str,
                              bool & success)
 {
     success = false;
     try
-    {
-        Library::Instance().Trace(prefixId,ch);
+    { 
+        Library::Instance().TraceString(prefixId, str);
         success = true;
     }
-    CATCH_LIBRARY_EXCEPTIONS;
+    CATCH_LIBRARY_EXCEPTIONS
 }
 
-void SwreC_TraceSyncBuffer(bool & success)
+void SwreC_TraceAppendSubstring(const Safir::Dob::Typesystem::Int64 prefixId,
+                                const char * const str,
+                                const Safir::Dob::Typesystem::Int32 offset,
+                                const Safir::Dob::Typesystem::Int32 length,
+                                bool & success)
+{
+    success = false;
+    try
+    { 
+        Library::Instance().TraceString(prefixId, 
+                                        str, 
+                                        static_cast<size_t>(offset), 
+                                        static_cast<size_t>(length));
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS
+}
+
+
+void SwreC_TraceAppendChar(const Safir::Dob::Typesystem::Int64 prefixId,
+                           const char ch,
+                           bool & success)
 {
     success = false;
     try
     {
-        Library::Instance().TraceSync();
+        Library::Instance().TraceChar(prefixId, ch);
         success = true;
     }
-    CATCH_LIBRARY_EXCEPTIONS;
+    CATCH_LIBRARY_EXCEPTIONS
 }
 
-void SwreC_TraceFlushBuffer(bool & success)
+void SwreC_TraceAppendWChar(const Safir::Dob::Typesystem::Int64 prefixId,
+                            const wchar_t ch,
+                            bool & success)
+{
+    success = false;
+    try
+    {
+        Library::Instance().TraceWChar(prefixId, ch);
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS
+}
+
+
+void SwreC_TraceFlush(bool & success)
 {
     success = false;
     try
@@ -206,8 +204,6 @@ SwreC_TracePrefixGetIsEnabledPointer(const Safir::Dob::Typesystem::Int64 id)
 {
     return Library::Instance().GetPrefixStatePointer(id);
 }
-
-
 
 void SwreC_SendFatalErrorReport(const char * const errorCode,
                                 const char * const location,
@@ -283,7 +279,6 @@ void SwreC_SendProgramInfoReport(const char * const text,
     }
     CATCH_LIBRARY_EXCEPTIONS;
 }
-
 
 
 

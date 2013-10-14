@@ -1,4 +1,0 @@
-#this file has been renamed to cmake_settings.txt have correct cmake file extension
-#we provide this file for backwards compatibility.
-INCLUDE($ENV{SAFIR_SDK}/data/build/common_settings.cmake)
-

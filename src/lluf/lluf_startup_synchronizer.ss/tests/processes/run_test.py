@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2011 (http://www.safirsdk.com)
+# Copyright Saab AB, 2011-2013 (http://safir.sourceforge.net)
 #
 # Created by: Lars Hagstrom (lars@foldspace.nu)
 #
@@ -25,10 +25,6 @@
 ###############################################################################
 from __future__ import print_function
 import subprocess, os, time, sys
-
-if sys.version_info[0] != 2:
-    print("This test script only works with python 2.x, exiting as if it was run successfully")
-    sys.exit(0)
 
 if sys.platform == "win32":
     config_type = os.environ.get("CMAKE_CONFIG_TYPE")

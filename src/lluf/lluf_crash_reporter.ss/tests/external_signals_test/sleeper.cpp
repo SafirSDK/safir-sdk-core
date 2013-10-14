@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab Systems AB, 2012 (http://www.safirsdk.com)
+* Copyright Saab AB, 2012-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *
@@ -34,6 +34,7 @@ int main()
 {
     Safir::Utilities::CrashReporter::RegisterCallback(callback);
     Safir::Utilities::CrashReporter::Start();
+    boost::this_thread::sleep(boost::posix_time::milliseconds(500)); //sleep a little while to let bg thread start.
     std::wcout << "Started" << std::endl;
     boost::this_thread::sleep(boost::posix_time::seconds(60));
     Safir::Utilities::CrashReporter::Stop();

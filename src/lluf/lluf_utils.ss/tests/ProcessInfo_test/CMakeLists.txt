@@ -7,3 +7,4 @@ IF (NOT MSVC)
 ENDIF()
 
 ADD_TEST(ProcessInfo ProcessInfo_test)
+SET_SAFIR_TEST_PROPERTIES(ProcessInfo)

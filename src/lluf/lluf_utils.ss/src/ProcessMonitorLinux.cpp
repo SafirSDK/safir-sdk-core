@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Jonas Thor / stjth
 *
@@ -21,12 +21,13 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifdef __GNUC__
+#if defined(linux) || defined(__linux) || defined(__linux__)
 
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
 
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 
 #include "ProcessMonitorLinux.h"
 
@@ -89,7 +90,8 @@ namespace Utilities
         
         if (ec) 
         {
-            lllerr << "ProcessMonitorLinux::HandleInotifyEvent() - Error from boost::asio " << ec << std::endl;
+            SEND_SYSTEM_LOG(Critical,
+                            << "ProcessMonitorLinux::HandleInotifyEvent() - Error from boost::asio " << ec);
             return;
         }
 
@@ -185,15 +187,17 @@ namespace Utilities
                     }
                     else
                     {
-                        lllerr << "ProcessMonitorLinux::ChangeMonitoredPids() - problem calling inotify_add_watch(). path: " 
-                               << path.c_str()
-                               << ". errno: " << errno << std::endl;
+                        SEND_SYSTEM_LOG(Critical,
+                                        << "ProcessMonitorLinux::ChangeMonitoredPids() - problem calling inotify_add_watch(). path: " 
+                                        << path.c_str()
+                                        << ". errno: " << errno);
                     }
                 }
             }
             else
             {
-                lllerr << "ProcessMonitorLinux::ChangeMonitoredPids() - problem finding bin path for pid: " << pid << std::endl;
+                SEND_SYSTEM_LOG(Critical,
+                                << "ProcessMonitorLinux::ChangeMonitoredPids() - problem finding bin path for pid: " << pid);
             }
         }
 
@@ -229,8 +233,9 @@ namespace Utilities
 
                         if (result == -1)
                         {
-                            lllerr << "ProcessMonitorLinux::ChangeMonitoredPids - problem with inotify_rm_watch() wd: " 
-                                   << (*wdIt).first << ". errno: " << errno << std::endl;
+                            SEND_SYSTEM_LOG(Critical,
+                                            << "ProcessMonitorLinux::ChangeMonitoredPids - problem with inotify_rm_watch() wd: " 
+                                            << (*wdIt).first << ". errno: " << errno);
                         }
                     
                         // Clean m_binpathMap
@@ -302,8 +307,10 @@ namespace Utilities
                     
                     if (result == -1)
                     {
-                        lllerr << "ProcessMonitorLinux::HandleTimeout - problem with inotify_rm_watch() wd: " << (*wdIt).first 
-                               << ". errno: " << errno << std::endl;
+                        SEND_SYSTEM_LOG(Critical,
+                                        << "ProcessMonitorLinux::HandleTimeout - problem with inotify_rm_watch() wd: " 
+                                        << (*wdIt).first 
+                                        << ". errno: " << errno);
                     }
 
                     // Store it
@@ -416,7 +423,8 @@ namespace Utilities
 
         if (fd == -1) 
         {
-            lllerr << "ProcessMonitorLinux::Run() - Problem with inotify_init()...." << std::endl;
+                SEND_SYSTEM_LOG(Critical,
+                                << "ProcessMonitorLinux::Run() - Problem with inotify_init()....");
             
             return;
         }
@@ -445,8 +453,9 @@ namespace Utilities
                     
             if (result == -1)
             {
-                lllerr << "ProcessMonitorLinux::Run() - problem with inotify_rm_watch() wd: " << (*it).first 
-                       << ". errno: " << errno << std::endl;
+                SEND_SYSTEM_LOG(Critical,
+                                << "ProcessMonitorLinux::Run() - problem with inotify_rm_watch() wd: " << (*it).first 
+                                << ". errno: " << errno);
             }
         }
     }

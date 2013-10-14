@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2012 (http://www.safirsdk.com)
+* Copyright Saab AB, 2012-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *
@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/LowLevelLoggerControl.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/StartupSynchronizer.h>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -30,52 +31,9 @@
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <iostream>
 
-//Boost property tree was introduced in 1.41
-//TODO: when we drop support for 1.41 we can remove this other implementation
-//Dont forget to remove the stuff in CMakeLists.txt
-#if ((BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) > 40)
-#define HAVE_BOOST_PROPERTY_TREE
-#include <boost/property_tree/ini_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
-#else
-#include <boost/program_options.hpp>
-#endif
-
 namespace //anonymous namespace for internal functions
 {
     const char * SHARED_MEMORY_NAME = "LLUF_LLL_SHARED_MEMORY";
-
-    const boost::filesystem::path GetLogDirectory()
-    {
-        const char * const env = getenv("SAFIR_RUNTIME");
-        if (env == NULL)
-        {
-            throw std::logic_error("SAFIR_RUNTIME environment variable is not set");
-        }
-        boost::filesystem::path filename(env);
-
-        filename /= "log";
-        filename /= "Dob-LowLevelLog";
-        return filename;
-    }
-
-    const boost::filesystem::path GetLogSettingsPath()
-    {
-        return GetLogDirectory()/"logging_on";
-    }
-
-    //check for file %SAFIR_RUNTIME%\log\Dob-LowLevelLog\logging_on
-    bool LogSettingsFileExists()
-    {
-        try
-        {
-            return boost::filesystem::exists(GetLogSettingsPath());
-        }
-        catch(const std::logic_error&)
-        {
-            return false;
-        }
-    }
 }
 
 
@@ -91,16 +49,45 @@ namespace Internal
     public:
         Impl(const bool openOnly, const bool readWrite)
             : m_shmData(NULL)
+            , m_configReader(new Safir::Utilities::Internal::ConfigReader())
+            , m_disabled(m_configReader->Logging().get<bool>("LowLevelLog.disabled"))
             , m_startupSynchronizer("LLUF_LLL_INITIALIZATION")
             , m_readWrite(readWrite)
             , m_openOnly(openOnly)
         {
+            if (m_disabled)
+            {
+                m_configReader.reset();
+                return;
+            }
+
             m_startupSynchronizer.Start(this);
+        }
+                         
+        bool Disabled() const
+        {
+            return m_disabled;
+        }
+
+        void CheckDisabled() const
+        {
+            if (m_disabled)
+            {
+                throw std::logic_error("LowLevelLogger is disabled! It is illegal to call this method!");
+            }
+        }
+                         
+        const boost::filesystem::path LogDirectory() const
+        {
+            CheckDisabled();
+            return m_configReader->Logging().get<std::string>("LowLevelLog.log_directory");
         }
 
         //StartupSynchronizer stuff
         virtual void Create()
         {
+            CheckDisabled();
+
             if (m_openOnly)
             {
                 return;
@@ -115,56 +102,17 @@ namespace Internal
                                                          boost::interprocess::read_write);
             ShmData* data = static_cast<ShmData*>(shmRegion.get_address());
 
-            data->logLevel = 0;
-            data->timestamps = true;
-            data->toStdout = true;
-            data->toFile = true;
-            data->ignoreFlush = false;
-
-            if (LogSettingsFileExists())
-            {
-                try
-                {
-#ifdef HAVE_BOOST_PROPERTY_TREE
-                    using boost::property_tree::ptree;
-                    
-                    ptree root;
-                    read_ini(GetLogSettingsPath().string(), root );                    
-                    data->logLevel = root.get("logLevel", 9);
-                    data->timestamps = root.get("timestamps", true);
-                    data->toStdout = root.get("toStdout", true);
-                    data->toFile = root.get("toFile", true);
-                    data->ignoreFlush = root.get("ignoreFlush", false);
-#else
-                    using namespace boost::program_options;
-                    options_description options;
-                    options.add_options()
-                        ("logLevel",value<int>(&data->logLevel)->default_value(9),"")
-                        ("ignoreFlush","")
-                        ("timestamps","")
-                        ("toStdout","")
-                        ("toFile","");
-                    variables_map vm;
-                    boost::filesystem::ifstream ini(GetLogSettingsPath());
-                    store(parse_config_file<char>(ini,options),vm);
-                    notify(vm);
-
-                    data->timestamps = vm["timestamps"].as<std::string>() == "true";
-                    data->toStdout = vm["toStdout"].as<std::string>() == "true";
-                    data->toFile = vm["toFile"].as<std::string>() == "true";
-                    data->ignoreFlush = vm["ignoreFlush"].as<std::string>() == "true";
-
-#endif
-                }
-                catch (const std::exception&)
-                {
-                    data->logLevel = 9;
-                }
-            }
+            data->logLevel = m_configReader->Logging().get<int>("LowLevelLog.log_level");
+            data->timestamps = m_configReader->Logging().get<bool>("LowLevelLog.show_timestamps");
+            data->toStdout = m_configReader->Logging().get<bool>("LowLevelLog.to_standard_output");
+            data->toFile = m_configReader->Logging().get<bool>("LowLevelLog.to_file");
+            data->ignoreFlush = m_configReader->Logging().get<bool>("LowLevelLog.ignore_flush");
         }
 
         virtual void Use()
         {
+            CheckDisabled();
+
             boost::interprocess::mode_t mode = boost::interprocess::read_only;
             if (m_readWrite)
             {
@@ -183,11 +131,15 @@ namespace Internal
 
         virtual void Destroy()
         {
+            CheckDisabled();
+
             boost::interprocess::shared_memory_object::remove(SHARED_MEMORY_NAME);
         }
 
         void CheckReadWrite() const 
         {
+            CheckDisabled();
+
             if (!m_readWrite)
             {
                 throw std::logic_error("This instance of LowLevelLoggerControl is not read-write");
@@ -205,6 +157,8 @@ namespace Internal
 
         ShmData* m_shmData;
     private:
+        boost::shared_ptr<Safir::Utilities::Internal::ConfigReader> m_configReader;
+        const bool m_disabled;
         boost::interprocess::shared_memory_object m_shm;
         boost::interprocess::mapped_region m_shmRegion;
         StartupSynchronizer m_startupSynchronizer;
@@ -217,18 +171,25 @@ namespace Internal
         m_impl.reset(new Impl(openOnly, readWrite));
     }
 
-    const boost::filesystem::path LowLevelLoggerControl::GetLogDirectory()
+    bool LowLevelLoggerControl::Disabled() const
     {
-        return ::GetLogDirectory();
+        return m_impl->Disabled();
+    }
+
+    const boost::filesystem::path LowLevelLoggerControl::LogDirectory() const
+    {
+        return m_impl->LogDirectory();
     }
 
     const int* LowLevelLoggerControl::GetLogLevelPointer() const
     {
+        m_impl->CheckDisabled();
         return &m_impl->m_shmData->logLevel;
     }
 
     int LowLevelLoggerControl::LogLevel() const
     {
+        m_impl->CheckDisabled();
         return m_impl->m_shmData->logLevel;
     }
 
@@ -241,6 +202,7 @@ namespace Internal
         
     bool LowLevelLoggerControl::UseTimestamps() const
     {
+        m_impl->CheckDisabled();
         return m_impl->m_shmData->timestamps;
     }
     
@@ -253,6 +215,7 @@ namespace Internal
         
     bool LowLevelLoggerControl::LogToStdout()  const
     {
+        m_impl->CheckDisabled();
         return m_impl->m_shmData->toStdout;
     }
     
@@ -265,6 +228,7 @@ namespace Internal
 
     bool LowLevelLoggerControl::LogToFile()  const
     {
+        m_impl->CheckDisabled();
         return m_impl->m_shmData->toFile;
     }
     
@@ -277,6 +241,7 @@ namespace Internal
 
     bool LowLevelLoggerControl::IgnoreFlush()  const
     {
+        m_impl->CheckDisabled();
         return m_impl->m_shmData->ignoreFlush;
     }
     
@@ -285,55 +250,6 @@ namespace Internal
         m_impl->CheckReadWrite();
         m_impl->m_shmData->ignoreFlush = enabled;
     }
-    
-    void LowLevelLoggerControl::WriteIniFile(const int level,
-                                             const bool useTimestamps,
-                                             const bool toStdout,
-                                             const bool toFile,
-                                             const bool ignoreFlush)
-    {
-        if (!LogSettingsFileExists())
-        {
-            try
-            {
-                boost::filesystem::create_directory(GetLogDirectory());
-            }
-            catch (const boost::filesystem::filesystem_error&)
-            {
-                throw std::logic_error("Failed to create log directory, does the $SAFIR_RUNTIME/log directory exist?");
-            }
-        }
-
-#ifdef HAVE_BOOST_PROPERTY_TREE
-        using boost::property_tree::ptree;
-
-        ptree root;
-        root.put("logLevel", level);
-        root.put("timestamps", useTimestamps);
-        root.put("toStdout", toStdout);
-        root.put("toFile", toFile);
-        root.put("ignoreFlush", ignoreFlush);
-
-        write_ini(GetLogSettingsPath().string(), root );
-#else
-        boost::filesystem::ofstream ini(GetLogSettingsPath());
-        ini << std::boolalpha
-            << "logLevel=" << level << "\n"
-            << "timestamps=" << useTimestamps << "\n"
-            << "toStdout=" << toStdout << "\n"
-            << "toFile=" << toFile << "\n"
-            << "ignoreFlush=" << ignoreFlush << std::endl;
-#endif
-    }
-
-    void LowLevelLoggerControl::RemoveIniFile()
-    {
-        if (LogSettingsFileExists())
-        {
-            boost::filesystem::remove(GetLogSettingsPath());
-        }
-    }
-
 }
 }
 }

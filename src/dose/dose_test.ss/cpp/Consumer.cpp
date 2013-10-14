@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -67,6 +67,7 @@ const std::wstring PREFIX = L"Consumer ";
 Consumer::Consumer(int consumerNumber,
                    const std::wstring & connectionName,
                    const std::wstring & instance):
+    m_backdoorKeeper(m_connection),
     m_consumerNumber(consumerNumber),
     m_connectionName(connectionName),
     m_connectionInstance(instance),
@@ -1211,7 +1212,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                     {
                         lout << PREFIX << m_consumerNumber << ": StartBackdoor" << std::endl;
 
-                        m_backdoorKeeper.Start(*this, m_connectionName, m_connectionInstance);
+                        m_backdoorKeeper.Start(*this);
                     }
                     break;
 

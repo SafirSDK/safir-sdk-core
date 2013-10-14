@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <iostream>
 #include <Safir/Utilities/Internal/LowLevelLoggerControl.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -50,21 +51,17 @@ public:
     ProgramOptions(int argc, char* argv[])
         : parseOk(false)
         , logLevel(false)
-        , permanent(false)
-        , clear(false)
-        , createLogdir(false)
         , ignoreFlush(false)
         , noTimestamps(false)
         , noStdout(false)
         , noFile(false)
     {
         using namespace boost::program_options;
+        Safir::Utilities::Internal::ConfigReader reader;
+        
         options_description general("General Options");
         general.add_options()
-            ("help,h", "show help message")
-            ("permanent,p", value<bool>(&permanent)->zero_tokens(), "Turn logging on permanently, by writing options to disk.")
-            ("clear,c", value<bool>(&clear)->zero_tokens(), "Clear permanent options (does not turn logging off for current session).")
-            ("create-logdir", value<bool>(&createLogdir)->zero_tokens(), "Create the $SAFIR_RUNTIME/log directory.");
+            ("help,h", "show help message");
         
         options_description overhead("Options that reduce logging overhead");
         overhead.add_options()
@@ -73,7 +70,7 @@ public:
             ("no-stdout,s", value<bool>(&noStdout)->zero_tokens(), "Don't log to stdout.")
             ("no-file,f", value<bool>(&noFile)->zero_tokens(), "Don't log to file.");
 
-        options_description hidden("Options that reduce logging overhead");
+        options_description hidden("Hidden options");
         hidden.add_options()
             ("log-level", value<int>(&logLevel));
 
@@ -107,16 +104,9 @@ public:
             return;
         }
 
-        if (!clear && (vm.count("log-level") == 0 || logLevel < 0 || logLevel >9))
+        if (vm.count("log-level") == 0 || logLevel < 0 || logLevel >9)
         {
             std::wcout << "Logging level has to be between 0 and 9.\n" << std::endl;
-            ShowHelp(visible_options);
-            return;
-        }
-
-        if (clear && permanent)
-        {
-            std::wcout << "The 'permanent' and 'clear' options are mutually exclusive\n" << std::endl;
             ShowHelp(visible_options);
             return;
         }
@@ -127,10 +117,6 @@ public:
     
     int logLevel;
     
-    bool permanent;
-    bool clear;
-    bool createLogdir;
-
     bool ignoreFlush;
     bool noTimestamps;
     bool noStdout;
@@ -144,9 +130,9 @@ private:
                    << "Control logging level and options.\n\n"
                    << "Log files are found in the directory %SAFIR_RUNTIME%/log/Dob-LowLevelLog\n"
                    << "The log directory must exist for it to be possible to turn on logging.\n\n"
-                   << "Logging is normally only turned on for the current session (i.e. settings are\n"
-                   << "reset to defaults when no program using the logger is running), but using the\n"
-                   << "'permanent' option described below it can be turned on permanently.\n\n"
+                   << "Logging is only turned on for the current session (i.e. settings are reset\n"
+                   << "to defaults when no program using the logger is running), but logging can\n"
+                   << "be enabled permanently by editing the logging.ini file.\n\n"
                    << "  <level> is a number between 0 and 9, where 0 is no logging and 9 is very\n"
                    << "          verbose logging.\n"
                    << desc << "\n"
@@ -160,18 +146,6 @@ private:
 
 };
 
-bool CheckLogdir()
-{
-    const char * const env = getenv("SAFIR_RUNTIME");
-    if (env == NULL)
-    {
-        std::wcerr << "SAFIR_RUNTIME environment variable is not set" << std::endl;
-        return false;
-    }
-    const boost::filesystem::path dir = boost::filesystem::path(env) / "log";
-    
-    return boost::filesystem::exists(dir) && boost::filesystem::is_directory(dir);
-}
 
 int main(int argc, char * argv[])
 {
@@ -182,37 +156,14 @@ int main(int argc, char * argv[])
         return 1;
     }
 
-    if (options.clear)
-    {
-        Safir::Utilities::Internal::LowLevelLoggerControl::RemoveIniFile();
-        return 0;
-    }
-
-    if (options.createLogdir)
-    {
-        boost::filesystem::create_directories(Safir::Utilities::Internal::LowLevelLoggerControl::GetLogDirectory());
-    }
-
-    if (!CheckLogdir())
-    {
-        std::wcerr << "$SAFIR_RUNTIME/log/ directory does not exist, use the --create-logdir option \n"
-                   << "to create it.\nWithout this directory it is not possible to do any kind of logging."
-                   << std::endl;
-        return 1;
-    }
-
-    if (options.permanent)
-    {
-        Safir::Utilities::Internal::LowLevelLoggerControl::WriteIniFile(options.logLevel,
-                                                                        !options.noTimestamps,
-                                                                        !options.noStdout,
-                                                                        !options.noFile,
-                                                                        options.ignoreFlush);
-    }
-
     try
     {
         Safir::Utilities::Internal::LowLevelLoggerControl control(true, true);
+        if (control.Disabled())
+        {
+            std::wcout << "LowLevelLogger is currently disabled, please enabled it in your logging.ini file." << std::endl;
+            return 1;
+        }
         control.LogLevel(options.logLevel);
         std::wcout << "Log level should now be " << options.logLevel << std::endl;
         control.UseTimestamps(!options.noTimestamps);
@@ -222,11 +173,8 @@ int main(int argc, char * argv[])
     }
     catch (const std::exception &)
     {
-        if (!options.permanent)
-        {
-            std::wcout << "Failed to change logging options for current session. Is any app using the logger running?" << std::endl;
-            return 1;
-        }
+        std::wcout << "Failed to change logging options for current session. Is any app using the logger running?" << std::endl;
+        return 1;
     }
     return 0;
 }

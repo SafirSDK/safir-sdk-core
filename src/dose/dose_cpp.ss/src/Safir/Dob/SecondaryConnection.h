@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -100,6 +100,13 @@ namespace Dob
          * @return True if the SecondaryConnection is attached to a Connection and that Connection is open.
          */
         bool IsAttached() const;
+
+        /**
+         * For a secondary connection this is the same as the IsAttached check.
+         *
+         * @return True if the SecondaryConnection is attached to a Connection and that Connection is open.
+         */
+        virtual bool IsOpen() const;
 
     private:
 

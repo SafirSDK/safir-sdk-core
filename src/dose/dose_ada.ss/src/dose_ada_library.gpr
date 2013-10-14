@@ -1,4 +1,5 @@
 with "safir_defaults";
+with "logging_ada";
 with "dots_ada";
 with "dots_generated_ada";
 with "dose_dll";

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(VehicleMmiCsWinForms NONE)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 find_package(CSharp REQUIRED)
 INCLUDE(CSharpMacros)
 
@@ -10,7 +10,7 @@ FILE(GLOB resx_files *.resx)
 FILE(GLOB property_resx_files Properties/*.resx)
 
 
-SET(CS_FLAGS ${COMMON_CS_FLAGS} "-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dll,${SAFIR_RUNTIME}/bin/Safir.Dob.dll,${SAFIR_RUNTIME}/bin/dots_generated-dotnet.dll,${SAFIR_RUNTIME}/bin/Safir.SwReports.dll,System.Windows.Forms.dll,System.Drawing.dll" )
+SET(CS_FLAGS ${COMMON_CS_FLAGS} "-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dll,${SAFIR_RUNTIME}/bin/Safir.Dob.dll,${SAFIR_RUNTIME}/bin/dots_generated-dotnet.dll,${SAFIR_RUNTIME}/bin/Safir.SwReports.dll,${SAFIR_RUNTIME}/bin/Safir.Logging.dll,System.Windows.Forms.dll,System.Drawing.dll" )
 
 ADD_CS_RESOURCES("${resx_files}" VehicleMmiCsWinForms .)
 ADD_CS_RESOURCES("${property_resx_files}" VehicleMmiCsWinForms.Properties ${CMAKE_CURRENT_SOURCE_DIR}/Properties)

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -23,7 +23,7 @@
 ******************************************************************************/
 
 #include "dose_main_app.h"
-#include <Safir/Utilities/Internal/PanicLogging.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/CrashReporter.h>
 
@@ -40,23 +40,19 @@ int main()
             Safir::Dob::Internal::DoseApp theApp;
             theApp.Run();
         }
-        lllerr << "Exiting..." << std::endl;
+        std::wcout << "Exiting..." << std::endl;
         return 0;
     }
     catch (const std::exception & exc)
     {
-        std::ostringstream ostr;
-        ostr << "dose_main: Caught 'std::exception' exception: "
-             << "  '" << exc.what() << "'." << std::endl;
-        lllerr << ostr.str().c_str();
-        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+        SEND_SYSTEM_LOG(Alert,
+                        << "dose_main: Caught 'std::exception' exception: "
+                        << "  '" << exc.what() << "'.");
     }
     catch (...)
     {
-        std::ostringstream ostr;
-        ostr << "dose_main: Caught '...' exception." <<std::endl;
-        lllerr << ostr.str().c_str();
-        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+        SEND_SYSTEM_LOG(Alert,
+                        << "dose_main: Caught '...' exception.");
     }
     return 1;
 }

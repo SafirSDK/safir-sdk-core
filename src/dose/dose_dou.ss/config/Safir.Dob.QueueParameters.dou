@@ -33,22 +33,6 @@
                 </members>
               </object>
             </arrayElement>
-            <arrayElement> 
-              <!--  swre_logger gets extra long message in queue so it won't miss stuff so easily-->
-              <object>
-                <name>Safir.Dob.QueueRule</name>
-                <members>
-                  <member>
-                    <name>ConnectionNameRegex</name>
-                    <value>SwreLogger</value>
-                  </member>
-                  <member>
-                    <name>MessageInQueueCapacity</name>
-                    <value>200</value>
-                  </member>
-                </members>
-              </object>
-            </arrayElement>
           </arrayElements>
         </parameter>
     </parameters>

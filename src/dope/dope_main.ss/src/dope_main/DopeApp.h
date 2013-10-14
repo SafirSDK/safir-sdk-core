@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -105,7 +105,7 @@ private:
     */
     void ConnectionThread();
     //Handler when ok to connect for applications.
-    void SignalOkToConnect();
+    void SignalOkToConnect(bool ok);
     
     boost::asio::io_service m_ioService;
     boost::thread m_thread;

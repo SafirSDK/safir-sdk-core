@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -172,7 +172,7 @@ namespace Safir.Dob
         /// Check if this Connection instance is open.
         /// </summary>
         /// <returns>True if the connection is open, otherwise false.</returns>
-        public bool IsOpen()
+        public override bool IsOpen()
         {
             byte isConn;
             byte success;

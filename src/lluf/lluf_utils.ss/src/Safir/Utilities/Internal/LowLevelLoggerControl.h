@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab Systems AB, 2012 (http://www.safirsdk.com)
+* Copyright Saab AB, 2012-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *
@@ -40,16 +40,18 @@ namespace Internal
 #pragma warning(disable: 4275)
 #pragma warning (disable: 4251)
 #endif
-
     class LLUF_UTILS_API LowLevelLoggerControl:
         private boost::noncopyable
     {
     public:
         LowLevelLoggerControl(const bool openOnly, bool readWrite);
 
-        static const boost::filesystem::path GetLogDirectory();
+        //If this returns true all other methods yield undefined results
+        bool Disabled() const;
         
         const int* GetLogLevelPointer() const;
+
+        const boost::filesystem::path LogDirectory() const;
 
         int LogLevel() const;
         void LogLevel(const int level);
@@ -66,12 +68,6 @@ namespace Internal
         bool IgnoreFlush() const;
         void IgnoreFlush(const bool enabled);
 
-        static void WriteIniFile(const int level,
-                                 const bool useTimestamps,
-                                 const bool toStdout,
-                                 const bool toFile,
-                                 const bool ignoreFlush);
-        static void RemoveIniFile();
     private:
         class Impl;
         boost::shared_ptr<Impl> m_impl;

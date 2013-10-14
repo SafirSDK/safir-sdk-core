@@ -1,6 +1,6 @@
 REM==============================================================
 REM
-REM Copyright:      Saab Systems 2007
+REM Copyright:      Saab AB 2007
 REM Author:         Jonas Thor
 REM
 REM Purpose:        Run DOPE database DDL script using BSQL.

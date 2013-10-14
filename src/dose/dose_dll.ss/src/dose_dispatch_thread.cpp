@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -29,6 +29,7 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <iostream>
 
 namespace Safir
@@ -116,22 +117,26 @@ namespace Internal
         }
         catch (const char * e)
         {
-            lllerr<<"DispatchThread for connection " << m_connectionName.c_str() <<" caught 'char *' exception: "
-                  << "  '" << e << "'." << std::endl;
+            SEND_SYSTEM_LOG(Critical, 
+                            <<"DispatchThread for connection " << m_connectionName.c_str() <<" caught 'char *' exception: "
+                            << "  '" << e << "'.");
         }
         catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase & e)
         {
-            lllerr <<"DispatchThread for connection " << m_connectionName.c_str() <<" caught 'DOTS' exception: "
-                      << "  '" << e.GetExceptionInfo() << "'." << std::endl;
+            SEND_SYSTEM_LOG(Critical,
+                            << "DispatchThread for connection " << m_connectionName.c_str() <<" caught 'DOTS' exception: "
+                            << "  '" << e.GetExceptionInfo() << "'.");
         }
         catch (const std::exception & e)
         {
-            lllerr<<"DispatchThread for connection " << m_connectionName.c_str() <<" caught 'std::exception' exception: "
-                  << "  '" << e.what() << "'." << std::endl;
+            SEND_SYSTEM_LOG(Critical,
+                            <<"DispatchThread for connection " << m_connectionName.c_str() <<" caught 'std::exception' exception: "
+                            << "  '" << e.what() << "'.");
         }
         catch (...)
         {
-            lllerr<<"DispatchThread for connection " << m_connectionName.c_str() <<" caught '...' exception!"<<std::endl;
+            SEND_SYSTEM_LOG(Critical,
+                            <<"DispatchThread for connection " << m_connectionName.c_str() <<" caught '...' exception!");
         }
 
         // Got exception. Connection is broken. Exit process.

@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --
---  Copyright Saab AB, 2009 (http://www.safirsdk.com)
+--  Copyright Saab AB, 2009-2013 (http://safir.sourceforge.net)
 --
 --  Created by: Anders Widén / stawi
 --
@@ -44,6 +44,7 @@ with Interfaces.C;
 with Ada.Strings.Wide_Fixed;
 with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 with Ada.Exceptions; use Ada.Exceptions;
+with Ada.Streams;
 with GNAT.Sockets; use GNAT.Sockets;
 with GNAT.Command_Line;
 with Text_IO; use Text_IO;

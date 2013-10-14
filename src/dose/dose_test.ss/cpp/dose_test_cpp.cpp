@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -25,13 +25,13 @@
 #include <iostream>
 #include "Executor.h"
 #include "Logger.h"
-#include <Safir/SwReports/SwReport.h>
+#include <Safir/Application/CrashReporter.h>
 
 
 
 int main(int argc, char* argv[])
 {
-    Safir::SwReports::SwReportStarter starter;
+    Safir::Application::ScopedCrashReporter crashReporter;
 
     const std::vector<std::string> arguments(&argv[0],&argv[argc]);
 

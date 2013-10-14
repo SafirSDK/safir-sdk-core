@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --
---  Copyright Saab AB, 2009 (http://www.safirsdk.com)
+--  Copyright Saab AB, 2009-2013 (http://safir.sourceforge.net)
 --
 --  Created by: Anders Widén / stawi
 --
@@ -176,7 +176,7 @@ package body Safir.Dob.Typesystem.Serialization is
       end if;
 
       declare
-         Xml_String : constant String := To_Ada (Xml_Buf, Result_Size);
+         Xml_String : constant String := To_Ada (Xml_Buf, Result_Size - 1); -- Remove null
       begin
          C_Free (Xml_Buf);
          return From_Utf_8 (Xml_String);

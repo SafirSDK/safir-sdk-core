@@ -1758,6 +1758,46 @@ Consumer 0: OnDeletedEntity:
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">Blabla</value></member></members></object>
 
 ==========================================================================
+TESTCASE 371
+Description: Test that SetAll on an instance for which there is a ghost, performed before OnInitialInjectionDone, gives a GhostExistsException
+Expectation: P0 gets a GhostExistsException
+--------- Setup -----------
+--------- Test  -----------
+Caught FundamentalException in ExecuteAction: Safir.Dob.GhostExistsException
+Consumer 0: ResetCallbackActions
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.InjectableEntity, 111)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">Blabla</value></member><member><name>MoreInfo</name></member><member><name>Int32Member</name></member><member><name>Int64Member</name></member><member><name>Float32Member</name></member><member><name>Float64Member</name></member><member><name>Ampere32Member</name></member><member><name>ArrayMember</name><arrayElements><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement></arrayElements></member><member><name>ObjectMember</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+    Int32Member
+    Int64Member
+    Float32Member
+    Float64Member
+    Ampere32Member
+    ArrayMember
+    ObjectMember
+
+Consumer 0: OnInjectedNewEntity:
+  EntityId  = (DoseTest.InjectableEntity, 222)
+  Injection = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">qwerty</value></member><member><name>MoreInfo</name></member><member><name>Int32Member</name></member><member><name>Int64Member</name></member><member><name>Float32Member</name></member><member><name>Float64Member</name></member><member><name>Ampere32Member</name></member><member><name>ArrayMember</name><arrayElements><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement><arrayElement></arrayElement></arrayElements></member><member><name>ObjectMember</name></member></members></object>
+  Changed top-level members: 
+    Info
+    MoreInfo
+    Int32Member
+    Int64Member
+    Float32Member
+    Float64Member
+    Ampere32Member
+    ArrayMember
+    ObjectMember
+
+Consumer 0: OnInitialInjectionsDone:
+  Type      = DoseTest.InjectableEntity
+  HandlerId = DEFAULT_HANDLER
+
+==========================================================================
 TESTCASE 375
 Description: Testing of injection for existing entity. Injector and handler reside on different nodes.
 Expectation: partner 0/consumer 0 receives an OnInitialInjectionsDone and an OnInjectedUpdatedEntity.

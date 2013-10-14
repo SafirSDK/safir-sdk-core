@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Anders Widén / stawi
 *
@@ -119,6 +119,8 @@ namespace Dob
          * Get the number of items currently in the queue.
          *
          * This method returns the number of items that is currently in the specified queue.
+         * NOTE: This method is only implemented for out-queues (MessageOutQueue, RequestOutQueue)
+         *       If this method is called for an in-queue, a SoftwareViolationException will be thrown.
          *
          * @param queue [in] The queue to get info for.
          * @return The current size of the queue.

@@ -10,22 +10,35 @@ build_dir        build/config                              Release
 build_dir        build/patch_check                         Release
 
 #LLUF
+build_dir        src/lluf/lluf_config.ss/src                Release          Debug
+build_dir        src/lluf/lluf_config_dump.ss/src           Release
 build_dir        src/lluf/lluf_crash_reporter.ss/src        Release
 build_dir        src/lluf/lluf_startup_synchronizer.ss/src  RelWithDebInfo
 build_dir        src/lluf/lluf_utils.ss/src                 RelWithDebInfo   Debug
 build_dir        src/lluf/lluf_logger_control.ss/src        RelWithDebInfo
+build_dir        src/lluf/lluf_crash_dump_monitor.ss/src    RelWithDebInfo
 
 #run the lluf unit tests
+run_test_suite   src/lluf/lluf_config.ss/tests                 lluf_config_tests
 run_test_suite   src/lluf/lluf_crash_reporter.ss/tests         lluf_crash_reporter_tests
+run_test_suite   src/lluf/lluf_crash_dump_monitor.ss/tests     lluf_crash_dump_monitor_tests
 run_test_suite   src/lluf/lluf_startup_synchronizer.ss/tests   lluf_startup_synchronizer_tests
 run_test_suite   src/lluf/lluf_utils.ss/tests                  lluf_tests
 
+#LOGGING
+build_dir        src/logging/logging_library.ss/src        RelWithDebInfo
+build_dir        src/logging/logging_cpp.ss/src            RelWithDebInfo   Debug
+build_dir        src/logging/logging_dotnet.ss/src         RelWithDebInfo
+build_dir        src/logging/logging_java.ss/src           RelWithDebInfo
+build_dir        src/logging/logging_ada.ss/src            RelWithDebInfo
+
+#LOGGING unit tests
+run_test_suite   src/logging/logging_test.ss               logging_tests
+ 
 
 #DOTS
 build_dir        src/dots/dots_id.ss/src                   RelWithDebInfo
 run_test_suite   src/dots/dots_id.ss/tests                 dots_id_tests
-build_dir        src/dots/dots_internal.ss/src             RelWithDebInfo   Debug
-run_test_suite   src/dots/dots_internal.ss/tests           dots_internal_tests
 build_dir        src/dots/dots_kernel.ss/src               RelWithDebInfo
 build_dir        src/dots/dots_configuration_check.ss/src  RelWithDebInfo
 build_dir        src/dots/dots_schema_validator.ss         RelWithDebInfo
@@ -73,38 +86,33 @@ build_dir        src/dose/dose_dobexplorer.ss/src          RelWithDebInfo
 
 #DOUF
 build_dir        src/douf/douf_time_library.ss/src         RelWithDebInfo
-
-#we need to build the douf_time subdirectories separately, since one of 
-#them contain a cpp dll, which must be built in two flavors.
-build_dir        src/douf/douf_time_interface.ss/cpp       RelWithDebInfo   Debug
-build_dir        src/douf/douf_time_interface.ss/dotnet    RelWithDebInfo
-build_dir        src/douf/douf_time_interface.ss/ada       RelWithDebInfo
-run_test_suite   src/douf/douf_time_interface.ss/tests     douf_time_tests
-
-#this is really just some header files (a lot of stuff for just two files...),
-#so we dont build it in release, even though it "looks" like a cpp dll.
-build_dir        src/douf/douf_utilities.ss/src            RelWithDebInfo
+build_dir        src/douf/douf_cpp.ss/src                  RelWithDebInfo   Debug
+build_dir        src/douf/douf_dotnet.ss/src               RelWithDebInfo
+build_dir        src/douf/douf_ada.ss                      RelWithDebInfo
+build_dir        src/douf/douf_java.ss/src                 RelWithDebInfo
+run_test_suite   src/douf/douf_test.ss/                    douf_tests
 
 #SWRE
 build_dir        src/swre/swre_library.ss/src              RelWithDebInfo
-build_dir        src/swre/swre_interface.ss/cpp/swre_interface_cpp         RelWithDebInfo   Debug
-build_dir        src/swre/swre_interface.ss/dotnet/swre_interface_dotnet   RelWithDebInfo
-build_dir        src/swre/swre_interface.ss/java           RelWithDebInfo
-build_dir        src/swre/swre_interface.ss/ada            RelWithDebInfo
-build_dir        src/swre/swre_logger.ss/src               RelWithDebInfo
+build_dir        src/swre/swre_cpp.ss/src                  RelWithDebInfo   Debug
+build_dir        src/swre/swre_dotnet.ss/src               RelWithDebInfo
+build_dir        src/swre/swre_java.ss/src                 RelWithDebInfo
+build_dir        src/swre/swre_ada.ss/                     RelWithDebInfo
 build_dir        src/swre/swre_backdoor.ss/src             RelWithDebInfo
 
 #FOREACH
 build_dir        src/foreach/foreach.ss/src                RelWithDebInfo
 
 #OLIB
-build_dir        src/olib/olib_code.ss/olib                RelWithDebInfo   Debug
+build_dir        src/olib/olib_code.ss/src                 RelWithDebInfo   Debug
 
 #DOPE
 build_dir        src/dope/dope_main.ss/src                 RelWithDebInfo
 
-#swre tests need dope..
+#swre tests need dope, so we can't run it until now
 run_test_suite   src/swre/swre_test.ss                     swre_test
+
+run_test_suite   src/tests/stop_orders_at_exit             stop_orders_at_exit
 
 #Run static header checks to ensure only "good" headers have been included
 run_test_suite   src/tests/header_check                    header_check

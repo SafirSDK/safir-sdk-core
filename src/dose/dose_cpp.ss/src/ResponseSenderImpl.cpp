@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -30,7 +30,7 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/PanicLogging.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/ErrorListResponse.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
@@ -57,21 +57,9 @@ namespace Internal
     {
         if (m_valid)
         {
-            lllerr << "A ResponseSender was discarded without having been used!"
-                   << " ctrl = " << m_ctrl
-                   << ", responseId = " << m_responseId << std::endl;
-
-            std::ostringstream ostr;
-            ostr << "A ResponseSender was destroyed without having been used!" << std::endl
-                 << "This is usually due to a programming error in the application:" << std::endl
-                 << "Either the application did not send a response to a request, or " << std::endl
-                 << "an exception was thrown inside a Service or Entity request callback, " << std::endl
-                 << "causing the ResponseSender to be destroyed prematurely." << std::endl
-                 << "In either case the application needs to be fixed and the system restarted"
-                 << std::endl << std::endl;
-
-            ostr << "NodeNumber = " << Safir::Dob::ThisNodeParameters::NodeNumber();
-            Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+            Safir::Utilities::Internal::SystemLog().Send
+                (Safir::Utilities::Internal::SystemLog::Critical,
+                 L"Programming Error! A ResponseSender was destroyed without having been used!");
         }
     }
 

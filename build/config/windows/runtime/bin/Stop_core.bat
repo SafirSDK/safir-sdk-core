@@ -17,7 +17,7 @@ taskkill /F /IM dope_main.exe 2>/nul
 taskkill /F /IM dose_main.exe 2>/nul
 taskkill /F /IM foreach.exe 2>/nul
 taskkill /F /IM lluf_logger_control.exe 2>/nul
-taskkill /F /IM swre_logger.exe 2>/nul
+taskkill /F /IM crash_dump_monitor.exe 2>/nul
 taskkill /F /IM sate.exe 2>/nul
 
 echo Safir SDK Core should now be terminated.

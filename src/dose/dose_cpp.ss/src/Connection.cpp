@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -127,7 +127,7 @@ namespace Dob
         }
     }
 
-    bool Connection::IsOpen()
+    bool Connection::IsOpen() const
     {
         bool isConn;
         bool success;

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(dots_internal_tests CXX)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 FIND_PACKAGE(Boost COMPONENTS filesystem system thread)
 

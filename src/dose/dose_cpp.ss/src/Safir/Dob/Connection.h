@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -107,7 +107,7 @@ namespace Dob
          *
          * @return True if the connection is open, otherwise false.
          */
-        bool IsOpen();
+        virtual bool IsOpen() const;
 
         /**
          * When the dispatch event or callback is signalled, the application MUST call

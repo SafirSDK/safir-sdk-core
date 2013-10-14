@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -24,6 +24,7 @@
 
 #include "dots_class_parser.h"
 #include <Safir/Dob/Typesystem/Internal/Id.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include "dots_blob_layout.h"
 #include "dots_basic_types.h"
 #include "dots_blob_serializer.h"
@@ -142,23 +143,28 @@ namespace Internal
 
     std::string ClassParser::ExpandEnvironmentVariables(const std::string& str)
     {
-        const size_t start=str.find("$(");
-        const size_t stop=str.find(')', start);
-
-        if (start==std::string::npos || stop==std::string::npos)
-            return str;
-
-        const std::string var=str.substr(start+2, stop-start-2);
-        const char * const env = getenv(var.c_str());
-        if (env == NULL)
+        std::string result;
+        try
         {
-            std::string desc = "Could not expand the environment variable '";
-            desc += var +"'";
-            ErrorHandler::Error("Environment variable expansion error", desc, "dots_class_parser");
+            result = Safir::Utilities::Internal::Expansion::ExpandSpecial(str);
+        }
+        catch (const std::logic_error& e)
+        {
+            ErrorHandler::Error("Special variable expansion error", e.what(), "dots_class_parser");
             exit(1);
         }
-        const std::string res=str.substr(0, start) + env + str.substr(stop+1, str.size()-stop-1);
-        return ExpandEnvironmentVariables(res); //search for next environment variable
+
+        try
+        {
+            result = Safir::Utilities::Internal::Expansion::ExpandEnvironment(result);
+        }
+        catch (const std::logic_error& e)
+        {
+            ErrorHandler::Error("Environment variable expansion error", e.what(), "dots_class_parser");
+            exit(1);
+        }
+        
+        return result;
     }
 
     void ClassParser::PushBackParameterValue()

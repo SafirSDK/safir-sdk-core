@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2009 (http://www.safirsdk.com)
+* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
 *
 * Created by: Petter Lönnstedt / stpeln
 *
@@ -29,12 +29,13 @@
 #include <Capabilities/Vehicles/Vehicle.h>
 //StopRemoveInExercise
 #include <Capabilities/Vehicles/VehicleParameters.h>
+#include <Safir/Logging/Log.h>
 #include <Safir/Dob/SuccessResponse.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/EntityIdResponse.h>
 #include <Safir/Dob/NotFoundException.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
-#include <Safir/SwReports/SwReport.h>
+
 
 
 namespace VehicleAppCpp
@@ -62,11 +63,10 @@ namespace VehicleAppCpp
         const Safir::Dob::Typesystem::HandlerId& handlerId)
     {
         // No longer registered for given type.
-       Safir::SwReports::SendErrorReport(
-           L"Unexpected revoked registration",
-           L"EntityHandler::OnRevokedRegistration",
-           L"The handler " + handlerId.ToString() +  L" is no longer registered for type " +
-           Safir::Dob::Typesystem::Operations::GetName(typeId));
+        Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                                      L"Unexpected revoked registration" +
+                                      handlerId.ToString() +  L" is no longer registered for type " +
+                                      Safir::Dob::Typesystem::Operations::GetName(typeId));
     }
 
     void EntityHandler::OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)

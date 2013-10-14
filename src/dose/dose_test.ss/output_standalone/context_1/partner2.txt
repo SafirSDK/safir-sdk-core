@@ -904,6 +904,12 @@ Consumer 0: OnInitialInjectionsDone:
   HandlerId = DEFAULT_HANDLER
 
 ==========================================================================
+TESTCASE 371
+Description: Test that SetAll on an instance for which there is a ghost, performed before OnInitialInjectionDone, gives a GhostExistsException
+Expectation: P0 gets a GhostExistsException
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
 TESTCASE 375
 Description: Testing of injection for existing entity. Injector and handler reside on different nodes.
 Expectation: partner 0/consumer 0 receives an OnInitialInjectionsDone and an OnInjectedUpdatedEntity.

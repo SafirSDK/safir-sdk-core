@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Joel Ottosson / stjoot
 *
@@ -26,6 +26,7 @@
 #include <Safir/Dob/Typesystem/Internal/Id.h>
 #include "dots_blob_layout.h"
 #include "dots_repository.h"
+#include "dots_file_collection.h"
 #include "dots_basic_types.h"
 #include "dots_xml_serializer.h"
 #include "dots_blob_serializer.h"
@@ -109,48 +110,6 @@ namespace
         static boost::mutex mtx;
         return mtx;
     }
-
-
-    boost::filesystem::path GetLogDirectory()
-    {
-        const char * ENV_NAME = "SAFIR_RUNTIME";
-        char * env = getenv(ENV_NAME);
-        if (env == NULL)
-        {
-            return "";
-        }
-        boost::filesystem::path filename(env);
-
-        filename /= "log";
-        filename /= "dump";
-
-        try
-        {
-            boost::filesystem::create_directory(filename);
-        }
-        catch (const boost::filesystem::filesystem_error &)
-        {
-            std::wcout << "Failed to create directory for binary dumps!!" <<std::endl;
-            return "";
-        }
-        return filename;
-    }
-
-    std::string MakeFileName(const std::string & filenamePart, int no)
-    {
-        const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
-        std::string filename = filenamePart + "_" + boost::posix_time::to_iso_string(now) + "-" + boost::lexical_cast<std::string>(no) + ".bin";
-        if (!boost::filesystem::portable_name(filename))
-        {
-            filename = boost::regex_replace(filename,boost::regex("[^0-9a-zA-Z\\._-]"),"_");
-            if (!boost::filesystem::portable_name(filename))
-            {
-                filename = "strange_exe_name";
-            }
-        }
-        return filename;
-    }
-
 }
 
 //********************************************************
@@ -1110,22 +1069,15 @@ void DotsC_HasProperty(const TypeId classTypeId, const TypeId propertyTypeId, bo
 //************************************************************************************
 //* Serialization
 //************************************************************************************
-/*void DotsC_BlobToXml(char* xmlDest, const char * const blobSource, const Int32& bufSize)
-  {
-    Init();
-  BlobToXmlSerializer ser;
-  strncpy(xmlDest,ser.Serialize(blobSource).c_str(), bufSize);
-  }*/
-
 void DotsC_BetterBlobToXml(char * const xmlDest, const char * const blobSource, const Int32 bufSize, Int32 & resultSize)
 {
     Init();
     BlobToXmlSerializer ser;
     std::string xml = ser.Serialize(blobSource);
-    resultSize = static_cast<Int32>(xml.length());
+    resultSize = static_cast<Int32>(xml.length()) + 1; //add one char for null termination
     if (resultSize <= bufSize)
     {
-        strncpy(xmlDest,xml.c_str(), bufSize);
+        strncpy(xmlDest, xml.c_str(), resultSize);
     }
 }
 
@@ -1137,7 +1089,7 @@ void DotsC_XmlToBlob(char * & blobDest,
 {
     Init();
     boost::call_once(createXmlToBlobLockFlag,boost::bind(getXmlToBlobLock));
-    // XmlToBlobSerializer holds data in global variabels while parsing
+    // XmlToBlobSerializer holds data in global variables while parsing
     // so we can't allow more than one thread at a time to execute.
 
     boost::lock_guard<boost::mutex> lck(getXmlToBlobLock());
@@ -1186,7 +1138,7 @@ void DotsC_GetBooleanParameter(const TypeId typeId, const ParameterIndex paramet
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=*(pd->Value<bool>(index));
+    val=pd->Value<bool>(index);
 }
 
 void DotsC_GetEnumerationParameter(const TypeId typeId,
@@ -1196,49 +1148,49 @@ void DotsC_GetEnumerationParameter(const TypeId typeId,
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=*(pd->Value<Safir::Dob::Typesystem::Internal::EnumInternal>(index));
+    val=pd->Value<Safir::Dob::Typesystem::Internal::EnumInternal>(index);
 }
 
 void DotsC_GetInt32Parameter(const TypeId typeId, const ParameterIndex parameter, const ArrayIndex index, Int32& val)
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=*(pd->Value<Int32>(index));
+    val=pd->Value<Int32>(index);
 }
 
 void DotsC_GetInt64Parameter(const TypeId typeId, const ParameterIndex parameter, const ArrayIndex index, Int64& val)
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=*(pd->Value<Int64>(index));
+    val=pd->Value<Int64>(index);
 }
 
 void DotsC_GetFloat32Parameter(const TypeId typeId, const ParameterIndex parameter, const ArrayIndex index, Float32& val)
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=*(pd->Value<Float32>(index));
+    val=pd->Value<Float32>(index);
 }
 
 void DotsC_GetFloat64Parameter(const TypeId typeId, const ParameterIndex parameter, const ArrayIndex index, Float64& val)
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=*(pd->Value<Float64>(index));
+    val=pd->Value<Float64>(index);
 }
 
 void DotsC_GetStringParameter(const TypeId typeId, const ParameterIndex parameter, const ArrayIndex index, const char* &val)
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=pd->Value<char>(index).get();
+    val=pd->ValuePtr<char>(index).get();
 }
 
 void DotsC_GetTypeIdParameter(const TypeId typeId, const ParameterIndex parameter, const ArrayIndex index, TypeId& val)
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=*(pd->Value<TypeId>(index));
+    val=pd->Value<TypeId>(index);
 }
 
 void DotsC_GetHashedIdParameter(const TypeId typeId,
@@ -1270,7 +1222,7 @@ void DotsC_GetObjectParameter(const TypeId typeId,
 {
     Init();
     const ParameterDescription * const pd = Repository::Classes().FindClass(typeId)->GetParameter(parameter);
-    val=pd->Value<char>(index).get();
+    val=pd->ValuePtr<char>(index).get();
 }
 
 void DotsC_GetBinaryParameter(const DotsC_TypeId typeId,
@@ -1990,7 +1942,7 @@ void DotsC_GetBooleanPropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=*(pd->Value<bool>(index));
+    val=pd->Value<bool>(index);
 }
 
 void DotsC_GetEnumerationPropertyParameter( const DotsC_TypeId typeId,
@@ -2015,7 +1967,7 @@ void DotsC_GetEnumerationPropertyParameter( const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=*(pd->Value<DotsC_EnumerationValue>(index));
+    val=pd->Value<DotsC_EnumerationValue>(index);
 }
 
 void DotsC_GetInt32PropertyParameter(const DotsC_TypeId typeId,
@@ -2040,7 +1992,7 @@ void DotsC_GetInt32PropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=*(pd->Value<DotsC_Int32>(index));
+    val=pd->Value<DotsC_Int32>(index);
 }
 
 void DotsC_GetInt64PropertyParameter(const DotsC_TypeId typeId,
@@ -2065,7 +2017,7 @@ void DotsC_GetInt64PropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=*(pd->Value<DotsC_Int64>(index));
+    val=pd->Value<DotsC_Int64>(index);
 }
 
 void DotsC_GetFloat32PropertyParameter(const DotsC_TypeId typeId,
@@ -2090,7 +2042,7 @@ void DotsC_GetFloat32PropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=*(pd->Value<DotsC_Float32>(index));
+    val=pd->Value<DotsC_Float32>(index);
 }
 
 void DotsC_GetFloat64PropertyParameter(const DotsC_TypeId typeId,
@@ -2115,7 +2067,7 @@ void DotsC_GetFloat64PropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=*(pd->Value<DotsC_Float64>(index));
+    val=pd->Value<DotsC_Float64>(index);
 }
 
 void DotsC_GetStringPropertyParameter(const DotsC_TypeId typeId,
@@ -2140,7 +2092,7 @@ void DotsC_GetStringPropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=pd->Value<char>(index).get();
+    val=pd->ValuePtr<char>(index).get();
 }
 
 void DotsC_GetTypeIdPropertyParameter(const DotsC_TypeId typeId,
@@ -2165,7 +2117,7 @@ void DotsC_GetTypeIdPropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=*(pd->Value<DotsC_TypeId>(index));
+    val=pd->Value<DotsC_TypeId>(index);
 }
 
 void DotsC_GetHashedIdPropertyParameter(const DotsC_TypeId typeId,
@@ -2243,7 +2195,7 @@ void DotsC_GetObjectPropertyParameter(const DotsC_TypeId typeId,
         return;
     }
     const ParameterDescription * const pd=mm->GetParameter();
-    val=pd->Value<char>(index).get();
+    val=pd->ValuePtr<char>(index).get();
 }
 
 void DotsC_GetBinaryPropertyParameter(const DotsC_TypeId typeId,
@@ -2312,40 +2264,34 @@ void DotsC_PeekAtException(DotsC_TypeId & exceptionId)
 }
 
 
-
-void DotsC_BinaryDump(const char * const blob,
-                      const char * const filenamePart)
+void DotsC_GetDouFilePathForType(const DotsC_TypeId typeId,
+                                 char * const buf, 
+                                 const Int32 bufSize, 
+                                 Int32 & resultSize)
 {
     Init();
-    try
-    {
-        //create a new file
-        static boost::filesystem::path path = GetLogDirectory();
 
-        boost::filesystem::path filename;
-        for (int i = 0;;++i)
-        {
-            filename = path / MakeFileName(filenamePart, i);
-            if (!boost::filesystem::exists(filename))
-            {
-                break;
-            }
-        }
+    const char* const name =  DotsC_GetTypeName(typeId);
+    if (name == NULL)
+    {
+        resultSize = -1;
+        return;
+    }
+    const std::string douName = std::string(name) + DOU_FILE_EXTENSION;
 
-        //write blob to file
-        DotsC_Int32 blobSize = DotsC_GetSize(blob);
-        boost::filesystem::ofstream output;
-        output.open (filename, std::ios::binary);
-        output.write(blob, blobSize);
-    }
-    catch(const std::exception & exc)
+    const FileCollection files;
+    FileLocations::const_iterator douFindIt = files.DouFiles().find(douName);
+    if (douFindIt == files.DouFiles().end())
     {
-        lllout << "Caught exception in DotsC_BinaryDump on "<< filenamePart << ": " << exc.what() <<std::endl;
-        std::wcout << "Caught exception in DotsC_BinaryDump on "<< filenamePart << ": " << exc.what() <<std::endl;
+        resultSize = -1;
+        return;
     }
-    catch(...)
+
+    const std::string path = douFindIt->second.string();
+
+    resultSize = static_cast<Int32>(path.length()) + 1; //add one for null termination
+    if (resultSize <= bufSize)
     {
-        lllout << "Caught ... exception in DotsC_BinaryDump on "<< filenamePart << ": " <<std::endl;
-        std::wcout << "Caught ... exception in DotsC_BinaryDump on "<< filenamePart << ": " <<std::endl;
+        strncpy(buf, path.c_str(), resultSize);
     }
 }

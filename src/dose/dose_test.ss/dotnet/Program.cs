@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Henrik Sundberg / sthesu
 *
@@ -28,7 +28,7 @@ namespace dose_test_dotnet
     {
         static int Main(string[] args)
         {
-            Safir.SwReports.SwReport.EnableCrashReporting();
+            Safir.Application.CrashReporter.Start();
 
             System.Console.WriteLine("Starting");
             try
@@ -43,7 +43,7 @@ namespace dose_test_dotnet
             }
             finally
             {
-                Safir.SwReports.SwReport.Stop();
+                Safir.Application.CrashReporter.Stop();
             }
 
             System.Console.WriteLine("Exiting");

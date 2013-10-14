@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -25,6 +25,7 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/CrashReporter.h>
 #include <iostream>
 
@@ -39,14 +40,15 @@ namespace Internal
 {
     void EnsureFailed (const std::wstring & str)
     {
-        lllerr << "ENSURE failed: '"<< str << "'" << std::endl;
-        std::wcout << "Please contact your nearest DOB developer!" << std::endl;
+        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Critical,
+                                                     L"ENSURE failed: " + str);
 
         const bool success = Safir::Utilities::CrashReporter::Dump();
         
         if (!success)
         {
-            lllerr << "ENSURE failed to generate a dump! It looks like CrashReporter is not started." << std::endl;
+            Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Critical,
+                                                         L"ENSURE failed to generate a dump! It looks like CrashReporter is not started.");
         }
 
         throw SoftwareViolationException(str, __WFILE__,__LINE__);

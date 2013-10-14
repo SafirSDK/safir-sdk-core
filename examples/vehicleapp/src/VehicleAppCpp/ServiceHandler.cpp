@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2009 (http://www.safirsdk.com)
+* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
 *
 * Created by: Petter Lönnstedt / stpeln
 *
@@ -28,10 +28,10 @@
 #include <Capabilities/CalculateSpeedDifferenceResponse.h>
 //StopRemoveInExercise
 #include <Capabilities/SpeedObjectProperty.h>
+#include <Safir/Logging/Log.h>
 #include <Safir/Dob/ErrorListResponse.h>
 #include <Safir/Dob/ResponseErrorInfo.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
-#include <Safir/SwReports/SwReport.h>
 
 namespace VehicleAppCpp
 {
@@ -58,10 +58,10 @@ namespace VehicleAppCpp
         const Safir::Dob::Typesystem::HandlerId& handlerId)
     {
         // No longer registered for given type.
-       Safir::SwReports::SendErrorReport(
-           L"Unexpected revoked registration", L"ServiceHandler::OnRevokedRegistration",
-           L"The handler " + handlerId.ToString() +  L" is no longer registered for type " +
-           Safir::Dob::Typesystem::Operations::GetName(typeId));
+        Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                                      L"Unexpected revoked registration" +
+                                      handlerId.ToString() +  L" is no longer registered for type " +
+                                      Safir::Dob::Typesystem::Operations::GetName(typeId));
     }
 
     void ServiceHandler::OnServiceRequest(

@@ -1,7 +1,7 @@
 .SILENT:
 .PHONY: all clean
 
-DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wildcard images/*.png) Makefile
+DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wildcard images/*.png) Makefile block-diagram.png
 
 default: safir_sdk_core_sug.pdf
 
@@ -14,6 +14,15 @@ help:
 
 all: archives #will build other stuff due to deps
 
+vpath %.dia images
+%.png: %.dia
+	dia --export=$@ -t png-libart $<
+
+#not used, but useful when we make dia images into eps for the pdf
+#%.eps: %.dia
+#	dia --export=$@ -t eps $<
+
+
 archives: safir_sdk_core_sug.pdf.zip \
 	 safir_sdk_core_sug.pdf.bz2 \
 	 safir_sdk_core_sug.single_html.zip \
@@ -23,7 +32,7 @@ archives: safir_sdk_core_sug.pdf.zip \
 
 safir_sdk_core_sug.pdf: $(DEPS)
 	echo "Building pdf"
-	a2x -L -f pdf -d book --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" safir_sdk_core_sug.txt
+	a2x -L -f pdf -d book --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" --dblatex-opts "-P latex.output.revhistory=0" safir_sdk_core_sug.txt 
 
 safir_sdk_core_sug.pdf.zip: safir_sdk_core_sug.pdf
 	zip safir_sdk_core_sug.pdf.zip safir_sdk_core_sug.pdf
@@ -36,6 +45,7 @@ safir_sdk_core_sug.chunked/index.html: $(DEPS)
 	a2x -L -f chunked -d book safir_sdk_core_sug.txt
 	-mkdir -p safir_sdk_core_sug.chunked/images
 	-cp -f images/*.png safir_sdk_core_sug.chunked/images/
+	-cp -f *.png safir_sdk_core_sug.chunked/
 
 safir_sdk_core_sug.chunked_html.zip: safir_sdk_core_sug.chunked/index.html
 	zip -r safir_sdk_core_sug.chunked_html.zip safir_sdk_core_sug.chunked
@@ -50,10 +60,10 @@ safir_sdk_core_sug.html: $(DEPS)
 
 safir_sdk_core_sug.single_html.zip: safir_sdk_core_sug.html 
 	zip safir_sdk_core_sug.single_html.zip safir_sdk_core_sug.html
-	find images -name "*.png" -print | zip safir_sdk_core_sug.single_html.zip -@
+	find . -name "*.png" -print | zip safir_sdk_core_sug.single_html.zip -@
 
 safir_sdk_core_sug.single_html.tar.bz2: safir_sdk_core_sug.html 
-	tar cfvj safir_sdk_core_sug.single_html.tar.bz2 safir_sdk_core_sug.html images/*.png
+	tar cfvj safir_sdk_core_sug.single_html.tar.bz2 safir_sdk_core_sug.html images/*.png *.png
 
 clean:
-	rm -rf *~ *.pdf *.html *.xml *.fo safir_sdk_core_sug.chunked *.zip *.bz2
+	rm -rf *~ *.pdf *.html *.xml *.fo safir_sdk_core_sug.chunked *.zip *.bz2 *.png

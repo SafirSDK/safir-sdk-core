@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -35,7 +35,6 @@
     #endif
 #elif defined __GNUC__
     #define LLUF_UTILS_API
-    #define __cdecl
 #endif
 
 #endif

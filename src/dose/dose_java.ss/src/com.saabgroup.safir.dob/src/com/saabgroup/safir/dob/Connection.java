@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -199,8 +199,9 @@ public final class Connection extends ConnectionBase
             }
             catch (Exception exc)
             {
-                System.out.println("Connection.finalize: Caught exception: " + exc);
-                System.out.println("Will return as if nothing happened!");
+                com.saabgroup.safir.Logging.sendSystemLog
+                    (com.saabgroup.safir.Logging.Severity.CRITICAL,
+                     "Connection.finalize: Caught exception: " + exc);
             }
             Interface.Destructor(getControllerId());
         }

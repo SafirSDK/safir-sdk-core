@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -1170,5 +1170,12 @@ namespace Safir.Dob.Typesystem.Internal
         //DotsC_PeekAtException
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DotsC_PeekAtException(out System.Int64 exceptionId);
+
+        //DotsC_GetDouFilePathForType
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DotsC_GetDouFilePathForType(System.Int64 typeId,
+                                                                System.IntPtr buf,
+                                                                System.Int32 bufSize,
+                                                                out System.Int32 resultSize);
     }
 }

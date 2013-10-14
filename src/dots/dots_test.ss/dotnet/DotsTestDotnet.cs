@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 *
 * Created by: Henrik Sundberg / sthesu
 *
@@ -37,7 +37,7 @@ class DotsTestDotnet
     {
         try
         {
-            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.OutputEncoding = new System.Text.UTF8Encoding(false);
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
             Test_Has_Property();
@@ -103,6 +103,7 @@ class DotsTestDotnet
             Test_IsProperty();
             Test_IsEnumeration();
             Test_IsException();
+            Test_GetDouFilePath();
         }
         finally
         {
@@ -7690,5 +7691,35 @@ class DotsTestDotnet
             Console.WriteLine("Caught native exception");
         }
     }
+
+    private static void FileCheck(string path, string expectedName)
+    {
+        if (!path.EndsWith(expectedName))
+        {
+            Console.WriteLine("Failed to find {0}", expectedName);
+        }
+        
+        if (!System.IO.File.Exists(path))
+        {
+            Console.WriteLine("Dou file does not exist: {0}", path);
+        }
+    }
+
+
+    private static void Test_GetDouFilePath()
+    {
+        FileCheck(Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath
+                  (DotsTest.MemberTypes.ClassTypeId),
+                  "DotsTest.MemberTypes.dou");
+        
+        FileCheck(Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath
+                  (DotsTest.TestException.ExceptionTypeId),
+                  "DotsTest.TestException.dou");
+        
+        FileCheck(Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath
+                  (DotsTest.MemberTypesProperty.ClassTypeId),
+                  "DotsTest.MemberTypesProperty.dou");
+    }
+
 
 }

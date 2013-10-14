@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(lluf_crash_reporter_test CXX)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 FIND_PACKAGE(Boost COMPONENTS thread date_time system)
 
@@ -17,7 +17,7 @@ ENDIF()
 
 
 ADD_TEST(CrashReporter_start_stop start_stop)
-
+SET_SAFIR_TEST_PROPERTIES(CrashReporter_start_stop)
 
 ADD_SUBDIRECTORY(simple_crash_test)
 ADD_SUBDIRECTORY(external_signals_test)

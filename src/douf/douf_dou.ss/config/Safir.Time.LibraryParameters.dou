@@ -5,24 +5,25 @@
     <baseClass>Safir.Dob.Parametrization</baseClass>
     <parameters>
       <parameter>
-        <summary>The name of the library that is the time provider in the system.</summary>
+        <summary>The name of the library that is the time provider in the system.
+                 If this parameter is empty the returned values will be based on boost date_time library.</summary>
         <name>LibraryName</name>
         <type>String</type>
-        <value>TihaDll.dll</value>
+        <value></value>
       </parameter>
       <parameter>
         <summary>The name of the function that returns current UTC time. The named function has to return a
                  double representing seconds and fraction since jan 1 1970 00:00</summary>
         <name>UtcTimeFunctionName</name>
         <type>String</type>
-        <value>Tiha_GetUtcTime</value>
+        <value>GetUtcTime</value>
       </parameter>
       <parameter>
         <summary>The name of the function that returns local time offset. The named function has to return an
                  int representing number of seconds relative to GMT</summary>
         <name>LocalTimeOffsetFunctionName</name>
         <type>String</type>
-        <value>Tiha_GetLocalTimeOffset</value>
+        <value>GetLocalTimeOffset</value>
       </parameter>
     </parameters>
   </class>

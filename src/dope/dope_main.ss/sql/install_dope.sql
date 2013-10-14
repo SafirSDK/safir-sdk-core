@@ -1,6 +1,6 @@
 --==============================================================
 --
--- Copyright:      Saab Systems 2007
+-- Copyright:      Saab AB 2007
 -- Author:         Jonas Thor
 --
 -- Purpose:        Mimer SQL DOPE database DDL script.

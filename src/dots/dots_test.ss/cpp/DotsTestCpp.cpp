@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -42,8 +42,9 @@
 #include <Safir/Dob/Typesystem/Parameters.h>
 #include <Safir/Dob/Typesystem/Members.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
+#include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <boost/algorithm/string/predicate.hpp>
-
+#include <boost/filesystem/operations.hpp>
 
 std::wstring utf8_to_wstr( const std::string& str )
 {
@@ -8573,6 +8574,33 @@ void Test_IsException()
         }   
 }
 
+void FileCheck(const std::wstring& path, const std::wstring& expectedName)
+{
+    if (!boost::ends_with
+        (path,
+         expectedName))
+    {
+        std::wcout << "Failed to find " << expectedName << std::endl;
+    }
+
+    if (!boost::filesystem::exists(path))
+    {
+        std::wcout << "Dou file does not exist: " << path << std::endl;
+    }
+}
+void Test_GetDouFilePath()
+{
+    using namespace Safir::Dob::Typesystem::Internal;
+    FileCheck(GetDouFilePath(DotsTest::MemberTypes::ClassTypeId),
+              L"DotsTest.MemberTypes.dou");
+
+    FileCheck(GetDouFilePath(DotsTest::TestException::ExceptionTypeId),
+              L"DotsTest.TestException.dou");
+
+    FileCheck(GetDouFilePath(DotsTest::MemberTypesProperty::ClassTypeId),
+              L"DotsTest.MemberTypesProperty.dou");
+}
+
 int main(int /*argc*/, char* /*argv*/[])
 {
     std::wcout << std::boolalpha;
@@ -8650,7 +8678,7 @@ int main(int /*argc*/, char* /*argv*/[])
         Test_IsProperty();
         Test_IsEnumeration();
         Test_IsException();
-
+        Test_GetDouFilePath();
     }
     catch (const Safir::Dob::Typesystem::FundamentalException & e)
     {

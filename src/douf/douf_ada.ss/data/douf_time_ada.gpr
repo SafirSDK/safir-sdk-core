@@ -1,0 +1,19 @@
+with "externally_built_library";
+with "dots_generated_ada";
+with "douf_time_library";
+
+project Douf_Time_Ada is
+
+    for Source_Dirs use (External ("SAFIR_SDK") & "/ada/douf_time_ada/interface");
+
+    for Library_Dir use Externally_Built_Library'Library_Dir;
+
+    for Library_Name use "douf_time_ada";
+ 
+    for Library_ALI_Dir use External ("SAFIR_SDK") & "/ada/douf_time_ada/ali";
+
+    for Library_Kind use "dynamic";
+
+    for Externally_Built use "true";
+    
+end Douf_Time_Ada;

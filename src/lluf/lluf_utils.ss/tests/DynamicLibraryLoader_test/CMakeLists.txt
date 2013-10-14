@@ -14,4 +14,4 @@ IF (NOT MSVC)
 ENDIF()
 
 ADD_TEST(DynamicLibraryLoader ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
-set_tests_properties(DynamicLibraryLoader PROPERTIES TIMEOUT 40)
+SET_SAFIR_TEST_PROPERTIES(DynamicLibraryLoader 40)

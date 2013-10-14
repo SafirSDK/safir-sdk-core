@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -28,10 +28,11 @@
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/ProcessInfo.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <boost/interprocess/sync/upgradable_lock.hpp>
 #include <boost/interprocess/sync/sharable_lock.hpp>
 #include <boost/interprocess/detail/move.hpp>
-
+#include <boost/lexical_cast.hpp>
 #include "Signals.h"
 
 #include <vector>
@@ -471,8 +472,10 @@ namespace Internal
             const ConnectionPtr conn = GetConnection(*it,std::nothrow);
             if (conn == NULL)
             {
-                lllerr << "Looks like a connection disappeared while we were handling connection out events. "
-                       << "Ignoring disappeared connection with id " << *it << std::endl;
+                SEND_SYSTEM_LOG(Critical,
+                                << "Looks like a connection disappeared while we were handling connection out events. "
+                                << "Ignoring disappeared connection with id "
+                                << boost::lexical_cast<std::wstring>(*it));
                 continue;
             }
             handler(conn);

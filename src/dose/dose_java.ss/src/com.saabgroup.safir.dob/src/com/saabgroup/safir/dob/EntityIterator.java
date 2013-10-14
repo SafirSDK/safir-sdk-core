@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2009 (http://www.safirsdk.com)
+* Copyright Saab AB, 2009-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -155,23 +155,17 @@ public class EntityIterator
         try {
             if (!m_disposed) {
                 dispose();
-                System.out.println("An EntityIterator was not disposed correctly when the finalizer was called.\n" +
-                                   "Make sure you call dispose() on the iterator when you are done with it!\n" +
-                                   "(See the comments on ConnectionBase#getEntityIterator(...) for an example\n" +
-                                   "of how to do that correctly!\n" +
-                                   "The program will now exit!");
-
-                PanicLogging.log("An EntityIterator was not disposed correctly when the finalizer was called.\n" +
-                                 "Make sure you call dispose() on the iterator when you are done with it!\n" +
-                                 "(See the comments on ConnectionBase#getEntityIterator(...) for an example\n" +
-                                 "of how to do that correctly!\n" +
-                                 "The program will now exit!");
-                System.exit(10);
+                
+                com.saabgroup.safir.Logging.sendSystemLog
+                    (com.saabgroup.safir.Logging.Severity.CRITICAL,
+                     "Programming Error! An EntityIterator was not disposed correctly when the finalizer was called!" + 
+                     "See the ConnectionBase#getEntityIterator(...).");
             }
         }
         catch (Exception exc) {
-            System.out.println("EntityIterator.finalize: Caught exception: " + exc);
-            System.out.println("Will return as if nothing happened!");
+            com.saabgroup.safir.Logging.sendSystemLog
+                (com.saabgroup.safir.Logging.Severity.CRITICAL,
+                 "EntityIterator.finalize: Caught exception: " + exc);
         }
         finally {
             super.finalize();

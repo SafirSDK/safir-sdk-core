@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2012 (http://www.safirsdk.com)
+* Copyright Saab AB, 2012-2013 (http://safir.sourceforge.net)
 *
 * Created by: Anders Widén / aiwi
 *
@@ -30,7 +30,7 @@
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/PanicLogging.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 
 #if defined _MSC_VER
   #pragma warning (push)
@@ -103,14 +103,12 @@ namespace Internal
                         {
                             if (m_loggingIsEnabled)
                             {
-                                std::ostringstream ostr;
-                                ostr << "Have tried " << lockTimeout.total_seconds() <<
-                                    " seconds to get an exclusive lock (type lock or registration container) "
-                                    "for type " << Safir::Dob::Typesystem::Utilities::ToUtf8(Typesystem::Operations::GetName(*it)) <<
-                                    " in context " << context << ". Probably an application has "
-                                    "terminated in an improper way leaving a locked lock behind!" << std::endl;
-                                lllerr << ostr.str().c_str();
-                                Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+                                SEND_SYSTEM_LOG(Alert,
+                                                << "Have tried " << lockTimeout.total_seconds()
+                                                << " seconds to get an exclusive lock (type lock or registration container) "
+                                                << "for type " << Typesystem::Operations::GetName(*it)
+                                                << " in context " << context << ". Probably an application has "
+                                                << "terminated in an improper way leaving a locked lock behind!");
                             }
                             serviceLocksOk = false;
                         }                    
@@ -128,14 +126,12 @@ namespace Internal
                         {
                             if (m_loggingIsEnabled)
                             {
-                                std::ostringstream ostr;
-                                ostr << "Have tried " << lockTimeout.total_seconds() <<
-                                    " seconds to get an exclusive lock (type lock, registration container lock or entity container lock) "
-                                    "for type " << Safir::Dob::Typesystem::Utilities::ToUtf8(Typesystem::Operations::GetName(*it)) <<
-                                    " in context " << context << ". Probably an application has "
-                                    "terminated in an improper way leaving a locked lock behind!" << std::endl;
-                                lllerr << ostr.str().c_str();
-                                Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+                                SEND_SYSTEM_LOG(Alert,
+                                                << "Have tried " << lockTimeout.total_seconds()
+                                                << " seconds to get an exclusive lock (type lock, registration container lock or entity container lock) "
+                                                << "for type " << Typesystem::Operations::GetName(*it)
+                                                << " in context " << context << ". Probably an application has "
+                                                << "terminated in an improper way leaving a locked lock behind!");
                             }
                             entityLocksOk = false;
                         }
@@ -144,14 +140,12 @@ namespace Internal
 
                 if (!serviceLocksOk || !entityLocksOk)
                 {
-                    std::ostringstream ostr;
-                    ostr << "Seems one or more shared memory locks are abandoned in a locked state!!" << '\n';
                     if (Safir::Dob::NodeParameters::TerminateDoseMainWhenUnrecoverableError())
                     {
-                        ostr << "Parameter TerminateDoseMainWhenUnrecoverableError is set to true"
-                            " which means that dose_main will now be terminated!!" << std::endl;
-                        lllerr << ostr.str().c_str();
-                        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+                        SEND_SYSTEM_LOG(Alert,
+                                        << "One or more shared memory locks are abandoned in a locked state!! " 
+                                        << "Parameter TerminateDoseMainWhenUnrecoverableError is set to true"
+                                        << " so dose_main will now be terminated!!");
 
                         boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(5));
 
@@ -159,10 +153,10 @@ namespace Internal
                     }
                     else if (m_loggingIsEnabled)
                     {
-                        ostr << "Parameter TerminateDoseMainWhenUnrecoverableError is set to false"
-                            " which means that dose_main will not be terminated!!" << std::endl;
-                        lllerr << ostr.str().c_str();
-                        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+                        SEND_SYSTEM_LOG(Alert,
+                                        << "One or more shared memory locks are abandoned in a locked state!! " 
+                                        << "Parameter TerminateDoseMainWhenUnrecoverableError is set to false"
+                                        << " so dose_main will not be terminated!!");
                         m_loggingIsEnabled = false;
                     } 
                 }

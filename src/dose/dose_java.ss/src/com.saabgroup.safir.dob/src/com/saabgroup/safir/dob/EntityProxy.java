@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -463,25 +463,16 @@ public class EntityProxy {
 
                 dispose();
 
-                System.out.println("An EntityProxy was not disposed correctly when the finalizer was called.\n" +
-                                   "Make sure you call dispose() on the proxy when you are done with it!\n" +
-                                   "(Use a try/finally clause, or you may get into trouble!)\n" +
-                                   "Entity being processed was " + eid + "\n" +
-                                   "The program will now exit!");
-
-                PanicLogging.log("An EntityProxy was not disposed correctly when the finalizer was called.\n" +
-                                 "Make sure you call dispose() on the proxy when you are done with it!\n" +
-                                 "(Use a try/finally clause, or you may get into trouble!)\n" +
-                                 "Entity being processed was " + eid + "\n" +
-                                 "The program will now exit!");
-
-                System.exit(123);
+                com.saabgroup.safir.Logging.sendSystemLog
+                    (com.saabgroup.safir.Logging.Severity.CRITICAL,
+                     "Programming Error! An EntityProxy was not disposed correctly when the finalizer was called.");
             }
         }
         catch (Exception exc)
         {
-            System.out.println("EntityProxy.finalize: Caught exception: " + exc);
-            System.out.println("Will return as if nothing happened!");
+            com.saabgroup.safir.Logging.sendSystemLog
+                (com.saabgroup.safir.Logging.Severity.CRITICAL,
+                 "EntityProxy.finalize: Caught exception: " + exc);
         }
         finally
         {

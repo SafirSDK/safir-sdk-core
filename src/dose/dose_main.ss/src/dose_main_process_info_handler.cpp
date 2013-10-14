@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -37,6 +37,7 @@
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/ProcessInfo.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 
 namespace Safir
 {
@@ -156,8 +157,9 @@ namespace Internal
         }
         catch (const Safir::Dob::AccessDeniedException &)
         {
-            lllerr << "ProcessInfoHandler::ConnectionAdded: Was unable to set ProcessInfo entity " << eid << std::endl;
-            lllerr << "Has anyone overregistered Safir::Dob::ProcessInfo?!?!" << std::endl;
+            SEND_SYSTEM_LOG(Error,
+                            << "Unable to set ProcessInfo entity " << eid 
+                            << ". Has anyone overregistered Safir::Dob::ProcessInfo?");
         }
     }
 
@@ -179,8 +181,9 @@ namespace Internal
         }
         catch (const Safir::Dob::AccessDeniedException &)
         {
-            lllerr << "ProcessInfoHandler::ConnectionAdded: Was unable to set ProcessInfo entity " << eid << std::endl;
-            lllerr << "Has anyone overregistered Safir::Dob::ProcessInfo?!?!" << std::endl;
+            SEND_SYSTEM_LOG(Error,
+                            << "Unable to set ProcessInfo entity " << eid
+                            << "Has anyone overregistered Safir::Dob::ProcessInfo?");
         }
     }
 
@@ -236,8 +239,9 @@ namespace Internal
     void ProcessInfoHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    /*typeId*/,
                                                    const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
     {
-        lllerr << "Someone overregistered Safir::Dob::ProcessInfo, so I'm not "
-            << "going to be able to update this entity any longer!" << std::endl;
+        SEND_SYSTEM_LOG(Critical,
+                        << "Someone overregistered Safir::Dob::ProcessInfo, so I'm not "
+                        << "going to be able to update this entity any longer!");
     }
 
     void ProcessInfoHandler::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,

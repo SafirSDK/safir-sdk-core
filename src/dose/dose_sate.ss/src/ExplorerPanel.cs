@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Joel Ottosson / stjoot
 *
@@ -1514,25 +1514,9 @@ namespace Sate
         private void viewDouFileMenuItem_Click(object sender, EventArgs e)
         {
             DobUnit node = (DobUnit)GetSelectedNode();
-            string fileName = Safir.Dob.Typesystem.Operations.GetName(node.TypeId) + ".dou";
-            string path1 = Environment.GetEnvironmentVariable(@"SAFIR_RUNTIME") + @"/data/text/dots/classes/";
-            string path2 = Environment.GetEnvironmentVariable(@"SAFIR_USER") + @"/runtime/data/text/dots/classes/";
+            string fileName = Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath(node.TypeId);
 
-            String[] files = System.IO.Directory.GetFiles(path1, fileName, System.IO.SearchOption.AllDirectories);
-
-            if (files.Length == 0)
-            {
-                files = System.IO.Directory.GetFiles(path2, fileName, System.IO.SearchOption.AllDirectories);
-            }
-
-
-            if (files.Length == 0)
-            {
-                MessageBox.Show("The dou-file could not be found, '" + fileName + "'", "File not found", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            using (System.IO.TextReader reader = new System.IO.StreamReader(files[0]))
+            using (System.IO.TextReader reader = new System.IO.StreamReader(fileName))
             {
                 string content = reader.ReadToEnd();
                 reader.Close();

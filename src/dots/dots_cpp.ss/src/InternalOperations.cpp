@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -87,6 +87,29 @@ namespace Internal
         return DotsId_GenerateRandom64();
     }
 
+
+    std::wstring GetDouFilePath(const Dob::Typesystem::TypeId typeId)
+    {
+        int BUF_SIZE = 512;
+        std::vector<char> buf(BUF_SIZE);
+        Int32 resultSize;
+        DotsC_GetDouFilePathForType(typeId, &buf[0], BUF_SIZE, resultSize);
+        if (resultSize == -1)
+        {
+            throw IllegalValueException(L"There is no such type defined", __WFILE__,__LINE__);
+        }
+        if (resultSize> BUF_SIZE)
+        {
+            BUF_SIZE = resultSize;
+            buf.resize(BUF_SIZE);
+            DotsC_GetDouFilePathForType(typeId, &buf[0], BUF_SIZE, resultSize);
+            if (resultSize != BUF_SIZE)
+            {
+                throw SoftwareViolationException(L"Error in GetDouFilePathForType",__WFILE__,__LINE__);
+            }
+        }
+        return Utilities::ToWstring(std::string(buf.begin(),buf.begin() + resultSize - 1)); //remove null char
+    }
 }
 }
 }

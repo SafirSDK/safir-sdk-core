@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -36,7 +36,7 @@
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/PanicLogging.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/CrashReporter.h>
 #include <boost/bind.hpp>
 #include <iostream>
@@ -73,13 +73,12 @@ namespace Internal
 
         void DumpFunc(const char* const dumpPath)
         {
-            std::ostringstream ostr;
-            ostr << "dose_main has generated a dump to:\n" 
-                 << dumpPath << "\n"
-                 << "Please send this file to your nearest Dob developer, along with\n"
-                 << "relevant information about what version of Safir SDK you are using" << std::endl;
-            lllerr << ostr.str().c_str();
-            Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+            std::wostringstream ostr;
+            SEND_SYSTEM_LOG(Alert, 
+                            << "dose_main has generated a dump to:\n" 
+                            << dumpPath << "\n"
+                            << "Please send this file to your nearest Dob developer, along with\n"
+                            << "relevant information about what version of Safir SDK you are using");
         }
     }
 
@@ -129,7 +128,7 @@ namespace Internal
 
         // Start monitoring of this thread (that is, the main thread)
         m_mainThreadId = boost::this_thread::get_id();
-        m_threadMonitor.StartWatchdog(m_mainThreadId, "dose_main main thread");
+        m_threadMonitor.StartWatchdog(m_mainThreadId, L"dose_main main thread");
 
         // Schedule a timer so that the main thread will kick the watchdog.
         TimerInfoPtr timerInfo(new EmptyTimerInfo(TimerHandler::Instance().RegisterTimeoutHandler(L"dose_main watchdog timer", *this)));
@@ -139,9 +138,9 @@ namespace Internal
 
         // enter main loop
 #ifndef NDEBUG
-        lllerr<<"dose_main running (debug)..." << std::endl;
+        std::wcout<<"dose_main running (debug)..." << std::endl;
 #else
-        lllerr<<"dose_main running (release)..." << std::endl;
+        std::wcout<<"dose_main running (release)..." << std::endl;
 #endif
 
         //we want the io service to keep running for ever.
@@ -296,20 +295,22 @@ namespace Internal
         {
         case TooManyProcesses:
             {
-                lllerr << "Could not let new connection '" << connectionName.c_str()
-                    << "' from process with pid = " << pid <<
-                    " connect since there are too many processes connected." << std::endl
-                    << "Please increase the parameter Safir.Dob.ProcessInfo.MaxNumberOfInstances." << std::endl;
+                SEND_SYSTEM_LOG(Critical, 
+                                << "Could not let new connection '" << connectionName.c_str()
+                                << "' from process with pid = " << pid
+                                << " connect since there are too many processes connected. "
+                                << "Increase Safir.Dob.ProcessInfo.MaxNumberOfInstances.");
                 return TooManyProcesses;
             }
             break;
 
         case TooManyConnectionsInProcess:
             {
-                lllerr << "Could not let new connection from process with pid = " << pid <<
-                    " connect since there are too many connections '" << connectionName.c_str()
-                    << "'from that process." << std::endl
-                    << "Please increase the size of the ConnectionNames array of class Safir.Dob.ProcessInfo." << std::endl;
+                SEND_SYSTEM_LOG(Critical,
+                                << "Could not let new connection '" << connectionName.c_str()
+                                << "' from process with pid = " << pid
+                                << " connect since there are too many connections from that process. "
+                                << "Increase length of Safir.Dob.ProcessInfo.ConnectionNames.");
                 return TooManyConnectionsInProcess;
             }
             break;
@@ -608,8 +609,8 @@ namespace Internal
 
         default: //Corrupted message
             {
-                lllerr << "ERROR: Received corrupt data from DoseCom (Type = " << data.GetType() << ")" <<std::endl;
-                lllerr << "Please contact your nearest DOB developer!" << std::endl;
+                SEND_SYSTEM_LOG(Alert,
+                                << "ERROR: Received corrupt data from DoseCom (Type = " << data.GetType() << ")");
             }
             break;
         }
@@ -671,26 +672,22 @@ namespace Internal
                     const double percentFree = static_cast<double>(free)/static_cast<double>(m_capacity) * 100;
                     if (percentFree < m_warningPercent)
                     {
-                        std::wostringstream ostr;
-                        ostr << "Less than " << m_warningPercent << "% of the Dob shared memory is available!" << std::endl
-                             << "This probably means that you're close to running out of memory!" << std::endl
-                             << "Please increase the parameter Safir.Dob.NodeParameters.SharedMemorySize.";
-                        Safir::Utilities::Internal::PanicLogging::Log(Safir::Dob::Typesystem::Utilities::ToUtf8(ostr.str()));
-                        lllerr << ostr.str() << std::endl;
+                        SEND_SYSTEM_LOG(Alert,
+                                        << "Less than " << m_warningPercent << "% of the Dob shared memory is available!"
+                                        << "This probably means that you're close to running out of memory!"
+                                        << "Increase Safir.Dob.NodeParameters.SharedMemorySize.");
                     }
                 }
                 catch (const std::exception& exc)
                 {
-                    std::ostringstream ostr;
-                    ostr << "Got exception in dose_main MemoryMonitor: " << std::endl
-                        << exc.what();
-                    Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+                    SEND_SYSTEM_LOG(Alert,
+                                    << "Got exception in dose_main MemoryMonitor: "
+                                    << exc.what());
                 }
                 catch (...)
                 {
-                    std::wostringstream ostr;
-                    ostr << "Got ... exception in dose_main MemoryMonitor!";
-                    Safir::Utilities::Internal::PanicLogging::Log(Safir::Dob::Typesystem::Utilities::ToUtf8(ostr.str()));
+                    SEND_SYSTEM_LOG(Alert,
+                                    << "Got ... exception in dose_main MemoryMonitor!");
                 }
             }
             catch(...)

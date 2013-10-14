@@ -1,4 +1,5 @@
 with "safir_defaults";
+with "logging_ada";
 with "dots_id";
 with "dots_kernel";
 
@@ -36,8 +37,7 @@ project Dots_Ada_Library is
                               "Safir.Dob.Typesystem.Utilities",
                               "Safir.Dob.Typesystem.Value_Container",
                               "Safir.Dob.Typesystem",
-                              "Safir.Dob",
-                              "Safir");
+                              "Safir.Dob");
    
    package Builder is
       for Default_Switches ("Ada") use Safir_Defaults.Builder'Default_Switches ("Ada");

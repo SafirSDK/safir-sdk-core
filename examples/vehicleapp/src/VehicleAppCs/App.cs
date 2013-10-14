@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2009 (http://www.safirsdk.com)
+* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
 *
 * Created by: Petter Lönnstedt / stpeln
 *
@@ -110,9 +110,8 @@ namespace VehicleAppCs
             catch (Exception e)
             {
                 String msg = e.Message + " " + e.InnerException + " " + e.StackTrace;
-                Safir.SwReports.SwReport.SendFatalErrorReport(
-                    "Unhandled Exception", "Main", msg);
-                Console.WriteLine(msg);
+                Safir.Logging.SendSystemLog(Safir.Logging.Severity.Critical,
+                                            "Unhandled Exception in Main: " + msg);
             }
         }
 
@@ -121,7 +120,7 @@ namespace VehicleAppCs
         /// </summary>
         public void Startup()
         {
-            Safir.SwReports.SwReport.EnableCrashReporting();
+            Safir.Application.CrashReporter.Start();
             try
             {
                 // Open the Dob connection.
@@ -136,7 +135,7 @@ namespace VehicleAppCs
             }
             finally
             {
-                Safir.SwReports.SwReport.Stop();
+                Safir.Application.CrashReporter.Stop();
             }
         }
 
@@ -164,9 +163,8 @@ namespace VehicleAppCs
             catch (Exception e)
             {
                 String msg = e.Message + " " + e.InnerException + " " + e.StackTrace;
-                Safir.SwReports.SwReport.SendFatalErrorReport(
-                    "Unhandled Exception", "OnDoDispatch", msg);
-                Console.WriteLine(msg);
+                Safir.Logging.SendSystemLog(Safir.Logging.Severity.Critical,
+                                            "Unhandled Exception in OnDoDispatch: " + msg);
             }
         }
     }

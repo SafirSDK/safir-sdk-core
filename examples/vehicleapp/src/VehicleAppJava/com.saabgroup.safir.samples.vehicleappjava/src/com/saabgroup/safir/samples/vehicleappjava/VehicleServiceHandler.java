@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2011 (http://www.safirsdk.com)
+* Copyright Saab AB, 2011-2013 (http://safir.sourceforge.net)
 *
 *******************************************************************************
 *
@@ -29,7 +29,7 @@ import com.saabgroup.safir.dob.ResponseSender;
 import com.saabgroup.safir.dob.SecondaryConnection;
 import com.saabgroup.safir.dob.ServiceRequestProxy;
 import com.saabgroup.safir.dob.typesystem.HandlerId;
-import com.saabgroup.safir.swreports.SwReport;
+import com.saabgroup.safir.Logging;
 
 /**
  * Defines a service. This class handles the registration
@@ -66,11 +66,11 @@ public class VehicleServiceHandler implements com.saabgroup.safir.dob.ServiceHan
     @Override
     public void onRevokedRegistration(long typeId, HandlerId handlerId) {
         // No longer registered for given type.
-        SwReport.SendErrorReport(
-            "Unexpected revoked registration",
-            "ServiceHandler.OnRevokedRegistration",
-            "The handler " + handlerId.toString() + " is no longer registered for type " +
-            com.saabgroup.safir.dob.typesystem.Operations.getName(typeId));
+        com.saabgroup.safir.Logging.sendSystemLog
+            (com.saabgroup.safir.Logging.Severity.CRITICAL,
+             "Unexpected revoked registration " +
+             handlerId.toString() + " is no longer registered for type " +
+             com.saabgroup.safir.dob.typesystem.Operations.getName(typeId));
     }
 
     @Override

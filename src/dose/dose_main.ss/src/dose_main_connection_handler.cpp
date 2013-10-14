@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -34,6 +34,7 @@
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Internal/NodeStatuses.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 
 
 namespace Safir
@@ -179,7 +180,8 @@ namespace Internal
         const ConnectionPtr connection = Connections::Instance().GetConnection(id, std::nothrow);
         if (connection == NULL)
         {
-            lllerr << "Got a Disconnect from dosecom for a connection that I dont have! id = " << id << std::endl;
+            SEND_SYSTEM_LOG(Error,
+                            << "Got a Disconnect from dosecom for a connection that I dont have! id = " << id);
             return;
         }
 

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -32,14 +32,14 @@
 #include <Safir/Dob/SuccessResponse.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
-#include <Safir/SwReports/SwReport.h>
+#include <Safir/Logging/Log.h>
 #include <Safir/Dob/ConnectionAspectInjector.h>
 #include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/NotOpenException.h>
 
 //Dope uses context 0 to connect to the dob. The strange looking negative number
 //is a way to indicate that this is a connection with special privileges.
-const Safir::Dob::Typesystem::Int32 PERSISTANCE_CONTEXT = -1000000;
+const Safir::Dob::Typesystem::Int32 PERSISTENCE_CONTEXT = -1000000;
 
 //-------------------------------------------------------
 PersistenceHandler::PersistenceHandler(boost::asio::io_service& ioService):
@@ -83,15 +83,14 @@ void PersistenceHandler::Start(bool restore)
     //m_dobConnection.Attach();
     try
     {
-        m_dobConnection.Open(L"DOPE_SUBSCRIBE", L"0", PERSISTANCE_CONTEXT, NULL, &m_dispatcher);
+        m_dobConnection.Open(L"DOPE_SUBSCRIBE", L"0", PERSISTENCE_CONTEXT, NULL, &m_dispatcher);
         m_debug << "Opened DOB connection DOPE_SUBSCRIBE"<<std::endl;
     }
     catch (Safir::Dob::NotOpenException e)
     {
-        Safir::SwReports::SendFatalErrorReport
-            (L"Failed to connect to DOB.",L"PersistenceHandler::Start",
-            L"Maybe DOPE is already started on this node.");
-        exit(1);
+        Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                                      L"PersistenceHandler failed to connect to Dob, Maybe Dope is already running?");
+        throw StartupError();
     }
 
     if (restore)
@@ -176,7 +175,7 @@ PersistenceHandler::ShouldPersist(const Safir::Dob::Typesystem::TypeId typeId)
     }
     catch (const Safir::Dob::Typesystem::NullException &)
     {
-        throw Safir::Dob::Typesystem::SoftwareViolationException(std::wstring(L"Failed to get persistance status for object ") +
+        throw Safir::Dob::Typesystem::SoftwareViolationException(std::wstring(L"Failed to get persistence status for object ") +
                                                                    Safir::Dob::Typesystem::Operations::GetName(typeId),
                                                                  __WFILE__,__LINE__);
     }
@@ -277,14 +276,9 @@ PersistenceHandler::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 
     if (!responseProxy.IsSuccess())
     {
-        std::wostringstream ostr;
-        ostr << "Did not get a SuccessResponse to the PersistentDataReady request to DOSE!" << std::endl
-            << "Response as xml: " << std::endl
-            << Safir::Dob::Typesystem::Serialization::ToXml(responseProxy.GetBlob());
-        Safir::SwReports::SendErrorReport
-            (L"Request error",
-            L"PersistenceHandler::OnResponse",
-            ostr.str());
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                      L"Did not get a SuccessResponse to the PersistentDataReady request to Dose. Response: "
+                                      + Safir::Dob::Typesystem::Serialization::ToXml(responseProxy.GetBlob()));
     }
 }
 

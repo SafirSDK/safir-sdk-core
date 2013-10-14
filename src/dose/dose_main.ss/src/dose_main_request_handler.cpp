@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -46,6 +46,7 @@
 #include <Safir/Dob/NotFoundException.h>
 #include <Safir/Dob/SuccessResponse.h>
 #include <boost/bind.hpp>
+#include <Safir/Utilities/Internal/SystemLog.h>
 
 namespace Safir
 {
@@ -335,8 +336,9 @@ namespace Internal
         }
         else
         {
-            lllerr << "RequestHandler::HandleRequest: Got a request that was neither sent to or from this node!" <<std::endl
-                   << "This does not really cause any problems, but it is unexpected, so please tell your nearest DOB developer." << std::endl;
+            SEND_SYSTEM_LOG(Error,
+                            << "RequestHandler::HandleRequest: Got a request that was neither sent to or from this node!");
+            // "This does not really cause any problems, but it is unexpected,
             return true; //Always OK, request not for us.
         }
     }

@@ -10,5 +10,4 @@ endif()
 ENABLE_TESTING()
 ADD_TEST(Signals signals_test)
 
-set_tests_properties(Signals PROPERTIES TIMEOUT 60)
-
+SET_SAFIR_TEST_PROPERTIES(Signals 180)

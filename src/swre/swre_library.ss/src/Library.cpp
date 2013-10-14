@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -36,22 +36,21 @@
 #pragma warning(pop)
 #endif
 
-#include "Dispatcher.h"
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
+#include <Safir/Logging/Log.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/PanicLogging.h>
 #include <Safir/Utilities/ProcessInfo.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <boost/bind.hpp>
 #include <Safir/Utilities/CrashReporter.h>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <iomanip>
 #include <iostream>
-#include <signal.h>
 
 //TODO get rid of these!
 #ifdef GetMessage
@@ -64,6 +63,9 @@ namespace SwReports
 {
 namespace Internal
 {
+    using Safir::Dob::Typesystem::Utilities::ToUtf8;
+    using Safir::Dob::Typesystem::Utilities::ToWstring;
+
     static const wchar_t* pingCmd = L"ping";
     static const wchar_t* helpCmd = L"help";
 
@@ -73,99 +75,12 @@ namespace Internal
 
     const boost::char_separator<wchar_t> separator(L" ");
 
-    void Library::AtExitFunc()
-    {
-        // To late to call Stop() here. We must do that before getting here.
-        
-        if (Instance().m_thread.get_id() != boost::thread::id())
-        {
-            lllerr << "Swre logger thread was still running when this program exited!" << std::endl
-                   << "Please make sure that Safir::SwReports::Stop is called before exiting your application!" << std::endl
-                   << "If you killed your program in a non-standard way you may still be getting this warning, " << std::endl
-                   << "even if you're calling Stop correctly in your normal stop-code." << std::endl;
-        }
-
-        {
-            boost::lock_guard<boost::mutex> lck(Instance().m_reportQueueLock);
-            if (!Instance().m_reportQueue.empty())
-            {
-                lllerr << "It appears that you've sent one or more error reports after stopping the Swre logger thread:" << std::endl;
-                for (std::deque<ReportPtr>::iterator it = Instance().m_reportQueue.begin();
-                     it != Instance().m_reportQueue.end(); ++it)
-                {
-                    lllerr << "----- Error report --------------------------------" << std::endl
-                           << Safir::Dob::Typesystem::Serialization::ToXml(*it)
-                           << std::endl
-                           << "----------------------------------------------------" << std::endl;
-                }
-                Instance().m_reportQueue.clear();
-            }
-        }
-
-        {
-            boost::lock_guard<boost::mutex> lock(Instance().m_traceBufferLock);
-            if (!Instance().m_traceBuffer.empty())
-            {
-                lllerr << "It appears that you've done some trace logging after stopping the Swre logger thread:" << std::endl;
-                lllerr << Instance().m_traceBuffer << std::endl;
-                Instance().m_traceBuffer.clear();
-            }
-        }
-    }
-
-    void Library::SignalFunc(const int signal)
-    {
-        std::wcerr << "swre_library caught a signal! signal = " << signal << ". Will try to clean up and call exit" << std::endl;
-
-        // Stop the thread nicely
-        Instance().Stop();
-        // Then try to exit and cleanup
-        Instance().AtExitFunc();
-        // Return that something was wrong
-        _exit(200);
-    }
-
-    void Library::HandleExit()
-    {
-        SendReports();
-
-        {
-            boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
-            if (!m_traceBuffer.empty())
-            {
-                std::wcout << m_traceBuffer << std::flush;
-                try
-                {
-                    //remove trailing newlines from report
-                    const std::wstring::iterator lastChar = m_traceBuffer.end() - 1;
-                    if (*lastChar == '\n')
-                    {
-                        m_traceBuffer.erase(lastChar);
-                    }
-
-                    const ReportPtr report = m_reportCreator.CreateProgramInfoReport(m_traceBuffer);
-                    m_connection->Send(report, Safir::Dob::Typesystem::ChannelId(), this);
-                }
-                catch (const Safir::Dob::OverflowException &)
-                {
-                    std::wcout << "Damn, there was an overflow when sending the trace message." << std::endl
-                               << "There is no way that it can be sent to the Dob now, so I'll just exit..."<< std::endl;
-                }
-                m_traceBuffer.clear();
-            }
-        }
-    }
-
     boost::once_flag Library::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
     boost::scoped_ptr<Library> Library::SingletonHelper::m_instance;
 
     void Library::SingletonHelper::Instantiate()
     {
         m_instance.reset(new Library());
-
-        //Install cannot be done in constructor, since then the singleton will be destroyed 
-        //before the atexit handler is called.
-        m_instance->Install();
     }
 
     Library & Library::Instance()
@@ -176,19 +91,20 @@ namespace Internal
 
 
     Library::Library():
-        m_isBackdoorStarted(false),
-        m_prefixPending(true),
-        m_thread(),
-        m_sendReportsPending(0),
-        m_flushPending(0),
-        m_crashed(0)
+          m_arguments(),
+          m_prefixes(),
+          m_prefixSearchLock(),
+          m_backdoorConnection(),
+          m_traceBufferLock(),
+          m_prefixPending(true),
+          m_windowsNativeLogging(false)
     {
         std::wstring env;
         {
             char * cenv = getenv("FORCE_LOG");
             if (cenv != NULL)
             {
-                env = Safir::Dob::Typesystem::Utilities::ToWstring(cenv);
+                env = ToWstring(cenv);
             }
         }
         try
@@ -214,9 +130,19 @@ namespace Internal
         }
         catch (const std::exception & exc)
         {
-            std::wcout << "Error while parsing FORCE_LOG environment variable '" <<
-                env << "'.\nException description is '"<< exc.what() << "'.\nContinuing as if it was not set" << std::endl;
+            std::wostringstream ostr;
+            ostr << "Failed to parse FORCE_LOG env (" << env << "): "<< exc.what();
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          ostr.str());
         }
+
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+
+        Safir::Utilities::Internal::ConfigReader configReader;
+
+        m_windowsNativeLogging = configReader.Logging().get<bool>("SystemLog.native_logging");
+#endif
+
     }
 
     Library::~Library() 
@@ -224,49 +150,35 @@ namespace Internal
 
     }
 
- 
-    void Library::Install()
+    void
+    Library::StartTraceBackdoor(const std::wstring& connectionNameCommonPart,
+                                const std::wstring& connectionNameInstancePart)
     {
-#if defined (_WIN32)
-        ::signal(SIGABRT, &SignalFunc);  //TODO: we should make breakpad handle SIGABRT on windows
-        ::signal(SIGBREAK, &SignalFunc);
-        ::signal(SIGINT, &SignalFunc);
-        ::signal(SIGTERM, &SignalFunc);
-#else
-        struct sigaction sa;
-        sa.sa_handler = &SignalFunc;
-        sigemptyset(&sa.sa_mask);
-        sa.sa_flags = SA_RESTART;
-        ::sigaction(SIGQUIT, &sa, NULL);
-        ::sigaction(SIGINT, &sa, NULL);
-        ::sigaction(SIGTERM, &sa, NULL);
-#endif
-        //TODO: when crash reporter is not enabled we will not try to stop thread on 
-        //crashes!
+        m_backdoorConnection.Attach(connectionNameCommonPart,
+                                    connectionNameInstancePart);
 
-        //TODO: This whole class should be refactored into several smaller ones
-        //with separate duties. This class is getting very messy!
-        //Also make the startup and shutdown easier to understand.
-        //Can we avoid using atexit?!
-
-        std::atexit(AtExitFunc);
+        m_backdoorConnection.SubscribeMessage(Safir::Application::BackdoorCommand::ClassTypeId,
+                                              Safir::Dob::Typesystem::ChannelId(),
+                                              this);
     }
-
 
     void
-    Library::SetProgramName(const std::wstring & programName)
+    Library::StopTraceBackdoor()
     {
-        m_programName = programName.substr(programName.find_last_of(L"/\\")+1);
-    }
+        if (!m_backdoorConnection.IsOpen())
+        {
+            // Connection has been closed.
+            return; // *** RETURN ***
+        }
 
+        m_backdoorConnection.UnsubscribeMessage(Safir::Application::BackdoorCommand::ClassTypeId,
+                                                Safir::Dob::Typesystem::ChannelId(),
+                                                this);
+    }
 
     Library::PrefixId
     Library::AddPrefix(const std::wstring & prefix)
     {
-        // Always start own thread so its connection is the one that will be used to
-        // establish the backdoor subscription.
-
-        StartThread();
         boost::lock_guard<boost::recursive_mutex> lck(m_prefixSearchLock);
         Prefixes::iterator findIt = std::find(m_prefixes.begin(), m_prefixes.end(), prefix);
         if (findIt != m_prefixes.end())
@@ -303,167 +215,123 @@ namespace Internal
         ToPrefix(prefixId).m_isEnabled = enabled;
     }
 
-
+    // Private method that assumes the buffer lock is already taken.
     void
-    Library::Trace(const PrefixId prefixId,
-                   const wchar_t ch,
-                   const bool dontLock)
+    Library::TraceInternal(const PrefixId prefixId,
+                           const wchar_t ch)
     {
-        StartThread();
-        boost::unique_lock<boost::mutex> lock(m_traceBufferLock, boost::defer_lock);
-        if (!dontLock)
-        {
-            lock.lock();
-        }
-        //if the buffer has grown too big we just discard the tracing.
-        //if this occurs the truncation message will be put last in the
-        //report before it is sent.
-        if (m_traceBuffer.size() > static_cast<size_t>(Safir::SwReports::Internal::Report::TextMaxStringLength()))
-        {
-            return;
-        }
-
         if (m_prefixPending)
         {
-            m_traceBuffer.append(ToPrefix(prefixId).m_prefix);
-            m_traceBuffer.append(L": ");
+            //no syslog when using windows native logging
+            if (!m_windowsNativeLogging)
+            {
+                m_traceSyslogBuffer.append(ToPrefix(prefixId).m_prefix);
+                m_traceSyslogBuffer.append(L": ");
+            }
+
+            m_traceStdoutBuffer.append(ToPrefix(prefixId).m_prefixAscii);
+            m_traceStdoutBuffer.append(L": ");
             m_prefixPending = false;
         }
+
+        //since we dont know the locale of wcout we strip off all non-ascii chars
+        if ((ch & ~0x7F) == 0)
+        {
+            m_traceStdoutBuffer.push_back(ch);
+        }
+        else
+        {
+            m_traceStdoutBuffer.push_back('@');
+        }
+        
+        //no syslog when using windows native logging
+        if (!m_windowsNativeLogging)
+        {
+            //Syslogs are flushed on newlines instead of flushes
+            if (ch == '\n')
+            {
+                Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                              m_traceSyslogBuffer);
+                m_traceSyslogBuffer.clear();
+            }
+            else
+            {
+                m_traceSyslogBuffer.push_back(ch);
+            }
+        }
+
         if (ch == '\n')
         {
             m_prefixPending = true;
         }
-        m_traceBuffer.push_back(ch);
-    }
-
-    void
-    Library::TraceString(const PrefixId prefixId,
-                         const std::wstring & str)
-    {
-        boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
-        std::for_each(str.begin(), str.end(), boost::bind(&Library::Trace,this,prefixId,_1,true));
-    }
-
-    void
-    Library::TraceSync()
-    {
-        if (m_flushPending == 0)
-        {
-            m_flushPending = 1;
-            //the functor will keep a reference to this shared_ptr, so we dont need to...
-            boost::shared_ptr<boost::asio::deadline_timer> syncTimer
-                (new boost::asio::deadline_timer(m_ioService,boost::posix_time::milliseconds(500)));
-            syncTimer->async_wait(boost::bind(&Library::HandleTimeout,this,_1,syncTimer));
-        }
-    }
-
-    void
-    Library::HandleTimeout(const boost::system::error_code& error, 
-                           const boost::shared_ptr<boost::asio::deadline_timer>&)
-    {
-        if (error)
-        {
-            lllerr << "Got an error from boost asio timer!\n" << error << std::endl;
-        }
-        
-        TraceFlush();
     }
 
     void
     Library::TraceFlush()
     {
-        if (boost::this_thread::get_id() == m_threadId)
-        {   
-            //ok, we're in the correct thread. flush the data!
-            m_flushPending = 0;
+        boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
 
-            std::wstring traceBuffer;
-            {
-                boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
-                std::swap(m_traceBuffer,traceBuffer);
-            }
-
-            if (traceBuffer.empty())
-            {
-                return;
-            }
-
-            // If the buffer is too big to fit in one report
-            // we truncate it and put in a truncation message.
-            if (traceBuffer.size() > static_cast<size_t>(Safir::SwReports::Internal::Report::TextMaxStringLength()))
-            {
-                const std::wstring TRUNCATION_WARNING =
-                    L"\nTHE TRACE BUFFER WAS TRUNCATED BECAUSE IT HAS GROWN TOO BIG! \n"
-                    L"IT IS ONLY POSSIBLE TO LOG 60K CHARACTERS PER 0.5 SECONDS\n";
-
-                //remove end of string
-                traceBuffer.erase(Safir::SwReports::Internal::Report::TextMaxStringLength() - TRUNCATION_WARNING.size());
-                traceBuffer.append(TRUNCATION_WARNING);
-            }
-
-            std::wcout << traceBuffer << std::flush;
-
-            //remove trailing newlines from report
-            const std::wstring::iterator lastChar = traceBuffer.end() - 1;
-            if (*lastChar == '\n')
-            {
-                traceBuffer.erase(lastChar);
-            }
-            
-            ReportPtr report = m_reportCreator.CreateProgramInfoReport(traceBuffer);
-
-            try
-            {
-                m_connection->Send(report, Safir::Dob::Typesystem::ChannelId(), this);
-            }
-            catch (const Safir::Dob::OverflowException &)
-            {
-                //do nothing
-            }
-        }
-        else
+        if (!m_traceStdoutBuffer.empty())
         {
-            if (m_thread.get_id() != boost::thread::id())
-            {
-                if (m_flushPending == 0)
-                {
-                    m_flushPending = 1;
-                    m_ioService.post(boost::bind(&Library::TraceFlush,this));
-                }
-            }
+            std::wcout << m_traceStdoutBuffer << std::flush;
+            m_traceStdoutBuffer.clear();
         }
     }
 
-
-    inline void
-    Library::StartThread()
+    void
+    Library::TraceChar(const PrefixId prefixId,
+                       char ch)
     {
-        if (m_thread.get_id() == boost::thread::id())
+        if ((ch & ~0x7F) != 0)
         {
-            boost::lock_guard<boost::mutex> lock(m_threadStartingLock);
-            if (m_thread.get_id() == boost::thread::id())
-            {
-                m_thread = boost::thread(boost::bind(&Library::Run,this));
-                m_threadId = m_thread.get_id();
-            }
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"TraceChar got non ascii character");
+            ch = '#';
         }
+        TraceWChar(prefixId,ch);
+    }
+
+    void
+    Library::TraceWChar(const PrefixId prefixId,
+                        const wchar_t ch)
+    {
+        boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
+        TraceInternal(prefixId, ch);
+    }
+
+    void
+    Library::TraceString(const PrefixId prefixId,
+                         const char* str)
+    {
+        TraceString(prefixId, ToWstring(str));
+    }
+
+    void
+    Library::TraceString(const PrefixId prefixId,
+                         const char* str,
+                         const size_t offset,
+                         const size_t length)
+    {
+        TraceString(prefixId, ToWstring(std::string(str + offset, str + offset + length)));
+    }
+
+    void
+    Library::TraceString(const PrefixId prefixId,
+                         const std::wstring& str)
+    {
+        boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
+        std::for_each(str.begin(), str.end(), boost::bind(&Library::TraceInternal,this,prefixId,_1));
     }
 
 
     void Library::CrashFunc(const char* const dumpPath)
     {
-        Instance().m_crashed = 1;
-        std::ostringstream ostr;
+        std::wostringstream ostr;
         ostr << "An application has crashed! A dump was generated to:\n" 
              << dumpPath;
         std::wcerr << ostr.str().c_str() << std::endl;
-        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
-
-        // Stop the thread nicely
-        Instance().StopInternal();
-
-        // Then try to exit and cleanup
-        Instance().AtExitFunc();
+        Safir::Logging::SendSystemLog(Safir::Logging::Alert,
+                                      ostr.str());
     }
 
     void
@@ -474,102 +342,9 @@ namespace Internal
     }
 
     void
-    Library::StopInternal()
+    Library::StopCrashReporting()
     {
-        //We only let one call to Stop try to do the join. otherwise who knows what will happen...
-        if (m_thread.get_id() != boost::thread::id())
-        {
-            boost::lock_guard<boost::mutex> lock(m_threadStartingLock);
-            if (m_thread.get_id() != boost::thread::id())
-            {
-                m_ioService.stop();
-                m_thread.join();
-                m_thread = boost::thread();
-                m_threadId = boost::thread::id();
-            }
-        }
-    }
-
-    void
-    Library::Stop()
-    {
-        StopInternal();
-
-        //CrashReporter gets stopped in thread, but if the thread was not running
-        //we need to stop it here too.
-
         Safir::Utilities::CrashReporter::Stop();
-    }
-
-    //The swre library thread uses context 0 to connect to the dob. The strange looking negative number
-    //is a way to indicate that this is a connection with special privileges.
-    const Safir::Dob::Typesystem::Int32 SWRE_LIBRARY_THREAD_CONTEXT = -1000000;
-
-    void
-    Library::Run()
-    {
-        try
-        {
-            m_connection.reset(new Safir::Dob::Connection());
-            Dispatcher dispatcher(*m_connection,m_ioService);
-
-            std::wstring connName = m_programName;
-            if (connName.empty())
-            {
-                Safir::Utilities::ProcessInfo proc(Safir::Utilities::ProcessInfo::GetPid());
-                connName = Safir::Dob::Typesystem::Utilities::ToWstring(proc.GetProcessName());
-            }
-            m_connection->Open(connName,
-                               boost::lexical_cast<std::wstring>(Safir::Utilities::ProcessInfo::GetPid()),
-                               SWRE_LIBRARY_THREAD_CONTEXT,
-                               NULL, 
-                               &dispatcher);
-
-            StartBackdoor();
-            boost::asio::io_service::work keepRunning(m_ioService);
-            m_ioService.run();
-            HandleExit();
-            m_connection->Close();
-            m_connection.reset();
-        }
-        catch (const std::exception & exc)
-        {
-            std::wcout << "SwreLibrary caught an unexpected exception!" <<std::endl
-                       << "Please report this error to the Safir System Kernel team!" <<std::endl
-                       << exc.what() <<std::endl;
-        }
-        catch (...)
-        {
-            std::wcout << "SwreLibrary caught an unexpected ... exception!" <<std::endl
-                       << "Please report this error to the Safir System Kernel team!" <<std::endl;
-        }
-        if (m_crashed != 0)
-        {
-            Safir::Utilities::CrashReporter::Stop();
-        }
-    }
-
-
-    void
-    Library::StartBackdoor()
-    {
-        if (m_isBackdoorStarted)
-        {
-            return;
-        }
-
-        // The backdoor subscription should always be done from the own thread connection. If we
-        // were to use a connection controlled by the application the backdoor subscription would
-        // be lost if that connection is closed. This has always been true but is even more accentuated
-        // now when an application may close its connection and then open it in a different context.
-
-        m_backdoorConnection.Attach();
-
-        using namespace Safir::Dob::Typesystem;
-        m_backdoorConnection.SubscribeMessage(Safir::Application::BackdoorCommand::ClassTypeId,
-                                              Safir::Dob::Typesystem::ChannelId(),
-                                              this);
-        m_isBackdoorStarted = true;
     }
 
     void
@@ -598,8 +373,7 @@ namespace Internal
                 Safir::Dob::SecondaryConnection conn;
                 conn.Attach();
                 Safir::Dob::ConnectionAspectMisc connectionAspectMisc(conn);
-                if (!boost::regex_search(connectionAspectMisc.GetConnectionName(), boost::wregex(cmd->ConnectionName().GetVal(), regExpFlags)) &&
-                    !boost::regex_search(m_programName, boost::wregex(cmd->ConnectionName().GetVal(), regExpFlags)))
+                if (!boost::regex_search(connectionAspectMisc.GetConnectionName(), boost::wregex(cmd->ConnectionName().GetVal(), regExpFlags)))
                 {
                     // Connection name doesn't match
                     return;  // *** RETURN ***
@@ -628,36 +402,22 @@ namespace Internal
                 if (cmdTokens[0] == pingCmd)
                 {
                     // It's a 'ping' command.
-                    std::wcout << "Ping reply" << std::endl;
-                    Safir::Dob::SecondaryConnection conn;
-                    conn.Attach();
-                    try
-                    {
-                        conn.Send(m_reportCreator.CreateProgramInfoReport(L"Tracer Ping reply"), Safir::Dob::Typesystem::ChannelId(), this);
-                    }
-                    catch (const Safir::Dob::OverflowException & )
-                    {
-                        //do nothing
-                    }
+
+                    std::wcout << L"Tracer Ping reply" << std::endl;
+
+                    Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                                  L"Tracer Ping reply");
 
                     return; // *** RETURN ***
                 }
                 else if (cmdTokens[0] == helpCmd)
                 {
                     std::wstring help = GetHelpText();
-                    //TODO: should this be sent to the other outputs too?
-                    std::wcout << help<<std::endl;
-                    Safir::Dob::SecondaryConnection conn;
-                    conn.Attach();
-                    try
-                    {
-                        conn.Send(m_reportCreator.CreateProgramInfoReport(help), Safir::Dob::Typesystem::ChannelId(), this);
-                    }
-                    catch (const Safir::Dob::OverflowException & )
-                    {
-                        //do nothing
-                    }
 
+                    std::wcout << help << std::endl;
+
+                    Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                                  help);
                     return; // *** RETURN ***
                 }
             }
@@ -672,9 +432,6 @@ namespace Internal
             return;  // *** RETURN ***
         }
     }
-
-    //TODO: where is the backdoor started?!?!?!?!
-    //I've just forgotten, need to check so we dont start the thread too early!
 
     void
     Library::HandleCommand(const std::vector<std::wstring>& cmdTokens)
@@ -706,7 +463,7 @@ namespace Internal
                 }
             }
         }
-        TraceSync();
+        TraceFlush();
     }
 
     std::wstring
@@ -739,107 +496,49 @@ namespace Internal
         return reinterpret_cast<PrefixId>(&prefix);
     }
 
-
-    bool
-    Library::TrySend(ReportPtr report)
+    Library::PrefixState::PrefixState(const std::wstring & prefix, const bool enabled)
+        : m_prefix(prefix)
+        , m_prefixAscii(prefix)
+        , m_isEnabled(enabled) 
     {
-        Safir::Dob::SecondaryConnection conn;
-        try
+        //replace non-ascii chars
+        for(std::wstring::iterator it = m_prefixAscii.begin();
+            it != m_prefixAscii.end(); ++it)
         {
-            conn.Attach();
-
-            Safir::Dob::ConnectionAspectMisc connAspectMisc(conn);            
-            if (connAspectMisc.GetContext() != 0)
+            if ((*it & ~0x7F) != 0)
             {
-                // Reports must be sent from context 0
-                return false;
-            }
-        }
-        catch (const Safir::Dob::NotOpenException &)
-        {
-            return false;
-        }
-
-        try
-        {
-            //should be ok to use the m_tryMessageSender from multiple threads at the 
-            //same time, since nothing is modified, and the calback is empty.
-            conn.Send(report, Safir::Dob::Typesystem::ChannelId(), &m_tryMessageSender);
-        }
-        catch (const Safir::Dob::OverflowException &)
-        {
-            return false;
-        }
-        return true;
-    }
-
-    void
-    Library::SendFatalErrorReport(const std::wstring & errorCode,
-                                  const std::wstring & location,
-                                  const std::wstring & text)
-    {
-        ReportPtr report = m_reportCreator.CreateFatalErrorReport(errorCode,location,text);
-        if (!TrySend(report))
-        {
-            StartThread();
-
-            {
-                boost::lock_guard<boost::mutex> lck(m_reportQueueLock);
-                m_reportQueue.push_back(report);
-            }
-
-            if (m_sendReportsPending == 0)
-            {
-                m_sendReportsPending = 1;
-                m_ioService.post(boost::bind(&Library::SendReports,this));
+                *it = '@';
             }
         }
     }
 
     void
-    Library::SendErrorReport(const std::wstring & errorCode,
-                             const std::wstring & location,
-                             const std::wstring & text)
+    Library::SendFatalErrorReport(const std::wstring& errorCode,
+                                  const std::wstring& location,
+                                  const std::wstring& text)
     {
-        ReportPtr report = m_reportCreator.CreateErrorReport(errorCode,location,text);
-        if (!TrySend(report))
-        {
-            StartThread();
-
-            {
-                boost::lock_guard<boost::mutex> lck(m_reportQueueLock);
-                m_reportQueue.push_back(report);
-            }
-
-            if (m_sendReportsPending == 0)
-            {
-                m_sendReportsPending = 1;
-                m_ioService.post(boost::bind(&Library::SendReports,this));
-            }
-        }
+        Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                         L"FatalError " + errorCode + L"|" + location + L"|" + text);
     }
 
     void
-    Library::SendResourceReport(const std::wstring & resourceId,
-                                const bool allocated,
-                                const std::wstring & text)
+    Library::SendErrorReport(const std::wstring& errorCode,
+                             const std::wstring& location,
+                             const std::wstring& text)
     {
-        ReportPtr report = m_reportCreator.CreateResourceReport(resourceId,allocated,text);
-        if (!TrySend(report))
-        {
-            StartThread();
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                      L"Error " + errorCode + L"|" + location + L"|" + text);
+    }
 
-            {
-                boost::lock_guard<boost::mutex> lck(m_reportQueueLock);
-                m_reportQueue.push_back(report);
-            }
-
-            if (m_sendReportsPending == 0)
-            {
-                m_sendReportsPending = 1;
-                m_ioService.post(boost::bind(&Library::SendReports,this));
-            }
-        }
+    void
+    Library::SendResourceReport(const std::wstring& resourceId,
+                                const bool          allocated,
+                                const std::wstring& text)
+    {
+        Safir::Logging::SendSystemLog(allocated ? Safir::Logging::Informational : Safir::Logging::Error,
+                                      L"Resource " + resourceId + L" is " 
+                                      + ((allocated) ? L"" : L"not ") 
+                                      + L"allocated" + L"|" + text);
     }
 
     void
@@ -847,68 +546,15 @@ namespace Internal
                                         const std::wstring & location,
                                         const std::wstring & text)
     {
-        ReportPtr report = m_reportCreator.CreateProgrammingErrorReport(errorCode,location,text);
-        if (!TrySend(report))
-        {
-            StartThread();
-
-            {
-                boost::lock_guard<boost::mutex> lck(m_reportQueueLock);
-                m_reportQueue.push_back(report);
-            }
-
-            if (m_sendReportsPending == 0)
-            {
-                m_sendReportsPending = 1;
-                m_ioService.post(boost::bind(&Library::SendReports,this));
-            }
-        }
+        Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                                      L"ProgrammingError " + errorCode + L"|" + location + L"|" + text);
     }
 
     void
     Library::SendProgramInfoReport(const std::wstring & text)
     {
-        ReportPtr report = m_reportCreator.CreateProgramInfoReport(text);
-        if (!TrySend(report))
-        {
-            StartThread();
-
-            {
-                boost::lock_guard<boost::mutex> lck(m_reportQueueLock);
-                m_reportQueue.push_back(report);
-            }
-
-            if (m_sendReportsPending == 0)
-            {
-                m_sendReportsPending = 1;
-                m_ioService.post(boost::bind(&Library::SendReports,this));
-            }
-        }
-    }
-
-    void Library::SendReports()
-    {
-        m_sendReportsPending = 0;
-        try
-        {
-            boost::lock_guard<boost::mutex> lck(m_reportQueueLock);
-            while (!m_reportQueue.empty())
-            {
-                m_reportCreator.SetConnectionInfoIfNotSet(m_reportQueue.front());
-                m_connection->Send(m_reportQueue.front(), Safir::Dob::Typesystem::ChannelId(), this);
-                m_reportQueue.pop_front();
-            }
-        }
-        catch (const Safir::Dob::OverflowException &)
-        {
-            //do nothing
-        }
-    }
-
-    void Library::OnNotMessageOverflow()
-    {
-        SendReports();
-        TraceFlush();
+        Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                      text);
     }
 }
 }

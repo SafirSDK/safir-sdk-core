@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -42,6 +42,13 @@ namespace Safir.Dob
         {
 
         }
+
+        /// <summary>
+        /// Tells if the connection is opened.
+        /// </summary>
+        /// <returns>True if the connection is open, otherwise false.</returns>
+        public abstract bool IsOpen();
+
 
         #region Non-pending (synchronous) registration of entity handler.
         /// <summary>
@@ -1132,6 +1139,7 @@ namespace Safir.Dob
         /// <param name="instanceId">Instance id.</param>
         /// <param name="handlerId">Handler id.</param>
         /// <exception cref="Safir.Dob.AccessDeniedException">The instance is owned by another handler.</exception>
+        /// <exception cref="Safir.Dob.GhostExistsException">There is a ghost instance that hasn't been injected.</exception>
         public void SetChanges(Entity entity,
                                Typesystem.InstanceId instanceId,
                                Typesystem.HandlerId handlerId)
@@ -1175,6 +1183,7 @@ namespace Safir.Dob
         /// <param name="instanceId">Instance id.</param>
         /// <param name="handlerId">Handler id.</param>
         /// <exception cref="Safir.Dob.AccessDeniedException">The instance is owned by another handler.</exception>
+        /// <exception cref="Safir.Dob.GhostExistsException">There is a ghost instance that hasn't been injected.</exception>
         public void SetAll(Entity entity,
                            Typesystem.InstanceId instanceId,
                            Typesystem.HandlerId handlerId)
@@ -1231,6 +1240,7 @@ namespace Safir.Dob
         /// <param name="entityId">Id of the entity to delete.</param>
         /// <param name="handlerId">Handler id.</param>
         /// <exception cref="Safir.Dob.AccessDeniedException">The instance is owned by another handler.</exception>
+        /// <exception cref="Safir.Dob.GhostExistsException">There is a ghost instance that hasn't been injected.</exception>
         public void Delete(Typesystem.EntityId entityId,
                            Typesystem.HandlerId handlerId)
         {

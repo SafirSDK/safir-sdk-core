@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -279,7 +279,6 @@ final class Kernel {
     public static native long Generate64(String id);
 
 
-
-
-
+    //Get all the dou directories defined in typesystem.ini
+    public static native String[] GetDouDirectories();
 }

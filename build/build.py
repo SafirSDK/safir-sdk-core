@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2009-2012 (http://www.safirsdk.com)
+# Copyright Saab AB, 2009-2013 (http://safir.sourceforge.net)
 #
 # Created by: Lars Hagstrom / lars.hagstrom@consoden.se
 #
@@ -420,7 +420,7 @@ class BuilderBase(object):
             mem_per_job = 400
             memory = physical_memory()
             if memory is not None and memory / self.num_jobs < mem_per_job:
-                self.num_jobs = max(1,memory / mem_per_job)
+                self.num_jobs = max(1, int(memory / mem_per_job))
         except:
             self.num_jobs = 2
 

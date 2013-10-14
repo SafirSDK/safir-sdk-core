@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2012 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *
@@ -49,9 +49,6 @@
                              Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().MagicLock()) ;    \
                      else Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
 #define lllout lllog(8)
-#define lllerr if(Safir::Utilities::Internal::Internal::LowLevelLogger::Magic lck_fjki34 =        \
-                  Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().MagicLock()) ; \
-               else Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
 
 namespace Safir
 {

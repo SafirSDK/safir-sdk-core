@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(dope_odbc_backend_test CXX)
 
-include($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+include($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 find_package(Boost COMPONENTS program_options system)
 
@@ -50,4 +50,4 @@ endif()
 ADD_TEST(dope_odbc_backend_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_odbc_backend_test.py --driver $ENV{Driver} --database $ENV{DATABASE_NAME} --hostname $ENV{DATABASE_SERVER})
 
 #Long timeouts are needed on slow machines.
-set_tests_properties(dope_odbc_backend_test PROPERTIES TIMEOUT 1800)
+SET_SAFIR_TEST_PROPERTIES(dope_odbc_backend_test 1800)

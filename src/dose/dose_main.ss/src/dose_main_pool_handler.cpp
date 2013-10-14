@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -42,6 +42,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <boost/bind.hpp>
+#include <Safir/Utilities/Internal/SystemLog.h>
 
 namespace Safir
 {
@@ -178,7 +179,7 @@ namespace Internal
             return;
         }
 
-        lllerr << "PoolHandler::RequestPoolDistribution: request sent to node " << nodeId << "." << std::endl;
+        lllog(1) << "PoolHandler::RequestPoolDistribution: request sent to node " << nodeId << "." << std::endl;
         DistributionData PDRequest
             (request_pool_distribution_request_tag,
             ConnectionId(ThisNodeParameters::NodeNumber(), 0, -1), //Sender - use context 0 for this request
@@ -190,7 +191,7 @@ namespace Internal
     {
         if (data.GetType() == DistributionData::Action_RequestPoolDistribution)
         {
-            lllerr << "Forcing pool distribution on request from node " << data.GetSenderId().m_node << "." << std::endl;
+            lllog(1) << "Forcing pool distribution on request from node " << data.GetSenderId().m_node << "." << std::endl;
             m_ecom->ForcePoolDistribution(data.GetSenderId().m_node);
         }
     }
@@ -225,7 +226,7 @@ namespace Internal
             lllout << "Pool distribution thread started" << std::endl;
             
         m_poolDistributionThreadId = boost::this_thread::get_id();
-        m_threadMonitor->StartWatchdog(m_poolDistributionThreadId, "pool distribution thread");
+        m_threadMonitor->StartWatchdog(m_poolDistributionThreadId, L"pool distribution thread");
 
             // Wait until persistent data is ready.
             if (!m_persistHandler->IsPersistentDataReady())
@@ -304,8 +305,9 @@ namespace Internal
 
         if (exceptionInfo != NULL)
         {
-            lllerr << "An exception was caught inside PoolHandler::PoolDistributionWorker!\n"
-                   << "The exception will be rethrown in the main thread" << std::endl;
+            SEND_SYSTEM_LOG(Alert,
+                            << "An exception was caught inside PoolHandler::PoolDistributionWorker!"
+                            << "The exception will be rethrown in the main thread");
         }
 
         lllout << "Signalling pool distribution completed"<< std::endl;
@@ -474,7 +476,8 @@ namespace Internal
 
         if (exceptionInfo != NULL)
         {
-            lllerr << "An exception occurred in pool distribution, rethrowing." << std::endl;
+            SEND_SYSTEM_LOG(Alert,
+                            << "An exception occurred in pool distribution, rethrowing.");
             exceptionInfo->Rethrow();
         }
         m_connectionHandler->MaybeSignalConnectSemaphore();

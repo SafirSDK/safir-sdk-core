@@ -5,10 +5,10 @@ project(dots_kernel CXX)
 INCLUDE_DIRECTORIES(.)
 
 #this library has a C interface, so we don't want the "d" suffix on debug builds on windows
-#Must be set before including cmake_settings.txt
+#Must be set before including safir_sdk_core_config.cmake
 SET(NO_LIBRARY_POSTFIXES 1) 
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
@@ -37,12 +37,12 @@ if (WIN32)
     INCLUDE_DIRECTORIES(${EXPAT_HEADER})
 endif()
 
-FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time)
+FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time system)
 
 TARGET_LINK_LIBRARIES(dots_kernel ${EXPAT_LIBRARY})
 
 IF (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dots_kernel dots_id lluf_utils lluf_startup_synchronizer lluf_crash_reporter ${Boost_LIBRARIES} rt)
+  TARGET_LINK_LIBRARIES(dots_kernel dots_id lluf_utils lluf_startup_synchronizer lluf_crash_reporter lluf_config ${Boost_LIBRARIES} rt)
 ENDIF()
 
 ADD_DEFINITIONS(-DDOTSKERNEL_EXPORTS)

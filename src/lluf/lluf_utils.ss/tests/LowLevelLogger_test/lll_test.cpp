@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -25,14 +25,14 @@
 
 //disable warnings in boost
 #if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4244)
+#  pragma warning (push)
+#  pragma warning (disable : 4244)
 #endif
 
 #include <boost/thread.hpp>
 
 #if defined _MSC_VER
-  #pragma warning (pop)
+#  pragma warning (pop)
 #endif
 
 #include <iostream>
@@ -42,7 +42,7 @@ int main()
     {
         lllog(5) << "Hello, World!"<<std::endl;
         lllog(9) << "Goodbye cruel world!"<<std::endl;
-        lllerr << 1234567890 << std::endl;
+        lllog(0) << 1234567890 << std::endl;
         boost::this_thread::sleep(boost::posix_time::milliseconds(10));
     }
 

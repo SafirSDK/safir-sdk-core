@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(dots_test CXX)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 ADD_SUBDIRECTORY(cpp)
 ADD_SUBDIRECTORY(dotnet)
@@ -18,14 +18,19 @@ endif()
 FIND_PACKAGE(PythonInterp)
 
 ENABLE_TESTING()
+
 ADD_TEST(dots_cpp ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py cpp)
+ADD_TEST(dots_dotnet ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py dotnet)
+
+SET_SAFIR_TEST_PROPERTIES(dots_cpp)
+SET_SAFIR_TEST_PROPERTIES(dots_dotnet)
 
 if (SAFIR_ADA_SUPPORT)
   ADD_TEST(dots_ada ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py ada)
+  SET_SAFIR_TEST_PROPERTIES(dots_ada)
 endif()
-
-ADD_TEST(dots_dotnet ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py dotnet)
 
 if (SAFIR_JAVA_SUPPORT)
   ADD_TEST(dots_java ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py java)
+  SET_SAFIR_TEST_PROPERTIES(dots_java)
 endif()

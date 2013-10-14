@@ -4,7 +4,7 @@ project(dose_main CXX)
 
 INCLUDE_DIRECTORIES(.)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)

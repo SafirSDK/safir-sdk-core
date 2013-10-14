@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -23,6 +23,7 @@
 ******************************************************************************/
 
 #include "dots_file_parser.h"
+#include "dots_file_collection.h"
 #include <Safir/Dob/Typesystem/Internal/Id.h>
 #include "dots_basic_types.h" 
 #include "dots_blob_layout.h"
@@ -34,7 +35,6 @@
 #include "dots_property_mapping_parser.h"
 #include "dots_enum_parser.h"
 
-#include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -42,6 +42,8 @@
 #include <iostream>
 #include <cstdio>
 #include <cstring>
+
+
 
 namespace Safir
 {
@@ -458,233 +460,51 @@ namespace Internal
 
     bool FileParser::ParseFiles()
     {
-        if (!ParseDouFiles())
-            return false;
-        if (!ParseDomFiles())
-            return false;
-        return true;
-    }
-
-    boost::filesystem::path GetDobFileDirectory()
-    {
-        char * env = getenv("SAFIR_DOTS_CLASSES_DIR");
-        
-        if (env == NULL)
+        try
         {
-            // Read the dou/dom files from the standard location 
-            env = getenv(RUNTIME_ENV);
-
-            if (env == NULL)
+            const FileCollection files;
+            
+            //parse dou files
+            for (FileLocations::const_iterator it = files.DouFiles().begin();
+                 it != files.DouFiles().end(); ++it)
             {
-                ErrorHandler::Error("Dou/Dom file parsing","Failed to get environment variable SAFIR_RUNTIME","dots_file_parser");
-                exit(1);
-            }
-            boost::filesystem::path filename(env);
-
-            filename /= DOB_CLASSES_DIR;
-            ENSURE(boost::filesystem::exists(filename) && boost::filesystem::is_directory(filename),
-                << "The directory for dou and dom files could not be found. Using $(SAFIR_RUNTIME)/" << DOB_CLASSES_DIR << " it evaluates to " << filename.string());
-
-
-            return filename;
-
-        }
-        else
-        {
-            // Read the dou/dom files from a non-standard location
-            boost::filesystem::path filename(env);
-
-            ENSURE(boost::filesystem::exists(filename) && boost::filesystem::is_directory(filename),
-                << "The directory for dou and dom files could not be found. $(SAFIR_DOTS_CLASSES_DIR) evaluates to " << filename.string());
-
-            return filename;
-
-        }
-    }
-
-    bool FileParser::ParseDouDir(const boost::filesystem::path & dirName)
-    {
-        lllout << "ParseDouDir: Parsing directory " << dirName.string().c_str() << std::endl;
-
-        for (boost::filesystem::directory_iterator dir = boost::filesystem::directory_iterator(dirName);
-             dir != boost::filesystem::directory_iterator(); ++dir)
-        {
-            const boost::filesystem::path path = dir->path();
-            const boost::filesystem::path extension = path.extension();
-
-            if ( boost::filesystem::is_directory(path) )
-            {
-                if (!ParseDouDir(path))
-                    return false;
-                else
-                    continue;
-            }
-
-            if (extension != UNIT_FILE_EXT)
-            {
-                continue;
-            }
-
-            lllout << "ParseDouFiles: Parsing file " << path.string().c_str() << std::endl;
-
-            if (!ParseFile(path))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-
-    bool FileParser::ParseDouFiles()
-    {
-        for (boost::filesystem::directory_iterator dir = boost::filesystem::directory_iterator(GetDobFileDirectory());
-             dir != boost::filesystem::directory_iterator(); ++dir)
-        {
-            const boost::filesystem::path path = dir->path();
-            const boost::filesystem::path extension = path.extension();
-
-            if ( boost::filesystem::is_directory(path) )
-            {
-                if (!ParseDouDir(path))
-                    return false;
-                else
-                    continue;
-            }
-
-            if (extension != UNIT_FILE_EXT)
-            {
-                continue;
-            }
-
-            lllout << "ParseDouFiles: Parsing file " << path.string().c_str() << std::endl;
-
-            if (!ParseFile(path))
-            {
-                return false;
-            }
-        }
-
-
-        // check for class duplicates.
-        bool duplicatesExist = false;
-        DobClasses theClasses = ParsingState::Instance().classParser.Result();
-        for (DobClasses::iterator iter = theClasses.begin(); iter < theClasses.end(); iter++)
-        {
-            int count = 0;
-            for (DobClasses::iterator iter2 = iter; iter2 < theClasses.end(); iter2++)
-            {
-                if (iter->m_typeId == iter2->m_typeId)
+                if (!ParseFile(it->second))
                 {
-                    if (count++ > 0)
-                    {
-                        lllerr << "Duplicate defined class found: " << iter->m_name.c_str() << std::endl; 
-                        duplicatesExist =  true;
-                    }
+                    return false;
                 }
             }
-        }
+            
+            if (!FinalizeClasses()) return false;
+            if (!FinalizeProperties()) return false;
 
-        // check for properties duplicates.
-        DobProperties theProperties = ParsingState::Instance().propertyParser.Result();
-        for (DobProperties::iterator iter = theProperties.begin(); iter < theProperties.end(); iter++)
-        {
-            int count = 0;
-            for (DobProperties::iterator iter2 = iter; iter2 < theProperties.end(); iter2++)
+            //parse dom files
+            for (FileLocations::const_iterator it = files.DomFiles().begin();
+                 it != files.DomFiles().end(); ++it)
             {
-                if (iter->m_typeId == iter2->m_typeId)
+                ParsingState::Instance().mappingParser.SetFileName(it->second);
+                if (!ParseFile(it->second))
                 {
-                    if (count++ > 0)
-                    {
-                        lllerr << "Duplicate defined property found: " << iter->m_name.c_str() << std::endl; 
-                        duplicatesExist =  true;
-                    }
+                    return false;
                 }
             }
+            
+            if (!FinalizePropertyMappings()) return false;
+            ParsingState::Instance().Reset();
         }
-
-
-        if(duplicatesExist) return false;
-        if (!FinalizeClasses()) return false;
-        if (!FinalizeProperties()) return false;
-
-        ParsingState::Instance().Reset();
-        return true;
-    }
-
-    bool FileParser::ParseDomDir(const boost::filesystem::path & dirName)
-    {
-        lllout << "ParseDomDir: Parsing directory " << dirName.string().c_str() << std::endl;
-        for (boost::filesystem::directory_iterator dir = boost::filesystem::directory_iterator(dirName);
-             dir != boost::filesystem::directory_iterator(); ++dir)
+        catch (const std::exception& e)
         {
-            const boost::filesystem::path path = dir->path();
-            const boost::filesystem::path extension = path.extension();
-
-            if ( boost::filesystem::is_directory(path) )
-            {
-                if (!ParseDomDir(path))
-                    return false;
-                else
-                    continue;
-            }
-
-            if (extension != PROPERTY_MAPPING_FILE_EXT)
-            {
-                continue;
-            }
-
-            lllout << "ParseDomFiles: Parsing file " << path.string().c_str() << std::endl;
-
-            ParsingState::Instance().mappingParser.SetFileName(path);
-            if (!ParseFile(path))
-            {
-                return false;
-            }
+            ErrorHandler::Error("Dou/Dom file parsing",
+                                "Caught exception while parsing dou and dom files: " + std::string(e.what()),
+                                "dots_file_parser");
+            return false;
         }
 
-        return true;
-    }
-
-
-    bool FileParser::ParseDomFiles()
-    {
-        for (boost::filesystem::directory_iterator dir = boost::filesystem::directory_iterator(GetDobFileDirectory());
-             dir != boost::filesystem::directory_iterator(); ++dir)
-        {
-            const boost::filesystem::path path = dir->path();
-            const boost::filesystem::path extension = path.extension();
-
-            if ( boost::filesystem::is_directory(path) )
-            {
-                if (!ParseDomDir(path))
-                    return false;
-                else
-                    continue;
-            }
-
-            if (extension != PROPERTY_MAPPING_FILE_EXT)
-            {
-                continue;
-            }
-
-            lllout << "ParseDomFiles: Parsing file " << path.string().c_str() << std::endl;
-
-            ParsingState::Instance().mappingParser.SetFileName(path);
-            if (!ParseFile(path))
-            {
-                return false;
-            }
-        }
-
-        if (!FinalizePropertyMappings()) return false;
-        ParsingState::Instance().Reset();
         return true;
     }
 
     bool FileParser::ParseFile(const boost::filesystem::path & filename)
     {
+        lllout << "Parsing '" << filename.string().c_str() << "'" << std::endl;
         std::vector<char> buf(100000);
         ParsingState::Instance().Reset();
         ParsingState::Instance().parser = XML_ParserCreate(NULL);
@@ -726,7 +546,7 @@ namespace Internal
             {
                 ErrorHandler::Error("File Syntax Error", "Syntax error in dou-file.", filename);
                 std::wcout << "Line number: " << XML_GetCurrentLineNumber(ParsingState::Instance().parser) << std::endl;
-                return !ParsingState::Instance().parseError;
+                return false;
             }
                 
         }

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -33,10 +33,6 @@
 #include <Safir/Application/Tracer.h>
 
 #include "PersistenceHandler.h"
-
-//const long DATA_COLUMNS_SIZE = 10485760; //10M
-
-
 
 /**
  * Storage backend for ODBC databases

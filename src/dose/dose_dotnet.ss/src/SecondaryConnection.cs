@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -166,6 +166,14 @@ namespace Safir.Dob
             return Interface.BoolOf(isConn);
         }
 
+        /// <summary>
+        /// For a secondary connection this is the same as the IsAttached check.
+        /// </summary>
+        /// <returns>True if the SecondaryConnection is attached to a Connection and that Connection is open.</returns>
+        public override bool IsOpen()
+        {
+            return IsAttached();
+        }
 
 
         //-------------------------------------

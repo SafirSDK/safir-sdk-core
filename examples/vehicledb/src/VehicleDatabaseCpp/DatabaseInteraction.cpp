@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2009 (http://www.safirsdk.com)
+* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
 *
 * Created by: Petter Lönnstedt / stpeln
 *
@@ -31,7 +31,8 @@
 #include <Safir/Databases/Odbc/RetryException.h>
 #include <Safir/Databases/Odbc/TimeoutException.h>
 #include <Safir/Dob/ErrorResponse.h>
-#include <Safir/SwReports/SwReport.h>
+#include <Safir/Logging/Log.h>
+
 
 namespace VehicleDatabaseCpp
 {
@@ -76,9 +77,8 @@ namespace VehicleDatabaseCpp
         catch (const Safir::Databases::Odbc::ReconnectException & ex)
         {
             // The operation cannot succeed without reconnecting to the RDBMS.
-            Safir::SwReports::SendErrorReport
-                (L"DatabaseError", L"DatabaseInteraction::ConnectToDatabase",
-                 ex.GetExceptionInfo());
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"DatabaseError: " + ex.GetExceptionInfo());
         }
     }
 
@@ -147,16 +147,14 @@ namespace VehicleDatabaseCpp
         catch (const Safir::Databases::Odbc::ReconnectException & ex)
         {
             // The operation cannot succeed without reconnecting to the database.
-            Safir::SwReports::SendErrorReport
-                (L"DatabaseError", L"DatabaseInteraction::ConnectToStoredProcedures",
-                 ex.GetExceptionInfo());
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"DatabaseError: " + ex.GetExceptionInfo());
         }
         catch (const Safir::Databases::Odbc::RetryException & ex)
         {
             // Retry the last operation.
-            Safir::SwReports::SendErrorReport
-                (L"DatabaseError", L"DatabaseInteraction::ConnectToStoredProcedures",
-                 ex.GetExceptionInfo());
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"DatabaseError: " + ex.GetExceptionInfo());
         }
     }
 
@@ -175,9 +173,9 @@ namespace VehicleDatabaseCpp
         if (request == NULL
             || request->VehicleCategory().IsNull())
         {
-            Safir::SwReports::SendErrorReport
-                (L"RequestError", L"DatabaseInteraction::GetVehicleCategory",
-                 L"VehicleCategory is missing.");
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"RequestError: VehicleCategory is missing.");
+
             return Safir::Dob::ErrorResponse::Create();
         }
 
@@ -243,9 +241,8 @@ namespace VehicleDatabaseCpp
                 //
                 // On any of these exceptions: Retry the last operation with a timer
                 // or abort the database transaction with "Rollback".
-                Safir::SwReports::SendErrorReport
-                    (L"DatabaseError", L"DatabaseInteraction::GetVehicleCategory",
-                     ex.GetExceptionInfo());
+                Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                              L"DatabaseError: " + ex.GetExceptionInfo());
                 m_connection.Rollback();  // Abort the database transaction.
                 return Safir::Dob::ErrorResponse::Create();
             }
@@ -253,9 +250,8 @@ namespace VehicleDatabaseCpp
         catch (const Safir::Databases::Odbc::ReconnectException & ex)
         {
             // The operation cannot succeed without reconnecting to the database.
-            Safir::SwReports::SendErrorReport
-                (L"DatabaseError", L"DatabaseInteraction::GetVehicleCategory",
-                 ex.GetExceptionInfo());
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"DatabaseError: " + ex.GetExceptionInfo());
             return Safir::Dob::ErrorResponse::Create();
         }
 
@@ -280,9 +276,8 @@ namespace VehicleDatabaseCpp
             || request->VehicleCategoryInfo().IsNull()
             || request->VehicleCategoryInfo()->VehicleCategory().IsNull())
         {
-            Safir::SwReports::SendErrorReport
-                (L"RequestError", L"DatabaseInteraction::SetVehicleCategory",
-                 L"VehicleCategory is missing.");
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"RequestError: VehicleCategory is missing.");
             return Safir::Dob::ErrorResponse::Create();
         }
 
@@ -326,9 +321,8 @@ namespace VehicleDatabaseCpp
                 //
                 // On any of these exceptions: Retry the last operation with a timer
                 // or abort the database transaction with "Rollback".
-                Safir::SwReports::SendErrorReport
-                    (L"DatabaseError", L"DatabaseInteraction::SetVehicleCategory",
-                     ex.GetExceptionInfo());
+                Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                              L"DatabaseError: " + ex.GetExceptionInfo());
                 m_connection.Rollback();  // Abort the database transaction.
                 return Safir::Dob::ErrorResponse::Create();
             }
@@ -336,9 +330,8 @@ namespace VehicleDatabaseCpp
         catch (const Safir::Databases::Odbc::ReconnectException & ex)
         {
             // The operation cannot succeed without reconnecting to the database.
-            Safir::SwReports::SendErrorReport
-                (L"DatabaseError", L"DatabaseInteraction::SetVehicleCategory",
-                 ex.GetExceptionInfo());
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"DatabaseError: " + ex.GetExceptionInfo());
             return Safir::Dob::ErrorResponse::Create();
         }
     }
@@ -351,9 +344,8 @@ namespace VehicleDatabaseCpp
         if (request == NULL
             || request->VehicleCategory().IsNull())
         {
-            Safir::SwReports::SendErrorReport
-                (L"RequestError", L"DatabaseInteraction::DeleteVehicleCategory",
-                 L"VehicleCategory is missing.");
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"RequestError: VehicleCategory is missing.");
             return Safir::Dob::ErrorResponse::Create();
         }
 
@@ -382,9 +374,9 @@ namespace VehicleDatabaseCpp
                 //
                 // On any of these exceptions: Retry the last operation with a timer
                 // or abort the database transaction with "Rollback".
-                Safir::SwReports::SendErrorReport
-                    (L"DatabaseError", L"DatabaseInteraction::DeleteVehicleCategory",
-                     ex.GetExceptionInfo());
+
+                Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                              L"DatabaseError: " + ex.GetExceptionInfo());
                 m_connection.Rollback();  // Abort the database transaction.
                 return Safir::Dob::ErrorResponse::Create();
             }
@@ -392,9 +384,8 @@ namespace VehicleDatabaseCpp
         catch (const Safir::Databases::Odbc::ReconnectException & ex)
         {
             // The operation cannot succeed without reconnecting to the database.
-            Safir::SwReports::SendErrorReport
-                (L"DatabaseError", L"DatabaseInteraction::DeleteVehicleCategory",
-                 ex.GetExceptionInfo());
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"DatabaseError: " + ex.GetExceptionInfo());
             return Safir::Dob::ErrorResponse::Create();
         }
     }

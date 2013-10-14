@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -39,6 +39,7 @@
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 
 
 namespace Safir
@@ -57,7 +58,8 @@ namespace Safir
 
             if (Dob::PersistenceParameters::SystemHasPersistence())
             {
-                lllerr << "dose_main is waiting for persistence data!" << std::endl;
+                lllog(0) << "dose_main is waiting for persistence data!" << std::endl;
+                std::wcout << "dose_main is waiting for persistence data!" << std::endl;
             }
 
         }
@@ -96,8 +98,11 @@ namespace Safir
             {
                 if(Dob::PersistenceParameters::TestMode())
                 {
-                    lllerr << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
+                    lllog(0) << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
                         << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
+                    std::wcout << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
+                        << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
+                    
                 }
                 else
                 {
@@ -224,7 +229,8 @@ namespace Safir
         void PersistHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    /*typeId*/,
             const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
         {
-            lllerr << "Someone overregistered Safir::Dob::PersistentDataReady, so I'm not going to be able to allow other connections to connect!" << std::endl;
+            SEND_SYSTEM_LOG(Alert,
+                            << "Someone overregistered Safir::Dob::PersistentDataReady, so I'm not going to be able to allow other connections to connect!");
         }
 
         void PersistHandler::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
@@ -262,7 +268,8 @@ namespace Safir
 
         void PersistHandler::SetPersistentDataReady()
         {
-            lllerr << "dose_main persistence data is ready!" << std::endl;
+            lllog(0) << "dose_main persistence data is ready!" << std::endl;
+            std::wcout << "dose_main persistence data is ready!" << std::endl;
             ENSURE(Dob::PersistenceParameters::SystemHasPersistence(), << "This system does not have persistence, it is an error to call SetPersistentDataReady");
 
             m_persistDataReady = true;

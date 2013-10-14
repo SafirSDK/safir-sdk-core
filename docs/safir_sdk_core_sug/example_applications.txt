@@ -10,13 +10,13 @@ Since the Dob provides interfaces in several different languages, the example ap
 === Some background
 The basic design tenets of Safir systems is the separation of business logic from GUI, and of breaking up responsibilities into several applications that each solve a small part of the problem.
 
-So Safir systems usually consist of a number of applications that execute on different computers (nodes), and they are classified as either _Business applications_ or _Presentation applications_. The first type handles all business logic – calculation, communication, request processing etc – while the latter takes care of all presentation of data in a GUI (also referred to as an MMI, Man-Machine Interface, or HMI, Human-Machine Interface). This is shown in <<logic-separation>>.
+So Safir systems usually consist of a number of applications that execute on different computers (nodes), and they are classified as either _Business applications_ or _Presentation applications_. The first type handles all business logic – calculation, communication, request processing etc – while the latter takes care of all presentation of data in a GUI. This is shown in <<logic-separation>>.
 
 The applications may execute on the same or different nodes, this is in fact one of the features of Safir SDK, that a developer can run everything on his development-machine, but when the system is deployed to the real or test environment the applications are run on multiple machines, completely transparently to the applications.
 
 [[logic-separation]]
 .Separation of logic from GUI
-image::images/separation_tenet.png["Separation tenet", width=300, link="images/separation_tenet.png"]
+image::images/separation_tenet.png["Separation tenet", width="50%", link="images/separation_tenet.png"]
 
 === The (example) problem
 The fictive problem is that we need a system that can give us an overview of a number of manually created vehicles. We also want some services associated with the vehicles.
@@ -48,7 +48,7 @@ A deployment of the applications is shown in <<vehicle-deployment>> where the ap
 
 [[vehicle-deployment]]
 .Deployment of the Vehicle system
-image::images/vehicle_deployment.png["Vehicle system deployment", width=300, link="images/vehicle_deployment.png"]
+image::images/vehicle_deployment.png["Vehicle system deployment", width="50%", link="images/vehicle_deployment.png"]
 
 === VehicleApp - Business Application
 This application exists in the languages C++ and C#.
@@ -100,7 +100,7 @@ Definition of vehicle parameters.
 
 [[vehicleapp-class-diagram]]
 .VehicleApp class diagram
-image::images/vehicleapp_class_diagram.png["Class Diagram", width=300, link="images/vehicleapp_class_diagram.png"]
+image::images/vehicleapp_class_diagram.png["Class Diagram", width="50%", link="images/vehicleapp_class_diagram.png"]
 
 App::
 Main class. Called by the Dob on application stop. Contains the main Dob connection.
@@ -134,31 +134,31 @@ The list view in <<vehiclemmi-list>> contains all published vehicle objects in t
 
 [[vehiclemmi-list]]
 .VehicleMmi list view.
-image::images/vehiclemmi_list.png["VehicleMmi List", width=450, link="images/vehiclemmi_list.png"]
+image::images/vehiclemmi_list.png["VehicleMmi List", width="50%", link="images/vehiclemmi_list.png"]
 
 The dialog in <<vehiclemmi-create>> is opened from the list view and is used to send create requests for new vehicle objects. The requests are received by VehicleApp.
 
 [[vehiclemmi-create]]
 .VehicleMmi Create dialog
-image::images/vehiclemmi_create.png["VehicleMmi Create dialog", width=200, link="images/vehiclemmi_create.png"]
+image::images/vehiclemmi_create.png["VehicleMmi Create dialog", width="50%", link="images/vehiclemmi_create.png"]
 
 The dialog in <<vehiclemmi-update>> is opened from the list view and is used to send update requests for existing vehicle objects. The requests are received by VehicleApp.
 
 [[vehiclemmi-update]]
 .VehicleMmi Update dialog
-image::images/vehiclemmi_update.png["VehicleMmi Update dialog", width=200, link="images/vehiclemmi_update.png"]
+image::images/vehiclemmi_update.png["VehicleMmi Update dialog", width="50%", link="images/vehiclemmi_update.png"]
 
 The dialog in <<vehiclemmi-calculate-speed>> is opened from the list view and is used to send to calculate the difference between the speed for a selected vehicle object and an entered speed. The request is sent through a service to VehicleApp and the result is given in the sevice response.
 
 [[vehiclemmi-calculate-speed]]
 .VehicleMmi Speed calculation dialog
-image::images/vehiclemmi_calculate_speed.png["Speed calculation", width=200, link="images/vehiclemmi_calculate_speed.png"]
+image::images/vehiclemmi_calculate_speed.png["Speed calculation", width="50%", link="images/vehiclemmi_calculate_speed.png"]
 
 The dialog in <<vehiclemmi-category-info>> is opened from the list view and is used to obtain category information for the selected vehicle object. If there is no information the category code in the database, the information entered in the dialog is instead stored for the given category code.
 
 [[vehiclemmi-category-info]]
 .VehicleMmi Category information dialog
-image::images/vehiclemmi_category_info.png["Category info", width=200, link="images/vehiclemmi_category_info.png"]
+image::images/vehiclemmi_category_info.png["Category info", width="50%", link="images/vehiclemmi_category_info.png"]
 
 ==== Dou-files
 No dou files are provided by VehicleMmi.
@@ -168,7 +168,7 @@ No dou files are provided by VehicleMmi.
 
 [[vehiclemmi-class-diagram]]
 .VehicleMmi class diagram
-image::images/vehiclemmi_class_diagram.png["Class Diagram", width=350, link="images/vehiclemmi_class_diagram.png"]
+image::images/vehiclemmi_class_diagram.png["Class Diagram", width="50%", link="images/vehiclemmi_class_diagram.png"]
 
 App::
 Main class. Called by the Dob on application stop.Contains the main Dob connection.
@@ -235,7 +235,7 @@ This service is used to create a new vehicle category info.
 
 [[vehicledb-class-diagram]]
 .VehicleDb class diagram
-image::images/vehicledb_class_diagram.png["Class Diagram", width=300, link="images/vehicledb_class_diagram.png"]
+image::images/vehicledb_class_diagram.png["Class Diagram", width="50%", link="images/vehicledb_class_diagram.png"]
 
 App::
 Main class. Called by the Dob on application stop. Contains the main Dob connection.

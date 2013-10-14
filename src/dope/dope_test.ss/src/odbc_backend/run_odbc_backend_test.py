@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2012 (http://www.safirsdk.com)
+# Copyright Saab AB, 2012-2013 (http://safir.sourceforge.net)
 #
 # Created by: Lars Hagstrom (lars@foldspace.nu)
 #
@@ -23,10 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-#import subprocess, os, time, sys, shutil, glob, xml.dom.minidom
 import sys, os, shutil, xml.dom.minidom, glob, time, subprocess, re
-
-sys.path.append("../../../../swre/swre_test.ss/testutil")
 from testenv import TestEnv, TestEnvStopper
 
 def rmdir(directory):
@@ -212,6 +209,11 @@ try:
         print "Some process exited with an unexpected value"
         sys.exit(1)
 
+    syslog_output = env.Syslog()
+    if len(syslog_output) != 0:
+        log("Unexpected syslog output:\n" + syslog_output)
+        sys.exit(1)
+
 
     print "== See if dope loads them at startup"
     env = TestEnv()
@@ -220,6 +222,11 @@ try:
 
     if not env.ReturnCodesOk():
         print "Some process exited with an unexpected value"
+        sys.exit(1)
+
+    syslog_output = env.Syslog()
+    if len(syslog_output) != 0:
+        log("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
 
     output = env.Output("entity_owner")
@@ -273,6 +280,11 @@ try:
         print "Some process exited with an unexpected value"
         sys.exit(1)
 
+    syslog_output = env.Syslog()
+    if len(syslog_output) != 0:
+        log("Unexpected syslog output:\n" + syslog_output)
+        sys.exit(1)
+        
     output = env.Output("entity_owner")
     if output.count("OnInjectedNewEntity") != 110:
         print "could not find the right number of 'OnInjectedNewEntity' in output"
@@ -317,6 +329,11 @@ try:
         print "Some process exited with an unexpected value"
         sys.exit(1)
 
+    syslog_output = env.Syslog()
+    if len(syslog_output) != 0:
+        log("Unexpected syslog output:\n" + syslog_output)
+        sys.exit(1)
+
     print "== Load them again and check output"
     env = TestEnv()
     with TestEnvStopper(env):
@@ -324,6 +341,11 @@ try:
 
     if not env.ReturnCodesOk():
         print "Some process exited with an unexpected value"
+        sys.exit(1)
+
+    syslog_output = env.Syslog()
+    if len(syslog_output) != 0:
+        log("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
 
     output = env.Output("entity_owner")

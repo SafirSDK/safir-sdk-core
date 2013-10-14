@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2009 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -135,6 +135,15 @@ public class SecondaryConnection extends ConnectionBase
             com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
         }
         return isConn[0];
+    }
+
+    /**
+     * For a secondary connection this is the same as the IsAttached check.
+     *
+     * @return True if the SecondaryConnection is attached to a Connection and that Connection is open.
+     */
+    public boolean isOpen() {
+        return isAttached();
     }
 
 

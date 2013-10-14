@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2012 (http://www.safirsdk.com)
+* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
 *
 * Created by: Erik Adolfsson / sterad
 *
@@ -45,8 +45,8 @@
 #include <Safir/Time/Internal/Interface.h>
 #include <Safir/Time/LibraryParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/DynamicLibraryLoader.h>
-#include <Safir/Utilities/Internal/PanicLogging.h>
 
 namespace 
 {
@@ -56,6 +56,8 @@ namespace
 
     boost::function<double()> GetUtcTime;
     boost::function<int()> GetLocalTimeOffset;
+
+    bool g_loadFailed = true;
 }
 
 // **************************************************************
@@ -70,6 +72,7 @@ void LoadLibrary()
     if (libraryName.empty())
     {
         lllout << "No external time provider specified, will use boost::posix_time instead" << std::endl;
+        g_loadFailed = false;
         return;
     }
 
@@ -85,9 +88,9 @@ void LoadLibrary()
     }
     catch(const std::logic_error&)
     {
-        lllout << "Failed to load external time provider library '" 
-               << libraryName.c_str() 
-               << "', using functionality from boost:posix_time instead" << std::endl;
+        SEND_SYSTEM_LOG(Critical,
+                        << "Failed to load external time provider library '" 
+                        << libraryName.c_str());
         return;
     }
     
@@ -103,18 +106,28 @@ void LoadLibrary()
     }
     catch (const std::logic_error& e)
     {
-        lllerr << e.what() << std::endl;
+        SEND_SYSTEM_LOG(Critical,
+                        << "Failed to load functions in external time provider library: " << e.what());
         GetUtcTime = NULL;
         GetLocalTimeOffset = NULL;
+        return;
     }
+
+    g_loadFailed = false;
 }
 
 // **************************************************************
 // Return current UTC time
 // **************************************************************
-void DoufTimeC_GetUtcTime(Safir::Dob::Typesystem::Si64::Second & utcTime)
+void DoufTimeC_GetUtcTime(Safir::Dob::Typesystem::Si64::Second & utcTime, bool& success)
 {
     boost::call_once(g_onceFlag,boost::bind(LoadLibrary));
+    
+    if (g_loadFailed)
+    {
+        success = false;
+        return;
+    }
 
     // Get current UTC time from the library, return boost clock if the function not is provided
     if (GetUtcTime != NULL)
@@ -126,14 +139,22 @@ void DoufTimeC_GetUtcTime(Safir::Dob::Typesystem::Si64::Second & utcTime)
         const boost::posix_time::time_duration d = boost::posix_time::microsec_clock::universal_time() - _1_JAN_1970;
         utcTime = static_cast<double>(d.ticks()) / d.ticks_per_second();
     }
+
+    success = true;
 }
 
 // **************************************************************
 // Return local offset from GMT
 // **************************************************************
-void DoufTimeC_GetLocalTimeOffset(Safir::Dob::Typesystem::Int32& offset)
+void DoufTimeC_GetLocalTimeOffset(Safir::Dob::Typesystem::Int32& offset, bool& success)
 {
     boost::call_once(g_onceFlag,boost::bind(LoadLibrary));
+
+    if (g_loadFailed)
+    {
+        success = false;
+        return;
+    }
 
     // Get local time offset from the library, return a time offset calulated from boost if the function not is provided
     if (GetUtcTime != NULL)
@@ -159,4 +180,6 @@ void DoufTimeC_GetLocalTimeOffset(Safir::Dob::Typesystem::Int32& offset)
             offset *= -1;
         }
     }
+
+    success = true;
 }

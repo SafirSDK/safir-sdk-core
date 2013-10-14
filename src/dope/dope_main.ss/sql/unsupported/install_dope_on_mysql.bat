@@ -1,7 +1,7 @@
 echo off
 REM==============================================================
 REM
-REM Copyright:      Saab Systems 2010
+REM Copyright:      Saab AB 2010
 REM Author:         Mikael Wennerberg
 REM
 REM Purpose:        Run DOPE database script using MYSQL.

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2012 (http://www.safirsdk.com)
+* Copyright Saab AB, 2012-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *
@@ -50,9 +50,6 @@ public slots:
     void Timestamps(bool use);
     void Stdout(bool use);
     void File(bool use);
-    void Save();
-    void Clear();
-    void CreateLogDir();
     
     void UpdateWidgets();
 private:

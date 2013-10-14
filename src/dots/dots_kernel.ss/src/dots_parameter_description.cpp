@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Joel Ottosson / stjoot
 *
@@ -92,10 +92,10 @@ namespace Internal
     }
 
 
-
+    
     template <>
     const boost::interprocess::offset_ptr<const char>
-    ParameterDescription::Value<char>(const ArrayIndex index) const
+    ParameterDescription::ValuePtr<char>(const ArrayIndex index) const
     {
         switch (m_memberType)
         {

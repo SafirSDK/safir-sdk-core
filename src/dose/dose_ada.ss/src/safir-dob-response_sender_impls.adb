@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --
---  Copyright Saab AB, 2009 (http://www.safirsdk.com)
+--  Copyright Saab AB, 2009-2013 (http://safir.sourceforge.net)
 --
 --  Created by: Anders Widén / stawi
 --
@@ -21,15 +21,13 @@
 --  along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 --
 -------------------------------------------------------------------------------
-with GNAT.OS_Lib;
-with Text_IO; use Text_IO;
 with Ada.Exceptions;
 with Interfaces.C;
 with Safir.Dob.Typesystem;
 with Safir.Dob.Typesystem.Internal_Operations;
 with Safir.Dob.Typesystem.Library_Exceptions;
 with Safir.Dob.Interf;
-with Safir.Dob.This_Node_Parameters;
+with Safir.Logging;
 
 pragma Warnings ("D");  -- turn off warnings for implicit dereference
 
@@ -71,16 +69,8 @@ package body Safir.Dob.Response_Sender_Impls is
    procedure Finalize (Self : in out Response_Sender_Impl) is
    begin
       if Self.Is_Valid then
-         Put_Line ("A ResponseSender was destroyed without having been used!");
-         Put_Line ("This is usually due to a programming error in the application:");
-         Put_Line ("Either the application did not send a response to a request, or ");
-         Put_Line ("an exception was thrown inside a Service or Entity request callback, ");
-         Put_Line ("causing the Response_Sender to be destroyed prematurely.");
-         Put_Line ("In either case the application needs to be fixed and the system restarted");
-         New_Line;
-         Put_Line ("NodeNumber = " &
-                   Safir.Dob.Typesystem.Int_32'Image (Safir.Dob.This_Node_Parameters.Node_Number));
-         GNAT.OS_Lib.OS_Exit (101010);
+         Safir.Logging.Send_System_Log (Safir.Logging.Critical,
+                                        "Programming Error! A ResponseSender was discarded without having been used!");
       end if;
    end Finalize;
 

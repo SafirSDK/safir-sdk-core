@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -27,7 +27,7 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/PanicLogging.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <iostream>
 #include <string>
 #include "dose_controller.h"
@@ -182,7 +182,8 @@ namespace Internal
 
         std::wcout << ostr.str();
         lllout << ostr.str();
-        Safir::Utilities::Internal::PanicLogging::Log(Safir::Dob::Typesystem::Utilities::ToUtf8(ostr.str()));
+        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
+                                                     ostr.str());
     }
 
     ControllerPtr ControllerTable::GetController(const long ctrl)

@@ -4,7 +4,7 @@ project(dots_web CXX)
 
 add_subdirectory(src)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 INSTALL(DIRECTORY web
         DESTINATION ${SAFIR_RUNTIME}/data/text

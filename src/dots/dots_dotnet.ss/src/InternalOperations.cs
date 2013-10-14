@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -75,6 +75,27 @@ namespace Safir.Dob.Typesystem.Internal
         /// Converts an UTF-8 encoded byte array to a string.
         /// </summary>
         /// <param name="p">Byte array.</param>
+        /// <param name="size">Size of array</param>
+        /// <returns>string</returns>
+        public static string StringOf(System.IntPtr p, System.Int32 size)
+        {
+            if (p == System.IntPtr.Zero)
+            {
+                throw new SoftwareViolationException("StringOf does not accept null strings!");
+            }
+
+            //copy bytes
+            byte[] utf8Bytes=new byte[size];
+
+            Marshal.Copy(p, utf8Bytes, 0, utf8Bytes.Length);
+
+            return System.Text.UTF8Encoding.UTF8.GetString(utf8Bytes);
+        }
+
+        /// <summary>
+        /// Converts an UTF-8 encoded byte array to a string.
+        /// </summary>
+        /// <param name="p">Byte array.</param>
         /// <returns>string</returns>
         public static string StringOf(System.IntPtr p)
         {
@@ -94,10 +115,8 @@ namespace Safir.Dob.Typesystem.Internal
 
             //copy bytes
             byte[] utf8Bytes=new byte[offs];
-            for (int i=0; i<offs; i++)
-            {
-                utf8Bytes[i]=Marshal.ReadByte(p, i);
-            }
+
+            Marshal.Copy(p, utf8Bytes, 0, utf8Bytes.Length);
 
             return System.Text.UTF8Encoding.UTF8.GetString(utf8Bytes);
         }
@@ -156,6 +175,44 @@ namespace Safir.Dob.Typesystem.Internal
         {
             Kernel.DotsC_SetChangedSinceLastRead(_base, _mine);
             //TODO: rename the function in DOTS.
+        }
+
+        /// <summary>
+        /// Get the full path to the dou file that the type id represents
+        /// <para/>
+        /// Note that this function looks at the disk every time it is called. No caching
+        /// is performed at all. Not meant to be used in "real" code, but useful for debugging
+        /// tools, such as sate or dobexplorer.
+        /// </summary>
+        /// <param name="typeId">Type id.</param>
+        /// <returns>The full path to the dou file</returns>
+        public static String GetDouFilePath(System.Int64 typeId)
+        {
+            int BUF_SIZE = 512;
+            IntPtr buf = Marshal.AllocHGlobal(BUF_SIZE);
+            System.Int32 resultSize = 0;
+            Internal.Kernel.DotsC_GetDouFilePathForType(typeId, buf, BUF_SIZE, out resultSize);
+            if (resultSize == -1)
+            {
+                Marshal.FreeHGlobal(buf);
+                throw new IllegalValueException("There is no such type defined");
+            }
+            if (resultSize > BUF_SIZE)
+            {
+                BUF_SIZE = resultSize;
+                Marshal.FreeHGlobal(buf);
+                buf = Marshal.AllocHGlobal(BUF_SIZE);
+                Internal.Kernel.DotsC_GetDouFilePathForType(typeId, buf, BUF_SIZE, out resultSize);
+                if (resultSize != BUF_SIZE)
+                {
+                    Marshal.FreeHGlobal(buf);
+                    throw new SoftwareViolationException("Error in GetDouFilePathForType!");
+                }
+            }
+            string str = Internal.InternalOperations.StringOf(buf,resultSize - 1); //remove null char
+            Marshal.FreeHGlobal(buf);
+
+            return str;
         }
     }
 }

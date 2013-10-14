@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(dose_internal_test CXX)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 FIND_PACKAGE(Boost COMPONENTS system thread)
 
@@ -26,6 +26,7 @@ ADD_TEST(MessageQueue dose_message_queue_test)
 ADD_TEST(DistributionData distribution_data_test)
 ADD_TEST(LamportClocks lamport_clock_test)
 
-set_tests_properties(Semaphore PROPERTIES TIMEOUT 60)
-set_tests_properties(MessageQueue PROPERTIES TIMEOUT 360)
-set_tests_properties(LamportClocks PROPERTIES TIMEOUT 2400)
+SET_SAFIR_TEST_PROPERTIES(Semaphore 60)
+SET_SAFIR_TEST_PROPERTIES(MessageQueue 360)
+SET_SAFIR_TEST_PROPERTIES(DistributionData)
+SET_SAFIR_TEST_PROPERTIES(LamportClocks 2400)

@@ -3,27 +3,26 @@
 
 Safir SDK Core User's Guide
 ==========================
-:Author: Lars Hagström (main author), Anders Widén and Mikael Wennerberg
-7 Nov 2012
+:Author: Lars Hagström and Anders Widén
+9 Oct 2013
 
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
 
+:numbered!:
 == Preface
 The purpose of this document is to provide a comprehensive guide to using the services in Safir SDK Core. The reader should have general knowledge about object-oriented programming. Some knowledge of distributed real-time systems programming is also desirable, but not essential.
 
 === How to read
-This document is intended to be used both as an introduction to new users of the Safir SDK Core, and as a reference for those who have used the SDK for a long time. Because of this the level of the different sections vary quite a lot. Some sections are marked as advanced (with an ^adv^ tag to them), to signal that they cover advanced topics that can be skipped by "beginners".
+This document is intended to be used both as an introduction to new users of the Safir SDK Core, and as a reference for those who have used the SDK for a long time. Because of this the level of the different sections vary quite a lot. Some sections are marked as advanced (with an ^adv^ tag to them), to signal that they cover advanced topics that can be skipped by newcomers.
 
 === Acknowledgements
 This document is a combination of several other documents, so some parts of the text have different authors, or is based on texts authored by other people. 
 
-More specifically the database section is written by Jörgen Johansson, the software error reporting section was originally written by Anders Widén, the section on Safir.Utilities.Foreach was written by Stefan Lindström, and the appendix about the example applications was written by Petter Lönnstedt. Most of the text on the basic Dob services is based on the original Dob Software User's Guide written by Jörgen Johansson. The context section, and the bits on how to use the Ada interfaces, are written by Anders Widén.
-
-This document has also been reviewed by a number of people: Henrik Sundberg, Mattias Gålnander and Anders Widén. If I've left someone out, then I apologise and I'll happily add you.
+More specifically the database section is written by Jörgen Johansson, the section on Safir.Utilities.Foreach was written by Stefan Lindström, and the appendix about the example applications was written by Petter Lönnstedt. Most of the text on the basic Dob services is based on the original Dob Software User's Guide written by Jörgen Johansson. Mikael Wennerberg wrote the section on redundant persistency.
 
 === Versions of this document
-To obtain the latest revision, or the latest approved and reviewed revision, please visit http://www.safirsdk.com/downloads/users_guide[].
+To obtain the latest version, please visit http://safir.sourceforge.net/[].
 
 [[licenses]]
 === Licences and Copying
@@ -31,24 +30,25 @@ This document is licensed under the Creative Commons "Attribution - Share Alike"
 
 For more information about the Creative Commons licenses see http://creativecommons.org/[]
 
-Safir SDK Core itself is available under the GPL v3 (GNU General Public License version 3) license from http://www.safirsdk.com/[] or a commercial license from Saab AB.
+Safir SDK Core itself is available under the GPL v3 (GNU General Public License version 3) license from http://safir.sourceforge.net[] or a commercial license from Saab AB.
 
-The GPL license means that you are free to try out or modify the software to your hearts content and create your own applications on top of it. But you are not allowed to distribute the modified software or your applications (which will classify as derivative works) without releasing your code under the GPL license too. If you want to do this you need to obtain (and pay for...) a commercial license from Saab AB (contact information at http://www.safirsdk.com[]).
+The GPL license means that you are free to try out or modify the software to your hearts content and create your own applications on top of it. But you are not allowed to distribute the modified software or your applications (which will classify as derivative works) without releasing your code under the GPL license too. If you want to do this you need to obtain (and pay for...) a commercial license from Saab AB (contact information at http://www.saabgroup.com[]).
 
 For more information on the GPL v3 license, see http://gplv3.fsf.org/[].
 
+:numbered:
 == What is Safir SDK Core?
 
 This section is meant to contain a high-level overview of what the Safir SDK Core is, what services it provides and what kind of systems it is suitable for, without going too much into the technical details. 
 
-But, we're not there yet. Due to time constraints we haven't been able to get that information in here in a form that we're satisfied with. If you want that kind of information please contact Saab AB (contact information at http://www.safirsdk.com[]).
+But, we're not there yet. We haven't been able to get that information in here in a form that we're satisfied with. If you want that kind of information please contact Saab AB (contact information at http://www.saabgroup.com[]).
 
 So for the time being this chapter just contains a collection of background information. 
 
 === Provided services
-Safir SDK Core is mainly aimed at providing a data distribution for distributed real-time systems and information systems, but there are a few other services included in Safir SDK Core, mostly because they are needed internally. <<sdk_service_summary>> contains a summary of the services provided by Safir SDK Core.
+Safir SDK Core is mainly aimed at providing data distribution for distributed real-time systems and information systems, but there are a few other services included in Safir SDK Core, mostly because they are needed internally. <<sdk_service_summary>> contains a summary of the services provided by Safir SDK Core.
 
-Safir SDK Core consists of a number of _components_, that have cryptic four-letter acronyms as names. Each component provides one or more services. This document tries not to use the cryptic acronyms, but rather talks about the services provided, but it is good to know about them.
+Safir SDK Core consists of a number of _components_, some of which have cryptic four-letter acronyms as names. Each component provides one or more services. This document tries not to use the cryptic acronyms, but rather talks about the services provided, but it is good to know about them.
 
 [[sdk_service_summary]]
 .Components and Services in Safir SDK Core
@@ -56,23 +56,25 @@ Safir SDK Core consists of a number of _components_, that have cryptic four-lett
 |=========================================================================
 |Acronym |Full name                       |Provided Service(s)
 
-|Lluf    |Low Level Utility Functions     |Low level functions that are not provided by ACE or Boost
-|Dots    |Distributed Objects Type system |The type system used for the distributed objects
-|Dose    |Distributed Objects Service     |Inter-process and inter-computer distribution
-|Douf    |Dob Utility Functions           |Utility functions for applications using the Dob
-|Swre    |Software Reports                |Software error reporting and debug trace logging
+|Lluf    |Low Level Utility Functions     |Low level functions that are not provided by Boost.
+|Dots    |Distributed Objects Type system |The type system used for the distributed objects.
+|Dose    |Distributed Objects Service     |Inter-process and inter-computer distribution.
+|Douf    |Dob Utility Functions           |Utility functions for applications using the Dob.
+|Logging |N/A                             |Send log messages to the Safir Log mechanism.
+|Swre    |Software Reports                |Debug trace logging.
 |Olib    |ODBC Library                    |C++ wrapper classes for Odbc database access.
-|Dope    |Dob Persistence                 |Persistent storage of Dob entities
+|Dope    |Dob Persistence                 |Persistent storage of Dob entities.
+|Foreach |N/A                             |Functionality for operating on multiple entity instances.
 
 |=========================================================================
 
 When we talk about _the Dob_ what is really meant is the services provided by Dots, Dose and Dope, i.e. distributed objects with optional persistence.
 
-Component dependencies are illustrated in <<sdk_core_component_dependencies>>.
+Component dependencies and the layered architecture of Safir SDK Core is illustrated in <<sdk_core_component_dependencies>>.
 
 [[sdk_core_component_dependencies]]
 .Safir SDK Core component dependencies
-image::images/dependencies.png["Component Dependencies", width=350, link="images/dependencies.png"]
+image::block-diagram.png["Component Dependencies", width="50%", link="block-diagram.png"]
 
 Again, to be able to use Safir SDK Core you do not need to understand or like these acronyms, but knowing that they are there may make some things in the SDK easier to use.
 
@@ -81,23 +83,23 @@ Saab sells another product Safir SDK, which is not open-source, which consists o
 
 The additional services that Safir SDK provides include Alert handling, Application and Node redundancy control, communication over low-bandwidth and low connectivity media (e.g. radios of different kinds), track handling and correlation etc. 
 
-Contact Saab AB for more information (contact information at http://www.safirsdk.com[]).
+Contact Saab AB for more information (contact information at http://www.saabgroup.com[]).
 
 === Prerequisites / Dependencies
-Safir SDK Core uses two open-source products to provide low level functionality and operating system independence wrappers.
+Safir SDK Core uses the _Boost_ library to provide low level functionality and operating system independence wrappers. See http://www.boost.org/[] for more information. Safir SDK Core requires boost version 1.41 or later.
 
-*ACE*, The ADAPTIVE Communication Environment, a freely available, open-source, C++ network programming toolkit. See http://www.cs.wustl.edu/~schmidt/ACE.html[] for more information. At Saab we are is using 5.6.3 and later, but Safir SDK Core is quite likely to work with earlier versions.
-
-*Boost*, a collection of portable high-quality C++ libraries. See http://www.boost.org/[] for more information. Safir SDK Core requires boost version 1.36 or later (it is possible to use 1.35 by patching a few bugs, or 1.34 by installing the Boost.Interprocess library separately).
+Safir SDK Core also uses some other open source libraries, such as Qt for C++ widgets, CMake for building and Expat for xml parsing. See the installation instructions for more information.
 
 === Supported Platforms
-Safir SDK Core supports both the Windows and Linux platforms on the x86 platform. It also supports Linux on 64 bit x86_64 platforms, but this has not been extensively tested. It should work well on 64 bit Windows platforms as well.
+Safir SDK Core supports both the Windows and Linux platforms on the x86 and x86_64 platforms. It also successufully builds and runs on ARM Linux, but we have not tested this extensively.
 
 Obviously it is possible to combine all these platforms into one system and use Safir SDK Core for communication (after all what use is a middleware if it isn't platform independent).
 
-An application should, written correctly using ACE and Boost and Safir SDK, be portable to all the supported platforms with no or very little effort.
+An application should, written correctly using Boost and Safir SDK Core, be portable to all the supported platforms with no or very little effort.
 
-The compilers that we know can be used for the C++ code are GNU gcc (version 4.0 or later), Microsoft Visual Studio (2005 SP1 or later). For C# code we use Visual Studio (2005 SP1 or later) or Mono (version 1.9.1 or later). Any Java 5 compiler should be able to compile the Java code (we've used Sun's), and for Ada we use Adacore's GNAT Pro (6.1.0w) and GNAT GPL (2008 and 2009).
+The compilers that we use for building and testing for the C++ code are GNU gcc (version 4.4 or later), Microsoft Visual Studio (2010 SP1 or later). For C# code we use Visual Studio (2010 SP1 or later) or Mono (version 2.4 or later). Any Java 6 compiler should be able to compile the Java code (we've used Oracles's and OpenJDK), and for Ada we use Adacore's GNAT GNAT GPL (2013). We strive to make all our code standars compliant, so other versions and compilers _should_ work.
+
+There is more information about platform support on the http://sourceforge.net/p/safir/wiki/[safir.sourceforge.net wiki].
 
 == What is the Dob?
 This chapter describes what the Dob does and a little bit about why it does it the way it does.
@@ -110,9 +112,9 @@ The main ``selling points'' include:
 - Completely transparent addressing on single or multi-node systems.
 - Supports _both_ request/response and publish/subscribe idioms.
 - Easy-to-use Persistency.
-- Redundancy and hot-standby.
-- Language independent inter-process/inter-computer communication.
-- Allows modular information model.
+- Support for redundancy and hot-standby.
+- Language independent inter-process and inter-computer communication.
+- Supports use of a modular information model.
 
 ==== A bit about the Dob architecture
 
@@ -131,7 +133,7 @@ The Dob is appropriate for distribution of data between applications (in the sam
 - Has no infinite queues.
 - Is event driven (no polling).
 - Is asynchronous (no RPC, no blocking calls).
-- Has a bounded latency.
+- Has bounded latency.
 
 The Dob implements a distributed object cache, making it possible to either read object information synchronously from shared memory, or to subscribe to object changes.
 
@@ -150,26 +152,21 @@ No record is kept of messages, i.e. they are not stored in the Dob in any way. S
 
 Messages do not have guaranteed delivery. If some application cannot keep up with the rate of messages it will miss messages. If you need guaranteed delivery, messages are not what you are looking for.
 
+[[service_overview]]
 ==== Services
-A Service has one or more handlers (known as a Service Handler) to which any application (known as a Requestor) can send service requests. For each service request that is sent, a response is received. The response is sent by the Service Handler, and should indicate the result of the operation (i.e. success or failure, with or without result data). If the service handler does not send a response within a reasonable amount of time (configurable, see <<request_timeouts>>), the Dob will send a timeout response to the requestor.
+A Service has one or more handlers (known as a Service Handler) to which any application (known as a Requestor) can send service requests. For each service request that is sent, a response is received. The response is sent by the Service Handler, and should indicate the result of the operation (i.e. success or failure, with or without result data). If the service handler does not send a response within a reasonable amount of time (configurable, see <<request_timeout_config>>), the Dob will send a timeout response to the requestor.
 
-Service requests and responses are guaranteed to be delivered. And you are guaranteed a response if you have sent a request.
+Service requests and responses are guaranteed to be delivered. And you are guaranteed a response if you have sent a request, even if it may be a timeout response if the handler is overloaded.
 
 ==== Entities
 An entity is a _class_ of which there can be objects (known as instances) that are stored in the Dob and has one (and only one) owner. Only the owner is allowed to modify the object. Any application can subscribe for a entity instances, which means that it will receive updates whenever the instances are changed. Applications can also send requests (very similar to the service requests above) to the entity owner asking it to change something in the object.
 
-Entity requests and responses are guaranteed to be delivered. And you are guaranteed a response if you have sent a request. Entity updates are guaranteed to reach all subscribers, with one important caveat; subscribers are not guaranteed to see all intermediate states of an entity. E.g. if an application misses one update the next update will look as if both things changed at once.
+Entity requests and responses are guaranteed to be delivered. And you are guaranteed a response if you have sent a request (this may be a timeout response, just as for service requests, as described above). Entity updates are guaranteed to reach all subscribers, with one important caveat; subscribers are not guaranteed to see all intermediate states of an entity. E.g. if an application misses one update the next update will look as if both things changed at once.
 
 ==== Defining the information model
 The Dob allows each application/component that wants to provide a Dob interface (as in a Service, Message or Entity that other applications/components can use) to contribute to the information model by specifying its objects in xml files, which are built into the information model.
 
 The xml files are used to generate language interfaces, that any application that wishes to use an object can include and use.
-
-[[information_model]]
-.Defining the information model
-image::images/typesystem_information_model.png["Defining the information model", width=400, link="images/typesystem_information_model.png"]
-
-The figure <<information_model>> attempts to show how applications contribute to, or partake of, the information model. 
 
 ===== Defining objects
 New types are defined by inheritance from a number of predefined classes. The classes for the distribution mechanisms are Safir.Dob.Message, Safir.Dob.Service, Safir.Dob.Entity, Safir.Dob.SuccessResponse and Safir.Dob.ErrorResponse.
@@ -265,7 +262,7 @@ The SI unit types are all based on Float32 or Float64 respectively:
 
 [[hashed_types]]
 ==== Hashed types
-The InstanceId, ChannelId and HandlerId types are hashed types. They can be defined either as a string or as a number. If defined as a number the number will be used as the value, but if defined by a string, the string is hashed and the hash is used as the value. 
+The InstanceId, ChannelId and HandlerId types are _hashed types_. They can be defined either as a string or as a number. If defined as a number the number will be used as the value, but if defined by a string, the string is hashed and the hash is used as the value. 
 
 If a string is used to define hashed type, the string will be included in the type, but is only meant to be used for reference (the hash value is used for all built-in operations). There is a method on all the hashed types, +RemoveString+, that removes the string to save space/bandwidth.
 
@@ -286,11 +283,11 @@ An Item works exactly the same way as any other Dob class apart from the fact th
 
 All these flags mean that there is a certain overhead to items, which in many cases is undesirable. And also, it doesn't always make sense to have null and change flags on all members of items. For example, in a Position type, there is no point in setting the Latitude member to null. Either the position as a whole is null or it is a valid position. For this purpose _Structs_ (inheriting from Safir.Dob.Struct) were introduced. Currently they behave exactly like an Item, but in a future Dob version they will be optimised so as to remove all the flags and overhead. 
 
-This means that there are some limitations to what you should do to a Struct. Do not use IsChanged or IsNull on any struct members. Do not inherit from a user-defined struct (structs will not support inheritance). In the current Dob this will of course work, but once the optimisation is introduced your code will break.
+This means that there are some limitations to what you should do to a Struct. Do not use IsChanged or IsNull on any members of a struct. Instead check IsNull and IsChanged on the whole struct. Do not inherit from a user-defined struct (structs will not support inheritance). In the current Dob this will of course work, but once the optimisation is introduced your code will break.
 
 [[parameters]]
 === Parameters 
-Apart from members a class can also contain constant parameters. These parameters are not compile-time constants, instead they are read from the dou-files by the Dob when it starts and applications can ask for the values by a simple function call. This means that all that is needed to change a parameter is to change its value in the dou file (under $(SAFIR_RUNTIME)/data/text/dots/classes/) and restarting the Dob and all the applications that use the Dob (note that running the code generation, as described in <<code-generation>>, will overwrite these changes).
+Apart from members a class can also contain constant parameters. These parameters are not compile-time constants, instead they are read from the dou-files by the Dob when it starts and applications can ask for the values by a simple function call. This means that all that is needed to change a parameter is to change its value in the dou file (under $(SAFIR_RUNTIME)/data/text/dots/classes/, or in an override directory, as described in <<typesystem_ini>>) and restarting the Dob and all the applications that use the Dob (note that running the code generation, as described in <<code-generation>>, will overwrite these changes).
 
 Parameters are defined by a name, a type and a value. Here is an example of a parameter definition (it is cut out of its context, but it goes in the dou-file at the same level as the _members_-tag).
 
@@ -414,6 +411,8 @@ The syntax for environment variables is +$(ENVIRONMENT_VARIABLE_NAME)+, and ther
 ----------------------------
 
 Remember that all parameters are loaded 'when the first application that uses parameters starts', so any environment variables set after that time will not be seen by the type system environment variable expansion.
+
+There is also support for _special variable_ expansion using the same syntax as is described in <<special_variables>>. This can be used to specify operating system paths in parameters.
 
 === Create routines 
 Create routines allow the designer of a Dob class to define custom routines for creating _commonly used_ instances of that class.
@@ -543,7 +542,7 @@ The string lengths and array sizes can be specified with parameters as well. The
 ----------------------------
 Of course, as mentioned in <<parameters>> it is recommended that parameters are placed in separate parameter classes.
 
-It is possible - indeed it is even recommended - to add comments to most fields in dou-files since these comments will be put into the generated code in a style that is appropriate for the specific language. (For C++/Java they will be made into _doxygen_/_javadoc_ comments.)
+It is possible - indeed it is even recommended - to add comments to most fields in dou-files since these comments will be put into the generated code in a style that is appropriate for the specific language.
 
 .A commented member
 [source,xml]
@@ -664,22 +663,29 @@ Note that in the code above there is no reference at all to what kind of object 
 
 [[code-generation]]
 === Generating code from Dou-files
-In order to use the classes defined by the Dou-files, interface code has to be generated for the different languages. First, source code will be generated from the dou-files and then this source code is built into loadable libraries suitable for your specific platform (e.g. dlls, shared libraries, or assemblies). All these steps are performed by running a single script, dobmake.py.
+In order to use the classes defined by the Dou-files, interface code has to be generated for the different languages. First, source code will be generated from the dou-files and then this source code is built into loadable libraries suitable for your specific platform (e.g. dlls, shared libraries, or assemblies). All these steps are performed by running a single script, _dobmake.py_.
 
-The code generation tools expect the dou-files to be located under $(SAFIR_SDK)/dots/dots_generated, so this is where you put your own defined dou-files. It is possible to place the files in sub-directories under this directory which can be a good idea for projects with a large number of dou-files. For instance, all dou-files containing parameter values can be placed under a separate sub-directory.
+The code generation tools expect the dou-files to be located under +$(SAFIR_SDK)/dots/dots_generated+, so this is where you put your own defined dou-files. It is possible to place the files in sub-directories under this directory which can be a good idea for projects with a large number of dou-files. For instance, all dou-files containing parameter values can be placed under a separate sub-directory.
 
-The generated source code gets put in subdirectories under $(SAFIR_SDK)/dots/dots_generated (e.g. cpp/ dotnet/ etc). The C++ and Ada header files are also copied to the $(SAFIR_SDK)/include and $(SAFIR_SDK)/ada directories so that they are available to include into your code.
+The generated source code gets put in subdirectories under +$(SAFIR_SDK)/dots/dots_generated+ (e.g. +cpp/+ and +dotnet/+). The C++ and Ada header files are also copied to the +$(SAFIR_SDK)/include+ and +$(SAFIR_SDK)/ada+ directories so that they are available to include into your code.
 
-The generated loadable libraries (e.g. dots_generated-cpp.dll) are copied to the $(SAFIR_RUNTIME)/bin or lib directory.
+The generated loadable libraries (e.g. dots_generated-cpp.dll) are copied to the +$(SAFIR_RUNTIME)/bin+ or +lib+ directory.
 
-As part of the code generation procedure the original dou-files are copied from $(SAFIR_SDK)/dots/dots_generated to $(SAFIR_RUNTIME}/data/text/dots/classes (the sub-directory structure is preserved). This is the directory used by the Dob at runtime to parse dou-files, including parameters. 
+As part of the code generation procedure the original dou-files are copied from +$(SAFIR_SDK)/dots/dots_generated+ to +$(SAFIR_RUNTIME}/data/text/dots/classes+ (the sub-directory structure is preserved). This is the directory used by the Dob at runtime to parse dou-files, including parameters. 
 
-Note that any changes to parameter files under $(SAFIR_RUNTIME}/data/text/dots/classes will be overwritten when dobmake.py is executed. If you want the parameter change to "survive" make the change under $(SAFIR_SDK)/dots/dots_generated.
+All this means that any changes to parameter files under +$(SAFIR_RUNTIME}/data/text/dots/classes+ will be overwritten when dobmake.py is executed. If you want the parameter change to "survive" make the change under +$(SAFIR_SDK)/dots/dots_generated+ _or use a parameter override directory, as described in <<typesystem_ini>>_.
+
+.Note
+************************************
+In the current version of Safir SDK Core (4.5), the dobmake.py script is not aware of the _typesystem.ini_ configuration (see <<typesystem_ini>>, so dou and dom files will always be copied to +$(SAFIR_RUNTIME}/data/text/dots/classes+ regardless of the contents of that configuration file.
+
+So, to keep the "expected" behaviour, don't change the Default section in typesystem.ini from pointing to +$(SAFIR_RUNTIME}/data/text/dots/classes+.
+************************************
 
 ==== Running dobmake.py
-To execute all code generations steps just run dobmake.py (located under $(SAFIR_RUNTIME}/bin) and you're done!
+To execute all code generation steps just run dobmake.py (located under +$(SAFIR_RUNTIME}/bin+) and you're done!
 
-The script requires that Python (at least version 2.4, from http://www.python.org) and CMake (at least version 2.6 from http://www.cmake.org) are installed.
+The script requires that Python 2.7 or later and CMake version 2.8 or later are installed. See http://www.python.org[] and http://www.cmake.org[].
 
 A GUI will open, and you will be able to choose between some different actions and to disable build of some languages. To get the fastest possible build time, select 'Rebuild' (radio button) if you are building for the first time or if you have changed a lot of dou-files, otherwise select 'Build'.
 
@@ -696,7 +702,7 @@ So an A object (myA) could look like in <<example_object>>.
 
 [[example_object]]
 .Example object
-image::images/rc_example_object.png["Example object", width=158]
+image::images/rc_example_object.png["Example object", width="50%"]
 
 ==== Syntax in the different languages
 The design approach is that the generated code should make use of the language's own features in the best possible way. Languages that support operator overloading should use them if it makes the interface ``better'', and languages that support properties should use them. This makes each language interface ``as good as it can possibly be'', but it has one obvious side effect, i.e. the interfaces are _not identical_.
@@ -963,7 +969,7 @@ Smart pointers are objects which store pointers to dynamically allocated (heap) 
 Conceptually, smart pointers are seen as owning the object pointed to, and thus responsible for deletion of the object when it is no longer needed.
 *********************************************
 
-The boost::shared_ptr type is going to be included in the next C++ standard (TR1).
+The boost::shared_ptr type is included in C++ since 2007 (ISO/IEC TR 19768:2007 aka C++TR1) under the name std::shared_ptr. Safir SDK Core will continue to use the boost version so as not to break backward compatibility.
 
 See <<cpp_type_casting>> for more information on how to cast smart pointers in C++.
 
@@ -1026,7 +1032,7 @@ For the discussion in this section the object hierarchy in <<example_object_hier
 
 [[example_object_hierarchy]]
 .Example object hierarchy
-image::images/object_hierarchy.png["Example object hierarchy", width=350, link="images/object_hierarchy.png"]
+image::images/object_hierarchy.png["Example object hierarchy", width="50%", link="images/object_hierarchy.png"]
 
 [[cpp_type_casting]]
 ===== C++ type casting
@@ -1342,7 +1348,7 @@ But here are some hints:
 - All Dob objects have GetMember(...) routines that return a ContainerBase for a specified member and array index. This can be casted to a container of the correct type, and thereafter manipulated.
 - Very few of the routines in the reflection interface check for errors. If you call them with incorrect arguments the results are usually undefined. E.g. If you try to get the type of the 4th member of a type that has only 3 members you will probably get an undefined value as the type.
 
-_Use with care!_ or even better: ``With great power comes great responsibility!''
+_Use with care!_ or even better: _With great power comes great responsibility!_
 
 == The distribution mechanisms
 
@@ -1365,7 +1371,7 @@ First we'll describe primary connections, and we'll cover secondary connections 
 To create a primary connection the application must create a Connection object and then call +Open+ on it. The +Open+ method takes a number of parameters:
 
 - A connection name and a connection instance. These are used to uniquely identify the connection in the system. No two connections can have the same name and instance.
-- A context, which specify the data "universe" that the connection will operate in. A normal application that is not concerned with Replay should connect with context 0. See <<contexts>> for further details.
+- A context, which specifies the data "universe" that the connection will operate in. A normal application that is not concerned with Replay should connect with context 0. See <<contexts>> for further details.
 - A +StopHandler+ consumer, which the Dob uses to tell the application to stop executing. Stop orders are described in <<stop_orders>>.
 - A +Dispatcher+ consumer, which the Dob uses to tell the application that there is data available to it, which it will receive if it calls the +Dispatch+ method. Dispatching is discussed in the next section.
 
@@ -1388,9 +1394,16 @@ The upshot is that all callbacks (except, of course, the +OnDoDispatch+ one) are
 
 [[dispatching_sequence_diagram]]
 .Dispatching sequence diagram
-image::images/dispatching_sequence_diagram.png["Dispatching Sequence Diagram", width=450, link="images/dispatching_sequence_diagram.png"]
+image::images/dispatching_sequence_diagram.png["Dispatching Sequence Diagram", width="50%", link="images/dispatching_sequence_diagram.png"]
 
-If you're using C++ and ACE the SDK provides a Dispatcher class that does the thread switch and calls Dispatch, see <<ace_dispatcher>>.
+If you're using C++ and Boost.Asio or ACE the SDK provides Dispatcher classes that do the thread switch and calls Dispatch, see <<dispatcher_classes>>.
+
+===== Breaking out of Dispatch "early"
+As mentioned above, the +Dispatch+ call will call _all_ pending callbacks before returning. If there is a lot happening in a system this can potientially take a long time, and for example for applications that have requirements to do other tasks periodically this can cause trouble (e.g. missed deadlines).
+
+To resolve this applications can, from within a callback, call +ExitDispatch+, which will cause the +Dispatch+ function to return ``as soon as possible''. ExitDispatch will also cause a new event to be triggered, so that dispatching will be resumed automatically.
+
+TIP: If you're using an ACE_Reactor in your application you will also need to call +max_notify_iterations(1)+ on your rector to make the reactor handle your timers in a fair manner. See your ACE documentation for more information.
 
 [[secondary_connections]]
 ==== Secondary Connections
@@ -1398,11 +1411,9 @@ Whereas a primary connection is a real connection to the Dob, a secondary connec
 
 Each application needs one primary connection (at least, see <<multithreading>>). This connection is the one that the Dob knows about and through which data is dispatched. A secondary connection is used by other parts of the application to "attach" to the primary connection.
 
-The reason for providing this functionality is so that different modules of an application can use the same connection without passing around the primary connection object, something that is not even possible if the parts are written in different languages (like a C# plugin to a C++ application). Instead the modules attach to the main program's connection using a secondary connection.
+The reason for providing this functionality is so that for example a C++ library used by a C# application can use the main programs connection. This would otherwise be impossible, since passing the connecton object over the C# to C++ interface is not possible. Instead modules can attach to the main program's connection using a secondary connection.
 
 When creating a secondary connection you can either specify a connection name and instance to get a specific connection instance, or not specify anything at all, in which case you will be given the first connection that was created in the current thread.
-
-
 
 === Using the mechanisms
 The three different distribution mechanisms of the Dob are used in different ways and require different things from the user application.
@@ -1438,7 +1449,7 @@ Of course it is possible to pass proxies to other methods, as long as the proxy 
 
 [[messages_sequence_diagram]]
 .Sequence diagram for messages
-image::images/messages_sequence_diagram.png["Messages Sequence Diagram", width=350, link="images/messages_sequence_diagram.png"]
+image::images/messages_sequence_diagram.png["Messages Sequence Diagram", width="50%", link="images/messages_sequence_diagram.png"]
 
 For messages there are two different roles involved. The Message Sender sends messages and the Message Subscriber receives messages. The subscriber needs to set up the subscription, and subsequently it will receive messages in its +OnMessage+ callback function whenever a Message Sender sends a message.
 
@@ -1548,7 +1559,7 @@ catch (const Safir::Dob::OverflowException &)
 
 [[services_sequence_diagram]]
 .Sequence diagram for services
-image::images/services_sequence_diagram.png["Services Sequence Diagram", width=350, link="images/services_sequence_diagram.png"]
+image::images/services_sequence_diagram.png["Services Sequence Diagram", width="50%", link="images/services_sequence_diagram.png"]
 
 
 For services there are two different roles involved. The ServiceHandler is the component implementing the service and the Requestor is the component using the service. The Handler needs to register the service and then the Requestor can send requests to it.
@@ -1710,7 +1721,7 @@ When handling entities there are three roles involved. _Entity Handler_ is an ap
 
 [[entities_sequence_diagram]]
 .Sequence diagram for entities
-image::images/entities_sequence_diagram.png["Entities Sequence Diagram", width=350, link="images/entities_sequence_diagram.png"]
+image::images/entities_sequence_diagram.png["Entities Sequence Diagram", width="50%", link="images/entities_sequence_diagram.png"]
 
 
 This section will first describe "simple" entity handling, such as is shown in <<entities_sequence_diagram>>, and later go on to describe more advanced concepts, such as _persistence_ and _injections_.
@@ -2348,7 +2359,7 @@ Now you need to create a dom file as described in <<simple_persistence>>, and th
 
 [[persistence_sequence_diagram]]
 .Sequence diagram for persistent entity
-image::images/persistence_sequence_diagram.png["Persistence Sequence Diagram", width=350, link="images/persistence_sequence_diagram.png"]
+image::images/persistence_sequence_diagram.png["Persistence Sequence Diagram", width="50%", link="images/persistence_sequence_diagram.png"]
 
 
 [[handler_registration_subscription]]
@@ -2491,11 +2502,124 @@ Upon receiving a stop order the application shall shut down gracefully.
 
 When an application has several connections to the Dob, only one of them should supply a StopHandler. It is the handler of this connections responsibility to tell the other parts of the application to shut down gracefully. If several connections have stop handlers there may be race conditions, since there is no guaranteed order between which stop handler gets called first.
 
+[[configuration]]
 == Configuration
-There are many things in Safir SDK Core that can be configured. This chapter aims to describe the most important ones, but the adventurous can always delve into the parameters in the dou-files of Safir SDK Core.
+Safir SDK Core has two different configuration mechanisms, one for basic system settings, using ini-files, and one for service level settings, using dou-parameters.
+
+The reason that we need two mechanisms is that the dou-parameters are not available for the lower level parts of the Safir SDK Core, and we need some way of configuring these. So we use ini-files for such things as where lock files should be kept, how logging should work, and where to actually look for dou-files.
+
+This chapter aims to describe the most important of all the things that can be configured in Safir SDK Core. There are many more things that can be configured, and you're encouraged to have a look in the parameter dou-files, which should contain descriptions of what the parameters do.
+
+=== Basic system settings
+The basic system settings consist of three ini files: _locations.ini_, _logging.ini_, and _typesystem.ini_. Currently these contain very few settings, but we have plans to use them for more settings (go to http://safir.sourceforge.net for more information).
+
+ * locations.ini - locations of stuff we need, e.g. lock file and crash dump directories.
+ * logging.ini - logging settings.
+ * typesystem.ini - typesystem configuration.
+
+The system will look for these configuration files in several places, which allows them to be kept separate or together with the rest of the Safir SDK Core files. The following locations are checked, and the first configuration found will be used:
+
+*Linux*::
+
+  1. /etc/safir_sdk_core/ - system wide configuration
+  2. ~/.config/safir_sdk_core/ - user configuration
+  3. $(SAFIR_RUNTIME)/data/core_config/
+
+*Windows*::
+
+  1. _CSIDL_COMMON_APPDATA_\safir_sdk_core\config\ - system wide configuration
+  2. _CSIDL_LOCAL_APPDATA_\safir_sdk_core\config\ - user configuration
+  3. %SAFIR_RUNTIME%\data\core_config\
+
++
+On Windows 7 _CSIDL_COMMON_APPDATA_ is +C:\ProgramData+ and _CSIDL_LOCAL_APPDATA_ is +%USERPROFILE%\AppData\Local+ by default. See http://msdn.microsoft.com/en-us/library/windows/desktop/bb762494%28v=vs.85%29.aspx[MSDN documentation] for more information about CSIDLs. (The reason that we use CSIDLs rather than Windows Known Folders is that it allows us to be backward compatible with Windows XP.)
+
+[[locations_ini]]
+==== locations.ini
+_locations.ini_ currently contains two parameters:
+
+lock_file_directory::
+To ensure correct platform independent initialization of some system-wide resources (e.g. shared memory) Safir SDK Core uses lock files. This parameter lets us know where we should keep them.
+
+crash_dump_directory::
+Controls where the crash reporting library (see <<crash_reporting>>) should write the dump files.
+
+[[logging_ini]]
+==== logging.ini
+_logging.ini_ has two sections, _SystemLog_ and _LowLevelLog_. The LowLevelLog section contains parameters that control the logs for an internal logging and debugging facility, and you should never really need to touch these parameters, unless one of the Safir SDK Core developers have asked you to. The SystemLog section, however, contains parameters of greater interest, since they control the way Safir Logging works:
+
+native_logging::
+Controls whether or not logs are sent to the native, plattform specific, logging mechanism.
+
+send_to_syslog_server::
+Controls whether or not logs are formatted by the Safir Log mechanism and sent to a syslog server using UDP datagrams.
+
+syslog_server_address::
+IP address for the syslog server.
+
+syslog_server_port::
+UDP Port for the syslog server.
+
+replace_newline_with_space::
+Controls whether or not a newline in the log message is replaced with a space.
+
+See <<safir_logging>> for more information on what "native" and "syslog" means, and how to use and configure the logging functionality.
+
+[[typesystem_ini]]
+==== typesystem.ini
+_typesystem.ini_ is a little bit more involved, so let's start with an example:
+
+.Example typesystem.ini
+------------------------------------------
+[Default]
+dou_directory=$(SAFIR_RUNTIME)/data/text/dots/classes
+
+[Override]
+dou_directory=/path/to/some/other/directory
+
+[AnotherOverride]
+dou_directory=/path/to/yet/another/directory
+------------------------------------------
+
+_typesystem.ini_ can contain any number of _sections_ (with arbitrary names), each specifying one directory where dou/dom files will be loaded from. If a file is found in multiple places, the _last one_ found will be the one used. For example, this can be used to override parameters or string or array lengths without having to change the files that are in SAFIR_RUNTIME, and for keeping project-specific changes separate from the Safir SDK Core defaults.
+
+In the above example there are three sections, one specifying the default place to look for dou/dom files, and two places to look for override files. If, for example, the Override directory contains a Safir.Dob.NodeParameters.dou file (which is also in the Default directory, by default) the file from the Override directory will be used.
+
+[[special_variables]]
+==== Environment and special variable expansion
+Since the configuration files need to be able to refer to system directories they also support environment variable expansion. E.g. +$(HOME)+ expands to the value of the +HOME+ environment variable.
+
+On Windows platforms we also support the _CSIDL_ values mentioned above, since Windows does not guarantee that there are always environment variables that correspond to them. For example the %PROGRAMDATA% environment variable is not guaranteed to be set or to point to the same directory as _CSIDL_COMMON_APPDATA_. So the configuration files support _special variables_ as well as environment variables. E.g. +@\{SPECIAL_VARIABLE\}+ will be expanded to the value of that variable (note that the syntax is different from the environment variable syntax).
+
+The supported special variables are listed in <<windows_special_variables>>. We also provide aliases that use the Windows Known Folder naming.
+
+[[windows_special_variables]]
+.Special Variables on Windows
+[width="70%",options="header",frame="topbot",grid="none"]
+|===========================
+|CSIDL name             |Windows Known Folder "alias"
+|CSIDL_APPDATA          |FOLDERID_RoamingAppData
+|CSIDL_LOCAL_APPDATA    |FOLDERID_LocalAppData
+|CSIDL_COMMON_APPDATA   |FOLDERID_ProgramData
+|CSIDL_MYDOCUMENTS      |FOLDERID_Documents
+|CSIDL_COMMON_DOCUMENTS |FOLDERID_PublicDocuments
+|===========================
+
+Here are two more links that contain useful information about Windows paths, CSIDLs, and Windows Known Folders.: "http://blogs.msdn.com/b/cjacks/archive/2008/02/05/where-should-i-write-program-data-instead-of-program-files.aspx[Where Should I Write Program Data...?]" and "http://blogs.msdn.com/b/patricka/archive/2010/03/18/where-should-i-store-my-data-and-configuration-files-if-i-target-multiple-os-versions.aspx[Where Should I Store my Data and Config...?]".
+
+There is currently one special variable that is available on both Linux and Windows. It is described in <<common_special_variables>>, below.
+
+[[common_special_variables]]
+.Common Special Variables
+[width="70%",options="header",frame="topbot",grid="none"]
+|===========================
+|Special Variable  |Meaning
+|TEMP              | /tmp on Linux and TEMP or TMP environment variable on Windows.
+|===========================
+
 
 === Network config
-A Safir SDK Core system can have two basic configurations, with respect to networking. _Standalone_ or _Multinode_. Standalone means that the system consists of only one node or computer. This is typically used for developer machines or systems that have only one node. Multinode is typically used when a system consists of several nodes, for example a couple of servers (where applications and databases run) and a few operator consoles (where only the HSI runs).
+A Safir SDK Core system can have two basic configurations, with respect to networking. _Standalone_ or _Multinode_. Standalone means that the system consists of only one node or computer. This is typically used for developer machines or systems that have only one node. Multinode is typically used when a system consists of several nodes, for example a couple of servers (where applications and databases run) and a few operator consoles (where only the HMI runs).
 
 [[standalone_config]]
 ==== Standalone
@@ -2531,7 +2655,7 @@ First of all you should specify the number of nodes that are part of your system
 
 Each node has to be configured to know which node number it is, which is done in the parameter +Safir.Dob.ThisNodeParameters.NodeNumber+. Change this to contain the node number of each node (yes, this means having different contents in that file on each node in the system, unless you use an environment variable in the parameter, as described in <<environment_parameters>>).
 
-If your nodes have multiple network cards the Dob needs to be told which network card it should use, and this is done by specifying a network address in +Safir.Dob.NodeParameters.NetworkAddress+ (you only have to specify enough to uniquely identify the subnet that the card has, so if all your nodes are on the 192.168.123.\* network you only need to specify 192.168.123.0).
+If your nodes have multiple network cards the Dob needs to be told which network card it should use, and this is done by specifying a network address in +Safir.Dob.NodeParameters.NetworkAddress+ (you only have to specify enough to uniquely identify the subnet that the card has, so if all your nodes are on the 192.168.123.* network you only need to specify 192.168.123.0).
 
 The last step to get a working multinode configuration is to change the Safir.Dob.DistributionChannelParameters dou file. What this file actually does is described below, but for now you just need to know that it specifies which multicast addresses the Dob uses. You need two +DistributionChannels+ defined, the +System+ and +PoolDistribution+ ones, which must be the first two distribution channels in the array.
 Set the MulticastAddress members to be valid multicast addresses, that are not used for something else on your network (e.g. 224.10.10.127 and 224.10.10.128).
@@ -2619,11 +2743,10 @@ The Dob uses the following ports:
 |6970          |KeepAlive messages, to know which nodes are running.
 |6971          |Acknowledgements
 |6972-6977     |Data (one port for every priority level)
-|31221         |Low level error logs (from components that can't use Software Reports)
 
 |==================
 
-If the system is configured to be StandAlone (as described in <<standalone_config>>) only the 31221 port is used, the others are not opened or used.
+If the system is configured to be StandAlone (as described in <<standalone_config>>) none of the ports will be opened or used.
 
 [[persistence_config]]
 === Persistence config
@@ -2636,7 +2759,7 @@ _Safir.Dob.PersistenceParameters.SystemHasPersistence_::
 _Safir.Dob.PersistenceParameters.Backend_::
         Which backend should be used, Odbc database or files.
 _Safir.Dob.PersistenceParameters.FileStoragePath_::
-        The path where files are stored if the file backend is chosen. Obviously dope_main needs write permissions here.
+        The path where files are stored if the file backend is chosen. Obviously dope_main needs write permissions here. Remember that you can use environment variables and special variables here, as described in <<environment_parameters>>.
 _Safir.Dob.PersistenceParameters.OdbcStorageConnectString_::
         The connection string to use to connect to the database.
 _Safir.Dob.PersistenceParameters.StandaloneMode_::
@@ -2648,9 +2771,9 @@ _Safir.Dob.PersistenceParameters.StandaloneMode_::
 
 There is more information about the persistence service in <<persistence_service>>.
 
-[[request_timeouts]]
+[[request_timeout_config]]
 === Request timeouts config
-Timeouts are defined using the properties Safir.Dob.RequestTimeoutProperty and Safir.Dob.RequestTimeoutOverrideProperty. If no response have been received when the timeout occurs, the Dob itself sends a timeout response to the Requestor. If the missing response arrives after this, it is just ignored. I.e., the Dob guarantees that the requestor will receive one, and only one, response.
+Timeouts are defined using the properties Safir.Dob.RequestTimeoutProperty and Safir.Dob.RequestTimeoutOverrideProperty. If no response have been received when the timeout occurs, the Dob itself sends a timeout response to the Requestor. If the missing response arrives after this, it is just ignored. I.e., the Dob guarantees that the requestor will receive one, and only one, response. See also <<request_timeouts>>.
 
 The default timeout for service requests is 7 seconds and for entity requests 2 seconds, and these can be changed by changing the timeout properties on the +Safir.Dob.Entity+ and +Safir.Dob.Service+ classes.
 
@@ -2729,7 +2852,7 @@ Here are some example connection names and their resulting queue lengths:
 
 |================================================================
 
-WARNING: Before deciding to change the queue lengths you should have read and understood <<overflow_handling>>, and the two items on overflows in <<faq>>. It is important to understand what effects, other than just increasing memory use, this may have on your system.
+WARNING: Before deciding to change the queue lengths you should have read and understood <<overflow_handling>>, <<request_timeouts>>, and the two items on overflows in <<faq>>. It is important to understand what effects, other than just increasing memory use, this may have on your system.
 
 [[memory_config]]
 === Shared Memory config
@@ -2739,61 +2862,143 @@ The amount of memory that the typesystem needs is completely static, i.e. it doe
 
 Knowing what value to set +SharedMemorySize+ to is trickier, but one approach is to run the system and monitor the memory usage, for example using _dobexplorer_, which is described in <<dobexplorer>>.
 
-[[software_reports]]
-== Software Error Reporting
-Software Reporting provides functionality for sending software reports from applications using the Dob as communication mechanism. Software Reporting introduces a number of Dob messages that correspond to the different types of software reports that can be sent.
+[[safir_logging]]
+== Safir Logging
+Safir SDK Core has a mechanism, Safir Log, designed to make it simpler for applications to generate and send log messages according to the widely adopted _Syslog_ protocol http://www.ietf.org/rfc/rfc3164.txt[RFC 3164].
 
-To make the sending of a software report as simple as possible, Software Reporting provides interface libraries to be used by applications. The interfaces add common information, like timestamp, node name and sequence number, to the report.
+Safir Log provides an easy-to-use interface that allows an application to create and send logs by a simple function call, specifying a severity and a message. The framework will do the neccessary formatting and transmission over UDP as is specified in RFC 3164.
 
-Software Reporting provides a logger application (swre_logger) that subscribes for software reports and writes them to standard output or a log file. It is possible to set various filter conditions for the logger application. Type "+swre_logger -?+" to get a complete listing of the command line options.
+It is also possible to configure Safir Log so that the logs are sent to a native, plattform specific, logging mechanism. In practice, this could be of use on the Windows plattform to send logs to the Windows Event Log and on Linux to send the logs directly to the +syslog(...)+ interface instead of using UDP messages.
 
-=== Report types
-There are five predefined report types with the following intended usage:
+.Example, sending a log message using C++
+[source,{cpp}]
+----------------------------
+#include <Safir/Logging/Log.h>
 
-- *Fatal Error Report:* Use it to report static conditions that must be fulfilled to be able to start/continue executing the program, for example missing static resources or invalid configuration. After a fatal error has been reported the program should terminate.
-- *Error Report:* Use it to report detected runtime errors, for example a message from an external system in an invalid format. Normally the program continues to execute, possibly in a degraded state.
-- *Resource Report:* Use it to report a missing/acquired dynamic resource. Note that it is "ok" for dynamic resource to be temporary missing which means that a Resource Report should be sent only after a reasonably number of retries to acquire it.
-- *Program Info Report:*  Use it to report internal program information for debugging purposes. Normally the sending of this report type is controlled by internal status variables that are set by sending program info commands to the program. This report type is used by the tracer functionality described in <<program_information>>.
-- *Programming Error Report:* Use it to report programming errors, i.e. errors of assert-type. After reporting the application should terminate.
+Safir::Logging::SendSystemLog(Safir::Logging::Error, L"This is an error log!");
+----------------------------
+ 
+Note that Safir SDK Core only provides the functionality related to the sending side for syslog messages. In order to collect and view the log messages a syslog server is needed. Such a server can range from a simple program listening for UDP packets and dumping the result on standard output, to more sophisticated solutions that support filtering, writing logs do disk or database and provide advanced search and report generation functionality. A syslog daemon is included in most Linux distributions and for Windows there are several third-party syslog servers.
 
-=== Send interface
-To make the sending of a software report as simple as possible, Software Reporting provides interfaces (currently available for C++, C#, Java and Ada) to be used by applications. The interface adds common information to the report before it is sent. The following information is added:
+=== Logging guidelines
+This section provides some guidelines that, when applied, will help you make your application behave like a "good citizen" in the syslog ecosystem.
 
-- Timestamp
-- Sequence Numbers: A software report has two sequence numbers. The Connection Sequence Number is incremented for each software report sent from a particular Dob connection. The Type Sequence Number is related to the report type and each type (Fatal Error, Error etc) has its own numbering series. This makes it easy to detect missing reports even when a certain report type isn't logged.
-- Connection name
-- Node name
+First of all we recommend that you establish project/product specific logging guidelines so that the separate parts that form your system exhibit a consistent logging behaviour.  
 
-All +Send+ methods are thread safe.
+Syslog is a "one-liner" oriented protocol. This, and the fact that syslog servers are known to handle messages differently regarding new lines, means that we recommend that you try to make your logs one-liners. When put together, the one-liner logs from your application should form a coherent narrative. 
 
-=== Logger application
-Software Reporting provides a separate logger application (swre_logger) that subscribes to software reports and writes them to standard output or file.
+==== Facility and Severity
+A syslog message has a Priority value (PRI) that is a representation of both the Facility and the Severity of the message. PRI is used by syslog deamons to filter and redirect logs but is normally not shown in the log output. Therefore, compose the log message text so that it is clear and understandable without the facility and severity context.
 
-When logging to file, the max size of the log file is supervised by swre_logger. If the max size is reached the file is renamed to old_<original name> (an already existing "old" file is deleted) and a new log file is opened. This mechanism makes it possible to have logging to file without the risk of filling up the available disk space.
+The Safir Log mechanism uses facility code 1 (user-level messages) for all syslog messages and it is not a parameter visible in the interface.
 
-It is possible to set various filter conditions for swre_logger. Type "swre_logger -?" to get a complete listing of the command line options.
+The severity level must be set by the application. RFC 3164 has a brief description of the interpretation of the severity level but doesn't really give any detailed advice. To summarize: higher severity levels imply that action from support/tech staff is more urgent, than for lower levels. In practice it isn't always obvious what severity level to use. This is especially true for code in libraries/platforms where there usually is no knowledge of the characteristics of the calling application. One could argue that libraries should refrain from generating logs at all and instead inform the using application that an error has occurred, so that it can take appropriate action. Since Safir SDK Core does not adhere to this rule itself we leave this as something to consider during library design.
 
-Swre_logger can be started in any number of instances in one or several nodes, each with its own filter conditions. For instance, it is possible to start an instance that logs only program information (PI) reports from a particular application.
+The system design in terms of redundancy might also affect the choosen severity level. For example, it might be appropriate for a system built and configured so that there is a standby application/node "taking over" in case of failure, to use severity level Error instead of Emergency for a given event.
 
-[[program_information]]
-== Software program information
+.Syslog severity levels
+[width="70%", cols="50%,50%",options="header",frame="topbot",grid="none"]
+|=========================================================================
+|RFC 3164 Severity Level |RFC 3164 Description
+
+|Emergency               |System is unusable .
+|Alert                   |Action must be taken immediately.
+|Critical                |Critical conditions.
+|Error                   |Error conditions.
+|Warning                 |Warning conditions.
+|Notice                  |Normal but significant condition.
+|Informational           |Informational messages.
+|Debug                   |Debug-level messages.
+
+|=========================================================================
+
+Here are some recommendations regarding wich severity level to use for some typical classes of errors and events found in Safir systems.
+
+Fatal error::
+This type of error includes static conditions that must be fulfilled to be able to start/continue executing the program, for example missing static resources or invalid configuration. It also includes programming errors, that is, errors of assert-type. In these cases send a Safir Log with severity in the range Critical to Emergency and then exit the program with an error code (i.e. a non-zero exit code).
+
+Non-fatal error::
+This type of error indicates that an error is detected but the program can continue to execute. An example would be the reception of a message from an external system in an invalid format. In this case send a Safir Log with severity Error. Normally the program continues to execute, possibly in a degraded state.
+
+Dynamic Resource::
+A dynamic resource is defined as a resource that is not guaranteed to be available at the time the program starts and/or a resource that can "come and go" during program execution. Send a Safir Log with severity Error to report that the resource is missing. When the resource has been acquired a Safir Log with severity Informational should be sent. Note that since it is "ok" for a dynamic resource to be temporarily missing, an Error log should be sent only after a reasonably number of retries to acquire it.
+
+Warning log::
+Use severity Warning for events that indicates that an error will occur if action is not taken, e.g. a disk is almost full.
+
+Informational/Debug log::
+For events of type Informational use the most appropriate of the severity Notice or Informational. Although it is possible to send debug logs using the Safir Log mechanism directly have a look Tracer and Backdoor functionality (see <<debugging_support>>) for a more powerful interface for debug logging.
+ 
+=== Safir Logging configuration
+The configuration of Safir Logging is located in the file +logging.ini+ (see <<configuration>>) and contains parameters that determine where the log messages are sent and how newlines in log messages should be handled.
+
+=== Safir Logging on Windows
+Windows doesn't have built-in support for receiving syslog messages. However, you can find third-party syslog servers that target the Windows plattform, both commercial and freely distributed. One example is Kiwi Syslog Server (http://www.kiwisyslog.com[]), but others are available.
+
+To enable logging using syslog on Windows, the parameter +send_to_syslog_server+ shall be set to true and the parameters +syslog_server_address+ and +syslog_server_port+ shall be set to appropriate values.
+
+[[windows_native_logging]]
+==== Windows Event Log
+Safir Log also provides a way of writing syslog messages to the Windows Event Log. To enable this, set the parameter +native_logging+ to true.
+
+For native logging the event source will be set to "Safir" and the severity level parameter is mapped to a corresponding Windows Event Log Type according to:
+
+.Mapping severity level to Windows event type
+[width="70%", cols="50%,50%",options="header",frame="topbot",grid="none"]
+|=========================================================================
+|RFC 3164 Severity Level           |Windows Event Log Type
+
+|Emergency, Alert, Critical, Error |Error
+|Warning                           |Warning
+|Notice, Informational, Debug      |Information
+
+|=========================================================================
+
+=== Safir Logging on Linux
+The recommended configuration on Linux is to have the system configured for native logging which means that Safir Log will use the Linux system call +syslog(...)+ for generating logs. If you want the logs sent to a remote syslog server you can configure your local sysloc daemon to forward the logs.
+
+Most Linux distributions come with a built-in syslog deamon capable of receiving and handling syslog messages, and many distributions make it possible to switch syslog daemon, in case you are not happy with the default. Refer to the documentation of your distribution for more information.
+
+=== Porting guidelines
+The logging interface provided by Safir SDK Core before version 4.5 (Software Reporting) is now deprecated and will be removed in some future version of the SDK. This section provides some guidelines when porting old code to use the new interface provided by Safir Log.
+
+As already mentioned, syslog has a bias towards one-liner messages which means that it could be a good idea to try to reduce the message text to contain just the most essential information.
+
+The following table shows the recommended mapping between the report types used by Software Reporting and syslog severity level.
+
+.Recommended mapping of Software Reporting types to syslog severity level
+[width="70%", cols="50%,50%",options="header",frame="topbot",grid="none"]
+|=========================================================================
+|Software Reporting                 |Recommended Syslog Severity Level 
+
+|Fatal Error Report                 |Emergency, Alert or Critical
+|Error Report                       |Error
+|Resource Report, missing resource  |Error
+|Resource Report, acquried resource |Informational
+|Program Info Report                |Debug
+|Programming Error Report           |Emergency, Alert or Critical
+
+|=========================================================================
+
+[[debugging_support]]
+== Debugging support
 Safir SDK Core provides support for applications to have a "back door" to make it possible to interactively enquire about the status of an application or to turn on and off debug logging. It also provides an interface that makes it easy to add debug trace logging to applications.
 
 === The backdoor command
-Software Reporting defines a Dob message (Safir.Application.Backdoor) to be used to send program information commands to applications. Backdoor commands can either be sent using Sate (see <<sate>>), or by the command-line program "backdoor" (use "+backdoor -h+" to get info on usage).
+The SDK defines a Dob message, Safir.Application.Backdoor to be used to send debugging commands to applications. Backdoor commands can either be sent using Sate (see <<sate>>), or by the command-line program "backdoor" (use "+backdoor -h+" to get info on usage).
 
 There are some predefined backdoor commands that applications should handle:
 
-- *Ping:* When receiving this command the application should send a Program Info Report as an indication that it is alive.
-- *Help:* When receiving this command the application should send a Program Info Report that contains a listing of the supported backdoor commands.
+- *Ping:* When receiving this command the application should send a Safir Log (at Debug severity) that indicates that it is alive.
+- *Help:* When receiving this command the application should send a Safir Log (at Debug severity) that contains a listing of the supported backdoor commands.
 
-Backdoor commands are defined as Dob messages and therefore sent to all subscribers. This means that applications have to check whether or not a backdoor message is addressed to the own application. Software Reporting provides classes (Safir.Application.BackdoorKeeper and Safir.Application.Backdoor) that simplifies the reception of backdoor commands. The classes provide this functionality:
+Backdoor commands are Dob messages and are therefore sent to all subscribers. This means that applications have to check whether or not a backdoor message is addressed to them before acting on them. The SDK provides two classes, +Safir.Application.BackdoorKeeper+ and +Safir.Application.Backdoor+, that simplifies the handling of backdoor commands. The classes provide this functionality:
 
-- Setup of subscriptions for PI command messages.
-- Checking of whether or not a PI command is to be handled by own application.
+- Setup of subscriptions for backdoor command messages.
+- Checking of whether or not a backdoor command is to be handled by this application.
 - Automatic answers to Ping commands.
 
-Output from an application as a response to a backdoor command should be through Program Information Reports (see <<software_reports>>).
+Output from an application as a response to a backdoor command should be through a system log, preferrably at Debug level (see <<safir_logging>>).
 
 === Tracer
 ////
@@ -2851,22 +3056,23 @@ For each service you can choose which type of answer you want. _Immediate_, _Bri
 
 The foreach service is provided by the "foreach" executable, which needs to be running for the foreach requests to be serviced.
 
-[[ace_dispatcher]]
-=== Ace Dispatcher
-For applications written in C++ and using ACE the class +Safir.Utilities.AceDispatcher+ provides a +Dispatcher+ class that performs the thread switch and call to +Dispatch+ as described in <<dispatching>>.
+[[dispatcher_classes]]
+=== Asio and Ace Dispatchers
+For applications written in C++ and using Boost.Asio or ACE the classes +Safir.Utilities.AsioDispatcher+ and +Safir.Utilities.AceDispatcher+ provide +Dispatcher+ classes that performs the thread switch and call to +Dispatch+ as described in <<dispatching>>.
 
-Just instantiate the +AceDispatcher+ passing it your ACE_Reactor, and pass a pointer to the instance to your connection when calling +Open+, and you're done. The +AceDispatcher+ will now perform the thread switch through the reactor main loop using +notify+.
+Just instantiate the +AsioDispatcher+ or +AceDispatcher+ passing it your io_service or ACE_Reactor, and pass a pointer to the instance to your connection when calling +Open+, and you're done. The dispatcher will now perform the thread switch through the io_service/reactor main loop using +post+/+notify+.
 
 === Time 
 Under the namespace +Safir.Time+ there are a few classes that provide functionality for obtaining the current time (both local and UTC) and converting it to and from various formats.
 
-The time library also has support for loading an external library at runtime which could provide a higher accuracy time. The full Safir SDK provides such a library, which provides a much higher accuracy multi-node synchronised clock than NTP can provide on both GNU/Linux or Windows based systems. For more information on this, contact Saab AB (contact information at http://www.safirsdk.com[]).
+The time library also has support for loading an external library at runtime which could provide a higher accuracy time. The full Safir SDK provides such a library, which provides a much higher accuracy multi-node synchronised clock than NTP can provide on both GNU/Linux or Windows based systems. For more information on this, contact Saab AB (contact information at http://www.saabgroup.com[]).
 
+[[crash_reporting]]
 === Crash Reporting
 Safir SDK Core includes a crash reporting library, google-breakpad (http://code.google.com/p/google-breakpad/[]). The crash reporting library can be used to generate dumps when applications crash (e.g. access violation or segmentation fault). The dumps contain, among other things, general system information, the call stack for each thread and the list of loaded modules. A dump file, together with symbolic debugging information, can be used to identify where in the software the crash occurred.  
 
 ==== Enabling the Crash Reporter
-To use the crash reporter you need to initiate it in your application. The initiation should occur as early as is at all possible.
+To use the crash reporter you need to initiate it in your application. The initiation should occur as early in your program as possible.
 
 For example, in C++ you would do something like this:
 
@@ -2875,19 +3081,19 @@ For example, in C++ you would do something like this:
 ----------------------------
 int main(int argc, char* argv[])
 {
-    Safir::SwReports::SwReportStarter swreports;
+    Safir::Application::ScopedCrashReporter crashReporter;
     ... run your application ...
 }
 ----------------------------
 
-Since the +SwReportStarter+ class is an RAII object this is the same as doing the following
+The +CrashReporterStarter+ class is an RAII class, which means that it is equivalent to doing the following:
 
 .Initializing and stopping crash reporter in C++ manually
 [source,{cpp}]
 ----------------------------
 int main(int argc, char* argv[])
 {
-    Safir::SwReports::SwReport::EnableCrashReporting();
+    Safir::Application::CrashReporter::Start();
     try
     {
         ... run your application ...
@@ -2896,18 +3102,16 @@ int main(int argc, char* argv[])
     {
         ... handle your exceptions ...
     }
-    Safir::SwReports::SwReport::Stop()
+    Safir::Application::CrashReporter::Stop()
 }
 ----------------------------
-
-So if you already have calls to +SwReport::Stop()+ in your main function and want the crash reporter you should use the RAII object and remove the +Stop+ call. This way is much easier to get to be exception safe.
 
 .Initializing and stopping crash reporting in C#
 [source,{csharp}]
 ----------------------------
 static void Main()
 {
-    Safir.SwReports.SwReport.EnableCrashReporting();
+    Safir.Application.CrashReporter.Start();
     try
     {
         ... run your application ...
@@ -2918,17 +3122,17 @@ static void Main()
     }
     finally
     {
-        Safir.SwReports.SwReport.Stop();
+        Safir.Application.CrashReporter.Stop();
     }
 }
 ----------------------------
 
-In Ada you need to call +Enable_Crash_Reporting+ at the start of the program, and +Stop+ at the end of the program.
+In Ada you need to call +Safir.Application.Crash_Reporter.Start+ at the start of the program, and +Safir.Application.Crash_Reporter.Stop+ at the end of the program.
 Java has its own crash handler, so the Crash Reporter should not be used there, and there is no interface to start it.
 
-See <<stop_tracer>> for a bit more info on the Stop function.
-
 You also need to make sure that you build your application with debug information enabled. For example in CMake you could use the RelWithDebInfo, which produces release binaries but with debug information. When using Visual Studio you would then get a .pdb file for every .dll or .exe. Make sure to keep these .pdb files, since they are required when you're analyzing a crash dump.
+
+NOTE: In previous versions (older than 4.5) of Safir SDK Core the Crash Reporter was started with a call to +Safir::SwReports::SwReport::EnableCrashReporting()+ and stopped with a call to +Safir::SwReports::SwReport::Stop()+. This was changed due to the introduction of Safir Logging and the changes in the Tracer.
 
 ////
 TODO: write about reporting sdk crashes
@@ -2936,14 +3140,14 @@ TODO: write about reporting sdk crashes
 
 ==== Analyzing a crash dump
 
-When an application crashes in a way that is caught by the crash reporter a dump file will be placed under +$(SAFIR_RUNTIME)/data/crash_dumps+ with a rather cryptic name (a lot of digits followed by .dmp). Apart from generating this dump file the crash reporter will attempt to log an error to swre_logger and to standard output that a crash has happened.
+When an application crashes in a way that is caught by the crash reporter a dump file will be placed in the crash dump directory (see <<locations_ini>>) with a rather cryptic name (a lot of digits followed by .dmp). Apart from generating this dump file the crash reporter will attempt to log an error to the Safir Log and to standard output that a crash has happened.
 
 If you're using Visual Studio you can just open the .dmp file and if you've got all the debug information and binaries available you will then see the call stack and be able to inspect the state of the application.
 On Linux, you can use gdb to analyze the .dmp files, although you will have to convert the dumps to a core file using the minidump-2-core tool that can be found under src/lluf_crash_reporter.ss/src/google-breakpad/tools/.
 For more information about how to use the dump files please see the Google Breakpad website at http://code.google.com/p/google-breakpad/[].
 
-== Tips and Tricks
-This section discusses some good design strategies for applications
+== Application Design Considerations
+This section discusses some things that you need to be aware of when designing systems and applications.
 
 [[overflow_handling]]
 === Overflow handling
@@ -2992,29 +3196,43 @@ Another way to handle overflows, which applies if the message or request is sent
 
 There is a little bit more info on this in <<faq>>.
 
+[[request_timeouts]]
+=== Request timeouts
+As has been mentioned in <<request_timeout_config>> and <<service_overview>> a request can result in a timeout response if the handler does not manage to handle the request in a timely fashion. It is very important to note that a timeout means that a request _may still be processed_!
+
+The reason for this is that the handler may have started to process the request, but while it is being processed the timeout expires, so a timeout response is sent to the request sender. The response that the handler sends is discarded.
+
+This means that a sender may retry sending the request, so handlers should be prepared to receive duplicate requests.
+
+Note that this behaviour applies to both service requests and entity requests.
+
 === Type system freedoms
 Since Messages, Entities, Items, and Services all inherits from Object, and it is possible to have members of the type Object, it is also possible to have Services as members in Items. And Entities as Service members etc.
 
-
 === Handling exceptions
 There are two base classes for exceptions. +Safir.Dob.Typesystem.FundamentalException+ and +Safir.Dob.Typesystem.Exception+.
-+Exceptions+ should be handled by the caller, but not +FundamentalExceptions+.
+Exceptions should be handled by the caller, but in most situations, FundamentalExceptions should not.
 
-+FundamentalExceptions+ are programming errors that can be avoided. You should never add code that tries to handle your own programming errors. It is better if the application just dies, instead of limping along, better to detect the crash and restart the application (maybe after fixing it...)
+In most cases a FundamentalException is to be treated as an indication that there is a programming error in your application. You should never add code that tries to handle your own programming errors. It is better if the application just dies, instead of limping along, better to detect the crash, fix and restart the application.
+
+In some rare cases catching a FundamentalException could be justified. However, a FundamentalException of type +Safir.Dob.Typesystem.SoftwareViolationException+ should never be handled by an application. Let it propagate up to your main loop where you report the error and exit the program.   
 
 ==== Exceptions in callbacks
 Letting an exception propagate out of a callback may cause your connection to the Dob to be corrupted in strange ways. You may loose messages, requests and entity subscription responses if you try to continue execution after this has occurred.
 
-So catch all "expected" exceptions in the callbacks, but let all programming-error type exceptions propagate up to your main loop where you report the error and exit the program.
+So catch all "expected" exceptions in the callbacks.
 
 === Handling OnRevokedRegistration
 For most applications a call to +OnRevokedRegistration+ is completely unexpected. Unless your system uses overregistration as a feature getting this callback is a sign of an error, and the following is a recommendation on what to do in this case: 
 
-Send a _FatalErrorReport_ (see <<software_reports>>) that you have lost the registration. Make the report state clearly that a registration was lost, along with the type and the handler id. Then terminate the application.
+Send a Safir Log (severity Critical) that you have lost the registration. Make the report state clearly that a registration was lost, along with the type and the handler id. Then terminate the application.
 
 The Rationale for this is that this probably happened due to a configuration error, or because someone is playing around with Sate (see <<sate>>), so you want to tell whoever may be interested that the system is probably not working correctly now.
 
 The application should terminate, since it is no longer functioning correctly.
+
+=== Set or Delete an entity before OnInitialInjectionsDone is received
+The basic rule is that an application that handles persistent entity types should wait for the callback OnIntialInjectonsDone before trying to set or delete any entity. (This callback signals that all ghosts have been injected). To get this to work the application has to distribute the "ok-to-set-entity" status to its different parts which, for some application designs, could be a hassle. An alternative in this case is to actually catch the GhostExistsException. (This is the exception you get when trying to set or delete an entity instance for which there is a ghost that hasn't been delivered yet).
 
 [[multithreading]]
 === Multithreading
@@ -3037,7 +3255,7 @@ The first time the application instances start, one of the instances will be giv
 
 [[redundancy_sequence_diagram]]
 .Sequence diagram for redundant entity handlers
-image::images/redundancy_sequence_diagram.png["Redundancy Sequence Diagram", width=350, link="images/redundancy_sequence_diagram.png"]
+image::images/redundancy_sequence_diagram.png["Redundancy Sequence Diagram", width="50%", link="images/redundancy_sequence_diagram.png"]
 
 Note that applications subscribing to the entities that are redundancy-handled _may_ see the entity instances as deleted for a short while, since in reality the handler was unregistered for a short while.
 
@@ -3048,7 +3266,7 @@ Applications that own the entities must make sure that no _orphans_ are left beh
 
 [[orphan_example]]
 .Entities that may cause orphans.
-image::images/orphan_object.png["Entities that may cause orphans", width=210]
+image::images/orphan_object.png["Entities that may cause orphans", width="50%"]
 
 For applications that use the entities that contain associations you need to be aware that the Dob does not guarantee the order in which entities are delivered to subscribers, and that while you're handling a subscription an associated entity may be removed, before you've managed to Read it.
 
@@ -3063,7 +3281,7 @@ This chapter contains information about how to write applications that support _
 
 The Dob itself relies on high reliability and high bandwidth LAN connections for its communication between nodes. Asynchronous injections makes it possible to create an application that links together multiple systems like this using a medium with low connectivity and low bandwidth (e.g. a legacy radio), or a medium with high bandwidth but non-optimal connectivity (e.g. the internet).
 
-A complete description of how to build a system with asynchronous injections, or how to create an _injector_, i.e. an application that performs the injections, is outside the scope if this document, which will concentrate on how to write applications that can handle injections. If you're interested in more information on this than this document provides, please contact Saab AB at http://www.safirsdk.com/[].
+A complete description of how to build a system with asynchronous injections, or how to create an _injector_, i.e. an application that performs the injections, is outside the scope if this document, which will concentrate on how to write applications that can handle injections. If you're interested in more information on this than this document provides, please get in touch with us.
 
 But, we need a little bit of background to be able to understand the rest of this chapter:
 
@@ -3098,7 +3316,7 @@ The +EntityHandlerInjection+ consumer interface has, as described in <<advanced_
 
 [[injection_sequence_diagram]]
 .Injection sequence diagram
-image::images/injection_sequence_diagram.png["Injection Sequence Diagram", width=350, link="images/injection_sequence_diagram.png"]
+image::images/injection_sequence_diagram.png["Injection Sequence Diagram", width="50%", link="images/injection_sequence_diagram.png"]
 
 
 Note that it is not possible to tell the difference between the two kinds of calls to +OnInjectedNewEntity+, and in fact both new and old (i.e. persisted and injected) data can be mixed (i.e. timestamp merged) in a call to +OnInjectedNewEntity+.
@@ -3136,7 +3354,7 @@ On another system (at time 110) the application does a +SetChanges+ with Member 
 
 [[ts_merge_2]]
 .Timestamp merge, first injection
-[width="40%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
+[width="50%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
 |==============================================
 |Member    |IsChanged     |Timestamp     |Value
 
@@ -3151,7 +3369,7 @@ This will be merged with the current entity (again, on "our" system) into the ob
 
 [[ts_merge_3]]
 .Timestamp merge, merged object
-[width="40%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
+[width="50%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
 |==============================================
 |Member    |IsChanged     |Timestamp     |Value
 
@@ -3182,7 +3400,7 @@ While all this was happening, a third system (at time 105) the application did a
 
 [[ts_merge_5]]
 .Timestamp merge, another injection
-[width="40%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
+[width="50%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
 |==============================================
 |Member    |IsChanged     |Timestamp     |Value
 
@@ -3198,7 +3416,7 @@ Which will be merged with the current entity to become the object shown in <<ts_
 
 [[ts_merge_6]]
 .Timestamp merge, second merge result
-[width="40%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
+[width="50%", cols="25%,25%,25%,25%",options="header",frame="topbot",grid="all"]
 |==============================================
 |Member    |IsChanged     |Timestamp     |Value
 
@@ -3223,7 +3441,7 @@ The Dob makes it possible to have several "data universes" side by side. Such a 
 
 The main principle is that there is no mixing of data (entities, messages etc) between different contexts.
 
-It is possible to override the default no-mixing behaviour by marking a type as ContextShared, thereby making it visible in all contexts. (See below for a motivation and explanation of the ContextShared mechanism.)
+It is possible to override the default no-mixing behaviour by marking a type as _ContextShared_, thereby making it visible in all contexts. (See below for a motivation and explanation of the ContextShared mechanism.)
 
 === What contexts can be used for
 This description presumes that the context functionality is used to support different system modes (changing either the whole system mode, or just one operator console). However, note that from a Safir SDK perspective the context functionality is a general mechanism which can be used for any purpose.
@@ -3248,7 +3466,7 @@ In a system that supports Replay there must be at least some data that is contro
 Forcing applications to have multiple Dob connections, one in context 0 for the control data, and one in the Replay context, and then dynamically working out which kind of data goes where, is considered a potential security risk. Therefore, Safir SDK Core has a concept of ContextShared types which eliminates the need to have parallel connections to different contexts.
 
 === ContextShared types
-A type could be marked as being visible in all contexts by mapping the ContextShared property to it. ContextShared types are typically control types, e.g. types used to control the system mode, or types used for logging purposes, e.g. Swre reports.
+A type could be marked as being visible in all contexts by mapping the ContextShared property to it. ContextShared types are typically control types, e.g. types used to control the system mode.
 
 For example, an APP or PRS that is connected to context 0 can "see" all that goes on in context 0 and the ContextShared types. An APP or PRS that is connected to context 1 can "see" all that goes on in context 1 and the ContextShared types.
 
@@ -3321,7 +3539,8 @@ When the PRS gets notified that the console is switching context it:
 * Tells all its "parts" to restart, i.e
 ** Clear all internal state information.
 ** Attach to the connection.
-** Set up subscriptions again (A PRS normally does not own entities, but if it does, registrations and creation of entities must be done again.) 
+** Set up subscriptions again (A PRS normally does not own entities, but if it does, registrations and creation of entities must be done again.)
+** Restart TracerBackdoor and any BackdoorKeepers (these use message subscriptions internally which are lost in connection Close).
 
 The attach and subscription are the same actions that the PRS must take when it starts up the first time. What is very important when changing context (but not when starting for the first time) is the clearing of internal state information. Leaving any internal state information is a serious safety risk!
 
@@ -3334,13 +3553,13 @@ Safir SDK Core contains some tools that are useful for, among other things, appl
 === Sate
 There is an application in Safir SDK Core, Sate (stands for _Safir Application Tester_), which is very useful for testing applications that use the Dob. In short it is a GUI application that allows you to perform most operations that the Dob provides interactively.
 
-For example, you can set up a subscription to an entity, register entity handlers and set entity instances. You can subscribe to and send messages etc. This can be very useful for interacting with an application, for example before the real HSI is implemented fully, or pretending to be another application that your application communicates with.
+For example, you can set up a subscription to an entity, register entity handlers and set entity instances. You can subscribe to and send messages etc. This can be very useful for interacting with an application, for example before the real HMI is implemented fully, or pretending to be another application that your application communicates with.
 
 <<sate_overview>> shows Sate with the Safir.Application.BackdoorCommandMessage opened. All the Dob classes are listed in the left sidebar, where you can right-click to get operations you can do on the types. The right sidebar contains operations you can do on the object opened.
 
 [[sate_overview]]
 .Sate screen shot
-image::images/sate_overview.png["Sate Screen shot", width=400, link="images/sate_overview.png"]
+image::images/sate_overview.png["Sate Screen shot", width="50%", link="images/sate_overview.png"]
 
 The lower left part is an "inbox", containing the most recent entity updates and requests, service requests and messages received. The lower right hand part shows a history of what "has happened", e.g. showing if a request has been successfully sent, etc.
 
@@ -3352,13 +3571,13 @@ Dobexplorer is a tool that is primarily meant for the developers of the Dob, but
 
 [[dobexplorer_memory]]
 .Dobexplorer showing a graph of memory usage.
-image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", width=400, link="images/dobexplorer_memory.png"]
+image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", width="50%", link="images/dobexplorer_memory.png"]
 
 <<dobexplorer_nodes>> shows dobexplorer displaying a table of the node statuses of a multinode system.
 
 [[dobexplorer_nodes]]
 .Dobexplorer showing node statuses.
-image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", width=400, link="images/dobexplorer_nodes.png"]
+image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", width="50%", link="images/dobexplorer_nodes.png"]
 
 [[olib]]
 == C++ ODBC database wrapper
@@ -3378,8 +3597,11 @@ The generated doxygen documentation is included in the downloads, and should be 
 
 _Use this documentation! It is the place where interface details are explained!_
 
-=== Forum
-Questions can be posted in the Safir SDK Core forum at http://www.safirsdk.com[].
+=== Forum and Mailing list
+Questions can be posted in the Safir SDK Core forum or the safir-devel mailing list. More info at http://safir.sourceforge.net[].
+
+=== Reporting bugs
+Bug reports can be filed under "Tickets" at at http://safir.sourceforge.net[].
 
 [[appendix_a]]
 == Appendix A: Example applications
@@ -3419,7 +3641,7 @@ Why shouldn't I have an infinite queue in my application to avoid overflows?::
   This is described somewhat in <<overflow_handling>>, and the FAQ entry above.
 
 == Appendix D: Building from source
-Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://www.safirsdk.com/[].
+Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://safir.sourceforge.net/[].
 
 [[glossary]]
 == Glossary
@@ -3444,8 +3666,8 @@ Dots::
 Dou::
     Distributed Objects Unit. File type for defining Dob classes (in Xml).
 
-HSI::
-    Human - System Interface.
+HMI::
+    Human-Machine Interface.
 
 Safir::
     Software Architecture For Information And Real-time systems.
@@ -3460,6 +3682,6 @@ SDK::
     Software Development Kit.
 
 Swre::
-    A Safir SDK Core component that provides Software Reporting and Trace logging functionality.
+    A Safir SDK Core component that provides Crash Reporting, Error/Event Logging and Trace logging functionality.
 
 

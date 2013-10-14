@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2009 (http://www.safirsdk.com)
+* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
 *
 * Created by: Petter Lönnstedt / stpeln
 *
@@ -177,12 +177,11 @@ namespace VehicleAppCs
         public void OnRevokedRegistration(
             long typeId, Safir.Dob.Typesystem.HandlerId handlerId)
         {
-            // No longer registered for given type.
-            Safir.SwReports.SwReport.SendErrorReport(
-                "Unexpected revoked registration",
-                "EntityHandler.OnRevokedRegistration",
-                "The handler " + handlerId.ToString() + " is no longer registered for type " +
-                Safir.Dob.Typesystem.Operations.GetName(typeId));
+            // No longer registered for given type.                                        
+            Safir.Logging.SendSystemLog(Safir.Logging.Severity.Critical,
+                                        "Unexpected revoked registration. " +
+                                        handlerId.ToString() + " is no longer registered for type " +
+                                        Safir.Dob.Typesystem.Operations.GetName(typeId));
         }
 
         public void OnInjectedNewEntity(

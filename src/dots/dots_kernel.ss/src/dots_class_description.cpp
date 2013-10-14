@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Joel Ottosson / stjoot
 *
@@ -170,14 +170,13 @@ namespace Internal
             }
         }
 
-
         if (BaseClass() == NULL)
         {
             return -1;
         }
         else
         {
-            return NumberOfInheritedParameters() + BaseClass()->GetParameterIndexFromName(name);
+            return BaseClass()->GetParameterIndexFromName(name);
         }
     }
 

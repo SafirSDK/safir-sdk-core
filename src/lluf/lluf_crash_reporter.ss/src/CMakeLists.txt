@@ -8,12 +8,12 @@ endif()
 
 #this library has an interface which is okay to call between debug/release runtimes,
 #and we only want one version of it, so we don't want the "d" suffix on debug builds on windows.
-#Must be set before including cmake_settings.txt
+#Must be set before including safir_sdk_core_config.cmake
 SET(NO_LIBRARY_POSTFIXES 1) 
 
 INCLUDE_DIRECTORIES(. google-breakpad/src/src)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 add_subdirectory(google-breakpad)
 
@@ -26,6 +26,7 @@ if (MSVC)
   "${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/breakpad_client.lib")
 else()
   TARGET_LINK_LIBRARIES(lluf_crash_reporter 
+    lluf_config
     ${Boost_LIBRARIES}
     "${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src/client/linux/libbreakpad_client.a")
 endif()

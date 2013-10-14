@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --
---  Copyright Saab AB, 2009 (http://www.safirsdk.com)
+--  Copyright Saab AB, 2009-2013 (http://safir.sourceforge.net)
 --
 --  Created by: Anders Widén / stawi
 --
@@ -41,6 +41,7 @@ with Dose_Test.Successful_Service;
 with Dose_Test.Successful_Update;
 with Logger;
 with Safir.Dob.Access_Denied_Exception;
+with Safir.Dob.Ghost_Exists_Exception;
 with Safir.Dob.Connection_Aspect_Injectors;
 with Safir.Dob.Connection_Aspect_Miscs;
 with Safir.Dob.Connection_Aspect_Postpones;
@@ -1448,7 +1449,7 @@ package body Consumers is
 
                when Dose_Test.Action_Enum.Start_Backdoor =>
                   Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": StartBackdoor");
-                  Self.Backdoor_Keeper.Start (Self'Unchecked_Access, Self.Connection_Name, Self.Connection_Instance);
+                  Self.Backdoor_Keeper.Start (Self.Connection, Self'Unchecked_Access);
 
                when Dose_Test.Action_Enum.Stop_Backdoor =>
                   Logger.Put_Line (PREFIX & Natural'Wide_Image (Self.Consumer_Number) & ": StopBackdoor");
@@ -1490,6 +1491,8 @@ package body Consumers is
          Logger.Put_Line ("Caught FundamentalException in ExecuteAction: Safir.Dob.AccessDeniedException");
       when Safir.Dob.Not_Found_Exception.Xception =>
          Logger.Put_Line ("Caught Exception in ExecuteAction: Safir.Dob.NotFoundException");
+      when Safir.Dob.Ghost_Exists_Exception.Xception =>
+         Logger.Put_Line ("Caught FundamentalException in ExecuteAction: Safir.Dob.GhostExistsException");
       when Safir.Dob.Typesystem.Software_Violation_Exception =>
          Logger.Put_Line ("Caught FundamentalException in ExecuteAction: Safir.Dob.Typesystem.SoftwareViolationException");
       when E : others =>

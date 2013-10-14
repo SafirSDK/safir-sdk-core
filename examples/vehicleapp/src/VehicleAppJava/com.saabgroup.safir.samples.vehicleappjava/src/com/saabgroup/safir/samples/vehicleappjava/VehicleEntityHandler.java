@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2011 (http://www.safirsdk.com)
+* Copyright Saab AB, 2011-2013 (http://safir.sourceforge.net)
 *
 *******************************************************************************
 *
@@ -21,7 +21,7 @@
 ******************************************************************************/
 package com.saabgroup.safir.samples.vehicleappjava;
 
-import com.saabgroup.safir.swreports.SwReport;
+import com.saabgroup.safir.Logging;
 
 /**
  * Defines a vehicle owner. This class handles the
@@ -62,11 +62,11 @@ public class VehicleEntityHandler implements com.saabgroup.safir.dob.EntityHandl
     @Override
     public void onRevokedRegistration(long typeId, com.saabgroup.safir.dob.typesystem.HandlerId handlerId) {
         // No longer registered for given type.
-        SwReport.SendErrorReport(
-            "Unexpected revoked registration",
-            "EntityHandler.OnRevokedRegistration",
-            "The handler " + handlerId.toString() + " is no longer registered for type " +
-            com.saabgroup.safir.dob.typesystem.Operations.getName(typeId));
+        com.saabgroup.safir.Logging.sendSystemLog
+            (com.saabgroup.safir.Logging.Severity.CRITICAL,
+             "Unexpected revoked registration " +
+             handlerId.toString() + " is no longer registered for type " +
+             com.saabgroup.safir.dob.typesystem.Operations.getName(typeId));
     }
 
     /*

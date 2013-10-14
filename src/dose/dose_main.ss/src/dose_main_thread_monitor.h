@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2011 (http://www.safirsdk.com)
+* Copyright Saab AB, 2011-2013 (http://safir.sourceforge.net)
 *
 * Created by: Anders Widén / aiwi
 *
@@ -59,7 +59,7 @@ namespace Internal
         ~ThreadMonitor();
 
         void StartWatchdog(const boost::thread::id& threadId,
-                           const std::string& threadName);
+                           const std::wstring& threadName);
 
         void StopWatchdog(const boost::thread::id& threadId);
 
@@ -71,14 +71,14 @@ namespace Internal
 
         struct WatchdogInfo
         {
-            explicit WatchdogInfo(const std::string& _threadName) :
+            explicit WatchdogInfo(const std::wstring& _threadName) :
                         threadName(_threadName),
                         counter(0),
                         lastCheckedCounterVal(0),
                         lastTimeAlive(boost::posix_time::second_clock::universal_time()),
                         errorLogIsGenerated(false) {};
 
-            std::string                 threadName;
+            std::wstring                threadName;
             unsigned int                counter;
             unsigned int                lastCheckedCounterVal;
             boost::posix_time::ptime    lastTimeAlive;

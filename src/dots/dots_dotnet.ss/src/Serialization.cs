@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -62,7 +62,7 @@ namespace Safir.Dob.Typesystem
                     throw new SoftwareViolationException("Error in serialization buffer sizes!!!");
                 }
             }
-            string str = Internal.InternalOperations.StringOf(buf);
+            string str = Internal.InternalOperations.StringOf(buf, resultSize - 1); //remove null
             Marshal.FreeHGlobal(buf);
             Marshal.FreeHGlobal(blob);
 
@@ -110,7 +110,7 @@ namespace Safir.Dob.Typesystem
                     throw new SoftwareViolationException("Error in serialization buffer sizes!!!");
                 }
             }
-            string str = Internal.InternalOperations.StringOf(buf);
+            string str = Internal.InternalOperations.StringOf(buf, resultSize - 1); //remove null
             Marshal.FreeHGlobal(buf);
             
             return str;

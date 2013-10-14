@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -42,7 +42,6 @@
 
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
-#include <Safir/SwReports/SwReport.h>
 #include <Safir/Databases/Odbc/Connection.h>
 #include <Safir/Databases/Odbc/Environment.h>
 #include <Safir/Databases/Odbc/InputParameter.h>

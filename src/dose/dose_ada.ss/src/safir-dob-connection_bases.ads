@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --
---  Copyright Saab AB, 2009 (http://www.safirsdk.com)
+--  Copyright Saab AB, 2009-2013 (http://safir.sourceforge.net)
 --
 --  Created by: Anders Widén / stawi
 --
@@ -41,8 +41,12 @@ package Safir.Dob.Connection_Bases is
    type Connection_Base is abstract new
      Ada.Finalization.Limited_Controlled with null record;
 
-   --type ClassAccess is access all Class'Class;
-
+   -- Check if this Connection instance is open.
+   --
+   -- Returns: True if the connection is open.
+   --
+   function Is_Open
+     (Self : in Connection_Base) return Boolean is abstract;
 
    ---------------------------------------------------------------
    -- Non-pending (synchronous) registration of entity handler. --
@@ -607,6 +611,7 @@ package Safir.Dob.Connection_Bases is
    --             Instance_Id - Instance id.
    --             Handler_Id - Handler id.
    -- Exceptions: Access_Denied_Exception - The instance is owned by another handler.
+   -- Exceptions: Ghost_Exists_Exception - There is a ghost instance that hasn't been injected.
    --
    procedure Set_Changes
      (Self          : in Connection_Base;
@@ -629,6 +634,7 @@ package Safir.Dob.Connection_Bases is
    --             Instance_Id - Instance id.
    --             Handler_Id - Handler id.
    -- Exceptions: Access_Denied_Exception - The instance is owned by another handler.
+   -- Exceptions: Ghost_Exists_Exception - There is a ghost instance that hasn't been injected.
    --
    procedure Set_All
      (Self          : in Connection_Base;
@@ -643,6 +649,7 @@ package Safir.Dob.Connection_Bases is
    -- Parameters: Entity_Id - Id of the entity to delete.
    --             Handler_Id - Handler id.
    -- Exceptions: Access_Denied_Exception - The instance is owned by another handler.
+   -- Exceptions: Ghost_Exists_Exception - There is a ghost instance that hasn't been injected.
    --
    procedure Delete
      (Self          : in Connection_Base;

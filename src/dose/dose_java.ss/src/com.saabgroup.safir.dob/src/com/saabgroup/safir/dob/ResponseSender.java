@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -35,6 +35,11 @@ package com.saabgroup.safir.dob;
  * Note that you still have to send the response within the timout period,
  * or the response will not be delivered to the requestor (who will have
  * received a timeout response instead).
+ *
+ * Not using a ResponseSender is considered a programming error, if it not
+ * used a log will be emitted when the object is being finalized.
+ * Since the finalizer is called by the Garbage Collector this may happen 
+ * "long after" you've dropped your reference to the response sender.
  */
 public class ResponseSender
 {
@@ -103,7 +108,7 @@ public class ResponseSender
      * Discard this ResponseSender.
      *
      * Calling this function means that you forfeit your chance to send a response
-     * to the request. It will disable the checks in the destructor (see above).
+     * to the request. It will disable the checks in the finalizer.
      *
      * The typical case when you must discard the ResponseSender is when calling
      * Postpone with redispatchCurrent set to True. In this case you will get
@@ -118,62 +123,25 @@ public class ResponseSender
     }
 
 
-
-    protected class MessageBox
-        extends java.awt.Dialog
-        implements java.awt.event.ActionListener
-    {
-        private static final long serialVersionUID = 0;
-
-        MessageBox(String msg)
-        {
-            super(new java.awt.Frame(""),"Programming Error!",true);
-            setLayout(new java.awt.BorderLayout());
-            java.awt.TextArea textArea = new java.awt.TextArea(msg,4,70,java.awt.TextArea.SCROLLBARS_NONE);
-            textArea.setEditable(false);
-            add("Center",textArea);
-            java.awt.Panel panel = new java.awt.Panel();
-            panel.setLayout(new java.awt.FlowLayout());
-            panel.add(m_ok = new java.awt.Button(" OK "));
-            add("South",panel);
-            m_ok.addActionListener(this);
-            java.awt.Dimension d = getToolkit().getScreenSize();
-            setLocation(d.width/3,d.height/3);
-            pack();
-            setAlwaysOnTop(true);
-            setVisible(true);
-        }
-
-        public void actionPerformed(java.awt.event.ActionEvent ae)
-        {
-            if(ae.getSource() == m_ok)
-            {
-                setVisible(false);
-            }
-        }
-
-        private java.awt.Button m_ok;
-    };
-
+    /**
+     * Finalizer
+     *
+     * Will check that the ResponseSender has been used, and if it hasn't a log will be emitted.
+     * Since the destructor is called by the Garbage Collector this may happen 
+     * "long after" you've dropped your reference to the response sender.
+     *
+     * Not using a ResponseSender is considered a programming error.
+     */
     protected void finalize() throws java.lang.Throwable
     {
-        try
-        {
-            if (m_valid)
-            {
-                System.out.println ("Programming Error! A ResponseSender was discarded " +
-                                    "without having been used! (A timeout response will be " +
-                                    "automatically sent). The program will now exit!");
-
-                new MessageBox("Programming Error! A ResponseSender was discarded "
-                               + "without having been used! (A timeout response was "
-                               + "automatically sent). The program will now exit!");
-
-                System.exit(101010);
+        try {
+            if (m_valid) {
+                com.saabgroup.safir.Logging.sendSystemLog
+                    (com.saabgroup.safir.Logging.Severity.CRITICAL,
+                     "Programming Error! A ResponseSender was discarded without having been used!");
             }
         }
-        finally
-        {
+        finally {
             super.finalize();
         }
     }

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Anders Widén / stawi
 *
@@ -53,13 +53,22 @@ namespace Dob
     {
     public:
 
-        /** Constructor
+        /** 
+         * Constructor
          */
         ConnectionBase();
 
-        /** Destructor.
+        /** 
+         * Destructor.
          */
         virtual ~ConnectionBase();
+
+        /**
+         * Tells if the connection is opened.
+         *
+         * @return True if the connection is open, otherwise false.
+         */
+        virtual bool IsOpen() const = 0;
 
         /**
          * @name Non-pending (synchronous) registration of entity handler.
@@ -633,6 +642,7 @@ namespace Dob
          * @param [in] handlerId Handler id.
          *
          * @throws Safir::Dob::AccessDeniedException The instance is owned by another handler.
+         * @throws Safir::Dob::GhostExistsException There is a ghost instance that hasn't been injected.
          */
         void SetChanges(const Dob::EntityPtr&              entity,
                         const Dob::Typesystem::InstanceId& instanceId,
@@ -655,6 +665,7 @@ namespace Dob
          * @param [in] handlerId Handler id.
          *
          * @throws Safir::Dob::AccessDeniedException The instance is owned by another handler.
+         * @throws Safir::Dob::GhostExistsException There is a ghost instance that hasn't been injected.
          */
         void SetAll(const Dob::EntityPtr&              entity,
                     const Dob::Typesystem::InstanceId& instanceId,
@@ -669,6 +680,7 @@ namespace Dob
          * @param [in] handlerId Handler id.
          *
          * @throws Safir::Dob::AccessDeniedException The instance is owned by another handler.
+         * @throws Safir::Dob::GhostExistsException There is a ghost instance that hasn't been injected.
          */
         void Delete(const Dob::Typesystem::EntityId&    entityId,
                     const Dob::Typesystem::HandlerId&   handlerId) const;

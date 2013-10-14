@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
 *
 * Created by: Erik Adolfsson / sterad
 *
@@ -50,13 +50,15 @@ extern "C"
 
     //----------------------------------------------
     // Get current UTC time
+    // If success is false there is a configuration error!
     //----------------------------------------------
-    DOUF_TIME_API void CALLING_CONVENTION DoufTimeC_GetUtcTime(DotsC_Float64& utcTime);
+    DOUF_TIME_API void CALLING_CONVENTION DoufTimeC_GetUtcTime(DotsC_Float64& utcTime, bool& success);
 
     //----------------------------------------------
     // Get local time offset according to GMT
+    // If success is false there is a configuration error!
     //----------------------------------------------
-    DOUF_TIME_API void CALLING_CONVENTION DoufTimeC_GetLocalTimeOffset(DotsC_Int32& offset);
+    DOUF_TIME_API void CALLING_CONVENTION DoufTimeC_GetLocalTimeOffset(DotsC_Int32& offset, bool& success);
 
 #ifdef __cplusplus
 }

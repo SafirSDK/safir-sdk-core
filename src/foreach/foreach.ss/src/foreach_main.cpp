@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Stefan Lindström / stsyli
 *
@@ -22,11 +22,11 @@
 *
 ******************************************************************************/
 #include "foreach_app.h"
-#include <Safir/SwReports/SwReport.h>
+#include <Safir/Application/CrashReporter.h>
 
 int main(int /*argc*/, char* /*argv*/[])
 {
-    Safir::SwReports::SwReportStarter starter;
+    Safir::Application::ScopedCrashReporter scopedStartStop;
 
     // Start the application.
     Safir::Utilities::ForEach::ForEachApp app;

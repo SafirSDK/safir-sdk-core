@@ -5,4 +5,5 @@ IF (NOT MSVC)
 ENDIF()
 
 ADD_TEST(CrashReporter_simple ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
-#ADD_TEST(CrashReporter_simple crasher)
+
+SET_SAFIR_TEST_PROPERTIES(CrashReporter_simple)

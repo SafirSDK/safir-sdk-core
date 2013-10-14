@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -296,7 +296,7 @@ namespace Internal
 
         if (findIt == m_unhandledRequests.end())
         {
-            lllerr << "RequestInQueue::RequestTimeout: There was no request with requestId "
+            lllog(1) << "RequestInQueue::RequestTimeout: There was no request with requestId "
                 << requestId << " to time out. Ignoring this call." << std::endl;
             return;
         }

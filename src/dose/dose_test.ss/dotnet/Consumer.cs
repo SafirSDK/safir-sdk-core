@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
 *
 * Created by: Henrik Sundberg / sthesu
 *
@@ -52,6 +52,7 @@ namespace dose_test_dotnet
                         string instance)
         {
             Interlocked.Increment(ref instanceCount);
+            m_backdoorKeeper = new Safir.Application.BackdoorKeeper(m_connection);
 
             m_consumerNumber = consumerNumber;
             m_connectionName = connectionName;
@@ -688,7 +689,7 @@ namespace dose_test_dotnet
                             case DoseTest.ActionEnum.Enumeration.StartBackdoor:
                                 {
                                     Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": StartBackdoor");
-                                    m_backdoorKeeper.Start(this, m_connectionName, m_connectionInstance);
+                                    m_backdoorKeeper.Start(this);
                                 }
                                 break;
 
@@ -1357,7 +1358,7 @@ namespace dose_test_dotnet
         private readonly int m_consumerNumber;
         private readonly string m_connectionName;
         private readonly string m_connectionInstance;
-        private Safir.Application.BackdoorKeeper m_backdoorKeeper = new Safir.Application.BackdoorKeeper();
+        private Safir.Application.BackdoorKeeper m_backdoorKeeper;
 
         private Dictionary<Safir.Dob.CallbackId.Enumeration, List<DoseTest.Action>> m_callbackActions;
 

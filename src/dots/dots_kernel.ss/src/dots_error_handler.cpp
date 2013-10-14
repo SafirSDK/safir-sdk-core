@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Joel Ottosson / stjoot
 *
@@ -23,7 +23,8 @@
 ******************************************************************************/
 
 #include "dots_error_handler.h"
-#include <Safir/Utilities/Internal/PanicLogging.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Utilities/Internal/StringEncoding.h>
 
 #include <iostream>
 #include <string>
@@ -37,6 +38,8 @@ namespace Typesystem
 namespace Internal
 {
 
+    using Safir::Utilities::Internal::ToUtf16;
+
     void ErrorHandler::Information(const std::string & msg)
     {
         std::ostringstream ostr;
@@ -45,8 +48,11 @@ namespace Internal
              << msg.c_str() << std::endl
              << "==================== END =====================" <<std::endl << std::endl;
 
-        std::wcout << ostr.str().c_str();
-        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+        std::wstring str = ToUtf16(ostr.str());
+        std::wcout << str;
+        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
+                                                     str);
+
     }
 
     void ErrorHandler::Error(const std::string & label,
@@ -62,8 +68,11 @@ namespace Internal
              << "Description: " << description.c_str() << std::endl
              << "==================== END =====================" << std::endl << std::endl;
 
-        std::wcout << ostr.str().c_str();
-        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+        std::wstring str = ToUtf16(ostr.str());
+
+        std::wcout << str;
+        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
+                                                     str);
     }
 
     void ErrorHandler::Error(const std::string & label,
@@ -77,8 +86,11 @@ namespace Internal
 
         ostr << filename.string().c_str() << ":" << linenumber << ": " << label.c_str() << ": " << description.c_str() << std::endl;
 
-        std::wcout << ostr.str().c_str();
-        Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+        std::wstring str = ToUtf16(ostr.str());
+
+        std::wcout << str;
+        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
+                                                     str);
     }
 }
 }

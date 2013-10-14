@@ -5,4 +5,4 @@ IF (NOT MSVC)
 ENDIF()
 
 ADD_TEST(StartupSynchronizer_threads ss_threads_test)
-set_tests_properties(StartupSynchronizer_threads PROPERTIES TIMEOUT 120)
+SET_SAFIR_TEST_PROPERTIES(StartupSynchronizer_threads 120)

@@ -1,1 +1,0 @@
-Class-Path: dots_java.jar dots_generated-java.jar dose_java.jar swre_reports_java.jar

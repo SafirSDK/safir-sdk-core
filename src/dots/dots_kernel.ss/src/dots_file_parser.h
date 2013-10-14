@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Joel Ottosson / stjoot
 *
@@ -58,10 +58,6 @@ namespace Internal
         void DumpProperties();
 
     private:
-        bool ParseDouFiles();
-        bool ParseDomFiles();
-        bool ParseDouDir(const boost::filesystem::path & dirName);
-        bool ParseDomDir(const boost::filesystem::path & dirName);
         bool ParseFile(const boost::filesystem::path & filename);
 
         bool UniqueTypes();

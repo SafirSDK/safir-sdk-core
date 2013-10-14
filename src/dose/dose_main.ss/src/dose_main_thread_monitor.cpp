@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2011 (http://www.safirsdk.com)
+* Copyright Saab AB, 2011-2013 (http://safir.sourceforge.net)
 *
 * Created by: Anders Widén / aiwi
 *
@@ -27,7 +27,8 @@
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/PanicLogging.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Utilities/Internal/StringEncoding.h>
 
 namespace Safir
 {
@@ -35,6 +36,8 @@ namespace Dob
 {
 namespace Internal
 {
+    using Safir::Utilities::Internal::ToUtf16;
+
     ThreadMonitor::ThreadMonitor()
         : m_watchdogs(),
           m_lock(),
@@ -50,7 +53,7 @@ namespace Internal
     }
 
     void ThreadMonitor::StartWatchdog(const boost::thread::id& threadId,
-                                      const std::string& threadName)
+                                      const std::wstring& threadName)
     {
         boost::lock_guard<boost::mutex> lock(m_lock);
 
@@ -120,16 +123,14 @@ namespace Internal
                             {
                                 // ... and this thread has been hanging for so long time now
                                 // that we actually will kill dose_main itself!!
-                                std::ostringstream ostr;
-                                ostr << it->second.threadName << " (tid " << it->first
-                                    << ") seems to have been hanging for at least "
-                                    << boost::posix_time::to_simple_string(timeSinceLastKick) << '\n';
                                 if (Safir::Dob::NodeParameters::TerminateDoseMainWhenUnrecoverableError())
                                 {
-                                    ostr << "Parameter TerminateDoseMainWhenUnrecoverableError is set to true"
-                                        " which means that dose_main will now be terminated!!" << std::endl;
-                                    lllerr << ostr.str().c_str();
-                                    Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+                                    SEND_SYSTEM_LOG(Alert,
+                                                    << it->second.threadName << " (tid " << it->first
+                                                    << ") has been hanging for at least "
+                                                    << ToUtf16(boost::posix_time::to_simple_string(timeSinceLastKick))
+                                                    << ". Safir.Dob.NodeParameters.TerminateDoseMainWhenUnrecoverableError is true"
+                                                    << " so dose_main will be terminated!!");
 
                                     boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(5));
 
@@ -137,10 +138,13 @@ namespace Internal
                                 }
                                 else if (!it->second.errorLogIsGenerated)
                                 {
-                                    ostr << "Parameter TerminateDoseMainWhenUnrecoverableError is set to false"
-                                        " which means that dose_main will not be terminated!!" << std::endl;
-                                    lllerr << ostr.str().c_str();
-                                    Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
+                                    SEND_SYSTEM_LOG(Alert,
+                                                    << it->second.threadName << " (tid " << it->first
+                                                    << ") has been hanging for at least "
+                                                    << ToUtf16(boost::posix_time::to_simple_string(timeSinceLastKick))
+                                                    << ". Safir.Dob.NodeParameters.TerminateDoseMainWhenUnrecoverableError is true"
+                                                    << " so dose_main will not be terminated!!");
+
                                     it->second.errorLogIsGenerated = true;
                                 }                           
                             }

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Joel Ottosson / stjoot
 *
@@ -29,6 +29,7 @@
 
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/CrashReporter.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/UnorderedMap.h>
 #include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 #include <iostream>
@@ -72,15 +73,13 @@ namespace Internal
     typedef Int64 ChannelId;
     typedef Int64 HandlerId;
 
-    //Files and environment variables
-    const char * const RUNTIME_ENV                      = "SAFIR_RUNTIME";
-    const char * const DOB_CLASSES_DIR                  = "/data/text/dots/classes"; //root=RUNTIME_ENV   /data/text/dots/classes
-    const char * const UNIT_FILE_EXT                    = ".dou";
-    const char * const PROPERTY_MAPPING_FILE_EXT        = ".dom";
+    //Files extensions
+    const char * const DOU_FILE_EXTENSION                    = ".dou";
+    const char * const DOM_FILE_EXTENSION                    = ".dom";
 
     //Preset class names
     const char * const NULL_CLASS           = "Null_Class";
-    const char * const OBJECT_CLASS         = "Object"; //"Safir.Dots.Object";
+    const char * const OBJECT_CLASS         = "Object";
 
     //--------------------------------------------------
     // Unsigned types
@@ -245,14 +244,18 @@ namespace Internal
 
     static inline void EnsureFailed (const std::string & str)
     {
-        lllerr << "ENSURE failed: '"<< str.c_str() << "'" << std::endl;
-        std::wcout << "Please contact your nearest DOB developer!" << std::endl;
+        std::wostringstream ostr;
+        ostr << "ENSURE Failed: " << str.c_str();
+        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Critical,
+                                                     ostr.str());
         
         const bool success = Safir::Utilities::CrashReporter::Dump();
         
         if (!success)
         {
-            lllerr << "ENSURE failed to generate a dump! It looks like CrashReporter is not started." << std::endl;
+            Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Critical,
+                                                         L"ENSURE failed to generate a dump! It looks like CrashReporter is not started.");
+            
         }
 
         throw InternalException(str, __FILE__,__LINE__);

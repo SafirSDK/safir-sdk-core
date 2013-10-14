@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2009 (http://www.safirsdk.com)
+# Copyright Saab AB, 2009-2013 (http://safir.sourceforge.net)
 #
 # Created by: Lars Hagstrom / stlrha
 #
@@ -661,29 +661,29 @@ class UnixGccBuilder(BuilderBase):
     def target_specific_build_cmds(self):
         return (("--", "-j", str(self.num_jobs)))
 
-def run_dots_configuration_check():
+def run_dots_configuration_check(check):
+    os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(SAFIR_SDK,"dots","dots_generated","dobmake_config", check)
+
     process = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","dots_configuration_check"),
                                stdout=subprocess.PIPE, 
                                stderr=subprocess.STDOUT,
                                universal_newlines=True)    
     logger.logOutput(process)
+
+    os.environ.pop("SAFIR_TEST_CONFIG_OVERRIDE")
     if process.returncode != 0:
         die("dots_configuration_check failed! There is something wrong with your dou and dom files")
         
 def check_config():
     logger.writeHeader("Checking dou and dom files\n")
     logger.writeCommand("dou and dom files located under $(SAFIR_RUNTIME)/data/text/dots/classes/ are checked.\n")
-    run_dots_configuration_check()
+    run_dots_configuration_check("postcheck")
 
 def check_config_dots_generated():
     logger.writeHeader("Checking dou and dom files\n")
     logger.writeCommand("dou and dom files located under $(SAFIR_SDK)/dots/dots_generated/ are checked.\n")
     
-    # Set a "special" environment variable for the sub-process. The env variable determines where dots_kernel should
-    # load dou/dom files from
-    os.putenv("SAFIR_DOTS_CLASSES_DIR", os.path.join(SAFIR_SDK,"dots","dots_generated"))
-
-    run_dots_configuration_check()
+    run_dots_configuration_check("precheck")
         
 def load_gui():
     global MainDialog

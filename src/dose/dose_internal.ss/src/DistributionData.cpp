@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrhafsetchangeflags
 *
@@ -328,7 +328,7 @@ namespace Internal
                                        const std::string & connectionNameWithoutCounter,
                                        const Typesystem::Int32 counter)
     {
-        Allocate(sizeof(ConnectHeader) + MAX_CONNECTION_NAME_LENGTH);
+        Allocate(sizeof(ConnectHeader) + MAX_CONNECTION_NAME_LENGTH + 1); //null termination
 
         Header & header = GetHeader();
         //Header
@@ -339,7 +339,7 @@ namespace Internal
         GetConnectHeader().m_counter = counter;
 
         //AppName
-        strncpy(GetData() + sizeof(ConnectHeader), connectionNameWithoutCounter.c_str(), MAX_CONNECTION_NAME_LENGTH);
+        strncpy(GetData() + sizeof(ConnectHeader), connectionNameWithoutCounter.c_str(), MAX_CONNECTION_NAME_LENGTH + 1);
     }
 
 

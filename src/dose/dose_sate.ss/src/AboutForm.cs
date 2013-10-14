@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Joel Ottosson / stjoot
 *
@@ -128,7 +128,7 @@ namespace Sate
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(100, 23);
             this.label3.TabIndex = 3;
-            this.label3.Text = "Saab Systems AB";
+            this.label3.Text = "Saab AB";
             // 
             // AboutForm
             // 

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Anders Widén / stawi
 *
@@ -25,6 +25,7 @@
 #include <Safir/Dob/Internal/EntityType.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/AccessDeniedException.h>
+#include <Safir/Dob/GhostExistsException.h>
 #include <Safir/Dob/NotFoundException.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Dob/Internal/LamportClocks.h>
@@ -866,7 +867,7 @@ namespace Internal
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", instanceId = " << instanceId
                      << ", handlerId = " << handlerId << ")";
-                throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+                throw Safir::Dob::GhostExistsException(ostr.str(),__WFILE__,__LINE__);
 
             }
             break;

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab Systems AB, 2012 (http://www.safirsdk.com)
+* Copyright Saab AB, 2012-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -14,6 +14,7 @@
 #include <csignal>
 #include <boost/bind.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 
 #if defined(DOSE_WIN32_SIGNALS)
 #  include <boost/function.hpp>
@@ -154,7 +155,8 @@ namespace Internal
         }
         else
         {
-            lllerr << "Got extra signal " << sig << std::endl;
+            SEND_SYSTEM_LOG(Critical,
+                            << "Got extra signal " << sig);
         }
     }
 

@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -40,6 +40,13 @@ public abstract class ConnectionBase
 
     }
 
+
+    /**
+     * Tells if the connection is opened.
+     *
+     * @return True if the connection is open, otherwise false.
+     */
+    public abstract boolean isOpen();
 
     //
     // Non-pending (synchronous) registration of entity handler.
@@ -1059,6 +1066,7 @@ public abstract class ConnectionBase
      * @param handlerId Handler id.
      *
      * @throws AccessDeniedException The instance is owned by another handler.
+     * @throws GhostExistsException There is a ghost instance that hasn't been injected.
      */
     public void setChanges(Entity entity,
                            com.saabgroup.safir.dob.typesystem.InstanceId instanceId,
@@ -1110,6 +1118,7 @@ public abstract class ConnectionBase
      * @param handlerId Handler id.
      *
      * @throws AccessDeniedException The instance is owned by another handler.
+     * @throws GhostExistsException There is a ghost instance that hasn't been injected.
      */
     public void setAll(Entity entity,
                        com.saabgroup.safir.dob.typesystem.InstanceId instanceId,
@@ -1160,6 +1169,7 @@ public abstract class ConnectionBase
      * @param handlerId Handler id.
      *
      * @throws AccessDeniedException The instance is owned by another handler.
+     * @throws GhostExistsException There is a ghost instance that hasn't been injected.
      */
     public void delete(com.saabgroup.safir.dob.typesystem.EntityId entityId,
                        com.saabgroup.safir.dob.typesystem.HandlerId handlerId)
