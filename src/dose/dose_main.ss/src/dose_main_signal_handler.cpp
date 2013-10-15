@@ -57,17 +57,18 @@ namespace Internal
         : m_ioService(ioService)
     {
         g_signalFunction = boost::bind(&SignalHandler::Impl::HandleSignal,this,_1);
-        
-        ::signal(SIGABRT, &SignalFunc); //TODO: we should make breakpad handle SIGABRT on windows
-        ::signal(SIGBREAK, &SignalFunc);
-        ::signal(SIGINT, &SignalFunc);
-        ::signal(SIGTERM, &SignalFunc);
+
+        SetConsoleCtrlHandler(HandlerFunc, TRUE);
+        //TODO: will crash reporter still pick up crashes?!
     }
 
-    
-    void SignalHandler::Impl::SignalFunc(const int sig)
+    // Handler function will be called on separate thread!
+    BOOL WINAPI HandlerFunc(DWORD dwCtrlType)
     {
-        g_signalFunction(sig);
+        g_signalFunction(dwCtrlType);
+
+        //return TRUE since we handled this message, further handler functions won't be called.
+        return TRUE;
     }
 
     void SignalHandler::Impl::HandleSignal(const int sig)
@@ -75,8 +76,6 @@ namespace Internal
         lllout << "Got signal " << sig << ", stopping io_service" << std::endl;
         m_ioService.stop();
     }
-
-
 
 #else
     namespace
