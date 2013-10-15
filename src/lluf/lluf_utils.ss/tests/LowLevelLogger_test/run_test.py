@@ -333,6 +333,7 @@ if res.find("Log level should now be 0") == -1:
     proc.kill()
     sys.exit(1)
 
+time.sleep(0.5) #fragile, since there might be a log pending that doesnt get out within this time...    
 print ("clear output and check that new logs are only error logs")
 p.output()
 time.sleep(0.5)
