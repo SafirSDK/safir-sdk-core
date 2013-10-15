@@ -12,14 +12,14 @@ FILE(GLOB dose_com_sources ${SAFIR_SDK}/include/Safir/Dob/Internal/DoseComAux/*.
 # As moc files are generated in the binary dir, tell CMake
 # to always look for includes there:
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
-
 
 # We default to Qt5 and fall back to Qt4
-#find_package(Qt5Widgets)
+find_package(Qt5Widgets)
 if (Qt5Widgets_FOUND)
   message("-- Building dobexplorer with Qt5")
-
+  #for qt5 we need a recent cmake
+  cmake_minimum_required(VERSION 2.8.8)
+  set(CMAKE_AUTOMOC ON)
   QT5_WRAP_UI(ui_headers ${ui})
 else() 
   # Try to use Qt4 instead
@@ -42,8 +42,11 @@ else()
     WORKING_DIRECTORY moctest)
   
   if (moctest_result) #if test failed
-    set(QT_AUTOMOC_MOC_OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
+    set(QT4_WRAP_CPP_OPTIONS OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
   endif()
+  
+  QT4_WRAP_CPP(moc_sources ${headers} ${QT4_WRAP_CPP_OPTIONS})
+
 endif()
 
 ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${dose_com_sources} ${headers})
