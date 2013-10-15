@@ -13,12 +13,14 @@ FILE(GLOB dose_com_sources ${SAFIR_SDK}/include/Safir/Dob/Internal/DoseComAux/*.
 # to always look for includes there:
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-# We default to Qt5 and fall back to Qt4
-find_package(Qt5Widgets)
+# We default to Qt5 if we can find it and fall back to Qt4
+
+if (CMAKE_VERSION VERSION_GREATER "2.8.10") #need cmake 2.8.11 or greater for qt5
+  find_package(Qt5Widgets)
+endif()
+
 if (Qt5Widgets_FOUND)
   message("-- Building dobexplorer with Qt5")
-  #for qt5 we need a recent cmake
-  cmake_minimum_required(VERSION 2.8.8)
   set(CMAKE_AUTOMOC ON)
   QT5_WRAP_UI(ui_headers ${ui})
 else() 
