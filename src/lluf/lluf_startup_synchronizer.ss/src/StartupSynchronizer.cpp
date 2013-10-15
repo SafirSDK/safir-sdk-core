@@ -401,7 +401,7 @@ namespace Utilities
 
 
 
-    StartupSynchronizer::StartupSynchronizer(const std::string& uniqueName)
+    StartupSynchronizer::StartupSynchronizer(const char* uniqueName)
         : m_impl(ImplKeeper::Instance().Get(uniqueName))
         , m_synchronized(NULL)
     {
