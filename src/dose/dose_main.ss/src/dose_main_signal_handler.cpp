@@ -34,11 +34,6 @@ namespace Internal
 
 
 #if defined(DOSE_WIN32_SIGNALS)
-    namespace 
-    {
-        boost::function<void(int)> g_signalFunction;
-    }
-
     class SignalHandler::Impl
         : private boost::noncopyable
     {
@@ -50,25 +45,28 @@ namespace Internal
 
         boost::asio::io_service& m_ioService;
 
-        static void SignalFunc(const int sig);
+        // Handler function will be called on separate thread!
+        static BOOL WINAPI HandlerFunc(DWORD dwCtrlType)
+        {
+            s_signalFunction(dwCtrlType);
+            
+            //return TRUE since we handled this message, further handler functions won't be called.
+            return TRUE;
+        }
+
+        static boost::function<void(int)> s_signalFunction;
     };
+
+    //Static member definition/initialization
+    boost::function<void(int)> SignalHandler::Impl::s_signalFunction;
 
     SignalHandler::Impl::Impl(boost::asio::io_service& ioService)
         : m_ioService(ioService)
     {
-        g_signalFunction = boost::bind(&SignalHandler::Impl::HandleSignal,this,_1);
+        s_signalFunction = boost::bind(&SignalHandler::Impl::HandleSignal,this,_1);
 
-        SetConsoleCtrlHandler(HandlerFunc, TRUE);
+        SetConsoleCtrlHandler(SignalHandler::Impl::HandlerFunc, TRUE);
         //TODO: will crash reporter still pick up crashes?!
-    }
-
-    // Handler function will be called on separate thread!
-    BOOL WINAPI HandlerFunc(DWORD dwCtrlType)
-    {
-        g_signalFunction(dwCtrlType);
-
-        //return TRUE since we handled this message, further handler functions won't be called.
-        return TRUE;
     }
 
     void SignalHandler::Impl::HandleSignal(const int sig)
