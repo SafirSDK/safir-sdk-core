@@ -49,9 +49,19 @@ namespace Internal
         static BOOL WINAPI HandlerFunc(DWORD dwCtrlType)
         {
             s_signalFunction(dwCtrlType);
-            
-            //return TRUE since we handled this message, further handler functions won't be called.
-            return TRUE;
+
+            //Windows Vista and later (probably?)
+            //will terminate immediately when this function returns
+            //for CTRL_CLOSE_EVENT. So we sleep forever here, but 
+            //will be terminated when main function exits.
+            for(;;)
+            {
+                Sleep(1000);
+            }
+
+            //If we weren't in an infinite loop due to the above workaround
+            //we would have wanted to return TRUE since we handled this 
+            //message and don't want further handler functions to be called.
         }
 
         static boost::function<void(int)> s_signalFunction;
