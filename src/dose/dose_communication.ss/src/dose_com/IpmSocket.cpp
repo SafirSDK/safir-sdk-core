@@ -199,8 +199,11 @@ IPADDR CIpmSocket::Get_OwnIpAddress(IPADDR NetAddr_nw)
         if (ioctl(sockfd, SIOCGIFFLAGS, ifr))
             continue;  // failed to get flags, skip it
 
-        IpAddr_nw = *reinterpret_cast<unsigned long *>
+        //get value in two steps to avoid warning
+        unsigned long* tmp = reinterpret_cast<unsigned long *>
             (ifr->ifr_addr.sa_data + sizeof sa.sin_port);
+
+        IpAddr_nw = *tmp;
 
         XorValue = htonl(IpAddr_nw) ^ NetAddr;
         //PrintDbg("N=%X X=%X < %X I=%X %X\n",
