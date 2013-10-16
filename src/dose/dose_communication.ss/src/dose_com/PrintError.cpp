@@ -34,7 +34,6 @@
 * --------
 * void PrintErr(int ErrorCode, const char *format, ... )
 * void PrintDbg( const char *format, ... )
-* void PrintSetMode(DWORD mode, char *pIpAddr)
 *
 * Currently implemented modes - see g_OutPutMode below.
 *********************************************************************/
@@ -51,6 +50,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include "PrintError.h"
 
 #ifdef _LINUX
@@ -60,31 +60,9 @@ typedef unsigned long SOCKET;
 #endif
 
 
-// g_OutPutMode =
-// 'U'  - send to UDP
-// 'N'  - no print
-// 'C'  - Print To Console
-// 'R'  - Print to RAM
-// 'L'  - Print to LLL
-// 'S'  - stdout
-// else - stdout
 
-static unsigned long g_OutPutMode = 'L';  // might be modified by PrintSetMode()
-
-static SOCKET g_SockId = INVALID_SOCKET;
-static struct sockaddr_in g_SockName;
-
-static char g_IpAddr[20] = SERVER_IPADDR;  // might be modified by PrintSetMode()
-
-static char * Get_IpAddr() { return(g_IpAddr); }
-
-static size_t g_ramBufSize = 300000;
-static char* g_ramBuf = 0;
-static char* g_ramFirstFree;
 
 static unsigned int g_logSeq = 0;
-
-//static char g_ProgName[PROGRAM_NAME_LENGTH] = {0};  //Note: this aso offset in msg to server
 
 /***************************************************************
 * Convert a UTF8-encoded std::string to std::wstring
@@ -237,141 +215,6 @@ static char *Get_Err_Text(int err_code, char *pBuff, int maxSize)
 }
 /*--------------------- end Get_Err_text() ------------------------*/
 
-/************************************************************
-* local
-************************************************************/
-#ifdef _WIN32
-static void PrintToConsole( const char *pTxt)
-{
-    int Length;
-    DWORD NumberOfCharsWritten;
-    static COORD dwWriteCoord = {1,1};
-    static HANDLE hConsoleOutput = INVALID_HANDLE_VALUE;
-
-
-    Length = static_cast<int>(strlen(pTxt));
-
-    if(hConsoleOutput == INVALID_HANDLE_VALUE)
-    {
-        AllocConsole();
-        hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-    }
-
-    WriteFile(hConsoleOutput,   //
-                pTxt,           // characters
-                Length,         // number of characters to write
-                &NumberOfCharsWritten,
-                NULL);
-}
-/*---------------------- end PrintToConsole() ----------------------*/
-#endif
-
-/************************************************
-* Used first time - creates a send socket
-*************************************************/
-
-static SOCKET Create_Socket(void)
-{
-    SOCKET SockId;
-#ifdef _WIN32
-    WSADATA  WSAData;
-    if (WSAStartup(MAKEWORD(2,2) ,&WSAData ) != 0)
-    {
-        std::wcout << "WSAStartup failed" << std::endl;
-        return(INVALID_SOCKET);
-    }
-#endif
-
-    SockId = socket(AF_INET,SOCK_DGRAM,0 );
-    if (SockId == INVALID_SOCKET)
-    {
-        std::wcout << "ERROR: Can't create socket." << std::endl;
-        return(INVALID_SOCKET);
-    }
-
-    g_SockName.sin_family      = AF_INET;
-    g_SockName.sin_addr.s_addr = inet_addr(Get_IpAddr());
-    g_SockName.sin_port        = htons(PRINTLOG_PORT);
-
-    return(SockId);
-}
-/*------------------ end Create_Socket() ------------------*/
-
-/**********************************************************
-* Args as printf
-***********************************************************/
-static int PrintUdp( const char *pMsg0)
-{
-    if(g_SockId == INVALID_SOCKET)  // First time
-    {
-        g_SockId = Create_Socket();
-        if (g_SockId == INVALID_SOCKET) return(-1);
-    }
-
-#ifdef zzzzzzzz_WIN32
-    int     result;
-    unsigned long   dwNumberOfBytesSent;
-    int     NumWsaBuff;
-    WSABUF  WsaBuff[4];
-
-    if(g_SockId == INVALID_SOCKET)  // First time
-    {
-        g_SockId = Create_Socket();
-        if (g_SockId == INVALID_SOCKET) return(-1);
-    }
-
-    WsaBuff[0].buf = (char *) pMsg0;
-    WsaBuff[0].len = strlen(pMsg0);
-
-    NumWsaBuff = 1;
-
-    result = WSASendTo (g_SockId,  WsaBuff,NumWsaBuff,
-                        &dwNumberOfBytesSent,0, //dwFlags,
-                       (struct sockaddr *) &g_SockName,
-                        sizeof(g_SockName), NULL, NULL);
-#endif
-
-//#ifdef _LINUX
-    sendto(g_SockId, pMsg0, static_cast<int>(strlen(pMsg0)),0,
-        (struct sockaddr *) &g_SockName, static_cast<int>(sizeof(g_SockName)));
-//#endif
-    return(0);
-}
-/*----------------- end PrintUdp() -----------------*/
-
-void PrintRam(const char* log)
-{
-    if (g_ramBuf == 0)
-    {
-        // Allocate ram
-        g_ramBuf = new char[g_ramBufSize];
-        memset (g_ramBuf, 0, g_ramBufSize);
-        g_ramBufSize -= 1; // always keep a null termination at the end
-        g_ramFirstFree = g_ramBuf;
-    }
-
-    size_t logLen = strlen(log);
-
-    if (logLen > g_ramBufSize)
-    {
-        std::wcout << "DoseCom log message to big for ram buffer!" << std::endl;
-    }
-
-    if (logLen > g_ramBufSize - (g_ramFirstFree - g_ramBuf))
-    {
-        // log doesn't fit in whats left of the buffer, start from the beginning.
-        g_ramFirstFree = g_ramBuf;
-    }
-
-    strncpy(g_ramFirstFree, log, logLen);
-    g_ramFirstFree += logLen;
-
-    if (g_ramFirstFree >= g_ramBuf + g_ramBufSize)
-    {
-        g_ramFirstFree = g_ramBuf; 
-    }
-}
-
 /**********************************************************
 * Args as printf
 ***********************************************************/
@@ -394,20 +237,7 @@ void PrintDbg( const char *format, ... )
 
     sprintf(resultBuf,"%s - %s", seqNoBuf, logBuf);
 
-    if(g_OutPutMode == 'N') return;
-#ifdef _WIN32
-    if(g_OutPutMode == 'C')     PrintToConsole(resultBuf);
-    else
-#endif
-    if(g_OutPutMode == 'U')     PrintUdp(resultBuf);
-    else
-    if(g_OutPutMode == 'R')     PrintRam(resultBuf);
-    else
-    if (g_OutPutMode == 'L')    lllog(1) << ToWstring(resultBuf) << std::flush; 
-    else
-    {
-        std::wcout << ToWstring(resultBuf) << std::flush;
-    }
+    lllog(1) << ToWstring(resultBuf) << std::flush; 
 }
 
 /**********************************************************
@@ -427,59 +257,19 @@ void PrintErr(int ErrorCode, const char *format, ... )
 
     va_end( marker ); /* needed ? Reset variable arguments */
 
-    if(g_OutPutMode == 'N') return;
-
     if(ErrorCode != 0)
     {
         Get_Err_Text(ErrorCode, ErrBuf, sizeof(ErrBuf));
-        sprintf(Buf2,"ERROR: %s - %s\n",Buf1, ErrBuf);
+        sprintf(Buf2,"ERROR: %s - %s",Buf1, ErrBuf);
     }
     else
     {
-        sprintf(Buf2,"ERROR: %s\n",Buf1);
+        sprintf(Buf2,"ERROR: %s",Buf1);
     }
-#ifdef _WIN32
-    if(g_OutPutMode == 'C') PrintToConsole(Buf2);
-    else
-#endif
-    if(g_OutPutMode == 'U') PrintUdp(Buf2);
-    else
-    if(g_OutPutMode == 'R') PrintRam(Buf2);
-    else
-    if (g_OutPutMode == 'L') lllog(0) << ToWstring(Buf2) << std::flush;
-    else
-    {
-        std::wcout << ToWstring(Buf2) << std::flush;
-    }
+
+    SEND_SYSTEM_LOG(Error,
+                    << ToWstring(Buf2));
 }
 
-/**********************************************************
-* Turn printing on or off
-*
-* mode =
-* 'U'  - send to UDP
-* 'N'  - no print
-* 'C'  - Print To Console
-* 'S'  - stdout
-* else - stdout
-*
-***********************************************************/
-void PrintSetMode(wchar_t mode,
-                  char *pIpAddr,        //dotted decimal or NULL
-                  size_t ramBufSize) 
-{
-    std::wcout << "PrintSetMode(" << mode << "," << ToWstring(pIpAddr) << ")" << std::endl;
-
-    if(pIpAddr != NULL)
-        strncpy(g_IpAddr, pIpAddr, sizeof(g_IpAddr));
-    if(mode != 0) g_OutPutMode = mode;
-
-    g_ramBufSize = ramBufSize;
-}
-
-void FlushRamBuffer()
-{
-    std::wcout << ToWstring(g_ramBuf) << std::flush;
-}
 
 /*------------------------- end PrintError.cpp ----------------------*/
