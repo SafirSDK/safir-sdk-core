@@ -260,14 +260,14 @@ void PrintErr(int ErrorCode, const char *format, ... )
     if(ErrorCode != 0)
     {
         Get_Err_Text(ErrorCode, ErrBuf, sizeof(ErrBuf));
-        sprintf(Buf2,"ERROR: %s - %s",Buf1, ErrBuf);
+        sprintf(Buf2,"DoseCom: %s - %s",Buf1, ErrBuf);
     }
     else
     {
-        sprintf(Buf2,"ERROR: %s",Buf1);
+        sprintf(Buf2,"DoseCom: %s",Buf1);
     }
 
-    SEND_SYSTEM_LOG(Error,
+    SEND_SYSTEM_LOG(Warning,
                     << ToWstring(Buf2));
 }
 
