@@ -577,7 +577,7 @@ class VisualStudioBuilder(BuilderBase):
             if DIR is None:
                 die("Could not work out which studio you are using, make sure you run dobmake.py in a Visual Studio command prompt.")
             if target_architecture is None:
-                die("No target_architecture set. Please specify on command line, using the --target-architecture switch.")
+                die("No target_architecture set. Please specify on command line, using the --target switch.")
             if not cfg.has_section("main"):
                 cfg.add_section("main")
             cfg.set("main","VSPATH",os.path.join(DIR,"Common7","Tools"))
