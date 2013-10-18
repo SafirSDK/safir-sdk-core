@@ -16,7 +16,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # We default to Qt5 if we can find it and fall back to Qt4
 
 if (CMAKE_VERSION VERSION_GREATER "2.8.10") #need cmake 2.8.11 or greater for qt5
-  find_package(Qt5Widgets)
+  find_package(Qt5Widgets QUIET)
 endif()
 
 if (Qt5Widgets_FOUND)
