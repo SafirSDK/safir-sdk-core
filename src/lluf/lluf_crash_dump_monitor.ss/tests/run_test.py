@@ -83,9 +83,8 @@ for i in range(2, 31):
     os.utime(f, (last_access_time, last_mod_time))                         
 
 # start the program that we are testing                        
-proc = subprocess.Popen([os.path.join(SAFIR_RUNTIME,"bin","crash_dump_monitor"), "--max-dump-files", "25", "--check-interval", "1"])
-time.sleep(2)
-proc.kill()
+proc = subprocess.Popen([os.path.join(SAFIR_RUNTIME,"bin","crash_dump_monitor"), "--max-dump-files", "25", "--check-interval", "1", "--run-once"])
+proc.communicate()
 
 # We have created 30 files and max dumpfiles is set to 25 which maybe make
 # you beleive that 5 files should deleted, leaving 25 files. Not so, actually

@@ -114,7 +114,7 @@ namespace Utilities
         /**
          * Construct a StartupSynchronizer for a resource with a given name.
          */
-        explicit StartupSynchronizer(const std::string& uniqueName);
+        explicit StartupSynchronizer(const char* uniqueName);
 
         /**
          * Destructor.

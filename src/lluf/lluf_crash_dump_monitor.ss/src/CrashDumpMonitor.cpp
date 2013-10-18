@@ -47,7 +47,8 @@ public:
     ProgramOptions(int argc, char* argv[])
         : parseOk(false),
           maxDumpFiles(0),
-          checkInterval(0)
+          checkInterval(0),
+          runOnce(false)
     {
         using namespace boost::program_options;
         Safir::Utilities::Internal::ConfigReader reader;
@@ -57,6 +58,7 @@ public:
             ("help,h", "show help message")
             ("max-dump-files,i", value<size_t>(&maxDumpFiles)->default_value(1000), "Max number of crash dumpfiles.")
             ("check-interval,c", value<int>(&checkInterval)->default_value(30), "Check interval in seconds.")
+            ("run-once,o", value<bool>(&runOnce)->zero_tokens(), "Run the program once and then return.")
             ;
         
         variables_map vm;
@@ -85,6 +87,7 @@ public:
     bool    parseOk;
     size_t  maxDumpFiles;
     int     checkInterval;
+    bool    runOnce;
 
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
@@ -114,8 +117,6 @@ int main(int argc, char * argv[])
 
     for (;;)
     {
-        boost::this_thread::sleep(boost::posix_time::seconds(options.checkInterval));
-
         try
         {
             namespace bfs = boost::filesystem;
@@ -151,6 +152,12 @@ int main(int argc, char * argv[])
         {
 
         }
+
+        if (options.runOnce)
+        {
+            return 0;
+        }
+        boost::this_thread::sleep(boost::posix_time::seconds(options.checkInterval));
     }
 
 #ifndef _MSC_VER

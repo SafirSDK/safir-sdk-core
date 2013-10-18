@@ -265,7 +265,7 @@ namespace VehicleMmiCppQt
         OnUpdatedEntityInternal(entityProxy);
     }
 
-    void EntityTableHandler::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool /*deletedByOwner*/)
+    void EntityTableHandler::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool /*deprecated*/)
     {
         OnDeletedEntityInternal(entityProxy);
     }

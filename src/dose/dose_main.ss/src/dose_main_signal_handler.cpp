@@ -34,11 +34,6 @@ namespace Internal
 
 
 #if defined(DOSE_WIN32_SIGNALS)
-    namespace 
-    {
-        boost::function<void(int)> g_signalFunction;
-    }
-
     class SignalHandler::Impl
         : private boost::noncopyable
     {
@@ -50,24 +45,38 @@ namespace Internal
 
         boost::asio::io_service& m_ioService;
 
-        static void SignalFunc(const int sig);
+        // Handler function will be called on separate thread!
+        static BOOL WINAPI HandlerFunc(DWORD dwCtrlType)
+        {
+            s_signalFunction(dwCtrlType);
+
+            //Windows Vista and later (probably?)
+            //will terminate immediately when this function returns
+            //for CTRL_CLOSE_EVENT. So we sleep forever here, but 
+            //will be terminated when main function exits.
+            for(;;)
+            {
+                Sleep(1000);
+            }
+
+            //If we weren't in an infinite loop due to the above workaround
+            //we would have wanted to return TRUE since we handled this 
+            //message and don't want further handler functions to be called.
+        }
+
+        static boost::function<void(int)> s_signalFunction;
     };
+
+    //Static member definition/initialization
+    boost::function<void(int)> SignalHandler::Impl::s_signalFunction;
 
     SignalHandler::Impl::Impl(boost::asio::io_service& ioService)
         : m_ioService(ioService)
     {
-        g_signalFunction = boost::bind(&SignalHandler::Impl::HandleSignal,this,_1);
-        
-        ::signal(SIGABRT, &SignalFunc); //TODO: we should make breakpad handle SIGABRT on windows
-        ::signal(SIGBREAK, &SignalFunc);
-        ::signal(SIGINT, &SignalFunc);
-        ::signal(SIGTERM, &SignalFunc);
-    }
+        s_signalFunction = boost::bind(&SignalHandler::Impl::HandleSignal,this,_1);
 
-    
-    void SignalHandler::Impl::SignalFunc(const int sig)
-    {
-        g_signalFunction(sig);
+        SetConsoleCtrlHandler(SignalHandler::Impl::HandlerFunc, TRUE);
+        //TODO: will crash reporter still pick up crashes?!
     }
 
     void SignalHandler::Impl::HandleSignal(const int sig)
@@ -75,8 +84,6 @@ namespace Internal
         lllout << "Got signal " << sig << ", stopping io_service" << std::endl;
         m_ioService.stop();
     }
-
-
 
 #else
     namespace
