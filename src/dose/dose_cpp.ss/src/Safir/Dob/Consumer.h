@@ -378,11 +378,9 @@ namespace Dob
          * Called when an entity is deleted.
          *
          * @param [in] entityProxy - Proxy object containing deleted entity information.
-         * @param [in] deletedByOwner - Flag indicating if the entity has been deleted by the owner (true) or
-         *                              if it was removed by the DOB because the owner is no longer present (false).
          */
         virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
-                                     const bool                    deletedByOwner) = 0;
+                                     const bool                    /*deprecated*/) = 0;
 
     private:
         virtual EntitySubscriber * ToEntitySubscriber() {return this;}
