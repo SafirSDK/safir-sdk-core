@@ -237,7 +237,7 @@ namespace VehicleMmiCsWinForms
         /// <summary>
         /// Remove the object from the list and the object map
         /// </summary>
-        public void OnDeletedEntity(Safir.Dob.EntityProxy entityProxy, bool deletedByOwner)
+        public void OnDeletedEntity(Safir.Dob.EntityProxy entityProxy, bool deprecated)
         {
             m_ListView.Items.RemoveByKey(entityProxy.InstanceId.ToString());
         }
