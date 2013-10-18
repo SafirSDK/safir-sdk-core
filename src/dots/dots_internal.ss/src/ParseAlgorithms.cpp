@@ -36,22 +36,27 @@ namespace Internal
     //----------------------------------------------
     bool ValidName(const std::string& name)
     {
-        //Maybe better to use regexp?
-        //Valid names must start with a alpha char and the rest must be alphanumeric chars. We also allow underscores.
-        std::string::const_iterator it=name.begin();
-        if (name.empty() || !std::isalpha(*it, std::locale::classic()))
+        if (name.empty())
         {
             return false;
         }
 
-        ++it;
-        for (; it!=name.end(); ++it)
+        bool firstLetter=true;
+        for (std::string::const_iterator it=name.begin(); it!=name.end(); ++it)
         {
-            if (!std::isalnum(*it, std::locale::classic()) && (*it)!='_' &&  (*it)!='.')
+            if (firstLetter)
             {
-                //not alphaNum, not underscore, and not an allowed dot.
+                if (!std::isalpha(*it, std::locale::classic()))
+                {
+                    return false;
+                }
+            }
+            else if (!std::isalnum(*it, std::locale::classic()) && (*it)!='_' &&  (*it)!='.')
+            {
                 return false;
             }
+
+            firstLetter=(*it)=='.';
         }
 
         return true;
@@ -69,43 +74,15 @@ namespace Internal
     //Resolves references on the form <...><name>param</name>123<index></index></...>
     void GetReferencedParameter(boost::property_tree::ptree& pt, std::string& paramName, int& paramIndex)
     {
-        paramName=pt.get<std::string>(ElementNames::Instance().String(ElementNames::ReferenceName));
-        paramIndex=pt.get(ElementNames::Instance().String(ElementNames::ReferenceIndex), 0);
+        paramName=pt.get<std::string>(Elements::ReferenceName::Name());
+        paramIndex=pt.get(Elements::ReferenceIndex::Name(), 0);
     }
 
     std::string GetEntityIdParameterAsString(boost::property_tree::ptree& pt)
     {
-        std::string name=pt.get<std::string>(ElementNames::Instance().String(ElementNames::ClassName));
-        std::string inst=pt.get<std::string>(ElementNames::Instance().String(ElementNames::InstanceId));
-        return  ExpandEnvironmentVariables(name)+std::string(", ")+ExpandEnvironmentVariables(inst);
-    }
-
-    std::string ExpandEnvironmentVariables(const std::string& str)
-    {
-        //Copied from dots_kernel::dots_class_parser
-        const size_t start=str.find("$(");
-        const size_t stop=str.find(')', start);
-
-        if (start==std::string::npos || stop==std::string::npos)
-            return str;
-
-        const std::string var=str.substr(start+2, stop-start-2);
-
-        //Get rid of Microsoft warning
-#ifdef _MSC_VER
-#pragma warning(disable:4996)
-#endif
-        const char * const env=getenv(var.c_str());
-#ifdef _MSC_VER
-#pragma warning(default:4996)
-#endif
-
-        if (env == NULL)
-        {
-            throw ParseError(var, "", "", -1);
-        }
-        const std::string res=str.substr(0, start) + env + str.substr(stop+1, str.size()-stop-1);
-        return ExpandEnvironmentVariables(res); //search for next environment variable
+        std::string name=pt.get<std::string>(Elements::ClassName::Name());
+        std::string inst=pt.get<std::string>(Elements::InstanceId::Name());
+        return  SerializationUtils::ExpandEnvironmentVariables(name)+std::string(", ")+SerializationUtils::ExpandEnvironmentVariables(inst);
     }
 
     bool ParseValue(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result)
@@ -197,7 +174,7 @@ namespace Internal
                 return false; //dont know about enum types here
             case BinaryMemberType:
             {
-                if (!BasicTypes::Instance().FromBase64(val, result.stringVal))
+                if (!SerializationUtils::FromBase64(val, result.stringVal))
                 {
                     return false;
                 }
@@ -281,7 +258,7 @@ namespace Internal
             {
                 std::ostringstream ss;
                 ss<<"The type '"<<it->second->GetName()<<"' is already defined. ";
-                throw ParseError("Duplicated type definition", ss.str(), it->second->FileName(), 2);
+                throw ParseError("Duplicated type definition", ss.str(), it->second->FileName(), 11);
             }
         }
     }
@@ -368,7 +345,7 @@ namespace Internal
                     {
                         std::ostringstream ss;
                         ss<<"The member '"<<(*memberIt)->name<<"' in class/property '"<<d->GetName()<<"' has an invalid type specified. Type: "<<(*memberIt)->typeName;
-                        throw ParseError("Invalid type", ss.str(), d->FileName(), 20);
+                        throw ParseError("Invalid type", ss.str(), d->FileName(), 104);
                     }
                 }
             }
@@ -390,7 +367,7 @@ namespace Internal
 
         //Add predefined types
         ClassDescriptionBasicPtr obj(new ClassDescriptionBasic);
-        obj->name=BasicTypes::ObjectName();
+        obj->name=BasicTypeOperations::PredefindedClassNames::ObjectName();
         obj->typeId=DotsId_Generate64(obj->name.c_str());
         obj->base=NULL;
         obj->ownSize=OFFSET_HEADER_LENGTH;
@@ -398,13 +375,13 @@ namespace Internal
         m_result->InsertClass(obj);
 
         ExceptionDescriptionBasicPtr exc(new ExceptionDescriptionBasic);
-        exc->name=BasicTypes::ExceptionName();
+        exc->name=BasicTypeOperations::PredefindedClassNames::ExceptionName();
         exc->typeId=DotsId_Generate64(exc->name.c_str());
         exc->base=NULL;
         m_result->InsertException(exc);
 
         ExceptionDescriptionBasicPtr fxc(new ExceptionDescriptionBasic);
-        fxc->name=BasicTypes::FundamentalExceptionName();
+        fxc->name=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         fxc->typeId=DotsId_Generate64(fxc->name.c_str());
         fxc->base=NULL;
         m_result->InsertException(fxc);
@@ -424,8 +401,8 @@ namespace Internal
 
         //Setup Exception baseclass
         std::set<DotsC_TypeId> endConditions;
-        endConditions.insert(DotsId_Generate64(BasicTypes::ExceptionName().c_str()));
-        endConditions.insert(DotsId_Generate64(BasicTypes::FundamentalExceptionName().c_str()));
+        endConditions.insert(DotsId_Generate64(BasicTypeOperations::PredefindedClassNames::ExceptionName().c_str()));
+        endConditions.insert(DotsId_Generate64(BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName().c_str()));
         boost::function<void(ExceptionDescriptionBasic*, ExceptionDescriptionBasic*)> setExeptBaseFun(SetExceptionBase);
         for (boost::unordered_map<DotsC_TypeId, ExceptionDescriptionBasicPtr>::iterator it=m_result->m_exceptions.begin(); it!=m_result->m_exceptions.end(); ++it)
         {
@@ -444,7 +421,7 @@ namespace Internal
         classesWithCreateRoutines.reserve(100);
         boost::function<void(ClassDescriptionBasic*, ClassDescriptionBasic*)> setClassBaseFun(SetClassBase);
         endConditions.clear();
-        endConditions.insert(DotsId_Generate64(BasicTypes::ObjectName().c_str()));
+        endConditions.insert(DotsId_Generate64(BasicTypeOperations::PredefindedClassNames::ObjectName().c_str()));
         for (boost::unordered_map<DotsC_TypeId, ClassDescriptionBasicPtr>::iterator it=m_result->m_classes.begin(); it!=m_result->m_classes.end(); ++it)
         {
             //Set base class
@@ -472,11 +449,11 @@ namespace Internal
             CalculateClassSize(it->second.get());
         }
 
+        //Verify that parameter with memberType typeId, entityId or enum is referencing valid types.
+        VerifyParameterTypes();
+
         //Deserialize xml objects
         DeserializeObjects(states);
-
-        //Verify that parameter with memberType object or enum is referencing valid types.
-        VerifyParameterTypes();
 
         //Create routines - verify types, check duplicates etc.
         std::for_each(classesWithCreateRoutines.begin(), classesWithCreateRoutines.end(), boost::bind(&RepositoryCompletionAlgorithms::HandleCreateRoutines, this, _1));
@@ -484,7 +461,8 @@ namespace Internal
 
     void RepositoryCompletionAlgorithms::DeserializeObjects(const std::vector<ParseStatePtr>& states)
     {
-        XmlToBlobSerializer<TypeRepository> serializer(m_result.get());
+        XmlToBlobSerializer<TypeRepository> niceSerializer(m_result.get());
+        UglyXmlToBlobSerializer<TypeRepository> deprecatedSerializer(m_result.get());
 
         for (std::vector<ParseStatePtr>::const_iterator stateIt=states.begin(); stateIt!=states.end(); ++stateIt)
         {
@@ -495,45 +473,70 @@ namespace Internal
                 ParameterDescriptionBasic* param=parIt->referee.referencingItem;
                 size_t paramIndex=parIt->referee.referencingIndex;
                 ValueDefinition& val=param->MutableValue(paramIndex);
-
-                //Get the correct type name of the serialized object
                 const boost::property_tree::ptree& pt=*(parIt->obj);
-                boost::optional<std::string> typeAttr=pt.get_optional<std::string>("<xmlattr>.type");
-                std::string typeName;
-                if (typeAttr)
+
+                if (!parIt->deprecatedXmlFormat)
                 {
-                    //if type has an explicit type-attribute, check type compliance
-                    typeName=*typeAttr;
-                    TypeId tid=DotsId_Generate64(typeName.c_str());
-                    if (!BasicTypes::Instance().IsOfType(m_result.get(), ObjectMemberType, tid, ObjectMemberType, param->GetTypeId()))
+                    //Get the correct type name of the serialized object
+                    boost::optional<std::string> typeAttr=pt.get_optional<std::string>("<xmlattr>.type");
+                    std::string typeName;
+                    if (typeAttr)
+                    {
+                        //if type has an explicit type-attribute, check type compliance
+                        typeName=*typeAttr;
+                        TypeId tid=DotsId_Generate64(typeName.c_str());
+                        if (!BasicTypeOperations::IsOfType<TypeRepository>(m_result.get(), ObjectMemberType, tid, ObjectMemberType, param->GetTypeId()))
+                        {
+                            std::ostringstream os;
+                            os<<param->GetName()<<" index="<<paramIndex<<" in class "<<parIt->referee.referencingClass->GetName()<<" contains a value of type '"
+                             <<typeName<<"' that is not a subtype of the declared type "<<param->typeName;
+                            throw ParseError("Type missmatch", os.str(), parIt->referee.referencingClass->FileName(), 105);
+                        }
+                    }
+                    else
+                    {
+                        //type defaults to dou declaration
+                        typeName=param->typeName;
+                    }
+
+                    //do the serialization to the expected type
+                    try
+                    {
+                        niceSerializer.SerializeObjectContent(typeName, val.binaryVal, pt); //since pt does not include the root element we have to use method SerializeObjectContent
+                    }
+                    catch (const ParseError& err)
+                    {
+                        std::ostringstream os;
+                        os<<"Failed to deserialize object parameter "<<param->GetName()<<" index="<<paramIndex<<" in class "<<parIt->referee.referencingClass->GetName()
+                         <<". "<<err.Description();
+                        throw ParseError("Invalid Object", os.str(), parIt->referee.referencingClass->FileName(), err.ErrorId());
+                    }
+                }
+                else //This is when using the old xml format
+                {
+                    DotsC_TypeId tid;
+                    try
+                    {
+                        tid=deprecatedSerializer.SerializeObjectContent(val.binaryVal, pt);
+                    }
+                    catch (const ParseError& err)
+                    {
+                        std::ostringstream os;
+                        os<<"Failed to deserialize object parameter "<<param->GetName()<<" index="<<paramIndex<<" in class "<<parIt->referee.referencingClass->GetName()
+                         <<". "<<err.Description();
+                        throw ParseError("Invalid Object", os.str(), parIt->referee.referencingClass->FileName(), err.ErrorId());
+                    }
+
+                    if (!BasicTypeOperations::IsOfType<TypeRepository>(m_result.get(), ObjectMemberType, tid, ObjectMemberType, param->GetTypeId()))
                     {
                         std::ostringstream os;
                         os<<param->GetName()<<" index="<<paramIndex<<" in class "<<parIt->referee.referencingClass->GetName()<<" contains a value of type '"
-                         <<typeName<<"' that is not a subtype of the declared type "<<param->typeName;
-                        throw ParseError("Type missmatch", os.str(), parIt->referee.referencingClass->FileName(), 105);
+                         <<m_result->GetClass(tid)->GetName()<<"' that is not a subtype of the declared type "<<param->typeName;
+                        throw ParseError("Type missmatch", os.str(), parIt->referee.referencingClass->FileName(), 106);
                     }
-                }
-                else
-                {
-                    //type defaults to dou declaration
-                    typeName=param->typeName;
-                }
-
-                //do the serialization to the expected type
-                try
-                {
-                    serializer.SerializeObjectContent(typeName, val.binaryVal, pt); //since pt does not include the root element we have to use method SerializeObjectContent
-                }
-                catch (const ParseError& err)
-                {
-                    std::ostringstream os;
-                    os<<"Failed to deserialize object parameter "<<param->GetName()<<" index="<<paramIndex<<" in class "<<parIt->referee.referencingClass->GetName()
-                     <<". "<<err.Description();
-                    throw ParseError("Invalid Object", os.str(), parIt->referee.referencingClass->FileName(), err.ErrorId());
                 }
             }
         }
-
     }
 
     void RepositoryCompletionAlgorithms::ResolveParamToParamRefs(const std::vector<ParseStatePtr>& states)
@@ -616,7 +619,7 @@ namespace Internal
             referencing->memberType=referenced->memberType;
         }
 
-        if (!BasicTypes::Instance().IsOfType(m_result.get(), referenced->memberType, referenced->GetTypeId(),
+        if (!BasicTypeOperations::IsOfType<TypeRepository>(m_result.get(), referenced->memberType, referenced->GetTypeId(),
                       referencing->memberType, referencing->GetTypeId()))
         {
             //referenced parameter cant be derived as the same type as referencing parameter
@@ -651,13 +654,13 @@ namespace Internal
         {
             std::ostringstream ss;
             ss<<"Array index out of range for Parameter arraySizeRef '"<<ref.parameterName<<"' and index="<<ref.parameterIndex<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
-            throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 43);
+            throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 51);
         }
         if (referenced->GetMemberType()!=Int32MemberType)
         {
             std::ostringstream ss;
             ss<<"The parameter referenced for arraySize '"<<ref.parameterName<<"' has type "<<referenced->typeName<<" and not the expected type Int32. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
-            throw ParseError("Type missmatch in arraySizeRef", ss.str(), cd->FileName(), 43);
+            throw ParseError("Type missmatch in arraySizeRef", ss.str(), cd->FileName(), 52);
         }
 
         int size=referenced->GetInt32Value(ref.parameterIndex);
@@ -682,19 +685,19 @@ namespace Internal
         {
             std::ostringstream ss;
             ss<<"Could not resolve parameter for maxLengthRef '"<<ref.parameterName<<"'. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
-            throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 49);
+            throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 107);
         }
         if (referenced->GetArraySize()<=static_cast<int>(ref.parameterIndex))
         {
             std::ostringstream ss;
             ss<<"Array index out of range for Parameter maxLengthRef '"<<ref.parameterName<<"' and index="<<ref.parameterIndex<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
-            throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 43);
+            throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 53);
         }
         if (referenced->GetMemberType()!=Int32MemberType)
         {
             std::ostringstream ss;
             ss<<"The parameter referenced for maxLength '"<<ref.parameterName<<"' has type "<<referenced->typeName<<" and not the expected type Int32. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
-            throw ParseError("Type missmatch in maxLengthRef", ss.str(), cd->FileName(), 43);
+            throw ParseError("Type missmatch in maxLengthRef", ss.str(), cd->FileName(), 41);
         }
 
         int size=referenced->GetInt32Value(ref.parameterIndex);
@@ -735,7 +738,9 @@ namespace Internal
             std::string paramRawVal=pdef->Value(0).stringVal;
             if (!ParseValue(pdef->memberType, paramRawVal, pdef->MutableValue(0)))
             {
-                throw ParseError("Invalid create routine value", "Cant parse value", cd->FileName(), 63);
+                std::ostringstream os;
+                os<<"Cant parse createRoutine value '"<<paramRawVal<<"' for member "<<memberName<<" in createRoutine "<<cr->GetName()<<" in class "<<cd->GetName()<<" as a value of the expected type";
+                throw ParseError("Invalid create routine value", os.str(), cd->FileName(), 63);
             }
         }
     }
@@ -823,7 +828,7 @@ namespace Internal
                     throw ParseError("Invalid CreateRoutine value", os.str(), cd->FileName(), 59);
                 }
                 const MemberDescriptionBasic* md=static_cast<const MemberDescriptionBasic*>(cd->GetMember(memberIndex));
-                if (!BasicTypes::Instance().IsOfType(m_result.get(), pd->GetMemberType(), pd->GetTypeId(), md->GetMemberType(), md->GetTypeId()))
+                if (!BasicTypeOperations::IsOfType<TypeRepository>(m_result.get(), pd->GetMemberType(), pd->GetTypeId(), md->GetMemberType(), md->GetTypeId()))
                 {
                     //Type missmatch
                     std::ostringstream os;
@@ -875,7 +880,7 @@ namespace Internal
                 for (int index=0; index<pd->GetArraySize(); ++index)
                 {
                     const ValueDefinition& val=pd->Value(static_cast<size_t>(index));
-                    if (!BasicTypes::Instance().ValidTypeId(m_result.get(), val.int64Val))
+                    if (!BasicTypeOperations::ValidTypeId(m_result.get(), val.int64Val))
                     {
                         std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
                         std::ostringstream os;
@@ -894,7 +899,7 @@ namespace Internal
                     {
                         std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
                         std::ostringstream os;
-                        os<<"The parameter "<<pd->GetName()<<" has an invalid value. '"<<val.stringVal<<"' is not a valid EntityId, the typeId does not exist.";
+                        os<<"The parameter "<<pd->GetName()<<" has an invalid value. The typeId does not exist.";
                         throw ParseError("Invalid EntityId parameter", os.str(), file, 46);
                     }
                 }
@@ -943,7 +948,7 @@ namespace Internal
         for (std::vector<MemberDescriptionBasicPtr>::const_iterator memIt=cd->members.begin(); memIt!=cd->members.end(); ++memIt)
         {
             int repeat=(*memIt)->isArray ? (*memIt)->arraySize : 1;
-            cd->ownSize+=OFFSET_MEMBER_LENGTH+(MEMBER_STATUS_LENGTH+BasicTypes::Instance().SizeOfType((*memIt)->memberType))*repeat;
+            cd->ownSize+=OFFSET_MEMBER_LENGTH+(MEMBER_STATUS_LENGTH+BasicTypeOperations::SizeOfType((*memIt)->memberType))*repeat;
         }
 
         cd->initialSize=cd->ownSize+cd->base->InitialSize();

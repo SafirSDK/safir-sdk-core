@@ -25,10 +25,13 @@
 #define __DOTS_INTERNAL_REPOSITORY_BASIC_H__
 
 #include <set>
+#include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/unordered_map.hpp>
 #include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
-#include <Safir/Dob/Typesystem/Internal/detail/BasicTypeOperations.h>
+#include <Safir/Dob/Typesystem/Internal/Detail/BasicTypeOperations.h>
 
-using namespace Safir::Dob::Typesystem::Internal::detail;
+using namespace Safir::Dob::Typesystem::Internal::Detail;
 
 //----------------------------------------------------------------------------------------
 // A local memeory (not shared memory) implementation of the TypeRespository interface
@@ -370,7 +373,7 @@ namespace Internal
         virtual int GetNumberOfParameters() const {return GetNumberOfOwnParameters()+GetNumberOfInheritedParameters();}
         virtual const ParameterDescription* GetParameter(DotsC_ParameterIndex index) const;
 
-        virtual void GetPropertyIds(std::vector<DotsC_TypeId>& propertyIds) const;
+        virtual void GetPropertyIds(std::set<DotsC_TypeId>& propertyIds) const;
         virtual const PropertyMappingDescription* GetPropertyMapping(DotsC_TypeId propertyTypeId, bool & isInherited) const;
 
         virtual int GetNumberOfCreateRoutines() const {return static_cast<int>(createRoutines.size());}
@@ -403,22 +406,22 @@ namespace Internal
         //Enmerations
         virtual const EnumDescription* GetEnum(DotsC_TypeId typeId) const {return GetPtr(m_enums, typeId);}
         virtual size_t GetNumberOfEnums() const {return m_enums.size();}
-        virtual void GetAllEnumTypeIds(std::vector<DotsC_TypeId>& typeIds) const {GetKeys(m_enums, typeIds);}
+        virtual void GetAllEnumTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys(m_enums, typeIds);}
 
         //properties
         virtual const PropertyDescription* GetProperty(DotsC_TypeId typeId) const {return GetPtr(m_properties, typeId);}
         virtual size_t GetNumberOfProperties() const {return m_properties.size();}
-        virtual void GetAllPropertyTypeIds(std::vector<DotsC_TypeId>& typeIds) const {GetKeys(m_properties, typeIds);}
+        virtual void GetAllPropertyTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys(m_properties, typeIds);}
 
         //classes
         virtual const ClassDescription* GetClass(DotsC_TypeId typeId) const {return GetPtr(m_classes, typeId);}
         virtual size_t GetNumberOfClasses() const {return m_classes.size();}
-        virtual void GetAllClassTypeIds(std::vector<DotsC_TypeId>& typeIds) const {GetKeys(m_classes, typeIds);}
+        virtual void GetAllClassTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys(m_classes, typeIds);}
 
         //exceptions
         virtual const ExceptionDescription* GetException(DotsC_TypeId typeId) const {return GetPtr(m_exceptions, typeId);}
         virtual size_t GetNumberOfExceptions() const {return m_exceptions.size();}
-        virtual void GetAllExceptionTypeIds(std::vector<DotsC_TypeId>& typeIds) const {GetKeys(m_exceptions, typeIds);}
+        virtual void GetAllExceptionTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys(m_exceptions, typeIds);}
 
         //Extra methods not from TypeRepository interface
         bool InsertEnum(const EnumDescriptionBasicPtr& val) {return m_enums.insert(std::make_pair(val->typeId, val)).second;}
@@ -441,11 +444,11 @@ namespace Internal
         boost::unordered_map<std::string, ParameterDescriptionBasic*> m_parameters;
 
         template <class Key, class Val>
-        static void GetKeys(const boost::unordered_map<Key, Val>& m, std::vector<Key>& keys)
+        static void GetKeys(const boost::unordered_map<Key, Val>& m, std::set<Key>& keys)
         {
             for (typename boost::unordered_map<Key, Val>::const_iterator it=m.begin(); it!=m.end(); ++it)
             {
-                keys.push_back(it->first);
+                keys.insert(it->first);
             }
         }
 

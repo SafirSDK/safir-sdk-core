@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <property>ParserTest.MyProperty</property>
+    <class>ParserTest.MyEntity</class>
+    <memberMapping>
+        
+        <member>
+            <propertyMember>MyEnumPropertyValue</propertyMember>
+            <value>Blackberry</value>
+        </member>
+        
+    </memberMapping>
+</propertyMapping>

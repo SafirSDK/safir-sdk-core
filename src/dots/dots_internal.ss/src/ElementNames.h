@@ -24,13 +24,6 @@
 #ifndef __DOTS_INTERNAL_ELEMENT_NAMES_H__
 #define __DOTS_INTERNAL_ELEMENT_NAMES_H__
 
-#include <map>
-
-
-//---------------------------------------------------
-// Defines all xml-elements used in dou/dom-syntax.
-// The class is a singleton.
-//---------------------------------------------------
 namespace Safir
 {
 namespace Dob
@@ -39,223 +32,91 @@ namespace Typesystem
 {
 namespace Internal
 {
-    class ElementNames
+    namespace Elements
     {
-    public:
-        enum Element
-        {
-            //--- Class ---
-            Class,
-            Classsummary,
-            ClassName,
-            BaseClass,
-            ClassMembers,
-            Parameters,
-            CreateRoutines,
+        struct XmlAttribute {static const std::string& Name() {static const std::string n="<xmlattr>"; return n;}};
+        struct Any {static const std::string& Name() {static const std::string n="any"; return n;}};
+        struct Classsummary {static const std::string& Name() {static const std::string n="summary"; return n;}};
+        struct Exceptionsummary {static const std::string& Name() {static const std::string n="summary"; return n;}};
+        struct Enumerationsummary {static const std::string& Name() {static const std::string n="summary"; return n;}};
+        struct Propertysummary {static const std::string& Name() {static const std::string n="summary"; return n;}};
+        struct Parametersummary {static const std::string& Name() {static const std::string n="summary"; return n;}};
+        struct Membersummary {static const std::string& Name() {static const std::string n="summary"; return n;}};
+        struct CreateRoutinesummary {static const std::string& Name() {static const std::string n="summary"; return n;}};
+        struct ClassName {static const std::string& Name() {static const std::string n="name"; return n;}};
+        struct ExceptionName {static const std::string& Name() {static const std::string n="name"; return n;}};
+        struct EnumerationName {static const std::string& Name() {static const std::string n="name"; return n;}};
+        struct PropertyName {static const std::string& Name() {static const std::string n="name"; return n;}};
+        struct ParameterName {static const std::string& Name() {static const std::string n="name"; return n;}};
+        struct MemberName {static const std::string& Name() {static const std::string n="name"; return n;}};
+        struct CreateRoutineName {static const std::string& Name() {static const std::string n="name"; return n;}};
+        struct ParameterType {static const std::string& Name() {static const std::string n="type"; return n;}};
+        struct ParameterValue {static const std::string& Name() {static const std::string n="value"; return n;}};
+        struct ParameterValueRef {static const std::string& Name() {static const std::string n="valueRef"; return n;}};
+        struct ParameterArrayElement {static const std::string& Name() {static const std::string n="arrayElement"; return n;}};
+        struct ParameterArrayElements {static const std::string& Name() {static const std::string n="arrayElements"; return n;}};
+        struct ParameterObject {static const std::string& Name() {static const std::string n="object"; return n;}};
+        struct ParameterEntityId {static const std::string& Name() {static const std::string n="entityId"; return n;}};
+        struct ParameterArrayIndex {static const std::string& Name() {static const std::string n="index"; return n;}};
+        struct ArraySize {static const std::string& Name() {static const std::string n="arraySize"; return n;}};
+        struct BaseClass {static const std::string& Name() {static const std::string n="baseClass"; return n;}};
+        struct ExceptionBase {static const std::string& Name() {static const std::string n="baseClass"; return n;}};
+        struct Class {static const std::string& Name() {static const std::string n="class"; return n;}};
+        struct CreateRoutine {static const std::string& Name() {static const std::string n="createRoutine"; return n;}};
+        struct CreateRoutines {static const std::string& Name() {static const std::string n="createRoutines"; return n;}};
+        struct CreateRoutineMemberName {static const std::string& Name() {static const std::string n="member"; return n;}};
+        struct CreateRoutineParameterList {static const std::string& Name() {static const std::string n="parameters"; return n;}};
+        struct CreateRoutineValues {static const std::string& Name() {static const std::string n="values"; return n;}};
+        struct CreateRoutineValue {static const std::string& Name() {static const std::string n="value"; return n;}};
+        struct CreateRoutineValueMember {static const std::string& Name() {static const std::string n="member"; return n;}};
+        struct CreateRoutineValueParameter {static const std::string& Name() {static const std::string n="parameter"; return n;}};
+        struct CreateRoutineValueValue {static const std::string& Name() {static const std::string n="value"; return n;}};
+        struct CreateRoutineValueEntityId {static const std::string& Name() {static const std::string n="entityId"; return n;}};
+        struct CreateRoutineValueObject {static const std::string& Name() {static const std::string n="object"; return n;}};
+        struct PropertyMember {static const std::string& Name() {static const std::string n="member"; return n;}};
+        struct Enumeration {static const std::string& Name() {static const std::string n="enumeration"; return n;}};
+        struct Exception {static const std::string& Name() {static const std::string n="exception"; return n;}};
+        struct MaxLength {static const std::string& Name() {static const std::string n="maxLength"; return n;}};
+        struct Member {static const std::string& Name() {static const std::string n="member"; return n;}};
+        struct ClassMembers {static const std::string& Name() {static const std::string n="members"; return n;}};
+        struct Parameter {static const std::string& Name() {static const std::string n="parameter"; return n;}};
+        struct Parameters {static const std::string& Name() {static const std::string n="parameters"; return n;}};
+        struct Property {static const std::string& Name() {static const std::string n="property"; return n;}};
+        struct MemberType {static const std::string& Name() {static const std::string n="type"; return n;}};
+        struct EnumerationValue {static const std::string& Name() {static const std::string n="value"; return n;}};
+        struct EnumerationValues {static const std::string& Name() {static const std::string n="values"; return n;}};
+        struct PropertyMembersummary {static const std::string& Name() {static const std::string n="summary"; return n;}};
+        struct PropertyMemberName {static const std::string& Name() {static const std::string n="name"; return n;}};
+        struct PropertyMemberType {static const std::string& Name() {static const std::string n="type"; return n;}};
+        struct PropertyMembers {static const std::string& Name() {static const std::string n="members"; return n;}};
+        struct PropertyMemberisArray {static const std::string& Name() {static const std::string n="array"; return n;}};
+        struct PropertyMapping {static const std::string& Name() {static const std::string n="propertyMapping"; return n;}};
+        struct PropertyMappingsummary {static const std::string& Name() {static const std::string n="summary"; return n;}};
+        struct MappedProperty {static const std::string& Name() {static const std::string n="property"; return n;}};
+        struct MappedClass {static const std::string& Name() {static const std::string n="class"; return n;}};
+        struct MemberMappings {static const std::string& Name() {static const std::string n="memberMapping"; return n;}};
+        struct MemberMapping {static const std::string& Name() {static const std::string n="member"; return n;}};
+        struct MapPropertyMember {static const std::string& Name() {static const std::string n="propertyMember"; return n;}};
+        struct MapValue {static const std::string& Name() {static const std::string n="value"; return n;}}; //dom
+        struct MapValueRef {static const std::string& Name() {static const std::string n="valueRef"; return n;}}; //dom
+        struct ClassMemberReference {static const std::string& Name() {static const std::string n="classMemberReference"; return n;}}; //dom
+        struct ClassMemberReferenceName {static const std::string& Name() {static const std::string n="classMember"; return n;}};
+        struct ClassMemberReferenceIndex {static const std::string& Name() {static const std::string n="index"; return n;}};
+        struct MapEntityId {static const std::string& Name() {static const std::string n="entityId"; return n;}};
+        struct MapObject {static const std::string& Name() {static const std::string n="object"; return n;}};
+        struct ArraySizeRef {static const std::string& Name() {static const std::string n="arraySizeRef"; return n;}}; //member array
+        struct MaxLengthRef {static const std::string& Name() {static const std::string n="maxLengthRef"; return n;}}; //member maxLength
+        struct InstanceIdRef {static const std::string& Name() {static const std::string n="instanceIdRef"; return n;}}; //??????
+        struct IndexRef {static const std::string& Name() {static const std::string n="indexRef"; return n;}}; //??????
+        struct ReferenceName {static const std::string& Name() {static const std::string n="name"; return n;}};
+        struct ReferenceIndex {static const std::string& Name() {static const std::string n="index"; return n;}};
+        struct InstanceId {static const std::string& Name() {static const std::string n="instanceId"; return n;}}; //<entityId><name/><instanceId/>..
 
-            Member,
-            Membersummary,
-            MemberName,
-            MemberType,
-            ArraySize,
-            ArraySizeRef,
-            MaxLength,
-            MaxLengthRef,
-
-            CreateRoutine,
-            CreateRoutinesummary,
-            CreateRoutineName,
-            CreateRoutineParameterList,
-            CreateRoutineMemberName,
-            CreateRoutineValues,
-            CreateRoutineValue,
-            CreateRoutineValueMember,
-            CreateRoutineValueParameter,
-            CreateRoutineValueValue,
-            CreateRoutineValueEntityId,
-            CreateRoutineValueObject,
-
-            Parameter,
-            Parametersummary,
-            ParameterName,
-            ParameterType,
-            ParameterValue,
-            ParameterValueRef,            
-            ParameterArrayElement,
-            ParameterArrayElements,
-            ParameterArrayIndex,
-            ParameterObject,
-            ParameterEntityId,
-            InstanceIdRef,
-            InstanceId,
-            
-            //--- Enum ---
-            Enumeration,
-            Enumerationsummary,
-            EnumerationName,
-            EnumerationValues,
-            EnumerationValue,
-
-            //--- Exception ---
-            Exception,
-            Exceptionsummary,
-            ExceptionName,
-            ExceptionBase,
-            
-
-            //--- Property ---
-            Property,
-            Propertysummary,
-            PropertyName,
-            PropertyMembers,
-
-            PropertyMember,
-            PropertyMembersummary,
-            PropertyMemberName,
-            PropertyMemberType,
-            PropertyMemberisArray,
-
-            //--- PropertyMapping ---
-            PropertyMapping,
-            PropertyMappingsummary,
-            MappedProperty,
-            MappedClass,
-            MemberMappings,
-            MemberMapping,
-            MapPropertyMember,
-            MapValue,
-            MapValueRef,
-            MapEntityId,
-            MapObject,
-            ClassMemberReference,
-            ClassMemberReferenceName,
-            ClassMemberReferenceIndex,
-
-            ReferenceName,
-            ReferenceIndex,
-
-            /*Index,
-            IndexRef,
-            IndexRefName,*/
-
-            /*
-            Changed,
-            TypeId,
-            Error,*/
-
-            //This one is a placeholder for all xml attributes and xml elements. I.e not a normal element.
-            XmlAttribute,
-            XmlComment,
-            Any
-        };
-
-        static ElementNames& Instance()
-        {
-            static ElementNames inst;
-            return inst;
-        }
-
-        const std::string& String(int id) {return m_map[id];}
-
-    private:
-        std::map<int, std::string> m_map;
-        ElementNames() : m_map()
-        {
-            m_map[XmlAttribute]="<xmlattr>";
-            m_map[XmlComment]="<xmlcomment>";
-            m_map[Any]="any";
-
-            m_map[Classsummary]="summary";
-            m_map[Exceptionsummary]="summary";
-            m_map[Enumerationsummary]="summary";
-            m_map[Propertysummary]="summary";
-            m_map[Parametersummary]="summary";
-            m_map[Membersummary]="summary";
-            m_map[CreateRoutinesummary]="summary";
-            m_map[ClassName]="name";
-            m_map[ExceptionName]="name";
-            m_map[EnumerationName]="name";
-            m_map[PropertyName]="name";
-            m_map[ParameterName]="name";
-            m_map[MemberName]="name";
-            m_map[CreateRoutineName]="name";
-            m_map[ParameterType]="type";
-            m_map[ParameterValue]="value";
-            m_map[ParameterValueRef]="valueRef";            
-            m_map[ParameterArrayElement]="arrayElement";
-            m_map[ParameterArrayElements]="arrayElements";
-            m_map[ParameterObject]="object";
-            m_map[ParameterEntityId]="entityId";
-            m_map[ParameterArrayIndex]="index";
-
-            m_map[ArraySize]="arraySize";
-            m_map[BaseClass]="baseClass";
-            m_map[ExceptionBase]="baseClass";
-            m_map[Class]="class";
-            m_map[CreateRoutine]="createRoutine";
-            m_map[CreateRoutines]="createRoutines";
-            m_map[CreateRoutineMemberName]="member";
-            m_map[CreateRoutineParameterList]="parameters";
-            m_map[CreateRoutineValues]="values";
-            m_map[CreateRoutineValue]="value";
-            m_map[CreateRoutineValueMember]="member";
-            m_map[CreateRoutineValueParameter]="parameter";
-            m_map[CreateRoutineValueValue]="value";
-            m_map[CreateRoutineValueEntityId]="entityId";
-            m_map[CreateRoutineValueObject]="object";
-
-            m_map[PropertyMember]="member";
-            m_map[Enumeration]="enumeration";
-            m_map[Exception]="exception";
-            m_map[MaxLength]="maxLength";
-            m_map[Member]="member";
-            m_map[ClassMembers]="members";
-            m_map[Parameter]="parameter";
-            m_map[Parameters]="parameters";
-            m_map[Property]="property";
-            m_map[MemberType]="type";
-            m_map[EnumerationValue]="value";
-            m_map[EnumerationValues]="values";
-            m_map[PropertyMembersummary]="summary";
-            m_map[PropertyMemberName]="name";
-            m_map[PropertyMemberType]="type";
-            m_map[PropertyMembers]="members";
-            m_map[PropertyMemberisArray]="array";
-
-            m_map[PropertyMapping]="propertyMapping";
-            m_map[PropertyMappingsummary]="summary";
-            m_map[MappedProperty]="property";
-            m_map[MappedClass]="class";
-            m_map[MemberMappings]="memberMapping";
-            m_map[MemberMapping]="member";
-            m_map[MapPropertyMember]="propertyMember";
-            m_map[MapValue]="value"; //dom
-            m_map[MapValueRef]="valueRef"; //dom
-            m_map[ClassMemberReference]="classMemberReference"; //dom
-            m_map[ClassMemberReferenceName]="classMember";
-            m_map[ClassMemberReferenceIndex]="index";
-            m_map[MapEntityId]="entityId";
-            m_map[MapObject]="object";
-
-            m_map[ArraySizeRef]="arraySizeRef"; //member array
-            m_map[MaxLengthRef]="maxLengthRef"; //member maxLength
-            m_map[InstanceIdRef]="instanceIdRef"; //??????
-            
-            m_map[ReferenceName]="name";
-            m_map[ReferenceIndex]="index";
-
-            //m_map[Index]="index";
-            //m_map[IndexRef]="indexRef"; //???????? troligen dom mot vrde i array
-                        
-            m_map[InstanceId]="instanceId"; //<entityId><name/><instanceId/>..
-
-            /*m_map[TypeId]="typeId";
-            
-            m_map[Error]="error";
-            m_map[Changed]="changed";
-            m_map[Array]="array";*/
-        }
-    };
+        //for handling of old deprecated xml format
+        struct ParameterObjectDeprecated {static const std::string& Name() {static const std::string n="object"; return n;}};
+        struct CreateRoutineValueObjectDeprecated {static const std::string& Name() {static const std::string n="object"; return n;}};
+        struct MapObjectDeprecated {static const std::string& Name() {static const std::string n="object"; return n;}};
+    }
 }
 }
 }

@@ -24,7 +24,7 @@
 #include <sstream>
 #include <algorithm>
 #include <set>
-#include <Safir/Dob/Typesystem/Internal/detail/InternalDefs.h>
+#include <Safir/Dob/Typesystem/Internal/Detail/InternalDefs.h>
 #include "RepositoryBasic.h"
 
 namespace Safir
@@ -62,7 +62,7 @@ namespace Internal
         return ownParameters[index-numInherited].get();
     }
 
-    void ClassDescriptionBasic::GetPropertyIds(std::vector<DotsC_TypeId>& propertyIds) const
+    void ClassDescriptionBasic::GetPropertyIds(std::set<DotsC_TypeId>& propertyIds) const
     {
         if (base)
         {
@@ -71,7 +71,7 @@ namespace Internal
 
         for (std::vector<PropertyMappingDescriptionBasicPtr>::const_iterator it=properties.begin(); it!=properties.end(); ++it)
         {
-            propertyIds.push_back((*it)->property->GetTypeId());
+            propertyIds.insert((*it)->property->GetTypeId());
         }
     }
 
@@ -129,14 +129,14 @@ namespace Internal
     //-----------
     DotsC_MemberIndex PropertyDescriptionBasic::GetMemberIndex(const std::string& memberName) const
     {
-        return TypeDescriptionHelpers::GetPropertyMemberIndex<PropertyDescription, MemberDescription>(this, memberName);
+        return TypeRepositoryHelpers::GetPropertyMemberIndex<PropertyDescription, MemberDescription>(this, memberName);
     }
 
     //enumerations
     //-------------
     int EnumDescriptionBasic::GetIndexOfValue(const std::string& valueName) const
     {
-        return TypeDescriptionHelpers::GetIndexOfEnumValue(this, valueName);
+        return TypeRepositoryHelpers::GetIndexOfEnumValue(this, valueName);
     }
 
     //CreateRoutines

@@ -10,7 +10,7 @@
 #include <set>
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include <Safir/Dob/Typesystem/Internal/TypeRepositoryOperations.h>
+#include <Safir/Dob/Typesystem/Internal/TypeParser.h>
 #include <Safir/Dob/Typesystem/Internal/BlobLayout.h>
 #include <Safir/Dob/Typesystem/Internal/Id.h>
 #include <Safir/Dob/Typesystem/Internal/Serialization.h>
@@ -55,13 +55,8 @@ int main(int argc, char* argv[])
     }
     else
     {
-        //douDir=boost::filesystem::path("C:/dev/dots_internal.ss/tests/serialization_test/dou");
-        //testDir=boost::filesystem::path("C:/dev/dots_internal.ss/tests/serialization_test/testcases");
-
-        douDir=boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_internal.ss/tests/serialization_test/dou");
-        testDir=boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_internal.ss/tests/serialization_test/testcases");
-        //douDir=boost::filesystem::path("/home/joot/dev/safir-svn/src/dots/dots_internal.ss/tests/serialization_test/dou");
-        //testDir=boost::filesystem::path("/home/joot/dev/safir-svn/src/dots/dots_internal.ss/tests/serialization_test/testcases");
+        std::cout<<"Too few arguments!"<<std::endl;
+        return 1;
     }
 
     RepositoryPtr repository;
@@ -75,6 +70,9 @@ int main(int argc, char* argv[])
         std::cout<<err.what()<<std::endl;
         return 1;
     }
+
+    std::cout<<"========= Repository ========"<<std::endl;
+    Safir::Dob::Typesystem::Internal::RepositoryToString(repository.get(), true, std::cout);
 
     std::cout<<"========= Test suite started ========"<<std::endl;
     try
@@ -94,9 +92,9 @@ int main(int argc, char* argv[])
 //--------------
 const ClassDescription* GetClassByName(const RepositoryPtr& rep, const std::string& name)
 {
-    std::vector<DotsC_TypeId> v;
+    std::set<DotsC_TypeId> v;
     rep->GetAllClassTypeIds(v);
-    for (std::vector<DotsC_TypeId>::const_iterator it=v.begin(); it!=v.end(); ++it)
+    for (std::set<DotsC_TypeId>::const_iterator it=v.begin(); it!=v.end(); ++it)
     {
         const ClassDescription* c=rep->GetClass(*it);
         if (c->GetName()==name)

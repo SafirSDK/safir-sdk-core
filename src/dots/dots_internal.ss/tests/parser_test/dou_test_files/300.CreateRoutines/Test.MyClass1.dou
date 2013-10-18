@@ -55,6 +55,14 @@
                 <name>Test.MyClass2.MyInt32Param</name>
             </maxLengthRef>
         </member>
+        <member>
+            <name>MyEnum</name>
+            <type>ParserTest.MyColorEnum</type>
+        </member>
+        <member>
+            <name>MyItem</name>
+            <type>ParserTest.MyItem</type>
+        </member>
     </members>
 
     <createRoutines>
@@ -89,6 +97,14 @@
                 <member>MyString</member>
                 <parameter><name>Test.MyClass2.MyStringRefParam</name></parameter>
             </value>
+            <value>
+                <member>MyEnum</member>
+                <parameter><name>Test.MyClass1.MyEnumParam</name></parameter>
+            </value>
+            <value>
+                <member>MyItem</member>
+                <parameter><name>Test.MyClass1.MyItemParam</name></parameter>
+            </value>
         </values>
     </createRoutine>
 
@@ -114,9 +130,23 @@
             <value>
                 <member>MyEid</member>
                 <entityId>
-                <name>Test.MyClass1</name>
-                <instanceId>123</instanceId>
-            </entityId>
+                    <name>Test.MyClass1</name>
+                    <instanceId>123</instanceId>
+                </entityId>
+            </value>
+            <value>
+                <member>MyEnum</member>
+                <value>Red</value>
+            </value>
+            <value>
+                <member>MyItem</member>
+                <ParserTest.MyItem>
+                    <MyNumber>987</MyNumber>
+                    <MyStrings>
+                        <String index='3'>Dilbert</String>
+                        <String index='1'>Wally</String>
+                    </MyStrings>
+            </ParserTest.MyItem>
             </value>
         </values>
     </createRoutine>
@@ -184,6 +214,12 @@
         </parameter>
 
         <parameter>
+            <name>MyEnumParam</name>
+            <type>ParserTest.MyColorEnum</type>
+            <value>Black</value>
+        </parameter>
+
+        <parameter>
             <name>MyStringArrayParam</name>
             <type>String</type>
             <arrayElements>
@@ -206,6 +242,18 @@
                     <value>ddd</value>
                 </arrayElement>
             </arrayElements>            
+        </parameter>
+
+        <parameter>
+            <name>MyItemParam</name>
+            <type>ParserTest.MyItem</type>
+            <ParserTest.MyItem>
+                <MyNumber>12345</MyNumber>
+                <MyStrings>
+                    <String index='2'>Kalle</String>
+                    <String index='3'>Sune</String>
+                </MyStrings>
+            </ParserTest.MyItem>
         </parameter>
     </parameters>
 

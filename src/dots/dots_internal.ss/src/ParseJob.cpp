@@ -24,8 +24,9 @@
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <boost/timer.hpp>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include "ParseJob.h"
-#include "ElementParserDefs.h"
+#include "SchemaDefinitions.h"
 
 namespace Safir
 {
@@ -35,18 +36,68 @@ namespace Typesystem
 {
 namespace Internal
 {
-    ParseJob::ParseJob(const boost::filesystem::path &definitions, size_t maxNumberOfThreads)
+    namespace
+    {
+        inline void SelectFiles(const std::vector<boost::filesystem::path>& roots,
+                                std::map<boost::filesystem::path, boost::filesystem::path>& douFiles,
+                                std::map<boost::filesystem::path, boost::filesystem::path>& domFiles)
+        {
+            std::set<boost::filesystem::path> thisRootFiles;
+            for (std::vector<boost::filesystem::path>::const_iterator rootDirIt=roots.begin(); rootDirIt!=roots.end(); ++rootDirIt)
+            {
+                thisRootFiles.clear();
+                boost::filesystem::recursive_directory_iterator fileIt(*rootDirIt), fileItend;
+                while (fileIt!=fileItend)
+                {
+                    const boost::filesystem::path& fp=fileIt->path();
+                    const boost::filesystem::path filename=fp.filename();
+                    if (thisRootFiles.find(filename)!=thisRootFiles.end())
+                    {
+                        std::ostringstream os;
+                        os<<"The directory '"<<rootDirIt->string()<<"' constains duplicated version of file '"<<filename.string()<<"'"<<std::endl;
+                        throw ParseError("Duplicated dou/dom file", os.str(), rootDirIt->string(), 2);
+                    }
+                    thisRootFiles.insert(filename);
+
+                    std::map<boost::filesystem::path, boost::filesystem::path>* pmap=NULL;
+                    if (fp.extension()==".dou")
+                    {
+                        pmap=&douFiles;
+                    }
+                    else if (fp.extension()==".dom")
+                    {
+                        pmap=&domFiles;
+                    }
+
+                    if (pmap)
+                    {
+                        std::pair<std::map<boost::filesystem::path, boost::filesystem::path>::iterator, bool> inserted=pmap->insert(std::make_pair(filename, fp));
+                        if (!inserted.second)
+                        {
+                            //log and update
+                            lllout<<"The file '"<<inserted.first->second.string().c_str()<<"' will be overridden by file '"<<fp.string().c_str()<<"'"<<std::endl;
+                            inserted.first->second=fp; //update to overriding path
+                        }
+                    }
+                    ++fileIt;
+                }
+            }
+        }
+    }
+
+    ParseJob::ParseJob(const std::vector<boost::filesystem::path>& roots, size_t maxNumberOfThreads)
         :m_result()
     {
-        size_t numFiles=NumberOfFiles(definitions);
-        size_t numWorkers=CalcNumberOfWorkers(maxNumberOfThreads, numFiles);
-        std::cout<<"        Starting ParseJob #files: "<<numFiles<<", #threads: "<<numWorkers<<std::endl;
+        std::map<boost::filesystem::path, boost::filesystem::path> douFiles;
+        std::map<boost::filesystem::path, boost::filesystem::path> domFiles;
+        SelectFiles(roots, douFiles, domFiles);
+        size_t numWorkers=CalcNumberOfWorkers(maxNumberOfThreads, douFiles.size());
+        lllout<<"        Starting ParseJob #files (dou/dom/tot): "<<douFiles.size()<<"/"<<domFiles.size()<<"/"<<douFiles.size()+domFiles.size()<<", #threads: "<<numWorkers<<std::endl;
 
         //Create worker threads that will parse all dou-files. Dom-files are also
         //read into propertyTrees and stored in domFiles for later parsing.
-        Futures futures;
-        XmlVec domFiles;
-        CreateWorkers(definitions, numWorkers, numFiles, futures, domFiles);
+        Futures futures;        
+        CreateDouWorkers(douFiles, numWorkers, futures);
 
         //Get all the parseStates form futures and handle if exception occurred during parsing.
         std::vector<ParseStatePtr> states;
@@ -56,108 +107,54 @@ namespace Internal
         RepositoryCompletionAlgorithms postProcessing(m_result);
         postProcessing.DouParsingCompletion(states);
 
-        //did we got this far, the repository is complete but still without any propertyMappings
+        //did we get this far, the repository is complete but still without any propertyMappings
 
         //Parse dom-files
-        ParseJob::Worker<DomParser> domWorker(m_result);
-        domWorker.m_xml->swap(domFiles);
-        boost::shared_ptr<Task> task(new Task(domWorker));
-        //futures.push_back(Future(task->get_future()));
-        Future fut(task->get_future());
-        boost::thread thd(boost::bind(&Task::operator(), task));
+        ParseJob::Worker<DomParser> domWorker(m_result, domFiles.begin(), domFiles.end());
+        boost::shared_ptr<Task> domTask(new Task(domWorker));
+        Future fut(domTask->get_future());
+        boost::thread thd(boost::bind(&Task::operator(), domTask));
         thd.detach();
         ParseStatePtr domState=fut.get();
         std::vector<ParseStatePtr> domStates;
         domStates.push_back(domState);
         postProcessing.DomParsingCompletion(domStates);
-    }    
+    }
 
-    void ParseJob::CreateWorkers(const boost::filesystem::path& definitions,
-                                 size_t numberOfWorkers,
-                                 size_t numberOfFiles,
-                                 Futures& futures,
-                                 XmlVec& domFiles)
+    void ParseJob::CreateDouWorkers(const std::map<boost::filesystem::path, boost::filesystem::path>& douFiles,
+                                    size_t numberOfWorkers,
+                                    Futures& futures)
     {
-        enum FileType{UnhandledFileType, DouFileType, DomFileType};
-
-        const size_t filesPerWorker=numberOfFiles/numberOfWorkers;
-        boost::filesystem::recursive_directory_iterator it(definitions), end;
-        futures.reserve(numberOfWorkers);
-        for (size_t workerCount=0; workerCount<numberOfWorkers; ++workerCount)
+        const size_t filesPerWorker=douFiles.size()/numberOfWorkers;
+        std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator it=douFiles.begin();
+        for (size_t i=0; i<numberOfWorkers-1; ++i)
         {
-            ParseJob::Worker<DouParser> worker;
-            size_t fileCount=0;
-
-            //Add files to current worker            
-            while (it!=end)
+            std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator start=it;
+            for (size_t j=0; j<filesPerWorker; ++j)
             {
-                FileType fileType=UnhandledFileType;
-                if (it->path().extension() == ".dou")
-                {
-                    fileType=DouFileType;
-                }
-                else if (it->path().extension()==".dom")
-                {
-                    fileType=DomFileType;
-                }
-
-                if (fileType!=UnhandledFileType)
-                {
-                    boost::shared_ptr<boost::property_tree::ptree> pt(new boost::property_tree::ptree);
-                    try
-                    {
-                        boost::property_tree::read_xml(it->path().string(), *pt, boost::property_tree::xml_parser::trim_whitespace);
-                    }
-                    catch (boost::property_tree::xml_parser_error& err) //cant catch as const-ref due to bug in early boost versions.
-                    {
-                        std::ostringstream ss;
-                        ss<<err.message()<<". Line: "<<err.line();
-                        throw ParseError("Invalid XML", ss.str(), it->path().string(), 10);;
-                    }
-
-                    switch (fileType)
-                    {
-                    case DouFileType:
-                        worker.m_xml->push_back(std::make_pair(it->path().string(), pt));
-                        break;
-                    case DomFileType:
-                        domFiles.push_back(std::make_pair(it->path().string(), pt)); //DomFiles are saved to later
-                        break;
-                    case UnhandledFileType:
-                        break;
-                    }
-                }
-
-                ++it; //increment file iterator
-
-                if (++fileCount>=filesPerWorker && workerCount<numberOfWorkers-1)
-                {
-                    //Enough files for this worker and it is not the last worker. Last worker has to take the rest of files.
-                    break;
-                }
+                ++it;
             }
-
-            //Start the worker
+            ParseJob::Worker<DouParser> worker(start, it);
             boost::shared_ptr<Task> task(new Task(worker));
             futures.push_back(Future(task->get_future()));
             boost::thread thd(boost::bind(&Task::operator(), task));
             thd.detach();
         }
-    }
-
-    size_t ParseJob::NumberOfFiles(const boost::filesystem::path& definitions) const
-    {
-        boost::filesystem::recursive_directory_iterator it(definitions), end;
-        return std::distance(it, end);
+        //last worker takes the rest
+        ParseJob::Worker<DouParser> worker(it, douFiles.end());
+        boost::shared_ptr<Task> task(new Task(worker));
+        futures.push_back(Future(task->get_future()));
+        boost::thread thd(boost::bind(&Task::operator(), task));
+        thd.detach();
     }
 
     size_t ParseJob::CalcNumberOfWorkers(size_t maxThreads, size_t files) const
     {
-        if (files<100)
+        if (files<200)
         {
             return 1;
         }
-        return std::min(files/100, maxThreads);
+        return std::min(files/200, maxThreads);
     }
 
     void ParseJob::CollectParseStates(Futures& futures, std::vector<ParseStatePtr>& states) const

@@ -24,21 +24,8 @@
 #ifndef __DOTS_INTERNAL_BLOB_LAYOUT_H__
 #define __DOTS_INTERNAL_BLOB_LAYOUT_H__
 
-#include <Safir/Dob/Typesystem/Internal/detail/BlobLayoutImpl.h>
+#include <Safir/Dob/Typesystem/Internal/Detail/BlobLayoutImpl.h>
 #include <boost/shared_ptr.hpp>
-
-#if defined _MSC_VER
-    #if defined DOTS_INTERNAL_EXPORTS
-        #define DOTS_API __declspec(dllexport)
-    #else
-        #define DOTS_API __declspec(dllimport)
-        #define SAFIR_LIBRARY_NAME "dots_internal"
-        #include <Safir/Utilities/Internal/AutoLink.h>
-    #endif
-#elif defined __GNUC__
-    #define DOTS_API
-    #define __cdecl
-#endif
 
 namespace Safir
 {
@@ -51,12 +38,13 @@ namespace Internal
     /**
      * @brief Operations on blobs. Creation of blobs and insertion/update of data in blobs.
      */
-    class DOTS_API BlobLayout
+    template <class RepT>
+    class BlobLayout
     {
     public:
         //ctor
-        BlobLayout(const TypeRepository* repository)
-            :m_impl(new detail::BlobLayoutImpl<TypeRepository>(repository))
+        BlobLayout(const RepT* repository)
+            :m_impl(new Detail::BlobLayoutImpl<RepT>(repository))
         {
         }
 
@@ -66,13 +54,13 @@ namespace Internal
         //Create a blob
         void CreateBlob(const DotsC_TypeId typeId, char * & blob) const
         {
-            m_impl->CreateBlob(typeId, blob);
+            m_impl.CreateBlob(typeId, blob);
         }
 
         //Delete a blob created with create blob
         void DeleteBlob(char * & blob) const
         {
-            m_impl->DeleteBlob(blob);
+            m_impl.DeleteBlob(blob);
 
         }
 
@@ -83,42 +71,42 @@ namespace Internal
                         const DotsC_TypeId typeId,
                         char * & beginningOfUnused) const
         {
-            m_impl->FormatBlob(blob, blobSize, typeId, beginningOfUnused);
+            m_impl.FormatBlob(blob, blobSize, typeId, beginningOfUnused);
         }
 
         DotsC_Int32 GetSize(const char * const blob) const
         {
-            return m_impl->GetSize(blob);
+            return m_impl.GetSize(blob);
         }
 
         DotsC_TypeId GetTypeId(const char * const blob) const
         {
-            return m_impl->GetTypeId(blob);
+            return m_impl.GetTypeId(blob);
         }
 
         bool IsAnythingChanged(const char * const blob) const
         {
-            return m_impl->IsAnythingChanged(blob);
+            return m_impl.IsAnythingChanged(blob);
         }
 
         void SetChanged(char * const blob, const bool changed) const
         {
-            m_impl->SetChanged(blob, changed);
+            m_impl.SetChanged(blob, changed);
         }
 
         void ResetChanged(char * const blob) const
         {
-            m_impl->ResetChanged(blob);
+            m_impl.ResetChanged(blob);
         }
 
         void MergeChanges(const char * const val, char * & blob) const
         {
-            m_impl->MergeChanges(val, blob);
+            m_impl.MergeChanges(val, blob);
         }
 
         bool SetChangedSinceLastRead(const char * const lastRead, char * const current) const
         {
-            return m_impl->SetChangedSinceLastRead(lastRead, current);
+            return m_impl.SetChangedSinceLastRead(lastRead, current);
         }
 
         //---------------------
@@ -128,7 +116,7 @@ namespace Internal
                                        const DotsC_MemberIndex member,
                                        const DotsC_ArrayIndex index) const
         {
-            return m_impl->GetStatus(blob, member, index);
+            return m_impl.GetStatus(blob, member, index);
         }
 
         DotsC_MemberStatus GetBoolMember(const char * const blob,
@@ -136,7 +124,7 @@ namespace Internal
                                        const DotsC_ArrayIndex index,
                                        bool & val) const
         {
-            return m_impl->GetMember<bool>(blob, member, index, val);
+            return m_impl.template GetMember<bool>(blob, member, index, val);
         }
 
         DotsC_MemberStatus GetInt32Member(const char * const blob,
@@ -144,7 +132,7 @@ namespace Internal
                                        const DotsC_ArrayIndex index,
                                        DotsC_Int32& val) const
         {
-            return m_impl->GetMember<DotsC_Int32>(blob, member, index, val);
+            return m_impl.template GetMember<DotsC_Int32>(blob, member, index, val);
         }
 
         DotsC_MemberStatus GetInt64Member(const char * const blob,
@@ -152,7 +140,7 @@ namespace Internal
                                        const DotsC_ArrayIndex index,
                                        DotsC_Int64& val) const
         {
-            return m_impl->GetMember<DotsC_Int64>(blob, member, index, val);
+            return m_impl.template GetMember<DotsC_Int64>(blob, member, index, val);
         }
 
         DotsC_MemberStatus GetFloat32Member(const char * const blob,
@@ -160,7 +148,7 @@ namespace Internal
                                        const DotsC_ArrayIndex index,
                                        DotsC_Float32& val) const
         {
-            return m_impl->GetMember<DotsC_Float32>(blob, member, index, val);
+            return m_impl.template GetMember<DotsC_Float32>(blob, member, index, val);
         }
 
         DotsC_MemberStatus GetFloat64Member(const char * const blob,
@@ -168,7 +156,7 @@ namespace Internal
                                        const DotsC_ArrayIndex index,
                                        DotsC_Float64& val) const
         {
-            return m_impl->GetMember<DotsC_Float64>(blob, member, index, val);
+            return m_impl.template GetMember<DotsC_Float64>(blob, member, index, val);
         }
 
         DotsC_MemberStatus GetHashedMember(const char * const blob,
@@ -177,7 +165,7 @@ namespace Internal
                                            DotsC_Int64 & hashVal,
                                            const char * & strVal) const
         {
-            return m_impl->GetMemberWithOptionalString(blob, member, index, hashVal, strVal);
+            return m_impl.template GetMemberWithOptionalString(blob, member, index, hashVal, strVal);
         }
 
         DotsC_MemberStatus GetDynamicMember(const char * const blob,
@@ -186,7 +174,7 @@ namespace Internal
                                               const char * & val, //out
                                               DotsC_Int32 & binarySize) const
         {
-            return m_impl->GetDynamicMember(blob, member, index, val, binarySize);
+            return m_impl.template GetDynamicMember(blob, member, index, val, binarySize);
         }
 
 
@@ -199,7 +187,7 @@ namespace Internal
                        const DotsC_MemberIndex member,
                        const DotsC_ArrayIndex index) const
         {
-            m_impl->SetStatus(isNull, isChanged, blob, member, index);
+            m_impl.SetStatus(isNull, isChanged, blob, member, index);
         }
 
         void SetBoolMember(const bool val,
@@ -207,7 +195,7 @@ namespace Internal
                        const DotsC_MemberIndex member,
                        const DotsC_ArrayIndex index) const
         {
-            m_impl->SetMember<bool>(val, blob, member, index);
+            m_impl.template SetMember<bool>(val, blob, member, index);
         }
 
         void SetInt32Member(const DotsC_Int32 val,
@@ -215,7 +203,7 @@ namespace Internal
                        const DotsC_MemberIndex member,
                        const DotsC_ArrayIndex index) const
         {
-            m_impl->SetMember<DotsC_Int32>(val, blob, member, index);
+            m_impl.template SetMember<DotsC_Int32>(val, blob, member, index);
         }
 
         void SetInt64Member(const DotsC_Int64 val,
@@ -223,7 +211,7 @@ namespace Internal
                        const DotsC_MemberIndex member,
                        const DotsC_ArrayIndex index) const
         {
-            m_impl->SetMember<DotsC_Int64>(val, blob, member, index);
+            m_impl.template SetMember<DotsC_Int64>(val, blob, member, index);
         }
 
         void SetFloat32Member(const DotsC_Float32 val,
@@ -231,7 +219,7 @@ namespace Internal
                        const DotsC_MemberIndex member,
                        const DotsC_ArrayIndex index) const
         {
-            m_impl->SetMember<DotsC_Float32>(val, blob, member, index);
+            m_impl.template SetMember<DotsC_Float32>(val, blob, member, index);
         }
 
         void SetFloat64Member(const DotsC_Float64 val,
@@ -239,7 +227,7 @@ namespace Internal
                        const DotsC_MemberIndex member,
                        const DotsC_ArrayIndex index) const
         {
-            m_impl->SetMember<DotsC_Float64>(val, blob, member, index);
+            m_impl.template SetMember<DotsC_Float64>(val, blob, member, index);
         }
 
         void SetMemberWithOptionalString(const DotsC_Int64 hashVal,
@@ -248,7 +236,7 @@ namespace Internal
                                          const DotsC_MemberIndex member,
                                          const DotsC_ArrayIndex index) const
         {
-            m_impl->SetMemberWithOptionalString(hashVal, strVal, blob, member, index);
+            m_impl.SetMemberWithOptionalString(hashVal, strVal, blob, member, index);
         }
 
         void SetDynamicMember(const char * const val,
@@ -257,7 +245,7 @@ namespace Internal
                               const DotsC_MemberIndex member,
                               const DotsC_ArrayIndex index) const
         {
-            m_impl->SetDynamicMember(val, binarySize, blob, member, index);
+            m_impl.SetDynamicMember(val, binarySize, blob, member, index);
         }
 
         //-------------------------
@@ -274,7 +262,7 @@ namespace Internal
                                 const bool isChanged,
                                 char * & beginningOfUnused) const
         {
-            m_impl->CreateObjectMember(insideBlob, size, typeId, member, index, isChanged, beginningOfUnused);
+            m_impl.CreateObjectMember(insideBlob, size, typeId, member, index, isChanged, beginningOfUnused);
         }
 
         //the new string will be placed at the position that beginningOfUnused points to _before_ the call
@@ -286,7 +274,7 @@ namespace Internal
                                 const bool isChanged,
                                 char * & beginningOfUnused) const
         {
-            m_impl->CreateStringMember(insideBlob, stringLength, member, index, isChanged, beginningOfUnused);
+            m_impl.CreateStringMember(insideBlob, stringLength, member, index, isChanged, beginningOfUnused);
         }
 
         //the new binary will be placed at the position that beginningOfUnused points to _before_ the call
@@ -298,7 +286,7 @@ namespace Internal
                                 const bool isChanged,
                                 char * & beginningOfUnused) const
         {
-            m_impl->CreateBinaryMember(insideBlob, binarySize, member, index, isChanged, beginningOfUnused);
+            m_impl.CreateBinaryMember(insideBlob, binarySize, member, index, isChanged, beginningOfUnused);
         }
 
         //if the string is non-null the new hash and string will be placed at the position that beginningOfUnused
@@ -313,18 +301,11 @@ namespace Internal
                                                   const bool isChanged,
                                                   char * & beginningOfUnused) const
         {
-            m_impl->CreateAndSetMemberWithOptionalString(blob, hashVal, strVal, stringLength, member, index, isChanged, beginningOfUnused);
+            m_impl.CreateAndSetMemberWithOptionalString(blob, hashVal, strVal, stringLength, member, index, isChanged, beginningOfUnused);
         }
 
     private:
-
-#ifdef _MSC_VER
-#pragma warning(disable:4251) //waring shared_ptr needs dll-interface
-#endif
-        boost::shared_ptr<const detail::BlobLayoutImpl<TypeRepository> > m_impl;
-#ifdef _MSC_VER
-#pragma warning(default:4251)
-#endif
+        const Detail::BlobLayoutImpl<RepT> m_impl;
     };
 }
 }

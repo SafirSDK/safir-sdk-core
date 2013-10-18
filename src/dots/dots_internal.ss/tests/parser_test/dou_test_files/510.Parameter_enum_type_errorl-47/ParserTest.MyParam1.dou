@@ -65,7 +65,9 @@
         <parameter>
             <name>MyObjectParam</name>
             <type>Test.MyClass2</type>
-            <object></object>
+            <object>
+                <name>Test.MyClass2</name>
+            </object>
         </parameter>
 
         <parameter>

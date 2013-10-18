@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_ERROR_H__
-#define __DOTS_INTERNAL_ERROR_H__
+#ifndef __DOTS_INTERNAL_PARSE_ERROR_H__
+#define __DOTS_INTERNAL_PARSE_ERROR_H__
 
 #include <sstream>
 
@@ -42,7 +42,7 @@ namespace Internal
 #endif
 
     /**
-     * Exception used to report errors in dou- and dom- files.
+     * @brief Exception used to report errors in dou- and dom- files.
      */
     class ParseError : public std::exception
     {

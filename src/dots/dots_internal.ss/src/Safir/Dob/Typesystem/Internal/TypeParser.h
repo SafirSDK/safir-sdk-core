@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://www.safirsdk.com)
+* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_TYPEDEFINITIONPARSER_H__
-#define __DOTS_INTERNAL_TYPEDEFINITIONPARSER_H__
+#ifndef __DOTS_INTERNAL_TYPE_PARSER_H__
+#define __DOTS_INTERNAL_TYPE_PARSER_H__
 
 #include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
@@ -58,14 +58,28 @@ namespace Internal
 #endif
 
     /**
-     * Will validate and parse a complete set of dou- and dom-files. If no error occurs, the
-     * result is returned.
+     * Will validate and parse a complete set of dou- and dom-files from If no error occurs, the
+     * result is returned. The root path will be parsed recursively, i.e any subfolders will be parsed too.
      *
-     * @param definitions [in] - Root directory path to location of dou- and dom-files that shall be parsed.
+     * @param root [in] - Root directory path to location of dou- and dom-files that shall be parsed.
      * @return TypeRepository containing all types, i.e classes, exceptions, enums, properties and property mappings.
      * @throws Safir::Dob::Typesystem::Parser:ParseError The dou- or dom- files at the specified path contains errors.
      */
-    DOTS_API boost::shared_ptr<const TypeRepository> ParseTypeDefinitions(const boost::filesystem::path& definitions);
+    DOTS_API boost::shared_ptr<const TypeRepository> ParseTypeDefinitions(const boost::filesystem::path& root);
+
+    /**
+     * Will validate and parse a complete set of dou- and dom-files. If no error occurs, the
+     * result is returned.
+     * This version takes a vector of paths and each path is traversed recursively includeing subfolders. If the same
+     * dou-/dom- file exists at many paths the latest found will override the previous ones. I.e files found at paths
+     * closer to the end of the vector will override files closer to the beginning of the vector.
+     *
+     * @param roots [in] - A vector of root directories containing dou- and dom-files that shall be parsed.
+     * @return TypeRepository containing all types, i.e classes, exceptions, enums, properties and property mappings.
+     * @throws Safir::Dob::Typesystem::Parser:ParseError The dou- or dom- files at the specified path contains errors.
+     */
+    DOTS_API boost::shared_ptr<const TypeRepository> ParseTypeDefinitions(const std::vector<boost::filesystem::path>& roots);
+
 
 #ifdef _MSC_VER
 #pragma warning (pop)

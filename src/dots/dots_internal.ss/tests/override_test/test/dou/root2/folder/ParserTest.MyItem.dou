@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Test item.</summary>
+    <name>ParserTest.MyItem</name>
+    <baseClass>Safir.Dob.Item</baseClass>
+    <members>
+        <member>
+            <summary>Number.</summary>
+            <name>MyNumber</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>A String of 64 characters.</summary>
+            <name>MyStrings</name>
+            <arraySizeRef>
+                <name>Test.MyParam.IntArray</name>
+                <index>1</index>
+            </arraySizeRef>
+            <type>String</type>
+            <maxLengthRef>
+                <name>Test.MyParam.IntArray</name>
+                <index>2</index>
+            </maxLengthRef>
+        </member>
+
+        <member>
+            <name>Special2</name>
+            <type>Int32</name>
+        </member>
+    </members>
+
+    <parameters>
+        <parameter>
+            <name>kalle</name>
+            <type>Int32</type>
+            <valueRef>
+                <name>Test.MyParam.IntArray</name>
+                <index>2</index>
+            </valueRef>
+
+        </parameter>
+    </parameters>
+
+</class>

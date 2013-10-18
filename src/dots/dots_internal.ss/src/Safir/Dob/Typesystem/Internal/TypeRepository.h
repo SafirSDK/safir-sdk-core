@@ -21,12 +21,13 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_TYPEREPOSITORY_H__
-#define __DOTS_INTERNAL_TYPEREPOSITORY_H__
+#ifndef __DOTS_INTERNAL_TYPE_REPOSITORY_H__
+#define __DOTS_INTERNAL_TYPE_REPOSITORY_H__
 
-#include <vector>
+#include <set>
 #include <string>
 #include <Safir/Dob/Typesystem/Internal/KernelDefs2.h>
+#include <Safir/Dob/Typesystem/Internal/Id.h>
 
 namespace Safir
 {
@@ -167,7 +168,7 @@ namespace Internal
         virtual int GetNumberOfOwnParameters() const=0;
         virtual int GetNumberOfInheritedParameters() const=0;
         virtual const ParameterDescription* GetParameter(DotsC_ParameterIndex index) const=0;
-        virtual void GetPropertyIds(std::vector<DotsC_TypeId>& propertyIds) const=0;
+        virtual void GetPropertyIds(std::set<DotsC_TypeId>& propertyIds) const=0;
         virtual const PropertyMappingDescription* GetPropertyMapping(DotsC_TypeId propertyTypeId, bool & isInherited) const=0;
         virtual int GetNumberOfCreateRoutines() const=0;
         virtual const CreateRoutineDescription* GetCreateRoutine(int index) const=0;
@@ -184,22 +185,22 @@ namespace Internal
         //Enmerations
         virtual const EnumDescription* GetEnum(DotsC_TypeId typeId) const=0;
         virtual size_t GetNumberOfEnums() const=0;
-        virtual void GetAllEnumTypeIds(std::vector<DotsC_TypeId>& typeIds) const=0;
+        virtual void GetAllEnumTypeIds(std::set<DotsC_TypeId>& typeIds) const=0;
 
         //properties
         virtual const PropertyDescription* GetProperty(DotsC_TypeId typeId) const=0;
         virtual size_t GetNumberOfProperties() const=0;
-        virtual void GetAllPropertyTypeIds(std::vector<DotsC_TypeId>& typeIds) const=0;
+        virtual void GetAllPropertyTypeIds(std::set<DotsC_TypeId>& typeIds) const=0;
 
         //classes
         virtual const ClassDescription* GetClass(DotsC_TypeId typeId) const=0;
         virtual size_t GetNumberOfClasses() const=0;
-        virtual void GetAllClassTypeIds(std::vector<DotsC_TypeId>& typeIds) const=0;
+        virtual void GetAllClassTypeIds(std::set<DotsC_TypeId>& typeIds) const=0;
 
         //exceptions
         virtual const ExceptionDescription* GetException(DotsC_TypeId typeId) const=0;
         virtual size_t GetNumberOfExceptions() const=0;
-        virtual void GetAllExceptionTypeIds(std::vector<DotsC_TypeId>& typeIds) const=0;
+        virtual void GetAllExceptionTypeIds(std::set<DotsC_TypeId>& typeIds) const=0;
     };
 
     template<> struct TypeRepositoryTraits<TypeRepository>
@@ -217,10 +218,9 @@ namespace Internal
     };
 
     /**
-      * Type description helper functions. Useful functionsa that could be part of the description classes
-      * but is too complex to re-implement in different implementations since.
+      * Useful helper functions that operates on type repositories and type descriptions.
       */
-    namespace TypeDescriptionHelpers
+    namespace TypeRepositoryHelpers
     {
         template <class EnumDescriptionT>
         int GetIndexOfEnumValue(const EnumDescriptionT* description, const std::string& valueName) //Supports short name and fully qualified name. Ex: 'Monday' and 'MyEnumType.Monday'
@@ -263,6 +263,63 @@ namespace Internal
             }
             return -1;
         }
+
+        template <class ClassDescriptionT, class ParameterDescriptionT>
+        const ParameterDescriptionT* GetParameterByName(const ClassDescriptionT* cd, const std::string& paramName)
+        {
+            size_t dot=paramName.find('.');
+            if (dot!=std::string::npos)
+            {
+                for (int i=0; i<cd->GetNumberOfParameters(); ++i)
+                {
+                    const ParameterDescriptionT* pd=cd->GetParameter(i);
+                    if (paramName==pd->GetName())
+                    {
+                        return pd;
+                    }
+                }
+            }
+            else
+            {
+                std::string fullName=std::string(cd->GetName())+"."+paramName;
+                for (int i=0; i<cd->GetNumberOfParameters(); ++i)
+                {
+                    const ParameterDescriptionT* pd=cd->GetParameter(i);
+                    if (fullName==pd->GetName())
+                    {
+                        return pd;
+                    }
+                }
+            }
+            return NULL;
+        }
+
+        template <class RepT, class Traits=Safir::Dob::Typesystem::Internal::TypeRepositoryTraits<RepT> >
+        struct GetParameterByFullName
+        {
+            typedef typename Traits::RepositoryType RepositoryType;
+            typedef typename Traits::ClassDescriptionType ClassDescriptionType;
+            typedef typename Traits::ParameterDescriptionType ParameterDescriptionType;
+
+            const ParameterDescriptionType* operator()(const RepositoryType* rep, const std::string& parameterName) const
+            {
+                size_t pos=parameterName.rfind('.');
+                if (pos==std::string::npos)
+                {
+                    return NULL;
+                }
+
+                std::string className=parameterName.substr(0, pos);
+                const ClassDescriptionType* cd=rep->GetClass(DotsId_Generate64(className.c_str()));
+                if (!cd)
+                {
+
+                    return NULL;
+                }
+
+                return GetParameterByName<ClassDescriptionType, ParameterDescriptionType>(cd, parameterName);
+            }
+        };
     }
 }
 }

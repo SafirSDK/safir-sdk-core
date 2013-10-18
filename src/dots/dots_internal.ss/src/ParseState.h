@@ -91,10 +91,11 @@ namespace Internal
         //This is an optimization so we dont have to copy the entire object-XML into a string.
         //Handling serialized object parameters is very time consuming.
         struct ObjectParameter
-        {
+        {            
             Reference<ParameterDescriptionBasic> referee;
             const boost::property_tree::ptree* obj;
             boost::shared_ptr<boost::property_tree::ptree> propertyTree; //prevent from destruction
+            bool deprecatedXmlFormat;
             ObjectParameter(){}
             ObjectParameter(const ClassDescriptionBasicPtr& class_,
                             const ParameterDescriptionBasicPtr& param,
@@ -104,6 +105,7 @@ namespace Internal
                 :referee(class_, param, paramArrayIndex)
                 ,obj(obj_)
                 ,propertyTree(pt)
+                ,deprecatedXmlFormat(false)
             {
             }
         };

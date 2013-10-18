@@ -28,12 +28,12 @@
 #include <vector>
 #include <sstream>
 #include <Safir/Dob/Typesystem/Internal/ParseError.h>
-#include <Safir/Dob/Typesystem/Internal/detail/BasicTypeOperations.h>
-#include <Safir/Dob/Typesystem/Internal/detail/BlobToXmlSerializer.h>
-#include <Safir/Dob/Typesystem/Internal/detail/BlobToJsonSerializer.h>
-#include <Safir/Dob/Typesystem/Internal/detail/XmlToBlobSerializer.h>
-#include <Safir/Dob/Typesystem/Internal/detail/JsonToBlobSerializer.h>
-#include <Safir/Dob/Typesystem/Internal/detail/RepositoryToStringHelper.h>
+#include <Safir/Dob/Typesystem/Internal/Detail/BasicTypeOperations.h>
+#include <Safir/Dob/Typesystem/Internal/Detail/BlobToXmlSerializer.h>
+#include <Safir/Dob/Typesystem/Internal/Detail/BlobToJsonSerializer.h>
+#include <Safir/Dob/Typesystem/Internal/Detail/XmlToBlobSerializer.h>
+#include <Safir/Dob/Typesystem/Internal/Detail/JsonToBlobSerializer.h>
+#include <Safir/Dob/Typesystem/Internal/Detail/RepositoryToStringHelper.h>
 
 namespace Safir
 {
@@ -53,10 +53,10 @@ namespace Internal
      * @param base64 [out] - Base64 encoded result.
      * @throws Safir::Dob::Typesystem::Parser:ParseError if anything goes wrong.
      */
-    void BinaryToBase64(const char* binary, size_t size, std::ostringstream& base64)
+    inline void BinaryToBase64(const char* binary, size_t size, std::ostringstream& base64)
     {
         std::string bin(binary, size); //Improvement: fix implementation to accept 'const char*' and avoid this copying
-        base64<<detail::BasicTypes::ToBase64(bin);
+        base64<<Detail::SerializationUtils::ToBase64(bin);
     }
 
     /**
@@ -66,10 +66,10 @@ namespace Internal
      * @param binary [out] - Binary result of conversion.
      * @throws Safir::Dob::Typesystem::Parser:ParseError if anything goes wrong. For example if base64Str is not well-formed.
      */
-    void Base64ToBinary(const std::string& base64Str, std::vector<char>& binary)
+    inline void Base64ToBinary(const std::string& base64Str, std::vector<char>& binary)
     {
         std::string bin;
-        detail::BasicTypes::FromBase64(base64Str, bin); //Improvement: fix implementation to accept vector and avoid this copying
+        Detail::SerializationUtils::FromBase64(base64Str, bin); //Improvement: fix implementation to accept vector and avoid this copying
         binary.insert(binary.begin(), bin.begin(), bin.end());
     }
 
@@ -84,7 +84,7 @@ namespace Internal
     template <class RepositoryT>
     void BinaryToXml(const RepositoryT* repository, const char* blob, std::ostringstream& xml)
     {
-        (detail::BlobToXmlSerializer<RepositoryT>(repository))(blob, xml);
+        (Detail::BlobToXmlSerializer<RepositoryT>(repository))(blob, xml);
     }
 
     /**
@@ -98,7 +98,7 @@ namespace Internal
     template <class RepositoryT>
     void XmlToBinary(const RepositoryT* repository, const char* xml, std::vector<char>& blob)
     {
-        (detail::XmlToBlobSerializer<RepositoryT>(repository))(xml, blob);
+        (Detail::XmlToBlobSerializer<RepositoryT>(repository))(xml, blob);
     }
 
     /**
@@ -112,7 +112,7 @@ namespace Internal
     template <class RepositoryT>
     void BinaryToJson(const RepositoryT* repository, const char* blob, std::ostringstream& json)
     {
-        (detail::BlobToJsonSerializer<RepositoryT>(repository))(blob, json);
+        (Detail::BlobToJsonSerializer<RepositoryT>(repository))(blob, json);
     }
 
     /**
@@ -126,20 +126,26 @@ namespace Internal
     template <class RepositoryT>
     void JsonToBinary(const RepositoryT* repository, const char* json, std::vector<char>& blob)
     {
-        (detail::JsonToBlobSerializer<RepositoryT>(repository))(json, blob);
+        (Detail::JsonToBlobSerializer<RepositoryT>(repository))(json, blob);
     }
 
     /**
      * Writes a complete text description of a type repository and all of its content.
-     * This function is primarily intended for debugging.
+     * This function is primarily intended for debugging. It can be used to compare if two repositiories are identical.
+     *
+     * Since CreateRoutines are only used for code generation and not needed for a repository to be fully
+     * functional the caller must choose if CreateRoutins are to be included in the output. The reason is that
+     * it shall be possible to compare outputs from two repositories where only one of them contains CreateRoutine
+     * information.
      *
      * @param repository [in] - Type repository to convert to text.
+     * @param includeCreateRoutines [in] - If true CreateRoutines will also be written to the output.
      * @param os [out] - Output stream. For example a ostringstream or cout.
      */
     template <class RepositoryT>
-    void RepositoryToString(const RepositoryT* repository, std::ostream &os)
+    void RepositoryToString(const RepositoryT* repository, bool includeCreateRoutines, std::ostream &os)
     {
-        (detail::ToStringHelper<RepositoryT>(repository))(os);
+        (Detail::ToStringHelper<RepositoryT>(repository, includeCreateRoutines))(os);
     }
 
 }

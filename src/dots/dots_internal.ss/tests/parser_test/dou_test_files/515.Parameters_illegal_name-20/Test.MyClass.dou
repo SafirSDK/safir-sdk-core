@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Test.MyClass</name>
+    <baseClass>Object</baseClass>
+
+    <parameters>
+        <parameter>
+            <type>Int32</int32>
+            <name>3slurp</name>
+            <value>123</value>
+        </parameter>
+    </parameters>
+    <members>
+        <member>
+            <name>MyInt</name>
+            <type>Int32</type>            
+        </member>                
+    </members>
+</class>

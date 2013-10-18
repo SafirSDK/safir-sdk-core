@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Test item.</summary>
+    <name>ParserTest.My%Item</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <member>
+            <summary>Object of same type.</summary>
+            <name>Obj</name>
+            <type>ParserTest.MyItem</type>
+        </member>
+    </members>
+
+    <parameters>
+        <parameter>
+            <summary>bla bla</summary>
+            <name>kalle</name>
+            <type>ParserTest.MyItem</type>
+            <ParserTest.MyItem/>
+        </parameter>
+    </parameters>
+</class>

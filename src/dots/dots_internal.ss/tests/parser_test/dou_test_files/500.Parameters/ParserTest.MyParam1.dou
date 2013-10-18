@@ -65,19 +65,31 @@
       <parameter>
             <name>Color</name>
             <type>ParserTest.MyColorEnum</type>
-            <value>Grey</value>
+            <value>ParserTest.MyColorEnum.Grey</value>
         </parameter>
         
         <parameter>
             <name>MyObjectParam</name>
             <type>Test.MyClass2</type>
-            <object></object>
+            <Test.MyClass2 type='Test.MyClass2'>
+                <MyInt>
+                    <Int32 index='0'>55</Int32>
+                </MyInt>
+                <MyString>hello</MyString>
+                <MyStringArray>
+                    <String index='0'>kalle</String>
+                </MyStringArray>
+            </Test.MyClass2>
         </parameter>
 
         <parameter>
             <name>NewObjParam</name>
             <type>Test.MyClass2</type>
-            <Test.MyClass3>hej</Test.MyClass3>
+            <Test.MyClass2>
+                <MyInt>
+                    <Int32 index='0'>66</Int32>
+                </MyInt>
+            </Test.MyClass2>
         </parameter>
         
         <parameter>

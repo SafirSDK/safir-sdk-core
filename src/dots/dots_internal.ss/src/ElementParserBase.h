@@ -195,17 +195,18 @@ namespace Internal
     #define ELEMENT_CHOICE_4(A,B,C,D,Occurrence) Choice<A, ELEMENT_CHOICE_3(B,C,D,Occurrence), Occurrence >
     #define ELEMENT_CHOICE_5(A,B,C,D,E,Occurrence) Choice<A, ELEMENT_CHOICE_4(B,C,D,E,Occurrence), Occurrence >
     #define ELEMENT_CHOICE_6(A,B,C,D,E,F,Occurrence) Choice<A, ELEMENT_CHOICE_5(B,C,D,E,F,Occurrence), Occurrence >
+    #define ELEMENT_CHOICE_7(A,B,C,D,E,F,G,Occurrence) Choice<A, ELEMENT_CHOICE_6(B,C,D,E,F,G,Occurrence), Occurrence >
 
     //------------------------------------------------------------
     //Helper element class that allows an element to be ignored
     //------------------------------------------------------------
-    template <int ElemName>
+    template <class ElementT>
     class Ignore : public ElementParserBase
     {
     public: 
         explicit Ignore() {}
         explicit Ignore(const ElementParserBase* parent) : ElementParserBase(parent) {}
-        static const std::string& ElementName(){return ElementNames::Instance().String(ElemName);}
+        static const std::string& ElementName(){return ElementT::Name();}
         static bool MatchElementName(const std::string& name){return ElementName()==name;}
         virtual bool Match(const std::string& name, ParseState&) const {return MatchElementName(name);}
         virtual const std::string& Name() const {return ElementName();}
@@ -235,10 +236,10 @@ namespace Internal
     //---------------------------------------------------------------------------------
     //Generic element class representing an element and contains all its subelements.
     //---------------------------------------------------------------------------------
-    template <  int ElemName,
+    template <  class ElementT,
                 class Occurrence,
                 class SubElem=boost::mpl::vector<>,
-                class Algorithm=ParseAlgorithm<ElemName>,
+                class Algorithm=ParseAlgorithm<ElementT>,
                 class MatchAlg=ElementNameMatcher >
     class Element : public ElementParserBase
     {
@@ -265,7 +266,7 @@ namespace Internal
 
         static const std::string& ElementName()
         {
-            return ElementNames::Instance().String(ElemName);
+            return ElementT::Name();
         }
 
         static bool MatchElementName(const std::string& name)
@@ -309,13 +310,7 @@ namespace Internal
 
             //Handle sub elements
             for (boost::property_tree::ptree::iterator it=pt.begin(); it!=pt.end(); ++it)
-            {             
-                static const std::string xmlComment=ElementNames::Instance().String(ElementNames::XmlComment);
-                if (it->first==xmlComment) //Instead of adding Ignore<XmlComment> to every element we hard-code it here.
-                {
-                    continue;
-                }
-
+            {
                 //it->first=ElementName, it->second=subTree
                 ElementParserBaseVector::iterator match=std::find_if( m_subElements.begin(), 
                                                                         m_subElements.end(), 
@@ -359,7 +354,7 @@ namespace Internal
                     ss<<"Element '"<<Name()<<"' only allowed to occur between "<<m_occurrences.MinOccurrences<<" and "<<m_occurrences.MaxOccurrences<<" times at location "<<Parent()->Path()<<". Number of occurrences="<<m_occurrences();
                 }
 #ifdef _MSC_VER
-#pragma warning(default:4996)
+#pragma warning(default:4127)
 #endif
                 throw ParseError("Wrong number of occurrences", ss.str(), state.currentPath, 15);
             }            

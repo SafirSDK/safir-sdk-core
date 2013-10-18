@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Test item.</summary>
+    <name>ParserTest.MyItem</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <member>
+            <name>Val</name>
+            <type>EntityId</type>
+        </member>
+    </members>
+
+    <parameters>
+        <parameter>
+            <summary>bla bla</summary>
+            <name>kalle</name>
+            <type>ParserTest.MyItem</type>
+            <ParserTest.MyItem/>
+        </parameter>
+    </parameters>
+
+    <createRoutines>
+        <createRoutine>
+            <name>MyCreateRoutine</name>
+            <values>                
+                <value>
+                    <!--member>Val</member-->
+                    <entityId>
+                        <name>ParserTest.MyItem</name>
+                        <instanceId>abc</instanceId>
+                    </entityId>
+                </value>
+            </values>
+            <!--parameters>
+                <member>Val</member>
+            </parameters-->
+        </createRoutine>
+    </createRoutines>
+</class>

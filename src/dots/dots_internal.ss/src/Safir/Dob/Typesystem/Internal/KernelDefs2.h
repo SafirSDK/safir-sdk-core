@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2006-2008 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -117,7 +117,7 @@ typedef enum
     NoError=0,
     ReadOnlyProperty,           //when reading properties straight from blobs
     UnableToDereferenceProperty, //when reading properties straight from blobs
-    IllegalValue,
+    IllegalValue
     //TODO: do all other functions that can return errors!
 } DotsC_ErrorCode;
 
@@ -126,7 +126,7 @@ typedef enum
 {
     MappedToNull,
     MappedToMember,
-    MappedToParameter,
+    MappedToParameter
 } DotsC_PropertyMappingKind;
 
 class DotsC_MemberStatus
