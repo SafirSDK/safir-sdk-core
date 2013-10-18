@@ -54,7 +54,7 @@ public interface EntitySubscriber extends com.saabgroup.safir.dob.internal.Consu
      * Called when an entity is deleted.
      *
      * @param entityProxy Proxy object containing deleted entity information.
-     * @param deprectaed This flag is deprecated
+     * @param deprecated This flag is deprecated
      */
     void onDeletedEntity(com.saabgroup.safir.dob.EntityProxy entityProxy, boolean deprecated);
 }
