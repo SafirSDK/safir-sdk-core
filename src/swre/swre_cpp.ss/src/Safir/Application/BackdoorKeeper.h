@@ -88,6 +88,9 @@ public:
     bool IsStarted() const {return m_started;}
 
 private:
+    //Disable copying and assignment
+    BackdoorKeeper(const BackdoorKeeper&);
+    BackdoorKeeper& operator=(const BackdoorKeeper&);
 
     // Implementation of message subscriber interface
     virtual void OnMessage(const Safir::Dob::MessageProxy messageProxy);
