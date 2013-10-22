@@ -271,7 +271,9 @@ def common():
     if retcode != 0:
         logError("Failed to do 'dobmake.py -b --clean'")
     log("-----------------------------------")
-
+    log("Removing some dobmake state")
+    os.remove(os.path.join(SAFIR_SDK,"dots", "dots_generated", "dobmake.ini"))
+    os.remove(os.path.join(SAFIR_SDK,"dots", "dots_generated", "installed_files.txt"))
     log("Removing logs from tests during build")
     rmdir(os.path.join(SAFIR_RUNTIME,"log"))
 
