@@ -4,6 +4,7 @@
 
 This release fixes the following tickets (see http://safir.sourceforge.net for details):
 
+#107    Build in dobmake does not work (as opposed to rebuild)
 #106    Dobmake prints out erroneous error message
 #105    Singleton in Boost.Interprocess breaks mixed debug/​release runtimes on Windows
 #103    StartupSynchronizer works badly with mixed debug and release runtimes on Windows
