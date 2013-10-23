@@ -1,6 +1,6 @@
 # Doxyfile 1.8.1.2
 
-PROJECT_NAME           = "\"Safir SDK Core\""
+PROJECT_NAME           = "Safir SDK Core"
 ALWAYS_DETAILED_SEC    = YES
 FULL_PATH_NAMES        = NO
 JAVADOC_AUTOBRIEF      = YES
