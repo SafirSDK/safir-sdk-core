@@ -1,9 +1,10 @@
 -----------------------------------------------------------------------------------------------------------------------
-2013-10-22 version 4.5.1:
+2013-10-23 version 4.5.1:
 -----------------------------------------------------------------------------------------------------------------------
 
 This release fixes the following tickets (see http://safir.sourceforge.net for details):
 
+#108    Clean up more dobmake stuff in prepare_for_distribution.py 
 #107    Build in dobmake does not work (as opposed to rebuild)
 #106    Dobmake prints out erroneous error message
 #105    Singleton in Boost.Interprocess breaks mixed debug/​release runtimes on Windows
