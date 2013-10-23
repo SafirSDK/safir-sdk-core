@@ -62,6 +62,8 @@ namespace Detail
 
         void operator()(std::ostream& os) {DumpRepository(os);}
 
+        const char* GetTypeName(boost::int64_t tid) const;
+
     private:
         const RepositoryType* m_rep;
         const bool m_includeCreateRoutines;
@@ -80,27 +82,43 @@ namespace Detail
     };
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::TypeIdToString(boost::int64_t tid, std::ostream& os) const
+    const char* ToStringHelper<RepT, Traits>::GetTypeName(boost::int64_t tid) const
     {
         const ClassDescriptionType* cd=m_rep->GetClass(tid);
         if (cd)
         {
-            os<<cd->GetName();
-            return;
+            return cd->GetName();
         }
         const EnumDescriptionType* ed=m_rep->GetEnum(tid);
         if (ed)
         {
-            os<<ed->GetName();
-            return;
+            return ed->GetName();
         }
         const PropertyDescriptionType* pd=m_rep->GetProperty(tid);
         if (pd)
         {
-            os<<pd->GetName();
-            return;
+            return pd->GetName();
         }
-        os<<"<UnknownType>";
+        const ExceptionDescriptionType* ex=m_rep->GetException(tid);
+        if (ex)
+        {
+            return ex->GetName();
+        }
+        return NULL;
+    }
+
+    template <class RepT, class Traits>
+    void ToStringHelper<RepT, Traits>::TypeIdToString(boost::int64_t tid, std::ostream& os) const
+    {
+        const char* name=GetTypeName(tid);
+        if (name)
+        {
+            os<<name;
+        }
+        else
+        {
+            os<<"<UnknownType>";
+        }
     }
 
     template <class RepT, class Traits>

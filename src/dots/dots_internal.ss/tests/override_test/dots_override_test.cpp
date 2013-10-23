@@ -12,6 +12,8 @@
 #include <boost/filesystem.hpp>
 #include <Safir/Dob/Typesystem/Internal/TypeParser.h>
 
+#include <boost/circular_buffer.hpp>
+
 void GetFiles(const boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository>& rep,
               std::set<std::string>& parsedFiles);
 void TestFailed(std::set<std::string>& parsedFiles);

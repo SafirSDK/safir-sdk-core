@@ -432,6 +432,7 @@ namespace Internal
         ParameterDescriptionBasic* GetParameterBasic(const std::string& name);
         PropertyDescriptionBasic* GetPropertyBasic(DotsC_TypeId typeId) const {return GetPtr(m_properties, typeId);}
         ClassDescriptionBasic* GetClassBasic(DotsC_TypeId typeId) const {return GetPtr(m_classes, typeId);}
+        ExceptionDescriptionBasic* GetExceptionBasic(DotsC_TypeId typeId) const {return GetPtr(m_exceptions, typeId);}
 
     private:
         friend class RepositoryCompletionAlgorithms;

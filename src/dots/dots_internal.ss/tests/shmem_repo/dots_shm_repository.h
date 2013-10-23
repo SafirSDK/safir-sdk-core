@@ -16,6 +16,7 @@
 #include <boost/interprocess/containers/map.hpp>
 #include <boost/interprocess/smart_ptr/shared_ptr.hpp>
 #include <boost/interprocess/offset_ptr.hpp>
+#include <boost/circular_buffer.hpp>
 #include <Safir/Utilities/StartupSynchronizer.h>
 #include <Safir/Dob/Typesystem/Internal/TypeParser.h>
 

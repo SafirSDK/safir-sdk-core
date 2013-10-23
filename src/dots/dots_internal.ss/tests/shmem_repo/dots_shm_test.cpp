@@ -7,7 +7,7 @@
 *******************************************************************************/
 #include <iostream>
 #include <Safir/Dob/Typesystem/Internal/Serialization.h>
-#include "dots_repository.h"
+#include "dots_shm_repository.h"
 
 #include <algorithm>
 #include <set>

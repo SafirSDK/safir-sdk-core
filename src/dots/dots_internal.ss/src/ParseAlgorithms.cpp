@@ -352,6 +352,17 @@ namespace Internal
         }
     }
 
+    void DumpExc(const RepositoryBasic* r)
+    {
+        std::set<DotsC_TypeId> types;
+        r->GetAllExceptionTypeIds(types);
+        for (std::set<DotsC_TypeId>::const_iterator it=types.begin(); it!=types.end(); ++it)
+        {
+            const ExceptionDescriptionBasic* e=r->GetExceptionBasic(*it);
+            std::cout<<e->name<<", base="<<e->baseClass<<", hasBasePtr="<<(e->base!=NULL)<<std::endl;
+        }
+    }
+
     //----------------------------------------------
     // RepositoryCompletionAlgorithms
     //----------------------------------------------
@@ -374,17 +385,59 @@ namespace Internal
         obj->initialSize=OFFSET_HEADER_LENGTH;
         m_result->InsertClass(obj);
 
-        ExceptionDescriptionBasicPtr exc(new ExceptionDescriptionBasic);
-        exc->name=BasicTypeOperations::PredefindedClassNames::ExceptionName();
-        exc->typeId=DotsId_Generate64(exc->name.c_str());
-        exc->base=NULL;
-        m_result->InsertException(exc);
+        ExceptionDescriptionBasicPtr exceptionBase(new ExceptionDescriptionBasic);
+        exceptionBase->name=BasicTypeOperations::PredefindedClassNames::ExceptionName();
+        exceptionBase->typeId=DotsId_Generate64(exceptionBase->name.c_str());
+        exceptionBase->base=NULL;
+        m_result->InsertException(exceptionBase);
 
-        ExceptionDescriptionBasicPtr fxc(new ExceptionDescriptionBasic);
-        fxc->name=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
-        fxc->typeId=DotsId_Generate64(fxc->name.c_str());
-        fxc->base=NULL;
-        m_result->InsertException(fxc);
+        ExceptionDescriptionBasicPtr fundamentalException(new ExceptionDescriptionBasic);
+        fundamentalException->name=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
+        fundamentalException->typeId=DotsId_Generate64(fundamentalException->name.c_str());
+        fundamentalException->base=NULL;
+        m_result->InsertException(fundamentalException);
+
+        ExceptionDescriptionBasicPtr nullException(new ExceptionDescriptionBasic);
+        nullException->name=BasicTypeOperations::PredefindedClassNames::NullExceptionName();
+        nullException->typeId=DotsId_Generate64(nullException->name.c_str());
+        nullException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
+        nullException->base=fundamentalException.get();
+        m_result->InsertException(nullException);
+
+        ExceptionDescriptionBasicPtr incompatibleTypesException(new ExceptionDescriptionBasic);
+        incompatibleTypesException->name=BasicTypeOperations::PredefindedClassNames::IncompatibleTypesExceptionName();
+        incompatibleTypesException->typeId=DotsId_Generate64(incompatibleTypesException->name.c_str());
+        incompatibleTypesException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
+        incompatibleTypesException->base=fundamentalException.get();
+        m_result->InsertException(incompatibleTypesException);
+
+        ExceptionDescriptionBasicPtr readOnlyException(new ExceptionDescriptionBasic);
+        readOnlyException->name=BasicTypeOperations::PredefindedClassNames::ReadOnlyExceptionName();
+        readOnlyException->typeId=DotsId_Generate64(readOnlyException->name.c_str());
+        readOnlyException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
+        readOnlyException->base=fundamentalException.get();
+        m_result->InsertException(readOnlyException);
+
+        ExceptionDescriptionBasicPtr illegalValueException(new ExceptionDescriptionBasic);
+        illegalValueException->name=BasicTypeOperations::PredefindedClassNames::IllegalValueExceptionName();
+        illegalValueException->typeId=DotsId_Generate64(illegalValueException->name.c_str());
+        illegalValueException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
+        illegalValueException->base=fundamentalException.get();
+        m_result->InsertException(illegalValueException);
+
+        ExceptionDescriptionBasicPtr softwareViolationException(new ExceptionDescriptionBasic);
+        softwareViolationException->name=BasicTypeOperations::PredefindedClassNames::SoftwareViolationExceptionName();
+        softwareViolationException->typeId=DotsId_Generate64(softwareViolationException->name.c_str());
+        softwareViolationException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
+        softwareViolationException->base=fundamentalException.get();
+        m_result->InsertException(softwareViolationException);
+
+        ExceptionDescriptionBasicPtr configurationErrorException(new ExceptionDescriptionBasic);
+        configurationErrorException->name=BasicTypeOperations::PredefindedClassNames::ConfigurationErrorExceptionName();
+        configurationErrorException->typeId=DotsId_Generate64(configurationErrorException->name.c_str());
+        configurationErrorException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
+        configurationErrorException->base=fundamentalException.get();
+        m_result->InsertException(configurationErrorException);
 
         //Merge the other repositiories into result
         for (size_t i=1; i<states.size(); ++i)
@@ -401,8 +454,14 @@ namespace Internal
 
         //Setup Exception baseclass
         std::set<DotsC_TypeId> endConditions;
-        endConditions.insert(DotsId_Generate64(BasicTypeOperations::PredefindedClassNames::ExceptionName().c_str()));
-        endConditions.insert(DotsId_Generate64(BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName().c_str()));
+        endConditions.insert(exceptionBase->typeId);
+        endConditions.insert(fundamentalException->typeId);
+        endConditions.insert(nullException->typeId);
+        endConditions.insert(incompatibleTypesException->typeId);
+        endConditions.insert(readOnlyException->typeId);
+        endConditions.insert(illegalValueException->typeId);
+        endConditions.insert(softwareViolationException->typeId);
+        endConditions.insert(configurationErrorException->typeId);
         boost::function<void(ExceptionDescriptionBasic*, ExceptionDescriptionBasic*)> setExeptBaseFun(SetExceptionBase);
         for (boost::unordered_map<DotsC_TypeId, ExceptionDescriptionBasicPtr>::iterator it=m_result->m_exceptions.begin(); it!=m_result->m_exceptions.end(); ++it)
         {
@@ -421,7 +480,7 @@ namespace Internal
         classesWithCreateRoutines.reserve(100);
         boost::function<void(ClassDescriptionBasic*, ClassDescriptionBasic*)> setClassBaseFun(SetClassBase);
         endConditions.clear();
-        endConditions.insert(DotsId_Generate64(BasicTypeOperations::PredefindedClassNames::ObjectName().c_str()));
+        endConditions.insert(obj->typeId);
         for (boost::unordered_map<DotsC_TypeId, ClassDescriptionBasicPtr>::iterator it=m_result->m_classes.begin(); it!=m_result->m_classes.end(); ++it)
         {
             //Set base class

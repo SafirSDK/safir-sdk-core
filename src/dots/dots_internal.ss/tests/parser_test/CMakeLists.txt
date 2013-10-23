@@ -7,3 +7,5 @@ if (NOT MSVC)
 endif()
 
 add_test(dots_parser_test_cases dots_parser_test ${CMAKE_CURRENT_SOURCE_DIR}/dou_test_files)
+SET_SAFIR_TEST_PROPERTIES(dots_parser_test_cases)
+

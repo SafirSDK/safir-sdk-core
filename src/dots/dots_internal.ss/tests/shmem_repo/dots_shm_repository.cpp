@@ -5,9 +5,10 @@
 * Created by: Joel Ottosson / joot
 *
 *******************************************************************************/
+#include <iostream>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include "dots_repository.h"
+#include "dots_shm_repository.h"
 
 namespace Safir
 {

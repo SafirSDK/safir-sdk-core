@@ -7,3 +7,5 @@ if (NOT MSVC)
 endif()
 
 add_test(dots_shm_test dots_shmem_repo -c ${CMAKE_CURRENT_SOURCE_DIR}/../serialization_test/dou)
+SET_SAFIR_TEST_PROPERTIES(dots_shm_test dots_shmem_repo)
+

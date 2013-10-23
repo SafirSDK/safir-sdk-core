@@ -7,3 +7,5 @@ if (NOT MSVC)
 endif()
 
 add_test(dots_serialization_test_cases dots_serialization_test ${CMAKE_CURRENT_SOURCE_DIR}/dou ${CMAKE_CURRENT_SOURCE_DIR}/testcases)
+SET_SAFIR_TEST_PROPERTIES(dots_serialization_test_cases)
+

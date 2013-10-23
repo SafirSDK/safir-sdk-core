@@ -152,7 +152,7 @@ namespace BasicTypeOperations
         case Watt64MemberType: return Watt64MemberTypeName::Get();
         }
 
-        throw std::logic_error("ENSURE");
+        throw "ENSURE";
     }
 
     inline const DotsC_MemberType StringToType(const std::string& typeName)
@@ -299,7 +299,7 @@ namespace BasicTypeOperations
             return sizeof(DotsC_Float64);
         }
 
-        throw std::logic_error("ENSURE");
+        throw "ENSURE";
     }
 
     template <class RepositoryT>
@@ -360,8 +360,14 @@ namespace BasicTypeOperations
     struct PredefindedClassNames
     {
         static const std::string& ObjectName() {static const std::string s("Object"); return s;}
-        static const std::string ExceptionName() {static const std::string s("Exception"); return s;}
-        static const std::string FundamentalExceptionName() {static const std::string s("FundamentalException"); return s;}
+        static const std::string& ExceptionName() {static const std::string s("Exception"); return s;}
+        static const std::string& FundamentalExceptionName() {static const std::string s("FundamentalException"); return s;}
+        static const std::string& NullExceptionName() {static const std::string s("Safir.Dob.Typesystem.NullException"); return s;}
+        static const std::string& IncompatibleTypesExceptionName() {static const std::string s("Safir.Dob.Typesystem.IncompatibleTypesException"); return s;}
+        static const std::string& ReadOnlyExceptionName() {static const std::string s("Safir.Dob.Typesystem.ReadOnlyException"); return s;}
+        static const std::string& IllegalValueExceptionName() {static const std::string s("Safir.Dob.Typesystem.IllegalValueException"); return s;}
+        static const std::string& SoftwareViolationExceptionName() {static const std::string s("Safir.Dob.Typesystem.SoftwareViolationException"); return s;}
+        static const std::string& ConfigurationErrorExceptionName() {static const std::string s("Safir.Dob.Typesystem.ConfigurationErrorException"); return s;}
     };
 }
 }
