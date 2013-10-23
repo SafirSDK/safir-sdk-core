@@ -75,18 +75,23 @@ def try_remove(path):
     if os.path.isfile(path):
         os.remove(path)
             
-def copy_file(name,destination):
+def copy_file(name,destDir):
     if not os.path.isfile(name):
         logError("ERROR! " + name + " is not a file!")
-    if not os.path.isdir(destination):
-        logError("ERROR! " + destination + " is not a directory!")
+    if not os.path.isdir(destDir):
+        logError("ERROR! " + destDir + " is not a directory!")
     try:
-        shutil.copy2(name, destination)
-        os.chmod(os.path.join(destination,os.path.split(name)[-1]),stat.S_IWRITE|stat.S_IREAD)
+        #the way this copy is meant to work is to copy the file contents
+        #and copy the create and modification dates but *NOT* any other
+        #metadata, such as permissions or ACLs.
+        destpath = os.path.join(destDir,os.path.split(name)[-1]) #full path
+        shutil.copy(name, destpath)
+        stat = os.stat(name)
+        os.utime(destpath, (stat.st_atime, stat.st_mtime)) #copy create and modify times correctly
     except:
         import filecmp
-        if not filecmp.cmp(name,os.path.join(destination,os.path.split(name)[-1])):
-            logError("Caught exception while copying " + name + " to " + destination + "/. Maybe the destination file or directory is read-only?")
+        if not filecmp.cmp(name,os.path.join(destDir,os.path.split(name)[-1])):
+            logError("Caught exception while copying " + name + " to " + destDir + "/. Maybe the destination file or directory is read-only?")
 
 def mkdir(newdir):
     """works the way a good mkdir should :)
