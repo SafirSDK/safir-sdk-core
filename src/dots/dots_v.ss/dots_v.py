@@ -1531,10 +1531,10 @@ def main():
             if dod_file.endswith(".dod"):
                 dod_files.append(normalized_path + dod_file)
     elif os.path.isfile(arguments.dod_files):
-        dod_files.append(arguments.dod_files)
+        dod_files.append(os.path.abspath(arguments.dod_files))
     elif arguments.dod_files.find("*") != -1:
         # Has wildcard
-        dod_files = glob(arguments.dod_files)
+        dod_files = glob(os.path.abspath(arguments.dod_files))
     
     if len(dod_files) == 0 or not os.path.isfile(dod_files[0]):
         print("Invalid argument for dod files.", file=sys.stderr)
@@ -1565,12 +1565,10 @@ def main():
                 if file.endswith(".dou"):
                     dou_files.append(os.path.join(path, file))
     elif os.path.isfile(arguments.dou_files):
-        path, file = os.path.split(arguments.dou_files)
-        dou_files.append(arguments.dou_files)
+        dou_files.append(os.path.abspath(arguments.dou_files))
     elif arguments.dou_files.find("*") != -1:
         # Has wildcard
-        path, file = os.path.split(arguments.dou_files)
-        dou_files = glob(arguments.dou_files)
+        dou_files = glob(os.path.abspath(arguments.dou_files))
     
     if len(dou_files) == 0:
         print("No valid dou files to process.", file=sys.stderr)

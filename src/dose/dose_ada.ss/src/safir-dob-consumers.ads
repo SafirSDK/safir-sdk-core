@@ -338,12 +338,10 @@ package Safir.Dob.Consumers is
    -- Called when an entity is deleted.
    --
    -- Parameters: Entity_Proxy - Proxy object containing deleted entity information.
-   --             Deleted_By_Owner - Flag indicating if the entity has been deleted
-   --                                by the owner (true) or if it was removed by the DOB
-   --                                because the owner is no longer present (false).
+   --             Deprecated - This flag is deprecated.
    --
    procedure On_Deleted_Entity
      (Self             : in out Entity_Subscriber;
       Entity_Proxy     : in Safir.Dob.Entity_Proxies.Entity_Proxy;
-      Deleted_By_Owner : in Boolean) is abstract;
+      Deprecated       : in Boolean) is abstract;
 end Safir.Dob.Consumers;

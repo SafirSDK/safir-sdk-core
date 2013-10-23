@@ -156,7 +156,30 @@
               </member>
             </members>
           </object>
-        </arrayElement>        
+        </arrayElement>
+
+        <!-- We have realized that the value of the deletedByOwner flag in the OnDeletedEntity is timing dependant -->
+        <!-- We therefor make the subscriber sleep so we can be sure that it will always dispatch deletedByOwner==true -->
+        <arrayElement>
+          <object>
+            <name>DoseTest.Action</name>
+            <members>
+            <member>
+              <name>Partner</name>
+              <value>1</value>
+            </member>
+              <member>
+                <name>ActionKind</name>
+                <value>DoseTest.ActionEnum.Sleep</value>
+              </member>
+              <member>
+                <name>SleepDuration</name>
+                <value>20</value>
+              </member>
+            </members>
+          </object>
+        </arrayElement>
+
         <arrayElement>
           <object>
             <name>DoseTest.Action</name>
@@ -188,6 +211,7 @@
             </members>
           </object>
         </arrayElement>
+
         <arrayElement>
           <object>
             <name>DoseTest.Action</name>
@@ -198,7 +222,7 @@
               </member>
               <member>
                 <name>SleepDuration</name>
-                <value>10</value>
+                <value>30</value> <!-- Have to wait for the partner 1 sleep + action -->
               </member>
             </members>
           </object>

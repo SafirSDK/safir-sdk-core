@@ -4,7 +4,7 @@
 Safir SDK Core User's Guide
 ==========================
 :Author: Lars Hagström and Anders Widén
-9 Oct 2013
+18 Oct 2013
 
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
@@ -677,7 +677,7 @@ All this means that any changes to parameter files under +$(SAFIR_RUNTIME}/data/
 
 .Note
 ************************************
-In the current version of Safir SDK Core (4.5), the dobmake.py script is not aware of the _typesystem.ini_ configuration (see <<typesystem_ini>>, so dou and dom files will always be copied to +$(SAFIR_RUNTIME}/data/text/dots/classes+ regardless of the contents of that configuration file.
+In the current version of Safir SDK Core (4.5.1), the dobmake.py script is not aware of the _typesystem.ini_ configuration (see <<typesystem_ini>>, so dou and dom files will always be copied to +$(SAFIR_RUNTIME}/data/text/dots/classes+ regardless of the contents of that configuration file.
 
 So, to keep the "expected" behaviour, don't change the Default section in typesystem.ini from pointing to +$(SAFIR_RUNTIME}/data/text/dots/classes+.
 ************************************
@@ -1955,7 +1955,7 @@ class VehicleSubscriber : public Safir::Dob::EntitySubscriber
 
     virtual void OnDeletedEntity
         (const Safir::Dob::EntityProxy entityProxy,
-         const bool                    deletedByOwner);
+         const bool /*deprecated*/);
 };
 ----------------------------
 
@@ -2024,7 +2024,7 @@ Note the use of +GetEntityWithChangeInfo()+ and the change flag on the callsign 
 ----------------------------
 void VehicleSubscriber::OnDeletedEntity
     (const Safir::Dob::EntityProxy entityProxy,
-     const bool                    deletedByOwner)
+     const bool /*deprecated*/)
 {
     ... do something ...
 }
@@ -2033,7 +2033,7 @@ If this class had been used to subscribe to several entities it can use +entityP
 
 It is also possible to use +entityProxy.GetPrevious()+ to get hold of information about the entity that was deleted, such as actually looking at the entity like it was when it was previously dispatched to the subscriber.
 
-The +deletedByOwner+ flag will be set to true if the owner deleted the entity with a call to +Delete+. It will be false if the owning handler was merely unregistered. This is to allow applications to work out whether the entity was removed due to it being explicitly deleted or because the application that owned the entity was stopped for some reason.
+Please ignore the +deprecated+ flag, it will be removed in a future version of Safir SDK Core (see <<faq>> if you're curious).
 
 To stop subscribing to an entity the application calls the +Unsubscribe+ method in the Dob connection object. (It is not necessary to do this before closing a connection or before the application shuts down, the Dob will handle that automatically when the connection is destroyed/closed.)
 
@@ -3639,6 +3639,11 @@ This of course means that your application should not introduce infinite queues 
 
 Why shouldn't I have an infinite queue in my application to avoid overflows?::
   This is described somewhat in <<overflow_handling>>, and the FAQ entry above.
+
+Whatever happened to +deletedByOwner+?::
+  Once upon a time (well, 4.5 and earlier) the deprecated-flag in the +OnDeletedEntity+ callback was known as +deletedByOwner+. This was used to signal how an entity was deleted, whether it was due to an unregistration or an explicit delete. Unfortunately this information was useless, since after the introduction of _ghosts_ and persistence it was no longer possible for the Dob to guarantee that you got the right value in all circumstances. Unfortunately we did not realize this at the time, so we've had to deprecate this flag now.
++
+The persistence service (_dope_), however, still uses this flag, since it has meaning when using the special _entity injector_ subscribe with +wantsLastState+ set to true. This will be changed in a future release, but you can safely ignore this bit of information unless you're writing your own persistence service or entity injector.
 
 == Appendix D: Building from source
 Since Safir SDK Core is released under an Open Source license (as described in <<licenses>>) you are able to download and build the source code from scratch. Instructions for building is included in the source distribution of Safir SDK Core obtained from http://safir.sourceforge.net/[].

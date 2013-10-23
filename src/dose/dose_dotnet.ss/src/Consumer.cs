@@ -196,8 +196,7 @@ namespace Safir.Dob
         /// Called when an entity is deleted.
         /// </summary>
         /// <param name="entityProxy">Proxy object containing deleted entity information.</param>
-        /// <param name="deletedByOwner">Flag indicating if the entity has been deleted by the owner (true) or
-        ///                              if it was removed by the DOB because the owner is no longer present (false).</param>
-        void OnDeletedEntity(Safir.Dob.EntityProxy entityProxy, bool deletedByOwner);
+        /// <param name="deprecated">This flag is deprecated.</param>
+        void OnDeletedEntity(Safir.Dob.EntityProxy entityProxy, bool deprecated);
     }
 }

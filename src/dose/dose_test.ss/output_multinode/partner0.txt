@@ -2950,7 +2950,7 @@ Expectation: Partner 0/Consumer 0 receives one OnDeletedEntity. Partner 2/Consum
 --------- Test  -----------
 Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.InjectableEntity, 12345)
-  deletedByOwner = false
+  deletedByOwner = true
   Owner          = DEFAULT_HANDLER
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.InjectableEntity</name><members><member><name>Info</name><value xml:space="preserve">Blabla</value></member></members></object>

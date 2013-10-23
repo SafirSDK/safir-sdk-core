@@ -93,7 +93,7 @@ namespace VehicleMmiCppQt
         /**
         * Overrides Safir::Dob::EntityTableHandler. Called when an entity is removed.
         */
-        virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool deletedByOwner);
+        virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool deprecated);
 
     private:
         /**

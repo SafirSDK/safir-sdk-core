@@ -1732,7 +1732,7 @@ Consumer 0: OnNewEntity:
 
 Consumer 0: OnDeletedEntity:
   EntityId       = (DoseTest.SynchronousVolatileEntity, 123)
-  deletedByOwner = false
+  deletedByOwner = true
   Owner          = DEFAULT_HANDLER
   OwnerStr  = DEFAULT_HANDLER
   Previous  = <object xmlns="urn:safir-dots-unit"><name>DoseTest.SynchronousVolatileEntity</name><members><member><name>Info</name><value xml:space="preserve">Kalle</value></member></members></object>
