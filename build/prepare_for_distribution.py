@@ -71,6 +71,10 @@ def rmdir(directory):
             time.sleep(0.2)
             shutil.rmtree(directory)
 
+def try_remove(path):
+    if os.path.isfile(path):
+        os.remove(path)
+            
 def copy_file(name,destination):
     if not os.path.isfile(name):
         logError("ERROR! " + name + " is not a file!")
@@ -271,7 +275,12 @@ def common():
     if retcode != 0:
         logError("Failed to do 'dobmake.py -b --clean'")
     log("-----------------------------------")
+    log("Removing some dobmake state")
 
+    #this file does not exist on linux, probably...
+    try_remove(os.path.join(SAFIR_SDK,"dots", "dots_generated", "dobmake.ini"))
+    
+    os.remove(os.path.join(SAFIR_SDK,"dots", "dots_generated", "installed_files.txt"))
     log("Removing logs from tests during build")
     rmdir(os.path.join(SAFIR_RUNTIME,"log"))
 

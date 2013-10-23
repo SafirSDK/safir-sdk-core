@@ -174,7 +174,7 @@
               </member>
               <member>
                 <name>SleepDuration</name>
-                <value>10</value>
+                <value>20</value>
               </member>
             </members>
           </object>
@@ -222,7 +222,7 @@
               </member>
               <member>
                 <name>SleepDuration</name>
-                <value>20</value> <!-- Have to wait for the partner 1 sleep + action -->
+                <value>30</value> <!-- Have to wait for the partner 1 sleep + action -->
               </member>
             </members>
           </object>

@@ -1,11 +1,13 @@
 -----------------------------------------------------------------------------------------------------------------------
-2013-10-19 version 4.5.1:
+2013-10-23 version 4.5.1:
 -----------------------------------------------------------------------------------------------------------------------
 
 This release fixes the following tickets (see http://safir.sourceforge.net for details):
 
+#108    Clean up more dobmake stuff in prepare_for_distribution.py 
+#107    Build in dobmake does not work (as opposed to rebuild)
 #106    Dobmake prints out erroneous error message
-#105    Singleton in Boost.Interprocess breaks mixed debug/​release runtimes on windows
+#105    Singleton in Boost.Interprocess breaks mixed debug/​release runtimes on Windows
 #103    StartupSynchronizer works badly with mixed debug and release runtimes on Windows
 #102    Crash dump monitor test fails spuriously
 #101    Close button on dose_main in windows does not send stop orders.
@@ -13,7 +15,8 @@ This release fixes the following tickets (see http://safir.sourceforge.net for d
 #92     dose_communication should use Safir Log or LowLevelLogger
 #90     A rejected injected entity is not set to deletedByOwner
 
-Fixing the last ticket, #90, resulted in making the deletedByOwner flag deprecated, since it has no useful meaning since at least version 4 of Safir SDK Core.
+When fixing the last ticket, #90, we realized that the deletedByOwner flag has no useful meaning since at least
+version 4 of Safir SDK Core. Consequently, this flag is now deprecated.
 
 -----------------------------------------------------------------------------------------------------------------------
 2013-10-12 version 4.5:
