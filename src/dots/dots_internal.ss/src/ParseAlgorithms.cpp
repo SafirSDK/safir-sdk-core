@@ -906,14 +906,13 @@ namespace Internal
                     throw ParseError("Invalid CreateRoutine value", os.str(), cd->FileName(), 60);
                 }
 
-                //Seems like the behaviour in the generated files is to initialize the whole array with the specified value in case the member is array
-//                if (md->IsArray())
-//                {
-//                    std::ostringstream os;
-//                    os<<"The createRoutine '"<<cr.name<<"' in class '"<<cd->GetName()<<"' a default value for member '"<<mit->first<<"' wich is an array. Array members can't have default values.";
-//                    os<<" ..."<<md->GetName()<<" arrSize="<<md->GetArraySize()<<" isArr="<<md->IsArray();
-//                    throw ParseError("CreateRoutine array values not supported", os.str(), cd->FileName(), 61);
-//                }
+                if (md->IsArray())
+                {
+                    std::ostringstream os;
+                    os<<"The createRoutine '"<<cr.name<<"' in class '"<<cd->GetName()<<"' a default value for member '"<<mit->first<<"' wich is an array. Array members can't have default values.";
+                    os<<" ..."<<md->GetName()<<" arrSize="<<md->GetArraySize()<<" isArr="<<md->IsArray();
+                    throw ParseError("CreateRoutine array values not supported", os.str(), cd->FileName(), 61);
+                }
 
                 cr.memberValuesParams.push_back(std::make_pair(pd, mit->second.second));
             }

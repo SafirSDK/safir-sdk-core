@@ -80,7 +80,10 @@
             </value>
             <value>
                 <member>MyInt32Array</member>
-                <parameter><name>Test.MyClass1.MyInt32Param</name></parameter>
+                <parameter>
+                    <name>Test.MyClass1.MyInt32ArrayParam</name>
+                    <index>1</index>
+                </parameter>
             </value>
             <value>
                 <member>MyFloat32</member>
@@ -134,6 +137,19 @@
             <name>MyInt32Param</name>
             <type>Int32</type>
             <value>5</value>
+        </parameter>
+
+        <parameter>
+            <name>MyInt32ArrayParam</name>
+            <type>Int32</type>
+            <arrayElements>
+                <arrayElement>
+                    <value>5</value>
+                </arrayElement>
+                <arrayElement>
+                    <value>10</value>
+                </arrayElement>
+            </arrayElements>
         </parameter>
 
         <parameter>

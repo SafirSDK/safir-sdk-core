@@ -109,11 +109,7 @@
             <value>
                 <member>MyItem</member>
                 <parameter><name>Test.MyClass1.MyItemParam</name></parameter>
-            </value>
-            <value>
-                <member>MyInt32Array</member>
-                <value>123</value>
-            </value>
+            </value>            
         </values>
     </createRoutine>
 
@@ -156,13 +152,6 @@
                         <String index='1'>Wally</String>
                     </MyStrings>
                 </ParserTest.MyItem>
-            </value>
-            <value>
-                <member>MyInt32Array</member>
-                <parameter>
-                    <name>Test.MyClass1.MyInt32ArrayParam</name>
-                    <index>Test.MyClass1.MyInt32Param</index>
-                </parameter>
             </value>
         </values>
     </createRoutine>
