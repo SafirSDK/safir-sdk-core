@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2013 (http://safir.sourceforge.net)
+# Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 #
 # Created by: Björn Weström
 #
@@ -98,10 +98,11 @@ class DouCreateRoutineParameter(object):
 
 class DouCreateRoutineValue(object):
     
-    def __init__(self, member, parameter, index, array, arraySize):
+    def __init__(self, member, parameter, inline, parameter_index, array, arraySize):
         self.member = member
         self.parameter = parameter
-        self.index = index
+        self.inline = inline
+        self.parameter_index = parameter_index
         self.array = array
         self.arraySize = arraySize
         
@@ -115,6 +116,10 @@ class DouParameter(object):
         self.arrayElements = arrayElements
         
 def readTextPropery(xml_root, element):
+    if (element.find("/") != -1):
+        # Has subtags, prefix all of them
+        element = element.replace("/", "/{urn:safir-dots-unit}");
+
     prefixed = "{urn:safir-dots-unit}" + element
     xe = xml_root.find(prefixed)
     if xe is None: return None
@@ -377,14 +382,41 @@ def parse_dou(gSession, dou_xmlfile):
             vs = cr.find("{urn:safir-dots-unit}values")
             if vs is not None:
                 for v in vs:
-                    m_parameter = readTextPropery(v, "parameter")
                     m_member = readTextPropery(v, "member")
                     m_type = member_name_to_type_lookup[m_member]
                     m_array = None
                     if member_name_to_is_array_lookup[m_member]: m_array = True
+
+                    m_parameter = ""
+                    m_p_index = None
+                    m_p_inline = False
+
+                    #m_value = readTextPropery(v, "value")
+                    m_parameter_new = readTextPropery(v, "parameter/name")
+                    m_parameter_old = readTextPropery(v, "parameter")
+                    if m_parameter_new is not None:
+                        # New <parameter> syntax!
+                        m_parameter = m_parameter_new
+                        m_p_index = readTextPropery(v, "parameter/index")
+                    elif m_parameter_old is not None:
+                        # Old <parameter> syntax!
+                        m_parameter = m_parameter_old
+                        m_p_index = readTextPropery(v, "index")
+                    else:
+                        # New syntax, direct parameter from dots_internal
+                        # This parameter shall be generated inline to hide it from external use
+                        m_p_inline = True
+
+                        m_parameter = readTextPropery(cr, "name")
+                        for cr_member in parameters:
+                            m_parameter += "#" + cr_member.name
+                        m_parameter += "@" + parsed.name + "." + m_member
+
+
                     values.append( DouCreateRoutineValue( m_member, \
                                                             m_parameter, \
-                                                            readTextPropery(v, "index"), \
+                                                            m_p_inline, \
+                                                            m_p_index, \
                                                             m_array, \
                                                             readTextPropery(v, "arraySize") ) )
                     parameter_class = m_parameter[:m_parameter.rfind(".")]
@@ -711,7 +743,7 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
     elif var == "BASECLASS" : return dou.baseClass
     elif var == "CREATEROUTINESUMMARY" : return dou.createRoutines[index].summary
     elif var == "CREATEROUTINE" : return member_formatter(gSession, dou.createRoutines[index].name)
-    elif var == "CREATEROUTINE'LENGTH" : return get_iterator_length("CREATEROUTINE", dou, 0, 0)
+    elif var == "CREATEROUTINE'LENGTH" : return get_iterator_length("CREATEROUTINE", dou, 0, 0) 
     elif var == "CREATEPARAMETERTYPE" : 
         return gSession.dod_types[dou.createRoutines[parent_table_line - 1].parameters[index].type].generated
     elif var == "UNIFORM_CREATEPARAMETERTYPE" :
@@ -731,11 +763,14 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
     elif var == "CREATEVALUEPARAMETER" :
         p1 = dou.createRoutines[parent_table_line - 1].values[index].parameter        
         return member_formatter(gSession, p1[p1.rfind(".")+1:])
+    elif var == "CREATEVALUEPARAMETERRAW" :
+        p1 = dou.createRoutines[parent_table_line - 1].values[index].parameter        
+        return p1;
     elif var == "CREATEVALUEPARAMETERCLASS" :
         p1 = dou.createRoutines[parent_table_line - 1].values[index].parameter        
         return type_formatter(gSession, p1[:p1.rfind(".")])
     elif var == "CREATEVALUEPARAMETERINDEX": 
-        return dou.createRoutines[parent_table_line - 1].values[table_line - 1].index
+        return type_formatter(gSession, dou.createRoutines[parent_table_line - 1].values[table_line - 1].parameter_index);
     elif var == "CREATEVALUE" :
         return member_formatter(gSession, dou.createRoutines[parent_table_line - 1].values[index].member)
     elif var == "CREATEVALUETYPE" :
@@ -743,7 +778,6 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
         m_type = dou.member_name_to_type_lookup[member]
         return gSession.dod_types[m_type].generated
     elif var == "CREATEVALUEISARRAY": return create_value_is_array(dou, table_line, parent_table_line)
-    elif var == "CREATEVALUEPARAMETERINDEX": return create_value_parameter_index(dou, table_line, parent_table_line)        
     elif var == "MEMBER" : return member_formatter(gSession, dou.members[index].name)
     elif var == "XMLMEMBER" : return dou.members[index].name
     elif var == "MEMBER'LENGTH" : return get_iterator_length("MEMBER", dou, 0, 0)
@@ -822,7 +856,12 @@ def create_value_is_array(dou, table_line, parent_table_line):
 def create_value_parameter_index(dou, table_line, parent_table_line):
     if len(dou.createRoutines) == 0: return False
     if len(dou.createRoutines[parent_table_line - 1].values) == 0 : return False
-    return dou.createRoutines[parent_table_line - 1].values[table_line - 1].index is not None
+    return dou.createRoutines[parent_table_line - 1].values[table_line - 1].parameter_index is not None
+
+def create_value_parameter_inline(dou, table_line, parent_table_line):
+    if len(dou.createRoutines) == 0: return False
+    if len(dou.createRoutines[parent_table_line - 1].values) == 0 : return False
+    return dou.createRoutines[parent_table_line - 1].values[table_line - 1].inline
     
 def parameter_is_array(dou, table_line):
     return trim_false(len(dou.parameters) > 0 and len(dou.parameters[table_line - 1].arrayElements) > 0)
@@ -871,6 +910,7 @@ def process_at_exist(at_string, dou, table_line, parent_table_line):
             return len(dou.createRoutines[parent_table_line - 1].values) > 0
     elif var == "CREATEVALUEISARRAY": return create_value_is_array(dou, table_line, parent_table_line)
     elif var == "CREATEVALUEPARAMETERINDEX": return create_value_parameter_index(dou, table_line, parent_table_line)        
+    elif var == "CREATEVALUEISINLINE" : return create_value_parameter_inline(dou, table_line, parent_table_line)
     else:
         print("process_at_exist: Missing", var, file=sys.stderr)
         return False
