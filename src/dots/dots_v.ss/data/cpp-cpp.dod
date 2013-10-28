@@ -973,33 +973,39 @@ namespace @_NAMESPACEV_@
 @@TABLE@@
 @@IF@@ @_EXIST:CREATEVALUE_@
 @@IF@@ @_EXIST:CREATEVALUEISARRAY_@
-@@IF@@ @_EXIST:CREATEVALUEPARAMETERINDEX_@
-@@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
-        object->@_CREATEVALUE_@()[0].SetPtr(@_CREATEVALUEPARAMETERCLASS_@::@_CREATEVALUEPARAMETER_@(@_CREATEVALUEPARAMETERINDEX_@));
-@@ELSE@@
-        object->@_CREATEVALUE_@()[0].SetVal(@_CREATEVALUEPARAMETERCLASS_@::@_CREATEVALUEPARAMETER_@(@_CREATEVALUEPARAMETERINDEX_@));
-@@END_IF@@
-@@ELSE@@
-        for (Safir::Dob::Typesystem::ArrayIndex i=0; i<@_CREATEVALUEPARAMETERCLASS_@::@_CREATEVALUEPARAMETER_@ArraySize(); i++)
-        {
-@@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
-            object->@_CREATEVALUE_@()[i].SetPtr(@_CREATEVALUEPARAMETERCLASS_@::@_CREATEVALUEPARAMETER_@(i));
-@@ELSE@@
-            object->@_CREATEVALUE_@()[i].SetVal(@_CREATEVALUEPARAMETERCLASS_@::@_CREATEVALUEPARAMETER_@(i));
-@@END_IF@@
-        }
-@@END_IF@@
+# error Cannot set array members through create routine!
 @@ELSIF@@ @_EXIST:CREATEVALUEPARAMETERINDEX_@
 @@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
+@@IF@@ @_EXIST:CREATEVALUEISINLINE_@
+# error Inline values in CreateRoutines with index not supported!        
+@@ELSE@@
         object->@_CREATEVALUE_@().SetPtr(@_CREATEVALUEPARAMETERCLASS_@::@_CREATEVALUEPARAMETER_@(@_CREATEVALUEPARAMETERINDEX_@));
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_EXIST:CREATEVALUEISINLINE_@
+# error Inline values in CreateRoutines with index not supported!        
 @@ELSE@@
         object->@_CREATEVALUE_@().SetVal(@_CREATEVALUEPARAMETERCLASS_@::@_CREATEVALUEPARAMETER_@(@_CREATEVALUEPARAMETERINDEX_@));
 @@END_IF@@
+@@END_IF@@
 @@ELSE@@
 @@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
+@@IF@@ @_EXIST:CREATEVALUEISINLINE_@
+// joot TODO!
+# error Inline objects in CreateRoutines not yet implemented!        
+@@ELSE@@
         object->@_CREATEVALUE_@().SetPtr(@_CREATEVALUEPARAMETERCLASS_@::@_CREATEVALUEPARAMETER_@());
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_EXIST:CREATEVALUEISINLINE_@
+
+        // Inline set of member @_CREATEVALUE_@ value
+        Safir::Dob::Typesystem::ParameterIndex tmp@_CREATEVALUE_@Index = 
+            Safir::Dob::Typesystem::Parameters::GetIndex(@_PARAMETERCLASS_@::ClassTypeId, L"@_CREATEVALUEPARAMETERRAW_@");
+        object->@_CREATEVALUE_@().SetVal(Safir::Dob::Typesystem::Parameters::Get@_UNIFORM_CREATEVALUETYPE_@(ClassTypeId, tmp@_CREATEVALUE_@Index, 0));
 @@ELSE@@
         object->@_CREATEVALUE_@().SetVal(@_CREATEVALUEPARAMETERCLASS_@::@_CREATEVALUEPARAMETER_@());
+@@END_IF@@
 @@END_IF@@
 @@END_IF@@
 @@END_IF@@
