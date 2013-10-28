@@ -63,7 +63,7 @@ namespace Internal
             ,m_errorId(errorId)
         {
             std::ostringstream os;
-            os<<m_label<<"; "<<m_description<<"; "<<m_file<<"; ErrCode="<<m_errorId;
+            os<<m_label<<"; "<<m_description<<"; "<<m_file<<"; ErrorCode="<<m_errorId;
             m_what=os.str();  //composed error info
         }
 

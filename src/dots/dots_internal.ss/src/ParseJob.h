@@ -61,8 +61,6 @@ namespace Internal
         boost::shared_ptr<TypeRepository> GetResult() {return m_result;}
 
     private:
-        typedef std::pair< std::string, boost::shared_ptr<boost::property_tree::ptree> > XmlDef;
-        typedef std::vector<XmlDef> XmlVec;
         typedef boost::packaged_task<ParseStatePtr> Task;
         typedef boost::shared_future<ParseStatePtr> Future;
         typedef std::vector< Future > Futures;
@@ -75,123 +73,6 @@ namespace Internal
         size_t CalcNumberOfWorkers(size_t maxThreads, size_t files) const;
 
         void CollectParseStates(Futures& futures, std::vector<ParseStatePtr>& states) const;
-
-//        template <class ParserT>
-//        struct Worker
-//        {
-//            Worker() : m_xml(new XmlVec), m_rep(new RepositoryBasic) {}
-//            Worker(const boost::shared_ptr<RepositoryBasic>& r) : m_xml(new XmlVec), m_rep(r) {}
-//            boost::shared_ptr<XmlVec> m_xml; //since Worker objects are copied into packaged task, we just want a pointer copy
-//            boost::shared_ptr<RepositoryBasic> m_rep;
-
-//            ParseStatePtr operator()()
-//            {
-//                ParseStatePtr state(new ParseState(m_rep));
-//                for (XmlVec::const_iterator it=m_xml->begin(); it!=m_xml->end(); ++it)
-//                {
-//                    try
-//                    {
-//                        state->currentPath=it->first;
-//                        state->propertyTree=it->second;
-//                        ParserT parser;
-//                        boost::property_tree::ptree::iterator ptIt=state->propertyTree->begin();
-//                        if (parser.Match(ptIt->first, *state))
-//                        {
-//                            parser.Parse(ptIt->second, *state);
-//                            parser.Reset(*state);
-//                        }
-//                    }
-//                    catch (const ParseError& err)
-//                    {
-//                        throw boost::enable_current_exception(err);
-//                    }
-//                    catch (const std::exception& err)
-//                    {
-//                        throw boost::enable_current_exception(ParseError("Unexpected Error", err.what(), state->currentPath, 11));
-//                    }
-//                    catch(...)
-//                    {
-//                        throw boost::enable_current_exception(ParseError("Programming Error", "You have found a bug in dots_internal. Please save the this dou-file and attach it to your bug report.", state->currentPath, 0));
-//                    }
-//                }
-
-//                return state;
-//            }
-//        };
-
-        template <class ParserT>
-        struct Worker
-        {
-            Worker(const std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator& begin,
-                   const std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator& end)
-                :m_rep(new RepositoryBasic)
-                ,m_begin(begin)
-                ,m_end(end)
-            {
-            }
-
-            Worker(const boost::shared_ptr<RepositoryBasic>& rep,
-                   const std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator& begin,
-                   const std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator& end)
-                :m_rep(rep)
-                ,m_begin(begin)
-                ,m_end(end)
-            {
-            }
-
-            boost::shared_ptr<RepositoryBasic> m_rep;
-            std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator m_begin;
-            std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator m_end;
-
-
-            ParseStatePtr operator()()
-            {
-                ParseStatePtr state(new ParseState(m_rep));
-
-                for (std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator it=m_begin; it!=m_end; ++it)
-                {
-                    const boost::filesystem::path& path=it->second;
-                    boost::shared_ptr<boost::property_tree::ptree> pt(new boost::property_tree::ptree);
-                    try
-                    {
-                        boost::property_tree::read_xml(path.string(), *pt, boost::property_tree::xml_parser::trim_whitespace | boost::property_tree::xml_parser::no_comments);
-                    }
-                    catch (boost::property_tree::xml_parser_error& err) //cant catch as const-ref due to bug in early boost versions.
-                    {
-                        std::ostringstream ss;
-                        ss<<err.message()<<". Line: "<<err.line();
-                        throw boost::enable_current_exception(ParseError("Invalid XML", ss.str(), path.string(), 10));
-                    }
-
-                    try
-                    {
-                        state->currentPath=path.string();
-                        state->propertyTree=pt;
-                        ParserT parser;
-                        boost::property_tree::ptree::iterator ptIt=state->propertyTree->begin();
-                        if (parser.Match(ptIt->first, *state))
-                        {
-                            parser.Parse(ptIt->second, *state);
-                            parser.Reset(*state);
-                        }
-                    }
-                    catch (const ParseError& err)
-                    {
-                        throw boost::enable_current_exception(err);
-                    }
-                    catch (const std::exception& err)
-                    {
-                        throw boost::enable_current_exception(ParseError("Unexpected Error", err.what(), state->currentPath, 11));
-                    }
-                    catch(...)
-                    {
-                        throw boost::enable_current_exception(ParseError("Programming Error", "You have found a bug in dots_internal. Please save the this dou-file and attach it to your bug report.", state->currentPath, 0));
-                    }
-                }
-
-                return state;
-            }
-        };
     };
 }
 }

@@ -70,12 +70,14 @@ namespace Internal
 
         ValueDefinition()
             :kind(ValueKind)
+            ,hashedVal(0)
             ,referenced(NULL)
         {
         }
 
         ValueDefinition(ValueDefinitionKind k)
             :kind(k)
+            ,hashedVal(0)
             ,referenced(NULL)
         {
         }
@@ -210,6 +212,12 @@ namespace Internal
         virtual std::pair<boost::int64_t, const char*> GetHashedValue(int index) const
         {
             const ValueDefinition& val=Value(static_cast<size_t>(index));
+            if (!val.stringVal.empty() && val.hashedVal==0)
+            {
+                //This is most likely a reference to a plain string, and if it's not this won't break anything anyway
+                boost::int64_t hash=DotsId_Generate64(val.stringVal.c_str());
+                return std::make_pair(hash, val.stringVal.c_str());
+            }
             return std::make_pair(val.hashedVal, val.stringVal.empty() ? NULL : val.stringVal.c_str());
         }
 
@@ -321,6 +329,7 @@ namespace Internal
     public:
         explicit CreateRoutineDescriptionBasic(ClassDescriptionBasic* parent_)
             :parent(parent_)
+            ,signature()
         {
         }
 
@@ -342,6 +351,7 @@ namespace Internal
         std::vector< std::pair<const ParameterDescriptionBasic*, int> > memberValuesParams;
 
         ClassDescriptionBasic* parent;
+        std::string signature;
     };
     typedef boost::shared_ptr<CreateRoutineDescriptionBasic> CreateRoutineDescriptionBasicPtr;
 

@@ -86,7 +86,7 @@ namespace Internal
             {
                 std::ostringstream ss;
                 ss<<"The type '"<<val->name<<"' is already defined. ";
-                throw ParseError("Duplicated type definition", ss.str(), currentPath, 2);
+                throw ParseError("Duplicated type definition", ss.str(), currentPath, 10);
             }
         }
         catch (const boost::property_tree::ptree_error&)
@@ -349,51 +349,61 @@ namespace Internal
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
+            CreateRoutineDescriptionBasicPtr def(new CreateRoutineDescriptionBasic(state.lastInsertedClass.get()));
             try
             {
-                const std::string& name=pt.get<std::string>(Elements::CreateRoutineName::Name());
-                if (!ValidName(name))
-                {
-                    throw ParseError("Invalid name", "CreateRoutine with name '"+name+"' in class "+state.lastInsertedClass->name+" is not valid.", state.currentPath, 24);
-                }
-
-                CreateRoutineDescriptionBasicPtr def(new CreateRoutineDescriptionBasic(state.lastInsertedClass.get()));
-                def->name=name;
-                state.lastInsertedClass->createRoutines.push_back(def);
-
+                def->name=pt.get<std::string>(Elements::CreateRoutineName::Name());
             }
             catch(const boost::property_tree::ptree_error&)
             {
                 throw ParseError("Missing Element", "CreateRoutine is missing <name> element", state.currentPath, 23);
             }
-        }
-    };
 
-    template<> struct ParseAlgorithm<Elements::CreateRoutineMemberName>
-    {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
-        {
-            //Check duplicates
-            CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
-            StringVector::const_iterator foundIt=std::find(def->parameters.begin(), def->parameters.end(), pt.data());
-            if (foundIt!=def->parameters.end())
+            if (!ValidName(def->name))
             {
-                std::ostringstream os;
-                os<<"Parameter '"<<pt.data()<<"' exists more than one time in createRoutine "<<def->name<<" in class "<<state.lastInsertedClass->name;
-                throw ParseError("Duplicated CreateRoutine parameter", os.str(), state.currentPath, 25);
+                throw ParseError("Invalid name", "CreateRoutine with name '"+def->name+"' in class "+state.lastInsertedClass->name+" is not valid.", state.currentPath, 24);
             }
-            for (MemberValueVector::const_iterator it=def->memberValues.begin(); it!=def->memberValues.end(); ++it)
+
+            //Extract the parameters and create the signature for createRoutine 'MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
+            std::ostringstream signature;
+            signature<<state.lastInsertedClass->name<<"."<<def->name;
+            boost::optional<boost::property_tree::ptree&> parameters=pt.get_child_optional(Elements::CreateRoutineParameterList::Name());
+            if (parameters)
             {
-                if (it->first==pt.data())
+                for (boost::property_tree::ptree::const_iterator it=parameters->begin(); it!=parameters->end(); ++it)
                 {
+                    if (it->first==Elements::CreateRoutineMemberName::Name())
+                    {
+                        signature<<"#"<<it->second.data();
+
+                        //Check for duplicates
+                        StringVector::const_iterator foundIt=std::find(def->parameters.begin(), def->parameters.end(), it->second.data());
+                        if (foundIt!=def->parameters.end())
+                        {
+                            std::ostringstream os;
+                            os<<"Parameter '"<<it->second.data()<<"' exists more than one time in createRoutine "<<def->name<<" in class "<<state.lastInsertedClass->name;
+                            throw ParseError("Duplicated CreateRoutine parameter", os.str(), state.currentPath, 25);
+                        }
+
+                        def->parameters.push_back(it->second.data());
+                    }
+                }
+            }
+            def->signature=signature.str();
+
+            //Check for createRoutines with same signature
+            for (std::vector<CreateRoutineDescriptionBasicPtr>::const_iterator crIt=state.lastInsertedClass->createRoutines.begin(); crIt!=state.lastInsertedClass->createRoutines.end(); ++crIt)
+            {
+                if ((*crIt)->signature==def->signature)
+                {
+                    //Same signature is not allowed
                     std::ostringstream os;
-                    os<<"Member '"<<pt.data()<<"' already has a specified value in createRoutine "<<def->name<<" in class "<<state.lastInsertedClass->name<<
-                        ". It is not allowed to declare the same classMember as createRoutineMember and createRoutineParameter.";
-                    throw ParseError("Duplicated CreateRoutine parameter", os.str(), state.currentPath, 26);
+                    os<<"The class '"<<state.lastInsertedClass->name<<"' contains CreatRoutines with the same name and identical parameters. Create routine name '"<<def->name<<"' signature("<<def->signature<<")";
+                    throw ParseError("Create routines with identical signature", os.str(), state.currentPath, 26);
                 }
             }
 
-            def->parameters.push_back(pt.data());
+            state.lastInsertedClass->createRoutines.push_back(def);
         }
     };
 
@@ -696,6 +706,10 @@ namespace Internal
                 if (def->memberType==ObjectMemberType)
                 {
                     def->memberType=EnumerationMemberType; //Handled later, should be an enum otherwise <value>-element is not valid
+                }
+
+                if (def->memberType==EnumerationMemberType)
+                {
                     val.stringVal=SerializationUtils::ExpandEnvironmentVariables(pt.data());
                     def->values.push_back(val);
                 }

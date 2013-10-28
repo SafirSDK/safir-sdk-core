@@ -14,6 +14,12 @@
         </parameter>
 
         <parameter>
+            <name>StringParam</name>
+            <type>String</type>
+            <value>Its more fun to compute</value>
+        </parameter>
+
+        <parameter>
             <name>Tid</name>
             <type>TypeId</type>
             <value>Safir.Dob.Entity</value>
@@ -69,6 +75,12 @@
         </parameter>
         
         <parameter>
+            <name>Color2</name>
+            <type>ParserTest.MyColorEnum</type>
+            <value>White</value>
+        </parameter>
+
+        <parameter>
             <name>MyObjectParam</name>
             <type>Test.MyClass2</type>
             <Test.MyClass2 type='Test.MyClass2'>
@@ -112,6 +124,22 @@
                 </arrayElement>
                 <arrayElement>
                     <value>4</value>
+                </arrayElement>
+            </arrayElements>            
+        </parameter>
+
+        <parameter>
+            <name>EnumArray</name>
+            <type>ParserTest.MyColorEnum</type>
+            <arrayElements>
+                <arrayElement>
+                    <value>Black</value>
+                </arrayElement>
+                <arrayElement>
+                    <value>Red</value>
+                </arrayElement>
+                <arrayElement>
+                    <value>White</value>
                 </arrayElement>
             </arrayElements>            
         </parameter>

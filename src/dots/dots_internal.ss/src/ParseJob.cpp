@@ -38,6 +38,9 @@ namespace Internal
 {
     namespace
     {
+        /**
+         * Selects files to parse and handles file override.
+         */
         inline void SelectFiles(const std::vector<boost::filesystem::path>& roots,
                                 std::map<boost::filesystem::path, boost::filesystem::path>& douFiles,
                                 std::map<boost::filesystem::path, boost::filesystem::path>& domFiles)
@@ -83,6 +86,82 @@ namespace Internal
                 }
             }
         }
+
+        /**
+         * Worker class run as separate future.
+         */
+        template <class ParserT>
+        struct ParseWorker
+        {
+            ParseWorker(const std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator& begin,
+                        const std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator& end)
+                :m_rep(new RepositoryBasic)
+                ,m_begin(begin)
+                ,m_end(end)
+            {
+            }
+
+            ParseWorker(const boost::shared_ptr<RepositoryBasic>& rep,
+                        const std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator& begin,
+                        const std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator& end)
+                :m_rep(rep)
+                ,m_begin(begin)
+                ,m_end(end)
+            {
+            }
+
+            boost::shared_ptr<RepositoryBasic> m_rep;
+            std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator m_begin;
+            std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator m_end;
+
+
+            ParseStatePtr operator()()
+            {
+                ParseStatePtr state(new ParseState(m_rep));
+
+                for (std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator it=m_begin; it!=m_end; ++it)
+                {
+                    const boost::filesystem::path& path=it->second;
+                    boost::shared_ptr<boost::property_tree::ptree> pt(new boost::property_tree::ptree);
+                    try
+                    {
+                        boost::property_tree::read_xml(path.string(), *pt, boost::property_tree::xml_parser::trim_whitespace | boost::property_tree::xml_parser::no_comments);
+                    }
+                    catch (boost::property_tree::xml_parser_error& err) //cant catch as const-ref due to bug in early boost versions.
+                    {
+                        std::ostringstream ss;
+                        ss<<err.message()<<". Line: "<<err.line();
+                        throw boost::enable_current_exception(ParseError("Invalid XML", ss.str(), path.string(), 10));
+                    }
+
+                    try
+                    {
+                        state->currentPath=path.string();
+                        state->propertyTree=pt;
+                        ParserT parser;
+                        boost::property_tree::ptree::iterator ptIt=state->propertyTree->begin();
+                        if (parser.Match(ptIt->first, *state))
+                        {
+                            parser.Parse(ptIt->second, *state);
+                        }
+                    }
+                    catch (const ParseError& err)
+                    {
+                        throw boost::enable_current_exception(err);
+                    }
+                    catch (const std::exception& err)
+                    {
+                        throw boost::enable_current_exception(ParseError("Unexpected Error", err.what(), state->currentPath, 11));
+                    }
+                    catch(...)
+                    {
+                        throw boost::enable_current_exception(ParseError("Programming Error", "You have found a bug in dots_internal. Please save the this dou-file and attach it to your bug report.", state->currentPath, 0));
+                    }
+                }
+
+                return state;
+            }
+        };
     }
 
     ParseJob::ParseJob(const std::vector<boost::filesystem::path>& roots, size_t maxNumberOfThreads)
@@ -110,7 +189,7 @@ namespace Internal
         //did we get this far, the repository is complete but still without any propertyMappings
 
         //Parse dom-files
-        ParseJob::Worker<DomParser> domWorker(m_result, domFiles.begin(), domFiles.end());
+        ParseWorker<DomParser> domWorker(m_result, domFiles.begin(), domFiles.end());
         boost::shared_ptr<Task> domTask(new Task(domWorker));
         Future fut(domTask->get_future());
         boost::thread thd(boost::bind(&Task::operator(), domTask));
@@ -134,14 +213,14 @@ namespace Internal
             {
                 ++it;
             }
-            ParseJob::Worker<DouParser> worker(start, it);
+            ParseWorker<DouParser> worker(start, it);
             boost::shared_ptr<Task> task(new Task(worker));
             futures.push_back(Future(task->get_future()));
             boost::thread thd(boost::bind(&Task::operator(), task));
             thd.detach();
         }
         //last worker takes the rest
-        ParseJob::Worker<DouParser> worker(it, douFiles.end());
+        ParseWorker<DouParser> worker(it, douFiles.end());
         boost::shared_ptr<Task> task(new Task(worker));
         futures.push_back(Future(task->get_future()));
         boost::thread thd(boost::bind(&Task::operator(), task));

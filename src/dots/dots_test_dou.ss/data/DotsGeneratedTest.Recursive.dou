@@ -38,7 +38,7 @@
             <values>
                 <value>
                     <member>Next</member>
-                    <parameter>DotsGeneratedTest.Recursive.Myself</parameter>
+                    <parameter><name>DotsGeneratedTest.Recursive.Myself</name></parameter>
                 </value>
             </values>
         </createRoutine>

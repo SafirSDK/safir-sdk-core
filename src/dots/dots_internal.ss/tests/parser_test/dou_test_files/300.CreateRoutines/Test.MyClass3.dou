@@ -14,23 +14,22 @@
             <type>ParserTest.MyItem</type>
         </member>        
     </members>    
-    
-    <!--createRoutines>
+        
+    <createRoutines>
         <createRoutine>
-            <summary>A create routine</createRoutine>
-            <name>MyCreateRoutine2</name>            
-            <values>                
-                <value>
-                    <member>MyString</member>
-                    <parameter>
-                        <name>Test.MyClass2.MyStringRefParam</name>
-                    </parameter>
-                </value>
-            </values>
+            <name>Cr1</name>                        
             <parameters>
-                <member>MyEid</member>
+                <member>MyInt32</member>
+                <member>MyItem</member>
             </parameters>
         </createRoutine>
-    </createRoutines-->
 
+        <createRoutine>
+            <name>Cr1</name>                        
+            <parameters>                
+                <member>MyItem</member>
+                <member>MyInt32</member>
+            </parameters>
+        </createRoutine>
+    </createRoutines>
 </class>

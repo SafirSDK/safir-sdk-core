@@ -32,6 +32,11 @@
             <type>Int32</type>
         </member>
         <member>
+            <name>MyInt32Array</name>
+            <type>Int32</type>
+            <arraySize>3</arraySize>
+        </member>
+        <member>
             <name>MyInt64</name>
             <type>Int64</type>
         </member>
@@ -44,10 +49,6 @@
             <type>Float64</type>
         </member>
         <member>
-            <name>MyBinary</name>
-            <type>Binary</type>
-        </member>
-        <member>
             <summary>A String of 64 characters.</summary>
             <name>MyString</name>            
             <type>String</type>
@@ -55,24 +56,11 @@
                 <name>Test.MyClass2.MyInt32Param</name>
             </maxLengthRef>
         </member>
-        <member>
-            <name>MyEnum</name>
-            <type>ParserTest.MyColorEnum</type>
-        </member>
-        <member>
-            <name>MyItem</name>
-            <type>ParserTest.MyItem</type>
-        </member>
-        <member>
-            <name>MyInt32Array</name>
-            <type>Int32</type>
-            <arraySize>3</arraySize>
-        </member>
     </members>
 
     <createRoutines>
     <createRoutine>
-        <summary>A create routine</summary>
+        <summary>A create routine</createRoutine>
         <name>MyCreateRoutine1</name>
         <parameters>
             <member>MyEid</member>
@@ -89,84 +77,20 @@
             <value>
                 <member>MyHandler</member>
                 <parameter><name>Test.MyClass2.MyHandlerParam</name></parameter>
-            </value>
-            <value>
-                <member>MyInt32</member>
-                <parameter><name>Test.MyClass1.MyInt32Param</name></parameter>
-            </value>
+            </value>            
             <value>
                 <member>MyFloat32</member>
                 <parameter><name>Test.MyClass2.MyFloat32Param</name></parameter>
             </value>
             <value>
-                <member>MyString</member>
-                <parameter><name>Test.MyClass2.MyStringRefParam</name></parameter>
-            </value>
-            <value>
-                <member>MyEnum</member>
-                <parameter><name>Test.MyClass1.MyEnumParam</name></parameter>
-            </value>
-            <value>
-                <member>MyItem</member>
-                <parameter><name>Test.MyClass1.MyItemParam</name></parameter>
-            </value>
-            <value>
-                <member>MyInt32Array</member>
-                <value>123</value>
-            </value>
-        </values>
-    </createRoutine>
-
-    <createRoutine>
-        <summary>Create routine with values that generates hidden parameters</summary>
-        <name>MyCreateRoutine2</name>
-        <parameters>
-            <member>MyInt32</member>
-        </parameters>
-        <values>
-            <value>
-                <member>MyInt64</member>
-                <value>5</value>
-            </value>
-            <value>
-                <member>MyBinary</member>
-                <value>U28geW91IGxpa2UgdG8gRE9CPw==</value> <!--So you like to DOB? -->
-            </value>
-            <value>
-                <member>MyString</member>
-                <value>Sure I like to DOB!</value>
-            </value>
-            <value>
-                <member>MyEid</member>
-                <entityId>
-                    <name>Test.MyClass1</name>
-                    <instanceId>123</instanceId>
-                </entityId>
-            </value>
-            <value>
-                <member>MyEnum</member>
-                <value>Red</value>
-            </value>
-            <value>
-                <member>MyItem</member>
-                <ParserTest.MyItem>
-                    <MyNumber>987</MyNumber>
-                    <MyStrings>
-                        <String index='3'>Dilbert</String>
-                        <String index='1'>Wally</String>
-                    </MyStrings>
-                </ParserTest.MyItem>
-            </value>
-            <value>
                 <member>MyInt32Array</member>
                 <parameter>
                     <name>Test.MyClass1.MyInt32ArrayParam</name>
-                    <index>Test.MyClass1.MyInt32Param</index>
+                    <index>2</index>
                 </parameter>
             </value>
         </values>
     </createRoutine>
-
     </createRoutines>
 
     <parameters>
@@ -228,11 +152,21 @@
             <type>Float64</type>
             <value>33.123456</value>
         </parameter>
-
+        
         <parameter>
-            <name>MyEnumParam</name>
-            <type>ParserTest.MyColorEnum</type>
-            <value>Black</value>
+            <name>MyInt32ArrayParam</name>
+            <type>Int32</type>
+            <arrayElements>
+                <arrayElement>
+                    <value>11</value>
+                </arrayElement>
+                <arrayElement>
+                    <value>12</value>
+                </arrayElement>
+                <arrayElement>
+                    <value>13</value>
+                </arrayElement>
+            </arrayElements>
         </parameter>
 
         <parameter>
@@ -258,34 +192,6 @@
                     <value>ddd</value>
                 </arrayElement>
             </arrayElements>            
-        </parameter>
-
-        <parameter>
-            <name>MyInt32ArrayParam</name>
-            <type>Int32</type>
-            <arrayElements>
-                <arrayElement>
-                    <value>11</value>
-                </arrayElement>
-                <arrayElement>
-                    <value>12</value>
-                </arrayElement>
-                <arrayElement>
-                    <value>13</value>
-                </arrayElement>
-            </arrayElements>
-        </parameter>
-
-        <parameter>
-            <name>MyItemParam</name>
-            <type>ParserTest.MyItem</type>
-            <ParserTest.MyItem>
-                <MyNumber>12345</MyNumber>
-                <MyStrings>
-                    <String index='2'>Kalle</String>
-                    <String index='3'>Sune</String>
-                </MyStrings>
-            </ParserTest.MyItem>
         </parameter>
     </parameters>
 

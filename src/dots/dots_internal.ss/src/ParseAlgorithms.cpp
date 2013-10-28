@@ -681,15 +681,25 @@ namespace Internal
         if (!BasicTypeOperations::IsOfType<TypeRepository>(m_result.get(), referenced->memberType, referenced->GetTypeId(),
                       referencing->memberType, referencing->GetTypeId()))
         {
-            //referenced parameter cant be derived as the same type as referencing parameter
-            std::ostringstream ss;
-            ss<<"The parameter '"<<referencing->GetName()<<"' ";
-            if (referencing->IsArray())
-                ss<<"(index="<<ref.referee.referencingIndex<<") ";
-            ss<<"of type "<<referencing->typeName<<" is referencing parameter '"<<referenced->GetName()<<
-                " of type "<<referenced->typeName<<". The types are not compatilbe and "<<
-                referenced->typeName<<" is not derived from "<<referencing->typeName;
-            throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 44);
+            if ((referencing->memberType==InstanceIdMemberType ||
+                 referencing->memberType==ChannelIdMemberType ||
+                 referencing->memberType==HandlerIdMemberType) &&
+                    referenced->memberType==StringMemberType)
+            {
+                //A special case, hashed types can reference a plain string
+            }
+            else
+            {
+                //referenced parameter cant be derived as the same type as referencing parameter
+                std::ostringstream ss;
+                ss<<"The parameter '"<<referencing->GetName()<<"' ";
+                if (referencing->IsArray())
+                    ss<<"(index="<<ref.referee.referencingIndex<<") ";
+                ss<<"of type "<<referencing->typeName<<" is referencing parameter '"<<referenced->GetName()<<
+                    " of type "<<referenced->typeName<<". The types are not compatilbe and "<<
+                    referenced->typeName<<" is not derived from "<<referencing->typeName;
+                throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 44);
+            }
         }
 
         //point to referenced
@@ -896,13 +906,14 @@ namespace Internal
                     throw ParseError("Invalid CreateRoutine value", os.str(), cd->FileName(), 60);
                 }
 
-                if (md->IsArray())
-                {
-                    std::ostringstream os;
-                    os<<"The createRoutine '"<<cr.name<<"' in class '"<<cd->GetName()<<"' a default value for member '"<<mit->first<<"' wich is an array. Array members can't have default values.";
-                    os<<" ..."<<md->GetName()<<" arrSize="<<md->GetArraySize()<<" isArr="<<md->IsArray();
-                    throw ParseError("CreateRoutine array values not supported", os.str(), cd->FileName(), 61);
-                }
+                //Seems like the behaviour in the generated files is to initialize the whole array with the specified value in case the member is array
+//                if (md->IsArray())
+//                {
+//                    std::ostringstream os;
+//                    os<<"The createRoutine '"<<cr.name<<"' in class '"<<cd->GetName()<<"' a default value for member '"<<mit->first<<"' wich is an array. Array members can't have default values.";
+//                    os<<" ..."<<md->GetName()<<" arrSize="<<md->GetArraySize()<<" isArr="<<md->IsArray();
+//                    throw ParseError("CreateRoutine array values not supported", os.str(), cd->FileName(), 61);
+//                }
 
                 cr.memberValuesParams.push_back(std::make_pair(pd, mit->second.second));
             }

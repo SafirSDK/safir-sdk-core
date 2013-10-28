@@ -42,6 +42,9 @@ void PrintTestFailMessage(const std::string& result, const std::string& shortInf
 
 int main(int argc, char* argv[])
 {
+    //ParseDir("/home/joot/dev/safir_open/dots_internal_rewrite/src/dots/dots_test_dou.ss/data");
+    //return 0;
+
     if (argc<2)
     {
         std::cout<<"Too few arguments!"<<std::endl;
@@ -52,7 +55,7 @@ int main(int argc, char* argv[])
 
     boost::filesystem::path douDir(argv[1]);
     int first=0;
-    int last=100000;
+    int last=10000;
     if (argc>2)
     {
         first=boost::lexical_cast<int>(argv[2]);
@@ -265,7 +268,7 @@ void ParseDir(const boost::filesystem::path& dir)
         std::cout<<"* Label: "<<err.Label()<<std::endl;
         std::cout<<"* Descr: "<<err.Description()<<std::endl;
         std::cout<<"* File:  "<<err.File()<<std::endl;
-        std::cout<<"* ErrId: "<<err.ErrorId()<<std::endl;
+        std::cout<<"* ErrorCode: "<<err.ErrorId()<<std::endl;
         std::cout<<"*********************************************************************"<<std::endl;
     }
     catch(...)
