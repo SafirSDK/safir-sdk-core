@@ -156,6 +156,64 @@
         </values>
     </createRoutine>
 
+    <createRoutine>
+        <summary>Create routine with indexed values and generated hidden parameters</summary>
+        <name>MyCreateRoutine3</name>
+        <parameters>
+            <member>MyFloat32</member>
+        </parameters>
+        <values>
+            <value>
+                <member>MyInt32</member>
+                <parameter>
+                    <name>Test.MyClass2.MyInt32ArrayParam</name>
+                    <index>Test.MyClass2.MyInt64Param</index>
+                </parameter>
+            </value>
+            <value>
+                <member>MyInt64</member>
+                <parameter>
+                    <name>Test.MyClass2.MyInt32ArrayParam</name>
+                    <index>1</index>
+                </parameter>
+            </value>
+            <value>
+                <member>MyFloat64</member>
+                <parameter>Test.MyClass2.MyInt32ArrayParam</parameter>
+                <index>2</index>
+            </value>
+            <value>
+                <member>MyBinary</member>
+                <value>U28geW91IGxpa2UgdG8gRE9CPw==</value> <!--So you like to DOB? -->
+            </value>
+            <value>
+                <member>MyString</member>
+                <value>Sure I like to DOB!</value>
+            </value>
+            <value>
+                <member>MyEid</member>
+                <entityId>
+                    <name>Test.MyClass1</name>
+                    <instanceId>123</instanceId>
+                </entityId>
+            </value>
+            <value>
+                <member>MyEnum</member>
+                <value>Red</value>
+            </value>
+            <value>
+                <member>MyItem</member>
+                <ParserTest.MyItem>
+                    <MyNumber>987</MyNumber>
+                    <MyStrings>
+                        <String index='3'>Dilbert</String>
+                        <String index='1'>Wally</String>
+                    </MyStrings>
+                </ParserTest.MyItem>
+            </value>
+        </values>
+    </createRoutine>
+
     </createRoutines>
 
     <parameters>
