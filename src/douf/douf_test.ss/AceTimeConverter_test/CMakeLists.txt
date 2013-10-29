@@ -3,7 +3,7 @@ find_package(ACE)
 if (ACE_FOUND)
   INCLUDE_DIRECTORIES(${ACE_INCLUDE_DIRECTORIES})
 
-  ADD_EXECUTABLE(AceTimeConverter_test test.cpp)
+  ADD_EXECUTABLE(AceTimeConverter_test test.cpp test2.cpp)
   
   if (NOT MSVC)
     TARGET_LINK_LIBRARIES(AceTimeConverter_test douf_time_cpp)
