@@ -24,8 +24,10 @@ They can most probably be adapted to other versions as well, but those are the o
 First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core.
 
 1.1. Ubuntu
-To install these from the command line "in one go" on Ubuntu/Kubuntu 12.04 run:
-   sudo apt-get install libqt4-dev mono-devel mono-gmcs libboost1.48-all-dev libiodbc2-dev cmake g++ default-jdk doxygen graphviz make python-tk libexpat1-dev autoconf build-essential subversion gnat-4.6
+To install these from the command line "in one go" on distributions based on Ubuntu 12.04 run:
+   sudo apt-get install libqt4-dev mono-devel mono-gmcs libiodbc2-dev cmake g++ default-jdk doxygen graphviz make python-tk libexpat1-dev autoconf build-essential subversion gnat libboost1.48-all-dev
+
+If you're using a different version you may have to change the version of the boost library (the very last argument above). If in doubt use the latest one that is available in your repositories. If you don't know how to work that out, use libboost-all-dev instead.
 
 1.2. Centos/RHEL
 There are a few more steps needed to set up a Centos/RHEL 6.x machine.
