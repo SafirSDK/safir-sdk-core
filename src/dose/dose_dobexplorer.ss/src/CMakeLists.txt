@@ -63,7 +63,7 @@ endif()
 FIND_PACKAGE(Boost COMPONENTS filesystem system)
 
 IF (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dobexplorer dots_cpp dots_generated-Safir-cpp dots_generated-cpp dose_internal lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(dobexplorer dots_cpp dots_generated-Safir-cpp dose_internal lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
 ENDIF ()
 
 INSTALL(TARGETS dobexplorer

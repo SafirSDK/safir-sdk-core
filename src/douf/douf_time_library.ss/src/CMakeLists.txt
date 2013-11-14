@@ -17,8 +17,8 @@ FIND_PACKAGE(Boost COMPONENTS regex thread system)
     
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(douf_time_library 
-      dots_generated-Safir-cpp 
-      dots_generated-cpp dots_cpp 
+      dots_generated-douf_time-cpp 
+      dots_cpp 
       ${Boost_LIBRARIES})
 endif()
 

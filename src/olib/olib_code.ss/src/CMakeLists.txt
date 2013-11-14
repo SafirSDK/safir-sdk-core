@@ -28,7 +28,7 @@ FILE(GLOB sources *.cpp)
 ADD_LIBRARY(olib SHARED ${sources} ${headers})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(olib dots_generated-Safir-cpp dots_generated-cpp logging_cpp ${ODBC_LIBRARIES})
+    TARGET_LINK_LIBRARIES(olib dots_generated-olib-cpp logging_cpp ${ODBC_LIBRARIES})
 endif()
 
 ADD_DEFINITIONS(-DOLIB_EXPORTS)

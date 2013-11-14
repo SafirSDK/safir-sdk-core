@@ -22,7 +22,6 @@ else() #NOT MSVC
     dose_internal 
     dose_com 
     dots_generated-Safir-cpp
-    dots_generated-cpp
     dots_cpp
     lluf_utils
     lluf_crash_reporter

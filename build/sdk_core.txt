@@ -73,40 +73,45 @@ build_dir        src/dose/dose_dou.ss                      RelWithDebInfo   Debu
 
 build_dir        src/dose/dose_internal.ss/src             RelWithDebInfo   Debug
 run_test_suite   src/dose/dose_internal.ss/tests           dose_internal_tests
-exit
 build_dir        src/dose/dose_dll.ss/src                  RelWithDebInfo
 build_dir        src/dose/dose_cpp.ss/src                  RelWithDebInfo   Debug
 build_dir        src/dose/dose_communication.ss/src        RelWithDebInfo   Debug
 build_dir        src/dose/dose_main.ss/src                 RelWithDebInfo
 run_test_suite   src/dose/dose_main.ss/tests               dose_main_tests
-build_dir        src/dose/dose_dotnet.ss/src               RelWithDebInfo
-build_dir        src/dose/dose_java.ss/src                 RelWithDebInfo
-build_dir        src/dose/dose_ada.ss                      RelWithDebInfo
+#build_dir        src/dose/dose_dotnet.ss/src               RelWithDebInfo
+#build_dir        src/dose/dose_java.ss/src                 RelWithDebInfo
+#build_dir        src/dose/dose_ada.ss                      RelWithDebInfo
 #TODO cmake file will move to src dir.
 
-build_dir        src/dose/dose_sate.ss/src                 RelWithDebInfo
+#build_dir        src/dose/dose_sate.ss/src                 RelWithDebInfo
 build_dir        src/dose/dose_dobexplorer.ss/src          RelWithDebInfo
 
 #DOUF
+build_dir        src/douf/douf_dou.ss                      RelWithDebInfo   Debug
 build_dir        src/douf/douf_time_library.ss/src         RelWithDebInfo
 build_dir        src/douf/douf_cpp.ss/src                  RelWithDebInfo   Debug
-build_dir        src/douf/douf_dotnet.ss/src               RelWithDebInfo
-build_dir        src/douf/douf_ada.ss                      RelWithDebInfo
-build_dir        src/douf/douf_java.ss/src                 RelWithDebInfo
+#build_dir        src/douf/douf_dotnet.ss/src               RelWithDebInfo
+#build_dir        src/douf/douf_ada.ss                      RelWithDebInfo
+#build_dir        src/douf/douf_java.ss/src                 RelWithDebInfo
 run_test_suite   src/douf/douf_test.ss/                    douf_tests
 
+
 #SWRE
+build_dir        src/swre/swre_dou.ss                      RelWithDebInfo   Debug
 build_dir        src/swre/swre_library.ss/src              RelWithDebInfo
 build_dir        src/swre/swre_cpp.ss/src                  RelWithDebInfo   Debug
-build_dir        src/swre/swre_dotnet.ss/src               RelWithDebInfo
-build_dir        src/swre/swre_java.ss/src                 RelWithDebInfo
-build_dir        src/swre/swre_ada.ss/                     RelWithDebInfo
+#build_dir        src/swre/swre_dotnet.ss/src               RelWithDebInfo
+#build_dir        src/swre/swre_java.ss/src                 RelWithDebInfo
+#build_dir        src/swre/swre_ada.ss/                     RelWithDebInfo
 build_dir        src/swre/swre_backdoor.ss/src             RelWithDebInfo
 
 #FOREACH
+build_dir        src/foreach/foreach_dou.ss                RelWithDebInfo   Debug
 build_dir        src/foreach/foreach.ss/src                RelWithDebInfo
 
+
 #OLIB
+build_dir        src/olib/olib_dou.ss                      RelWithDebInfo   Debug
 build_dir        src/olib/olib_code.ss/src                 RelWithDebInfo   Debug
 
 #DOPE

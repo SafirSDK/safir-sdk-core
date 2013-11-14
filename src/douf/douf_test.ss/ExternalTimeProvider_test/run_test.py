@@ -41,9 +41,9 @@ parameters_path = os.path.join(SAFIR_RUNTIME,
                                "data", 
                                "text", 
                                "dots", 
-                               "classes", 
-                               "safir_core", 
-                               "config")
+                               "classes")
+#TODO                               "safir_core", 
+#TODO                               "config")
 
 LibraryParameters_path = os.path.join(parameters_path, 
                                "Safir.Time.LibraryParameters.dou")

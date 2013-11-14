@@ -12,7 +12,7 @@ FIND_PACKAGE(Boost COMPONENTS program_options system)
 TARGET_LINK_LIBRARIES(backdoor ${Boost_LIBRARIES})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(backdoor dots_cpp dots_generated-Safir-cpp dots_generated-cpp dose_cpp)
+    TARGET_LINK_LIBRARIES(backdoor dots_cpp dots_generated-swre_library-cpp dots_generated-Safir-cpp dose_cpp)
 endif()
 
 INSTALL(TARGETS backdoor

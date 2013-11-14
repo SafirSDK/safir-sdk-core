@@ -12,7 +12,7 @@ FILE(GLOB sources *.cpp)
 ADD_LIBRARY(douf_time_cpp SHARED ${sources} ${headers})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(douf_time_cpp douf_time_library dots_generated-cpp)
+    TARGET_LINK_LIBRARIES(douf_time_cpp douf_time_library dots_generated-douf_time-cpp)
 endif()
 
 ADD_DEFINITIONS(-DDOUF_TIME_CPP_EXPORTS)
