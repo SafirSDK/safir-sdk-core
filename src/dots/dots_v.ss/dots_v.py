@@ -146,7 +146,7 @@ def dou_uniform_lookup(gSession, typename):
     if typename in gSession.dou_uniform_lookup_cache: return gSession.dou_uniform_lookup_cache[typename]
                 
     print("** ERROR - Cannot match dou type", typename, file=sys.stderr)
-    return "** ERROR - Cannot match dou type"
+    sys.exit(1)
 
 
 # We only need to call this once per dod file (if Namespace prefixes are used) 
@@ -372,6 +372,7 @@ def parse_dou(gSession, dou_xmlfile):
                     
                     else:
                         print("** ERROR unknown CreateRoutineParameter subtag", parameter_tag, file=sys.stderr)
+                        sys.exit(1)
 
             values = []
             vs = cr.find("{urn:safir-dots-unit}values")
@@ -552,8 +553,8 @@ def underscore_formatter(name, style):
         s4 = re.sub('([A-Za-z])([0-9])', r'\1_\2', s3)
         return s4
     else:
-        print("** Error, unsupported underscore format", style, file=sys.stderr)
-        return name
+        print("** ERROR, unsupported underscore format", style, file=sys.stderr)
+        sys.exit(1)
 
 def case_formatter(name, style):
     # *_Case_Style is one of: "Upper", "Lower", "Camel", "Keep"
@@ -561,8 +562,8 @@ def case_formatter(name, style):
     elif style == "Upper": return name.upper()
     elif style == "Lower": return name.lower()
     else:
-        print("** Error, unsupported case format", style, file=sys.stderr)
-        return name
+        print("** ERROR, unsupported case format", style, file=sys.stderr)
+        sys.exit(1)
 
 def separator_formatter(gSession, name, style):
     if style != gSession.dod_parameters["Namespace_Separator"]:
@@ -778,7 +779,7 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
             return enum_formatter(gSession, dou.values[index])
     elif var == "ENUMVALUE'LENGTH": return get_iterator_length("ENUMVALUE", dou, 0, 0)
     print("** ERROR - invalid var lookup,", var, file=sys.stderr)
-    return None
+    sys.exit(1)
 
 def get_iterator_length(var, dou, table_line, parent_table_line):
     # if the variable is no iterator return -1
@@ -804,7 +805,7 @@ def get_iterator_length(var, dou, table_line, parent_table_line):
     elif var == "ENUMVALUE" : return len(dou.values)
     
     print("** ERROR ** - bad iterator: ", var, file=sys.stderr)
-    return -1
+    sys.exit(1)
 
 def create_parameter_is_array(dou, table_line, parent_table_line):
     if len(dou.createRoutines) == 0: return trim_false(False)
@@ -986,6 +987,7 @@ def process_at_str(gSession, at_string, dou, table_line, parent_table_line, stri
                 
             else:
                 print("** ERROR - Unknown @ command", command, file=sys.stderr)
+                sys.exit(1)
     
     if isinstance(result, (bool, int)): result = str(result)
     elif strings_with_quotes and not result.isdigit(): result = '"' + result + '"'
@@ -1150,6 +1152,7 @@ def parse_parameters(gSession, line):
             
     if not valid_parameter:
         print("** ERROR - Cannot parse parameter line:", line, file=sys.stderr)
+        sys.exit(1)
 
     
 def parse_if_clause(gSession, current_line, file, dou, process_if_content, table_line, parent_table_line):

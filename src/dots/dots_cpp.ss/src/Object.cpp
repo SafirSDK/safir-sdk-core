@@ -27,6 +27,9 @@
 #include "Safir/Dob/Typesystem/ObjectFactory.h"
 #include "Safir/Dob/Typesystem/BlobOperations.h"
 #include "Safir/Dob/Typesystem/ContainerProxies.h"
+#include <Safir/Utilities/DynamicLibraryLoader.h>
+#include <iostream>
+
 namespace Safir
 {
 namespace Dob
@@ -56,6 +59,37 @@ namespace Typesystem
         }
         const bool registered =
             ObjectFactory::Instance().RegisterClass(Safir::Dob::Typesystem::Object::ClassTypeId,CreateObject);
+
+        void LoadLib(const std::string& name)
+        {
+            const std::string fullName = "dots_generated-" + name + "-cpp";
+            try
+            {
+                Safir::Utilities::DynamicLibraryLoader loader;
+                loader.Load(fullName, false, true);
+            }
+            catch (const std::logic_error& e)
+            {
+                std::wcout << "Failed to load " << fullName.c_str() << " library: " << e.what() << std::endl;
+            }
+
+        }
+
+        bool LoadLibraries()
+        {
+            //TODO: read from ini file instead!
+            LoadLib("Safir");
+            LoadLib("swre_library");
+            LoadLib("olib");
+            LoadLib("foreach");
+            LoadLib("douf_time");
+
+            return true;
+        }
+
+        const bool loadedLibraries = 
+                                                                                       LoadLibraries();
+
     }
 
     //Check if anything in the object has change flags set

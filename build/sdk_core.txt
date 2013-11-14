@@ -41,36 +41,39 @@ build_dir        src/dots/dots_id.ss/src                   RelWithDebInfo
 run_test_suite   src/dots/dots_id.ss/tests                 dots_id_tests
 build_dir        src/dots/dots_kernel.ss/src               RelWithDebInfo
 build_dir        src/dots/dots_configuration_check.ss/src  RelWithDebInfo
-build_dir        src/dots/dots_schema_validator.ss         RelWithDebInfo
+#build_dir        src/dots/dots_schema_validator.ss         RelWithDebInfo
 build_dir        src/dots/dots_cpp.ss/src                  RelWithDebInfo   Debug
 run_test_suite   src/dots/dots_cpp.ss/tests/constants_test dots_cpp_constants_test
 build_dir        src/dots/dots_dotnet.ss/src               RelWithDebInfo
 build_dir        src/dots/dots_ada.ss                      RelWithDebInfo
 build_dir        src/dots/dots_java.ss/src                 RelWithDebInfo
 build_dir        src/dots/dots_v.ss                        RelWithDebInfo
-build_dir        src/dots/dots_depends.ss                  RelWithDebInfo
+#build_dir        src/dots/dots_depends.ss                  RelWithDebInfo
 
 #COPY DOB FILES
-copy_dob_files   src/dose/dose_dou.ss/data                 safir_core
-copy_dob_files   src/dose/dose_dou.ss/config               safir_core/config
+#copy_dob_files   src/dose/dose_dou.ss/data                 safir_core
+#copy_dob_files   src/dose/dose_dou.ss/config               safir_core/config
 
-copy_dob_files   src/swre/swre_dou.ss/data                 safir_core
+#copy_dob_files   src/swre/swre_dou.ss/data                 safir_core
 
-copy_dob_files   src/foreach/foreach_dou.ss/data           safir_core
-copy_dob_files   src/foreach/foreach_dou.ss/config         safir_core/config
+#copy_dob_files   src/foreach/foreach_dou.ss/data           safir_core
+#copy_dob_files   src/foreach/foreach_dou.ss/config         safir_core/config
 
-copy_dob_files   src/douf/douf_dou.ss/config               safir_core/config
+#copy_dob_files   src/douf/douf_dou.ss/config               safir_core/config
 
-copy_dob_files   src/olib/olib_dou.ss/data                 safir_core
+#copy_dob_files   src/olib/olib_dou.ss/data                 safir_core
 
-copy_dob_files   src/dope/dope_dou.ss/data                 safir_core
-copy_dob_files   src/dope/dope_dou.ss/config               safir_core/config
+#copy_dob_files   src/dope/dope_dou.ss/data                 safir_core
+#copy_dob_files   src/dope/dope_dou.ss/config               safir_core/config
 
 #run dobmake to build dots_generated dlls/libs
-dobmake
+#dobmake
+
+build_dir        src/dose/dose_dou.ss                      RelWithDebInfo   Debug
 
 build_dir        src/dose/dose_internal.ss/src             RelWithDebInfo   Debug
 run_test_suite   src/dose/dose_internal.ss/tests           dose_internal_tests
+exit
 build_dir        src/dose/dose_dll.ss/src                  RelWithDebInfo
 build_dir        src/dose/dose_cpp.ss/src                  RelWithDebInfo   Debug
 build_dir        src/dose/dose_communication.ss/src        RelWithDebInfo   Debug

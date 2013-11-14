@@ -4,7 +4,7 @@ ADD_EXECUTABLE(signals_test test.cpp ../../src/Signals.cpp)
 add_definitions(-DDOSE_NO_LOCK_CHECKING)
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(signals_test dots_generated-Safir-cpp dots_generated-cpp dots_cpp lluf_utils ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(signals_test dots_generated-Safir-cpp dots_cpp lluf_utils ${Boost_LIBRARIES})
 endif()
 
 ENABLE_TESTING()
