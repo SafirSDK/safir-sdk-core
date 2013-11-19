@@ -590,7 +590,7 @@ class VisualStudioBuilder(BuilderBase):
 
     def setup_command_line_options(self,parser):
         parser.add_option("--use-studio",action="store",type="string",dest="use_studio",
-                          help="The visual studio to use for building, can be '2010' or '2012'")
+                          help="The visual studio to use for building, can be '2010', '2012' or '2013'")
 
     def handle_command_line_options(self,options):
         self.use_studio = options.use_studio
@@ -618,13 +618,15 @@ class VisualStudioBuilder(BuilderBase):
         logger.log("'subst k:" + bindir + "' exited with return code " + str(ret),"output")
 
     def __find_vcvarsall(self):
-        install_dirs = set(["VS110COMNTOOLS","VS100COMNTOOLS"])
+        install_dirs = set(["VS120COMNTOOLS","VS110COMNTOOLS","VS100COMNTOOLS"])
         #we use set intersections so that we double check that the variable 
         #names are the same in both places...
         if self.use_studio == "2010":
             install_dirs &= set(["VS100COMNTOOLS",]) #keep only vs2010 dir
         elif self.use_studio == "2012":
             install_dirs &= set(["VS110COMNTOOLS",]) #keep only vs2012 dir
+        elif self.use_studio == "2013":
+            install_dirs &= set(["VS120COMNTOOLS",]) #keep only vs2013 dir
         
         if len(install_dirs) < 1:
             die("Internal error in __find_vcvarsall(...)")
