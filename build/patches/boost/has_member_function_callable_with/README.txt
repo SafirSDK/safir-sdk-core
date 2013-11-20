@@ -14,4 +14,4 @@ Applies to:
 1.55
 
 Comment:
-None.
+Our patch is the same as the one boost used: https://svn.boost.org/trac/boost/changeset/86626
