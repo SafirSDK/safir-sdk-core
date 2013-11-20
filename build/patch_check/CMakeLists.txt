@@ -19,6 +19,7 @@ add_subdirectory(tmp_dir_helpers)
 add_subdirectory(win32_api)
 add_subdirectory(locks)
 add_subdirectory(arm_swp_deprecated)
+add_subdirectory(has_member_function_callable_with)
 
 #dummy install to get an install target in the makefiles
 INSTALL (FILES
