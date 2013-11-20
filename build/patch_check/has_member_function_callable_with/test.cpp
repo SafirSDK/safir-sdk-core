@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2012-2013 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *
@@ -21,12 +21,11 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <boost/intrusive/pointer_traits.hpp>
+#include <boost/interprocess/sync/named_semaphore.hpp>
 
 int main()
 {
-    boost::intrusive::pointer_traits<void*> traits;
-    
+    boost::interprocess::named_semaphore sem(boost::interprocess::create_only, "amelia_pond", 1);
     return 0;
 }
 
