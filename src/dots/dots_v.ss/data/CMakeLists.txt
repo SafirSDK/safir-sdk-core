@@ -36,7 +36,7 @@ if (NOT NO_CXX)
       #Visual C++ needs a "special" cpp file in its source list for precompiled headers to work,
       #and also wants an absolute path to the header
       configure_file(precompiled_header_for_cpp.cpp precompiled_header_${prefix}.cpp)
-      set(cpp_files ${cpp_files} precompiled_header_${prefix}.cpp)
+      #set(cpp_files ${cpp_files} precompiled_header_${prefix}.cpp)
       set(precompiled_header ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_${prefix}.h)
     else()
       #gcc wants a relative path to the header-
@@ -46,9 +46,9 @@ if (NOT NO_CXX)
 
     ADD_LIBRARY(dots_generated-${prefix}-cpp SHARED ${cpp_files} ${h_files})
 
-    ADD_PRECOMPILED_HEADER(dots_generated-${prefix}-cpp 
-                           ${precompiled_header}
-                           FORCEINCLUDE)
+    #ADD_PRECOMPILED_HEADER(dots_generated-${prefix}-cpp 
+    #                       ${precompiled_header}
+    #                       FORCEINCLUDE)
 
     # check dependecies and build order
     if(DEFINED DOTS_NS_${prefix})
