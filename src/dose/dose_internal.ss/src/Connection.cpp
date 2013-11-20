@@ -203,7 +203,7 @@ namespace Internal
     void Connection::AddEmptyInitialInjection(const Typesystem::TypeId              typeId,
                                               const Dob::Typesystem::HandlerId&     handlerId)
     {
-        TypeHandlerKey key = std::make_pair(typeId, handlerId);
+        TypeHandlerKey key = std::make_pair(typeId, ShmHandlerId(handlerId));
         InitialInjectionValue instanceSet;
         ScopedConnectionLock lck(m_lock);
         m_initialInjectionInstances.insert(std::make_pair(key, instanceSet));
@@ -237,7 +237,7 @@ namespace Internal
                                                  const Dob::Typesystem::HandlerId&     handlerId,
                                                  const Dob::Typesystem::InstanceId&    instanceId)
     {
-        TypeHandlerKey key = std::make_pair(typeId, handlerId);
+        TypeHandlerKey key = std::make_pair(typeId, ShmHandlerId(handlerId));
 
         ScopedConnectionLock lck(m_lock);
 
@@ -266,7 +266,7 @@ namespace Internal
             return false;
         }
 
-        TypeHandlerKey key = std::make_pair(typeId, handlerId);
+        TypeHandlerKey key = std::make_pair(typeId, ShmHandlerId(handlerId));
 
         ScopedConnectionLock lck(m_lock);
 
@@ -291,7 +291,7 @@ namespace Internal
                                                     const Dob::Typesystem::HandlerId&     handlerId,
                                                     const Dob::Typesystem::InstanceId&    instanceId)
     {
-        TypeHandlerKey key = std::make_pair(typeId, handlerId);
+        TypeHandlerKey key = std::make_pair(typeId, ShmHandlerId(handlerId));
 
         ScopedConnectionLock lck(m_lock);
 
@@ -312,7 +312,7 @@ namespace Internal
             return;
         }
 
-        TypeHandlerKey key = std::make_pair(typeId, handlerId);
+        TypeHandlerKey key = std::make_pair(typeId, ShmHandlerId(handlerId));
 
         InitialInjectionInstances::iterator it = m_initialInjectionInstances.find(key);
 
