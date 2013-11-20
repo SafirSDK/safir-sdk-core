@@ -142,8 +142,8 @@ namespace Internal
             }
         }
         const std::string name = GetSemaphoreName(connection);
-        return m_semaphores.insert(std::make_pair(connection.m_id,
-                                                  new NamedSemaphore(name))).
+        SemaphorePtr sem(new NamedSemaphore(name));
+        return m_semaphores.insert(std::make_pair(connection.m_id, sem)).
             first->second;
     }
 
