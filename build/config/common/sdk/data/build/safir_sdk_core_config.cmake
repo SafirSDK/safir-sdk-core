@@ -189,7 +189,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SAFIR_SDK}/data/build/)
 #MSVC variable is not set when using None as project languages
 #as is done in the dotnet projects.
 if (WIN32)
-    SET(COMMON_CS_FLAGS "-warn:4")
+    SET(COMMON_CS_FLAGS "-warn:4" "-nologo")
 
     #this will make 32 bit builds work on a 64bit machine
     if (NOT "$ENV{Platform}" STREQUAL "X64")
