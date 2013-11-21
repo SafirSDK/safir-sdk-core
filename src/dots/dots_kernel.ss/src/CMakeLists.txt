@@ -57,10 +57,11 @@ if(NOT can_do_unaligned_access)
 endif()
 
 #We have a weird issue which causes a buffer overrun error when using Visual Studio 2013
-#and Boost 1.55. Don't know if this is a bug in our code or in the compiler or in boost.
+#and Boost 1.55 in 64 bit and release builds. 
+#Don't know if this is a bug in our code or in the compiler or in boost.
 #The workaround below disables inlining in one of the files in dots_kernel, which appears
 #to resolve the problem.
-if(MSVC12 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+if(MSVC_VERSION EQUAL 1800 AND Boost_VERSION EQUAL 105500 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
   set_source_files_properties(dots_class_database.cpp PROPERTIES COMPILE_FLAGS "/Ob0")
 endif()
 
