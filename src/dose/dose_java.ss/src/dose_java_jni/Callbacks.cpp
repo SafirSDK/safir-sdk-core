@@ -77,7 +77,10 @@ bool GetJArray(JNIEnv * _env,
     return value;
 }
 
-
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4702) //unreachable code
+#endif
 
 JNIEnv* Callbacks::CallbackEnv()
 {
@@ -96,8 +99,12 @@ JNIEnv* Callbacks::CallbackEnv()
         std::wcout << "CallbackEnv() failed, GetEnv returned " << res << "!" << std::endl;
     }
     abort();
+    return NULL;
 }
 
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 jclass Callbacks::GetCallbacksClass()
 {
