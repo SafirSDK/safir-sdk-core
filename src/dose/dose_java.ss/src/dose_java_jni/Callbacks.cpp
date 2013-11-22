@@ -96,7 +96,6 @@ JNIEnv* Callbacks::CallbackEnv()
         std::wcout << "CallbackEnv() failed, GetEnv returned " << res << "!" << std::endl;
     }
     abort();
-    return NULL;
 }
 
 
