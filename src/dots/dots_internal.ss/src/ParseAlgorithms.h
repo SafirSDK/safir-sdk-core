@@ -337,7 +337,7 @@ namespace Internal
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedClass->members.back()->typeName=pt.data();
-            if (!BasicTypeOperations::IsBasicType(pt.data(), state.lastInsertedClass->members.back()->memberType))
+            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedClass->members.back()->memberType))
             {
                 //not a basic type, we have to check later if its an enum or class type, for now we assume class
                 state.lastInsertedClass->members.back()->memberType=ObjectMemberType;
@@ -550,7 +550,7 @@ namespace Internal
             par->hidden=true;
             par->isArray=false;
             par->memberType=EntityIdMemberType;
-            par->typeName=BasicTypeOperations::TypeToString(EntityIdMemberType);
+            par->typeName=BasicTypeOperations::MemberTypeToString(EntityIdMemberType);
             par->values.push_back(val);
             state.lastInsertedClass->ownParameters.push_back(par);
             state.repository->InsertParameter(par);
@@ -667,7 +667,7 @@ namespace Internal
             try
             {
                 def->typeName=pt.get<std::string>(Elements::ParameterType::Name());
-                if (!BasicTypeOperations::IsBasicType(def->typeName, def->memberType))
+                if (!BasicTypeOperations::IsBasicTypeName(def->typeName, def->memberType))
                 {
                     //not a basic type, we have to check later if its an enum or class type, for now we assume class
                     def->memberType=ObjectMemberType;
@@ -821,7 +821,7 @@ namespace Internal
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedProperty->members.back()->typeName=pt.data();
-            if (!BasicTypeOperations::IsBasicType(pt.data(), state.lastInsertedProperty->members.back()->memberType))
+            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedProperty->members.back()->memberType))
             {
                 //not a basic type, we have to check later if its an enum or class type, for now we assume class
                 state.lastInsertedProperty->members.back()->memberType=ObjectMemberType;
@@ -898,6 +898,26 @@ namespace Internal
     //-----------------------------------------------
     // DOM file algorithms
     //-----------------------------------------------
+    inline void InsertInlineParameter(ParseState& state, bool isArray)
+    {
+        const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
+        const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+
+        ParameterDescriptionBasicPtr param(new ParameterDescriptionBasic);
+        std::ostringstream paramName;
+        paramName<<pd->GetName()<<"."<<propMem->GetName()<<"@"<<state.lastInsertedPropertyMapping->class_->GetName()<<"#pm";
+        param->name=paramName.str();
+        param->hidden=true;
+        param->isArray=isArray;
+        param->memberType=propMem->memberType;
+        param->typeId=propMem->typeId;
+        param->typeName=propMem->typeName;
+
+        state.lastInsertedMemberMapping->paramRef=param.get();
+        state.lastInsertedMemberMapping->paramIndex=0;
+        state.notInsertedParameters.push_back(std::make_pair(state.lastInsertedPropertyMapping->class_, param));
+    }
+
     template<> struct ParseAlgorithm<Elements::MapObject>
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
@@ -905,13 +925,6 @@ namespace Internal
             state.lastInsertedMemberMapping->kind=MappedToParameter;
             const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
             const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
-            if (propMem->IsArray())
-            {
-                std::ostringstream os;
-                os<<"Inline array parameters are not allowed. "<<state.lastInsertedPropertyMapping->property->name<<"."<<
-                    propMem->GetName()<<". Define an explicit parameter instead and use valueRef";
-                throw ParseError("Cant define array value mapping", os.str(), state.currentPath, 96);
-            }
 
             if (propMem->memberType!=ObjectMemberType)
             {
@@ -920,19 +933,7 @@ namespace Internal
                 throw ParseError("Type missmatch", os.str(), state.currentPath, 98);
             }
 
-            ParameterDescriptionBasicPtr param(new ParameterDescriptionBasic);
-            std::ostringstream paramName;
-            paramName<<pd->GetName()<<"."<<propMem->GetName()<<"@"<<state.lastInsertedPropertyMapping->class_->GetName()<<"#pm";
-            param->name=paramName.str();
-            param->hidden=true;
-            param->isArray=false;
-            param->memberType=propMem->memberType;
-            param->typeId=propMem->typeId;
-            param->typeName=propMem->typeName;
-
-            state.lastInsertedMemberMapping->paramRef=param.get();
-            state.lastInsertedMemberMapping->paramIndex=0;
-            state.notInsertedParameters.push_back(std::make_pair(state.lastInsertedPropertyMapping->class_, param));
+            ParameterDescriptionBasic* param=state.lastInsertedMemberMapping->paramRef;
 
             //Get the correct type name of the serialized object
             boost::optional<std::string> typeAttr=pt.get_optional<std::string>("<xmlattr>.type");
@@ -975,6 +976,8 @@ namespace Internal
         }
     };
 
+
+
     template<> struct ParseAlgorithm<Elements::MapObjectDeprecated>
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
@@ -982,13 +985,6 @@ namespace Internal
             state.lastInsertedMemberMapping->kind=MappedToParameter;
             const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
             const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
-            if (propMem->IsArray())
-            {
-                std::ostringstream os;
-                os<<"Inline array parameters are not allowed. "<<state.lastInsertedPropertyMapping->property->name<<"."<<
-                    propMem->GetName()<<". Define a explicit parameter instead and use valueRef";
-                throw ParseError("Cant define array value mapping", os.str(), state.currentPath, 108);
-            }
 
             if (propMem->memberType!=ObjectMemberType)
             {
@@ -997,19 +993,7 @@ namespace Internal
                 throw ParseError("Type missmatch", os.str(), state.currentPath, 99);
             }
 
-            ParameterDescriptionBasicPtr param(new ParameterDescriptionBasic);
-            std::ostringstream paramName;
-            paramName<<pd->GetName()<<"."<<propMem->GetName()<<"@"<<state.lastInsertedPropertyMapping->class_->GetName()<<"#pm";
-            param->name=paramName.str();
-            param->hidden=true;
-            param->isArray=false;
-            param->memberType=propMem->memberType;
-            param->typeId=propMem->typeId;
-            param->typeName=propMem->typeName;
-
-            state.lastInsertedMemberMapping->paramRef=param.get();
-            state.lastInsertedMemberMapping->paramIndex=0;
-            state.notInsertedParameters.push_back(std::make_pair(state.lastInsertedPropertyMapping->class_, param));
+            ParameterDescriptionBasic* param=state.lastInsertedMemberMapping->paramRef;
 
             //do the serialization to the expected type
             ValueDefinition vd;
@@ -1047,13 +1031,6 @@ namespace Internal
             state.lastInsertedMemberMapping->kind=MappedToParameter;
             const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
             const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
-            if (propMem->IsArray())
-            {
-                std::ostringstream os;
-                os<<"Inline array parameters are not allowed. "<<state.lastInsertedPropertyMapping->property->name<<"."<<
-                    propMem->GetName()<<". Define a explicit parameter instead and use valueRef";
-                throw ParseError("Cant define array value mapping", os.str(), state.currentPath, 109);
-            }
 
             if (propMem->memberType!=EntityIdMemberType)
             {
@@ -1062,15 +1039,7 @@ namespace Internal
                 throw ParseError("Type missmatch", os.str(), state.currentPath, 103);
             }
 
-            ParameterDescriptionBasicPtr param(new ParameterDescriptionBasic);
-            std::ostringstream paramName;
-            paramName<<pd->GetName()<<"."<<propMem->GetName()<<"@"<<state.lastInsertedPropertyMapping->class_->GetName()<<"#pm";
-            param->name=paramName.str();
-            param->hidden=true;
-            param->isArray=false;
-            param->memberType=propMem->memberType;
-            param->typeId=propMem->typeId;
-            param->typeName=propMem->typeName;
+            ParameterDescriptionBasic* param=state.lastInsertedMemberMapping->paramRef;
 
             try
             {
@@ -1095,10 +1064,6 @@ namespace Internal
             {
                 throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+envVar+"' in propertyMapping for member "+propMem->GetName(), state.currentPath, 141);
             }
-
-            state.lastInsertedMemberMapping->paramRef=param.get();
-            state.lastInsertedMemberMapping->paramIndex=0;
-            state.notInsertedParameters.push_back(std::make_pair(state.lastInsertedPropertyMapping->class_, param));
         }
     };
 
@@ -1109,24 +1074,8 @@ namespace Internal
             state.lastInsertedMemberMapping->kind=MappedToParameter;
             const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
             const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
-            if (propMem->IsArray())
-            {
-                std::ostringstream os;
-                os<<"Inline array parameters are not allowed. "<<state.lastInsertedPropertyMapping->property->name<<"."<<
-                    propMem->GetName()<<". Define a explicit parameter instead and use valueRef";
-                throw ParseError("Cant define array value mapping", os.str(), state.currentPath, 110);
 
-            }
-
-            ParameterDescriptionBasicPtr param(new ParameterDescriptionBasic);
-            std::ostringstream paramName;
-            paramName<<pd->GetName()<<"."<<propMem->GetName()<<"@"<<state.lastInsertedPropertyMapping->class_->GetName()<<"#pm";
-            param->name=paramName.str();
-            param->hidden=true;
-            param->isArray=false;
-            param->memberType=propMem->memberType;
-            param->typeId=propMem->typeId;
-            param->typeName=propMem->typeName;
+            ParameterDescriptionBasic* param=state.lastInsertedMemberMapping->paramRef;
 
             ValueDefinition vd;
             vd.kind=ValueKind;
@@ -1156,10 +1105,6 @@ namespace Internal
                     throw ParseError("Invalid value", os.str(), state.currentPath, 112);
                 }
             }
-
-            state.lastInsertedMemberMapping->paramRef=param.get();
-            state.lastInsertedMemberMapping->paramIndex=0;
-            state.notInsertedParameters.push_back(std::make_pair(state.lastInsertedPropertyMapping->class_, param));
         }
     };
 
@@ -1328,7 +1273,7 @@ namespace Internal
                 {
                     std::ostringstream os;
                     os<<"PropertyMapping can only use nested references into object members. PropertyMember "<<propMem->GetName()<<
-                        "' is using nested references into class member '"<<classMem->GetName()<<"' of type "<<BasicTypeOperations::TypeToString(classMem->GetMemberType());
+                        "' is using nested references into class member '"<<classMem->GetName()<<"' of type "<<BasicTypeOperations::MemberTypeToString(classMem->GetMemberType());
                     throw ParseError("Nested propertyMapping into non-object member", os.str(), state.currentPath, 82);
                 }
 
@@ -1412,37 +1357,92 @@ namespace Internal
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
+            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
             MemberMappingBasicPtr md(new MemberMappingBasic);
             md->kind=MappedToNull;
-            try
+            bool foundPropertyMember=false;
+            bool inlineParam=false;
+            bool isArray=false;
+
+            for (boost::property_tree::ptree::iterator it=pt.begin(); it!=pt.end(); ++it)
             {
-                const std::string& propMemberName=pt.get<std::string>(Elements::MapPropertyMember::Name());
-                const PropertyDescription* pd=state.lastInsertedPropertyMapping->GetProperty();
-
-                //check that property member exists
-                md->propertyMemberIndex=pd->GetMemberIndex(propMemberName);
-                if (md->propertyMemberIndex<0)
+                if (it->first==Elements::MapPropertyMember::Name())
                 {
-                    std::ostringstream os;
-                    os<<"The property member '"<<propMemberName<<"' has been mapped in a propertyMapping, but the member does not exist in property "<<pd->GetName();
-                    throw ParseError("Invalid propertyMapping", os.str(), state.currentPath, 74);
-                }
+                    //check that property member exists
+                    const std::string& propMemberName=it->second.data();
+                    md->propertyMemberIndex=pd->GetMemberIndex(propMemberName);
+                    if (md->propertyMemberIndex<0)
+                    {
+                        std::ostringstream os;
+                        os<<"The property member '"<<propMemberName<<"' has been mapped in a propertyMapping, but the member does not exist in property "<<pd->GetName();
+                        throw ParseError("Invalid propertyMapping", os.str(), state.currentPath, 74);
+                    }
 
-                //check for duplicates                
-                if (state.lastInsertedPropertyMapping->memberMappings[md->propertyMemberIndex]!=NULL)
+                    //check for duplicates
+                    if (state.lastInsertedPropertyMapping->memberMappings[md->propertyMemberIndex]!=NULL)
+                    {
+                        //Already been mapped, i.e duplicated memberMapping
+                        std::ostringstream ss;
+                        ss<<"The property member '"<<propMemberName<<"' in property '"<<pd->GetName()<<"' is defined more than one time in property mapping.";
+                        throw ParseError("Duplicated property member mapping", ss.str(), state.currentPath, 75);
+                    }
+
+                    foundPropertyMember=true;
+                }
+                else if (it->first==Elements::ClassMemberReference::Name())
                 {
-                    //Already been mapped, i.e duplicated memberMapping
-                    std::ostringstream ss;
-                    ss<<"The property member '"<<propMemberName<<"' in property '"<<pd->GetName()<<"' is defined more than one time in property mapping.";
-                    throw ParseError("Duplicated property member mapping", ss.str(), state.currentPath, 75);
+                    //mapped to a class member
+                    md->kind=MappedToMember;
+                    break;
                 }
-
-                state.lastInsertedPropertyMapping->memberMappings[md->propertyMemberIndex]=md;
-                state.lastInsertedMemberMapping=md;
+                else if (it->first==Elements::MapValueRef::Name())
+                {
+                    //mapped to real parameter (not a hidden inline param)
+                    md->kind=MappedToParameter;
+                    break;
+                }
+                else if (it->first==Elements::MapArrayElements::Name())
+                {
+                    //inline array value
+                    md->kind=MappedToParameter;
+                    inlineParam=true;
+                    isArray=true;
+                    break;
+                }
+                else
+                {
+                    //value, entityId, object, i.e inline non-array value
+                    md->kind=MappedToParameter;
+                    inlineParam=true;
+                    break;
+                }
             }
-            catch (const boost::property_tree::ptree_error&)
+
+            if (!foundPropertyMember)
             {
                 throw ParseError("Missing element", "PropertyMapping is missing the propertyMember-element in a memberMapping'", state.currentPath, 76);
+            }
+
+            state.lastInsertedPropertyMapping->memberMappings[md->propertyMemberIndex]=md;
+            state.lastInsertedMemberMapping=md;
+
+            if (inlineParam)
+            {
+                const MemberDescriptionBasic* propMem=pd->members[md->propertyMemberIndex].get();
+                if (isArray && !propMem->IsArray())
+                {
+                    std::ostringstream os;
+                    os<<"PropertyMember '"<<pd->GetName()<<"."<<propMem->GetName()<<"' is not an array. Element <arrayElements> is not allowed.";
+                    throw ParseError("Property member not array", os.str(), state.currentPath, 96);
+                }
+                else if (!isArray && propMem->IsArray())
+                {
+                    std::ostringstream os;
+                    os<<"PropertyMember '"<<pd->GetName()<<"."<<propMem->GetName()<<"' is an array but the specified value is not an array.";
+                    throw ParseError("Property member is array", os.str(), state.currentPath, 108);
+                }
+
+                InsertInlineParameter(state, isArray);
             }
         }
     };

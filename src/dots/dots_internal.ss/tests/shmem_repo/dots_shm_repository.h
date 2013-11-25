@@ -19,6 +19,7 @@
 #include <boost/circular_buffer.hpp>
 #include <Safir/Utilities/StartupSynchronizer.h>
 #include <Safir/Dob/Typesystem/Internal/TypeParser.h>
+#include <Safir/Dob/Typesystem/Internal/TypeUtilities.h>
 
 namespace Safir
 {
@@ -144,7 +145,7 @@ namespace Internal
         DotsC_TypeId GetCheckSum() const {return m_checkSum;}
         int GetNumberOfValues() const {return static_cast<int>(m_enumerationValues.size());}
         const char* GetValueName(DotsC_EnumerationValue val) const {return m_enumerationValues[static_cast<size_t>(val)].c_str();}
-        int GetIndexOfValue(const std::string& valueName) const {return TypeRepositoryHelpers::GetIndexOfEnumValue(this, valueName);}
+        int GetIndexOfValue(const std::string& valueName) const {return TypeUtilities::GetIndexOfEnumValue(this, valueName);}
 
     private:
         DotsC_TypeId m_typeId;
@@ -208,7 +209,7 @@ namespace Internal
         DotsC_TypeId GetTypeId() const {return m_typeId;}
         const char* GetName() const {return m_name.c_str();}
         int GetNumberOfMembers() const {return static_cast<int>(m_members.size());}
-        DotsC_MemberIndex GetMemberIndex(const std::string& memberName) const {return TypeRepositoryHelpers::GetPropertyMemberIndex<PropertyDescriptionShm, MemberDescriptionShm>(this, memberName);}
+        DotsC_MemberIndex GetMemberIndex(const std::string& memberName) const {return TypeUtilities::GetPropertyMemberIndex<PropertyDescriptionShm, MemberDescriptionShm>(this, memberName);}
         const MemberDescriptionShm* GetMember(DotsC_MemberIndex index) const {return &m_members[static_cast<size_t>(index)];}
 
     private:

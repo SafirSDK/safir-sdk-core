@@ -99,6 +99,8 @@ namespace Internal
         struct MapPropertyMember {static const std::string& Name() {static const std::string n="propertyMember"; return n;}};
         struct MapValue {static const std::string& Name() {static const std::string n="value"; return n;}}; //dom
         struct MapValueRef {static const std::string& Name() {static const std::string n="valueRef"; return n;}}; //dom
+        struct MapArrayElements {static const std::string& Name() {static const std::string n="arrayElements"; return n;}}; //dom
+        struct MapArrayElement {static const std::string& Name() {static const std::string n="arrayElement"; return n;}}; //dom
         struct ClassMemberReference {static const std::string& Name() {static const std::string n="classMemberReference"; return n;}}; //dom
         struct ClassMemberReferenceName {static const std::string& Name() {static const std::string n="classMember"; return n;}};
         struct ClassMemberReferenceIndex {static const std::string& Name() {static const std::string n="index"; return n;}};
@@ -106,7 +108,7 @@ namespace Internal
         struct MapObject {static const std::string& Name() {static const std::string n="object"; return n;}};
         struct ArraySizeRef {static const std::string& Name() {static const std::string n="arraySizeRef"; return n;}}; //member array
         struct MaxLengthRef {static const std::string& Name() {static const std::string n="maxLengthRef"; return n;}}; //member maxLength
-        struct InstanceIdRef {static const std::string& Name() {static const std::string n="instanceIdRef"; return n;}}; //??????
+        struct InstanceIdRef {static const std::string& Name() {static const std::string n="instanceIdRef"; return n;}};
         struct IndexRef {static const std::string& Name() {static const std::string n="indexRef"; return n;}}; //??????
         struct ReferenceName {static const std::string& Name() {static const std::string n="name"; return n;}};
         struct ReferenceIndex {static const std::string& Name() {static const std::string n="index"; return n;}};

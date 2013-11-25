@@ -147,19 +147,6 @@ namespace Internal
     {
         (Detail::ToStringHelper<RepositoryT>(repository, includeCreateRoutines))(os);
     }
-
-    /**
-     * Finds corresponding type name to a typeId. If no type exists with given typeId NULL is returned.
-     *
-     * @param repository [in] - Type repository containing all type information
-     * @param typeId [in] - TypeId to lookup and find name for.
-     * @return The type name or NULL if type doesn't exist in the repository.
-     */
-    template <class RepositoryT>
-    const char* GetTypeName(const RepositoryT* repository, DotsC_TypeId typeId)
-    {
-        return (Safir::Dob::Typesystem::Internal::Detail::ToStringHelper<RepositoryT>(repository, false)).GetTypeName(typeId);
-    }
 }
 }
 }

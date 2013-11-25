@@ -94,7 +94,12 @@ namespace BasicTypeOperations
     struct Volt64MemberTypeName {static const std::string& Get() {static const std::string n="Volt64"; return n;}};
     struct Watt64MemberTypeName {static const std::string& Get() {static const std::string n="Watt64"; return n;}};
 
-    inline const std::string& TypeToString(DotsC_MemberType type)
+    /**
+     * @brief Converts member type to string
+     * @param type [in] - Get string representation of the member type. Note that Object and Enum are not looked up by this function.
+     * @return name of member type
+     */
+    inline const std::string& MemberTypeToString(DotsC_MemberType type)
     {
         switch(type)
         {
@@ -155,7 +160,12 @@ namespace BasicTypeOperations
         throw "ENSURE";
     }
 
-    inline const DotsC_MemberType StringToType(const std::string& typeName)
+    /**
+     * @brief Looks up the memberType that corresponds to the typeName.
+     * @param typeName [in] - name of a type
+     * @return Corresponding memberType.
+     */
+    inline const DotsC_MemberType StringToMemberType(const std::string& typeName)
     {
         if (typeName==TypeIdMemberTypeName::Get()) return TypeIdMemberType;
         if (typeName==EntityIdMemberTypeName::Get()) return EntityIdMemberType;
@@ -214,10 +224,26 @@ namespace BasicTypeOperations
         return ObjectMemberType;
     }
 
-    inline bool IsBasicType(const std::string& typeName, DotsC_MemberType& memberType)
+    /**
+     * @brief Check if memberType is a basic type (built in type) or a complex type (user defined).
+     * @param memberType [in] - memberType to check if it is a basic type, i.e a non user defined type.
+     * @return True if memberType is a basic type.
+     */
+    inline bool IsBasicMemberType(DotsC_MemberType memberType)
     {
-        memberType=StringToType(typeName);
         return (memberType!=ObjectMemberType && memberType!=EnumerationMemberType); //Object and Enum is not basic types
+    }
+
+    /**
+     * @brief Check if typeName represents a basic type. In that case the memberType is also returned in out parameter 'memberType'
+     * @param typeName [in] - name of a type
+     * @param memberType [out] - if typeName represents a basic type, the memberType is returned here
+     * @return True if typeName is a basic type.
+     */
+    inline bool IsBasicTypeName(const std::string& typeName, DotsC_MemberType& memberType)
+    {
+        memberType=StringToMemberType(typeName);
+        return IsBasicMemberType(memberType);
     }
 
     inline Size SizeOfType(MemberType type)
@@ -303,7 +329,7 @@ namespace BasicTypeOperations
     }
 
     template <class RepositoryT>
-    bool ValidTypeId(const RepositoryT* repository, TypeId tid)
+    bool ValidTypeId(const RepositoryT* repository, DotsC_TypeId tid)
     {
         return repository->GetClass(tid)!=NULL ||
                 repository->GetEnum(tid)!=NULL ||
@@ -311,50 +337,83 @@ namespace BasicTypeOperations
                 repository->GetException(tid)!=NULL;
     }
 
-    namespace //anonymous namespace with helper class that resolves the correct ClassDescription type for us
+    template <class RepT, class Traits=Safir::Dob::Typesystem::Internal::TypeRepositoryTraits<RepT> >
+    struct BasicTypeOperationHelper
     {
-        template <class RepT, class Traits=Safir::Dob::Typesystem::Internal::TypeRepositoryTraits<RepT> >
-        struct IsOfTypeHelper
+        typedef typename Traits::RepositoryType RepositoryType;
+        typedef typename Traits::ClassDescriptionType ClassDescriptionType;
+        typedef typename Traits::EnumDescriptionType EnumDescriptionType;
+        typedef typename Traits::PropertyDescriptionType PropertyDescriptionType;
+        typedef typename Traits::ExceptionDescriptionType ExceptionDescriptionType;
+
+        bool IsOfType(const RepositoryType* repository, MemberType mt, TypeId tid, MemberType ofMt, TypeId ofTid) const
         {
-            typedef typename Traits::RepositoryType RepositoryType;
-            typedef typename Traits::ClassDescriptionType ClassDescriptionType;
-
-            bool operator()(const RepositoryType* repository, MemberType mt, TypeId tid, MemberType ofMt, TypeId ofTid) const
+            if (mt!=ofMt)
             {
-                if (mt!=ofMt)
-                {
-                    return false;
-                }
-                else if (mt==EnumerationMemberType)
-                {
-                    return tid==ofTid;
-                }
-                else if (mt==ObjectMemberType)
-                {
-                    //Check object types and handle inheritance.
-                    const ClassDescriptionType* tmpClass=repository->GetClass(tid);
-                    while (tmpClass)
-                    {
-                        if (tmpClass->GetTypeId()==ofTid)
-                            return true;
-
-                        tmpClass=tmpClass->GetBaseClass();
-                    }
-                    return false;
-                }
-                else //Basic types
-                {
-                    return true;
-                }
+                return false;
             }
-        };
-    }
+            else if (mt==EnumerationMemberType)
+            {
+                return tid==ofTid;
+            }
+            else if (mt==ObjectMemberType)
+            {
+                //Check object types and handle inheritance.
+                const ClassDescriptionType* tmpClass=repository->GetClass(tid);
+                while (tmpClass)
+                {
+                    if (tmpClass->GetTypeId()==ofTid)
+                        return true;
+
+                    tmpClass=tmpClass->GetBaseClass();
+                }
+                return false;
+            }
+            else //Basic types
+            {
+                return true;
+            }
+        }
+
+        const char* TypeIdToTypeName(const RepositoryType* repository, boost::int64_t tid) const
+        {
+            const ClassDescriptionType* cd=repository->GetClass(tid);
+            if (cd)
+            {
+                return cd->GetName();
+            }
+            const EnumDescriptionType* ed=repository->GetEnum(tid);
+            if (ed)
+            {
+                return ed->GetName();
+            }
+            const PropertyDescriptionType* pd=repository->GetProperty(tid);
+            if (pd)
+            {
+                return pd->GetName();
+            }
+            const ExceptionDescriptionType* ex=repository->GetException(tid);
+            if (ex)
+            {
+                return ex->GetName();
+            }
+            return NULL;
+
+        }
+    };
 
     template <class RepositoryT>
     bool IsOfType(const RepositoryT* repository, MemberType mt, TypeId tid, MemberType ofMt, TypeId ofTid)
     {
-        IsOfTypeHelper<RepositoryT> helper;
-        return helper(repository, mt, tid, ofMt, ofTid);
+        BasicTypeOperationHelper<RepositoryT> helper;
+        return helper.IsOfType(repository, mt, tid, ofMt, ofTid);
+    }
+
+    template <class RepositoryT>
+    const char* TypeIdToTypeName(const RepositoryT* repository, TypeId tid)
+    {
+        BasicTypeOperationHelper<RepositoryT> helper;
+        return helper.TypeIdToTypeName(repository, tid);
     }
 
     struct PredefindedClassNames

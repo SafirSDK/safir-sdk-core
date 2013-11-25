@@ -36,6 +36,7 @@
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/insert_linebreaks.hpp>
 #include <boost/archive/iterators/remove_whitespace.hpp>
+#include <Safir/Dob/Typesystem/Internal/TypeUtilities.h>
 #include <Safir/Dob/Typesystem/Internal/ParseError.h>
 #include <Safir/Dob/Typesystem/Internal/Detail/classic_string_cast.h>
 
@@ -403,8 +404,11 @@ namespace SerializationUtils
                                 char* &beginningOfUnused)
     {
         //get the referenced parameter an make all the error checking
-        TypeRepositoryHelpers::GetParameterByFullName<typename BlobLayoutT::RepositoryType> tmp;
+        //typedef typename BlobLayoutT::RepositoryType RepT;
+        //Safir::Dob::Typesystem::Internal::TypeUtilities::GetParameterByFullName<RepT> tmp;
+        Safir::Dob::Typesystem::Internal::TypeUtilities::GetParameterByFullName<typename BlobLayoutT::RepositoryType> tmp;
         const typename BlobLayoutT::ParameterDescriptionType* param=tmp(repository, parameterName);
+
         if (!param)
         {
             std::ostringstream os;
@@ -427,8 +431,8 @@ namespace SerializationUtils
         if (param->GetMemberType()!=md->GetMemberType())
         {
             std::ostringstream os;
-            os<<"Member "<<md->GetName()<<" s referencing a parameter of another type. Expected type is "<<BasicTypeOperations::TypeToString(md->GetMemberType())<<
-                " but parameter "<<param->GetName()<<" has type "<<BasicTypeOperations::TypeToString(param->GetMemberType());
+            os<<"Member "<<md->GetName()<<" is referencing a parameter of another type. Expected type is "<<BasicTypeOperations::MemberTypeToString(md->GetMemberType())<<
+                " but parameter "<<param->GetName()<<" has type "<<BasicTypeOperations::MemberTypeToString(param->GetMemberType());
             throw ParseError("UglyXmlToBinary serialization error", os.str(), "", 122);
         }
         if (param->GetMemberType()==ObjectMemberType)

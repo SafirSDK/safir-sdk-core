@@ -39,7 +39,7 @@ namespace Typesystem
 {
 namespace Internal
 {
-    namespace
+    namespace Schema
     {
         //DOU file elements
         typedef Element<Elements::Classsummary, OptionalOne> Classsummary;
@@ -114,8 +114,12 @@ namespace Internal
         typedef Element<Elements::MapEntityId, One, boost::mpl::vector< Ignore<Elements::ClassName>, Ignore<Elements::InstanceId> > > MapEntityId;
         typedef Element<Elements::Any, One, boost::mpl::vector<IgnoreAny>, ParseAlgorithm<Elements::MapObject>, AnyMatcher > MapObject;
         typedef Element<Elements::MapObjectDeprecated, One, boost::mpl::vector<IgnoreAny> > MapObjectDeprecated;
+
+        typedef Element<Elements::MapArrayElement, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_5(MapValue, MapValueRef, MapEntityId, MapObjectDeprecated, MapObject, OptionalOne), Ignore<Elements::ParameterArrayIndex> > > MapArrayElement;
+        typedef Element<Elements::MapArrayElements, One, boost::mpl::vector<MapArrayElement> > MapArrayElements;
+
         typedef Element<Elements::ClassMemberReference, One, boost::mpl::vector<IgnoreAny> > ClassMemberReference;
-        typedef Element<Elements::MemberMapping, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_6(MapValue, MapValueRef, MapEntityId, ClassMemberReference, MapObjectDeprecated, MapObject, OptionalOne), MapPropertyMember > > MemberMapping;
+        typedef Element<Elements::MemberMapping, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_7(MapValue, MapValueRef, MapEntityId, MapArrayElements, ClassMemberReference, MapObjectDeprecated, MapObject, OptionalOne), MapPropertyMember > > MemberMapping;
         typedef Element<Elements::MemberMappings, OptionalOne, boost::mpl::vector<MemberMapping> > MemberMappings;
 
         //Top level
@@ -127,8 +131,8 @@ namespace Internal
     }
 
     //This is the top level parser, the only one used directly on a dou or dom-file.
-    typedef ELEMENT_CHOICE_4(ClassParser, EnumerationParser, ExceptionParser, PropertyParser, OptionalOne) DouParser;
-    typedef PropertyMappingParser DomParser;
+    typedef ELEMENT_CHOICE_4(Schema::ClassParser, Schema::EnumerationParser, Schema::ExceptionParser, Schema::PropertyParser, OptionalOne) DouParser;
+    typedef Schema::PropertyMappingParser DomParser;
 }
 }
 }

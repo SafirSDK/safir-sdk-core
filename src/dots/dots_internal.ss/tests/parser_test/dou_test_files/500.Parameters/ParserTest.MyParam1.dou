@@ -125,6 +125,14 @@
                 <arrayElement>
                     <value>4</value>
                 </arrayElement>
+                <arrayElement>
+                    <index>7</index> <!--For what reason should this be allowed element -->
+                    <value>7</value>
+                </arrayElement>
+                <arrayElement>
+                    <value>8</value>
+                </arrayElement>
+
             </arrayElements>            
         </parameter>
 

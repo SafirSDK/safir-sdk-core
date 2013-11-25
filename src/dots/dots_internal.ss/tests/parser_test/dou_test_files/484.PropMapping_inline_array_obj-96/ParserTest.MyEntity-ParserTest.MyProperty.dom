@@ -26,8 +26,11 @@
         
         <member>
             <propertyMember>MyItemPropertyValue</propertyMember>
-            <ParserTest.MyItem/>
-            <ParserTest.MyItem/>
+            <arrayElements>
+                <arrayElement>
+                    <ParserTest.MyItem/>
+                </arrayElement>
+            </arrayElements>
         </member>                
         
 
@@ -41,7 +44,6 @@
 
         <member>
             <propertyMember>MyStringPropertyArray</propertyMember>
-            <value>kalle</value>
         </member>
         
     </memberMapping>

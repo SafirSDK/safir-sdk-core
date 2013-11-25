@@ -40,6 +40,7 @@
 #include <Safir/Dob/Typesystem/Internal/Id.h>
 #include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
 #include <Safir/Dob/Typesystem/Internal/Detail/BlobLayoutImpl.h>
+#include <Safir/Dob/Typesystem/Internal/Detail/SerializationUtils.h>
 
 namespace Safir
 {

@@ -150,7 +150,7 @@
     
     <createRoutines>
         <createRoutine>
-            <summary>A create routine</summary>
+            <summary>A create routine</createRoutine>
             <name>MyCreateRoutine2</name>            
             <values>                
                 <value>

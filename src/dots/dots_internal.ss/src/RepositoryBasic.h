@@ -28,7 +28,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
-#include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
+#include <Safir/Dob/Typesystem/Internal/TypeUtilities.h>
 #include <Safir/Dob/Typesystem/Internal/Detail/BasicTypeOperations.h>
 
 using namespace Safir::Dob::Typesystem::Internal::Detail;

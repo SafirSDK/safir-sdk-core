@@ -23,6 +23,13 @@
             </entityId>
         </parameter>
 
+        <parameter>
+            <name>ObjParam</name>
+            <type>ParserTest.MyItem</type>
+            <ParserTest.MyEntity type='ParserTest.MyEntity'/>
+        </parameter>
+
+
     <parameter>
             <name>StringArray</name>
             <type>String</type>

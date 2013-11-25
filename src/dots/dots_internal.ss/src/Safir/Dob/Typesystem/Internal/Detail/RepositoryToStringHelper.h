@@ -26,7 +26,7 @@
 
 #include <iostream>
 #include <Safir/Dob/Typesystem/Internal/ParseError.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/JsonToBlobSerializer.h>
+#include <Safir/Dob/Typesystem/Internal/Detail/BlobToJsonSerializer.h>
 
 namespace Safir
 {
@@ -62,8 +62,6 @@ namespace Detail
 
         void operator()(std::ostream& os) {DumpRepository(os);}
 
-        const char* GetTypeName(boost::int64_t tid) const;
-
     private:
         const RepositoryType* m_rep;
         const bool m_includeCreateRoutines;
@@ -82,35 +80,9 @@ namespace Detail
     };
 
     template <class RepT, class Traits>
-    const char* ToStringHelper<RepT, Traits>::GetTypeName(boost::int64_t tid) const
-    {
-        const ClassDescriptionType* cd=m_rep->GetClass(tid);
-        if (cd)
-        {
-            return cd->GetName();
-        }
-        const EnumDescriptionType* ed=m_rep->GetEnum(tid);
-        if (ed)
-        {
-            return ed->GetName();
-        }
-        const PropertyDescriptionType* pd=m_rep->GetProperty(tid);
-        if (pd)
-        {
-            return pd->GetName();
-        }
-        const ExceptionDescriptionType* ex=m_rep->GetException(tid);
-        if (ex)
-        {
-            return ex->GetName();
-        }
-        return NULL;
-    }
-
-    template <class RepT, class Traits>
     void ToStringHelper<RepT, Traits>::TypeIdToString(boost::int64_t tid, std::ostream& os) const
     {
-        const char* name=GetTypeName(tid);
+        const char* name=BasicTypeOperations::TypeIdToTypeName(m_rep, tid);
         if (name)
         {
             os<<name;
@@ -254,10 +226,10 @@ namespace Detail
             os<<m_rep->GetClass(c->GetTypeId())->GetName();
             break;
         case StringMemberType:            
-            os<<BasicTypeOperations::TypeToString(c->GetMemberType())<<", maxLen="<<c->GetMaxLength();
+            os<<BasicTypeOperations::MemberTypeToString(c->GetMemberType())<<", maxLen="<<c->GetMaxLength();
             break;
         default:
-            os<<BasicTypeOperations::TypeToString(c->GetMemberType());
+            os<<BasicTypeOperations::MemberTypeToString(c->GetMemberType());
             break;
         }
 
@@ -285,7 +257,7 @@ namespace Detail
             os<<m_rep->GetClass(c->GetTypeId())->GetName();
             break;
         default:
-            os<<BasicTypeOperations::TypeToString(c->GetMemberType());
+            os<<BasicTypeOperations::MemberTypeToString(c->GetMemberType());
             break;
         }
 
@@ -473,8 +445,9 @@ namespace Detail
         for (int i=0; i<p->GetNumberOfMembers(); ++i)
         {
             const MemberMappingDescriptionType* md=pmd->GetMemberMapping(i);
+            const MemberDescriptionType* propertyMember=p->GetMember(i);
 
-            os<<"      PropertyMember:  "<<p->GetMember(i)->GetName()<<std::endl;
+            os<<"      PropertyMember:  "<<propertyMember->GetName()<<std::endl;
             switch(md->GetMappingKind())
             {
             case MappedToParameter:
@@ -482,7 +455,7 @@ namespace Detail
                 std::pair<const ParameterDescriptionType*, int> par=md->GetParameter();
                 os<<"        MappingKind:     ValueMapping"<<std::endl;
                 os<<"        Parameter:       "<<par.first->GetName();
-                if (par.second>=0)
+                if (!propertyMember->IsArray())
                 {
                     os<<"["<<par.second<<"]";
                 }
@@ -494,14 +467,20 @@ namespace Detail
             {
                 os<<"        MappingKind:     MemberMapping"<<std::endl;
                 os<<"        MemberRef:       ";
+                const ClassDescriptionType* currentClass=c;
                 for (int memRef=0; memRef<md->MemberReferenceDepth(); ++memRef)
                 {
                     std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> ref=md->GetMemberReference(memRef);
-                    const MemberDescriptionType* member=c->GetMember(ref.first);
+                    const MemberDescriptionType* member=currentClass->GetMember(ref.first);
                     os<<"->"<<member->GetName();
-                    if (member->IsArray())
+                    if (member->IsArray() && !propertyMember->IsArray())
                     {
                         os<<"["<<ref.second<<"]";
+                    }
+
+                    if (member->GetMemberType()==ObjectMemberType)
+                    {
+                        currentClass=m_rep->GetClass(member->GetTypeId());
                     }
                 }
                 os<<std::endl;

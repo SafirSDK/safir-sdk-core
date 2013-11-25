@@ -129,14 +129,14 @@ namespace Internal
     //-----------
     DotsC_MemberIndex PropertyDescriptionBasic::GetMemberIndex(const std::string& memberName) const
     {
-        return TypeRepositoryHelpers::GetPropertyMemberIndex<PropertyDescription, MemberDescription>(this, memberName);
+        return TypeUtilities::GetPropertyMemberIndex<PropertyDescription, MemberDescription>(this, memberName);
     }
 
     //enumerations
     //-------------
     int EnumDescriptionBasic::GetIndexOfValue(const std::string& valueName) const
     {
-        return TypeRepositoryHelpers::GetIndexOfEnumValue(this, valueName);
+        return TypeUtilities::GetIndexOfEnumValue(this, valueName);
     }
 
     //CreateRoutines

@@ -6,15 +6,16 @@
         
         <member>
             <propertyMember>Int32PropertyValue</propertyMember>
-            <value>123</value>
+            <classMemberReference>
+                <classMember>MyInt32</classMember>
+            </classMemberReference>
         </member>
         
         <member>
             <propertyMember>EntityIdPropertyValue</propertyMember>
-            <entityId>
-                <name>ParserTest.MyEntity</name>
-                <instanceId>TestInstance</instanceId>
-            </entityId>
+            <classMemberReference>
+                <classMember>MyEntityId</classMember>
+            </classMemberReference>
         </member>
         
         <member>
@@ -22,19 +23,25 @@
             <classMemberReference>
                 <classMember>MyChannelId</classMember>
             </classMemberReference>
-        </member>       
-
+        </member>
+        
         <member>
-            <propertyMember>MyStringPropertyValue</propertyMember>
+            <propertyMember>MyItemPropertyValue</propertyMember>
+            <classMemberReference>
+                <classMember>MyObj</classMember>
+            </classMemberReference>
+        </member>                
+        
+        <member>
+            <propertyMember>MyStringPropertyValue</propertyMember>  
             <valueRef>
-                <name>ParserTest.Params.StringArray</name>
-                <index>1</index>
-            </valueRef>
+                <name>ParserTest.Params.StringParam</name>        
+            </valueRef>          
         </member>
 
         <member>
             <propertyMember>MyStringPropertyArray</propertyMember>
-            <value>kalle</value>
+            <value>Kalle</value>                        
         </member>
         
     </memberMapping>

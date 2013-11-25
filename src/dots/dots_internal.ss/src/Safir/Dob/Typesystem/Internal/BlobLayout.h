@@ -127,6 +127,14 @@ namespace Internal
             return m_impl.template GetMember<bool>(blob, member, index, val);
         }
 
+        DotsC_MemberStatus GetEnumMember(const char * const blob,
+                                         const DotsC_MemberIndex member,
+                                         const DotsC_ArrayIndex index,
+                                         DotsC_EnumerationValue& val) const
+        {
+            return m_impl.template GetMember<DotsC_EnumerationValue>(blob, member, index, val);
+        }
+
         DotsC_MemberStatus GetInt32Member(const char * const blob,
                                        const DotsC_MemberIndex member,
                                        const DotsC_ArrayIndex index,
@@ -168,11 +176,29 @@ namespace Internal
             return m_impl.template GetMemberWithOptionalString(blob, member, index, hashVal, strVal);
         }
 
+        DotsC_MemberStatus GetEntityIdMember(const char * const blob,
+                                             const DotsC_MemberIndex member,
+                                             const DotsC_ArrayIndex index,
+                                             DotsC_EntityId & entityId,
+                                             const char * & strVal) const
+        {
+            return m_impl.template GetMemberWithOptionalString(blob, member, index, entityId, strVal);
+        }
+
         DotsC_MemberStatus GetDynamicMember(const char * const blob,
                                               const DotsC_MemberIndex member,
                                               const DotsC_ArrayIndex index,
                                               const char * & val, //out
                                               DotsC_Int32 & binarySize) const
+        {
+            return m_impl.template GetDynamicMember(blob, member, index, val, binarySize);
+        }
+
+        DotsC_MemberStatus GetWritableDynamicMember(const char * const blob,
+                                                    const DotsC_MemberIndex member,
+                                                    const DotsC_ArrayIndex index,
+                                                    char * & val, //out
+                                                    DotsC_Int32 & binarySize) const
         {
             return m_impl.template GetDynamicMember(blob, member, index, val, binarySize);
         }
@@ -196,6 +222,14 @@ namespace Internal
                        const DotsC_ArrayIndex index) const
         {
             m_impl.template SetMember<bool>(val, blob, member, index);
+        }
+
+        void SetEnumMember(const DotsC_EnumerationValue val,
+                           char * blob,
+                           const DotsC_MemberIndex member,
+                           const DotsC_ArrayIndex index) const
+        {
+            m_impl.template SetMember<DotsC_EnumerationValue>(val, blob, member, index);
         }
 
         void SetInt32Member(const DotsC_Int32 val,
@@ -230,13 +264,22 @@ namespace Internal
             m_impl.template SetMember<DotsC_Float64>(val, blob, member, index);
         }
 
-        void SetMemberWithOptionalString(const DotsC_Int64 hashVal,
-                                         const char * const strVal,
-                                         char * & blob,
-                                         const DotsC_MemberIndex member,
-                                         const DotsC_ArrayIndex index) const
+        void SetHashedMember(const DotsC_Int64 hashVal,
+                             const char * const strVal,
+                             char * & blob,
+                             const DotsC_MemberIndex member,
+                             const DotsC_ArrayIndex index) const
         {
             m_impl.SetMemberWithOptionalString(hashVal, strVal, blob, member, index);
+        }
+
+        void SetEntityIdMember(const DotsC_EntityId entityId,
+                               const char * const strVal,
+                               char * & blob,
+                               const DotsC_MemberIndex member,
+                               const DotsC_ArrayIndex index) const
+        {
+            m_impl.SetMemberWithOptionalString(entityId, strVal, blob, member, index);
         }
 
         void SetDynamicMember(const char * const val,

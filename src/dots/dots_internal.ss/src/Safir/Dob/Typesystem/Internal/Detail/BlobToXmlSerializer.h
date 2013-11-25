@@ -103,7 +103,7 @@ namespace Detail
                         typeName=m_repository->GetEnum(md->GetTypeId())->GetName();
                         break;
                     default:
-                        typeName=BasicTypeOperations::TypeToString(mt).c_str();
+                        typeName=BasicTypeOperations::MemberTypeToString(mt).c_str();
                         break;
                     }
 

@@ -1,61 +1,100 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    
     <property>ParserTest.MyProperty</property>
     <class>ParserTest.MyEntity</class>
+    
     <memberMapping>
-        
         <member>
             <propertyMember>Int32PropertyValue</propertyMember>
-            <valueRef>
-                <name>ParserTest.Params.Int32Param</name>
-            </valueRef>
+            <classMemberReference>
+                <classMember>MyInt32</classMember>
+            </classMemberReference>
+        </member>        
+        <member>
+            <propertyMember>Float64PropertyValue</propertyMember>
+            <classMemberReference>
+                <classMember>MyFloat64</classMember>
+            </classMemberReference>
         </member>
-        
+        <member>
+            <propertyMember>StringPropertyValue</propertyMember>
+            <classMemberReference>
+                <classMember>MyItem</classMember>
+                <classMemberReference>
+                    <classMember>MyStrings</classMember>
+                    <index>3</index>
+                </classMemberReference>
+            </classMemberReference>
+        </member>
+        <member>
+            <propertyMember>EnumPropertyValue</propertyMember>
+            <classMemberReference>
+                <classMember>MyEnum</classMember>
+            </classMemberReference>
+        </member>
         <member>
             <propertyMember>EntityIdPropertyValue</propertyMember>
             <classMemberReference>
                 <classMember>MyEntityId</classMember>
             </classMemberReference>
         </member>
-        
         <member>
             <propertyMember>ChannelIdPropertyValue</propertyMember>
             <classMemberReference>
                 <classMember>MyChannelId</classMember>
             </classMemberReference>
         </member>
-        
         <member>
-            <propertyMember>MyItemPropertyValue</propertyMember>
+            <propertyMember>ItemPropertyValue</propertyMember>
             <classMemberReference>
-                <classMember>MyObj</classMember>
+                <classMember>MyItem</classMember>
             </classMemberReference>
-        </member>
-        
-        <member>
-            <propertyMember>MyStringArrayPropertyValue</propertyMember>            
-        </member>
-        
-        <member>
-            <propertyMember>MyFloat32PropertyValue</propertyMember>
-            <value>123.9</value>
         </member>
 
-    <member>
-            <propertyMember>MyEnumPropertyValue</propertyMember>
-            <value>Black</value>
-        </member>
-        
+        <!-- array -->
         <member>
-            <propertyMember>MyStringPropertyValue</propertyMember>
+            <propertyMember>Int32PropertyValueArray</propertyMember>
             <classMemberReference>
-                <classMember>MyObj</classMember>
-                <classMemberReference>
-                    <classMember>MyStrings</classMember>
-                    <index>2</index>
-                </classMemberReference>
+                <classMember>MyInt32Array</classMember>
+            </classMemberReference>
+        </member>        
+        <member>
+            <propertyMember>Float64PropertyValueArray</propertyMember>
+            <classMemberReference>
+                <classMember>MyFloat64Array</classMember>
             </classMemberReference>
         </member>
-        
+        <member>
+            <propertyMember>StringPropertyValueArray</propertyMember>
+            <classMemberReference>
+                <classMember>MyStringArray</classMember>
+            </classMemberReference>
+        </member>
+        <member>
+            <propertyMember>EnumPropertyValueArray</propertyMember>
+            <classMemberReference>
+                <classMember>MyEnumArray</classMember>
+            </classMemberReference>
+        </member>
+        <member>
+            <propertyMember>EntityIdPropertyValueArray</propertyMember>
+            <classMemberReference>
+                <classMember>MyEntityIdArray</classMember>
+            </classMemberReference>
+        </member>
+        <member>
+            <propertyMember>ChannelIdPropertyValueArray</propertyMember>
+            <classMemberReference>
+                <classMember>MyChannelIdArray</classMember>
+            </classMemberReference>
+        </member>
+        <member>
+            <propertyMember>ItemPropertyValueArray</propertyMember>
+            <classMemberReference>
+                <classMember>MyItemArray</classMember>
+            </classMemberReference>
+        </member>
     </memberMapping>
+
 </propertyMapping>

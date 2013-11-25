@@ -34,6 +34,7 @@
 #include <boost/iostreams/device/array.hpp>
 #include <Safir/Dob/Typesystem/Internal/Id.h>
 #include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
+#include <Safir/Dob/Typesystem/Internal/TypeUtilities.h>
 #include <Safir/Dob/Typesystem/Internal/Detail/BlobLayoutImpl.h>
 #include <Safir/Dob/Typesystem/Internal/Detail/UglyXmlToBlobSerializer.h>
 
@@ -210,13 +211,13 @@ namespace Detail
                 {
                     std::ostringstream os;
                     os<<"Member '"<<md->GetName()<<"' is referencing an parameter and hence is not allowed to contain data or sub elements";
-                    throw ParseError("XmlToBinary serialization error", os.str(), "", 168);
+                    throw ParseError("XmlToBinary serialization error", os.str(), "", 109);
                 }
                 else if (md->GetMemberType()==ObjectMemberType)
                 {
                     std::ostringstream os;
                     os<<"Only members of non-object types can use the valueRef mechanism. Member '"<<md->GetName()<<"' has type "<<m_repository->GetClass(md->GetTypeId())->GetName();
-                    throw ParseError("XmlToBinary serialization error", os.str(), "", 169);
+                    throw ParseError("XmlToBinary serialization error", os.str(), "", 110);
                 }
 
                 SerializationUtils::SetMemberFromParameter(m_repository, m_blobLayout, md, memIx, arrIx, *valueRef, valueRefIndex, blob, beginningOfUnused);

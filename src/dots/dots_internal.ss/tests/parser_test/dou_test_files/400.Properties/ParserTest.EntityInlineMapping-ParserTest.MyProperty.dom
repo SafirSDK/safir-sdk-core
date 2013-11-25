@@ -1,130 +1,107 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <summary>Contains parameters</summary>
-    <name>ParserTest.Params</name>
-    <baseClass>Object</baseClass>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
 
-    <parameters>
+    <property>ParserTest.MyProperty</property>
+    <class>ParserTest.EntityInlineMapping</class>
 
-        <parameter>
-            <name>Int32Param</name>
-            <type>Int32</type>
+    <memberMapping>
+        <member>
+            <propertyMember>Int32PropertyValue</propertyMember>
             <value>123</value>
-        </parameter>
-
-        <parameter>
-            <name>Float64Param</name>
-            <type>Float64</type>
+        </member>        
+        <member>
+            <propertyMember>Float64PropertyValue</propertyMember>
             <value>123.321</value>
-        </parameter>
-
-        <parameter>
-            <name>StringParam</name>
-            <type>String</type>
-            <value>Meatball eating loser</value>
-        </parameter>
-
-        <parameter>
-            <name>EnumParam</name>
-            <type>ParserTest.MyColorEnum</type>
-            <value>ParserTest.MyColorEnum.Black</value>
-        </parameter>
-
-        <parameter>
-            <name>EntityIdParam</name>
-            <type>EntityId</type>
+        </member>
+        <member>
+            <propertyMember>StringPropertyValue</propertyMember>
+            <value>Stand in line</value>
+        </member>
+        <member>
+            <propertyMember>EnumPropertyValue</propertyMember>
+            <value>ParserTest.MyColorEnum.Red</value>
+        </member>
+        <member>
+            <propertyMember>EntityIdPropertyValue</propertyMember>
             <entityId>
                 <name>ParserTest.MyEntity</name>
-                <instanceId>TestInstance</instanceId>
+                <instanceId>TestInstanceInlined</instanceId>
             </entityId>
-        </parameter>
-
-        <parameter>
-            <name>ChannelIdParam</name>
-            <type>ChannelId</type>
-            <value>channel_one</value>
-        </parameter>
-
-        <parameter>
-            <name>ItemParam</name>
-            <type>ParserTest.MyItem</type>
+        </member>
+        <member>
+            <propertyMember>ChannelIdPropertyValue</propertyMember>
+            <value>channel_one_inlined</value>
+        </member>
+        <member>
+            <propertyMember>ItemPropertyValue</propertyMember>
             <ParserTest.MyItem>
                 <MyNumber>5</MyNumber>
                 <MyStrings>
-                    <String index='0'>Kalle</String>
-                    <String index='3'>Svarre</String>
+                    <String index='0'>Kalle Inline</String>
+                    <String index='3'>Svarre Inline</String>
                 </MyStrings>
             </ParserTest.MyItem>
-        </parameter>
+        </member>
 
-        <!-- Array params -->
-        <parameter>
-            <name>Int32ParamArray</name>
-            <type>Int32</type>
+        <!-- array -->
+        <member>
+            <propertyMember>Int32PropertyValueArray</propertyMember>
             <arrayElements>
                 <arrayElement>
-                    <value>123</value>
+                    <value>1</value>
                 </arrayElement>
                 <arrayElement>
-                    <value>456</value>
+                    <value>2</value>
                 </arrayElement>
                 <arrayElement>
-                    <value>789</value>
+                    <value>3</value>
                 </arrayElement>
             </arrayElements>
-        </parameter>
-
-        <parameter>
-            <name>Float64ParamArray</name>
-            <type>Float64</type>
+        </member>        
+        <member>
+            <propertyMember>Float64PropertyValueArray</propertyMember>
             <arrayElements>
                 <arrayElement>
-                    <value>123.11</value>
+                    <value>1.1</value>
                 </arrayElement>
                 <arrayElement>
-                    <value>456.22</value>
+                    <value>2.2</value>
                 </arrayElement>
                 <arrayElement>
-                    <value>789.33</value>
+                    <value>3.3</value>
                 </arrayElement>
             </arrayElements>
-        </parameter>
-
-        <parameter>
-            <name>StringParamArray</name>
-            <type>String</type>
+        </member>
+        <member>
+            <propertyMember>StringPropertyValueArray</propertyMember>
             <arrayElements>
                 <arrayElement>
-                    <value>Meatloaf with</value>
+                    <value>abc</value>
                 </arrayElement>
                 <arrayElement>
-                    <value>thick brown</value>
+                    <value>def</value>
                 </arrayElement>
                 <arrayElement>
-                    <value>fat sauce</value>
+                    <value>ghi</value>
                 </arrayElement>
             </arrayElements>
-        </parameter>
-
-        <parameter>
-            <name>EnumParamArray</name>
-            <type>ParserTest.MyColorEnum</type>
+        </member>
+        <member>
+            <propertyMember>EnumPropertyValueArray</propertyMember>
             <arrayElements>
-                <arrayElement>
-                    <value>Black</value>
-                </arrayElement>
                 <arrayElement>
                     <value>White</value>
+                </arrayElement>
+                <arrayElement>
+                    <value>Black</value>
                 </arrayElement>
                 <arrayElement>
                     <value>Red</value>
                 </arrayElement>
             </arrayElements>
-        </parameter>
-
-        <parameter>
-            <name>EntityIdParamArray</name>
-            <type>EntityId</type>
+        </member>
+        <member>
+            <propertyMember>EntityIdPropertyValueArray</propertyMember>
             <arrayElements>
                 <arrayElement>
                     <entityId>
@@ -145,11 +122,9 @@
                     </entityId>
                 </arrayElement>
             </arrayElements>
-        </parameter>
-
-        <parameter>
-            <name>ChannelIdParamArray</name>
-            <type>ChannelId</type>
+        </member>
+        <member>
+            <propertyMember>ChannelIdPropertyValueArray</propertyMember>
             <arrayElements>
                 <arrayElement>
                     <value>channel_one</value>
@@ -161,11 +136,9 @@
                     <value>channel_three</value>
                 </arrayElement>
             </arrayElements>
-        </parameter>
-
-        <parameter>
-            <name>ItemParamArray</name>
-            <type>ParserTest.MyItem</type>
+        </member>
+        <member>
+            <propertyMember>ItemPropertyValueArray</propertyMember>
             <arrayElements>
                 <arrayElement>
                     <ParserTest.MyItem>
@@ -195,8 +168,7 @@
                     </ParserTest.MyItem>
                 </arrayElement>
             </arrayElements>
-        </parameter>
+        </member>
+    </memberMapping>
 
-    </parameters>
-</class>
-
+</propertyMapping>

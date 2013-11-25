@@ -25,7 +25,6 @@
             <summary>Object property</summary>
             <name>MyItemPropertyValue</name>
             <type>ParserTest.MyItem</type>
-            <array/>
         </member>
         
         <member>
