@@ -80,16 +80,6 @@ if (MSVC)
    #Set linker flag /OPT:REF (eliminates functions and/or data that are never referenced) reduces size of executable to approx the same size as in Release mode. Also disable incremental linking to avoid warning.
    set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF /INCREMENTAL:NO")
    set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF /INCREMENTAL:NO")
-
-   #We have a weird issue which causes a buffer overrun error when using Visual Studio 2013
-   #and Boost 1.55 in 64 bit and release builds. 
-   #Don't know if this is a bug in our code or in the compiler or in boost.
-   #The workaround below disables optimizations and inlining in release builds
-   #which appears to resolve the problem.
-   if(MSVC_VERSION EQUAL 1800 AND Boost_VERSION EQUAL 105500 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
-     SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} "/Ob0" "/O0")
-     SET (CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} "/Ob0" "/O0")
-   endif()
 endif ()
 
 #Add some more boost library versions that we want to be able to use,
@@ -138,6 +128,21 @@ ADD_DEFINITIONS(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 #Set up boost for any test code (i.e. CheckCXXSourceCompiles stuff)
 set(CMAKE_REQUIRED_INCLUDES ${Boost_INCLUDE_DIRS})
 set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_DYN_LINK -DBOOST_FILESYSTEM_NO_DEPRECATED)
+
+if(MSVC)
+   #We have a weird issue which causes a buffer overrun error when using Visual Studio 2013
+   #and Boost 1.55 in 64 bit and release builds. 
+   #Don't know if this is a bug in our code or in the compiler or in boost.
+   #The workaround below disables some optimizations and all inlining in release builds
+   #which appears to resolve the problem.
+   if(MSVC_VERSION EQUAL 1800 AND Boost_VERSION EQUAL 105500 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+     STRING(REGEX REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+     STRING(REGEX REPLACE "/O2" "/O1" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+     STRING(REGEX REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+     STRING(REGEX REPLACE "/O2" "/O1" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+   endif()
+endif()
+
 
 #Let ctest output stdout on failure by default.
 set(CTEST_OUTPUT_ON_FAILURE ON)
