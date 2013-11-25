@@ -81,6 +81,14 @@ if (MSVC)
    set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF /INCREMENTAL:NO")
    set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF /INCREMENTAL:NO")
 
+   #We have a weird issue which causes a buffer overrun error when using Visual Studio 2013
+   #and Boost 1.55 in 64 bit and release builds. 
+   #Don't know if this is a bug in our code or in the compiler or in boost.
+   #The workaround below disables inlining which appears to resolve the problem.
+   if(MSVC_VERSION EQUAL 1800 AND Boost_VERSION EQUAL 105500 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+     SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} "/Ob0")
+     SET (CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} "/Ob0")
+   endif()
 endif ()
 
 #Add some more boost library versions that we want to be able to use,
