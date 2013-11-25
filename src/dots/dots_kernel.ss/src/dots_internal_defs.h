@@ -222,6 +222,11 @@ namespace Internal
 
         }
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4702) //unreachable code
+#endif
+
         virtual const char * what() const throw()
         {
             try
@@ -234,6 +239,10 @@ namespace Internal
             }
 
         }
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
     private:
         std::string m_msg;

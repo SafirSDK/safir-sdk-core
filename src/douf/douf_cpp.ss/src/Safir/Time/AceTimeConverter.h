@@ -95,7 +95,7 @@ namespace Time
 
     };
 
-    ACE_Time_Value AceTimeConverter::ToAceTime(const boost::posix_time::time_duration & duration)
+    inline ACE_Time_Value AceTimeConverter::ToAceTime(const boost::posix_time::time_duration & duration)
     {
         if (boost::posix_time::time_duration::num_fractional_digits() == 6)
         {
@@ -110,23 +110,23 @@ namespace Time
         }
     }
 
-    ACE_Time_Value AceTimeConverter::ToAceTime(const Safir::Dob::Typesystem::Si64::Second time)
+    inline ACE_Time_Value AceTimeConverter::ToAceTime(const Safir::Dob::Typesystem::Si64::Second time)
     {
         return ACE_Time_Value(static_cast<suseconds_t>(time),
             static_cast<suseconds_t>((time - Safir::Dob::Typesystem::Int64(time)) * pow (10.0,6)));
     }
 
-    ACE_Time_Value AceTimeConverter::ToAceTime(const boost::posix_time::ptime & time)
+    inline ACE_Time_Value AceTimeConverter::ToAceTime(const boost::posix_time::ptime & time)
     {
         return ToAceTime(TimeProvider::ToDouble(time));
     }
 
-    Safir::Dob::Typesystem::Si64::Second AceTimeConverter::ToDouble(const ACE_Time_Value & time)
+    inline Safir::Dob::Typesystem::Si64::Second AceTimeConverter::ToDouble(const ACE_Time_Value & time)
     {
         return time.sec() + (time.usec() / pow (10.0,6));
     }
 
-    boost::posix_time::ptime AceTimeConverter::ToPtime(const ACE_Time_Value & time)
+    inline boost::posix_time::ptime AceTimeConverter::ToPtime(const ACE_Time_Value & time)
     {
         return TimeProvider::ToPtime(ToDouble(time));
     }
