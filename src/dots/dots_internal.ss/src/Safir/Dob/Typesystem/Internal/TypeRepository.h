@@ -26,7 +26,7 @@
 
 #include <set>
 #include <string>
-#include <Safir/Dob/Typesystem/Internal/KernelDefs2.h>
+#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 #include <Safir/Dob/Typesystem/Internal/Id.h>
 
 namespace Safir
@@ -78,7 +78,7 @@ namespace Internal
 
         //Get parameter values - depending on actual type of the parameter
         //For entityId use GetInt64Value for typeId and GetHashedValue for instanceId
-        virtual boost::int32_t GetInt32Value(int index) const=0; //int32, enum
+        virtual boost::int32_t GetInt32Value(int index) const=0; //int32, enum        
         virtual boost::int64_t GetInt64Value(int index) const=0; //int64, typeId
         virtual float GetFloat32Value(int index) const=0; //float32, si32
         virtual double GetFloat64Value(int index) const=0; //float64, si64

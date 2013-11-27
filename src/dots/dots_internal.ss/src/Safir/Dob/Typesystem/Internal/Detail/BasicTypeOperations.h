@@ -26,7 +26,7 @@
 
 #include <string>
 #include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
-#include <Safir/Dob/Typesystem/Internal/KernelDefs2.h>
+#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 #include <Safir/Dob/Typesystem/Internal/Detail/InternalDefs.h>
 
 namespace Safir
@@ -246,7 +246,7 @@ namespace BasicTypeOperations
         return IsBasicMemberType(memberType);
     }
 
-    inline Size SizeOfType(MemberType type)
+    inline Size SizeOfType(DotsC_MemberType type)
     {
         switch(type)
         {
@@ -346,7 +346,7 @@ namespace BasicTypeOperations
         typedef typename Traits::PropertyDescriptionType PropertyDescriptionType;
         typedef typename Traits::ExceptionDescriptionType ExceptionDescriptionType;
 
-        bool IsOfType(const RepositoryType* repository, MemberType mt, TypeId tid, MemberType ofMt, TypeId ofTid) const
+        bool IsOfType(const RepositoryType* repository, DotsC_MemberType mt, DotsC_TypeId tid, DotsC_MemberType ofMt, DotsC_TypeId ofTid) const
         {
             if (mt!=ofMt)
             {
@@ -375,7 +375,7 @@ namespace BasicTypeOperations
             }
         }
 
-        const char* TypeIdToTypeName(const RepositoryType* repository, boost::int64_t tid) const
+        const char* TypeIdToTypeName(const RepositoryType* repository, DotsC_TypeId tid) const
         {
             const ClassDescriptionType* cd=repository->GetClass(tid);
             if (cd)
@@ -398,19 +398,18 @@ namespace BasicTypeOperations
                 return ex->GetName();
             }
             return NULL;
-
         }
     };
 
     template <class RepositoryT>
-    bool IsOfType(const RepositoryT* repository, MemberType mt, TypeId tid, MemberType ofMt, TypeId ofTid)
+    bool IsOfType(const RepositoryT* repository, DotsC_MemberType mt, DotsC_TypeId tid, DotsC_MemberType ofMt, DotsC_TypeId ofTid)
     {
         BasicTypeOperationHelper<RepositoryT> helper;
         return helper.IsOfType(repository, mt, tid, ofMt, ofTid);
     }
 
     template <class RepositoryT>
-    const char* TypeIdToTypeName(const RepositoryT* repository, TypeId tid)
+    const char* TypeIdToTypeName(const RepositoryT* repository, DotsC_TypeId tid)
     {
         BasicTypeOperationHelper<RepositoryT> helper;
         return helper.TypeIdToTypeName(repository, tid);

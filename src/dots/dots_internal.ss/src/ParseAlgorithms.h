@@ -942,7 +942,7 @@ namespace Internal
             {
                 //if type has an explicit type-attribute, check type compliance
                 typeName=*typeAttr;
-                TypeId tid=DotsId_Generate64(typeName.c_str());
+                DotsC_TypeId tid=DotsId_Generate64(typeName.c_str());
                 if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), ObjectMemberType, tid, ObjectMemberType, param->GetTypeId()))
                 {
                     std::ostringstream os;
@@ -998,7 +998,7 @@ namespace Internal
             //do the serialization to the expected type
             ValueDefinition vd;
             vd.kind=ValueKind;
-            TypeId tid;
+            DotsC_TypeId tid;
             try
             {
                 UglyXmlToBlobSerializer<TypeRepository> serializer(state.repository.get());
@@ -1207,7 +1207,7 @@ namespace Internal
             for (std::vector< std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> >::const_iterator it=state.lastInsertedMemberMapping->memberRef.begin();
                  it!=state.lastInsertedMemberMapping->memberRef.end(); ++it)
             {
-                TypeId tid=cd->GetMember(it->first)->GetTypeId();
+                DotsC_TypeId tid=cd->GetMember(it->first)->GetTypeId();
                 cd=state.repository->GetClassBasic(tid);
                 //ENSURE(cd!=NULL, <<"Nested class member ref, type id does not exist" );
             }
@@ -1460,7 +1460,7 @@ namespace Internal
             try
             {
                 const std::string& className=pt.get<std::string>(Elements::MappedClass::Name());
-                TypeId classTypeId=DotsId_Generate64(className.c_str());
+                DotsC_TypeId classTypeId=DotsId_Generate64(className.c_str());
                 def->class_=state.repository->GetClassBasic(classTypeId);
                 if (!def->class_)
                 {
@@ -1476,7 +1476,7 @@ namespace Internal
             try
             {
                 const std::string& propName=pt.get<std::string>(Elements::MappedProperty::Name());
-                TypeId propTypeId=DotsId_Generate64(propName.c_str());
+                DotsC_TypeId propTypeId=DotsId_Generate64(propName.c_str());
                 def->property=state.repository->GetPropertyBasic(propTypeId);
                 if (!def->property)
                 {

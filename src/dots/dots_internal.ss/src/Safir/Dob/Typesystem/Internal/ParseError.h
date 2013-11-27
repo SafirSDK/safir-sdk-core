@@ -60,11 +60,9 @@ namespace Internal
             :m_label(label)
             ,m_description(description)
             ,m_file(file)
+            ,m_what()
             ,m_errorId(errorId)
         {
-            std::ostringstream os;
-            os<<m_label<<"; "<<m_description<<"; "<<m_file<<"; ErrorCode="<<m_errorId;
-            m_what=os.str();  //composed error info
         }
 
         /**
@@ -107,13 +105,22 @@ namespace Internal
          *
          * @return Error information.
          */
-        virtual const char* what () const throw (){return m_what.c_str();}
+        virtual const char* what () const throw ()
+        {
+            if (m_what.empty())
+            {
+                std::ostringstream os;
+                os<<m_label<<"; "<<m_description<<"; "<<m_file<<"; ErrorCode="<<m_errorId;
+                m_what=os.str();  //composed error info
+            }
+            return m_what.c_str();
+        }
 
     private:
         std::string m_label;
         std::string m_description;
         std::string m_file;
-        std::string m_what;
+        mutable std::string m_what;
         int m_errorId;
     };
 

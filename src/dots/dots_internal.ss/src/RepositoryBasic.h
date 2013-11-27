@@ -115,7 +115,7 @@ namespace Internal
         std::string summary;
         std::string name;
         std::string typeName;
-        MemberType memberType;
+        DotsC_MemberType memberType;
         bool isArray;
         int arraySize; //If isArray
         int maxLength; //Max string length. Only applicable if typeName is 'String'.
@@ -141,7 +141,7 @@ namespace Internal
         virtual const MemberDescription* GetMember(DotsC_MemberIndex index) const {return members[index].get();}
 
         //Fields
-        TypeId typeId;
+        DotsC_TypeId typeId;
         std::string summary;
         std::string fileName;
         std::string name;
@@ -165,7 +165,7 @@ namespace Internal
         virtual const ExceptionDescription* GetBaseClass() const {return base;}
 
         //Fields
-        TypeId typeId;
+        DotsC_TypeId typeId;
         std::string summary;
         std::string fileName;
         std::string name;
@@ -241,7 +241,7 @@ namespace Internal
         std::string summary;
         std::string name;
         std::string typeName;
-        MemberType memberType;
+        DotsC_MemberType memberType;
         bool isArray;
         bool hidden;   //Some parameters are derived from propertyMapping values. The parser will automatically generate a
                         //hidden parameter for those values. All explicitly declared parameters will have hidden=false.
@@ -269,13 +269,13 @@ namespace Internal
         virtual int GetIndexOfValue(const std::string& valueName) const;
 
         //Fields
-        TypeId typeId;
+        DotsC_TypeId typeId;
         std::string summary;
         std::string fileName;
         std::string name;
         StringVector enumerationValues;
 
-        TypeId checksum;
+        DotsC_TypeId checksum;
     };
     typedef boost::shared_ptr<EnumDescriptionBasic> EnumDescriptionBasicPtr;
 
@@ -293,7 +293,7 @@ namespace Internal
         virtual std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> GetMemberReference(int depth) const {return memberRef[depth];} //if mapped to member
 
         //Fields
-        MappingKind kind;
+        DotsC_PropertyMappingKind kind;
         int propertyMemberIndex;
         ParameterDescriptionBasic* paramRef;
         int paramIndex;
@@ -393,7 +393,7 @@ namespace Internal
         virtual int OwnSize() const {return ownSize;}
 
         //Fields
-        TypeId typeId;
+        DotsC_TypeId typeId;
         std::string summary;
         std::string fileName;
         std::string name;

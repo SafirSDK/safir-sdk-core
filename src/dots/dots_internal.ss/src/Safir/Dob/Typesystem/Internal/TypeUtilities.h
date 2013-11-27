@@ -52,23 +52,42 @@ namespace TypeUtilities
         return Safir::Dob::Typesystem::Internal::Detail::BasicTypeOperations::TypeIdToTypeName(repository, typeId);
     }
 
-//    /**
-//     * Finds corresponding type name to a typeId. If no type exists with given typeId NULL is returned.
-//     *
-//     * @param repository [in] - Type repository containing all type information
-//     * @param typeId [in] - TypeId to lookup and find name for.
-//     * @return The type name or NULL if type doesn't exist in the repository.
-//     */
-//    template <class RepositoryT>
-//    const char* GetMemberTypeName(const RepositoryT* repository, DotsC_MemberType memberType, DotsC_TypeId typeId)
-//    {
-//        if (Safir::Dob::Typesystem::Internal::Detail::BasicTypeOperations::IsBasicMemberType(memberType))
-//        {
-//            return Safir::Dob::Typesystem::Internal::Detail::BasicTypeOperations::ty
-//        }
-//        return (Safir::Dob::Typesystem::Internal::Detail::ToStringHelper<RepositoryT>(repository, false)).GetTypeName(typeId);
-//    }
+    /**
+     * Finds corresponding type name to a memberType.
+     *
+     * @param memberType [in] - MemberType to convert to string
+     * @return The type name or NULL if type doesn't exist
+     */
+    inline const char* GetTypeName(DotsC_MemberType memberType)
+    {
+        return Safir::Dob::Typesystem::Internal::Detail::BasicTypeOperations::MemberTypeToString(memberType).c_str();
+    }
 
+    /**
+     * Check if a type is the same or a subtype of another type. Only usable for Enumerations and ObjectTypes.
+     *
+     * @param repository [in] - Type repository containing all type information
+     * @param tid [in] - TypeId to check if it is the same or a subtype of the ofTid
+     * @param ofTid [in] - The typeId to check tid against.
+     * @return True if tid is the same or a subtype of ofTid, else false.
+     */
+    template <class RepositoryT>
+    bool IsOfType(const RepositoryT* repository, DotsC_TypeId tid, DotsC_TypeId ofTid)
+    {
+        if (tid==ofTid)
+        {
+            return true;
+        }
+        return Safir::Dob::Typesystem::Internal::Detail::BasicTypeOperations::IsOfType(repository, ObjectMemberType, tid, ObjectMemberType, ofTid);
+    }
+
+    /**
+     * Get the index (ordinal) of an enumeration value.
+     *
+     * @param description [in] - EnumerationDescription
+     * @param valueName [in] - Enumeration value name, can be short form or fully qualified. Ex: 'Monday' and 'MyNamespace.MyEnumType.Monday'
+     * @return Index of the value or -1 if not found.
+     */
     template <class EnumDescriptionT>
     int GetIndexOfEnumValue(const EnumDescriptionT* description, const std::string& valueName) //Supports short name and fully qualified name. Ex: 'Monday' and 'MyEnumType.Monday'
     {
@@ -97,6 +116,13 @@ namespace TypeUtilities
         return -1;
     }
 
+    /**
+     * Get index of a property member.
+     *
+     * @param pd [in] - Property description.
+     * @param memberName [in] - member name
+     * @return Index of member or -1 if not found.
+     */
     template <class PropertyDescriptionT, class MemberDescriptionT>
     DotsC_MemberIndex GetPropertyMemberIndex(const PropertyDescriptionT* pd, const std::string& memberName)
     {
@@ -111,6 +137,14 @@ namespace TypeUtilities
         return -1;
     }
 
+    /**
+     * Get parameter by name when the classDesription is already retrieved. To get parameter from a
+     * fully qualified name, use GetParameterByFullName below.
+     *
+     * @param cd [in] - The class description that contains the parameter.
+     * @param paramName [in] - Parameter name, can be short form or fully qualified name.
+     * @return ParameterDescription or NULL if not found.
+     */
     template <class ClassDescriptionT, class ParameterDescriptionT>
     const ParameterDescriptionT* GetParameterByName(const ClassDescriptionT* cd, const std::string& paramName)
     {
@@ -141,6 +175,9 @@ namespace TypeUtilities
         return NULL;
     }
 
+    /**
+     * Helper class to get ParameterDescription from a fully qualified name without having the ClassDescription.
+     */
     template <class RepT, class Traits=Safir::Dob::Typesystem::Internal::TypeRepositoryTraits<RepT> >
     struct GetParameterByFullName
     {
@@ -148,6 +185,12 @@ namespace TypeUtilities
         typedef typename Traits::ClassDescriptionType ClassDescriptionType;
         typedef typename Traits::ParameterDescriptionType ParameterDescriptionType;
 
+        /**
+         * Get ParameterDescription from a fully qualified name.
+         * @param rep [in] - TypeRepository containing all type information needed.
+         * @param parameterName [in] - Fully qualified name includeing namespace and class name, Ex: MyNamespace.MyClass.MyParameter
+         * @return ParameterDescription or NULL if not found.
+         */
         const ParameterDescriptionType* operator()(const RepositoryType* rep, const std::string& parameterName) const
         {
             size_t pos=parameterName.rfind('.');

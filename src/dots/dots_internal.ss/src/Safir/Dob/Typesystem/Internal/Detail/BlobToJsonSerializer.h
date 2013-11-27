@@ -509,7 +509,7 @@ namespace boostfix
 
         const ClassDescriptionType* GetClass(const char* blob) const
         {
-            TypeId typeId=m_blobLayout.GetTypeId(blob);
+            DotsC_TypeId typeId=m_blobLayout.GetTypeId(blob);
             const ClassDescriptionType* cd=m_repository->GetClass(typeId);
             if (cd==NULL)
             {

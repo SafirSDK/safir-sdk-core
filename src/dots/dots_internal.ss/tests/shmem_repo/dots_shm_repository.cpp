@@ -26,12 +26,12 @@ namespace Internal
         return instance;
     }
 
-    void RepositoryKeeper::Initialize(const std::string& path)
+    void RepositoryKeeper::Initialize(const std::vector<boost::filesystem::path>& paths)
     {
         try
         {
             RepositoryKeeper* instance=&RepositoryKeeper::Instance();
-            instance->m_path=path;
+            instance->m_paths.insert(instance->m_paths.begin(), paths.begin(), paths.end());
             instance->m_startupSynchronizer.Start(instance);
             return;
         }
@@ -39,6 +39,15 @@ namespace Internal
         {
             SEND_SYSTEM_LOG(Error, << "Ran out of shared memory while loading types and parameters." <<std::endl
                             << "Please adjust the parameter Safir.Dob.NodeParameters.TypesystemSharedMemorySize");
+        }
+        catch(const Safir::Dob::Typesystem::Internal::ParseError& err)
+        {
+            std::cout<<"********** Parse Error **********************************************"<<std::endl;
+            std::cout<<"* Label: "<<err.Label()<<std::endl;
+            std::cout<<"* Descr: "<<err.Description()<<std::endl;
+            std::cout<<"* File:  "<<err.File()<<std::endl;
+            std::cout<<"* ErrId: "<<err.ErrorId()<<std::endl;
+            std::cout<<"*********************************************************************"<<std::endl;
         }
         catch (const std::exception & exc)
         {
@@ -58,6 +67,7 @@ namespace Internal
 
     RepositoryKeeper::RepositoryKeeper()
         :m_startupSynchronizer("DOTS_INITIALIZATION")
+        ,m_paths()
     {
     }
 
@@ -89,24 +99,7 @@ namespace Internal
         //Parse dou and dom files into local repository
         //-------------------------------------------------
         boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository> localRepository;
-        try
-        {
-            localRepository=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(m_path);
-            std::cout<<"Parsed successfully! NumTypes="<<(localRepository->GetNumberOfClasses()+localRepository->GetNumberOfEnums()+localRepository->GetNumberOfExceptions()+localRepository->GetNumberOfProperties())<<std::endl;
-        }
-        catch(const Safir::Dob::Typesystem::Internal::ParseError& err)
-        {
-            std::cout<<"********** Parse Error **********************************************"<<std::endl;
-            std::cout<<"* Label: "<<err.Label()<<std::endl;
-            std::cout<<"* Descr: "<<err.Description()<<std::endl;
-            std::cout<<"* File:  "<<err.File()<<std::endl;
-            std::cout<<"* ErrId: "<<err.ErrorId()<<std::endl;
-            std::cout<<"*********************************************************************"<<std::endl;
-        }
-        catch(...)
-        {
-            std::cout<<"Unexpected exception occured when parsing path '"<<m_path<<"'"<<std::endl;
-        }
+        localRepository=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(m_paths);
 
         //-------------------------------------------------
         //Copy localRepository into shared memory

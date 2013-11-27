@@ -16,7 +16,6 @@
 #include <boost/interprocess/containers/map.hpp>
 #include <boost/interprocess/smart_ptr/shared_ptr.hpp>
 #include <boost/interprocess/offset_ptr.hpp>
-#include <boost/circular_buffer.hpp>
 #include <Safir/Utilities/StartupSynchronizer.h>
 #include <Safir/Dob/Typesystem/Internal/TypeParser.h>
 #include <Safir/Dob/Typesystem/Internal/TypeUtilities.h>
@@ -322,8 +321,6 @@ namespace Internal
     //-------------------------------------------
     //MemberMappingDescriptionShm
     //-------------------------------------------
-    typedef std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> MemberRef;
-    typedef VectorShm<MemberRef>::Type MemberRefVectorShm;
     class MemberMappingDescriptionShm
     {
     public:
@@ -333,7 +330,9 @@ namespace Internal
         {
             for (int i=0; i<md->MemberReferenceDepth(); ++i)
             {
-                m_memberRefs.push_back(md->GetMemberReference(i));
+                std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> mref=md->GetMemberReference(i);
+                m_memberRefs.push_back(mref.first); //memberIndex
+                m_memberRefs.push_back(mref.second); //arrayIndex
             }
         }
 
@@ -354,9 +353,16 @@ namespace Internal
             return *this;
         }
 
-        int MemberReferenceDepth() const {return static_cast<int>(m_memberRefs.size());}
-        std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> GetMemberReference(int depth) const {return m_memberRefs[static_cast<size_t>(depth)];}
+        int MemberReferenceDepth() const {return static_cast<int>(m_memberRefs.size())/2;}
+
+        std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> GetMemberReference(int depth) const
+        {
+            size_t index=static_cast<size_t>(depth*2);
+            return std::make_pair(m_memberRefs[index], m_memberRefs[index+1]);
+        }
+
         DotsC_PropertyMappingKind GetMappingKind() const {return m_kind;}
+
         std::pair<const ParameterDescriptionShm*, int /*paramIndex*/> GetParameter() const {return std::make_pair(m_paramRef.get(), m_paramIndex);}
 
         void SetParamRef(const ParameterDescriptionShm* param, int paramIndex)
@@ -365,10 +371,13 @@ namespace Internal
             m_paramIndex=paramIndex;
         }
 
+        //only needed by dots_kernel, not a constraint on a functional repository
+        const DotsC_Int32* GetRawMemberRef() const {return &m_memberRefs[0];}
+
     private:
         DotsC_PropertyMappingKind m_kind;
         int m_paramIndex;
-        MemberRefVectorShm m_memberRefs;
+        VectorShm<DotsC_Int32>::Type m_memberRefs;
         ParameterDescriptionShmPtr m_paramRef;
     };
     typedef VectorShm<MemberMappingDescriptionShm>::Type MemberMappingVectorShm;
@@ -652,12 +661,12 @@ namespace Internal
             private boost::noncopyable
     {
     public:
-        static void Initialize(const std::string& path_);
+        static void Initialize(const std::vector<boost::filesystem::path>& paths);
         static const RepositoryShm* GetRepository();
 
     private:
-        std::string m_path;
         Safir::Utilities::StartupSynchronizer m_startupSynchronizer;
+        std::vector<boost::filesystem::path> m_paths;
         boost::scoped_ptr<boost::interprocess::managed_shared_memory> m_sharedMemory;
         RepositoryShm* m_repository;
 

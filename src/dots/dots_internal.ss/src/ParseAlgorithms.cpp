@@ -543,7 +543,7 @@ namespace Internal
                     {
                         //if type has an explicit type-attribute, check type compliance
                         typeName=*typeAttr;
-                        TypeId tid=DotsId_Generate64(typeName.c_str());
+                        DotsC_TypeId tid=DotsId_Generate64(typeName.c_str());
                         if (!BasicTypeOperations::IsOfType<TypeRepository>(m_result.get(), ObjectMemberType, tid, ObjectMemberType, param->GetTypeId()))
                         {
                             std::ostringstream os;

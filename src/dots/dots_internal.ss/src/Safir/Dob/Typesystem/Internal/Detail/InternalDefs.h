@@ -28,7 +28,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
-#include <Safir/Dob/Typesystem/Internal/KernelDefs2.h>
+#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -55,18 +55,6 @@ namespace Detail
 {
     typedef std::vector<std::string> StringVector;
 
-    typedef DotsC_Int32 Int32;
-    typedef DotsC_Int64 Int64;
-    typedef DotsC_Float32 Float32;
-    typedef DotsC_Float64 Float64;
-    typedef DotsC_TypeId TypeId;
-    typedef DotsC_MemberIndex MemberIndex;
-    typedef DotsC_ParameterIndex ParameterIndex;
-    typedef DotsC_ArrayIndex ArrayIndex;
-    typedef DotsC_EnumerationValue EnumerationValue;
-    typedef DotsC_MemberType MemberType;
-    typedef DotsC_PropertyMappingKind MappingKind;
-
     typedef boost::uint32_t Offset;
     typedef boost::uint32_t Size;
     typedef DotsC_Int32 EnumInternal;
@@ -83,7 +71,7 @@ namespace Detail
     BOOST_STATIC_ASSERT(sizeof(char) == 1);
     BOOST_STATIC_ASSERT(sizeof(Offset) == 4);
     BOOST_STATIC_ASSERT(sizeof(Size) == 4);
-    BOOST_STATIC_ASSERT(sizeof(Offset) <= sizeof(Int64)); //this is to ensure that an offset can fit into a hashedId member.
+    BOOST_STATIC_ASSERT(sizeof(Offset) <= sizeof(DotsC_Float64)); //this is to ensure that an offset can fit into a hashedId member.
 
     inline bool operator ==(const DotsC_EntityId& left, const DotsC_EntityId& right)
     {

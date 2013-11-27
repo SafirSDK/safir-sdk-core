@@ -25,7 +25,6 @@
 #define __DOTS_INTERNAL_BLOB_LAYOUT_H__
 
 #include <Safir/Dob/Typesystem/Internal/Detail/BlobLayoutImpl.h>
-#include <boost/shared_ptr.hpp>
 
 namespace Safir
 {
@@ -44,7 +43,7 @@ namespace Internal
     public:
         //ctor
         BlobLayout(const RepT* repository)
-            :m_impl(new Detail::BlobLayoutImpl<RepT>(repository))
+            :m_impl(repository)
         {
         }
 
@@ -191,16 +190,16 @@ namespace Internal
                                               const char * & val, //out
                                               DotsC_Int32 & binarySize) const
         {
-            return m_impl.template GetDynamicMember(blob, member, index, val, binarySize);
+            return m_impl.GetDynamicMember(blob, member, index, val, binarySize);
         }
 
-        DotsC_MemberStatus GetWritableDynamicMember(const char * const blob,
+        DotsC_MemberStatus GetWritableDynamicMember(char* blob,
                                                     const DotsC_MemberIndex member,
                                                     const DotsC_ArrayIndex index,
-                                                    char * & val, //out
-                                                    DotsC_Int32 & binarySize) const
+                                                    char*& val, //out
+                                                    DotsC_Int32& binarySize) const
         {
-            return m_impl.template GetDynamicMember(blob, member, index, val, binarySize);
+            return m_impl.GetDynamicMember(blob, member, index, val, binarySize);
         }
 
 
@@ -335,8 +334,9 @@ namespace Internal
         //if the string is non-null the new hash and string will be placed at the position that beginningOfUnused
         //if the string is null the dynamic part of the blob will be untouched.
         //points to _before_ the call. After the call beginningOfUnused will be updated to point past the newly set data.
+        template <class T>
         void CreateAndSetMemberWithOptionalString(char * const blob,
-                                                  const DotsC_Int64 hashVal,
+                                                  const T hashVal,
                                                   const char * const strVal,
                                                   const DotsC_Int32 stringLength,
                                                   const DotsC_MemberIndex member,
@@ -344,7 +344,7 @@ namespace Internal
                                                   const bool isChanged,
                                                   char * & beginningOfUnused) const
         {
-            m_impl.CreateAndSetMemberWithOptionalString(blob, hashVal, strVal, stringLength, member, index, isChanged, beginningOfUnused);
+            m_impl.CreateAndSetMemberWithOptionalString<T>(blob, hashVal, strVal, stringLength, member, index, isChanged, beginningOfUnused);
         }
 
     private:

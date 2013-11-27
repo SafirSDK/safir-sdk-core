@@ -108,7 +108,7 @@ namespace Detail
                                     std::vector<char>& blob,
                                     const boost::property_tree::ptree& members) const
         {
-            TypeId typeId=DotsId_Generate64(typeName.c_str());
+            DotsC_TypeId typeId=DotsId_Generate64(typeName.c_str());
             const ClassDescriptionType* cd=m_repository->GetClass(typeId);
             if (!cd)
             {
