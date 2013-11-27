@@ -42,7 +42,7 @@ FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time system)
 TARGET_LINK_LIBRARIES(dots_kernel ${EXPAT_LIBRARY})
 
 IF (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dots_kernel dots_id lluf_utils lluf_startup_synchronizer lluf_crash_reporter lluf_config ${Boost_LIBRARIES} rt)
+  TARGET_LINK_LIBRARIES(dots_kernel dots_id dots_internal lluf_utils lluf_startup_synchronizer lluf_crash_reporter lluf_config ${Boost_LIBRARIES} rt)
 ENDIF()
 
 ADD_DEFINITIONS(-DDOTSKERNEL_EXPORTS)
@@ -55,6 +55,7 @@ if(NOT can_do_unaligned_access)
   MESSAGE("This platform does not appear able to do unaligned accesses, so we'll use memcpy instead")
   ADD_DEFINITIONS(-DNO_UNALIGNED_ACCESS)
 endif()
+
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
