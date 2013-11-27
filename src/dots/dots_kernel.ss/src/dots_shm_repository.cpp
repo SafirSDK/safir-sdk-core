@@ -99,7 +99,20 @@ namespace Internal
         //Parse dou and dom files into local repository
         //-------------------------------------------------
         boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository> localRepository;
-        localRepository=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(m_paths);
+        try
+        {
+            localRepository=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(m_paths);
+        }
+        catch(const Safir::Dob::Typesystem::Internal::ParseError& err)
+        {
+            std::cout<<"********** Parse Error **********************************************"<<std::endl;
+            std::cout<<"* Label: "<<err.Label()<<std::endl;
+            std::cout<<"* Descr: "<<err.Description()<<std::endl;
+            std::cout<<"* File:  "<<err.File()<<std::endl;
+            std::cout<<"* ErrId: "<<err.ErrorId()<<std::endl;
+            std::cout<<"*********************************************************************"<<std::endl;
+            exit(1);
+        }
 
         //-------------------------------------------------
         //Copy localRepository into shared memory

@@ -54,13 +54,6 @@ namespace Internal
                 {
                     const boost::filesystem::path& fp=fileIt->path();
                     const boost::filesystem::path filename=fp.filename();
-                    if (thisRootFiles.find(filename)!=thisRootFiles.end())
-                    {
-                        std::ostringstream os;
-                        os<<"The directory '"<<rootDirIt->string()<<"' constains duplicated version of file '"<<filename.string()<<"'"<<std::endl;
-                        throw ParseError("Duplicated dou/dom file", os.str(), rootDirIt->string(), 2);
-                    }
-                    thisRootFiles.insert(filename);
 
                     std::map<boost::filesystem::path, boost::filesystem::path>* pmap=NULL;
                     if (fp.extension()==".dou")
@@ -74,6 +67,14 @@ namespace Internal
 
                     if (pmap)
                     {
+                        if (thisRootFiles.find(filename)!=thisRootFiles.end())
+                        {
+                            std::ostringstream os;
+                            os<<"The directory '"<<rootDirIt->string()<<"' constains duplicated version of file '"<<filename.string()<<"'"<<std::endl;
+                            throw ParseError("Duplicated dou/dom file", os.str(), rootDirIt->string(), 2);
+                        }
+                        thisRootFiles.insert(filename);
+
                         std::pair<std::map<boost::filesystem::path, boost::filesystem::path>::iterator, bool> inserted=pmap->insert(std::make_pair(filename, fp));
                         if (!inserted.second)
                         {
