@@ -26,7 +26,7 @@
             <values>
                 <value>
                     <member>NumberOfErrors</member>
-                    <parameter>Safir.Dob.CreateRoutineParameters.One</parameter>
+                    <parameter><name>Safir.Dob.CreateRoutineParameters.One</name></parameter>
                 </value>
             </values>
         </createRoutine>

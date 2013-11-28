@@ -33,13 +33,13 @@
 
 using namespace Safir::Dob::Typesystem::Internal::Detail;
 
-//----------------------------------------------------------------------------------------
-// A local memeory (not shared memory) implementation of the TypeRespository interface
-// The constructor takes all the ParseState from each worker in a ParseJob and performes
-// necessary finalization work that could not be done during the xml-parsing stage by the
-// workers. On errors ParseError is thrown, else the Repository is constructed and the
-// dou/dom-parsing is completed.
-//-----------------------------------------------------------------------------------------
+/**
+ * A local memeory implementation of the TypeRespository interface
+ * The constructor takes all the ParseState from each worker in a ParseJob and performes
+ * necessary finalization work that could not be done during the xml-parsing stage by the
+ * workers. On errors ParseError is thrown, else the Repository is constructed and the
+ * dou/dom-parsing is completed.
+ */
 namespace Safir
 {
 namespace Dob
@@ -438,8 +438,8 @@ namespace Internal
         bool InsertClass(const ClassDescriptionBasicPtr& val) {return m_classes.insert(std::make_pair(val->typeId, val)).second;}
         bool InsertProperty(const PropertyDescriptionBasicPtr& val) {return m_properties.insert(std::make_pair(val->typeId, val)).second;}
         bool InsertException(const ExceptionDescriptionBasicPtr& val) {return m_exceptions.insert(std::make_pair(val->typeId, val)).second;}
-        bool InsertParameter(const ParameterDescriptionBasicPtr& val) {return m_parameters.insert(std::make_pair(val->name, val.get())).second;}
-        ParameterDescriptionBasic* GetParameterBasic(const std::string& name);
+        bool InsertParameter(const std::string& fullName, const ParameterDescriptionBasicPtr& val) {return m_parameters.insert(std::make_pair(fullName, val.get())).second;}
+        ParameterDescriptionBasic* GetParameterBasic(const std::string& fullName);
         PropertyDescriptionBasic* GetPropertyBasic(DotsC_TypeId typeId) const {return GetPtr(m_properties, typeId);}
         ClassDescriptionBasic* GetClassBasic(DotsC_TypeId typeId) const {return GetPtr(m_classes, typeId);}
         ExceptionDescriptionBasic* GetExceptionBasic(DotsC_TypeId typeId) const {return GetPtr(m_exceptions, typeId);}

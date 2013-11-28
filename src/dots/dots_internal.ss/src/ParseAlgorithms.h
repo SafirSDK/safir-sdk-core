@@ -500,7 +500,7 @@ namespace Internal
             val.stringVal=pt.data();
             par->values.push_back(val);
             state.lastInsertedClass->ownParameters.push_back(par);
-            state.repository->InsertParameter(par);
+            state.repository->InsertParameter(par->name, par);
 
             //type is still missing, add for later processing
             ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
@@ -553,7 +553,7 @@ namespace Internal
             par->typeName=BasicTypeOperations::MemberTypeToString(EntityIdMemberType);
             par->values.push_back(val);
             state.lastInsertedClass->ownParameters.push_back(par);
-            state.repository->InsertParameter(par);
+            state.repository->InsertParameter(par->name, par);
         }
     };
 
@@ -584,7 +584,7 @@ namespace Internal
                                                                          par,
                                                                          par->values.size()-1,
                                                                          &pt, state.propertyTree));
-            state.repository->InsertParameter(par);
+            state.repository->InsertParameter(par->name, par);
 
             //type is still missing, add for later processing
             ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
@@ -623,7 +623,7 @@ namespace Internal
                                                                          par->values.size()-1,
                                                                          &pt, state.propertyTree));
             state.objectParameters.back().deprecatedXmlFormat=true;
-            state.repository->InsertParameter(par);
+            state.repository->InsertParameter(par->name, par);
 
             //type is still missing, add for later processing
             ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
@@ -643,16 +643,16 @@ namespace Internal
             //Check parameter name
             try
             {
-                def->name=state.lastInsertedClass->name+"."+pt.get<std::string>(Elements::ParameterName::Name());
-                 std::vector<ParameterDescriptionBasicPtr>::const_iterator found=std::find_if(state.lastInsertedClass->ownParameters.begin(),
-                                                                         state.lastInsertedClass->ownParameters.end(),
-                                                                         boost::bind(NameComparerPtr<ParameterDescriptionBasicPtr>, _1, def->name));
-                 if (found!=state.lastInsertedClass->ownParameters.end())
-                 {
-                     std::ostringstream os;
-                     os<<"The parameter '"<<def->name<<"' is defined more than one time in class "<<state.lastInsertedClass->name;
-                     throw ParseError("Duplicated parameter", os.str(), state.currentPath, 37);
-                 }
+                def->name=pt.get<std::string>(Elements::ParameterName::Name());
+                std::vector<ParameterDescriptionBasicPtr>::const_iterator found=std::find_if(state.lastInsertedClass->ownParameters.begin(),
+                                                                                             state.lastInsertedClass->ownParameters.end(),
+                                                                                             boost::bind(NameComparerPtr<ParameterDescriptionBasicPtr>, _1, def->name));
+                if (found!=state.lastInsertedClass->ownParameters.end())
+                {
+                    std::ostringstream os;
+                    os<<"The parameter '"<<def->name<<"' is defined more than one time in class "<<state.lastInsertedClass->name;
+                    throw ParseError("Duplicated parameter", os.str(), state.currentPath, 37);
+                }
             }
             catch (const boost::property_tree::ptree_error&)
             {
@@ -681,7 +681,9 @@ namespace Internal
 
             //Check for duplicates later after baseClass is known too.
             state.lastInsertedClass->ownParameters.push_back(def);
-            state.repository->InsertParameter(def);
+
+            std::string fullName=state.lastInsertedClass->name+"."+def->name;
+            state.repository->InsertParameter(fullName, def);
         }
     };
 

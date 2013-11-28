@@ -44,8 +44,8 @@ int main(int argc, char* argv[])
     //ParseDir("/home/joot/safir/runtime/data/text/dots/classes");
     //ParseDir("/home/joot/dev/slb_dou/dots/classes");
     //ParseDir("/home/joot/Dropbox/Dev/DotsParser/dots_generated_conv");
-    ParseDir("/home/joot/dev/safir_open/dots_internal_rewrite/src/dots/dots_test_dou.ss/data");
-    return 0;
+    //ParseDir("/home/joot/dev/safir_open/dots_internal_rewrite/src/dots/dots_test_dou.ss/data");
+    //return 0;
 
     if (argc<2)
     {

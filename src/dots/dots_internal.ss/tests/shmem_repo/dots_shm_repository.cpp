@@ -77,11 +77,13 @@ namespace Internal
 
     void RepositoryKeeper::Create()
     {
+        std::cout<<"Repo.Create"<<std::endl;
         LoadData();
     }
 
     void RepositoryKeeper::Use()
     {
+        std::cout<<"Repo.Use"<<std::endl;
         m_sharedMemory.reset(new boost::interprocess::managed_shared_memory
                              (boost::interprocess::open_read_only,
                               DOTS_SHMEM_NAME));
@@ -90,6 +92,7 @@ namespace Internal
 
     void RepositoryKeeper::Destroy()
     {
+        std::cout<<"Repo.Destroy"<<std::endl;
         boost::interprocess::shared_memory_object::remove(DOTS_SHMEM_NAME);
     }
 
@@ -100,6 +103,20 @@ namespace Internal
         //-------------------------------------------------
         boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository> localRepository;
         localRepository=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(m_paths);
+//        try
+//        {
+//            localRepository=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(m_paths);
+//        }
+//        catch(const Safir::Dob::Typesystem::Internal::ParseError& err)
+//        {
+//            std::cout<<"********** Parse Error **********************************************"<<std::endl;
+//            std::cout<<"* Label: "<<err.Label()<<std::endl;
+//            std::cout<<"* Descr: "<<err.Description()<<std::endl;
+//            std::cout<<"* File:  "<<err.File()<<std::endl;
+//            std::cout<<"* ErrId: "<<err.ErrorId()<<std::endl;
+//            std::cout<<"*********************************************************************"<<std::endl;
+//            throw;
+//        }
 
         //-------------------------------------------------
         //Copy localRepository into shared memory

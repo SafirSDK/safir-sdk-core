@@ -28,13 +28,22 @@
 #pragma warning (push)
 #pragma warning (disable : 4702)
 #endif
+
+void ListAllTypes();
+void ShowType(const char* name);
+void ShowClass(DotsC_TypeId tid);
+void ShowEnum(DotsC_TypeId tid);
+void ShowProperty(DotsC_TypeId tid);
+void ShowException(DotsC_TypeId tid);
+
 int main(int /*argc*/, char* /*argv*/[])
 {
     std::wcout<<"Checking configuration..."<<std::endl;
 
     try
-    {
-        DotsC_NumberOfTypeIds();
+    {        
+
+        std::cout<<"Number of types: "<<DotsC_NumberOfTypeIds()<<std::endl;
     }
     catch (const std::exception & exc)
     {
@@ -48,8 +57,105 @@ int main(int /*argc*/, char* /*argv*/[])
         return 1;
     }
 
+
+    //ListAllTypes();
+
     std::wcout<<"Success!"<<std::endl;
 
+    sleep(10);
     return 0;
 }
 
+void ListAllTypes()
+{
+    DotsC_TypeId tid[3000];
+    int size;
+    DotsC_GetAllTypeIds(tid, 3000, size);
+    if (size==0)
+    {
+        std::cout<<"No types found!"<<std::endl;
+    }
+    for (int i=0; i<size; ++i)
+    {
+        const char* n=DotsC_GetTypeName(tid[i]);
+        ShowType(n);
+        std::cout<<"- - - - -"<<std::endl;
+        //std::cout<<n<<" ["<<tid[i]<<"]"<<std::endl;
+    }
+}
+
+void ShowType(const char* name)
+{
+    DotsC_TypeId tid=DotsC_TypeIdFromName(name);
+    if (DotsC_IsClass(tid))
+    {
+        ShowClass(tid);
+    }
+    else if (DotsC_IsEnumeration(tid))
+    {
+        ShowEnum(tid);
+    }
+    else if (DotsC_IsProperty(tid))
+    {
+        ShowProperty(tid);
+    }
+    else if (DotsC_IsException(tid))
+    {
+        ShowException(tid);
+    }
+}
+
+void ShowClass(DotsC_TypeId tid)
+{
+    std::cout<<"Class: "<<DotsC_GetTypeName(tid)<<" ["<<tid<<"]"<<std::endl;
+
+    int numMem=DotsC_GetNumberOfMembers(tid);
+    if (numMem>0)
+    {
+        std::cout<<"  Members"<<std::endl;
+    }
+    for (int i=0; i<numMem; ++i)
+    {
+        const char* name;
+        DotsC_MemberType mt;
+        DotsC_TypeId complexTid;
+        int strLen;
+        bool isArray;
+        int arrSize;
+        DotsC_GetMemberInfo(tid, i, mt, name, complexTid, strLen, isArray, arrSize);
+        std::cout<<"    "<<i<<". "<<DotsC_GetMemberTypeName(tid, i)<<" "<<name<<std::endl;
+    }
+
+    int numParams=DotsC_GetNumberOfParameters(tid);
+    if (numParams>0)
+    {
+        std::cout<<"  Parameters"<<std::endl;
+    }
+    for (int i=0; i<numParams; ++i)
+    {
+        const char* n=DotsC_GetParameterName(tid, i);
+        std::cout<<"    "<<i<<". "<<n<<std::endl;
+    }
+}
+
+void ShowEnum(DotsC_TypeId tid)
+{
+    std::cout<<"Enum: "<<DotsC_GetTypeName(tid)<<" ["<<tid<<"]"<<std::endl;
+
+    int numVal=DotsC_GetNumberOfEnumerationValues(tid);
+    for (int i=0; i<numVal; ++i)
+    {
+        const char* n=DotsC_GetEnumerationValueName(tid, i);
+        std::cout<<"  Value "<<i<<": "<<n<<std::endl;
+    }
+}
+
+void ShowProperty(DotsC_TypeId tid)
+{
+    std::cout<<"Property: "<<DotsC_GetTypeName(tid)<<" ["<<tid<<"]"<<std::endl;
+}
+
+void ShowException(DotsC_TypeId tid)
+{
+    std::cout<<"Exception: "<<DotsC_GetTypeName(tid)<<" ["<<tid<<"]"<<std::endl;
+}
