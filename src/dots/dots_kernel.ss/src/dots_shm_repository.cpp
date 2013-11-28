@@ -33,21 +33,15 @@ namespace Internal
             RepositoryKeeper* instance=&RepositoryKeeper::Instance();
             instance->m_paths.insert(instance->m_paths.begin(), paths.begin(), paths.end());
             instance->m_startupSynchronizer.Start(instance);
-            return;
+            if (instance->m_repository!=NULL)
+            {
+                return; //loaded ok
+            }
         }
         catch (const boost::interprocess::bad_alloc&)
         {
             SEND_SYSTEM_LOG(Error, << "Ran out of shared memory while loading types and parameters." <<std::endl
                             << "Please adjust the parameter Safir.Dob.NodeParameters.TypesystemSharedMemorySize");
-        }
-        catch(const Safir::Dob::Typesystem::Internal::ParseError& err)
-        {
-            std::cout<<"********** Parse Error **********************************************"<<std::endl;
-            std::cout<<"* Label: "<<err.Label()<<std::endl;
-            std::cout<<"* Descr: "<<err.Description()<<std::endl;
-            std::cout<<"* File:  "<<err.File()<<std::endl;
-            std::cout<<"* ErrId: "<<err.ErrorId()<<std::endl;
-            std::cout<<"*********************************************************************"<<std::endl;
         }
         catch (const std::exception & exc)
         {
@@ -82,9 +76,18 @@ namespace Internal
 
     void RepositoryKeeper::Use()
     {
-        m_sharedMemory.reset(new boost::interprocess::managed_shared_memory
-                             (boost::interprocess::open_read_only,
-                              DOTS_SHMEM_NAME));
+        try
+        {
+            m_sharedMemory.reset(new boost::interprocess::managed_shared_memory
+                                 (boost::interprocess::open_read_only,
+                                  DOTS_SHMEM_NAME));
+        }
+        catch (...)
+        {
+            m_repository=NULL;
+            return;
+        }
+
         m_repository=m_sharedMemory->find<RepositoryShm>("DOTS_REPOSITORY").first;
     }
 
@@ -105,13 +108,15 @@ namespace Internal
         }
         catch(const Safir::Dob::Typesystem::Internal::ParseError& err)
         {
-            std::cout<<"********** Parse Error **********************************************"<<std::endl;
-            std::cout<<"* Label: "<<err.Label()<<std::endl;
-            std::cout<<"* Descr: "<<err.Description()<<std::endl;
-            std::cout<<"* File:  "<<err.File()<<std::endl;
-            std::cout<<"* ErrId: "<<err.ErrorId()<<std::endl;
-            std::cout<<"*********************************************************************"<<std::endl;
-            exit(1);
+            std::wcout<<"********** Parse Error **********************************************"<<std::endl;
+            std::wcout<<"* Label: "<<err.Label().c_str()<<std::endl;
+            std::wcout<<"* Descr: "<<err.Description().c_str()<<std::endl;
+            std::wcout<<"* File:  "<<err.File().c_str()<<std::endl;
+            std::wcout<<"* ErrId: "<<err.ErrorId()<<std::endl;
+            std::wcout<<"*********************************************************************"<<std::endl;
+            localRepository.reset();
+            m_repository=NULL;
+            return;
         }
 
         //-------------------------------------------------
