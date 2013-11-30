@@ -201,12 +201,17 @@ ENDMACRO()
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SAFIR_SDK}/data/build/)
 
 #MSVC variable is not set when using None as project languages
-#as is done in the dotnet projects.
+#as is done in the dotnet projects. So we check on WIN32 instead.
 if (WIN32)
     SET(COMMON_CS_FLAGS "-warn:4" "-nologo")
 
-    #this will make 32 bit builds work on a 64bit machine
-    if (NOT "$ENV{Platform}" STREQUAL "X64")
+    #Get platform and convert it to lowercase (vs2010 has it as X64 and vs2013 express as x64!)
+    string(TOLOWER "$ENV{Platform}" PLATFORM)
+
+    #make sure we set the arch of dotnet assemblies to be the same as the native code we build.
+    if (PLATFORM STREQUAL "x64")
+      SET(COMMON_CS_FLAGS ${COMMON_CS_FLAGS} "-platform:x64")
+    else()
       SET(COMMON_CS_FLAGS ${COMMON_CS_FLAGS} "-platform:x86")
     endif()
 else()
