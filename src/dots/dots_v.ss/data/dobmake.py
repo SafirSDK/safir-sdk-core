@@ -600,7 +600,7 @@ class VisualStudioBuilder(BuilderBase):
 
     def __run_vcvarsall(self, vcvarsall, arch):
         cmd = '"%s" %s & set' % (vcvarsall, arch)
-        logger.log("Running '" + cmd + "' to extract environment")
+        logger.write("Running '" + cmd + "' to extract environment")
         proc = subprocess.Popen(cmd,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
@@ -625,7 +625,7 @@ class VisualStudioBuilder(BuilderBase):
 
         #retry with cross compilation toolset if we're on amd64 and vcvarsall says the toolset is missing
         if self.arch == "x86-64" and output.find("configuration might not be installed") != -1:
-            logger.log("Native toolset appears to be missing, trying cross compilation")
+            logger.write("Native toolset appears to be missing, trying cross compilation")
             output = self.__run_vcvarsall(vcvarsall, "x86_amd64")
         
         found_variables = set()
