@@ -203,7 +203,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SAFIR_SDK}/data/build/)
 #MSVC variable is not set when using None as project languages
 #as is done in the dotnet projects. So we check on WIN32 instead.
 if (WIN32)
-    SET(COMMON_CS_FLAGS "-warn:4" "-nologo")
+    SET(COMMON_CS_FLAGS "-warn:4" "-nologo" "-nowarn:1607")
 
     #Get platform and convert it to lowercase (vs2010 has it as X64 and vs2013 express as x64!)
     string(TOLOWER "$ENV{Platform}" PLATFORM)
