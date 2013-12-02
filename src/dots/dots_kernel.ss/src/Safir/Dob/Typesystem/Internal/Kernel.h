@@ -493,6 +493,30 @@ extern "C"
                                                             DotsC_BytePointerDeleter & deleter,
                                                             const char * const xmlSource);
 
+    // Function:    DotsC_BlobToJson
+    // Parameters:  jsonDest    -   result of serialization, will be a json string. Out parameter
+    //              blobSource  -   blob to serialize
+    //              bufSize     -   size of jsonDest. string is null terminated.
+    //              resultSize  -   if the buffer was big enough for the json this holds the number
+    //                              of bytes written (including null termination)
+    //                              if it was too small it holds the size that was needed
+    //                              (so resultSize > bufSize ==> try again with bigger buffer)
+    // Returns:     -
+    // Comments:    Serializes a blob to a json string.
+    DOTS_KERNEL_API void CALLING_CONVENTION DotsC_BlobToJson(char * const jsonDest,
+                                                             const char * const blobSource,
+                                                             const DotsC_Int32 bufSize,
+                                                             DotsC_Int32 & resultSize);
+
+    // Function:    DotsC_JsonToBlob
+    // Parameters:  blobDest    -   blob that is the result of the serialization, out parameter
+    //              xmlSource   -   json string to serialize
+    // Returns:     -
+    // Comments:    Serializes a json string to a blob.
+    DOTS_KERNEL_API void CALLING_CONVENTION DotsC_JsonToBlob(char * & blobDest,
+                                                             DotsC_BytePointerDeleter & deleter,
+                                                             const char * const jsonSource);
+
     // Function:    DotsC_BinaryToBase64
     // Parameters:  binarySourceSize    -   number of bytes to be converted to Base64.
     // Returns:     number of characters in the Base64 converted representation. This is the
@@ -1412,6 +1436,15 @@ extern "C"
                                                                         char * const buf, 
                                                                         const DotsC_Int32 bufSize, 
                                                                         DotsC_Int32 & resultSize);
+
+    DOTS_KERNEL_API const char* CALLING_CONVENTION DotsC_GetDouFilePath(const DotsC_TypeId typeId);
+
+
+    // Function:    DotsC_TypeRepositoryLoadedByThisProcess
+    // Returns:     True if this process created the shared memory and loaded the type repository
+    // Comments:    Check if this process created and the shared memory and loaded type repository
+    //              or if it just opened it (i.e someone else already created it for us).
+    DOTS_KERNEL_API bool CALLING_CONVENTION DotsC_TypeRepositoryLoadedByThisProcess();
 }
 
 

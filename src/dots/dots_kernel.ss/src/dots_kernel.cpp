@@ -41,8 +41,7 @@
 #include <Safir/Dob/Typesystem/Internal/BlobLayout.h>
 #include <Safir/Dob/Typesystem/Internal/Serialization.h>
 
-#include "dots_shm_repository.h"
-#include "dots_file_collection.h"
+#include "dots_init_helper.h"
 #include "dots_exception_keeper.h"
 
 //disable warnings in boost
@@ -62,16 +61,6 @@ using namespace Safir::Dob::Typesystem::Internal;
 
 namespace 
 {
-    //check size of type definitions
-    BOOST_STATIC_ASSERT(sizeof(DotsC_Int32)==4);
-    BOOST_STATIC_ASSERT(sizeof(DotsC_Int64)==8);
-    BOOST_STATIC_ASSERT(sizeof(DotsC_Float32)==4);
-    BOOST_STATIC_ASSERT(sizeof(DotsC_Float64)==8);
-    BOOST_STATIC_ASSERT(sizeof(DotsC_EntityId)==sizeof(DotsC_TypeId) + sizeof(DotsC_Int64));
-    BOOST_STATIC_ASSERT(sizeof(DotsC_EntityId)==16);
-    BOOST_STATIC_ASSERT(sizeof(bool)==1);
-
-    
     void CALLING_CONVENTION DeleteBytePointer(char* & ptr)
     {
         if (ptr!=NULL)
@@ -79,32 +68,6 @@ namespace
             delete [] ptr;
             ptr=NULL;
         }
-    }
-
-    const BlobLayout<RepositoryShm>& GetBlobLayout()
-    {
-        static BlobLayout<RepositoryShm> inst(RepositoryKeeper::GetRepository());
-        return inst;
-    }
-    
-    class InitHelper
-    {
-    private:
-        friend void Init();
-        static boost::once_flag initFlag;
-        static void Init() 
-        {
-            std::vector<boost::filesystem::path> paths;
-            FileCollection::Dirs(paths);
-            RepositoryKeeper::Initialize(paths);
-            GetBlobLayout(); //creates instance of blobLayout
-        }
-    };
-    boost::once_flag InitHelper::initFlag=BOOST_ONCE_INIT;
-    
-    void Init()
-    {
-        boost::call_once(InitHelper::initFlag,InitHelper::Init);
     }
 
     void GetCompleteTypeInternal(const ClassDescriptionShm * const cd,
@@ -309,20 +272,20 @@ void DotsC_CreateBlob(const DotsC_TypeId typeId,
                       char* & blob)
 {
     Init();
-    GetBlobLayout().CreateBlob(typeId, blob);
+    RepositoryKeeper::GetBlobLayout()->CreateBlob(typeId, blob);
 }
 
 void DotsC_DeleteBlob(char* & blob)
 {
     Init();
-    GetBlobLayout().DeleteBlob(blob);
+    RepositoryKeeper::GetBlobLayout()->DeleteBlob(blob);
 }
 
 void DotsC_CreateCopyOfBlob(char* & to,
                             const char* const from)
 {
     Init();
-    const size_t size=static_cast<size_t>(GetBlobLayout().GetSize(from));
+    const size_t size=static_cast<size_t>(RepositoryKeeper::GetBlobLayout()->GetSize(from));
     to=new char[size];
     memcpy(to, from, size);
 }
@@ -330,21 +293,21 @@ void DotsC_CreateCopyOfBlob(char* & to,
 DotsC_TypeId DotsC_GetTypeId(const char* const blob)
 {
     Init();
-    return GetBlobLayout().GetTypeId(blob);
+    return RepositoryKeeper::GetBlobLayout()->GetTypeId(blob);
 }
 
 //Gives the total size of the blob
 DotsC_Int32 DotsC_GetSize(const char* const blob)
 {
     Init();
-    return GetBlobLayout().GetSize(blob);
+    return RepositoryKeeper::GetBlobLayout()->GetSize(blob);
 }
 
 // IsAnythingChanged
 bool DotsC_IsAnythingChanged(const char* const blob)
 {
     Init();
-    return GetBlobLayout().IsAnythingChanged(blob);
+    return RepositoryKeeper::GetBlobLayout()->IsAnythingChanged(blob);
 }
 
 
@@ -352,7 +315,7 @@ bool DotsC_IsAnythingChanged(const char* const blob)
 void DotsC_ResetChanged(char* const blob)
 {
     Init();
-    GetBlobLayout().ResetChanged(blob);
+    RepositoryKeeper::GetBlobLayout()->ResetChanged(blob);
 }
 
 //Reset changed flags for the members
@@ -360,7 +323,7 @@ void DotsC_SetChanged(char* const blob,
                       const bool changed)
 {
     Init();
-    GetBlobLayout().SetChanged(blob,changed);
+    RepositoryKeeper::GetBlobLayout()->SetChanged(blob,changed);
 }
 
 void DotsC_SetChangedHere(char* const blob,
@@ -369,14 +332,14 @@ void DotsC_SetChangedHere(char* const blob,
                           const bool changed)
 {
     Init();
-    const DotsC_MemberStatus status=GetBlobLayout().GetMemberStatus(blob, member, index);
-    GetBlobLayout().SetMemberStatus(status.IsNull(), changed, blob, member, index);
+    const DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetMemberStatus(blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(status.IsNull(), changed, blob, member, index);
 }
 
 void DotsC_SetChangedMembers(const char* const val, char* & blob)
 {
     Init();
-    GetBlobLayout().MergeChanges(val, blob);
+    RepositoryKeeper::GetBlobLayout()->MergeChanges(val, blob);
 }
 
 
@@ -384,7 +347,7 @@ void DotsC_SetChangedSinceLastRead(const char* const lastRead,
                                    char* const current)
 {
     Init();
-    GetBlobLayout().SetChangedSinceLastRead(lastRead, current);
+    RepositoryKeeper::GetBlobLayout()->SetChangedSinceLastRead(lastRead, current);
 }
 
 //***********************************************************
@@ -747,7 +710,15 @@ DotsC_MemberType DotsC_GetParameterType(const DotsC_TypeId typeId, const DotsC_P
 const char* DotsC_GetParameterTypeName(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter)
 {
     Init();
-    return Safir::Dob::Typesystem::Internal::TypeUtilities::GetTypeName(RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter)->GetMemberType());
+    const ParameterDescriptionShm* pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
+    if (pd->GetMemberType()==ObjectMemberType || pd->GetMemberType()==EnumerationMemberType)
+    {
+        return Safir::Dob::Typesystem::Internal::TypeUtilities::GetTypeName(RepositoryKeeper::GetRepository(), pd->GetTypeId());
+    }
+    else
+    {
+        return Safir::Dob::Typesystem::Internal::TypeUtilities::GetTypeName(pd->GetMemberType());
+    }
 }
 
 DotsC_Int32 DotsC_GetParameterArraySize(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter)
@@ -763,20 +734,20 @@ DotsC_Int32 DotsC_GetParameterArraySize(const DotsC_TypeId typeId, const DotsC_P
 bool DotsC_IsNullMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index)
 {
     Init();
-    DotsC_MemberStatus status=GetBlobLayout().GetMemberStatus(blob, member, index);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetMemberStatus(blob, member, index);
     return status.IsNull();
 }
 
 bool DotsC_IsChangedMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index)
 {
     Init();
-    DotsC_MemberStatus status=GetBlobLayout().GetMemberStatus(blob, member, index);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetMemberStatus(blob, member, index);
     if (status.HasChanged())
     {
         return true;
     }
 
-    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(GetBlobLayout().GetTypeId(blob));
+    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(RepositoryKeeper::GetBlobLayout()->GetTypeId(blob));
     if (cd==NULL)
     {
         return false;
@@ -788,8 +759,8 @@ bool DotsC_IsChangedMember(const char* const blob, const DotsC_MemberIndex membe
     {
         DotsC_Int32 dummy=0;
         const char* childBlob;
-        GetBlobLayout().GetDynamicMember(blob, member, index, childBlob, dummy);
-        return GetBlobLayout().IsAnythingChanged(childBlob);
+        RepositoryKeeper::GetBlobLayout()->GetDynamicMember(blob, member, index, childBlob, dummy);
+        return RepositoryKeeper::GetBlobLayout()->IsAnythingChanged(childBlob);
     }
     else
     {
@@ -801,7 +772,7 @@ bool DotsC_IsChangedMember(const char* const blob, const DotsC_MemberIndex membe
 void DotsC_GetBooleanMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, bool& val, bool& isNull, bool& isChanged)
 {
     Init();
-    DotsC_MemberStatus status=GetBlobLayout().GetBoolMember(blob, member, index, val);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetBoolMember(blob, member, index, val);
     isNull=status.IsNull();
     isChanged=status.HasChanged();
 }
@@ -814,7 +785,7 @@ void DotsC_GetEnumerationMember(const char* const blob,
                                 bool& isChanged)
 {
     Init();
-    DotsC_MemberStatus status=GetBlobLayout().GetEnumMember(blob, member, index, val);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetEnumMember(blob, member, index, val);
     isNull=status.IsNull();
     isChanged=status.HasChanged();
 }
@@ -822,7 +793,7 @@ void DotsC_GetEnumerationMember(const char* const blob,
 void DotsC_GetInt32Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_Int32& val, bool& isNull, bool& isChanged)
 {
     Init();
-    DotsC_MemberStatus status=GetBlobLayout().GetInt32Member(blob, member, index, val);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetInt32Member(blob, member, index, val);
     isNull=status.IsNull();
     isChanged=status.HasChanged();
 }
@@ -831,7 +802,7 @@ void DotsC_GetInt32Member(const char* const blob, const DotsC_MemberIndex member
 void DotsC_GetInt64Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_Int64& val, bool& isNull, bool& isChanged)
 {
     Init();
-    DotsC_MemberStatus status=GetBlobLayout().GetInt64Member(blob, member, index, val);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetInt64Member(blob, member, index, val);
     isNull=status.IsNull();
     isChanged=status.HasChanged();
 }
@@ -839,7 +810,7 @@ void DotsC_GetInt64Member(const char* const blob, const DotsC_MemberIndex member
 void DotsC_GetFloat32Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_Float32& val, bool& isNull, bool& isChanged)
 {
     Init();
-    DotsC_MemberStatus status=GetBlobLayout().GetFloat32Member(blob, member, index, val);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetFloat32Member(blob, member, index, val);
     isNull=status.IsNull();
     isChanged=status.HasChanged();
     if (isNull)
@@ -853,7 +824,7 @@ void DotsC_GetFloat32Member(const char* const blob, const DotsC_MemberIndex memb
 void DotsC_GetFloat64Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_Float64& val, bool& isNull, bool& isChanged)
 {
     Init();
-    DotsC_MemberStatus status=GetBlobLayout().GetFloat64Member(blob, member, index, val);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetFloat64Member(blob, member, index, val);
     isNull=status.IsNull();
     isChanged=status.HasChanged();
     if (isNull)
@@ -868,7 +839,7 @@ void DotsC_GetStringMember(const char* const blob, const DotsC_MemberIndex membe
 {
     Init();
     DotsC_Int32 dummy=0;
-    DotsC_MemberStatus status=GetBlobLayout().GetDynamicMember(blob, member, index, val, dummy);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetDynamicMember(blob, member, index, val, dummy);
     isNull=status.IsNull();
     isChanged=status.HasChanged();
 }
@@ -882,7 +853,7 @@ void DotsC_GetObjectMember(const char* const blob,
 {
     Init();
     DotsC_Int32 dummy=0;
-    DotsC_MemberStatus status=GetBlobLayout().GetDynamicMember(blob, member, index, val, dummy);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetDynamicMember(blob, member, index, val, dummy);
     isNull=status.IsNull();
     isChanged=status.HasChanged();
 }
@@ -896,7 +867,7 @@ void DotsC_GetWriteableObjectMember(char* const blob,
 {
     Init();
     DotsC_Int32 dummy=0;
-    DotsC_MemberStatus status=GetBlobLayout().GetWritableDynamicMember(blob, member, index, val, dummy);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetWritableDynamicMember(blob, member, index, val, dummy);
     isNull=status.IsNull();
     isChanged=status.HasChanged();
 }
@@ -911,7 +882,7 @@ void DotsC_GetBinaryMember(const char* const blob,
                            bool & isChanged)
 {
     Init();
-    DotsC_MemberStatus status=GetBlobLayout().GetDynamicMember(blob, member, index, val, size);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetDynamicMember(blob, member, index, val, size);
     isNull=status.IsNull();
     isChanged=status.HasChanged();
 }
@@ -919,7 +890,7 @@ void DotsC_GetBinaryMember(const char* const blob,
 void DotsC_GetTypeIdMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_TypeId& val, bool & isNull, bool & isChanged)
 {
     Init();
-    DotsC_MemberStatus status=GetBlobLayout().GetInt64Member(blob, member, index, val);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetInt64Member(blob, member, index, val);
     isNull=status.IsNull();
     isChanged=status.HasChanged();
 }
@@ -933,7 +904,7 @@ void DotsC_GetHashedIdMember(const char* const blob,
                              bool & isChanged)
 {
     Init();
-    DotsC_MemberStatus status=GetBlobLayout().GetHashedMember(blob, member, index, hashVal, strVal);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetHashedMember(blob, member, index, hashVal, strVal);
     isNull=status.IsNull();
     isChanged=status.HasChanged();
 }
@@ -947,7 +918,7 @@ void DotsC_GetEntityIdMember(const char* const blob,
                              bool & isChanged)
 {
     Init();
-    DotsC_MemberStatus status=GetBlobLayout().GetEntityIdMember(blob, member, index, entityId, instanceIdStr);
+    DotsC_MemberStatus status=RepositoryKeeper::GetBlobLayout()->GetEntityIdMember(blob, member, index, entityId, instanceIdStr);
     isNull=status.IsNull();
     isChanged=status.HasChanged();
 }
@@ -960,7 +931,7 @@ void DotsC_SetNullMember(char* const blob,
                          const DotsC_ArrayIndex index)
 {
     Init();
-    GetBlobLayout().SetMemberStatus(true, true, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(true, true, blob, member, index);
 }
 
 void DotsC_SetBooleanMember(const bool val,
@@ -969,8 +940,8 @@ void DotsC_SetBooleanMember(const bool val,
                             const DotsC_ArrayIndex index)
 {
     Init();
-    GetBlobLayout().SetBoolMember(val, blob, member, index);
-    GetBlobLayout().SetMemberStatus(false, true, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetBoolMember(val, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
 }
 
 void DotsC_SetEnumerationMember(const DotsC_EnumerationValue val,
@@ -979,8 +950,8 @@ void DotsC_SetEnumerationMember(const DotsC_EnumerationValue val,
                                 const DotsC_ArrayIndex index)
 {
     Init();
-    GetBlobLayout().SetEnumMember(val, blob, member, index);
-    GetBlobLayout().SetMemberStatus(false, true, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetEnumMember(val, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
 }
 
 
@@ -990,8 +961,8 @@ void DotsC_SetInt32Member(const DotsC_Int32 val,
                           const DotsC_ArrayIndex index)
 {
     Init();
-    GetBlobLayout().SetInt32Member(val, blob, member, index);
-    GetBlobLayout().SetMemberStatus(false, true, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetInt32Member(val, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
 }
 
 void DotsC_SetInt64Member(const DotsC_Int64 val,
@@ -1000,8 +971,8 @@ void DotsC_SetInt64Member(const DotsC_Int64 val,
                           const DotsC_ArrayIndex index)
 {
     Init();
-    GetBlobLayout().SetInt64Member(val, blob, member, index);
-    GetBlobLayout().SetMemberStatus(false, true, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetInt64Member(val, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
 }
 
 void DotsC_SetFloat32Member(const DotsC_Float32 val,
@@ -1010,8 +981,8 @@ void DotsC_SetFloat32Member(const DotsC_Float32 val,
                             const DotsC_ArrayIndex index)
 {
     Init();
-    GetBlobLayout().SetFloat32Member(val, blob, member, index);
-    GetBlobLayout().SetMemberStatus(false, true, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetFloat32Member(val, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
 }
 
 void DotsC_SetFloat64Member(const DotsC_Float64 val,
@@ -1020,8 +991,8 @@ void DotsC_SetFloat64Member(const DotsC_Float64 val,
                             const DotsC_ArrayIndex index)
 {
     Init();
-    GetBlobLayout().SetFloat64Member(val, blob, member, index);
-    GetBlobLayout().SetMemberStatus(false, true, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetFloat64Member(val, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
 }
 
 void DotsC_SetStringMember(const char* const val,
@@ -1031,8 +1002,8 @@ void DotsC_SetStringMember(const char* const val,
 {
     Init();
     DotsC_Int32 dummy=0;
-    GetBlobLayout().SetDynamicMember(val, dummy, blob, member, index);
-    GetBlobLayout().SetMemberStatus(false, true, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetDynamicMember(val, dummy, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
 }
 
 void DotsC_SetTypeIdMember(const DotsC_TypeId val,
@@ -1041,8 +1012,8 @@ void DotsC_SetTypeIdMember(const DotsC_TypeId val,
                            const DotsC_ArrayIndex index)
 {
     Init();
-    GetBlobLayout().SetInt64Member(val, blob, member, index);
-    GetBlobLayout().SetMemberStatus(false, true, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetInt64Member(val, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
 }
 
 void DotsC_SetHashedIdMember(const DotsC_Int64 hashVal,
@@ -1052,8 +1023,8 @@ void DotsC_SetHashedIdMember(const DotsC_Int64 hashVal,
                              const DotsC_ArrayIndex index)
 {
     Init();
-    GetBlobLayout().SetHashedMember(hashVal, strVal, blob, member, index);
-    GetBlobLayout().SetMemberStatus(false, true, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetHashedMember(hashVal, strVal, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
 }
 
 void DotsC_SetEntityIdMember(const DotsC_EntityId& entityId,
@@ -1063,16 +1034,16 @@ void DotsC_SetEntityIdMember(const DotsC_EntityId& entityId,
                              const DotsC_ArrayIndex index)
 {
     Init();
-    GetBlobLayout().SetEntityIdMember(entityId, instanceIdStr, blob, member, index);
-    GetBlobLayout().SetMemberStatus(false, true, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetEntityIdMember(entityId, instanceIdStr, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
 }
 
 void DotsC_SetObjectMember(const char* const val, char* & blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index)
 {
     Init();
     DotsC_Int32 dummy=0;
-    GetBlobLayout().SetDynamicMember(val, dummy, blob, member, index);
-    GetBlobLayout().SetMemberStatus(false, true, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetDynamicMember(val, dummy, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
 }
 
 void DotsC_SetBinaryMember(const char* val,
@@ -1082,8 +1053,8 @@ void DotsC_SetBinaryMember(const char* val,
                            const DotsC_ArrayIndex index)
 {
     Init();
-    GetBlobLayout().SetDynamicMember(val, numberOfBytes, blob, member, index);
-    GetBlobLayout().SetMemberStatus(false, true, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetDynamicMember(val, numberOfBytes, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
 }
 
 //************************************************************************************
@@ -1162,6 +1133,42 @@ void DotsC_XmlToBlob(char* & blobDest,
     deleter=DeleteBytePointer;
     std::vector<char> blob;
     Safir::Dob::Typesystem::Internal::XmlToBinary(RepositoryKeeper::GetRepository(), xmlSource, blob);
+    if (!blob.empty())
+    {
+        blobDest=new char[blob.size()];
+        memcpy(blobDest, &blob[0], blob.size());
+    }
+    else
+    {
+        blobDest=NULL;
+    }
+}
+
+void DotsC_BlobToJson(char * const jsonDest,
+                      const char * const blobSource,
+                      const DotsC_Int32 bufSize,
+                      DotsC_Int32 & resultSize)
+{
+    Init();
+    std::ostringstream jsonStream;
+    Safir::Dob::Typesystem::Internal::BinaryToJson(RepositoryKeeper::GetRepository(), blobSource, jsonStream);
+    std::string json=jsonStream.str();
+    resultSize=static_cast<DotsC_Int32>(json.size())+1; //add one char for null termination
+    if (resultSize <= bufSize)
+    {
+        strncpy(jsonDest, json.c_str(), resultSize);
+    }
+
+}
+
+void DotsC_JsonToBlob(char * & blobDest,
+                      DotsC_BytePointerDeleter & deleter,
+                      const char * const jsonSource)
+{
+    Init();
+    deleter=DeleteBytePointer;
+    std::vector<char> blob;
+    Safir::Dob::Typesystem::Internal::JsonToBinary(RepositoryKeeper::GetRepository(), jsonSource, blob);
     if (!blob.empty())
     {
         blobDest=new char[blob.size()];
@@ -1359,7 +1366,7 @@ void DotsC_FormatBlob(char* const blob,
                       char* & beginningOfUnused)
 {
     Init();
-    GetBlobLayout().FormatBlob(blob, blobSize, typeId, beginningOfUnused);
+    RepositoryKeeper::GetBlobLayout()->FormatBlob(blob, blobSize, typeId, beginningOfUnused);
 }
 
 
@@ -1372,7 +1379,7 @@ void DotsC_CreateObjectMember(char* const insideBlob,
                               char* & beginningOfUnused)
 {
     Init();
-    GetBlobLayout().CreateObjectMember(insideBlob,blobSize, typeId, member, index, isChanged, beginningOfUnused);
+    RepositoryKeeper::GetBlobLayout()->CreateObjectMember(insideBlob,blobSize, typeId, member, index, isChanged, beginningOfUnused);
 }
 
 void DotsC_CreateStringMember(char* const insideBlob,
@@ -1383,7 +1390,7 @@ void DotsC_CreateStringMember(char* const insideBlob,
                               char* & beginningOfUnused)
 {
     Init();
-    GetBlobLayout().CreateStringMember(insideBlob,stringLength,member,index,isChanged,beginningOfUnused);
+    RepositoryKeeper::GetBlobLayout()->CreateStringMember(insideBlob,stringLength,member,index,isChanged,beginningOfUnused);
 }
 
 void DotsC_CreateBinaryMember(char* const insideBlob,
@@ -1394,7 +1401,7 @@ void DotsC_CreateBinaryMember(char* const insideBlob,
                               char* & beginningOfUnused)
 {
     Init();
-    GetBlobLayout().CreateBinaryMember(insideBlob,binarySize,member,index,isChanged,beginningOfUnused);
+    RepositoryKeeper::GetBlobLayout()->CreateBinaryMember(insideBlob,binarySize,member,index,isChanged,beginningOfUnused);
 }
 
 void DotsC_SetBooleanMemberInPreallocated(const bool val,
@@ -1407,9 +1414,9 @@ void DotsC_SetBooleanMemberInPreallocated(const bool val,
     Init();
     if (!isNull)
     {
-        GetBlobLayout().SetBoolMember(val, blob, member, index);
+        RepositoryKeeper::GetBlobLayout()->SetBoolMember(val, blob, member, index);
     }
-    GetBlobLayout().SetMemberStatus(isNull, isChanged, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(isNull, isChanged, blob, member, index);
 }
 
 
@@ -1424,9 +1431,9 @@ void DotsC_SetInt32MemberInPreallocated(const DotsC_Int32 val,
     Init();
     if (!isNull)
     {
-        GetBlobLayout().SetInt32Member(val, blob, member, index);
+        RepositoryKeeper::GetBlobLayout()->SetInt32Member(val, blob, member, index);
     }
-    GetBlobLayout().SetMemberStatus(isNull, isChanged, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(isNull, isChanged, blob, member, index);
 }
 
 
@@ -1440,9 +1447,9 @@ void DotsC_SetInt64MemberInPreallocated(const DotsC_Int64 val,
     Init();
     if (!isNull)
     {
-        GetBlobLayout().SetInt64Member(val, blob, member, index);
+        RepositoryKeeper::GetBlobLayout()->SetInt64Member(val, blob, member, index);
     }
-    GetBlobLayout().SetMemberStatus(isNull, isChanged, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(isNull, isChanged, blob, member, index);
 
 }
 
@@ -1456,9 +1463,9 @@ void DotsC_SetFloat32MemberInPreallocated(const DotsC_Float32 val,
     Init();
     if (!isNull)
     {
-        GetBlobLayout().SetFloat32Member(val, blob, member, index);
+        RepositoryKeeper::GetBlobLayout()->SetFloat32Member(val, blob, member, index);
     }
-    GetBlobLayout().SetMemberStatus(isNull, isChanged, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(isNull, isChanged, blob, member, index);
 
 }
 
@@ -1472,9 +1479,9 @@ void DotsC_SetFloat64MemberInPreallocated(const DotsC_Float64 val,
     Init();
     if (!isNull)
     {
-        GetBlobLayout().SetFloat64Member(val, blob, member, index);
+        RepositoryKeeper::GetBlobLayout()->SetFloat64Member(val, blob, member, index);
     }
-    GetBlobLayout().SetMemberStatus(isNull, isChanged, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(isNull, isChanged, blob, member, index);
 
 }
 
@@ -1491,7 +1498,7 @@ void DotsC_SetHashedIdMemberInPreallocated(const DotsC_Int64 hashVal,
     Init();
     if (!isNull)
     {
-        GetBlobLayout().CreateAndSetMemberWithOptionalString(blob,
+        RepositoryKeeper::GetBlobLayout()->CreateAndSetMemberWithOptionalString(blob,
                                                          hashVal,
                                                          strVal,
                                                          stringLength,
@@ -1500,7 +1507,7 @@ void DotsC_SetHashedIdMemberInPreallocated(const DotsC_Int64 hashVal,
                                                          isChanged,
                                                          beginningOfUnused);
     }
-    GetBlobLayout().SetMemberStatus(isNull, isChanged, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(isNull, isChanged, blob, member, index);
 }
 
 void DotsC_SetEntityIdMemberInPreallocated(const DotsC_EntityId & entityId,
@@ -1516,7 +1523,7 @@ void DotsC_SetEntityIdMemberInPreallocated(const DotsC_EntityId & entityId,
     Init();
     if (!isNull)
     {
-        GetBlobLayout().CreateAndSetMemberWithOptionalString(blob,
+        RepositoryKeeper::GetBlobLayout()->CreateAndSetMemberWithOptionalString(blob,
                                                          entityId,
                                                          instanceIdStr,
                                                          stringLength,
@@ -1525,7 +1532,7 @@ void DotsC_SetEntityIdMemberInPreallocated(const DotsC_EntityId & entityId,
                                                          isChanged,
                                                          beginningOfUnused);
     }
-    GetBlobLayout().SetMemberStatus(isNull, isChanged, blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(isNull, isChanged, blob, member, index);
 }
 
 void DotsC_GetPropertyMappingKind(const DotsC_TypeId typeId,
@@ -1883,4 +1890,45 @@ void DotsC_GetDouFilePathForType(const DotsC_TypeId typeId,
     {
         strncpy(buf, file, resultSize);
     }
+}
+
+const char* DotsC_GetDouFilePath(const DotsC_TypeId typeId)
+{
+    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
+    if (cd!=NULL)
+    {
+        return cd->FileName();
+    }
+    else
+    {
+        const EnumDescriptionShm* ed=RepositoryKeeper::GetRepository()->GetEnum(typeId);
+        if (ed!=NULL)
+        {
+            return ed->FileName();
+        }
+        else
+        {
+            const PropertyDescriptionShm* pd=RepositoryKeeper::GetRepository()->GetProperty(typeId);
+            if (pd!=NULL)
+            {
+                return pd->FileName();
+            }
+            else
+            {
+                const ExceptionDescriptionShm* ex=RepositoryKeeper::GetRepository()->GetException(typeId);
+                if (ex!=NULL)
+                {
+                    return ex->FileName();
+                }
+            }
+        }
+    }
+
+    return NULL;
+}
+
+bool DotsC_TypeRepositoryLoadedByThisProcess()
+{
+    Init();
+    return RepositoryKeeper::RepositoryCreatedByThisProcess();
 }

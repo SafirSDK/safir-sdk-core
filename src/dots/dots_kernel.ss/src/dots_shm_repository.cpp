@@ -4,7 +4,23 @@
 *
 * Created by: Joel Ottosson / joot
 *
-*******************************************************************************/
+*******************************************************************************
+*
+* This file is part of Safir SDK Core.
+*
+* Safir SDK Core is free software: you can redistribute it and/or modify
+* it under the terms of version 3 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* Safir SDK Core is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+*
+******************************************************************************/
 #include <iostream>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
@@ -26,22 +42,19 @@ namespace Internal
         return instance;
     }
 
-    void RepositoryKeeper::Initialize(const std::vector<boost::filesystem::path>& paths)
+    void RepositoryKeeper::Initialize(size_t sharedMemorySize, const std::vector<boost::filesystem::path>& paths)
     {
         try
         {
             RepositoryKeeper* instance=&RepositoryKeeper::Instance();
+            instance->m_sharedMemorySize=sharedMemorySize;
             instance->m_paths.insert(instance->m_paths.begin(), paths.begin(), paths.end());
             instance->m_startupSynchronizer.Start(instance);
             if (instance->m_repository!=NULL)
             {
+                instance->m_blobLayout.reset(new Safir::Dob::Typesystem::Internal::BlobLayout<RepositoryShm>(instance->m_repository));
                 return; //loaded ok
             }
-        }
-        catch (const boost::interprocess::bad_alloc&)
-        {
-            SEND_SYSTEM_LOG(Error, << "Ran out of shared memory while loading types and parameters." <<std::endl
-                            << "Please adjust the parameter Safir.Dob.NodeParameters.TypesystemSharedMemorySize");
         }
         catch (const std::exception & exc)
         {
@@ -54,14 +67,26 @@ namespace Internal
         exit(1);
     }
 
+    bool RepositoryKeeper::RepositoryCreatedByThisProcess()
+    {
+        return Instance().m_repositoryCreatedByThisProcess;
+    }
+
     const RepositoryShm* RepositoryKeeper::GetRepository()
     {
         return Instance().m_repository;
     }
 
+    const Safir::Dob::Typesystem::Internal::BlobLayout<RepositoryShm>* RepositoryKeeper::GetBlobLayout()
+    {
+        return Instance().m_blobLayout.get();
+    }
+
     RepositoryKeeper::RepositoryKeeper()
         :m_startupSynchronizer("DOTS_INITIALIZATION")
+        ,m_sharedMemorySize(0)
         ,m_paths()
+        ,m_repositoryCreatedByThisProcess(false)
     {
     }
 
@@ -72,6 +97,7 @@ namespace Internal
     void RepositoryKeeper::Create()
     {
         LoadData();
+        m_repositoryCreatedByThisProcess=true;
     }
 
     void RepositoryKeeper::Use()
@@ -119,121 +145,137 @@ namespace Internal
             return;
         }
 
-        //-------------------------------------------------
-        //Copy localRepository into shared memory
-        //-------------------------------------------------
-        boost::interprocess::shared_memory_object::remove(DOTS_SHMEM_NAME);
-        m_sharedMemory.reset(new boost::interprocess::managed_shared_memory
-                             (boost::interprocess::create_only,
-                              DOTS_SHMEM_NAME,
-                              10 * 1024 * 1024));
-        m_repository=m_sharedMemory->construct<RepositoryShm>("DOTS_REPOSITORY")(m_sharedMemory.get());
+        try
+        {
+            //-------------------------------------------------
+            //Copy localRepository into shared memory
+            //-------------------------------------------------
+            boost::interprocess::shared_memory_object::remove(DOTS_SHMEM_NAME);
+            m_sharedMemory.reset(new boost::interprocess::managed_shared_memory
+                                 (boost::interprocess::create_only,
+                                  DOTS_SHMEM_NAME,
+                                  m_sharedMemorySize));
+            m_repository=m_sharedMemory->construct<RepositoryShm>("DOTS_REPOSITORY")(m_sharedMemory.get());
 
-        //----------------------------------
-        //Enums
-        //----------------------------------
-        std::set<DotsC_TypeId> typeIdVec;
-        localRepository->GetAllEnumTypeIds(typeIdVec);
-        for (std::set<DotsC_TypeId>::const_iterator it=typeIdVec.begin(); it!=typeIdVec.end(); ++it)
-        {
-            m_repository->m_enums.insert(EnumMapShm::value_type(*it, EnumDescriptionShm(localRepository->GetEnum(*it), m_sharedMemory.get())));
-        }
-
-        //----------------------------------
-        //Exceptions
-        //----------------------------------
-        typeIdVec.clear();
-        localRepository->GetAllExceptionTypeIds(typeIdVec);
-        for (std::set<DotsC_TypeId>::const_iterator it=typeIdVec.begin(); it!=typeIdVec.end(); ++it)
-        {
-            m_repository->m_exceptions.insert(ExceptionMapShm::value_type(*it, ExceptionDescriptionShm(localRepository->GetException(*it), m_sharedMemory.get())));
-        }
-        for (ExceptionMapShm::iterator it=m_repository->m_exceptions.begin(); it!=m_repository->m_exceptions.end(); ++it)
-        {
-            const ExceptionDescription* base=localRepository->GetException(it->first)->GetBaseClass();
-            if (base)
+            //----------------------------------
+            //Enums
+            //----------------------------------
+            std::set<DotsC_TypeId> typeIdVec;
+            localRepository->GetAllEnumTypeIds(typeIdVec);
+            for (std::set<DotsC_TypeId>::const_iterator it=typeIdVec.begin(); it!=typeIdVec.end(); ++it)
             {
-                it->second.SetBaseClass(&(m_repository->m_exceptions.find(base->GetTypeId())->second));
-                //
-            }
-        }
-
-        //----------------------------------
-        //Properties
-        //----------------------------------
-        typeIdVec.clear();
-        localRepository->GetAllPropertyTypeIds(typeIdVec);
-        for (std::set<DotsC_TypeId>::const_iterator it=typeIdVec.begin(); it!=typeIdVec.end(); ++it)
-        {
-            m_repository->m_properties.insert(PropertyMapShm::value_type(*it, PropertyDescriptionShm(localRepository->GetProperty(*it), m_sharedMemory.get())));
-        }
-
-        //--------------------------------------------
-        //Classes, parameters and propertyMappings
-        //--------------------------------------------
-        typeIdVec.clear();
-        localRepository->GetAllClassTypeIds(typeIdVec);
-        for (std::set<DotsC_TypeId>::const_iterator it=typeIdVec.begin(); it!=typeIdVec.end(); ++it)
-        {
-            //class
-            const ClassDescription* cd=localRepository->GetClass(*it);
-            ClassDescriptionShm* cdShm= &(m_repository->m_classes.insert(ClassMapShm::value_type(*it, ClassDescriptionShm(cd, m_sharedMemory.get()))).first->second);
-
-            //parameters
-            int numParams=cd->GetNumberOfParameters();
-            int startParam=numParams-cd->GetNumberOfOwnParameters();
-            for (int i=startParam; i<numParams; ++i)
-            {
-                const ParameterDescription* paramDesc=cd->GetParameter(i);
-                ParameterDescriptionShmPtr paramPtr=&(m_repository->m_params.insert(ParameterMapShm::value_type(StringShm(paramDesc->GetName(), m_sharedMemory->get_segment_manager()),
-                                                                          ParameterDescriptionShm(paramDesc, m_sharedMemory.get()))).first->second);
-                cdShm->AddOwnParameter(paramPtr);
-            }
-        }
-
-        //Setup baseclasses and descendants and propertyMappings
-        for (ClassMapShm::iterator it=m_repository->m_classes.begin(); it!=m_repository->m_classes.end(); ++it)
-        {
-            const ClassDescription* cd=localRepository->GetClass(it->first);
-            ClassDescriptionShm& cdShm=it->second;
-            if (cd->GetBaseClass())
-            {
-                ClassDescriptionShm* baseShm=&(m_repository->m_classes.find(cd->GetBaseClass()->GetTypeId())->second);
-                cdShm.SetBaseClass(baseShm);
-                baseShm->AddDescendant(&cdShm);
+                m_repository->m_enums.insert(EnumMapShm::value_type(*it, EnumDescriptionShm(localRepository->GetEnum(*it), m_sharedMemory.get())));
             }
 
-            //propertyMappings
+            //----------------------------------
+            //Exceptions
+            //----------------------------------
             typeIdVec.clear();
-            cd->GetPropertyIds(typeIdVec);
-            for (std::set<DotsC_TypeId>::const_iterator propIdIt=typeIdVec.begin(); propIdIt!=typeIdVec.end(); ++propIdIt)
+            localRepository->GetAllExceptionTypeIds(typeIdVec);
+            for (std::set<DotsC_TypeId>::const_iterator it=typeIdVec.begin(); it!=typeIdVec.end(); ++it)
             {
-                bool inherited=false;
-                const PropertyMappingDescription* pm=cd->GetPropertyMapping(*propIdIt, inherited);
-
-                if (!inherited)
+                m_repository->m_exceptions.insert(ExceptionMapShm::value_type(*it, ExceptionDescriptionShm(localRepository->GetException(*it), m_sharedMemory.get())));
+            }
+            for (ExceptionMapShm::iterator it=m_repository->m_exceptions.begin(); it!=m_repository->m_exceptions.end(); ++it)
+            {
+                const ExceptionDescription* base=localRepository->GetException(it->first)->GetBaseClass();
+                if (base)
                 {
-                    PropertyMappingDescriptionShm pmShm(pm,
-                                                        &cdShm,
-                                                        &(m_repository->m_properties.find(pm->GetProperty()->GetTypeId())->second),
-                                                        m_sharedMemory.get());
-
-                    for (int i=0; i<pm->GetProperty()->GetNumberOfMembers(); ++i)
-                    {
-                        const MemberMappingDescription* mm=pm->GetMemberMapping(i);
-                        MemberMappingDescriptionShm mmShm(mm, m_sharedMemory.get());
-                        if (mm->GetMappingKind()==MappedToParameter)
-                        {
-                            std::pair<const ParameterDescription*, int> paramAndIndex=mm->GetParameter();
-                            mmShm.SetParamRef(&(m_repository->m_params.find(StringShm(paramAndIndex.first->GetName(), m_sharedMemory->get_segment_manager()))->second), paramAndIndex.second);
-                        }
-
-                        pmShm.AddMemberMapping(mmShm);
-                    }
-
-                    cdShm.AddPropertyMapping(pmShm);
+                    it->second.SetBaseClass(&(m_repository->m_exceptions.find(base->GetTypeId())->second));
+                    //
                 }
             }
+
+            //----------------------------------
+            //Properties
+            //----------------------------------
+            typeIdVec.clear();
+            localRepository->GetAllPropertyTypeIds(typeIdVec);
+            for (std::set<DotsC_TypeId>::const_iterator it=typeIdVec.begin(); it!=typeIdVec.end(); ++it)
+            {
+                m_repository->m_properties.insert(PropertyMapShm::value_type(*it, PropertyDescriptionShm(localRepository->GetProperty(*it), m_sharedMemory.get())));
+            }
+
+            //--------------------------------------------
+            //Classes, parameters and propertyMappings
+            //--------------------------------------------
+            typeIdVec.clear();
+            localRepository->GetAllClassTypeIds(typeIdVec);
+            for (std::set<DotsC_TypeId>::const_iterator it=typeIdVec.begin(); it!=typeIdVec.end(); ++it)
+            {
+                //class
+                const ClassDescription* cd=localRepository->GetClass(*it);
+                ClassDescriptionShm* cdShm= &(m_repository->m_classes.insert(ClassMapShm::value_type(*it, ClassDescriptionShm(cd, m_sharedMemory.get()))).first->second);
+
+                //parameters
+                int numParams=cd->GetNumberOfParameters();
+                int startParam=numParams-cd->GetNumberOfOwnParameters();
+                for (int i=startParam; i<numParams; ++i)
+                {
+                    const ParameterDescription* paramDesc=cd->GetParameter(i);
+                    ParameterDescriptionShmPtr paramPtr=&(m_repository->m_params.insert(ParameterMapShm::value_type(StringShm(paramDesc->GetName(), m_sharedMemory->get_segment_manager()),
+                                                                              ParameterDescriptionShm(paramDesc, m_sharedMemory.get()))).first->second);
+                    cdShm->AddOwnParameter(paramPtr);
+                }
+            }
+
+            //Setup baseclasses and descendants and propertyMappings
+            for (ClassMapShm::iterator it=m_repository->m_classes.begin(); it!=m_repository->m_classes.end(); ++it)
+            {
+                const ClassDescription* cd=localRepository->GetClass(it->first);
+                ClassDescriptionShm& cdShm=it->second;
+                if (cd->GetBaseClass())
+                {
+                    ClassDescriptionShm* baseShm=&(m_repository->m_classes.find(cd->GetBaseClass()->GetTypeId())->second);
+                    cdShm.SetBaseClass(baseShm);
+                    baseShm->AddDescendant(&cdShm);
+                }
+
+                //propertyMappings
+                typeIdVec.clear();
+                cd->GetPropertyIds(typeIdVec);
+                for (std::set<DotsC_TypeId>::const_iterator propIdIt=typeIdVec.begin(); propIdIt!=typeIdVec.end(); ++propIdIt)
+                {
+                    bool inherited=false;
+                    const PropertyMappingDescription* pm=cd->GetPropertyMapping(*propIdIt, inherited);
+
+                    if (!inherited)
+                    {
+                        PropertyMappingDescriptionShm pmShm(pm,
+                                                            &cdShm,
+                                                            &(m_repository->m_properties.find(pm->GetProperty()->GetTypeId())->second),
+                                                            m_sharedMemory.get());
+
+                        for (int i=0; i<pm->GetProperty()->GetNumberOfMembers(); ++i)
+                        {
+                            const MemberMappingDescription* mm=pm->GetMemberMapping(i);
+                            MemberMappingDescriptionShm mmShm(mm, m_sharedMemory.get());
+                            if (mm->GetMappingKind()==MappedToParameter)
+                            {
+                                std::pair<const ParameterDescription*, int> paramAndIndex=mm->GetParameter();
+                                mmShm.SetParamRef(&(m_repository->m_params.find(StringShm(paramAndIndex.first->GetName(), m_sharedMemory->get_segment_manager()))->second), paramAndIndex.second);
+                            }
+
+                            pmShm.AddMemberMapping(mmShm);
+                        }
+
+                        cdShm.AddPropertyMapping(pmShm);
+                    }
+                }
+            }
+        }
+        catch (const boost::interprocess::interprocess_exception&)
+        {
+            SEND_SYSTEM_LOG(Error, << "Ran out of shared memory while loading types and parameters." <<std::endl
+                            << "Please increase the sharemd memory size specified in typesystem.ini");
+            localRepository.reset();
+            m_repository=NULL;
+        }
+        catch (const std::exception& ex)
+        {
+            std::wcout<<"std "<<ex.what()<<std::endl;
+            localRepository.reset();
+            m_repository=NULL;
         }
     }
 

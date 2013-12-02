@@ -145,7 +145,7 @@ namespace Internal
     template <class RepositoryT>
     void RepositoryToString(const RepositoryT* repository, bool includeCreateRoutines, std::ostream &os)
     {
-        (Detail::ToStringHelper<RepositoryT>(repository, includeCreateRoutines))(os);
+        (Detail::ToStringHelper<RepositoryT>(repository, includeCreateRoutines)).RepositoryToString(os);
     }
 }
 }

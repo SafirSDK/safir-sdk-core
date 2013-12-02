@@ -60,24 +60,54 @@ namespace Detail
         {
         }
 
-        void operator()(std::ostream& os) {DumpRepository(os);}
+        void RepositoryToString(std::ostream& os) const {DumpRepository(os);}
+        void TypeToString(DotsC_TypeId typeId, std::ostream& os) const;
 
     private:
         const RepositoryType* m_rep;
         const bool m_includeCreateRoutines;
-        void DumpRepository(std::ostream& os);
-        void DumpClassDescription(const ClassDescriptionType* c, std::ostream& os);
-        void DumpMemberDescription(const MemberDescriptionType* c, std::ostream& os);
-        void DumpParameterDescription(const ParameterDescriptionType* c, std::ostream& os);
-        void DumpEnumerationDescription(const EnumDescriptionType* c, std::ostream& os);
-        void DumpExceptionDescription(const ExceptionDescriptionType* c, std::ostream& os);
-        void DumpPropertyDescription(const PropertyDescriptionType* c, std::ostream& os);
-        void DumpMappingDescription(const PropertyMappingDescriptionType* c, bool inherited, std::ostream& os);
-        void DumpCreateRoutineDescription(const CreateRoutineDescriptionType* c, std::ostream& os);
+        void DumpRepository(std::ostream& os) const;
+        void DumpClassDescription(const ClassDescriptionType* c, std::ostream& os) const;
+        void DumpMemberDescription(const MemberDescriptionType* c, std::ostream& os) const;
+        void DumpParameterDescription(const ParameterDescriptionType* c, std::ostream& os) const;
+        void DumpEnumerationDescription(const EnumDescriptionType* c, std::ostream& os) const;
+        void DumpExceptionDescription(const ExceptionDescriptionType* c, std::ostream& os) const;
+        void DumpPropertyDescription(const PropertyDescriptionType* c, std::ostream& os) const;
+        void DumpMappingDescription(const PropertyMappingDescriptionType* c, bool inherited, std::ostream& os) const;
+        void DumpCreateRoutineDescription(const CreateRoutineDescriptionType* c, std::ostream& os) const;
 
         void TypeIdToString(boost::int64_t tid, std::ostream& os) const;
         void HashedValToString(const std::pair<boost::int64_t, const char*>& hv, std::ostream& os) const;
     };
+
+    template <class RepT, class Traits>
+    void ToStringHelper<RepT, Traits>::TypeToString(DotsC_TypeId typeId, std::ostream& os) const
+    {
+        const ClassDescriptionType* cd=m_rep->GetClass(typeId);
+        if (cd)
+        {
+            DumpClassDescription(cd, os);
+            return;
+        }
+        const EnumDescriptionType* ed=m_rep->GetEnum(typeId);
+        if (ed)
+        {
+            DumpEnumerationDescription(ed, os);
+            return;
+        }
+        const PropertyDescriptionType* pd=m_rep->GetProperty(typeId);
+        if (pd)
+        {
+            DumpPropertyDescription(pd, os);
+            return;
+        }
+        const ExceptionDescriptionType* ex=m_rep->GetException(typeId);
+        if (ex)
+        {
+            DumpExceptionDescription(ex, os);
+            return;
+        }
+    }
 
     template <class RepT, class Traits>
     void ToStringHelper<RepT, Traits>::TypeIdToString(boost::int64_t tid, std::ostream& os) const
@@ -104,7 +134,7 @@ namespace Detail
     }
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::DumpRepository(std::ostream& os)
+    void ToStringHelper<RepT, Traits>::DumpRepository(std::ostream& os) const
     {
         std::set<DotsC_TypeId> types;
         m_rep->GetAllClassTypeIds(types);
@@ -140,7 +170,7 @@ namespace Detail
     }
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::DumpClassDescription(const ClassDescriptionType* c, std::ostream& os)
+    void ToStringHelper<RepT, Traits>::DumpClassDescription(const ClassDescriptionType* c, std::ostream& os) const
     {
         os<<"=========================================================="<<std::endl;
         os<<"Class: "<<c->GetName()<<std::endl;
@@ -175,7 +205,7 @@ namespace Detail
     }
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::DumpEnumerationDescription(const EnumDescriptionType* c, std::ostream& os)
+    void ToStringHelper<RepT, Traits>::DumpEnumerationDescription(const EnumDescriptionType* c, std::ostream& os) const
     {
         os<<"=========================================================="<<std::endl;
         os<<"Enumeration: "<<c->GetName()<<std::endl;
@@ -189,7 +219,7 @@ namespace Detail
     }
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::DumpExceptionDescription(const ExceptionDescriptionType* c, std::ostream& os)
+    void ToStringHelper<RepT, Traits>::DumpExceptionDescription(const ExceptionDescriptionType* c, std::ostream& os) const
     {
         os<<"=========================================================="<<std::endl;
         os<<"Exception: "<<c->GetName()<<std::endl;
@@ -200,7 +230,7 @@ namespace Detail
     }
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::DumpPropertyDescription(const PropertyDescriptionType* c, std::ostream& os)
+    void ToStringHelper<RepT, Traits>::DumpPropertyDescription(const PropertyDescriptionType* c, std::ostream& os) const
     {
         os<<"=========================================================="<<std::endl;
         os<<"Property: "<<c->GetName()<<std::endl;
@@ -214,7 +244,7 @@ namespace Detail
     }
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::DumpMemberDescription(const MemberDescriptionType* c, std::ostream& os)
+    void ToStringHelper<RepT, Traits>::DumpMemberDescription(const MemberDescriptionType* c, std::ostream& os) const
     {
         os<<"    Member: "<<c->GetName()<<", type=";
         switch (c->GetMemberType())
@@ -244,7 +274,7 @@ namespace Detail
     }
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::DumpParameterDescription(const ParameterDescriptionType* c, std::ostream& os)
+    void ToStringHelper<RepT, Traits>::DumpParameterDescription(const ParameterDescriptionType* c, std::ostream& os) const
     {
         os<<"    Parameter: "<<c->GetName()<<", type=";
 
@@ -435,7 +465,7 @@ namespace Detail
     }
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::DumpMappingDescription(const PropertyMappingDescriptionType* pmd, bool inherited, std::ostream& os)
+    void ToStringHelper<RepT, Traits>::DumpMappingDescription(const PropertyMappingDescriptionType* pmd, bool inherited, std::ostream& os) const
     {
         const PropertyDescriptionType* p=pmd->GetProperty();
         const ClassDescriptionType* c=pmd->GetClass();
@@ -497,7 +527,7 @@ namespace Detail
     }
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::DumpCreateRoutineDescription(const CreateRoutineDescriptionType* c, std::ostream& os)
+    void ToStringHelper<RepT, Traits>::DumpCreateRoutineDescription(const CreateRoutineDescriptionType* c, std::ostream& os) const
     {
         if (!m_includeCreateRoutines)
         {
@@ -515,7 +545,6 @@ namespace Detail
             std::pair<const ParameterDescriptionType*, int> val=c->GetDefaultValue(i);
             os<<"      DefaultVal: "<<c->GetDefaultValueMember(i)->GetName()<<"="<<val.first->GetName()<<"["<<val.second<<"]"<<std::endl;
         }
-
     }
 }
 }

@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
 *
-* Created by: Lars Hagström / lars.hagstrom@consoden.se
+* Created by: Joel Ottosson / joot
 *
 *******************************************************************************
 *
@@ -21,13 +21,23 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_FILE_COLLECTION_H__
-#define __DOTS_FILE_COLLECTION_H__
+#ifndef __DOTS_INIT_HELPER_H__
+#define __DOTS_INIT_HELPER_H__
 
-#include <Safir/Utilities/Internal/ConfigReader.h>
-#include <Safir/Utilities/Internal/SystemLog.h>
 #include <vector>
 #include <boost/filesystem.hpp>
+#include <Safir/Utilities/Internal/ConfigReader.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
+#include "dots_shm_repository.h"
+
+//check size of type definitions
+BOOST_STATIC_ASSERT(sizeof(DotsC_Int32)==4);
+BOOST_STATIC_ASSERT(sizeof(DotsC_Int64)==8);
+BOOST_STATIC_ASSERT(sizeof(DotsC_Float32)==4);
+BOOST_STATIC_ASSERT(sizeof(DotsC_Float64)==8);
+BOOST_STATIC_ASSERT(sizeof(DotsC_EntityId)==sizeof(DotsC_TypeId) + sizeof(DotsC_Int64));
+BOOST_STATIC_ASSERT(sizeof(DotsC_EntityId)==16);
+BOOST_STATIC_ASSERT(sizeof(bool)==1);
 
 namespace Safir
 {
@@ -37,20 +47,28 @@ namespace Typesystem
 {
 namespace Internal
 {
-    //first is file name, second is full path (including file name)
-
-
-    //helper class for reading the directories containing dou and dom files
-    //and for checking for illegal duplicates
-    class FileCollection
+    class InitHelper
     {
-    public:
-        static void Dirs(std::vector<boost::filesystem::path>& directories)
+    private:
+        friend void Init();
+        static boost::once_flag initFlag;
+        static void Init()
         {
-            using namespace Safir::Dob::Typesystem::Internal;
+            std::vector<boost::filesystem::path> paths;
+            size_t sharedMemorySize;
+            ReadTypesystemIni(sharedMemorySize, paths);
+            RepositoryKeeper::Initialize(sharedMemorySize, paths);
+        }
 
+        //Reads the typesystem.ini file.
+        static void ReadTypesystemIni(size_t& sharedMemorySize, std::vector<boost::filesystem::path>& directories)
+        {
             //Read the config files
             Safir::Utilities::Internal::ConfigReader reader;
+
+            sharedMemorySize=reader.Typesystem().get<size_t>("dots_shared_memory_size");
+            sharedMemorySize*=(1024*1024); //megabytes to bytes
+
 
             //loop through all sections in typesystem.ini
             for (boost::property_tree::ptree::const_iterator it = reader.Typesystem().begin();
@@ -71,7 +89,7 @@ namespace Internal
                         std::cout<<"Failed to read dou_directory in section " + it->first + " of typesystem.ini"<<std::endl;
                         exit(1);
                     }
-                    
+
                     if (!boost::filesystem::exists(douDirectory) || !boost::filesystem::is_directory(douDirectory))
                     {
                         SEND_SYSTEM_LOG(Error, <<"Dir not found");
@@ -84,6 +102,13 @@ namespace Internal
             }
         }
     };
+
+    boost::once_flag InitHelper::initFlag=BOOST_ONCE_INIT;
+
+    inline void Init()
+    {
+        boost::call_once(InitHelper::initFlag,InitHelper::Init);
+    }
 }
 }
 }
