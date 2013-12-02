@@ -21,6 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "${CMAKE_CURRENT_BINARY_DIR}/cpp/precompiled_header_${prefix}.h"
+#include "${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_${prefix}.h"
 
 
