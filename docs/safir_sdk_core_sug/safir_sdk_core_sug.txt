@@ -74,7 +74,12 @@ Component dependencies and the layered architecture of Safir SDK Core is illustr
 
 [[sdk_core_component_dependencies]]
 .Safir SDK Core component dependencies
+ifdef::backend-docbook[]
+image::block-diagram.png["Component Dependencies", scaledwidth="75%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
 image::block-diagram.png["Component Dependencies", width="50%", link="block-diagram.png"]
+endif::backend-docbook[]
 
 Again, to be able to use Safir SDK Core you do not need to understand or like these acronyms, but knowing that they are there may make some things in the SDK easier to use.
 
