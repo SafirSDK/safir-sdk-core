@@ -3,8 +3,10 @@
 
 Safir SDK Core User's Guide
 ==========================
-:Author: Lars Hagström and Anders Widén
-18 Oct 2013
+Lars Hagström and Anders Widén
+2013-12-02 
+
+// REMEMBER: UPDATE DATE IN safir_sdk_core_sug-docinfo.xml TOO!!!!
 
 :cpp: {basebackend@docbook:c++:cpp}
 :csharp: {basebackend@docbook:c:csharp}
