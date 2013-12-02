@@ -1,7 +1,7 @@
 .SILENT:
 .PHONY: all clean
 
-DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wildcard images/*.png) Makefile block-diagram.png
+DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wildcard images/*.png) Makefile block-diagram.png safir_sdk_core_sug-docinfo.xml
 
 default: safir_sdk_core_sug.pdf
 
@@ -32,7 +32,7 @@ archives: safir_sdk_core_sug.pdf.zip \
 
 safir_sdk_core_sug.pdf: $(DEPS)
 	echo "Building pdf"
-	a2x -L -f pdf -d book --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" --dblatex-opts "-P latex.output.revhistory=0" safir_sdk_core_sug.txt 
+	a2x -L -f pdf -d book -a docinfo --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" --dblatex-opts "-P latex.output.revhistory=0" safir_sdk_core_sug.txt 
 
 safir_sdk_core_sug.pdf.zip: safir_sdk_core_sug.pdf
 	zip safir_sdk_core_sug.pdf.zip safir_sdk_core_sug.pdf
@@ -66,4 +66,4 @@ safir_sdk_core_sug.single_html.tar.bz2: safir_sdk_core_sug.html
 	tar cfvj safir_sdk_core_sug.single_html.tar.bz2 safir_sdk_core_sug.html images/*.png *.png
 
 clean:
-	rm -rf *~ *.pdf *.html *.xml *.fo safir_sdk_core_sug.chunked *.zip *.bz2 *.png
+	rm -rf *~ *.pdf *.html *.fo safir_sdk_core_sug.chunked *.zip *.bz2 *.png
