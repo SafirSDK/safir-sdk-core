@@ -470,7 +470,7 @@ namespace Detail
         const PropertyDescriptionType* p=pmd->GetProperty();
         const ClassDescriptionType* c=pmd->GetClass();
         os<<"    Property: "<<p->GetName()<<", inherited="<<std::boolalpha<<inherited<<std::dec<<std::endl;
-        os<<"File: "<<pmd->FileName()<<std::endl;
+        os<<"      File: "<<pmd->FileName()<<std::endl;
 
         for (int i=0; i<p->GetNumberOfMembers(); ++i)
         {

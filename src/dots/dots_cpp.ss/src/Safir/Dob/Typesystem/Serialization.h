@@ -57,6 +57,15 @@ namespace Typesystem
         static const std::wstring ToXml(const Dob::Typesystem::ObjectPtr object);
 
         /**
+         * Serialize an object to JSON.
+         *
+         * @param [in] object - The object to serialize
+         * @return The json serialization
+         * @exception IllegalValueException - There is something wrong with the object.
+         */
+        static const std::wstring ToJson(const Dob::Typesystem::ObjectPtr object);
+
+        /**
          * Deserialize an XML serialization.
          *
          * This method creates a new object from a given xml serialization.
@@ -71,6 +80,20 @@ namespace Typesystem
         static Dob::Typesystem::ObjectPtr ToObject(const std::wstring & xml);
 
         /**
+         * Deserialize an JSON serialization.
+         *
+         * This method creates a new object from a given json serialization.
+         * It uses the ObjectFactory to accomplish this.
+         *
+         * @param [in] json - The json to convert.
+         * @return A boost::shared_ptr to the new object
+         * @exception IllegalValueException If there is something wrong with the JSON or if the type
+         *                                  represented by the serialization isn't found
+         *                                  in the ObjectFactory.
+         */
+        static Dob::Typesystem::ObjectPtr ToObjectFromJson(const std::wstring & json);
+
+        /**
          * Convert a binary serialization to XML.
          *
          * @param [in] bin - the binary serialization to convert to xml.
@@ -79,12 +102,28 @@ namespace Typesystem
         static const std::wstring ToXml(const BinarySerialization & bin);
 
         /**
+         * Convert a binary serialization to JSON.
+         *
+         * @param [in] bin - the binary serialization to convert to json.
+         * @return The json of the binary serialization.
+         */
+        static const std::wstring ToJson(const BinarySerialization & bin);
+
+        /**
          * Convert a blob to XML.
          *
          * @param [in] blob - the blob to convert to xml.
          * @return The xml of the blob.
          */
         static const std::wstring ToXml(const char * const blob);
+
+        /**
+         * Convert a blob to JSON.
+         *
+         * @param [in] blob - the blob to convert to json.
+         * @return The json of the blob.
+         */
+        static const std::wstring ToJson(const char * const blob);
 
         /**
          * Serialize an object to binary form.

@@ -147,6 +147,19 @@ namespace Internal
     {
         (Detail::ToStringHelper<RepositoryT>(repository, includeCreateRoutines)).RepositoryToString(os);
     }
+
+    /**
+     * Writes a complete text description of a type. If typeId refers to a class, CreateRoutines will be omitted.
+     *
+     * @param repository [in] - Type repository containing all type information.
+     * @param typeId [in] - The type to convert to text.
+     * @param os [out] - Output stream. For example a ostringstream or cout.
+     */
+    template <class RepositoryT>
+    void TypeToString(const RepositoryT* repository, DotsC_TypeId typeId, std::ostream &os)
+    {
+        (Detail::ToStringHelper<RepositoryT>(repository, false)).TypeToString(typeId, os);
+    }
 }
 }
 }

@@ -1418,6 +1418,10 @@ extern "C"
 
     DOTS_KERNEL_API void CALLING_CONVENTION DotsC_PeekAtException(DotsC_TypeId & exceptionId);
 
+    //************************************************************************************
+    //* Functions mostly indended for debugging
+    //************************************************************************************
+
     // Function:    DotsC_GetDouFilePathForType
     // Parameters:  typeId      -   Type to find path for
     //              buf         -   Buffer where file path will be put, will be null terminated
@@ -1445,6 +1449,22 @@ extern "C"
     // Comments:    Check if this process created and the shared memory and loaded type repository
     //              or if it just opened it (i.e someone else already created it for us).
     DOTS_KERNEL_API bool CALLING_CONVENTION DotsC_TypeRepositoryLoadedByThisProcess();
+
+    // Function:    DotsC_GetTypeDescription
+    // Parameters:  typeId      -   Type to describe. If 0 all types will be completely described. Very much text.
+    //              buf         -   Buffer where file text description will be put, will be null terminated.
+    //              bufSize     -   size of buf.
+    //              resultSize  -   if the buffer was big enough for the description this holds the number
+    //                              of bytes written
+    //                              if it was too small it holds the size that was needed
+    //                              (so resultSize > bufSize ==> try again with bigger buffer)
+    //                              Includes the null termination at the end.
+    // Returns:     -
+    // Comments:    Get a text description of a type or the complete type repository.
+    DOTS_KERNEL_API void CALLING_CONVENTION DotsC_GetTypeDescription(const DotsC_TypeId typeId,
+                                                                     char * const buf,
+                                                                     const DotsC_Int32 bufSize,
+                                                                     DotsC_Int32 & resultSize);
 }
 
 

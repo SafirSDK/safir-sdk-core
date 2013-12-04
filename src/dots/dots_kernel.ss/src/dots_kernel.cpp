@@ -1932,3 +1932,29 @@ bool DotsC_TypeRepositoryLoadedByThisProcess()
     Init();
     return RepositoryKeeper::RepositoryCreatedByThisProcess();
 }
+
+void DotsC_GetTypeDescription(const DotsC_TypeId typeId,
+                              char * const buf,
+                              const DotsC_Int32 bufSize,
+                              DotsC_Int32 & resultSize)
+{
+    Init();
+    std::ostringstream os;
+    if (typeId==0)
+    {
+        Safir::Dob::Typesystem::Internal::RepositoryToString(RepositoryKeeper::GetRepository(), false, os);
+    }
+    else
+    {
+        Safir::Dob::Typesystem::Internal::TypeToString(RepositoryKeeper::GetRepository(), typeId, os);
+    }
+
+    std::string text=os.str();
+    resultSize=static_cast<DotsC_Int32>(text.size())+1; //add one for null char
+    if (resultSize>bufSize)
+    {
+        return;
+    }
+
+    strncpy(buf, &text[0], resultSize);
+}

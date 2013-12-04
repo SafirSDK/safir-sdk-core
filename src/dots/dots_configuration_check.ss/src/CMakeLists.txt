@@ -11,7 +11,7 @@ ADD_EXECUTABLE(dots_configuration_check ${sources})
 FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time system program_options)
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dots_configuration_check dots_kernel ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(dots_configuration_check dots_internal dots_kernel ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS dots_configuration_check
