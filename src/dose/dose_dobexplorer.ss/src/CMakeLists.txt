@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 #make sure we link with qtmain.lib on windows
-if (CMAKE_VERSION VERSION_LESS "2.8.11")
-  SET(QT_USE_QTMAIN TRUE)
-else()
+if (NOT CMAKE_VERSION VERSION_LESS "2.8.11")
   cmake_policy(SET CMP0020 NEW)
 endif()
 
@@ -32,6 +30,7 @@ if (Qt5Widgets_FOUND)
   QT5_WRAP_UI(ui_headers ${ui})
 else()
   # Try to use Qt4 instead
+  SET(QT_USE_QTMAIN TRUE)
   find_package(Qt4 REQUIRED)
 
   message("-- Building dobexplorer with Qt4")
