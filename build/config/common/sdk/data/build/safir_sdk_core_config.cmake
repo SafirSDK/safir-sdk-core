@@ -154,48 +154,27 @@ endif()
 
 MACRO(INSTALL_DEBUG_INFO target)
   if(MSVC)
+    #the problem here is to find out where the pdb file is located. It is located next to the binary
+    #in some directory which either the nmake/jom builds create or that the studio creates.
 
-    GET_TARGET_PROPERTY(location ${target} LOCATION)
-    # fix for vs2010
-    if (MSVC_VERSION EQUAL 1600)
-       STRING(REPLACE "$(Configuration)" Debug location ${location})
-    else()
-       STRING(REPLACE "$(OutDir)" Debug location ${location})
-    endif()
+    GET_TARGET_PROPERTY(debug_location ${target} LOCATION_Debug)
+    GET_TARGET_PROPERTY(relwithdebinfo_location ${target} LOCATION_RelWithDebInfo)
 
-    STRING(REPLACE .dll ${CMAKE_DEBUG_POSTFIX}.pdb location ${location})
-    STRING(REPLACE .exe .pdb location ${location})
+    #replace binary's the extension with .pdb
+    #.exe --> .pdb
+    #.dll --> .pdb
+    STRING(REPLACE .dll .pdb debug_location ${debug_location})
+    STRING(REPLACE .exe .pdb debug_location ${debug_location})
+
+    STRING(REPLACE .dll .pdb relwithdebinfo_location ${relwithdebinfo_location})
+    STRING(REPLACE .exe .pdb relwithdebinfo_location ${relwithdebinfo_location})
     
-    INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
-
-    GET_TARGET_PROPERTY(location ${target} LOCATION)
-    # fix for vs2010
-    if (MSVC_VERSION EQUAL 1600)
-       STRING(REPLACE "$(Configuration)" RelWithDebInfo location ${location})
-    else()
-       STRING(REPLACE "$(OutDir)" RelWithDebInfo location ${location})
-    endif()
-
-    STRING(REPLACE .dll ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
-    STRING(REPLACE .exe ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
-
-    INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
-
-    if (EXPORT_SYMBOLS)
-      GET_TARGET_PROPERTY(location ${target} LOCATION)
-      #fix for vs2010
-      if (MSVC_VERSION EQUAL 1600)
-        STRING(REPLACE "$(Configuration)" Release location ${location})
-      else()
-        STRING(REPLACE "$(OutDir)" Release location ${location})
-      endif()
-      
-      STRING(REPLACE .dll ${CMAKE_RELEASE_POSTFIX}.pdb location ${location})
-      STRING(REPLACE .exe ${CMAKE_RELEASE_POSTFIX}.pdb location ${location})
-      
-      INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/dump/Symbols CONFIGURATIONS Release)
-    endif(EXPORT_SYMBOLS)
-
+    #Install the pdb files using the locations we just worked out.
+    INSTALL(FILES ${debug_location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
+    INSTALL(FILES ${relwithdebinfo_location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
+    
+    UNSET(debug_location)
+    UNSET(relwithdebinfo_location)
   endif()
 ENDMACRO()
 
