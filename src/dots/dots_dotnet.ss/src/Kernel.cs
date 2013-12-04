@@ -307,12 +307,26 @@ namespace Safir.Dob.Typesystem.Internal
                                                           System.IntPtr blobSource,
                                                           System.Int32 bufSize,
                                                           out System.Int32 resultSize);
+
+        //BlobToJson
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_BlobToJson(System.IntPtr jsonDest,
+                                                     System.IntPtr blobSource,
+                                                     System.Int32 bufSize,
+                                                     out System.Int32 resultSize);
+
 #if FUNC_PTR_WORKAROUND
         //XmlToBlob
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
         internal static extern void DotsC_XmlToBlob(out System.IntPtr blobDest,
                                                     out System.IntPtr dummy,
                                                     System.IntPtr val);
+
+        //JsonToBlob
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_JsonToBlob(out System.IntPtr blobDest,
+                                                     out System.IntPtr dummy,
+                                                     System.IntPtr val);
 
 
 #else
@@ -322,6 +336,12 @@ namespace Safir.Dob.Typesystem.Internal
         //XmlToBlob
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DotsC_XmlToBlob(out System.IntPtr blobDest,
+                                                    out DotsC_BytePointerDeleter deleter,
+                                                    System.IntPtr val);
+
+        //JsonToBlob
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DotsC_JsonToBlob(out System.IntPtr blobDest,
                                                     out DotsC_BytePointerDeleter deleter,
                                                     System.IntPtr val);
 #endif

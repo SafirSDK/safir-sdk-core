@@ -130,14 +130,14 @@ private:
     static void ShowType(DotsC_TypeId tid)
     {
         std::vector<char> v;
-        v.resize(500000);
+        v.resize(1000000);
         DotsC_Int32 resultSize=0;
-        do
+        DotsC_GetTypeDescription(tid, &v[0], static_cast<DotsC_Int32>(v.size()), resultSize);
+        if (resultSize>static_cast<DotsC_Int32>(v.size()))
         {
-            v.resize(v.size()*2);
+            v.resize(static_cast<size_t>(resultSize));
             DotsC_GetTypeDescription(tid, &v[0], static_cast<DotsC_Int32>(v.size()), resultSize);
-
-        } while(resultSize>static_cast<DotsC_Int32>(v.size()));
+        }
 
         std::wcout<<&v[0]<<std::endl;
     }

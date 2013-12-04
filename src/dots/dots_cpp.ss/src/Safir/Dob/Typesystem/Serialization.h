@@ -42,7 +42,7 @@ namespace Typesystem
     typedef boost::shared_ptr<Object> ObjectPtr;
 
     /**
-    * Functions for serializing objects to binary and XML forms.
+    * Functions for serializing objects to binary, XML and JSON forms.
     */
     class DOTS_API Serialization
     {
