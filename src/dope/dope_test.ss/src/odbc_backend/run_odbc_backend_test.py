@@ -27,6 +27,15 @@ from __future__ import print_function
 import sys, os, shutil, xml.dom.minidom, glob, time, subprocess, re
 from testenv import TestEnv, TestEnvStopper
 
+class Unbuffered:
+   def __init__(self, stream):
+       self.stream = stream
+   def write(self, data):
+       self.stream.write(data)
+       self.stream.flush()
+   def __getattr__(self, attr):
+       return getattr(self.stream, attr)
+
 def rmdir(directory):
     if os.path.exists(directory):
         try:
@@ -136,7 +145,7 @@ def RestoreConfig(parameters):
     rmdir(parameters.tempdir)
 
 #make stdout unbuffered
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+sys.stdout=Unbuffered(sys.stdout)
 
 if sys.platform == "win32":
     config_type = os.environ.get("CMAKE_CONFIG_TYPE")
