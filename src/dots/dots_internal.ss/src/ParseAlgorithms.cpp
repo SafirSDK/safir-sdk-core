@@ -352,17 +352,6 @@ namespace Internal
         }
     }
 
-    void DumpExc(const RepositoryBasic* r)
-    {
-        std::set<DotsC_TypeId> types;
-        r->GetAllExceptionTypeIds(types);
-        for (std::set<DotsC_TypeId>::const_iterator it=types.begin(); it!=types.end(); ++it)
-        {
-            const ExceptionDescriptionBasic* e=r->GetExceptionBasic(*it);
-            std::cout<<e->name<<", base="<<e->baseClass<<", hasBasePtr="<<(e->base!=NULL)<<std::endl;
-        }
-    }
-
     //----------------------------------------------
     // RepositoryCompletionAlgorithms
     //----------------------------------------------
@@ -1059,7 +1048,6 @@ namespace Internal
 
         //Check that all members have been mapped
         size_t numMembers=pm->GetProperty()->GetNumberOfMembers();
-        //std::cout<<"PropMembers "<<numMembers<<", mappings="<<pm->memberMappings.size()<<std::endl;
         for (size_t memIx=0; memIx<numMembers; ++memIx)
         {
             if (pm->memberMappings[memIx]==NULL)

@@ -15,7 +15,7 @@
 #include <boost/limits.hpp>
 
 static bool StopOnError=true;
-static bool PrintRepository=false;
+static bool PrintRepository=true;
 
 struct TestCase
 {

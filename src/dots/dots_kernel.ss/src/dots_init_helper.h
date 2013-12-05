@@ -86,14 +86,14 @@ namespace Internal
                     catch (const std::exception&)
                     {
                         SEND_SYSTEM_LOG(Error, <<"Exceptions while examining dirs");
-                        std::cout<<"Failed to read dou_directory in section " + it->first + " of typesystem.ini"<<std::endl;
+                        std::cout<<"Failed to read dou_directory in section "+it->first+" of typesystem.ini"<<std::endl;
                         exit(1);
                     }
 
                     if (!boost::filesystem::exists(douDirectory) || !boost::filesystem::is_directory(douDirectory))
                     {
                         SEND_SYSTEM_LOG(Error, <<"Dir not found");
-                        std::cout<<"dou_directory '" + douDirectory.string() + "' in section " + it->first + " of typesystem.ini does not appear to be a directory"<<std::endl;
+                        std::cout<<"dou_directory '"+douDirectory.string()+"' in section "+it->first+" of typesystem.ini does not appear to be a directory"<<std::endl;
                         exit(1);
                     }
 

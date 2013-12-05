@@ -78,7 +78,6 @@ namespace Detail
             if (xml.front().first=="object")
             {
                 //redirect to the UglyXml xml parser
-                std::cout<<"Warning: Deprecated XML serialization format!"<<std::endl;
                 (UglyXmlToBlobSerializer<RepositoryType>(m_repository))(xml, blob);
                 return;
             }

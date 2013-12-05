@@ -307,7 +307,14 @@ namespace Detail
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                os<<"      value["<<i<<"]=";
+                if (c->IsArray())
+                {
+                    os<<"      value["<<i<<"]=";
+                }
+                else
+                {
+                    os<<"      value=";
+                }
                 os<<std::boolalpha<<c->GetBoolValue(i)<<std::dec<<std::endl;
             }
         }
@@ -317,7 +324,15 @@ namespace Detail
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                os<<"      value["<<i<<"]="<<c->GetInt32Value(i)<<std::endl;
+                if (c->IsArray())
+                {
+                    os<<"      value["<<i<<"]=";
+                }
+                else
+                {
+                    os<<"      value=";
+                }
+                os<<c->GetInt32Value(i)<<std::endl;
             }
         }
             break;
@@ -325,7 +340,15 @@ namespace Detail
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                os<<"      value["<<i<<"]="<<c->GetInt64Value(i)<<std::endl;
+                if (c->IsArray())
+                {
+                    os<<"      value["<<i<<"]=";
+                }
+                else
+                {
+                    os<<"      value=";
+                }
+                os<<c->GetInt64Value(i)<<std::endl;
             }
         }
             break;
@@ -334,7 +357,14 @@ namespace Detail
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                os<<"      value["<<i<<"]=";
+                if (c->IsArray())
+                {
+                    os<<"      value["<<i<<"]=";
+                }
+                else
+                {
+                    os<<"      value=";
+                }
                 TypeIdToString(c->GetInt64Value(i), os);
                 os<<" : ";
                 HashedValToString(c->GetHashedValue(i), os);
@@ -346,7 +376,14 @@ namespace Detail
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                os<<"      value["<<i<<"]=";
+                if (c->IsArray())
+                {
+                    os<<"      value["<<i<<"]=";
+                }
+                else
+                {
+                    os<<"      value=";
+                }
                 TypeIdToString(c->GetInt64Value(i), os);
                 os<<std::endl;
             }
@@ -358,7 +395,14 @@ namespace Detail
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                os<<"      value["<<i<<"]=";
+                if (c->IsArray())
+                {
+                    os<<"      value["<<i<<"]=";
+                }
+                else
+                {
+                    os<<"      value=";
+                }
                 HashedValToString(c->GetHashedValue(i), os);
                 os<<std::endl;
             }
@@ -369,7 +413,15 @@ namespace Detail
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                os<<"      value["<<i<<"]="<<c->GetStringValue(i)<<std::endl;
+                if (c->IsArray())
+                {
+                    os<<"      value["<<i<<"]=";
+                }
+                else
+                {
+                    os<<"      value=";
+                }
+                os<<c->GetStringValue(i)<<std::endl;
             }
         }
             break;
@@ -378,10 +430,18 @@ namespace Detail
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
+                if (c->IsArray())
+                {
+                    os<<"      value["<<i<<"]="<<std::endl;
+                }
+                else
+                {
+                    os<<"      value="<<std::endl;
+                }
                 const char* objParam=c->GetObjectValue(i).first;
                 std::ostringstream json;
                 (BlobToJsonSerializer<RepositoryType>(m_rep))(objParam, json);
-                os<<"      value["<<i<<"]="<<json.str()<<std::endl;
+                os<<json.str()<<std::endl;
             }
         }
             break;
@@ -390,7 +450,15 @@ namespace Detail
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                os<<"      value["<<i<<"]="<<m_rep->GetEnum(c->GetTypeId())->GetValueName(c->GetInt32Value(i))<<std::endl;
+                if (c->IsArray())
+                {
+                    os<<"      value["<<i<<"]=";
+                }
+                else
+                {
+                    os<<"      value=";
+                }
+                os<<m_rep->GetEnum(c->GetTypeId())->GetValueName(c->GetInt32Value(i))<<std::endl;
             }
         }
             break;
@@ -400,7 +468,15 @@ namespace Detail
             for (int i=0; i<c->GetArraySize(); ++i)
             {
                 //TODO: change to hex or base64 output, this assumes binary is an ascii string
-                os<<"      value["<<i<<"]="<<c->GetStringValue(i)<<std::endl;
+                if (c->IsArray())
+                {
+                    os<<"      value["<<i<<"]=";
+                }
+                else
+                {
+                    os<<"      value=";
+                }
+                os<<c->GetStringValue(i)<<std::endl;
             }
 
         }
@@ -429,7 +505,15 @@ namespace Detail
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                os<<"      value["<<i<<"]="<<c->GetFloat32Value(i)<<std::endl;
+                if (c->IsArray())
+                {
+                    os<<"      value["<<i<<"]=";
+                }
+                else
+                {
+                    os<<"      value=";
+                }
+                os<<c->GetFloat32Value(i)<<std::endl;
             }
         }
             break;
@@ -457,7 +541,15 @@ namespace Detail
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                os<<"      value["<<i<<"]="<<c->GetFloat64Value(i)<<std::endl;
+                if (c->IsArray())
+                {
+                    os<<"      value["<<i<<"]=";
+                }
+                else
+                {
+                    os<<"      value=";
+                }
+                os<<c->GetFloat64Value(i)<<std::endl;
             }
         }
             break;

@@ -68,7 +68,10 @@
         <member>
             <propertyMember>StringPropertyValueArray</propertyMember>
             <classMemberReference>
-                <classMember>MyStringArray</classMember>
+                <classMember>MyItem</classMember>
+                <classMemberReference>
+                    <classMember>MyStrings</classMember>
+                </classMemberReference>
             </classMemberReference>
         </member>
         <member>

@@ -1294,13 +1294,18 @@ namespace Internal
                             "' to non-array class member '"<<classMem->GetName()<<"'. ";
                         throw ParseError("Invalid classMemberReference", os.str(), state.currentPath, 83);
                     }
-                    else if (memberArrayIndex>=0)
+                    else if (memberArrayIndex!=-1)
                     {
                         //property is array but is mapped to a singel member array index
                         std::ostringstream os;
                         os<<"PropertyMapping is mapping array property member "<<propMem->GetName()<<
                             "' to a single array index in class member '"<<classMem->GetName()<<"'. Index-element is not allowed when mapping whole array.";
                         throw ParseError("Invalid classMemberReference", os.str(), state.currentPath, 84);
+                    }
+                    else
+                    {
+                        //this is the leaf memberRef, and the propertyMember is an array. Then there is an agreement that arrayIndex shall be -1
+                        state.lastInsertedMemberMapping->memberRef.back().second=-1;
                     }
                 }
                 else //propertyMember not array
