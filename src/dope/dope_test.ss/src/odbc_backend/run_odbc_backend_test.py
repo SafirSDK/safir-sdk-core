@@ -23,9 +23,9 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+from __future__ import print_function
 import sys, os, shutil, xml.dom.minidom, glob, time, subprocess, re
 from testenv import TestEnv, TestEnvStopper
-from __future__ import print_function
 
 def rmdir(directory):
     if os.path.exists(directory):
