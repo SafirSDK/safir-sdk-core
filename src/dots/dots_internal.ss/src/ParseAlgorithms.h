@@ -482,11 +482,11 @@ namespace Internal
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             //Add hidden parameter
-            //Naming: //className.member@createRoutineName#cr<N> - ex: namespace.MyClass@MyCreateRoutine#cr0
+            //member@signature -> MyClassMember@MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
             CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
             MemberValue& memVal=def->memberValues.back();
             std::ostringstream paramName;
-            paramName<<state.lastInsertedClass->name<<"."<<memVal.first<<"@"<<def->name<<"#cr"<<(state.lastInsertedClass->createRoutines.size()-1);
+            paramName<<memVal.first<<"@"<<def->signature;
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
@@ -516,10 +516,11 @@ namespace Internal
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             //Add hidden parameter
+            //member@signature -> MyClassMember@MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
             CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
             MemberValue& memVal=def->memberValues.back();
             std::ostringstream paramName;
-            paramName<<state.lastInsertedClass->name<<"."<<memVal.first<<"@"<<def->name<<"#cr"<<(state.lastInsertedClass->createRoutines.size()-1);
+            paramName<<memVal.first<<"@"<<def->signature;
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
@@ -562,11 +563,11 @@ namespace Internal
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             //Add hidden parameter
-            //Naming: //className.member@createRoutineName#cr<N> - ex: namespace.MyClass@MyCreateRoutine#cr0
+            //member@signature -> MyClassMember@MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
             CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
             MemberValue& memVal=def->memberValues.back();
             std::ostringstream paramName;
-            paramName<<state.lastInsertedClass->name<<"."<<memVal.first<<"@"<<def->name<<"#cr"<<(state.lastInsertedClass->createRoutines.size()-1);
+            paramName<<memVal.first<<"@"<<def->signature;
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
@@ -600,11 +601,11 @@ namespace Internal
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             //Add hidden parameter
-            //Naming: //className.member@createRoutineName#cr<N> - ex: namespace.MyClass@MyCreateRoutine#cr0
+            //member@signature -> MyClassMember@MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
             CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
             MemberValue& memVal=def->memberValues.back();
             std::ostringstream paramName;
-            paramName<<state.lastInsertedClass->name<<"."<<memVal.first<<"@"<<def->name<<"#cr"<<(state.lastInsertedClass->createRoutines.size()-1);
+            paramName<<memVal.first<<"@"<<def->signature;
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
@@ -907,7 +908,8 @@ namespace Internal
 
         ParameterDescriptionBasicPtr param(new ParameterDescriptionBasic);
         std::ostringstream paramName;
-        paramName<<pd->GetName()<<"."<<propMem->GetName()<<"@"<<state.lastInsertedPropertyMapping->class_->GetName()<<"#pm";
+        //MyPropNamespace.MyProperty.PropMember@MyClassNamespace.MyClass#pm
+        paramName<<pd->GetName()<<"."<<propMem->GetName()<<"@"<<state.lastInsertedPropertyMapping->class_->GetName();
         param->name=paramName.str();
         param->hidden=true;
         param->isArray=isArray;

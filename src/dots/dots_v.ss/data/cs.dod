@@ -484,8 +484,11 @@ namespace @_NAMESPACE_@
 @@ELSE@@
 @@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
-// joot TODO!
-# error Inline objects in CreateRoutines not yet implemented!        
+
+            // Inline set of object member @_CREATEVALUE_@ value
+            System.Int32 tmp@_CREATEVALUE_@Index = 
+                Safir.Dob.Typesystem.Parameters.GetIndex(ClassTypeId, "@_CREATEVALUEPARAMETERRAW_@");
+            val.@_CREATEVALUE_@.Obj = (@_CREATEVALUEMEMBERTYPE_@)Safir.Dob.Typesystem.Parameters.GetObject(ClassTypeId, tmp@_CREATEVALUE_@Index, 0);
 @@ELSE@@
             val.@_CREATEVALUE_@.Obj = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@;
 @@END_IF@@
@@ -495,7 +498,7 @@ namespace @_NAMESPACE_@
             // Inline set of member @_CREATEVALUE_@ value
             System.Int32 tmp@_CREATEVALUE_@Index = 
                 Safir.Dob.Typesystem.Parameters.GetIndex(ClassTypeId, "@_CREATEVALUEPARAMETERRAW_@");
-            object->@_CREATEVALUE_@().SetVal(Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_CREATEVALUETYPE_@(ClassTypeId, tmp@_CREATEVALUE_@Index, 0));
+            val.@_CREATEVALUE_@.Val = Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_CREATEVALUETYPE_@(ClassTypeId, tmp@_CREATEVALUE_@Index, 0);
 @@ELSE@@
             val.@_CREATEVALUE_@.Val = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@;
 @@END_IF@@

@@ -98,8 +98,9 @@ class DouCreateRoutineParameter(object):
 
 class DouCreateRoutineValue(object):
     
-    def __init__(self, member, parameter, inline, parameter_index, array, arraySize):
+    def __init__(self, member, member_type, parameter, inline, parameter_index, array, arraySize):
         self.member = member
+        self.member_type = member_type
         self.parameter = parameter
         self.inline = inline
         self.parameter_index = parameter_index
@@ -405,22 +406,22 @@ def parse_dou(gSession, dou_xmlfile):
                     else:
                         # New syntax, direct parameter from dots_internal
                         # This parameter shall be generated inline to hide it from external use
+                        # Parameter name: member@signature -> MyClassMember@MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
                         m_p_inline = True
 
-                        m_parameter = readTextPropery(cr, "name")
+                        m_parameter = m_member + "@" + parsed.name + "." + readTextPropery(cr, "name")
                         for cr_member in parameters:
                             m_parameter += "#" + cr_member.name
-                        m_parameter += "@" + parsed.name + "." + m_member
-
 
                     values.append( DouCreateRoutineValue( m_member, \
+                                                            m_type, \
                                                             m_parameter, \
                                                             m_p_inline, \
                                                             m_p_index, \
                                                             m_array, \
                                                             readTextPropery(v, "arraySize") ) )
                     parameter_class = m_parameter[:m_parameter.rfind(".")]
-                    if not parameter_class == parsed.name:
+                    if not m_p_inline and parameter_class != parsed.name:
                         parsed.unique_dependencies.append(dependency_formatter(gSession, parameter_class))
                 
             parsed.createRoutines.append( DouCreateRoutine(     summary_formatter(readTextPropery(cr, "summary")), \
@@ -769,6 +770,8 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
     elif var == "CREATEVALUEPARAMETERCLASS" :
         p1 = dou.createRoutines[parent_table_line - 1].values[index].parameter        
         return type_formatter(gSession, p1[:p1.rfind(".")])
+    elif var == "CREATEVALUEMEMBERTYPE" :
+        return gSession.dod_types[dou.createRoutines[parent_table_line - 1].values[index].member_type].generated
     elif var == "CREATEVALUEPARAMETERINDEX": 
         return type_formatter(gSession, dou.createRoutines[parent_table_line - 1].values[table_line - 1].parameter_index);
     elif var == "CREATEVALUE" :

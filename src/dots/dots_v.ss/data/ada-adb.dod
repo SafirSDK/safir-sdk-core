@@ -1052,7 +1052,15 @@ package body @_NAMESPACE_@.@_CLASS_@ is
 @@END_IF@@
 @@ELSE@@
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
-    -- joot TODO! --
+      -- Inline set of object member @_CREATEVALUE_@ value
+      declare
+         Tmp_@_CREATEVALUE_@_Idx : Safir.Dob.Typesystem.Member_Index := 0;
+      begin
+         Tmp_@_CREATEVALUE_@_Idx := Safir.Dob.Typesystem.Members.Get_Index (Class_Type_Id, To_Unbounded_Wide_String ("@_CREATEVALUEPARAMETERRAW_@"));
+         Object_Access.@_CREATEVALUE_@.Set_Ptr ( @_CREATEVALUEMEMBERTYPE_@.Smart_Pointer(Safir.Dob.Typesystem.Parameters.Get_Object (Class_Type_Id, Tmp_@_CREATEVALUE_@_Idx, 0)) );
+                  
+      end;
+      
 @@ELSE@@
       Object_Access.@_CREATEVALUE_@.Set_Ptr (@_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@);
 @@END_IF@@
@@ -1068,11 +1076,14 @@ package body @_NAMESPACE_@.@_CLASS_@ is
 @@END_IF@@
 @@ELSE@@
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
-
-      // Inline set of member @_CREATEVALUE_@ value
-      Tmp_@_CREATEVALUE_@_Idx : Safir.Dob.Typesystem.Member_Index := 
-        Safir.Dob.Typesystem.Members.Get_Index (Class_Type_Id, To_Unbounded_Wide_String ("@_CREATEVALUEPARAMETERRAW_@"));
-      Object_Access.@_CREATEVALUE_@.Set_Val (Safir.Dob.Typesystem.Parameters.Get_@_UNIFORM_PARAMETERTYPE_@ (Class_Type_Id, Tmp_@_CREATEVALUE_@_Idx, 0)));
+      -- Inline set of member @_CREATEVALUE_@ value
+      declare
+         Tmp_@_CREATEVALUE_@_Idx : Safir.Dob.Typesystem.Member_Index := 0;
+      begin
+         Tmp_@_CREATEVALUE_@_Idx := Safir.Dob.Typesystem.Members.Get_Index (Class_Type_Id, To_Unbounded_Wide_String ("@_CREATEVALUEPARAMETERRAW_@"));
+         Object_Access.@_CREATEVALUE_@.Set_Val (Safir.Dob.Typesystem.Parameters.Get_@_UNIFORM_CREATEVALUETYPE_@ (Class_Type_Id, Tmp_@_CREATEVALUE_@_Idx, 0));
+      end;
+      
 @@ELSE@@
       Object_Access.@_CREATEVALUE_@.Set_Val (@_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@);
 @@END_IF@@

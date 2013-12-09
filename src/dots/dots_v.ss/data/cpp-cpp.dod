@@ -991,8 +991,10 @@ namespace @_NAMESPACEV_@
 @@ELSE@@
 @@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
-// joot TODO!
-# error Inline objects in CreateRoutines not yet implemented!        
+        //Inline createRoutine object parameter
+        Safir::Dob::Typesystem::ParameterIndex tmp@_CREATEVALUE_@Index = 
+            Safir::Dob::Typesystem::Parameters::GetIndex(@_PARAMETERCLASS_@::ClassTypeId, L"@_CREATEVALUEPARAMETERRAW_@");
+        object->@_CREATEVALUE_@().SetPtr(Safir::Dob::Typesystem::Parameters::GetObject(ClassTypeId, tmp@_CREATEVALUE_@Index, 0));
 @@ELSE@@
         object->@_CREATEVALUE_@().SetPtr(@_CREATEVALUEPARAMETERCLASS_@::@_CREATEVALUEPARAMETER_@());
 @@END_IF@@

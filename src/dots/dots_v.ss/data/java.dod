@@ -924,7 +924,9 @@ public class @_CLASS_@
 @@ELSE@@
 @@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
-    /** joot - TODO! */
+        // Inline set of object member @_CREATEVALUE_@ value
+        int tmp@_LOWER:CREATEVALUE_@index = com.saabgroup.safir.dob.typesystem.Parameters.getIndex(ClassTypeId, "@_CREATEVALUEPARAMETERRAW_@");
+        val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().setObj((@_CREATEVALUEMEMBERTYPE_@)com.saabgroup.safir.dob.typesystem.Parameters.getObject(ClassTypeId, tmp@_LOWER:CREATEVALUE_@index, 0) );
 @@ELSE@@
         val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().setObj(@_CREATEVALUEPARAMETERCLASS_@.get@_CREATEVALUEPARAMETER_@());
 @@END_IF@@
