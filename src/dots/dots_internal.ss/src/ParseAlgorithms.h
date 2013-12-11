@@ -327,7 +327,14 @@ namespace Internal
                 throw ParseError("Invalid name", "Class name '"+def->name+" is invalid. Must start with an alphabetic char and then only contain alpha-numeric chars", state.currentPath, 18);
             }
 
-            //Check for duplicates later after baseClass is known too.
+            //check for duplicates
+            if (std::find_if(state.lastInsertedClass->members.begin(), state.lastInsertedClass->members.end(),
+                             boost::bind(NameComparerPtr<MemberDescriptionBasicPtr>, _1, def->name))!=state.lastInsertedClass->members.end())
+            {
+                std::ostringstream os;
+                os<<"A member with name '"<<def->name<<"' is defined more than one time in class "<<state.lastInsertedClass->name;
+                throw ParseError("Duplicated member", os.str(), state.currentPath, 175);
+            }
 
             state.lastInsertedClass->members.push_back(def);
         }

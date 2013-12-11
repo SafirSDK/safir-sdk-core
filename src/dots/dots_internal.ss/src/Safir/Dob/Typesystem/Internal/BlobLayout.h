@@ -172,7 +172,7 @@ namespace Internal
                                            DotsC_Int64 & hashVal,
                                            const char * & strVal) const
         {
-            return m_impl.template GetMemberWithOptionalString(blob, member, index, hashVal, strVal);
+            return m_impl.template GetMemberWithOptionalString<DotsC_Int64>(blob, member, index, hashVal, strVal);
         }
 
         DotsC_MemberStatus GetEntityIdMember(const char * const blob,
@@ -181,7 +181,7 @@ namespace Internal
                                              DotsC_EntityId & entityId,
                                              const char * & strVal) const
         {
-            return m_impl.template GetMemberWithOptionalString(blob, member, index, entityId, strVal);
+            return m_impl.template GetMemberWithOptionalString<DotsC_EntityId>(blob, member, index, entityId, strVal);
         }
 
         DotsC_MemberStatus GetDynamicMember(const char * const blob,

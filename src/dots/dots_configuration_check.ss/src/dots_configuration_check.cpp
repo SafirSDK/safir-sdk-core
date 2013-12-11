@@ -58,8 +58,8 @@ public:
             exit(0);
         }
 
-        summary=vm.count("summary");
-        details=vm.count("details");
+        summary=vm.count("summary")>0;
+        details=vm.count("details")>0;
         if (vm.count("type"))
         {
             typeName=vm["type"].as<std::string>();

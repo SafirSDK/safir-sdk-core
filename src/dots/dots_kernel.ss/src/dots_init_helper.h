@@ -107,7 +107,6 @@ namespace Internal
                         exit(1);
                     }
 
-                    std::cout<<douDirectory.string()<<std::endl;
                     directories.push_back(douDirectory);
                 }
             }
