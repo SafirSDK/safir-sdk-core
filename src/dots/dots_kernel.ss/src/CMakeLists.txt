@@ -42,7 +42,7 @@ FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time system)
 TARGET_LINK_LIBRARIES(dots_kernel ${EXPAT_LIBRARY})
 
 IF (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dots_kernel dots_id dots_internal lluf_utils lluf_startup_synchronizer lluf_crash_reporter lluf_config ${Boost_LIBRARIES} rt)
+  TARGET_LINK_LIBRARIES(dots_kernel dots_internal lluf_utils lluf_startup_synchronizer lluf_crash_reporter lluf_config ${Boost_LIBRARIES} rt)
 ENDIF()
 
 ADD_DEFINITIONS(-DDOTSKERNEL_EXPORTS)

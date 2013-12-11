@@ -2,5 +2,5 @@
 <class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <summary>Lorem ipsum</summary>
     <name>ParserTest.EntityParamMapping</name>
-    <baseClass>Object</baseClass>
+    <baseClass>Safir.Dob.Entity</baseClass>
 </class>

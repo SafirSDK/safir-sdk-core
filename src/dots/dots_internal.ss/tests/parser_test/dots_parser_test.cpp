@@ -14,8 +14,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/limits.hpp>
 
-static bool StopOnError=true;
-static bool PrintRepository=true;
+static bool StopOnError=false;
+static bool PrintRepository=false;
 
 struct TestCase
 {

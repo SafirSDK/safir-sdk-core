@@ -55,7 +55,7 @@ public:
         if (vm.count("help"))
         {
             std::cout<<desc<<std::endl;
-            return;
+            exit(0);
         }
 
         summary=vm.count("summary");
@@ -179,7 +179,7 @@ public:
 
         if (!cmd.typeName.empty())
         {
-            ShowType(rep, DotsC_TypeIdFromName(cmd.typeName.c_str()));
+            ShowType(rep, Safir::Dob::Typesystem::Internal::TypeUtilities::CalculateTypeId(cmd.typeName));
         }
         else if (cmd.summary)
         {

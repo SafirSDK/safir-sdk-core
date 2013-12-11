@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <property>ParserTest.MyProperty</property>
+    <class>ParserTest.MyEntity</class>
+    <memberMapping>
+        
+        <member>
+            <propertyMember>EntityIdPropertyValue</propertyMember>
+            <entityId>
+                <name>ParserTest.MyEntity</name>
+                <instanceId>TestInstance</instanceId>
+            </entityId>
+        </member>
+        
+        <member>
+            <propertyMember>MyObjPropertyValue</propertyMember>
+            <ParserTest.MyEntity>
+            </ParserTest.MyEntity>
+        </member>                
+        
+
+        <member>
+            <propertyMember>MyStringPropertyValue</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.StringArray</name>
+                <indexRef>
+                    <name>ParserTest.Params.StringArray</name>
+                    <index>1</index>
+                </indexRef>
+            </valueRef>
+        </member>
+        
+    </memberMapping>
+</propertyMapping>

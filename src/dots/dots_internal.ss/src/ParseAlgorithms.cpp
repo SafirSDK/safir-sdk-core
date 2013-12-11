@@ -78,6 +78,57 @@ namespace Internal
         paramIndex=pt.get(Elements::ReferenceIndex::Name(), 0);
     }
 
+    int GetReferencedIndex(boost::property_tree::ptree& pt, ParseState& state)
+    {
+        boost::optional<std::string> paramName=pt.get_optional<std::string>(Elements::ReferenceName::Name());
+        if (!paramName)
+        {
+            //name missing in indexRef
+            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            std::ostringstream os;
+            os<<"The <name> element is missing in indexRef for propertyMember "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName();
+            throw ParseError("Bad indexRef", os.str(), state.currentPath, 168);
+        }
+
+        int paramIndex=pt.get(Elements::ReferenceIndex::Name(), 0); //default to 0
+        const ParameterDescriptionBasic* param=state.repository->GetParameterBasic(*paramName);
+        if (!param)
+        {
+            //Error referenced param not exist
+            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            std::ostringstream os;
+            os<<"The parameter '"<<*paramName<<"' used in indexRef for propertyMember "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName()<<
+                " does not exist";
+            throw ParseError("Bad indexRef", os.str(), state.currentPath, 169);
+        }
+        if (param->GetMemberType()!=Int32MemberType)
+        {
+            //wrong type
+            std::ostringstream os;
+            os<<"The referenced parameter '"<<*paramName<<"' has type "<<param->typeName<<". Only Int32 parameters are valid as indexRef.";
+            throw ParseError("Bad indexRef", os.str(), state.currentPath, 170);
+        }
+        if (paramIndex>=param->GetArraySize())
+        {
+            //index out of bounds
+            std::ostringstream os;
+            os<<"The specified index "<<paramIndex<<" is out of bounds. Referenced parameter "<<*paramName;
+            if (param->IsArray())
+            {
+                os<<" has arraySize="<<param->GetArraySize();
+            }
+            else
+            {
+                os<<" is not an array.";
+            }
+            throw ParseError("Bad indexRef", os.str(), state.currentPath, 171);
+        }
+
+        return param->GetInt32Value(paramIndex);
+    }
+
     std::string GetEntityIdParameterAsString(boost::property_tree::ptree& pt)
     {
         std::string name=pt.get<std::string>(Elements::ClassName::Name());
@@ -926,6 +977,8 @@ namespace Internal
 
     void RepositoryCompletionAlgorithms::VerifyParameterTypes()
     {
+        static const DotsC_TypeId EntityTypeId=DotsId_Generate64("Safir.Dob.Entity");
+
         //loop through all parameters and verify all TypeId, EntityId, and Enum
         for (boost::unordered_map<std::string, ParameterDescriptionBasic*>::iterator parIt=m_result->m_parameters.begin();
              parIt!=m_result->m_parameters.end(); ++parIt)
@@ -949,16 +1002,25 @@ namespace Internal
             }
             else if (pd->GetMemberType()==EntityIdMemberType)
             {
-                //Verify that EntityId parameters contains values that are existing classe types.
+                //Verify that EntityId parameters contains values that are existing class type.
                 for (int index=0; index<pd->GetArraySize(); ++index)
                 {
                     const ValueDefinition& val=pd->Value(static_cast<size_t>(index));
-                    if (!m_result->GetClass(val.int64Val))
+                    const ClassDescription* tmpCd=m_result->GetClass(val.int64Val);
+                    if (!tmpCd)
                     {
                         std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
                         std::ostringstream os;
-                        os<<"The parameter "<<pd->GetName()<<" has an invalid value. The typeId does not exist.";
+                        os<<"The parameter "<<pd->GetName()<<" has an invalid value. The typeId does not exist or is not a class type.";
                         throw ParseError("Invalid EntityId parameter", os.str(), file, 46);
+                    }
+
+                    if (!BasicTypeOperations::IsOfType<TypeRepository>(m_result.get(), ObjectMemberType, val.int64Val, ObjectMemberType, EntityTypeId))
+                    {
+                        std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
+                        std::ostringstream os;
+                        os<<"The parameter "<<pd->GetName()<<" has an invalid typeId. The class '"<<tmpCd->GetName()<<"' is not a subtype of Safir.Dob.Entity";
+                        throw ParseError("Invalid EntityId parameter", os.str(), file, 172);
                     }
                 }
             }

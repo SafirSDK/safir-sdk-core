@@ -280,7 +280,7 @@
                 <member>TestClassMember</member>
             </parameters>
         </createRoutine>
-        <createRoutine>
+        <!--createRoutine>
             <summary>Initializes Int32, enum, and class - as value from class parameter array (index 1)</summary>
             <name>ValueArraysOne</name>
             <values>
@@ -324,6 +324,6 @@
                     <parameter><name>DotsTest.ParameterArrays.TestClassParameter</name></parameter>
                 </value>
             </values>
-        </createRoutine>
+        </createRoutine-->
     </createRoutines>
 </class>

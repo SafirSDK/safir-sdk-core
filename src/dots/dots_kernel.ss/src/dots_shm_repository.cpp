@@ -326,6 +326,10 @@ namespace Internal
             for (int i=0; i<pd->GetArraySize(); ++i)
             {
                 std::pair<boost::int64_t, const char*> hashed=pd->GetHashedValue(i);
+                if (hashed.second==NULL)
+                {
+                    hashed.second="";
+                }
                 ValueDefinitionShm vd(hashed.second, shm);
                 vd.hashedVal=hashed.first;
                 vd.int64Val=pd->GetInt64Value(i);
@@ -350,6 +354,10 @@ namespace Internal
             for (int i=0; i<pd->GetArraySize(); ++i)
             {
                 std::pair<boost::int64_t, const char*> hashed=pd->GetHashedValue(i);
+                if (hashed.second==NULL)
+                {
+                    hashed.second="";
+                }
                 ValueDefinitionShm vd(hashed.second, shm);
                 vd.hashedVal=hashed.first;
                 m_values.push_back(vd);

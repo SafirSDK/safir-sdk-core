@@ -53,6 +53,7 @@ namespace Internal
     void CheckNameAndFilenameConsistency(const std::string& filename, const std::string name);
     //Resolves references on the form <...><name>param</name>123<index></index></...>
     void GetReferencedParameter(boost::property_tree::ptree& pt, std::string& paramName, int& paramIndex);
+    int GetReferencedIndex(boost::property_tree::ptree& pt, ParseState& state);
     std::string GetEntityIdParameterAsString(boost::property_tree::ptree& pt);
     bool ParseValue(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
 
@@ -1122,10 +1123,10 @@ namespace Internal
             std::string paramName;
             int paramIndex=-1;
 
+            //Get parameterName
             try
             {
                 paramName=pt.get<std::string>(Elements::ReferenceName::Name());
-                paramIndex=pt.get(Elements::ReferenceIndex::Name(), -1);
             }
             catch (const boost::property_tree::ptree_error&)
             {
@@ -1133,6 +1134,17 @@ namespace Internal
                 os<<"Missing <name> element in parameter reference. In propertyMapping for member "<<state.lastInsertedPropertyMapping->property->name<<"."<<
                     propMem->GetName()<<" in class "<<state.lastInsertedPropertyMapping->class_->GetName();
                 throw ParseError("Invalid parameter reference syntax", os.str(), state.currentPath, 89);
+            }
+
+            //Get Parameter Index
+            boost::optional<boost::property_tree::ptree&> indexRef=pt.get_child_optional(Elements::IndexRef::Name());
+            if (indexRef)
+            {
+                paramIndex=GetReferencedIndex(*indexRef, state);
+            }
+            else
+            {
+                paramIndex=pt.get(Elements::ReferenceIndex::Name(), -1);
             }
 
             ParameterDescriptionBasic* param=state.repository->GetParameterBasic(paramName);
@@ -1213,14 +1225,24 @@ namespace Internal
             {
                 DotsC_TypeId tid=cd->GetMember(it->first)->GetTypeId();
                 cd=state.repository->GetClassBasic(tid);
-                //ENSURE(cd!=NULL, <<"Nested class member ref, type id does not exist" );
             }
 
             //Get class description
             try
             {
                 const std::string& memberName=pt.get<std::string>(Elements::ClassMemberReferenceName::Name());
-                memberArrayIndex=pt.get(Elements::ClassMemberReferenceIndex::Name(), -1); //default index=-1 if not present
+
+                //Get Parameter Index
+                boost::optional<boost::property_tree::ptree&> indexRef=pt.get_child_optional(Elements::IndexRef::Name());
+                if (indexRef)
+                {
+                    memberArrayIndex=GetReferencedIndex(*indexRef, state);
+                }
+                else
+                {
+                    memberArrayIndex=pt.get(Elements::ClassMemberReferenceIndex::Name(), -1); //default index=-1 if not present
+                }
+
                 int classMemberIx=cd->GetMemberIndex(memberName);
                 if (classMemberIx<0)
                 {

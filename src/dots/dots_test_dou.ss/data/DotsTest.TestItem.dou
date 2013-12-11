@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit">
     <name>DotsTest.TestItem</name>
-    <baseClass>Object</baseClass>
+    <baseClass>Safir.Dob.Entity</baseClass>
     <members>
         <member>
             <name>MyInt</name>

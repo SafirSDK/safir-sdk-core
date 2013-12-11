@@ -109,7 +109,7 @@ namespace Internal
         struct ArraySizeRef {static const std::string& Name() {static const std::string n="arraySizeRef"; return n;}}; //member array
         struct MaxLengthRef {static const std::string& Name() {static const std::string n="maxLengthRef"; return n;}}; //member maxLength
         struct InstanceIdRef {static const std::string& Name() {static const std::string n="instanceIdRef"; return n;}};
-        struct IndexRef {static const std::string& Name() {static const std::string n="indexRef"; return n;}}; //??????
+        struct IndexRef {static const std::string& Name() {static const std::string n="indexRef"; return n;}}; //domFiles valueRef and classMemberReference
         struct ReferenceName {static const std::string& Name() {static const std::string n="name"; return n;}};
         struct ReferenceIndex {static const std::string& Name() {static const std::string n="index"; return n;}};
         struct InstanceId {static const std::string& Name() {static const std::string n="instanceId"; return n;}}; //<entityId><name/><instanceId/>..

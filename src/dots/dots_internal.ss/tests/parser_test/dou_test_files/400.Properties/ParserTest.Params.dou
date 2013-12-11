@@ -9,7 +9,7 @@
         <parameter>
             <name>Int32Param</name>
             <type>Int32</type>
-            <value>123</value>
+            <value>2</value>
         </parameter>
 
         <parameter>
@@ -63,13 +63,13 @@
             <type>Int32</type>
             <arrayElements>
                 <arrayElement>
-                    <value>123</value>
+                    <value>0</value>
                 </arrayElement>
                 <arrayElement>
-                    <value>456</value>
+                    <value>1</value>
                 </arrayElement>
                 <arrayElement>
-                    <value>789</value>
+                    <value>2</value>
                 </arrayElement>
             </arrayElements>
         </parameter>

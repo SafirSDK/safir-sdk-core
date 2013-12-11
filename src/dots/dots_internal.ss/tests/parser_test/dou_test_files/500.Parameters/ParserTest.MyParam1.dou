@@ -18,6 +18,13 @@
             <type>String</type>
             <value>Its more fun to compute</value>
         </parameter>
+        
+        <parameter>
+            <name>StringSpecialParam</name>
+            <type>String</type>
+            <value>        ?
+                                    ampersand=&amp;        less=&lt; great=&gt; quota=&quot;            ?      </value>
+        </parameter>
 
         <parameter>
             <name>Tid</name>

@@ -206,7 +206,7 @@ namespace SerializationUtils
             {
                 std::ostringstream os;
                 os<<"Enumeration member '"<<md->GetName()<<"' contains an invalid value. Value="<<memberContent.data()<<" is not a value of enum type "<<ed->GetName();
-                throw ParseError("XmlToBlob serialization error", os.str(), "", 114);
+                throw ParseError("Serialization error", os.str(), "", 114);
             }
 
             blobLayout.template SetMember<DotsC_Int32>(enumOrdinal, &blob[0], memIx, arrIx);
@@ -233,6 +233,14 @@ namespace SerializationUtils
         case TypeIdMemberType:
         {
             DotsC_TypeId tid=SerializationUtils::StringToTypeId(memberContent.data());
+
+            if (!BasicTypeOperations::TypeIdToTypeName(repository, tid))
+            {
+                std::ostringstream os;
+                os<<"TypeId does not refer to an existing type. Specified type name: "<<memberContent.data();
+                throw ParseError("Serialization error", os.str(), "", 174);
+            }
+
             blobLayout.template SetMember<DotsC_TypeId>(tid, &blob[0], memIx, arrIx);
             blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
         }
@@ -255,21 +263,31 @@ namespace SerializationUtils
 
         case EntityIdMemberType:
         {
+            static const DotsC_TypeId EntityTypeId=DotsId_Generate64("Safir.Dob.Entity");
+
             boost::optional<std::string> typeIdString=memberContent.get_optional<std::string>("name");
             boost::optional<std::string> instanceIdString=memberContent.get_optional<std::string>("instanceId");
             if (!typeIdString)
             {
                 std::ostringstream os;
                 os<<"EntityId member '"<<md->GetName()<<"' is missing the name-element that specifies the type.";
-                throw ParseError("XmlToBlob serialization error", os.str(), "", 115);
+                throw ParseError("Serialization error", os.str(), "", 115);
             }
             if (!instanceIdString)
             {
                 std::ostringstream os;
                 os<<"EntityId member '"<<md->GetName()<<"' is missing the instanceId-element that specifies the instance.";
-                throw ParseError("XmlToBlob serialization error", os.str(), "", 116);
+                throw ParseError("Serialization error", os.str(), "", 116);
             }
             DotsC_TypeId tid=SerializationUtils::StringToTypeId(*typeIdString);
+
+            if (!BasicTypeOperations::IsOfType(repository, ObjectMemberType, tid, ObjectMemberType, EntityTypeId))
+            {
+                std::ostringstream os;
+                os<<"EntityId contains a typeId that does not refer to a subtype of Safir.Dob.Entity. Specified type name: "<<*typeIdString;
+                throw ParseError("Serialization error", os.str(), "", 173);
+            }
+
             std::pair<DotsC_TypeId, const char*> instanceId=SerializationUtils::StringToHash(*instanceIdString);
             if (instanceId.second!=NULL)
             {
@@ -306,7 +324,7 @@ namespace SerializationUtils
             {
                 std::ostringstream os;
                 os<<"Member "<<md->GetName()<<" of type binary containes invalid base64 data";
-                throw ParseError("XmlToBlob serialization error", os.str(), "",  117);
+                throw ParseError("Serialization error", os.str(), "",  117);
             }
             SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, bin.size());
             char* writeBinary=beginningOfUnused;
@@ -348,7 +366,7 @@ namespace SerializationUtils
             {
                 std::ostringstream os;
                 os<<"Member "<<md->GetName()<<" of type Float32 contains invalid value. Value="<<memberContent.data();
-                throw ParseError("XmlToBlob serialization error", os.str(), "",  118);
+                throw ParseError("Serialization error", os.str(), "",  118);
             }
         }
             break;
@@ -384,8 +402,8 @@ namespace SerializationUtils
             catch (const boost::bad_lexical_cast&)
             {
                 std::ostringstream os;
-                os<<"Member "<<md->GetName()<<" of type Float32 contains invalid value. Value="<<memberContent.data();
-                throw ParseError("XmlToBlob serialization error", os.str(), "",  119);
+                os<<"Member "<<md->GetName()<<" of type Float64 contains invalid value. Value="<<memberContent.data();
+                throw ParseError("Serialization error", os.str(), "",  119);
             }
         }
             break;
@@ -404,8 +422,6 @@ namespace SerializationUtils
                                 char* &beginningOfUnused)
     {
         //get the referenced parameter an make all the error checking
-        //typedef typename BlobLayoutT::RepositoryType RepT;
-        //Safir::Dob::Typesystem::Internal::TypeUtilities::GetParameterByFullName<RepT> tmp;
         Safir::Dob::Typesystem::Internal::TypeUtilities::GetParameterByFullName<typename BlobLayoutT::RepositoryType> tmp;
         const typename BlobLayoutT::ParameterDescriptionType* param=tmp(repository, parameterName);
 
@@ -413,7 +429,7 @@ namespace SerializationUtils
         {
             std::ostringstream os;
             os<<"The parameter '"<<parameterName<<"' does not exist. Specified as valueRef in member "<<md->GetName();
-            throw ParseError("UglyXmlToBinary serialization error", os.str(), "", 120);
+            throw ParseError("Serialization error", os.str(), "", 120);
         }
 
         if (parameterIndex>=param->GetArraySize())
@@ -426,20 +442,20 @@ namespace SerializationUtils
             else
                 os<<" is not an array.";
 
-            throw ParseError("UglyXmlToBinary serialization error", os.str(), "", 121);
+            throw ParseError("Serialization error", os.str(), "", 121);
         }
         if (param->GetMemberType()!=md->GetMemberType())
         {
             std::ostringstream os;
             os<<"Member "<<md->GetName()<<" is referencing a parameter of another type. Expected type is "<<BasicTypeOperations::MemberTypeToString(md->GetMemberType())<<
                 " but parameter "<<param->GetName()<<" has type "<<BasicTypeOperations::MemberTypeToString(param->GetMemberType());
-            throw ParseError("UglyXmlToBinary serialization error", os.str(), "", 122);
+            throw ParseError("Serialization error", os.str(), "", 122);
         }
         if (param->GetMemberType()==ObjectMemberType)
         {
             std::ostringstream os;
             os<<"ValueRef is not supported for complex types (objects). Occurred in member "<<md->GetName();
-            throw ParseError("UglyXmlToBinary serialization error", os.str(), "", 123);
+            throw ParseError("Serialization error", os.str(), "", 123);
         }
 
         //when we get here we have found the referenced parameter and it seems to be valid for usage here

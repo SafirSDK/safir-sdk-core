@@ -66,8 +66,18 @@ namespace Internal
             //Read the config files
             Safir::Utilities::Internal::ConfigReader reader;
 
-            sharedMemorySize=reader.Typesystem().get<size_t>("dots_shared_memory_size");
-            sharedMemorySize*=(1024*1024); //megabytes to bytes
+            sharedMemorySize=0;
+            try
+            {
+                sharedMemorySize=reader.Typesystem().get<size_t>("dots_shared_memory_size");
+                sharedMemorySize*=(1024*1024); //megabytes to bytes
+            }
+            catch(...)
+            {
+                SEND_SYSTEM_LOG(Error, <<"Could not read dots_shared_memory_size from typesystem.ini");
+                std::wcout<<"Could not read dots_shared_memory_size from typesystem.ini"<<std::endl;
+                exit(1);
+            }
 
 
             //loop through all sections in typesystem.ini
@@ -97,6 +107,7 @@ namespace Internal
                         exit(1);
                     }
 
+                    std::cout<<douDirectory.string()<<std::endl;
                     directories.push_back(douDirectory);
                 }
             }

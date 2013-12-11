@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<property xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Defines property.</summary>
+    <name>ParserTest.MyProperty</name>
+    <members>
+      
+        <member>
+            <name>EntityIdPropertyValue</name>
+            <type>EntityId</type>
+        </member>
+        
+        <member>
+            <name>MyObjPropertyValue</name>
+            <type>ParserTest.MyEntity</type>
+        </member>
+        
+        <member>
+            <name>MyStringPropertyValue</name>
+            <type>String</type>
+        </member>
+                
+    </members>
+</property>

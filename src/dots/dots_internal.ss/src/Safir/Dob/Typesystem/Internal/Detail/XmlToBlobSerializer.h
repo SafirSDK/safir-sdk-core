@@ -209,7 +209,7 @@ namespace Detail
                 if (memberContent.size()>1 || !memberContent.data().empty())
                 {
                     std::ostringstream os;
-                    os<<"Member '"<<md->GetName()<<"' is referencing an parameter and hence is not allowed to contain data or sub elements";
+                    os<<"Member '"<<md->GetName()<<"' is referencing a parameter and hence is not allowed to contain data or sub elements";
                     throw ParseError("XmlToBinary serialization error", os.str(), "", 109);
                 }
                 else if (md->GetMemberType()==ObjectMemberType)

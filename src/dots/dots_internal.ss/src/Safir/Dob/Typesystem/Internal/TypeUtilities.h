@@ -52,6 +52,11 @@ namespace TypeUtilities
         return Safir::Dob::Typesystem::Internal::Detail::BasicTypeOperations::TypeIdToTypeName(repository, typeId);
     }
 
+    inline DotsC_TypeId CalculateTypeId(const std::string& name)
+    {
+        return DotsId_Generate64(name.c_str());
+    }
+
     /**
      * Finds corresponding type name to a memberType.
      *
@@ -148,8 +153,8 @@ namespace TypeUtilities
     template <class ClassDescriptionT, class ParameterDescriptionT>
     const ParameterDescriptionT* GetParameterByName(const ClassDescriptionT* cd, const std::string& paramName)
     {
-        size_t dot=paramName.find('.');
-        if (dot!=std::string::npos)
+        size_t dot=paramName.rfind('.');
+        if (dot==std::string::npos)
         {
             for (int i=0; i<cd->GetNumberOfParameters(); ++i)
             {
@@ -162,11 +167,11 @@ namespace TypeUtilities
         }
         else
         {
-            std::string fullName=std::string(cd->GetName())+"."+paramName;
+            std::string shortName=paramName.substr(dot+1);
             for (int i=0; i<cd->GetNumberOfParameters(); ++i)
             {
                 const ParameterDescriptionT* pd=cd->GetParameter(i);
-                if (fullName==pd->GetName())
+                if (shortName==pd->GetName())
                 {
                     return pd;
                 }
@@ -203,11 +208,10 @@ namespace TypeUtilities
             const ClassDescriptionType* cd=rep->GetClass(DotsId_Generate64(className.c_str()));
             if (!cd)
             {
-
                 return NULL;
             }
 
-            return GetParameterByName<ClassDescriptionType, ParameterDescriptionType>(cd, parameterName);
+            return GetParameterByName<ClassDescriptionType, ParameterDescriptionType>(cd, parameterName.substr(pos+1));
         }
     };
 }

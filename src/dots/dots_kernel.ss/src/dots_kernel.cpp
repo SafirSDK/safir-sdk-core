@@ -37,7 +37,6 @@
 #include <Safir/Utilities/Internal/ConfigReader.h>
 
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
-#include <Safir/Dob/Typesystem/Internal/Id.h>
 #include <Safir/Dob/Typesystem/Internal/BlobLayout.h>
 #include <Safir/Dob/Typesystem/Internal/Serialization.h>
 
@@ -221,7 +220,7 @@ bool DotsC_IsException(const DotsC_TypeId typeId)
 DotsC_TypeId DotsC_TypeIdFromName(const char* typeName)
 {
     Init();
-    return DotsId_Generate64(typeName);
+    return Safir::Dob::Typesystem::Internal::TypeUtilities::CalculateTypeId(typeName);
 }
 
 const char* DotsC_GetTypeName(const DotsC_TypeId typeId)
