@@ -14,7 +14,7 @@ Python (>= 2.7)
 CMake (>=2.8.12.1)
 Expat
 Jom *
-Qt (>=4.4) *
+Qt (>=4.8) *
 GNAT Ada compiler *
 Java Platform (JDK) *
 Doxygen *
@@ -50,7 +50,7 @@ Java Platform JDK
 
 Visual Studio and utils
 ~~~~~~~~~~~~~~~~~~~~~~~
-You are assumed to already have Visual Studio installed, so we proceed immediately to the more interesting bits.
+You are assumed to already have Visual Studio installed. Be aware that Visual Studio 2010 is sometimes referred to as "msvc10", Visual Studio 2012 as "msvc11" and Visual Studio 2013 as "msvc12". Yes, that's right, very confusing, but don't blame us, blame Microsoft...
 You are also assumed to have some unpacking tool installed that can handle .gz files, like winzip, 7-zip or winrar.
 
 Subversion
