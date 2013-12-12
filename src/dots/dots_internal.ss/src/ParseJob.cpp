@@ -24,6 +24,9 @@
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <boost/timer.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/asio.hpp>
+#include <boost/make_shared.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include "ParseJob.h"
 #include "SchemaDefinitions.h"
@@ -92,76 +95,91 @@ namespace Internal
          * Worker class run as separate future.
          */
         template <class ParserT>
-        struct ParseWorker
+        class ParseWorker
         {
-            ParseWorker(const std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator& begin,
-                        const std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator& end)
+        public:
+            ParseWorker()
                 :m_rep(new RepositoryBasic)
-                ,m_begin(begin)
-                ,m_end(end)
+                ,m_state(new ParseState(m_rep))
+                ,m_error()
             {
             }
 
-            ParseWorker(const boost::shared_ptr<RepositoryBasic>& rep,
-                        const std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator& begin,
-                        const std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator& end)
+            ParseWorker(const boost::shared_ptr<RepositoryBasic>& rep)
                 :m_rep(rep)
-                ,m_begin(begin)
-                ,m_end(end)
+                ,m_state(new ParseState(m_rep))
+                ,m_error()
             {
             }
 
-            boost::shared_ptr<RepositoryBasic> m_rep;
-            std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator m_begin;
-            std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator m_end;
-
-
-            ParseStatePtr operator()()
+            void AddPath(const boost::filesystem::path& p)
             {
-                ParseStatePtr state(new ParseState(m_rep));
+                m_paths.push_back(p);
+            }
 
-                for (std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator it=m_begin; it!=m_end; ++it)
+            ParseStatePtr GetResult() //throws if error occured in Run
+            {
+                if (!m_error)
                 {
-                    const boost::filesystem::path& path=it->second;
+                    return m_state;
+                }
+                else
+                {
+                    throw *m_error; //throw ParseError
+                }
+            }
+
+            void Run()
+            {
+                for (std::vector<boost::filesystem::path>::const_iterator pathIt=m_paths.begin(); pathIt!=m_paths.end(); ++pathIt)
+                {
                     boost::shared_ptr<boost::property_tree::ptree> pt(new boost::property_tree::ptree);
                     try
                     {
-                        boost::property_tree::read_xml(path.string(), *pt, boost::property_tree::xml_parser::trim_whitespace | boost::property_tree::xml_parser::no_comments);
+                        boost::property_tree::read_xml(pathIt->string(), *pt, boost::property_tree::xml_parser::trim_whitespace | boost::property_tree::xml_parser::no_comments);
                     }
                     catch (boost::property_tree::xml_parser_error& err) //cant catch as const-ref due to bug in early boost versions.
                     {
                         std::ostringstream ss;
                         ss<<err.message()<<". Line: "<<err.line();
-                        throw boost::enable_current_exception(ParseError("Invalid XML", ss.str(), path.string(), 10));
+                        m_error.reset(new ParseError("Invalid XML", ss.str(), pathIt->string(), 10));
+                        return;
                     }
 
                     try
                     {
-                        state->currentPath=path.string();
-                        state->propertyTree=pt;
+                        m_state->currentPath=pathIt->string();
+                        m_state->propertyTree=pt;
                         ParserT parser;
-                        boost::property_tree::ptree::iterator ptIt=state->propertyTree->begin();
-                        if (parser.Match(ptIt->first, *state))
+                        boost::property_tree::ptree::iterator ptIt=m_state->propertyTree->begin();
+                        if (parser.Match(ptIt->first, *m_state))
                         {
-                            parser.Parse(ptIt->second, *state);
+                            parser.Parse(ptIt->second, *m_state);
                         }
                     }
                     catch (const ParseError& err)
                     {
-                        throw boost::enable_current_exception(err);
+                        m_error.reset(new ParseError(err.Label(), err.Description(), err.File(), err.ErrorId()));
+                        return;
                     }
                     catch (const std::exception& err)
                     {
-                        throw boost::enable_current_exception(ParseError("Unexpected Error", err.what(), state->currentPath, 11));
+                        m_error.reset(new ParseError("Unexpected Error", err.what(), m_state->currentPath, 11));
+                        return;
                     }
                     catch(...)
                     {
-                        throw boost::enable_current_exception(ParseError("Programming Error", "You have found a bug in dots_internal. Please save the this dou-file and attach it to your bug report.", state->currentPath, 0));
+                        m_error.reset(new ParseError("Programming Error", "You have found a bug in dots_internal. Please save the this dou-file and attach it to your bug report.", m_state->currentPath, 0));
+                        return;
                     }
                 }
-
-                return state;
             }
+
+        private:
+            boost::shared_ptr<RepositoryBasic> m_rep;
+            std::vector<boost::filesystem::path> m_paths;
+            ParseStatePtr m_state;
+            boost::shared_ptr<const ParseError> m_error;
         };
     }
 
@@ -171,17 +189,13 @@ namespace Internal
         std::map<boost::filesystem::path, boost::filesystem::path> douFiles;
         std::map<boost::filesystem::path, boost::filesystem::path> domFiles;
         SelectFiles(roots, douFiles, domFiles);
-        size_t numWorkers=CalcNumberOfWorkers(maxNumberOfThreads, douFiles.size());
+        size_t numWorkers=std::max(size_t(1), std::min(douFiles.size()/500, maxNumberOfThreads)); //500 files per thread, but always in range 1..maxNumberOfThreads
+
         lllout<<"        Starting ParseJob #files (dou/dom/tot): "<<douFiles.size()<<"/"<<domFiles.size()<<"/"<<douFiles.size()+domFiles.size()<<", #threads: "<<numWorkers<<std::endl;
 
-        //Create worker threads that will parse all dou-files. Dom-files are also
-        //read into propertyTrees and stored in domFiles for later parsing.
-        Futures futures;        
-        CreateDouWorkers(douFiles, numWorkers, futures);
-
-        //Get all the parseStates form futures and handle if exception occurred during parsing.
+        //Create worker threads that will parse all dou-files.
         std::vector<ParseStatePtr> states;
-        CollectParseStates(futures, states);
+        CreateAndRunWorkers(douFiles, numWorkers, states);
 
         //After dou files are parsed, we must do some completion stuff before the repository is ready to use.
         RepositoryCompletionAlgorithms postProcessing(m_result);
@@ -190,70 +204,78 @@ namespace Internal
         //did we get this far, the repository is complete but still without any propertyMappings
 
         //Parse dom-files
-        ParseWorker<DomParser> domWorker(m_result, domFiles.begin(), domFiles.end());
-        boost::shared_ptr<Task> domTask(new Task(domWorker));
-        Future fut(domTask->get_future());
-        boost::thread thd(boost::bind(&Task::operator(), domTask));
-        thd.detach();
-        ParseStatePtr domState=fut.get();
+        ParseWorker<DomParser> domWorker(m_result);
+        for (std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator it=domFiles.begin(); it!=domFiles.end(); ++it)
+        {
+            domWorker.AddPath(it->second);
+        }
+        domWorker.Run();
         std::vector<ParseStatePtr> domStates;
-        domStates.push_back(domState);
+        domStates.push_back(domWorker.GetResult());
         postProcessing.DomParsingCompletion(domStates);
     }
 
-    void ParseJob::CreateDouWorkers(const std::map<boost::filesystem::path, boost::filesystem::path>& douFiles,
-                                    size_t numberOfWorkers,
-                                    Futures& futures)
+    void ParseJob::CreateAndRunWorkers(const std::map<boost::filesystem::path, boost::filesystem::path>& douFiles,
+                                       size_t numberOfWorkers,
+                                       std::vector<ParseStatePtr>& states) const
     {
-        const size_t filesPerWorker=douFiles.size()/numberOfWorkers;
-        std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator it=douFiles.begin();
-        for (size_t i=0; i<numberOfWorkers-1; ++i)
+        if (numberOfWorkers==1)
         {
-            std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator start=it;
+            //an optimization: do everything in this thread
+            ParseWorker<DouParser> worker;
+            for (std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator it=douFiles.begin(); it!=douFiles.end(); ++it)
+            {
+                worker.AddPath(it->second);
+            }
+            worker.Run();
+            states.push_back(worker.GetResult());
+            return;
+        }
+
+        typedef boost::shared_ptr< ParseWorker<DouParser> > WorkPtr;
+
+        const size_t filesPerWorker=douFiles.size()/numberOfWorkers;
+
+        boost::asio::io_service ioService;
+        std::vector<WorkPtr> workers;
+        boost::thread_group threads;
+
+        boost::scoped_ptr<boost::asio::io_service::work> keepAlive(new boost::asio::io_service::work(ioService));
+        for (size_t i=0; i<numberOfWorkers; ++i)
+        {
+            threads.create_thread(boost::bind(&boost::asio::io_service::run, &ioService));
+        }
+
+
+        std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator it=douFiles.begin();
+        for (size_t workerCount=0; workerCount<numberOfWorkers; ++workerCount)
+        {
+            WorkPtr worker=boost::make_shared< ParseWorker<DouParser> >();
             for (size_t j=0; j<filesPerWorker; ++j)
             {
+                worker->AddPath(it->second);
                 ++it;
             }
-            ParseWorker<DouParser> worker(start, it);
-            boost::shared_ptr<Task> task(new Task(worker));
-            futures.push_back(Future(task->get_future()));
-            boost::thread thd(boost::bind(&Task::operator(), task));
-            thd.detach();
-        }
-        //last worker takes the rest
-        ParseWorker<DouParser> worker(it, douFiles.end());
-        boost::shared_ptr<Task> task(new Task(worker));
-        futures.push_back(Future(task->get_future()));
-        boost::thread thd(boost::bind(&Task::operator(), task));
-        thd.detach();
-    }
 
-    size_t ParseJob::CalcNumberOfWorkers(size_t maxThreads, size_t files) const
-    {
-        if (files<200)
-        {
-            return 1;
+            if (workerCount+1==numberOfWorkers)
+            {
+                //this is the last worker, add the remaining files
+                for (; it!=douFiles.end(); ++it)
+                {
+                    worker->AddPath(it->second);
+                }
+            }
+            workers.push_back(worker);
+            ioService.post(boost::bind(&ParseWorker<DouParser>::Run, worker));
         }
-        return std::min(files/200, maxThreads);
-    }
+        keepAlive.reset(); //remove dummy work that keeps ioService alive when no real work exists
+        threads.join_all();
+        ioService.stop();
 
-    void ParseJob::CollectParseStates(Futures& futures, std::vector<ParseStatePtr>& states) const
-    {        
-        states.reserve(futures.size());
-        for (Futures::iterator it=futures.begin(); it!=futures.end(); ++it)
+        //collect all results
+        for (std::vector<WorkPtr>::iterator workerIt=workers.begin(); workerIt!=workers.end(); ++workerIt)
         {
-            try
-            {
-                states.push_back(it->get());
-            }
-            catch(...)
-            {
-                ParseError* parseErr=boost::current_exception_cast<ParseError>();
-                if (parseErr)
-                    throw *parseErr;
-                else
-                    throw; //This was an totally unexpected exception
-            }
+            states.push_back((*workerIt)->GetResult()); //GetResult will throw ParseError if an error occured during parsing
         }
     }
 }
