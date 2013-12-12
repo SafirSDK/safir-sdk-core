@@ -76,14 +76,20 @@ Download the latest version of jom from http://qt-project.org/wiki/jom, and put 
 
 Qt
 ~~
-32 bit:
-Download the "Qt Library" installer for your compiler from http://qt-project.org/downloads#qt-lib. Run and install.
-Set up environment variable QTDIR to refer the installation directory (e.g. QTDIR=C:\Qt\4.8.1) and add %QTDIR%\bin to PATH environment variable.
+Qt can either be built/installed from source or using a Qt installer downloaded from qt-project.org. The installer is only available for VS2010-32bit, VS2012-32bit and VS2012-64bit, if you're using another compiler you will have to build from source.
 
-64 bit:
-1. Download the Qt source code from http://qt.nokia.com/downloads, unzip and move the contents to C:\Qt\4.8.1.
+Safir SDK Core supports both Qt 4.8 and Qt 5, so you can choose whichever one you want.
+
+As of this writing Qt has no official support for VS2013, but it can be made to work. Get in touch with us for more info.
+
+Installer:
+Download and run the appropriate the installer for your compiler from http://qt-project.org/downloads.
+Set up environment variable QTDIR to refer the to the directory in the installation that contains the "include" and "bin" folders (e.g. QTDIR=C:\Qt\4.8.1 or QTDIR=c:\Qt\Qt5.2.0\5.2.0\msvc2012_64) and add %QTDIR%\bin to PATH environment variable.
+
+Build from source:
+1. Download the Qt source code from http://qt.nokia.com/downloads, unzip and move the contents to an appropriately named directory, i.e. C:\Qt\4.8.1.
 2. Set up environment variable QTDIR=C:\Qt\4.8.1 and add %QTDIR%\bin to PATH environment variable 
-3. Start Visual Studio 2010 Command Prompt (Start > Programs > Microsoft Visual Studio 2010 > Visual Studio Tools > Visual Studio Command Prompt).
+3. Start the appropriate Visual Studio Command Prompt (make sure to choose 32 or 64 bit variant correctly)
 4.Run following commands in it:
    >cd c:\Qt\4.8.1
    >configure -debug-and-release -opensource
@@ -122,7 +128,7 @@ Java
 ~~~~
 This step is optional, if you don't want Java interfaces you do not need to install Java. You will need to pass --no-java-support to the build script as described below if you do not install Java.
 
-Go to http://java.sun.com/javase/downloads/index.jsp and download and install a JDK kit. (Last time I used "JDK 6 Update 29", since I needed only the jdk itself, but any of the JDK kits should work)
+Go to http://java.sun.com/javase/downloads/index.jsp and download and install a JDK kit. (Last time I used "JDK 6 Update 45", since I needed only the jdk itself, but any of the JDK kits should work)
 
 Python
 ~~~~~~
