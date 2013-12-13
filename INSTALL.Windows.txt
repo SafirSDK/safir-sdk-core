@@ -142,6 +142,8 @@ These tools are used to build the interface documentation from the C++ source co
 Go to http://www.doxygen.org/ and download and install the windows installer 
 Go to http://www.graphviz.org/ and download and install the windows installer
 
+Add the Graphviz installation bin directory to your PATH.
+
 It appears that Graphviz installs its own version of libexpat.dll which conflicts with the one we installed above (part of Expat). You have to make sure that the libexpat.dll that we installed above is before the graphviz one in your PATH. 
 (If you don't do this you will get an error message about "The ordinal 63 could not be located in the dynamic link library libexpat.dll" when you build Safir SDK Core.)
 
