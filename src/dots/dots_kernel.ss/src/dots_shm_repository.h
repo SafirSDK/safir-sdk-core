@@ -25,14 +25,12 @@
 #define __DOTS_KERNEL_REPOSITORY_H__
 
 #include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/containers/string.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/containers/map.hpp>
 #include <boost/interprocess/smart_ptr/shared_ptr.hpp>
 #include <boost/interprocess/offset_ptr.hpp>
-#include <Safir/Utilities/StartupSynchronizer.h>
 #include <Safir/Dob/Typesystem/Internal/TypeParser.h>
 #include <Safir/Dob/Typesystem/Internal/TypeUtilities.h>
 #include <Safir/Dob/Typesystem/Internal/BlobLayout.h>
@@ -667,42 +665,9 @@ namespace Internal
         ExceptionMapShm m_exceptions;
         ParameterMapShm m_params;
 
-        friend class RepositoryKeeper;
-    };
-
-    /**This class creates the shared memory. It initiates the dou-parsing and then
-     * copies the data into the shared memory.
-     */
-    class RepositoryKeeper :
-            public Safir::Utilities::Synchronized,
-            private boost::noncopyable
-    {
-    public:
-        static void Initialize(size_t sharedMemorySize, const std::vector<boost::filesystem::path>& paths);
-        static const RepositoryShm* GetRepository();
-        static const Safir::Dob::Typesystem::Internal::BlobLayout<RepositoryShm>* GetBlobLayout();
-        static bool RepositoryCreatedByThisProcess();
-
-    private:
-        Safir::Utilities::StartupSynchronizer m_startupSynchronizer;
-        size_t m_sharedMemorySize;
-        std::vector<boost::filesystem::path> m_paths;
-        boost::scoped_ptr<boost::interprocess::managed_shared_memory> m_sharedMemory;
-        RepositoryShm* m_repository;
-        bool m_repositoryCreatedByThisProcess;
-        boost::scoped_ptr< Safir::Dob::Typesystem::Internal::BlobLayout<RepositoryShm> > m_blobLayout;
-
-        static RepositoryKeeper& Instance();
-
-        RepositoryKeeper();
-        ~RepositoryKeeper();
-
-        void LoadData();
-
-        //StartupSynchronizer stuff
-        virtual void Create();
-        virtual void Use();
-        virtual void Destroy();
+        friend void Safir::Dob::Typesystem::Internal::CreateShmCopyOfRepository(const Safir::Dob::Typesystem::Internal::TypeRepository& srcRepository,
+                                                                                const std::string& shmRepositoryName,
+                                                                                boost::interprocess::managed_shared_memory& sharedMemory);
     };
 
     //type traits for shared memory repository. Needed to be able to use the
@@ -720,6 +685,16 @@ namespace Internal
         typedef PropertyMappingDescriptionShm PropertyMappingDescriptionType;
         typedef CreateRoutineDescriptionShm CreateRoutineDescriptionType;
     };
+
+    /**
+     * @brief CreateShmCopyOfRepository - creates a named RepositoryShm repository with identical content as srcRepository
+     * @param srcRepository - the prototype repository that will be cloned in shared memory
+     * @param repositoryName - name of the shared memory repository that will be created
+     * @param sharedMemory - the shared memory to copy into
+     */
+    void CreateShmCopyOfRepository(const Safir::Dob::Typesystem::Internal::TypeRepository& srcRepository,
+                                   const std::string& shmRepositoryName,
+                                   boost::interprocess::managed_shared_memory& sharedMemory);
 }
 }
 }

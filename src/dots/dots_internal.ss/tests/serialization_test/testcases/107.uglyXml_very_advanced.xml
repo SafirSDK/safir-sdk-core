@@ -260,7 +260,7 @@
                     <arrayElement>
                          <entityId>
                               <name>
-                                   Object
+                                   BlobTest.MyEntity
                               </name>
                               <instanceId>
                                    2
@@ -270,7 +270,7 @@
                     <arrayElement>
                          <entityId>
                               <name>
-                                   Safir.Dob.Item
+                                   BlobTest.MyEntityBase
                               </name>
                               <instanceId>
                                    3

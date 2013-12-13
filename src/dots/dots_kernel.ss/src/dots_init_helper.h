@@ -28,7 +28,7 @@
 #include <boost/filesystem.hpp>
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include "dots_shm_repository.h"
+#include "dots_repository_keeper.h"
 
 //check size of type definitions
 BOOST_STATIC_ASSERT(sizeof(DotsC_Int32)==4);

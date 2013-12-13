@@ -285,6 +285,10 @@ namespace SerializationUtils
             {
                 std::ostringstream os;
                 os<<"EntityId contains a typeId that does not refer to a subtype of Safir.Dob.Entity. Specified type name: "<<*typeIdString;
+                if (!BasicTypeOperations::TypeIdToTypeName(repository, tid))
+                {
+                    os<<". By the way, the type '"<<*typeIdString<<"'' does not exist at all!";
+                }
                 throw ParseError("Serialization error", os.str(), "", 173);
             }
 

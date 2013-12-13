@@ -7,7 +7,7 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 FIND_PACKAGE(Boost COMPONENTS filesystem system thread)
 
 ENABLE_TESTING()
+ADD_SUBDIRECTORY(override_test)
 ADD_SUBDIRECTORY(parser_test)
 ADD_SUBDIRECTORY(serialization_test)
-ADD_SUBDIRECTORY(shmem_repo)
-ADD_SUBDIRECTORY(override_test)
+
