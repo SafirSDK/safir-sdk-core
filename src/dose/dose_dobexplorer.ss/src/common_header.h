@@ -27,11 +27,13 @@
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning (disable: 4127)
+#pragma warning (disable: 4244)
 #endif
 
 //need to do this to allow for both qt4 and qt5
 #include <QtGui>
 #if QT_VERSION >= 0x050000
+#  include <QtCore/qstring.h>
 #  include <QtWidgets>
 #endif
 
