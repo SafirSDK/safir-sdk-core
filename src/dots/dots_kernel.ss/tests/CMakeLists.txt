@@ -4,7 +4,7 @@ project(dots_kernel_test CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
-FIND_PACKAGE(Boost COMPONENTS thread)
+FIND_PACKAGE(Boost COMPONENTS thread system)
 add_executable(multiple_accesses multiple_accesses.cpp)
 add_executable(multiple_serialization multiple_serialization.cpp)
 
