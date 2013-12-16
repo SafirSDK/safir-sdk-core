@@ -199,6 +199,12 @@ def uninstall():
 def get_config_file():
     return os.path.join(SAFIR_SDK,"dots","dots_generated","dobmake.ini")
 
+def replace_non_ascii(s):
+    if type(s) is str:
+        return "".join([c if ord(c) < 128 else '#' for c in s])
+    else:
+        return "".join([chr(c) if c < 128 else '#' for c in s])
+
 class Logger(object):
     def __init__(self):
         self.logdata = list()
@@ -256,8 +262,7 @@ class Logger(object):
                 data = self.process.stdout.readline()
                 if not data:
                     break
-                if type(data) is not str:
-                    data = data.decode("utf8")
+                replace_non_ascii(data)
                 if self.strip_cr:
                     data = data.replace('\r','')
                 self.logger.write(data,"pre")
