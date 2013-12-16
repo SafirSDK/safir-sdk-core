@@ -1200,10 +1200,7 @@ void DotsC_BinaryToBase64(char* base64Dest,
     Safir::Dob::Typesystem::Internal::BinaryToBase64(binarySource, sourceSize, b64Stream);
     std::string base64=b64Stream.str();
     resultSize=static_cast<DotsC_Int32>(base64.size())+1; //add one char for null termination
-    if (resultSize<=destSize)
-    {
-        strncpy(base64Dest, base64.c_str(), resultSize);
-    }
+    strncpy(base64Dest, base64.c_str(), std::min(resultSize, destSize));
 }
 
 DotsC_Int32 DotsC_CalculateBinaryBufferSize(DotsC_Int32 base64SourceSize)

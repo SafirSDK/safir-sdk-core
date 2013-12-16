@@ -186,6 +186,7 @@ namespace Internal
         //Visible interface
         virtual const char* Summary() const {return summary.c_str();}
         virtual const char* GetName() const {return name.c_str();}
+        virtual const char* GetQualifiedName() const {return qualifiedName.c_str();}
         virtual DotsC_MemberType GetMemberType() const {return memberType;}
         virtual DotsC_TypeId GetTypeId() const {return typeId;} //only valid if MemberType is object or enum
         virtual bool IsArray() const {return isArray;}
@@ -240,6 +241,7 @@ namespace Internal
         //Fields
         std::string summary;
         std::string name;
+        std::string qualifiedName;
         std::string typeName;
         DotsC_MemberType memberType;
         bool isArray;
@@ -438,8 +440,8 @@ namespace Internal
         bool InsertClass(const ClassDescriptionBasicPtr& val) {return m_classes.insert(std::make_pair(val->typeId, val)).second;}
         bool InsertProperty(const PropertyDescriptionBasicPtr& val) {return m_properties.insert(std::make_pair(val->typeId, val)).second;}
         bool InsertException(const ExceptionDescriptionBasicPtr& val) {return m_exceptions.insert(std::make_pair(val->typeId, val)).second;}
-        bool InsertParameter(const std::string& fullName, const ParameterDescriptionBasicPtr& val) {return m_parameters.insert(std::make_pair(fullName, val.get())).second;}
-        ParameterDescriptionBasic* GetParameterBasic(const std::string& fullName);
+        bool InsertParameter(const ParameterDescriptionBasicPtr& val) {return m_parameters.insert(std::make_pair(val->GetQualifiedName(), val.get())).second;}
+        ParameterDescriptionBasic* GetParameterBasic(const std::string& qualifiedName);
         PropertyDescriptionBasic* GetPropertyBasic(DotsC_TypeId typeId) const {return GetPtr(m_properties, typeId);}
         ClassDescriptionBasic* GetClassBasic(DotsC_TypeId typeId) const {return GetPtr(m_classes, typeId);}
         ExceptionDescriptionBasic* GetExceptionBasic(DotsC_TypeId typeId) const {return GetPtr(m_exceptions, typeId);}

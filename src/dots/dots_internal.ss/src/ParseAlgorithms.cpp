@@ -1088,7 +1088,7 @@ namespace Internal
                  parIt!=(*stateIt)->notInsertedParameters.end(); ++parIt)
             {
                 parIt->first->ownParameters.push_back(parIt->second);
-                m_result->InsertParameter(parIt->second->name, parIt->second);
+                m_result->InsertParameter(parIt->second);
             }
         }
     }

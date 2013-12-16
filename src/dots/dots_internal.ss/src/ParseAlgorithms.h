@@ -499,7 +499,8 @@ namespace Internal
             memVal.second.second=0;
 
             ParameterDescriptionBasicPtr par(new ParameterDescriptionBasic);
-            par->name=paramName.str();
+            par->qualifiedName=paramName.str();
+            par->name=par->qualifiedName;
             par->hidden=true;
             par->isArray=false;
             par->memberType=Int32MemberType; //just to indicate that type is not object or entityId, it is a basicType or enum
@@ -508,7 +509,7 @@ namespace Internal
             val.stringVal=pt.data();
             par->values.push_back(val);
             state.lastInsertedClass->ownParameters.push_back(par);
-            state.repository->InsertParameter(par->name, par);
+            state.repository->InsertParameter(par);
 
             //type is still missing, add for later processing
             ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
@@ -555,14 +556,15 @@ namespace Internal
             }
 
             ParameterDescriptionBasicPtr par(new ParameterDescriptionBasic);
-            par->name=paramName.str();
+            par->qualifiedName=paramName.str();
+            par->name=par->qualifiedName;
             par->hidden=true;
             par->isArray=false;
             par->memberType=EntityIdMemberType;
             par->typeName=BasicTypeOperations::MemberTypeToString(EntityIdMemberType);
             par->values.push_back(val);
             state.lastInsertedClass->ownParameters.push_back(par);
-            state.repository->InsertParameter(par->name, par);
+            state.repository->InsertParameter(par);
         }
     };
 
@@ -580,7 +582,8 @@ namespace Internal
             memVal.second.second=0;
 
             ParameterDescriptionBasicPtr par(new ParameterDescriptionBasic);
-            par->name=paramName.str();
+            par->qualifiedName=paramName.str();
+            par->name=par->qualifiedName;
             par->hidden=true;
             par->isArray=false;
             par->memberType=ObjectMemberType;
@@ -593,7 +596,7 @@ namespace Internal
                                                                          par,
                                                                          par->values.size()-1,
                                                                          &pt, state.propertyTree));
-            state.repository->InsertParameter(par->name, par);
+            state.repository->InsertParameter(par);
 
             //type is still missing, add for later processing
             ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
@@ -618,7 +621,8 @@ namespace Internal
             memVal.second.second=0;
 
             ParameterDescriptionBasicPtr par(new ParameterDescriptionBasic);
-            par->name=paramName.str();
+            par->qualifiedName=paramName.str();
+            par->name=par->qualifiedName;
             par->hidden=true;
             par->isArray=false;
             par->memberType=ObjectMemberType;
@@ -632,7 +636,7 @@ namespace Internal
                                                                          par->values.size()-1,
                                                                          &pt, state.propertyTree));
             state.objectParameters.back().deprecatedXmlFormat=true;
-            state.repository->InsertParameter(par->name, par);
+            state.repository->InsertParameter(par);
 
             //type is still missing, add for later processing
             ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
@@ -672,6 +676,9 @@ namespace Internal
             {
                 throw ParseError("Invalid name", "Parameter name '"+def->name+"'' is invalid. Must start with an alphabetic char and then only contain alpha-numeric chars", state.currentPath, 20);
             }
+
+            def->qualifiedName=state.lastInsertedClass->name+"."+def->name;
+
             //Check parameter type
             try
             {
@@ -690,9 +697,7 @@ namespace Internal
 
             //Check for duplicates later after baseClass is known too.
             state.lastInsertedClass->ownParameters.push_back(def);
-
-            std::string fullName=state.lastInsertedClass->name+"."+def->name;
-            state.repository->InsertParameter(fullName, def);
+            state.repository->InsertParameter(def);
         }
     };
 
@@ -918,7 +923,8 @@ namespace Internal
         std::ostringstream paramName;
         //MyPropNamespace.MyProperty.PropMember@MyClassNamespace.MyClass#pm
         paramName<<pd->GetName()<<"."<<propMem->GetName()<<"@"<<state.lastInsertedPropertyMapping->class_->GetName();
-        param->name=paramName.str();
+        param->qualifiedName=paramName.str();
+        param->name=param->qualifiedName;
         param->hidden=true;
         param->isArray=isArray;
         param->memberType=propMem->memberType;

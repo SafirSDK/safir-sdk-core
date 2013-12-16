@@ -33,9 +33,9 @@ namespace Typesystem
 {
 namespace Internal
 {
-    void CreateShmCopyOfRepository(const Safir::Dob::Typesystem::Internal::TypeRepository& srcRepository,
-                                   const std::string& shmRepositoryName,
-                                   boost::interprocess::managed_shared_memory& sharedMemory)
+    void RepositoryShm::CreateShmCopyOfRepository(const Safir::Dob::Typesystem::Internal::TypeRepository& srcRepository,
+                                                  const std::string& shmRepositoryName,
+                                                  boost::interprocess::managed_shared_memory& sharedMemory)
     {
         //Start copy content from src into repository
         try
@@ -101,7 +101,7 @@ namespace Internal
                 for (int i=startParam; i<numParams; ++i)
                 {
                     const ParameterDescription* paramDesc=cd->GetParameter(i);
-                    ParameterDescriptionShmPtr paramPtr=&(repository->m_params.insert(ParameterMapShm::value_type(StringShm(paramDesc->GetName(), sharedMemory.get_segment_manager()),
+                    ParameterDescriptionShmPtr paramPtr=&(repository->m_params.insert(ParameterMapShm::value_type(StringShm(paramDesc->GetQualifiedName(), sharedMemory.get_segment_manager()),
                                                                               ParameterDescriptionShm(paramDesc, &sharedMemory))).first->second);
                     cdShm->AddOwnParameter(paramPtr);
                 }
@@ -141,7 +141,7 @@ namespace Internal
                             if (mm->GetMappingKind()==MappedToParameter)
                             {
                                 std::pair<const ParameterDescription*, int> paramAndIndex=mm->GetParameter();
-                                mmShm.SetParamRef(&(repository->m_params.find(StringShm(paramAndIndex.first->GetName(), sharedMemory.get_segment_manager()))->second), paramAndIndex.second);
+                                mmShm.SetParamRef(&(repository->m_params.find(StringShm(paramAndIndex.first->GetQualifiedName(), sharedMemory.get_segment_manager()))->second), paramAndIndex.second);
                             }
 
                             pmShm.AddMemberMapping(mmShm);
@@ -168,6 +168,7 @@ namespace Internal
 
     ParameterDescriptionShm::ParameterDescriptionShm(const ParameterDescription* pd, boost::interprocess::managed_shared_memory* shm)
         :m_name(pd->GetName(), shm->get_segment_manager())
+        ,m_qualifiedName(pd->GetQualifiedName(), shm->get_segment_manager())
         ,m_memberType(pd->GetMemberType())
         ,m_isArray(pd->IsArray())
         ,m_hidden(pd->IsHidden())

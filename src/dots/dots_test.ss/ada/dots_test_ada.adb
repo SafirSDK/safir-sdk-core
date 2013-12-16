@@ -377,21 +377,7 @@ procedure Dots_Test_Ada is
               (Dots_Test.Member_Types.Create_Value_Types));
       Print ("Create_ValueArrays   : ",
              Safir.Dob.Typesystem.Serialization.To_Xml
-               (Dots_Test.Member_Types.Create_Value_Arrays));
-
-      Header ("Create routines (Arrays)");
-      Print ("Create_ParameterArrays: ",
-        Safir.Dob.Typesystem.Serialization.To_Xml
-          (Dots_Test.Member_Arrays.Create_Parameter_Arrays
-             (Dots_Test.Parameter_Types.Int_32_Parameter,
-              Dots_Test.Parameter_Types.Enumeration_Parameter,
-              Dots_Test.Parameter_Types.Test_Class_Parameter)));
-      Print ("Create_ValueArraysOne : ",
-             Safir.Dob.Typesystem.Serialization.To_Xml
-               (Dots_Test.Member_Arrays.Create_Value_Arrays_One));
-      Print ("Create_ValueArraysAll : ",
-             Safir.Dob.Typesystem.Serialization.To_Xml
-               (Dots_Test.Member_Arrays.Create_Value_Arrays_All));
+               (Dots_Test.Member_Types.Create_Value_Arrays)); 
    end Test_Create_Routines;
 
 

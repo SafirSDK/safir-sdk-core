@@ -69,7 +69,8 @@ namespace Internal
     {
     public:
         virtual const char* Summary() const=0;
-        virtual const char* GetName() const=0;
+        virtual const char* GetName() const=0; //get the parameter name, no namespace and class name: MyParameter
+        virtual const char* GetQualifiedName() const=0; //get fully qualified parameter name: MyNamespace.MyClass.MyParameter
         virtual DotsC_MemberType GetMemberType() const=0;
         virtual DotsC_TypeId GetTypeId() const=0; //only valid if MemberType is object or enum
         virtual bool IsArray() const=0;

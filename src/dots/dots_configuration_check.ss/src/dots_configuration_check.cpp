@@ -104,27 +104,27 @@ private:
 
     static void SimpleCheck()
     {
-        std::wcout<<"Checking configuration..."<<std::endl;
+        std::cout<<"Checking configuration..."<<std::endl;
         DotsC_NumberOfTypeIds();
-        std::wcout<<"Success!"<<std::endl;
+        std::cout<<"Success!"<<std::endl;
     }
 
     static void ShowSummary()
     {
         if (DotsC_TypeRepositoryLoadedByThisProcess())
         {
-            std::wcout<<L"Type system created by this process."<<std::endl;
+            std::cout<<"Type system created by this process."<<std::endl;
         }
         else
         {
-            std::wcout<<L"Type system loaded, was already created."<<std::endl;
+            std::cout<<"Type system loaded, was already created."<<std::endl;
 
         }
-        std::wcout<<L"Number of classes:     "<<DotsC_NumberOfClasses()<<std::endl;
-        std::wcout<<L"Number of enums:       "<<DotsC_NumberOfEnumerations()<<std::endl;
-        std::wcout<<L"Number of properties:  "<<DotsC_NumberOfProperties()<<std::endl;
-        std::wcout<<L"Number of exceptions:  "<<DotsC_NumberOfExceptions()<<std::endl;
-        std::wcout<<L"Total number of types: "<<DotsC_NumberOfTypeIds()<<std::endl;
+        std::cout<<"Number of classes:     "<<DotsC_NumberOfClasses()<<std::endl;
+        std::cout<<"Number of enums:       "<<DotsC_NumberOfEnumerations()<<std::endl;
+        std::cout<<"Number of properties:  "<<DotsC_NumberOfProperties()<<std::endl;
+        std::cout<<"Number of exceptions:  "<<DotsC_NumberOfExceptions()<<std::endl;
+        std::cout<<"Total number of types: "<<DotsC_NumberOfTypeIds()<<std::endl;
     }
 
     static void ShowType(DotsC_TypeId tid)
@@ -139,13 +139,13 @@ private:
             DotsC_GetTypeDescription(tid, &v[0], static_cast<DotsC_Int32>(v.size()), resultSize);
         }
 
-        std::wcout<<&v[0]<<std::endl;
+        std::cout<<&v[0]<<std::endl;
     }
 
     static void ShowDetails()
     {
         ShowType(0); //shows entire repository
-        std::wcout<<"===== Summary ====="<<std::endl;
+        std::cout<<"===== Summary ====="<<std::endl;
         ShowSummary();
     }
 };
@@ -168,12 +168,12 @@ public:
         }
         catch(const Safir::Dob::Typesystem::Internal::ParseError& err)
         {
-            std::wcout<<"********** Parse Error **********************************************"<<std::endl;
-            std::wcout<<"* Label: "<<err.Label().c_str()<<std::endl;
-            std::wcout<<"* Descr: "<<err.Description().c_str()<<std::endl;
-            std::wcout<<"* File:  "<<err.File().c_str()<<std::endl;
-            std::wcout<<"* ErrId: "<<err.ErrorId()<<std::endl;
-            std::wcout<<"*********************************************************************"<<std::endl;
+            std::cout<<"********** Parse Error **********************************************"<<std::endl;
+            std::cout<<"* Label: "<<err.Label()<<std::endl;
+            std::cout<<"* Descr: "<<err.Description()<<std::endl;
+            std::cout<<"* File:  "<<err.File()<<std::endl;
+            std::cout<<"* ErrId: "<<err.ErrorId()<<std::endl;
+            std::cout<<"*********************************************************************"<<std::endl;
             exit(1);
         }
 
@@ -191,35 +191,35 @@ public:
         }
         else //SimpleCheck, already succeeded if we get here
         {
-            std::wcout<<"Checking configuration..."<<std::endl;
-            std::wcout<<"Success!"<<std::endl;
+            std::cout<<"Checking configuration..."<<std::endl;
+            std::cout<<"Success!"<<std::endl;
         }
     }
 
 private:
     static void ShowSummary(const RepPtr& rep)
     {
-        std::wcout<<L"Type system created by this process in local memory"<<std::endl;
-        std::wcout<<L"Number of classes:     "<<rep->GetNumberOfClasses()<<std::endl;
-        std::wcout<<L"Number of enums:       "<<rep->GetNumberOfEnums()<<std::endl;
-        std::wcout<<L"Number of properties:  "<<rep->GetNumberOfProperties()<<std::endl;
-        std::wcout<<L"Number of exceptions:  "<<rep->GetNumberOfExceptions()<<std::endl;
-        std::wcout<<L"Total number of types: "<<(rep->GetNumberOfClasses()+rep->GetNumberOfEnums()+rep->GetNumberOfExceptions()+rep->GetNumberOfProperties())<<std::endl;
+        std::cout<<"Type system created by this process in local memory"<<std::endl;
+        std::cout<<"Number of classes:     "<<rep->GetNumberOfClasses()<<std::endl;
+        std::cout<<"Number of enums:       "<<rep->GetNumberOfEnums()<<std::endl;
+        std::cout<<"Number of properties:  "<<rep->GetNumberOfProperties()<<std::endl;
+        std::cout<<"Number of exceptions:  "<<rep->GetNumberOfExceptions()<<std::endl;
+        std::cout<<"Total number of types: "<<(rep->GetNumberOfClasses()+rep->GetNumberOfEnums()+rep->GetNumberOfExceptions()+rep->GetNumberOfProperties())<<std::endl;
     }
 
     static void ShowType(const RepPtr& rep, DotsC_TypeId tid)
     {
         std::ostringstream os;
         Safir::Dob::Typesystem::Internal::TypeToString(rep.get(), tid, os);
-        std::wcout<<os.str().c_str()<<std::endl;
+        std::cout<<os.str()<<std::endl;
     }
 
     static void ShowDetails(const RepPtr& rep)
     {
         std::ostringstream os;
         Safir::Dob::Typesystem::Internal::RepositoryToString(rep.get(), true, os); //include createRoutines
-        std::wcout<<os.str().c_str()<<std::endl;
-        std::wcout<<"===== Summary ====="<<std::endl;
+        std::cout<<os.str()<<std::endl;
+        std::cout<<"===== Summary ====="<<std::endl;
         ShowSummary(rep);
     }
 };
@@ -241,12 +241,12 @@ int main(int argc, char* argv[])
     }
     catch (const std::exception & exc)
     {
-        std::wcout << "Failed with exception description: " << exc.what() << std::endl;
+        std::cout << "Failed with exception description: " << exc.what() << std::endl;
         exit(1);
     }
     catch (...)
     {
-        std::wcout << "Failed with ... exception." << std::endl;
+        std::cout << "Failed with ... exception." << std::endl;
         exit(1);
     }
 

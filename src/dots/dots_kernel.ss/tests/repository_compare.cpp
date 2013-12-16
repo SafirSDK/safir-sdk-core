@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 
     boost::interprocess::shared_memory_object::remove("DOTS_SHM_TEST");
     boost::interprocess::managed_shared_memory sharedMemory(boost::interprocess::create_only, "DOTS_SHM_TEST", 5000000);
-    Safir::Dob::Typesystem::Internal::CreateShmCopyOfRepository(*local, "DOTS_TEST_REPO", sharedMemory);
+    Safir::Dob::Typesystem::Internal::RepositoryShm::CreateShmCopyOfRepository(*local, "DOTS_TEST_REPO", sharedMemory);
     Safir::Dob::Typesystem::Internal::RepositoryShm* shm=sharedMemory.find<Safir::Dob::Typesystem::Internal::RepositoryShm>("DOTS_TEST_REPO").first;
 
     std::ostringstream som;
@@ -38,7 +38,12 @@ int main(int argc, char* argv[])
 
     if (som.str()!=lom.str())
     {
+        std::cout<<"=====LOCAL====="<<std::endl;
+        std::cout<<lom.str()<<std::endl;
+        std::cout<<"=====SHM====="<<std::endl;
+        std::cout<<som.str()<<std::endl;
         std::cout<<"Local repository and shared repository differ!"<<std::endl;
+
         return 1;
     }
     else

@@ -222,17 +222,6 @@ public class Test {
                 + Serialization.toXml(MemberTypes.createValueTypes()));
         System.out.println("Create_ValueArrays   : "
                 + Serialization.toXml(MemberTypes.createValueArrays()));
-
-        Header("Create routines (Arrays)");
-        System.out.println("Create_ParameterArrays: "
-                + Serialization.toXml(MemberArrays.createParameterArrays(
-                        ParameterTypes.getInt32Parameter(), ParameterTypes
-                                .getEnumerationParameter(), ParameterTypes
-                                .getTestClassParameter())));
-        System.out.println("Create_ValueArraysOne : "
-                + Serialization.toXml(MemberArrays.createValueArraysOne()));
-        System.out.println("Create_ValueArraysAll : "
-                + Serialization.toXml(MemberArrays.createValueArraysAll()));
     }
 
     private static String toStringNoUnderscore(MemberType val) {

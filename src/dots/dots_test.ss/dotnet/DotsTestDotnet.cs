@@ -246,15 +246,6 @@ class DotsTestDotnet
                                                                    (i, e, c)));
         Console.WriteLine("CreateValueTypes     : " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.MemberTypes.CreateValueTypes()));
         Console.WriteLine("Create_ValueArrays   : " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.MemberTypes.CreateValueArrays()));
-
-        Header("Create routines (Arrays)");
-        Console.WriteLine("Create_ParameterArrays: " +
-                          Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.MemberArrays.CreateParameterArrays
-                                                                   (DotsTest.ParameterTypes.Int32Parameter,
-                                                                    DotsTest.ParameterTypes.EnumerationParameter,
-                                                                    DotsTest.ParameterTypes.TestClassParameter)));
-        Console.WriteLine("Create_ValueArraysOne : " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.MemberArrays.CreateValueArraysOne()));
-        Console.WriteLine("Create_ValueArraysAll : " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.MemberArrays.CreateValueArraysAll()));
     }
 
 

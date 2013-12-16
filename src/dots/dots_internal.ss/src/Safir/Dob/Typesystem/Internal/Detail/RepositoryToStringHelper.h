@@ -107,6 +107,8 @@ namespace Detail
             DumpExceptionDescription(ex, os);
             return;
         }
+
+        os<<"No such type!"<<std::endl;
     }
 
     template <class RepT, class Traits>
@@ -276,18 +278,23 @@ namespace Detail
     template <class RepT, class Traits>
     void ToStringHelper<RepT, Traits>::DumpParameterDescription(const ParameterDescriptionType* c, std::ostream& os) const
     {
-        os<<"    Parameter: "<<c->GetName()<<", type=";
+        os<<"    Parameter: "<<c->GetName();
+
+        if (c->IsHidden())
+        {
+            os<<" (HIDDEN)";
+        }
 
         switch (c->GetMemberType())
         {
         case EnumerationMemberType:
-            os<<m_rep->GetEnum(c->GetTypeId())->GetName();
+            os<<", type="<<m_rep->GetEnum(c->GetTypeId())->GetName();
             break;
         case ObjectMemberType:
-            os<<m_rep->GetClass(c->GetTypeId())->GetName();
+            os<<", type="<<m_rep->GetClass(c->GetTypeId())->GetName();
             break;
         default:
-            os<<BasicTypeOperations::MemberTypeToString(c->GetMemberType());
+            os<<", type="<<BasicTypeOperations::MemberTypeToString(c->GetMemberType());
             break;
         }
 
@@ -299,6 +306,8 @@ namespace Detail
         {
             os<<", isArray=false"<<std::endl;
         }
+
+
 
         //Values
         switch(c->GetMemberType())
@@ -476,7 +485,13 @@ namespace Detail
                 {
                     os<<"      value=";
                 }
-                os<<c->GetStringValue(i)<<std::endl;
+
+                std::pair<const char*, size_t> bin=c->GetBinaryValue(i);
+                if (bin.second>0)
+                {
+                    std::string tmp(bin.first, bin.first+bin.second);
+                    os<<Safir::Dob::Typesystem::Internal::Detail::SerializationUtils::ToBase64(tmp)<<std::endl;
+                }
             }
 
         }
@@ -576,13 +591,12 @@ namespace Detail
             {
                 std::pair<const ParameterDescriptionType*, int> par=md->GetParameter();
                 os<<"        MappingKind:     ValueMapping"<<std::endl;
-                os<<"        Parameter:       "<<par.first->GetName();
+                os<<"        MappedParam:       "<<par.first->GetName();
                 if (!propertyMember->IsArray())
                 {
                     os<<"["<<par.second<<"]";
                 }
                 os<<std::endl;
-                os<<"        Value:           <see parameter>"<<std::endl;
             }
                 break;
             case MappedToMember:
@@ -630,7 +644,7 @@ namespace Detail
         os<<"    summary:    "<<c->Summary()<<std::endl;
         for (int i=0; i<c->GetNumberOfInParameters(); ++i)
         {
-            os<<"      Parameter: "<<c->GetInParameterMember(i)->GetName()<<std::endl;
+            os<<"      Argument: "<<c->GetInParameterMember(i)->GetName()<<std::endl;
         }
         for (int i=0; i<c->GetNumberOfDefaultValues(); ++i)
         {

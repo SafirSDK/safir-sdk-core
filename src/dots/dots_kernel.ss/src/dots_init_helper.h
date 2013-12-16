@@ -75,7 +75,7 @@ namespace Internal
             catch(...)
             {
                 SEND_SYSTEM_LOG(Error, <<"Could not read dots_shared_memory_size from typesystem.ini");
-                std::wcout<<"Could not read dots_shared_memory_size from typesystem.ini"<<std::endl;
+                std::cout<<"Could not read dots_shared_memory_size from typesystem.ini"<<std::endl;
                 exit(1);
             }
 

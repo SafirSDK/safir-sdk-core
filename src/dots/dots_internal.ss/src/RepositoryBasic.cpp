@@ -35,9 +35,9 @@ namespace Typesystem
 {
 namespace Internal
 {
-    ParameterDescriptionBasic* RepositoryBasic::GetParameterBasic(const std::string& fullName)
+    ParameterDescriptionBasic* RepositoryBasic::GetParameterBasic(const std::string& qualifiedName)
     {
-        boost::unordered_map<std::string, ParameterDescriptionBasic*>::const_iterator it=m_parameters.find(fullName);
+        boost::unordered_map<std::string, ParameterDescriptionBasic*>::const_iterator it=m_parameters.find(qualifiedName);
         if (it!=m_parameters.end())
         {
             return it->second;

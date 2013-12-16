@@ -290,6 +290,7 @@ namespace Internal
 
         const char* Summary() const {return NULL;}
         const char* GetName() const {return m_name.c_str();}
+        const char* GetQualifiedName() const {return m_qualifiedName.c_str();}
         DotsC_MemberType GetMemberType() const {return m_memberType;}
         DotsC_TypeId GetTypeId() const {return m_typeId;}
         bool IsArray() const {return m_isArray;}
@@ -322,6 +323,7 @@ namespace Internal
 
     private:
         StringShm m_name;
+        StringShm m_qualifiedName;
         DotsC_MemberType m_memberType;
         bool m_isArray;
         bool m_hidden;
@@ -609,6 +611,17 @@ namespace Internal
     class RepositoryShm : private boost::noncopyable
     {
     public:
+
+        /**
+         * @brief CreateShmCopyOfRepository - creates a named RepositoryShm repository with identical content as srcRepository
+         * @param srcRepository - the prototype repository that will be cloned in shared memory
+         * @param repositoryName - name of the shared memory repository that will be created
+         * @param sharedMemory - the shared memory to copy into
+         */
+        static void CreateShmCopyOfRepository(const Safir::Dob::Typesystem::Internal::TypeRepository& srcRepository,
+                                              const std::string& shmRepositoryName,
+                                              boost::interprocess::managed_shared_memory& sharedMemory);
+
         RepositoryShm(boost::interprocess::managed_shared_memory* shm)
             :m_enums(std::less<const DotsC_TypeId>(), shm->get_segment_manager())
             ,m_classes(std::less<const DotsC_TypeId>(), shm->get_segment_manager())
@@ -639,6 +652,7 @@ namespace Internal
         void GetAllExceptionTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys<ExceptionDescriptionShm>(m_exceptions, typeIds);}
 
     private:
+
         template <class Val>
         static const Val* GetPtr(const typename MapShm<Val>::Type& m, DotsC_TypeId key)
         {
@@ -664,10 +678,6 @@ namespace Internal
         PropertyMapShm m_properties;
         ExceptionMapShm m_exceptions;
         ParameterMapShm m_params;
-
-        friend void Safir::Dob::Typesystem::Internal::CreateShmCopyOfRepository(const Safir::Dob::Typesystem::Internal::TypeRepository& srcRepository,
-                                                                                const std::string& shmRepositoryName,
-                                                                                boost::interprocess::managed_shared_memory& sharedMemory);
     };
 
     //type traits for shared memory repository. Needed to be able to use the
@@ -685,16 +695,6 @@ namespace Internal
         typedef PropertyMappingDescriptionShm PropertyMappingDescriptionType;
         typedef CreateRoutineDescriptionShm CreateRoutineDescriptionType;
     };
-
-    /**
-     * @brief CreateShmCopyOfRepository - creates a named RepositoryShm repository with identical content as srcRepository
-     * @param srcRepository - the prototype repository that will be cloned in shared memory
-     * @param repositoryName - name of the shared memory repository that will be created
-     * @param sharedMemory - the shared memory to copy into
-     */
-    void CreateShmCopyOfRepository(const Safir::Dob::Typesystem::Internal::TypeRepository& srcRepository,
-                                   const std::string& shmRepositoryName,
-                                   boost::interprocess::managed_shared_memory& sharedMemory);
 }
 }
 }
