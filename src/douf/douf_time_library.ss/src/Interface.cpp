@@ -173,12 +173,6 @@ void DoufTimeC_GetLocalTimeOffset(Safir::Dob::Typesystem::Int32& offset, bool& s
         const ptime now = local_adj::utc_to_local(utc_now);
         const time_duration diff = now - utc_now;
         offset = diff.total_seconds();
-
-        //total_seconds loses the sign, so we fix that
-        if (diff.is_negative())
-        {
-            offset *= -1;
-        }
     }
 
     success = true;
