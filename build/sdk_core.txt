@@ -39,12 +39,10 @@ run_test_suite   src/logging/logging_test.ss               logging_tests
 #DOTS
 build_dir        src/dots/dots_id.ss/src                   RelWithDebInfo
 run_test_suite   src/dots/dots_id.ss/tests                 dots_id_tests
-build_dir        src/dots/dots_internal.ss/src               RelWithDebInfo
-#run_test_suite   src/dots/dots_internal.ss/tests/override_test     dots_internal_override_test
-#run_test_suite   src/dots/dots_internal.ss/tests/parser_test     dots_internal_parser_test
-#run_test_suite   src/dots/dots_internal.ss/tests/serialization_test     dots_internal_serialization_test
-#run_test_suite   src/dots/dots_internal.ss/tests/shmem_repo     dots_internal_shm_repo_test
+build_dir        src/dots/dots_internal.ss/src             RelWithDebInfo
+run_test_suite   src/dots/dots_internal.ss/tests           dost_internal_test_suite
 build_dir        src/dots/dots_kernel.ss/src               RelWithDebInfo
+#run_test_suite   src/dots/dots_kernel.ss/tests             dots_kernel_tests
 build_dir        src/dots/dots_configuration_check.ss/src  RelWithDebInfo
 build_dir        src/dots/dots_schema_validator.ss         RelWithDebInfo
 build_dir        src/dots/dots_cpp.ss/src                  RelWithDebInfo   Debug
