@@ -36,7 +36,7 @@ public class Test {
             System.out.println("com.saabgroup.safir.time.TimeProvider.ToDouble(ptime) returned incorrect value");
             System.exit(1);
         }
-        
+
         java.util.Date back_to_datetime = com.saabgroup.safir.time.TimeProvider.ToDate(as_double);
         if (!back_to_datetime.equals(a_date))
         {
@@ -44,10 +44,13 @@ public class Test {
             System.exit(1);
         }
 
-        if (com.saabgroup.safir.time.TimeProvider.getLocalTimeOffset() != 
+        if (com.saabgroup.safir.time.TimeProvider.getLocalTimeOffset() !=
             java.util.TimeZone.getDefault().getOffset(new java.util.Date().getTime()) / 1000)
         {
             System.out.println("com.saabgroup.safir.time.TimeProvider.getLocalTimeOffset() returned incorrect value");
+            System.out.println("Expected " + com.saabgroup.safir.time.TimeProvider.getLocalTimeOffset() +
+                               " Got " + java.util.TimeZone.getDefault().getOffset(new java.util.Date().getTime()) / 1000);
+
             System.exit(1);
         }
 
