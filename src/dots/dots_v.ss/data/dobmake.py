@@ -262,7 +262,7 @@ class Logger(object):
                 data = self.process.stdout.readline()
                 if not data:
                     break
-                replace_non_ascii(data)
+                data = replace_non_ascii(data)
                 if self.strip_cr:
                     data = data.replace('\r','')
                 self.logger.write(data,"pre")
