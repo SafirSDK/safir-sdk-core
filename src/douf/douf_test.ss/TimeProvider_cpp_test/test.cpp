@@ -52,7 +52,7 @@ boost::posix_time::time_duration get_utc_offset()
             boost::posix_time::microsec_clock::local_time() -
             boost::posix_time::microsec_clock::universal_time();
         
-        const double seconds = offset.total_microseconds() / 1.0e6 * (offset.is_negative()?-1:1);
+        const double seconds = offset.total_microseconds() / 1.0e6;
         const long rounded = static_cast<long>(boost::math::round(seconds));
 
         //        std::wcout << "test: "<< offset << " (" << rounded << ")" << std::endl;
@@ -73,17 +73,31 @@ const boost::posix_time::ptime a_ptime(boost::gregorian::date(2010,boost::gregor
 
 const Safir::Dob::Typesystem::Si64::Second as_double = Safir::Time::TimeProvider::ToDouble(a_ptime);
 
-bool check_timezone(const std::string& tz)
+bool check_timezone(const std::string& tz, 
+                    const boost::posix_time::time_duration& expectedOffset1,
+                    const boost::posix_time::time_duration& expectedOffset2)
 {
     SetTZ(tz);
+
+    const boost::posix_time::time_duration offset = get_utc_offset();
+
     const boost::posix_time::ptime as_localtime = Safir::Time::TimeProvider::ToLocalTime(as_double);
     
-    if (as_localtime - a_ptime != get_utc_offset())
+    if (as_localtime - a_ptime != offset)
     {
         std::wcout << "Safir::Time::TimeProvider::ToLocalTime(double) for timezone " << tz.c_str() << " returned incorrect value" << std::endl;
         std::wcout << "diff: " << as_localtime - a_ptime << std::endl;
         return false;
     }
+
+    if (expectedOffset1 != offset && expectedOffset2 != offset)
+    {
+        std::wcout << "Unexpected offset for tz " << tz.c_str() << "!" << std::endl;
+        std::wcout << "Expected " << expectedOffset1 
+                   << " or " << expectedOffset2 
+                   << ", but got " << offset << std::endl;
+    }
+
     return true;
 }
 
@@ -133,10 +147,10 @@ int main()
         return 1;
     }
 
-    if (!check_timezone("EST5EDT") ||
-        !check_timezone("PST8PDT") ||
-        !check_timezone("WAUST-8WAUDT") ||
-        !check_timezone("NZST-12NZDT"))
+    if (!check_timezone("EST5EDT", boost::posix_time::hours(-5), boost::posix_time::hours(-4)) ||
+        !check_timezone("PST8PDT", boost::posix_time::hours(-8), boost::posix_time::hours(-7)) ||
+        !check_timezone("WAUST-8WAUDT", boost::posix_time::hours(8), boost::posix_time::hours(8)) ||
+        !check_timezone("NZST-12NZDT", boost::posix_time::hours(12),boost::posix_time::hours(13)))
     {
         return 1;
     }

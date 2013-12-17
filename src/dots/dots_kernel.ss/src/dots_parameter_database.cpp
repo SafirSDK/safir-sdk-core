@@ -374,6 +374,11 @@ namespace Internal
         m_firstFree = nextString;
     }
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4702) //unreachable code
+#endif
+
     void ParameterDatabase::IentityId(const DobParameter& val, AllocationHelper & /*allocHelper*/)
     {
         ParameterOffset nextString = m_firstFree + val.m_values.size()*sizeof(ParameterOffset);
@@ -389,7 +394,7 @@ namespace Internal
             if (!success)
             {
                 Error(val, ix, "EntityId contains undefined type");
-                throw "No such type";
+                throw "No such type"; //never reached.
             }
             Write(*ParameterOffsetCast<DotsC_EntityId>(nextString), entityId);
             strcpy(nextString.get() + sizeof(DotsC_EntityId), instanceIdStr.c_str());
@@ -398,6 +403,10 @@ namespace Internal
         }
         m_firstFree = nextString;
     }
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
     void ParameterDatabase::Istring(const DobParameter& val, AllocationHelper & /*allocHelper*/)
     {

@@ -132,6 +132,11 @@ namespace Typesystem
 
         ~UnknownException() throw() {}
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4702) //unreachable code
+#endif
+
         const char * what() const throw ()
         {
             try
@@ -147,6 +152,11 @@ namespace Typesystem
                 return err2;
             }
         }
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
     private:
         std::string m_what;
     };

@@ -80,11 +80,11 @@ if (MSVC)
    #Set linker flag /OPT:REF (eliminates functions and/or data that are never referenced) reduces size of executable to approx the same size as in Release mode. Also disable incremental linking to avoid warning.
    set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF /INCREMENTAL:NO")
    set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF /INCREMENTAL:NO")
-
 endif ()
 
-#Add some more boost library versions that we want to be able to use,
-# just to try to be "future safe"
+# Add some more boost library versions that we want to be able to use,
+# just to try to be "future safe". This does not actually mean that we
+# support all these versions, see our release information for that info.
 set (Boost_ADDITIONAL_VERSIONS 
   "1.40" "1.40.0" "1.41" "1.41.0" "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" 
   "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0" 
@@ -130,6 +130,21 @@ ADD_DEFINITIONS(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 set(CMAKE_REQUIRED_INCLUDES ${Boost_INCLUDE_DIRS})
 set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_DYN_LINK -DBOOST_FILESYSTEM_NO_DEPRECATED)
 
+if(MSVC)
+   #We have a weird issue which causes a buffer overrun error when using Visual Studio 2013
+   #and Boost 1.55 in 64 bit and release builds. 
+   #Don't know if this is a bug in our code or in the compiler or in boost.
+   #The workaround below disables some optimizations and all inlining in release builds
+   #which appears to resolve the problem.
+   if(MSVC_VERSION EQUAL 1800 AND Boost_VERSION EQUAL 105500 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+     STRING(REGEX REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+     STRING(REGEX REPLACE "/O2" "/O1" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+     STRING(REGEX REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+     STRING(REGEX REPLACE "/O2" "/O1" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+   endif()
+endif()
+
+
 #Let ctest output stdout on failure by default.
 set(CTEST_OUTPUT_ON_FAILURE ON)
 
@@ -139,60 +154,44 @@ endif()
 
 MACRO(INSTALL_DEBUG_INFO target)
   if(MSVC)
+    #the problem here is to find out where the pdb file is located. It is located next to the binary
+    #in some directory which either the nmake/jom builds create or that the studio creates.
 
-    GET_TARGET_PROPERTY(location ${target} LOCATION)
-    # fix for vs2010
-    if (MSVC_VERSION EQUAL 1600)
-       STRING(REPLACE "$(Configuration)" Debug location ${location})
-    else()
-       STRING(REPLACE "$(OutDir)" Debug location ${location})
-    endif()
+    GET_TARGET_PROPERTY(debug_location ${target} LOCATION_Debug)
+    GET_TARGET_PROPERTY(relwithdebinfo_location ${target} LOCATION_RelWithDebInfo)
 
-    STRING(REPLACE .dll ${CMAKE_DEBUG_POSTFIX}.pdb location ${location})
-    STRING(REPLACE .exe .pdb location ${location})
+    #replace binary's the extension with .pdb
+    #.exe --> .pdb
+    #.dll --> .pdb
+    STRING(REPLACE .dll .pdb debug_location ${debug_location})
+    STRING(REPLACE .exe .pdb debug_location ${debug_location})
+
+    STRING(REPLACE .dll .pdb relwithdebinfo_location ${relwithdebinfo_location})
+    STRING(REPLACE .exe .pdb relwithdebinfo_location ${relwithdebinfo_location})
     
-    INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
-
-    GET_TARGET_PROPERTY(location ${target} LOCATION)
-    # fix for vs2010
-    if (MSVC_VERSION EQUAL 1600)
-       STRING(REPLACE "$(Configuration)" RelWithDebInfo location ${location})
-    else()
-       STRING(REPLACE "$(OutDir)" RelWithDebInfo location ${location})
-    endif()
-
-    STRING(REPLACE .dll ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
-    STRING(REPLACE .exe ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
-
-    INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
-
-    if (EXPORT_SYMBOLS)
-      GET_TARGET_PROPERTY(location ${target} LOCATION)
-      #fix for vs2010
-      if (MSVC_VERSION EQUAL 1600)
-        STRING(REPLACE "$(Configuration)" Release location ${location})
-      else()
-        STRING(REPLACE "$(OutDir)" Release location ${location})
-      endif()
-      
-      STRING(REPLACE .dll ${CMAKE_RELEASE_POSTFIX}.pdb location ${location})
-      STRING(REPLACE .exe ${CMAKE_RELEASE_POSTFIX}.pdb location ${location})
-      
-      INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/dump/Symbols CONFIGURATIONS Release)
-    endif(EXPORT_SYMBOLS)
-
+    #Install the pdb files using the locations we just worked out.
+    INSTALL(FILES ${debug_location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
+    INSTALL(FILES ${relwithdebinfo_location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
+    
+    UNSET(debug_location)
+    UNSET(relwithdebinfo_location)
   endif()
 ENDMACRO()
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SAFIR_SDK}/data/build/)
 
 #MSVC variable is not set when using None as project languages
-#as is done in the dotnet projects.
+#as is done in the dotnet projects. So we check on WIN32 instead.
 if (WIN32)
-    SET(COMMON_CS_FLAGS "-warn:4")
+    SET(COMMON_CS_FLAGS "-warn:4" "-nologo" "-nowarn:1607")
 
-    #this will make 32 bit builds work on a 64bit machine
-    if (NOT "$ENV{Platform}" STREQUAL "X64")
+    #Get platform and convert it to lowercase (vs2010 has it as X64 and vs2013 express as x64!)
+    string(TOLOWER "$ENV{Platform}" PLATFORM)
+
+    #make sure we set the arch of dotnet assemblies to be the same as the native code we build.
+    if (PLATFORM STREQUAL "x64")
+      SET(COMMON_CS_FLAGS ${COMMON_CS_FLAGS} "-platform:x64")
+    else()
       SET(COMMON_CS_FLAGS ${COMMON_CS_FLAGS} "-platform:x86")
     endif()
 else()

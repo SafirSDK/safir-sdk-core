@@ -590,7 +590,7 @@ class VisualStudioBuilder(BuilderBase):
 
     def setup_command_line_options(self,parser):
         parser.add_option("--use-studio",action="store",type="string",dest="use_studio",
-                          help="The visual studio to use for building, can be '2010' or '2012'")
+                          help="The visual studio to use for building, can be '2010', '2012' or '2013'")
 
     def handle_command_line_options(self,options):
         self.use_studio = options.use_studio
@@ -618,13 +618,15 @@ class VisualStudioBuilder(BuilderBase):
         logger.log("'subst k:" + bindir + "' exited with return code " + str(ret),"output")
 
     def __find_vcvarsall(self):
-        install_dirs = set(["VS110COMNTOOLS","VS100COMNTOOLS"])
+        install_dirs = set(["VS120COMNTOOLS","VS110COMNTOOLS","VS100COMNTOOLS"])
         #we use set intersections so that we double check that the variable 
         #names are the same in both places...
         if self.use_studio == "2010":
             install_dirs &= set(["VS100COMNTOOLS",]) #keep only vs2010 dir
         elif self.use_studio == "2012":
             install_dirs &= set(["VS110COMNTOOLS",]) #keep only vs2012 dir
+        elif self.use_studio == "2013":
+            install_dirs &= set(["VS120COMNTOOLS",]) #keep only vs2013 dir
         
         if len(install_dirs) < 1:
             die("Internal error in __find_vcvarsall(...)")
@@ -640,6 +642,18 @@ class VisualStudioBuilder(BuilderBase):
             die("No such file: " + result)
         return result
 
+    def __run_vcvarsall(self, vcvarsall, arch):
+        cmd = '"%s" %s & set' % (vcvarsall, arch)
+        logger.log("Running '" + cmd + "' to extract environment")
+        proc = subprocess.Popen(cmd,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                universal_newlines = True)
+        output = proc.communicate()[0]
+        if proc.returncode != 0:
+            die ("Failed to fetch environment variables out of vcvarsall.bat: " + output)
+        return output
+    
     def setup_build_environment(self):
         """Find vcvarsall.bat and load the relevant environment variables from it.
         This function is inspired (but not copied, for licensing reasons) by the one in python distutils2 msvc9compiler.py"""
@@ -651,16 +665,12 @@ class VisualStudioBuilder(BuilderBase):
         wanted_variables = required_variables | optional_variables #union
 
         logger.log("Loading Visual Studio Environment","header")
-        arch = "x86" if target_architecture == "x86" else "amd64"
-        cmd = '"%s" %s & set' % (vcvarsall, arch)
-        logger.log("Running '" + cmd + "' to extract environment")
-        proc = subprocess.Popen(cmd,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT,
-                                universal_newlines = True)
-        output = proc.communicate()[0]
-        if proc.returncode != 0:
-            die ("Failed to fetch environment variables out of vcvarsall.bat: " + output)
+        output = self.__run_vcvarsall(vcvarsall, "x86" if target_architecture == "x86" else "amd64")
+
+        #retry with cross compilation toolset if we're on amd64 and vcvarsall says the toolset is missing
+        if target_architecture == "x86-64" and output.find("configuration might not be installed") != -1:
+            logger.log("Native toolset appears to be missing, trying cross compilation")
+            output = self.__run_vcvarsall(vcvarsall, "x86_amd64")
         
         found_variables = set()
 

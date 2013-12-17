@@ -241,9 +241,9 @@ def windows():
     copy_header_dir(os.path.join(boost_dir, "boost"))
 
     ############
-    log("Copying the Qt runtime dll")
-    copy_dll("QtCore4.dll")
-    copy_dll("QtGui4.dll")
+    log("Copying the Qt runtime dlls")
+    copy_dll("QtCore4.dll", ("QtCore5.dll"))
+    copy_dll("QtGui4.dll", ("QtWidgets5.dll"))
 
     ############
     log("Copying expat stuff")

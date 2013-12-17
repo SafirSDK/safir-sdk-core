@@ -56,7 +56,6 @@ if(NOT can_do_unaligned_access)
   ADD_DEFINITIONS(-DNO_UNALIGNED_ACCESS)
 endif()
 
-
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)

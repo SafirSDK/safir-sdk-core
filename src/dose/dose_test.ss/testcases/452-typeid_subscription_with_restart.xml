@@ -158,6 +158,21 @@
             </members>
           </object>
         </arrayElement>
+        <arrayElement><!-- Sleep a little while to let everything dispatch -->
+          <object>
+            <name>DoseTest.Action</name>
+            <members>
+              <member>
+                <name>ActionKind</name>
+                <value>DoseTest.ActionEnum.Sleep</value>
+              </member>
+              <member>
+                <name>SleepDuration</name>
+                <value>2</value>
+              </member>
+            </members>
+          </object>
+        </arrayElement>
         <arrayElement>
           <object>
             <name>DoseTest.Action</name>
@@ -193,6 +208,21 @@
               <member>
                 <name>Consumer</name>
                 <value>0</value>
+              </member>
+            </members>
+          </object>
+        </arrayElement>
+        <arrayElement><!-- Sleep a little while to let everything dispatch -->
+          <object>
+            <name>DoseTest.Action</name>
+            <members>
+              <member>
+                <name>ActionKind</name>
+                <value>DoseTest.ActionEnum.Sleep</value>
+              </member>
+              <member>
+                <name>SleepDuration</name>
+                <value>2</value>
               </member>
             </members>
           </object>

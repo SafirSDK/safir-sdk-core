@@ -23,6 +23,7 @@
 -------------------------------------------------------------------------------
 with Ada.Exceptions;
 with Interfaces.C;
+with Ada.Calendar.Formatting;
 
 package body Safir.Time.Time_Provider is
 
@@ -40,10 +41,10 @@ package body Safir.Time.Time_Provider is
    procedure Get_Local_Time_Offset (offset : out Safir.Dob.Typesystem.Int_32; Success : out C.char);
    pragma Import (C, Get_Local_Time_Offset, "DoufTimeC_GetLocalTimeOffset");
 
-   ADA_1_JAN_1970 : constant Ada.Calendar.Time := Ada.Calendar.Time_Of (
-                                                                Year => 1970,
-                                                                Month => 1,
-                                                                Day   => 1);
+   ADA_1_JAN_1970 : constant Ada.Calendar.Time := Ada.Calendar.Formatting.Time_Of (Year => 1970,
+                                                                                   Month => 1,
+                                                                                   Day   => 1,
+                                                                                   Time_Zone => 0);
 
    ----------------------------------------------------------------------------
    function Get_UTC_Time return Safir.Dob.Typesystem.Si_64.Second is

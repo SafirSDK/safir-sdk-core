@@ -22,7 +22,8 @@
 --
 -------------------------------------------------------------------------------
 with Ada.Calendar;
-with Ada.Calendar.Time_Zones;
+with Ada.Calendar.Formatting;
+with Ada.Calendar.Time_Zones; use Ada.Calendar.Time_Zones;
 with Ada.Command_Line;
 with Ada.Text_IO;
 with Safir.Time.Time_Provider;
@@ -32,10 +33,13 @@ procedure Douf_Test_Ada is
    use type Ada.Calendar.Time;
    use type Safir.Dob.Typesystem.Si_64.Second;
 
-   A_Date : constant Ada.Calendar.Time := Ada.Calendar.Time_Of (Year => 2010,
-                                                                Month => 2,
-                                                                Day => 24,
-                                                                Seconds => 3900.0);
+   A_Date : constant Ada.Calendar.Time := Ada.Calendar.Formatting.Time_Of (Year => 2010,
+                                                                           Month => 2,
+                                                                           Day => 24,
+                                                                           Hour => 1,
+                                                                           Minute => 5,
+                                                                           Second => 0,
+                                                                           Time_Zone => 0);
    As_Double : constant Safir.Dob.Typesystem.Si_64.Second := Safir.Time.Time_Provider.Seconds_Of (A_Date);
 
    Back_To_Calendar : constant Ada.Calendar.Time := Safir.Time.Time_Provider.Calendar_Time_Of (As_Double);
@@ -46,7 +50,10 @@ procedure Douf_Test_Ada is
 
    Now_Safir : constant Safir.Dob.Typesystem.Si_64.Second := Safir.Time.Time_Provider.Get_UTC_Time;
 
-   Now_Ada : constant Duration := Ada.Calendar.Clock - Ada.Calendar.Time_Of (1970, 1, 1);
+   Now_Ada : constant Duration :=
+      Ada.Calendar.Clock
+      + Duration (Ada.Calendar.Time_Zones.UTC_Time_Offset * 60)
+      - Ada.Calendar.Formatting.Time_Of (1970, 1, 1, Time_Zone => 0);
 
    Diff : constant Safir.Dob.Typesystem.Si_64.Second := abs Now_Safir - Safir.Dob.Typesystem.Si_64.Second (Now_Ada);
 begin
@@ -74,6 +81,8 @@ begin
 
    if Diff > 0.1 then
       Ada.Text_IO.Put_Line ("Safir.Time.Time_Provider.Get_UTC_Time returned incorrect value");
+      Ada.Text_IO.Put_Line ("Diff = " & Safir.Dob.Typesystem.Si_64.Second'Image (Diff));
+      Ada.Text_IO.Put_Line ("Now_Safir = " & Safir.Dob.Typesystem.Si_64.Second'Image (Now_Safir));
       return;
    end if;
 
