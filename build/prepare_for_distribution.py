@@ -253,8 +253,9 @@ def windows():
         qt_dir = os.path.join(qt_dir,"bin")
         log("Copying the Qt runtime dlls from " + qt_dir)
         copy_qt_dlls(qt_dir,
-                     ("QtCore5.dll",
-                      "QtWidgets5.dll",
+                     ("Qt5Core.dll",
+                      "Qt5Widgets.dll",
+                      "Qt5Gui.dll",
                       "QtCore4.dll",
                       "QtGui4.dll"))
         #QTDIR should only contain one qt version, so this should work.
