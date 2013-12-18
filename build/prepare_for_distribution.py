@@ -210,11 +210,15 @@ def copy_qt_dlls(dir):
     for file in names:
         path = os.path.join(dir, "bin", file)
         if os.path.isfile(path):
+            log (" " + file)
             copy_file(path, DLL_DESTINATION)
 
-    qwindows = os.path.join(dir, "bin", "plugins", "platforms", "qwindows.dll")
+    qwindows = os.path.join(dir, "plugins", "platforms", "qwindows.dll")
     if os.path.isfile(qwindows):
-        copy_file(path, os.path.join(DLL_DESTINATION, "platforms"))
+        log (" qwindows.dll")
+        platforms = os.path.join(DLL_DESTINATION, "platforms")
+        mkdir(platforms)
+        copy_file(path, platforms)
 
 def copy_header_dir(dir):
     if not os.path.isdir(dir):
