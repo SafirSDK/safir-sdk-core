@@ -193,7 +193,9 @@ def copy_boost_dlls(dir, libraries):
 def copy_qt_dlls(dir, names):
     dirlist = os.listdir(dir)
     for file in names:
-        copy_file(os.path.join(dir,file), DLL_DESTINATION)
+        path = os.path.join(dir,file)
+        if os.path.isfile(path):
+            copy_file(path, DLL_DESTINATION)
             
 def copy_header_dir(dir):
     if not os.path.isdir(dir):
