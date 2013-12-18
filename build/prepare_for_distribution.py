@@ -190,13 +190,32 @@ def copy_boost_dlls(dir, libraries):
         if match is not None and match.group(1) in libraries:
             copy_file(os.path.join(dir,file), DLL_DESTINATION)
 
-def copy_qt_dlls(dir, names):
-    dirlist = os.listdir(dir)
+def copy_qt_dlls(dir):
+    """Try to copy a bunch of qt files. This is a mismash of qt4 and qt5 stuff,
+    but since QTDIR should only contain one qt version, this should work.
+    The stuff that is marked as for qt4 are the ones that are needed for Qt4,
+    all others are for qt5."""
+
+    names = ("Qt5Core.dll",
+             "Qt5Widgets.dll",
+             "Qt5Gui.dll",
+             "LibGLESv2.dll",
+             "LibEGL.dll",
+             "icudt51.dll",
+             "icuin51.dll",
+             "icuuc51.dll",
+             "QtCore4.dll",  #for qt4
+             "QtGui4.dll")  #for qt4
+
     for file in names:
-        path = os.path.join(dir,file)
+        path = os.path.join(dir, "bin", file)
         if os.path.isfile(path):
             copy_file(path, DLL_DESTINATION)
-            
+
+    qwindows = os.path.join(dir, "bin", "plugins", "platforms", "qwindows.dll")
+    if os.path.isfile(qwindows):
+        copy_file(path, os.path.join(DLL_DESTINATION, "platforms"))
+
 def copy_header_dir(dir):
     if not os.path.isdir(dir):
         logError("ERROR! " + dir + " is not a directory")
@@ -252,15 +271,8 @@ def windows():
     if qt_dir is None:
         logError("QTDIR is not set! Will not copy qt stuff")
     else:
-        qt_dir = os.path.join(qt_dir,"bin")
         log("Copying the Qt runtime dlls from " + qt_dir)
-        copy_qt_dlls(qt_dir,
-                     ("Qt5Core.dll",
-                      "Qt5Widgets.dll",
-                      "Qt5Gui.dll",
-                      "QtCore4.dll",
-                      "QtGui4.dll"))
-        #QTDIR should only contain one qt version, so this should work.
+        copy_qt_dlls(qt_dir)
 
     ############
     log("Copying expat stuff")
