@@ -218,7 +218,7 @@ def copy_qt_dlls(dir):
         log (" qwindows.dll")
         platforms = os.path.join(DLL_DESTINATION, "platforms")
         mkdir(platforms)
-        copy_file(path, platforms)
+        copy_file(qwindows, platforms)
 
 def copy_header_dir(dir):
     if not os.path.isdir(dir):
