@@ -1,4 +1,26 @@
 -----------------------------------------------------------------------------------------------------------------------
+2013-12-19 version 4.5.4:
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following tickets (see http://safir.sourceforge.net for details):
+
+#122    Douf fallback implementation of GetUtcOffset is wrong for some timezones
+#123    dobmake crashes when used on "non-english" Windows installations
+#125    Add support for Visual Studio 2012 and 2013
+
+-----------------------------------------------------------------------------------------------------------------------
+2013-12-03 version 4.5.3:
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following tickets (see http://safir.sourceforge.net for details):
+
+#113    dots_configuration_check crashes when run from dobmake.
+#117    Dobmake fails with cmake 2.8.12.1
+#118    Dobexplorer fails to link on Windows when using Qt5
+#119    Image on page 2 in user's guide is not scaled properly in PDF
+#120    No revision information in PDF version of Users guide
+
+-----------------------------------------------------------------------------------------------------------------------
 2013-10-29 version 4.5.2:
 -----------------------------------------------------------------------------------------------------------------------
 

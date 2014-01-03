@@ -24,10 +24,8 @@
 
 #include "common_header.h"
 #include "memgraph.h"
-//#include <iostream>
 #include <sstream>
 #include <math.h>
-// if we include <QtGui> there is no need to include every class used: <QString>, <QFileDialog>,...
 
 MemGraph::MemGraph(QWidget* /*parent*/):
     m_timer(this),
