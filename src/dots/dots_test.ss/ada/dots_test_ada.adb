@@ -377,7 +377,7 @@ procedure Dots_Test_Ada is
               (Dots_Test.Member_Types.Create_Value_Types));
       Print ("Create_ValueArrays   : ",
              Safir.Dob.Typesystem.Serialization.To_Xml
-               (Dots_Test.Member_Types.Create_Value_Arrays)); 
+               (Dots_Test.Member_Types.Create_Value_Arrays));
    end Test_Create_Routines;
 
 
