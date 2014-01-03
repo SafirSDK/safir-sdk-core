@@ -40,7 +40,7 @@ run_test_suite   src/logging/logging_test.ss               logging_tests
 build_dir        src/dots/dots_id.ss/src                   RelWithDebInfo
 run_test_suite   src/dots/dots_id.ss/tests                 dots_id_tests
 build_dir        src/dots/dots_internal.ss/src             RelWithDebInfo
-run_test_suite   src/dots/dots_internal.ss/tests           dost_internal_test_suite
+run_test_suite   src/dots/dots_internal.ss/tests           dots_internal_test_suite
 build_dir        src/dots/dots_kernel.ss/src               RelWithDebInfo
 #run_test_suite   src/dots/dots_kernel.ss/tests             dots_kernel_tests
 build_dir        src/dots/dots_configuration_check.ss/src  RelWithDebInfo
