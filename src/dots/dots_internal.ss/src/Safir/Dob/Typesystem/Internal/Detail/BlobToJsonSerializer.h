@@ -230,7 +230,7 @@ namespace boostfix
                         else
                         {
                             //element at index is null, then we must insert null value
-                            arrayValues.push_back(std::make_pair("", "null"));
+                            arrayValues.push_back(std::make_pair(std::string(""), std::string("null")));
                         }
                     }
                     if (nonNullValueInserted) //only add array element if there are non-null values
