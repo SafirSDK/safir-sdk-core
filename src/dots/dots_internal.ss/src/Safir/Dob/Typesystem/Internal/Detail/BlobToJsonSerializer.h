@@ -204,6 +204,14 @@ namespace boostfix
         const RepositoryType* m_repository;
         const BlobLayoutImpl<RepositoryType> m_blobLayout;
 
+        //On Visual Studio 2012 and 2013 std::make_pair gets confused with the type conversions, 
+        //so we have this utility function that helps the little acorns get it right. :-)
+        template <class T1, class T2>
+        static boost::property_tree::ptree::value_type MakePtreeValue(const T1& v1, const T2& v2)
+        {
+            return std::make_pair(v1, boost::property_tree::ptree(v2));
+        }
+
         void SerializeMembers(const char* blob, boost::property_tree::ptree& content) const
         {
             const ClassDescriptionType* cd=GetClass(blob);
@@ -230,7 +238,7 @@ namespace boostfix
                         else
                         {
                             //element at index is null, then we must insert null value
-                            arrayValues.push_back(std::make_pair(std::string(""), std::string("null")));
+                            arrayValues.push_back(MakePtreeValue("", "null"));
                         }
                     }
                     if (nonNullValueInserted) //only add array element if there are non-null values
@@ -256,7 +264,7 @@ namespace boostfix
                 DotsC_MemberStatus status=m_blobLayout.template GetMember<bool>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    pt.push_back(std::make_pair(elementName, val ? "true" : "false"));
+                    pt.push_back(MakePtreeValue(elementName, val ? "true" : "false"));
                     return true;
                 }
             }
@@ -269,7 +277,7 @@ namespace boostfix
                 if (!status.IsNull())
                 {
                     const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
-                    pt.push_back(std::make_pair(elementName, enumVal));
+                    pt.push_back(MakePtreeValue(elementName, enumVal));
                     return true;
                 }
             }
@@ -281,7 +289,7 @@ namespace boostfix
                 DotsC_MemberStatus status=m_blobLayout.template GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    pt.push_back(std::make_pair(elementName, boost::lexical_cast<std::string>(val)));
+                    pt.push_back(MakePtreeValue(elementName, boost::lexical_cast<std::string>(val)));
                     return true;
                 }
             }
@@ -293,7 +301,7 @@ namespace boostfix
                 DotsC_MemberStatus status=m_blobLayout.template GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    pt.push_back(std::make_pair(elementName, boost::lexical_cast<std::string>(val)));
+                    pt.push_back(MakePtreeValue(elementName, boost::lexical_cast<std::string>(val)));
                     return true;
                 }
             }
@@ -308,11 +316,11 @@ namespace boostfix
                     const char* typeName=TypeIdToString(val);
                     if (typeName)
                     {
-                        pt.push_back(std::make_pair(elementName, Quoted(typeName)));
+                        pt.push_back(MakePtreeValue(elementName, Quoted(typeName)));
                     }
                     else
                     {
-                        pt.push_back(std::make_pair(elementName, boost::lexical_cast<std::string>(val)));
+                        pt.push_back(MakePtreeValue(elementName, boost::lexical_cast<std::string>(val)));
                     }
                     return true;
                 }
@@ -330,11 +338,11 @@ namespace boostfix
                 {
                     if (hashStr)
                     {
-                        pt.push_back(std::make_pair(elementName, Quoted(hashStr)));
+                        pt.push_back(MakePtreeValue(elementName, Quoted(hashStr)));
                     }
                     else
                     {
-                        pt.push_back(std::make_pair(elementName, boost::lexical_cast<std::string>(val)));
+                        pt.push_back(MakePtreeValue(elementName, boost::lexical_cast<std::string>(val)));
                     }
                     return true;
                 }
@@ -367,7 +375,7 @@ namespace boostfix
                     {
                         entIdPt.add("instanceId", entId.instanceId);
                     }
-                    pt.push_back(std::make_pair(elementName, entIdPt));
+                    pt.push_back(MakePtreeValue(elementName, entIdPt));
                     return true;
                 }
             }
@@ -380,7 +388,7 @@ namespace boostfix
                 DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, strVal, size);
                 if (!status.IsNull())
                 {
-                    pt.push_back(std::make_pair(elementName, Quoted(strVal)));
+                    pt.push_back(MakePtreeValue(elementName, Quoted(strVal)));
                     return true;
                 }
             }
@@ -410,7 +418,7 @@ namespace boostfix
                 if (!status.IsNull())
                 {
                     std::string bin(binary, size);
-                    pt.push_back(std::make_pair(elementName, Quoted(SerializationUtils::ToBase64(bin))));
+                    pt.push_back(MakePtreeValue(elementName, Quoted(SerializationUtils::ToBase64(bin))));
                     return true;
                 }
             }
@@ -442,7 +450,7 @@ namespace boostfix
                 DotsC_MemberStatus status=m_blobLayout.template GetMember<DotsC_Float32>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    pt.push_back(std::make_pair(elementName, classic_string_cast<std::string>(val)));
+                    pt.push_back(MakePtreeValue(elementName, classic_string_cast<std::string>(val)));
                     return true;
                 }
             }
@@ -474,7 +482,7 @@ namespace boostfix
                 DotsC_MemberStatus status=m_blobLayout.template GetMember<DotsC_Float64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    pt.push_back(std::make_pair(elementName, classic_string_cast<std::string>(val)));
+                    pt.push_back(MakePtreeValue(elementName, classic_string_cast<std::string>(val)));
                     return true;
                 }
             }
