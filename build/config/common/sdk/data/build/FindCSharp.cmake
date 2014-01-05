@@ -13,7 +13,7 @@
 # Redistribution and use is allowed according to the terms of the GPL license.
 
 FIND_PROGRAM (CSHARP_COMPILER NAMES cli-csc csc gmcs gmcs2)
-FIND_PROGRAM (CSHARP_LINKER cli-al al)
+FIND_PROGRAM (CSHARP_LINKER NAMES cli-al al)
 FIND_PROGRAM (GACUTIL_EXECUTABLE gacutil)
 FIND_PROGRAM (RESGEN_EXECUTABLE NAMES cli-resgen resgen2 resgen PATH_SUFFIXES ..) #in vs2013 express x64 we need to look one step up!
 
@@ -47,7 +47,12 @@ IF (CSHARP_FOUND)
     ENDIF ()
 ELSE ()
     IF (CSharp_FIND_REQUIRED)
-        MESSAGE(FATAL_ERROR "Could not find one or more of the following programs: (cli-csc, gmcsm or csc), gacutil or (cli-resgen, resgen, or resgen2)")
+        MESSAGE(FATAL_ERROR "Could not find one or more of the C# development tools")
+        MESSAGE(STATUS "Found CSharp compiler: ${CSHARP_COMPILER}")
+        MESSAGE(STATUS "Found CSharp linker: ${CSHARP_LINKER}")
+        MESSAGE(STATUS "Found gacutil: ${GACUTIL_EXECUTABLE}")
+        MESSAGE(STATUS "Found resgen: ${RESGEN_EXECUTABLE}")
+
     ENDIF ()
 ENDIF ()
 
