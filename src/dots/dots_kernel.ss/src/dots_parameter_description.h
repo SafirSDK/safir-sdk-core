@@ -128,9 +128,18 @@ namespace Internal
         case ChannelIdMemberType:
         case HandlerIdMemberType:
             {
+#ifdef NO_UNALIGNED_ACCESS
+                const char* const offsetPtrLocation = (const char*)(m_offset.get() + index * sizeof(ParameterOffset));
+                ptrdiff_t offsetPtrValue = 0;
+                memcpy(&offsetPtrValue, offsetPtrLocation, sizeof(ptrdiff_t));
+                const ParameterOffsetConst dataLocation(offsetPtrLocation + offsetPtrValue);
+
+                memcpy(&val, dataLocation.get(), sizeof(T));
+#else
                 const ParameterOffsetConst dataLocation =
                     *ParameterOffsetCast<const ParameterOffsetConst>(m_offset + index * sizeof(ParameterOffset));
                 val = *ParameterOffsetCast<T>(dataLocation);
+#endif
                 strVal = dataLocation.get() + sizeof(T);
                 if (strVal[0] == 0) //strlen == 0
                 {
