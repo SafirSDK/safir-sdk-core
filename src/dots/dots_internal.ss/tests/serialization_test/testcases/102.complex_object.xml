@@ -30,4 +30,9 @@
     <MyInt32Array>
         <Int32 index="1">23</Int32>
     </MyInt32Array>
+    <MyEnumArray>
+        <BlobTest.MyColorEnum index="0">Black</BlobTest.MyColorEnum>
+        <BlobTest.MyColorEnum index="1">White</BlobTest.MyColorEnum>
+        <BlobTest.MyColorEnum index="2">Grey</BlobTest.MyColorEnum>                
+    </MyEnumArray>
 </BlobTest.MyEntity>

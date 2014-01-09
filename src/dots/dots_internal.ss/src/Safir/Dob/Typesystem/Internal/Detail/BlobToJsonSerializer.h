@@ -277,7 +277,7 @@ namespace boostfix
                 if (!status.IsNull())
                 {
                     const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
-                    pt.push_back(MakePtreeValue(elementName, enumVal));
+                    pt.push_back(MakePtreeValue(elementName, Quoted(enumVal)));
                     return true;
                 }
             }
