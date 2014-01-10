@@ -316,6 +316,10 @@ bool RunTestFromXml(const TypeRepository* repository, const std::string& fileNam
     BinaryToJson(repository, &bin4[0], json2);
     std::cout<<"--- JSON 2 ---"<<std::endl<<json2.str()<<std::endl;
 
+    if (json1.str()!=json2.str())
+    {
+        throw std::logic_error("JSON 1 differs from JSON 2");
+    }
 
     return true;
 }

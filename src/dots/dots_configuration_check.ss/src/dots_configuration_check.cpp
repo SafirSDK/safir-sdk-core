@@ -47,7 +47,7 @@ public:
                 ("summary,s", "Output a brief summary of the type system'")
                 ("details,d", "Output a full information about the entire type system")
                 ("type,t", boost::program_options::value<std::string>(), "Output info about a specific type")
-                ("path", boost::program_options::value< std::vector<std::string> >()->multitoken(), "Parse specified path(s) into a local memory type repostionry. If same type exists in more than one path, the latter wins.");
+                ("path,p", boost::program_options::value< std::vector<std::string> >()->multitoken(), "Parse specified path(s) into a local memory type repository. If same type exists in more than one path, the latter wins.");
 
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
