@@ -50,7 +50,7 @@ if (UNIX)
 
    #turn on more warnings and set up use of threads etc
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread")
-   SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wall -pthread")
+   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pthread")
    SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")
 
    #make sure we get the correct posix version
