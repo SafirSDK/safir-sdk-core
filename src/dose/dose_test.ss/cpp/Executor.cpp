@@ -340,6 +340,9 @@ Executor::Run()
 
     boost::asio::io_service::work keepRunning(m_ioService);
     m_ioService.run();
+
+    m_testConnection.Close();
+    m_controlConnection.Close();
 }
 
 void
