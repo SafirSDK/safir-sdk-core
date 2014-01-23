@@ -276,7 +276,12 @@ namespace Internal
          */
         /** @{ */
 
-        // Keep only ghosts with the latest registration time
+        // Do a cleanup of ghosts for all types, handler ids and contexts.
+        // The cleanup will remove any ghost that has a registration time that is older than the most recent registration time
+        // for any of the ghosts.
+        void CleanGhosts();
+
+        // Do a cleanup of ghosts for the given typeI id, handler id and context.
         void CleanGhosts(const Dob::Typesystem::TypeId      typeId,
                          const Dob::Typesystem::HandlerId&  handlerId,
                          const ContextId                    context);
