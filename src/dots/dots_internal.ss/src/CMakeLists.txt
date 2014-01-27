@@ -11,7 +11,7 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dots_internal SHARED ${sources} ${headers})
 
-FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time)
+FIND_PACKAGE(Boost COMPONENTS regex filesystem)
 
 ADD_DEFINITIONS(-DDOTS_INTERNAL_EXPORTS)
 

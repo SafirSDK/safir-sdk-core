@@ -12,7 +12,7 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 ADD_LIBRARY(dots_id SHARED dots_id.cpp md5.c md5.h Safir/Dob/Typesystem/Internal/Id.h)
 
-FIND_PACKAGE(Boost COMPONENTS filesystem date_time thread)
+FIND_PACKAGE(Boost COMPONENTS filesystem thread)
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(dots_id lluf_utils ${Boost_LIBRARIES})

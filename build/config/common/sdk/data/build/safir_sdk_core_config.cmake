@@ -126,9 +126,12 @@ ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 #disable all deprecated functionality in boost.filesystem.
 ADD_DEFINITIONS(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 
+#Make sure we only use the header-only part of Boost.DateTime
+ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
+
 #Set up boost for any test code (i.e. CheckCXXSourceCompiles stuff)
 set(CMAKE_REQUIRED_INCLUDES ${Boost_INCLUDE_DIRS})
-set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_DYN_LINK -DBOOST_FILESYSTEM_NO_DEPRECATED)
+set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_DYN_LINK -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_DATE_TIME_NO_LIB)
 
 if(MSVC)
    #We have a weird issue which causes a buffer overrun error when using Visual Studio 2013
