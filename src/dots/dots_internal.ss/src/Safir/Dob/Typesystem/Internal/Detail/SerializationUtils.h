@@ -256,7 +256,7 @@ namespace SerializationUtils
                 size_t numBytesNeeded=memberContent.data().size()+1+sizeof(DotsC_Int64)+sizeof(DotsC_Int32); //hash+stringLength+string
                 SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
             }
-            blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, memberContent.data().size()+1, memIx, arrIx, false, beginningOfUnused);
+            blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, static_cast<Size>(memberContent.data().size()+1), memIx, arrIx, false, beginningOfUnused);
             blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
         }
             break;
@@ -299,7 +299,7 @@ namespace SerializationUtils
                 SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
             }
             DotsC_EntityId eid={tid, instanceId.first};
-            blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, instanceIdString->size()+1, memIx, arrIx, false, beginningOfUnused);
+            blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, static_cast<Size>(instanceIdString->size()+1), memIx, arrIx, false, beginningOfUnused);
             blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
         }
             break;
@@ -309,7 +309,7 @@ namespace SerializationUtils
             size_t numBytesNeeded=std::min(memberContent.data().size(), static_cast<size_t>(md->GetMaxLength()))+1; //add one for '\0'
             SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
             char* writeString=beginningOfUnused;
-            blobLayout.CreateStringMember(&blob[0], numBytesNeeded, memIx, arrIx, false, beginningOfUnused);
+            blobLayout.CreateStringMember(&blob[0], static_cast<Size>(numBytesNeeded), memIx, arrIx, false, beginningOfUnused);
             strncpy(writeString, memberContent.data().c_str(), numBytesNeeded-1);
             blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
         }
@@ -332,7 +332,7 @@ namespace SerializationUtils
             }
             SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, bin.size());
             char* writeBinary=beginningOfUnused;
-            blobLayout.CreateBinaryMember(&blob[0], bin.size(), memIx, arrIx, false, beginningOfUnused);
+            blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.size()), memIx, arrIx, false, beginningOfUnused);
             memcpy(writeBinary, &bin[0], bin.size());
             blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
         }
@@ -512,7 +512,7 @@ namespace SerializationUtils
                 size_t numBytesNeeded=strLen+sizeof(DotsC_Int64)+sizeof(DotsC_Int32); //hash+stringLength+string
                 SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
             }
-            blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, strLen, memIx, arrIx, false, beginningOfUnused);
+            blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, static_cast<Size>(strLen), memIx, arrIx, false, beginningOfUnused);
             blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
         }
             break;
@@ -529,7 +529,7 @@ namespace SerializationUtils
                 SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
             }
             DotsC_EntityId eid={tid, instanceId.first};
-            blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, strLen, memIx, arrIx, false, beginningOfUnused);
+            blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, static_cast<Size>(strLen), memIx, arrIx, false, beginningOfUnused);
             blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
         }
             break;
@@ -541,7 +541,7 @@ namespace SerializationUtils
             size_t numBytesNeeded=std::min(strLen, static_cast<size_t>(md->GetMaxLength()))+1; //add one for '\0'
             SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
             char* writeString=beginningOfUnused;
-            blobLayout.CreateStringMember(&blob[0], numBytesNeeded, memIx, arrIx, false, beginningOfUnused);
+            blobLayout.CreateStringMember(&blob[0], static_cast<Size>(numBytesNeeded), memIx, arrIx, false, beginningOfUnused);
             strncpy(writeString, str, numBytesNeeded-1);
             blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
         }
@@ -558,7 +558,7 @@ namespace SerializationUtils
             std::pair<const char*, size_t> bin=param->GetBinaryValue(parameterIndex);
             SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, bin.second);
             char* writeBinary=beginningOfUnused;
-            blobLayout.CreateBinaryMember(&blob[0], bin.second, memIx, arrIx, false, beginningOfUnused);
+            blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.second), memIx, arrIx, false, beginningOfUnused);
             memcpy(writeBinary, bin.first, bin.second);
             blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
         }

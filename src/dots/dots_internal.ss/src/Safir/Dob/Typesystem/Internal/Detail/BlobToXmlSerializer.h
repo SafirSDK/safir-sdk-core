@@ -149,7 +149,7 @@ namespace Detail
                 if (!status.IsNull())
                 {
                     const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
-                    pt.push_back(std::make_pair(elementName, enumVal));
+                    pt.push_back(std::make_pair(elementName, boost::property_tree::ptree(enumVal)));
                     arrayElementPt=&pt.back().second;
                 }
             }

@@ -772,7 +772,7 @@ namespace Internal
             throw ParseError("Type missmatch in arraySizeRef", ss.str(), cd->FileName(), 52);
         }
 
-        int size=referenced->GetInt32Value(ref.parameterIndex);
+        int size=referenced->GetInt32Value(static_cast<int>(ref.parameterIndex));
         if (size<=0)
         {
             std::ostringstream ss;
@@ -809,7 +809,7 @@ namespace Internal
             throw ParseError("Type missmatch in maxLengthRef", ss.str(), cd->FileName(), 41);
         }
 
-        int size=referenced->GetInt32Value(ref.parameterIndex);
+        int size=referenced->GetInt32Value(static_cast<int>(ref.parameterIndex));
         if (size<=0)
         {
             std::ostringstream ss;
@@ -1116,7 +1116,7 @@ namespace Internal
             {
                 //Member has not been mapped
                 std::ostringstream ss;
-                ss<<"In propertyMapping between property '"<<pm->property->GetName()<<"' and class '"<<pm->class_->GetName()<<"' there is no mapping for property member '"<< pm->property->GetMember(memIx)->GetName()<<"'.";
+                ss<<"In propertyMapping between property '"<<pm->property->GetName()<<"' and class '"<<pm->class_->GetName()<<"' there is no mapping for property member '"<< pm->property->GetMember(static_cast<int>(memIx))->GetName()<<"'.";
                 throw ParseError("Member not mapped", ss.str(), pm->FileName(), 101);
             }
         }

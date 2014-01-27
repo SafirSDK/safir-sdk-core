@@ -119,7 +119,7 @@ namespace Detail
             size_t blobInitSize=std::max(size_t(1000), static_cast<size_t>(2*cd->InitialSize()));
             blob.reserve(blobInitSize); //Note: maybe xmlSize/2 would be enogh in almost all cases
             blob.resize(cd->InitialSize(), 0);
-            m_blobLayout.FormatBlob(&blob[0], blob.size(), typeId, beginningOfUnused);
+            m_blobLayout.FormatBlob(&blob[0], static_cast<Size>(blob.size()), typeId, beginningOfUnused);
 
             for (boost::property_tree::ptree::const_iterator memIt=members.begin(); memIt!=members.end(); ++memIt)
             {
@@ -251,7 +251,7 @@ namespace Detail
                 SerializeObjectContent(cd->GetName(), insideBlob, memberContent);
                 SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, insideBlob.size());
                 char* writeObj=beginningOfUnused;
-                m_blobLayout.CreateObjectMember(&blob[0], insideBlob.size(), cd->GetTypeId(), memIx, arrIx, false, beginningOfUnused);
+                m_blobLayout.CreateObjectMember(&blob[0], static_cast<Size>(insideBlob.size()), cd->GetTypeId(), memIx, arrIx, false, beginningOfUnused);
                 beginningOfUnused=writeObj+insideBlob.size(); //This is a hack. BlobLayout is not moving beginningOfUnused by the blobSize but instead only by the initialSize. Has to do with genated code.
                 memcpy(writeObj, &insideBlob[0], insideBlob.size());
                 m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
