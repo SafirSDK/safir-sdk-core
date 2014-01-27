@@ -126,6 +126,9 @@ ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 #disable all deprecated functionality in boost.filesystem.
 ADD_DEFINITIONS(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 
+#disable all deprecated functionality in Boost.System.
+ADD_DEFINITIONS(-DBOOST_SYSTEM_NO_DEPRECATED)
+
 #Make sure we only use the header-only part of Boost.DateTime
 ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
 
