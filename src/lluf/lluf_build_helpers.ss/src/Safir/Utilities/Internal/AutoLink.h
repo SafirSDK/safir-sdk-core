@@ -37,7 +37,7 @@
 
 #if defined (_MSC_VER) 
 
-#  ifdef NDEBUG
+#  if defined(NDEBUG) || defined(SAFIR_NO_DEBUG_LIBRARY_SUFFIX)
 #    define SAFIR_BUILD_TYPE
 #  else
 #    define SAFIR_BUILD_TYPE "d"

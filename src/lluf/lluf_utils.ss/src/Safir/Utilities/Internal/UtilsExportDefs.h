@@ -24,17 +24,16 @@
 #ifndef _lluf_utils_export_defs_h
 #define _lluf_utils_export_defs_h
 
-#if defined _MSC_VER
-    #ifdef LLUF_UTILS_EXPORTS
-        #define LLUF_UTILS_API __declspec(dllexport)
-    #else
-        #define LLUF_UTILS_API __declspec(dllimport)
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
-        #define SAFIR_LIBRARY_NAME "lluf_utils"
-        #include <Safir/Utilities/Internal/AutoLink.h>
-    #endif
-#elif defined __GNUC__
-    #define LLUF_UTILS_API
+#ifdef lluf_utils_EXPORTS
+#  define LLUF_UTILS_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define LLUF_UTILS_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "lluf_utils"
+#  define SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
+#define LLUF_UTILS_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 #endif

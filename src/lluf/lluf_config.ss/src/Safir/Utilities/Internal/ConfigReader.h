@@ -24,10 +24,7 @@
 #ifndef __SAFIR_UTILITIES_CONFIG_READER_H__
 #define __SAFIR_UTILITIES_CONFIG_READER_H__
 
-#include <boost/shared_ptr.hpp>
-#include <boost/property_tree/ptree.hpp>
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
-
 
 #ifdef lluf_config_EXPORTS
 #  define LLUF_CONFIG_API SAFIR_HELPER_DLL_EXPORT
@@ -38,6 +35,8 @@
 #endif
 #define LLUF_CONFIG_LOCAL SAFIR_HELPER_DLL_LOCAL
 
+#include <boost/shared_ptr.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 namespace Safir
 {
