@@ -24,20 +24,17 @@
 #ifndef __SAFIR_LOGGING_LOG_H__
 #define __SAFIR_LOGGING_LOG_H__
 
-#if defined _MSC_VER
-#  ifdef logging_cpp_EXPORTS
-#    define LOGGING_EXPORTS __declspec(dllexport)
-#  else
-#    define LOGGING_EXPORTS __declspec(dllimport)
-#    ifdef NDEBUG
-#      pragma comment( lib, "logging_cpp.lib" )
-#    else
-#      pragma comment( lib, "logging_cppd.lib" )
-#    endif
-#  endif
-#elif defined __GNUC__
-#  define LOGGING_EXPORTS
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef logging_cpp_EXPORTS
+#  define LOGGING_CPP_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define LOGGING_CPP_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "logging_cpp"
+#  define SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
+#define LOGGING_CPP_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 #include <string>
 
@@ -88,7 +85,7 @@ namespace Logging
      * @param [in] severity Severity according to RFC 3164.
      * @param [in] message Log text.
      */
-    LOGGING_EXPORTS void SendSystemLog(const Severity severity,
+    LOGGING_CPP_API void SendSystemLog(const Severity severity,
                                        const std::wstring& message);
 
 }
