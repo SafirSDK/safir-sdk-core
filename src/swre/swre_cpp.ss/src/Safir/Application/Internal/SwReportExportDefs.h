@@ -24,19 +24,15 @@
 #ifndef _swre_export_defs_h
 #define _swre_export_defs_h
 
-#if defined _MSC_VER
-    #ifdef SWRE_EXPORTS
-        #define SWRE_API __declspec(dllexport)
-    #else
-        #define SWRE_API __declspec(dllimport)
-        #ifdef NDEBUG
-            #pragma comment( lib, "swre_interface_cpp.lib" )
-        #else
-            #pragma comment( lib, "swre_interface_cppd.lib" )
-       #endif
-    #endif
-#elif defined __GNUC__
-    #define SWRE_API
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef swre_interface_cpp_EXPORTS
+#  define SWRE_INTERFACE_CPP_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define SWRE_INTERFACE_CPP_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "swre_interface_cpp"
+#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
+#define SWRE_INTERFACE_CPP_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 #endif //_swre_defs_h

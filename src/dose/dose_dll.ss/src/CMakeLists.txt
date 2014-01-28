@@ -17,8 +17,6 @@ FIND_PACKAGE(Boost COMPONENTS thread)
 
 ADD_LIBRARY(dose_dll SHARED ${sources} ${headers})
 
-ADD_DEFINITIONS(-DDOSE_EXPORTS)
-
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(dose_dll dose_internal ${Boost_LIBRARIES})
 endif()

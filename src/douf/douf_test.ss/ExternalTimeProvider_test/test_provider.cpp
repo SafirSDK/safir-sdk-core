@@ -22,26 +22,18 @@
 *
 ******************************************************************************/
 
-#if defined _MSC_VER
-#  define EXPORT __declspec(dllexport)
-#  define CALLING_CONVENTION __cdecl
-#elif defined __GNUC__
-#  define EXPORT
-#  if defined (__i386)
-#    define CALLING_CONVENTION __attribute__((cdecl))
-#  else
-#    define CALLING_CONVENTION
-#  endif
-#endif
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#define EXPORT SAFIR_HELPER_DLL_EXPORT
 
 extern "C"
 {
-    EXPORT double CALLING_CONVENTION MyGetTimeUtc()
+    EXPORT double MyGetTimeUtc()
     {
         return 10101.0;
     }
 
-    EXPORT int CALLING_CONVENTION MyGetLocalTimeOffset()
+    EXPORT int MyGetLocalTimeOffset()
     {
         return 5300;
     }

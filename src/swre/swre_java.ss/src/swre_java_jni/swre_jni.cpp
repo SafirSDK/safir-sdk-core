@@ -21,11 +21,14 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#pragma GCC visibility push (default)
+#include "com_saabgroup_safir_application_Library.h"
+#include "com_saabgroup_safir_swreports_Library.h"
+#pragma GCC visibility pop
+
 #include <assert.h>
 #include <Safir/SwReports/Internal/Interface.h>
 #include <Safir/Dob/Typesystem/Defs.h>
-#include "com_saabgroup_safir_application_Library.h"
-#include "com_saabgroup_safir_swreports_Library.h"
 #include <vector>
 
 class StringConverter

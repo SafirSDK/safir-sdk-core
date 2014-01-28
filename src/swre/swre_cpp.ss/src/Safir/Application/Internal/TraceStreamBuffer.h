@@ -40,7 +40,7 @@ namespace Internal
 #pragma warning (disable:4251)
 #endif
 
-    class SWRE_API TraceStreamBuffer :
+    class SWRE_INTERFACE_CPP_API TraceStreamBuffer :
         public std::basic_streambuf<wchar_t, std::char_traits<wchar_t> >
     {
         typedef std::char_traits<wchar_t> _Tr;

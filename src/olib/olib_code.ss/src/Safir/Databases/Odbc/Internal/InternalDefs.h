@@ -24,29 +24,25 @@
 #ifndef Safir_Databases_Odbc_Internal_Internal_Defs_h
 #define Safir_Databases_Odbc_Internal_Internal_Defs_h
 
-#if defined _MSC_VER
-  #pragma warning (disable: 4251 4275)
-  #ifdef OLIB_EXPORTS
-    #define OLIB_API __declspec(dllexport)
-  #else
-    #define OLIB_API __declspec(dllimport)
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
-    #ifdef NDEBUG
-      #pragma comment (lib, "olib.lib")
-    #else
-      #pragma comment (lib, "olibd.lib")
-    #endif //NDEBUG
-  #endif // OLIB_EXPORTS
+#ifdef olib_EXPORTS
+#  define OLIB_API SAFIR_HELPER_DLL_EXPORT
 #else
-  #define OLIB_API
-#endif // _MSC_VER
+#  define OLIB_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "olib"
+#  include <Safir/Utilities/Internal/AutoLink.h>
+#endif
+#define OLIB_LOCAL SAFIR_HELPER_DLL_LOCAL
+
+//TODO??  #pragma warning (disable: 4251 4275)
 
 #if defined _MSC_VER
-    #ifndef WIN32_LEAN_AND_MEAN
-    #define WIN32_LEAN_AND_MEAN
-    #endif
-    #include <windows.h>             // sql.h etc need windows.h
-    #pragma comment(lib, "odbc32.lib")
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  include <windows.h>             // sql.h etc need windows.h
+#  pragma comment(lib, "odbc32.lib")
 #endif // _MSC_VER
 
 #include <sqltypes.h>

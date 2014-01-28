@@ -25,21 +25,15 @@
 #ifndef _dose_internal_export_defs_h
 #define _dose_internal_export_defs_h
 
-#if defined _MSC_VER
-    #pragma warning (disable: 4251 4275)
-    #ifdef DOSE_INT_EXPORTS
-        #define DOSE_INTERNAL_API __declspec(dllexport)
-    #else
-        #define DOSE_INTERNAL_API __declspec(dllimport)
-        #ifndef NDEBUG
-            #pragma comment( lib, "dose_internald.lib" )
-        #else
-            #pragma comment( lib, "dose_internal.lib" )
-       #endif
-    #endif
-#elif defined __GNUC__
-    #define DOSE_INTERNAL_API
-    #define __cdecl
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef dose_internal_EXPORTS
+#  define DOSE_INTERNAL_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define DOSE_INTERNAL_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "dose_internal"
+#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
+#define DOSE_INTERNAL_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 #endif //_dose_internal_defs_h
