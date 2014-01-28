@@ -46,7 +46,7 @@ namespace Typesystem
      * If you need member information (names, typeids etc) from a property, use the
      * functions in Members. (For array sizes, use the method in this class though...).
     */
-    class DOTS_API Properties
+    class DOTS_CPP_API Properties
     {
     public:
 

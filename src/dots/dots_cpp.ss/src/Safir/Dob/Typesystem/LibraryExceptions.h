@@ -66,7 +66,7 @@ namespace Typesystem
     /**
      * Contains methods used when passing exceptions across language boundaries.
      */
-    class DOTS_API LibraryExceptions:
+    class DOTS_CPP_API LibraryExceptions:
         private boost::noncopyable
     {
     public:

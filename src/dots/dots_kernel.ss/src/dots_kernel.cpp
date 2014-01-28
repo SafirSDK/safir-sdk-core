@@ -77,7 +77,7 @@ namespace
     BOOST_STATIC_ASSERT(sizeof(bool) == 1);
 
     
-    void CALLING_CONVENTION DeleteBytePointer(char * & ptr)
+    void DeleteBytePointer(char * & ptr)
     {
         if (ptr != NULL)
         {

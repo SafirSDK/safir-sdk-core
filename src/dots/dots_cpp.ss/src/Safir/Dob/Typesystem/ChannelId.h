@@ -46,7 +46,7 @@ namespace Typesystem
     {
     public:
         /** Constant representing all channels. */
-        static DOTS_API const ChannelId ALL_CHANNELS;
+        static DOTS_CPP_API const ChannelId ALL_CHANNELS;
 
         /**
          * Default constructor.
@@ -151,7 +151,7 @@ namespace Typesystem
         /**
          * Return a string representation of the channel id.
          */
-        DOTS_API const std::wstring ToString() const;
+        DOTS_CPP_API const std::wstring ToString() const;
 
 
         /** @{ */

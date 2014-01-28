@@ -25,18 +25,17 @@
 #ifndef __SAFIR_DOB_TYPESYSTEM_DEFS_H__
 #define __SAFIR_DOB_TYPESYSTEM_DEFS_H__
 
-#if defined _MSC_VER
-    #if defined DOTS_EXPORTS
-        #define DOTS_API __declspec(dllexport)
-    #else
-        #define DOTS_API __declspec(dllimport)
-        #define SAFIR_LIBRARY_NAME "dots_cpp"
-        #include <Safir/Utilities/Internal/AutoLink.h>
-    #endif
-#elif defined __GNUC__
-    #define DOTS_API
-    #define __cdecl
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef dots_cpp_EXPORTS
+#  define DOTS_CPP_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define DOTS_CPP_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "dots_cpp"
+#  define SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
+#define DOTS_CPP_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 #include <Safir/Utilities/Internal/UnorderedMap.h>
 #include <Safir/Dob/Typesystem/Internal/KernelDefs.h>

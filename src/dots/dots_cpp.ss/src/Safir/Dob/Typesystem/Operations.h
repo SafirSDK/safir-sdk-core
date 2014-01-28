@@ -50,35 +50,35 @@ namespace Operations
      *
      * @return Number of existing types.
      */
-    DOTS_API Dob::Typesystem::Int32 GetNumberOfTypeIds();
+    DOTS_CPP_API Dob::Typesystem::Int32 GetNumberOfTypeIds();
 
     /**
      * Get the number of classes defined in the system.
      *
      * @return Number of existing classes.
     */
-    DOTS_API Dob::Typesystem::Int32 GetNumberOfClasses();
+    DOTS_CPP_API Dob::Typesystem::Int32 GetNumberOfClasses();
 
     /**
      * Get the number of properties defined in the system.
      *
      * @return Number of existing properties
      */
-    DOTS_API Dob::Typesystem::Int32 GetNumberOfProperties();
+    DOTS_CPP_API Dob::Typesystem::Int32 GetNumberOfProperties();
 
     /**
      * Get the number of enum types defined in the system.
      *
      * @return Number of existing enumeration types.
      */
-    DOTS_API Dob::Typesystem::Int32 GetNumberOfEnumerations();
+    DOTS_CPP_API Dob::Typesystem::Int32 GetNumberOfEnumerations();
 
     /**
      * Get all type id's that exists in the system.
      *
      * @return A vector containing all the type ids in the system.
      */
-    DOTS_API TypeIdVector GetAllTypeIds();
+    DOTS_CPP_API TypeIdVector GetAllTypeIds();
 
     /**
      * Check if class with specified type id exist.
@@ -86,7 +86,7 @@ namespace Operations
      * @param typeId [in] - Type id of class.
      * @return True if the type exists.
      */
-    DOTS_API bool Exists(const Dob::Typesystem::TypeId typeId);
+    DOTS_CPP_API bool Exists(const Dob::Typesystem::TypeId typeId);
 
     /**
      * Check if a type represented by a type id is a class.
@@ -96,7 +96,7 @@ namespace Operations
      * @param typeId [in] - Type id to check.
      * @return True if the type exists as a class.
      */
-    DOTS_API bool IsClass(const Dob::Typesystem::TypeId typeId);
+    DOTS_CPP_API bool IsClass(const Dob::Typesystem::TypeId typeId);
 
     /**
      * Check if a type represented by a type id is a property.
@@ -106,7 +106,7 @@ namespace Operations
      * @param typeId [in] - Type id to check.
      * @return True if the type exists as a property.
      */
-    DOTS_API bool IsProperty(const Dob::Typesystem::TypeId typeId);
+    DOTS_CPP_API bool IsProperty(const Dob::Typesystem::TypeId typeId);
 
     /**
      * Check if a type represented by a type id is an enumeration.
@@ -116,7 +116,7 @@ namespace Operations
      * @param typeId [in] - Type id to check.
      * @return True if the type exists as an enumeration.
      */
-    DOTS_API bool IsEnumeration(const Dob::Typesystem::TypeId typeId);
+    DOTS_CPP_API bool IsEnumeration(const Dob::Typesystem::TypeId typeId);
 
     /**
      * Check if a type represented by a type id is an exception.
@@ -126,7 +126,7 @@ namespace Operations
      * @param typeId [in] - Type id to check.
      * @return True if the type exists as an exception.
      */
-    DOTS_API bool IsException(const Dob::Typesystem::TypeId typeId);
+    DOTS_CPP_API bool IsException(const Dob::Typesystem::TypeId typeId);
 
     
 
@@ -147,7 +147,7 @@ namespace Operations
      *                        with '.' as separator, example "MyNamespace1.MyNamespace2.MyClass"
      * @return Generated type id.
      */
-    DOTS_API Dob::Typesystem::TypeId GetTypeId(const std::wstring & typeName);
+    DOTS_CPP_API Dob::Typesystem::TypeId GetTypeId(const std::wstring & typeName);
 
     /**
      * Gets the name associated with the specified type id.
@@ -156,7 +156,7 @@ namespace Operations
      * @return Name of the type.
      * @throws IllegalValueException There is no such type defined.
      */
-    DOTS_API std::wstring GetName(const Dob::Typesystem::TypeId typeId);
+    DOTS_CPP_API std::wstring GetName(const Dob::Typesystem::TypeId typeId);
 
     /**
      * Get the number of enumeration values the specified enumeration type has.
@@ -165,7 +165,7 @@ namespace Operations
      * @return Number of enumeration values.
      * @throws IllegalValueException There is no such type defined or it is not an enumeration.
      */
-    DOTS_API Dob::Typesystem::Int32 GetNumberOfEnumerationValues(const Dob::Typesystem::TypeId enumId);
+    DOTS_CPP_API Dob::Typesystem::Int32 GetNumberOfEnumerationValues(const Dob::Typesystem::TypeId enumId);
 
     /**
      * Get the string representation of the specified value for a enumeration type.
@@ -175,7 +175,7 @@ namespace Operations
      * @return String representation of the enumeration value.
      * @throws IllegalValueException There is no such type defined or it is not an enumeration.
      */
-    DOTS_API std::wstring GetEnumerationValueName(const Dob::Typesystem::TypeId enumId,
+    DOTS_CPP_API std::wstring GetEnumerationValueName(const Dob::Typesystem::TypeId enumId,
                                                   const Dob::Typesystem::EnumerationValue enumVal);
 
     /**
@@ -186,7 +186,7 @@ namespace Operations
      * @return Integer value for the enumeration value name.
      * @throws IllegalValueException There is no such type defined or it is not an enumeration.
      */
-    DOTS_API EnumerationValue GetEnumerationValue(const Dob::Typesystem::TypeId enumId,
+    DOTS_CPP_API EnumerationValue GetEnumerationValue(const Dob::Typesystem::TypeId enumId,
                                                   const std::wstring & enumValueName);
     /**
      * Get the Checksum over all enumeration members for an enumeration type.
@@ -195,7 +195,7 @@ namespace Operations
      * @return Checksum of the enumeration type.
      * @throws IllegalValueException There is no such type defined or it is not an enumeration.
      */
-    DOTS_API Dob::Typesystem::TypeId GetEnumerationChecksum(const Dob::Typesystem::TypeId enumId);
+    DOTS_CPP_API Dob::Typesystem::TypeId GetEnumerationChecksum(const Dob::Typesystem::TypeId enumId);
 
     /** @} */
 
@@ -213,7 +213,7 @@ namespace Operations
      *          false if one of the types are not a class type id. (i.e. a random number or a
      *          property or enumeration id).
      */
-    DOTS_API bool IsOfType(const Dob::Typesystem::TypeId type,
+    DOTS_CPP_API bool IsOfType(const Dob::Typesystem::TypeId type,
                            const Dob::Typesystem::TypeId ofType);
 
     /**
@@ -225,7 +225,7 @@ namespace Operations
      * @param rootClass [in] - The base type.
      * @return A vector of type ids.
      */
-    DOTS_API TypeIdVector GetClassTree(const Dob::Typesystem::TypeId rootClass);
+    DOTS_CPP_API TypeIdVector GetClassTree(const Dob::Typesystem::TypeId rootClass);
 
     /**
      * Returns the typeId of the base class to the argument type. If type represents
@@ -234,7 +234,7 @@ namespace Operations
      * @param type [in] - The type for which the parent type is requested.
      * @return A typeId.
      */
-    DOTS_API Dob::Typesystem::TypeId GetParentType(const Dob::Typesystem::TypeId type);
+    DOTS_CPP_API Dob::Typesystem::TypeId GetParentType(const Dob::Typesystem::TypeId type);
 
     /**
      * Checks if the a class has a property.
@@ -243,7 +243,7 @@ namespace Operations
      * @param propertyType [in] - The type id of the property.
      * @return True if the class has the property.
      */
-    DOTS_API bool HasProperty(const Dob::Typesystem::TypeId classType,
+    DOTS_CPP_API bool HasProperty(const Dob::Typesystem::TypeId classType,
                               const Dob::Typesystem::TypeId propertyType);
 
     /**
@@ -255,7 +255,7 @@ namespace Operations
      * @param isInherited [out] - Indicates whether the property is set on the class itself or
      *                            whether it was inherited from a parent class.
      */
-    DOTS_API void HasProperty(const Dob::Typesystem::TypeId classType,
+    DOTS_CPP_API void HasProperty(const Dob::Typesystem::TypeId classType,
                               const Dob::Typesystem::TypeId propertyType,
                               bool & hasProperty,
                               bool & isInherited);

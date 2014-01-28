@@ -153,7 +153,7 @@ namespace Typesystem
          *
          * @return The entity id as a string.
          */
-        DOTS_API const std::wstring ToString() const;
+        DOTS_CPP_API const std::wstring ToString() const;
 
         /**
          * Convert an entity id to a string that has only numeric parts.
@@ -164,7 +164,7 @@ namespace Typesystem
          *
          * @return The entity id as a string.
          */
-        DOTS_API const std::wstring ToStringNumeric() const;
+        DOTS_CPP_API const std::wstring ToStringNumeric() const;
     private:
 
 #ifdef _MSC_VER

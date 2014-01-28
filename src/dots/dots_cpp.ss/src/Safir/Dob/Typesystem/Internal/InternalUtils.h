@@ -42,7 +42,7 @@ namespace Typesystem
 {
 namespace Internal
 {
-    void DOTS_API EnsureFailed (const std::wstring & str);
+    void DOTS_CPP_API EnsureFailed (const std::wstring & str);
 
     static inline bool EnsureHelper(const bool expr)
     {

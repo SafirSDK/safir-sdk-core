@@ -24,7 +24,11 @@
 
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Internal/Id.h>
+
+#pragma GCC visibility push (default)
 #include "com_saabgroup_safir_dob_typesystem_Kernel.h"
+#pragma GCC visibility pop
+
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <iostream>
 #include <vector>

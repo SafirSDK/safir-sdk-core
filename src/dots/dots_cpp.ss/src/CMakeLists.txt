@@ -11,8 +11,6 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dots_cpp SHARED ${sources} ${headers})
 
-ADD_DEFINITIONS(-DDOTS_EXPORTS)
-
 FIND_PACKAGE(Boost COMPONENTS thread system)
 
 if (NOT MSVC)
