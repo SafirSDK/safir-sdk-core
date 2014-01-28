@@ -94,7 +94,7 @@ set (Boost_ADDITIONAL_VERSIONS
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_FIND_QUIETLY 1)
-# Use boost from tower if it exists, unless specifically set to something else
+# Use boost from "tower" if it exists, unless specifically set to something else
 if (NOT BOOST_ROOT AND "$ENV{BOOST_ROOT}" STREQUAL "")
   set(BOOST_ROOT ${SAFIR_SDK})
 endif()
@@ -127,7 +127,10 @@ ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 ADD_DEFINITIONS(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 
 #disable all deprecated functionality in Boost.System.
-ADD_DEFINITIONS(-DBOOST_SYSTEM_NO_DEPRECATED)
+#this flag is broken in 1.41 so we don't define it there
+if (Boost_VERSION GREATER 104100) #1.41
+  ADD_DEFINITIONS(-DBOOST_SYSTEM_NO_DEPRECATED)
+endif()
 
 #Make sure we only use the header-only part of Boost.DateTime
 ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
