@@ -133,7 +133,10 @@ if (Boost_VERSION GREATER 104100) #1.41
 endif()
 
 #Make sure we only use the header-only part of Boost.DateTime
-ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
+#on non microsoft compilers/platforms
+if(NOT MSVC)
+  ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
+endif()
 
 #Set up boost for any test code (i.e. CheckCXXSourceCompiles stuff)
 set(CMAKE_REQUIRED_INCLUDES ${Boost_INCLUDE_DIRS})
