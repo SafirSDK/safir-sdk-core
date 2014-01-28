@@ -120,7 +120,7 @@ namespace Safir
 namespace Utilities
 {
 
-    class LLUF_SS_API StartupSynchronizerImpl
+    class LLUF_STARTUP_SYNCHRONIZER_API StartupSynchronizerImpl
     {
         friend class ImplKeeper;
     private: //constructor and destructor are private, to make sure only ImplKeeper can destroy them
