@@ -185,22 +185,22 @@ namespace Internal
     public:        
         //Enmerations
         virtual const EnumDescription* GetEnum(DotsC_TypeId typeId) const=0;
-        virtual size_t GetNumberOfEnums() const=0;
+        virtual int GetNumberOfEnums() const=0;
         virtual void GetAllEnumTypeIds(std::set<DotsC_TypeId>& typeIds) const=0;
 
         //properties
         virtual const PropertyDescription* GetProperty(DotsC_TypeId typeId) const=0;
-        virtual size_t GetNumberOfProperties() const=0;
+        virtual int GetNumberOfProperties() const=0;
         virtual void GetAllPropertyTypeIds(std::set<DotsC_TypeId>& typeIds) const=0;
 
         //classes
         virtual const ClassDescription* GetClass(DotsC_TypeId typeId) const=0;
-        virtual size_t GetNumberOfClasses() const=0;
+        virtual int GetNumberOfClasses() const=0;
         virtual void GetAllClassTypeIds(std::set<DotsC_TypeId>& typeIds) const=0;
 
         //exceptions
         virtual const ExceptionDescription* GetException(DotsC_TypeId typeId) const=0;
-        virtual size_t GetNumberOfExceptions() const=0;
+        virtual int GetNumberOfExceptions() const=0;
         virtual void GetAllExceptionTypeIds(std::set<DotsC_TypeId>& typeIds) const=0;
     };
 

@@ -633,22 +633,22 @@ namespace Internal
 
         //Enmerations
         const EnumDescriptionShm* GetEnum(DotsC_TypeId typeId) const {return GetPtr<EnumDescriptionShm>(m_enums, typeId);}
-        size_t GetNumberOfEnums() const {return m_enums.size();}
+        int GetNumberOfEnums() const {return static_cast<int>(m_enums.size());}
         void GetAllEnumTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys<EnumDescriptionShm>(m_enums, typeIds);}
 
         //properties
         const PropertyDescriptionShm* GetProperty(DotsC_TypeId typeId) const {return GetPtr<PropertyDescriptionShm>(m_properties, typeId);}
-        size_t GetNumberOfProperties() const {return m_properties.size();}
+        int GetNumberOfProperties() const {return static_cast<int>(m_properties.size());}
         void GetAllPropertyTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys<PropertyDescriptionShm>(m_properties, typeIds);}
 
         //classes
         const ClassDescriptionShm* GetClass(DotsC_TypeId typeId) const {return GetPtr<ClassDescriptionShm>(m_classes, typeId);}
-        size_t GetNumberOfClasses() const {return m_classes.size();}
+        int GetNumberOfClasses() const {return static_cast<int>(m_classes.size());}
         void GetAllClassTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys<ClassDescriptionShm>(m_classes, typeIds);}
 
         //exceptionsm_properties
         const ExceptionDescriptionShm* GetException(DotsC_TypeId typeId) const {return GetPtr<ExceptionDescriptionShm>(m_exceptions, typeId);}
-        size_t GetNumberOfExceptions() const {return m_exceptions.size();}
+        int GetNumberOfExceptions() const {return static_cast<int>(m_exceptions.size());}
         void GetAllExceptionTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys<ExceptionDescriptionShm>(m_exceptions, typeIds);}
 
     private:

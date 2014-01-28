@@ -417,22 +417,22 @@ namespace Internal
     public:
         //Enmerations
         virtual const EnumDescription* GetEnum(DotsC_TypeId typeId) const {return GetPtr(m_enums, typeId);}
-        virtual size_t GetNumberOfEnums() const {return m_enums.size();}
+        virtual int GetNumberOfEnums() const {return static_cast<int>(m_enums.size());}
         virtual void GetAllEnumTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys(m_enums, typeIds);}
 
         //properties
         virtual const PropertyDescription* GetProperty(DotsC_TypeId typeId) const {return GetPtr(m_properties, typeId);}
-        virtual size_t GetNumberOfProperties() const {return m_properties.size();}
+        virtual int GetNumberOfProperties() const {return static_cast<int>(m_properties.size());}
         virtual void GetAllPropertyTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys(m_properties, typeIds);}
 
         //classes
         virtual const ClassDescription* GetClass(DotsC_TypeId typeId) const {return GetPtr(m_classes, typeId);}
-        virtual size_t GetNumberOfClasses() const {return m_classes.size();}
+        virtual int GetNumberOfClasses() const {return static_cast<int>(m_classes.size());}
         virtual void GetAllClassTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys(m_classes, typeIds);}
 
         //exceptions
         virtual const ExceptionDescription* GetException(DotsC_TypeId typeId) const {return GetPtr(m_exceptions, typeId);}
-        virtual size_t GetNumberOfExceptions() const {return m_exceptions.size();}
+        virtual int GetNumberOfExceptions() const {return static_cast<int>(m_exceptions.size());}
         virtual void GetAllExceptionTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys(m_exceptions, typeIds);}
 
         //Extra methods not from TypeRepository interface

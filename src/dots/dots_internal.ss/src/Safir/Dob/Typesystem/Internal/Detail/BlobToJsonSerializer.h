@@ -24,6 +24,11 @@
 #ifndef __DOTS_INTERNAL_DETAIL_BLOB_TO_JSON_H__
 #define __DOTS_INTERNAL_DETAIL_BLOB_TO_JSON_H__
 
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4100 )
+#endif
+
 #include <string>
 #include <vector>
 #include <sstream>
@@ -541,5 +546,9 @@ namespace boostfix
 }
 }
 } //end namespace Safir::Dob::Typesystem::Internal::Detail
+
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
 
 #endif

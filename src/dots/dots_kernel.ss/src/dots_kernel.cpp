@@ -176,7 +176,7 @@ void DotsC_GetAllTypeIds(DotsC_TypeId* buf, DotsC_Int32 bufSize, DotsC_Int32& si
     }
     else
     {
-        size=types.size();
+        size=static_cast<DotsC_Int32>(types.size());
     }
 
     std::set<DotsC_TypeId>::const_iterator it=types.begin();
@@ -1881,7 +1881,7 @@ void DotsC_GetDouFilePathForType(const DotsC_TypeId typeId,
         return;
     }
 
-    resultSize=strlen(file)+1; //add one for null termination
+    resultSize=static_cast<DotsC_Int32>(strlen(file))+1; //add one for null termination
     if (resultSize<=bufSize)
     {
         strncpy(buf, file, resultSize);

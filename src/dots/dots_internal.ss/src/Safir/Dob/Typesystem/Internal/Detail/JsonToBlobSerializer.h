@@ -103,7 +103,7 @@ namespace Detail
             size_t blobInitSize=std::max(size_t(1000), static_cast<size_t>(2*cd->InitialSize()));
             blob.reserve(blobInitSize); //Note: maybe JsonSize/2 would be enogh in almost all cases
             blob.resize(cd->InitialSize(), 0);
-            m_blobLayout.FormatBlob(&blob[0], blob.size(), typeId, beginningOfUnused);
+            m_blobLayout.FormatBlob(&blob[0], static_cast<Size>(blob.size()), typeId, beginningOfUnused);
 
             for (boost::property_tree::ptree::const_iterator memIt=members.begin(); memIt!=members.end(); ++memIt)
             {
@@ -240,7 +240,7 @@ namespace Detail
                     size_t numBytesNeeded=memberContent.data().size()+1+sizeof(DotsC_Int64)+sizeof(DotsC_Int32); //hash+stringLength+string
                     CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
                 }
-                m_blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, memberContent.data().size()+1, memIx, arrIx, false, beginningOfUnused);
+                m_blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, static_cast<Size>(memberContent.data().size())+1, memIx, arrIx, false, beginningOfUnused);
                 m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
             }
                 break;
@@ -269,7 +269,7 @@ namespace Detail
                     CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
                 }
                 DotsC_EntityId eid={tid, instanceId.first};
-                m_blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, instanceIdString->size()+1, memIx, arrIx, false, beginningOfUnused);
+                m_blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, static_cast<Size>(instanceIdString->size())+1, memIx, arrIx, false, beginningOfUnused);
                 m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
             }
                 break;
@@ -279,7 +279,7 @@ namespace Detail
                 size_t numBytesNeeded=std::min(memberContent.data().size(), static_cast<size_t>(md->GetMaxLength()))+1; //add one for '\0'
                 CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
                 char* writeString=beginningOfUnused;
-                m_blobLayout.CreateStringMember(&blob[0], numBytesNeeded, memIx, arrIx, false, beginningOfUnused);
+                m_blobLayout.CreateStringMember(&blob[0], static_cast<Size>(numBytesNeeded), memIx, arrIx, false, beginningOfUnused);
                 strncpy(writeString, memberContent.data().c_str(), numBytesNeeded);
                 m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
             }
@@ -313,7 +313,7 @@ namespace Detail
                 SerializeObjectContent(*xsiType, insideBlob, memberContent);
                 CreateSpaceForDynamicMember(blob, beginningOfUnused, insideBlob.size());
                 char* writeObj=beginningOfUnused;
-                m_blobLayout.CreateObjectMember(&blob[0], insideBlob.size(), DotsId_Generate64(xsiType->c_str()), memIx, arrIx, false, beginningOfUnused);
+                m_blobLayout.CreateObjectMember(&blob[0], static_cast<Size>(insideBlob.size()), DotsId_Generate64(xsiType->c_str()), memIx, arrIx, false, beginningOfUnused);
                 beginningOfUnused=writeObj+insideBlob.size(); //This is a hack. BlobLayout is not moving beginningOfUnused by the blobSize but instead only by the initialSize. Has to do with genated code.
                 memcpy(writeObj, &insideBlob[0], insideBlob.size());
                 m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
@@ -331,7 +331,7 @@ namespace Detail
                 }
                 CreateSpaceForDynamicMember(blob, beginningOfUnused, bin.size());
                 char* writeBinary=beginningOfUnused;
-                m_blobLayout.CreateBinaryMember(&blob[0], bin.size(), memIx, arrIx, false, beginningOfUnused);
+                m_blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.size()), memIx, arrIx, false, beginningOfUnused);
                 memcpy(writeBinary, &bin[0], bin.size());
                 m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
             }
