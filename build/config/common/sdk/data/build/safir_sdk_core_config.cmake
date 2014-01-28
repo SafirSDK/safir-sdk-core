@@ -49,8 +49,8 @@ if (UNIX)
    LINK_DIRECTORIES(${SAFIR_RUNTIME}/lib)
 
    #turn on more warnings and set up use of threads etc
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread")
-   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pthread")
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread -fvisibility=hidden -fvisibility-inlines-hidden -Bsymbolic")
+   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pthread -fvisibility=hidden -fvisibility-inlines-hidden -Bsymbolic")
    SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")
 
    #make sure we get the correct posix version
@@ -144,7 +144,6 @@ set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_DYN_LINK -DBOOST_FILESYSTEM_NO_DEPREC
 if (Boost_VERSION GREATER 104100) #1.41
   set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DBOOST_SYSTEM_NO_DEPRECATED)
 endif()
-
 
 if(MSVC)
    #We have a weird issue which causes a buffer overrun error when using Visual Studio 2013
