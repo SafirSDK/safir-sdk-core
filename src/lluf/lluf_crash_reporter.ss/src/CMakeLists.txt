@@ -25,10 +25,6 @@ if (MSVC)
   TARGET_LINK_LIBRARIES(lluf_crash_reporter 
   "${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/breakpad_client.lib")
 else()
-
-  #don't export symbols from the static lib we linked to.
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--exclude-libs=ALL")
-
   TARGET_LINK_LIBRARIES(lluf_crash_reporter 
     lluf_config
     ${Boost_LIBRARIES}
