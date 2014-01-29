@@ -120,20 +120,40 @@ private:
 
     }
 
+    static void Timeout(const int which)
+    {
+        try
+        {
+            //boost::this_thread::sleep(boost::posix_time::minutes(5));
+            std::wcout << "Read from partner " << which << " timed out!" << std::endl;
+            exit(31);
+        }
+        catch (const boost::thread_interrupted&)
+        {
+            //ok, read was successful, we just let the thread go away.
+        }
+    }
+
     void SendInternal(const Safir::Dob::Typesystem::BinarySerialization& binary,
                       const int which)
     {
         boost::asio::write(*m_sockets[which], boost::asio::buffer(&binary[0], binary.size()));
 
         try
-        {
+        {            
             //        std::wcout << "Sent action to " << which << ", waiting for ok" << std::endl;
+            boost::thread timeout(boost::bind(ActionSender::Timeout, which));
+            
             char reply[3];
             boost::asio::read(*m_sockets[which],
                               boost::asio::buffer(reply, 3));
+
+            timeout.interrupt();
+            timeout.join();
+
             if (reply != std::string("ok"))
             {
-                std::wcout << "Got unexpected reply: '" << std::wstring(reply,reply+3) << "'" << std::endl;
+                std::wcout << "Got unexpected reply: '" << std::wstring(reply,reply+3) << "' from " << which << std::endl;
                 throw std::logic_error("Got unexpected reply!");
             }
         }
