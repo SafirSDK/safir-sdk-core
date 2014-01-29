@@ -79,11 +79,11 @@ namespace Detail
         void operator()(const boost::property_tree::ptree& json, std::vector<char>& blob) const
         {
             const boost::property_tree::ptree& members=json.front().second;
-            boost::optional<std::string> typeName=members.get_optional<std::string>("_DobType");
+            boost::optional<std::string> typeName=members.get_optional<std::string>("_DouType");
 
             if (!typeName)
             {
-                throw ParseError("JsonToBinary serialization error", "Json object does not have the _DobType field", "", 143);
+                throw ParseError("JsonToBinary serialization error", "Json object does not have the _DouType field", "", 143);
             }
 
             SerializeObjectContent(*typeName, blob, members);
@@ -111,7 +111,7 @@ namespace Detail
                 int memIx=cd->GetMemberIndex(elementName);
                 if (memIx<0)
                 {
-                    if (elementName=="_DobType")
+                    if (elementName=="_DouType")
                     {
                         continue;
                     }
@@ -287,7 +287,7 @@ namespace Detail
 
             case ObjectMemberType:
             {
-                boost::optional<std::string> xsiType=memberContent.get_optional<std::string>("_DobType");
+                boost::optional<std::string> xsiType=memberContent.get_optional<std::string>("_DouType");
                 if (!xsiType)
                 {
                     std::ostringstream os;

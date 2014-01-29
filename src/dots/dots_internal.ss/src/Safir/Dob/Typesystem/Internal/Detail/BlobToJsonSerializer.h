@@ -219,9 +219,10 @@ namespace boostfix
 
         void SerializeMembers(const char* blob, boost::property_tree::ptree& content) const
         {
+            static const std::string nullString="null";
             const ClassDescriptionType* cd=GetClass(blob);
 
-            content.add("_DobType", Quoted(cd->GetName()));
+            content.add("_DouType", Quoted(cd->GetName()));
 
             for (DotsC_MemberIndex memberIx=0; memberIx<cd->GetNumberOfMembers(); ++memberIx)
             {
@@ -233,17 +234,26 @@ namespace boostfix
                 else //array member
                 {
                     bool nonNullValueInserted=false;
+                    int accumulatedNulls=0;
                     boost::property_tree::ptree arrayValues;
                     for (DotsC_ArrayIndex arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
                     {
-                        if (SerializeMember(blob, md, memberIx, arrIx, "", arrayValues))
+                        if (m_blobLayout.GetStatus(blob, memberIx, arrIx).IsNull())
                         {
-                            nonNullValueInserted=true;
+                            //we wait to insert null until we know we have to because an value exists after.
+                            //This way we avoid lots of null at the end of an array
+                            ++accumulatedNulls;
                         }
                         else
                         {
-                            //element at index is null, then we must insert null value
-                            arrayValues.push_back(MakePtreeValue("", "null"));
+                            for (int nullCount=0; nullCount<accumulatedNulls; ++nullCount)
+                            {
+                                arrayValues.push_back(MakePtreeValue("", "null"));
+                            }
+
+                            accumulatedNulls=0;
+                            nonNullValueInserted=true;
+                            SerializeMember(blob, md, memberIx, arrIx, "", arrayValues);
                         }
                     }
                     if (nonNullValueInserted) //only add array element if there are non-null values

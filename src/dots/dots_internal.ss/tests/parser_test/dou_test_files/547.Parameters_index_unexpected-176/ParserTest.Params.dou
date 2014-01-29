@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>ParserTest.Params</name>
+    <baseClass>Object</baseClass>
+    <parameters>
+        <parameter>
+            <name>ObjParam</name>
+            <type>ParserTest.MyEntity</type>
+            <ParserTest.MyEntity>
+                <Int32Arr>
+                    <Int32>1</Int32>
+                    <Int32>2</Int32>
+                    <Int32>3</Int32>
+                    <Int32 index="4">4</Int32>
+                    <Int32>5</Int32>
+                </Int32Arr>
+            </ParserTest.MyEntity>
+        </parameter>
+    </parameters>
+</class>

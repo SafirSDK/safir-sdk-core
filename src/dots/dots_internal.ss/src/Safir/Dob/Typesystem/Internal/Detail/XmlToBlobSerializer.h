@@ -157,35 +157,52 @@ namespace Detail
                 {
                     //array, then the inner propertyTree contains array element and the array elements contains the content
                     //i.e <myIntArray><Int32 index=0>1</Int32><Int32 index=5>2</Int32></myIntArray>
+                    int arrayIndex=0;
+                    bool usesIndexAttr=memIt->second.begin()->second.get_optional<int>("<xmlattr>.index") ? true : false;
                     for (boost::property_tree::ptree::const_iterator arrIt=memIt->second.begin(); arrIt!=memIt->second.end(); ++arrIt)
                     {
                         boost::optional<int> index=arrIt->second.get_optional<int>("<xmlattr>.index");
-                        if (index)
+                        if (usesIndexAttr)
                         {
-                            if (md->GetArraySize()<=*index)
+                            //we expect an index attribute on every array element
+                            if (index)
+                            {
+                                arrayIndex=*index;
+                            }
+                            else
                             {
                                 std::ostringstream os;
-                                os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<*index<<" from xml to binary. Index out of range. ArraySize is "<<md->GetArraySize();
-                                throw ParseError("XmlToBinary serialization error", os.str(), "", 154);
-                            }
-
-                            try
-                            {
-                                SetMember(md, memIx, *index, arrIt->second, blob, beginningOfUnused);
-                            }
-                            catch (const boost::property_tree::ptree_error&)
-                            {
-                                std::ostringstream os;
-                                os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<*index<<" from xml to binary. Type is incorrect.";
-                                throw ParseError("XmlToBinary serialization error", os.str(), "", 155);
+                                os<<"Serialization from xml to binary failed because the xml of array member '"<<md->GetName()<<"' is missing index-attribute";
+                                throw ParseError("XmlToBinary serialization error", os.str(), "", 156);
                             }
                         }
-                        else
+                        else if (index) //not usesIndexAttr but got it anyway
+                        {
+                            //We got an index attribute but does not expect it since it has not been present for every previous array elements
+                            std::ostringstream os;
+                            os<<"Serialization from xml to binary failed because the xml of array member '"<<md->GetName()<<"' is contains an unexpected index-attribute. Index must be present on every array element or none. Not just some of them!";
+                            throw ParseError("XmlToBinary serialization error", os.str(), "", 176);
+                        }
+
+                        if (md->GetArraySize()<=arrayIndex)
                         {
                             std::ostringstream os;
-                            os<<"Serialization from xml to binary failed because the xml of array member '"<<md->GetName()<<"' is missing index-attribute";
-                            throw ParseError("XmlToBinary serialization error", os.str(), "", 156);
+                            os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<arrayIndex<<" from xml to binary. Index out of range. ArraySize is "<<md->GetArraySize();
+                            throw ParseError("XmlToBinary serialization error", os.str(), "", 154);
                         }
+
+                        try
+                        {
+                            SetMember(md, memIx, arrayIndex, arrIt->second, blob, beginningOfUnused);
+                        }
+                        catch (const boost::property_tree::ptree_error&)
+                        {
+                            std::ostringstream os;
+                            os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<arrayIndex<<" from xml to binary. Type is incorrect.";
+                            throw ParseError("XmlToBinary serialization error", os.str(), "", 155);
+                        }
+
+                        ++arrayIndex;
                     }
                 }
             }

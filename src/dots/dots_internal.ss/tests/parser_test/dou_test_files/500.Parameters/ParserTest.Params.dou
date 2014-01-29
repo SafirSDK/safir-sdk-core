@@ -9,6 +9,53 @@
             <type>ParserTest.MyEntity</type>
             <ParserTest.MyEntity>
                 <Int32Val valueRef="ParserTest.Params.Int32ParamArray" valueRefIndex="2"/>
+                <StringVal xml:space="preserve">Hello       Kalle         Kula</StringVal>
+            </ParserTest.MyEntity>
+        </parameter>
+        
+        <parameter>
+            <name>ObjParam2</name>
+            <type>ParserTest.MyEntity</type>
+            <ParserTest.MyEntity>
+                <Int32Arr>
+                    <Int32>1</Int32>
+                    <Int32>2</Int32>
+                    <Int32>3</Int32>
+                </Int32Arr>
+            </ParserTest.MyEntity>
+        </parameter>
+        
+        <parameter>
+            <name>ObjParam3</name>
+            <type>ParserTest.MyEntity</type>
+            <ParserTest.MyEntity>
+                <Int32Arr>
+                    <Int32 index="2">1</Int32>
+                    <Int32 index="1">2</Int32>
+                    <Int32 index="0">3</Int32>
+                </Int32Arr>
+            </ParserTest.MyEntity>
+        </parameter>
+        
+        <parameter>
+            <name>ObjParam4</name>
+            <type>ParserTest.MyEntity</type>
+            <ParserTest.MyEntity>
+                <Int32Arr>
+                    <Int32>1</Int32>
+                    <Int32>2</Int32>
+                </Int32Arr>
+            </ParserTest.MyEntity>
+        </parameter>
+        
+        <parameter>
+            <name>ObjParam5</name>
+            <type>ParserTest.MyEntity</type>
+            <ParserTest.MyEntity>
+                <Int32Arr>
+                    <Int32 index="2">1</Int32>
+                    <Int32 index="0">3</Int32>
+                </Int32Arr>
             </ParserTest.MyEntity>
         </parameter>
         
@@ -19,6 +66,13 @@
                 <name>Safir.Dob.Entity</name>
                 <instanceId>abc</instanceId>
             </entityId>
+        </parameter>
+        
+        <parameter>
+            <name>StringVal</name>
+            <type>String</type>
+            <value>  Hello    hello   Spurv   
+            spurv spurv</value>
         </parameter>
         
         <parameter>

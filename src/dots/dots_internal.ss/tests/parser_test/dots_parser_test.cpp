@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
     if (argc<2)
     {
         std::cout<<"Too few arguments!"<<std::endl;
-        std::cout<<"Usage: 'dots_parser_test <testRoot> firstTest lastTest'"<<std::endl;
+        std::cout<<"Usage: 'dots_parser_test <testRoot> firstTest lastTest print'"<<std::endl;
         std::cout<<"   or just 'dots_parser_test <testRoot>''  to run all tests."<<std::endl;
         return 1;
     }
@@ -65,6 +65,10 @@ int main(int argc, char* argv[])
     if (argc>3)
     {
         last=boost::lexical_cast<int>(argv[3]);
+    }
+    if (argc>4)
+    {
+        PrintRepository=true;
     }
 
     std::cout<<"========= Test suite started ========"<<std::endl;

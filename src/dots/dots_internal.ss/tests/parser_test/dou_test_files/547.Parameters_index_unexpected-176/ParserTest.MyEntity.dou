@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <summary>Contains the definition of a distribution channel name.</summary>
     <name>ParserTest.MyEntity</name>
-    <baseClass>Safir.Dob.Entity</baseClass>
+    <baseClass>Object</baseClass>
     <members>
         <member>
             <name>Int32Val</name>
@@ -11,12 +10,7 @@
         <member>
             <name>Int32Arr</name>
             <type>Int32</type>
-            <arraySize>3</arraySize>
-        </member>
-        <member>
-            <name>StringVal</name>
-            <type>String</type>
-            <maxLength>50</maxLength>
+            <arraySize>5</arraySize>
         </member>
     </members>
 </class>
