@@ -26,18 +26,6 @@
 #include <Safir/Dob/Internal/Interface.h>
 #include <jni.h>
 
-
-#if defined _MSC_VER
-#  define CALLING_CONVENTION __cdecl
-#elif defined __GNUC__
-#  if defined (__i386)
-#    define CALLING_CONVENTION __attribute__((cdecl))
-#  else
-#    define CALLING_CONVENTION
-#  endif
-#endif
-
-
 class Callbacks
 {
 public:
@@ -50,131 +38,131 @@ public:
     //-------------------------------
     //Callbacks passed to dose_dll
     //-------------------------------
-    static void CALLING_CONVENTION OnDispatchCb(void* const consumer,
-                                                bool& success);
+    static void OnDispatchCb(void* const consumer,
+                             bool& success);
 
-    static void CALLING_CONVENTION OnStopOrderCb(void* const consumer,
-                                                 bool& success);
+    static void OnStopOrderCb(void* const consumer,
+                              bool& success);
 
-    static void CALLING_CONVENTION OnNewEntityCb(const char* const currentBlob,
-                                                 const char* const currentState,
-                                                 void* const consumer,
-                                                 const bool timestampDiff,
-                                                 bool& success);
+    static void OnNewEntityCb(const char* const currentBlob,
+                              const char* const currentState,
+                              void* const consumer,
+                              const bool timestampDiff,
+                              bool& success);
 
-    static void CALLING_CONVENTION OnUpdatedEntityCb(const char* const currentBlob,
-                                                     const char* const currentState,
-                                                     const char* const previousBlob,
-                                                     const char* const previousState,
-                                                     void* const consumer,
-                                                     const bool timestampDiff,
-                                                     bool& success);
+    static void OnUpdatedEntityCb(const char* const currentBlob,
+                                  const char* const currentState,
+                                  const char* const previousBlob,
+                                  const char* const previousState,
+                                  void* const consumer,
+                                  const bool timestampDiff,
+                                  bool& success);
 
-    static void CALLING_CONVENTION OnDeletedEntityCb(const char* const currentState,
-                                                     const char* const previousBlob,
-                                                     const char* const previousState,
-                                                     const bool explicitlyDeleted,
-                                                     void* const consumer,
-                                                     const bool timestampDiff,
-                                                     bool& success);
+    static void OnDeletedEntityCb(const char* const currentState,
+                                  const char* const previousBlob,
+                                  const char* const previousState,
+                                  const bool explicitlyDeleted,
+                                  void* const consumer,
+                                  const bool timestampDiff,
+                                  bool& success);
 
-    static void CALLING_CONVENTION OnCreateRequestCb(const char* const requestBlob,
-                                                     const char* const state,
-                                                     const long ctrl,
-                                                     const DotsC_Int32 responseId,
-                                                     void* const consumer,
-                                                     bool& success);
+    static void OnCreateRequestCb(const char* const requestBlob,
+                                  const char* const state,
+                                  const long ctrl,
+                                  const DotsC_Int32 responseId,
+                                  void* const consumer,
+                                  bool& success);
 
-    static void CALLING_CONVENTION OnUpdateRequestCb(const char* const requestBlob,
-                                                     const char* const state,
-                                                     const long ctrl,
-                                                     const DotsC_Int32 responseId,
-                                                     void* const consumer,
-                                                     bool& success);
+    static void OnUpdateRequestCb(const char* const requestBlob,
+                                  const char* const state,
+                                  const long ctrl,
+                                  const DotsC_Int32 responseId,
+                                  void* const consumer,
+                                  bool& success);
 
-    static void CALLING_CONVENTION OnDeleteRequestCb(const char* const state,
-                                                     const long ctrl,
-                                                     const DotsC_Int32 responseId,
-                                                     void* const consumer,
-                                                     bool& success);
+    static void OnDeleteRequestCb(const char* const state,
+                                  const long ctrl,
+                                  const DotsC_Int32 responseId,
+                                  void* const consumer,
+                                  bool& success);
 
-    static void CALLING_CONVENTION OnServiceRequestCb(const char* const requestBlob,
-                                                      const char* const state,
-                                                      const long ctrl,
-                                                      const DotsC_Int32 responseId,
-                                                      void* const consumer,
-                                                      bool& success);
+    static void OnServiceRequestCb(const char* const requestBlob,
+                                   const char* const state,
+                                   const long ctrl,
+                                   const DotsC_Int32 responseId,
+                                   void* const consumer,
+                                   bool& success);
 
-    static void CALLING_CONVENTION OnResponseCb(const DoseC_RequestId requestId,
-                                                const char* const responseBlob,
-                                                const char* const responseState,
-                                                const char* const requestBlob,
-                                                const char* const requestState,
-                                                void* const consumer,
-                                                bool& success);
+    static void OnResponseCb(const DoseC_RequestId requestId,
+                             const char* const responseBlob,
+                             const char* const responseState,
+                             const char* const requestBlob,
+                             const char* const requestState,
+                             void* const consumer,
+                             bool& success);
 
-    static void CALLING_CONVENTION OnMessageCb(const char* const message,
-                                               const char* const state,
-                                               void* const consumer,
-                                               bool& success);
+    static void OnMessageCb(const char* const message,
+                            const char* const state,
+                            void* const consumer,
+                            bool& success);
 
-    static void CALLING_CONVENTION OnRegisteredCb(const DotsC_TypeId typeId,
-                                                  const DotsC_Int64 handlerId,
-                                                  const char* const handlerIdStr,
-                                                  void* const consumer,
-                                                  bool& success);
+    static void OnRegisteredCb(const DotsC_TypeId typeId,
+                               const DotsC_Int64 handlerId,
+                               const char* const handlerIdStr,
+                               void* const consumer,
+                               bool& success);
 
-    static void CALLING_CONVENTION OnUnregisteredCb(const DotsC_TypeId typeId,
-                                                    const DotsC_Int64 handlerId,
-                                                    const char* const handlerIdStr,
-                                                    void* const consumer,
-                                                    bool& success);
+    static void OnUnregisteredCb(const DotsC_TypeId typeId,
+                                 const DotsC_Int64 handlerId,
+                                 const char* const handlerIdStr,
+                                 void* const consumer,
+                                 bool& success);
 
-    static void CALLING_CONVENTION OnRevokedRegistrationCb(const DotsC_TypeId typeId,
-                                                           const DotsC_Int64 handlerId,
-                                                           const char* const handlerIdStr,
-                                                           void* const consumer,
-                                                           bool& success);
+    static void OnRevokedRegistrationCb(const DotsC_TypeId typeId,
+                                        const DotsC_Int64 handlerId,
+                                        const char* const handlerIdStr,
+                                        void* const consumer,
+                                        bool& success);
 
-    static void CALLING_CONVENTION OnCompletedRegistrationCb(const DotsC_TypeId typeId,
-                                                             const DotsC_Int64 handlerId,
-                                                             const char* const handlerIdStr,
-                                                             void* const consumer,
-                                                             bool& success);
+    static void OnCompletedRegistrationCb(const DotsC_TypeId typeId,
+                                          const DotsC_Int64 handlerId,
+                                          const char* const handlerIdStr,
+                                          void* const consumer,
+                                          bool& success);
 
-    static void CALLING_CONVENTION OnInjectedNewEntityCb(const char* const injectionBlob,
-                                                         const char* const injectionState,
-                                                         void* const consumer,
-                                                         bool& success);
+    static void OnInjectedNewEntityCb(const char* const injectionBlob,
+                                      const char* const injectionState,
+                                      void* const consumer,
+                                      bool& success);
 
-    static void CALLING_CONVENTION OnInjectedUpdatedEntityCb(const char* const injectionBlob,
-                                                             const char* const injectionState,
-                                                             const char* const currentBlob,
-                                                             const char* const currentState,
-                                                             void* const consumer,
-                                                             bool& success);
+    static void OnInjectedUpdatedEntityCb(const char* const injectionBlob,
+                                          const char* const injectionState,
+                                          const char* const currentBlob,
+                                          const char* const currentState,
+                                          void* const consumer,
+                                          bool& success);
 
-    static void CALLING_CONVENTION OnInjectedDeletedEntityCb(const char* const injectionState,
-                                                             const char* const currentBlob,
-                                                             const char* const currentState,
-                                                             void* const consumer,
-                                                             bool& success);
+    static void OnInjectedDeletedEntityCb(const char* const injectionState,
+                                          const char* const currentBlob,
+                                          const char* const currentState,
+                                          void* const consumer,
+                                          bool& success);
 
-    static void CALLING_CONVENTION OnInitialInjectionsDoneCb(const DotsC_TypeId typeId,
-                                                             const DotsC_Int64 handlerId,
-                                                             const char* const handlerIdStr,
-                                                             void* const consumer,
-                                                             bool& success);
+    static void OnInitialInjectionsDoneCb(const DotsC_TypeId typeId,
+                                          const DotsC_Int64 handlerId,
+                                          const char* const handlerIdStr,
+                                          void* const consumer,
+                                          bool& success);
 
-    static void CALLING_CONVENTION OnNotRequestOverflowCb(void* const consumer,
-                                                          bool& success);
+    static void OnNotRequestOverflowCb(void* const consumer,
+                                       bool& success);
 
-    static void CALLING_CONVENTION OnNotMessageOverflowCb(void* const consumer,
-                                                          bool& success);
+    static void OnNotMessageOverflowCb(void* const consumer,
+                                       bool& success);
 
-    static void CALLING_CONVENTION OnDropReferenceCb(void* const consumer,
-                                                     const long refCounter,
-                                                     bool& success);
+    static void OnDropReferenceCb(void* const consumer,
+                                  const long refCounter,
+                                  bool& success);
 
 private:
     static JNIEnv* CallbackEnv();
