@@ -124,7 +124,7 @@ private:
     {
         try
         {
-            //boost::this_thread::sleep(boost::posix_time::minutes(5));
+            boost::this_thread::sleep(boost::posix_time::minutes(5));
             std::wcout << "Read from partner " << which << " timed out!" << std::endl;
             exit(31);
         }
