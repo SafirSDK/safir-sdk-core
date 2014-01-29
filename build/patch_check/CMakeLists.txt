@@ -7,10 +7,6 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 FIND_PACKAGE(Boost COMPONENTS thread system REQUIRED)
 set(CMAKE_REQUIRED_LIBRARIES ${Boost_LIBRARIES})
 
-#on some boost versions we need to link chrono as well, so we
-#check for chrono quietly (it doesnt exist in all versions).
-set (Boost_FIND_QUIETLY 1)
-FIND_PACKAGE(Boost COMPONENTS chrono)
 set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${Boost_LIBRARIES})
 
 add_subdirectory(boost_iostreams_flushing)
