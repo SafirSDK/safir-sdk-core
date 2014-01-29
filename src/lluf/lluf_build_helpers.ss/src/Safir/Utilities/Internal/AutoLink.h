@@ -45,8 +45,12 @@
 
 #  pragma comment(lib, SAFIR_LIBRARY_NAME SAFIR_BUILD_TYPE ".lib")
 
-#undef SAFIR_BUILD_TYPE
+#  undef SAFIR_BUILD_TYPE
 
 #endif
 
 #undef SAFIR_LIBRARY_NAME
+
+#ifdef SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#  undef SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#endif
