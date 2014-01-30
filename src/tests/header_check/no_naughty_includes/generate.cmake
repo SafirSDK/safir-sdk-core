@@ -15,7 +15,7 @@ set(EXCLUDE_LIST
   AceDispatcher\\.h    # include ace, which includes windows.h...
   AsioDispatcher\\.h   #includes asio.hpp, which appears to include windows.h
 
-  /Typesystem/Internal/Detail/ #property_tree appears to have some windows.h stuff in it
+  /Typesystem/ToolSupport #property_tree appears to have some windows.h stuff in it
 
   #here are the headers that include windows.h and should not!
   /Odbc/
