@@ -21,9 +21,15 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#ifdef __GNUC__
 #pragma GCC visibility push (default)
+#endif
+
 #include "com_saabgroup_safir_dob_test_util_DoseTestUtil.h"
+
+#ifdef __GNUC__
 #pragma GCC visibility pop
+#endif
 
 #include <Safir/Dob/Internal/DoseTest/dose_test_util.h>
 #include <assert.h>

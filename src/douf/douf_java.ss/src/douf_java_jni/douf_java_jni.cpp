@@ -21,9 +21,15 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#ifdef __GNUC__
 #pragma GCC visibility push (default)
+#endif
+
 #include "com_saabgroup_safir_time_Library.h"
+
+#ifdef __GNUC_
 #pragma GCC visibility pop
+#endif
 
 #include <Safir/Time/Internal/Interface.h>
 

@@ -35,8 +35,6 @@
 #endif
 #define OLIB_LOCAL SAFIR_HELPER_DLL_LOCAL
 
-//TODO??  #pragma warning (disable: 4251 4275)
-
 #if defined _MSC_VER
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN

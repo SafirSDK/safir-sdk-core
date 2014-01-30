@@ -1,4 +1,4 @@
-/******************************************************************************
+ /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
@@ -35,5 +35,9 @@
 #  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
 #define DOSE_INTERNAL_LOCAL SAFIR_HELPER_DLL_LOCAL
+
+#if defined _MSC_VER
+#  pragma warning (disable: 4251 4275)
+#endif
 
 #endif //_dose_internal_defs_h
