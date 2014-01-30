@@ -15,7 +15,7 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
@@ -32,7 +32,7 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
 
 #ifdef _MSC_VER
@@ -52,7 +52,7 @@ namespace Internal
          * Constructor - Creates a ParseError object.
          *
          * @param label [in] - Short description of the error.
-         * @param description [in] - Detailed description of the error.
+         * @param description [in] - Internaled description of the error.
          * @param file [in] - Name of the dou- or dom-file that caused the error.
          * @param errorId [in] - Id of this specific error. Can be used by test code and developvers to locate from where this error was thrown.
          */
@@ -78,7 +78,7 @@ namespace Internal
         const std::string& Label() const throw() {return m_label;}
 
         /**
-         * Get detailed error description.
+         * Get Internaled error description.
          *
          * @return Error description.
          */

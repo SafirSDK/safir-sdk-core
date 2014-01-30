@@ -27,7 +27,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/filesystem.hpp>
 #include <Safir/Utilities/StartupSynchronizer.h>
-#include <Safir/Dob/Typesystem/Internal/BlobLayout.h>
+#include <Safir/Dob/Typesystem/ToolSupport/BlobLayout.h>
 #include "dots_shm_repository.h"
 
 namespace Safir
@@ -48,7 +48,7 @@ namespace Internal
     public:
         static void Initialize(size_t sharedMemorySize, const std::vector<boost::filesystem::path>& paths);
         static const RepositoryShm* GetRepository();
-        static const Safir::Dob::Typesystem::Internal::BlobLayout<RepositoryShm>* GetBlobLayout();
+        static const Safir::Dob::Typesystem::ToolSupport::BlobLayout<RepositoryShm>* GetBlobLayout();
         static bool RepositoryCreatedByThisProcess();
 
     private:
@@ -58,7 +58,7 @@ namespace Internal
         boost::scoped_ptr<boost::interprocess::managed_shared_memory> m_sharedMemory;
         RepositoryShm* m_repository;
         bool m_repositoryCreatedByThisProcess;
-        boost::scoped_ptr< Safir::Dob::Typesystem::Internal::BlobLayout<RepositoryShm> > m_blobLayout;
+        boost::scoped_ptr< Safir::Dob::Typesystem::ToolSupport::BlobLayout<RepositoryShm> > m_blobLayout;
 
         static RepositoryKeeper& Instance();
         RepositoryKeeper();

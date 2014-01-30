@@ -15,18 +15,18 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_DETAIL_TOSTRING_HELPERS__
-#define __DOTS_INTERNAL_DETAIL_TOSTRING_HELPERS__
+#ifndef __DOTS_INTERNAL_Internal_TOSTRING_HELPERS__
+#define __DOTS_INTERNAL_Internal_TOSTRING_HELPERS__
 
 #include <iostream>
-#include <Safir/Dob/Typesystem/Internal/ParseError.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/BlobToJsonSerializer.h>
+#include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobToJsonSerializer.h>
 
 namespace Safir
 {
@@ -34,12 +34,12 @@ namespace Dob
 {
 namespace Typesystem
 {
+namespace ToolSupport
+{
 namespace Internal
 {
-namespace Detail
-{
     //Helper class for dumping a complete repository to a stream like stringstream och cout.
-    template <class RepT, class Traits=Safir::Dob::Typesystem::Internal::TypeRepositoryTraits<RepT> >
+    template <class RepT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepT> >
     class ToStringHelper
     {
     public:
@@ -490,7 +490,7 @@ namespace Detail
                 if (bin.second>0)
                 {
                     std::string tmp(bin.first, bin.first+bin.second);
-                    os<<Safir::Dob::Typesystem::Internal::Detail::SerializationUtils::ToBase64(tmp)<<std::endl;
+                    os<<Safir::Dob::Typesystem::ToolSupport::Internal::SerializationUtils::ToBase64(tmp)<<std::endl;
                 }
             }
 
@@ -656,6 +656,6 @@ namespace Detail
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal::Detail
+} //end namespace Safir::Dob::Typesystem::Internal::Internal
 
 #endif

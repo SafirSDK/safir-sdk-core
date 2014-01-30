@@ -15,7 +15,7 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
@@ -37,7 +37,7 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
     namespace
     {
@@ -136,7 +136,7 @@ namespace Internal
                     boost::shared_ptr<boost::property_tree::ptree> pt(new boost::property_tree::ptree);
                     try
                     {
-                        boost::property_tree::read_xml(pathIt->string(), *pt, boost::property_tree::xml_parser::trim_whitespace | boost::property_tree::xml_parser::no_comments);
+                        boost::property_tree::read_xml(pathIt->string(), *pt, boost::property_tree::xml_parser::no_comments);
                     }
                     catch (boost::property_tree::xml_parser_error& err) //cant catch as const-ref due to bug in early boost versions.
                     {

@@ -24,8 +24,8 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
-#include <Safir/Dob/Typesystem/Internal/TypeParser.h>
-#include <Safir/Dob/Typesystem/Internal/Serialization.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -153,7 +153,7 @@ private:
 class CheckConfigurationLocal
 {
 public:
-    typedef boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository> RepPtr;
+    typedef boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> RepPtr;
     static void Run(const CmdLine& cmd)
     {
         RepPtr rep;
@@ -164,9 +164,9 @@ public:
             {
                 paths.push_back(boost::filesystem::path(*it));
             }
-            rep=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(paths);
+            rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(paths);
         }
-        catch(const Safir::Dob::Typesystem::Internal::ParseError& err)
+        catch(const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
         {
             std::cout<<"********** Parse Error **********************************************"<<std::endl;
             std::cout<<"* Label: "<<err.Label()<<std::endl;
@@ -179,7 +179,7 @@ public:
 
         if (!cmd.typeName.empty())
         {
-            ShowType(rep, Safir::Dob::Typesystem::Internal::TypeUtilities::CalculateTypeId(cmd.typeName));
+            ShowType(rep, Safir::Dob::Typesystem::ToolSupport::TypeUtilities::CalculateTypeId(cmd.typeName));
         }
         else if (cmd.summary)
         {
@@ -210,14 +210,14 @@ private:
     static void ShowType(const RepPtr& rep, DotsC_TypeId tid)
     {
         std::ostringstream os;
-        Safir::Dob::Typesystem::Internal::TypeToString(rep.get(), tid, os);
+        Safir::Dob::Typesystem::ToolSupport::TypeToString(rep.get(), tid, os);
         std::cout<<os.str()<<std::endl;
     }
 
     static void ShowDetails(const RepPtr& rep)
     {
         std::ostringstream os;
-        Safir::Dob::Typesystem::Internal::RepositoryToString(rep.get(), true, os); //include createRoutines
+        Safir::Dob::Typesystem::ToolSupport::RepositoryToString(rep.get(), true, os); //include createRoutines
         std::cout<<os.str()<<std::endl;
         std::cout<<"===== Summary ====="<<std::endl;
         ShowSummary(rep);

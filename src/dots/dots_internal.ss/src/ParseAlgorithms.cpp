@@ -15,7 +15,7 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
@@ -29,7 +29,7 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
     //----------------------------------------------
     // Free helper functions
@@ -75,7 +75,10 @@ namespace Internal
     void GetReferencedParameter(boost::property_tree::ptree& pt, std::string& paramName, int& paramIndex)
     {
         paramName=pt.get<std::string>(Elements::ReferenceName::Name());
-        paramIndex=pt.get(Elements::ReferenceIndex::Name(), 0);
+        SerializationUtils::Trim(paramName);
+        std::string index=pt.get(Elements::ReferenceIndex::Name(), "0");
+        SerializationUtils::Trim(index);
+        paramIndex=boost::lexical_cast<int>(index);
     }
 
     int GetReferencedIndex(boost::property_tree::ptree& pt, ParseState& state)
@@ -91,7 +94,24 @@ namespace Internal
             throw ParseError("Bad indexRef", os.str(), state.currentPath, 168);
         }
 
-        int paramIndex=pt.get(Elements::ReferenceIndex::Name(), 0); //default to 0
+        SerializationUtils::Trim(*paramName);
+        int paramIndex=0;
+        boost::optional<std::string> index=pt.get_optional<std::string>(Elements::ReferenceIndex::Name());
+        if (index)
+        {
+            try
+            {
+                SerializationUtils::Trim(*index);
+                paramIndex=boost::lexical_cast<int>(*index);
+            }
+            catch (const boost::bad_lexical_cast&)
+            {
+                std::ostringstream os;
+                os<<"The specified index "<<*index<<" can not be parsed as an Int32 value. Referenced parameter is "<<*paramName;
+                throw ParseError("Bad indexRef", os.str(), state.currentPath, 177);
+            }
+        }
+
         const ParameterDescriptionBasic* param=state.repository->GetParameterBasic(*paramName);
         if (!param)
         {
@@ -133,6 +153,8 @@ namespace Internal
     {
         std::string name=pt.get<std::string>(Elements::ClassName::Name());
         std::string inst=pt.get<std::string>(Elements::InstanceId::Name());
+        SerializationUtils::Trim(name);
+        SerializationUtils::Trim(inst);
         return  SerializationUtils::ExpandEnvironmentVariables(name)+std::string(", ")+SerializationUtils::ExpandEnvironmentVariables(inst);
     }
 
@@ -572,7 +594,7 @@ namespace Internal
                 ParameterDescriptionBasic* param=parIt->referee.referencingItem;
                 size_t paramIndex=parIt->referee.referencingIndex;
                 ValueDefinition& val=param->MutableValue(paramIndex);
-                const boost::property_tree::ptree& pt=*(parIt->obj);
+                boost::property_tree::ptree& pt=*(parIt->obj);
 
                 if (!parIt->deprecatedXmlFormat)
                 {
@@ -581,6 +603,7 @@ namespace Internal
                     std::string typeName;
                     if (typeAttr)
                     {
+                        SerializationUtils::Trim(*typeAttr);
                         //if type has an explicit type-attribute, check type compliance
                         typeName=*typeAttr;
                         DotsC_TypeId tid=DotsId_Generate64(typeName.c_str());

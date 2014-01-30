@@ -15,7 +15,7 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
@@ -24,7 +24,7 @@
 #ifndef __DOTS_INTERNAL_BLOB_LAYOUT_H__
 #define __DOTS_INTERNAL_BLOB_LAYOUT_H__
 
-#include <Safir/Dob/Typesystem/Internal/Detail/BlobLayoutImpl.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobLayoutImpl.h>
 
 namespace Safir
 {
@@ -32,7 +32,7 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
     /**
      * @brief Operations on blobs. Creation of blobs and insertion/update of data in blobs.
@@ -348,7 +348,7 @@ namespace Internal
         }
 
     private:
-        const Detail::BlobLayoutImpl<RepT> m_impl;
+        const Internal::BlobLayoutImpl<RepT> m_impl;
     };
 }
 }

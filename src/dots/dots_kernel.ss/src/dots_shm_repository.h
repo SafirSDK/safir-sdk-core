@@ -31,9 +31,11 @@
 #include <boost/interprocess/containers/map.hpp>
 #include <boost/interprocess/smart_ptr/shared_ptr.hpp>
 #include <boost/interprocess/offset_ptr.hpp>
-#include <Safir/Dob/Typesystem/Internal/TypeParser.h>
-#include <Safir/Dob/Typesystem/Internal/TypeUtilities.h>
-#include <Safir/Dob/Typesystem/Internal/BlobLayout.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
+#include <Safir/Dob/Typesystem/ToolSupport/BlobLayout.h>
+
+using namespace Safir::Dob::Typesystem::ToolSupport;
 
 namespace Safir
 {
@@ -618,7 +620,7 @@ namespace Internal
          * @param repositoryName - name of the shared memory repository that will be created
          * @param sharedMemory - the shared memory to copy into
          */
-        static void CreateShmCopyOfRepository(const Safir::Dob::Typesystem::Internal::TypeRepository& srcRepository,
+        static void CreateShmCopyOfRepository(const Safir::Dob::Typesystem::ToolSupport::TypeRepository& srcRepository,
                                               const std::string& shmRepositoryName,
                                               boost::interprocess::managed_shared_memory& sharedMemory);
 
@@ -679,23 +681,28 @@ namespace Internal
         ExceptionMapShm m_exceptions;
         ParameterMapShm m_params;
     };
+}
 
+namespace ToolSupport
+{
     //type traits for shared memory repository. Needed to be able to use the
     //generic stuff in dots_internal.
-    template<> struct TypeRepositoryTraits<RepositoryShm>
+    namespace internal = Safir::Dob::Typesystem::Internal;
+    template<> struct TypeRepositoryTraits<internal::RepositoryShm>
     {
-        typedef RepositoryShm RepositoryType;
-        typedef ClassDescriptionShm ClassDescriptionType;
-        typedef MemberDescriptionShm MemberDescriptionType;
-        typedef PropertyDescriptionShm PropertyDescriptionType;
-        typedef ExceptionDescriptionShm ExceptionDescriptionType;
-        typedef ParameterDescriptionShm ParameterDescriptionType;
-        typedef EnumDescriptionShm EnumDescriptionType;
-        typedef MemberMappingDescriptionShm MemberMappingDescriptionType;
-        typedef PropertyMappingDescriptionShm PropertyMappingDescriptionType;
-        typedef CreateRoutineDescriptionShm CreateRoutineDescriptionType;
+        typedef internal::RepositoryShm RepositoryType;
+        typedef internal::ClassDescriptionShm ClassDescriptionType;
+        typedef internal::MemberDescriptionShm MemberDescriptionType;
+        typedef internal::PropertyDescriptionShm PropertyDescriptionType;
+        typedef internal::ExceptionDescriptionShm ExceptionDescriptionType;
+        typedef internal::ParameterDescriptionShm ParameterDescriptionType;
+        typedef internal::EnumDescriptionShm EnumDescriptionType;
+        typedef internal::MemberMappingDescriptionShm MemberMappingDescriptionType;
+        typedef internal::PropertyMappingDescriptionShm PropertyMappingDescriptionType;
+        typedef internal::CreateRoutineDescriptionShm CreateRoutineDescriptionType;
     };
 }
+
 }
 }
 }

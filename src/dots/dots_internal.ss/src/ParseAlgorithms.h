@@ -15,7 +15,7 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
@@ -26,10 +26,11 @@
 
 #include <iostream>
 #include <set>
+#include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/lexical_cast.hpp>
-#include <Safir/Dob/Typesystem/Internal/Detail/XmlToBlobSerializer.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/XmlToBlobSerializer.h>
 #include "ParseState.h"
 #include "ElementNames.h"
 
@@ -44,7 +45,7 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
     //------------------------------------------
     // Helper functions
@@ -193,7 +194,7 @@ namespace Internal
                 ref.referee.referencingItem->values.push_back(ValueDefinition(RefKind)); //add placeholder for the value when it's resolved later
                 state.paramToParamReferences.push_back(ref);
             }
-            catch (const boost::property_tree::ptree_error&)
+            catch (...)
             {
                 std::ostringstream os;
                 os<<"Missing <name> element in parameter reference. In parameter "<<state.lastInsertedClass->ownParameters.back()->name<<
@@ -218,7 +219,7 @@ namespace Internal
                                                                            paramName, paramIx);
                 state.maxLengthReferences.push_back(ref);
             }
-            catch (const boost::property_tree::ptree_error&)
+            catch (...)
             {
                 std::ostringstream os;
                 os<<"Missing <name> element in maxLengthRef. In member "<<state.lastInsertedClass->members.back()->name<<
@@ -244,7 +245,7 @@ namespace Internal
                                                                            paramName, paramIx);
                 state.arraySizeReferences.push_back(ref);
             }
-            catch (const boost::property_tree::ptree_error&)
+            catch (...)
             {
                 std::ostringstream os;
                 os<<"Missing <name> element in arraySizeRef. In member "<<state.lastInsertedClass->members.back()->name<<
@@ -316,6 +317,7 @@ namespace Internal
             try
             {
                  def->name=pt.get<std::string>(Elements::MemberName::Name());
+                 SerializationUtils::Trim(def->name);
             }
             catch (const boost::property_tree::ptree_error&)
             {
@@ -344,6 +346,7 @@ namespace Internal
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
+            SerializationUtils::Trim(pt.data());
             state.lastInsertedClass->members.back()->typeName=pt.data();
             if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedClass->members.back()->memberType))
             {
@@ -361,6 +364,7 @@ namespace Internal
             try
             {
                 def->name=pt.get<std::string>(Elements::CreateRoutineName::Name());
+                SerializationUtils::Trim(def->name);
             }
             catch(const boost::property_tree::ptree_error&)
             {
@@ -378,10 +382,11 @@ namespace Internal
             boost::optional<boost::property_tree::ptree&> parameters=pt.get_child_optional(Elements::CreateRoutineParameterList::Name());
             if (parameters)
             {
-                for (boost::property_tree::ptree::const_iterator it=parameters->begin(); it!=parameters->end(); ++it)
+                for (boost::property_tree::ptree::iterator it=parameters->begin(); it!=parameters->end(); ++it)
                 {
                     if (it->first==Elements::CreateRoutineMemberName::Name())
                     {
+                        SerializationUtils::Trim(it->second.data());
                         signature<<"#"<<it->second.data();
 
                         //Check for duplicates
@@ -423,7 +428,8 @@ namespace Internal
             //We get the member here to since it is mandatory and it simplifies the parsing of CreateRoutineValueXXX if we are sure we alredy know the member name.
             try
             {
-                const std::string& memberName=pt.get<std::string>(Elements::CreateRoutineValueMember::Name());
+                std::string memberName=pt.get<std::string>(Elements::CreateRoutineValueMember::Name());
+                SerializationUtils::Trim(memberName);
 
                 //Check duplicates
                 StringVector::const_iterator foundIt=std::find(def->parameters.begin(), def->parameters.end(), memberName);
@@ -465,7 +471,7 @@ namespace Internal
                 MemberValue& memVal=state.lastInsertedClass->createRoutines.back()->memberValues.back();
                 GetReferencedParameter(pt, memVal.second.first, memVal.second.second);
             }
-            catch (const boost::property_tree::ptree_error&)
+            catch (...)
             {
                 std::ostringstream os;
                 os<<"Missing <name> element in parameter reference. In createRoutine "<<state.lastInsertedClass->createRoutines.back()->name<<
@@ -489,6 +495,8 @@ namespace Internal
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
+            SerializationUtils::Trim(pt.data());
+
             //Add hidden parameter
             //member@signature -> MyClassMember@MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
             CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
@@ -657,6 +665,7 @@ namespace Internal
             try
             {
                 def->name=pt.get<std::string>(Elements::ParameterName::Name());
+                SerializationUtils::Trim(def->name);
                 std::vector<ParameterDescriptionBasicPtr>::const_iterator found=std::find_if(state.lastInsertedClass->ownParameters.begin(),
                                                                                              state.lastInsertedClass->ownParameters.end(),
                                                                                              boost::bind(NameComparerPtr<ParameterDescriptionBasicPtr>, _1, def->name));
@@ -683,6 +692,7 @@ namespace Internal
             try
             {
                 def->typeName=pt.get<std::string>(Elements::ParameterType::Name());
+                SerializationUtils::Trim(def->typeName);
                 if (!BasicTypeOperations::IsBasicTypeName(def->typeName, def->memberType))
                 {
                     //not a basic type, we have to check later if its an enum or class type, for now we assume class
@@ -715,6 +725,8 @@ namespace Internal
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
+            SerializationUtils::Trim(pt.data());
+
             ParameterDescriptionBasicPtr& def=state.lastInsertedClass->ownParameters.back();
             ValueDefinition val;
             try
@@ -751,18 +763,27 @@ namespace Internal
 
     template<> struct ParseAlgorithm<Elements::BaseClass>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->baseClass=pt.data();}
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            SerializationUtils::Trim(pt.data());
+            state.lastInsertedClass->baseClass=pt.data();
+        }
     };
 
     template<> struct ParseAlgorithm<Elements::ExceptionBase>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedException->baseClass=pt.data();}
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            SerializationUtils::Trim(pt.data());
+            state.lastInsertedException->baseClass=pt.data();
+        }
     };
 
     template<> struct ParseAlgorithm<Elements::EnumerationValue>
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
+            SerializationUtils::Trim(pt.data());
             if (!ValidName(pt.data()))
             {
                 throw ParseError("Invalid enumeration value", std::string("Enumeration value '")+pt.data()+" is invalid. Must start with an alphabetic char and then only contain alpha-numeric chars", state.currentPath, 66);
@@ -804,6 +825,7 @@ namespace Internal
             try
             {
                  def->name=pt.get<std::string>(Elements::PropertyMemberName::Name());
+                 SerializationUtils::Trim(def->name);
             }
             catch (const boost::property_tree::ptree_error&)
             {
@@ -836,6 +858,7 @@ namespace Internal
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
+            SerializationUtils::Trim(pt.data());
             state.lastInsertedProperty->members.back()->typeName=pt.data();
             if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedProperty->members.back()->memberType))
             {
@@ -866,6 +889,7 @@ namespace Internal
         {
             try
             {
+                SerializationUtils::Trim(pt.data());
                 int size=boost::lexical_cast<int, std::string>(pt.data());
                 if (size<=0)
                 {
@@ -892,6 +916,7 @@ namespace Internal
             state.lastInsertedClass->members.back()->isArray=true;
             try
             {
+                SerializationUtils::Trim(pt.data());
                 int size=boost::lexical_cast<int, std::string>(pt.data());
                 if (size<=0)
                 {
@@ -958,6 +983,7 @@ namespace Internal
             std::string typeName;
             if (typeAttr)
             {
+                SerializationUtils::Trim(*typeAttr);
                 //if type has an explicit type-attribute, check type compliance
                 typeName=*typeAttr;
                 DotsC_TypeId tid=DotsId_Generate64(typeName.c_str());
@@ -1089,6 +1115,8 @@ namespace Internal
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
+            SerializationUtils::Trim(pt.data());
+
             state.lastInsertedMemberMapping->kind=MappedToParameter;
             const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
             const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
@@ -1140,6 +1168,7 @@ namespace Internal
             try
             {
                 paramName=pt.get<std::string>(Elements::ReferenceName::Name());
+                SerializationUtils::Trim(paramName);
             }
             catch (const boost::property_tree::ptree_error&)
             {
@@ -1243,7 +1272,8 @@ namespace Internal
             //Get class description
             try
             {
-                const std::string& memberName=pt.get<std::string>(Elements::ClassMemberReferenceName::Name());
+                std::string memberName=pt.get<std::string>(Elements::ClassMemberReferenceName::Name());
+                SerializationUtils::Trim(memberName);
 
                 //Get Parameter Index
                 boost::optional<boost::property_tree::ptree&> indexRef=pt.get_child_optional(Elements::IndexRef::Name());
@@ -1503,7 +1533,8 @@ namespace Internal
             //Get class
             try
             {
-                const std::string& className=pt.get<std::string>(Elements::MappedClass::Name());
+                std::string className=pt.get<std::string>(Elements::MappedClass::Name());
+                SerializationUtils::Trim(className);
                 DotsC_TypeId classTypeId=DotsId_Generate64(className.c_str());
                 def->class_=state.repository->GetClassBasic(classTypeId);
                 if (!def->class_)
@@ -1519,7 +1550,8 @@ namespace Internal
             //Get property
             try
             {
-                const std::string& propName=pt.get<std::string>(Elements::MappedProperty::Name());
+                std::string propName=pt.get<std::string>(Elements::MappedProperty::Name());
+                SerializationUtils::Trim(propName);
                 DotsC_TypeId propTypeId=DotsId_Generate64(propName.c_str());
                 def->property=state.repository->GetPropertyBasic(propTypeId);
                 if (!def->property)

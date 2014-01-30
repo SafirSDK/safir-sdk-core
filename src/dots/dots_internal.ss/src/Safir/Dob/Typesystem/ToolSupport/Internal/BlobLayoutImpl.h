@@ -15,19 +15,19 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
 
-#ifndef __DOTS_INTERNAL_DETAIL_BLOB_LAYOUT_IMPL_H__
-#define __DOTS_INTERNAL_DETAIL_BLOB_LAYOUT_IMPL_H__
+#ifndef __DOTS_INTERNAL_Internal_BLOB_LAYOUT_IMPL_H__
+#define __DOTS_INTERNAL_Internal_BLOB_LAYOUT_IMPL_H__
 
-#include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/InternalDefs.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/BasicTypeOperations.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/InternalDefs.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/BasicTypeOperations.h>
 
 namespace Safir
 {
@@ -35,14 +35,14 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
-namespace Detail
+namespace Internal
 {
     /**
         * Operations on blobs. Creation of blobs and insertion/update of data in blobs.
         */
-    template <class RepT, class Traits=Safir::Dob::Typesystem::Internal::TypeRepositoryTraits<RepT> >
+    template <class RepT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepT> >
     class BlobLayoutImpl
     {
     public:

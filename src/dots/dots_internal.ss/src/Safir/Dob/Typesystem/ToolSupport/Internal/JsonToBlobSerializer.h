@@ -15,14 +15,14 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_DETAIL_JSON_TO_BLOB_H__
-#define __DOTS_INTERNAL_DETAIL_JSON_TO_BLOB_H__
+#ifndef __DOTS_INTERNAL_Internal_JSON_TO_BLOB_H__
+#define __DOTS_INTERNAL_Internal_JSON_TO_BLOB_H__
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -38,9 +38,9 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <Safir/Dob/Typesystem/Internal/Id.h>
-#include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/BlobLayoutImpl.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/SerializationUtils.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobLayoutImpl.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/SerializationUtils.h>
 
 namespace Safir
 {
@@ -48,11 +48,11 @@ namespace Dob
 {
 namespace Typesystem
 {
+namespace ToolSupport
+{
 namespace Internal
 {
-namespace Detail
-{
-    template <class RepT, class Traits=Safir::Dob::Typesystem::Internal::TypeRepositoryTraits<RepT> >
+    template <class RepT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepT> >
     class JsonToBlobSerializer : private boost::noncopyable
     {
     public:
@@ -476,7 +476,7 @@ namespace Detail
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal::Detail
+} //end namespace Safir::Dob::Typesystem::Internal::Internal
 
 #ifdef _MSC_VER
 #pragma warning( pop )

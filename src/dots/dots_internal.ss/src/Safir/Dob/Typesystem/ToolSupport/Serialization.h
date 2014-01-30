@@ -15,7 +15,7 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
@@ -27,13 +27,13 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include <Safir/Dob/Typesystem/Internal/ParseError.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/BasicTypeOperations.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/BlobToXmlSerializer.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/BlobToJsonSerializer.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/XmlToBlobSerializer.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/JsonToBlobSerializer.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/RepositoryToStringHelper.h>
+#include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/BasicTypeOperations.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobToXmlSerializer.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobToJsonSerializer.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/XmlToBlobSerializer.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/JsonToBlobSerializer.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/RepositoryToStringHelper.h>
 
 namespace Safir
 {
@@ -41,7 +41,7 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
     class TypeRepository;
 
@@ -56,7 +56,7 @@ namespace Internal
     inline void BinaryToBase64(const char* binary, size_t size, std::ostringstream& base64)
     {
         std::string bin(binary, size); //Improvement: fix implementation to accept 'const char*' and avoid this copying
-        base64<<Detail::SerializationUtils::ToBase64(bin);
+        base64<<Internal::SerializationUtils::ToBase64(bin);
     }
 
     /**
@@ -69,7 +69,7 @@ namespace Internal
     inline void Base64ToBinary(const std::string& base64Str, std::vector<char>& binary)
     {
         std::string bin;
-        Detail::SerializationUtils::FromBase64(base64Str, bin); //Improvement: fix implementation to accept vector and avoid this copying
+        Internal::SerializationUtils::FromBase64(base64Str, bin); //Improvement: fix implementation to accept vector and avoid this copying
         binary.insert(binary.begin(), bin.begin(), bin.end());
     }
 
@@ -84,7 +84,7 @@ namespace Internal
     template <class RepositoryT>
     void BinaryToXml(const RepositoryT* repository, const char* blob, std::ostringstream& xml)
     {
-        (Detail::BlobToXmlSerializer<RepositoryT>(repository))(blob, xml);
+        (Internal::BlobToXmlSerializer<RepositoryT>(repository))(blob, xml);
     }
 
     /**
@@ -98,7 +98,7 @@ namespace Internal
     template <class RepositoryT>
     void XmlToBinary(const RepositoryT* repository, const char* xml, std::vector<char>& blob)
     {
-        (Detail::XmlToBlobSerializer<RepositoryT>(repository))(xml, blob);
+        (Internal::XmlToBlobSerializer<RepositoryT>(repository))(xml, blob);
     }
 
     /**
@@ -112,7 +112,7 @@ namespace Internal
     template <class RepositoryT>
     void BinaryToJson(const RepositoryT* repository, const char* blob, std::ostringstream& json)
     {
-        (Detail::BlobToJsonSerializer<RepositoryT>(repository))(blob, json);
+        (Internal::BlobToJsonSerializer<RepositoryT>(repository))(blob, json);
     }
 
     /**
@@ -126,7 +126,7 @@ namespace Internal
     template <class RepositoryT>
     void JsonToBinary(const RepositoryT* repository, const char* json, std::vector<char>& blob)
     {
-        (Detail::JsonToBlobSerializer<RepositoryT>(repository))(json, blob);
+        (Internal::JsonToBlobSerializer<RepositoryT>(repository))(json, blob);
     }
 
     /**
@@ -145,7 +145,7 @@ namespace Internal
     template <class RepositoryT>
     void RepositoryToString(const RepositoryT* repository, bool includeCreateRoutines, std::ostream &os)
     {
-        (Detail::ToStringHelper<RepositoryT>(repository, includeCreateRoutines)).RepositoryToString(os);
+        (Internal::ToStringHelper<RepositoryT>(repository, includeCreateRoutines)).RepositoryToString(os);
     }
 
     /**
@@ -158,7 +158,7 @@ namespace Internal
     template <class RepositoryT>
     void TypeToString(const RepositoryT* repository, DotsC_TypeId typeId, std::ostream &os)
     {
-        (Detail::ToStringHelper<RepositoryT>(repository, false)).TypeToString(typeId, os);
+        (Internal::ToStringHelper<RepositoryT>(repository, false)).TypeToString(typeId, os);
     }
 }
 }

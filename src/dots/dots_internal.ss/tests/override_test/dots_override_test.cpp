@@ -10,11 +10,11 @@
 #include <string>
 #include <set>
 #include <boost/filesystem.hpp>
-#include <Safir/Dob/Typesystem/Internal/TypeParser.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
 
 #include <boost/circular_buffer.hpp>
 
-void GetFiles(const boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository>& rep,
+void GetFiles(const boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository>& rep,
               std::set<std::string>& parsedFiles);
 void TestFailed(std::set<std::string>& parsedFiles);
 
@@ -53,10 +53,10 @@ int main(int argc, char* argv[])
     std::set<std::string> parsedFiles;
     try
     {
-        boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository> rep=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(roots);
+        boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
         GetFiles(rep, parsedFiles);
     }
-    catch (const Safir::Dob::Typesystem::Internal::ParseError& err)
+    catch (const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
     {
         std::cout<<"********** Parse Error **********************************************"<<std::endl;
         std::cout<<"* Label: "<<err.Label()<<std::endl;
@@ -103,14 +103,14 @@ std::string FileName(const T& t)
 }
 
 //get files parsed
-void GetFiles(const boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository>& rep,
+void GetFiles(const boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository>& rep,
               std::set<std::string>& parsedFiles)
 {
     std::set<DotsC_TypeId> types;
     rep->GetAllClassTypeIds(types);
     for (std::set<DotsC_TypeId>::const_iterator it=types.begin(); it!=types.end(); ++it)
     {
-        const Safir::Dob::Typesystem::Internal::ClassDescription* c=rep->GetClass(*it);        
+        const Safir::Dob::Typesystem::ToolSupport::ClassDescription* c=rep->GetClass(*it);
         parsedFiles.insert(FileName(c));
         std::set<DotsC_TypeId> pmIds;
         c->GetPropertyIds(pmIds);

@@ -15,19 +15,19 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_DETAIL_BASIC_TYPE_OPERATIONS_H__
-#define __DOTS_INTERNAL_DETAIL_BASIC_TYPE_OPERATIONS_H__
+#ifndef __DOTS_INTERNAL_Internal_BASIC_TYPE_OPERATIONS_H__
+#define __DOTS_INTERNAL_Internal_BASIC_TYPE_OPERATIONS_H__
 
 #include <string>
-#include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/InternalDefs.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
+#include <Safir/Dob/Typesystem/ToolSupport/KernelDefs.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/InternalDefs.h>
 
 namespace Safir
 {
@@ -35,9 +35,9 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
-namespace Detail
+namespace Internal
 {
 namespace BasicTypeOperations
 {
@@ -337,7 +337,7 @@ namespace BasicTypeOperations
                 repository->GetException(tid)!=NULL;
     }
 
-    template <class RepT, class Traits=Safir::Dob::Typesystem::Internal::TypeRepositoryTraits<RepT> >
+    template <class RepT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepT> >
     struct BasicTypeOperationHelper
     {
         typedef typename Traits::RepositoryType RepositoryType;
@@ -432,7 +432,7 @@ namespace BasicTypeOperations
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Detail
+} //end namespace Safir::Dob::Typesystem::Internal
 
 #endif
 

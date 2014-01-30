@@ -15,7 +15,7 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
@@ -26,8 +26,8 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
-#include <Safir/Dob/Typesystem/Internal/ParseError.h>
-#include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
+#include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
 
 #if defined _MSC_VER
     #if defined DOTS_INTERNAL_EXPORTS
@@ -48,7 +48,7 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
 
 #ifdef _MSC_VER

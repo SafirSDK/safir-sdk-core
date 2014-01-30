@@ -10,12 +10,12 @@
 #include <set>
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include <Safir/Dob/Typesystem/Internal/TypeParser.h>
-#include <Safir/Dob/Typesystem/Internal/BlobLayout.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
+#include <Safir/Dob/Typesystem/ToolSupport/BlobLayout.h>
 #include <Safir/Dob/Typesystem/Internal/Id.h>
-#include <Safir/Dob/Typesystem/Internal/Serialization.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 
-using namespace Safir::Dob::Typesystem::Internal;
+using namespace Safir::Dob::Typesystem::ToolSupport;
 
 struct TestCase
 {
@@ -31,7 +31,7 @@ struct CompareTestCase
 };
 typedef  std::set<TestCase, CompareTestCase> TestSet;
 
-typedef boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository> RepositoryPtr;
+typedef boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> RepositoryPtr;
 const ClassDescription* GetClassByName(const RepositoryPtr& rep, const std::string& name);
 bool TestInfoFromPath(const boost::filesystem::path& p, TestCase& test);
 
@@ -62,17 +62,17 @@ int main(int argc, char* argv[])
     RepositoryPtr repository;
     try
     {
-        repository=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(douDir);
+        repository=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(douDir);
 
     }
-    catch (const Safir::Dob::Typesystem::Internal::ParseError& err)
+    catch (const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
     {
         std::cout<<err.what()<<std::endl;
         return 1;
     }
 
     std::cout<<"========= Repository ========"<<std::endl;
-    Safir::Dob::Typesystem::Internal::RepositoryToString(repository.get(), true, std::cout);
+    Safir::Dob::Typesystem::ToolSupport::RepositoryToString(repository.get(), true, std::cout);
 
     std::cout<<"========= Test suite started ========"<<std::endl;
     try
@@ -233,7 +233,7 @@ bool RunSingleTest(const TypeRepository* repository, const TestCase& test)
         std::cout<<"        Result:  success"<<std::endl;
 
     }
-    catch (const Safir::Dob::Typesystem::Internal::ParseError& err)
+    catch (const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
     {
         std::cout<<"        Result:  "<<err.ErrorId()<<std::endl;
         std::cout<<"        Message: "<<err.Label()<<std::endl;
@@ -255,7 +255,7 @@ bool RunSingleTest(const TypeRepository* repository, const TestCase& test)
     }
     catch (...)
     {
-        throw Safir::Dob::Typesystem::Internal::ParseError("Unexpected error", "An unhandled exception occured in test.", test.path.string(), -2);
+        throw Safir::Dob::Typesystem::ToolSupport::ParseError("Unexpected error", "An unhandled exception occured in test.", test.path.string(), -2);
     }
 
     return true;
@@ -273,13 +273,13 @@ bool RunTestFromXml(const TypeRepository* repository, const std::string& fileNam
     }
     std::cout<<"---- RAW ---"<<std::endl<<xml1.str()<<std::endl;
     std::vector<char> bin1;
-    Safir::Dob::Typesystem::Internal::XmlToBinary(repository, xml1.str().c_str(), bin1);    
+    Safir::Dob::Typesystem::ToolSupport::XmlToBinary(repository, xml1.str().c_str(), bin1);
 
     std::ostringstream os1;
-    Safir::Dob::Typesystem::Internal::BinaryToBase64(&bin1[0], bin1.size(), os1);
+    Safir::Dob::Typesystem::ToolSupport::BinaryToBase64(&bin1[0], bin1.size(), os1);
 
     std::vector<char> bin2;
-    Safir::Dob::Typesystem::Internal::Base64ToBinary(os1.str(), bin2);
+    Safir::Dob::Typesystem::ToolSupport::Base64ToBinary(os1.str(), bin2);
 
     if (bin1.size()!=bin2.size() || memcmp(&bin1[0], &bin2[0], bin1.size())!=0)
     {
@@ -291,7 +291,7 @@ bool RunTestFromXml(const TypeRepository* repository, const std::string& fileNam
     std::cout<<"---- XML2 ---"<<std::endl<<xml2.str()<<std::endl;
 
     std::vector<char> bin3;
-    Safir::Dob::Typesystem::Internal::XmlToBinary(repository, xml2.str().c_str(), bin3);
+    Safir::Dob::Typesystem::ToolSupport::XmlToBinary(repository, xml2.str().c_str(), bin3);
 
     if (bin1.size()!=bin3.size() || memcmp(&bin1[0], &bin3[0], bin1.size())!=0)
     {
@@ -333,143 +333,3 @@ void PrintTestFailMessage(const std::string& result, const std::string& shortInf
     std::cout<<"* File:  "<<file<<std::endl;
     std::cout<<"*********************************************************************"<<std::endl;
 }
-
-
-//==============================================================================================
-// Heres some code that maybe will be used later in a test case. It builds a blob from scratch
-//==============================================================================================
-//    boost::filesystem::recursive_directory_iterator it(testDir), end;
-//    while (it!=end)
-//    {
-//        if (it->path().extension()==".xml")
-//        {
-//            RunTestFromXml(repository.get(), it->path().string());
-//        }
-//        else if (it->path().extension()==".json")
-//        {
-
-//        }
-//        ++it;
-//    }
-//    return 0;
-
-    //------ blob builder ------
-//    //Inital declarations
-//    BlobLayout bl(repository.get());
-//    const ClassDescription* cd=GetClassByName(repository, "BlobTest.MyEntity");
-//    int size=2*cd->InitialSize()+GetClassByName(repository, "BlobTest.MyItem")->InitialSize()*5;
-//    std::cout<<"Create a blob sized "<<size<<std::endl;
-//    char* blob=new char[size];
-//    char* unused=NULL;
-//    bl.FormatBlob(blob, size, cd->GetTypeId(), unused);
-//    DotsC_MemberIndex memIx=-1;
-//    DotsC_MemberStatus stat;
-
-//    //-----------------------------------------------------------
-//    // Start tests
-//    //-----------------------------------------------------------
-
-//    //int32
-//    //-----------------
-//    {
-//        DotsC_Int32 int32val=0;
-//        memIx=cd->GetMemberIndex("MyInt32Val");
-//        stat=bl.GetMemberStatus(blob, memIx, 0);
-//        bl.SetInt32Member(123, blob, memIx, 0);
-//        bl.SetMemberStatus(false, true, blob, memIx, 0);
-//        stat=bl.GetInt32Member(blob, memIx, 0, int32val);
-//        std::cout<<"val="<<int32val<<std::endl;
-//    }
-
-//    //MyInt32Array
-//    //------------------------
-//    {
-//        DotsC_Int32 int32arr=0;
-//        memIx=cd->GetMemberIndex("MyInt32Array");
-//        stat=bl.GetMemberStatus(blob, memIx, 0);
-//        for (int ai=0; ai<3; ++ai)
-//        {
-//            bl.SetInt32Member(10+ai, blob, memIx, ai);
-//            bl.SetMemberStatus(false, true, blob, memIx, ai);
-//            stat=bl.GetInt32Member(blob, memIx, ai, int32arr);
-//            std::cout<<"val="<<int32arr<<std::endl;
-//        }
-//    }
-
-//    //stringVal
-//    //-----------------
-//    {
-//        char* strVal=unused;
-//        memIx=cd->GetMemberIndex("MyStringVal");
-//        stat=bl.GetMemberStatus(blob, memIx, 0);
-
-//        std::string toSet="Bill & Bull vet inte att 4<9,\\ 10>5 \"muhaha!\"";
-//        //std::string toSet="Hello_JoelOttosson";
-//        bl.CreateStringMember(blob, toSet.size()+1, memIx, 0, true, unused);
-//        strcpy(strVal, toSet.c_str());
-
-//        const char* result=NULL;
-//        int dummy=0;
-//        stat=bl.GetDynamicMember(blob, memIx, 0, result, dummy);
-//        std::cout<<"val="<<result<<std::endl;
-//    }
-
-//    //item
-//    //-------------------
-//    {
-//        const ClassDescription* itemCd=GetClassByName(repository, "BlobTest.MyItem");
-//        int itemSize=2*itemCd->InitialSize();
-//        char* itemBlob=new char[itemSize];
-//        char* itemUnused=NULL;
-//        bl.FormatBlob(itemBlob, itemSize, itemCd->GetTypeId(), itemUnused);
-//        DotsC_MemberIndex itemMemIx=itemCd->GetMemberIndex("MyNumber");
-//        bl.SetInt32Member(666, itemBlob, itemMemIx, 0);
-//        bl.SetMemberStatus(false, true, itemBlob, itemMemIx, 0);
-
-
-//        char* obj=unused;
-//        memIx=cd->GetMemberIndex("MyItemVal");
-//        stat=bl.GetMemberStatus(blob, memIx, 0);
-
-//        bl.CreateObjectMember(blob, itemSize, bl.GetTypeId(itemBlob), memIx, 0, true, unused);
-//        memcpy(obj, itemBlob, itemSize);
-
-//    }
-
-
-//    try
-//    {
-//        std::cout<<"--- BinaryToXml ---"<<std::endl;
-//        std::ostringstream xml;
-//        Safir::Dob::Typesystem::Internal::BinaryToXml(repository.get(), blob, xml);
-//        std::cout<<xml.str()<<std::endl;
-
-//        std::cout<<std::endl<<"--- XmlToBinary ---"<<std::endl;
-//        std::vector<char> toBlob;
-//        Safir::Dob::Typesystem::Internal::XmlToBinary(repository.get(), xml.str().c_str(), toBlob);
-
-//        std::cout<<std::endl<<"--- BinaryToXml again---"<<std::endl;
-//        std::ostringstream xml2;
-//        Safir::Dob::Typesystem::Internal::BinaryToXml(repository.get(), &toBlob[0], xml2);
-//        std::cout<<xml2.str()<<std::endl;
-//    }
-//    catch (const Safir::Dob::Typesystem::Internal::ParseError& err)
-//    {
-//        std::cout<<err.what()<<std::endl;
-//        return 1;
-//    }
-
-//    //int32
-//    //-----------------
-//    memIx=cd->GetMemberIndex("MyInt32");
-//    md=cd->GetMember(memIx);r
-//    bl.SetInt32Member(123, blob, memIx, 0);
-//    stat=bl.GetInt32Member(blob, memIx, 0, int32Val);
-
-//    //int32
-//    //-----------------
-//    memIx=cd->GetMemberIndex("MyInt32");
-//    md=cd->GetMember(memIx);
-//    bl.SetInt32Member(123, blob, memIx, 0);
-//    stat=bl.GetInt32Member(blob, memIx, 0, int32Val);
-

@@ -15,14 +15,14 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_DETAIL_XML_TO_BLOB_H__
-#define __DOTS_INTERNAL_DETAIL_XML_TO_BLOB_H__
+#ifndef __DOTS_INTERNAL_Internal_XML_TO_BLOB_H__
+#define __DOTS_INTERNAL_Internal_XML_TO_BLOB_H__
 
 #include <string>
 #include <vector>
@@ -33,10 +33,10 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <Safir/Dob/Typesystem/Internal/Id.h>
-#include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
-#include <Safir/Dob/Typesystem/Internal/TypeUtilities.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/BlobLayoutImpl.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/UglyXmlToBlobSerializer.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobLayoutImpl.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/UglyXmlToBlobSerializer.h>
 
 namespace Safir
 {
@@ -44,11 +44,11 @@ namespace Dob
 {
 namespace Typesystem
 {
+namespace ToolSupport
+{
 namespace Internal
 {
-namespace Detail
-{
-    template <class RepT, class Traits=Safir::Dob::Typesystem::Internal::TypeRepositoryTraits<RepT> >
+    template <class RepT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepT> >
     class XmlToBlobSerializer : private boost::noncopyable
     {
     public:
@@ -72,7 +72,7 @@ namespace Detail
             this->operator ()(pt, blob);
         }
 
-        void operator()(const boost::property_tree::ptree& xml, std::vector<char>& blob) const
+        void operator()(boost::property_tree::ptree& xml, std::vector<char>& blob) const
         {
             //*********************** One day this should be removed: Handle old deprecated XML format ***********************
             if (xml.front().first=="object")
@@ -83,7 +83,7 @@ namespace Detail
             }
             //*****************************End To be removed *********************************************************
 
-            const boost::property_tree::ptree& members=xml.front().second;
+            boost::property_tree::ptree& members=xml.front().second;
             boost::optional<std::string> xsiType=members.get_optional<std::string>("<xmlattr>.type");
             std::string typeName;
             if (xsiType)
@@ -94,7 +94,7 @@ namespace Detail
             {
                 typeName=xml.front().first;
             }
-
+            SerializationUtils::Trim(typeName);
             SerializeObjectContent(typeName, blob, members);
 
         }
@@ -105,7 +105,7 @@ namespace Detail
         //have an ptree at root level use operator()(const boost::property_tree::ptree& xml, std::vector<char>& blob)
         void SerializeObjectContent(const std::string& typeName,
                                     std::vector<char>& blob,
-                                    const boost::property_tree::ptree& members) const
+                                    boost::property_tree::ptree& members) const
         {
             DotsC_TypeId typeId=DotsId_Generate64(typeName.c_str());
             const ClassDescriptionType* cd=m_repository->GetClass(typeId);
@@ -121,7 +121,7 @@ namespace Detail
             blob.resize(cd->InitialSize(), 0);
             m_blobLayout.FormatBlob(&blob[0], static_cast<Size>(blob.size()), typeId, beginningOfUnused);
 
-            for (boost::property_tree::ptree::const_iterator memIt=members.begin(); memIt!=members.end(); ++memIt)
+            for (boost::property_tree::ptree::iterator memIt=members.begin(); memIt!=members.end(); ++memIt)
             {
                 const std::string& elementName=memIt->first;
                 int memIx=cd->GetMemberIndex(elementName);
@@ -129,7 +129,7 @@ namespace Detail
                 {
                     if (elementName=="<xmlattr>")
                     {
-                        continue; //we ignore attributes. Improvement is to check that only allowed attributes are present. I.e type and xsi:nil
+                        continue; //we ignore attributes.
                     }
 
                     std::ostringstream os;
@@ -159,7 +159,7 @@ namespace Detail
                     //i.e <myIntArray><Int32 index=0>1</Int32><Int32 index=5>2</Int32></myIntArray>
                     int arrayIndex=0;
                     bool usesIndexAttr=memIt->second.begin()->second.get_optional<int>("<xmlattr>.index") ? true : false;
-                    for (boost::property_tree::ptree::const_iterator arrIt=memIt->second.begin(); arrIt!=memIt->second.end(); ++arrIt)
+                    for (boost::property_tree::ptree::iterator arrIt=memIt->second.begin(); arrIt!=memIt->second.end(); ++arrIt)
                     {
                         boost::optional<int> index=arrIt->second.get_optional<int>("<xmlattr>.index");
                         if (usesIndexAttr)
@@ -215,7 +215,7 @@ namespace Detail
         void SetMember(const MemberDescriptionType* md,
                        DotsC_MemberIndex memIx,
                        DotsC_ArrayIndex arrIx,
-                       const boost::property_tree::ptree& memberContent,
+                       boost::property_tree::ptree& memberContent,
                        std::vector<char>& blob,
                        char* &beginningOfUnused) const
         {
@@ -223,6 +223,8 @@ namespace Detail
             int valueRefIndex=memberContent.get<int>("<xmlattr>.valueRefIndex", 0);
             if (valueRef)
             {
+                SerializationUtils::Trim(*valueRef);
+
                 if (memberContent.size()>1 || !memberContent.data().empty())
                 {
                     std::ostringstream os;
@@ -245,6 +247,7 @@ namespace Detail
                 boost::optional<std::string> xsiType=memberContent.get_optional<std::string>("<xmlattr>.type");
                 if (xsiType)
                 {
+                    SerializationUtils::Trim(*xsiType);
                     cd=m_repository->GetClass(DotsId_Generate64(xsiType->c_str()));
                     if (!cd)
                     {
@@ -284,6 +287,6 @@ namespace Detail
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal:detail
+} //end namespace Safir::Dob::Typesystem::Internal:Internal
 
 #endif

@@ -15,20 +15,20 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
 
-#ifndef __DOTS_INTERNAL_DETAIL_DEFS__
-#define __DOTS_INTERNAL_DETAIL_DEFS__
+#ifndef __DOTS_INTERNAL_Internal_DEFS__
+#define __DOTS_INTERNAL_Internal_DEFS__
 
 #include <sstream>
 #include <iostream>
 #include <vector>
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/ToolSupport/KernelDefs.h>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -49,9 +49,9 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
-namespace Detail
+namespace Internal
 {
     typedef std::vector<std::string> StringVector;
 

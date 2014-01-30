@@ -9,8 +9,8 @@
 #include <set>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/timer.hpp>
-#include <Safir/Dob/Typesystem/Internal/TypeParser.h>
-#include <Safir/Dob/Typesystem/Internal/Serialization.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/limits.hpp>
 
@@ -164,10 +164,10 @@ bool RunSingleTest(const TestCase& test)
     //prelusive part of ParseError.Label if an error is expected to occur.    
     try
     {
-        boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository> rep=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(test.path);
+        boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(test.path);
         if (PrintRepository)
         {
-            Safir::Dob::Typesystem::Internal::RepositoryToString(rep.get(), true, std::cout);
+            Safir::Dob::Typesystem::ToolSupport::RepositoryToString(rep.get(), true, std::cout);
         }
 
         if (test.expectedResult!=TestCase::SuccessCode)
@@ -180,7 +180,7 @@ bool RunSingleTest(const TestCase& test)
         std::cout<<"        Result:  success"<<std::endl;
 
     }
-    catch (const Safir::Dob::Typesystem::Internal::ParseError& err)
+    catch (const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
     {
         std::cout<<"        Result:  "<<err.ErrorId()<<std::endl;
         std::cout<<"        Message: "<<err.Label()<<std::endl;
@@ -202,7 +202,7 @@ bool RunSingleTest(const TestCase& test)
     }
     catch (...)
     {
-        throw Safir::Dob::Typesystem::Internal::ParseError("Unexpected error", "An unhandled exception occured in test.", test.path.string(), -2);
+        throw Safir::Dob::Typesystem::ToolSupport::ParseError("Unexpected error", "An unhandled exception occured in test.", test.path.string(), -2);
     }
 
     return true;
@@ -264,11 +264,11 @@ void ParseDir(const boost::filesystem::path& dir)
     boost::timer timer;
     try
     {
-        boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository> rep=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(dir);
-        //Safir::Dob::Typesystem::Internal::RepositoryToString(rep.get(), std::cout);
+        boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(dir);
+        //Safir::Dob::Typesystem::ToolSupport::RepositoryToString(rep.get(), std::cout);
         std::cout<<"Parsed successfully! NumTypes="<<(rep->GetNumberOfClasses()+rep->GetNumberOfEnums()+rep->GetNumberOfExceptions()+rep->GetNumberOfProperties())<<std::endl;
     }
-    catch(const Safir::Dob::Typesystem::Internal::ParseError& err)
+    catch(const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
     {
         std::cout<<"********** Parse Error **********************************************"<<std::endl;
         std::cout<<"* Label: "<<err.Label()<<std::endl;

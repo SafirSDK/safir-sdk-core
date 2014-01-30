@@ -15,7 +15,7 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
@@ -28,10 +28,10 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
-#include <Safir/Dob/Typesystem/Internal/TypeUtilities.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/BasicTypeOperations.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/BasicTypeOperations.h>
 
-using namespace Safir::Dob::Typesystem::Internal::Detail;
+using namespace Safir::Dob::Typesystem::ToolSupport::Internal;
 
 /**
  * A local memeory implementation of the TypeRespository interface
@@ -46,7 +46,7 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
     /**
      * Definition of a value. Used in parameters, createRoutines and propertyMappings.

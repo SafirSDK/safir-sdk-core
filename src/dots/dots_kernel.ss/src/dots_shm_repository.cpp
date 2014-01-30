@@ -33,7 +33,7 @@ namespace Typesystem
 {
 namespace Internal
 {
-    void RepositoryShm::CreateShmCopyOfRepository(const Safir::Dob::Typesystem::Internal::TypeRepository& srcRepository,
+    void RepositoryShm::CreateShmCopyOfRepository(const Safir::Dob::Typesystem::ToolSupport::TypeRepository& srcRepository,
                                                   const std::string& shmRepositoryName,
                                                   boost::interprocess::managed_shared_memory& sharedMemory)
     {

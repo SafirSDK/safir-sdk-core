@@ -8,7 +8,7 @@
 #include <iostream>
 #include <algorithm>
 #include <set>
-#include <Safir/Dob/Typesystem/Internal/Serialization.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 #include "../src/dots_shm_repository.h"
 
 int main(int argc, char* argv[])
@@ -24,8 +24,8 @@ int main(int argc, char* argv[])
     paths.push_back(path);
 
     std::ostringstream lom;
-    boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository> local=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(path);
-    Safir::Dob::Typesystem::Internal::RepositoryToString(local.get(), false, lom);
+    boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> local=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(path);
+    Safir::Dob::Typesystem::ToolSupport::RepositoryToString(local.get(), false, lom);
 
     boost::interprocess::shared_memory_object::remove("DOTS_SHM_TEST");
     boost::interprocess::managed_shared_memory sharedMemory(boost::interprocess::create_only, "DOTS_SHM_TEST", 5000000);
@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     Safir::Dob::Typesystem::Internal::RepositoryShm* shm=sharedMemory.find<Safir::Dob::Typesystem::Internal::RepositoryShm>("DOTS_TEST_REPO").first;
 
     std::ostringstream som;
-    Safir::Dob::Typesystem::Internal::RepositoryToString(shm, false, som);
+    Safir::Dob::Typesystem::ToolSupport::RepositoryToString(shm, false, som);
 
 
     if (som.str()!=lom.str())

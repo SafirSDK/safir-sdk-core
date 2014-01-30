@@ -37,8 +37,8 @@
 #include <Safir/Utilities/Internal/ConfigReader.h>
 
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
-#include <Safir/Dob/Typesystem/Internal/BlobLayout.h>
-#include <Safir/Dob/Typesystem/Internal/Serialization.h>
+#include <Safir/Dob/Typesystem/ToolSupport/BlobLayout.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 
 #include "dots_init_helper.h"
 #include "dots_exception_keeper.h"
@@ -220,7 +220,7 @@ bool DotsC_IsException(const DotsC_TypeId typeId)
 DotsC_TypeId DotsC_TypeIdFromName(const char* typeName)
 {
     Init();
-    return Safir::Dob::Typesystem::Internal::TypeUtilities::CalculateTypeId(typeName);
+    return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::CalculateTypeId(typeName);
 }
 
 const char* DotsC_GetTypeName(const DotsC_TypeId typeId)
@@ -258,7 +258,7 @@ DotsC_EnumerationValue DotsC_EnumerationValueFromName(const DotsC_TypeId enumId,
     const EnumDescriptionShm* ed=RepositoryKeeper::GetRepository()->GetEnum(enumId);
     if (ed!=NULL)
     {
-        return Safir::Dob::Typesystem::Internal::TypeUtilities::GetIndexOfEnumValue(ed, enumValueName);
+        return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetIndexOfEnumValue(ed, enumValueName);
     }
     return -1;
 }
@@ -642,14 +642,14 @@ const char* DotsC_GetMemberTypeName(const DotsC_TypeId typeId, const DotsC_Membe
     const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
     if (cd!=NULL)
     {
-        return Safir::Dob::Typesystem::Internal::TypeUtilities::GetTypeName(cd->GetMember(member)->GetMemberType());
+        return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(cd->GetMember(member)->GetMemberType());
     }
     else
     {
         const PropertyDescriptionShm* pd=RepositoryKeeper::GetRepository()->GetProperty(typeId);
         if (pd!=NULL)
         {
-            return Safir::Dob::Typesystem::Internal::TypeUtilities::GetTypeName(pd->GetMember(member)->GetMemberType());
+            return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(pd->GetMember(member)->GetMemberType());
         }
     }
 
@@ -712,11 +712,11 @@ const char* DotsC_GetParameterTypeName(const DotsC_TypeId typeId, const DotsC_Pa
     const ParameterDescriptionShm* pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
     if (pd->GetMemberType()==ObjectMemberType || pd->GetMemberType()==EnumerationMemberType)
     {
-        return Safir::Dob::Typesystem::Internal::TypeUtilities::GetTypeName(RepositoryKeeper::GetRepository(), pd->GetTypeId());
+        return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(RepositoryKeeper::GetRepository(), pd->GetTypeId());
     }
     else
     {
-        return Safir::Dob::Typesystem::Internal::TypeUtilities::GetTypeName(pd->GetMemberType());
+        return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(pd->GetMemberType());
     }
 }
 
@@ -1063,7 +1063,7 @@ void DotsC_SetBinaryMember(const char* val,
 bool DotsC_IsOfType(const DotsC_TypeId type, const DotsC_TypeId ofType)
 {
     Init();
-    return Safir::Dob::Typesystem::Internal::TypeUtilities::IsOfType(RepositoryKeeper::GetRepository(), type, ofType);
+    return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::IsOfType(RepositoryKeeper::GetRepository(), type, ofType);
 }
 
 void DotsC_GetCompleteType(const DotsC_TypeId type,
@@ -1113,7 +1113,7 @@ void DotsC_BetterBlobToXml(char* const xmlDest, const char* const blobSource, co
 {
     Init();
     std::ostringstream xmlStream;
-    Safir::Dob::Typesystem::Internal::BinaryToXml(RepositoryKeeper::GetRepository(), blobSource, xmlStream);
+    Safir::Dob::Typesystem::ToolSupport::BinaryToXml(RepositoryKeeper::GetRepository(), blobSource, xmlStream);
     std::string xml=xmlStream.str();
     resultSize=static_cast<DotsC_Int32>(xml.size())+1; //add one char for null termination
     if (resultSize <= bufSize)
@@ -1131,7 +1131,7 @@ void DotsC_XmlToBlob(char* & blobDest,
     Init();
     deleter=DeleteBytePointer;
     std::vector<char> blob;
-    Safir::Dob::Typesystem::Internal::XmlToBinary(RepositoryKeeper::GetRepository(), xmlSource, blob);
+    Safir::Dob::Typesystem::ToolSupport::XmlToBinary(RepositoryKeeper::GetRepository(), xmlSource, blob);
     if (!blob.empty())
     {
         blobDest=new char[blob.size()];
@@ -1150,7 +1150,7 @@ void DotsC_BlobToJson(char * const jsonDest,
 {
     Init();
     std::ostringstream jsonStream;
-    Safir::Dob::Typesystem::Internal::BinaryToJson(RepositoryKeeper::GetRepository(), blobSource, jsonStream);
+    Safir::Dob::Typesystem::ToolSupport::BinaryToJson(RepositoryKeeper::GetRepository(), blobSource, jsonStream);
     std::string json=jsonStream.str();
     resultSize=static_cast<DotsC_Int32>(json.size())+1; //add one char for null termination
     if (resultSize <= bufSize)
@@ -1167,7 +1167,7 @@ void DotsC_JsonToBlob(char * & blobDest,
     Init();
     deleter=DeleteBytePointer;
     std::vector<char> blob;
-    Safir::Dob::Typesystem::Internal::JsonToBinary(RepositoryKeeper::GetRepository(), jsonSource, blob);
+    Safir::Dob::Typesystem::ToolSupport::JsonToBinary(RepositoryKeeper::GetRepository(), jsonSource, blob);
     if (!blob.empty())
     {
         blobDest=new char[blob.size()];
@@ -1197,7 +1197,7 @@ void DotsC_BinaryToBase64(char* base64Dest,
 {
     Init();
     std::ostringstream b64Stream;
-    Safir::Dob::Typesystem::Internal::BinaryToBase64(binarySource, sourceSize, b64Stream);
+    Safir::Dob::Typesystem::ToolSupport::BinaryToBase64(binarySource, sourceSize, b64Stream);
     std::string base64=b64Stream.str();
     resultSize=static_cast<DotsC_Int32>(base64.size())+1; //add one char for null termination
     strncpy(base64Dest, base64.c_str(), std::min(resultSize, destSize));
@@ -1219,7 +1219,7 @@ void DotsC_Base64ToBinary(char* binaryDest,
     Init();
     std::vector<char> bin;
     std::string base64(base64Source, base64Source+static_cast<size_t>(sourceSize));
-    Safir::Dob::Typesystem::Internal::Base64ToBinary(base64, bin);
+    Safir::Dob::Typesystem::ToolSupport::Base64ToBinary(base64, bin);
     resultSize=static_cast<DotsC_Int32>(bin.size());
     if (resultSize<=destSize)
     {
@@ -1938,11 +1938,11 @@ void DotsC_GetTypeDescription(const DotsC_TypeId typeId,
     std::ostringstream os;
     if (typeId==0)
     {
-        Safir::Dob::Typesystem::Internal::RepositoryToString(RepositoryKeeper::GetRepository(), false, os);
+        Safir::Dob::Typesystem::ToolSupport::RepositoryToString(RepositoryKeeper::GetRepository(), false, os);
     }
     else
     {
-        Safir::Dob::Typesystem::Internal::TypeToString(RepositoryKeeper::GetRepository(), typeId, os);
+        Safir::Dob::Typesystem::ToolSupport::TypeToString(RepositoryKeeper::GetRepository(), typeId, os);
     }
 
     std::string text=os.str();

@@ -21,9 +21,9 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
-namespace Detail
+namespace Internal
 {
 /**
   * The function 'classic_string_cast' is to be used the same way as boost::lexical_cast. The

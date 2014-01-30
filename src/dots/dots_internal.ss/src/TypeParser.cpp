@@ -15,13 +15,13 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <Safir/Dob/Typesystem/Internal/TypeParser.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
 #include "ParseJob.h"
 
 namespace Safir
@@ -30,7 +30,7 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
     boost::shared_ptr<const TypeRepository> ParseTypeDefinitions(const boost::filesystem::path& root)
     {

@@ -15,14 +15,14 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_DETAIL_SERIALIZATION_UTILS_H__
-#define __DOTS_INTERNAL_DETAIL_SERIALIZATION_UTILS_H__
+#ifndef __DOTS_INTERNAL_Internal_SERIALIZATION_UTILS_H__
+#define __DOTS_INTERNAL_Internal_SERIALIZATION_UTILS_H__
 
 #ifdef _MSC_VER
 #pragma warning(disable:4127)
@@ -36,9 +36,9 @@
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/insert_linebreaks.hpp>
 #include <boost/archive/iterators/remove_whitespace.hpp>
-#include <Safir/Dob/Typesystem/Internal/TypeUtilities.h>
-#include <Safir/Dob/Typesystem/Internal/ParseError.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/classic_string_cast.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
+#include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/classic_string_cast.h>
 
 namespace Safir
 {
@@ -46,9 +46,9 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
-namespace Detail
+namespace Internal
 {
 namespace SerializationUtils
 {
@@ -76,6 +76,16 @@ namespace SerializationUtils
         {
             return false;
         }
+    }
+
+    inline void Trim(std::string& s)
+    {
+        boost::trim_if(s, boost::is_any_of("\r\n\t "));
+    }
+
+    inline std::string TrimCopy(const std::string& s)
+    {
+        return boost::trim_copy_if(s, boost::is_any_of("\r\n\t "));
     }
 
     inline std::string ExpandEnvironmentVariables(const std::string& str)
@@ -170,7 +180,7 @@ namespace SerializationUtils
                         const typename BlobLayoutT::MemberDescriptionType* md,
                         DotsC_MemberIndex memIx,
                         DotsC_ArrayIndex arrIx,
-                        const boost::property_tree::ptree& memberContent,
+                        boost::property_tree::ptree& memberContent,
                         std::vector<char>& blob,
                         char* &beginningOfUnused)
     {
@@ -178,7 +188,7 @@ namespace SerializationUtils
         {
         case BooleanMemberType:
         {
-
+            Trim(memberContent.data());
             bool boolVal=true;
             const std::string& val=memberContent.data();
             if (val=="True" || val=="true")
@@ -200,6 +210,7 @@ namespace SerializationUtils
 
         case EnumerationMemberType:
         {
+            Trim(memberContent.data());
             const typename BlobLayoutT::EnumDescriptionType* ed=repository->GetEnum(md->GetTypeId());
             int enumOrdinal=ed->GetIndexOfValue(memberContent.data());
             if (enumOrdinal<0)
@@ -216,6 +227,7 @@ namespace SerializationUtils
 
         case Int32MemberType:
         {
+            Trim(memberContent.data());
             DotsC_Int32 val=memberContent.get_value<DotsC_Int32>();
             blobLayout.template SetMember<DotsC_Int32>(val, &blob[0], memIx, arrIx);
             blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
@@ -224,6 +236,7 @@ namespace SerializationUtils
 
         case Int64MemberType:
         {
+            Trim(memberContent.data());
             DotsC_Int64 val=memberContent.get_value<DotsC_Int64>();
             blobLayout.template SetMember<DotsC_Int64>(val, &blob[0], memIx, arrIx);
             blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
@@ -232,6 +245,7 @@ namespace SerializationUtils
 
         case TypeIdMemberType:
         {
+            Trim(memberContent.data());
             DotsC_TypeId tid=SerializationUtils::StringToTypeId(memberContent.data());
 
             if (!BasicTypeOperations::TypeIdToTypeName(repository, tid))
@@ -250,6 +264,7 @@ namespace SerializationUtils
         case ChannelIdMemberType:
         case HandlerIdMemberType:
         {
+            Trim(memberContent.data());
             std::pair<DotsC_TypeId, const char*> hash=SerializationUtils::StringToHash(memberContent.data());
             if (hash.second!=NULL)
             {
@@ -279,6 +294,7 @@ namespace SerializationUtils
                 os<<"EntityId member '"<<md->GetName()<<"' is missing the instanceId-element that specifies the instance.";
                 throw ParseError("Serialization error", os.str(), "", 116);
             }
+            Trim(*typeIdString);
             DotsC_TypeId tid=SerializationUtils::StringToTypeId(*typeIdString);
 
             if (!BasicTypeOperations::IsOfType(repository, ObjectMemberType, tid, ObjectMemberType, EntityTypeId))
@@ -292,6 +308,7 @@ namespace SerializationUtils
                 throw ParseError("Serialization error", os.str(), "", 173);
             }
 
+            Trim(*instanceIdString);
             std::pair<DotsC_TypeId, const char*> instanceId=SerializationUtils::StringToHash(*instanceIdString);
             if (instanceId.second!=NULL)
             {
@@ -306,6 +323,7 @@ namespace SerializationUtils
 
         case StringMemberType:
         {
+            //The only time we dont trim content
             size_t numBytesNeeded=std::min(memberContent.data().size(), static_cast<size_t>(md->GetMaxLength()))+1; //add one for '\0'
             SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
             char* writeString=beginningOfUnused;
@@ -323,6 +341,7 @@ namespace SerializationUtils
 
         case BinaryMemberType:
         {
+            Trim(memberContent.data());
             std::string bin;
             if (!FromBase64(memberContent.data(), bin))
             {
@@ -360,6 +379,7 @@ namespace SerializationUtils
         case Volt32MemberType:
         case Watt32MemberType:
         {
+            Trim(memberContent.data());
             try
             {
                 DotsC_Float32 val=classic_string_cast<DotsC_Float32>(memberContent.data());
@@ -397,6 +417,7 @@ namespace SerializationUtils
         case Volt64MemberType:
         case Watt64MemberType:
         {
+            Trim(memberContent.data());
             try
             {
                 DotsC_Float64 val=classic_string_cast<DotsC_Float64>(memberContent.data());
@@ -426,7 +447,7 @@ namespace SerializationUtils
                                 char* &beginningOfUnused)
     {
         //get the referenced parameter an make all the error checking
-        Safir::Dob::Typesystem::Internal::TypeUtilities::GetParameterByFullName<typename BlobLayoutT::RepositoryType> tmp;
+        Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetParameterByFullName<typename BlobLayoutT::RepositoryType> tmp;
         const typename BlobLayoutT::ParameterDescriptionType* param=tmp(repository, parameterName);
 
         if (!param)
@@ -624,7 +645,7 @@ namespace SerializationUtils
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal::Detail
+} //end namespace Safir::Dob::Typesystem::Internal::Internal
 
 #ifdef _MSC_VER
 #pragma warning(default:4127) //Get rid of warning that this if-expression is constant (comparing two constants)

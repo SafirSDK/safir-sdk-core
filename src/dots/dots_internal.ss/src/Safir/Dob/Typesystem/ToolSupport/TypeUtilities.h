@@ -15,7 +15,7 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
@@ -24,7 +24,7 @@
 #ifndef __DOTS_INTERNAL_TYPE_UTILITIES_H__
 #define __DOTS_INTERNAL_TYPE_UTILITIES_H__
 
-#include <Safir/Dob/Typesystem/Internal/Detail/BasicTypeOperations.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/BasicTypeOperations.h>
 
 /**
   * Useful helper functions that operates on type repositories and type descriptions.
@@ -35,7 +35,7 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
 namespace TypeUtilities
 {
@@ -49,7 +49,7 @@ namespace TypeUtilities
     template <class RepositoryT>
     const char* GetTypeName(const RepositoryT* repository, DotsC_TypeId typeId)
     {
-        return Safir::Dob::Typesystem::Internal::Detail::BasicTypeOperations::TypeIdToTypeName(repository, typeId);
+        return Safir::Dob::Typesystem::ToolSupport::Internal::BasicTypeOperations::TypeIdToTypeName(repository, typeId);
     }
 
     inline DotsC_TypeId CalculateTypeId(const std::string& name)
@@ -65,7 +65,7 @@ namespace TypeUtilities
      */
     inline const char* GetTypeName(DotsC_MemberType memberType)
     {
-        return Safir::Dob::Typesystem::Internal::Detail::BasicTypeOperations::MemberTypeToString(memberType).c_str();
+        return Safir::Dob::Typesystem::ToolSupport::Internal::BasicTypeOperations::MemberTypeToString(memberType).c_str();
     }
 
     /**
@@ -83,7 +83,7 @@ namespace TypeUtilities
         {
             return true;
         }
-        return Safir::Dob::Typesystem::Internal::Detail::BasicTypeOperations::IsOfType(repository, ObjectMemberType, tid, ObjectMemberType, ofTid);
+        return Safir::Dob::Typesystem::ToolSupport::Internal::BasicTypeOperations::IsOfType(repository, ObjectMemberType, tid, ObjectMemberType, ofTid);
     }
 
     /**
@@ -183,7 +183,7 @@ namespace TypeUtilities
     /**
      * Helper class to get ParameterDescription from a fully qualified name without having the ClassDescription.
      */
-    template <class RepT, class Traits=Safir::Dob::Typesystem::Internal::TypeRepositoryTraits<RepT> >
+    template <class RepT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepT> >
     struct GetParameterByFullName
     {
         typedef typename Traits::RepositoryType RepositoryType;

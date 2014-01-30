@@ -53,7 +53,7 @@ namespace Internal
             instance->m_startupSynchronizer.Start(instance);
             if (instance->m_repository!=NULL)
             {
-                instance->m_blobLayout.reset(new Safir::Dob::Typesystem::Internal::BlobLayout<RepositoryShm>(instance->m_repository));
+                instance->m_blobLayout.reset(new Safir::Dob::Typesystem::ToolSupport::BlobLayout<RepositoryShm>(instance->m_repository));
                 return; //loaded ok
             }
         }
@@ -78,7 +78,7 @@ namespace Internal
         return Instance().m_repository;
     }
 
-    const Safir::Dob::Typesystem::Internal::BlobLayout<RepositoryShm>* RepositoryKeeper::GetBlobLayout()
+    const Safir::Dob::Typesystem::ToolSupport::BlobLayout<RepositoryShm>* RepositoryKeeper::GetBlobLayout()
     {
         return Instance().m_blobLayout.get();
     }
@@ -124,12 +124,12 @@ namespace Internal
         //-------------------------------------------------
         //Parse dou and dom files into local repository
         //-------------------------------------------------
-        boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository> localRepository;
+        boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> localRepository;
         try
         {
-            localRepository=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(m_paths);
+            localRepository=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(m_paths);
         }
-        catch(const Safir::Dob::Typesystem::Internal::ParseError& err)
+        catch(const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
         {
             std::cout<<"********** Parse Error **********************************************"<<std::endl;
             std::cout<<"* Label: "<<err.Label()<<std::endl;

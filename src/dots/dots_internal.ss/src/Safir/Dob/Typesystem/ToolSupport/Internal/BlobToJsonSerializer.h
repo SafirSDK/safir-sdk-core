@@ -15,14 +15,19 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_DETAIL_BLOB_TO_XML_H__
-#define __DOTS_INTERNAL_DETAIL_BLOB_TO_XML_H__
+#ifndef __DOTS_INTERNAL_Internal_BLOB_TO_JSON_H__
+#define __DOTS_INTERNAL_Internal_BLOB_TO_JSON_H__
+
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4100 )
+#endif
 
 #include <string>
 #include <vector>
@@ -31,9 +36,10 @@
 #include <boost/noncopyable.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include <Safir/Dob/Typesystem/Internal/TypeRepository.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/BlobLayoutImpl.h>
-#include <Safir/Dob/Typesystem/Internal/Detail/SerializationUtils.h>
+#include <boost/property_tree/json_parser.hpp>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobLayoutImpl.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/SerializationUtils.h>
 
 namespace Safir
 {
@@ -41,12 +47,141 @@ namespace Dob
 {
 namespace Typesystem
 {
+namespace ToolSupport
+{
 namespace Internal
 {
-namespace Detail
+
+//Namepspace boostfix is a hack that prevents boosts json_writer to make all values to a strings.
+//Instead nothing will be quoted and strings must manually be quoted before insertion in the property-tree
+//All code are copied from the boost file 'json_parser_write.hpp'. Modified lines are commented.
+namespace boostfix
 {
-    template <class RepT, class Traits=Safir::Dob::Typesystem::Internal::TypeRepositoryTraits<RepT> >
-    class BlobToXmlSerializer : private boost::noncopyable
+    using namespace boost;
+    using namespace boost::detail;
+    using namespace boost::details;
+    using namespace boost::property_tree;
+    using namespace boost::property_tree::json_parser;
+
+    // Create necessary escape sequences from illegal characters
+    template<class Ch>
+    std::basic_string<Ch> create_escapes(const std::basic_string<Ch> &s)
+    {
+        std::basic_string<Ch> result;
+        typename std::basic_string<Ch>::const_iterator b = s.begin();
+        typename std::basic_string<Ch>::const_iterator e = s.end();
+        while (b != e)
+        {
+            // This assumes an ASCII superset. But so does everything in PTree.
+            // We escape everything outside ASCII, because this code can't
+            // handle high unicode characters.
+            if (*b == 0x20 || *b == 0x21 || (*b >= 0x23 && *b <= 0x2E) ||
+                (*b >= 0x30 && *b <= 0x5B) || (*b >= 0x5D && *b <= 0xFF))
+                result += *b;
+            else if (*b == Ch('\b')) result += Ch('\\'), result += Ch('b');
+            else if (*b == Ch('\f')) result += Ch('\\'), result += Ch('f');
+            else if (*b == Ch('\n')) result += Ch('\\'), result += Ch('n');
+            else if (*b == Ch('\r')) result += Ch('\\'), result += Ch('r');
+            else if (*b == Ch('/')) result += Ch('\\'), result += Ch('/');
+            else if (*b == Ch('"'))  result += Ch('"'); //Modified by JOOT!
+            else if (*b == Ch('\\')) result += Ch('\\'), result += Ch('\\');
+            else
+            {
+                const char *hexdigits = "0123456789ABCDEF";
+                typedef typename make_unsigned<Ch>::type UCh;
+                unsigned long u = (std::min)(static_cast<unsigned long>(
+                                                 static_cast<UCh>(*b)),
+                                             0xFFFFul);
+                int d1 = u / 4096; u -= d1 * 4096;
+                int d2 = u / 256; u -= d2 * 256;
+                int d3 = u / 16; u -= d3 * 16;
+                int d4 = u;
+                result += Ch('\\'); result += Ch('u');
+                result += Ch(hexdigits[d1]); result += Ch(hexdigits[d2]);
+                result += Ch(hexdigits[d3]); result += Ch(hexdigits[d4]);
+            }
+            ++b;
+        }
+        return result;
+    }
+
+    template<class Ptree>
+    void write_json_helper(std::basic_ostream<typename Ptree::key_type::value_type> &stream,
+                           const Ptree &pt,
+                           int indent, bool pretty)
+    {
+
+        typedef typename Ptree::key_type::value_type Ch;
+        typedef typename std::basic_string<Ch> Str;
+
+        // Value or object or array
+        if (indent > 0 && pt.empty())
+        {
+            // Write value
+            Str data = create_escapes(pt.template get_value<Str>());
+            stream << data; //Modified by JOOT!
+
+        }
+        else if (indent > 0 && pt.count(Str()) == pt.size())
+        {
+            // Write array
+            stream << Ch('[');
+            if (pretty) stream << Ch('\n');
+            typename Ptree::const_iterator it = pt.begin();
+            for (; it != pt.end(); ++it)
+            {
+                if (pretty) stream << Str(4 * (indent + 1), Ch(' '));
+                write_json_helper(stream, it->second, indent + 1, pretty);
+                if (boost::next(it) != pt.end())
+                    stream << Ch(',');
+                if (pretty) stream << Ch('\n');
+            }
+            stream << Str(4 * indent, Ch(' ')) << Ch(']');
+
+        }
+        else
+        {
+            // Write object
+            stream << Ch('{');
+            if (pretty) stream << Ch('\n');
+            typename Ptree::const_iterator it = pt.begin();
+            for (; it != pt.end(); ++it)
+            {
+                if (pretty) stream << Str(4 * (indent + 1), Ch(' '));
+                stream << Ch('"') << create_escapes(it->first) << Ch('"') << Ch(':');
+                if (pretty) {
+                    if (it->second.empty())
+                        stream << Ch(' ');
+                    else
+                        stream << Ch('\n') << Str(4 * (indent + 1), Ch(' '));
+                }
+                write_json_helper(stream, it->second, indent + 1, pretty);
+                if (boost::next(it) != pt.end())
+                    stream << Ch(',');
+                if (pretty) stream << Ch('\n');
+            }
+            if (pretty) stream << Str(4 * indent, Ch(' '));
+            stream << Ch('}');
+        }
+    }
+
+    template<class Ptree>
+    void write_json_internal(std::basic_ostream<typename Ptree::key_type::value_type> &stream,
+                             const Ptree &pt,
+                             const std::string &filename,
+                             bool pretty)
+    {
+        if (!verify_json(pt, 0))
+            BOOST_PROPERTY_TREE_THROW(json_parser_error("ptree contains data that cannot be represented in JSON format", filename, 0));
+        Safir::Dob::Typesystem::ToolSupport::Internal::boostfix::write_json_helper(stream, pt, 0, pretty); //Modified by JOOT!
+        stream << std::endl;
+        if (!stream.good())
+            BOOST_PROPERTY_TREE_THROW(json_parser_error("write error", filename, 0));
+    }
+}
+
+    template <class RepT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepT> >
+    class BlobToJsonSerializer : private boost::noncopyable
     {
     public:
         typedef typename Traits::RepositoryType RepositoryType;
@@ -55,7 +190,7 @@ namespace Detail
         typedef typename Traits::MemberDescriptionType MemberDescriptionType;
         typedef typename Traits::EnumDescriptionType EnumDescriptionType;
 
-        BlobToXmlSerializer(const RepositoryType* repository)
+        BlobToJsonSerializer(const RepositoryType* repository)
             :m_repository(repository)
             ,m_blobLayout(repository)
         {
@@ -64,24 +199,30 @@ namespace Detail
         void operator()(const char* blob, std::ostream& os) const
         {
             boost::property_tree::ptree content;
-            SerializeMembers(blob, content, false);
+            SerializeMembers(blob, content);
             boost::property_tree::ptree root;
             root.push_back(std::make_pair(GetClass(blob)->GetName(), content));
-            boost::property_tree::xml_parser::write_xml(os, root);
+            boostfix::write_json_internal(os, root, std::string(), true);
         }
 
     private:
         const RepositoryType* m_repository;
         const BlobLayoutImpl<RepositoryType> m_blobLayout;
 
-        void SerializeMembers(const char* blob, boost::property_tree::ptree& content, bool addTypeAttr) const
+        //On Visual Studio 2012 and 2013 std::make_pair gets confused with the type conversions, 
+        //so we have this utility function that helps the little acorns get it right. :-)
+        template <class T1, class T2>
+        static boost::property_tree::ptree::value_type MakePtreeValue(const T1& v1, const T2& v2)
         {
+            return std::make_pair(v1, boost::property_tree::ptree(v2));
+        }
+
+        void SerializeMembers(const char* blob, boost::property_tree::ptree& content) const
+        {
+            static const std::string nullString="null";
             const ClassDescriptionType* cd=GetClass(blob);
 
-            if (addTypeAttr)
-            {
-                content.add("<xmlattr>.type", cd->GetName());
-            }
+            content.add("_DouType", Quoted(cd->GetName()));
 
             for (DotsC_MemberIndex memberIx=0; memberIx<cd->GetNumberOfMembers(); ++memberIx)
             {
@@ -92,27 +233,30 @@ namespace Detail
                 }
                 else //array member
                 {
-                    DotsC_MemberType mt=md->GetMemberType();
-                    const char* typeName=NULL;
-                    switch (mt)
-                    {
-                    case ObjectMemberType:
-                        typeName=m_repository->GetClass(md->GetTypeId())->GetName();
-                        break;
-                    case EnumerationMemberType:
-                        typeName=m_repository->GetEnum(md->GetTypeId())->GetName();
-                        break;
-                    default:
-                        typeName=BasicTypeOperations::MemberTypeToString(mt).c_str();
-                        break;
-                    }
-
+                    bool nonNullValueInserted=false;
+                    int accumulatedNulls=0;
                     boost::property_tree::ptree arrayValues;
                     for (DotsC_ArrayIndex arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
                     {
-                        SerializeMember(blob, md, memberIx, arrIx, typeName, arrayValues);
+                        if (m_blobLayout.GetStatus(blob, memberIx, arrIx).IsNull())
+                        {
+                            //we wait to insert null until we know we have to because an value exists after.
+                            //This way we avoid lots of null at the end of an array
+                            ++accumulatedNulls;
+                        }
+                        else
+                        {
+                            for (int nullCount=0; nullCount<accumulatedNulls; ++nullCount)
+                            {
+                                arrayValues.push_back(MakePtreeValue("", "null"));
+                            }
+
+                            accumulatedNulls=0;
+                            nonNullValueInserted=true;
+                            SerializeMember(blob, md, memberIx, arrIx, "", arrayValues);
+                        }
                     }
-                    if (arrayValues.size()>0) //only add array element if there are non-null values
+                    if (nonNullValueInserted) //only add array element if there are non-null values
                     {
                         content.add_child(md->GetName(), arrayValues);
                     }
@@ -120,15 +264,13 @@ namespace Detail
             }
         }
 
-        void SerializeMember(const char* blob,
+        bool SerializeMember(const char* blob,
                              const MemberDescriptionType* md,
                              DotsC_MemberIndex memberIndex,
                              DotsC_ArrayIndex arrayIndex,
                              const char* elementName,
                              boost::property_tree::ptree& pt) const
         {
-            boost::property_tree::ptree* arrayElementPt=NULL;
-
             switch(md->GetMemberType())
             {
             case BooleanMemberType:
@@ -137,7 +279,8 @@ namespace Detail
                 DotsC_MemberStatus status=m_blobLayout.template GetMember<bool>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    arrayElementPt=&pt.add(elementName, val ? "true" : "false");
+                    pt.push_back(MakePtreeValue(elementName, val ? "true" : "false"));
+                    return true;
                 }
             }
                 break;
@@ -149,8 +292,8 @@ namespace Detail
                 if (!status.IsNull())
                 {
                     const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
-                    pt.push_back(std::make_pair(elementName, boost::property_tree::ptree(enumVal)));
-                    arrayElementPt=&pt.back().second;
+                    pt.push_back(MakePtreeValue(elementName, Quoted(enumVal)));
+                    return true;
                 }
             }
                 break;
@@ -161,7 +304,8 @@ namespace Detail
                 DotsC_MemberStatus status=m_blobLayout.template GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    arrayElementPt=&pt.add(elementName, val);
+                    pt.push_back(MakePtreeValue(elementName, boost::lexical_cast<std::string>(val)));
+                    return true;
                 }
             }
                 break;
@@ -172,7 +316,8 @@ namespace Detail
                 DotsC_MemberStatus status=m_blobLayout.template GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    arrayElementPt=&pt.add(elementName, val);
+                    pt.push_back(MakePtreeValue(elementName, boost::lexical_cast<std::string>(val)));
+                    return true;
                 }
             }
                 break;
@@ -186,12 +331,13 @@ namespace Detail
                     const char* typeName=TypeIdToString(val);
                     if (typeName)
                     {
-                        arrayElementPt=&pt.add(elementName, typeName);
+                        pt.push_back(MakePtreeValue(elementName, Quoted(typeName)));
                     }
                     else
                     {
-                        arrayElementPt=&pt.add(elementName, val);
+                        pt.push_back(MakePtreeValue(elementName, boost::lexical_cast<std::string>(val)));
                     }
+                    return true;
                 }
             }
                 break;
@@ -207,12 +353,13 @@ namespace Detail
                 {
                     if (hashStr)
                     {
-                        arrayElementPt=&pt.add(elementName, hashStr);
+                        pt.push_back(MakePtreeValue(elementName, Quoted(hashStr)));
                     }
                     else
                     {
-                        arrayElementPt=&pt.add(elementName, val);
+                        pt.push_back(MakePtreeValue(elementName, boost::lexical_cast<std::string>(val)));
                     }
+                    return true;
                 }
             }
                 break;
@@ -224,27 +371,27 @@ namespace Detail
                 DotsC_MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, entId, hashStr);
                 if (!status.IsNull())
                 {
-                    boost::property_tree::ptree eid;
+                    boost::property_tree::ptree entIdPt;
                     const char* typeName=TypeIdToString(entId.typeId);
                     if (typeName)
                     {
-                        eid.add("name", typeName);
+                        entIdPt.add("name", Quoted(typeName));
                     }
                     else
                     {
-                        eid.add("name", entId.typeId);
+                        entIdPt.add("name", entId.typeId);
                     }
 
                     if (hashStr)
                     {
-                        eid.add("instanceId", hashStr);
+                        entIdPt.add("instanceId", Quoted(hashStr));
                     }
                     else
                     {
-                        eid.add("instanceId", entId.instanceId);
+                        entIdPt.add("instanceId", entId.instanceId);
                     }
-
-                    arrayElementPt=&pt.add_child(elementName, eid);
+                    pt.push_back(MakePtreeValue(elementName, entIdPt));
+                    return true;
                 }
             }
                 break;
@@ -256,9 +403,8 @@ namespace Detail
                 DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, strVal, size);
                 if (!status.IsNull())
                 {
-
-                    arrayElementPt=&pt.add(elementName, strVal);
-                    arrayElementPt->add("<xmlattr>.xml:space", "preserve");
+                    pt.push_back(MakePtreeValue(elementName, Quoted(strVal)));
+                    return true;
                 }
             }
                 break;
@@ -271,11 +417,10 @@ namespace Detail
                 if (!status.IsNull())
                 {
                     boost::property_tree::ptree members; //Serialize without the root-element, only members
-                    BlobToXmlSerializer objParser(m_repository);
-                    bool typesDiffer=m_blobLayout.GetTypeId(obj)!=md->GetTypeId();
-                    objParser.SerializeMembers(obj, members, typesDiffer); //we only need to add typeAttribute if types are not same as declared in dou (differ by inheritance)
+                    BlobToJsonSerializer objParser(m_repository);
+                    objParser.SerializeMembers(obj, members);
                     pt.push_back(std::make_pair(elementName, members));
-                    arrayElementPt=&pt.back().second;
+                    return true;
                 }
             }
                 break;
@@ -288,7 +433,8 @@ namespace Detail
                 if (!status.IsNull())
                 {
                     std::string bin(binary, size);
-                    arrayElementPt=&pt.add(elementName, SerializationUtils::ToBase64(bin));
+                    pt.push_back(MakePtreeValue(elementName, Quoted(SerializationUtils::ToBase64(bin))));
+                    return true;
                 }
             }
                 break;
@@ -319,7 +465,8 @@ namespace Detail
                 DotsC_MemberStatus status=m_blobLayout.template GetMember<DotsC_Float32>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    arrayElementPt=&pt.add(elementName, val);
+                    pt.push_back(MakePtreeValue(elementName, classic_string_cast<std::string>(val)));
+                    return true;
                 }
             }
                 break;
@@ -350,16 +497,14 @@ namespace Detail
                 DotsC_MemberStatus status=m_blobLayout.template GetMember<DotsC_Float64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    arrayElementPt=&pt.add(elementName, val);
+                    pt.push_back(MakePtreeValue(elementName, classic_string_cast<std::string>(val)));
+                    return true;
                 }
             }
                 break;
             }
 
-            if (arrayElementPt!=NULL && md->IsArray())
-            {
-                arrayElementPt->add("<xmlattr>.index", arrayIndex);
-            }
+            return false;
         }
 
         const char* TypeIdToString(DotsC_TypeId tid) const
@@ -393,9 +538,16 @@ namespace Detail
             {
                 std::ostringstream os;
                 os<<"Corrupt blob. Can't find type descriptor for blob with typeId="<<typeId;
-                throw ParseError("Binary to XML error", os.str(), "", 167);
+                throw ParseError("Binary to JSON error", os.str(), "", 166);
             }
             return cd;
+        }
+
+        static std::string Quoted(const std::string& str)
+        {
+            std::ostringstream os;
+            os<<'\"'<<str<<'\"';
+            return os.str();
         }
     };
 
@@ -403,6 +555,10 @@ namespace Detail
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal::Detail
+} //end namespace Safir::Dob::Typesystem::Internal::Internal
+
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
 
 #endif
