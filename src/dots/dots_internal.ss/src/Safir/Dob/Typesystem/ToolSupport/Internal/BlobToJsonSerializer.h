@@ -276,7 +276,7 @@ namespace boostfix
             case BooleanMemberType:
             {
                 bool val=true;
-                DotsC_MemberStatus status=m_blobLayout.template GetMember<bool>(blob, memberIndex, arrayIndex, val);
+                MemberStatus status=m_blobLayout.template GetMember<bool>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
                     pt.push_back(MakePtreeValue(elementName, val ? "true" : "false"));
@@ -288,7 +288,7 @@ namespace boostfix
             case EnumerationMemberType:
             {
                 DotsC_Int32 val=0;
-                DotsC_MemberStatus status=m_blobLayout.template GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
+                MemberStatus status=m_blobLayout.template GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
                     const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
@@ -301,7 +301,7 @@ namespace boostfix
             case Int32MemberType:
             {
                 DotsC_Int32 val=0;
-                DotsC_MemberStatus status=m_blobLayout.template GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
+                MemberStatus status=m_blobLayout.template GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
                     pt.push_back(MakePtreeValue(elementName, boost::lexical_cast<std::string>(val)));
@@ -313,7 +313,7 @@ namespace boostfix
             case Int64MemberType:
             {
                 DotsC_Int64 val=0;
-                DotsC_MemberStatus status=m_blobLayout.template GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
+                MemberStatus status=m_blobLayout.template GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
                     pt.push_back(MakePtreeValue(elementName, boost::lexical_cast<std::string>(val)));
@@ -325,7 +325,7 @@ namespace boostfix
             case TypeIdMemberType:
             {
                 DotsC_Int64 val=0;
-                DotsC_MemberStatus status=m_blobLayout.template GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
+                MemberStatus status=m_blobLayout.template GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
                     const char* typeName=TypeIdToString(val);
@@ -348,7 +348,7 @@ namespace boostfix
             {
                 DotsC_Int64 val=0;
                 const char* hashStr=NULL;
-                DotsC_MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, val, hashStr);
+                MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, val, hashStr);
                 if (!status.IsNull())
                 {
                     if (hashStr)
@@ -368,7 +368,7 @@ namespace boostfix
             {
                 DotsC_EntityId entId;
                 const char* hashStr=0;
-                DotsC_MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, entId, hashStr);
+                MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, entId, hashStr);
                 if (!status.IsNull())
                 {
                     boost::property_tree::ptree entIdPt;
@@ -400,7 +400,7 @@ namespace boostfix
             {
                 const char* strVal=NULL;
                 DotsC_Int32 size=0;
-                DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, strVal, size);
+                MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, strVal, size);
                 if (!status.IsNull())
                 {
                     pt.push_back(MakePtreeValue(elementName, Quoted(strVal)));
@@ -413,7 +413,7 @@ namespace boostfix
             {
                 const char* obj=NULL;
                 DotsC_Int32 size=0;
-                DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, obj, size);
+                MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, obj, size);
                 if (!status.IsNull())
                 {
                     boost::property_tree::ptree members; //Serialize without the root-element, only members
@@ -429,7 +429,7 @@ namespace boostfix
             {
                 const char* binary=NULL;
                 DotsC_Int32 size=0;
-                DotsC_MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, binary, size);
+                MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, binary, size);
                 if (!status.IsNull())
                 {
                     std::string bin(binary, size);
@@ -462,7 +462,7 @@ namespace boostfix
             case Watt32MemberType:
             {
                 DotsC_Float32 val=0;
-                DotsC_MemberStatus status=m_blobLayout.template GetMember<DotsC_Float32>(blob, memberIndex, arrayIndex, val);
+                MemberStatus status=m_blobLayout.template GetMember<DotsC_Float32>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
                     pt.push_back(MakePtreeValue(elementName, classic_string_cast<std::string>(val)));
@@ -494,7 +494,7 @@ namespace boostfix
             case Watt64MemberType:
             {
                 DotsC_Float64 val=0;
-                DotsC_MemberStatus status=m_blobLayout.template GetMember<DotsC_Float64>(blob, memberIndex, arrayIndex, val);
+                MemberStatus status=m_blobLayout.template GetMember<DotsC_Float64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
                     pt.push_back(MakePtreeValue(elementName, classic_string_cast<std::string>(val)));

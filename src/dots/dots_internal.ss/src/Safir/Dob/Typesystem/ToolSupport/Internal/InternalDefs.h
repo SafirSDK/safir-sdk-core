@@ -28,7 +28,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
-#include <Safir/Dob/Typesystem/ToolSupport/KernelDefs.h>
+#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 
 //disable warnings in boost
 #if defined _MSC_VER

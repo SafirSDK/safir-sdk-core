@@ -24,7 +24,7 @@
 #ifndef __SWRE_LIBRARY_H__
 #define __SWRE_LIBRARY_H__
 
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 
 #if defined _MSC_VER
 #  ifdef SWRE_LIBRARY_EXPORTS

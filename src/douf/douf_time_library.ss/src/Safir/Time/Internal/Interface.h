@@ -24,7 +24,7 @@
 #ifndef __DOUF_TIME_LIBRARY_H
 #define __DOUF_TIME_LIBRARY_H
 
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 
 #if defined _MSC_VER
 #  ifdef DOUF_TIME_EXPORTS

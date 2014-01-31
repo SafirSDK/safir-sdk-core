@@ -25,7 +25,7 @@
 #ifndef _dose_interface_h
 #define _dose_interface_h
 
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 
 typedef DotsC_Int32 DoseC_RequestId;
 

@@ -26,7 +26,7 @@
 #define __DOTS_EXCEPTION_KEEPER_H__
 
 #include <boost/noncopyable.hpp>
-#include <Safir/Dob/Typesystem/ToolSupport/KernelDefs.h>
+#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 #include <map>
 //disable warnings in boost
 #if defined _MSC_VER

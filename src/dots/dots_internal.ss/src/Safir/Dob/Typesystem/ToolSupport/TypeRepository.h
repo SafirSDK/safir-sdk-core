@@ -26,7 +26,7 @@
 
 #include <set>
 #include <string>
-#include <Safir/Dob/Typesystem/ToolSupport/KernelDefs.h>
+#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 #include <Safir/Dob/Typesystem/Internal/Id.h>
 
 namespace Safir

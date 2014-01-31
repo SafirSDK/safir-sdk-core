@@ -39,9 +39,47 @@ namespace ToolSupport
 {
 namespace Internal
 {
+    class MemberStatus
+    {
+    public:
+
+        MemberStatus()
+            :m_status(MemberStatus::NULL_FLAG_MASK) {}
+
+        MemberStatus(char status)
+            :m_status(status) {}
+
+        char RawValue() const {return m_status;}
+
+        bool HasChanged() const {return (m_status & CHANGE_FLAG_MASK) != 0;}
+        bool IsNull() const {return (m_status & NULL_FLAG_MASK) != 0;}
+        bool HasDynamicPart() const {return (m_status & SEMIDYNAMIC_FLAG_MASK) != 0;}
+
+        void SetChanged(bool changed) {Set(changed, MemberStatus::CHANGE_FLAG_MASK);}
+        void SetNull(bool isNull) {Set(isNull, MemberStatus::NULL_FLAG_MASK);}
+        void SetDynamicPart(bool hasDynamicPart) {Set(hasDynamicPart, MemberStatus::SEMIDYNAMIC_FLAG_MASK);}
+
+    private:
+        char m_status;
+        static const char NULL_FLAG_MASK=0x1;
+        static const char CHANGE_FLAG_MASK=0x2;
+        static const char SEMIDYNAMIC_FLAG_MASK=0x4; //means that a HashedId member or EntityId has a string.
+        void Set(bool val, char mask)
+        {
+            if (val)
+            {
+                m_status |= mask;
+            }
+            else
+            {
+                m_status &= (0xff ^ mask);
+            }
+        }
+    };
+
     /**
-        * Operations on blobs. Creation of blobs and insertion/update of data in blobs.
-        */
+    * Operations on blobs. Creation of blobs and insertion/update of data in blobs.
+    */
     template <class RepT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepT> >
     class BlobLayoutImpl
     {
@@ -116,7 +154,7 @@ namespace Internal
             blob=new char[header.size];
             Write(blob, header);
 
-            const DotsC_MemberStatus defaultStatus;
+            const MemberStatus defaultStatus;
             Offset currentPos=OFFSET_HEADER_LENGTH+numMembers*OFFSET_MEMBER_LENGTH; //start of data part
             for (DotsC_MemberIndex i=0; i < numMembers; i++)
             {
@@ -153,7 +191,7 @@ namespace Internal
             const BlobHeader header={blobSize, typeId};
             Write(blob, header);
 
-            const DotsC_MemberStatus defaultStatus;
+            const MemberStatus defaultStatus;
             Offset currentPos=OFFSET_HEADER_LENGTH+numMembers*OFFSET_MEMBER_LENGTH; //start of data part
             for (DotsC_MemberIndex i=0; i<numMembers; i++)
             {
@@ -196,7 +234,7 @@ namespace Internal
             const BlobHeader header={blobSize, typeId};
             Write(childBlob, header);
 
-            const DotsC_MemberStatus defaultStatus;
+            const MemberStatus defaultStatus;
             Offset currentPos=static_cast<Offset>(OFFSET_HEADER_LENGTH+numMembers*OFFSET_MEMBER_LENGTH); //start of data part
             for (DotsC_MemberIndex i=0; i<numMembers; i++)
             {
@@ -280,7 +318,7 @@ namespace Internal
             }
 
             //Set status
-            DotsC_MemberStatus memberStatus;
+            MemberStatus memberStatus;
             memberStatus.SetNull(false);
             memberStatus.SetChanged(isChanged);
             memberStatus.SetDynamicPart(strVal!=NULL);
@@ -291,14 +329,14 @@ namespace Internal
         inline Size GetSize(const char * const blob) const {return Read<BlobHeader>(blob).size;}
         inline DotsC_TypeId GetTypeId(const char * const blob) const {return Read<BlobHeader>(blob).typeId;}
 
-        DotsC_MemberStatus GetStatus(const char * const blob,
+        MemberStatus GetStatus(const char * const blob,
                                      const DotsC_MemberIndex member,
                                      const DotsC_ArrayIndex index) const
         {
             const MemberDescriptionType* const mde=m_repository->GetClass(GetTypeId(blob))->GetMember(member);
             const Size memberSize=BasicTypeOperations::SizeOfType(mde->GetMemberType());
             const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+memberSize)*index;
-            return DotsC_MemberStatus(Read<char>(blob+startOfElement));
+            return MemberStatus(Read<char>(blob+startOfElement));
         }
 
         void SetStatus( bool isNull,
@@ -310,7 +348,7 @@ namespace Internal
             const MemberDescriptionType* memberDesc=m_repository->GetClass(GetTypeId(blob))->GetMember(member);
             Size size=BasicTypeOperations::SizeOfType(memberDesc->GetMemberType())+MEMBER_STATUS_LENGTH;
             char oldStatus = Read<char>(blob + GetOffset(blob, member) + index*size);
-            DotsC_MemberStatus status(oldStatus);
+            MemberStatus status(oldStatus);
             status.SetNull(isNull);
             status.SetChanged(isChanged);
             Write(blob+GetOffset(blob, member)+index*size, status.RawValue());
@@ -329,7 +367,7 @@ namespace Internal
 
                 for (Size ix=0; ix<static_cast<Size>(memberDesc->GetArraySize()); ix++)
                 {
-                    DotsC_MemberStatus status(Read<char>(blob + GetOffset(blob, member) + ix*size));
+                    MemberStatus status(Read<char>(blob + GetOffset(blob, member) + ix*size));
                     if (status.HasChanged())
                     {
                         return true;
@@ -363,7 +401,7 @@ namespace Internal
                 for (Size ix=0; ix<static_cast<Size>(memberDesc->GetArraySize()); ix++)
                 {
                     char* s=blob+memOffs+ix*size;
-                    DotsC_MemberStatus status(s[0]);
+                    MemberStatus status(s[0]);
                     status.SetChanged(changed);
                     s[0]=status.RawValue();
 
@@ -396,7 +434,7 @@ namespace Internal
                 for (Size ix=0; ix<static_cast<Size>(memberDesc->GetArraySize()); ix++)
                 {
                     char* s=blob+memOffs+ix*size;
-                    DotsC_MemberStatus status(s[0]);
+                    MemberStatus status(s[0]);
                     status.SetChanged(false);
                     s[0]=status.RawValue();
                 }
@@ -424,7 +462,7 @@ namespace Internal
                 Size size=MEMBER_STATUS_LENGTH+BasicTypeOperations::SizeOfType(memberDesc->GetMemberType());
                 for (Size ix=0; ix<static_cast<Size>(memberDesc->GetArraySize()); ix++)
                 {
-                    DotsC_MemberStatus status(Read<char>(val+GetOffset(val, member)+ix*size));
+                    MemberStatus status(Read<char>(val+GetOffset(val, member)+ix*size));
                     const bool isNull=status.IsNull();
                     const bool isChanged=status.HasChanged();
 
@@ -603,11 +641,11 @@ namespace Internal
                 for (Size ix=0; ix<static_cast<Size>(memberDesc->GetArraySize()); ix++)
                 {
                     char* currStat=current+GetOffset(current, member)+ix*size;
-                    DotsC_MemberStatus currStatus(currStat[0]);
+                    MemberStatus currStatus(currStat[0]);
                     bool currentNull=currStatus.IsNull();
 
                     const char* lastStat=lastRead+GetOffset(lastRead, member)+ix*size;
-                    DotsC_MemberStatus lastStatus(lastStat[0]);
+                    MemberStatus lastStatus(lastStat[0]);
                     bool lastNull=lastStatus.IsNull();
 
                     if (currentNull!=lastNull) //changed from val->null or null->val
@@ -801,7 +839,7 @@ namespace Internal
         }
 
         //Objects and Strings
-        DotsC_MemberStatus GetDynamicMember(char* blob,
+        MemberStatus GetDynamicMember(char* blob,
                                             const DotsC_MemberIndex member,
                                             const DotsC_ArrayIndex index,
                                             char* &val,
@@ -813,7 +851,7 @@ namespace Internal
             Size dynSize;
             GetOffsetDynamicOffsetAndSize(blob, member, index, offset, dynOffs, dynSize);
 
-            const DotsC_MemberStatus status(Read<char>(blob+offset));
+            const MemberStatus status(Read<char>(blob+offset));
             if (status.IsNull() || dynOffs==0)
             {
                 const MemberDescriptionType* memberDesc=m_repository->GetClass(GetTypeId(blob))->GetMember(member);
@@ -842,7 +880,7 @@ namespace Internal
         }
 
         //const version of the above
-        DotsC_MemberStatus GetDynamicMember(const char * const blob,
+        MemberStatus GetDynamicMember(const char * const blob,
                                             const DotsC_MemberIndex member,
                                             const DotsC_ArrayIndex index,
                                             const char * & val, //out
@@ -968,7 +1006,7 @@ namespace Internal
                     {
                         const Size memberSize=BasicTypeOperations::SizeOfType(lm->GetMemberType());
                         const size_t startOfElement=GetOffset(blob, mem)+(MEMBER_STATUS_LENGTH+memberSize)*ix;
-                        const DotsC_MemberStatus status(blob[startOfElement]);
+                        const MemberStatus status(blob[startOfElement]);
                         if (status.HasDynamicPart())
                         { //there is only need to do anything if the member had a dynamic part in the old blob
                             Write(newObj+startOfElement+MEMBER_STATUS_LENGTH, END_OF_STATIC+currentDynOffs);
@@ -996,7 +1034,7 @@ namespace Internal
 
         //Basic types - not string and object
         template <typename T>
-        DotsC_MemberStatus GetMember(const char * const blob,
+        MemberStatus GetMember(const char * const blob,
                                      const DotsC_MemberIndex member,
                                      const DotsC_ArrayIndex index,
                                      T & t) const
@@ -1004,7 +1042,7 @@ namespace Internal
             size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
             t=Read<T>(blob+startOfElement+MEMBER_STATUS_LENGTH);
             const char* tmp=blob + startOfElement;
-            DotsC_MemberStatus s(tmp[0]);
+            MemberStatus s(tmp[0]);
             return s;
         }
 public:
@@ -1021,14 +1059,14 @@ public:
 
 
         template <typename T>
-        DotsC_MemberStatus GetMemberWithOptionalString(const char * const blob,
+        MemberStatus GetMemberWithOptionalString(const char * const blob,
                                                        const DotsC_MemberIndex member,
                                                        const DotsC_ArrayIndex index,
                                                        T & val,
                                                        const char * & strVal) const
         {
             const size_t startOfElement=GetOffset(blob, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
-            const DotsC_MemberStatus status(blob[startOfElement]);
+            const MemberStatus status(blob[startOfElement]);
             if (status.HasDynamicPart())
             {
                 const Offset dynOffs=Read<Offset>(blob + startOfElement + MEMBER_STATUS_LENGTH);
@@ -1057,7 +1095,7 @@ public:
             if (strVal == NULL) // no string, this will be easy!
             {
                 Write<T>(blob+startOfElement+MEMBER_STATUS_LENGTH, val);
-                DotsC_MemberStatus status;
+                MemberStatus status;
                 status.SetNull(false);
                 status.SetChanged(true);
                 status.SetDynamicPart(false);
@@ -1068,7 +1106,7 @@ public:
                 const DotsC_Int32 newStringLength=static_cast<DotsC_Int32>(strlen(strVal)) + 1;
                 char * dataLocation=NULL;
                 DotsC_Int32 currentStringLength=0;
-                const DotsC_MemberStatus status(blob[startOfElement]);
+                const MemberStatus status(blob[startOfElement]);
                 const bool currentlyHasDynamicPart=status.HasDynamicPart();
                 if (currentlyHasDynamicPart)
                 {
@@ -1143,7 +1181,7 @@ public:
                             {
                                 const Size memSize=BasicTypeOperations::SizeOfType(lm->GetMemberType());
                                 const size_t startOfElement=GetOffset(blob, mem)+(MEMBER_STATUS_LENGTH+memSize)*ix;
-                                const DotsC_MemberStatus status(blob[startOfElement]);
+                                const MemberStatus status(blob[startOfElement]);
                                 if (status.HasDynamicPart())
                                 { //there is only need to do anything if the member had a dynamic part in the old blob
                                     Write(newObj+startOfElement+MEMBER_STATUS_LENGTH, END_OF_STATIC+currentDynOffs);
@@ -1156,7 +1194,7 @@ public:
                             else //the member this call is all about
                             {
                                 const size_t startOfElement=GetOffset(newObj, member)+(MEMBER_STATUS_LENGTH+sizeof(T))*index;
-                                DotsC_MemberStatus status;
+                                MemberStatus status;
                                 status.SetNull(false);
                                 status.SetChanged(true);
                                 status.SetDynamicPart(true);
@@ -1273,7 +1311,7 @@ public:
             GetMember<T>(lastRead, member, ix, lVal);
             if (cVal!=lVal)
             {
-                DotsC_MemberStatus status(stat[0]);
+                MemberStatus status(stat[0]);
                 status.SetChanged(true);
                 stat[0]=status.RawValue();
                 changed=true;

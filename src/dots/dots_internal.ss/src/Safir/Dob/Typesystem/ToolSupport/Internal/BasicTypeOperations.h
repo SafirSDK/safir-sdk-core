@@ -26,7 +26,6 @@
 
 #include <string>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
-#include <Safir/Dob/Typesystem/ToolSupport/KernelDefs.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/InternalDefs.h>
 
 namespace Safir

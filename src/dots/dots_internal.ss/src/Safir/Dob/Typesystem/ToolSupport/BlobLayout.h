@@ -34,6 +34,8 @@ namespace Typesystem
 {
 namespace ToolSupport
 {
+    typedef Safir::Dob::Typesystem::ToolSupport::Internal::MemberStatus MemberStatus;
+
     /**
      * @brief Operations on blobs. Creation of blobs and insertion/update of data in blobs.
      */
@@ -111,14 +113,14 @@ namespace ToolSupport
         //---------------------
         // Get members
         //---------------------
-        DotsC_MemberStatus GetMemberStatus(const char * const blob,
+        MemberStatus GetMemberStatus(const char * const blob,
                                        const DotsC_MemberIndex member,
                                        const DotsC_ArrayIndex index) const
         {
             return m_impl.GetStatus(blob, member, index);
         }
 
-        DotsC_MemberStatus GetBoolMember(const char * const blob,
+        MemberStatus GetBoolMember(const char * const blob,
                                        const DotsC_MemberIndex member,
                                        const DotsC_ArrayIndex index,
                                        bool & val) const
@@ -126,7 +128,7 @@ namespace ToolSupport
             return m_impl.template GetMember<bool>(blob, member, index, val);
         }
 
-        DotsC_MemberStatus GetEnumMember(const char * const blob,
+        MemberStatus GetEnumMember(const char * const blob,
                                          const DotsC_MemberIndex member,
                                          const DotsC_ArrayIndex index,
                                          DotsC_EnumerationValue& val) const
@@ -134,7 +136,7 @@ namespace ToolSupport
             return m_impl.template GetMember<DotsC_EnumerationValue>(blob, member, index, val);
         }
 
-        DotsC_MemberStatus GetInt32Member(const char * const blob,
+        MemberStatus GetInt32Member(const char * const blob,
                                        const DotsC_MemberIndex member,
                                        const DotsC_ArrayIndex index,
                                        DotsC_Int32& val) const
@@ -142,7 +144,7 @@ namespace ToolSupport
             return m_impl.template GetMember<DotsC_Int32>(blob, member, index, val);
         }
 
-        DotsC_MemberStatus GetInt64Member(const char * const blob,
+        MemberStatus GetInt64Member(const char * const blob,
                                        const DotsC_MemberIndex member,
                                        const DotsC_ArrayIndex index,
                                        DotsC_Int64& val) const
@@ -150,7 +152,7 @@ namespace ToolSupport
             return m_impl.template GetMember<DotsC_Int64>(blob, member, index, val);
         }
 
-        DotsC_MemberStatus GetFloat32Member(const char * const blob,
+        MemberStatus GetFloat32Member(const char * const blob,
                                        const DotsC_MemberIndex member,
                                        const DotsC_ArrayIndex index,
                                        DotsC_Float32& val) const
@@ -158,7 +160,7 @@ namespace ToolSupport
             return m_impl.template GetMember<DotsC_Float32>(blob, member, index, val);
         }
 
-        DotsC_MemberStatus GetFloat64Member(const char * const blob,
+        MemberStatus GetFloat64Member(const char * const blob,
                                        const DotsC_MemberIndex member,
                                        const DotsC_ArrayIndex index,
                                        DotsC_Float64& val) const
@@ -166,7 +168,7 @@ namespace ToolSupport
             return m_impl.template GetMember<DotsC_Float64>(blob, member, index, val);
         }
 
-        DotsC_MemberStatus GetHashedMember(const char * const blob,
+        MemberStatus GetHashedMember(const char * const blob,
                                            const DotsC_MemberIndex member,
                                            const DotsC_ArrayIndex index,
                                            DotsC_Int64 & hashVal,
@@ -175,7 +177,7 @@ namespace ToolSupport
             return m_impl.template GetMemberWithOptionalString<DotsC_Int64>(blob, member, index, hashVal, strVal);
         }
 
-        DotsC_MemberStatus GetEntityIdMember(const char * const blob,
+        MemberStatus GetEntityIdMember(const char * const blob,
                                              const DotsC_MemberIndex member,
                                              const DotsC_ArrayIndex index,
                                              DotsC_EntityId & entityId,
@@ -184,7 +186,7 @@ namespace ToolSupport
             return m_impl.template GetMemberWithOptionalString<DotsC_EntityId>(blob, member, index, entityId, strVal);
         }
 
-        DotsC_MemberStatus GetDynamicMember(const char * const blob,
+        MemberStatus GetDynamicMember(const char * const blob,
                                               const DotsC_MemberIndex member,
                                               const DotsC_ArrayIndex index,
                                               const char * & val, //out
@@ -193,7 +195,7 @@ namespace ToolSupport
             return m_impl.GetDynamicMember(blob, member, index, val, binarySize);
         }
 
-        DotsC_MemberStatus GetWritableDynamicMember(char* blob,
+        MemberStatus GetWritableDynamicMember(char* blob,
                                                     const DotsC_MemberIndex member,
                                                     const DotsC_ArrayIndex index,
                                                     char*& val, //out

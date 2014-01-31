@@ -46,7 +46,7 @@
 #  endif
 #endif
 
-#include <Safir/Dob/Typesystem/ToolSupport/KernelDefs.h>
+#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 
 extern "C"
 {

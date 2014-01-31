@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2008 (http://safir.sourceforge.net)
-* 
-* Created by: Lars Hagström / stlrha
+* Copyright Saab AB, 2004-2014 (http://safir.sourceforge.net)
+*
+* Created by: Joel Ottosson / joot
 *
 *******************************************************************************
 *
@@ -21,9 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-#ifndef __DOTS_KERNEL_DEFS_H__
-#define __DOTS_KERNEL_DEFS_H__
+#ifndef __DOTS_LANGUAGE_INTERFACE_DEFS_H__
+#define __DOTS_LANGUAGE_INTERFACE_DEFS_H__
 
 #include <boost/cstdint.hpp>
 
@@ -118,7 +117,6 @@ typedef enum
     ReadOnlyProperty,           //when reading properties straight from blobs
     UnableToDereferenceProperty, //when reading properties straight from blobs
     IllegalValue
-    //TODO: do all other functions that can return errors!
 } DotsC_ErrorCode;
 
 
@@ -129,43 +127,4 @@ typedef enum
     MappedToParameter
 } DotsC_PropertyMappingKind;
 
-class DotsC_MemberStatus
-{
-public:
-
-    DotsC_MemberStatus()
-        :m_status(DotsC_MemberStatus::NULL_FLAG_MASK) {}
-
-    DotsC_MemberStatus(char status)
-        :m_status(status) {}
-
-    char RawValue() const {return m_status;}
-
-    bool HasChanged() const {return (m_status & CHANGE_FLAG_MASK) != 0;}
-    bool IsNull() const {return (m_status & NULL_FLAG_MASK) != 0;}
-    bool HasDynamicPart() const {return (m_status & SEMIDYNAMIC_FLAG_MASK) != 0;}
-
-    void SetChanged(bool changed) {Set(changed, DotsC_MemberStatus::CHANGE_FLAG_MASK);}
-    void SetNull(bool isNull) {Set(isNull, DotsC_MemberStatus::NULL_FLAG_MASK);}
-    void SetDynamicPart(bool hasDynamicPart) {Set(hasDynamicPart, DotsC_MemberStatus::SEMIDYNAMIC_FLAG_MASK);}
-
-private:
-    char m_status;
-    static const char NULL_FLAG_MASK=0x1;
-    static const char CHANGE_FLAG_MASK=0x2;
-    static const char SEMIDYNAMIC_FLAG_MASK=0x4; //means that a HashedId member or EntityId has a string.
-    void Set(bool val, char mask)
-    {
-        if (val)
-        {
-            m_status |= mask;
-        }
-        else
-        {
-            m_status &= (0xff ^ mask);
-        }
-    }
-};
-
 #endif
-

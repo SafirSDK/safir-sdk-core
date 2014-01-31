@@ -38,6 +38,8 @@ namespace Typesystem
 {
 namespace Internal
 {
+    typedef Safir::Dob::Typesystem::ToolSupport::MemberStatus MemberStatus; //shorter name, used a lot in dots_kernel.cpp
+
     /**This class creates the shared memory. It initiates the dou-parsing and then
      * copies the data into the shared memory.
      */
