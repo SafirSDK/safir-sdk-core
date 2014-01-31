@@ -139,17 +139,14 @@ private:
     {
         boost::asio::write(*m_sockets[which], boost::asio::buffer(&binary[0], binary.size()));
 
+        boost::thread timeout(boost::bind(ActionSender::Timeout, which));
+
         try
         {            
             //        std::wcout << "Sent action to " << which << ", waiting for ok" << std::endl;
-            boost::thread timeout(boost::bind(ActionSender::Timeout, which));
-            
             char reply[3];
             boost::asio::read(*m_sockets[which],
                               boost::asio::buffer(reply, 3));
-
-            timeout.interrupt();
-            timeout.join();
 
             if (reply != std::string("ok"))
             {
@@ -161,6 +158,9 @@ private:
         {
             std::wcout << "reading failed" << std::endl;
         }
+
+        timeout.interrupt();
+        timeout.join();
     }
 
     void SleepyTime(const DoseTest::ActionEnum::Enumeration actionKind)
