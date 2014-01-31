@@ -39,7 +39,7 @@
 #endif
 
 #include <Safir/Utilities/Internal/UnorderedMap.h>
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/ToolSupport/KernelDefs.h>
 #include <string>
 #include <vector>
 /**
@@ -275,8 +275,8 @@ namespace Typesystem
     /**
      * An enumeration of all possible types of an object member.
      *
-     * The values of this enumeration is defined in the file Safir/Dob/Typesystem/Internal/KernelDefs.h.
-     * @see Safir/Dob/Typesystem/Internal/KernelDefs.h
+     * The values of this enumeration is defined in the file Safir/Dob/Typesystem/ToolSupport/KernelDefs.h.
+     * @see Safir/Dob/Typesystem/ToolSupport/KernelDefs.h
      */
     typedef DotsC_MemberType MemberType;
 
