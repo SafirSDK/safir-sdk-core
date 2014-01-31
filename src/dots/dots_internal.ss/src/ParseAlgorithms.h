@@ -37,7 +37,7 @@
 //--------------------------------------------------------------------------------------------------------------
 //This file contains all algoritms that is performed during the xml-parsing. Work done here must be fully
 //parallelizable since parsing may be done in many threads simultanously. The work that cannot be done before
-//all types are known or cant be done in parallel is done in the RepositoryBasic.
+//all types are known or cant be done in parallel is done in the RepositoryCompletionAlgorithms.
 //--------------------------------------------------------------------------------------------------------------
 namespace Safir
 {
