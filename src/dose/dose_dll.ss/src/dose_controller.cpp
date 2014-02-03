@@ -2569,24 +2569,6 @@ namespace Internal
                 dontRemove = true;
                 return false;  // Don't remove from queue and don't reset dirty flag
             }
-            else if (!NodeStatuses::Instance().AnyNodeHasStatus(NodeStatus::Failed))
-            {
-                // Ok, it seems that all nodes are either Started or Expected (has never been started).
-                // In this case we know that we have got the pools, and thus the ghosts, from all nodes so
-                // we can clean-up the ghosts and only save the ones from the newest registration.
-                EntityTypes::Instance().CleanGhosts(realState.GetTypeId(), stateHandlerId, GetContext());
-
-                // Check if the clean-up has "deleted" this ghost state 
-                if (subscription->GetState()->IsReleased())
-                {
-                    // This ghost is "deleted" and should not be used.
-                    InitialInjectionHandled(Dob::Typesystem::HandlerId(subscription->GetSubscriptionId().id),
-                                    subscription->GetSubscriptionId().connectionConsumer.consumer,
-                                    entityId.GetTypeId(),
-                                    entityId.GetInstanceId());
-                    return true; // Remove from queue and reset dirty flag
-                }
-            }
         }
 
         if (!injectionStateChanged && !isGhost)

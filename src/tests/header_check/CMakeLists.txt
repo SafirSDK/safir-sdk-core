@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project(header_checks NONE)
 
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
+
 enable_testing()
 
 if (NOT CMAKE_BUILD_TYPE)

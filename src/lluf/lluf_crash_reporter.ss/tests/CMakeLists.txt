@@ -4,7 +4,7 @@ project(lluf_crash_reporter_test CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
-FIND_PACKAGE(Boost COMPONENTS thread date_time system)
+FIND_PACKAGE(Boost COMPONENTS thread system)
 
 FIND_PACKAGE(PythonInterp)
 

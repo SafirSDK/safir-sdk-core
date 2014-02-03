@@ -50,7 +50,7 @@ if (UNIX)
 
    #turn on more warnings and set up use of threads etc
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread")
-   SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wall -pthread")
+   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pthread")
    SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")
 
    #make sure we get the correct posix version
@@ -94,7 +94,7 @@ set (Boost_ADDITIONAL_VERSIONS
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_FIND_QUIETLY 1)
-# Use boost from tower if it exists, unless specifically set to something else
+# Use boost from "tower" if it exists, unless specifically set to something else
 if (NOT BOOST_ROOT AND "$ENV{BOOST_ROOT}" STREQUAL "")
   set(BOOST_ROOT ${SAFIR_SDK})
 endif()
@@ -113,6 +113,7 @@ else()
     endif()
 endif()
 set (Boost_FIND_QUIETLY 0)
+
 #use dynamic linking with boost
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 
@@ -126,9 +127,33 @@ ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 #disable all deprecated functionality in boost.filesystem.
 ADD_DEFINITIONS(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 
+#disable all deprecated functionality in Boost.System.
+#this flag is broken in 1.41 so we don't define it there
+if (Boost_VERSION GREATER 104100) #1.41
+  ADD_DEFINITIONS(-DBOOST_SYSTEM_NO_DEPRECATED)
+endif()
+
+#Make sure we only use the header-only part of Boost.DateTime
+#on non microsoft compilers/platforms
+if(NOT MSVC)
+  ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
+endif()
+
+#Make Boost.Chrono header-only
+ADD_DEFINITIONS(-DBOOST_CHRONO_HEADER_ONLY)
+
 #Set up boost for any test code (i.e. CheckCXXSourceCompiles stuff)
 set(CMAKE_REQUIRED_INCLUDES ${Boost_INCLUDE_DIRS})
-set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_DYN_LINK -DBOOST_FILESYSTEM_NO_DEPRECATED)
+set(CMAKE_REQUIRED_DEFINITIONS 
+  -DBOOST_ALL_DYN_LINK
+  -DBOOST_FILESYSTEM_NO_DEPRECATED
+  -DBOOST_DATE_TIME_NO_LIB 
+  -DBOOST_CHRONO_HEADER_ONLY)
+
+if (Boost_VERSION GREATER 104100) #1.41
+  set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DBOOST_SYSTEM_NO_DEPRECATED)
+endif()
+
 
 if(MSVC)
    #We have a weird issue which causes a buffer overrun error when using Visual Studio 2013
