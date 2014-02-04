@@ -13,8 +13,6 @@ ADD_LIBRARY(dots_internal SHARED ${sources} ${headers})
 
 FIND_PACKAGE(Boost COMPONENTS regex filesystem)
 
-ADD_DEFINITIONS(-DDOTS_INTERNAL_EXPORTS)
-
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(dots_internal dots_id lluf_utils  ${Boost_LIBRARIES})
 endif()

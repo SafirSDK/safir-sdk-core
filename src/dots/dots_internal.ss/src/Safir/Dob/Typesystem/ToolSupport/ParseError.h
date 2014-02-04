@@ -44,7 +44,7 @@ namespace ToolSupport
     /**
      * @brief Exception used to report errors in dou- and dom- files.
      */
-    class ParseError : public std::exception
+    class DOTS_INTERNAL_API ParseError : public std::exception
     {
     public:
 

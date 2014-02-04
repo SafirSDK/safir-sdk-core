@@ -24,23 +24,21 @@
 #ifndef __DOTS_INTERNAL_TYPE_PARSER_H__
 #define __DOTS_INTERNAL_TYPE_PARSER_H__
 
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef dots_internal_EXPORTS
+#  define DOTS_INTERNAL_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define DOTS_INTERNAL_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "dots_internal"
+#  include <Safir/Utilities/Internal/AutoLink.h>
+#endif
+#define DOTS_INTERNAL_LOCAL SAFIR_HELPER_DLL_LOCAL
+
 #include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
-
-#if defined _MSC_VER
-    #if defined DOTS_INTERNAL_EXPORTS
-        #define DOTS_API __declspec(dllexport)
-    #else
-        #define DOTS_API __declspec(dllimport)
-        #define SAFIR_LIBRARY_NAME "dots_internal"
-        #include <Safir/Utilities/Internal/AutoLink.h>
-    #endif
-#elif defined __GNUC__
-    #define DOTS_API
-    #define __cdecl
-#endif
 
 namespace Safir
 {
@@ -65,7 +63,7 @@ namespace ToolSupport
      * @return TypeRepository containing all types, i.e classes, exceptions, enums, properties and property mappings.
      * @throws Safir::Dob::Typesystem::Parser:ParseError The dou- or dom- files at the specified path contains errors.
      */
-    DOTS_API boost::shared_ptr<const TypeRepository> ParseTypeDefinitions(const boost::filesystem::path& root);
+    DOTS_INTERNAL_API boost::shared_ptr<const TypeRepository> ParseTypeDefinitions(const boost::filesystem::path& root);
 
     /**
      * Will validate and parse a complete set of dou- and dom-files. If no error occurs, the
@@ -78,7 +76,7 @@ namespace ToolSupport
      * @return TypeRepository containing all types, i.e classes, exceptions, enums, properties and property mappings.
      * @throws Safir::Dob::Typesystem::Parser:ParseError The dou- or dom- files at the specified path contains errors.
      */
-    DOTS_API boost::shared_ptr<const TypeRepository> ParseTypeDefinitions(const std::vector<boost::filesystem::path>& roots);
+    DOTS_INTERNAL_API boost::shared_ptr<const TypeRepository> ParseTypeDefinitions(const std::vector<boost::filesystem::path>& roots);
 
 
 #ifdef _MSC_VER
