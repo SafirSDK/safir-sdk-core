@@ -37,7 +37,7 @@ namespace Safir
 {
 namespace Utilities
 {
-    class LLUF_UTILS_API DynamicLibraryLoader::Impl 
+    class DynamicLibraryLoader::Impl 
     {
     public:
         Impl()

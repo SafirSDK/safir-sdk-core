@@ -84,7 +84,7 @@ std::string GetSyslogTimestamp()
 
 }
 
-class LLUF_UTILS_API SystemLogImpl
+class SystemLogImpl
 {
     friend class SystemLogImplKeeper;
 
