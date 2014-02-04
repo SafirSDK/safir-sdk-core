@@ -498,20 +498,20 @@ extern "C"
     //                              (so resultSize > bufSize ==> try again with bigger buffer)
     // Returns:     -
     // Comments:    Serializes a blob to a json string.
-    DOTS_KERNEL_API void CALLING_CONVENTION DotsC_BlobToJson(char * const jsonDest,
-                                                             const char * const blobSource,
-                                                             const DotsC_Int32 bufSize,
-                                                             DotsC_Int32 & resultSize);
-
+    DOTS_KERNEL_API void DotsC_BlobToJson(char * const jsonDest,
+                                          const char * const blobSource,
+                                          const DotsC_Int32 bufSize,
+                                          DotsC_Int32 & resultSize);
+    
     // Function:    DotsC_JsonToBlob
     // Parameters:  blobDest    -   blob that is the result of the serialization, out parameter
     //              xmlSource   -   json string to serialize
     // Returns:     -
     // Comments:    Serializes a json string to a blob.
-    DOTS_KERNEL_API void CALLING_CONVENTION DotsC_JsonToBlob(char * & blobDest,
-                                                             DotsC_BytePointerDeleter & deleter,
-                                                             const char * const jsonSource);
-
+    DOTS_KERNEL_API void DotsC_JsonToBlob(char * & blobDest,
+                                          DotsC_BytePointerDeleter & deleter,
+                                          const char * const jsonSource);
+    
     // Function:    DotsC_BinaryToBase64
     // Parameters:  binarySourceSize    -   number of bytes to be converted to Base64.
     // Returns:     number of characters in the Base64 converted representation. This is the
@@ -1110,517 +1110,9 @@ extern "C"
                                                char * & blob,
                                                const DotsC_MemberIndex member,
                                                const DotsC_ArrayIndex index);
-<<<<<<< .working
-=======
 
-    //************************************************************************************
-    //* Functions for retrieving property member values
-    //************************************************************************************
-    // Function:    DotsC_IsNullProperty
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    // Returns:     boolean value
-    // Comments:    Get the if a property is null or a value.
-    DOTS_KERNEL_API bool DotsC_IsNullProperty(const char * const blob,
-                                              const DotsC_TypeId property,
-                                              const DotsC_MemberIndex member,
-                                              const DotsC_ArrayIndex index);
-
-    // Function:    DotsC_IsChangedProperty
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    // Returns:     boolean value
-    // Comments:    Get the if a property is changed
-    DOTS_KERNEL_API bool DotsC_IsChangedProperty(const char * const blob,
-                                                 const DotsC_TypeId property,
-                                                 const DotsC_MemberIndex member,
-                                                 const DotsC_ArrayIndex index);
-
-    // Function:    DotsC_GetBooleanProperty
-    // Parameters:  blob    -   blob containing the object
-    //              property -  id of the property
-    //              member  -   id of property member
-    //              index   -   array index.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    //              errorCode - NoError or UnableToDereferenceProperty.
-    // Returns:     -
-    // Comments:    Get a boolean member defined in a property supporeted by the object. The value is retrived from the blob.
-    DOTS_KERNEL_API void DotsC_GetBooleanProperty(const char * const blob,
-                                                  const DotsC_TypeId property,
-                                                  const DotsC_MemberIndex member,
-                                                  const DotsC_ArrayIndex index,
-                                                  bool & val,
-                                                  bool & isNull,
-                                                  bool & isChanged,
-                                                  DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_GetEnumerationProperty
-    // Parameters:  blob    -   blob containing the object
-    //              property -  id of the property
-    //              member  -   id of property member
-    //              index   -   array index.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    //              errorCode - NoError or UnableToDereferenceProperty.
-    // Returns:     -
-    // Comments:    Get a enumeration member defined in a property supporeted by the object. The value is retrived from the blob.
-    DOTS_KERNEL_API void DotsC_GetEnumerationProperty(const char * const blob,
-                                                      const DotsC_TypeId property,
-                                                      const DotsC_MemberIndex member,
-                                                      const DotsC_ArrayIndex index,
-                                                      DotsC_EnumerationValue & val,
-                                                      bool & isNull,
-                                                      bool & isChanged,
-                                                      DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_GetInt32Property
-    // Parameters:  blob    -   blob containing the object
-    //              property -  id of the property
-    //              member  -   id of property member
-    //              index   -   array index.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    //              errorCode - NoError or UnableToDereferenceProperty.
-    // Returns:     -
-    // Comments:    Get a int32 member defined in a property supporeted by the object. The value is retrived from the blob.
-    DOTS_KERNEL_API void DotsC_GetInt32Property(const char * const blob,
-                                                const DotsC_TypeId property,
-                                                const DotsC_MemberIndex member,
-                                                const DotsC_ArrayIndex index,
-                                                DotsC_Int32 & val,
-                                                bool & isNull,
-                                                bool & isChanged,
-                                                DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_GetInt64Property
-    // Parameters:  blob    -   blob containing the object
-    //              property -  id of the property
-    //              member  -   id of property member
-    //              index   -   array index.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    //              errorCode - NoError or UnableToDereferenceProperty.
-    // Returns:     -
-    // Comments:    Get a int64 member defined in a property supporeted by the object. The value is retrived from the blob.
-    DOTS_KERNEL_API void DotsC_GetInt64Property(const char * const blob,
-                                                const DotsC_TypeId property,
-                                                const DotsC_MemberIndex member,
-                                                const DotsC_ArrayIndex index,
-                                                DotsC_Int64 & val,
-                                                bool & isNull,
-                                                bool & isChanged,
-                                                DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_GetFloat32Property
-    // Parameters:  blob    -   blob containing the object
-    //              property -  id of the property
-    //              member  -   id of property member
-    //              index   -   array index.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    //              errorCode - NoError or UnableToDereferenceProperty.
-    // Returns:     -
-    // Comments:    Get a float member defined in a property supporeted by the object. The value is retrived from the blob.
-    DOTS_KERNEL_API void DotsC_GetFloat32Property(const char * const blob,
-                                                  const DotsC_TypeId property,
-                                                  const DotsC_MemberIndex member,
-                                                  const DotsC_ArrayIndex index,
-                                                  DotsC_Float32 & val,
-                                                  bool & isNull,
-                                                  bool & isChanged,
-                                                  DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_GetFloat64Property
-    // Parameters:  blob    -   blob containing the object
-    //              property -  id of the property
-    //              member  -   id of property member
-    //              index   -   array index.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    //              errorCode - NoError or UnableToDereferenceProperty.
-    // Returns:     -
-    // Comments:    Get a 64 bit float member defined in a property supporeted by the object. The value is retrived from the blob.
-    DOTS_KERNEL_API void DotsC_GetFloat64Property(const char * const blob,
-                                                  const DotsC_TypeId property,
-                                                  const DotsC_MemberIndex member,
-                                                  const DotsC_ArrayIndex index,
-                                                  DotsC_Float64 & val,
-                                                  bool & isNull,
-                                                  bool & isChanged,
-                                                  DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_GetStringProperty
-    // Parameters:  blob    -   blob containing the object
-    //              property -  id of the property
-    //              member  -   id of property member
-    //              index   -   array index.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    //              errorCode - NoError or UnableToDereferenceProperty.
-    // Returns:     -
-    // Comments:    Get a string member defined in a property supporeted by the object. The value is retrived from the blob.
-    DOTS_KERNEL_API void DotsC_GetStringProperty(const char * const blob,
-                                                 const DotsC_TypeId property,
-                                                 const DotsC_MemberIndex member,
-                                                 const DotsC_ArrayIndex index,
-                                                 const char * & val,
-                                                 bool & isNull,
-                                                 bool & isChanged,
-                                                 DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_GetTypeIdProperty
-    // Parameters:  blob    -   blob containing the object
-    //              property -  id of the property
-    //              member  -   id of property member
-    //              index   -   array index.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    //              errorCode - NoError or UnableToDereferenceProperty.
-    // Returns:     -
-    // Comments:    Get a type id member defined in a property supporeted by the object. The value is retrived from the blob.
-    DOTS_KERNEL_API void DotsC_GetTypeIdProperty(const char * const blob,
-                                                 const DotsC_TypeId property,
-                                                 const DotsC_MemberIndex member,
-                                                 const DotsC_ArrayIndex index,
-                                                 DotsC_TypeId & val,
-                                                 bool & isNull,
-                                                 bool & isChanged,
-                                                 DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_GetHashedIdProperty
-    // Parameters:  blob    -   blob containing the object
-    //              property -  id of the property
-    //              member  -   id of property member
-    //              index   -   array index.
-    //              hashVal -   the retrieved value.
-    //              strVal  -   the string representation, if there is one otherwise NULL.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    //              errorCode - NoError or UnableToDereferenceProperty.
-    // Returns:     -
-    // Comments:    Get a hashed id member defined in a property supporeted by the object. The value is retrived from the blob.
-    DOTS_KERNEL_API void DotsC_GetHashedIdProperty(const char * const blob,
-                                                   const DotsC_TypeId property,
-                                                   const DotsC_MemberIndex member,
-                                                   const DotsC_ArrayIndex index,
-                                                   DotsC_Int64 & hashVal,
-                                                   const char * & strVal,
-                                                   bool & isNull,
-                                                   bool & isChanged,
-                                                   DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_GetEntityIdProperty
-    // Parameters:  blob    -   blob containing the object
-    //              property -  id of the property
-    //              member  -   id of property member
-    //              index   -   array index.
-    //              val     -   the retrieved value.
-    //              instanceIdStr - the string representation, if there is one otherwise NULL.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    //              errorCode - NoError or UnableToDereferenceProperty.
-    // Returns:     -
-    // Comments:    Get a object id member defined in a property supporeted by the object. The value is retrived from the blob.
-    DOTS_KERNEL_API void DotsC_GetEntityIdProperty(const char * const blob,
-                                                   const DotsC_TypeId property,
-                                                   const DotsC_MemberIndex member,
-                                                   const DotsC_ArrayIndex index,
-                                                   DotsC_EntityId & val,
-                                                   const char * & instanceIdStr,
-                                                   bool & isNull,
-                                                   bool & isChanged,
-                                                   DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_GetObjectProperty
-    // Parameters:  blob    -   blob containing the object
-    //              property -  id of the property
-    //              member  -   id of property member
-    //              index   -   array index.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    //              errorCode - NoError or UnableToDereferenceProperty.
-    // Returns:     -
-    // Comments:    Get a object member defined in a property supporeted by the object. The value is retrived from the blob.
-    DOTS_KERNEL_API void DotsC_GetObjectProperty(const char * const blob,
-                                                 const DotsC_TypeId property,
-                                                 const DotsC_MemberIndex member,
-                                                 const DotsC_ArrayIndex index,
-                                                 const char * & val,
-                                                 bool & isNull,
-                                                 bool & isChanged,
-                                                 DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_GetBinaryProperty
-    // Parameters:  blob    -   blob containing the object
-    //              property -  id of the property
-    //              member  -   id of property member
-    //              index   -   array index.
-    //              val     -   the retrieved value.
-    //              size     -  number of bytes in val.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    //              errorCode - NoError or UnableToDereferenceProperty.
-    // Returns:     -
-    // Comments:    Get a object member defined in a property supporeted by the object. The value is retrived from the blob.
-    DOTS_KERNEL_API void DotsC_GetBinaryProperty(const char * const blob,
-                                                 const DotsC_TypeId property,
-                                                 const DotsC_MemberIndex member,
-                                                 const DotsC_ArrayIndex index,
-                                                 const char * & val,
-                                                 DotsC_Int32 & size,
-                                                 bool & isNull,
-                                                 bool & isChanged,
-                                                 DotsC_ErrorCode & errorCode);
-
-    //************************************************************************************
-    //* Functions for setting property member values
-    //************************************************************************************
-    // Function:    DotsC_SetNullProperty
-    // Parameters:  blob        -   blob containing the member.
-    //              property    -   id of the property
-    //              member      -   id of the member
-    //              index       -   array index of member. Shall be 0 if member is not an array.
-    //              errorCode   -   NoError, UnableToDereferenceProperty or ReadOnlyProperty.
-    // Returns:     -
-    // Comments:    Sets the property member to null.
-    DOTS_KERNEL_API void DotsC_SetNullProperty(char * & blob,
-                                               const DotsC_TypeId property,
-                                               const DotsC_MemberIndex member,
-                                               const DotsC_ArrayIndex index,
-                                               DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_SetBooleanProperty
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              property -  id of the property
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    //              errorCode   -   NoError, UnableToDereferenceProperty or ReadOnlyProperty.
-    // Returns:     -
-    // Comments:    Sets the value for a boolean property member.
-    DOTS_KERNEL_API void DotsC_SetBooleanProperty(const bool val,
-                                                  char * & blob,
-                                                  const DotsC_TypeId property,
-                                                  const DotsC_MemberIndex member,
-                                                  const DotsC_ArrayIndex index,
-                                                  DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_SetEnumerationProperty
-    // Parameters:  val     -   the value to be set
-    //              enumId  -   id of enumeration type
-    //              blob    -   blob containing the member.
-    //              property -  id of the property
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    //              isMismatch - true if there is mismatch between caller and dots.
-    //              errorCode   -   NoError, UnableToDereferenceProperty or ReadOnlyProperty.
-    // Returns:     -
-    // Comments:    Sets the value for a enumeration property member.
-    DOTS_KERNEL_API void DotsC_SetEnumerationProperty(const DotsC_EnumerationValue val,
-                                                      char * & blob,
-                                                      const DotsC_TypeId property,
-                                                      const DotsC_MemberIndex member,
-                                                      const DotsC_ArrayIndex index,
-                                                      DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_SetInt32Property
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              property -  id of the property
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    //              errorCode   -   NoError, UnableToDereferenceProperty or ReadOnlyProperty.
-    // Returns:     -
-    // Comments:    Sets the value for a 32-bits integer property member.
-    DOTS_KERNEL_API void DotsC_SetInt32Property(const DotsC_Int32 val,
-                                                char * & blob,
-                                                const DotsC_TypeId property,
-                                                const DotsC_MemberIndex member,
-                                                const DotsC_ArrayIndex index,
-                                                DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_SetInt64Property
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              property -  id of the property
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    //              errorCode   -   NoError, UnableToDereferenceProperty or ReadOnlyProperty.
-    // Returns:     -
-    // Comments:    Sets the value for a 64-bits integer property member.
-    DOTS_KERNEL_API void DotsC_SetInt64Property(const DotsC_Int64 val,
-                                                char * & blob,
-                                                const DotsC_TypeId property,
-                                                const DotsC_MemberIndex member,
-                                                const DotsC_ArrayIndex index,
-                                                DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_SetFloat32Property
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              property -  id of the property
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    //              errorCode   -   NoError, UnableToDereferenceProperty or ReadOnlyProperty.
-    // Comments:    Sets the value for a 32-bits float property member.
-    DOTS_KERNEL_API void DotsC_SetFloat32Property(const DotsC_Float32 val,
-                                                  char * & blob,
-                                                  const DotsC_TypeId property,
-                                                  const DotsC_MemberIndex member,
-                                                  const DotsC_ArrayIndex index,
-                                                  DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_SetFloat64Property
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              property -  id of the property
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    //              errorCode   -   NoError, UnableToDereferenceProperty or ReadOnlyProperty.
-    // Returns:     -
-    // Comments:    Sets the value for a 64-bits float property member.
-    DOTS_KERNEL_API void DotsC_SetFloat64Property(const DotsC_Float64 val,
-                                                  char * & blob,
-                                                  const DotsC_TypeId property,
-                                                  const DotsC_MemberIndex member,
-                                                  const DotsC_ArrayIndex index,
-                                                  DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_SetStringProperty
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              property -  id of the property
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    //              errorCode   -   NoError, UnableToDereferenceProperty or ReadOnlyProperty.
-    // Returns:     -
-    // Comments:    Sets the value for a string property member.
-    DOTS_KERNEL_API void DotsC_SetStringProperty(const char * const val,
-                                                 char * & blob,
-                                                 const DotsC_TypeId property,
-                                                 const DotsC_MemberIndex member,
-                                                 const DotsC_ArrayIndex index,
-                                                 DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_SetTypeIdProperty
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              property -  id of the property
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    //              errorCode   -   NoError, UnableToDereferenceProperty or ReadOnlyProperty.
-    // Returns:     -
-    // Comments:    Sets the value for a type id property member.
-    DOTS_KERNEL_API void DotsC_SetTypeIdProperty(const DotsC_TypeId val,
-                                                 char * & blob,
-                                                 const DotsC_TypeId property,
-                                                 const DotsC_MemberIndex member,
-                                                 const DotsC_ArrayIndex index,
-                                                 DotsC_ErrorCode & errorCode);
-
-
-    // Function:    DotsC_SetEntityIdProperty
-    // Parameters:  val     -   the value to be set
-    //              instanceIdStr - the string rep if there is one, otherwise NULL
-    //              blob    -   blob containing the member.
-    //              property -  id of the property
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    //              errorCode   -   NoError, UnableToDereferenceProperty or ReadOnlyProperty.
-    // Returns:     -
-    // Comments:    Sets the value for a object id property member.
-    DOTS_KERNEL_API void DotsC_SetHashedIdProperty(const DotsC_Int64 hashVal,
-                                                   const char * const strVal,
-                                                   char * & blob,
-                                                   const DotsC_TypeId property,
-                                                   const DotsC_MemberIndex member,
-                                                   const DotsC_ArrayIndex index,
-                                                   DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_SetEntityIdProperty
-    // Parameters:  val     -   the value to be set
-    //              instanceIdStr - the string rep if there is one, otherwise NULL
-    //              blob    -   blob containing the member.
-    //              property -  id of the property
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    //              errorCode   -   NoError, UnableToDereferenceProperty or ReadOnlyProperty.
-    // Returns:     -
-    // Comments:    Sets the value for a object id property member.
-    DOTS_KERNEL_API void DotsC_SetEntityIdProperty(const DotsC_EntityId& val,
-                                                   const char * const instanceIdStr,
-                                                   char * & blob,
-                                                   const DotsC_TypeId property,
-                                                   const DotsC_MemberIndex member,
-                                                   const DotsC_ArrayIndex index,
-                                                   DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_SetObjectProperty
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              property -  id of the property
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    //              errorCode   -   NoError, UnableToDereferenceProperty or ReadOnlyProperty.
-    // Returns:     -
-    // Comments:    Sets the value for a object property member.
-    DOTS_KERNEL_API void DotsC_SetObjectProperty(const char * const val,
-                                                 char * & blob,
-                                                 const DotsC_TypeId property,
-                                                 const DotsC_MemberIndex member,
-                                                 const DotsC_ArrayIndex index,
-                                                 DotsC_ErrorCode & errorCode);
-
-    // Function:    DotsC_SetBinaryProperty
-    // Parameters:  val     -   the value to be set
-    //              size    -   number of bytes to be written to the blob
-    //              blob    -   blob containing the member.
-    //              property -  id of the property
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    //              errorCode   -   NoError, UnableToDereferenceProperty or ReadOnlyProperty.
-    // Returns:     -
-    // Comments:    Sets the value for a string property member.
-    DOTS_KERNEL_API void DotsC_SetBinaryProperty(const char * const val,
-                                                 const DotsC_Int32 size,
-                                                 char * & blob,
-                                                 const DotsC_TypeId property,
-                                                 const DotsC_MemberIndex member,
-                                                 const DotsC_ArrayIndex index,
-                                                 DotsC_ErrorCode & errorCode);
-
->>>>>>> .merge-right.r2747
-    //*********************************
-<<<<<<< .working
-=======
-    //* For debug
-    //*********************************
-    // Function:    DotsC_DumpClassDescriptions
-    // Parameters:  -
-    // Returns:     -
-    // Comments:    Prints all type information to standard output.
-    DOTS_KERNEL_API void DotsC_DumpClassDescriptions();
-
-    // Function:    DotsC_DumpMemoryBlockInfo
-    // Parameters:  -
-    // Returns:     -
-    // Comments:    Prints shared memory pool status to standard output.
-    DOTS_KERNEL_API void DotsC_DumpMemoryBlockInfo();
 
     //*********************************
->>>>>>> .merge-right.r2747
     //* For "real classes"
     //*********************************
 
@@ -1661,16 +1153,6 @@ extern "C"
                                                               char * const blob,
                                                               const DotsC_MemberIndex member,
                                                               const DotsC_ArrayIndex index);
-<<<<<<< .working
-=======
-    /*
-      DOTS_KERNEL_API void DotsC_SetEnumerationMemberInPreallocated(const DotsC_EnumerationValue val,
-      const bool isNull,
-      const bool isChanged,
-      char * const blob,
-      const DotsC_MemberIndex member,
-      const DotsC_ArrayIndex index);
->>>>>>> .merge-right.r2747
 
     DOTS_KERNEL_API void DotsC_SetInt32MemberInPreallocated(const DotsC_Int32 val,
                                                             const bool isNull,
@@ -1917,19 +1399,13 @@ extern "C"
                                                           const char * & val,
                                                           DotsC_Int32 & size);
     
-    DOTS_KERNEL_API void DotsC_SetException(const DotsC_TypeId exceptionId,
-                                            const char * const description);
-
-<<<<<<< .working
     //************************************************************************************
     //* Library exception handling
     //************************************************************************************
-    DOTS_KERNEL_API void CALLING_CONVENTION DotsC_SetException(const DotsC_TypeId exceptionId,
-                                                               const char * const description);
-=======
-    DOTS_KERNEL_API void DotsC_AppendExceptionDescription(const char * const moreDescription);
->>>>>>> .merge-right.r2747
+    DOTS_KERNEL_API void DotsC_SetException(const DotsC_TypeId exceptionId,
+                                            const char * const description);
 
+    DOTS_KERNEL_API void DotsC_AppendExceptionDescription(const char * const moreDescription);
 
     DOTS_KERNEL_API void DotsC_GetAndClearException(DotsC_TypeId & exceptionId,
                                                     char * & description,
@@ -1961,15 +1437,15 @@ extern "C"
                                                      const DotsC_Int32 bufSize, 
                                                      DotsC_Int32 & resultSize);
 
-    DOTS_KERNEL_API const char* CALLING_CONVENTION DotsC_GetDouFilePath(const DotsC_TypeId typeId);
+    DOTS_KERNEL_API const char* DotsC_GetDouFilePath(const DotsC_TypeId typeId);
 
 
     // Function:    DotsC_TypeRepositoryLoadedByThisProcess
     // Returns:     True if this process created the shared memory and loaded the type repository
     // Comments:    Check if this process created and the shared memory and loaded type repository
     //              or if it just opened it (i.e someone else already created it for us).
-    DOTS_KERNEL_API bool CALLING_CONVENTION DotsC_TypeRepositoryLoadedByThisProcess();
-
+    DOTS_KERNEL_API bool DotsC_TypeRepositoryLoadedByThisProcess();
+    
     // Function:    DotsC_GetTypeDescription
     // Parameters:  typeId      -   Type to describe. If 0 all types will be completely described. Very much text.
     //              buf         -   Buffer where file text description will be put, will be null terminated.
@@ -1981,10 +1457,10 @@ extern "C"
     //                              Includes the null termination at the end.
     // Returns:     -
     // Comments:    Get a text description of a type or the complete type repository.
-    DOTS_KERNEL_API void CALLING_CONVENTION DotsC_GetTypeDescription(const DotsC_TypeId typeId,
-                                                                     char * const buf,
-                                                                     const DotsC_Int32 bufSize,
-                                                                     DotsC_Int32 & resultSize);
+    DOTS_KERNEL_API void DotsC_GetTypeDescription(const DotsC_TypeId typeId,
+                                                  char * const buf,
+                                                  const DotsC_Int32 bufSize,
+                                                  DotsC_Int32 & resultSize);
 }
 
 
