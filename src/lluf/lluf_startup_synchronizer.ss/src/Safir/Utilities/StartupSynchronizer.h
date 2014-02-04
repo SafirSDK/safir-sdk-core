@@ -24,20 +24,20 @@
 #ifndef __LLUF_STARTUP_SYNCHRONIZER_H__
 #define __LLUF_STARTUP_SYNCHRONIZER_H__
 
-#if defined _MSC_VER
-    #ifdef lluf_startup_synchronizer_EXPORTS
-        #define LLUF_SS_API __declspec(dllexport)
-    #else
-        #define LLUF_SS_API __declspec(dllimport)
-        #pragma comment(lib , "lluf_startup_synchronizer.lib")
-    #endif
-#elif defined __GNUC__
-    #define LLUF_SS_API
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef lluf_startup_synchronizer_EXPORTS
+#  define LLUF_STARTUP_SYNCHRONIZER_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define LLUF_STARTUP_SYNCHRONIZER_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "lluf_startup_synchronizer"
+#  define SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
+#define LLUF_STARTUP_SYNCHRONIZER_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
-#include <string>
 
 
 #ifdef _MSC_VER
@@ -107,7 +107,7 @@ namespace Utilities
      * Note that multiple threads within a process may call these functions simultaneously
      * on *different* instances with different arguments to no ill effect.
      */
-    class LLUF_SS_API StartupSynchronizer:
+    class LLUF_STARTUP_SYNCHRONIZER_API StartupSynchronizer:
         private boost::noncopyable
     {
     public:

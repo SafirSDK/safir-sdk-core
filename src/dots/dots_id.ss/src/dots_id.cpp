@@ -50,7 +50,7 @@
 #endif
 
 
-boost::int64_t __cdecl DotsId_Generate64(const char* str)
+boost::int64_t DotsId_Generate64(const char* str)
 {
     md5_state_s md5;
     md5_init(&md5);
@@ -163,7 +163,7 @@ private:
 boost::once_flag RandomGenerator::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
 
-boost::int64_t __cdecl DotsId_GenerateRandom64()
+boost::int64_t DotsId_GenerateRandom64()
 {
     return RandomGenerator::Instance().Generate();
 }

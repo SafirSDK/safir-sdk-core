@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2012-2013 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
-* Created by: Lars Hagström / lars@foldspace.nu
+* Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
 *
@@ -22,19 +22,35 @@
 *
 ******************************************************************************/
 
-#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+/* This file is inspired by boost/config/auto_link.hpp, but has 
+ * far fewer options.
+ *
+ * Define SAFIR_LIBRARY_NAME to the name of the library, e.g. dots_cpp 
+ *
+ * For an example of how to use it check out UtilsExportDefs.h from lluf_utils.
+ */
 
-#define EXPORT SAFIR_HELPER_DLL_EXPORT
+#if !defined (SAFIR_LIBRARY_NAME)
+#  error "SAFIR_LIBRARY_NAME must be defined when using AutoLink.h"
+#endif
 
-extern "C"
-{
-    EXPORT double MyGetTimeUtc()
-    {
-        return 10101.0;
-    }
 
-    EXPORT int MyGetLocalTimeOffset()
-    {
-        return 5300;
-    }
-}
+#if defined (_MSC_VER) 
+
+#  if defined(NDEBUG) || defined(SAFIR_NO_DEBUG_LIBRARY_SUFFIX)
+#    define SAFIR_BUILD_TYPE
+#  else
+#    define SAFIR_BUILD_TYPE "d"
+#  endif
+
+#  pragma comment(lib, SAFIR_LIBRARY_NAME SAFIR_BUILD_TYPE ".lib")
+
+#  undef SAFIR_BUILD_TYPE
+
+#endif
+
+#undef SAFIR_LIBRARY_NAME
+
+#ifdef SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#  undef SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#endif

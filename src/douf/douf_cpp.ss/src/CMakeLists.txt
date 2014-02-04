@@ -15,8 +15,6 @@ if (NOT MSVC)
     TARGET_LINK_LIBRARIES(douf_time_cpp douf_time_library dots_generated-cpp)
 endif()
 
-ADD_DEFINITIONS(-DDOUF_TIME_CPP_EXPORTS)
-
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)

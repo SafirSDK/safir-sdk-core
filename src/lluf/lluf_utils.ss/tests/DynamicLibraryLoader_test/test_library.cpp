@@ -33,7 +33,7 @@
 #    define ANOTHER_CALLING_CONVENTION
 #  endif
 #elif defined __GNUC__
-#  define EXPORT
+#  define EXPORT __attribute__ ((visibility ("default")))
 #  if defined (__i386)
 #    define STANDARD_CALLING_CONVENTION __attribute__((cdecl))
 #    define ANOTHER_CALLING_CONVENTION __attribute__((stdcall))

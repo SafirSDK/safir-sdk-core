@@ -9,8 +9,6 @@ FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 FILE(GLOB dose_com_sources ${SAFIR_SDK}/include/Safir/Dob/Internal/DoseComAux/*.cpp)
 
-ADD_DEFINITIONS(-DDOSE_EXPORTS)
-
 ADD_LIBRARY(dose_test_util SHARED ${sources} ${dose_com_sources} ${headers})
 
 INSTALL(DIRECTORY Safir 

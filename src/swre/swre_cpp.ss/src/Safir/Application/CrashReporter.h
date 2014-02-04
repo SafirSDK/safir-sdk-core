@@ -33,7 +33,7 @@ namespace Application
     /**
      * Provides methods to start and stop the crash reporting functionality.
      */
-    class SWRE_API CrashReporter
+    class SWRE_INTERFACE_CPP_API CrashReporter
     {
     public:
         /**

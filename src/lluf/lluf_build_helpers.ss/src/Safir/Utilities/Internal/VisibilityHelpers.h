@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2014 (http://safir.sourceforge.net)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
 *******************************************************************************
 *
@@ -21,32 +21,27 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-/* This file is inspired by boost/config/auto_link.hpp, but has 
- * far fewer options.
- *
- * Define SAFIR_LIBRARY_NAME to the name of the library, e.g. dots_cpp 
- *
- * For an example of how to use it check out UtilsExportDefs.h from lluf_utils.
- */
-
-#if !defined (SAFIR_LIBRARY_NAME)
-#  error "SAFIR_LIBRARY_NAME must be defined when using AutoLink.h"
-#endif
+#ifndef __LLUF_VISIBILITY_HELPERS_H__
+#define __LLUF_VISIBILITY_HELPERS_H__
 
 
-#if defined (_MSC_VER) 
-
-#  ifdef NDEBUG
-#    define SAFIR_BUILD_TYPE
+// Generic helper definitions for shared library support
+#if defined _WIN32 || defined __CYGWIN__
+#  define SAFIR_HELPER_DLL_IMPORT __declspec(dllimport)
+#  define SAFIR_HELPER_DLL_EXPORT __declspec(dllexport)
+#  define SAFIR_HELPER_DLL_LOCAL
+#else
+#  if __GNUC__ >= 4
+#    define SAFIR_HELPER_DLL_IMPORT __attribute__ ((visibility ("default")))
+#    define SAFIR_HELPER_DLL_EXPORT __attribute__ ((visibility ("default")))
+#    define SAFIR_HELPER_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
 #  else
-#    define SAFIR_BUILD_TYPE "d"
+#    define SAFIR_HELPER_DLL_IMPORT
+#    define SAFIR_HELPER_DLL_EXPORT
+#    define SAFIR_HELPER_DLL_LOCAL
 #  endif
+#endif
 
-#  pragma comment(lib, SAFIR_LIBRARY_NAME SAFIR_BUILD_TYPE ".lib")
-
-#undef SAFIR_BUILD_TYPE
 
 #endif
 
-#undef SAFIR_LIBRARY_NAME

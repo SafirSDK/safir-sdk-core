@@ -38,6 +38,7 @@
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/DistributionChannelParameters.h>
 #include <boost/thread.hpp>
+#include <boost/timer.hpp>
 #include <iostream>
 
 class ActionSender
@@ -122,10 +123,22 @@ private:
 
     static void Timeout(const int which)
     {
+        boost::timer doublecheck;
         try
         {
-            boost::this_thread::sleep(boost::posix_time::minutes(5));
+            boost::this_thread::sleep(boost::posix_time::seconds(60)*10); //ten minutes
+
+            try
+            {
+                boost::this_thread::interruption_point();
+            }
+            catch (const boost::thread_interrupted&)
+            {
+                std::wcout << "BUG IN Boost.Thread!" << std::endl;
+            }
+
             std::wcout << "Read from partner " << which << " timed out!" << std::endl;
+            std::wcout << "elapsed time " << doublecheck.elapsed() << std::endl;
             exit(31);
         }
         catch (const boost::thread_interrupted&)
@@ -151,6 +164,8 @@ private:
             if (reply != std::string("ok"))
             {
                 std::wcout << "Got unexpected reply: '" << std::wstring(reply,reply+3) << "' from " << which << std::endl;
+                timeout.interrupt();
+                timeout.join();
                 throw std::logic_error("Got unexpected reply!");
             }
         }

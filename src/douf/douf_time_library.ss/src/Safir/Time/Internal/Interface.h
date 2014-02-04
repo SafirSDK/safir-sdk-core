@@ -24,24 +24,19 @@
 #ifndef __DOUF_TIME_LIBRARY_H
 #define __DOUF_TIME_LIBRARY_H
 
-#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
-#if defined _MSC_VER
-#  ifdef DOUF_TIME_EXPORTS
-#    define DOUF_TIME_API __declspec(dllexport)
-#  else
-#    define DOUF_TIME_API __declspec(dllimport)
-#    pragma comment( lib, "douf_time_library.lib" )
-#  endif
-#  define CALLING_CONVENTION __cdecl
-#elif defined __GNUC__
-#  define DOUF_TIME_API
-#  if defined (__i386)
-#    define CALLING_CONVENTION __attribute__((cdecl))
-#  else
-#    define CALLING_CONVENTION
-#  endif
+#ifdef douf_time_library_EXPORTS
+#  define DOUF_TIME_LIBRARY_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define DOUF_TIME_LIBRARY_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "douf_time_library"
+#  define SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
+#define DOUF_TIME_LIBRARY_LOCAL SAFIR_HELPER_DLL_LOCAL
+
+#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -52,13 +47,13 @@ extern "C"
     // Get current UTC time
     // If success is false there is a configuration error!
     //----------------------------------------------
-    DOUF_TIME_API void CALLING_CONVENTION DoufTimeC_GetUtcTime(DotsC_Float64& utcTime, bool& success);
+    DOUF_TIME_LIBRARY_API void DoufTimeC_GetUtcTime(DotsC_Float64& utcTime, bool& success);
 
     //----------------------------------------------
     // Get local time offset according to GMT
     // If success is false there is a configuration error!
     //----------------------------------------------
-    DOUF_TIME_API void CALLING_CONVENTION DoufTimeC_GetLocalTimeOffset(DotsC_Int32& offset, bool& success);
+    DOUF_TIME_LIBRARY_API void DoufTimeC_GetLocalTimeOffset(DotsC_Int32& offset, bool& success);
 
 #ifdef __cplusplus
 }

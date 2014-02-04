@@ -59,9 +59,6 @@ if (NOT NO_CXX)
       ENDFOREACH()
     endif()
 
-    ADD_DEFINITIONS(-DDOTS_GENERATED_CPP_EXPORTS)
-
-
     TARGET_LINK_LIBRARIES(dots_generated-${prefix}-cpp dots_generated-cpp)    
 
     if (NOT MSVC)
@@ -80,7 +77,6 @@ if (NOT NO_CXX)
   # build main dots_generated-cpp
   ##
   ADD_LIBRARY(dots_generated-cpp SHARED dll_imports.cpp dll_imports.h)  
-  ADD_DEFINITIONS(-DDOTS_GENERATED_CPP_EXPORTS)
 
   if (NOT MSVC)
     TARGET_LINK_LIBRARIES(dots_generated-cpp dots_cpp dl)

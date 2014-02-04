@@ -114,7 +114,7 @@ namespace Typesystem
     static const char * err1 = "Failed to copy the exception string in UnknownException constructor";
     static const char * err2 = "Failed to extract the c_str from the std::string in what()";
 
-    class UnknownException:
+    class DOTS_CPP_API UnknownException:
         public std::exception
     {
     public:

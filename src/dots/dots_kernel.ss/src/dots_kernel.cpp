@@ -62,7 +62,7 @@ namespace
 {
     typedef Safir::Dob::Typesystem::ToolSupport::MemberStatus Status;
 
-    void CALLING_CONVENTION DeleteBytePointer(char* & ptr)
+    void DeleteBytePointer(char* & ptr)
     {
         if (ptr!=NULL)
         {

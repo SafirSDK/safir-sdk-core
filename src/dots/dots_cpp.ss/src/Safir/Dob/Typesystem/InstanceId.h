@@ -157,7 +157,7 @@ namespace Typesystem
          *
          * @return The instance id as a string.
          */
-        DOTS_API const std::wstring ToString() const;
+        DOTS_CPP_API const std::wstring ToString() const;
 
 
         /** @{ */

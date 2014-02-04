@@ -41,7 +41,7 @@ namespace Application
  * Backdoor will be called every time there is a Command aimed for
  * the given connection.
  */
-class SWRE_API BackdoorKeeper :
+class SWRE_INTERFACE_CPP_API BackdoorKeeper :
         public Safir::Dob::MessageSubscriber
 {
 public:

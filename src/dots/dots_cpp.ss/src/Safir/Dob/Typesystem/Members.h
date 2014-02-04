@@ -53,7 +53,7 @@ namespace Members
      * @return Number of members in the class.
      * @throws IllegalValueException There is no such type defined.
      */
-    DOTS_API Dob::Typesystem::Int32 GetNumberOfMembers(const Dob::Typesystem::TypeId typeId);
+    DOTS_CPP_API Dob::Typesystem::Int32 GetNumberOfMembers(const Dob::Typesystem::TypeId typeId);
 
     /**
      * Get the member index of a named member.
@@ -64,7 +64,7 @@ namespace Members
      * @throws IllegalValueException There is no such type defined or there is no such member
      *                               in the type.
      */
-    DOTS_API Dob::Typesystem::MemberIndex GetIndex(const Dob::Typesystem::TypeId typeId,
+    DOTS_CPP_API Dob::Typesystem::MemberIndex GetIndex(const Dob::Typesystem::TypeId typeId,
                                                    const std::wstring & memberName);
 
     /**
@@ -76,7 +76,7 @@ namespace Members
      * @throws IllegalValueException There is no such type defined or there is no such member
      *                               in the type.
      */
-    DOTS_API std::wstring GetName(const Dob::Typesystem::TypeId typeId,
+    DOTS_CPP_API std::wstring GetName(const Dob::Typesystem::TypeId typeId,
                                   const Dob::Typesystem::MemberIndex member);
 
     /**
@@ -91,7 +91,7 @@ namespace Members
      * @throws IllegalValueException There is no such type defined or there is no such member
      *                               in the type or the member is not an enum or object.
      */
-    DOTS_API Dob::Typesystem::TypeId GetTypeId(const Dob::Typesystem::TypeId typeId,
+    DOTS_CPP_API Dob::Typesystem::TypeId GetTypeId(const Dob::Typesystem::TypeId typeId,
                                                const Dob::Typesystem::MemberIndex member);
 
     /**
@@ -109,7 +109,7 @@ namespace Members
      * @throws IllegalValueException There is no such type defined or there is no such member
      *                               in the type.
      */
-    DOTS_API void GetInfo(const Dob::Typesystem::TypeId typeId,
+    DOTS_CPP_API void GetInfo(const Dob::Typesystem::TypeId typeId,
                           const Dob::Typesystem::MemberIndex member,
                           Dob::Typesystem::MemberType& memberType,
                           const char * & memberName,
@@ -127,7 +127,7 @@ namespace Members
      * @throws IllegalValueException There is no such class defined or there is no such member
      *                               in the type.
      */
-    DOTS_API Dob::Typesystem::Int32 GetArraySize(const Dob::Typesystem::TypeId typeId,
+    DOTS_CPP_API Dob::Typesystem::Int32 GetArraySize(const Dob::Typesystem::TypeId typeId,
                                                  const Dob::Typesystem::MemberIndex member);
 
     /**
@@ -139,7 +139,7 @@ namespace Members
      * @throws IllegalValueException There is no such class defined or there is no such member
      *                               in the type or the member is not a string.
      */
-    DOTS_API Dob::Typesystem::Int32 GetMaxStringLength(const Dob::Typesystem::TypeId typeId,
+    DOTS_CPP_API Dob::Typesystem::Int32 GetMaxStringLength(const Dob::Typesystem::TypeId typeId,
                                                        const Dob::Typesystem::MemberIndex member);
 
     /**
@@ -151,7 +151,7 @@ namespace Members
      * @throws IllegalValueException There is no such class defined or there is no such member
      *                               in the type or the member is not a string.
      */
-    DOTS_API std::wstring GetTypeName(const Dob::Typesystem::TypeId typeId,
+    DOTS_CPP_API std::wstring GetTypeName(const Dob::Typesystem::TypeId typeId,
                                       const Dob::Typesystem::MemberIndex member);
 }
 }

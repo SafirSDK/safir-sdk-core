@@ -17,8 +17,6 @@ if (NOT MSVC)
   TARGET_LINK_LIBRARIES(lluf_utils lluf_startup_synchronizer lluf_config ${Boost_LIBRARIES} dl rt)
 endif()
 
-ADD_DEFINITIONS(-DLLUF_UTILS_EXPORTS)
-
 #on windows we need the psapi library
 if (WIN32)
   TARGET_LINK_LIBRARIES(lluf_utils psapi)

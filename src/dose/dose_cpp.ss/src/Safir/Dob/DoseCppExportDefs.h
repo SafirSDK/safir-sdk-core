@@ -25,20 +25,14 @@
 #ifndef _dose_cpp_export_defs_h
 #define _dose_cpp_export_defs_h
 
-#if defined _MSC_VER
-    #ifdef DOSE_CPP_EXPORTS
-        #define DOSE_CPP_API __declspec(dllexport)
-    #else
-        #define DOSE_CPP_API __declspec(dllimport)
-        #ifndef NDEBUG
-            #pragma comment( lib, "dose_cppd.lib" )
-        #else
-            #pragma comment( lib, "dose_cpp.lib" )
-        #endif
-    #endif
-#elif defined __GNUC__
-  #define DOSE_CPP_API
-  #define __cdecl
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef dose_cpp_EXPORTS
+#  define DOSE_CPP_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define DOSE_CPP_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "dose_cpp"
+#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
 
 #endif
