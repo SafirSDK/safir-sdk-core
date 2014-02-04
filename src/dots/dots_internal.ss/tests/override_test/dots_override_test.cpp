@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 template <class T>
 std::string FileName(const T& t)
 {
-    std::string tmp=boost::filesystem::path(t->FileName()).generic_string();
+    std::string tmp=boost::filesystem::path(t->FileName()).string();
     return tmp;
 }
 
