@@ -44,7 +44,7 @@ namespace Typesystem
     /**
     * Functions for serializing objects to binary and XML forms.
     */
-    class DOTS_API Serialization
+    class DOTS_CPP_API Serialization
     {
     public:
         /**

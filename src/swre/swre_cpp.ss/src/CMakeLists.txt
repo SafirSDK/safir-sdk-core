@@ -15,8 +15,6 @@ if (NOT MSVC)
     TARGET_LINK_LIBRARIES(swre_interface_cpp dose_cpp swre_library douf_time_cpp logging_cpp)
 endif()
 
-ADD_DEFINITIONS(-DSWRE_EXPORTS)
-
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)

@@ -50,7 +50,7 @@ namespace Typesystem
      * Note: Most of these methods have no checks on them to make sure that everything
      *       has worked okay. They will just return unexpected values if something went wrong.
      */
-    class DOTS_API BlobOperations
+    class DOTS_CPP_API BlobOperations
     {
     public:
 

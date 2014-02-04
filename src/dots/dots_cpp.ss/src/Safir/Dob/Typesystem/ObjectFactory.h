@@ -55,7 +55,7 @@ namespace Typesystem
      * (this is if they receive the type id from some other application so that they cannot
      * call the Create routine of the class itself directly).
      */
-    class DOTS_API ObjectFactory
+    class DOTS_CPP_API ObjectFactory
         : private boost::noncopyable
     {
     public:

@@ -60,7 +60,7 @@ namespace Typesystem
 #pragma warning (disable:4251)
 #endif
 
-        class DOTS_API CommonExceptionBase:
+        class DOTS_CPP_API CommonExceptionBase:
             public std::exception
         {
         public:
@@ -187,7 +187,7 @@ namespace Typesystem
     * by the main loop in applications. They usually mean that something has gone very
     * wrong.
     */
-    class DOTS_API FundamentalException :
+    class DOTS_CPP_API FundamentalException :
         public Internal::CommonExceptionBase
     {
     public:
@@ -220,7 +220,7 @@ namespace Typesystem
      * are more of a dynamic nature. These exceptions are expected to be handled directly
      * by the calling function and are possible to recover from.
      */
-    class DOTS_API Exception :
+    class DOTS_CPP_API Exception :
         public Internal::CommonExceptionBase
     {
     public:
@@ -251,7 +251,7 @@ namespace Typesystem
     * A parameter in the call was invalid.
     * One of the parameters in the call was out of range or unexpected in some other way.
     */
-    class DOTS_API IllegalValueException :
+    class DOTS_CPP_API IllegalValueException :
         public FundamentalException
     {
     public:
@@ -286,7 +286,7 @@ namespace Typesystem
     * This exception is thrown if a class cannot be cast to the expected type.
     * This usually signals a programming error in the client code.
     */
-    class DOTS_API IncompatibleTypesException :
+    class DOTS_CPP_API IncompatibleTypesException :
         public FundamentalException
     {
     public:
@@ -321,7 +321,7 @@ namespace Typesystem
     * Used when there is an error that implies that there is
     *  something wrong in the configuration.
     */
-    class DOTS_API ConfigurationErrorException :
+    class DOTS_CPP_API ConfigurationErrorException :
         public FundamentalException
     {
     public:
@@ -357,7 +357,7 @@ namespace Typesystem
     *  It means that there is a programming error somewhere.
     *  Can be used instead of using assert(...).
     */
-    class DOTS_API SoftwareViolationException :
+    class DOTS_CPP_API SoftwareViolationException :
         public FundamentalException
     {
     public:
@@ -391,7 +391,7 @@ namespace Typesystem
     /**
     * Thrown when an application attempts to get the value of a member that is null.
     */
-    class DOTS_API NullException :
+    class DOTS_CPP_API NullException :
         public FundamentalException
     {
     public:
@@ -427,7 +427,7 @@ namespace Typesystem
     * Used when someone tries to set a property that is mapped
     *  to something that cannot be changed.
     */
-    class DOTS_API ReadOnlyException :
+    class DOTS_CPP_API ReadOnlyException :
         public FundamentalException
     {
     public:

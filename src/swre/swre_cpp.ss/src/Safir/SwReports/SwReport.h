@@ -73,9 +73,9 @@ namespace SwReports
      *
      * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
-    SWRE_API void SendFatalErrorReport(const std::wstring&   errorCode,
-                                       const std::wstring&   location,
-                                       const std::wstring&   text);
+    SWRE_INTERFACE_CPP_API void SendFatalErrorReport(const std::wstring&   errorCode,
+                                                     const std::wstring&   location,
+                                                     const std::wstring&   text);
 
     /**
      * Sends an Error report.
@@ -89,9 +89,9 @@ namespace SwReports
      *
      * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
-    SWRE_API void SendErrorReport(const std::wstring&   errorCode,
-                                  const std::wstring&   location,
-                                  const std::wstring&   text);
+    SWRE_INTERFACE_CPP_API void SendErrorReport(const std::wstring&   errorCode,
+                                                const std::wstring&   location,
+                                                const std::wstring&   text);
 
     /**
      * Sends a Resource report.
@@ -106,9 +106,9 @@ namespace SwReports
      *
      * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
-    SWRE_API void SendResourceReport(const std::wstring&   resourceId,
-                                     bool                  allocated,
-                                     const std::wstring&   text);
+    SWRE_INTERFACE_CPP_API void SendResourceReport(const std::wstring&   resourceId,
+                                                   bool                  allocated,
+                                                   const std::wstring&   text);
 
     /**
      * Sends a Programming Error report.
@@ -123,9 +123,9 @@ namespace SwReports
      *
      * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
-    SWRE_API void SendProgrammingErrorReport(const std::wstring&   errorCode,
-                                             const std::wstring&   location,
-                                             const std::wstring&   text);
+    SWRE_INTERFACE_CPP_API void SendProgrammingErrorReport(const std::wstring&   errorCode,
+                                                           const std::wstring&   location,
+                                                           const std::wstring&   text);
 
     /**
      * Sends a Programming Info report.
@@ -138,7 +138,7 @@ namespace SwReports
      *
      * @deprecated use Safir::Logging::SendSystemLog() instead.
      */
-    SWRE_API void SendProgramInfoReport(const std::wstring&   text);
+    SWRE_INTERFACE_CPP_API void SendProgramInfoReport(const std::wstring&   text);
 
 };
 };

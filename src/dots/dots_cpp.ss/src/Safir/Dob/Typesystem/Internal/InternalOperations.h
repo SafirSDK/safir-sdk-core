@@ -44,7 +44,7 @@ namespace Internal
      * @param blob [in] - the blob to copy.
      * @return The copied blob.
      */
-    DOTS_API char * CreateCopy(char const * const blob);
+    DOTS_CPP_API char * CreateCopy(char const * const blob);
 
     /**
      * Delete a blob.
@@ -53,7 +53,7 @@ namespace Internal
      *
      * @param blob [in,out] - the blob to delete.
      */
-    DOTS_API void Delete(char * & blob);
+    DOTS_CPP_API void Delete(char * & blob);
 
     /**
      * Set all changed flags in the blob.
@@ -61,7 +61,7 @@ namespace Internal
      * @param blob [in] - The blob to modify.
      * @param changed [in] - The value to set the change flags to.
      */
-    DOTS_API void SetChanged(char * const blob, const bool changed);
+    DOTS_CPP_API void SetChanged(char * const blob, const bool changed);
 
     /**
      * Set the change flag on a member in blob. 
@@ -73,7 +73,7 @@ namespace Internal
      * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
      * @param changed [in] - The value to set the change flag to.
      */
-    DOTS_API void SetChangedHere(char* const blob,
+    DOTS_CPP_API void SetChangedHere(char* const blob,
                                  const Dob::Typesystem::MemberIndex member,
                                  const Dob::Typesystem::ArrayIndex index,
                                  const bool changed);
@@ -87,18 +87,18 @@ namespace Internal
      * @param base [in] - Original to compare.
      * @param mine [in,out] - Compare to this and set change flags.
      */
-    DOTS_API void Diff(char const * const base,
+    DOTS_CPP_API void Diff(char const * const base,
                        char * const mine);
 
     /**
      * Generate a 64 bit hash from a string.
      */
-    DOTS_API Int64 Generate64BitHash(const std::wstring & str);
+    DOTS_CPP_API Int64 Generate64BitHash(const std::wstring & str);
 
     /**
      * Generate a random 64 bit number.
      */
-    DOTS_API Int64 GenerateRandom64Bit();
+    DOTS_CPP_API Int64 GenerateRandom64Bit();
 
     /**
      * Get the full path to the dou file that the type id represents
@@ -110,7 +110,7 @@ namespace Internal
      * @param typeId Type id
      * @returns The full path to the dou file
      */
-    DOTS_API std::wstring GetDouFilePath(const Dob::Typesystem::TypeId typeId);
+    DOTS_CPP_API std::wstring GetDouFilePath(const Dob::Typesystem::TypeId typeId);
         
 
     //These constants used to be calculated from the strings, but that caused some

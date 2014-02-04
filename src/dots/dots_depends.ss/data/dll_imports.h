@@ -24,21 +24,16 @@
 #ifndef __DOTS_DLL_IMPORTS_H__
 #define __DOTS_DLL_IMPORTS_H__
 
-#ifdef _MSC_VER
-#ifdef DOTS_GENERATED_CPP_EXPORTS
-#define GENERATED_API __declspec(dllexport)
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef dots_generated_cpp_EXPORTS
+#  define DOTS_GENERATED_CPP_API SAFIR_HELPER_DLL_EXPORT
 #else
-#define GENERATED_API __declspec(dllimport)
-#ifdef NDEBUG
-#pragma comment( lib, "dots_generated-cpp.lib" )
-#else
-#pragma comment( lib, "dots_generated-cppd.lib" )
+#  define DOTS_GENERATED_CPP_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "dots_generated-cpp"
+#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
-#endif
-#endif
-#ifdef __GNUC__
-#define GENERATED_API
-#endif
+#define DOTS_GENERATED_CPP_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 #include <boost/thread/once.hpp>
 
@@ -48,7 +43,7 @@ namespace Dob
 {
 namespace Typesystem
 {
-    class GENERATED_API Dll_Imports
+    class DOTS_GENERATED_CPP_API Dll_Imports
     {
         
     public:

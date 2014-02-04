@@ -24,6 +24,17 @@
 #ifndef __DOUF_TIME_H
 #define __DOUF_TIME_H
 
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef douf_time_cpp_EXPORTS
+#  define DOUF_TIME_CPP_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define DOUF_TIME_CPP_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "douf_time_cpp"
+#  include <Safir/Utilities/Internal/AutoLink.h>
+#endif
+#define DOUF_TIME_CPP_LOCAL SAFIR_HELPER_DLL_LOCAL
+
 #include <Safir/Dob/Typesystem/Defs.h>
 
 //disable warnings in boost
@@ -37,21 +48,6 @@
 //and enable the warnings again
 #if defined _MSC_VER
   #pragma warning (pop)
-#endif
-
-#if defined _MSC_VER
-#  ifdef DOUF_TIME_CPP_EXPORTS
-#    define DOUF_TIME_CPP_API __declspec(dllexport)
-#  else
-#    define DOUF_TIME_CPP_API __declspec(dllimport)
-#    ifdef NDEBUG
-#      pragma comment( lib, "douf_time_cpp.lib" )
-#    else
-#      pragma comment( lib, "douf_time_cppd.lib" )
-#    endif
-#  endif
-#elif defined __GNUC__
-#  define DOUF_TIME_CPP_API
 #endif
 
 namespace Safir

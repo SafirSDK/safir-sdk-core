@@ -25,24 +25,17 @@
 #ifndef _dose_test_util_h
 #define _dose_test_util_h
 
-#if defined _MSC_VER
-#  ifdef DOSE_EXPORTS
-#    define DOSE_UTIL_API __declspec(dllexport)
-#  else
-#    define DOSE_UTIL_API __declspec(dllimport)
-#    ifndef DOSE_TEST_NO_AUTOLINK
-#      pragma comment( lib, "dose_test_util.lib" )
-#    endif
-#  endif
-#  define CALLING_CONVENTION __cdecl
-#elif defined __GNUC__
-#  define DOSE_UTIL_API
-#  if defined (__i386)
-#    define CALLING_CONVENTION __attribute__((cdecl))
-#  else
-#    define CALLING_CONVENTION
-#  endif
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef dose_test_util_EXPORTS
+#  define DOSE_TEST_UTIL_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define DOSE_TEST_UTIL_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "dose_test_util"
+#  define SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
+#define DOSE_TEST_UTIL_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 #ifdef __cplusplus
 extern "C"
@@ -53,8 +46,8 @@ extern "C"
     //---------------------------------------------------------------------------
     // Dose_Com interface
     //---------------------------------------------------------------------------
-    DOSE_UTIL_API void CALLING_CONVENTION InhibitOutgoingTraffic(const bool inhibit, bool& success);
-    DOSE_UTIL_API void CALLING_CONVENTION InhibitOutgoingTrafficStatus(bool& isInhibited);
+    DOSE_TEST_UTIL_API void InhibitOutgoingTraffic(const bool inhibit, bool& success);
+    DOSE_TEST_UTIL_API void InhibitOutgoingTrafficStatus(bool& isInhibited);
 
 #ifdef __cplusplus
 }

@@ -60,7 +60,7 @@ namespace Typesystem
          * @return The number of parameters.
          * @throws IllegalValueException There is no such type defined.
          */
-        DOTS_API Dob::Typesystem::Int32 GetNumberOfParameters(const Dob::Typesystem::TypeId typeId);
+        DOTS_CPP_API Dob::Typesystem::Int32 GetNumberOfParameters(const Dob::Typesystem::TypeId typeId);
 
         /**
          * Gets index of a named parameter.
@@ -70,7 +70,7 @@ namespace Typesystem
          * @return index of the named parameter.
          * @throws IllegalValueException There is no such type or parameter defined.
          */
-        DOTS_API Dob::Typesystem::ParameterIndex GetIndex(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API Dob::Typesystem::ParameterIndex GetIndex(const Dob::Typesystem::TypeId typeId,
                                                           const std::wstring & parameterName);
 
         /**
@@ -83,7 +83,7 @@ namespace Typesystem
          * @param parameter [in] - Index of parameter.
          * @return The name of the parameter.
          */
-        DOTS_API const std::wstring GetName(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API const std::wstring GetName(const Dob::Typesystem::TypeId typeId,
                                             const Dob::Typesystem::ParameterIndex parameter);
 
         /**
@@ -96,7 +96,7 @@ namespace Typesystem
          * @param parameter [in] - Index of parameter.
          * @return The type of the parameter.
          */
-        DOTS_API MemberType GetType(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API MemberType GetType(const Dob::Typesystem::TypeId typeId,
                                     const Dob::Typesystem::ParameterIndex parameter);
 
         /**
@@ -111,7 +111,7 @@ namespace Typesystem
          * @param parameter [in] - Index of parameter.
          * @return Name of the parameter type.
          */
-        DOTS_API const std::wstring GetTypeName(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API const std::wstring GetTypeName(const Dob::Typesystem::TypeId typeId,
                                                 const Dob::Typesystem::ParameterIndex parameter);
 
         /**
@@ -124,7 +124,7 @@ namespace Typesystem
          * @param parameter [in] - Index of parameter.
          * @return The array size of the parameter, or 1 if it is not an array.
          */
-        DOTS_API Dob::Typesystem::Int32 GetArraySize(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API Dob::Typesystem::Int32 GetArraySize(const Dob::Typesystem::TypeId typeId,
                                                      const Dob::Typesystem::ParameterIndex parameter);
 
         /** @} */
@@ -143,7 +143,7 @@ namespace Typesystem
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
          */
-        DOTS_API bool GetBoolean(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API bool GetBoolean(const Dob::Typesystem::TypeId typeId,
                                  const Dob::Typesystem::ParameterIndex parameter,
                                  const Dob::Typesystem::ArrayIndex index);
 
@@ -155,7 +155,7 @@ namespace Typesystem
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
          */
-        DOTS_API Dob::Typesystem::Int32 GetEnumeration(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API Dob::Typesystem::Int32 GetEnumeration(const Dob::Typesystem::TypeId typeId,
                                                        const Dob::Typesystem::ParameterIndex parameter,
                                                        const Dob::Typesystem::ArrayIndex index);
 
@@ -167,7 +167,7 @@ namespace Typesystem
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
          */
-        DOTS_API Dob::Typesystem::Int32 GetInt32(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API Dob::Typesystem::Int32 GetInt32(const Dob::Typesystem::TypeId typeId,
                                                  const Dob::Typesystem::ParameterIndex parameter,
                                                  const Dob::Typesystem::ArrayIndex index);
 
@@ -179,7 +179,7 @@ namespace Typesystem
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
          */
-        DOTS_API Dob::Typesystem::Int64 GetInt64(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API Dob::Typesystem::Int64 GetInt64(const Dob::Typesystem::TypeId typeId,
                                                  const Dob::Typesystem::ParameterIndex parameter,
                                                  const Dob::Typesystem::ArrayIndex index);
 
@@ -191,7 +191,7 @@ namespace Typesystem
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
          */
-        DOTS_API Dob::Typesystem::Float32 GetFloat32(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API Dob::Typesystem::Float32 GetFloat32(const Dob::Typesystem::TypeId typeId,
                                                      const Dob::Typesystem::ParameterIndex parameter,
                                                      const Dob::Typesystem::ArrayIndex index);
 
@@ -203,7 +203,7 @@ namespace Typesystem
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
          */
-        DOTS_API Dob::Typesystem::Float64 GetFloat64(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API Dob::Typesystem::Float64 GetFloat64(const Dob::Typesystem::TypeId typeId,
                                                      const Dob::Typesystem::ParameterIndex parameter,
                                                      const Dob::Typesystem::ArrayIndex index);
         /**
@@ -214,7 +214,7 @@ namespace Typesystem
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
          */
-        DOTS_API const std::wstring GetString(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API const std::wstring GetString(const Dob::Typesystem::TypeId typeId,
                                               const Dob::Typesystem::ParameterIndex parameter,
                                               const Dob::Typesystem::ArrayIndex index);
 
@@ -226,7 +226,7 @@ namespace Typesystem
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
          */
-        DOTS_API Dob::Typesystem::TypeId GetTypeId(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API Dob::Typesystem::TypeId GetTypeId(const Dob::Typesystem::TypeId typeId,
                                                    const Dob::Typesystem::ParameterIndex parameter,
                                                    const Dob::Typesystem::ArrayIndex index);
 
@@ -238,7 +238,7 @@ namespace Typesystem
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
          */
-        DOTS_API const Dob::Typesystem::InstanceId GetInstanceId(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API const Dob::Typesystem::InstanceId GetInstanceId(const Dob::Typesystem::TypeId typeId,
                                                                  const Dob::Typesystem::ParameterIndex parameter,
                                                                  const Dob::Typesystem::ArrayIndex index);
 
@@ -250,7 +250,7 @@ namespace Typesystem
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
          */
-        DOTS_API const Dob::Typesystem::EntityId GetEntityId(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API const Dob::Typesystem::EntityId GetEntityId(const Dob::Typesystem::TypeId typeId,
                                                              const Dob::Typesystem::ParameterIndex parameter,
                                                              const Dob::Typesystem::ArrayIndex index);
 
@@ -262,7 +262,7 @@ namespace Typesystem
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
          */
-        DOTS_API const Dob::Typesystem::ChannelId GetChannelId(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API const Dob::Typesystem::ChannelId GetChannelId(const Dob::Typesystem::TypeId typeId,
                                                                const Dob::Typesystem::ParameterIndex parameter,
                                                                const Dob::Typesystem::ArrayIndex index);
 
@@ -274,7 +274,7 @@ namespace Typesystem
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
          */
-        DOTS_API const Dob::Typesystem::HandlerId GetHandlerId(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API const Dob::Typesystem::HandlerId GetHandlerId(const Dob::Typesystem::TypeId typeId,
                                                                const Dob::Typesystem::ParameterIndex parameter,
                                                                const Dob::Typesystem::ArrayIndex index);
 
@@ -288,7 +288,7 @@ namespace Typesystem
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
          */
-        DOTS_API const Dob::Typesystem::ObjectPtr GetObject(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API const Dob::Typesystem::ObjectPtr GetObject(const Dob::Typesystem::TypeId typeId,
                                                             const Dob::Typesystem::ParameterIndex parameter,
                                                             const Dob::Typesystem::ArrayIndex index);
 
@@ -302,7 +302,7 @@ namespace Typesystem
          * @param index [in] - Array index. If parameter is not an array this shall be 0.
          * @return Parameter value.
          */
-        DOTS_API const Dob::Typesystem::Binary GetBinary(const Dob::Typesystem::TypeId typeId,
+        DOTS_CPP_API const Dob::Typesystem::Binary GetBinary(const Dob::Typesystem::TypeId typeId,
                                                          const Dob::Typesystem::ParameterIndex parameter,
                                                          const Dob::Typesystem::ArrayIndex index);
 
