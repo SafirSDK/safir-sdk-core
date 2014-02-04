@@ -25,6 +25,7 @@
 #define __DOTS_INTERNAL_PARSE_ERROR_H__
 
 #include <sstream>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/InternalExportDefs.h>
 
 namespace Safir
 {
