@@ -158,7 +158,17 @@ namespace Typesystem
 #endif
 
     private:
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4251) //unreachable code
+#endif
+
         std::string m_what;
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
     };
 
     // -----------------------------------------------------------
