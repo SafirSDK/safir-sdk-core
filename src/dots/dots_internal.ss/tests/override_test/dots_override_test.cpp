@@ -98,7 +98,8 @@ int main(int argc, char* argv[])
 template <class T>
 std::string FileName(const T& t)
 {
-#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION != 3
+    //Old boost versions doesn't have generic_string()
+#if ((BOOST_VERSION / 100000) < 2) && ((BOOST_VERSION / 100 % 1000) < 44)
     std::string tmp=boost::filesystem::path(t->FileName()).string();
 #else
     std::string tmp=boost::filesystem::path(t->FileName()).generic_string();
