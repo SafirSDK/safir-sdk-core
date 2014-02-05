@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     {
         if (!line.empty())
         {
-            expectedToBeParsed.insert(boost::filesystem::path(line).string());
+            expectedToBeParsed.insert(boost::filesystem::path(line).make_preferred().string());
         }
     }    
 
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 template <class T>
 std::string FileName(const T& t)
 {
-    std::string tmp=boost::filesystem::path(t->FileName()).string();
+    std::string tmp=boost::filesystem::path(t->FileName()).make_preferred().string();
     return tmp;
 }
 
