@@ -221,9 +221,11 @@ namespace Internal
                 val=memberContent.get_child_optional("object");
                 if (!val)
                 {
-                    std::ostringstream os;
-                    os<<"Element <object> is missing on member '"<<md->GetName()<<"'.";
-                    throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 134);
+                    //It seems like the old parser treats this case as a null-value
+                    return;
+//                    std::ostringstream os;
+//                    os<<"Element <object> is missing on member '"<<md->GetName()<<"'.";
+//                    throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 134);
                 }
 
                 std::vector<char> insideBlob;
@@ -269,9 +271,10 @@ namespace Internal
                 }
                 catch (const boost::property_tree::ptree_error&)
                 {
-                    std::ostringstream os;
-                    os<<"Error while parsing member "<<md->GetName();
-                    throw ParseError("UglyXmlToBinary serialization error", os.str(), "", 136);
+                    //It seems like the old parser treats this case as a null-value
+//                    std::ostringstream os;
+//                    os<<"Error while parsing member "<<md->GetName();
+//                    throw ParseError("UglyXmlToBinary serialization error", os.str(), "", 136);
                 }
             }
         }

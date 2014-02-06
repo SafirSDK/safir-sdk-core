@@ -251,7 +251,7 @@ namespace SerializationUtils
             if (!BasicTypeOperations::TypeIdToTypeName(repository, tid))
             {
                 std::ostringstream os;
-                os<<"TypeId does not refer to an existing type. Specified type name: "<<memberContent.data();
+                os<<"TypeId member "<<md->GetName()<<" does not refer to an existing type. Specified type name: "<<memberContent.data();
                 throw ParseError("Serialization error", os.str(), "", 174);
             }
 
@@ -300,7 +300,7 @@ namespace SerializationUtils
             if (!BasicTypeOperations::IsOfType(repository, ObjectMemberType, tid, ObjectMemberType, EntityTypeId))
             {
                 std::ostringstream os;
-                os<<"EntityId contains a typeId that does not refer to a subtype of Safir.Dob.Entity. Specified type name: "<<*typeIdString;
+                os<<"EntityId member "<<md->GetName()<<" contains a typeId that does not refer to a subtype of Safir.Dob.Entity. Specified type name: "<<*typeIdString;
                 if (!BasicTypeOperations::TypeIdToTypeName(repository, tid))
                 {
                     os<<". By the way, the type '"<<*typeIdString<<"'' does not exist at all!";
