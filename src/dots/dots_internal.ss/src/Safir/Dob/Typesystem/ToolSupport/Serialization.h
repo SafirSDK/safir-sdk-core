@@ -77,7 +77,7 @@ namespace ToolSupport
      * Serializes binary representation of an object to xml.
      *
      * @param repository [in] - Type repository containing needed type information.
-     * @param binary [in] - Binary data to be converted.
+     * @param blob [in] - Binary data to be converted.
      * @param xml [out] - Xml result of conversion.
      * @throws Safir::Dob::Typesystem::Parser:ParseError if binary can't be serialized to xml.
      */
@@ -92,11 +92,11 @@ namespace ToolSupport
      *
      * @param repository [in] - Type repository containing needed type information.
      * @param xml [in] - Xml serialized object.
-     * @param blob [out] - Resulting binary data.
+     * @param binary [out] - Resulting binary data.
      * @throws Safir::Dob::Typesystem::Parser:ParseError if xml can't be serialized to a binary.
      */
     template <class RepositoryT>
-    void XmlToBinary(const RepositoryT* repository, const char* xml, std::vector<char>& blob)
+    void XmlToBinary(const RepositoryT* repository, const char* xml, std::vector<char>& binary)
     {
         (Internal::XmlToBlobSerializer<RepositoryT>(repository))(xml, blob);
     }
@@ -106,7 +106,7 @@ namespace ToolSupport
      *
      * @param repository [in] - Type repository containing needed type information.
      * @param blob [in] - Binary data to be converted.
-     * @param xml [out] - Json result of conversion.
+     * @param json [out] - Json result of conversion.
      * @throws Safir::Dob::Typesystem::Parser:ParseError if binary can't be serialized to json.
      */
     template <class RepositoryT>
@@ -124,7 +124,7 @@ namespace ToolSupport
      * @throws Safir::Dob::Typesystem::Parser:ParseError if json can't be serialized to a binary.
      */
     template <class RepositoryT>
-    void JsonToBinary(const RepositoryT* repository, const char* json, std::vector<char>& blob)
+    void JsonToBinary(const RepositoryT* repository, const char* json, std::vector<char>& binary)
     {
         (Internal::JsonToBlobSerializer<RepositoryT>(repository))(json, blob);
     }
