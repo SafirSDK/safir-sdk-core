@@ -98,7 +98,7 @@ namespace ToolSupport
     template <class RepositoryT>
     void XmlToBinary(const RepositoryT* repository, const char* xml, std::vector<char>& binary)
     {
-        (Internal::XmlToBlobSerializer<RepositoryT>(repository))(xml, blob);
+        (Internal::XmlToBlobSerializer<RepositoryT>(repository))(xml, binary);
     }
 
     /**
@@ -126,7 +126,7 @@ namespace ToolSupport
     template <class RepositoryT>
     void JsonToBinary(const RepositoryT* repository, const char* json, std::vector<char>& binary)
     {
-        (Internal::JsonToBlobSerializer<RepositoryT>(repository))(json, blob);
+        (Internal::JsonToBlobSerializer<RepositoryT>(repository))(json, binary);
     }
 
     /**
