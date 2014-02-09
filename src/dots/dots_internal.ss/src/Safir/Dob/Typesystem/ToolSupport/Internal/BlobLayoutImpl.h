@@ -78,6 +78,22 @@ namespace Internal
         }
     };
 
+
+#pragma pack (push)
+#pragma pack(4)
+    /** This struct is really private to BlobLayoutImpl, but because of a GCC bug
+     * which makes pragma pack inside a template be very unreliable it has to 
+     * stay outside the template class. So here it is...
+     */
+    struct BlobHeader
+    {
+        Size   size;
+        DotsC_TypeId typeId;
+    };
+#pragma pack (pop)
+
+
+
     /**
     * Operations on blobs. Creation of blobs and insertion/update of data in blobs.
     */
@@ -99,14 +115,6 @@ namespace Internal
     private:
 
 
-    #pragma pack (push)
-    #pragma pack(4)
-        struct BlobHeader
-        {
-            Size   size;
-            DotsC_TypeId typeId;
-        };
-    #pragma pack (pop)
 
         template <class T>
         static inline void Write(char* const blob, const T val)
