@@ -93,6 +93,10 @@ namespace Internal
 #pragma pack (pop)
 
 
+    BOOST_STATIC_ASSERT(sizeof(DotsC_TypeId) == 8);
+    BOOST_STATIC_ASSERT(sizeof(BlobHeader) == 12);
+    BOOST_STATIC_ASSERT(sizeof(MemberStatus) == 1);
+
 
     /**
     * Operations on blobs. Creation of blobs and insertion/update of data in blobs.
