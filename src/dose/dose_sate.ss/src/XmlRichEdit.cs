@@ -34,9 +34,6 @@ namespace Sate
     /// </summary>
     public class XmlRichEdit : System.Windows.Forms.RichTextBox
     {
-        private Font elementFont=new Font("", 8, FontStyle.Regular);
-        private Font contentFont=new Font("", 8, FontStyle.Bold);
-
         public XmlRichEdit()
         {
             this.BackColor = Color.White;
@@ -64,27 +61,5 @@ namespace Sate
 
             reader.Close();
         }
-
-        private const string BLANK = "                                                                                                    ";
-        private const int IND = 5;
-        private void Indent(int level)
-        {
-            int c=level*IND;
-            if (c>0)
-            {
-                if (c<=BLANK.Length)
-                {
-                    AppendText(BLANK.Substring(0, c));
-                }
-                else
-                {
-                    AppendText(BLANK);
-                    for (int i=0; i<c-BLANK.Length; i++)
-                        AppendText(" ");
-                }
-            }
-        }
-
-
     }
 }
