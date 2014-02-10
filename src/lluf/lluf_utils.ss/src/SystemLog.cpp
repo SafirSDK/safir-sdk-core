@@ -97,7 +97,7 @@ private:
         : m_pid(Safir::Utilities::ProcessInfo::GetPid()),
           m_processName(Safir::Utilities::ProcessInfo(m_pid).GetProcessName()),
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-          m_eventLog(ToUtf16(m_processName))
+          m_eventLog(ToUtf16(m_processName)),
 #endif
           m_nativeLogging(false),
           m_sendToSyslogServer(false),
