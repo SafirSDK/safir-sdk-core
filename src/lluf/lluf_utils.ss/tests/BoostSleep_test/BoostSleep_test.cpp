@@ -27,11 +27,13 @@
 
 void Timeout()
 {
+    boost::timer stopwatch;
     try
     {
         boost::this_thread::sleep(boost::posix_time::seconds(60)*10); //ten minutes
         
         std::wcout << "Timeout!" << std::endl;
+        std::wcout << "Elapsed time " << stopwatch.elapsed() << " seconds." << std::endl;
         exit(31);
     }
     catch (const boost::thread_interrupted&)
@@ -72,7 +74,7 @@ int main()
         thread.join();
         if (stopwatch.elapsed() > 60) //more than 1 minute!
         {
-            std::wcout << "Interrupt was too slow!" << std::endl;
+            std::wcout << "Interrupt was too slow! elapsed = " << stopwatch.elapsed() << std::endl;
             exit(14);
         }
     }
