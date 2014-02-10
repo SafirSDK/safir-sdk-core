@@ -57,9 +57,8 @@ namespace Internal
     {
         if (m_valid)
         {
-            Safir::Utilities::Internal::SystemLog().Send
-                (Safir::Utilities::Internal::SystemLog::Critical,
-                 L"Programming Error! A ResponseSender was destroyed without having been used!");
+            SEND_SYSTEM_LOG(Critical,
+                            << "Programming Error! A ResponseSender was destroyed without having been used!");
         }
     }
 

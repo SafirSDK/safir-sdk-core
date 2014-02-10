@@ -50,8 +50,8 @@ namespace Internal
 
         std::wstring str = ToUtf16(ostr.str());
         std::wcout << str;
-        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
-                                                     str);
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Alert,
+                                              str);
 
     }
 
@@ -71,8 +71,8 @@ namespace Internal
         std::wstring str = ToUtf16(ostr.str());
 
         std::wcout << str;
-        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
-                                                     str);
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Alert,
+                                              str);
     }
 
     void ErrorHandler::Error(const std::string & label,
@@ -89,8 +89,8 @@ namespace Internal
         std::wstring str = ToUtf16(ostr.str());
 
         std::wcout << str;
-        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
-                                                     str);
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Alert,
+                                              str);
     }
 }
 }

@@ -255,15 +255,15 @@ namespace Internal
     {
         std::wostringstream ostr;
         ostr << "ENSURE Failed: " << str.c_str();
-        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Critical,
-                                                     ostr.str());
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Critical,
+                                              ostr.str());
         
         const bool success = Safir::Utilities::CrashReporter::Dump();
         
         if (!success)
         {
-            Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Critical,
-                                                         L"ENSURE failed to generate a dump! It looks like CrashReporter is not started.");
+            Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Critical,
+                                                  L"ENSURE failed to generate a dump! It looks like CrashReporter is not started.");
             
         }
 
