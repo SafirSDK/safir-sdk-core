@@ -24,23 +24,52 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <iostream>
 
+class Singleton
+{
+public:
+    static Singleton& Instance()
+    {
+        static Singleton inst;
+        return inst;
+    }
+
+private:
+    Singleton()
+    {
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Alert, L"This is a log from a singleton constructor");
+    }
+
+    ~Singleton()
+    {
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Alert, L"This is a log from a singleton destructor");
+    }
+};
+
 int main()
 {
-    //using namespace Safir::Utilities::Internal;
-
     try
     {
-        Safir::Utilities::Internal::SystemLog logger;
-        logger.Send(Safir::Utilities::Internal::SystemLog::Emergency, L"This is an emergency log");
-        logger.Send(Safir::Utilities::Internal::SystemLog::Alert, L"This is an alert log");
-        logger.Send(Safir::Utilities::Internal::SystemLog::Critical, L"This is a critical log with \n newline and \t tab");
-        logger.Send(Safir::Utilities::Internal::SystemLog::Error, L"This is an error log");
-        logger.Send(Safir::Utilities::Internal::SystemLog::Warning, L"This is a warning log with \n newline and \t tab");
-        logger.Send(Safir::Utilities::Internal::SystemLog::Notice, L"This is a notice log");
-        logger.Send(Safir::Utilities::Internal::SystemLog::Informational, L"This is an informational log with \n newline and \t tab");
-        logger.Send(Safir::Utilities::Internal::SystemLog::Debug, L"This is a debug log with \n newline and \t tab");
+        Singleton::Instance();
+
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Emergency, L"This is an emergency log");
+
+        Safir::Utilities::Internal::Log::Close();
+        // The following logs should still be sent since a Send implicitly opens the log
+
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Alert, L"This is an alert log");
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Critical, L"This is a critical log with \n newline and \t tab");
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Error, L"This is an error log");
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Warning, L"This is a warning log with \n newline and \t tab");
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Notice, L"This is a notice log");
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Informational, L"This is an informational log with \n newline and \t tab");
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Debug, L"This is a debug log with \n newline and \t tab");
+
+        Safir::Utilities::Internal::Log::Close();
+        Safir::Utilities::Internal::Log::Open();
 
         SEND_SYSTEM_LOG(Error, << L"This is another error log");
+
+        Safir::Utilities::Internal::Log::Close();
     }
     catch (const std::exception& e)
     {

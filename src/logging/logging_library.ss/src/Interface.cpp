@@ -31,8 +31,8 @@ void LoggingC_SendSystemLog(const boost::int32_t severity,
 {
     try
     {
-        Safir::Utilities::Internal::SystemLog().Send
-            (static_cast<Safir::Utilities::Internal::SystemLog::Severity>(severity),
+        Safir::Utilities::Internal::Log::Send
+            (static_cast<Safir::Utilities::Internal::Log::Severity>(severity),
              Safir::Utilities::Internal::ToUtf16(message));
     }
     catch (...)
