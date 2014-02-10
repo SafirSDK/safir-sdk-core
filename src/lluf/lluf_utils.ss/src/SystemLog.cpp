@@ -246,31 +246,31 @@ private:
         WORD eventType = 0;
         switch (severity)
         {
-            case SystemLog::Emergency:
-            case SystemLog::Alert:
-            case SystemLog::Critical:
-            case SystemLog::Error:
+            case Log::Emergency:
+            case Log::Alert:
+            case Log::Critical:
+            case Log::Error:
             {
                 eventType = EVENTLOG_ERROR_TYPE;
             }
             break;
 
-            case SystemLog::Warning:
+            case Log::Warning:
             {
                 eventType = EVENTLOG_WARNING_TYPE;
             }
             break;
 
-            case SystemLog::Notice:
-            case SystemLog::Informational:
-            case SystemLog::Debug:
+            case Log::Notice:
+            case Log::Informational:
+            case Log::Debug:
             {
                 eventType = EVENTLOG_INFORMATION_TYPE;
             }
             break;
 
             default:
-                FatalError(L"SystemLogImpl::SendNativeLog: Unknown severity!");
+                FatalError(L"LogImpl::SendNativeLog: Unknown severity!");
         }
 
         boost::lock_guard<boost::mutex> lck(m_lock);
