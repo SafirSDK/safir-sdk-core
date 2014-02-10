@@ -378,9 +378,10 @@ namespace Dob
          * Called when an entity is deleted.
          *
          * @param [in] entityProxy - Proxy object containing deleted entity information.
+         * @param [in] deprecated - Deprecated flag.
          */
         virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
-                                     const bool                    /*deprecated*/) = 0;
+                                     const bool                    deprecated) = 0;
 
     private:
         virtual EntitySubscriber * ToEntitySubscriber() {return this;}
