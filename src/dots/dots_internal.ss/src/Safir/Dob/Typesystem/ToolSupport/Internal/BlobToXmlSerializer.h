@@ -63,32 +63,27 @@ namespace Internal
 
         void operator()(const char* blob, std::ostream& os) const
         {
-            boost::property_tree::ptree content;
-            SerializeMembers(blob, content, false);
-            boost::property_tree::ptree root;
-            root.push_back(std::make_pair(GetClass(blob)->GetName(), content));
-            boost::property_tree::xml_parser::write_xml(os, root);
+            os<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+            const ClassDescriptionType* cd=GetClass(blob);
+            os<<"<"<<cd->GetName()<<">";
+            SerializeMembers(blob, os);
+            os<<"</"<<cd->GetName()<<">";
         }
 
     private:
         const RepositoryType* m_repository;
         const BlobLayoutImpl<RepositoryType> m_blobLayout;
 
-        void SerializeMembers(const char* blob, boost::property_tree::ptree& content, bool addTypeAttr) const
+        void SerializeMembers(const char* blob, std::ostream& os) const
         {
             const ClassDescriptionType* cd=GetClass(blob);
-
-            if (addTypeAttr)
-            {
-                content.add("<xmlattr>.type", cd->GetName());
-            }
 
             for (DotsC_MemberIndex memberIx=0; memberIx<cd->GetNumberOfMembers(); ++memberIx)
             {
                 const MemberDescriptionType* md=cd->GetMember(memberIx);
                 if (!md->IsArray()) //normal member
                 {
-                    SerializeMember(blob, md, memberIx, 0, md->GetName(), content);
+                    SerializeMember(blob, md, memberIx, 0, md->GetName(), os);
                 }
                 else //array member
                 {
@@ -107,16 +102,43 @@ namespace Internal
                         break;
                     }
 
-                    boost::property_tree::ptree arrayValues;
-                    for (DotsC_ArrayIndex arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
+                    //find first non-null value in array
+                    DotsC_ArrayIndex arrIx=0;
+                    while (arrIx<md->GetArraySize())
                     {
-                        SerializeMember(blob, md, memberIx, arrIx, typeName, arrayValues);
+                        MemberStatus status=m_blobLayout.GetStatus(blob, memberIx, arrIx);
+                        if (!status.IsNull())
+                        {
+                            break;
+                        }
+                        ++arrIx;
                     }
-                    if (arrayValues.size()>0) //only add array element if there are non-null values
+
+                    if (arrIx<md->GetArraySize()) //only add array if it contains non-null values
                     {
-                        content.add_child(md->GetName(), arrayValues);
+                        os<<"<"<<md->GetName()<<">";
+                        for (DotsC_ArrayIndex arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
+                        {
+                            SerializeMember(blob, md, memberIx, arrIx, typeName, os);
+                        }
+                        os<<"</"<<md->GetName()<<">";
                     }
                 }
+            }
+        }
+
+        void WriteStartElement(const char* elementName,
+                               DotsC_ArrayIndex arrayIndex,
+                               bool isArray,
+                               std::ostream& os) const
+        {
+            if (!isArray)
+            {
+                os<<"<"<<elementName<<">";
+            }
+            else
+            {
+                os<<"<"<<elementName<<" index=\""<<arrayIndex<<"\">";
             }
         }
 
@@ -125,9 +147,9 @@ namespace Internal
                              DotsC_MemberIndex memberIndex,
                              DotsC_ArrayIndex arrayIndex,
                              const char* elementName,
-                             boost::property_tree::ptree& pt) const
+                             std::ostream& os) const
         {
-            boost::property_tree::ptree* arrayElementPt=NULL;
+
 
             switch(md->GetMemberType())
             {
@@ -137,7 +159,9 @@ namespace Internal
                 MemberStatus status=m_blobLayout.template GetMember<bool>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    arrayElementPt=&pt.add(elementName, val ? "true" : "false");
+                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    os<<(val ? "true" : "false");
+                    os<<"</"<<elementName<<">";
                 }
             }
                 break;
@@ -149,8 +173,9 @@ namespace Internal
                 if (!status.IsNull())
                 {
                     const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
-                    pt.push_back(std::make_pair(elementName, boost::property_tree::ptree(enumVal)));
-                    arrayElementPt=&pt.back().second;
+                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    os<<enumVal;
+                    os<<"</"<<elementName<<">";
                 }
             }
                 break;
@@ -161,7 +186,9 @@ namespace Internal
                 MemberStatus status=m_blobLayout.template GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    arrayElementPt=&pt.add(elementName, val);
+                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    os<<val;
+                    os<<"</"<<elementName<<">";
                 }
             }
                 break;
@@ -172,7 +199,9 @@ namespace Internal
                 MemberStatus status=m_blobLayout.template GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    arrayElementPt=&pt.add(elementName, val);
+                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    os<<val;
+                    os<<"</"<<elementName<<">";
                 }
             }
                 break;
@@ -183,15 +212,19 @@ namespace Internal
                 MemberStatus status=m_blobLayout.template GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
+                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+
                     const char* typeName=TypeIdToString(val);
                     if (typeName)
                     {
-                        arrayElementPt=&pt.add(elementName, typeName);
+                        os<<typeName;
                     }
                     else
                     {
-                        arrayElementPt=&pt.add(elementName, val);
+                        os<<val;
                     }
+
+                    os<<"</"<<elementName<<">";
                 }
             }
                 break;
@@ -205,14 +238,16 @@ namespace Internal
                 MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, val, hashStr);
                 if (!status.IsNull())
                 {
+                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
                     if (hashStr)
                     {
-                        arrayElementPt=&pt.add(elementName, hashStr);
+                        os<<hashStr;
                     }
                     else
                     {
-                        arrayElementPt=&pt.add(elementName, val);
+                        os<<val;
                     }
+                    os<<"</"<<elementName<<">";
                 }
             }
                 break;
@@ -224,27 +259,28 @@ namespace Internal
                 MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, entId, hashStr);
                 if (!status.IsNull())
                 {
-                    boost::property_tree::ptree eid;
+                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+
                     const char* typeName=TypeIdToString(entId.typeId);
                     if (typeName)
                     {
-                        eid.add("name", typeName);
+                        os<<"<name>"<<typeName<<"</name>";
                     }
                     else
                     {
-                        eid.add("name", entId.typeId);
+                        os<<"<name>"<<entId.typeId<<"</name>";
                     }
 
                     if (hashStr)
                     {
-                        eid.add("instanceId", hashStr);
+                        os<<"<instanceId>"<<hashStr<<"</instanceId>";
                     }
                     else
                     {
-                        eid.add("instanceId", entId.instanceId);
+                        os<<"<instanceId>"<<entId.instanceId<<"</instanceId>";
                     }
 
-                    arrayElementPt=&pt.add_child(elementName, eid);
+                    os<<"</"<<elementName<<">";
                 }
             }
                 break;
@@ -256,9 +292,16 @@ namespace Internal
                 MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, strVal, size);
                 if (!status.IsNull())
                 {
-
-                    arrayElementPt=&pt.add(elementName, strVal);
-                    arrayElementPt->add("<xmlattr>.xml:space", "preserve");
+                    if (!md->IsArray())
+                    {
+                        os<<"<"<<elementName<<" xml:space=\"preserve\">";
+                    }
+                    else
+                    {
+                        os<<"<"<<elementName<<" index=\""<<arrayIndex<<"\" xml:space=\"preserve\">";
+                    }
+                    os<<strVal;
+                    os<<"</"<<elementName<<">";
                 }
             }
                 break;
@@ -270,12 +313,28 @@ namespace Internal
                 MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, obj, size);
                 if (!status.IsNull())
                 {
-                    boost::property_tree::ptree members; //Serialize without the root-element, only members
-                    BlobToXmlSerializer objParser(m_repository);
                     bool typesDiffer=m_blobLayout.GetTypeId(obj)!=md->GetTypeId();
-                    objParser.SerializeMembers(obj, members, typesDiffer); //we only need to add typeAttribute if types are not same as declared in dou (differ by inheritance)
-                    pt.push_back(std::make_pair(elementName, members));
-                    arrayElementPt=&pt.back().second;
+
+                    if (typesDiffer) //we only need to add typeAttribute if types are not same as declared in dou (differ by inheritance)
+                    {
+                        os<<"<"<<elementName<<" type=\""<<GetClass(obj)->GetName()<<"\"";
+                    }
+                    else
+                    {
+                        os<<"<"<<elementName;
+                    }
+
+                    if (!md->IsArray())
+                    {
+                        os<<">";
+                    }
+                    else
+                    {
+                        os<<" index=\""<<arrayIndex<<"\">";
+                    }
+
+                    SerializeMembers(obj, os);
+                    os<<"</"<<elementName<<">";
                 }
             }
                 break;
@@ -287,8 +346,10 @@ namespace Internal
                 MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, binary, size);
                 if (!status.IsNull())
                 {
+                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
                     std::string bin(binary, size);
-                    arrayElementPt=&pt.add(elementName, SerializationUtils::ToBase64(bin));
+                    os<<SerializationUtils::ToBase64(bin);
+                    os<<"</"<<elementName<<">";
                 }
             }
                 break;
@@ -319,7 +380,9 @@ namespace Internal
                 MemberStatus status=m_blobLayout.template GetMember<DotsC_Float32>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    arrayElementPt=&pt.add(elementName, val);
+                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    os<<classic_string_cast<std::string>(val);
+                    os<<"</"<<elementName<<">";
                 }
             }
                 break;
@@ -350,15 +413,12 @@ namespace Internal
                 MemberStatus status=m_blobLayout.template GetMember<DotsC_Float64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    arrayElementPt=&pt.add(elementName, val);
+                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    os<<classic_string_cast<std::string>(val);
+                    os<<"</"<<elementName<<">";
                 }
             }
                 break;
-            }
-
-            if (arrayElementPt!=NULL && md->IsArray())
-            {
-                arrayElementPt->add("<xmlattr>.index", arrayIndex);
             }
         }
 
