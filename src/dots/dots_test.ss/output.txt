@@ -61,12 +61,9 @@ ParameterArrays      - 55
 =====================================================
 Testing: Create routines (Types)
 =====================================================
-Create_ParameterTypes: <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.MemberTypes><Int32Member>32</Int32Member><EnumerationMember>MyFirst</EnumerationMember><TestClassMember><MyInt>-32</MyInt></TestClassMember></DotsTest.MemberTypes>
-CreateValueTypes     : <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.MemberTypes><Int32Member>32</Int32Member><EnumerationMember>MyFirst</EnumerationMember><TestClassMember><MyInt>-32</MyInt></TestClassMember></DotsTest.MemberTypes>
-Create_ValueArrays   : <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.MemberTypes><Int32Member>-32</Int32Member><EnumerationMember>MySecond</EnumerationMember><TestClassMember><MyInt>-3200</MyInt></TestClassMember></DotsTest.MemberTypes>
+Create_ParameterTypes: <?xml version="1.0" encoding="utf-8"?><DotsTest.MemberTypes><Int32Member>32</Int32Member><EnumerationMember>MyFirst</EnumerationMember><TestClassMember><MyInt>-32</MyInt></TestClassMember></DotsTest.MemberTypes>
+CreateValueTypes     : <?xml version="1.0" encoding="utf-8"?><DotsTest.MemberTypes><Int32Member>32</Int32Member><EnumerationMember>MyFirst</EnumerationMember><TestClassMember><MyInt>-32</MyInt></TestClassMember></DotsTest.MemberTypes>
+Create_ValueArrays   : <?xml version="1.0" encoding="utf-8"?><DotsTest.MemberTypes><Int32Member>-32</Int32Member><EnumerationMember>MySecond</EnumerationMember><TestClassMember><MyInt>-3200</MyInt></TestClassMember></DotsTest.MemberTypes>
 
 
 
@@ -477,30 +474,18 @@ GetName: ObjectParameter
 GetType: OBJECTMEMBERTYPE
 GetTypeName: Object
 ------------------ 
-Val: <?xml version="1.0" encoding="utf-8"?>
-<Object/>
-Item Val: <?xml version="1.0" encoding="utf-8"?>
-<Object/>
-Item Array Val: <?xml version="1.0" encoding="utf-8"?>
-<Object/>
-Property Parameter Val: <?xml version="1.0" encoding="utf-8"?>
-<Object/>
-Val 0: <?xml version="1.0" encoding="utf-8"?>
-<Object/>
-Array Item Val 0: <?xml version="1.0" encoding="utf-8"?>
-<Object/>
-Array Item Array Val 0: <?xml version="1.0" encoding="utf-8"?>
-<Object/>
-Parameter Array Val 0: <?xml version="1.0" encoding="utf-8"?>
-<Object/>
-Val 1: <?xml version="1.0" encoding="utf-8"?>
-<Object/>
-Array Item Val 1: <?xml version="1.0" encoding="utf-8"?>
-<Object/>
-Array Item Array Val 1: <?xml version="1.0" encoding="utf-8"?>
-<Object/>
-Parameter Array Val 1: <?xml version="1.0" encoding="utf-8"?>
-<Object/>
+Val: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Item Val: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Item Array Val: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Property Parameter Val: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Val 0: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Array Item Val 0: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Array Item Array Val 0: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Parameter Array Val 0: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Val 1: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Array Item Val 1: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Array Item Array Val 1: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Parameter Array Val 1: <?xml version="1.0" encoding="utf-8"?><Object></Object>
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -554,30 +539,18 @@ GetName: TestClassParameter
 GetType: OBJECTMEMBERTYPE
 GetTypeName: DotsTest.TestItem
 ------------------ 
-Val: <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.TestItem><MyInt>-32</MyInt></DotsTest.TestItem>
-Item Val: <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.TestItem><MyInt>-32</MyInt></DotsTest.TestItem>
-Item Array Val: <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.TestItem><MyInt>-32</MyInt></DotsTest.TestItem>
-Property Parameter Val: <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.TestItem><MyInt>20</MyInt></DotsTest.TestItem>
-Val 0: <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.TestItem><MyInt>3200</MyInt></DotsTest.TestItem>
-Array Item Val 0: <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.TestItem><MyInt>3200</MyInt></DotsTest.TestItem>
-Array Item Array Val 0: <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.TestItem><MyInt>3200</MyInt></DotsTest.TestItem>
-Parameter Array Val 0: <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.TestItem><MyInt>20</MyInt></DotsTest.TestItem>
-Val 1: <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.TestItem><MyInt>-3200</MyInt></DotsTest.TestItem>
-Array Item Val 1: <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.TestItem><MyInt>-3200</MyInt></DotsTest.TestItem>
-Array Item Array Val 1: <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.TestItem><MyInt>-3200</MyInt></DotsTest.TestItem>
-Parameter Array Val 1: <?xml version="1.0" encoding="utf-8"?>
-<DotsTest.TestItem><MyInt>20</MyInt></DotsTest.TestItem>
+Val: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-32</MyInt></DotsTest.TestItem>
+Item Val: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-32</MyInt></DotsTest.TestItem>
+Item Array Val: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-32</MyInt></DotsTest.TestItem>
+Property Parameter Val: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>20</MyInt></DotsTest.TestItem>
+Val 0: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>3200</MyInt></DotsTest.TestItem>
+Array Item Val 0: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>3200</MyInt></DotsTest.TestItem>
+Array Item Array Val 0: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>3200</MyInt></DotsTest.TestItem>
+Parameter Array Val 0: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>20</MyInt></DotsTest.TestItem>
+Val 1: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-3200</MyInt></DotsTest.TestItem>
+Array Item Val 1: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-3200</MyInt></DotsTest.TestItem>
+Array Item Array Val 1: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-3200</MyInt></DotsTest.TestItem>
+Parameter Array Val 1: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>20</MyInt></DotsTest.TestItem>
 Is_Null OK: true
 Is_Changed OK: true
 
