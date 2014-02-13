@@ -79,6 +79,11 @@ int main(int argc, char* argv[])
     {
         RunTests(repository.get(), testDir, 0, 10000);
     }
+    catch (const std::logic_error& err)
+    {
+        std::cout<<err.what()<<std::endl;
+        return 1;
+    }
     catch(...)
     {
         std::cout<<"Test failed with unexpected exception!"<<std::endl;
@@ -253,6 +258,11 @@ bool RunSingleTest(const TypeRepository* repository, const TestCase& test)
             return false;
         }
     }
+    catch (const std::logic_error& err)
+    {
+        PrintTestFailMessage("Test failed", "", err.what(), test.path.string());
+        return false;
+    }
     catch (...)
     {
         throw Safir::Dob::Typesystem::ToolSupport::ParseError("Unexpected error", "An unhandled exception occured in test.", test.path.string(), -2);
@@ -309,6 +319,10 @@ bool RunTestFromXml(const TypeRepository* repository, const std::string& fileNam
     JsonToBinary(repository, json1.str().c_str(), bin4);
     if (bin1.size()!=bin4.size() || memcmp(&bin1[0], &bin4[0], bin1.size())!=0)
     {
+        std::ostringstream dummyJson;
+        BinaryToJson(repository, &bin4[0], dummyJson);
+        std::cout<<"--- JSON DUMMY ---"<<std::endl<<dummyJson.str()<<std::endl;
+
         throw std::logic_error("Not binary equal after json conversion");
     }
 

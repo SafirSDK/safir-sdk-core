@@ -54,7 +54,7 @@ private:
         std::map<size_t, bool> tags;
 
         size_t next=0;
-        while (true)
+        for(;;)
         {
             next=str.find("<object", next);
             if (next==std::string::npos)
@@ -66,7 +66,7 @@ private:
         }
 
         next=0;
-        while (true)
+        for(;;)
         {
             next=str.find("</object", next);
             if (next==std::string::npos)
@@ -179,17 +179,18 @@ private:
 
                 std::ostringstream xmlDest;
                 Safir::Dob::Typesystem::ToolSupport::BinaryToXml(m_rep.get(), &blob[0], xmlDest);
+                of<<xmlDest.str();
 
-                std::string xml=xmlDest.str();
-                if (boost::starts_with(xml, "<?xml")) //remove <?xml version="1.0" encoding="utf-8"?>
-                {
-                    of<<xml.substr(xml.find("?>")+2);
+//                std::string xml=xmlDest.str();
+//                if (boost::starts_with(xml, "<?xml")) //remove <?xml version="1.0" encoding="utf-8"?>
+//                {
+//                    of<<xml.substr(xml.find("?>")+2);
 
-                }
-                else
-                {
-                    of<<xmlDest.str();
-                }
+//                }
+//                else
+//                {
+//                    of<<xmlDest.str();
+//                }
             }
             catch (const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
             {
@@ -211,24 +212,19 @@ private:
 
 int main(int argc, char* argv[])
 {    
+    if (argc<4)
+    {
+        std::cout<<"usage: dots_xm_converter douDir srcDir outDir"<<std::endl;
+    }
     //-----------------------------------------------------------
     //Parse dou files for this test and create a type repository
     //-----------------------------------------------------------
-    std::string douDir="/home/joot/safir/runtime/data/text/dots/classes";
-    std::string srcDir="/home/joot/dose_test_output/unconverted";
-    //std::string srcDir="/home/joot/dose_test_output/tmp";
-    std::string outDir="/home/joot/dose_test_output/converted";
-//    if (argc>3)
-//    {
-//        douDir=argv[1];
-//        srcDir=argv[2];
-//        outDir=argv[3];
-//    }
-//    else
-//    {
-//        std::cout<<"Too few arguments!"<<std::endl;
-//        return 1;
-//    }
+    //std::string douDir="/home/joot/safir/runtime/data/text/dots/classes";
+    //std::string srcDir="/home/joot/dose_test_output/unconverted";
+    //std::string outDir="/home/joot/dose_test_output/converted";
+    std::string douDir=argv[1];
+    std::string srcDir=argv[2];
+    std::string outDir=argv[3];
 
     Convert conv(douDir, srcDir, outDir);
 

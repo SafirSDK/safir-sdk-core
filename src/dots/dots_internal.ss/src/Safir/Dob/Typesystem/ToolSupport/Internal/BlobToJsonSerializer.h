@@ -34,6 +34,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <boost/noncopyable.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -84,7 +85,7 @@ namespace boostfix
             else if (*b == Ch('\r')) result += Ch('\\'), result += Ch('r');
             else if (*b == Ch('/')) result += Ch('\\'), result += Ch('/');
             else if (*b == Ch('"'))  result += Ch('"'); //Modified by JOOT!
-            else if (*b == Ch('\\')) result += Ch('\\'), result += Ch('\\');
+            //else if (*b == Ch('\\')) result += Ch('\\'), result += Ch('\\'); //Commented out by JOOT!
             else
             {
                 const char *hexdigits = "0123456789ABCDEF";
@@ -403,7 +404,11 @@ namespace boostfix
                 MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, strVal, size);
                 if (!status.IsNull())
                 {
-                    pt.push_back(MakePtreeValue(elementName, Quoted(strVal)));
+                    std::string str=strVal;
+                    std::string repl=std::string("\\")+std::string("\"");
+                    boost::replace_all(str, "\"", repl);
+                    std::cout<<"Insert "<<str<<std::endl;
+                    pt.push_back(MakePtreeValue(elementName, Quoted(str)));
                     return true;
                 }
             }

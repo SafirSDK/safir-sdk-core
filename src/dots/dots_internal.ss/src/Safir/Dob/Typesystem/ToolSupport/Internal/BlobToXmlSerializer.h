@@ -142,6 +142,37 @@ namespace Internal
             }
         }
 
+        void WriteString(const char* str, std::ostream& os) const
+        {
+            size_t i=0;
+            while (str[i]!='\0')
+            {
+                switch (str[i])
+                {
+                case '<':
+                    os<<"&lt;";
+                    break;
+
+                case '>':
+                    os<<"&gt;";
+                    break;
+
+                case '&':
+                    os<<"&amp;";
+                    break;
+
+                case '"':
+                    os<<"&quot;";
+                    break;
+
+                default:
+                    os<<str[i];
+                    break;
+                }
+                ++i;
+            }
+        }
+
         void SerializeMember(const char* blob,
                              const MemberDescriptionType* md,
                              DotsC_MemberIndex memberIndex,
@@ -300,7 +331,7 @@ namespace Internal
                     {
                         os<<"<"<<elementName<<" index=\""<<arrayIndex<<"\" xml:space=\"preserve\">";
                     }
-                    os<<strVal;
+                    WriteString(strVal, os);
                     os<<"</"<<elementName<<">";
                 }
             }
