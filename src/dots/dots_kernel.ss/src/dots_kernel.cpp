@@ -1117,15 +1117,6 @@ void DotsC_BetterBlobToXml(char* const xmlDest, const char* const blobSource, co
     std::ostringstream xmlStream;
     Safir::Dob::Typesystem::ToolSupport::BinaryToXml(RepositoryKeeper::GetRepository(), blobSource, xmlStream);
     std::string xml=xmlStream.str();
-
-    //Boost 1.41 has a bug which causes a spurious newline character to be appended to some xml serializations.
-#if ((BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) == 41)
-    if (xml[xml.size()-1] == '\n')
-    {
-        xml.erase(xml.size() - 1);
-    }
-#endif
-
     resultSize=static_cast<DotsC_Int32>(xml.size())+1; //add one char for null termination
     if (resultSize <= bufSize)
     {
