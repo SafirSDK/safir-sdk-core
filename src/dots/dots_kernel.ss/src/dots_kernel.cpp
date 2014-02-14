@@ -1136,6 +1136,7 @@ void DotsC_XmlToBlob(char* & blobDest,
     Safir::Dob::Typesystem::ToolSupport::XmlToBinary(RepositoryKeeper::GetRepository(), xmlSource, blob);
     if (!blob.empty())
     {
+        RepositoryKeeper::GetBlobLayout()->SetChanged(&blob[0], true); //we think the caller want everything marked as changed
         blobDest=new char[blob.size()];
         memcpy(blobDest, &blob[0], blob.size());
     }
@@ -1172,6 +1173,7 @@ void DotsC_JsonToBlob(char * & blobDest,
     Safir::Dob::Typesystem::ToolSupport::JsonToBinary(RepositoryKeeper::GetRepository(), jsonSource, blob);
     if (!blob.empty())
     {
+        RepositoryKeeper::GetBlobLayout()->SetChanged(&blob[0], true); //we think the caller want everything marked as changed
         blobDest=new char[blob.size()];
         memcpy(blobDest, &blob[0], blob.size());
     }

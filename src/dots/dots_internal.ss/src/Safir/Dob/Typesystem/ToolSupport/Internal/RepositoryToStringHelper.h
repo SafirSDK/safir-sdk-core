@@ -216,7 +216,7 @@ namespace Internal
 
         for (int i=0; i<c->GetNumberOfValues(); ++i)
         {
-            os<<"    Value: "<<c->GetValueName(i)<<std::endl;
+            os<<"    Value ("<<i<<"): "<<c->GetValueName(i)<<std::endl;
         }
     }
 
