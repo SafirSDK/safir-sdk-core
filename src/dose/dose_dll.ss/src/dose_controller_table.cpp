@@ -182,8 +182,8 @@ namespace Internal
 
         std::wcout << ostr.str();
         lllout << ostr.str();
-        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Alert,
-                                                     ostr.str());
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Alert,
+                                              ostr.str());
     }
 
     ControllerPtr ControllerTable::GetController(const long ctrl)

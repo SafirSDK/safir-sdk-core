@@ -128,15 +128,6 @@ private:
         {
             boost::this_thread::sleep(boost::posix_time::seconds(60)*10); //ten minutes
 
-            try
-            {
-                boost::this_thread::interruption_point();
-            }
-            catch (const boost::thread_interrupted&)
-            {
-                std::wcout << "BUG IN Boost.Thread!" << std::endl;
-            }
-
             std::wcout << "Read from partner " << which << " timed out!" << std::endl;
             std::wcout << "elapsed time " << doublecheck.elapsed() << std::endl;
             exit(31);
@@ -174,8 +165,13 @@ private:
             std::wcout << "reading failed" << std::endl;
         }
 
+        boost::timer timer;
         timeout.interrupt();
         timeout.join();
+        if (timer.elapsed() > 60)
+        {
+            std::wcout << "Interrupting the timeout thread took " << timer.elapsed() << " seconds!" << std::endl;
+        }
     }
 
     void SleepyTime(const DoseTest::ActionEnum::Enumeration actionKind)

@@ -31,7 +31,7 @@
 
 
 #define SEND_SYSTEM_LOG(severity, comment) \
-    {std::wostringstream ostr; ostr comment; Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::severity, ostr.str());}
+    {std::wostringstream ostr; ostr comment; Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::severity, ostr.str());}
 
 namespace Safir
 {
@@ -39,14 +39,8 @@ namespace Utilities
 {
 namespace Internal
 {
-
-/** Forward declaration for pimpl idiom */
-class SystemLogImpl;
-
-class LLUF_UTILS_API SystemLog
+namespace Log
 {
-public:
-
     enum Severity
     {
         Emergency = 0,
@@ -59,9 +53,13 @@ public:
         Debug
     };
 
-    SystemLog();
-    ~SystemLog();
-
+    /**
+    * Open the connection to the system logger.
+    *
+    * The use of Open() is optional; it will automatically be called if necessary,
+    *
+    */
+    LLUF_UTILS_API void Open();
 
     /**
     * Service for sending log messages to the native system logging mechanism.
@@ -74,25 +72,17 @@ public:
     * @param [in] text Log text.
     *
     */
-    void Send(const Severity severity, const std::wstring& text);
+    LLUF_UTILS_API void Send(const Severity severity, const std::wstring& text);
 
-private:
+    /**
+    * Close the connection to the system logger.
+    *
+    * The use of Close() is optional; it will automatically be called if necessary,
+    *
+    */
+    LLUF_UTILS_API void Close();
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4251)
-#endif
-
-        boost::shared_ptr<SystemLogImpl> m_impl;
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
-
-
-};
-
-
+}
 }
 }
 }

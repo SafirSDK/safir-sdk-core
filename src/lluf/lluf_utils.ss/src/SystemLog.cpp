@@ -64,6 +64,8 @@ namespace Utilities
 {
 namespace Internal
 {
+namespace Log
+{
 
 namespace
 {
@@ -84,23 +86,24 @@ std::string GetSyslogTimestamp()
 
 }
 
-class SystemLogImpl
+class LLUF_UTILS_API SystemLogImpl
 {
     friend class SystemLogImplKeeper;
+    friend void Send(const Severity, const std::wstring&);
 
 private:
     //constructor is private, to make sure only SystemLogImplKeeper can create it
     SystemLogImpl()
         : m_pid(Safir::Utilities::ProcessInfo::GetPid()),
-          m_processName(),
+          m_processName(Safir::Utilities::ProcessInfo(m_pid).GetProcessName()),
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+          m_eventLog(ToUtf16(m_processName)),
+#endif
           m_nativeLogging(false),
           m_sendToSyslogServer(false),
           m_syslogServerEndpoint(),
           m_service(),
           m_sock(m_service),
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-          m_eventLog(ToUtf16(m_processName)),
-#endif
           m_lock()
     {
         //this will allow wcout to coexist with cout and with printf/wprintf
@@ -109,7 +112,6 @@ private:
 
         try
         {
-            m_processName = Safir::Utilities::ProcessInfo(m_pid).GetProcessName();
             boost::algorithm::replace_last(m_processName, ".exe", "");
 
             Safir::Utilities::Internal::ConfigReader configReader;
@@ -158,7 +160,7 @@ public:
 #endif
     }
 
-    void Send(const SystemLog::Severity severity,
+    void Send(const Severity severity,
               const std::wstring& text)
     {
         std::wstring textAscii = text;
@@ -175,38 +177,38 @@ public:
         switch (severity)
         {
             // fatal errors are written to std::wcerr
-            case SystemLog::Emergency:
+            case Emergency:
             {
                 std::wcerr << L"EMERGENCY: " << textAscii << std::endl;
                 lllog(0) << L"EMERGENCY: " << textAscii << std::endl;
             }
             break;
 
-            case SystemLog::Alert:
+            case Alert:
             {
                 std::wcerr << L"ALERT: " << textAscii << std::endl;
                 lllog(0) << L"ALERT: " << textAscii << std::endl;
             }
             break;
 
-            case SystemLog::Critical:
+            case Critical:
             {
                 std::wcerr << L"CRITICAL: " << textAscii << std::endl;
                 lllog(0) << L"CRITICAL: " << textAscii << std::endl;
             }
             break;
 
-            case SystemLog::Error:
+            case Error:
             {
                 std::wcerr << L"ERROR: " << textAscii << std::endl;
                 lllog(0) << L"ERROR: " << textAscii << std::endl;
             }
             break;
 
-            case SystemLog::Warning:
-            case SystemLog::Notice:
-            case SystemLog::Informational:
-            case SystemLog::Debug:
+            case Warning:
+            case Notice:
+            case Informational:
+            case Debug:
             {
                 // No output to std::wcerr/lllog in these cases.
                 ;
@@ -232,7 +234,7 @@ public:
 private:
 
     //-------------------------------------------------------------------------
-    void SendNativeLog(const SystemLog::Severity severity, const std::wstring& text)
+    void SendNativeLog(const Severity severity, const std::wstring& text)
     {
 #if defined(linux) || defined(__linux) || defined(__linux__)
 
@@ -244,39 +246,41 @@ private:
         WORD eventType = 0;
         switch (severity)
         {
-            case SystemLog::Emergency:
-            case SystemLog::Alert:
-            case SystemLog::Critical:
-            case SystemLog::Error:
+            case Log::Emergency:
+            case Log::Alert:
+            case Log::Critical:
+            case Log::Error:
             {
                 eventType = EVENTLOG_ERROR_TYPE;
             }
             break;
 
-            case SystemLog::Warning:
+            case Log::Warning:
             {
                 eventType = EVENTLOG_WARNING_TYPE;
             }
             break;
 
-            case SystemLog::Notice:
-            case SystemLog::Informational:
-            case SystemLog::Debug:
+            case Log::Notice:
+            case Log::Informational:
+            case Log::Debug:
             {
                 eventType = EVENTLOG_INFORMATION_TYPE;
             }
             break;
 
             default:
-                FatalError(L"SystemLogImpl::SendNativeLog: Unknown severity!");
+                FatalError(L"LogImpl::SendNativeLog: Unknown severity!");
         }
+
+        boost::lock_guard<boost::mutex> lck(m_lock);
 
         m_eventLog.Send(eventType, text);
 #endif
     }
 
     //-------------------------------------------------------------------------
-    void SendToSyslogServer(const SystemLog::Severity severity,
+    void SendToSyslogServer(const Severity severity,
                             const std::string& text)
     {
         std::ostringstream log;
@@ -299,6 +303,9 @@ private:
             logStr += "...";
 
         }
+
+        // The asio socket is not thread safe
+        boost::lock_guard<boost::mutex> lck(m_lock);
 
         m_sock.send_to(boost::asio::buffer(logStr.c_str(),
                                            logStr.size()),
@@ -335,7 +342,7 @@ private:
     //-------------------------------------------------------------------------
     void FatalError(const std::wstring& errTxt)
     {
-        SendNativeLog(SystemLog::Critical, errTxt);
+        SendNativeLog(Critical, errTxt);
         std::wcerr << errTxt << std::endl;
         throw std::logic_error(ToUtf8(errTxt));
     }
@@ -348,18 +355,16 @@ private:
     pid_t                           m_pid;
     std::string                     m_processName;
 
-    bool                            m_nativeLogging;
-    bool                            m_sendToSyslogServer;
-    bool                            m_replaceNewlines;
-    
-    boost::asio::ip::udp::endpoint  m_syslogServerEndpoint;
-    boost::asio::io_service         m_service;
-    boost::asio::ip::udp::socket    m_sock;
-
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
     WindowsLogger                   m_eventLog;
 #endif
 
+    bool                            m_nativeLogging;
+    bool                            m_sendToSyslogServer;
+    bool                            m_replaceNewlines;    
+    boost::asio::ip::udp::endpoint  m_syslogServerEndpoint;
+    boost::asio::io_service         m_service;
+    boost::asio::ip::udp::socket    m_sock;
     boost::mutex                    m_lock;
 
 #ifdef _MSC_VER
@@ -368,16 +373,18 @@ private:
 
 };
 
-/**
-* A singleton that holds a weak pointer to the impl which means
-* that this singleton will never keep an impl "alive" on its own.
-*/
 class SystemLogImplKeeper
 {
 public:
     static SystemLogImplKeeper& Instance()
     {
         boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
+        
+        if (destroyed)
+        {
+            throw std::runtime_error("Dead reference detected for singleton SystemLogImplKeeper");
+        }
+            
         return SingletonHelper::Instance();
     }
 
@@ -385,31 +392,43 @@ public:
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
 
-        boost::shared_ptr<SystemLogImpl> impl = m_weakImpl.lock();
-
-        if (!impl)
+        if (!m_impl)
         {
-            // There is no impl instance, create one!
-            impl = boost::shared_ptr<SystemLogImpl>(new SystemLogImpl());
-            m_weakImpl = impl;
+            m_impl = boost::shared_ptr<SystemLogImpl>(new SystemLogImpl());
         }
-        return impl;
+        return m_impl;
+    }
+    
+    void Reset()
+    {
+        boost::lock_guard<boost::mutex> lck(m_lock);
+        m_impl.reset();
     }
 
 private:
-    SystemLogImplKeeper() {}
-    ~SystemLogImplKeeper() {}
+    SystemLogImplKeeper()
+    {
+    }
 
-    boost::mutex m_lock;
+    ~SystemLogImplKeeper()
+    {
+        boost::lock_guard<boost::mutex> lck(m_lock);
 
-    boost::weak_ptr<SystemLogImpl> m_weakImpl;
+        m_impl.reset();
+        destroyed = true;
+    }
+
+    boost::shared_ptr<SystemLogImpl> m_impl;
+    boost::mutex                     m_lock;
+    
+    static bool                      destroyed;
 
     /**
-         * This class is here to ensure that only the Instance method can get at the
-         * instance, so as to be sure that boost call_once is used correctly.
-         * Also makes it easier to grep for singletons in the code, if all
-         * singletons use the same construction and helper-name.
-         */
+     * This class is here to ensure that only the Instance method can get at the
+     * instance, so as to be sure that boost call_once is used correctly.
+     * Also makes it easier to grep for singletons in the code, if all
+     * singletons use the same construction and helper-name.
+     */
     struct SingletonHelper
     {
     private:
@@ -427,21 +446,55 @@ private:
 
 //mandatory static initialization
 boost::once_flag SystemLogImplKeeper::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+bool SystemLogImplKeeper::destroyed = false;
 
-SystemLog::SystemLog()
-    : m_impl(SystemLogImplKeeper::Instance().Get())
+void Open()
 {
+    try
+    {
+        SystemLogImplKeeper::Instance().Get();
+    }
+    catch (const std::runtime_error&)
+    {
+        // The singleton has been destroyed, most likely because Open is called from
+        // another singleton's destructor.
+        // We don't do anything in this case.
+    }
 }
 
-SystemLog::~SystemLog()
+void Send(const Severity severity, const std::wstring& text)
 {
+    try
+    {
+        SystemLogImplKeeper::Instance().Get()->Send(severity, text);
+    }
+    catch (const std::runtime_error&)
+    {
+        // The singleton has been destroyed, most likely because Send is called from
+        // another singleton's destructor.
+        // Instead of an approach where we try to resurrect the SystemLogImplKeeper singleton
+        // (Phoenix Singleton) we just create a temporary SystemLogImpl on the stack for this
+        // specific call to Send.
+        SystemLogImpl log;
+        log.Send(severity, text);
+    }
 }
 
-void SystemLog::Send(const Severity severity, const std::wstring& text)
+void Close()
 {
-    m_impl->Send(severity, text);
+    try
+    {
+        SystemLogImplKeeper::Instance().Reset();
+    }
+    catch (const std::runtime_error&)
+    {
+        // The singleton has been destroyed, most likely because Close is called from
+        // another singleton's destructor.
+        // We don't do anything in this case.
+    }
 }
 
+}
 }
 }
 }
