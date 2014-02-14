@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
     std::cout<<"========= Test suite started ========"<<std::endl;
     try
     {
-        RunTests(repository.get(), testDir, 0, 10000);
+        RunTests(repository.get(), testDir, 103, 103);
     }
     catch (const std::logic_error& err)
     {

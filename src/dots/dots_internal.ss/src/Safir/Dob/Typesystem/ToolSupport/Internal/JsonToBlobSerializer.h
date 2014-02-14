@@ -187,7 +187,7 @@ namespace Internal
             {
                 bool val=memberContent.get_value<bool>();
                 m_blobLayout.template SetMember<bool>(val, &blob[0], memIx, arrIx);
-                m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
             }
                 break;
 
@@ -202,7 +202,7 @@ namespace Internal
                     throw ParseError("JsonToBinary serialization error", os.str(), "", 158);
                 }
                 m_blobLayout.template SetMember<DotsC_Int32>(enumOrdinal, &blob[0], memIx, arrIx);
-                m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
             }
                 break;
 
@@ -210,7 +210,7 @@ namespace Internal
             {
                 DotsC_Int32 val=memberContent.get_value<DotsC_Int32>();
                 m_blobLayout.template SetMember<DotsC_Int32>(val, &blob[0], memIx, arrIx);
-                m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
             }
                 break;
 
@@ -218,7 +218,7 @@ namespace Internal
             {
                 DotsC_Int64 val=memberContent.get_value<DotsC_Int64>();
                 m_blobLayout.template SetMember<DotsC_Int64>(val, &blob[0], memIx, arrIx);
-                m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
             }
                 break;
 
@@ -226,7 +226,7 @@ namespace Internal
             {
                 DotsC_TypeId tid=StringToTypeId(memberContent.data());
                 m_blobLayout.template SetMember<DotsC_TypeId>(tid, &blob[0], memIx, arrIx);
-                m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
             }
                 break;
 
@@ -241,7 +241,7 @@ namespace Internal
                     CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
                 }
                 m_blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, static_cast<Size>(memberContent.data().size())+1, memIx, arrIx, false, beginningOfUnused);
-                m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
             }
                 break;
 
@@ -270,7 +270,7 @@ namespace Internal
                 }
                 DotsC_EntityId eid={tid, instanceId.first};
                 m_blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, static_cast<Size>(instanceIdString->size())+1, memIx, arrIx, false, beginningOfUnused);
-                m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
             }
                 break;
 
@@ -281,7 +281,7 @@ namespace Internal
                 char* writeString=beginningOfUnused;
                 m_blobLayout.CreateStringMember(&blob[0], static_cast<Size>(numBytesNeeded), memIx, arrIx, false, beginningOfUnused);
                 strncpy(writeString, memberContent.data().c_str(), numBytesNeeded);
-                m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
             }
                 break;
 
@@ -316,7 +316,7 @@ namespace Internal
                 m_blobLayout.CreateObjectMember(&blob[0], static_cast<Size>(insideBlob.size()), DotsId_Generate64(xsiType->c_str()), memIx, arrIx, false, beginningOfUnused);
                 beginningOfUnused=writeObj+insideBlob.size(); //This is a hack. BlobLayout is not moving beginningOfUnused by the blobSize but instead only by the initialSize. Has to do with genated code.
                 memcpy(writeObj, &insideBlob[0], insideBlob.size());
-                m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
             }
                 break;
 
@@ -333,7 +333,7 @@ namespace Internal
                 char* writeBinary=beginningOfUnused;
                 m_blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.size()), memIx, arrIx, false, beginningOfUnused);
                 memcpy(writeBinary, &bin[0], bin.size());
-                m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
             }
                 break;
 
@@ -363,7 +363,7 @@ namespace Internal
                 {
                     DotsC_Float32 val=classic_string_cast<DotsC_Float32>(memberContent.data());
                     m_blobLayout.template SetMember<DotsC_Float32>(val, &blob[0], memIx, arrIx);
-                    m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                    m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
                 }
                 catch (const boost::bad_lexical_cast&)
                 {
@@ -400,7 +400,7 @@ namespace Internal
                 {
                     DotsC_Float64 val=classic_string_cast<DotsC_Float64>(memberContent.data());
                     m_blobLayout.template SetMember<DotsC_Float64>(val, &blob[0], memIx, arrIx);
-                    m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                    m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
                 }
                 catch (const boost::bad_lexical_cast&)
                 {

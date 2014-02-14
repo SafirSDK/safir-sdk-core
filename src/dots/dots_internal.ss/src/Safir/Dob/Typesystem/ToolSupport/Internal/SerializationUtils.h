@@ -204,7 +204,7 @@ namespace SerializationUtils
                 boolVal=memberContent.get_value<bool>();
             }
             blobLayout.template SetMember<bool>(boolVal, &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
@@ -221,7 +221,7 @@ namespace SerializationUtils
             }
 
             blobLayout.template SetMember<DotsC_Int32>(enumOrdinal, &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
@@ -230,7 +230,7 @@ namespace SerializationUtils
             Trim(memberContent.data());
             DotsC_Int32 val=memberContent.get_value<DotsC_Int32>();
             blobLayout.template SetMember<DotsC_Int32>(val, &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
@@ -239,7 +239,7 @@ namespace SerializationUtils
             Trim(memberContent.data());
             DotsC_Int64 val=memberContent.get_value<DotsC_Int64>();
             blobLayout.template SetMember<DotsC_Int64>(val, &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
@@ -256,7 +256,7 @@ namespace SerializationUtils
             }
 
             blobLayout.template SetMember<DotsC_TypeId>(tid, &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
@@ -272,7 +272,7 @@ namespace SerializationUtils
                 SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
             }
             blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, static_cast<Size>(memberContent.data().size()+1), memIx, arrIx, false, beginningOfUnused);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
@@ -317,19 +317,24 @@ namespace SerializationUtils
             }
             DotsC_EntityId eid={tid, instanceId.first};
             blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, static_cast<Size>(instanceIdString->size()+1), memIx, arrIx, false, beginningOfUnused);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
         case StringMemberType:
         {
+            boost::optional<std::string> preserve=memberContent.get_optional<std::string>("<xmlattr>.xml:space");
+            if (!preserve || *preserve!="preserve")
+            {
+                Trim(memberContent.data());
+            }
             //The only time we dont trim content
             size_t numBytesNeeded=std::min(memberContent.data().size(), static_cast<size_t>(md->GetMaxLength()))+1; //add one for '\0'
             SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
             char* writeString=beginningOfUnused;
             blobLayout.CreateStringMember(&blob[0], static_cast<Size>(numBytesNeeded), memIx, arrIx, false, beginningOfUnused);
             strncpy(writeString, memberContent.data().c_str(), numBytesNeeded-1);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
@@ -353,7 +358,7 @@ namespace SerializationUtils
             char* writeBinary=beginningOfUnused;
             blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.size()), memIx, arrIx, false, beginningOfUnused);
             memcpy(writeBinary, &bin[0], bin.size());
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
@@ -384,7 +389,7 @@ namespace SerializationUtils
             {
                 DotsC_Float32 val=classic_string_cast<DotsC_Float32>(memberContent.data());
                 blobLayout.template SetMember<DotsC_Float32>(val, &blob[0], memIx, arrIx);
-                blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
             }
             catch (const boost::bad_lexical_cast&)
             {
@@ -422,7 +427,7 @@ namespace SerializationUtils
             {
                 DotsC_Float64 val=classic_string_cast<DotsC_Float64>(memberContent.data());
                 blobLayout.template SetMember<DotsC_Float64>(val, &blob[0], memIx, arrIx);
-                blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
             }
             catch (const boost::bad_lexical_cast&)
             {
@@ -489,35 +494,35 @@ namespace SerializationUtils
         case BooleanMemberType:
         {
             blobLayout.template SetMember<bool>(param->GetBoolValue(parameterIndex), &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
         case EnumerationMemberType:
         {
             blobLayout.template SetMember<DotsC_Int32>(param->GetInt32Value(parameterIndex), &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
         case Int32MemberType:
         {
             blobLayout.template SetMember<DotsC_Int32>(param->GetInt32Value(parameterIndex), &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
         case Int64MemberType:
         {
             blobLayout.template SetMember<DotsC_Int64>(param->GetInt64Value(parameterIndex), &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
         case TypeIdMemberType:
         {
             blobLayout.template SetMember<DotsC_TypeId>(param->GetInt64Value(parameterIndex), &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
@@ -534,7 +539,7 @@ namespace SerializationUtils
                 SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
             }
             blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, static_cast<Size>(strLen), memIx, arrIx, false, beginningOfUnused);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
@@ -551,7 +556,7 @@ namespace SerializationUtils
             }
             DotsC_EntityId eid={tid, instanceId.first};
             blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, static_cast<Size>(strLen), memIx, arrIx, false, beginningOfUnused);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
@@ -564,7 +569,7 @@ namespace SerializationUtils
             char* writeString=beginningOfUnused;
             blobLayout.CreateStringMember(&blob[0], static_cast<Size>(numBytesNeeded), memIx, arrIx, false, beginningOfUnused);
             strncpy(writeString, str, numBytesNeeded-1);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
@@ -581,7 +586,7 @@ namespace SerializationUtils
             char* writeBinary=beginningOfUnused;
             blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.second), memIx, arrIx, false, beginningOfUnused);
             memcpy(writeBinary, bin.first, bin.second);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
@@ -608,7 +613,7 @@ namespace SerializationUtils
         case Watt32MemberType:
         {
             blobLayout.template SetMember<DotsC_Float32>(param->GetFloat32Value(parameterIndex), &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
 
@@ -635,7 +640,7 @@ namespace SerializationUtils
         case Watt64MemberType:
         {
             blobLayout.template SetMember<DotsC_Float64>(param->GetFloat64Value(parameterIndex), &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
         }

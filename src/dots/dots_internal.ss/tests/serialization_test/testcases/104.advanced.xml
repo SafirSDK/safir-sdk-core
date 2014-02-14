@@ -29,8 +29,8 @@
     <BlobTest.MySpecialItem index="1" type="BlobTest.MySpecialItem">
       <MyNumber>76</MyNumber>
       <MyStrings>
-        <value index="1">My name is Sven</value>
-        <value index="3">Whats yours?</value>
+        <value index="1" xsi:space="preserve">  My name is Sven  </value>
+        <value index="3" xsi:space="default">  Whats yours?  </value>
       </MyStrings>
       <Child type="BlobTest.MySpecialItem">
         <MyNumber>8</MyNumber>

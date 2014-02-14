@@ -68,7 +68,7 @@ namespace Internal
             boost::property_tree::ptree pt;
             boost::iostreams::array_source src(xml, strlen(xml));
             boost::iostreams::stream<boost::iostreams::array_source> stream(src);
-            boost::property_tree::xml_parser::read_xml(stream, pt, boost::property_tree::xml_parser::trim_whitespace | boost::property_tree::xml_parser::no_comments);
+            boost::property_tree::xml_parser::read_xml(stream, pt, boost::property_tree::xml_parser::no_comments);
             this->operator ()(pt, blob);
         }
 
@@ -244,7 +244,7 @@ namespace Internal
                 beginningOfUnused=writeObj+insideBlob.size(); //This is a hack. BlobLayout is not moving beginningOfUnused by the blobSize but instead only by the initialSize. Has to do with genated code.
                 assert(static_cast<size_t>(beginningOfUnused-&blob[0])<=blob.size()); //size_t usedSize=static_cast<size_t>(beginningOfUnused-&blob[0]);
                 memcpy(writeObj, &insideBlob[0], insideBlob.size());
-                m_blobLayout.SetStatus(false, false, &blob[0], memIx, arrIx);
+                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
                 return;
             }
             else if (md->GetMemberType()==EntityIdMemberType)
