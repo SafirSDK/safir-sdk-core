@@ -126,7 +126,12 @@ private:
         boost::timer doublecheck;
         try
         {
+            //for recent boost versions we use sleep_for instead of sleep
+#if ((BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) > 50)
+            boost::this_thread::sleep_for(boost::chrono::minutes(10));
+#else
             boost::this_thread::sleep(boost::posix_time::seconds(60)*10); //ten minutes
+#endif
 
             std::wcout << "Read from partner " << which << " timed out!" << std::endl;
             std::wcout << "elapsed time " << doublecheck.elapsed() << std::endl;
