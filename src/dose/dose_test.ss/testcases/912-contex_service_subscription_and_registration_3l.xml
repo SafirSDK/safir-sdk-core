@@ -1,4 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of registering/unregistering with different contexts</Description><Expectation xml:space="preserve">P0 receives one OnRegistered and one OnUnregistered callback</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>Close</ActionKind><Partner>0</Partner></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Open</ActionKind><Partner>0</Partner><Context>0</Context></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Close</ActionKind><Partner>2</Partner></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Open</ActionKind><Partner>2</Partner><Context>0</Context></DoseTest.Action><DoseTest.Action index="4"><ActionKind>SubscribeRegistration</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>ALL_HANDLERS</Handler><IncludeSubclasses>true</IncludeSubclasses><RestartSubscription>false</RestartSubscription></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>RegisterServiceHandler</ActionKind><Partner>2</Partner><Consumer>2</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="1"><ActionKind>UnregisterHandler</ActionKind><Partner>2</Partner><Consumer>2</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Close</ActionKind><Partner>2</Partner></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Open</ActionKind><Partner>2</Partner><Context>1</Context></DoseTest.Action><DoseTest.Action index="4"><ActionKind>RegisterServiceHandler</ActionKind><Partner>2</Partner><Consumer>2</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="5"><ActionKind>UnregisterHandler</ActionKind><Partner>2</Partner><Consumer>2</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of registering/unregistering with different contexts</Description>
+  <Expectation xml:space="preserve">P0 receives one OnRegistered and one OnUnregistered callback</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Close</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Open</ActionKind>
+      <Partner>0</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Close</ActionKind>
+      <Partner>2</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Open</ActionKind>
+      <Partner>2</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>SubscribeRegistration</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>UnregisterHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Close</ActionKind>
+      <Partner>2</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Open</ActionKind>
+      <Partner>2</Partner>
+      <Context>1</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>UnregisterHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

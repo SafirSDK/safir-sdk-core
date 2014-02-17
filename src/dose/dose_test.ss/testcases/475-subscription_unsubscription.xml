@@ -1,4 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Testing subscription and unsubscription</Description><Expectation xml:space="preserve">Partner 0/Consumer 2 receives one OnNewEntity and one OnUpdatedEntity callback</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SubscribeEntity</ActionKind><Partner>0</Partner><Consumer>2</Consumer><TypeId>DoseTest.LocalEntity</TypeId><IncludeUpdates>true</IncludeUpdates><IncludeSubclasses>false</IncludeSubclasses><RestartSubscription>false</RestartSubscription></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Instance>0</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">New information</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Instance>0</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">Even more new information</Info></Object></DoseTest.Action><DoseTest.Action index="2"><ActionKind>UnsubscribeEntity</ActionKind><Partner>0</Partner><Consumer>2</Consumer><TypeId>DoseTest.LocalEntity</TypeId><IncludeSubclasses>false</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Instance>0</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">IF YOU SEE THIS LINE OF TEXT SOMETHING IS WRONG!!</Info></Object></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Testing subscription and unsubscription</Description>
+  <Expectation xml:space="preserve">Partner 0/Consumer 2 receives one OnNewEntity and one OnUpdatedEntity callback</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SubscribeEntity</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <IncludeUpdates>true</IncludeUpdates>
+      <IncludeSubclasses>false</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Instance>0</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">New information</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Instance>0</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">Even more new information</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>UnsubscribeEntity</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <IncludeSubclasses>false</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Instance>0</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">IF YOU SEE THIS LINE OF TEXT SOMETHING IS WRONG!!</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

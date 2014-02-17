@@ -1,4 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Check that ghost instances get dispatched to correct handler when there are sevaral handlers for a type.</Description><Expectation xml:space="preserve">Partner 0 receives no OnNewInjectedEntity. Partner 0 receives one OnNewInjectedEntity for instance 353535.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>P0_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SetAll</ActionKind><Partner>0</Partner><Consumer>0</Consumer><Instance>678678</Instance><Handler>P0_HANDLER</Handler><Object type="DoseTest.SynchronousVolatileEntity"><Info xml:space="preserve">Partner0BlaBla</Info></Object></DoseTest.Action><DoseTest.Action index="2"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>P1_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Instance>353535</Instance><Handler>P1_HANDLER</Handler><Object type="DoseTest.SynchronousVolatileEntity"><Info xml:space="preserve">Partner1SnickSnack</Info></Object></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>UnregisterHandler</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>P1_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Delete</ActionKind><Partner>0</Partner><Consumer>0</Consumer><Handler>P0_HANDLER</Handler><EntityId><name>DoseTest.SynchronousVolatileEntity</name><instanceId>678678</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Close</ActionKind><Partner>0</Partner></DoseTest.Action><DoseTest.Action index="3"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>P1_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="4"><ActionKind>Delete</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Handler>P1_HANDLER</Handler><EntityId><name>DoseTest.SynchronousVolatileEntity</name><instanceId>353535</instanceId></EntityId></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Check that ghost instances get dispatched to correct handler when there are sevaral handlers for a type.</Description>
+  <Expectation xml:space="preserve">Partner 0 receives no OnNewInjectedEntity. Partner 0 receives one OnNewInjectedEntity for instance 353535.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>P0_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Instance>678678</Instance>
+      <Handler>P0_HANDLER</Handler>
+      <Object type="DoseTest.SynchronousVolatileEntity">
+        <Info xml:space="preserve">Partner0BlaBla</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>P1_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Instance>353535</Instance>
+      <Handler>P1_HANDLER</Handler>
+      <Object type="DoseTest.SynchronousVolatileEntity">
+        <Info xml:space="preserve">Partner1SnickSnack</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>UnregisterHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>P1_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Delete</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Handler>P0_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.SynchronousVolatileEntity</name>
+        <instanceId>678678</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Close</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>P1_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>Delete</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Handler>P1_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.SynchronousVolatileEntity</name>
+        <instanceId>353535</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

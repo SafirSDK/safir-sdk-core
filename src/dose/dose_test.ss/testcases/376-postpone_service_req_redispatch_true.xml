@@ -1,3 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Postpone OnServiceRequest, redispatch is True.</Description><Expectation xml:space="preserve">P0 receives three OnServiceRequest, the first and second with Info set to &apos;Service request 1&apos; and the third with Info set to &apos;Service request 2&apos;.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterServiceHandler</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="1"><ActionKind>DiscardResponseSender</ActionKind><Partner>0</Partner><ActionCallback>OnServiceRequest</ActionCallback><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Postpone</ActionKind><Partner>0</Partner><ActionCallback>OnServiceRequest</ActionCallback><Consumer>0</Consumer><RedispatchCurrent>true</RedispatchCurrent></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>ServiceRequest</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalService"><Info xml:space="preserve">Service request 1</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>ResetCallbackActions</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="2"><ActionKind>ResumePostponed</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="3"><ActionKind>ServiceRequest</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalService"><Info xml:space="preserve">Service request 2</Info></Object></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Postpone OnServiceRequest, redispatch is True.</Description>
+  <Expectation xml:space="preserve">P0 receives three OnServiceRequest, the first and second with Info set to 'Service request 1' and the third with Info set to 'Service request 2'.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>DiscardResponseSender</ActionKind>
+      <Partner>0</Partner>
+      <ActionCallback>OnServiceRequest</ActionCallback>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Postpone</ActionKind>
+      <Partner>0</Partner>
+      <ActionCallback>OnServiceRequest</ActionCallback>
+      <Consumer>0</Consumer>
+      <RedispatchCurrent>true</RedispatchCurrent>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalService">
+        <Info xml:space="preserve">Service request 1</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>ResetCallbackActions</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>ResumePostponed</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalService">
+        <Info xml:space="preserve">Service request 2</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

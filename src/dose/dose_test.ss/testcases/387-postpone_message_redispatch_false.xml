@@ -1,3 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Postpone OnMessage, redispatch is False.</Description><Expectation xml:space="preserve">P0 receives two OnMessage, the first with Info set to &apos;Message 1&apos; and the second with Info set to &apos;Message 2&apos;.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>SubscribeMessage</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalMessage</TypeId><Channel>DEFAULT_CHANNEL</Channel><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Postpone</ActionKind><Partner>0</Partner><ActionCallback>OnMessage</ActionCallback><Consumer>0</Consumer><RedispatchCurrent>false</RedispatchCurrent></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>SendMessage</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="DoseTest.GlobalMessage"><Info xml:space="preserve">Message 1</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>ResetCallbackActions</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="2"><ActionKind>ResumePostponed</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SendMessage</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="DoseTest.GlobalMessage"><Info xml:space="preserve">Message 2</Info></Object></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Postpone OnMessage, redispatch is False.</Description>
+  <Expectation xml:space="preserve">P0 receives two OnMessage, the first with Info set to 'Message 1' and the second with Info set to 'Message 2'.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SubscribeMessage</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalMessage</TypeId>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Postpone</ActionKind>
+      <Partner>0</Partner>
+      <ActionCallback>OnMessage</ActionCallback>
+      <Consumer>0</Consumer>
+      <RedispatchCurrent>false</RedispatchCurrent>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="DoseTest.GlobalMessage">
+        <Info xml:space="preserve">Message 1</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>ResetCallbackActions</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>ResumePostponed</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="DoseTest.GlobalMessage">
+        <Info xml:space="preserve">Message 2</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

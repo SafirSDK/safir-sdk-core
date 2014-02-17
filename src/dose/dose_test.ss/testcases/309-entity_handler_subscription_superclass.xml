@@ -1,4 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of registration subscription including superclass (local)</Description><Expectation xml:space="preserve">Partner 0/Consumer 0 receives OnRegistered for ROOT_HANDLER_0 and ROOT_HANDLER_1</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterServiceHandler</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.RootService</TypeId><Handler>ROOT_HANDLER_0</Handler></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterServiceHandler</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>GLOBAL_HANDLER_0</Handler></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>SubscribeRegistration</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.RootService</TypeId><Handler>ALL_HANDLERS</Handler><IncludeSubclasses>false</IncludeSubclasses><RestartSubscription>false</RestartSubscription></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterServiceHandler</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.RootService</TypeId><Handler>ROOT_HANDLER_1</Handler></DoseTest.Action><DoseTest.Action index="2"><ActionKind>UnsubscribeRegistration</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.RootService</TypeId><Handler>ALL_HANDLERS</Handler><IncludeSubclasses>false</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="3"><ActionKind>RegisterServiceHandler</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.RootService</TypeId><Handler>ROOT_HANDLER_2</Handler></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of registration subscription including superclass (local)</Description>
+  <Expectation xml:space="preserve">Partner 0/Consumer 0 receives OnRegistered for ROOT_HANDLER_0 and ROOT_HANDLER_1</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.RootService</TypeId>
+      <Handler>ROOT_HANDLER_0</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>GLOBAL_HANDLER_0</Handler>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SubscribeRegistration</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootService</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>false</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.RootService</TypeId>
+      <Handler>ROOT_HANDLER_1</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>UnsubscribeRegistration</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootService</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>false</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.RootService</TypeId>
+      <Handler>ROOT_HANDLER_2</Handler>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

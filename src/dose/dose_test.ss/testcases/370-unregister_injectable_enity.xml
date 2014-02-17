@@ -1,4 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test that unregistration of the owner makes created instances (of injectable type) become ghosts</Description><Expectation xml:space="preserve">Partner 0 receives OnNewEntity and OnDeletedEntity twice, P2 takes over ownership from P1</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SubscribeEntity</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><IncludeUpdates>true</IncludeUpdates><IncludeSubclasses>false</IncludeSubclasses><RestartSubscription>false</RestartSubscription></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Instance>12345</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.InjectableEntity"><Info xml:space="preserve">Blabla</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>UnregisterHandler</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="2"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="3"><ActionKind>DeleteAllInstances</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test that unregistration of the owner makes created instances (of injectable type) become ghosts</Description>
+  <Expectation xml:space="preserve">Partner 0 receives OnNewEntity and OnDeletedEntity twice, P2 takes over ownership from P1</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SubscribeEntity</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <IncludeUpdates>true</IncludeUpdates>
+      <IncludeSubclasses>false</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Instance>12345</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.InjectableEntity">
+        <Info xml:space="preserve">Blabla</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>UnregisterHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>DeleteAllInstances</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

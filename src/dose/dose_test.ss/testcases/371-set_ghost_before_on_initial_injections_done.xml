@@ -1,4 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test that SetAll on an instance for which there is a ghost, performed before OnInitialInjectionDone, gives a GhostExistsException</Description><Expectation xml:space="preserve">P0 gets a GhostExistsException</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Instance>111</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.InjectableEntity"><Info xml:space="preserve">Blabla</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Instance>222</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.InjectableEntity"><Info xml:space="preserve">qwerty</Info></Object></DoseTest.Action><DoseTest.Action index="2"><ActionKind>UnregisterHandler</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SetAll</ActionKind><Partner>0</Partner><ActionCallback>OnInjectedNewEntity</ActionCallback><Consumer>0</Consumer><Instance>222</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.InjectableEntity"/></DoseTest.Action><DoseTest.Action index="4"><ActionKind>ResetCallbackActions</ActionKind><Partner>0</Partner><ActionCallback>OnInjectedNewEntity</ActionCallback><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="5"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="6"><ActionKind>DeleteAllInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test that SetAll on an instance for which there is a ghost, performed before OnInitialInjectionDone, gives a GhostExistsException</Description>
+  <Expectation xml:space="preserve">P0 gets a GhostExistsException</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Instance>111</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.InjectableEntity">
+        <Info xml:space="preserve">Blabla</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Instance>222</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.InjectableEntity">
+        <Info xml:space="preserve">qwerty</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>UnregisterHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>0</Partner>
+      <ActionCallback>OnInjectedNewEntity</ActionCallback>
+      <Consumer>0</Consumer>
+      <Instance>222</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.InjectableEntity"/>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>ResetCallbackActions</ActionKind>
+      <Partner>0</Partner>
+      <ActionCallback>OnInjectedNewEntity</ActionCallback>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>DeleteAllInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

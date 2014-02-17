@@ -1,4 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of reception of an OnCreateRequest where the requestor decides instance id</Description><Expectation xml:space="preserve">Partner 0 receives an OnCreateRequest (Requestor decides instance id) with instance id 789789789</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>Sleep</ActionKind><SleepDuration>10</SleepDuration></DoseTest.Action><DoseTest.Action index="1"><ActionKind>CreateRequest</ActionKind><Partner>2</Partner><Consumer>0</Consumer><Instance>789789789</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">Created</Info></Object></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of reception of an OnCreateRequest where the requestor decides instance id</Description>
+  <Expectation xml:space="preserve">Partner 0 receives an OnCreateRequest (Requestor decides instance id) with instance id 789789789</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>10</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Instance>789789789</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Created</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

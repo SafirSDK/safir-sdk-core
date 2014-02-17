@@ -1,4 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Testing subscription of local entity using typeid with includeSubclasses</Description><Expectation xml:space="preserve">Partner 0/Consumer 0 receives OnNewEntity callback for RootEntity and LocalEntity and OnUpdatedEntity callback for LocalEntity</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.RootEntity</TypeId><Handler>ROOT_HANDLER_0</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>LOCAL_HANDLER_0</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="2"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Instance>0</Instance><Handler>ROOT_HANDLER_0</Handler><Object type="DoseTest.RootEntity"><Info xml:space="preserve">New information</Info></Object></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Instance>0</Instance><Handler>LOCAL_HANDLER_0</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">New information</Info></Object></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>SubscribeEntity</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.RootEntity</TypeId><IncludeUpdates>true</IncludeUpdates><IncludeSubclasses>true</IncludeSubclasses><RestartSubscription>false</RestartSubscription></DoseTest.Action><DoseTest.Action index="1"><ActionKind>UnsubscribeEntity</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.RootEntity</TypeId><IncludeSubclasses>false</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="2"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Instance>0</Instance><Handler>ROOT_HANDLER_0</Handler><Object type="DoseTest.RootEntity"><Info xml:space="preserve">Update information</Info></Object></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Instance>0</Instance><Handler>LOCAL_HANDLER_0</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">Updated information</Info></Object></DoseTest.Action><DoseTest.Action index="4"><ActionKind>UnsubscribeEntity</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.RootEntity</TypeId><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="5"><ActionKind>Delete</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Handler>LOCAL_HANDLER_0</Handler><EntityId><name>DoseTest.LocalEntity</name><instanceId>0</instanceId></EntityId></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Testing subscription of local entity using typeid with includeSubclasses</Description>
+  <Expectation xml:space="preserve">Partner 0/Consumer 0 receives OnNewEntity callback for RootEntity and LocalEntity and OnUpdatedEntity callback for LocalEntity</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.RootEntity</TypeId>
+      <Handler>ROOT_HANDLER_0</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>LOCAL_HANDLER_0</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Instance>0</Instance>
+      <Handler>ROOT_HANDLER_0</Handler>
+      <Object type="DoseTest.RootEntity">
+        <Info xml:space="preserve">New information</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Instance>0</Instance>
+      <Handler>LOCAL_HANDLER_0</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">New information</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SubscribeEntity</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootEntity</TypeId>
+      <IncludeUpdates>true</IncludeUpdates>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>UnsubscribeEntity</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootEntity</TypeId>
+      <IncludeSubclasses>false</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Instance>0</Instance>
+      <Handler>ROOT_HANDLER_0</Handler>
+      <Object type="DoseTest.RootEntity">
+        <Info xml:space="preserve">Update information</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Instance>0</Instance>
+      <Handler>LOCAL_HANDLER_0</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">Updated information</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>UnsubscribeEntity</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootEntity</TypeId>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>Delete</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Handler>LOCAL_HANDLER_0</Handler>
+      <EntityId>
+        <name>DoseTest.LocalEntity</name>
+        <instanceId>0</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

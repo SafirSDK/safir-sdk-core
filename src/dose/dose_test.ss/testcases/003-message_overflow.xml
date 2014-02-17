@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of overflow notification while sending message</Description><Expectation xml:space="preserve">Overflow exception followed by a not overflow notification</Expectation><TestActions><DoseTest.Action index="0"><ActionKind>SendMessage</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="DoseTest.GlobalMessage"><Info xml:space="preserve">Global Message</Info></Object><RepeatUntilOverflow>true</RepeatUntilOverflow></DoseTest.Action></TestActions><TestConfig>Multinode</TestConfig></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of overflow notification while sending message</Description>
+  <Expectation xml:space="preserve">Overflow exception followed by a not overflow notification</Expectation>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="DoseTest.GlobalMessage">
+        <Info xml:space="preserve">Global Message</Info>
+      </Object>
+      <RepeatUntilOverflow>true</RepeatUntilOverflow>
+    </DoseTest.Action>
+  </TestActions>
+  <TestConfig>Multinode</TestConfig>
+</DoseTest.Items.TestCase>

@@ -1,4 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of sending create request (owner on this node)</Description><Expectation xml:space="preserve">Partner 0/Consumer 0 receives a success response and the entity info field should be &quot;Created&quot; (part 0/cons 1)</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>SendResponse</ActionKind><Partner>1</Partner><ActionCallback>OnCreateRequest</ActionCallback><Consumer>1</Consumer><Object type="DoseTest.Success"><Info xml:space="preserve">Succesful response</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>CreateRequest</ActionKind><Partner>0</Partner><Consumer>0</Consumer><Instance>345678</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">Created</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Read</ActionKind><Partner>0</Partner><Consumer>1</Consumer><EntityId><name>DoseTest.LocalEntity</name><instanceId>345678</instanceId></EntityId></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of sending create request (owner on this node)</Description>
+  <Expectation xml:space="preserve">Partner 0/Consumer 0 receives a success response and the entity info field should be "Created" (part 0/cons 1)</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SendResponse</ActionKind>
+      <Partner>1</Partner>
+      <ActionCallback>OnCreateRequest</ActionCallback>
+      <Consumer>1</Consumer>
+      <Object type="DoseTest.Success">
+        <Info xml:space="preserve">Succesful response</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Instance>345678</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">Created</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Read</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <EntityId>
+        <name>DoseTest.LocalEntity</name>
+        <instanceId>345678</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

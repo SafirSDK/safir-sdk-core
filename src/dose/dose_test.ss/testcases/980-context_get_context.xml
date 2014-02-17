@@ -1,4 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test to read the current context for a connection.</Description><Expectation xml:space="preserve">Partner 0 &apos;s test connection is opened in context 0 and Partner 1 &apos;s test connection is opened in context 1</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>Close</ActionKind><Partner>0</Partner></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Open</ActionKind><Partner>0</Partner><Context>0</Context></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Close</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Open</ActionKind><Partner>1</Partner><Context>1</Context></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>GetContext</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="1"><ActionKind>GetContext</ActionKind><Partner>1</Partner><Consumer>0</Consumer></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test to read the current context for a connection.</Description>
+  <Expectation xml:space="preserve">Partner 0 's test connection is opened in context 0 and Partner 1 's test connection is opened in context 1</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Close</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Open</ActionKind>
+      <Partner>0</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Close</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Open</ActionKind>
+      <Partner>1</Partner>
+      <Context>1</Context>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>GetContext</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>GetContext</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

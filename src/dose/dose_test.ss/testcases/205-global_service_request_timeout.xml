@@ -1,4 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of service request timeout (global request)</Description><Expectation xml:space="preserve">Partner0/Consumer 1 should get a time out response on a service request</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterServiceHandler</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="1"><ActionKind>DiscardResponseSender</ActionKind><Partner>2</Partner><ActionCallback>OnServiceRequest</ActionCallback><Consumer>0</Consumer></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>ServiceRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalService"/></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Sleep</ActionKind><SleepDuration>8</SleepDuration></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of service request timeout (global request)</Description>
+  <Expectation xml:space="preserve">Partner0/Consumer 1 should get a time out response on a service request</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>DiscardResponseSender</ActionKind>
+      <Partner>2</Partner>
+      <ActionCallback>OnServiceRequest</ActionCallback>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalService"/>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>8</SleepDuration>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

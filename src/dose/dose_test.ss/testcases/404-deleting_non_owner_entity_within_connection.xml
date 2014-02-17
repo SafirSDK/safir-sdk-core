@@ -1,4 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of non-owner deleting entity within the same connection as owner</Description><Expectation xml:space="preserve">Exception Safir.Dob.NotFoundException shall be thrown</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>0</Partner><Consumer>1</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SetAll</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Instance>0</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">New information</Info></Object></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>Delete</ActionKind><Partner>0</Partner><Consumer>2</Consumer><Handler>DEFAULT_HANDLER</Handler><EntityId><name>DoseTest.LocalEntity</name><instanceId>0</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Read</ActionKind><Partner>0</Partner><Consumer>1</Consumer><EntityId><name>DoseTest.LocalEntity</name><instanceId>0</instanceId></EntityId></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of non-owner deleting entity within the same connection as owner</Description>
+  <Expectation xml:space="preserve">Exception Safir.Dob.NotFoundException shall be thrown</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Instance>0</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">New information</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Delete</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>2</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.LocalEntity</name>
+        <instanceId>0</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Read</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <EntityId>
+        <name>DoseTest.LocalEntity</name>
+        <instanceId>0</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

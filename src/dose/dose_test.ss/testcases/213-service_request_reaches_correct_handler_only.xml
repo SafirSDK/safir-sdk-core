@@ -1,4 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test that only the specified handler gets the request.</Description><Expectation xml:space="preserve">Each partner should receive one (and only one) request, and p0 should receive three success responses and one error response (not registered).</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterServiceHandler</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>GLOBAL_HANDLER_0</Handler></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterServiceHandler</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>GLOBAL_HANDLER_1</Handler></DoseTest.Action><DoseTest.Action index="2"><ActionKind>RegisterServiceHandler</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>GLOBAL_HANDLER_2</Handler></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>ServiceRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Handler>GLOBAL_HANDLER_0</Handler><Object type="DoseTest.GlobalService"/></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Sleep</ActionKind><SleepDuration>1</SleepDuration></DoseTest.Action><DoseTest.Action index="2"><ActionKind>ServiceRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Handler>GLOBAL_HANDLER_1</Handler><Object type="DoseTest.GlobalService"/></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Sleep</ActionKind><SleepDuration>1</SleepDuration></DoseTest.Action><DoseTest.Action index="4"><ActionKind>ServiceRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Handler>GLOBAL_HANDLER_2</Handler><Object type="DoseTest.GlobalService"/></DoseTest.Action><DoseTest.Action index="5"><ActionKind>Sleep</ActionKind><SleepDuration>1</SleepDuration></DoseTest.Action><DoseTest.Action index="6"><ActionKind>ServiceRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Handler>GLOBAL_HANDLER_3</Handler><Object type="DoseTest.GlobalService"/></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test that only the specified handler gets the request.</Description>
+  <Expectation xml:space="preserve">Each partner should receive one (and only one) request, and p0 should receive three success responses and one error response (not registered).</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>GLOBAL_HANDLER_0</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>GLOBAL_HANDLER_1</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>GLOBAL_HANDLER_2</Handler>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Handler>GLOBAL_HANDLER_0</Handler>
+      <Object type="DoseTest.GlobalService"/>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Handler>GLOBAL_HANDLER_1</Handler>
+      <Object type="DoseTest.GlobalService"/>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Handler>GLOBAL_HANDLER_2</Handler>
+      <Object type="DoseTest.GlobalService"/>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Handler>GLOBAL_HANDLER_3</Handler>
+      <Object type="DoseTest.GlobalService"/>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

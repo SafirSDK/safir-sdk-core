@@ -1,4 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of iterating an entity class tree</Description><Expectation xml:space="preserve">There should be six entities, two each of Root, Global and Local</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.RootEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterEntityHandler</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="2"><ActionKind>RegisterEntityHandler</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Instance>One</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.RootEntity"><Info xml:space="preserve">One</Info></Object></DoseTest.Action><DoseTest.Action index="4"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Instance>Two</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.RootEntity"><Info xml:space="preserve">Two</Info></Object></DoseTest.Action><DoseTest.Action index="5"><ActionKind>SetAll</ActionKind><Partner>2</Partner><Consumer>0</Consumer><Instance>One</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">One</Info></Object></DoseTest.Action><DoseTest.Action index="6"><ActionKind>SetAll</ActionKind><Partner>2</Partner><Consumer>0</Consumer><Instance>Two</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">Two</Info></Object></DoseTest.Action><DoseTest.Action index="7"><ActionKind>SetAll</ActionKind><Partner>0</Partner><Consumer>0</Consumer><Instance>One</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">One</Info></Object></DoseTest.Action><DoseTest.Action index="8"><ActionKind>SetAll</ActionKind><Partner>0</Partner><Consumer>0</Consumer><Instance>Two</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">Two</Info></Object></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>GetEntityIterator</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.RootEntity</TypeId><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of iterating an entity class tree</Description>
+  <Expectation xml:space="preserve">There should be six entities, two each of Root, Global and Local</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Instance>One</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.RootEntity">
+        <Info xml:space="preserve">One</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Instance>Two</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.RootEntity">
+        <Info xml:space="preserve">Two</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Instance>One</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">One</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Instance>Two</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Two</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="7">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Instance>One</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">One</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="8">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Instance>Two</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">Two</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>GetEntityIterator</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootEntity</TypeId>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

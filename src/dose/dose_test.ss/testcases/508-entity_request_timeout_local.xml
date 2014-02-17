@@ -1,4 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of entity request timeout (local request)</Description><Expectation xml:space="preserve">Partner 0/Consumer 1 should get a time out response</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>DiscardResponseSender</ActionKind><Partner>1</Partner><ActionCallback>OnCreateRequest</ActionCallback><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>CreateRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Instance>0</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">Created</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Sleep</ActionKind><SleepDuration>3</SleepDuration></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of entity request timeout (local request)</Description>
+  <Expectation xml:space="preserve">Partner 0/Consumer 1 should get a time out response</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>DiscardResponseSender</ActionKind>
+      <Partner>1</Partner>
+      <ActionCallback>OnCreateRequest</ActionCallback>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Instance>0</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">Created</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>3</SleepDuration>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

@@ -1,4 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test that only the specified handler gets the request.</Description><Expectation xml:space="preserve">Each partner should receive one (and only one) request, and P0 should receive three success responses and one error response (not registered).</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>GLOBAL_HANDLER_0</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>GLOBAL_HANDLER_1</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="2"><ActionKind>RegisterEntityHandler</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>GLOBAL_HANDLER_2</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>CreateRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Instance>0</Instance><Handler>GLOBAL_HANDLER_0</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">Created</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>CreateRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Instance>1</Instance><Handler>GLOBAL_HANDLER_1</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">Created</Info></Object></DoseTest.Action><DoseTest.Action index="2"><ActionKind>CreateRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Instance>2</Instance><Handler>GLOBAL_HANDLER_2</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">Created</Info></Object></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Sleep</ActionKind><SleepDuration>0.5</SleepDuration></DoseTest.Action><DoseTest.Action index="4"><ActionKind>CreateRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Instance>3</Instance><Handler>GLOBAL_HANDLER_3</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">Created</Info></Object></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test that only the specified handler gets the request.</Description>
+  <Expectation xml:space="preserve">Each partner should receive one (and only one) request, and P0 should receive three success responses and one error response (not registered).</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>GLOBAL_HANDLER_0</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>GLOBAL_HANDLER_1</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>GLOBAL_HANDLER_2</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Instance>0</Instance>
+      <Handler>GLOBAL_HANDLER_0</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Created</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Instance>1</Instance>
+      <Handler>GLOBAL_HANDLER_1</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Created</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Instance>2</Instance>
+      <Handler>GLOBAL_HANDLER_2</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Created</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>0.5</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Instance>3</Instance>
+      <Handler>GLOBAL_HANDLER_3</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Created</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

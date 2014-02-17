@@ -1,4 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test GetInstanceIdPolicy.</Description><Expectation xml:space="preserve">Handler_1 uses RequestorDecidesInstanceId and Handler_2 uses HandlerDecidesInstanceId.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>Handler_1</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>Handler_2</Handler><InstanceIdPolicy>HandlerDecidesInstanceId</InstanceIdPolicy></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>GetInstanceIdPolicy</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>Handler_1</Handler></DoseTest.Action><DoseTest.Action index="1"><ActionKind>GetInstanceIdPolicy</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>Handler_2</Handler></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test GetInstanceIdPolicy.</Description>
+  <Expectation xml:space="preserve">Handler_1 uses RequestorDecidesInstanceId and Handler_2 uses HandlerDecidesInstanceId.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>Handler_1</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>Handler_2</Handler>
+      <InstanceIdPolicy>HandlerDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>GetInstanceIdPolicy</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>Handler_1</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>GetInstanceIdPolicy</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>Handler_2</Handler>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

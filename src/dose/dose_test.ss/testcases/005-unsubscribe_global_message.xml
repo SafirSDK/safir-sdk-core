@@ -1,4 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of unsubscription of global messages</Description><Expectation xml:space="preserve">Parter 0/Consumer 0 recieves ONE global message</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>SubscribeMessage</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalMessage</TypeId><Channel>DEFAULT_CHANNEL</Channel><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>SendMessage</ActionKind><Partner>2</Partner><Consumer>0</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="DoseTest.GlobalMessage"><Info xml:space="preserve">Global Message</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>UnsubscribeMessage</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalMessage</TypeId><Channel>DEFAULT_CHANNEL</Channel><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="2"><ActionKind>SendMessage</ActionKind><Partner>2</Partner><Consumer>0</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="DoseTest.GlobalMessage"><Info xml:space="preserve">Global Message</Info></Object></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of unsubscription of global messages</Description>
+  <Expectation xml:space="preserve">Parter 0/Consumer 0 recieves ONE global message</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SubscribeMessage</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalMessage</TypeId>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="DoseTest.GlobalMessage">
+        <Info xml:space="preserve">Global Message</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>UnsubscribeMessage</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalMessage</TypeId>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="DoseTest.GlobalMessage">
+        <Info xml:space="preserve">Global Message</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

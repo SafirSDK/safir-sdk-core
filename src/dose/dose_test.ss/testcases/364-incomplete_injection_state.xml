@@ -1,3 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test incomplete injection state.</Description><Expectation xml:space="preserve">The first read gives a not found exception. The second read gives an existing instance</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>IncompleteInjectionState</ActionKind><Partner>0</Partner><ActionCallback>OnInjectedNewEntity</ActionCallback><Consumer>0</Consumer></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>InjectChanges</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Instance>654321</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.InjectableEntity"><Info xml:space="preserve">111111</Info></Object><TimestampDelta>10</TimestampDelta></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Read</ActionKind><Partner>0</Partner><Consumer>1</Consumer><EntityId><name>DoseTest.InjectableEntity</name><instanceId>654321</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="2"><ActionKind>ResetCallbackActions</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="3"><ActionKind>InjectChanges</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Instance>654321</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.InjectableEntity"><Info xml:space="preserve">222222</Info></Object><TimestampDelta>40</TimestampDelta></DoseTest.Action><DoseTest.Action index="4"><ActionKind>Read</ActionKind><Partner>0</Partner><Consumer>1</Consumer><EntityId><name>DoseTest.InjectableEntity</name><instanceId>654321</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="5"><ActionKind>DeleteAllInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test incomplete injection state.</Description>
+  <Expectation xml:space="preserve">The first read gives a not found exception. The second read gives an existing instance</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>IncompleteInjectionState</ActionKind>
+      <Partner>0</Partner>
+      <ActionCallback>OnInjectedNewEntity</ActionCallback>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>InjectChanges</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Instance>654321</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.InjectableEntity">
+        <Info xml:space="preserve">111111</Info>
+      </Object>
+      <TimestampDelta>10</TimestampDelta>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Read</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <EntityId>
+        <name>DoseTest.InjectableEntity</name>
+        <instanceId>654321</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>ResetCallbackActions</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>InjectChanges</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Instance>654321</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.InjectableEntity">
+        <Info xml:space="preserve">222222</Info>
+      </Object>
+      <TimestampDelta>40</TimestampDelta>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>Read</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <EntityId>
+        <name>DoseTest.InjectableEntity</name>
+        <instanceId>654321</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>DeleteAllInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

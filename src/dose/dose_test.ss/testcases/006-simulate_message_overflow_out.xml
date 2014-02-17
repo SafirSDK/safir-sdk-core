@@ -1,4 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of simulate overflows in message out queues.</Description><Expectation xml:space="preserve">Overflow exception followed by a not overflow notification</Expectation><TestActions><DoseTest.Action index="0"><ActionKind>SimulateOverflows</ActionKind><Partner>0</Partner><Consumer>0</Consumer><InQueues>false</InQueues><OutQueues>true</OutQueues></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SendMessage</ActionKind><Partner>0</Partner><Consumer>0</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="DoseTest.GlobalMessage"><Info xml:space="preserve">Local Message</Info></Object><RepeatUntilOverflow>true</RepeatUntilOverflow></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Sleep</ActionKind><SleepDuration>1</SleepDuration></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SimulateOverflows</ActionKind><Partner>0</Partner><Consumer>0</Consumer><InQueues>false</InQueues><OutQueues>false</OutQueues></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of simulate overflows in message out queues.</Description>
+  <Expectation xml:space="preserve">Overflow exception followed by a not overflow notification</Expectation>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SimulateOverflows</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <InQueues>false</InQueues>
+      <OutQueues>true</OutQueues>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="DoseTest.GlobalMessage">
+        <Info xml:space="preserve">Local Message</Info>
+      </Object>
+      <RepeatUntilOverflow>true</RepeatUntilOverflow>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SimulateOverflows</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <InQueues>false</InQueues>
+      <OutQueues>false</OutQueues>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

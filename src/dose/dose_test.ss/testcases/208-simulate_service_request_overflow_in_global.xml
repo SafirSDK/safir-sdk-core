@@ -1,4 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test simulate overflow on service request in queue globally</Description><Expectation xml:space="preserve">Partner0/Consumer 0 should get an overflow exception and then one response followed by OnNotRequestOverflow and then 9 more responses</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterServiceHandler</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SimulateOverflows</ActionKind><Partner>2</Partner><Consumer>0</Consumer><InQueues>true</InQueues><OutQueues>false</OutQueues></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>ServiceRequest</ActionKind><Partner>0</Partner><Consumer>0</Consumer><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalService"/><RepeatUntilOverflow>true</RepeatUntilOverflow></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SimulateOverflows</ActionKind><Partner>2</Partner><Consumer>0</Consumer><InQueues>false</InQueues><OutQueues>false</OutQueues></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Sleep</ActionKind><SleepDuration>1</SleepDuration></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test simulate overflow on service request in queue globally</Description>
+  <Expectation xml:space="preserve">Partner0/Consumer 0 should get an overflow exception and then one response followed by OnNotRequestOverflow and then 9 more responses</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SimulateOverflows</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <InQueues>true</InQueues>
+      <OutQueues>false</OutQueues>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalService"/>
+      <RepeatUntilOverflow>true</RepeatUntilOverflow>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SimulateOverflows</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <InQueues>false</InQueues>
+      <OutQueues>false</OutQueues>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

@@ -1,3 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test that registering an injection handler for a type that has no injection property is ok.</Description><Expectation xml:space="preserve">partner 0/consumer 0 receives OnInitialInjectionsDone.</Expectation><TestActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test that registering an injection handler for a type that has no injection property is ok.</Description>
+  <Expectation xml:space="preserve">partner 0/consumer 0 receives OnInitialInjectionsDone.</Expectation>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

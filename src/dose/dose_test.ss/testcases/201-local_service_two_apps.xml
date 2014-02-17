@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of using local service (between two partners)</Description><Expectation xml:space="preserve">Consumer 0 should get a service request</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterServiceHandler</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalService</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>ServiceRequest</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.LocalService"/></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of using local service (between two partners)</Description>
+  <Expectation xml:space="preserve">Consumer 0 should get a service request</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LocalService"/>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

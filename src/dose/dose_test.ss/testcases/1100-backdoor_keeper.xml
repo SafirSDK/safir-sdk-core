@@ -1,4 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of the backdoor keeper.</Description><Expectation xml:space="preserve">Partner 0 shall report: 1.Backdoor is not started. 2.Backdoor is started. 3.Received command &quot;test-command 2 olle&quot; 4.Backdoor is not started. 5.Backdoor is started. 6.Received command &quot;test-command 4 bertil bertilsson&quot;.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>Close</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Open</ActionKind><Partner>1</Partner><Context>0</Context></DoseTest.Action><DoseTest.Action index="2"><ActionKind>IsBackdoorStarted</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SendMessage</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="Safir.Application.BackdoorCommand"><ConnectionName xml:space="preserve">.*partner_test_conn.*</ConnectionName><NodeName xml:space="preserve">.*</NodeName><Command xml:space="preserve">test-command 1 kalle</Command></Object></DoseTest.Action><DoseTest.Action index="4"><ActionKind>StartBackdoor</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="5"><ActionKind>IsBackdoorStarted</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="6"><ActionKind>SendMessage</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="Safir.Application.BackdoorCommand"><ConnectionName xml:space="preserve">.*partner_test_conn.*</ConnectionName><NodeName xml:space="preserve">.*</NodeName><Command xml:space="preserve">test-command 2 olle</Command></Object></DoseTest.Action><DoseTest.Action index="7"><ActionKind>StopBackdoor</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="8"><ActionKind>IsBackdoorStarted</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="9"><ActionKind>SendMessage</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="Safir.Application.BackdoorCommand"><ConnectionName xml:space="preserve">.*partner_test_co.*</ConnectionName><NodeName xml:space="preserve">.*</NodeName><Command xml:space="preserve">test-command 3 nisse</Command></Object></DoseTest.Action><DoseTest.Action index="10"><ActionKind>StartBackdoor</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="11"><ActionKind>IsBackdoorStarted</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="12"><ActionKind>SendMessage</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="Safir.Application.BackdoorCommand"><ConnectionName xml:space="preserve">.*partner_test_co.*</ConnectionName><NodeName xml:space="preserve">.*</NodeName><Command xml:space="preserve">test-command 4 bertil bertilsson</Command></Object></DoseTest.Action></TestCaseSetupActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of the backdoor keeper.</Description>
+  <Expectation xml:space="preserve">Partner 0 shall report: 1.Backdoor is not started. 2.Backdoor is started. 3.Received command "test-command 2 olle" 4.Backdoor is not started. 5.Backdoor is started. 6.Received command "test-command 4 bertil bertilsson".</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Close</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Open</ActionKind>
+      <Partner>1</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>IsBackdoorStarted</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="Safir.Application.BackdoorCommand">
+        <ConnectionName xml:space="preserve">.*partner_test_conn.*</ConnectionName>
+        <NodeName xml:space="preserve">.*</NodeName>
+        <Command xml:space="preserve">test-command 1 kalle</Command>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>StartBackdoor</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>IsBackdoorStarted</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="Safir.Application.BackdoorCommand">
+        <ConnectionName xml:space="preserve">.*partner_test_conn.*</ConnectionName>
+        <NodeName xml:space="preserve">.*</NodeName>
+        <Command xml:space="preserve">test-command 2 olle</Command>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="7">
+      <ActionKind>StopBackdoor</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="8">
+      <ActionKind>IsBackdoorStarted</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="9">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="Safir.Application.BackdoorCommand">
+        <ConnectionName xml:space="preserve">.*partner_test_co.*</ConnectionName>
+        <NodeName xml:space="preserve">.*</NodeName>
+        <Command xml:space="preserve">test-command 3 nisse</Command>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="10">
+      <ActionKind>StartBackdoor</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="11">
+      <ActionKind>IsBackdoorStarted</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="12">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="Safir.Application.BackdoorCommand">
+        <ConnectionName xml:space="preserve">.*partner_test_co.*</ConnectionName>
+        <NodeName xml:space="preserve">.*</NodeName>
+        <Command xml:space="preserve">test-command 4 bertil bertilsson</Command>
+      </Object>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+</DoseTest.Items.TestCase>

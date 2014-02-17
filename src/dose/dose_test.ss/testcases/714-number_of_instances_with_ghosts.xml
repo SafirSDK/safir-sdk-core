@@ -1,4 +1,199 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of GetNumberOfInstances on an entity class tree where there are ghosts</Description><Expectation xml:space="preserve">There should be two Local entities twice, then the ghosts are removed and the checks are done again.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="2"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Instance>One</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">One</Info></Object></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Instance>Two</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">Two</Info></Object></DoseTest.Action><DoseTest.Action index="4"><ActionKind>SetAll</ActionKind><Partner>2</Partner><Consumer>0</Consumer><Instance>One</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.SynchronousVolatileEntity"><Info xml:space="preserve">One</Info></Object></DoseTest.Action><DoseTest.Action index="5"><ActionKind>SetAll</ActionKind><Partner>2</Partner><Consumer>0</Consumer><Instance>Two</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.SynchronousVolatileEntity"><Info xml:space="preserve">Two</Info></Object></DoseTest.Action><DoseTest.Action index="6"><ActionKind>UnregisterHandler</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>GetNumberOfInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><IncludeSubclasses>false</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="1"><ActionKind>GetNumberOfInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>ALL_HANDLERS</Handler><IncludeSubclasses>false</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="2"><ActionKind>GetNumberOfInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>ANOTHER_HANDLER</Handler><IncludeSubclasses>false</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="3"><ActionKind>GetNumberOfInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><IncludeSubclasses>false</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="4"><ActionKind>GetNumberOfInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.RootEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="5"><ActionKind>GetNumberOfInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.RootEntity</TypeId><Handler>ALL_HANDLERS</Handler><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="6"><ActionKind>GetNumberOfInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.RootEntity</TypeId><Handler>ANOTHER_HANDLER</Handler><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="7"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="8"><ActionKind>DeleteAllInstances</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="9"><ActionKind>GetNumberOfInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><IncludeSubclasses>false</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="10"><ActionKind>GetNumberOfInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>ALL_HANDLERS</Handler><IncludeSubclasses>false</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="11"><ActionKind>GetNumberOfInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>ANOTHER_HANDLER</Handler><IncludeSubclasses>false</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="12"><ActionKind>GetNumberOfInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><IncludeSubclasses>false</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="13"><ActionKind>GetNumberOfInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.RootEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="14"><ActionKind>GetNumberOfInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.RootEntity</TypeId><Handler>ALL_HANDLERS</Handler><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="15"><ActionKind>GetNumberOfInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.RootEntity</TypeId><Handler>ANOTHER_HANDLER</Handler><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of GetNumberOfInstances on an entity class tree where there are ghosts</Description>
+  <Expectation xml:space="preserve">There should be two Local entities twice, then the ghosts are removed and the checks are done again.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Instance>One</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">One</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Instance>Two</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">Two</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Instance>One</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.SynchronousVolatileEntity">
+        <Info xml:space="preserve">One</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Instance>Two</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.SynchronousVolatileEntity">
+        <Info xml:space="preserve">Two</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>UnregisterHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>GetNumberOfInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <IncludeSubclasses>false</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>GetNumberOfInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>false</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>GetNumberOfInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>ANOTHER_HANDLER</Handler>
+      <IncludeSubclasses>false</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>GetNumberOfInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <IncludeSubclasses>false</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>GetNumberOfInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>GetNumberOfInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootEntity</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>GetNumberOfInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootEntity</TypeId>
+      <Handler>ANOTHER_HANDLER</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="7">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="8">
+      <ActionKind>DeleteAllInstances</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="9">
+      <ActionKind>GetNumberOfInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <IncludeSubclasses>false</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="10">
+      <ActionKind>GetNumberOfInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>false</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="11">
+      <ActionKind>GetNumberOfInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>ANOTHER_HANDLER</Handler>
+      <IncludeSubclasses>false</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="12">
+      <ActionKind>GetNumberOfInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <IncludeSubclasses>false</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="13">
+      <ActionKind>GetNumberOfInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="14">
+      <ActionKind>GetNumberOfInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootEntity</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="15">
+      <ActionKind>GetNumberOfInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootEntity</TypeId>
+      <Handler>ANOTHER_HANDLER</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

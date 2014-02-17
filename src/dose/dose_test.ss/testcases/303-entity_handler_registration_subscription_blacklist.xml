@@ -1,4 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test the registration subscription blacklist</Description><Expectation xml:space="preserve">Partner 0/Consumer 0 receives one OnRegistered callback for handler HANDLER_1</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>SubscribeRegistration</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>ALL_HANDLERS</Handler><IncludeSubclasses>true</IncludeSubclasses><RestartSubscription>false</RestartSubscription></DoseTest.Action><DoseTest.Action index="1"><ActionKind>UnsubscribeRegistration</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>HANDLER_0</Handler><IncludeSubclasses>true</IncludeSubclasses><RestartSubscription>false</RestartSubscription></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>HANDLER_0</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>HANDLER_1</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="2"><ActionKind>UnsubscribeRegistration</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>ALL_HANDLERS</Handler><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test the registration subscription blacklist</Description>
+  <Expectation xml:space="preserve">Partner 0/Consumer 0 receives one OnRegistered callback for handler HANDLER_1</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SubscribeRegistration</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>UnsubscribeRegistration</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>HANDLER_0</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>HANDLER_0</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>HANDLER_1</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>UnsubscribeRegistration</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

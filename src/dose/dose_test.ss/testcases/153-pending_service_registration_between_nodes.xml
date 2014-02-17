@@ -1,3 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Testing of Pending registrations between nodes</Description><Expectation xml:space="preserve">Global Service 0 gets registered (by someone else). The service gets unregistered (by someone else) which leads to Consumer 1 getting a Completed.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>SubscribeRegistration</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>ALL_HANDLERS</Handler><IncludeSubclasses>true</IncludeSubclasses><RestartSubscription>false</RestartSubscription></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>RegisterServiceHandlerPending</ActionKind><Partner>2</Partner><Consumer>1</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterServiceHandlerPending</ActionKind><Partner>0</Partner><Consumer>1</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="2"><ActionKind>UnregisterHandler</ActionKind><Partner>2</Partner><Consumer>1</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Sleep</ActionKind><SleepDuration>10</SleepDuration></DoseTest.Action><DoseTest.Action index="4"><ActionKind>UnsubscribeRegistration</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>ALL_HANDLERS</Handler><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Testing of Pending registrations between nodes</Description>
+  <Expectation xml:space="preserve">Global Service 0 gets registered (by someone else). The service gets unregistered (by someone else) which leads to Consumer 1 getting a Completed.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SubscribeRegistration</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterServiceHandlerPending</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterServiceHandlerPending</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>UnregisterHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>10</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>UnsubscribeRegistration</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

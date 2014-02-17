@@ -1,4 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of volatile persistence with two different handlers for the same type</Description><Expectation xml:space="preserve">Partner 0 receives OnNewInjectedEntity for instance 678678. Partner 1 receives OnNewInjectedEntity for instance 353535</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>P0_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SetAll</ActionKind><Partner>0</Partner><Consumer>0</Consumer><Instance>678678</Instance><Handler>P0_HANDLER</Handler><Object type="DoseTest.SynchronousVolatileEntity"><Info xml:space="preserve">Partner0BlaBla</Info></Object></DoseTest.Action><DoseTest.Action index="2"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>P1_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Instance>353535</Instance><Handler>P1_HANDLER</Handler><Object type="DoseTest.SynchronousVolatileEntity"><Info xml:space="preserve">Partner1SnickSnack</Info></Object></DoseTest.Action><DoseTest.Action index="4"><ActionKind>Close</ActionKind><Partner>0</Partner></DoseTest.Action><DoseTest.Action index="5"><ActionKind>Close</ActionKind><Partner>1</Partner></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>Open</ActionKind><Partner>0</Partner></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>P0_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Delete</ActionKind><Partner>0</Partner><Consumer>0</Consumer><Handler>P0_HANDLER</Handler><EntityId><name>DoseTest.SynchronousVolatileEntity</name><instanceId>678678</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Open</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="4"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>P1_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="5"><ActionKind>Delete</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Handler>P1_HANDLER</Handler><EntityId><name>DoseTest.SynchronousVolatileEntity</name><instanceId>353535</instanceId></EntityId></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of volatile persistence with two different handlers for the same type</Description>
+  <Expectation xml:space="preserve">Partner 0 receives OnNewInjectedEntity for instance 678678. Partner 1 receives OnNewInjectedEntity for instance 353535</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>P0_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Instance>678678</Instance>
+      <Handler>P0_HANDLER</Handler>
+      <Object type="DoseTest.SynchronousVolatileEntity">
+        <Info xml:space="preserve">Partner0BlaBla</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>P1_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Instance>353535</Instance>
+      <Handler>P1_HANDLER</Handler>
+      <Object type="DoseTest.SynchronousVolatileEntity">
+        <Info xml:space="preserve">Partner1SnickSnack</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>Close</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>Close</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Open</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>P0_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Delete</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Handler>P0_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.SynchronousVolatileEntity</name>
+        <instanceId>678678</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Open</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>P1_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>Delete</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Handler>P1_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.SynchronousVolatileEntity</name>
+        <instanceId>353535</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

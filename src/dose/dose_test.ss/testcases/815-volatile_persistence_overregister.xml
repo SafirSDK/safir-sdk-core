@@ -1,4 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of overregistration of a handler for a synchronous volatile persistence type. The instance is deleted by the new registerer when injected.</Description><Expectation xml:space="preserve">Node 0 receives OnInitialInjectionsDone and OnRevokedRegistration. Node 1 receives OnNewEntity and OnDeletedEntity. Node 2 receives OnInjectedNewEntity and OnInitialInjectionsDone.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SubscribeEntity</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><IncludeUpdates>true</IncludeUpdates><IncludeSubclasses>false</IncludeSubclasses><RestartSubscription>false</RestartSubscription></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>SetAll</ActionKind><Partner>0</Partner><Consumer>0</Consumer><Instance>123</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.SynchronousVolatileEntity"><Info xml:space="preserve">Kalle</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Delete</ActionKind><Partner>2</Partner><ActionCallback>OnInjectedNewEntity</ActionCallback><Consumer>0</Consumer><Handler>DEFAULT_HANDLER</Handler><EntityId><name>DoseTest.SynchronousVolatileEntity</name><instanceId>123</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Sleep</ActionKind><Partner>1</Partner><SleepDuration>20</SleepDuration></DoseTest.Action><DoseTest.Action index="3"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="4"><ActionKind>Sleep</ActionKind><SleepDuration>30</SleepDuration></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of overregistration of a handler for a synchronous volatile persistence type. The instance is deleted by the new registerer when injected.</Description>
+  <Expectation xml:space="preserve">Node 0 receives OnInitialInjectionsDone and OnRevokedRegistration. Node 1 receives OnNewEntity and OnDeletedEntity. Node 2 receives OnInjectedNewEntity and OnInitialInjectionsDone.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SubscribeEntity</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <IncludeUpdates>true</IncludeUpdates>
+      <IncludeSubclasses>false</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Instance>123</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.SynchronousVolatileEntity">
+        <Info xml:space="preserve">Kalle</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Delete</ActionKind>
+      <Partner>2</Partner>
+      <ActionCallback>OnInjectedNewEntity</ActionCallback>
+      <Consumer>0</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.SynchronousVolatileEntity</name>
+        <instanceId>123</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Sleep</ActionKind>
+      <Partner>1</Partner>
+      <SleepDuration>20</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>30</SleepDuration>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

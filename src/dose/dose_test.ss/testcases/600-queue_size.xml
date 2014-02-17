@@ -1,4 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of GetQueueSize</Description><Expectation xml:space="preserve">Queue size should be 0 for all queues</Expectation><TestActions><DoseTest.Action index="0"><ActionKind>GetQueueSize</ActionKind><Partner>0</Partner><Consumer>0</Consumer><ConnectionQueueId>MessageOutQueue</ConnectionQueueId></DoseTest.Action><DoseTest.Action index="1"><ActionKind>GetQueueSize</ActionKind><Partner>0</Partner><Consumer>0</Consumer><ConnectionQueueId>RequestOutQueue</ConnectionQueueId></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Close</ActionKind><Partner>0</Partner></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Open</ActionKind><Partner>0</Partner><ConnectionName xml:space="preserve">long_message_out_queues</ConnectionName></DoseTest.Action><DoseTest.Action index="4"><ActionKind>GetQueueSize</ActionKind><Partner>0</Partner><Consumer>0</Consumer><ConnectionQueueId>MessageOutQueue</ConnectionQueueId></DoseTest.Action><DoseTest.Action index="5"><ActionKind>GetQueueSize</ActionKind><Partner>0</Partner><Consumer>0</Consumer><ConnectionQueueId>RequestOutQueue</ConnectionQueueId></DoseTest.Action><DoseTest.Action index="6"><ActionKind>Close</ActionKind><Partner>0</Partner></DoseTest.Action><DoseTest.Action index="7"><ActionKind>Open</ActionKind><Partner>0</Partner><ConnectionName xml:space="preserve">long_request_out_queues</ConnectionName></DoseTest.Action><DoseTest.Action index="8"><ActionKind>GetQueueSize</ActionKind><Partner>0</Partner><Consumer>0</Consumer><ConnectionQueueId>MessageOutQueue</ConnectionQueueId></DoseTest.Action><DoseTest.Action index="9"><ActionKind>GetQueueSize</ActionKind><Partner>0</Partner><Consumer>0</Consumer><ConnectionQueueId>RequestOutQueue</ConnectionQueueId></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of GetQueueSize</Description>
+  <Expectation xml:space="preserve">Queue size should be 0 for all queues</Expectation>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>GetQueueSize</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <ConnectionQueueId>MessageOutQueue</ConnectionQueueId>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>GetQueueSize</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <ConnectionQueueId>RequestOutQueue</ConnectionQueueId>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Close</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Open</ActionKind>
+      <Partner>0</Partner>
+      <ConnectionName xml:space="preserve">long_message_out_queues</ConnectionName>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>GetQueueSize</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <ConnectionQueueId>MessageOutQueue</ConnectionQueueId>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>GetQueueSize</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <ConnectionQueueId>RequestOutQueue</ConnectionQueueId>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>Close</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="7">
+      <ActionKind>Open</ActionKind>
+      <Partner>0</Partner>
+      <ConnectionName xml:space="preserve">long_request_out_queues</ConnectionName>
+    </DoseTest.Action>
+    <DoseTest.Action index="8">
+      <ActionKind>GetQueueSize</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <ConnectionQueueId>MessageOutQueue</ConnectionQueueId>
+    </DoseTest.Action>
+    <DoseTest.Action index="9">
+      <ActionKind>GetQueueSize</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <ConnectionQueueId>RequestOutQueue</ConnectionQueueId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

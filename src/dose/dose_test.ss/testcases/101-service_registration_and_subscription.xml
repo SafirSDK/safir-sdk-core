@@ -1,4 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of setting up a susbcription while there is an existing registration (local)</Description><Expectation xml:space="preserve">Consumer 0 receives one OnRegistered and one OnUnregistered callback</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterServiceHandler</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.LocalService</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>SubscribeRegistration</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalService</TypeId><Handler>ALL_HANDLERS</Handler><IncludeSubclasses>true</IncludeSubclasses><RestartSubscription>false</RestartSubscription></DoseTest.Action><DoseTest.Action index="1"><ActionKind>UnregisterHandler</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.LocalService</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of setting up a susbcription while there is an existing registration (local)</Description>
+  <Expectation xml:space="preserve">Consumer 0 receives one OnRegistered and one OnUnregistered callback</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.LocalService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SubscribeRegistration</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalService</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>UnregisterHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.LocalService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

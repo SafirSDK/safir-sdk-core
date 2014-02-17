@@ -1,4 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test that a backdoor keeper can be &quot;restarted&quot; when the main connection has been closed and opened in a different context.</Description><Expectation xml:space="preserve">Partner 0 shall receive command &quot;test-command 1&quot; and &quot;test-command 3&quot;</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>Close</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Open</ActionKind><Partner>1</Partner><Context>0</Context></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Close</ActionKind><Partner>0</Partner></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Open</ActionKind><Partner>0</Partner><Context>0</Context></DoseTest.Action><DoseTest.Action index="4"><ActionKind>StartBackdoor</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="5"><ActionKind>SendMessage</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="Safir.Application.BackdoorCommand"><ConnectionName xml:space="preserve">.*partner_test_conn.*</ConnectionName><NodeName xml:space="preserve">.*</NodeName><Command xml:space="preserve">test-command 1</Command></Object></DoseTest.Action><DoseTest.Action index="6"><ActionKind>Close</ActionKind><Partner>0</Partner></DoseTest.Action><DoseTest.Action index="7"><ActionKind>Open</ActionKind><Partner>0</Partner><Context>1</Context></DoseTest.Action><DoseTest.Action index="8"><ActionKind>SendMessage</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="Safir.Application.BackdoorCommand"><ConnectionName xml:space="preserve">.*partner_test_conn.*</ConnectionName><NodeName xml:space="preserve">.*</NodeName><Command xml:space="preserve">test-command 2</Command></Object></DoseTest.Action><DoseTest.Action index="9"><ActionKind>StartBackdoor</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="10"><ActionKind>SendMessage</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="Safir.Application.BackdoorCommand"><ConnectionName xml:space="preserve">.*partner_test_conn.*</ConnectionName><NodeName xml:space="preserve">.*</NodeName><Command xml:space="preserve">test-command 3</Command></Object></DoseTest.Action></TestCaseSetupActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test that a backdoor keeper can be "restarted" when the main connection has been closed and opened in a different context.</Description>
+  <Expectation xml:space="preserve">Partner 0 shall receive command "test-command 1" and "test-command 3"</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Close</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Open</ActionKind>
+      <Partner>1</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Close</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Open</ActionKind>
+      <Partner>0</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>StartBackdoor</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="Safir.Application.BackdoorCommand">
+        <ConnectionName xml:space="preserve">.*partner_test_conn.*</ConnectionName>
+        <NodeName xml:space="preserve">.*</NodeName>
+        <Command xml:space="preserve">test-command 1</Command>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>Close</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="7">
+      <ActionKind>Open</ActionKind>
+      <Partner>0</Partner>
+      <Context>1</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="8">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="Safir.Application.BackdoorCommand">
+        <ConnectionName xml:space="preserve">.*partner_test_conn.*</ConnectionName>
+        <NodeName xml:space="preserve">.*</NodeName>
+        <Command xml:space="preserve">test-command 2</Command>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="9">
+      <ActionKind>StartBackdoor</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="10">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="Safir.Application.BackdoorCommand">
+        <ConnectionName xml:space="preserve">.*partner_test_conn.*</ConnectionName>
+        <NodeName xml:space="preserve">.*</NodeName>
+        <Command xml:space="preserve">test-command 3</Command>
+      </Object>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+</DoseTest.Items.TestCase>

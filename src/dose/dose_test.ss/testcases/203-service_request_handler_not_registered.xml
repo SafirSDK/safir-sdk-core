@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of sending a service request to a non-existing handler</Description><Expectation xml:space="preserve">Partner0/consumer 1 should get an error response saying &quot;not registered handler&quot;</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterServiceHandler</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalService</TypeId><Handler>GLOBAL_SERVICE_0</Handler></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>ServiceRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Handler>GLOBAL_SERVICE_1</Handler><Object type="DoseTest.GlobalService"/></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of sending a service request to a non-existing handler</Description>
+  <Expectation xml:space="preserve">Partner0/consumer 1 should get an error response saying "not registered handler"</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalService</TypeId>
+      <Handler>GLOBAL_SERVICE_0</Handler>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Handler>GLOBAL_SERVICE_1</Handler>
+      <Object type="DoseTest.GlobalService"/>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

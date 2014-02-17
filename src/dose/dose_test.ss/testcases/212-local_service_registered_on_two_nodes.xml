@@ -1,4 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of sending a local service request to a handler that is registered on both nodes.</Description><Expectation xml:space="preserve">P0/C1 and P2/C1 should get ONE response, P1 and P2 should get one request each.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterServiceHandler</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalService</TypeId><Handler>LOCAL_SERVICE_0</Handler></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterServiceHandler</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalService</TypeId><Handler>LOCAL_SERVICE_0</Handler></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>ServiceRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Handler>LOCAL_SERVICE_0</Handler><Object type="DoseTest.LocalService"/></DoseTest.Action><DoseTest.Action index="1"><ActionKind>ServiceRequest</ActionKind><Partner>2</Partner><Consumer>1</Consumer><Handler>LOCAL_SERVICE_0</Handler><Object type="DoseTest.LocalService"/></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of sending a local service request to a handler that is registered on both nodes.</Description>
+  <Expectation xml:space="preserve">P0/C1 and P2/C1 should get ONE response, P1 and P2 should get one request each.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalService</TypeId>
+      <Handler>LOCAL_SERVICE_0</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalService</TypeId>
+      <Handler>LOCAL_SERVICE_0</Handler>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Handler>LOCAL_SERVICE_0</Handler>
+      <Object type="DoseTest.LocalService"/>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>1</Consumer>
+      <Handler>LOCAL_SERVICE_0</Handler>
+      <Object type="DoseTest.LocalService"/>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

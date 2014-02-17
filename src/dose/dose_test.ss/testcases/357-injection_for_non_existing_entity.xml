@@ -1,3 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Testing of injection for a non-existing entity</Description><Expectation xml:space="preserve">partner 0/consumer 0 receives one OnInjectedNewEntity</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>InjectChanges</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Instance>654321</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.InjectableEntity"><Info xml:space="preserve">Some new info</Info></Object><TimestampDelta>10</TimestampDelta></DoseTest.Action><DoseTest.Action index="1"><ActionKind>DeleteAllInstances</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Testing of injection for a non-existing entity</Description>
+  <Expectation xml:space="preserve">partner 0/consumer 0 receives one OnInjectedNewEntity</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>InjectChanges</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Instance>654321</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.InjectableEntity">
+        <Info xml:space="preserve">Some new info</Info>
+      </Object>
+      <TimestampDelta>10</TimestampDelta>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>DeleteAllInstances</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

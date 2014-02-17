@@ -1,4 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test a foreach delete request with a brief response containing both a successful and an unsuccessful response.</Description><Expectation xml:space="preserve">Partner 1 and 2 should get a delete request. Partner 0 should get a brief response with one success and one error. The read of the instances should give NotFound</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>SendResponse</ActionKind><Partner>1</Partner><ActionCallback>OnDeleteRequest</ActionCallback><Consumer>0</Consumer><Object type="DoseTest.Success"><Info xml:space="preserve">Succesful response</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SendResponse</ActionKind><Partner>2</Partner><ActionCallback>OnDeleteRequest</ActionCallback><Consumer>0</Consumer><Object type="Safir.Dob.ErrorResponse"><Code xml:space="preserve">BadBadbad</Code></Object></DoseTest.Action><DoseTest.Action index="2"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>PARTNER_1_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Instance>123</Instance><Handler>PARTNER_1_HANDLER</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">Text to be updated</Info></Object></DoseTest.Action><DoseTest.Action index="4"><ActionKind>RegisterEntityHandler</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>PARTNER_2_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="5"><ActionKind>SetAll</ActionKind><Partner>2</Partner><Consumer>0</Consumer><Instance>456</Instance><Handler>PARTNER_2_HANDLER</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">Text to be updated</Info></Object></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>ServiceRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Handler>DEFAULT_HANDLER</Handler><Object type="Safir.Utilities.ForEach.DeleteRequest"><ResponseType>Brief</ResponseType><OperateOn><EntityId index="0"><name>DoseTest.GlobalEntity</name><instanceId>123</instanceId></EntityId><EntityId index="1"><name>DoseTest.GlobalEntity</name><instanceId>456</instanceId></EntityId></OperateOn></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Sleep</ActionKind><SleepDuration>2</SleepDuration></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Read</ActionKind><Partner>0</Partner><Consumer>0</Consumer><EntityId><name>DoseTest.GlobalEntity</name><instanceId>123</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Read</ActionKind><Partner>0</Partner><Consumer>0</Consumer><EntityId><name>DoseTest.GlobalEntity</name><instanceId>456</instanceId></EntityId></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test a foreach delete request with a brief response containing both a successful and an unsuccessful response.</Description>
+  <Expectation xml:space="preserve">Partner 1 and 2 should get a delete request. Partner 0 should get a brief response with one success and one error. The read of the instances should give NotFound</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SendResponse</ActionKind>
+      <Partner>1</Partner>
+      <ActionCallback>OnDeleteRequest</ActionCallback>
+      <Consumer>0</Consumer>
+      <Object type="DoseTest.Success">
+        <Info xml:space="preserve">Succesful response</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SendResponse</ActionKind>
+      <Partner>2</Partner>
+      <ActionCallback>OnDeleteRequest</ActionCallback>
+      <Consumer>0</Consumer>
+      <Object type="Safir.Dob.ErrorResponse">
+        <Code xml:space="preserve">BadBadbad</Code>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>PARTNER_1_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Instance>123</Instance>
+      <Handler>PARTNER_1_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Text to be updated</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>PARTNER_2_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Instance>456</Instance>
+      <Handler>PARTNER_2_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Text to be updated</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="Safir.Utilities.ForEach.DeleteRequest">
+        <ResponseType>Brief</ResponseType>
+        <OperateOn>
+          <EntityId index="0">
+            <name>DoseTest.GlobalEntity</name>
+            <instanceId>123</instanceId>
+          </EntityId>
+          <EntityId index="1">
+            <name>DoseTest.GlobalEntity</name>
+            <instanceId>456</instanceId>
+          </EntityId>
+        </OperateOn>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>2</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Read</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <EntityId>
+        <name>DoseTest.GlobalEntity</name>
+        <instanceId>123</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Read</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <EntityId>
+        <name>DoseTest.GlobalEntity</name>
+        <instanceId>456</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

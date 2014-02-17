@@ -1,4 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of non-owner setting entity owned by another connection</Description><Expectation xml:space="preserve">Exception (access denied) should be raised</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>1</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>PARTNER1_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Instance>12345</Instance><Handler>PARTNER1_HANDLER</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">Updated information</Info></Object></DoseTest.Action><DoseTest.Action index="2"><ActionKind>RegisterEntityHandler</ActionKind><Partner>0</Partner><Consumer>1</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>PARTNER0_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>SetAll</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Instance>12345</Instance><Handler>PARTNER0_HANDLER</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">Partner0 updated information</Info></Object></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of non-owner setting entity owned by another connection</Description>
+  <Expectation xml:space="preserve">Exception (access denied) should be raised</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>PARTNER1_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Instance>12345</Instance>
+      <Handler>PARTNER1_HANDLER</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">Updated information</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>PARTNER0_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Instance>12345</Instance>
+      <Handler>PARTNER0_HANDLER</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">Partner0 updated information</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

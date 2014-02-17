@@ -1,3 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Postpone OnCreateRequest, redispatch is False.</Description><Expectation xml:space="preserve">P0 receives two OnCreateRequest, the first for instance 121212 and the second for instance 343434.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Postpone</ActionKind><Partner>0</Partner><ActionCallback>OnCreateRequest</ActionCallback><Consumer>0</Consumer><RedispatchCurrent>false</RedispatchCurrent></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>CreateRequest</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Instance>121212</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">Create request 1</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>ResetCallbackActions</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="2"><ActionKind>ResumePostponed</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="3"><ActionKind>CreateRequest</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Instance>343434</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">Create request 2</Info></Object></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Postpone OnCreateRequest, redispatch is False.</Description>
+  <Expectation xml:space="preserve">P0 receives two OnCreateRequest, the first for instance 121212 and the second for instance 343434.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Postpone</ActionKind>
+      <Partner>0</Partner>
+      <ActionCallback>OnCreateRequest</ActionCallback>
+      <Consumer>0</Consumer>
+      <RedispatchCurrent>false</RedispatchCurrent>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Instance>121212</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Create request 1</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>ResetCallbackActions</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>ResumePostponed</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Instance>343434</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Create request 2</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

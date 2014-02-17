@@ -1,4 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test that a service request on a ContextShared service can be sent from any context.</Description><Expectation xml:space="preserve">P0 (context 0) receives two OnServiceRequest. P1 and P2 receive an OnResponse (DoseTest.SucessfullService)</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>Close</ActionKind><Partner>0</Partner></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Open</ActionKind><Partner>0</Partner><Context>0</Context></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Close</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Open</ActionKind><Partner>1</Partner><Context>0</Context></DoseTest.Action><DoseTest.Action index="4"><ActionKind>Close</ActionKind><Partner>2</Partner></DoseTest.Action><DoseTest.Action index="5"><ActionKind>Open</ActionKind><Partner>2</Partner><Context>1</Context></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>RegisterServiceHandler</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.ContextSharedService</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="1"><ActionKind>ServiceRequest</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.ContextSharedService"/></DoseTest.Action><DoseTest.Action index="2"><ActionKind>ServiceRequest</ActionKind><Partner>2</Partner><Consumer>0</Consumer><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.ContextSharedService"/></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test that a service request on a ContextShared service can be sent from any context.</Description>
+  <Expectation xml:space="preserve">P0 (context 0) receives two OnServiceRequest. P1 and P2 receive an OnResponse (DoseTest.SucessfullService)</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Close</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Open</ActionKind>
+      <Partner>0</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Close</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Open</ActionKind>
+      <Partner>1</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>Close</ActionKind>
+      <Partner>2</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>Open</ActionKind>
+      <Partner>2</Partner>
+      <Context>1</Context>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.ContextSharedService</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.ContextSharedService"/>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.ContextSharedService"/>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

@@ -1,4 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Testing that local entities are not propagated to other nodes</Description><Expectation xml:space="preserve">Only partner 0 gets an OnNewEntity, not partner 2.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.LocalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SubscribeEntity</ActionKind><Partner>0</Partner><Consumer>2</Consumer><TypeId>DoseTest.LocalEntity</TypeId><IncludeUpdates>true</IncludeUpdates><IncludeSubclasses>false</IncludeSubclasses><RestartSubscription>true</RestartSubscription></DoseTest.Action><DoseTest.Action index="2"><ActionKind>SubscribeEntity</ActionKind><Partner>2</Partner><Consumer>2</Consumer><TypeId>DoseTest.LocalEntity</TypeId><IncludeUpdates>true</IncludeUpdates><IncludeSubclasses>false</IncludeSubclasses><RestartSubscription>true</RestartSubscription></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>SetChanges</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Instance>0</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.LocalEntity"><Info xml:space="preserve">Some Data</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Delete</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Handler>DEFAULT_HANDLER</Handler><EntityId><name>DoseTest.LocalEntity</name><instanceId>0</instanceId></EntityId></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Testing that local entities are not propagated to other nodes</Description>
+  <Expectation xml:space="preserve">Only partner 0 gets an OnNewEntity, not partner 2.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SubscribeEntity</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <IncludeUpdates>true</IncludeUpdates>
+      <IncludeSubclasses>false</IncludeSubclasses>
+      <RestartSubscription>true</RestartSubscription>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>SubscribeEntity</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <IncludeUpdates>true</IncludeUpdates>
+      <IncludeSubclasses>false</IncludeSubclasses>
+      <RestartSubscription>true</RestartSubscription>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SetChanges</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Instance>0</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.LocalEntity">
+        <Info xml:space="preserve">Some Data</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Delete</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.LocalEntity</name>
+        <instanceId>0</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

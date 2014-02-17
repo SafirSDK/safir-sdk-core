@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of iterating an entity class tree without registerers</Description><Expectation xml:space="preserve">There should be no entities</Expectation><TestActions><DoseTest.Action index="0"><ActionKind>GetEntityIterator</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.RootEntity</TypeId><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of iterating an entity class tree without registerers</Description>
+  <Expectation xml:space="preserve">There should be no entities</Expectation>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>GetEntityIterator</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootEntity</TypeId>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

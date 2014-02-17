@@ -1,3 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Postpone OnInjectedNewEntity, redispatch is True.</Description><Expectation xml:space="preserve">partner 0/consumer 0 receives one OnInitialInjectionsDone and two OnInjectedNewEntity. The first P2 read gives a &quot;not found&quot; exception, second read gives an entity.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Postpone</ActionKind><Partner>0</Partner><ActionCallback>OnInjectedNewEntity</ActionCallback><Consumer>0</Consumer><RedispatchCurrent>true</RedispatchCurrent></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>InjectChanges</ActionKind><Partner>1</Partner><Consumer>1</Consumer><Instance>654321</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.InjectableEntity"><Info xml:space="preserve">qwerty</Info></Object><TimestampDelta>10</TimestampDelta></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Read</ActionKind><Partner>2</Partner><Consumer>0</Consumer><EntityId><name>DoseTest.InjectableEntity</name><instanceId>654321</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="2"><ActionKind>ResetCallbackActions</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="3"><ActionKind>ResumePostponed</ActionKind><Partner>0</Partner><Consumer>0</Consumer></DoseTest.Action><DoseTest.Action index="4"><ActionKind>Read</ActionKind><Partner>2</Partner><Consumer>0</Consumer><EntityId><name>DoseTest.InjectableEntity</name><instanceId>654321</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="5"><ActionKind>Delete</ActionKind><Partner>0</Partner><Consumer>0</Consumer><Handler>DEFAULT_HANDLER</Handler><EntityId><name>DoseTest.InjectableEntity</name><instanceId>654321</instanceId></EntityId></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Postpone OnInjectedNewEntity, redispatch is True.</Description>
+  <Expectation xml:space="preserve">partner 0/consumer 0 receives one OnInitialInjectionsDone and two OnInjectedNewEntity. The first P2 read gives a "not found" exception, second read gives an entity.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Postpone</ActionKind>
+      <Partner>0</Partner>
+      <ActionCallback>OnInjectedNewEntity</ActionCallback>
+      <Consumer>0</Consumer>
+      <RedispatchCurrent>true</RedispatchCurrent>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>InjectChanges</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Instance>654321</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.InjectableEntity">
+        <Info xml:space="preserve">qwerty</Info>
+      </Object>
+      <TimestampDelta>10</TimestampDelta>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Read</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <EntityId>
+        <name>DoseTest.InjectableEntity</name>
+        <instanceId>654321</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>ResetCallbackActions</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>ResumePostponed</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>Read</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <EntityId>
+        <name>DoseTest.InjectableEntity</name>
+        <instanceId>654321</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>Delete</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.InjectableEntity</name>
+        <instanceId>654321</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

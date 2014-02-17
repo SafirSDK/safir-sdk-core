@@ -1,4 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of double registration of global entity handler (revoke)</Description><Expectation xml:space="preserve">Partner 0/Consumer 0 receives one OnRevokedRegistration for GLOBAL_HANDLER_0</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>GLOBAL_HANDLER_0</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>2</Partner><Consumer>2</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>GLOBAL_HANDLER_0</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of double registration of global entity handler (revoke)</Description>
+  <Expectation xml:space="preserve">Partner 0/Consumer 0 receives one OnRevokedRegistration for GLOBAL_HANDLER_0</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>GLOBAL_HANDLER_0</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>GLOBAL_HANDLER_0</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

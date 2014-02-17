@@ -1,4 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of owner deleting instance (global)</Description><Expectation xml:space="preserve">The created instance shall be found and after deletion exception Safir.Dob.NotFoundException shall be thrown</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>2</Partner><Consumer>1</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SetAll</ActionKind><Partner>2</Partner><Consumer>1</Consumer><Instance>987654321</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">New information</Info></Object></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>Read</ActionKind><Partner>0</Partner><Consumer>1</Consumer><EntityId><name>DoseTest.GlobalEntity</name><instanceId>987654321</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Delete</ActionKind><Partner>2</Partner><Consumer>1</Consumer><Handler>DEFAULT_HANDLER</Handler><EntityId><name>DoseTest.GlobalEntity</name><instanceId>987654321</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Read</ActionKind><Partner>0</Partner><Consumer>1</Consumer><EntityId><name>DoseTest.GlobalEntity</name><instanceId>987654321</instanceId></EntityId></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of owner deleting instance (global)</Description>
+  <Expectation xml:space="preserve">The created instance shall be found and after deletion exception Safir.Dob.NotFoundException shall be thrown</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>1</Consumer>
+      <Instance>987654321</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">New information</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Read</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <EntityId>
+        <name>DoseTest.GlobalEntity</name>
+        <instanceId>987654321</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Delete</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>1</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.GlobalEntity</name>
+        <instanceId>987654321</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Read</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <EntityId>
+        <name>DoseTest.GlobalEntity</name>
+        <instanceId>987654321</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

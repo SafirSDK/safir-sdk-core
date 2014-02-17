@@ -1,4 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of sending global delete request of non-created instance</Description><Expectation xml:space="preserve">Partner 0/Consumer 1 receives an error response SafirNotRegistered, with info that the instance does not exist</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>2</Partner><Consumer>1</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SetAll</ActionKind><Partner>2</Partner><Consumer>1</Consumer><Instance>88889999</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">Created</Info></Object></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Delete</ActionKind><Partner>2</Partner><ActionCallback>OnDoDispatch</ActionCallback><Consumer>1</Consumer><Handler>DEFAULT_HANDLER</Handler><EntityId><name>DoseTest.GlobalEntity</name><instanceId>88889999</instanceId></EntityId></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>DeleteRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Handler>DEFAULT_HANDLER</Handler><EntityId><name>DoseTest.GlobalEntity</name><instanceId>88889999</instanceId></EntityId></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of sending global delete request of non-created instance</Description>
+  <Expectation xml:space="preserve">Partner 0/Consumer 1 receives an error response SafirNotRegistered, with info that the instance does not exist</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>1</Consumer>
+      <Instance>88889999</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Created</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Delete</ActionKind>
+      <Partner>2</Partner>
+      <ActionCallback>OnDoDispatch</ActionCallback>
+      <Consumer>1</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.GlobalEntity</name>
+        <instanceId>88889999</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>DeleteRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.GlobalEntity</name>
+        <instanceId>88889999</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

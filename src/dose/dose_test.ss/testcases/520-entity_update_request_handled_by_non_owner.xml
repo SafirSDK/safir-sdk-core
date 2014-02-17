@@ -1,3 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">A handler receives an update request for a non-existing entity.</Description><Expectation xml:space="preserve">Partner 0 receives a SafirNotRegistered response.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandler</ActionKind><Partner>2</Partner><Consumer>2</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>DiscardResponseSender</ActionKind><Partner>2</Partner><ActionCallback>OnUpdateRequest</ActionCallback><Consumer>2</Consumer></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Postpone</ActionKind><Partner>2</Partner><ActionCallback>OnUpdateRequest</ActionCallback><Consumer>2</Consumer><RedispatchCurrent>true</RedispatchCurrent></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SetAll</ActionKind><Partner>2</Partner><Consumer>2</Consumer><Instance>321321</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">hejhej</Info></Object></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>UpdateRequest</ActionKind><Partner>0</Partner><Consumer>0</Consumer><Instance>321321</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">hej pa dig!</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Delete</ActionKind><Partner>2</Partner><Consumer>2</Consumer><Handler>DEFAULT_HANDLER</Handler><EntityId><name>DoseTest.GlobalEntity</name><instanceId>321321</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="2"><ActionKind>ResetCallbackActions</ActionKind><Partner>2</Partner><Consumer>2</Consumer></DoseTest.Action><DoseTest.Action index="3"><ActionKind>ResumePostponed</ActionKind><Partner>2</Partner><Consumer>2</Consumer></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">A handler receives an update request for a non-existing entity.</Description>
+  <Expectation xml:space="preserve">Partner 0 receives a SafirNotRegistered response.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>DiscardResponseSender</ActionKind>
+      <Partner>2</Partner>
+      <ActionCallback>OnUpdateRequest</ActionCallback>
+      <Consumer>2</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Postpone</ActionKind>
+      <Partner>2</Partner>
+      <ActionCallback>OnUpdateRequest</ActionCallback>
+      <Consumer>2</Consumer>
+      <RedispatchCurrent>true</RedispatchCurrent>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>2</Consumer>
+      <Instance>321321</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">hejhej</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>UpdateRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Instance>321321</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">hej pa dig!</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Delete</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>2</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.GlobalEntity</name>
+        <instanceId>321321</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>ResetCallbackActions</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>2</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>ResumePostponed</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>2</Consumer>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

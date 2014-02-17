@@ -1,4 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of sending and subscribing of global messages in different contexts</Description><Expectation xml:space="preserve">Partner 0 recieves one global message with info &quot;context 0&quot;. Partner 1 recieves one global message with info &quot;context 1&quot;.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>Close</ActionKind><Partner>0</Partner></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Open</ActionKind><Partner>0</Partner><Context>0</Context></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Close</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Open</ActionKind><Partner>1</Partner><Context>1</Context></DoseTest.Action><DoseTest.Action index="4"><ActionKind>Close</ActionKind><Partner>2</Partner></DoseTest.Action><DoseTest.Action index="5"><ActionKind>Open</ActionKind><Partner>2</Partner><Context>0</Context></DoseTest.Action><DoseTest.Action index="6"><ActionKind>SubscribeMessage</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalMessage</TypeId><Channel>DEFAULT_CHANNEL</Channel><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="7"><ActionKind>SubscribeMessage</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.GlobalMessage</TypeId><Channel>DEFAULT_CHANNEL</Channel><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>SendMessage</ActionKind><Partner>2</Partner><Consumer>0</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="DoseTest.GlobalMessage"><Info xml:space="preserve">context 0</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Close</ActionKind><Partner>2</Partner></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Open</ActionKind><Partner>2</Partner><Context>1</Context></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SendMessage</ActionKind><Partner>2</Partner><Consumer>0</Consumer><Channel>DEFAULT_CHANNEL</Channel><Object type="DoseTest.GlobalMessage"><Info xml:space="preserve">context 1</Info></Object></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of sending and subscribing of global messages in different contexts</Description>
+  <Expectation xml:space="preserve">Partner 0 recieves one global message with info "context 0". Partner 1 recieves one global message with info "context 1".</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Close</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Open</ActionKind>
+      <Partner>0</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Close</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Open</ActionKind>
+      <Partner>1</Partner>
+      <Context>1</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>Close</ActionKind>
+      <Partner>2</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>Open</ActionKind>
+      <Partner>2</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>SubscribeMessage</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalMessage</TypeId>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="7">
+      <ActionKind>SubscribeMessage</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalMessage</TypeId>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="DoseTest.GlobalMessage">
+        <Info xml:space="preserve">context 0</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Close</ActionKind>
+      <Partner>2</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Open</ActionKind>
+      <Partner>2</Partner>
+      <Context>1</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="DoseTest.GlobalMessage">
+        <Info xml:space="preserve">context 1</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

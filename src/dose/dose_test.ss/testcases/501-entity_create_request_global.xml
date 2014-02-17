@@ -1,4 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of sending create request (owner on other node)</Description><Expectation xml:space="preserve">Partner 0/Consumer 0 receives a success response and the entity info field should be &quot;Created&quot; (part 0/cons 1)</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>SendResponse</ActionKind><Partner>2</Partner><ActionCallback>OnCreateRequest</ActionCallback><Consumer>1</Consumer><Object type="DoseTest.Success"><Info xml:space="preserve">Succesful response</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterEntityHandler</ActionKind><Partner>2</Partner><Consumer>1</Consumer><TypeId>DoseTest.GlobalEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>CreateRequest</ActionKind><Partner>0</Partner><Consumer>0</Consumer><Instance>987654</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalEntity"><Info xml:space="preserve">Created</Info></Object></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Sleep</ActionKind><SleepDuration>10</SleepDuration></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Read</ActionKind><Partner>0</Partner><Consumer>1</Consumer><EntityId><name>DoseTest.GlobalEntity</name><instanceId>987654</instanceId></EntityId></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of sending create request (owner on other node)</Description>
+  <Expectation xml:space="preserve">Partner 0/Consumer 0 receives a success response and the entity info field should be "Created" (part 0/cons 1)</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SendResponse</ActionKind>
+      <Partner>2</Partner>
+      <ActionCallback>OnCreateRequest</ActionCallback>
+      <Consumer>1</Consumer>
+      <Object type="DoseTest.Success">
+        <Info xml:space="preserve">Succesful response</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Instance>987654</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Created</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>10</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Read</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <EntityId>
+        <name>DoseTest.GlobalEntity</name>
+        <instanceId>987654</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

@@ -1,4 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of simulate overflow in request out queue</Description><Expectation xml:space="preserve">Partner0/Consumer 1 should get an overflow exception and then a OnNotRequestOverflow</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>SimulateOverflows</ActionKind><Partner>0</Partner><Consumer>1</Consumer><InQueues>false</InQueues><OutQueues>true</OutQueues></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>ServiceRequest</ActionKind><Partner>0</Partner><Consumer>1</Consumer><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.GlobalService"/></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SimulateOverflows</ActionKind><Partner>0</Partner><Consumer>1</Consumer><InQueues>false</InQueues><OutQueues>false</OutQueues></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of simulate overflow in request out queue</Description>
+  <Expectation xml:space="preserve">Partner0/Consumer 1 should get an overflow exception and then a OnNotRequestOverflow</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SimulateOverflows</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <InQueues>false</InQueues>
+      <OutQueues>true</OutQueues>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>ServiceRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalService"/>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SimulateOverflows</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <InQueues>false</InQueues>
+      <OutQueues>false</OutQueues>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

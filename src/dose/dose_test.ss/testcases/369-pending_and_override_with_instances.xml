@@ -1,3 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Testing of Pending entity handler registrations between nodes</Description><Expectation xml:space="preserve">Partner 1 gets 4 OnInitialInjectionsDone, all but the first is preceeded by an OnInjectedNewEntity.  Partner 2 gets OnCompletedRegistration, OnInjectedNewEntity, OnInitialInjectionsDone, OnRevokedRegistration. This sequence is repeated 3 times.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>SubscribeRegistration</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousPermanentEntity</TypeId><Handler>ALL_HANDLERS</Handler><IncludeSubclasses>true</IncludeSubclasses><RestartSubscription>false</RestartSubscription></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterEntityHandlerPending</ActionKind><Partner>2</Partner><ActionCallback>OnRevokedRegistration</ActionCallback><Consumer>0</Consumer><TypeId>DoseTest.SynchronousPermanentEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousPermanentEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Instance>0</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.SynchronousPermanentEntity"><Info xml:space="preserve">Some info</Info></Object></DoseTest.Action><DoseTest.Action index="2"><ActionKind>RegisterEntityHandlerPending</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousPermanentEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Sleep</ActionKind><SleepDuration>10</SleepDuration></DoseTest.Action><DoseTest.Action index="4"><ActionKind>Close</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="5"><ActionKind>Sleep</ActionKind><SleepDuration>10</SleepDuration></DoseTest.Action><DoseTest.Action index="6"><ActionKind>Open</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="7"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousPermanentEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="8"><ActionKind>Sleep</ActionKind><SleepDuration>10</SleepDuration></DoseTest.Action><DoseTest.Action index="9"><ActionKind>Close</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="10"><ActionKind>Sleep</ActionKind><SleepDuration>10</SleepDuration></DoseTest.Action><DoseTest.Action index="11"><ActionKind>Open</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="12"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousPermanentEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="13"><ActionKind>Sleep</ActionKind><SleepDuration>10</SleepDuration></DoseTest.Action><DoseTest.Action index="14"><ActionKind>Close</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="15"><ActionKind>Sleep</ActionKind><SleepDuration>10</SleepDuration></DoseTest.Action><DoseTest.Action index="16"><ActionKind>Open</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="17"><ActionKind>Sleep</ActionKind><SleepDuration>10</SleepDuration></DoseTest.Action><DoseTest.Action index="18"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousPermanentEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="19"><ActionKind>Sleep</ActionKind><SleepDuration>10</SleepDuration></DoseTest.Action><DoseTest.Action index="20"><ActionKind>UnsubscribeRegistration</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousPermanentEntity</TypeId><Handler>ALL_HANDLERS</Handler><IncludeSubclasses>true</IncludeSubclasses></DoseTest.Action><DoseTest.Action index="21"><ActionKind>Delete</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Handler>DEFAULT_HANDLER</Handler><EntityId><name>DoseTest.SynchronousPermanentEntity</name><instanceId>0</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="22"><ActionKind>UnregisterHandler</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousPermanentEntity</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action><DoseTest.Action index="23"><ActionKind>UnregisterHandler</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousPermanentEntity</TypeId><Handler>DEFAULT_HANDLER</Handler></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Testing of Pending entity handler registrations between nodes</Description>
+  <Expectation xml:space="preserve">Partner 1 gets 4 OnInitialInjectionsDone, all but the first is preceeded by an OnInjectedNewEntity.  Partner 2 gets OnCompletedRegistration, OnInjectedNewEntity, OnInitialInjectionsDone, OnRevokedRegistration. This sequence is repeated 3 times.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SubscribeRegistration</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousPermanentEntity</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterEntityHandlerPending</ActionKind>
+      <Partner>2</Partner>
+      <ActionCallback>OnRevokedRegistration</ActionCallback>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousPermanentEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousPermanentEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Instance>0</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.SynchronousPermanentEntity">
+        <Info xml:space="preserve">Some info</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>RegisterEntityHandlerPending</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousPermanentEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>10</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>Close</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>10</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>Open</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="7">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousPermanentEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="8">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>10</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="9">
+      <ActionKind>Close</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="10">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>10</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="11">
+      <ActionKind>Open</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="12">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousPermanentEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="13">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>10</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="14">
+      <ActionKind>Close</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="15">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>10</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="16">
+      <ActionKind>Open</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="17">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>10</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="18">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousPermanentEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="19">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>10</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="20">
+      <ActionKind>UnsubscribeRegistration</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousPermanentEntity</TypeId>
+      <Handler>ALL_HANDLERS</Handler>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+    <DoseTest.Action index="21">
+      <ActionKind>Delete</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.SynchronousPermanentEntity</name>
+        <instanceId>0</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="22">
+      <ActionKind>UnregisterHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousPermanentEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+    <DoseTest.Action index="23">
+      <ActionKind>UnregisterHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousPermanentEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

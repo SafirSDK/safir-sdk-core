@@ -1,4 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test of special subscription WantsGhostDelete</Description><Expectation xml:space="preserve">Partner 0/Consumer 0 receives one OnDeletedEntity. Partner 2/Consumer 0 receives no subscription responses.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>SetAll</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Instance>12345</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.InjectableEntity"><Info xml:space="preserve">Blabla</Info></Object></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Close</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Open</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="4"><ActionKind>Delete</ActionKind><Partner>1</Partner><ActionCallback>OnInjectedNewEntity</ActionCallback><Consumer>0</Consumer><Handler>DEFAULT_HANDLER</Handler><EntityId><name>DoseTest.InjectableEntity</name><instanceId>12345</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="5"><ActionKind>InjectorSubscribeEntity</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><IncludeUpdates>true</IncludeUpdates><IncludeSubclasses>false</IncludeSubclasses><RestartSubscription>false</RestartSubscription><WantsGhostDelete>true</WantsGhostDelete><WantsLastState>false</WantsLastState><DoesntWantSourceIsPermanentStore>true</DoesntWantSourceIsPermanentStore><WantsAllStateChanges>false</WantsAllStateChanges><TimestampChangeInfo>false</TimestampChangeInfo></DoseTest.Action><DoseTest.Action index="6"><ActionKind>InjectorSubscribeEntity</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><IncludeUpdates>true</IncludeUpdates><IncludeSubclasses>false</IncludeSubclasses><RestartSubscription>false</RestartSubscription><WantsGhostDelete>false</WantsGhostDelete><WantsLastState>false</WantsLastState><DoesntWantSourceIsPermanentStore>true</DoesntWantSourceIsPermanentStore><WantsAllStateChanges>false</WantsAllStateChanges><TimestampChangeInfo>false</TimestampChangeInfo></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.InjectableEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of special subscription WantsGhostDelete</Description>
+  <Expectation xml:space="preserve">Partner 0/Consumer 0 receives one OnDeletedEntity. Partner 2/Consumer 0 receives no subscription responses.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Instance>12345</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.InjectableEntity">
+        <Info xml:space="preserve">Blabla</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Close</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Open</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>Delete</ActionKind>
+      <Partner>1</Partner>
+      <ActionCallback>OnInjectedNewEntity</ActionCallback>
+      <Consumer>0</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.InjectableEntity</name>
+        <instanceId>12345</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>InjectorSubscribeEntity</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <IncludeUpdates>true</IncludeUpdates>
+      <IncludeSubclasses>false</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+      <WantsGhostDelete>true</WantsGhostDelete>
+      <WantsLastState>false</WantsLastState>
+      <DoesntWantSourceIsPermanentStore>true</DoesntWantSourceIsPermanentStore>
+      <WantsAllStateChanges>false</WantsAllStateChanges>
+      <TimestampChangeInfo>false</TimestampChangeInfo>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>InjectorSubscribeEntity</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <IncludeUpdates>true</IncludeUpdates>
+      <IncludeSubclasses>false</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+      <WantsGhostDelete>false</WantsGhostDelete>
+      <WantsLastState>false</WantsLastState>
+      <DoesntWantSourceIsPermanentStore>true</DoesntWantSourceIsPermanentStore>
+      <WantsAllStateChanges>false</WantsAllStateChanges>
+      <TimestampChangeInfo>false</TimestampChangeInfo>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.InjectableEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

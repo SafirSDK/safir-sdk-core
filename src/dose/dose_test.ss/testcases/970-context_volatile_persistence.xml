@@ -1,4 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<DoseTest.Items.TestCase><Description xml:space="preserve">Test that ghosts from correct context is injected</Description><Expectation xml:space="preserve">P0 receives OnNewInjectedEntity with SynchronousVolatileEntity (inst 54321), member &apos;Info&apos; has value &quot;Context 0&quot;. P1 receives OnNewInjectedEntity with SynchronousVolatileEntity (inst 54321), member &apos;Info&apos; has value &quot;Context 1&quot;.</Expectation><TestCaseSetupActions><DoseTest.Action index="0"><ActionKind>Close</ActionKind><Partner>2</Partner></DoseTest.Action><DoseTest.Action index="1"><ActionKind>Open</ActionKind><Partner>2</Partner><Context>0</Context></DoseTest.Action><DoseTest.Action index="2"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="3"><ActionKind>SetAll</ActionKind><Partner>2</Partner><Consumer>0</Consumer><Instance>54321</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.SynchronousVolatileEntity"><Info xml:space="preserve">Context 0</Info></Object></DoseTest.Action><DoseTest.Action index="4"><ActionKind>Close</ActionKind><Partner>2</Partner></DoseTest.Action><DoseTest.Action index="5"><ActionKind>Open</ActionKind><Partner>2</Partner><Context>1</Context></DoseTest.Action><DoseTest.Action index="6"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>2</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="7"><ActionKind>SetAll</ActionKind><Partner>2</Partner><Consumer>0</Consumer><Instance>54321</Instance><Handler>DEFAULT_HANDLER</Handler><Object type="DoseTest.SynchronousVolatileEntity"><Info xml:space="preserve">Context 1</Info></Object></DoseTest.Action><DoseTest.Action index="8"><ActionKind>Close</ActionKind><Partner>2</Partner></DoseTest.Action><DoseTest.Action index="9"><ActionKind>Close</ActionKind><Partner>0</Partner></DoseTest.Action><DoseTest.Action index="10"><ActionKind>Open</ActionKind><Partner>0</Partner><Context>0</Context></DoseTest.Action><DoseTest.Action index="11"><ActionKind>Close</ActionKind><Partner>1</Partner></DoseTest.Action><DoseTest.Action index="12"><ActionKind>Open</ActionKind><Partner>1</Partner><Context>1</Context></DoseTest.Action></TestCaseSetupActions><TestActions><DoseTest.Action index="0"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>0</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="1"><ActionKind>RegisterEntityHandlerInjection</ActionKind><Partner>1</Partner><Consumer>0</Consumer><TypeId>DoseTest.SynchronousVolatileEntity</TypeId><Handler>DEFAULT_HANDLER</Handler><InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy></DoseTest.Action><DoseTest.Action index="2"><ActionKind>Delete</ActionKind><Partner>0</Partner><Consumer>0</Consumer><Handler>DEFAULT_HANDLER</Handler><EntityId><name>DoseTest.SynchronousVolatileEntity</name><instanceId>54321</instanceId></EntityId></DoseTest.Action><DoseTest.Action index="3"><ActionKind>Delete</ActionKind><Partner>1</Partner><Consumer>0</Consumer><Handler>DEFAULT_HANDLER</Handler><EntityId><name>DoseTest.SynchronousVolatileEntity</name><instanceId>54321</instanceId></EntityId></DoseTest.Action></TestActions></DoseTest.Items.TestCase>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test that ghosts from correct context is injected</Description>
+  <Expectation xml:space="preserve">P0 receives OnNewInjectedEntity with SynchronousVolatileEntity (inst 54321), member 'Info' has value "Context 0". P1 receives OnNewInjectedEntity with SynchronousVolatileEntity (inst 54321), member 'Info' has value "Context 1".</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Close</ActionKind>
+      <Partner>2</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Open</ActionKind>
+      <Partner>2</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Instance>54321</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.SynchronousVolatileEntity">
+        <Info xml:space="preserve">Context 0</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>Close</ActionKind>
+      <Partner>2</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>Open</ActionKind>
+      <Partner>2</Partner>
+      <Context>1</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="7">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Instance>54321</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.SynchronousVolatileEntity">
+        <Info xml:space="preserve">Context 1</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="8">
+      <ActionKind>Close</ActionKind>
+      <Partner>2</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="9">
+      <ActionKind>Close</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="10">
+      <ActionKind>Open</ActionKind>
+      <Partner>0</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="11">
+      <ActionKind>Close</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="12">
+      <ActionKind>Open</ActionKind>
+      <Partner>1</Partner>
+      <Context>1</Context>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterEntityHandlerInjection</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.SynchronousVolatileEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Delete</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.SynchronousVolatileEntity</name>
+        <instanceId>54321</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Delete</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.SynchronousVolatileEntity</name>
+        <instanceId>54321</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>
