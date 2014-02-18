@@ -22,8 +22,8 @@
 *
 ******************************************************************************/
 
-#ifndef __DOTS_INTERNAL_Internal_BLOB_LAYOUT_IMPL_H__
-#define __DOTS_INTERNAL_Internal_BLOB_LAYOUT_IMPL_H__
+#ifndef __DOTS_INTERNAL_BLOB_LAYOUT_IMPL_H__
+#define __DOTS_INTERNAL_BLOB_LAYOUT_IMPL_H__
 
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/InternalDefs.h>

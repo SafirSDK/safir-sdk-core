@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_Internal_BASIC_TYPE_OPERATIONS_H__
-#define __DOTS_INTERNAL_Internal_BASIC_TYPE_OPERATIONS_H__
+#ifndef __DOTS_INTERNAL_BASIC_TYPE_OPERATIONS_H__
+#define __DOTS_INTERNAL_BASIC_TYPE_OPERATIONS_H__
 
 #include <string>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>

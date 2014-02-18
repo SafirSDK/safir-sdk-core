@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_Internal_JSON_TO_BLOB_H__
-#define __DOTS_INTERNAL_Internal_JSON_TO_BLOB_H__
+#ifndef __DOTS_INTERNAL_JSON_TO_BLOB_H__
+#define __DOTS_INTERNAL_JSON_TO_BLOB_H__
 
 #ifdef _MSC_VER
 #pragma warning( push )

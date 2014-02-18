@@ -22,8 +22,8 @@
 *
 ******************************************************************************/
 
-#ifndef __DOTS_INTERNAL_Internal_DEFS__
-#define __DOTS_INTERNAL_Internal_DEFS__
+#ifndef __DOTS_INTERNAL_DEFS__
+#define __DOTS_INTERNAL_DEFS__
 
 #include <sstream>
 #include <iostream>

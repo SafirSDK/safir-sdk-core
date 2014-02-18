@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_Internal_TOSTRING_HELPERS__
-#define __DOTS_INTERNAL_Internal_TOSTRING_HELPERS__
+#ifndef __DOTS_INTERNAL_TOSTRING_HELPERS__
+#define __DOTS_INTERNAL_TOSTRING_HELPERS__
 
 #include <iostream>
 #include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>

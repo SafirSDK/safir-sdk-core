@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_Internal_SERIALIZATION_UTILS_H__
-#define __DOTS_INTERNAL_Internal_SERIALIZATION_UTILS_H__
+#ifndef __DOTS_INTERNAL_SERIALIZATION_UTILS_H__
+#define __DOTS_INTERNAL_SERIALIZATION_UTILS_H__
 
 #ifdef _MSC_VER
 #pragma warning(disable:4127)
@@ -30,6 +30,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/property_tree/ptree.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/binary_from_base64.hpp>

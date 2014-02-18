@@ -21,16 +21,14 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_Internal_BLOB_TO_XML_H__
-#define __DOTS_INTERNAL_Internal_BLOB_TO_XML_H__
+#ifndef __DOTS_INTERNAL_BLOB_TO_XML_H__
+#define __DOTS_INTERNAL_BLOB_TO_XML_H__
 
 #include <string>
 #include <vector>
 #include <sstream>
 #include <stdexcept>
 #include <boost/noncopyable.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobLayoutImpl.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/SerializationUtils.h>

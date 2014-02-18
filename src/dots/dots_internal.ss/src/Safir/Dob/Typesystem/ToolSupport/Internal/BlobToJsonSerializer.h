@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_Internal_BLOB_TO_JSON_H__
-#define __DOTS_INTERNAL_Internal_BLOB_TO_JSON_H__
+#ifndef __DOTS_INTERNAL_BLOB_TO_JSON_H__
+#define __DOTS_INTERNAL_BLOB_TO_JSON_H__
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -35,12 +35,11 @@
 #include <stdexcept>
 #include <boost/noncopyable.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/property_tree/json_parser.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobLayoutImpl.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/SerializationUtils.h>
+
+#define JQUOT(x) "\""<<x<<"\""
 
 namespace Safir
 {
@@ -52,135 +51,6 @@ namespace ToolSupport
 {
 namespace Internal
 {
-
-//Namepspace boostfix is a hack that prevents boosts json_writer to make all values to a strings.
-//Instead nothing will be quoted and strings must manually be quoted before insertion in the property-tree
-//All code are copied from the boost file 'json_parser_write.hpp'. Modified lines are commented.
-namespace boostfix
-{
-    using namespace boost;
-    using namespace boost::detail;
-    using namespace boost::details;
-    using namespace boost::property_tree;
-    using namespace boost::property_tree::json_parser;
-
-    // Create necessary escape sequences from illegal characters
-    template<class Ch>
-    std::basic_string<Ch> create_escapes(const std::basic_string<Ch> &s)
-    {
-        std::basic_string<Ch> result;
-        typename std::basic_string<Ch>::const_iterator b = s.begin();
-        typename std::basic_string<Ch>::const_iterator e = s.end();
-        while (b != e)
-        {
-            // This assumes an ASCII superset. But so does everything in PTree.
-            // We escape everything outside ASCII, because this code can't
-            // handle high unicode characters.
-            if (*b == 0x20 || *b == 0x21 || (*b >= 0x23 && *b <= 0x2E) ||
-                (*b >= 0x30 && *b <= 0x5B) || (*b >= 0x5D && *b <= 0xFF))
-                result += *b;
-            else if (*b == Ch('\b')) result += Ch('\\'), result += Ch('b');
-            else if (*b == Ch('\f')) result += Ch('\\'), result += Ch('f');
-            else if (*b == Ch('\n')) result += Ch('\\'), result += Ch('n');
-            else if (*b == Ch('\r')) result += Ch('\\'), result += Ch('r');
-            else if (*b == Ch('/')) result += Ch('\\'), result += Ch('/');
-            else if (*b == Ch('"'))  result += Ch('"'); //Modified by JOOT!
-            //else if (*b == Ch('\\')) result += Ch('\\'), result += Ch('\\'); //Commented out by JOOT!
-            else
-            {
-                const char *hexdigits = "0123456789ABCDEF";
-                typedef typename make_unsigned<Ch>::type UCh;
-                unsigned long u = (std::min)(static_cast<unsigned long>(
-                                                 static_cast<UCh>(*b)),
-                                             0xFFFFul);
-                int d1 = u / 4096; u -= d1 * 4096;
-                int d2 = u / 256; u -= d2 * 256;
-                int d3 = u / 16; u -= d3 * 16;
-                int d4 = u;
-                result += Ch('\\'); result += Ch('u');
-                result += Ch(hexdigits[d1]); result += Ch(hexdigits[d2]);
-                result += Ch(hexdigits[d3]); result += Ch(hexdigits[d4]);
-            }
-            ++b;
-        }
-        return result;
-    }
-
-    template<class Ptree>
-    void write_json_helper(std::basic_ostream<typename Ptree::key_type::value_type> &stream,
-                           const Ptree &pt,
-                           int indent, bool pretty)
-    {
-
-        typedef typename Ptree::key_type::value_type Ch;
-        typedef typename std::basic_string<Ch> Str;
-
-        // Value or object or array
-        if (indent > 0 && pt.empty())
-        {
-            // Write value
-            Str data = create_escapes(pt.template get_value<Str>());
-            stream << data; //Modified by JOOT!
-
-        }
-        else if (indent > 0 && pt.count(Str()) == pt.size())
-        {
-            // Write array
-            stream << Ch('[');
-            if (pretty) stream << Ch('\n');
-            typename Ptree::const_iterator it = pt.begin();
-            for (; it != pt.end(); ++it)
-            {
-                if (pretty) stream << Str(4 * (indent + 1), Ch(' '));
-                write_json_helper(stream, it->second, indent + 1, pretty);
-                if (boost::next(it) != pt.end())
-                    stream << Ch(',');
-                if (pretty) stream << Ch('\n');
-            }
-            stream << Str(4 * indent, Ch(' ')) << Ch(']');
-
-        }
-        else
-        {
-            // Write object
-            stream << Ch('{');
-            if (pretty) stream << Ch('\n');
-            typename Ptree::const_iterator it = pt.begin();
-            for (; it != pt.end(); ++it)
-            {
-                if (pretty) stream << Str(4 * (indent + 1), Ch(' '));
-                stream << Ch('"') << create_escapes(it->first) << Ch('"') << Ch(':');
-                if (pretty) {
-                    if (it->second.empty())
-                        stream << Ch(' ');
-                    else
-                        stream << Ch('\n') << Str(4 * (indent + 1), Ch(' '));
-                }
-                write_json_helper(stream, it->second, indent + 1, pretty);
-                if (boost::next(it) != pt.end())
-                    stream << Ch(',');
-                if (pretty) stream << Ch('\n');
-            }
-            if (pretty) stream << Str(4 * indent, Ch(' '));
-            stream << Ch('}');
-        }
-    }
-
-    template<class Ptree>
-    void write_json_internal(std::basic_ostream<typename Ptree::key_type::value_type> &stream,
-                             const Ptree &pt,
-                             const std::string &filename,
-                             bool pretty)
-    {
-        if (!verify_json(pt, 0))
-            BOOST_PROPERTY_TREE_THROW(json_parser_error("ptree contains data that cannot be represented in JSON format", filename, 0));
-        Safir::Dob::Typesystem::ToolSupport::Internal::boostfix::write_json_helper(stream, pt, 0, pretty); //Modified by JOOT!
-        stream << std::endl;
-        if (!stream.good())
-            BOOST_PROPERTY_TREE_THROW(json_parser_error("write error", filename, 0));
-    }
-}
-
     template <class RepT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepT> >
     class BlobToJsonSerializer : private boost::noncopyable
     {
@@ -199,44 +69,54 @@ namespace boostfix
 
         void operator()(const char* blob, std::ostream& os) const
         {
-            boost::property_tree::ptree content;
-            SerializeMembers(blob, content);
-            boost::property_tree::ptree root;
-            root.push_back(std::make_pair(GetClass(blob)->GetName(), content));
-            boostfix::write_json_internal(os, root, std::string(), true);
+            const ClassDescriptionType* cd=GetClass(blob);
+            os<<"{";
+            WriteMemberName(cd->GetName(), os);
+            SerializeMembers(blob, os);
+            os<<"}";
         }
 
     private:
         const RepositoryType* m_repository;
         const BlobLayoutImpl<RepositoryType> m_blobLayout;
 
-        //On Visual Studio 2012 and 2013 std::make_pair gets confused with the type conversions, 
-        //so we have this utility function that helps the little acorns get it right. :-)
-        template <class T1, class T2>
-        static boost::property_tree::ptree::value_type MakePtreeValue(const T1& v1, const T2& v2)
+        inline void WriteMemberName(const char* name, std::ostream& os) const
         {
-            return std::make_pair(v1, boost::property_tree::ptree(v2));
+            os<<"\""<<name<<"\": ";
         }
 
-        void SerializeMembers(const char* blob, boost::property_tree::ptree& content) const
+        void SerializeMembers(const char* blob, std::ostream& os) const
         {
             static const std::string nullString="null";
-            const ClassDescriptionType* cd=GetClass(blob);
 
-            content.add("_DouType", Quoted(cd->GetName()));
+            os<<"{";
+
+            const ClassDescriptionType* cd=GetClass(blob);
+            WriteMemberName("_DouType", os);
+            os<<JQUOT(cd->GetName());
 
             for (DotsC_MemberIndex memberIx=0; memberIx<cd->GetNumberOfMembers(); ++memberIx)
             {
                 const MemberDescriptionType* md=cd->GetMember(memberIx);
+
                 if (!md->IsArray()) //normal member
                 {
-                    SerializeMember(blob, md, memberIx, 0, md->GetName(), content);
+                    if (!m_blobLayout.GetStatus(blob, memberIx, 0).IsNull())
+                    {
+                        os<<", ";
+                        WriteMemberName(md->GetName(), os);
+                        SerializeMember(blob, md, memberIx, 0, os);
+                    }
                 }
                 else //array member
                 {
+                    std::ostringstream arrayValues;
+                    arrayValues<<", ";
+                    WriteMemberName(md->GetName(), arrayValues);
+                    arrayValues<<"[";
                     bool nonNullValueInserted=false;
                     int accumulatedNulls=0;
-                    boost::property_tree::ptree arrayValues;
+                    bool hasInsertedValues=false;
                     for (DotsC_ArrayIndex arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
                     {
                         if (m_blobLayout.GetStatus(blob, memberIx, arrIx).IsNull())
@@ -247,30 +127,39 @@ namespace boostfix
                         }
                         else
                         {
-                            for (int nullCount=0; nullCount<accumulatedNulls; ++nullCount)
+                            if (hasInsertedValues)
                             {
-                                arrayValues.push_back(MakePtreeValue("", "null"));
+                                arrayValues<<", ";
                             }
 
+                            for (int nullCount=0; nullCount<accumulatedNulls; ++nullCount)
+                            {
+                                arrayValues<<"null, ";
+                            }
                             accumulatedNulls=0;
                             nonNullValueInserted=true;
-                            SerializeMember(blob, md, memberIx, arrIx, "", arrayValues);
+
+                            SerializeMember(blob, md, memberIx, arrIx, arrayValues);
+                            hasInsertedValues=true;
                         }
                     }
+                    arrayValues<<"]";
+
                     if (nonNullValueInserted) //only add array element if there are non-null values
                     {
-                        content.add_child(md->GetName(), arrayValues);
+                        os<<arrayValues.str();
                     }
                 }
             }
+
+            os<<"}";
         }
 
         bool SerializeMember(const char* blob,
                              const MemberDescriptionType* md,
                              DotsC_MemberIndex memberIndex,
                              DotsC_ArrayIndex arrayIndex,
-                             const char* elementName,
-                             boost::property_tree::ptree& pt) const
+                             std::ostream& os) const
         {
             switch(md->GetMemberType())
             {
@@ -280,7 +169,7 @@ namespace boostfix
                 MemberStatus status=m_blobLayout.template GetMember<bool>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    pt.push_back(MakePtreeValue(elementName, val ? "true" : "false"));
+                    os<<(val ? "true" : "false");
                     return true;
                 }
             }
@@ -293,7 +182,7 @@ namespace boostfix
                 if (!status.IsNull())
                 {
                     const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
-                    pt.push_back(MakePtreeValue(elementName, Quoted(enumVal)));
+                    os<<JQUOT(enumVal);
                     return true;
                 }
             }
@@ -305,7 +194,7 @@ namespace boostfix
                 MemberStatus status=m_blobLayout.template GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    pt.push_back(MakePtreeValue(elementName, boost::lexical_cast<std::string>(val)));
+                    os<<val;
                     return true;
                 }
             }
@@ -317,7 +206,7 @@ namespace boostfix
                 MemberStatus status=m_blobLayout.template GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    pt.push_back(MakePtreeValue(elementName, boost::lexical_cast<std::string>(val)));
+                    os<<val;
                     return true;
                 }
             }
@@ -332,11 +221,11 @@ namespace boostfix
                     const char* typeName=TypeIdToString(val);
                     if (typeName)
                     {
-                        pt.push_back(MakePtreeValue(elementName, Quoted(typeName)));
+                        os<<JQUOT(typeName);
                     }
                     else
                     {
-                        pt.push_back(MakePtreeValue(elementName, boost::lexical_cast<std::string>(val)));
+                        os<<val;
                     }
                     return true;
                 }
@@ -354,11 +243,11 @@ namespace boostfix
                 {
                     if (hashStr)
                     {
-                        pt.push_back(MakePtreeValue(elementName, Quoted(hashStr)));
+                        os<<JQUOT(hashStr);
                     }
                     else
                     {
-                        pt.push_back(MakePtreeValue(elementName, boost::lexical_cast<std::string>(val)));
+                        os<<val;
                     }
                     return true;
                 }
@@ -372,26 +261,29 @@ namespace boostfix
                 MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, entId, hashStr);
                 if (!status.IsNull())
                 {
-                    boost::property_tree::ptree entIdPt;
+                    os<<"{";
+                    WriteMemberName("name", os);
                     const char* typeName=TypeIdToString(entId.typeId);
                     if (typeName)
                     {
-                        entIdPt.add("name", Quoted(typeName));
+                        os<<JQUOT(typeName);
                     }
                     else
                     {
-                        entIdPt.add("name", entId.typeId);
+                        os<<entId.typeId;
                     }
 
+                    os<<", ";
+                    WriteMemberName("instanceId", os);
                     if (hashStr)
                     {
-                        entIdPt.add("instanceId", Quoted(hashStr));
+                        os<<JQUOT(hashStr);
                     }
                     else
                     {
-                        entIdPt.add("instanceId", entId.instanceId);
+                        os<<entId.instanceId;
                     }
-                    pt.push_back(MakePtreeValue(elementName, entIdPt));
+                    os<<"}";
                     return true;
                 }
             }
@@ -407,8 +299,7 @@ namespace boostfix
                     std::string str=strVal;
                     std::string repl=std::string("\\")+std::string("\"");
                     boost::replace_all(str, "\"", repl);
-                    std::cout<<"Insert "<<str<<std::endl;
-                    pt.push_back(MakePtreeValue(elementName, Quoted(str)));
+                    os<<JQUOT(str);
                     return true;
                 }
             }
@@ -421,10 +312,7 @@ namespace boostfix
                 MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, obj, size);
                 if (!status.IsNull())
                 {
-                    boost::property_tree::ptree members; //Serialize without the root-element, only members
-                    BlobToJsonSerializer objParser(m_repository);
-                    objParser.SerializeMembers(obj, members);
-                    pt.push_back(std::make_pair(elementName, members));
+                    SerializeMembers(obj, os);
                     return true;
                 }
             }
@@ -438,7 +326,7 @@ namespace boostfix
                 if (!status.IsNull())
                 {
                     std::string bin(binary, size);
-                    pt.push_back(MakePtreeValue(elementName, Quoted(SerializationUtils::ToBase64(bin))));
+                    os<<JQUOT(SerializationUtils::ToBase64(bin));
                     return true;
                 }
             }
@@ -470,7 +358,7 @@ namespace boostfix
                 MemberStatus status=m_blobLayout.template GetMember<DotsC_Float32>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    pt.push_back(MakePtreeValue(elementName, classic_string_cast<std::string>(val)));
+                    os<<classic_string_cast<std::string>(val);
                     return true;
                 }
             }
@@ -502,7 +390,7 @@ namespace boostfix
                 MemberStatus status=m_blobLayout.template GetMember<DotsC_Float64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    pt.push_back(MakePtreeValue(elementName, classic_string_cast<std::string>(val)));
+                    os<<classic_string_cast<std::string>(val);
                     return true;
                 }
             }
@@ -546,13 +434,6 @@ namespace boostfix
                 throw ParseError("Binary to JSON error", os.str(), "", 166);
             }
             return cd;
-        }
-
-        static std::string Quoted(const std::string& str)
-        {
-            std::ostringstream os;
-            os<<'\"'<<str<<'\"';
-            return os.str();
         }
     };
 
