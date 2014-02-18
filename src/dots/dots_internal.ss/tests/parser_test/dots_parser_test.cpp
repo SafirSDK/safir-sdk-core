@@ -5,6 +5,10 @@
 * Created by: Joel Ottosson / joot
 *
 *******************************************************************************/
+#ifdef _MSC_VER
+#pragma warning(disable:4913)
+#endif
+
 #include <iostream>
 #include <set>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -285,3 +289,7 @@ void ParseDir(const boost::filesystem::path& dir)
 
     std::cout<<"Time elapsed: "<<timer.elapsed()<<std::endl;
 }
+
+#ifdef _MSC_VER
+#pragma warning(default:4913)
+#endif
