@@ -73,6 +73,8 @@ int main()
     }
 
     std::wcout << "second test" << std::endl;
+    double sleepTime = 0;
+    double maxSleepTime = 0;
     for(int i = 0; i < 10000; ++i)
     {
         boost::timer stopwatch;
@@ -80,12 +82,18 @@ int main()
         boost::thread thread(Timeout);
         thread.interrupt();
         thread.join();
-        if (stopwatch.elapsed() > 60) //more than 1 minute!
+        const double elapsed = stopwatch.elapsed();
+        sleepTime += elapsed;
+        maxSleepTime = std::max(maxSleepTime, elapsed);
+        if (elapsed > 60) //more than 1 minute!
         {
-            std::wcout << "Interrupt was too slow! elapsed = " << stopwatch.elapsed() << std::endl;
+            std::wcout << "Interrupt was too slow! elapsed = " << elapsed << std::endl;
             exit(14);
         }
     }
+
+    std::wcout << "Average interrupt time is " << sleepTime/10000*1000 << " milliseconds" << std::endl;
+    std::wcout << "Maximum interrupt time is " << maxSleepTime*1000 << " milliseconds" << std::endl;
 
     return 0;
 }
