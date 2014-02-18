@@ -54,11 +54,19 @@ int main()
         for(int j = 0; j < 50; ++j)
         {
             threads.push_back(boost::shared_ptr<boost::thread>(new boost::thread(Timeout)));
+            if (j%2 == 0)
+            {
+                threads.back()->interrupt();
+            }
+        }
+
+        for (std::vector<boost::shared_ptr<boost::thread> >::iterator it = threads.begin(); it != threads.end(); ++it)
+        {
+            (*it)->interrupt();
         }
 
         while (!threads.empty())
         {
-            threads.back()->interrupt();
             threads.back()->join();
             threads.pop_back();
         }

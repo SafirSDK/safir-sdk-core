@@ -23,7 +23,6 @@
 ******************************************************************************/
 #include <iostream>
 #include <boost/thread.hpp>
-#include <boost/timer.hpp>
 
 
 int main()
@@ -46,15 +45,24 @@ int main()
     ++errors;
 #endif
 
-
-#ifndef BOOST_THREAD_SLEEP_FOR_IS_STEADY
+#ifndef _MSC_VER
+#  ifndef BOOST_THREAD_SLEEP_FOR_IS_STEADY
     std::wcout << "BOOST_THREAD_SLEEP_FOR_IS_STEADY is not defined!" << std::endl;
     ++errors;
+#  endif
+
+#  ifndef BOOST_HAS_NANOSLEEP
+    std::wcout << "BOOST_HAS_NANOSLEEP is not defined!" << std::endl;
+    ++errors;
+#  endif
+
+#  ifdef BOOST_HAS_PTHREAD_DELAY_NP
+    std::wcout << "BOOST_HAS_PTHREAD_DELAY_NP is defined!" << std::endl;
+    ++errors;
+#  endif
 #endif
-
-
-
     return errors;
+
 }
 
 
