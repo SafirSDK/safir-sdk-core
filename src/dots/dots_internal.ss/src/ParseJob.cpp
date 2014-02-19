@@ -23,7 +23,6 @@
 ******************************************************************************/
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
-#include <boost/timer.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/asio.hpp>
 #include <boost/make_shared.hpp>

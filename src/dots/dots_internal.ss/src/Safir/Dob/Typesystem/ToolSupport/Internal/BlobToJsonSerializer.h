@@ -39,7 +39,7 @@
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobLayoutImpl.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/SerializationUtils.h>
 
-#define JQUOT(x) "\""<<x<<"\""
+#define SAFIR_JSON_QUOTE(x) "\""<<x<<"\""
 
 namespace Safir
 {
@@ -93,7 +93,7 @@ namespace Internal
 
             const ClassDescriptionType* cd=GetClass(blob);
             WriteMemberName("_DouType", os);
-            os<<JQUOT(cd->GetName());
+            os<<SAFIR_JSON_QUOTE(cd->GetName());
 
             for (DotsC_MemberIndex memberIx=0; memberIx<cd->GetNumberOfMembers(); ++memberIx)
             {
@@ -182,7 +182,7 @@ namespace Internal
                 if (!status.IsNull())
                 {
                     const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
-                    os<<JQUOT(enumVal);
+                    os<<SAFIR_JSON_QUOTE(enumVal);
                     return true;
                 }
             }
@@ -221,7 +221,7 @@ namespace Internal
                     const char* typeName=TypeIdToString(val);
                     if (typeName)
                     {
-                        os<<JQUOT(typeName);
+                        os<<SAFIR_JSON_QUOTE(typeName);
                     }
                     else
                     {
@@ -243,7 +243,7 @@ namespace Internal
                 {
                     if (hashStr)
                     {
-                        os<<JQUOT(hashStr);
+                        os<<SAFIR_JSON_QUOTE(hashStr);
                     }
                     else
                     {
@@ -266,7 +266,7 @@ namespace Internal
                     const char* typeName=TypeIdToString(entId.typeId);
                     if (typeName)
                     {
-                        os<<JQUOT(typeName);
+                        os<<SAFIR_JSON_QUOTE(typeName);
                     }
                     else
                     {
@@ -277,7 +277,7 @@ namespace Internal
                     WriteMemberName("instanceId", os);
                     if (hashStr)
                     {
-                        os<<JQUOT(hashStr);
+                        os<<SAFIR_JSON_QUOTE(hashStr);
                     }
                     else
                     {
@@ -299,7 +299,7 @@ namespace Internal
                     std::string str=strVal;
                     std::string repl=std::string("\\")+std::string("\"");
                     boost::replace_all(str, "\"", repl);
-                    os<<JQUOT(str);
+                    os<<SAFIR_JSON_QUOTE(str);
                     return true;
                 }
             }
@@ -326,7 +326,7 @@ namespace Internal
                 if (!status.IsNull())
                 {
                     std::string bin(binary, size);
-                    os<<JQUOT(SerializationUtils::ToBase64(bin));
+                    os<<SAFIR_JSON_QUOTE(SerializationUtils::ToBase64(bin));
                     return true;
                 }
             }
