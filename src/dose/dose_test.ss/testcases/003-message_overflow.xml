@@ -1,80 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<object xmlns="urn:safir-dots-unit">
-  <name>DoseTest.Items.TestCase</name>
-  <members>
-    <member>
-      <!-- This test is valid only in multinode mode, since it is not completely unlikely to take an infinite amount of time
-           on a standalone machine, if dose_main is faster than the partner.-->
-      <name>TestConfig</name>
-      <value>DoseTest.TestConfigEnum.Multinode</value>
-    </member>
-    <member>
-      <name>Description</name>
-      <value>Test of overflow notification while sending message</value>
-    </member>
-    <member>
-      <name>Expectation</name>
-      <value>Overflow exception followed by a not overflow notification</value>
-    </member>
-    <member>
-      <name>TestActions</name>
-      <arrayElements>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.SendMessage</value>
-              </member>
-              <member>
-                <name>Channel</name>
-                <value>DEFAULT_CHANNEL</value>
-              </member>
-              <member>
-                <name>RepeatUntilOverflow</name>
-                <value>true</value>
-              </member>
-              <member>
-                <name>Object</name>
-                <object>
-                  <name>DoseTest.GlobalMessage</name>
-                  <members>
-                    <member>
-                      <name>Info</name>
-                      <value>Global Message</value>
-                    </member>
-                  </members>
-                </object>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>1</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-<!--        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Sleep</value>
-              </member>
-              <member>
-                <name>SleepDuration</name>
-                <value>30</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>-->
-      </arrayElements>
-    </member>
-  </members>
-</object>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of overflow notification while sending message</Description>
+  <Expectation xml:space="preserve">Overflow exception followed by a not overflow notification</Expectation>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="DoseTest.GlobalMessage">
+        <Info xml:space="preserve">Global Message</Info>
+      </Object>
+      <RepeatUntilOverflow>true</RepeatUntilOverflow>
+    </DoseTest.Action>
+  </TestActions>
+  <TestConfig>Multinode</TestConfig>
+</DoseTest.Items.TestCase>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Contains parameters</summary>
+    <name>ParserTest.Params</name>
+    <baseClass>Object</baseClass>
+    <parameters>
+        <parameter>
+            <name>ObjParam</name>
+            <type>ParserTest.MyEntity</type>
+            <ParserTest.MyEntity>
+                <Val>
+                    <instanceId>abc</instanceId>
+                </Val>
+            </ParserTest.MyEntity>
+        </parameter>
+    </parameters>
+</class>

@@ -372,6 +372,18 @@ package Safir.Dob.Typesystem.Kernel is
                           Xml_Source  : in C.char_array);
    pragma Import (C, Xml_To_Blob, "DotsC_XmlToBlob");
 
+   procedure Blob_To_Json
+     (Json_Dest   : in Safir.Dob.Typesystem.Char_Star;
+      Blob_Source : in      Safir.Dob.Typesystem.Blob_T;
+      Buf_Size    : in      Safir.Dob.Typesystem.Int_32;
+      Result_Size : out Safir.Dob.Typesystem.Int_32);
+   pragma Import (C, Blob_To_Json, "DotsC_BlobToJson");
+
+   procedure Json_To_Blob (Blob_Dest   : out Safir.Dob.Typesystem.Blob_T;
+                           Deleter     : out Blob_Deleter_Cb_Type;
+                           Json_Source : in C.char_array);
+   pragma Import (C, Json_To_Blob, "DotsC_JsonToBlob");
+
    function Calculate_Base_64_Buffer_Size
      (Binary_Source_Size : Safir.Dob.Typesystem.Int_32)
          return Safir.Dob.Typesystem.Int_32;

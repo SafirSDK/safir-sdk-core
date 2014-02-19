@@ -39,7 +39,9 @@ Do not inherit from this class. Inheritance may be prohibited in the future.</su
             <values>
                 <value>
                     <member>Altitude</member>
-                    <parameter>Safir.Geodesy.Position.DummyAltitude</parameter>
+                    <parameter>
+                      <name>Safir.Geodesy.Position.DummyAltitude</name>
+                    </parameter>
                 </value>
             </values>
         </createRoutine>

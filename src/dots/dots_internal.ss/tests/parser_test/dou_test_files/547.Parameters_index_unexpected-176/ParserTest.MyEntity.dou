@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>ParserTest.MyEntity</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <member>
+            <name>Int32Val</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>Int32Arr</name>
+            <type>Int32</type>
+            <arraySize>5</arraySize>
+        </member>
+    </members>
+</class>

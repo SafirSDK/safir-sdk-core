@@ -245,15 +245,6 @@ void Test_Create_Routines()
                                                       DotsTest::ParameterTypes::TestClassParameter()))<<std::endl;
     std::wcout<< "CreateValueTypes     : " << Safir::Dob::Typesystem::Serialization::ToXml(DotsTest::MemberTypes::CreateValueTypes())<<std::endl;
     std::wcout<< "Create_ValueArrays   : " << Safir::Dob::Typesystem::Serialization::ToXml(DotsTest::MemberTypes::CreateValueArrays())<<std::endl;
-
-    Header(L"Create routines (Arrays)");
-    std::wcout<< "Create_ParameterArrays: " <<
-        Safir::Dob::Typesystem::Serialization::ToXml(DotsTest::MemberArrays::CreateParameterArrays
-                                                                  (DotsTest::ParameterTypes::Int32Parameter(),
-                                                                   DotsTest::ParameterTypes::EnumerationParameter(),
-                                                                   DotsTest::ParameterTypes::TestClassParameter()))<<std::endl;
-    std::wcout<< "Create_ValueArraysOne : " << Safir::Dob::Typesystem::Serialization::ToXml(DotsTest::MemberArrays::CreateValueArraysOne())<<std::endl;
-    std::wcout<< "Create_ValueArraysAll : " << Safir::Dob::Typesystem::Serialization::ToXml(DotsTest::MemberArrays::CreateValueArraysAll())<<std::endl;
 }
 
 

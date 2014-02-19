@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>ParserTest.MyColorEnum</name>  
+  <values>
+    <value>Black</value>    
+    <value>White</value>
+    <value>Grey</value>
+    <value>@Slurp</value>
+    <value>Red</value>
+  </values>
+</enumeration>

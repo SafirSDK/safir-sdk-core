@@ -1,86 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<object xmlns="urn:safir-dots-unit">
-  <name>DoseTest.Items.TestCase</name>
-  <members>
-    <member>
-      <name>Description</name>
-      <value>Test of handler deleting non-existing instance.</value>
-    </member>
-    <member>
-      <name>Expectation</name>
-      <value>This should be a NOP</value>
-    </member>
-    <member>
-      <name>TestCaseSetupActions</name>
-      <arrayElements>
-        <arrayElement>
-        <object>
-          <name>DoseTest.Action</name>
-          <members>
-            <member>
-              <name>Partner</name>
-              <value>0</value>
-            </member>
-            <member>
-              <name>ActionKind</name>
-              <value>DoseTest.ActionEnum.RegisterEntityHandler</value>
-            </member>
-            <member>
-              <name>TypeId</name>
-              <value>DoseTest.LocalEntity</value>
-            </member>
-            <member>
-              <name>Handler</name>
-              <value>DEFAULT_HANDLER</value>
-            </member>
-            <member>
-              <name>InstanceIdPolicy</name>
-              <value>Safir.Dob.InstanceIdPolicy.RequestorDecidesInstanceId</value>
-            </member>
-            <member>
-              <name>Consumer</name>
-              <value>2</value>
-            </member>
-          </members>
-        </object>
-        </arrayElement>
-      </arrayElements>        
-    </member>
-    <member>
-      <name>TestActions</name>
-      <arrayElements>        
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Delete</value>
-              </member>
-              <member>
-                <name>EntityId</name>
-                <entityId>
-                  <name>DoseTest.LocalEntity</name>
-                  <instanceId>0</instanceId>
-                </entityId>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>DEFAULT_HANDLER</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>2</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-      </arrayElements>
-    </member>
-  </members>
-</object>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of handler deleting non-existing instance.</Description>
+  <Expectation xml:space="preserve">This should be a NOP</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.LocalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Delete</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>2</Consumer>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <EntityId>
+        <name>DoseTest.LocalEntity</name>
+        <instanceId>0</instanceId>
+      </EntityId>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

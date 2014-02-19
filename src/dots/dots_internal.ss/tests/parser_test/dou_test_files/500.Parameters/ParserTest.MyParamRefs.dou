@@ -29,6 +29,14 @@
         </parameter>
         
         <parameter>
+            <name>IidFromStr</name>
+            <type>InstanceId</type>
+            <valueRef>
+                <name>ParserTest.MyParam1.StringParam</name>
+            </valueRef> 
+        </parameter>
+
+        <parameter>
             <name>Hid</name>
             <type>HandlerId</type>
             <valueRef>

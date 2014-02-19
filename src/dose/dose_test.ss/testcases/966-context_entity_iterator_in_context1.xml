@@ -1,379 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<object xmlns="urn:safir-dots-unit">
-  <name>DoseTest.Items.TestCase</name>
-  <members>
-    <member>
-      <name>Description</name>
-      <value>Test that a connection in context 1 "sees" entities in context 1 and ContextShared entities.</value>
-    </member>
-    <member>
-      <name>Expectation</name>
-      <value>P2 "sees" one ContextSharedEntity instance (2222) and one GlobalEntity2 instance (3333).</value>
-    </member>
-    <member>
-      <name>TestCaseSetupActions</name>
-      <arrayElements>
-
-        <!-- Make sure Partner 0 is in context 0 -->
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Close</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Open</value>
-              </member>
-              <member>
-                <name>Context</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <!-- Make sure Partner 1 is in context 1 -->
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>1</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Close</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>1</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Open</value>
-              </member>
-              <member>
-                <name>Context</name>
-                <value>1</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <!-- Make sure Partner 2 is in context 1 -->
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>2</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Close</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>2</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Open</value>
-              </member>
-              <member>
-                <name>Context</name>
-                <value>1</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <!-- Partner 0 registers an entity handler (in context 0) and creates a GlobalEntity instance -->
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.RegisterEntityHandler</value>
-              </member>
-              <member>
-                <name>TypeId</name>
-                <value>DoseTest.GlobalEntity</value>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>DEFAULT_HANDLER</value>
-              </member>
-              <member>
-                <name>InstanceIdPolicy</name>
-                <value>Safir.Dob.InstanceIdPolicy.RequestorDecidesInstanceId</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>1</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.SetAll</value>
-              </member>
-              <member>
-                <name>Instance</name>
-                <value>1111</value>
-              </member>
-              <member>
-                <name>Object</name>
-                <object>
-                  <name>DoseTest.GlobalEntity</name>
-                  <members>
-                    <member>
-                      <name>Info</name>
-                      <value>This is a GlobalEntity</value>
-                    </member>
-                  </members>
-                </object>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>DEFAULT_HANDLER</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>1</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <!-- Partner 0 registers an entity handler (in context 0) and creates a ContextSharedEntity instance -->
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.RegisterEntityHandler</value>
-              </member>
-              <member>
-                <name>TypeId</name>
-                <value>DoseTest.ContextSharedEntity</value>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>DEFAULT_HANDLER</value>
-              </member>
-              <member>
-                <name>InstanceIdPolicy</name>
-                <value>Safir.Dob.InstanceIdPolicy.RequestorDecidesInstanceId</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>1</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.SetAll</value>
-              </member>
-              <member>
-                <name>Instance</name>
-                <value>2222</value>
-              </member>
-              <member>
-                <name>Object</name>
-                <object>
-                  <name>DoseTest.ContextSharedEntity</name>
-                  <members>
-                    <member>
-                      <name>Info</name>
-                      <value>This is a ContextSharedEntity</value>
-                    </member>
-                  </members>
-                </object>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>DEFAULT_HANDLER</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>1</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <!-- Partner 1 registers an entity handler (in context 1) and creates a GlobalEntity2 instance -->
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>1</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.RegisterEntityHandler</value>
-              </member>
-              <member>
-                <name>TypeId</name>
-                <value>DoseTest.GlobalEntity2</value>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>DEFAULT_HANDLER</value>
-              </member>
-              <member>
-                <name>InstanceIdPolicy</name>
-                <value>Safir.Dob.InstanceIdPolicy.RequestorDecidesInstanceId</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>1</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>1</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.SetAll</value>
-              </member>
-              <member>
-                <name>Instance</name>
-                <value>3333</value>
-              </member>
-              <member>
-                <name>Object</name>
-                <object>
-                  <name>DoseTest.GlobalEntity2</name>
-                  <members>
-                    <member>
-                      <name>Info</name>
-                      <value>This is a GlobalEntity2</value>
-                    </member>
-                  </members>
-                </object>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>DEFAULT_HANDLER</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>1</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        
-      </arrayElements>
-    </member>
-    <member>
-      <name>TestActions</name>
-      <arrayElements>
-
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>2</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.GetEntityIterator</value>
-              </member>
-              <member>
-                <name>TypeId</name>
-                <value>DoseTest.RootEntity</value>
-              </member>
-              <member>
-                <name>IncludeSubclasses</name>
-                <value>true</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-                
-      </arrayElements>
-    </member>
-  </members>
-</object>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test that a connection in context 1 "sees" entities in context 1 and ContextShared entities.</Description>
+  <Expectation xml:space="preserve">P2 "sees" one ContextSharedEntity instance (2222) and one GlobalEntity2 instance (3333).</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Close</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Open</ActionKind>
+      <Partner>0</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Close</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Open</ActionKind>
+      <Partner>1</Partner>
+      <Context>1</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>Close</ActionKind>
+      <Partner>2</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>Open</ActionKind>
+      <Partner>2</Partner>
+      <Context>1</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="7">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Instance>1111</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">This is a GlobalEntity</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="8">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.ContextSharedEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="9">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Instance>2222</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.ContextSharedEntity">
+        <Info xml:space="preserve">This is a ContextSharedEntity</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="10">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.GlobalEntity2</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="11">
+      <ActionKind>SetAll</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>1</Consumer>
+      <Instance>3333</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity2">
+        <Info xml:space="preserve">This is a GlobalEntity2</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>GetEntityIterator</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.RootEntity</TypeId>
+      <IncludeSubclasses>true</IncludeSubclasses>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

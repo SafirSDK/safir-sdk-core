@@ -12,7 +12,6 @@ Subversion
 Boost (>=1.50, or >=1.55 if using VS2013)
 Python (>= 2.7)
 CMake (>=2.8.12.1)
-Expat
 Jom *
 Qt (>=4.8) *
 GNAT Ada compiler *
@@ -41,9 +40,6 @@ Boost
 
 Qt
 64 bit build is needed if you want to run the dobexplorer tool.
-
-Expat
-64 bit build is mandatory.
 
 Java Platform JDK
 64 bit build is needed if you intend to build 64 bit Java applications.
@@ -100,23 +96,6 @@ CMake
 Go to http://www.cmake.org/ and download and install the CMake installer.
 In the "Install Options" step, check the "Add CMake to the system PATH for all users", or "... current user" if you prefer.
 
-Expat
-~~~~~
-32 bit:
-Go to http://expat.sourceforge.net/ and download and install the binary installer for windows.
-
-64 bit:
-1. Download and unpack http://sourceforge.net/projects/expat/files/expat/2.1.0/expat-2.1.0.tar.gz or later to a directory of your choice (This directory is just used as build directory)
-2. Add a subdirectory 'build' (e.g. C:\tmp\expat-2.1.0\build)
-3. Open a command window for the 64 bit tool-chain as Administrator. Start -> All Programs -> Microsoft Visual Studio 2010 -> Visual Studio Tools -> Visual Studio x64 Win64 Command Prompt (2010)
-   (To be able to install files under "Program Files" you might have to open the command window as Administrator)
-4. cd into c:\tmp\expat-2.1.0\build
-5. Run cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
-6. Run nmake install
-
-For both 32 and 64 bit builds:
-Add <expat dir>\bin to your PATH, where <expat dir> is the location where expat got installed.
-
 GNAT
 ~~~~
 This step is optional, if you don't want Ada interfaces you do not need to install GNAT. You will need to pass --no-ada-support to the build script as described below if you do not install GNAT.
@@ -141,11 +120,6 @@ Doxygen and Graphviz
 These tools are used to build the interface documentation from the C++ source code. If you do not require this documentation you can skip this step.
 Go to http://www.doxygen.org/ and download and install the windows installer 
 Go to http://www.graphviz.org/ and download and install the windows installer
-
-Add the Graphviz installation bin directory to your PATH.
-
-It appears that Graphviz installs its own version of libexpat.dll which conflicts with the one we installed above (part of Expat). You have to make sure that the libexpat.dll that we installed above is before the graphviz one in your PATH. 
-(If you don't do this you will get an error message about "The ordinal 63 could not be located in the dynamic link library libexpat.dll" when you build Safir SDK Core.)
 
 Now you can continue to "Building Safir SDK Core"
 
@@ -198,11 +172,9 @@ If you do the below step, "Recreating the downloadable binary", you can skip all
 Open Visual Studio and go to Tools --> Options --> Projects and Solutions --> VC++ Directories:
 Add the following under "Include files" (top right combo-box)
     $(BOOST_ROOT)
-    C:\Program Files\Expat 2.1.0\Source\lib
     $(SAFIR_SDK)/include
 Add the following under "Library files"
     $(BOOST_ROOT)/lib
-    C:\Program Files\Expat 2.1.0\Bin
     $(SAFIR_SDK)/lib
 
 

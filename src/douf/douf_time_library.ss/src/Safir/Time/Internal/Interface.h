@@ -36,7 +36,7 @@
 #endif
 #define DOUF_TIME_LIBRARY_LOCAL SAFIR_HELPER_DLL_LOCAL
 
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 
 #ifdef __cplusplus
 extern "C"

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    
+    <property>ParserTest.MyProperty</property>
+    <class>ParserTest.EntityParamMapping</class>
+    
+    <memberMapping>
+        <member>
+            <propertyMember>Int32PropertyValue</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.Int32Param</name>
+            </valueRef>
+        </member>        
+        <member>
+            <propertyMember>Float64PropertyValue</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.Float64Param</name>
+            </valueRef>
+        </member>
+        <member>
+            <propertyMember>StringPropertyValue</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.StringParam</name>
+            </valueRef>
+        </member>
+        <member>
+            <propertyMember>EnumPropertyValue</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.EnumParam</name>
+            </valueRef>
+        </member>
+        <member>
+            <propertyMember>EntityIdPropertyValue</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.EntityIdParam</name>
+            </valueRef>
+        </member>
+        <member>
+            <propertyMember>ChannelIdPropertyValue</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.ChannelIdParam</name>
+            </valueRef>
+        </member>
+        <member>
+            <propertyMember>ItemPropertyValue</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.ItemParam</name>
+            </valueRef>
+        </member>
+
+        <!-- array -->
+        <member>
+            <propertyMember>Int32PropertyValueArray</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.Int32ParamArray</name>
+            </valueRef>
+        </member>        
+        <member>
+            <propertyMember>Float64PropertyValueArray</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.Float64ParamArray</name>
+            </valueRef>
+        </member>
+        <member>
+            <propertyMember>StringPropertyValueArray</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.StringParamArray</name>
+            </valueRef>
+        </member>
+        <member>
+            <propertyMember>EnumPropertyValueArray</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.EnumParamArray</name>
+            </valueRef>
+        </member>
+        <member>
+            <propertyMember>EntityIdPropertyValueArray</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.EntityIdParamArray</name>
+            </valueRef>
+        </member>
+        <member>
+            <propertyMember>ChannelIdPropertyValueArray</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.ChannelIdParamArray</name>
+            </valueRef>
+        </member>
+        <member>
+            <propertyMember>ItemPropertyValueArray</propertyMember>
+            <valueRef>
+                <name>ParserTest.Params.ItemParamArray</name>
+            </valueRef>
+        </member>
+    </memberMapping>
+
+</propertyMapping>

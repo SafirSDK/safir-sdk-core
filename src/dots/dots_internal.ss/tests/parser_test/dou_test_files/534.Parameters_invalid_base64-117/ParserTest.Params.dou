@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Contains parameters</summary>
+    <name>ParserTest.Params</name>
+    <baseClass>Object</baseClass>
+    <parameters>
+        <parameter>
+            <name>ObjParam</name>
+            <type>ParserTest.MyEntity</type>
+            <ParserTest.MyEntity>
+                <BinVal>Kalle_Anka</BinVal>
+            </ParserTest.MyEntity>
+        </parameter>
+  
+        <parameter>
+            <name>Int32ParamArray</name>
+            <type>Int32</type>
+            <arrayElements>
+                <arrayElement>
+                    <value>10</value>
+                </arrayElement>
+                <arrayElement>
+                    <value>20</value>
+                </arrayElement> 
+                <arrayElement>
+                    <value>30</value>
+                </arrayElement> 
+            </arrayElements>                              
+        </parameter>
+    </parameters>
+</class>

@@ -5,28 +5,21 @@
 * Created by: Joel Ottosson / joot
 *
 *******************************************************************************/
+#ifdef _MSC_VER
+#pragma warning(disable:4913)
+#endif
+
 #include <iostream>
 #include <set>
-#include <boost/timer.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <Safir/Dob/Typesystem/Internal/TypeRepositoryOperations.h>
+#include <boost/timer.hpp>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/limits.hpp>
 
-static bool PrintRepository=true;
-
-struct MyTimer
-{
-    MyTimer() : m_last(boost::posix_time::microsec_clock().universal_time()) {}
-
-    double Elapsed() const
-    {
-        boost::posix_time::time_duration d=(boost::posix_time::microsec_clock().universal_time()-m_last);
-        return d.total_milliseconds()/1000.0;
-    }
-    void Reset() {m_last=boost::posix_time::microsec_clock().universal_time();}
-    boost::posix_time::ptime m_last;
-};
+static bool StopOnError=false;
+static bool PrintRepository=false;
 
 struct TestCase
 {
@@ -50,33 +43,43 @@ bool TestInfoFromPath(const boost::filesystem::path& testDir, int& testNumber, s
 bool TestInfoFromPath(const boost::filesystem::path& testDir, TestCase& test);
 void PrintTestFailMessage(const std::string& result, const std::string& shortInfo, const std::string& description, const std::string& file);
 
-
 int main(int argc, char* argv[])
-{    
-    //ParseDir(boost::filesystem::path("/home/joot/Dropbox/Dev/Dots parser/dots_generated_conv"));
+{
+    //ParseDir("/home/joot/safir/runtime/data/text/dots/classes");
+    //ParseDir("/home/joot/dev/slb_dou/dots/classes");
+    //ParseDir("/home/joot/Dropbox/Dev/DotsParser/dots_generated_conv");
+    //ParseDir("/home/joot/dev/safir_open/dots_internal_rewrite/src/dots/dots_test_dou.ss/data");
     //return 0;
 
-    boost::filesystem::path douDir;  //= boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_parser.ss/tests/dou_test_files");
-    if (argc>1)
+    if (argc<2)
     {
-        douDir=boost::filesystem::path(argv[1]);
+        std::cout<<"Too few arguments!"<<std::endl;
+        std::cout<<"Usage: 'dots_parser_test <testRoot> firstTest lastTest print'"<<std::endl;
+        std::cout<<"   or just 'dots_parser_test <testRoot>''  to run all tests."<<std::endl;
+        return 1;
     }
-    else
+
+    boost::filesystem::path douDir(argv[1]);
+    int first=0;
+    int last=10000;
+    if (argc>2)
     {
-        //For testing locally on developer machine without args.
-#ifdef _MSC_VER
-        douDir=boost::filesystem::path("C:/dev/dots_internal.ss/tests/parser_test/dou_test_files");
-#else
-        douDir=boost::filesystem::path("/home/joel/dev/safir_open/src/dots/dots_internal.ss/tests/parser_test/dou_test_files");
-        //douDir=boost::filesystem::path("/home/joot/dev/safir-svn/src/dots/dots_internal.ss/tests/parser_test/dou_test_files");
-#endif
+        first=boost::lexical_cast<int>(argv[2]);
+    }
+    if (argc>3)
+    {
+        last=boost::lexical_cast<int>(argv[3]);
+    }
+    if (argc>4)
+    {
+        PrintRepository=true;
     }
 
     std::cout<<"========= Test suite started ========"<<std::endl;
-    MyTimer timer;
+    boost::timer timer;
     try
     {
-        RunTests(douDir, 0, 10000);
+        RunTests(douDir, first, last);
     }
     catch(...)
     {
@@ -84,7 +87,7 @@ int main(int argc, char* argv[])
         return 1; //Failed
     }
 
-    std::cout<<"- Time elapsed: "<<timer.Elapsed()<<std::endl;
+    std::cout<<"- Time elapsed: "<<timer.elapsed()<<std::endl;
     std::cout<<"====================================="<<std::endl;
     return 0;
 }
@@ -136,6 +139,10 @@ void RunTests(const boost::filesystem::path& testRoot, int firstTest, int lastTe
         {
             std::cout<<"        Test Failed"<<std::endl;
             ++failed;
+            if (StopOnError)
+            {
+                break;
+            }
         }
     }
 
@@ -161,11 +168,10 @@ bool RunSingleTest(const TestCase& test)
     //prelusive part of ParseError.Label if an error is expected to occur.    
     try
     {
-        boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository> rep=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(test.path);
+        boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(test.path);
         if (PrintRepository)
         {
-            //std::cout<<Safir::Dob::Typesystem::Internal::TypeRepositoryToString(rep.get())<<std::endl;
-            std::cout<<rep<<std::endl;
+            Safir::Dob::Typesystem::ToolSupport::RepositoryToString(rep.get(), true, std::cout);
         }
 
         if (test.expectedResult!=TestCase::SuccessCode)
@@ -178,7 +184,7 @@ bool RunSingleTest(const TestCase& test)
         std::cout<<"        Result:  success"<<std::endl;
 
     }
-    catch (const Safir::Dob::Typesystem::Internal::ParseError& err)
+    catch (const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
     {
         std::cout<<"        Result:  "<<err.ErrorId()<<std::endl;
         std::cout<<"        Message: "<<err.Label()<<std::endl;
@@ -200,7 +206,7 @@ bool RunSingleTest(const TestCase& test)
     }
     catch (...)
     {
-        throw Safir::Dob::Typesystem::Internal::ParseError("Unexpected error", "An unhandled exception occured in test.", test.path.string(), -2);
+        throw Safir::Dob::Typesystem::ToolSupport::ParseError("Unexpected error", "An unhandled exception occured in test.", test.path.string(), -2);
     }
 
     return true;
@@ -259,20 +265,20 @@ void PrintTestFailMessage(const std::string& result, const std::string& shortInf
 void ParseDir(const boost::filesystem::path& dir)
 {
     std::cout<<"Start parsing"<<std::endl;
-    MyTimer timer;
+    boost::timer timer;
     try
     {
-        boost::shared_ptr<const Safir::Dob::Typesystem::Internal::TypeRepository> rep=Safir::Dob::Typesystem::Internal::ParseTypeDefinitions(dir);
-        //std::cout<<Safir::Dob::Typesystem::Internal::TypeRepositoryToString(rep)<<std::endl;
+        boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(dir);
+        //Safir::Dob::Typesystem::ToolSupport::RepositoryToString(rep.get(), std::cout);
         std::cout<<"Parsed successfully! NumTypes="<<(rep->GetNumberOfClasses()+rep->GetNumberOfEnums()+rep->GetNumberOfExceptions()+rep->GetNumberOfProperties())<<std::endl;
     }
-    catch(const Safir::Dob::Typesystem::Internal::ParseError& err)
+    catch(const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
     {
         std::cout<<"********** Parse Error **********************************************"<<std::endl;
         std::cout<<"* Label: "<<err.Label()<<std::endl;
         std::cout<<"* Descr: "<<err.Description()<<std::endl;
         std::cout<<"* File:  "<<err.File()<<std::endl;
-        std::cout<<"* ErrId: "<<err.ErrorId()<<std::endl;
+        std::cout<<"* ErrorCode: "<<err.ErrorId()<<std::endl;
         std::cout<<"*********************************************************************"<<std::endl;
     }
     catch(...)
@@ -281,5 +287,9 @@ void ParseDir(const boost::filesystem::path& dir)
     }
 
 
-    std::cout<<"Time elapsed: "<<timer.Elapsed()<<std::endl;
+    std::cout<<"Time elapsed: "<<timer.elapsed()<<std::endl;
 }
+
+#ifdef _MSC_VER
+#pragma warning(default:4913)
+#endif

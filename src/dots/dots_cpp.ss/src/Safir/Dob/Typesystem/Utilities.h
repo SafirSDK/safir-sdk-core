@@ -100,10 +100,10 @@ namespace Utilities
      *
      * Will convert data from Base64 format to binary format.
      *
-     * @param base64 [in] - Base64 data to convert.
+     * @param base64Str [in] - Base64 data to convert.
      * @param binary [out] - binary serialization that will contain the result.
      */
-    DOTS_CPP_API void Base64ToBinary(const std::string& base64, Dob::Typesystem::Binary & binary);
+    DOTS_CPP_API void Base64ToBinary(const std::string& base64Str, Dob::Typesystem::Binary & binary);
 }
 }
 }

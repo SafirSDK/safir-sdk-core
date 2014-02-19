@@ -25,7 +25,7 @@ with Ada.Strings.Wide_Unbounded; use Ada.Strings.Wide_Unbounded;
 with Safir.Dob.Typesystem.Object;
 pragma Warnings ("H");  -- turn off warnings for hiding variable
 
--- Functions for serializing objects to binary and XML forms.
+-- Functions for serializing objects to binary, XML and JSON forms.
 --
 package Safir.Dob.Typesystem.Serialization is
 
@@ -65,6 +65,44 @@ package Safir.Dob.Typesystem.Serialization is
    -- Returns: The xml of the blob.
    --
    function To_Xml
+     (Blob : Safir.Dob.Typesystem.Blob_T) return Unbounded_Wide_String;
+
+   -- Serialize an object to JSON.
+   --
+   -- Parameters: Object - The object to serialize.
+   -- Returns: String containing the json-serialized version of the object.
+   -- Exceptions Illegal_Value_Exception - There is something wrong with the object.
+   --
+   function To_Json
+     (Object : Safir.Dob.Typesystem.Object.Smart_Pointer'Class)
+      return Unbounded_Wide_String;
+
+   -- Deserialize an JSON serialization.
+   --
+   -- Creates a new object from a given json serialization.
+   --
+   -- Parameters: Json - The json to convert.
+   -- Returns: A smart pointer to the new object.
+   -- Exceptions: Illegal_Value_Exception - If there is something wrong with the JSON
+   --                                       or if the type represented by the serialization
+   --                                       isn't found in the ObjectFactory.
+   function To_Object_From_Json (Json : in Unbounded_Wide_String) return
+     Safir.Dob.Typesystem.Object.Smart_Pointer'Class;
+
+   -- Convert a binary serialization to JSON.
+   --
+   -- Parameters: Binary - The binary serialization to convert to json.
+   -- Returns: The json of the binary serialization.
+   --
+   function To_Json (Binary : in Safir.Dob.Typesystem.Binary_Vectors.Vector)
+                    return Unbounded_Wide_String;
+
+   -- Convert a blob to JSON.
+   --
+   -- Parameters: Blob - The blob to convert to json.
+   -- Returns: The json of the blob.
+   --
+   function To_Json
      (Blob : Safir.Dob.Typesystem.Blob_T) return Unbounded_Wide_String;
 
    -- Serialize an object to binary form.

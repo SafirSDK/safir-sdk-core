@@ -93,9 +93,9 @@ The additional services that Safir SDK provides include Alert handling, Applicat
 Contact Saab AB for more information (contact information at http://www.saabgroup.com[]).
 
 === Prerequisites / Dependencies
-Safir SDK Core uses the _Boost_ library to provide low level functionality and operating system independence wrappers. See http://www.boost.org/[] for more information. Safir SDK Core requires boost version 1.41 or later.
+Safir SDK Core uses the _Boost_ library to provide low level functionality and operating system independence wrappers. See http://www.boost.org/[] for more information.
 
-Safir SDK Core also uses some other open source libraries, such as Qt for C++ widgets, CMake for building and Expat for xml parsing. See the installation instructions for more information.
+Safir SDK Core also uses some other open source libraries, such as Qt for C++ widgets and CMake for building. See the installation instructions for more information.
 
 === Supported Platforms
 Safir SDK Core supports both the Windows and Linux platforms on the x86 and x86_64 platforms. It also successufully builds and runs on ARM Linux, but we have not tested this extensively.

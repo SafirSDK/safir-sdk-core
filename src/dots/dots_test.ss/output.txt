@@ -48,31 +48,22 @@ ParameterArrays      - 0
 =====================================================
 Testing: Get Number Of Parameters
 =====================================================
-MemberTypes          - 0
-MemberArrays         - 0
-MemberItems          - 0
-MemberItemsArray     - 1
-EmptyObject          - 0
-ParameterTypes       - 58
-ParameterArrays      - 53
+MemberTypes          - 2
+MemberArrays         - 2
+MemberItems          - 2
+MemberItemsArray     - 3
+EmptyObject          - 112
+ParameterTypes       - 60
+ParameterArrays      - 55
 
 
 
 =====================================================
 Testing: Create routines (Types)
 =====================================================
-Create_ParameterTypes: <object xmlns="urn:safir-dots-unit"><name>DotsTest.MemberTypes</name><members><member><name>Int32Member</name><value>32</value></member><member><name>EnumerationMember</name><value>DotsTest.TestEnum.MyFirst</value></member><member><name>TestClassMember</name><object><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-32</value></member></members></object></member></members></object>
-CreateValueTypes     : <object xmlns="urn:safir-dots-unit"><name>DotsTest.MemberTypes</name><members><member><name>Int32Member</name><value>32</value></member><member><name>EnumerationMember</name><value>DotsTest.TestEnum.MyFirst</value></member><member><name>TestClassMember</name><object><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-32</value></member></members></object></member></members></object>
-Create_ValueArrays   : <object xmlns="urn:safir-dots-unit"><name>DotsTest.MemberTypes</name><members><member><name>Int32Member</name><value>-32</value></member><member><name>EnumerationMember</name><value>DotsTest.TestEnum.MySecond</value></member><member><name>TestClassMember</name><object><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-3200</value></member></members></object></member></members></object>
-
-
-
-=====================================================
-Testing: Create routines (Arrays)
-=====================================================
-Create_ParameterArrays: <object xmlns="urn:safir-dots-unit"><name>DotsTest.MemberArrays</name><members><member><name>Int32Member</name><arrayElements><arrayElement><value>32</value></arrayElement></arrayElements></member><member><name>EnumerationMember</name><arrayElements><arrayElement><value>DotsTest.TestEnum.MyFirst</value></arrayElement></arrayElements></member><member><name>TestClassMember</name><arrayElements><arrayElement><object><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-32</value></member></members></object></arrayElement></arrayElements></member></members></object>
-Create_ValueArraysOne : <object xmlns="urn:safir-dots-unit"><name>DotsTest.MemberArrays</name><members><member><name>Int32Member</name><arrayElements><arrayElement><value>-32</value></arrayElement></arrayElements></member><member><name>EnumerationMember</name><arrayElements><arrayElement><value>DotsTest.TestEnum.MySecond</value></arrayElement></arrayElements></member><member><name>TestClassMember</name><arrayElements><arrayElement><object><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-3200</value></member></members></object></arrayElement></arrayElements></member></members></object>
-Create_ValueArraysAll : <object xmlns="urn:safir-dots-unit"><name>DotsTest.MemberArrays</name><members><member><name>Int32Member</name><arrayElements><arrayElement><value>32</value></arrayElement><arrayElement><value>-32</value></arrayElement></arrayElements></member><member><name>EnumerationMember</name><arrayElements><arrayElement><value>DotsTest.TestEnum.MyFirst</value></arrayElement><arrayElement><value>DotsTest.TestEnum.MySecond</value></arrayElement></arrayElements></member><member><name>TestClassMember</name><arrayElements><arrayElement><object><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>3200</value></member></members></object></arrayElement><arrayElement><object><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-3200</value></member></members></object></arrayElement></arrayElements></member></members></object>
+Create_ParameterTypes: <?xml version="1.0" encoding="utf-8"?><DotsTest.MemberTypes><Int32Member>32</Int32Member><EnumerationMember>MyFirst</EnumerationMember><TestClassMember><MyInt>-32</MyInt></TestClassMember></DotsTest.MemberTypes>
+CreateValueTypes     : <?xml version="1.0" encoding="utf-8"?><DotsTest.MemberTypes><Int32Member>32</Int32Member><EnumerationMember>MyFirst</EnumerationMember><TestClassMember><MyInt>-32</MyInt></TestClassMember></DotsTest.MemberTypes>
+Create_ValueArrays   : <?xml version="1.0" encoding="utf-8"?><DotsTest.MemberTypes><Int32Member>-32</Int32Member><EnumerationMember>MySecond</EnumerationMember><TestClassMember><MyInt>-3200</MyInt></TestClassMember></DotsTest.MemberTypes>
 
 
 
@@ -255,7 +246,7 @@ GetTypeId: 7765043459684641017
 ----Parameters---- 
 GetName: EnumerationParameter
 GetType: ENUMERATIONMEMBERTYPE
-GetTypeName: Enumeration
+GetTypeName: DotsTest.TestEnum
 ------------------ 
 Val: MyFirst
 Item Val: MyFirst
@@ -483,18 +474,18 @@ GetName: ObjectParameter
 GetType: OBJECTMEMBERTYPE
 GetTypeName: Object
 ------------------ 
-Val: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
-Item Val: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
-Item Array Val: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
-Property Parameter Val: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
-Val 0: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
-Array Item Val 0: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
-Array Item Array Val 0: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
-Parameter Array Val 0: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
-Val 1: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
-Array Item Val 1: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
-Array Item Array Val 1: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
-Parameter Array Val 1: <object xmlns="urn:safir-dots-unit"><name>Object</name></object>
+Val: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Item Val: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Item Array Val: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Property Parameter Val: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Val 0: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Array Item Val 0: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Array Item Array Val 0: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Parameter Array Val 0: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Val 1: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Array Item Val 1: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Array Item Array Val 1: <?xml version="1.0" encoding="utf-8"?><Object></Object>
+Parameter Array Val 1: <?xml version="1.0" encoding="utf-8"?><Object></Object>
 Is_Null OK: true
 Is_Changed OK: true
 
@@ -546,20 +537,20 @@ GetTypeId: 6091706122362893070
 ----Parameters---- 
 GetName: TestClassParameter
 GetType: OBJECTMEMBERTYPE
-GetTypeName: Object
+GetTypeName: DotsTest.TestItem
 ------------------ 
-Val: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-32</value></member></members></object>
-Item Val: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-32</value></member></members></object>
-Item Array Val: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-32</value></member></members></object>
-Property Parameter Val: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>20</value></member></members></object>
-Val 0: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>3200</value></member></members></object>
-Array Item Val 0: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>3200</value></member></members></object>
-Array Item Array Val 0: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>3200</value></member></members></object>
-Parameter Array Val 0: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>20</value></member></members></object>
-Val 1: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-3200</value></member></members></object>
-Array Item Val 1: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-3200</value></member></members></object>
-Array Item Array Val 1: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>-3200</value></member></members></object>
-Parameter Array Val 1: <object xmlns="urn:safir-dots-unit"><name>DotsTest.TestItem</name><members><member><name>MyInt</name><value>20</value></member></members></object>
+Val: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-32</MyInt></DotsTest.TestItem>
+Item Val: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-32</MyInt></DotsTest.TestItem>
+Item Array Val: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-32</MyInt></DotsTest.TestItem>
+Property Parameter Val: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>20</MyInt></DotsTest.TestItem>
+Val 0: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>3200</MyInt></DotsTest.TestItem>
+Array Item Val 0: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>3200</MyInt></DotsTest.TestItem>
+Array Item Array Val 0: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>3200</MyInt></DotsTest.TestItem>
+Parameter Array Val 0: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>20</MyInt></DotsTest.TestItem>
+Val 1: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-3200</MyInt></DotsTest.TestItem>
+Array Item Val 1: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-3200</MyInt></DotsTest.TestItem>
+Array Item Array Val 1: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>-3200</MyInt></DotsTest.TestItem>
+Parameter Array Val 1: <?xml version="1.0" encoding="utf-8"?><DotsTest.TestItem><MyInt>20</MyInt></DotsTest.TestItem>
 Is_Null OK: true
 Is_Changed OK: true
 

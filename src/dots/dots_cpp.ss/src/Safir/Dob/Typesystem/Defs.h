@@ -37,7 +37,7 @@
 #define DOTS_CPP_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 #include <Safir/Utilities/Internal/UnorderedMap.h>
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 #include <string>
 #include <vector>
 /**
@@ -273,8 +273,8 @@ namespace Typesystem
     /**
      * An enumeration of all possible types of an object member.
      *
-     * The values of this enumeration is defined in the file Safir/Dob/Typesystem/Internal/KernelDefs.h.
-     * @see Safir/Dob/Typesystem/Internal/KernelDefs.h
+     * The values of this enumeration is defined in the file Safir/Dob/Typesystem/LanguageInterfaceDefs.h.
+     * @see Safir/Dob/Typesystem/LanguageInterfaceDefs.h
      */
     typedef DotsC_MemberType MemberType;
 

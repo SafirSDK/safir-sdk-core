@@ -1,0 +1,19 @@
+<propertyMapping xmlns="urn:safir-dots-unit">
+  <property>ParserTest.MyProperty</property>
+  <class>ParserTest.MyEntity</class>
+  <memberMapping>
+    <member>
+      <propertyMember>Int32PropertyValue</propertyMember>      
+    </member>
+    <member>
+      <propertyMember>TypeIdPropertyValue</propertyMember>
+      <valueRef>
+        <name>Test.MyParam.Tid</name>
+      </valueRef>
+    </member>
+    <member>
+      <propertyMember>InstanceIdPropertyValue</propertyMember>
+      <value>111</value>
+    </member>
+  </memberMapping>
+</propertyMapping>

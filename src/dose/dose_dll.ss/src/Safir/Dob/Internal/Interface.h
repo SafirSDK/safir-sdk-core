@@ -21,7 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
 #ifndef _dose_interface_h
 #define _dose_interface_h
 
@@ -38,7 +37,7 @@
 #define DOSE_DLL_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 
 typedef DotsC_Int32 DoseC_RequestId;
 

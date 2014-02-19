@@ -27,6 +27,7 @@ void access()
 int main(int argc, char* argv[])
 {
     //read xml
+
     std::ifstream obj("obj.xml");
     for (;;)
     {

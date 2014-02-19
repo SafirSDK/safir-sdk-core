@@ -1,15 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<object xmlns="urn:safir-dots-unit">
-  <name>DoseTest.Items.TestCase</name>
-  <members>
-    <member>
-      <name>Description</name>
-      <value>Empty Test case</value>
-    </member>
-    <member>
-      <name>Expectation</name>
-      <value>Nothing</value>
-    </member>
-  </members>
-</object>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Empty Test case</Description>
+  <Expectation xml:space="preserve">Nothing</Expectation>
+</DoseTest.Items.TestCase>

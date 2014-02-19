@@ -67,11 +67,47 @@ namespace Typesystem
                                                 xml8.begin() + resultSize - 1)); //remove null
     }
 
+    const std::wstring
+    Serialization::ToJson(const Dob::Typesystem::ObjectPtr object)
+    {
+        if (object == NULL)
+        {
+            throw SoftwareViolationException(L"Attempt to serialize a null pointer to json!", __WFILE__,__LINE__);
+        }
+
+        BinarySerialization bin;
+        ToBinary(object, bin);
+
+        int BUF_SIZE = 100000;
+        std::vector<char> json8(BUF_SIZE);
+        Int32 resultSize;
+        DotsC_BlobToJson(&json8[0], &bin[0], BUF_SIZE, resultSize);
+        if (resultSize> BUF_SIZE)
+        {
+            BUF_SIZE = resultSize;
+            json8.resize(BUF_SIZE);
+            DotsC_BlobToJson(&json8[0], &bin[0], BUF_SIZE, resultSize);
+            if (resultSize != BUF_SIZE)
+            {
+                throw SoftwareViolationException(L"Error in serialization buffer sizes",__WFILE__,__LINE__);
+            }
+        }
+        return Utilities::ToWstring(std::string(json8.begin(),
+                                                json8.begin() + resultSize - 1)); //remove null
+    }
+
     const std::wstring 
     Serialization::ToXml(const BinarySerialization & bin)
     {
         return ToXml(&bin[0]);
     }
+
+    const std::wstring
+    Serialization::ToJson(const BinarySerialization & bin)
+    {
+        return ToJson(&bin[0]);
+    }
+
 
     const std::wstring 
     Serialization::ToXml(const char * const blob)
@@ -93,7 +129,27 @@ namespace Typesystem
         return Utilities::ToWstring(std::string(xml8.begin(),
                                                 xml8.begin() + resultSize - 1)); //remove null.
     }
-        
+
+    const std::wstring
+    Serialization::ToJson(const char * const blob)
+    {
+        int BUF_SIZE = 100000;
+        std::vector<char> json8(BUF_SIZE);
+        Int32 resultSize;
+        DotsC_BlobToJson(&json8[0], blob, BUF_SIZE, resultSize);
+        if (resultSize> BUF_SIZE)
+        {
+            BUF_SIZE = resultSize;
+            json8.resize(BUF_SIZE);
+            DotsC_BlobToJson(&json8[0], blob, BUF_SIZE, resultSize);
+            if (resultSize != BUF_SIZE)
+            {
+                throw SoftwareViolationException(L"Error in serialization buffer sizes",__WFILE__,__LINE__);
+            }
+        }
+        return Utilities::ToWstring(std::string(json8.begin(),
+                                                json8.begin() + resultSize - 1)); //remove null.
+    }
 
     Dob::Typesystem::ObjectPtr 
     Serialization::ToObject(const std::wstring & xml)
@@ -115,6 +171,25 @@ namespace Typesystem
         return p;
     }
 
+    Dob::Typesystem::ObjectPtr
+    Serialization::ToObjectFromJson(const std::wstring & json)
+    {
+        char * blob;
+        std::string json8 = Utilities::ToUtf8(json);
+
+        std::vector<char> json8v(json8.size() +1);
+        json8v.assign(json8.begin(),json8.end());
+        json8v.push_back(0); //null termination
+        DotsC_BytePointerDeleter deleter;
+        DotsC_JsonToBlob(blob, deleter, &json8v[0]);
+        if (blob == NULL)
+        {
+            throw IllegalValueException(L"Something is wrong with the XML-formated object", __WFILE__,__LINE__);
+        }
+        ObjectPtr p = ObjectFactory::Instance().CreateObject(blob);
+        deleter(blob);
+        return p;
+    }
 
     void 
     Serialization::ToBinary(const Dob::Typesystem::ObjectPtr object, BinarySerialization & binary)

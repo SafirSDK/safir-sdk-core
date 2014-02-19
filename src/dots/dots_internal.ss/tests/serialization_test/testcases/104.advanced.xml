@@ -9,7 +9,7 @@
     </MyStrings>
   </SingelItem>
   <SingleEntityId>
-    <name>Safir.Dob.Item</name>
+    <name>Safir.Dob.Entity</name>
     <instanceId>3</instanceId>
   </SingleEntityId>
   <SingleChannel>anyChannel</SingleChannel>
@@ -29,8 +29,8 @@
     <BlobTest.MySpecialItem index="1" type="BlobTest.MySpecialItem">
       <MyNumber>76</MyNumber>
       <MyStrings>
-        <value index="1">My name is Sven</value>
-        <value index="3">Whats yours?</value>
+        <value index="1" xsi:space="preserve">  My name is Sven  </value>
+        <value index="3" xsi:space="default">  Whats yours?  </value>
       </MyStrings>
       <Child type="BlobTest.MySpecialItem">
         <MyNumber>8</MyNumber>
@@ -47,11 +47,11 @@
   </MyItemArray>
   <MyEntityIds>
     <entityId index="1">
-      <name>BlobTest.MyItem</name>
+      <name>BlobTest.MyEntity</name>
       <instanceId>one</instanceId>
     </entityId>
     <entityId index="3">
-      <name>BlobTest.MySpecialItem</name>
+      <name>BlobTest.MyEntityBase</name>
       <instanceId>2</instanceId>
     </entityId>
   </MyEntityIds>

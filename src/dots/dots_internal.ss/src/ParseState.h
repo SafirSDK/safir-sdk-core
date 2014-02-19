@@ -15,7 +15,7 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
@@ -36,7 +36,7 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {    
     //----------------------------------------------------------------------------------
     // The class ParseState keeps the current state of an ongoing parse job. Each
@@ -91,19 +91,21 @@ namespace Internal
         //This is an optimization so we dont have to copy the entire object-XML into a string.
         //Handling serialized object parameters is very time consuming.
         struct ObjectParameter
-        {
+        {            
             Reference<ParameterDescriptionBasic> referee;
-            const boost::property_tree::ptree* obj;
+            boost::property_tree::ptree* obj;
             boost::shared_ptr<boost::property_tree::ptree> propertyTree; //prevent from destruction
+            bool deprecatedXmlFormat;
             ObjectParameter(){}
             ObjectParameter(const ClassDescriptionBasicPtr& class_,
                             const ParameterDescriptionBasicPtr& param,
                             size_t paramArrayIndex,
-                            const boost::property_tree::ptree* obj_,
+                            boost::property_tree::ptree* obj_,
                             const boost::shared_ptr<boost::property_tree::ptree>& pt)
                 :referee(class_, param, paramArrayIndex)
                 ,obj(obj_)
                 ,propertyTree(pt)
+                ,deprecatedXmlFormat(false)
             {
             }
         };

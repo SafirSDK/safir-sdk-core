@@ -27,7 +27,7 @@ package com.saabgroup.safir.dob.typesystem;
 
 
 /**
- * Serialization and deserialization of objects and base64.
+ * Serialization and deserialization of objects, xml, json and base64.
  */
 public class Serialization {
     /**
@@ -95,6 +95,77 @@ public class Serialization {
         }
 
         String res = Kernel.BlobToXml(blob);
+        if (res == null) {
+            throw new SoftwareViolationException("Error in serialization buffer sizes!!!");
+        }
+        return res;
+    }
+
+    /**
+     * Serialize an object to JSON.
+     *
+     * @param obj - The object to serialize
+     * @return The json serialization
+     * @exception IllegalValueException - There is something wrong with the object.
+     */
+    public static String toJson(com.saabgroup.safir.dob.typesystem.Object obj)
+    {
+        int blobSize = obj.calculateBlobSize();
+
+        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize);
+        int beginningOfUnused = InternalOperations.formatBlob(blob, blobSize, obj.getTypeId());
+        beginningOfUnused = obj.writeToBlob(blob, beginningOfUnused);
+        return toJson(blob);
+    }
+
+
+    /**
+     * Deserialize an JSON serialization.
+     *
+     * This method creates a new object from a given json serialization.
+     * It uses the ObjectFactory to accomplish this.
+     *
+     * @param json The json to convert.
+     * @return A boost::shared_ptr to the new object
+     * @exception IllegalValueException If the type represented by the serialization isn't found
+     *                                   in the ObjectFactory.
+     */
+    public static com.saabgroup.safir.dob.typesystem.Object toObjectFromJson(String json) {
+        java.nio.ByteBuffer blob [] = new java.nio.ByteBuffer[1];
+        java.nio.ByteBuffer deleter [] = new java.nio.ByteBuffer[1];
+        Kernel.JsonToBlob(blob, deleter, json);
+        if (blob[0] == null) {
+            throw new IllegalValueException("Something is wrong with the JSON-formated object");
+        }
+        com.saabgroup.safir.dob.typesystem.Object obj = ObjectFactory.getInstance().createObject(blob[0]);
+        Kernel.InvokeDeleter(deleter[0],blob[0]);
+        return obj;
+    }
+
+    /**
+     * Convert a binary serialization to JSON.
+     *
+     * @param binary The binary serialization to convert to json.
+     * @return The json of the binary serialization.
+     */
+    public static String toJson(byte [] binary) {
+        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(binary.length);
+        blob.put(binary);
+        return toJson(blob);
+    }
+
+    /**
+     * Convert a blob to JSON.
+     *
+     * @param blob - the blob to convert to json.
+     * @return The json of the blob.
+     */
+    public static String toJson(java.nio.ByteBuffer blob) {
+        if (! blob.isDirect()){
+            throw new SoftwareViolationException("blob ByteBuffer must be a 'direct' java.nio.ByteBuffer");
+        }
+
+        String res = Kernel.BlobToJson(blob);
         if (res == null) {
             throw new SoftwareViolationException("Error in serialization buffer sizes!!!");
         }

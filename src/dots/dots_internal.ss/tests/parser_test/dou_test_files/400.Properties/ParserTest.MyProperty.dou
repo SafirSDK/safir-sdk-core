@@ -8,6 +8,24 @@
             <name>Int32PropertyValue</name>
             <type>Int32</type>
         </member>
+
+        <member>
+            <summary>Float64 property</summary>
+            <name>Float64PropertyValue</name>
+            <type>Float64</type>
+        </member>
+
+        <member>
+            <summary>String array property</summary>
+            <name>StringPropertyValue</name>
+            <type>String</type>
+        </member>
+
+        <member>
+            <summary>Enum</summary>
+            <name>EnumPropertyValue</name>
+            <type>ParserTest.MyColorEnum</type>
+        </member>
         
         <member>
             <summary>EntityId property</summary>
@@ -19,38 +37,63 @@
             <summary>ChannelId property</summary>
             <name>ChannelIdPropertyValue</name>
             <type>ChannelId</type>
-        </member>
-        
+        </member>                
+                        
         <member>
             <summary>Object property</summary>
-            <name>MyItemPropertyValue</name>
+            <name>ItemPropertyValue</name>
             <type>ParserTest.MyItem</type>
         </member>
-        
+    
+        <!-- Arrays -->
         <member>
-            <summary>String property</summary>
-            <name>MyStringPropertyValue</name>
-            <type>String</type>
+            <summary>Int32 property</summary>
+            <name>Int32PropertyValueArray</name>
+            <type>Int32</type>
+            <array/>
         </member>
-        
+
+        <member>
+            <summary>Float64 property</summary>
+            <name>Float64PropertyValueArray</name>
+            <type>Float64</type>
+            <array/>
+        </member>
+
         <member>
             <summary>String array property</summary>
-            <name>MyStringArrayPropertyValue</name>
+            <name>StringPropertyValueArray</name>
             <type>String</type>
+            <array/>
+        </member>
+
+        <member>
+            <summary>Enum</summary>
+            <name>EnumPropertyValueArray</name>
+            <type>ParserTest.MyColorEnum</type>
             <array/>
         </member>
         
         <member>
-            <summary>Float32 property</summary>
-            <name>MyFloat32PropertyValue</name>
-            <type>Float32</type>
+            <summary>EntityId property</summary>
+            <name>EntityIdPropertyValueArray</name>
+            <type>EntityId</type>
+            <array/>
         </member>
-
-    <member>
-            <summary>Enum</summary>
-            <name>MyEnumPropertyValue</name>
-            <type>ParserTest.MyColorEnum</type>
-        </member>
+        
+        <member>
+            <summary>ChannelId property</summary>
+            <name>ChannelIdPropertyValueArray</name>
+            <type>ChannelId</type>
+            <array/>
+        </member>                
+                        
+        <member>
+            <summary>Object property</summary>
+            <name>ItemPropertyValueArray</name>
+            <type>ParserTest.MyItem</type>
+            <array/>
+        </member>        
                 
     </members>
 </property>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Test item.</summary>
+    <name>ParserTest.MyItem</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <member>
+            <name>Val</name>
+            <type>String</type>
+            <maxLength>4</maxLength>
+            <arraySizeRef><name>ParserTest.MyItem.MyInt</name><index>1</index></arraySizeRef>
+        </member>
+    </members>
+
+    <parameters>
+        <parameter>
+            <name>MyInt</name>
+            <type>Int64</type>
+            <arrayElements>
+                <arrayElement><value>1</value></arrayElement>
+                <arrayElement><value>1</value></arrayElement>
+                <arrayElement><value>2</value></arrayElement>
+                <arrayElement><value>3</value></arrayElement>
+            </arrayElements>
+        </parameter>
+    </parameters>
+</class>

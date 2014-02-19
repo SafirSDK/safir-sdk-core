@@ -1,96 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<object xmlns="urn:safir-dots-unit">
-  <name>DoseTest.Items.TestCase</name>
-  <members>
-    <member>
-      <name>Description</name>
-      <value>Test of sending a context shared message from context != 0.</value>
-    </member>
-    <member>
-      <name>Expectation</name>
-      <value>Partner 0 gets a Software violation exception</value>
-    </member>
-    <member>
-      <name>TestCaseSetupActions</name>
-      <!-- First we close partner 0's connection and opens it in context 1 -->
-      <arrayElements>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Close</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Open</value>
-              </member>
-              <member>
-                <name>Context</name>
-                <value>1</value>
-              </member>              
-            </members>
-          </object>
-        </arrayElement>               
-      </arrayElements>
-    </member>
-    <member>
-      <name>TestActions</name>
-      <arrayElements>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.SendMessage</value>
-              </member>
-              <member>
-                <name>Channel</name>
-                <value>DEFAULT_CHANNEL</value>
-              </member>
-              <member>
-                <name>Object</name>
-                <object>
-                  <name>DoseTest.ContextSharedMessage</name>
-                  <members>
-                    <member>
-                      <name>Info</name>
-                      <value>context shared info</value>
-                    </member>
-                  </members>
-                </object>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        
-      </arrayElements>
-    </member>
-  </members>
-</object>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of sending a context shared message from context != 0.</Description>
+  <Expectation xml:space="preserve">Partner 0 gets a Software violation exception</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Close</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Open</ActionKind>
+      <Partner>0</Partner>
+      <Context>1</Context>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="DoseTest.ContextSharedMessage">
+        <Info xml:space="preserve">context shared info</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

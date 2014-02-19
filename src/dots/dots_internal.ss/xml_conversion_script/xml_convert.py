@@ -136,6 +136,7 @@ def convert_member_item(src, dest, member_name):
     #1. <value> ---> <mem>value</mem>
     #2. <entityId> ---> <memEid> <name>Entity</name> <instanceId>3</instanceId> </memEid>
     #3. <object> ---> <memObj type="typeName"> ..... </memObj>
+    #4. <valueRef><name>...</name><index>...</index></valueRef> ---> <mem valueRef="..." valueRefIndex="..."/>
 
     member_name=member_name.strip()
     value_element=src.find(ns('value'))
@@ -143,7 +144,10 @@ def convert_member_item(src, dest, member_name):
         if member_name=='':
             member_name='value'
         member_element=ET.SubElement(dest, member_name)
-        member_element.text=value_element.text.strip()
+        if value_element.text!=None:
+            member_element.text=value_element.text.strip()
+        else:
+            member_element.text=''
     else:
         eid_element=src.find(ns('entityId'))
         if eid_element!=None:
@@ -162,9 +166,27 @@ def convert_member_item(src, dest, member_name):
                 #insert_at=len(dest)
                 #dest.insert(insert_at, inner_obj)
             else:
-                print('*** Unexpected member in '+current_file)
-                for x in src:
-                    print(x.tag)
+                value_ref_element=src.find(ns('valueRef'))
+                if value_ref_element!=None:
+                    if member_name=='':
+                        member_name='value'
+                    member_element=ET.SubElement(dest, member_name)
+                    param_name_element=value_ref_element.find(ns('name'))
+                    member_element.attrib['valueRef']=param_name_element.text.strip()
+                    param_index_element=value_ref_element.find(ns('index'))
+                    if param_index_element!=None:
+                        member_element.attrib['valueRefIndex']=param_index_element.text.strip()
+                #else:
+                    #Treated as null in old syntax
+                    #print('*************************************************************************')
+                    #print('* Unexpected member structure in member: '+src.tag.replace(current_namespace, ''))
+                    #print('* '+current_file)
+                    #print('* Expected <name> and one of: <value>, <entityId>, <object>, <valueRef>')
+                    #print('* Found:')
+                    #for x in src:
+                    #    print('*    <'+x.tag.replace(current_namespace, '')+'>')
+                    #print('* Member will be removed from the converted result')
+                    #print('*************************************************************************')
 
 def convert_object(tree, root_name=''):
     """Convert object structure"""

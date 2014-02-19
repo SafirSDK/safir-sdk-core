@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Contains parameters to be used as values in CreateRoutines.</summary>
+    <name>Safir.Dob.CreateRoutineParameters</name>
+    <baseClass>Safir.Dob.Parametrization</baseClass>
+    <parameters>
+        <parameter>
+            <summary>Value 0</summary>
+            <name>Zero</name>
+            <type>Int32</type>
+            <value>0</value>
+        </parameter>
+        <parameter>
+            <summary>Value 1</summary>
+            <name>One</name>
+            <type>Int32</type>
+            <value>1</value>
+        </parameter>
+        <parameter>
+            <summary>Value 2</summary>
+            <name>Two</name>
+            <type>Int32</type>
+            <value>2</value>
+        </parameter>
+    </parameters>
+</class>

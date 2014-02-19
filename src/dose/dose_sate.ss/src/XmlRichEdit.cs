@@ -34,9 +34,6 @@ namespace Sate
     /// </summary>
     public class XmlRichEdit : System.Windows.Forms.RichTextBox
     {
-        private Font elementFont=new Font("", 8, FontStyle.Regular);
-        private Font contentFont=new Font("", 8, FontStyle.Bold);
-
         public XmlRichEdit()
         {
             this.BackColor = Color.White;
@@ -46,86 +43,23 @@ namespace Sate
         public void WriteXml(string xml)
         {
             this.Clear();
-
+            
             System.Xml.XmlTextReader reader=new System.Xml.XmlTextReader(new System.IO.StringReader(xml));
-
-            reader.WhitespaceHandling = WhitespaceHandling.None;
-
-            // Parse the file and display each of the nodes.
-            int level=0;
-            while (reader.Read())
-            {
-                this.Font=elementFont;
-                this.ForeColor=Color.Blue;
-
-                switch (reader.NodeType)
-                {
-                    case XmlNodeType.Element:
-                        Indent(level);
-                        AppendText("<"+reader.Name+">\n");
-                        level++;
-                        break;
-                    case XmlNodeType.Text:
-                        Indent(level);
-                        int start=Text.Length;
-                        int length=reader.Value.Length;
-                        AppendText(reader.Value+"\n");
-                        this.SelectionStart=start;
-                        this.SelectionLength=length;
-                        this.SelectionFont=contentFont;
-                        this.SelectionColor=Color.Black;
-                        break;
-                    case XmlNodeType.CDATA:
-                        AppendText("<![CDATA["+reader.Value+"]]>");
-                        break;
-                    case XmlNodeType.ProcessingInstruction:
-                        AppendText("<?"+reader.Name+" "+reader.Value+"?>");
-                        break;
-                    case XmlNodeType.Comment:
-                        AppendText("<!--"+reader.Value+"-->");
-                        break;
-                    case XmlNodeType.XmlDeclaration:
-                        //AppendText("<? "+reader.Value+" ?>\n");
-                        break;
-                    case XmlNodeType.Document:
-                        break;
-                    case XmlNodeType.DocumentType:
-                        AppendText("<!DOCTYPE "+reader.Name+" ["+reader.Value+"]");
-                        break;
-                    case XmlNodeType.EntityReference:
-                        AppendText(reader.Name);
-                        break;
-                    case XmlNodeType.EndElement:
-                        level--;
-                        Indent(level);
-                        AppendText("</"+reader.Name+">\n");
-                        break;
-                }
+            System.Xml.XmlDocument doc=new System.Xml.XmlDocument();
+            doc.Load(reader);
+            
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "  ";
+            settings.NewLineChars = "\r\n";
+            settings.NewLineHandling = NewLineHandling.Replace;
+            using (XmlWriter writer = XmlWriter.Create(sb, settings)) {
+                doc.Save(writer);
             }
+            AppendText(sb.ToString());
 
             reader.Close();
         }
-
-        private const string BLANK = "                                                                                                    ";
-        private const int IND = 5;
-        private void Indent(int level)
-        {
-            int c=level*IND;
-            if (c>0)
-            {
-                if (c<=BLANK.Length)
-                {
-                    AppendText(BLANK.Substring(0, c));
-                }
-                else
-                {
-                    AppendText(BLANK);
-                    for (int i=0; i<c-BLANK.Length; i++)
-                        AppendText(" ");
-                }
-            }
-        }
-
-
     }
 }

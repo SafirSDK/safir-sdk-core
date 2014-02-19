@@ -10,12 +10,6 @@
             <value>StandAlone</value>
         </parameter>
         <parameter>
-            <summary>Specifies the amount of shared memory to allocate for the Dob Typesystem (storage for parameters etc). Specified in megabytes.</summary>
-            <name>TypesystemSharedMemorySize</name>
-            <type>Int32</type>
-            <value>10</value>
-        </parameter>
-        <parameter>
             <summary>Specifies the amount of shared memory to allocate for the Dob distribution (in megabytes)</summary>
             <name>SharedMemorySize</name>
             <type>Int32</type>

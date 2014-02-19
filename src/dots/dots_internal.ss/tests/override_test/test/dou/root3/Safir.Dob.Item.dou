@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>The baseclass for all items. Items are used as members in other classes.</summary>
+    <name>Safir.Dob.Item</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <member>
+            <name>ItemName</name>
+            <type>String</type>
+            <maxLength>40</maxLength>
+        </member>
+    </members>
+</class>

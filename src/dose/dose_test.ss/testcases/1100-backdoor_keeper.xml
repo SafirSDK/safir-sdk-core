@@ -1,374 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<object xmlns="urn:safir-dots-unit">
-  <name>DoseTest.Items.TestCase</name>
-  <members>
-    <member>
-      <name>Description</name>
-      <value>Test of the backdoor keeper.</value>
-    </member>
-    <member>
-      <name>Expectation</name>
-      <value>Partner 0 shall report: 1.Backdoor is not started. 2.Backdoor is started. 3.Received command "test-command 2 olle" 4.Backdoor is not started. 5.Backdoor is started. 6.Received command "test-command 4 bertil bertilsson".</value>
-    </member>
-    <member>
-      <name>TestCaseSetupActions</name>
-      <arrayElements>
-
-        <!-- Make sure Partner 1 is in context 0 so it can send backdoor commands -->
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>1</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Close</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>1</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Open</value>
-              </member>
-              <member>
-                <name>Context</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-               
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.IsBackdoorStarted</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <!-- Send a backdoor command while the keeper isn't started -->
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>1</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.SendMessage</value>
-              </member>
-              <member>
-                <name>Channel</name>
-                <value>DEFAULT_CHANNEL</value>
-              </member>
-              <member>
-                <name>Object</name>
-                <object>
-                  <name>Safir.Application.BackdoorCommand</name>
-                  <members>
-                    <member>
-                      <name>ConnectionName</name>
-                      <value>.*partner_test_conn.*</value>
-                    </member>
-                    <member>
-                      <name>NodeName</name>
-                      <value>.*</value>
-                    </member>
-                    <member>
-                      <name>Command</name>
-                      <value>test-command 1 kalle</value>
-                    </member>
-                  </members>
-                </object>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.StartBackdoor</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.IsBackdoorStarted</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>1</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.SendMessage</value>
-              </member>
-              <member>
-                <name>Channel</name>
-                <value>DEFAULT_CHANNEL</value>
-              </member>
-              <member>
-                <name>Object</name>
-                <object>
-                  <name>Safir.Application.BackdoorCommand</name>
-                  <members>
-                    <member>
-                      <name>ConnectionName</name>
-                      <value>.*partner_test_conn.*</value>
-                    </member>
-                    <member>
-                      <name>NodeName</name>
-                      <value>.*</value>
-                    </member>
-                    <member>
-                      <name>Command</name>
-                      <value>test-command 2 olle</value>
-                    </member>
-                  </members>
-                </object>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.StopBackdoor</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.IsBackdoorStarted</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>1</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.SendMessage</value>
-              </member>
-              <member>
-                <name>Channel</name>
-                <value>DEFAULT_CHANNEL</value>
-              </member>
-              <member>
-                <name>Object</name>
-                <object>
-                  <name>Safir.Application.BackdoorCommand</name>
-                  <members>
-                    <member>
-                      <name>ConnectionName</name>
-                      <value>.*partner_test_co.*</value>
-                    </member>
-                    <member>
-                      <name>NodeName</name>
-                      <value>.*</value>
-                    </member>
-                    <member>
-                      <name>Command</name>
-                      <value>test-command 3 nisse</value>
-                    </member>
-                  </members>
-                </object>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.StartBackdoor</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.IsBackdoorStarted</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>1</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.SendMessage</value>
-              </member>
-              <member>
-                <name>Channel</name>
-                <value>DEFAULT_CHANNEL</value>
-              </member>
-              <member>
-                <name>Object</name>
-                <object>
-                  <name>Safir.Application.BackdoorCommand</name>
-                  <members>
-                    <member>
-                      <name>ConnectionName</name>
-                      <value>.*partner_test_co.*</value>
-                    </member>
-                    <member>
-                      <name>NodeName</name>
-                      <value>.*</value>
-                    </member>
-                    <member>
-                      <name>Command</name>
-                      <value>test-command 4 bertil bertilsson</value>
-                    </member>
-                  </members>
-                </object>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>        
-                
-      </arrayElements>
-    </member>
-  </members>
-</object>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of the backdoor keeper.</Description>
+  <Expectation xml:space="preserve">Partner 0 shall report: 1.Backdoor is not started. 2.Backdoor is started. 3.Received command "test-command 2 olle" 4.Backdoor is not started. 5.Backdoor is started. 6.Received command "test-command 4 bertil bertilsson".</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Close</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Open</ActionKind>
+      <Partner>1</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>IsBackdoorStarted</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="Safir.Application.BackdoorCommand">
+        <ConnectionName xml:space="preserve">.*partner_test_conn.*</ConnectionName>
+        <NodeName xml:space="preserve">.*</NodeName>
+        <Command xml:space="preserve">test-command 1 kalle</Command>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>StartBackdoor</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>IsBackdoorStarted</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="Safir.Application.BackdoorCommand">
+        <ConnectionName xml:space="preserve">.*partner_test_conn.*</ConnectionName>
+        <NodeName xml:space="preserve">.*</NodeName>
+        <Command xml:space="preserve">test-command 2 olle</Command>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="7">
+      <ActionKind>StopBackdoor</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="8">
+      <ActionKind>IsBackdoorStarted</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="9">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="Safir.Application.BackdoorCommand">
+        <ConnectionName xml:space="preserve">.*partner_test_co.*</ConnectionName>
+        <NodeName xml:space="preserve">.*</NodeName>
+        <Command xml:space="preserve">test-command 3 nisse</Command>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="10">
+      <ActionKind>StartBackdoor</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="11">
+      <ActionKind>IsBackdoorStarted</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+    </DoseTest.Action>
+    <DoseTest.Action index="12">
+      <ActionKind>SendMessage</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <Channel>DEFAULT_CHANNEL</Channel>
+      <Object type="Safir.Application.BackdoorCommand">
+        <ConnectionName xml:space="preserve">.*partner_test_co.*</ConnectionName>
+        <NodeName xml:space="preserve">.*</NodeName>
+        <Command xml:space="preserve">test-command 4 bertil bertilsson</Command>
+      </Object>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+</DoseTest.Items.TestCase>

@@ -98,11 +98,11 @@ if output.count("OnInjectedNewEntity") != 110:
     log("could not find the right number of 'OnInjectedNewEntity' in output")
     sys.exit(1)
 
-if output.count("<name>DopeTest.SmallEntity</name>") != 100:
+if output.count("<DopeTest.SmallEntity>") != 100:
     log("could not find the right number of 'DopeTest.SmallEntity' in output")
     sys.exit(1)
 
-if output.count("<name>DopeTest.BigEntity</name>") != 10:
+if output.count("<DopeTest.BigEntity>") != 10:
     log("could not find the right number of 'DopeTest.BigEntity' in output")
     sys.exit(1)
 
@@ -143,11 +143,11 @@ if output.count("OnInjectedNewEntity") != 110:
     log("could not find the right number of 'OnInjectedNewEntity' in output")
     sys.exit(1)
 
-if output.count("<name>DopeTest.SmallEntity</name>") != 100:
+if output.count("<DopeTest.SmallEntity>") != 100:
     log("could not find the right number of 'DopeTest.SmallEntity' in output")
     sys.exit(1)
 
-if output.count("<name>DopeTest.BigEntity</name>") != 10:
+if output.count("<DopeTest.BigEntity>") != 10:
     log("could not find the right number of 'DopeTest.BigEntity' in output")
     sys.exit(1)
 

@@ -36,7 +36,7 @@
 #endif
 #define SWRE_LIBRARY_LOCAL SAFIR_HELPER_DLL_LOCAL
 
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 
 extern "C"
 {
