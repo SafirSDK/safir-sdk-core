@@ -54,17 +54,27 @@ int main()
         for(int j = 0; j < 50; ++j)
         {
             threads.push_back(boost::shared_ptr<boost::thread>(new boost::thread(Timeout)));
+            if (j%2 == 0)
+            {
+                threads.back()->interrupt();
+            }
+        }
+
+        for (std::vector<boost::shared_ptr<boost::thread> >::iterator it = threads.begin(); it != threads.end(); ++it)
+        {
+            (*it)->interrupt();
         }
 
         while (!threads.empty())
         {
-            threads.back()->interrupt();
             threads.back()->join();
             threads.pop_back();
         }
     }
 
     std::wcout << "second test" << std::endl;
+    double sleepTime = 0;
+    double maxSleepTime = 0;
     for(int i = 0; i < 10000; ++i)
     {
         boost::timer stopwatch;
@@ -72,12 +82,18 @@ int main()
         boost::thread thread(Timeout);
         thread.interrupt();
         thread.join();
-        if (stopwatch.elapsed() > 60) //more than 1 minute!
+        const double elapsed = stopwatch.elapsed();
+        sleepTime += elapsed;
+        maxSleepTime = std::max(maxSleepTime, elapsed);
+        if (elapsed > 60) //more than 1 minute!
         {
-            std::wcout << "Interrupt was too slow! elapsed = " << stopwatch.elapsed() << std::endl;
+            std::wcout << "Interrupt was too slow! elapsed = " << elapsed << std::endl;
             exit(14);
         }
     }
+
+    std::wcout << "Average interrupt time is " << sleepTime/10000*1000 << " milliseconds" << std::endl;
+    std::wcout << "Maximum interrupt time is " << maxSleepTime*1000 << " milliseconds" << std::endl;
 
     return 0;
 }
