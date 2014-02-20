@@ -84,11 +84,11 @@ void run_test()
         boost::thread thread(Timeout);
         thread.interrupt();
         thread.join();
-        const double elapsed = stopwatch.elapsed().wall / 1000000.0;
+        const double elapsed = stopwatch.elapsed().wall / 1000000000.0;
         sleepTime += elapsed;
         maxSleepTime = std::max(maxSleepTime, elapsed);
 
-        if (elapsed > 10) //more than 10 seconds
+        if (elapsed > 30) //more than 30 seconds
         {
             std::wcout << "Interrupt was too slow! elapsed: " << boost::timer::format(stopwatch.elapsed()).c_str() << "." << std::endl;
             exit(14);
