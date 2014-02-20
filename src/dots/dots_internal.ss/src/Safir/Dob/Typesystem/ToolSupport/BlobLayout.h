@@ -346,7 +346,7 @@ namespace ToolSupport
                                                   const bool isChanged,
                                                   char * & beginningOfUnused) const
         {
-            m_impl.CreateAndSetMemberWithOptionalString<T>(blob, hashVal, strVal, stringLength, member, index, isChanged, beginningOfUnused);
+            m_impl.template CreateAndSetMemberWithOptionalString<T>(blob, hashVal, strVal, stringLength, member, index, isChanged, beginningOfUnused);
         }
 
     private:
