@@ -30,7 +30,7 @@ void Timeout()
     boost::timer::cpu_timer stopwatch;
     try
     {
-        boost::this_thread::sleep(boost::posix_time::seconds(30)); 
+        boost::this_thread::sleep(boost::posix_time::minutes(10)); 
         
         std::wcout << "Timeout!" << std::endl;
         std::wcout << "Elapsed time: " << boost::timer::format(stopwatch.elapsed()).c_str() << "." << std::endl;
@@ -43,7 +43,7 @@ void Timeout()
 }
 
 
-int main()
+void run_test()
 {
 
     std::wcout << "first test" << std::endl;
@@ -51,10 +51,12 @@ int main()
     {
         std::vector<boost::shared_ptr<boost::thread> > threads;
 
-        for(int j = 0; j < 200; ++j)
+        for(int j = 0; j < 50; ++j)
         {
             threads.push_back(boost::shared_ptr<boost::thread>(new boost::thread(Timeout)));
-            if (j%2 == 0)
+
+            //interrupt some of the threads immediately
+            if (j%4 == 0)
             {
                 threads.back()->interrupt();
             }
@@ -95,6 +97,23 @@ int main()
 
     std::wcout << "Average interrupt time is " << sleepTime/10000*1000 << " milliseconds" << std::endl;
     std::wcout << "Maximum interrupt time is " << maxSleepTime*1000 << " milliseconds" << std::endl;
-    
+}
+
+int main()
+{
+    try
+    {
+        run_test();
+    }
+    catch(const std::exception& e)
+    {
+        std::wcout << "Caught exception: " << e.what() << std::endl;
+        return 1;
+    }
+    catch (...)
+    {
+        std::wcout << "Caught ... exception" << std::endl;
+        return 1;
+    }
     return 0;
 }
