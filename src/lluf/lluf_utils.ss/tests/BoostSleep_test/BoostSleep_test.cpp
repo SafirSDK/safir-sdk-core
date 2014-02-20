@@ -23,17 +23,17 @@
 ******************************************************************************/
 #include <iostream>
 #include <boost/thread.hpp>
-#include <boost/timer.hpp>
+#include <boost/timer/timer.hpp>
 
 void Timeout()
 {
-    boost::timer stopwatch;
+    boost::timer::cpu_timer stopwatch;
     try
     {
-        boost::this_thread::sleep(boost::posix_time::seconds(60)*10); //ten minutes
+        boost::this_thread::sleep(boost::posix_time::seconds(30)); 
         
         std::wcout << "Timeout!" << std::endl;
-        std::wcout << "Elapsed time " << stopwatch.elapsed() << " seconds." << std::endl;
+        std::wcout << "Elapsed time: " << boost::timer::format(stopwatch.elapsed()).c_str() << "." << std::endl;
         exit(31);
     }
     catch (const boost::thread_interrupted&)
@@ -51,7 +51,7 @@ int main()
     {
         std::vector<boost::shared_ptr<boost::thread> > threads;
 
-        for(int j = 0; j < 50; ++j)
+        for(int j = 0; j < 200; ++j)
         {
             threads.push_back(boost::shared_ptr<boost::thread>(new boost::thread(Timeout)));
             if (j%2 == 0)
@@ -71,29 +71,30 @@ int main()
             threads.pop_back();
         }
     }
-
+    
     std::wcout << "second test" << std::endl;
     double sleepTime = 0;
     double maxSleepTime = 0;
     for(int i = 0; i < 10000; ++i)
     {
-        boost::timer stopwatch;
+        boost::timer::cpu_timer stopwatch;
 
         boost::thread thread(Timeout);
         thread.interrupt();
         thread.join();
-        const double elapsed = stopwatch.elapsed();
+        const double elapsed = stopwatch.elapsed().wall / 1000000.0;
         sleepTime += elapsed;
         maxSleepTime = std::max(maxSleepTime, elapsed);
-        if (elapsed > 60) //more than 1 minute!
+
+        if (elapsed > 10) //more than 10 seconds
         {
-            std::wcout << "Interrupt was too slow! elapsed = " << elapsed << std::endl;
+            std::wcout << "Interrupt was too slow! elapsed: " << boost::timer::format(stopwatch.elapsed()).c_str() << "." << std::endl;
             exit(14);
         }
     }
 
     std::wcout << "Average interrupt time is " << sleepTime/10000*1000 << " milliseconds" << std::endl;
     std::wcout << "Maximum interrupt time is " << maxSleepTime*1000 << " milliseconds" << std::endl;
-
+    
     return 0;
 }
