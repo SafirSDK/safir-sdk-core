@@ -8,7 +8,7 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(dose_test_sequencer ${sources} ${headers})
 
-FIND_PACKAGE(Boost COMPONENTS program_options filesystem regex system thread)
+FIND_PACKAGE(Boost COMPONENTS timer program_options filesystem regex system thread)
 
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(dose_test_sequencer dose_cpp dots_generated-DoseTest-cpp dots_generated-Safir-cpp dots_generated-cpp dots_cpp ${Boost_LIBRARIES})

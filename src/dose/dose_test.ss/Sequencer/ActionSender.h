@@ -38,7 +38,7 @@
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/DistributionChannelParameters.h>
 #include <boost/thread.hpp>
-#include <boost/timer.hpp>
+#include <boost/timer/timer.hpp>
 #include <iostream>
 
 class ActionSender
@@ -123,18 +123,14 @@ private:
 
     static void Timeout(const int which)
     {
-        boost::timer doublecheck;
+        boost::timer::cpu_timer doublecheck;
         try
         {
             //for recent boost versions we use sleep_for instead of sleep
-#if ((BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) > 50)
             boost::this_thread::sleep_for(boost::chrono::minutes(10));
-#else
-            boost::this_thread::sleep(boost::posix_time::seconds(60)*10); //ten minutes
-#endif
 
             std::wcout << "Read from partner " << which << " timed out!" << std::endl;
-            std::wcout << "elapsed time " << doublecheck.elapsed() << std::endl;
+            std::wcout << "elapsed time " << doublecheck.elapsed().wall / 1000.0 << " milliseconds" << std::endl;
             exit(31);
         }
         catch (const boost::thread_interrupted&)
@@ -170,12 +166,13 @@ private:
             std::wcout << "reading failed" << std::endl;
         }
 
-        boost::timer timer;
+        boost::timer::cpu_timer timer;
         timeout.interrupt();
         timeout.join();
-        if (timer.elapsed() > 60)
+        if (timer.elapsed().wall > 3*60*1000*1000) //3 minutes in nanoseconds
         {
-            std::wcout << "Interrupting the timeout thread took " << timer.elapsed() << " seconds!" << std::endl;
+            std::wcout << "Interrupting the timeout thread took " << timer.elapsed().wall / 1000.0 << " milliseconds!" << std::endl;
+            exit(32);
         }
     }
 
