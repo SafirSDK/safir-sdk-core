@@ -50,16 +50,23 @@ int main()
 #endif
 
 #ifndef _MSC_VER
-#  ifndef BOOST_THREAD_SLEEP_FOR_IS_STEADY
+
+    //New boosts have a macro that tells whether sleep is steady
+#  if ((BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) >= 53)
+#    ifndef BOOST_THREAD_SLEEP_FOR_IS_STEADY
     std::wcout << "BOOST_THREAD_SLEEP_FOR_IS_STEADY is not defined!" << std::endl;
     ++errors;
+#    endif
 #  endif
 
+    //dunno whether this is really needed.
 #  ifndef BOOST_HAS_NANOSLEEP
     std::wcout << "BOOST_HAS_NANOSLEEP is not defined!" << std::endl;
     ++errors;
 #  endif
 
+    //dunno whether this is really needed.
+    //maybe we should really be checking whether either this or BOOST_HAS_NANOSLEEP is defined.
 #  ifdef BOOST_HAS_PTHREAD_DELAY_NP
     std::wcout << "BOOST_HAS_PTHREAD_DELAY_NP is defined!" << std::endl;
     ++errors;
