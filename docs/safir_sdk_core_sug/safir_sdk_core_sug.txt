@@ -2967,7 +2967,7 @@ The recommended configuration on Linux is to have the system configured for nati
 Most Linux distributions come with a built-in syslog deamon capable of receiving and handling syslog messages, and many distributions make it possible to switch syslog daemon, in case you are not happy with the default. Refer to the documentation of your distribution for more information.
 
 === Porting guidelines
-The logging interface provided by Safir SDK Core before version 4.5 (Software Reporting) is now deprecated and will be removed in some future version of the SDK. This section provides some guidelines when porting old code to use the new interface provided by Safir Log.
+The logging interface provided by Safir SDK Core before version 4.5 (aka Software Reporting or SwReports) is now deprecated and will be removed in some future version of the SDK. This section provides some guidelines when porting old code to use the new interface provided by Safir Log.
 
 As already mentioned, syslog has a bias towards one-liner messages which means that it could be a good idea to try to reduce the message text to contain just the most essential information.
 
