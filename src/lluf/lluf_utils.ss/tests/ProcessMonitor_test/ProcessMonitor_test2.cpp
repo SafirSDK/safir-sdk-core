@@ -67,10 +67,10 @@ int main(int argc, char** argv)
     {
         monitor.StartMonitorPid(*it);
     }
-    boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
     monitor.StopMonitorPid(*pids.begin());
 
-    boost::this_thread::sleep(boost::posix_time::milliseconds(400));
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(400));
 
     return 0;
 }

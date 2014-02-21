@@ -34,9 +34,9 @@ int main()
 {
     Safir::Utilities::CrashReporter::RegisterCallback(callback);
     Safir::Utilities::CrashReporter::Start();
-    boost::this_thread::sleep(boost::posix_time::milliseconds(500)); //sleep a little while to let bg thread start.
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(500)); //sleep a little while to let bg thread start.
     std::wcout << "Started" << std::endl;
-    boost::this_thread::sleep(boost::posix_time::seconds(60));
+    boost::this_thread::sleep_for(boost::chrono::seconds(60));
     Safir::Utilities::CrashReporter::Stop();
     return 0;
 }

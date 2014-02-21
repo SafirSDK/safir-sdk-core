@@ -229,7 +229,7 @@ void Sequencer::ExecuteCurrentAction()
     if (m_currentAction->Partner().IsNull() && m_currentAction->ActionKind() == DoseTest::ActionEnum::Sleep)
     {
         std::wcout << " - Sleeping " << m_currentAction->SleepDuration() << " seconds"<<std::endl;
-        boost::this_thread::sleep(boost::posix_time::microseconds
+        boost::this_thread::sleep_for(boost::chrono::microseconds
                                   (static_cast<boost::int64_t>(m_currentAction->SleepDuration() * 1e6)));
     }
     else
@@ -361,7 +361,7 @@ void Sequencer::Tick()
         break;
     case SequencerStates::CleaningUpTestcase:
         {
-            boost::this_thread::sleep(boost::posix_time::milliseconds(150));
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(150));
             SetState(SequencerStates::ResetPartners);
             m_currentCaseNo++;
         }

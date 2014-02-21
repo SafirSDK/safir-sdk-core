@@ -30,7 +30,7 @@ void Timeout()
     boost::timer::cpu_timer stopwatch;
     try
     {
-        boost::this_thread::sleep(boost::posix_time::minutes(10)); 
+        boost::this_thread::sleep_for(boost::chrono::minutes(10)); 
         
         std::wcout << "Timeout!" << std::endl;
         std::wcout << "Elapsed time: " << boost::timer::format(stopwatch.elapsed()).c_str() << "." << std::endl;

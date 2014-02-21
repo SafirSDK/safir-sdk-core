@@ -230,7 +230,7 @@ namespace Internal
 
             if (m_queueIsFull[m_pdPriority] != 0)
             {
-                boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+                boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
                 continue;
             }
 
@@ -277,7 +277,7 @@ namespace Internal
         {
             threadMonitor.KickWatchdog(threadId);
             lllout << "Waiting for m_okToSignalPDComplete to be set to true. Current value = " << m_okToSignalPDComplete.value() << std::endl;
-            boost::this_thread::sleep(boost::posix_time::milliseconds(20));
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(20));
         }
         lllout << "m_okToSignalPDComplete is true!" << std::endl;
 

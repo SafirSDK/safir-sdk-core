@@ -707,7 +707,7 @@ namespace Internal
             MemoryMonitor monitor;
             for (;;)
             {
-                boost::this_thread::sleep(boost::posix_time::seconds(5));
+                boost::this_thread::sleep_for(boost::chrono::seconds(5));
                 monitor.Check();
             }
         }

@@ -204,10 +204,10 @@ private:
         case DoseTest::ActionEnum::UnregisterHandler:
         case DoseTest::ActionEnum::UpdateRequest:
         case DoseTest::ActionEnum::ResumePostponed:
-            boost::this_thread::sleep(boost::posix_time::milliseconds(140));
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(140));
             break;
         default:
-            boost::this_thread::sleep(boost::posix_time::milliseconds(40));
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(40));
             break;
         }
     }

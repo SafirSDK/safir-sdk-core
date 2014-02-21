@@ -234,7 +234,7 @@ namespace Internal
                 lllout << "Pool distribution thread is waiting for persistence data from DOPE" << std::endl;
                 while (!m_persistHandler->IsPersistentDataReady())
                 {
-                    boost::this_thread::sleep(boost::posix_time::milliseconds(10)); //sleep is interruption point
+                    boost::this_thread::sleep_for(boost::chrono::milliseconds(10)); //sleep is interruption point
                 
                 m_threadMonitor->KickWatchdog(m_poolDistributionThreadId);
                 }

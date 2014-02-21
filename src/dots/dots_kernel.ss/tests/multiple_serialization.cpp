@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 
     //let dots_kernel load in peace.
     DotsC_NumberOfTypeIds();
-    boost::this_thread::sleep(boost::posix_time::seconds(5));
+    boost::this_thread::sleep_for(boost::chrono::seconds(5));
 
     boost::thread_group tg;
     for (int i = 0; i < 50; ++i)

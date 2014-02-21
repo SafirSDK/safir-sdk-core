@@ -43,7 +43,7 @@ int main()
         lllog(5) << "Hello, World!"<<std::endl;
         lllog(9) << "Goodbye cruel world!"<<std::endl;
         lllog(0) << 1234567890 << std::endl;
-        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     }
 
     return 0;

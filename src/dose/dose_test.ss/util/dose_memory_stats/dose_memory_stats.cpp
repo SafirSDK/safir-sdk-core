@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
         {
             break;
         }
-        boost::this_thread::sleep(boost::posix_time::seconds(3));
+        boost::this_thread::sleep_for(boost::chrono::seconds(3));
     }
 
     return 0;

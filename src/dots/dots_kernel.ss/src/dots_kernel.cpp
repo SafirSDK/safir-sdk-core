@@ -43,19 +43,6 @@
 #include "dots_init_helper.h"
 #include "dots_exception_keeper.h"
 
-//disable warnings in boost
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4127)
-#endif
-
-#include <boost/date_time/posix_time/posix_time.hpp>
-
-//and enable the warnings again
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
-
 using namespace Safir::Dob::Typesystem::Internal;
 
 namespace 

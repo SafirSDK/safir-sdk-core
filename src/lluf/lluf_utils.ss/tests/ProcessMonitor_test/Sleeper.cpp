@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    boost::this_thread::sleep(boost::posix_time::seconds(boost::lexical_cast<int>(argv[1])));
+    boost::this_thread::sleep_for(boost::chrono::seconds(boost::lexical_cast<int>(argv[1])));
     return 0;
 }
 

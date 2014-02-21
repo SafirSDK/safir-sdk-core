@@ -195,7 +195,7 @@ public:
     {
         ++m_timeoutCount;
         const double now = GetUtcTime();
-        boost::this_thread::sleep(boost::posix_time::milliseconds(20));
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(20));
         TimerHandler::Instance().Set(Discard, m_timerInfo, now + 0.01);
     }
 
