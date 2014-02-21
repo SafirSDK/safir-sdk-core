@@ -241,20 +241,6 @@ void Sequencer::ExecuteCurrentAction()
         }
 
         m_actionSender.Send(m_currentAction);
-
-        /*
-        if (m_currentAction->ActionKind() == DoseTest::ActionEnum::CheckReferences ||
-            m_currentAction->ActionKind() == DoseTest::ActionEnum::CloseAndCheckReferences ||
-            m_currentAction->ActionKind() == DoseTest::ActionEnum::RunGarbageCollector)
-        {
-            // These actions will force the garbage collector to be run by the partner (if
-            // the partner is of a GC type) so we wait a while before moving on.
-
-            const unsigned int sleepDuration = 1;
-            std::wcout << "Sleeping " << sleepDuration << " seconds" << std::endl;
-
-            boost::this_thread::sleep(boost::posix_time::seconds(sleepDuration));
-            }*/
     }
 }
 
