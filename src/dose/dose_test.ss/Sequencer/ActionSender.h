@@ -123,14 +123,15 @@ private:
 
     static void Timeout(const int which)
     {
+        //We've been having problems with a boost sleep bug in some versions, so the double check
+        //here is to allow us to see if it happens again.
         boost::timer::cpu_timer doublecheck;
         try
         {
-            //for recent boost versions we use sleep_for instead of sleep
             boost::this_thread::sleep_for(boost::chrono::minutes(10));
 
             std::wcout << "Read from partner " << which << " timed out!" << std::endl;
-            std::wcout << "elapsed time " << doublecheck.elapsed().wall / 1000.0 << " milliseconds" << std::endl;
+            std::wcout << "elapsed time " << doublecheck.elapsed().wall / 1.0e6 << " milliseconds" << std::endl;
             exit(31);
         }
         catch (const boost::thread_interrupted&)
@@ -166,12 +167,14 @@ private:
             std::wcout << "reading failed" << std::endl;
         }
 
+        //We've been having problems with a boost sleep bug in some versions, so the timer
+        //here is to allow us to see if it happens again.
         boost::timer::cpu_timer timer;
         timeout.interrupt();
         timeout.join();
         if (timer.elapsed().wall > 3*60*1000*1000) //3 minutes in nanoseconds
         {
-            std::wcout << "Interrupting the timeout thread took " << timer.elapsed().wall / 1000.0 << " milliseconds!" << std::endl;
+            std::wcout << "Interrupting the timeout thread took " << timer.elapsed().wall / 1.0e6 << " milliseconds!" << std::endl;
             exit(32);
         }
     }
