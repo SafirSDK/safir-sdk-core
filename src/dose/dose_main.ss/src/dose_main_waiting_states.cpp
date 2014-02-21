@@ -80,10 +80,10 @@ namespace Internal
                 //if we didn't have a connection id before
                 theStates.connectionId = senderId;
             }
-            else
+            else if (theStates.connectionId.m_id != -1 && senderId.m_id != -1)
             {
                 ENSURE(theStates.connectionId == senderId, << "WaitingStates::Add does not expect connection id's to change! old "
-                    << theStates.connectionId << ", new " << senderId << ". While processing state " << state.Image());
+                       << theStates.connectionId << ", new " << senderId << ". While processing state " << state.Image());
             }
         }
 

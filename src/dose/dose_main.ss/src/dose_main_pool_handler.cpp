@@ -430,9 +430,6 @@ namespace Internal
                 }
                 else
                 {
-                    //delete states bypass all waitingstates handling and go straight
-                    //into shared memory, and we keep a reference in endstates for a while
-
                     ENSURE(state.GetSenderId().m_id == -1, << "Delete states are expected to have ConnectionId == -1! Delete for "
                            << state.GetEntityId());
 
