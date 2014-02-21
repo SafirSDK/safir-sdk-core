@@ -264,7 +264,8 @@ def windows():
                        "random",
                        "regex",
                        "system",
-                       "thread")
+                       "thread",
+                       "timer")
 
     copy_boost_libs(boost_lib_dir, boost_libraries)
     copy_boost_dlls(boost_lib_dir, boost_libraries)
