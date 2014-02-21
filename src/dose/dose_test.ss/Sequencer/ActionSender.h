@@ -111,14 +111,31 @@ private:
 
     static void ConnectSocket(const SocketPtr& socket, const std::string& address, const short port)
     {
-        std::wcout << "Connecting to " << address.c_str() << ":" << port << std::endl;
-        //Set up address
-        const boost::asio::ip::address addr = 
-            boost::asio::ip::address::from_string(address);
+        int tries = 0;
 
-        const boost::asio::ip::tcp::endpoint endpoint(addr, port);
-        socket->connect(endpoint);
-
+        for(;;)
+        {
+            ++tries;
+            try
+            {
+                std::wcout << "Connecting to " << address.c_str() << ":" << port << std::endl;
+                //Set up address
+                const boost::asio::ip::address addr = 
+                    boost::asio::ip::address::from_string(address);
+                
+                const boost::asio::ip::tcp::endpoint endpoint(addr, port);
+                socket->connect(endpoint);
+                return;
+            }
+            catch (const boost::system::system_error& e)
+            {
+                std::wcout << "Failed to Connect: " << e.what() << std::endl;
+                if (tries > 3)
+                {
+                    throw;
+                }
+            }
+        }
     }
 
     static void Timeout(const int which)
