@@ -160,17 +160,19 @@ private:
     void SendInternal(const Safir::Dob::Typesystem::BinarySerialization& binary,
                       const int which)
     {
+        std::wcout << "Sending action to " << which << std::endl;
         boost::asio::write(*m_sockets[which], boost::asio::buffer(&binary[0], binary.size()));
 
         boost::thread timeout(boost::bind(ActionSender::Timeout, which));
 
         try
         {            
-            //        std::wcout << "Sent action to " << which << ", waiting for ok" << std::endl;
+            std::wcout << "Waiting for reply" << std::endl;
             char reply[3];
             boost::asio::read(*m_sockets[which],
                               boost::asio::buffer(reply, 3));
 
+            std::wcout << "Got reply" << std::endl;
             if (reply != std::string("ok"))
             {
                 std::wcout << "Got unexpected reply: '" << std::wstring(reply,reply+3) << "' from " << which << std::endl;
