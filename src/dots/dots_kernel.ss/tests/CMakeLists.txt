@@ -22,3 +22,7 @@ enable_testing()
 add_test(multiple_init multiple_accesses)
 add_test(multiple_accesses_after_init multiple_accesses sleep)
 add_test(multiple_serialization multiple_serialization)
+
+SET_SAFIR_TEST_PROPERTIES(multiple_init 120)
+SET_SAFIR_TEST_PROPERTIES(multiple_accesses_after_init 120)
+SET_SAFIR_TEST_PROPERTIES(multiple_serialization 120)
