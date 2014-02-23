@@ -83,6 +83,7 @@ public:
 
     void Send(const DoseTest::ActionPtr& msg, const int which)
     {
+        std::wcout << "Send(msg,which) of " << DoseTest::ActionEnum::ToString(msg->ActionKind()) << " to " << which << std::endl;
         Safir::Dob::Typesystem::BinarySerialization binary;
         Safir::Dob::Typesystem::Serialization::ToBinary(msg, binary);
         SendInternal(binary,which);
@@ -95,12 +96,15 @@ public:
         Safir::Dob::Typesystem::Serialization::ToBinary(msg, binary);
         if (msg->Partner().IsNull())
         {
+            std::wcout << "Send(msg) of " << DoseTest::ActionEnum::ToString(msg->ActionKind()) << " to all" << std::endl;
             SendInternal(binary,0);
             SendInternal(binary,1);
             SendInternal(binary,2);
         }
         else
         {
+            std::wcout << "Send(msg) of " << DoseTest::ActionEnum::ToString(msg->ActionKind()) << " to " 
+                       << static_cast<int>(msg->Partner().GetVal().GetRawValue()) << std::endl;
             SendInternal(binary,static_cast<int>(msg->Partner().GetVal().GetRawValue()));
         }
 
