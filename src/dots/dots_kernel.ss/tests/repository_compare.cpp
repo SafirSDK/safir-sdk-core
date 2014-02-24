@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 {
     if (argc!=2)
     {
-        std::cout<<"Wrong number of arguments, no dou path"<<std::endl;
+        std::wcout<<"Wrong number of arguments, no dou path"<<std::endl;
         return 1;
     }
 
@@ -25,6 +25,12 @@ int main(int argc, char* argv[])
 
     std::ostringstream lom;
     boost::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> local=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(path);
+
+    if (local->GetNumberOfClasses() <= 1) //object is predefined
+    {
+        std::wcout << "No classes in that path! Try again!" << std::endl;
+        return 1;
+    }
     Safir::Dob::Typesystem::ToolSupport::RepositoryToString(local.get(), false, lom);
 
     boost::interprocess::shared_memory_object::remove("DOTS_SHM_TEST");
@@ -38,18 +44,18 @@ int main(int argc, char* argv[])
 
     if (som.str()!=lom.str())
     {
-        std::cout<<"=====LOCAL====="<<std::endl;
-        std::cout<<lom.str()<<std::endl;
-        std::cout<<"=====SHM====="<<std::endl;
-        std::cout<<som.str()<<std::endl;
-        std::cout<<"Local repository and shared repository differ!"<<std::endl;
+        std::wcout<<"=====LOCAL====="<<std::endl;
+        std::wcout<<lom.str().c_str()<<std::endl;
+        std::wcout<<"=====SHM====="<<std::endl;
+        std::wcout<<som.str().c_str()<<std::endl;
+        std::wcout<<"Local repository and shared repository differ!"<<std::endl;
 
         return 1;
     }
     else
     {
-        std::cout<<"Local repository and shared repository are identical!"<<std::endl;
-        std::cout<<"Passed!"<<std::endl;
+        std::wcout<<"Local repository and shared repository are identical!"<<std::endl;
+        std::wcout<<"Passed!"<<std::endl;
     }
 
 
