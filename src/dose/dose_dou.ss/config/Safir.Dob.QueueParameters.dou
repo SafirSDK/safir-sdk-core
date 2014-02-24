@@ -7,6 +7,8 @@
       <name>QueueRules</name>
       <type>Safir.Dob.QueueRule</type>
       <arrayElements>
+        <!-- The first array item is the default queue lengths.
+             We match all connections. -->
         <arrayElement>
           <Safir.Dob.QueueRule type="Safir.Dob.QueueRule">
             <MessageInQueueCapacity>10</MessageInQueueCapacity>
