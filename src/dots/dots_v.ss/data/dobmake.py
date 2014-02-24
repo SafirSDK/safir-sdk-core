@@ -289,6 +289,7 @@ buildType = "build"
 default_config="RelWithDebInfo"
 build_java = True
 build_ada = True
+build_dotnet = True
 build_cpp_release = True
 build_cpp_debug = True
 no_gui = False
@@ -307,6 +308,8 @@ def parse_command_line():
                       help="Dont attempt to build Ada code")
     parser.add_option("--no-java", action="store_true",dest="no_java",default=False,
                       help="Dont attempt to build Java code")
+    parser.add_option("--no-dotnet", action="store_true",dest="no_dotnet",default=False,
+                      help="Dont attempt to build C#/.Net code")
     parser.add_option("--no-cpp-debug", action="store_true",dest="no_cpp_debug",default=False,
                       help="Dont attempt to build cpp debug code")      
     parser.add_option("--no-cpp-release", action="store_true",dest="no_cpp_release",default=False,
@@ -356,11 +359,14 @@ def parse_command_line():
 
     global build_java
     global build_ada
+    global build_dotnet
     
     if options.no_ada:
         build_ada = False
     if options.no_java:
         build_java = False
+    if options.no_dotnet:
+        build_dotnet = False
 
     global build_cpp_debug
     global build_cpp_release
@@ -477,8 +483,10 @@ class BuilderBase(object):
 
         run_dots_depends()
 
-        default_builds = ["dotnet",]
+        default_builds = []
         other_builds = []
+        if build_dotnet:
+            default_builds.append("dotnet")
         if build_java:
             default_builds.append("java")
         if build_ada:
