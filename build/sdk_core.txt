@@ -43,7 +43,6 @@ run_test_suite   src/dots/dots_id.ss/tests                 dots_id_tests
 build_dir        src/dots/dots_internal.ss/src             RelWithDebInfo
 run_test_suite   src/dots/dots_internal.ss/tests           dots_internal_test_suite
 build_dir        src/dots/dots_kernel.ss/src               RelWithDebInfo
-run_test_suite   src/dots/dots_kernel.ss/tests             dots_kernel_tests
 build_dir        src/dots/dots_configuration_check.ss/src  RelWithDebInfo
 build_dir        src/dots/dots_schema_validator.ss         RelWithDebInfo
 build_dir        src/dots/dots_cpp.ss/src                  RelWithDebInfo   Debug
@@ -72,6 +71,10 @@ copy_dob_files   src/dope/dope_dou.ss/config               safir_core/config
 
 #run dobmake to build dots_generated dlls/libs
 dobmake
+
+#dots_kernel tests need dou files.
+run_test_suite   src/dots/dots_kernel.ss/tests             dots_kernel_tests
+
 
 build_dir        src/dose/dose_internal.ss/src             RelWithDebInfo   Debug
 run_test_suite   src/dose/dose_internal.ss/tests           dose_internal_tests
