@@ -142,7 +142,10 @@ class TestEnv:
                 polls += 1
 
             if proc.returncode != 0:
-                print(" ", name, "returncode is", proc.returncode)
+                print("--", name, "returncode is", proc.returncode, " -----")
+                print(self.Output(name))
+                print("----------------------------------")
+                
         self.syslog.stop()
         
     def Syslog(self):
