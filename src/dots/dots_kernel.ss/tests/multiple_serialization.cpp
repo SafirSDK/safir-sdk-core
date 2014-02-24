@@ -24,7 +24,7 @@ void access()
     deleter(blob);
 }
 
-int main(int argc, char* argv[])
+int main()
 {
     //read xml
 
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
         {
             break;
         }
-        xml.push_back(c);
+        xml.push_back(static_cast<char>(c));
     }
     xml.push_back(0);
 
