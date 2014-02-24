@@ -1,129 +1,56 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <summary>This is the parametrization of the priority channels used when sending information over the lan.</summary>
-    <name>Safir.Dob.PriorityParameters</name>
-    <baseClass>Safir.Dob.Parametrization</baseClass>
-    <parameters>
-        <parameter>
-            <summary>0 is highest priority and 7 is lowest priority.</summary>
-            <name>Priorities</name>
-            <type>Safir.Dob.Priority</type>
-            <arrayElements>
-                <arrayElement>
-                    <object>
-                        <name>Safir.Dob.Priority</name>
-                        <members>
-                            <member>
-                                <name>PriorityLevel</name>
-                                <value>0</value>
-                            </member>
-                            <member>
-                                <name>Name</name>
-                                <value>High No Ack</value>
-                            </member>
-                            <member>
-                                <name>Acknowledged</name>
-                                <value>false</value>
-                            </member>
-                        </members>
-                    </object>
-                </arrayElement>
-                <arrayElement>
-                    <object>
-                        <name>Safir.Dob.Priority</name>
-                        <members>
-                            <member>
-                                <name>PriorityLevel</name>
-                                <value>1</value>
-                            </member>
-                            <member>
-                                <name>Name</name>
-                                <value>High</value>
-                            </member>
-                            <member>
-                                <name>Acknowledged</name>
-                                <value>true</value>
-                            </member>
-                        </members>
-                    </object>
-                </arrayElement>
-                <arrayElement>
-                    <object>
-                        <name>Safir.Dob.Priority</name>
-                        <members>
-                            <member>
-                                <name>PriorityLevel</name>
-                                <value>2</value>
-                            </member>
-                            <member>
-                                <name>Name</name>
-                                <value>NormalNo Ack</value>
-                            </member>
-                            <member>
-                                <name>Acknowledged</name>
-                                <value>false</value>
-                            </member>
-                        </members>
-                    </object>
-                </arrayElement>
-                <arrayElement>
-                    <object>
-                        <name>Safir.Dob.Priority</name>
-                        <members>
-                            <member>
-                                <name>PriorityLevel</name>
-                                <value>3</value>
-                            </member>
-                            <member>
-                                <name>Name</name>
-                                <value>Normal</value>
-                            </member>
-                            <member>
-                                <name>Acknowledged</name>
-                                <value>true</value>
-                            </member>
-                        </members>
-                    </object>
-                </arrayElement>
-                <arrayElement>
-                    <object>
-                        <name>Safir.Dob.Priority</name>
-                        <members>
-                            <member>
-                                <name>PriorityLevel</name>
-                                <value>4</value>
-                            </member>
-                            <member>
-                                <name>Name</name>
-                                <value>Low No Ack</value>
-                            </member>
-                            <member>
-                                <name>Acknowledged</name>
-                                <value>false</value>
-                            </member>
-                        </members>
-                    </object>
-                </arrayElement>
-                <arrayElement>
-                    <object>
-                        <name>Safir.Dob.Priority</name>
-                        <members>
-                            <member>
-                                <name>PriorityLevel</name>
-                                <value>5</value>
-                            </member>
-                            <member>
-                                <name>Name</name>
-                                <value>Low</value>
-                            </member>
-                            <member>
-                                <name>Acknowledged</name>
-                                <value>True</value>
-                            </member>
-                        </members>
-                    </object>
-                </arrayElement>
-            </arrayElements>
-        </parameter>
-    </parameters>
+<class xmlns="urn:safir-dots-unit">
+  <summary>This is the parametrization of the priority channels used when sending information over the lan.</summary>
+  <name>Safir.Dob.PriorityParameters</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters>
+    <parameter>
+      <summary>0 is highest priority and 7 is lowest priority.</summary>
+      <name>Priorities</name>
+      <type>Safir.Dob.Priority</type>
+      <arrayElements>
+        <arrayElement>
+          <Safir.Dob.Priority type="Safir.Dob.Priority">
+            <PriorityLevel>0</PriorityLevel>
+            <Name>High No Ack</Name>
+            <Acknowledged>false</Acknowledged>
+          </Safir.Dob.Priority>
+        </arrayElement>
+        <arrayElement>
+          <Safir.Dob.Priority type="Safir.Dob.Priority">
+            <PriorityLevel>1</PriorityLevel>
+            <Name>High</Name>
+            <Acknowledged>true</Acknowledged>
+          </Safir.Dob.Priority>
+        </arrayElement>
+        <arrayElement>
+          <Safir.Dob.Priority type="Safir.Dob.Priority">
+            <PriorityLevel>2</PriorityLevel>
+            <Name>NormalNo Ack</Name>
+            <Acknowledged>false</Acknowledged>
+          </Safir.Dob.Priority>
+        </arrayElement>
+        <arrayElement>
+          <Safir.Dob.Priority type="Safir.Dob.Priority">
+            <PriorityLevel>3</PriorityLevel>
+            <Name>Normal</Name>
+            <Acknowledged>true</Acknowledged>
+          </Safir.Dob.Priority>
+        </arrayElement>
+        <arrayElement>
+          <Safir.Dob.Priority type="Safir.Dob.Priority">
+            <PriorityLevel>4</PriorityLevel>
+            <Name>Low No Ack</Name>
+            <Acknowledged>false</Acknowledged>
+          </Safir.Dob.Priority>
+        </arrayElement>
+        <arrayElement>
+          <Safir.Dob.Priority type="Safir.Dob.Priority">
+            <PriorityLevel>5</PriorityLevel>
+            <Name>Low</Name>
+            <Acknowledged>True</Acknowledged>
+          </Safir.Dob.Priority>
+        </arrayElement>
+      </arrayElements>
+    </parameter>
+  </parameters>
 </class>

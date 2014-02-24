@@ -1,45 +1,26 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <summary>Contains the definitions of the aliases for the distribution channel names.</summary>
-    <name>Safir.Dob.DistributionChannelAliases</name>
-    <baseClass>Safir.Dob.Parametrization</baseClass>
-    <parameters>
-        <parameter>
-            <summary>The definitions of the aliases for the priority channel names.</summary>
-            <name>Aliases</name>
-            <type>Safir.Dob.Alias</type>
-            <arrayElements>
-                <arrayElement>
-                    <object>
-                        <name>Safir.Dob.Alias</name>
-                        <members>
-                            <member>
-                                <name>AliasName</name>
-                                <value>Tracks</value>
-                            </member>
-                            <member>
-                                <name>RealName</name>
-                                <value>System</value>
-                            </member>
-                        </members>
-                    </object>
-                </arrayElement>
-                <arrayElement>
-                    <object>
-                        <name>Safir.Dob.Alias</name>
-                        <members>
-                            <member>
-                                <name>AliasName</name>
-                                <value>Foo</value>
-                            </member>
-                            <member>
-                                <name>RealName</name>
-                                <value>Local</value>
-                            </member>
-                        </members>
-                    </object>
-                </arrayElement>
-            </arrayElements>
-        </parameter>
-    </parameters>
+<class xmlns="urn:safir-dots-unit">
+  <summary>Contains the definitions of the aliases for the distribution channel names.</summary>
+  <name>Safir.Dob.DistributionChannelAliases</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters>
+    <parameter>
+      <summary>The definitions of the aliases for the priority channel names.</summary>
+      <name>Aliases</name>
+      <type>Safir.Dob.Alias</type>
+      <arrayElements>
+        <arrayElement>
+          <Safir.Dob.Alias type="Safir.Dob.Alias">
+            <AliasName>Tracks</AliasName>
+            <RealName>System</RealName>
+          </Safir.Dob.Alias>
+        </arrayElement>
+        <arrayElement>
+          <Safir.Dob.Alias type="Safir.Dob.Alias">
+            <AliasName>Foo</AliasName>
+            <RealName>Local</RealName>
+          </Safir.Dob.Alias>
+        </arrayElement>
+      </arrayElements>
+    </parameter>
+  </parameters>
 </class>
