@@ -18,9 +18,9 @@ void access()
     char* blob = NULL;
     DotsC_BytePointerDeleter deleter;
     DotsC_XmlToBlob(blob,deleter,&xml[0]);
-    char xml2[1000000];
+    std::vector<char> xml2(100000);
     DotsC_Int32 resultsize = 0;
-    DotsC_BetterBlobToXml(xml2,blob,1000000,resultsize);
+    DotsC_BetterBlobToXml(&xml2[0],blob,100000,resultsize);
     deleter(blob);
 }
 
@@ -42,7 +42,6 @@ int main()
 
     //let dots_kernel load in peace.
     DotsC_NumberOfTypeIds();
-    boost::this_thread::sleep_for(boost::chrono::seconds(5));
 
     boost::thread_group tg;
     for (int i = 0; i < 50; ++i)

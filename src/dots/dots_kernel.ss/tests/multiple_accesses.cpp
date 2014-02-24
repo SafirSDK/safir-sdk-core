@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
     if (argc == 2 && std::string(argv[1]) == "sleep")
     {
         DotsC_NumberOfTypeIds();
-        boost::this_thread::sleep_for(boost::chrono::seconds(5));
+        boost::this_thread::sleep_for(boost::chrono::seconds(1));
     }
     boost::thread_group tg;
     for (int i = 0; i < 50; ++i)
