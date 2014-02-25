@@ -368,26 +368,16 @@ Parameters can also contain whole Dou-defined objects, not just the basic types.
             <type>Safir.Dob.NodeDefinition</type>
             <arrayElements>
                 <arrayElement>
-                    <object>
-                        <name>Safir.Dob.NodeDefinition</name>
-                        <members> <!-- Node 0 -->
-                            <member>
-                                <name>NodeName</name>
-                                <value>My Server</value>
-                            </member>
-                        </members>
-                    </object>
+                    <!-- Node 0 -->
+                    <Safir.Dob.NodeDefinition type="Safir.Dob.NodeDefinition">
+                        <NodeName>My Server</NodeName>
+                    </Safir.Dob.NodeDefinition>
                 </arrayElement>
                 <arrayElement>
-                    <object>
-                        <name>Safir.Dob.NodeDefinition</name>
-                        <members> <!-- Node 1 -->
-                            <member>
-                                <name>NodeName</name>
-                                <value>My Client</value>
-                            </member>
-                        </members>
-                    </object>
+                    <!-- Node 1 -->
+                    <Safir.Dob.NodeDefinition type="Safir.Dob.NodeDefinition">
+                        <NodeName>My Client</NodeName>
+                    </Safir.Dob.NodeDefinition>
                 </arrayElement>
             </arrayElements>
         </parameter>
@@ -398,7 +388,7 @@ Parameters can also contain whole Dou-defined objects, not just the basic types.
 Each index in the array contains the xml serialization of an instance of the +Safir.Dob.NodeDefinition+ item (which currently only contains one member, the node name).
 Of course this can be done in non-array parameters as well, just leave out all the array stuff.
 
-One interesting feature is that you can put any item that _derives_ from +Safir.Dob.NodeDefinition+ into this array (that is the reason for the redundant specification of the +type+ at the top and the +name+ in the array item).
+One interesting feature is that you can put any item that _derives_ from +Safir.Dob.NodeDefinition+ into this array (that is the reason for the redundant specification of the +type-attribute+ in the objects). The type-attribute could be omitted in this case since the type is the same as the specified base type.
 
 [[environment_parameters]]
 ==== Environment variables in parameters
@@ -440,7 +430,9 @@ Create routines are similar to constructors. The members to be given as paramete
         <values>
             <value>
                 <member>Altitude</member>
-                <parameter>Safir.Geodesy.Position.DummyAltitude</parameter>
+                <parameter>
+                    <name>Safir.Geodesy.Position.DummyAltitude</name>
+                </parameter>
             </value>
         </values>
     </createRoutine>
@@ -465,6 +457,25 @@ Using the +CreatePosition+ method will allow the user to create a two-dimensiona
 The Altitude member will be set to the value specified in the +Safir.Geodesy.Position.DummyAltitude+ member.
 
 The Position class also supplies a create routine for a three-dimensional position, but the two-dimensional one is a better example, since it uses a parameter.
+
+From version 5.0 of Safir SDK Core it is also possible to write member values in place instead of referencing parameters the way it's done above with the Altitude member. The example could then be written like this instead:
+
+.In place altitude value.
+[source,xml]
+----------------------------
+<createRoutines>
+    <createRoutine>
+        ...
+        <values>
+            <value>
+                <member>Altitude</member>
+                <value>0</value> <!-- No need to declare a dummy paramater -->
+            </value>
+        </values>
+    </createRoutine>
+</createRoutines>
+----------------------------
+
 
 === The syntax - putting it all together
 As mentioned above classes are defined by creating an Xml-file called a dou-file. The dou-file describes the class and is used to generate the interface code used by the components to interface the Dob. All dou-files have two mandatory fields that describe the name of the class and its base class. The _name_ field contains both the name of class and the namespace the class is located in, and the _baseClass_ field contains the base class (and its namespace) to inherit from.
@@ -1343,6 +1354,66 @@ There are also methods to explicitly set the change flags, SetChanged(bool) and 
 
 So, what of all this stuff do you need to use? Probably only the IsChanged() method. All the other stuff is mostly used behind the scenes by the Dob to weave its magic. But there may be times that you have to do something like this.
 
+==== Serialization
+All objects of types defined by dou-files can be serialized to XML and JSON format (JSON was introduced in version 5.0). Methods for serialization and deserialization of objects are found in Safir.Dob.Typesystem.Serialization.
+
+===== XML serialization
+Serialized objects are allowed to have a type-attribute specifying the exact type of the object. If the type-attribute is missing, the root-element of the serialized object must be the type, or when the object is a member that is part of another object, the type must exactly match the one specified by the dou-files. In case the type is a subtype of the one specified by the dou-files, the type-attribute is necessary.
+
+When serializing objects to XML, all null-values are omitted to keep serialization result as small and readable as possible. This means that an object with only null-values will only consist of a start- and end-tag, for example: +<Safir.Dob.Position/>+
+
+Serialized strings are by default trimmed and all leading and trailing whitespaces, newlines and tabs are removed. To turn off this behaviour, insert the xml attribute +xml:space="preserve"+
+
+Arrays in serialized objects can optionally have an index-attribute on each array element. This allows for gaps in big sparse arrays. When using the Safir.Dob.Typesystem.Serialization API the index-attribute will always be generated. If index-attribute is missing the array elements are assumed to come in the correct order without gaps. It is not allowed to specify index-attributes for only some of the elments in an array.
+
+.Example
+[source,xml]
+----------------------------
+<Capabilities.TestObj>
+    <MyStringArray> <!-- indices are implicit, 0 and 1 -->
+        <String>  bla bla </String> <!-- will be trimmed to "bla bla" -->
+        <String xml:space="preserve">  bla bla </String> <!-- will not be trimmed, value "  bla bla " -->
+    </MyStringArray>
+    <MyInt32Array> <!-- indices are explicit, all missing will be null -->
+        <Int32 index="1">123</Int32>        
+        <Int32 index="3">456</Int32>        
+    </MyInt32Array>
+    <MyFirstBaseObject> <!-- type expected to comply with dou-file specification -->
+        ...
+    <MyFirstBaseObject>
+    <MySecondBaseObject type="Capabilities.Derived"> <!-- type-attr needed since type is a subtype -->
+        ...
+    <MySecondBaseObject>    
+</Capabilities.TestObj>
+----------------------------
+
+
+===== JSON serialization
+JSON serialized objects must always have an attrubute named "_douType" whos value is the name of the type as it is stated in the dou-file.
+For example +"_douType" : "Safir.Dob.NodeInfo"+. The rest of the attributes will be named exactly as they are in the corresponding dou-file.
+
+Null-values in non-array attributes are always omitted in JSON serialization to benefit small size and readability. For arrays, since there is no explicit index-attribute in JSON, null-values in between two non-null-values must be present to ensure correct indices. However consecutive null-values at the end of an array can and should be omitted.
+
+.Example
+[source,java]
+----------------------------
+{
+    "Capabilities.TestObj" : {
+        "_douType" : "Capabilities.TestObj",
+        "MyStringArray" : ["hello", "world"],
+        "MyInt32Array" : [null, 123, null, 456], //Here might be lots of null values after 456 depending on arraySize.
+        "MyFirstBaseObject" : {
+            "_douType" : "Capabilities.Base",
+            ...
+        }
+        "MySecondBaseObject" : {
+            "_douType" : "Capabilities.Derived",
+            ...
+        }
+    }
+}
+----------------------------
+
 
 
 ==== The reflection interface ^adv^
@@ -1356,6 +1427,12 @@ But here are some hints:
 - Very few of the routines in the reflection interface check for errors. If you call them with incorrect arguments the results are usually undefined. E.g. If you try to get the type of the 4th member of a type that has only 3 members you will probably get an undefined value as the type.
 
 _Use with care!_ or even better: _With great power comes great responsibility!_
+
+=== Porting guidelines
+Safir SDK Core versions prior to 5.0 used a completely different XML serialization format that was a lot more chunky and unconventional. For backward compatibility reasons and to make the threshold moving up to Safir SDK Core 5.0 as smooth as possible, the old format is still supported. That being said, it is still recommended to convert all serialized objects to the new format. It can easily be done using the script _xml_convert.py_. For example this command will recursively convert all dou- and dom-files for you:
++xml_convert.py -d <path_to_douFiles> -o <converted_result_path> -r+
+
+To convert serialized objects that reside in databases etc, it might be easier to write a small program that deserializes your objects and then serializes them back to XML again. Those two steps will generate equivalent XML but in the new format. Actually such tool already exists, please don't hesitate to contact any Safir SDK Core developers for help and information.
 
 == The distribution mechanisms
 
@@ -2637,18 +2714,10 @@ To configure a system to be Standalone (which is the default configuration anywa
 ----------------------------
 <arrayElements>
   <arrayElement>
-    <object>
-      <name>Safir.Dob.DistributionChannel</name>
-      <members>
-        <member>
-          <name>Name</name>
-          <value>System</value>
-        </member>
-         ... IncludedNodes parameter that doesn't fit here ...
-        <member>
-          <name>MulticastAddress</name>
-          <value>127.0.0.1</value>
-        </member>
+    <Safir.Dob.DistributionChannel>
+        <Name>System</Name>
+        ... IncludedNodes parameter that doesn't fit here ...
+        <MulticastAddress>127.0.0.1</MulticastAddress>
 ----------------------------
 
 Once the MulticastAddress is set to 127.0.0.1 all the rest of the network configuration files are ignored.
@@ -2805,40 +2874,32 @@ The QueueRules paramater is an array of +Safir.Dob.QueueRule+ items, each contai
       <arrayElements>
 <!-- The first array item is the default queue lengths.
      It matches all connection names. -->
-        <arrayElement><object><name>Safir.Dob.QueueRule</name>
-            <members>
-              <member><name>MessageInQueueCapacity</name>
-                <value>10</value></member>
-              <member><name>MessageOutQueueCapacity</name>
-                <value>10</value></member>
-              <member><name>RequestInQueueCapacity</name>
-                <value>10</value></member>
-              <member><name>RequestOutQueueCapacity</name>
-                <value>10</value></member>
-            </members>
-        </object></arrayElement>
+        <arrayElement>
+            <Safir.Dob.QueueRule>
+                <MessageInQueueCapacity>10</MessageInQueueCapacity>
+                <MessageOutQueueCapacity>10</MessageOutQueueCapacity>
+                <RequestInQueueCapacity>10</RequestInQueueCapacity>
+                <RequestOutQueueCapacity>10</RequestOutQueueCapacity>
+            </Safir.Dob.QueueRule>
+        </arrayElement>
 <!-- let connections with 'long' in their connection names
      have longer message in queues and request out queues. -->
-        <arrayElement><object><name>Safir.Dob.QueueRule</name>
-            <members>
-              <member><name>ConnectionNameRegex</name>
-                <value>long</value></member>
-              <member><name>MessageInQueueCapacity</name>
-                <value>20</value></member>
-              <member><name>RequestOutQueueCapacity</name>
-                <value>50</value></member>
-            </members>
-        </object></arrayElement>
+        <arrayElement>
+            <Safir.Dob.QueueRule>
+                <ConnectionNameRegex>long</ConnectionNameRegex>
+                <MessageInQueueCapacity>20</MessageInQueueCapacity>
+                <RequestOutQueueCapacity>50</RequestOutQueueCapacity>
+            </Safir.Dob.QueueRule>
+        </arrayElement>
 <!-- let connections with at least one capital letter in 
      their connection name have longer message out queues. -->
-        <arrayElement><object><name>Safir.Dob.QueueRule</name>
-            <members>
-              <member><name>ConnectionNameRegex</name>
-                <value>[A-Z]+</value></member>
-              <member><name>MessageOutQueueCapacity</name>
-                <value>300</value></member>
-            </members>
-        </object></arrayElement>
+        <arrayElement>
+            <Safir.Dob.QueueRule>
+                <ConnectionNameRegex>[A-Z]+</ConnectionNameRegex>
+                <MessageOutQueueCapacity>300</MessageOutQueueCapacity>
+
+            </Safir.Dob.QueueRule>
+        </arrayElement>
       </arrayElements>
   </parameter></parameters>
 </class>
