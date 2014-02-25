@@ -44,7 +44,7 @@
       <Object type="DoseTest.InjectableEntity">
         <Int64Member>777666</Int64Member>
       </Object>
-      <TimestampDelta>10</TimestampDelta>
+      <TimestampDelta>20</TimestampDelta>
     </DoseTest.Action>
     <DoseTest.Action index="2">
       <ActionKind>Sleep</ActionKind>
