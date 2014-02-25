@@ -30,6 +30,7 @@ For most packages below there are build/install instructions for both 32 and 64 
 Visual Studio
 If you're using Visual Studio 2010 Express you will need to install the Windows SDK 7.1 to build 64 bit applications.
 See http://stackoverflow.com/questions/1865069/how-to-compile-a-64-bit-application-using-visual-c-2010-express
+Later versions of Visual Studio Express can build 64bit applications out of the box.
 
 GNAT
 An Ada compiler capable of generating 64 bit binaries is necessary only if you want to build a 64 bit Ada application.

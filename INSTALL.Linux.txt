@@ -16,7 +16,7 @@ Table of contents
 5.2     Centos/RHEL
 
 
-Here are instructions for installing on Centos/RHEL 7.x and Ubuntu 13.10.
+Here are instructions for installing on Centos/RHEL 7.x and Ubuntu 13.10 or later.
 The instructions can be adapted to other versions as well, but these are the ones that we run our tests on currently. Contact us at http://safir.sourceforge.net for more info on compatibility and requirements.
 
 1. Prerequisites
@@ -28,7 +28,7 @@ To install these from the command line "in one go" on distributions based on Ubu
    sudo apt-get install qt5-default mono-devel unixodbc-dev cmake g++ default-jdk doxygen graphviz make python-tk autoconf build-essential subversion gnat libboost-all-dev
 
 1.2. Centos/RHEL
-Safir SDK Core is only compatible with 7.0 or later of Centos/RHEL (unless you install a custom Boost of version 1.50 or later), and at the time of this writing RHEL 7 is in Beta. These instructions have been created while using that beta, so they may not end up being 100% correct with the final product. If in doubt, please contact us at safir.sourceforge.net.
+Safir SDK Core is only compatible with 7.0 or later of Centos/RHEL (unless you install a custom Boost of version 1.50 or later), and at the time of this writing RHEL 7 is in Beta. These instructions have been created while using that beta, so they may not end up being 100% correct with the final product. If in doubt, please contact us at http://safir.sourceforge.net.
 
 #1.2.1. Add EPEL repository
 Mono, the C#/.Net environment for Linux is not part of the default repositories, so you need to add EPEL to your list of repositories. Follow the instructions on http://fedoraproject.org/wiki/EPEL.
@@ -43,7 +43,7 @@ Add "echo ':CLR:M::MZ::/usr/bin/mono:' > /proc/sys/fs/binfmt_misc/register" to t
 
 2. Patch Boost
 
-Some Boost versions have bugs that we need to patch to be able to run correctly.
+Some Boost versions have bugs that we need to patch to be able to run correctly. Our build script attempts to detect whether patches need to be installed, so if you want to you can skip this step until the build script tells you that you need to install patches.
 
 Go into the build/patches directory in the Safir SDK Core source code tree and run "cmake ." followed by a "sudo make install" which will cause the files to be installed into the correct places.
 
