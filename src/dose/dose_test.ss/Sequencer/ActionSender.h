@@ -195,7 +195,7 @@ private:
         boost::timer::cpu_timer timer;
         timeout.interrupt();
         timeout.join();
-        if (timer.elapsed().wall > 3*60*1000*1000) //3 minutes in nanoseconds
+        if (timer.elapsed().wall > 3*60*1e9) //3 minutes in nanoseconds
         {
             std::wcout << "Interrupting the timeout thread took " << timer.elapsed().wall / 1.0e6 << " milliseconds!" << std::endl;
             exit(32);
