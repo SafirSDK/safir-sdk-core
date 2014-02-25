@@ -80,7 +80,7 @@
         <name>DoseTest.InjectableEntity</name>
         <instanceId>654321</instanceId>
       </EntityId>
-      <TimestampDelta>20</TimestampDelta>
+      <TimestampDelta>30</TimestampDelta>
     </DoseTest.Action>
     <DoseTest.Action index="7">
       <ActionKind>Read</ActionKind>

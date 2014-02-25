@@ -23,7 +23,7 @@
       <Object type="DoseTest.InjectableEntity">
         <Int32Member>123</Int32Member>
       </Object>
-      <TimestampDelta>10</TimestampDelta>
+      <TimestampDelta>20</TimestampDelta>
     </DoseTest.Action>
     <DoseTest.Action index="2">
       <ActionKind>InjectChanges</ActionKind>
@@ -34,7 +34,7 @@
       <Object type="DoseTest.InjectableEntity">
         <Int64Member>123456</Int64Member>
       </Object>
-      <TimestampDelta>10</TimestampDelta>
+      <TimestampDelta>30</TimestampDelta>
     </DoseTest.Action>
     <DoseTest.Action index="3">
       <ActionKind>InjectDelete</ActionKind>
@@ -45,7 +45,7 @@
         <name>DoseTest.InjectableEntity</name>
         <instanceId>4545</instanceId>
       </EntityId>
-      <TimestampDelta>10</TimestampDelta>
+      <TimestampDelta>40</TimestampDelta>
     </DoseTest.Action>
   </TestCaseSetupActions>
   <TestActions>
