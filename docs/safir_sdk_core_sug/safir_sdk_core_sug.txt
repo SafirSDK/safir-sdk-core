@@ -3,8 +3,8 @@
 
 Safir SDK Core User's Guide
 ==========================
-Lars Hagström and Anders Widén
-2013-12-02 
+Lars Hagström, Anders Widén and Joel Ottosson
+2014-02-26
 
 // REMEMBER: UPDATE DATE IN safir_sdk_core_sug-docinfo.xml TOO!!!!
 
@@ -412,7 +412,7 @@ Remember that all parameters are loaded 'when the first application that uses pa
 There is also support for _special variable_ expansion using the same syntax as is described in <<special_variables>>. This can be used to specify operating system paths in parameters.
 
 === Create routines 
-Create routines allow the designer of a Dob class to define custom routines for creating _commonly used_ instances of that class.
+Create routines allow the designer of a Dob class to define custom routines for creating commonly used instances of that class.
 
 Create routines are similar to constructors. The members to be given as parameters to the routine, and those to be fetched from parameter definitions are defined. For example: 
 
@@ -1355,53 +1355,54 @@ There are also methods to explicitly set the change flags, SetChanged(bool) and 
 So, what of all this stuff do you need to use? Probably only the IsChanged() method. All the other stuff is mostly used behind the scenes by the Dob to weave its magic. But there may be times that you have to do something like this.
 
 ==== Serialization
-All objects of types defined by dou-files can be serialized to XML and JSON format (JSON was introduced in version 5.0). Methods for serialization and deserialization of objects are found in Safir.Dob.Typesystem.Serialization.
+All objects of types defined by dou files can be serialized to and from XML and JSON format (JSON support was introduced in Safir SDK Core 5.0). Methods for serialization and deserialization of objects are found in Safir.Dob.Typesystem.Serialization.
 
-===== XML serialization
-Serialized objects are allowed to have a type-attribute specifying the exact type of the object. If the type-attribute is missing, the root-element of the serialized object must be the type, or when the object is a member that is part of another object, the type must exactly match the one specified by the dou-files. In case the type is a subtype of the one specified by the dou-files, the type-attribute is necessary.
+*Some notes on the XML serialization:*
 
-When serializing objects to XML, all null-values are omitted to keep serialization result as small and readable as possible. This means that an object with only null-values will only consist of a start- and end-tag, for example: +<Safir.Dob.Position/>+
+ * When serializing objects to XML, all null values are omitted to keep serialization results small and readable. This means that an object with only null values will only consist of a start and end tag, e.g. +<Safir.Dob.Position/>+.
 
-Serialized strings are by default trimmed and all leading and trailing whitespaces, newlines and tabs are removed. To turn off this behaviour, insert the xml attribute +xml:space="preserve"+
+ * Serialized strings are trimmed by default and all leading and trailing whitespaces, newlines and tabs are removed. To change this behaviour, use the xml attribute +xml:space="preserve"+, which will cause the spaces in the string to be preserved.
 
-Arrays in serialized objects can optionally have an index-attribute on each array element. This allows for gaps in big sparse arrays. When using the Safir.Dob.Typesystem.Serialization API the index-attribute will always be generated. If index-attribute is missing the array elements are assumed to come in the correct order without gaps. It is not allowed to specify index-attributes for only some of the elments in an array.
+ * Arrays in serialized objects can optionally have an index attribute on each array element, which makes it possible to have gaps in arrays. If no index attribute is specified the array elements are assumed to be in order with the first index being 0. Indices have to be specified for all or none of the array elements. When using the Safir.Dob.Typesystem.Serialization API the index attribute will always be generated.
 
-.Example
+ * Serialized objects can have a type attribute that specifies the exact type of the object. This is mostly useful when an object member or parameter array element needs to be of a subtype of the type specified in the dou file. E.g. if the type of the member is specified to be +BaseObject+, but you want to put an instance of +DerivedObject+ in that member.
+
+.Example of object serialized to XML
 [source,xml]
 ----------------------------
 <Capabilities.TestObj>
     <MyStringArray> <!-- indices are implicit, 0 and 1 -->
         <String>  bla bla </String> <!-- will be trimmed to "bla bla" -->
-        <String xml:space="preserve">  bla bla </String> <!-- will not be trimmed, value "  bla bla " -->
+        <String xml:space="preserve">  bla bla </String> <!-- will not be trimmed -->
     </MyStringArray>
     <MyInt32Array> <!-- indices are explicit, all missing will be null -->
         <Int32 index="1">123</Int32>        
         <Int32 index="3">456</Int32>        
     </MyInt32Array>
-    <MyFirstBaseObject> <!-- type expected to comply with dou-file specification -->
+    <MyFirstBaseObject> <!-- type expected to comply with dou file specification -->
         ...
     <MyFirstBaseObject>
-    <MySecondBaseObject type="Capabilities.Derived"> <!-- type-attr needed since type is a subtype -->
+    <MySecondBaseObject type="Capabilities.Derived"> <!-- type attr needed since type is a subtype -->
         ...
     <MySecondBaseObject>    
 </Capabilities.TestObj>
 ----------------------------
 
 
-===== JSON serialization
-JSON serialized objects must always have an attrubute named "_douType" whos value is the name of the type as it is stated in the dou-file.
-For example +"_douType" : "Safir.Dob.NodeInfo"+. The rest of the attributes will be named exactly as they are in the corresponding dou-file.
+*Some notes on the JSON serialization:*
 
-Null-values in non-array attributes are always omitted in JSON serialization to benefit small size and readability. For arrays, since there is no explicit index-attribute in JSON, null-values in between two non-null-values must be present to ensure correct indices. However consecutive null-values at the end of an array can and should be omitted.
+* Null values in non-array attributes are always omitted to keep the JSON serialization small and readable. For arrays, since there is no explicit index attribute in JSON, null values in between two non-null values must be present to ensure correct indices. However consecutive null values at the end of an array can and should be omitted.
 
-.Example
+* JSON serialized objects must always have an attribute named "_douType" which specifies the type as it is stated in the dou file. For example +"_douType" : "Safir.Dob.NodeInfo"+. The rest of the attributes will be named exactly as they are in the corresponding dou file.
+
+.Example of object serialized to JSON
 [source,java]
 ----------------------------
 {
     "Capabilities.TestObj" : {
         "_douType" : "Capabilities.TestObj",
         "MyStringArray" : ["hello", "world"],
-        "MyInt32Array" : [null, 123, null, 456], //Here might be lots of null values after 456 depending on arraySize.
+        "MyInt32Array" : [null, 123, null, 456], //array is padded with null values up to array size
         "MyFirstBaseObject" : {
             "_douType" : "Capabilities.Base",
             ...
@@ -1415,6 +1416,15 @@ Null-values in non-array attributes are always omitted in JSON serialization to 
 ----------------------------
 
 
+===== Porting "old" XML to "new" XML
+
+Safir SDK Core versions prior to 5.0 used a different XML serialization format that did not follow any XML best practices. In 5.0 a new XML serialization was introduced, to make it easier to use third party tools to manipulate the XML, and to make it more like "good" XML.
+
+For backward compatibility reasons and to make the transition to 5.0 as smooth as possible, Safir SDK Core can still read the old format, even though it is considered deprecated.
+
+However, it is quite easy to convert old XML to new XML, since Safir SDK Core provides a script, _xml_convert.py_, that does just that. For example +xml_convert.py -d <path_to_douFiles> -o <converted_result_path> -r+ will recursively convert all dou and dom files for you. The script can be found in +$SAFIR_SDK/data/utils+.
+
+To convert serialized objects that reside in databases etc, it might be easier to write a small program that deserializes your objects and then serializes them back to XML again. Those two steps will generate equivalent XML but in the new format. Actually such tool already exists, please don't hesitate to contact any Safir SDK Core developers for help and information.
 
 ==== The reflection interface ^adv^
 The reflection interface can be used to interrogate (and modify) anonymous Objects about their member names, types and values. This is something that not many applications should have to do, and therefore it is not described fully in this document.
@@ -1427,12 +1437,6 @@ But here are some hints:
 - Very few of the routines in the reflection interface check for errors. If you call them with incorrect arguments the results are usually undefined. E.g. If you try to get the type of the 4th member of a type that has only 3 members you will probably get an undefined value as the type.
 
 _Use with care!_ or even better: _With great power comes great responsibility!_
-
-=== Porting guidelines
-Safir SDK Core versions prior to 5.0 used a completely different XML serialization format that was a lot more chunky and unconventional. For backward compatibility reasons and to make the threshold moving up to Safir SDK Core 5.0 as smooth as possible, the old format is still supported. That being said, it is still recommended to convert all serialized objects to the new format. It can easily be done using the script _xml_convert.py_. For example this command will recursively convert all dou- and dom-files for you:
-+xml_convert.py -d <path_to_douFiles> -o <converted_result_path> -r+
-
-To convert serialized objects that reside in databases etc, it might be easier to write a small program that deserializes your objects and then serializes them back to XML again. Those two steps will generate equivalent XML but in the new format. Actually such tool already exists, please don't hesitate to contact any Safir SDK Core developers for help and information.
 
 == The distribution mechanisms
 
