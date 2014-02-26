@@ -83,7 +83,7 @@ public:
 
     void Send(const DoseTest::ActionPtr& msg, const int which)
     {
-        std::wcout << "Send(msg,which) of " << DoseTest::ActionEnum::ToString(msg->ActionKind()) << " to " << which << std::endl;
+        std::wcout << "Send(msg,which) '" << DoseTest::ActionEnum::ToString(msg->ActionKind()) << "' to " << which << std::endl;
         Safir::Dob::Typesystem::BinarySerialization binary;
         Safir::Dob::Typesystem::Serialization::ToBinary(msg, binary);
         SendInternal(binary,which);
@@ -96,7 +96,7 @@ public:
         Safir::Dob::Typesystem::Serialization::ToBinary(msg, binary);
         if (msg->Partner().IsNull())
         {
-            std::wcout << "Send(msg) of " << DoseTest::ActionEnum::ToString(msg->ActionKind()) << " to all" << std::endl;
+            std::wcout << "Send(msg) '" << DoseTest::ActionEnum::ToString(msg->ActionKind()) << "' to all" << std::endl;
             SendInternal(binary,0);
             SendInternal(binary,1);
             SendInternal(binary,2);
@@ -175,14 +175,44 @@ private:
         try
         {            
             std::wcout << "Waiting for reply" << std::endl;
-            char reply[3];
-            boost::asio::read(*m_sockets[which],
-                              boost::asio::buffer(reply, 3));
+            std::vector<char> reply;
+            while(reply.size() < 3)
+            {
+                char buf[3];
+                boost::system::error_code ec;
+                const size_t received = m_sockets[which]->receive(boost::asio::buffer(buf, 3),
+                                                                  0,
+                                                                  ec);
+                if (received == 0)
+                {
+                    std::wcout << "Received 0 bytes! ERROR!" << std::endl;
+                    std::wcout << "error_code = " << ec << std::endl;
+                    exit(33);
+                }
+
+                if (!!ec)
+                {
+                    std::wcout << "Got an error_code = " << ec << std::endl;
+                    exit(34);
+                }
+
+
+                std::wcout << "Received ";
+                        
+                for (size_t i = 0; i < received; ++i)
+                {
+                    std::wcout << static_cast<int>(buf[i]) << " ";
+                    reply.push_back(buf[i]);
+                }
+
+                std::wcout << std::endl;
+                
+            }
 
             std::wcout << "Got reply" << std::endl;
-            if (reply != std::string("ok"))
+            if (&reply[0] != std::string("ok"))
             {
-                std::wcout << "Got unexpected reply: '" << std::wstring(reply,reply+3) << "' from " << which << std::endl;
+                std::wcout << "Got unexpected reply: '" << std::wstring(reply.begin(),reply.end()) << "' from " << which << std::endl;
                 timeout.interrupt();
                 timeout.join();
                 throw std::logic_error("Got unexpected reply!");
