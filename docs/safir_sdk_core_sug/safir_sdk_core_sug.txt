@@ -104,7 +104,7 @@ Obviously it is possible to combine all these platforms into one system and use 
 
 An application should, written correctly using Boost and Safir SDK Core, be portable to all the supported platforms with no or very little effort.
 
-The compilers that we use for building and testing for the C++ code are GNU gcc (version 4.4 or later), Microsoft Visual Studio (2010 SP1 or later). For C# code we use Visual Studio (2010 SP1 or later) or Mono (version 2.4 or later). Any Java 6 compiler should be able to compile the Java code (we've used Oracles's and OpenJDK), and for Ada we use Adacore's GNAT GNAT GPL (2013). We strive to make all our code standars compliant, so other versions and compilers _should_ work.
+The compilers that we use for building and testing for the C++ code are GNU gcc (version 4.7 or later), Microsoft Visual Studio (2010 SP1 or later). For C# code we use Visual Studio (2010 SP1 or later) or Mono (version 2.4 or later). Any Java 6 compiler should be able to compile the Java code (we've used Oracles's and OpenJDK), and for Ada we use Adacore's GNAT GNAT GPL (2013). We strive to make all our code standards compliant, so other versions and compilers _should_ work.
 
 There is more information about platform support on the http://sourceforge.net/p/safir/wiki/[safir.sourceforge.net wiki].
 
