@@ -73,7 +73,7 @@ namespace ToolSupport
             boost::shared_ptr<Descr> val(new Descr);
             val->fileName=currentPath;
             val->name=pt.get<std::string>(elementName);
-            val->typeId=DotsId_Generate64(val->name.c_str());
+            val->typeId=LlufId_Generate64(val->name.c_str());
             if (!ValidName(val->name))
             {
                 throw ParseError("Invalid name", elementName + std::string(" name '")+val->name+std::string(" is invalid. Must start with an alphabetic char and then only contain alpha-numeric chars"), val->fileName, 1);
@@ -697,7 +697,7 @@ namespace ToolSupport
                 {
                     //not a basic type, we have to check later if its an enum or class type, for now we assume class
                     def->memberType=ObjectMemberType;
-                    def->typeId=DotsId_Generate64(def->typeName.c_str());
+                    def->typeId=LlufId_Generate64(def->typeName.c_str());
                 }
             }
             catch (const boost::property_tree::ptree_error&)
@@ -986,7 +986,7 @@ namespace ToolSupport
                 SerializationUtils::Trim(*typeAttr);
                 //if type has an explicit type-attribute, check type compliance
                 typeName=*typeAttr;
-                DotsC_TypeId tid=DotsId_Generate64(typeName.c_str());
+                DotsC_TypeId tid=LlufId_Generate64(typeName.c_str());
                 if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), ObjectMemberType, tid, ObjectMemberType, param->GetTypeId()))
                 {
                     std::ostringstream os;
@@ -1535,7 +1535,7 @@ namespace ToolSupport
             {
                 std::string className=pt.get<std::string>(Elements::MappedClass::Name());
                 SerializationUtils::Trim(className);
-                DotsC_TypeId classTypeId=DotsId_Generate64(className.c_str());
+                DotsC_TypeId classTypeId=LlufId_Generate64(className.c_str());
                 def->class_=state.repository->GetClassBasic(classTypeId);
                 if (!def->class_)
                 {
@@ -1552,7 +1552,7 @@ namespace ToolSupport
             {
                 std::string propName=pt.get<std::string>(Elements::MappedProperty::Name());
                 SerializationUtils::Trim(propName);
-                DotsC_TypeId propTypeId=DotsId_Generate64(propName.c_str());
+                DotsC_TypeId propTypeId=LlufId_Generate64(propName.c_str());
                 def->property=state.repository->GetPropertyBasic(propTypeId);
                 if (!def->property)
                 {

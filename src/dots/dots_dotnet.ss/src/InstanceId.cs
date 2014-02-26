@@ -39,7 +39,7 @@ namespace Safir.Dob.Typesystem
         /// <returns>Random instance id.</returns>
         public static InstanceId GenerateRandom()
         {
-            return new InstanceId(Internal.Id.DotsId_GenerateRandom64());
+            return new InstanceId(Internal.Id.LlufId_GenerateRandom64());
         }
 
         /// <summary>

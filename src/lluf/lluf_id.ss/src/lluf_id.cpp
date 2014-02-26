@@ -22,11 +22,12 @@
 *
 ******************************************************************************/
 
-#include <Safir/Dob/Typesystem/Internal/Id.h>
+#include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include "md5.h"
 #include <boost/limits.hpp>
 #include <boost/thread/once.hpp>
+#include <boost/thread/locks.hpp>
 #include <boost/bind.hpp>
 #include <ctime>
 #include <string.h>
@@ -42,7 +43,6 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/random/ranlux.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/thread/locks.hpp>
 
 //and enable the warnings again
 #if defined _MSC_VER
@@ -50,7 +50,7 @@
 #endif
 
 
-boost::int64_t DotsId_Generate64(const char* str)
+boost::int64_t LlufId_Generate64(const char* str)
 {
     md5_state_s md5;
     md5_init(&md5);
@@ -163,7 +163,7 @@ private:
 boost::once_flag RandomGenerator::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
 
-boost::int64_t DotsId_GenerateRandom64()
+boost::int64_t LlufId_GenerateRandom64()
 {
     return RandomGenerator::Instance().Generate();
 }

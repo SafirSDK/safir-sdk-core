@@ -22,8 +22,8 @@
 *
 ******************************************************************************/
 
+#include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
-#include <Safir/Dob/Typesystem/Internal/Id.h>
 
 #ifdef __GNUC__
 #pragma GCC visibility push (default)
@@ -1549,7 +1549,7 @@ jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetEnumerationCheck
 jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GenerateRandom64
   (JNIEnv *, jclass)
 {
-    return DotsId_GenerateRandom64();
+    return LlufId_GenerateRandom64();
 }
 
 /*
@@ -1560,7 +1560,7 @@ jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GenerateRandom64
 jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Generate64
   (JNIEnv * env, jclass, jstring _str)
 {
-    return DotsId_Generate64(GetUtf8(env,_str).get());
+    return LlufId_Generate64(GetUtf8(env,_str).get());
 }
 
 

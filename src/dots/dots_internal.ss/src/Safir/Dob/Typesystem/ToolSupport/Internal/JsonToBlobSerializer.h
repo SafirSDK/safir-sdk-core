@@ -37,7 +37,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
-#include <Safir/Dob/Typesystem/Internal/Id.h>
+#include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobLayoutImpl.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/SerializationUtils.h>
@@ -91,7 +91,7 @@ namespace Internal
 
         void SerializeObjectContent(const std::string& typeName, std::vector<char>& blob, const boost::property_tree::ptree& members) const
         {
-            const DotsC_TypeId typeId=DotsId_Generate64(typeName.c_str());
+            const DotsC_TypeId typeId=LlufId_Generate64(typeName.c_str());
             const ClassDescriptionType* cd=m_repository->GetClass(typeId);
             if (!cd)
             {
@@ -295,7 +295,7 @@ namespace Internal
                     throw ParseError("JsonToBinary serialization error", os.str(), "", 161);
                 }
 
-                const ClassDescriptionType* cd=m_repository->GetClass(DotsId_Generate64(xsiType->c_str()));
+                const ClassDescriptionType* cd=m_repository->GetClass(LlufId_Generate64(xsiType->c_str()));
                 if (!cd)
                 {
                     std::ostringstream os;
@@ -313,7 +313,7 @@ namespace Internal
                 SerializeObjectContent(*xsiType, insideBlob, memberContent);
                 CreateSpaceForDynamicMember(blob, beginningOfUnused, insideBlob.size());
                 char* writeObj=beginningOfUnused;
-                m_blobLayout.CreateObjectMember(&blob[0], static_cast<Size>(insideBlob.size()), DotsId_Generate64(xsiType->c_str()), memIx, arrIx, false, beginningOfUnused);
+                m_blobLayout.CreateObjectMember(&blob[0], static_cast<Size>(insideBlob.size()), LlufId_Generate64(xsiType->c_str()), memIx, arrIx, false, beginningOfUnused);
                 beginningOfUnused=writeObj+insideBlob.size(); //This is a hack. BlobLayout is not moving beginningOfUnused by the blobSize but instead only by the initialSize. Has to do with genated code.
                 memcpy(writeObj, &insideBlob[0], insideBlob.size());
                 m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
@@ -422,7 +422,7 @@ namespace Internal
             }
             catch (const boost::bad_lexical_cast&)
             {
-                tid=DotsId_Generate64(str.c_str());
+                tid=LlufId_Generate64(str.c_str());
             }
             return tid;
         }
@@ -436,7 +436,7 @@ namespace Internal
             }
             catch (const boost::bad_lexical_cast&)
             {
-                result.first=DotsId_Generate64(str.c_str());
+                result.first=LlufId_Generate64(str.c_str());
                 result.second=str.c_str();
             }
             return result;

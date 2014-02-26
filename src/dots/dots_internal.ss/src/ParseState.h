@@ -27,7 +27,7 @@
 #include <iostream>
 #include <boost/noncopyable.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include <Safir/Dob/Typesystem/Internal/Id.h>
+#include <Safir/Utilities/Internal/Id.h>
 #include "RepositoryBasic.h"
 
 namespace Safir

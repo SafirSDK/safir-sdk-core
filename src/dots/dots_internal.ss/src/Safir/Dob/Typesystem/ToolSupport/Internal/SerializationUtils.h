@@ -126,7 +126,7 @@ namespace SerializationUtils
         }
         catch (const boost::bad_lexical_cast&)
         {
-            tid=DotsId_Generate64(str.c_str());
+            tid=LlufId_Generate64(str.c_str());
         }
         return tid;
     }
@@ -140,7 +140,7 @@ namespace SerializationUtils
         }
         catch (const boost::bad_lexical_cast&)
         {
-            result.first=DotsId_Generate64(str.c_str());
+            result.first=LlufId_Generate64(str.c_str());
             result.second=str.c_str();
         }
         return result;
@@ -279,7 +279,7 @@ namespace SerializationUtils
 
         case EntityIdMemberType:
         {
-            static const DotsC_TypeId EntityTypeId=DotsId_Generate64("Safir.Dob.Entity");
+            static const DotsC_TypeId EntityTypeId=LlufId_Generate64("Safir.Dob.Entity");
 
             boost::optional<std::string> typeIdString=memberContent.get_optional<std::string>("name");
             boost::optional<std::string> instanceIdString=memberContent.get_optional<std::string>("instanceId");

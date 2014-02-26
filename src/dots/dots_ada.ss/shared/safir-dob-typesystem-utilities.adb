@@ -244,7 +244,7 @@ package body Safir.Dob.Typesystem.Utilities is
    function Generate_64_Bit_Hash (Id : in Unbounded_Wide_String) return Int_64 is
       use Interfaces.C;
       function Internal (Name : in char_array) return Int_64;
-      pragma Import (C, Internal, "DotsId_Generate64");
+      pragma Import (C, Internal, "LlufId_Generate64");
    begin
       return Internal (To_C (To_Utf_8 (Id)));
    end Generate_64_Bit_Hash;
@@ -253,7 +253,7 @@ package body Safir.Dob.Typesystem.Utilities is
    is
       use Interfaces.C;
       function Internal (Name : in char_array) return Int_64;
-      pragma Import (C, Internal, "DotsId_Generate64");
+      pragma Import (C, Internal, "LlufId_Generate64");
    begin
       return Internal (To_C (Id));
    end Generate_64_Bit_Hash;

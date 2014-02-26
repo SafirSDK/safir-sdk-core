@@ -32,7 +32,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
-#include <Safir/Dob/Typesystem/Internal/Id.h>
+#include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobLayoutImpl.h>
@@ -107,7 +107,7 @@ namespace Internal
                                     std::vector<char>& blob,
                                     boost::property_tree::ptree& members) const
         {
-            DotsC_TypeId typeId=DotsId_Generate64(typeName.c_str());
+            DotsC_TypeId typeId=LlufId_Generate64(typeName.c_str());
             const ClassDescriptionType* cd=m_repository->GetClass(typeId);
             if (!cd)
             {
@@ -248,7 +248,7 @@ namespace Internal
                 if (xsiType)
                 {
                     SerializationUtils::Trim(*xsiType);
-                    cd=m_repository->GetClass(DotsId_Generate64(xsiType->c_str()));
+                    cd=m_repository->GetClass(LlufId_Generate64(xsiType->c_str()));
                     if (!cd)
                     {
                         std::ostringstream os;

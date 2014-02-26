@@ -19,7 +19,7 @@ ADD_LIBRARY(dots_internal SHARED ${sources} ${headers})
 FIND_PACKAGE(Boost COMPONENTS regex filesystem)
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dots_internal dots_id lluf_utils  ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(dots_internal lluf_id lluf_utils  ${Boost_LIBRARIES})
 endif()
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include

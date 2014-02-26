@@ -54,7 +54,7 @@ namespace TypeUtilities
 
     inline DotsC_TypeId CalculateTypeId(const std::string& name)
     {
-        return DotsId_Generate64(name.c_str());
+        return LlufId_Generate64(name.c_str());
     }
 
     /**
@@ -205,7 +205,7 @@ namespace TypeUtilities
             }
 
             std::string className=parameterName.substr(0, pos);
-            const ClassDescriptionType* cd=rep->GetClass(DotsId_Generate64(className.c_str()));
+            const ClassDescriptionType* cd=rep->GetClass(CalculateTypeId(className));
             if (!cd)
             {
                 return NULL;

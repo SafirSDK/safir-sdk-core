@@ -32,7 +32,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
-#include <Safir/Dob/Typesystem/Internal/Id.h>
+#include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobLayoutImpl.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/SerializationUtils.h>
@@ -95,7 +95,7 @@ namespace Internal
             }
 
             SerializationUtils::Trim(*typeName);
-            DotsC_TypeId typeId=DotsId_Generate64(typeName->c_str());
+            DotsC_TypeId typeId=LlufId_Generate64(typeName->c_str());
             const ClassDescriptionType* cd=m_repository->GetClass(typeId);
             if (!cd)
             {

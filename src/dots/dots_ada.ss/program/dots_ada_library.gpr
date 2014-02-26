@@ -1,6 +1,6 @@
 with "safir_defaults";
 with "logging_ada";
-with "dots_id";
+with "lluf_id";
 with "dots_kernel";
 
 project Dots_Ada_Library is

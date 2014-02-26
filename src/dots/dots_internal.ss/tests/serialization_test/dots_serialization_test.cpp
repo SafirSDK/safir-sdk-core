@@ -12,7 +12,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
 #include <Safir/Dob/Typesystem/ToolSupport/BlobLayout.h>
-#include <Safir/Dob/Typesystem/Internal/Id.h>
+#include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 
 using namespace Safir::Dob::Typesystem::ToolSupport;

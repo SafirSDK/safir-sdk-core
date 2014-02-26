@@ -24,7 +24,6 @@
 
 #include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
-#include <Safir/Dob/Typesystem/Internal/Id.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>

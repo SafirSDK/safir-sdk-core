@@ -25,6 +25,7 @@
 #include <Safir/Dob/Internal/Connection.h>
 
 #include "Signals.h"
+#include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/Service.h>
 #include <Safir/Dob/Message.h>
@@ -36,7 +37,6 @@
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Dob/ThisNodeParameters.h>
-#include <Safir/Dob/Typesystem/Internal/Id.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
@@ -65,7 +65,7 @@ namespace Internal
 
     Identifier Connection::CalculateIdentifier(const std::string & name)
     {
-        return DotsId_Generate64(name.c_str());
+        return LlufId_Generate64(name.c_str());
     }
 
     Connection::Connection(const std::string & name,

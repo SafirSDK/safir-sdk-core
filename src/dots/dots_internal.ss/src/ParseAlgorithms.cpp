@@ -199,7 +199,7 @@ namespace ToolSupport
             {
                 result.stringVal=val;
                 size_t sep=val.find(", ");
-                result.int64Val=DotsId_Generate64(val.substr(0, sep).c_str());
+                result.int64Val=LlufId_Generate64(val.substr(0, sep).c_str());
                 result.stringVal=val.substr(sep+2);
                 try
                 {
@@ -208,13 +208,13 @@ namespace ToolSupport
                 }
                 catch(const boost::bad_lexical_cast&)
                 {
-                    result.hashedVal=DotsId_Generate64(result.stringVal.c_str());
+                    result.hashedVal=LlufId_Generate64(result.stringVal.c_str());
                 }
             }
                 break;
             case TypeIdMemberType:
             {
-                result.int64Val=DotsId_Generate64(val.c_str());
+                result.int64Val=LlufId_Generate64(val.c_str());
                 result.stringVal=val;
             }
                 break;
@@ -229,7 +229,7 @@ namespace ToolSupport
                 }
                 catch(const boost::bad_lexical_cast&)
                 {
-                    result.hashedVal=DotsId_Generate64(val.c_str());
+                    result.hashedVal=LlufId_Generate64(val.c_str());
                     result.stringVal=val;
                 }
             }
@@ -371,7 +371,7 @@ namespace ToolSupport
         }
         else
         {
-            DotsC_TypeId baseId=DotsId_Generate64(d->baseClass.c_str());
+            DotsC_TypeId baseId=LlufId_Generate64(d->baseClass.c_str());
             Descr* basePtr=GetPtr(m, baseId);
             if (!basePtr)
             {
@@ -400,7 +400,7 @@ namespace ToolSupport
             //that the type actually is an enum, in that case we also have to change the memberType to EnumerationMemberType
             if ((*memberIt)->memberType==ObjectMemberType)
             {
-                boost::int64_t id=DotsId_Generate64((*memberIt)->typeName.c_str());
+                boost::int64_t id=LlufId_Generate64((*memberIt)->typeName.c_str());
                 const ClassDescription* cd=repository->GetClass(id);
                 if (cd)
                 {
@@ -441,7 +441,7 @@ namespace ToolSupport
         //Add predefined types
         ClassDescriptionBasicPtr obj(new ClassDescriptionBasic);
         obj->name=BasicTypeOperations::PredefindedClassNames::ObjectName();
-        obj->typeId=DotsId_Generate64(obj->name.c_str());
+        obj->typeId=LlufId_Generate64(obj->name.c_str());
         obj->base=NULL;
         obj->ownSize=OFFSET_HEADER_LENGTH;
         obj->initialSize=OFFSET_HEADER_LENGTH;
@@ -449,54 +449,54 @@ namespace ToolSupport
 
         ExceptionDescriptionBasicPtr exceptionBase(new ExceptionDescriptionBasic);
         exceptionBase->name=BasicTypeOperations::PredefindedClassNames::ExceptionName();
-        exceptionBase->typeId=DotsId_Generate64(exceptionBase->name.c_str());
+        exceptionBase->typeId=LlufId_Generate64(exceptionBase->name.c_str());
         exceptionBase->base=NULL;
         m_result->InsertException(exceptionBase);
 
         ExceptionDescriptionBasicPtr fundamentalException(new ExceptionDescriptionBasic);
         fundamentalException->name=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
-        fundamentalException->typeId=DotsId_Generate64(fundamentalException->name.c_str());
+        fundamentalException->typeId=LlufId_Generate64(fundamentalException->name.c_str());
         fundamentalException->base=NULL;
         m_result->InsertException(fundamentalException);
 
         ExceptionDescriptionBasicPtr nullException(new ExceptionDescriptionBasic);
         nullException->name=BasicTypeOperations::PredefindedClassNames::NullExceptionName();
-        nullException->typeId=DotsId_Generate64(nullException->name.c_str());
+        nullException->typeId=LlufId_Generate64(nullException->name.c_str());
         nullException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         nullException->base=fundamentalException.get();
         m_result->InsertException(nullException);
 
         ExceptionDescriptionBasicPtr incompatibleTypesException(new ExceptionDescriptionBasic);
         incompatibleTypesException->name=BasicTypeOperations::PredefindedClassNames::IncompatibleTypesExceptionName();
-        incompatibleTypesException->typeId=DotsId_Generate64(incompatibleTypesException->name.c_str());
+        incompatibleTypesException->typeId=LlufId_Generate64(incompatibleTypesException->name.c_str());
         incompatibleTypesException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         incompatibleTypesException->base=fundamentalException.get();
         m_result->InsertException(incompatibleTypesException);
 
         ExceptionDescriptionBasicPtr readOnlyException(new ExceptionDescriptionBasic);
         readOnlyException->name=BasicTypeOperations::PredefindedClassNames::ReadOnlyExceptionName();
-        readOnlyException->typeId=DotsId_Generate64(readOnlyException->name.c_str());
+        readOnlyException->typeId=LlufId_Generate64(readOnlyException->name.c_str());
         readOnlyException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         readOnlyException->base=fundamentalException.get();
         m_result->InsertException(readOnlyException);
 
         ExceptionDescriptionBasicPtr illegalValueException(new ExceptionDescriptionBasic);
         illegalValueException->name=BasicTypeOperations::PredefindedClassNames::IllegalValueExceptionName();
-        illegalValueException->typeId=DotsId_Generate64(illegalValueException->name.c_str());
+        illegalValueException->typeId=LlufId_Generate64(illegalValueException->name.c_str());
         illegalValueException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         illegalValueException->base=fundamentalException.get();
         m_result->InsertException(illegalValueException);
 
         ExceptionDescriptionBasicPtr softwareViolationException(new ExceptionDescriptionBasic);
         softwareViolationException->name=BasicTypeOperations::PredefindedClassNames::SoftwareViolationExceptionName();
-        softwareViolationException->typeId=DotsId_Generate64(softwareViolationException->name.c_str());
+        softwareViolationException->typeId=LlufId_Generate64(softwareViolationException->name.c_str());
         softwareViolationException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         softwareViolationException->base=fundamentalException.get();
         m_result->InsertException(softwareViolationException);
 
         ExceptionDescriptionBasicPtr configurationErrorException(new ExceptionDescriptionBasic);
         configurationErrorException->name=BasicTypeOperations::PredefindedClassNames::ConfigurationErrorExceptionName();
-        configurationErrorException->typeId=DotsId_Generate64(configurationErrorException->name.c_str());
+        configurationErrorException->typeId=LlufId_Generate64(configurationErrorException->name.c_str());
         configurationErrorException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         configurationErrorException->base=fundamentalException.get();
         m_result->InsertException(configurationErrorException);
@@ -606,7 +606,7 @@ namespace ToolSupport
                         SerializationUtils::Trim(*typeAttr);
                         //if type has an explicit type-attribute, check type compliance
                         typeName=*typeAttr;
-                        DotsC_TypeId tid=DotsId_Generate64(typeName.c_str());
+                        DotsC_TypeId tid=LlufId_Generate64(typeName.c_str());
                         if (!BasicTypeOperations::IsOfType<TypeRepository>(m_result.get(), ObjectMemberType, tid, ObjectMemberType, param->GetTypeId()))
                         {
                             std::ostringstream os;
@@ -994,13 +994,13 @@ namespace ToolSupport
             {
                 ss<<"."<<*valIt;
             }
-            ed->checksum=DotsId_Generate64(ss.str().c_str());
+            ed->checksum=LlufId_Generate64(ss.str().c_str());
         }
     }
 
     void RepositoryCompletionAlgorithms::VerifyParameterTypes()
     {
-        static const DotsC_TypeId EntityTypeId=DotsId_Generate64("Safir.Dob.Entity");
+        static const DotsC_TypeId EntityTypeId=LlufId_Generate64("Safir.Dob.Entity");
 
         //loop through all parameters and verify all TypeId, EntityId, and Enum
         for (boost::unordered_map<std::string, ParameterDescriptionBasic*>::iterator parIt=m_result->m_parameters.begin();
@@ -1050,7 +1050,7 @@ namespace ToolSupport
             else if (pd->GetMemberType()==EnumerationMemberType)
             {
                 //Verify that enum parameter values are valid according to the specified enum type.
-                pd->typeId=DotsId_Generate64(pd->typeName.c_str());
+                pd->typeId=LlufId_Generate64(pd->typeName.c_str());
                 const EnumDescription* ed=m_result->GetEnum(pd->typeId);
                 if (!ed)
                 {

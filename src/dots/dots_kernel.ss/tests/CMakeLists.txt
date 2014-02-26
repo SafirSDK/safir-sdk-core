@@ -14,7 +14,7 @@ add_executable(repository_compare repository_compare.cpp
 IF (NOT MSVC)
   TARGET_LINK_LIBRARIES(multiple_accesses dots_kernel ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(multiple_serialization dots_kernel ${Boost_LIBRARIES})
-  TARGET_LINK_LIBRARIES(repository_compare dots_id lluf_utils dots_internal ${Boost_LIBRARIES} rt)
+  TARGET_LINK_LIBRARIES(repository_compare lluf_id lluf_utils dots_internal ${Boost_LIBRARIES} rt)
 ENDIF()
 
 enable_testing()

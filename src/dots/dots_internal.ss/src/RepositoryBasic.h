@@ -216,7 +216,7 @@ namespace ToolSupport
             if (!val.stringVal.empty() && val.hashedVal==0)
             {
                 //This is most likely a reference to a plain string, and if it's not this won't break anything anyway
-                boost::int64_t hash=DotsId_Generate64(val.stringVal.c_str());
+                boost::int64_t hash=LlufId_Generate64(val.stringVal.c_str());
                 return std::make_pair(hash, val.stringVal.c_str());
             }
             return std::make_pair(val.hashedVal, val.stringVal.empty() ? NULL : val.stringVal.c_str());

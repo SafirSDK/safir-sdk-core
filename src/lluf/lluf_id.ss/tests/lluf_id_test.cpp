@@ -22,23 +22,23 @@
 *
 ******************************************************************************/
 
-#include <Safir/Dob/Typesystem/Internal/Id.h>
+#include <Safir/Utilities/Internal/Id.h>
 #include <set>
 #include <iostream>
 #include <iomanip>
 int main()
 {
     bool result =
-        DotsId_Generate64("Object") == 5955188366590963785LL &&
-        DotsId_Generate64("Safir.Dob.Typesystem.Exception") == -2177307456017217044LL &&
-        DotsId_Generate64("Safir.Dob.Typesystem.FundamentalException") == 6297553511903368764LL &&
-        DotsId_Generate64("Safir.Dob.Typesystem.SoftwareViolationException") == -2318636033853590373LL;
+        LlufId_Generate64("Object") == 5955188366590963785LL &&
+        LlufId_Generate64("Safir.Dob.Typesystem.Exception") == -2177307456017217044LL &&
+        LlufId_Generate64("Safir.Dob.Typesystem.FundamentalException") == 6297553511903368764LL &&
+        LlufId_Generate64("Safir.Dob.Typesystem.SoftwareViolationException") == -2318636033853590373LL;
 
     std::set<boost::int64_t> numbers;
     boost::int64_t ored = 0;
     for (int i = 0; i < 100000; ++i)
     {
-        const boost::int64_t num = DotsId_GenerateRandom64();
+        const boost::int64_t num = LlufId_GenerateRandom64();
 
         //std::wcout.fill('0');
         //std::wcout << "0x" << std::setw(16) << std::hex << num << std::endl;

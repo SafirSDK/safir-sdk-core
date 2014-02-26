@@ -21,20 +21,20 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef _dots_id_h
-#define _dots_id_h
+
+#ifndef _lluf_id_h
+#define _lluf_id_h
 
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
-#ifdef dots_id_EXPORTS
-#  define DOTS_ID_API SAFIR_HELPER_DLL_EXPORT
+#ifdef lluf_id_EXPORTS
+#  define LLUF_ID_API SAFIR_HELPER_DLL_EXPORT
 #else
-#  define DOTS_ID_API SAFIR_HELPER_DLL_IMPORT
-#  define SAFIR_LIBRARY_NAME "dots_id"
-#  define SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#  define LLUF_ID_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "lluf_id"
 #  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
-#define DOTS_ID_LOCAL SAFIR_HELPER_DLL_LOCAL
+#define LLUF_ID_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 #include <boost/cstdint.hpp>
 
@@ -46,14 +46,14 @@ extern "C"
      * @param str The string to hash.
      * @return A 64 bit hash.
      */
-    DOTS_ID_API boost::int64_t DotsId_Generate64(const char* str);
+    LLUF_ID_API boost::int64_t LlufId_Generate64(const char* str);
 
     /**
      * Generates a 64 bits long integer randomly.
      *
      * @return A 64 bit hash.
      */
-    DOTS_ID_API boost::int64_t DotsId_GenerateRandom64();
+    LLUF_ID_API boost::int64_t LlufId_GenerateRandom64();
 }
 
 #endif
