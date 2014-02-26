@@ -810,7 +810,7 @@ namespace dose_test_dotnet
                 // Get the socket that handles the client request.
                 Socket listener = (Socket)ar.AsyncState;
                 m_socket = listener.EndAccept(ar);
-
+                m_socket.NoDelay = true;
                 // Signal the main thread to continue.
                 allDone.Set();
 

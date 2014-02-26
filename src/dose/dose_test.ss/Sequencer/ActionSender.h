@@ -129,6 +129,9 @@ private:
                 
                 const boost::asio::ip::tcp::endpoint endpoint(addr, port);
                 socket->connect(endpoint);
+                boost::asio::ip::tcp::no_delay option(true);
+                socket->set_option(option);
+
                 return;
             }
             catch (const boost::system::system_error& e)
