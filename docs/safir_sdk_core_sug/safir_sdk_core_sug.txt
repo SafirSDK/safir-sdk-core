@@ -320,6 +320,9 @@ This defines a parameter MyParameter that is a 32 bit integer of value 25.
 
 It is recommended to keep most parameters in pure parameter classes, suffixed Parameters, that inherit from Safir.Dob.Parametrization. These classes should not contain any members. The reason for this is to make it easier to know where parameters can be found. The Dob does not enforce this recommendation in any way.
 
+String members are normally trimmed, i.e. leading and trailing whitespace is removed. This behaviour can be changed by using the attribute +xml:space="preserve"+.
+
+Parameter values can contain CDATA sections and use character references to specify characters by their numeric codes, e.g. +&amp;#89;+.
 
 ==== Parameter arrays
 A parameter can also be an array of values, as shown below, where an array of string parameters are defined with two values.
@@ -368,15 +371,20 @@ Parameters can also contain whole Dou-defined objects, not just the basic types.
             <type>Safir.Dob.NodeDefinition</type>
             <arrayElements>
                 <arrayElement>
-                    <!-- Node 0 -->
-                    <Safir.Dob.NodeDefinition type="Safir.Dob.NodeDefinition">
+                    <Safir.Dob.NodeDefinition>
                         <NodeName>My Server</NodeName>
                     </Safir.Dob.NodeDefinition>
                 </arrayElement>
                 <arrayElement>
-                    <!-- Node 1 -->
-                    <Safir.Dob.NodeDefinition type="Safir.Dob.NodeDefinition">
+                    <Safir.Dob.NodeDefinition>
                         <NodeName>My Client</NodeName>
+                    </Safir.Dob.NodeDefinition>
+                </arrayElement>
+                <arrayElement>
+                    <Safir.Dob.NodeDefinition type="Safir.Dob.NodeDefinitionSubtype">
+                        <!-- type attribute is needed since we're inserting derived type -->
+                        <NodeName>My Special Client</NodeName>
+                        <AnotherValue>5</AnotherValue>
                     </Safir.Dob.NodeDefinition>
                 </arrayElement>
             </arrayElements>
@@ -388,7 +396,7 @@ Parameters can also contain whole Dou-defined objects, not just the basic types.
 Each index in the array contains the xml serialization of an instance of the +Safir.Dob.NodeDefinition+ item (which currently only contains one member, the node name).
 Of course this can be done in non-array parameters as well, just leave out all the array stuff.
 
-One interesting feature is that you can put any item that _derives_ from +Safir.Dob.NodeDefinition+ into this array (that is the reason for the redundant specification of the +type-attribute+ in the objects). The type-attribute could be omitted in this case since the type is the same as the specified base type.
+One interesting feature is that you can put any item that _derives_ from +Safir.Dob.NodeDefinition+ into this array (that is the reason for the redundant specification of the +type+ attribute in the objects). The type attribute is only needed when you want to put an instance of a derived type into the member or array element, otherwise it is redundant.
 
 [[environment_parameters]]
 ==== Environment variables in parameters
