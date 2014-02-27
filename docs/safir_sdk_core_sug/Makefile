@@ -18,7 +18,6 @@ vpath %.dia images
 %.png: %.dia
 	dia --export=$@ -t png-libart $<
 
-#not used, but useful when we make dia images into eps for the pdf
 %.eps: %.dia
 	dia --export=$@ -t eps $<
 
