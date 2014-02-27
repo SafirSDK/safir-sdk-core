@@ -728,7 +728,13 @@ So an A object (myA) could look like in <<example_object>>.
 
 [[example_object]]
 .Example object
-image::images/rc_example_object.png["Example object", width="50%"]
+ifdef::backend-docbook[]
+image::example_object.eps["Example object", scaledwidth="30%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::example_object.png["Example object", link="example_object.png"]
+endif::backend-docbook[]
+
 
 ==== Syntax in the different languages
 The design approach is that the generated code should make use of the language's own features in the best possible way. Languages that support operator overloading should use them if it makes the interface ``better'', and languages that support properties should use them. This makes each language interface ``as good as it can possibly be'', but it has one obvious side effect, i.e. the interfaces are _not identical_.

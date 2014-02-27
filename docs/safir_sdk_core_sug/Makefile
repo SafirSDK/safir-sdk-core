@@ -1,7 +1,7 @@
 .SILENT:
 .PHONY: all clean default
 
-DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wildcard images/*.png) Makefile block-diagram.eps block-diagram.png safir_sdk_core_sug-docinfo.xml
+DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wildcard images/*.png) Makefile block_diagram.eps block_diagram.png example_object.png example_object.eps safir_sdk_core_sug-docinfo.xml
 
 default: all
 
@@ -31,4 +31,4 @@ safir_sdk_core_sug.html: $(DEPS)
 	asciidoc -d book -a toc -a toclevels=4 -a numbered safir_sdk_core_sug.txt
 
 clean:
-	rm -rf *~ *.pdf *.html *.fo *.png
+	rm -rf *~ *.pdf *.html *.fo *.png *.eps
