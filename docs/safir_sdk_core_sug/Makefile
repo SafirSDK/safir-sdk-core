@@ -1,18 +1,18 @@
 .SILENT:
-.PHONY: all clean
+.PHONY: all clean default
 
 DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wildcard images/*.png) Makefile block-diagram.png safir_sdk_core_sug-docinfo.xml
 
-default: safir_sdk_core_sug.pdf
+default: all
 
 help:
 	echo "Some available targets:"
-	echo "   default                 - build pdf"
-	echo "   all                     - build pdf, htmls and compressed archives"
-	echo "   safir_sdk_core_sug.html - build single page html" 
+	echo "   default                 - build pdf and html"
+	echo "   safir_sdk_core_sug.html - build html" 
+	echo "   safir_sdk_core_sug.pdf -  build pdf" 
 	echo " Check the Makefile for other targets"
 
-all: archives #will build other stuff due to deps
+all: safir_sdk_core_sug.pdf safir_sdk_core_sug.html
 
 vpath %.dia images
 %.png: %.dia
@@ -23,47 +23,13 @@ vpath %.dia images
 #	dia --export=$@ -t eps $<
 
 
-archives: safir_sdk_core_sug.pdf.zip \
-	 safir_sdk_core_sug.pdf.bz2 \
-	 safir_sdk_core_sug.single_html.zip \
-	 safir_sdk_core_sug.single_html.tar.bz2 \
-	 safir_sdk_core_sug.chunked_html.zip \
-	 safir_sdk_core_sug.chunked_html.tar.bz2
-
 safir_sdk_core_sug.pdf: $(DEPS)
 	echo "Building pdf"
 	a2x -L -f pdf -d book -a docinfo --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" --dblatex-opts "-P latex.output.revhistory=0" safir_sdk_core_sug.txt 
-
-safir_sdk_core_sug.pdf.zip: safir_sdk_core_sug.pdf
-	zip safir_sdk_core_sug.pdf.zip safir_sdk_core_sug.pdf
-
-safir_sdk_core_sug.pdf.bz2: safir_sdk_core_sug.pdf
-	bzip2 -9 -fk safir_sdk_core_sug.pdf
-
-safir_sdk_core_sug.chunked/index.html: $(DEPS)
-	echo "Building chunked html"
-	a2x -L -f chunked -d book safir_sdk_core_sug.txt
-	-mkdir -p safir_sdk_core_sug.chunked/images
-	-cp -f images/*.png safir_sdk_core_sug.chunked/images/
-	-cp -f *.png safir_sdk_core_sug.chunked/
-
-safir_sdk_core_sug.chunked_html.zip: safir_sdk_core_sug.chunked/index.html
-	zip -r safir_sdk_core_sug.chunked_html.zip safir_sdk_core_sug.chunked
-
-safir_sdk_core_sug.chunked_html.tar.bz2: safir_sdk_core_sug.chunked/index.html
-	tar cvfj safir_sdk_core_sug.chunked_html.tar.bz2 safir_sdk_core_sug.chunked/
-
 
 safir_sdk_core_sug.html: $(DEPS)
 	echo "Building html"
 	asciidoc -d book -a toc -a toclevels=4 -a numbered safir_sdk_core_sug.txt
 
-safir_sdk_core_sug.single_html.zip: safir_sdk_core_sug.html 
-	zip safir_sdk_core_sug.single_html.zip safir_sdk_core_sug.html
-	find . -name "*.png" -print | zip safir_sdk_core_sug.single_html.zip -@
-
-safir_sdk_core_sug.single_html.tar.bz2: safir_sdk_core_sug.html 
-	tar cfvj safir_sdk_core_sug.single_html.tar.bz2 safir_sdk_core_sug.html images/*.png *.png
-
 clean:
-	rm -rf *~ *.pdf *.html *.fo safir_sdk_core_sug.chunked *.zip *.bz2 *.png
+	rm -rf *~ *.pdf *.html *.fo *.png
