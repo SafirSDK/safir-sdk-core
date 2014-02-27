@@ -703,7 +703,7 @@ All this means that any changes to parameter files under +$(SAFIR_RUNTIME}/data/
 
 .Note
 ************************************
-In the current version of Safir SDK Core (4.5.1), the dobmake.py script is not aware of the _typesystem.ini_ configuration (see <<typesystem_ini>>, so dou and dom files will always be copied to +$(SAFIR_RUNTIME}/data/text/dots/classes+ regardless of the contents of that configuration file.
+In the current version of Safir SDK Core (5.0), the dobmake.py script is not aware of the _typesystem.ini_ configuration (see <<typesystem_ini>>, so dou and dom files will always be copied to +$(SAFIR_RUNTIME}/data/text/dots/classes+ regardless of the contents of that configuration file.
 
 So, to keep the "expected" behaviour, don't change the Default section in typesystem.ini from pointing to +$(SAFIR_RUNTIME}/data/text/dots/classes+.
 ************************************
