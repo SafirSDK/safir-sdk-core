@@ -37,6 +37,7 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/DistributionChannelParameters.h>
+#include <Safir/Logging/Log.h>
 #include <boost/thread.hpp>
 #include <boost/timer/timer.hpp>
 #include <iostream>
@@ -154,6 +155,8 @@ private:
         {
             boost::this_thread::sleep_for(boost::chrono::minutes(10));
 
+            Safir::Logging::SendSystemLog(Safir::Logging::Emergency,
+                                          L"Test partner read timed out!");
             std::wcout << "Read from partner " << which << " timed out!" << std::endl;
             std::wcout << "elapsed time " << doublecheck.elapsed().wall / 1.0e6 << " milliseconds" << std::endl;
             exit(31);
@@ -230,6 +233,9 @@ private:
         timeout.join();
         if (timer.elapsed().wall > 3*60*1e9) //3 minutes in nanoseconds
         {
+            Safir::Logging::SendSystemLog(Safir::Logging::Emergency,
+                                          L"Interrupt of timeout thread was _very_ slow");
+
             std::wcout << "Interrupting the timeout thread took " << timer.elapsed().wall / 1.0e6 << " milliseconds!" << std::endl;
             exit(32);
         }
