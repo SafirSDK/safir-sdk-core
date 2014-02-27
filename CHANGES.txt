@@ -1,4 +1,32 @@
 -----------------------------------------------------------------------------------------------------------------------
+2014-02-28 version 5.0
+-----------------------------------------------------------------------------------------------------------------------
+
+This release introduces the following changes:
+
+* Rewrite of the parser and serializer in Typesystem (Dots):
+ - New public parser interface that can be used for building tools that need to understand the xml.
+ - More robust parsing - detects a lot of errors that previously would cause random failures.
+ - More language features now actually work - previously some constructions caused dots_kernel to give up.
+ - New and better XML object serialization - much more terse and also easier for 3rd party tools to understand.
+ - Backwards compatible - still understands old XML serialized objects.
+ - Provides a script that translates from old to new XML syntax.
+ - Add support for character references (e.g. &#12;) and CDATA for parameters.
+ - JSON object serialization.
+ - No longer depends on the Expat XML parser, instead uses Boost Property Tree. This means that Expat is no longer a 
+   dependency for Safir SDK Core.
+
+* Visibility set correctly on GCC, as described in http://gcc.gnu.org/wiki/Visibility. Makes it possible to build 
+  stuff on top of Safir SDK Core with c++11 enabled, even if the SDK is built with it disabled.
+
+* Internal changes and cleanups.
+
+* Some bug fixes, among which the most notable ones are (see http://safir.sourceforge.net for details):
+
+#128    Incorrect triggering of Ensure in WaitingStates::Add
+#126    Bad performance when injecting entities
+
+-----------------------------------------------------------------------------------------------------------------------
 2013-12-19 version 4.5.4:
 -----------------------------------------------------------------------------------------------------------------------
 
