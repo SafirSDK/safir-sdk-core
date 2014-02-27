@@ -1,7 +1,7 @@
 .SILENT:
 .PHONY: all clean default
 
-DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wildcard images/*.png) Makefile block-diagram.png safir_sdk_core_sug-docinfo.xml
+DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wildcard images/*.png) Makefile block-diagram.eps block-diagram.png safir_sdk_core_sug-docinfo.xml
 
 default: all
 
@@ -19,8 +19,8 @@ vpath %.dia images
 	dia --export=$@ -t png-libart $<
 
 #not used, but useful when we make dia images into eps for the pdf
-#%.eps: %.dia
-#	dia --export=$@ -t eps $<
+%.eps: %.dia
+	dia --export=$@ -t eps $<
 
 
 safir_sdk_core_sug.pdf: $(DEPS)
