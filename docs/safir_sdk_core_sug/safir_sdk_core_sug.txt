@@ -3352,7 +3352,13 @@ Applications that own the entities must make sure that no _orphans_ are left beh
 
 [[orphan_example]]
 .Entities that may cause orphans.
-image::images/orphan_object.png["Entities that may cause orphans", width="50%"]
+ifdef::backend-docbook[]
+image::orphan_object.eps["Entities that may cause orphans", scaledwidth="40%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::orphan_object.png["Entities that may cause orphans", link="orphan_object.png"]
+endif::backend-docbook[]
+
 
 For applications that use the entities that contain associations you need to be aware that the Dob does not guarantee the order in which entities are delivered to subscribers, and that while you're handling a subscription an associated entity may be removed, before you've managed to Read it.
 
