@@ -3671,6 +3671,16 @@ image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", width="
 .Dobexplorer showing node statuses.
 image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", width="50%", link="images/dobexplorer_nodes.png"]
 
+=== dots_configuration_check
++dots_configuration_check+ is a command line tool that can be used to quickly validate any set of dou-files without having to run dobmake. It can also be used to look into the typesystem and retrieve information like:
+
+* Is the typesystem already loaded by another application.
+* Get type name that belongs to a specific typeId or vice versa.
+* Get parameter values.
+* Make a complete textual output of the loaded typesystem.
+
+By typing "+dots_configuration_check --help+" all available options are displayed.
+
 [[olib]]
 == C++ ODBC database wrapper
 ////
