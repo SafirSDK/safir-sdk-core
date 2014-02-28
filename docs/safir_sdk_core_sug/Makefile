@@ -1,7 +1,12 @@
 .SILENT:
 .PHONY: all clean default
 
-DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt $(wildcard images/*.png) Makefile block_diagram.eps block_diagram.png example_object.png example_object.eps orphan_object.eps orphan_object.png safir_sdk_core_sug-docinfo.xml
+DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt \
+		$(wildcard images/*.png) \
+		$(patsubst %.dia,%.eps,$(wildcard images/*.dia)) \
+		$(patsubst %.dia,%.png,$(wildcard images/*.dia)) \
+	    safir_sdk_core_sug-docinfo.xml \
+		Makefile
 
 default: all
 

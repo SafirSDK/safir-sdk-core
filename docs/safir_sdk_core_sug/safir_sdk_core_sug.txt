@@ -77,10 +77,10 @@ Component dependencies and the layered architecture of Safir SDK Core is illustr
 [[sdk_core_component_dependencies]]
 .Safir SDK Core component dependencies
 ifdef::backend-docbook[]
-image::block_diagram.eps["Component Dependencies", scaledwidth="60%"]
+image::images/block_diagram.eps["Component Dependencies", scaledwidth="60%"]
 endif::backend-docbook[]
 ifndef::backend-docbook[]
-image::block_diagram.png["Component Dependencies", link="block_diagram.png"]
+image::images/block_diagram.png["Component Dependencies", link="images/block_diagram.png"]
 endif::backend-docbook[]
 
 Again, to be able to use Safir SDK Core you do not need to understand or like these acronyms, but knowing that they are there may make some things in the SDK easier to use.
@@ -729,10 +729,10 @@ So an A object (myA) could look like in <<example_object>>.
 [[example_object]]
 .Example object
 ifdef::backend-docbook[]
-image::example_object.eps["Example object", scaledwidth="30%"]
+image::images/example_object.eps["Example object", scaledwidth="30%"]
 endif::backend-docbook[]
 ifndef::backend-docbook[]
-image::example_object.png["Example object", link="example_object.png"]
+image::images/example_object.png["Example object", link="images/example_object.png"]
 endif::backend-docbook[]
 
 
@@ -3353,10 +3353,10 @@ Applications that own the entities must make sure that no _orphans_ are left beh
 [[orphan_example]]
 .Entities that may cause orphans.
 ifdef::backend-docbook[]
-image::orphan_object.eps["Entities that may cause orphans", scaledwidth="40%"]
+image::images/orphan_object.eps["Entities that may cause orphans", scaledwidth="40%"]
 endif::backend-docbook[]
 ifndef::backend-docbook[]
-image::orphan_object.png["Entities that may cause orphans", link="orphan_object.png"]
+image::images/orphan_object.png["Entities that may cause orphans", link="images/orphan_object.png"]
 endif::backend-docbook[]
 
 
