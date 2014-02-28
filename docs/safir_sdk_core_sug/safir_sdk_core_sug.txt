@@ -77,10 +77,10 @@ Component dependencies and the layered architecture of Safir SDK Core is illustr
 [[sdk_core_component_dependencies]]
 .Safir SDK Core component dependencies
 ifdef::backend-docbook[]
-image::block_diagram.eps["Component Dependencies", scaledwidth="60%"]
+image::images/block_diagram.eps["Component Dependencies", scaledwidth="60%"]
 endif::backend-docbook[]
 ifndef::backend-docbook[]
-image::block_diagram.png["Component Dependencies", link="block_diagram.png"]
+image::images/block_diagram.png["Component Dependencies", link="images/block_diagram.png"]
 endif::backend-docbook[]
 
 Again, to be able to use Safir SDK Core you do not need to understand or like these acronyms, but knowing that they are there may make some things in the SDK easier to use.
@@ -729,10 +729,10 @@ So an A object (myA) could look like in <<example_object>>.
 [[example_object]]
 .Example object
 ifdef::backend-docbook[]
-image::example_object.eps["Example object", scaledwidth="30%"]
+image::images/example_object.eps["Example object", scaledwidth="30%"]
 endif::backend-docbook[]
 ifndef::backend-docbook[]
-image::example_object.png["Example object", link="example_object.png"]
+image::images/example_object.png["Example object", link="images/example_object.png"]
 endif::backend-docbook[]
 
 
@@ -3352,7 +3352,13 @@ Applications that own the entities must make sure that no _orphans_ are left beh
 
 [[orphan_example]]
 .Entities that may cause orphans.
-image::images/orphan_object.png["Entities that may cause orphans", width="50%"]
+ifdef::backend-docbook[]
+image::images/orphan_object.eps["Entities that may cause orphans", scaledwidth="40%"]
+endif::backend-docbook[]
+ifndef::backend-docbook[]
+image::images/orphan_object.png["Entities that may cause orphans", link="images/orphan_object.png"]
+endif::backend-docbook[]
+
 
 For applications that use the entities that contain associations you need to be aware that the Dob does not guarantee the order in which entities are delivered to subscribers, and that while you're handling a subscription an associated entity may be removed, before you've managed to Read it.
 
@@ -3664,6 +3670,16 @@ image::images/dobexplorer_memory.png["Dobexplorer showing memory usage", width="
 [[dobexplorer_nodes]]
 .Dobexplorer showing node statuses.
 image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", width="50%", link="images/dobexplorer_nodes.png"]
+
+=== dots_configuration_check
++dots_configuration_check+ is a command line tool that can be used to quickly validate any set of dou-files without having to run dobmake. It can also be used to look into the typesystem and retrieve information like:
+
+* Is the typesystem already loaded by another application.
+* Get type name that belongs to a specific typeId or vice versa.
+* Get parameter values.
+* Make a complete textual output of the loaded typesystem.
+
+By typing "+dots_configuration_check --help+" all available options are displayed.
 
 [[olib]]
 == C++ ODBC database wrapper
