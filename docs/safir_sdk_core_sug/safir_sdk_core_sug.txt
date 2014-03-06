@@ -2673,6 +2673,9 @@ _typesystem.ini_ is a little bit more involved, so let's start with an example:
 
 .Example typesystem.ini
 ------------------------------------------
+;Number of megabytes of shared memory that will be allocated by dots kernel.
+dots_shared_memory_size=10
+
 [Default]
 dou_directory=$(SAFIR_RUNTIME)/data/text/dots/classes
 
@@ -2686,6 +2689,8 @@ dou_directory=/path/to/yet/another/directory
 _typesystem.ini_ can contain any number of _sections_ (with arbitrary names), each specifying one directory where dou/dom files will be loaded from. If a file is found in multiple places, the _last one_ found will be the one used. For example, this can be used to override parameters or string or array lengths without having to change the files that are in SAFIR_RUNTIME, and for keeping project-specific changes separate from the Safir SDK Core defaults.
 
 In the above example there are three sections, one specifying the default place to look for dou/dom files, and two places to look for override files. If, for example, the Override directory contains a Safir.Dob.NodeParameters.dou file (which is also in the Default directory, by default) the file from the Override directory will be used.
+
+The parameter _dots_shared_memory_size_ specifies the size of shared memory allocated for the typesystem. The default value is big enough for most systems, but if the typesystem contains a very large number of types it may be necessary to increase this value.
 
 [[special_variables]]
 ==== Environment and special variable expansion
