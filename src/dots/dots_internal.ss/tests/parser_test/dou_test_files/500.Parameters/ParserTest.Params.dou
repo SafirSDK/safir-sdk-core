@@ -14,6 +14,14 @@
         </parameter>
         
         <parameter>
+            <name>ObjParam1</name>
+            <type>ParserTest.MyEntity</type>
+            <ParserTest.MyEntity>
+                <Int32Arr/>
+            </ParserTest.MyEntity>
+        </parameter>
+        
+        <parameter>
             <name>ObjParam2</name>
             <type>ParserTest.MyEntity</type>
             <ParserTest.MyEntity>

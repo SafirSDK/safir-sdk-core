@@ -158,7 +158,8 @@ namespace Internal
                     //array, then the inner propertyTree contains array element and the array elements contains the content
                     //i.e <myIntArray><Int32 index=0>1</Int32><Int32 index=5>2</Int32></myIntArray>
                     int arrayIndex=0;
-                    bool usesIndexAttr=memIt->second.begin()->second.get_optional<int>("<xmlattr>.index") ? true : false;
+                    bool usesIndexAttr=(!memIt->second.empty() && memIt->second.begin()->second.get_optional<int>("<xmlattr>.index")) ? true : false;
+
                     for (boost::property_tree::ptree::iterator arrIt=memIt->second.begin(); arrIt!=memIt->second.end(); ++arrIt)
                     {
                         boost::optional<int> index=arrIt->second.get_optional<int>("<xmlattr>.index");
