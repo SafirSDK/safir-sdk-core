@@ -119,8 +119,12 @@ def indent(elem, level=0):
             elem.tail = i
 
 def convert_array(src, dest, member_name):
-    member_element=ET.SubElement(dest, member_name)
     array_elements=src.find(ns('arrayElements'))
+    if array_elements.find(ns('arrayElement'))==None:
+        #empty array
+        return
+        
+    member_element=ET.SubElement(dest, member_name)
     index=0
     for arr_el in array_elements.findall(ns('arrayElement')):
         index_el=arr_el.find(ns('index'))
@@ -129,7 +133,6 @@ def convert_array(src, dest, member_name):
         convert_member_item(arr_el, member_element, '')
         member_element[-1].attrib['index']=str(index)
         index=index+1
-    pass
 
 def convert_member_item(src, dest, member_name):    
     """ convert a member or array item """
@@ -253,8 +256,8 @@ def convert_file(file_path, out_dir):
         #save new file tree.write
         output('Converted file: '+file_path)
         indent(root)
-        new_file=os.path.join(out_dir, os.path.basename(file_path))        
-        tree.write(new_file, 'utf-8')        
+        new_file=os.path.join(out_dir, os.path.basename(file_path))
+        tree.write(new_file, encoding='utf-8', xml_declaration=True, default_namespace=None, method='xml')
         number_of_converted=number_of_converted+1
     else:
         output('No changes to: '+file_path)
@@ -279,6 +282,7 @@ def convert_dir(path, out_dir):
 def main(argv):
     """Main program"""
     parse_commandline(argv)
+    ET.register_namespace('xsi', 'http://www.w3.org/2001/XMLSchema-instance')
     if convert_mode=="file":
         convert_file(input_path, output_dir)
     else:
