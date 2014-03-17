@@ -359,9 +359,9 @@ namespace Internal
     }
 
     //returns the time to the next timeout in milliseconds
-    const boost::posix_time::time_duration TimerHandler::NextTimeout() const
+    const boost::chrono::microseconds TimerHandler::NextTimeout() const
     {
-        using namespace boost::posix_time;
+        using namespace boost::chrono;
 
         if(m_timerQueue.empty())
         {
@@ -385,12 +385,12 @@ namespace Internal
 
     void TimerHandler::ScheduleTimer()
     {
-        if (m_deadlineTimer != NULL)
+        if (m_steadyTimer != NULL)
         {
-            m_deadlineTimer->cancel();
+            m_steadyTimer->cancel();
         }
-        m_deadlineTimer.reset(new boost::asio::deadline_timer(m_ioService,NextTimeout()));
-        m_deadlineTimer->async_wait(boost::bind(&TimerHandler::HandleTimeout,this,_1));
+        m_steadyTimer.reset(new boost::asio::steady_timer(m_ioService,NextTimeout()));
+        m_steadyTimer->async_wait(boost::bind(&TimerHandler::HandleTimeout,this,_1));
     }
 
     void TimerHandler::HandleTimeout(const boost::system::error_code & error)

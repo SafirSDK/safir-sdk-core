@@ -25,11 +25,11 @@
 #ifndef __DOSE_MAIN_TIMERS_H__
 #define __DOSE_MAIN_TIMERS_H__
 
-
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <set>
 #include <boost/noncopyable.hpp>
 #include <vector>
@@ -160,7 +160,7 @@ namespace Internal
     private:
 
         //returns the time to the next timeout (relative time)
-        const boost::posix_time::time_duration NextTimeout() const;
+        const boost::chrono::microseconds NextTimeout() const;
 
         void HandleTimeout(const boost::system::error_code & error);
 
@@ -180,7 +180,7 @@ namespace Internal
         TimeoutHandlerTable m_timeoutHandlerTable;
         
         boost::asio::io_service & m_ioService;
-        boost::scoped_ptr<boost::asio::deadline_timer> m_deadlineTimer;
+        boost::scoped_ptr<boost::asio::steady_timer> m_steadyTimer;
 
         static TimerHandler* m_instance;
     };
