@@ -85,7 +85,7 @@ namespace Internal
             ConnectionId connectionId;
             Dob::Typesystem::TypeId typeId;
             Dob::Typesystem::HandlerId handlerId;
-            double nextRequestTime;
+            boost::chrono::steady_clock::time_point nextRequestTime;
             unsigned int nbrOfSentRequests;
             LamportTimestamp lastRequestTimestamp;
             std::bitset<NUM_NODES> acceptedNodes;

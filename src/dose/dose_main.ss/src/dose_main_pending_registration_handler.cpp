@@ -195,7 +195,7 @@ namespace Internal
 
         ENSURE (findIt != m_pendingRegistrations.end(), << "PendingRegistrationHandler::SendRequest: Request id not found!");
 
-        const Safir::Dob::Typesystem::Si64::Second now = GetUtcTime();
+        const boost::chrono::steady_clock::time_point now = boost::chrono::steady_clock::now();
 
         TimerInfoPtr timerInfo(new ResendPendingTimerInfo(m_timerId,requestId));
 
@@ -221,12 +221,15 @@ namespace Internal
             {
                 // Set the first timeout to now + 1.0, the second to now + 1.5, and so on. This is to handle
                 // any node that for some reason is permanently slow.
-                findIt->second.nextRequestTime = now + 1.0 + findIt->second.nbrOfSentRequests * 0.5;
+                findIt->second.nextRequestTime = boost::chrono::steady_clock::now() + 
+                    boost::chrono::milliseconds(1000 + findIt->second.nbrOfSentRequests * 500);
+
                 ++findIt->second.nbrOfSentRequests;
             }
             else
             {
-                findIt->second.nextRequestTime = now + 0.01;
+                findIt->second.nextRequestTime = boost::chrono::steady_clock::now() + 
+                    boost::chrono::milliseconds(10);
             }
 
             TimerHandler::Instance().Set(Discard,

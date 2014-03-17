@@ -156,16 +156,16 @@ namespace Safir
             if (result)
             {
                 //successful send, wait for responses for 100ms
-                TimerHandler::Instance().Set(Discard,
-                    timerInfo,
-                    GetUtcTime() + 0.1); //time out in 100 milliseconds*/
+                TimerHandler::Instance().SetRelative(Discard,
+                                                     timerInfo,
+                                                     0.1); //time out in 100 milliseconds*/
             }
             else
             {
                 //failed to send (dosecom overflow), retry in 10ms
-                TimerHandler::Instance().Set(Discard,
-                    timerInfo,
-                    GetUtcTime() + 0.01); //time out in 10 milliseconds*/
+                TimerHandler::Instance().SetRelative(Discard,
+                                                     timerInfo,
+                                                     0.01); //time out in 10 milliseconds*/
             }
         }
 
