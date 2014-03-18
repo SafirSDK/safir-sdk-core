@@ -340,6 +340,7 @@ namespace Internal
 
         //Get header info
         inline Size GetSize(const char * const blob) const {return Read<BlobHeader>(blob).size;}
+        inline void SetSize(char* const blob, Size size) const {return Write<Size>(blob+OFFSET_SIZE, size);}
         inline DotsC_TypeId GetTypeId(const char * const blob) const {return Read<BlobHeader>(blob).typeId;}
 
         MemberStatus GetStatus(const char * const blob,

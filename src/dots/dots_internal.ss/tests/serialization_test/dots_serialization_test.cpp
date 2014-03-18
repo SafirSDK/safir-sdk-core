@@ -41,6 +41,20 @@ bool RunTestFromXml(const TypeRepository* repository, const std::string& fileNam
 void RunTestFromJson(const TypeRepository* repository, const std::string& fileName);
 void PrintTestFailMessage(const std::string& result, const std::string& shortInfo, const std::string& description, const std::string& file);
 
+void CheckBlobSize(const std::vector<char>& blob)
+{
+    DotsC_Int32 size=*reinterpret_cast<const DotsC_Int32*>(&blob[0]);
+
+    if (static_cast<size_t>(size)!=blob.size())
+    {
+        std::cout<<"Wrong blob size. BlobSize="<<size<<", blobVector.size()="<<blob.size()<<std::endl;
+        exit(1);
+    }
+
+    std::cout<<"blob size="<<blob.size()<<", capacity="<<blob.capacity()<<std::endl;
+
+}
+
 int main(int argc, char* argv[])
 {    
     //-----------------------------------------------------------
@@ -273,7 +287,7 @@ bool RunSingleTest(const TypeRepository* repository, const TestCase& test)
 
 
 bool RunTestFromXml(const TypeRepository* repository, const std::string& fileName)
-{
+{    
     //read file into xml
     std::ostringstream xml1;
     {
@@ -284,12 +298,14 @@ bool RunTestFromXml(const TypeRepository* repository, const std::string& fileNam
     std::cout<<"---- RAW ---"<<std::endl<<xml1.str()<<std::endl;
     std::vector<char> bin1;
     Safir::Dob::Typesystem::ToolSupport::XmlToBinary(repository, xml1.str().c_str(), bin1);
+    CheckBlobSize(bin1);
 
     std::ostringstream os1;
     Safir::Dob::Typesystem::ToolSupport::BinaryToBase64(&bin1[0], bin1.size(), os1);
 
     std::vector<char> bin2;
     Safir::Dob::Typesystem::ToolSupport::Base64ToBinary(os1.str(), bin2);
+    CheckBlobSize(bin2);
 
     if (bin1.size()!=bin2.size() || memcmp(&bin1[0], &bin2[0], bin1.size())!=0)
     {
@@ -302,6 +318,7 @@ bool RunTestFromXml(const TypeRepository* repository, const std::string& fileNam
 
     std::vector<char> bin3;
     Safir::Dob::Typesystem::ToolSupport::XmlToBinary(repository, xml2.str().c_str(), bin3);
+    CheckBlobSize(bin3);
 
     if (bin1.size()!=bin3.size() || memcmp(&bin1[0], &bin3[0], bin1.size())!=0)
     {
@@ -317,6 +334,7 @@ bool RunTestFromXml(const TypeRepository* repository, const std::string& fileNam
 
     std::vector<char> bin4;
     JsonToBinary(repository, json1.str().c_str(), bin4);
+    CheckBlobSize(bin4);
     if (bin1.size()!=bin4.size() || memcmp(&bin1[0], &bin4[0], bin1.size())!=0)
     {
         std::ostringstream dummyJson;

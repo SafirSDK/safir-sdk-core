@@ -238,7 +238,6 @@ namespace Internal
                     os<<"Only members of non-object types can use the valueRef mechanism. Member '"<<md->GetName()<<"' has type "<<m_repository->GetClass(md->GetTypeId())->GetName();
                     throw ParseError("XmlToBinary serialization error", os.str(), "", 110);
                 }
-
                 SerializationUtils::SetMemberFromParameter(m_repository, m_blobLayout, md, memIx, arrIx, *valueRef, valueRefIndex, blob, beginningOfUnused);
             }
             else if (md->GetMemberType()==ObjectMemberType)
@@ -270,7 +269,7 @@ namespace Internal
 
                 std::vector<char> insideBlob;
                 SerializeObjectContent(cd->GetName(), insideBlob, memberContent);
-                SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, insideBlob.size());
+                SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, insideBlob.size());
                 char* writeObj=beginningOfUnused;
                 m_blobLayout.CreateObjectMember(&blob[0], static_cast<Size>(insideBlob.size()), cd->GetTypeId(), memIx, arrIx, false, beginningOfUnused);
                 beginningOfUnused=writeObj+insideBlob.size(); //This is a hack. BlobLayout is not moving beginningOfUnused by the blobSize but instead only by the initialSize. Has to do with genated code.
