@@ -117,21 +117,16 @@ set (Boost_FIND_QUIETLY 0)
 #use dynamic linking with boost
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 
-#Note that we do not request a specific boost.filesystem version,
-#so we may get either v2 or v3. This is due to the fact that
-#we're still supporting versions where v3 does not exist.
-#When we drop support for those old versions, uncomment the line below,
-#and add the same define to the CMAKE_REQUIRED_DEFINITIONS below.
-#ADD_DEFINITIONS(-DBOOST_FILESYSTEM_VERSION=3)
-
-#disable all deprecated functionality in boost.filesystem.
+#disable deprecated functionality that we don't want
 ADD_DEFINITIONS(-DBOOST_FILESYSTEM_NO_DEPRECATED)
+ADD_DEFINITIONS(-DBOOST_SYSTEM_NO_DEPRECATED)
 
-#disable all deprecated functionality in Boost.System.
-#this flag is broken in 1.41 so we don't define it there
-if (Boost_VERSION GREATER 104100) #1.41
-  ADD_DEFINITIONS(-DBOOST_SYSTEM_NO_DEPRECATED)
-endif()
+#we want to use boost::chrono instead of std::chrono and date_time for threads and asio
+ADD_DEFINITIONS(-DBOOST_ASIO_DISABLE_STD_CHRONO)
+ADD_DEFINITIONS(-DBOOST_THREAD_DONT_USE_DATETIME)
+
+#Make Boost.Chrono header-only
+ADD_DEFINITIONS(-DBOOST_CHRONO_HEADER_ONLY)
 
 #Make sure we only use the header-only part of Boost.DateTime
 #on non microsoft compilers/platforms
@@ -139,20 +134,16 @@ if(NOT MSVC)
   ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
 endif()
 
-#Make Boost.Chrono header-only
-ADD_DEFINITIONS(-DBOOST_CHRONO_HEADER_ONLY)
-
 #Set up boost for any test code (i.e. CheckCXXSourceCompiles stuff)
 set(CMAKE_REQUIRED_INCLUDES ${Boost_INCLUDE_DIRS})
 set(CMAKE_REQUIRED_DEFINITIONS 
   -DBOOST_ALL_DYN_LINK
   -DBOOST_FILESYSTEM_NO_DEPRECATED
-  -DBOOST_DATE_TIME_NO_LIB 
-  -DBOOST_CHRONO_HEADER_ONLY)
-
-if (Boost_VERSION GREATER 104100) #1.41
-  set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DBOOST_SYSTEM_NO_DEPRECATED)
-endif()
+  -DBOOST_SYSTEM_NO_DEPRECATED
+  -DBOOST_ASIO_DISABLE_STD_CHRONO
+  -DBOOST_THREAD_DONT_USE_DATETIME
+  -DBOOST_CHRONO_HEADER_ONLY
+  -DBOOST_DATE_TIME_NO_LIB)
 
 if(MSVC)
    #We have a weird issue which causes a buffer overrun error when using Visual Studio 2013
