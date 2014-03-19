@@ -241,6 +241,9 @@ que_req_2:: It shall be possible to configure the length of the inbound request/
 que_req_3:: It shall be possible to configure the length of the outbound message queue separately for each connection.
 que_req_4:: It shall be possible to configure the length of the inbound message queue separately for each connection.
 
+==== Low-level distribution mechanisms
+dislow_req_1:: Safir SDK Core shall support distribution using multicast as well as unicast on network level. 
+
 === Persistence
 Persistency services are provided to allow applications to store data persistently in order to survive a restart of the system or an application.
 
@@ -259,6 +262,7 @@ Safir SDK Core shall provide a type system that can be used to construct complex
 type_req_1:: Safir SDK Core shall provide basic types like integers and floating point values.
 type_req_2:: Safir SDK Core shall permit creation of user defined enumeration types.
 type_req_3:: Safir SDK Core shall permit creation of user defined classes consisting of the predefined types and other user defined types.
+type_req_4:: Safir SDK Core shall support type extension by the use of inheritance.
 
 ==== Parameters
 A parameter is a name-value pair that can be configured when the system is not started and read during runtime. Parameters cannot be changed during runtime. The value can be of any type that is supported by the type system, both simple types like integers or string and complex user defined types. Parameters can also referee to other parameters of the same type, that is using the same value as another parameter.
