@@ -2,8 +2,13 @@
 :encoding: UTF-8
 
 
-Requirements for Safir SDK Core
-===============================
+Requirements Specification for Safir SDK Core
+=============================================
+Anders Widén, Joel Ottosson and Lars Hagström
+2014-03-20
+
+// REMEMBER: UPDATE DATE IN requirements_specification-docinfo.xml TOO!!!!
+
 
 == Introduction
 
@@ -25,8 +30,9 @@ This document establishes the requirements for Safir SDK Core.
 
 The requirements are logically grouped in chapters. All requirements are assigned a unique identifier on the form <chap>_n, where <chap> is an abbreviation of the chapter name and n is a positive integer.
 
-=== Revision History
+=== History
 
+.Revision History
 [width="80%",cols="10%,15%,75%",options="header",frame="topbot",grid="none"]
 |=========================================================
 |Version|Date      |Comment
@@ -163,7 +169,7 @@ There are two types of messages; messages that are guaranteed to be delivered an
 
 mes_req_1:: Safir SDK Core shall provide a mechanism for applications to send messages that are received by zero or more subscribers.
 mes_req_2:: Safir SDK Core shall provide a mechanism for applications to subscribe to messages.
-mes_req_3:: Safir SDK Core shall guarantee that the message order is kept between sender and receiver.
+mes_req_3:: Safir SDK Core shall guarantee that the message order for a certain message type is preserved between sender and receiver.
 mes_req_4:: Safir SDK Core shall issue an overflow to the message sender when a message can't be added to the outbound queue.
 mes_req_5:: In the case of an overflow Safir SDK Core shall notify the application when it’s possible to start sending messages again.
 
@@ -179,6 +185,8 @@ mesack_req_1:: Safir SDK Core shall provide a mechanism for applications to send
 mesack_req_2:: Safir SDK Core shall provide a mechanism for the message sender to be notified when a message has been successfully delivery to all subscribers.
 mesack_req_3:: Safir SDK Core shall provide a mechanism for the message sender to be notified if the message delivery to one or more subscribers did fail.
 mesack_req_4:: It shall be possible to configure how long time to wait for responses from all subscribers before notifying the sender.
+
+Note that due to the different interface requirements of messages with and without guaranteed delivery the interface for sending these two types of messages are different. I.e. it is not just a configuration issue to change between the two types of messages.
 
 ==== Entities
 An entity is a class of which there can be instances that are stored in the Dob. For every entity class there can be several entity handlers. A handler announces its intention to "handle" entity instances of a certain class by making a registration with the class. The handler that creates a particular instance is said to be the owner of that instance. An instance has one (and only one) owner. Only the owner is allowed to modify the instance.
@@ -203,6 +211,8 @@ ent_req_13:: Safir SDK Core shall provide a mechanism for applications to subscr
 ent_req_14:: Safir SDK Core shall provide a mechanism for applications to subscribe to entity instance deletes.
 ent_req_15:: Safir SDK Core shall provide a mechanism for applications to read entity instance states.
 ent_req_16:: It shall be possible to configure if entities shall be acknowledged or not. Unacknowledged entities is an optimization that can be used for entities that are cyclically (and frequently) updated
+ent_req_17:: When an application exits (i.e. either through a crash or controlled exit) Safir SDK Core shall automatically unregister the service handlers registered by that application.
+ent_req_17:: When contact with a node is lost (e.g. either through a network failure or controlled shutdown) Safir SDK Core shall automatically unregister the service handlers registered by applications on that node.
 
 ==== Services
 A Service has one or more handlers (known as a Service Handlers) to which any application (known as a Requestor) can send service requests. For each service request that is sent, a response is received. The response is sent by the Service Handler, and indicates the result of the operation.
@@ -210,6 +220,8 @@ A Service has one or more handlers (known as a Service Handlers) to which any ap
 ser_req_1:: Safir SDK Core shall provide a mechanism for applications to register handlers for service classes.
 ser_req_2:: Safir SDK Core shall provide a mechanism for applications to send requests to service handlers.
 ser_req_3:: Safir SDK Core shall provide a mechanism for service handlers to send responses to received requests.
+ser_req_4:: When an application exits (i.e. either through a crash or controlled exit) Safir SDK Core shall automatically unregister the service handlers registered by that application.
+ser_req_5:: When contact with a node is lost (e.g. either through a network failure or controlled shutdown) Safir SDK Core shall automatically unregister the service handlers registered by applications on that node.
 
 ==== Requests/Responses
 The following requirements applies to entity create requests, entity update requests, entity delete requests, service requests and their corresponding responses.
@@ -230,7 +242,8 @@ hanreg_req_2:: Safir SDK Core shall guarantee that a subscriber gets at least on
 ==== Addressing
 The addressing mechanism used by Safir SDK Core is completly transparent. The sender of a request or message doesn't know if the receiver is located on the same node or on a remote node.
   
-addr_req_1:: Safir SDK Core shall provide a mechanism for requestors to address a handler by a logical name that is completly transparent to where the receiver is located.
+addr_req_1:: Safir SDK Core shall for addressing use logical addressing, i.e. an applications shall be unaware of the physical address of its counterparts.
+
 addr_req_2:: Safir SDK Core shall provide a mechanism for message senders to send messages without any knowledge of the location of the subscribers.
 
 ==== Queues
@@ -262,7 +275,8 @@ Safir SDK Core shall provide a type system that can be used to construct complex
 type_req_1:: Safir SDK Core shall provide basic types like integers and floating point values.
 type_req_2:: Safir SDK Core shall permit creation of user defined enumeration types.
 type_req_3:: Safir SDK Core shall permit creation of user defined classes consisting of the predefined types and other user defined types.
-type_req_4:: Safir SDK Core shall support type extension by the use of inheritance.
+type_req_4:: Creation and configuration of user defined types shall be done in XML files.
+type_req_5:: Safir SDK Core shall support type extension by the use of inheritance.
 
 ==== Parameters
 A parameter is a name-value pair that can be configured when the system is not started and read during runtime. Parameters cannot be changed during runtime. The value can be of any type that is supported by the type system, both simple types like integers or string and complex user defined types. Parameters can also referee to other parameters of the same type, that is using the same value as another parameter.
