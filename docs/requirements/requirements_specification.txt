@@ -147,9 +147,11 @@ Since Safir SDK Core is also available under a closed-source commercial license 
 
 lic_req_4:: Third party libraries that are used by Safir SDK Core shall be available under a license that allows for closed-source distribution of derivative works.
 
-=== Documentation
+=== Documentation and examples
 
 doc_req_1:: Safir SDK Core shall be well documented in a User's Guide.
+doc_req_2:: Safir SDK Core shall contain example source code corresponding to a business logic application.
+doc_req_3:: Safir SDK Core shall contain example source code corresponding to a gui logic application.
 
 === Distribution
 The Dob provides three distribution mechanisms; Messages, Services and Entities. These three fulfil different needs in a distributed real time system, and have different characteristics and provide different guarantees.
@@ -323,6 +325,7 @@ Common usages of contexts are simulated data and replay of recorded data. By def
 
 context_req_1:: Safir SDK Core shall support separation of information into different contexts.
 context_req_2:: An application that is connected to the Dob in one context shall not be able to access data from other contexts.
+context_req_3:: It shall be possible to configure the number of contexts.
 
 === Performance
 
