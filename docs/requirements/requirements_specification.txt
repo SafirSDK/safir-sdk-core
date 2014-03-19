@@ -212,7 +212,12 @@ ent_req_14:: Safir SDK Core shall provide a mechanism for applications to subscr
 ent_req_15:: Safir SDK Core shall provide a mechanism for applications to read entity instance states.
 ent_req_16:: It shall be possible to configure if entities shall be acknowledged or not. Unacknowledged entities is an optimization that can be used for entities that are cyclically (and frequently) updated
 ent_req_17:: When an application exits (i.e. either through a crash or controlled exit) Safir SDK Core shall automatically unregister the service handlers registered by that application.
-ent_req_17:: When contact with a node is lost (e.g. either through a network failure or controlled shutdown) Safir SDK Core shall automatically unregister the service handlers registered by applications on that node.
+ent_req_18:: When contact with a node is lost (e.g. either through a network failure or controlled shutdown) Safir SDK Core shall automatically unregister the service handlers registered by applications on that node.
+
+Although Safir SDK Core allows an application to have several outstanding requests at a time it is sometimes desirable to be able to send off a bunch of requests and just get a summary of how it all went.
+ent_req_19:: Safir SDK Core shall provide a mechanism to delete all instances of a given entity.
+ent_req_20:: Safir SDK Core shall provide a mechanism to delete a specified set of entities.
+ent_req_21:: Safir SDK Core shall provide a mechanism to update a specified set of entities according to a template object. 
 
 ==== Services
 A Service has one or more handlers (known as a Service Handlers) to which any application (known as a Requestor) can send service requests. For each service request that is sent, a response is received. The response is sent by the Service Handler, and indicates the result of the operation.
@@ -253,6 +258,7 @@ que_reg_1:: It shall be possible to configure the length of the outbound request
 que_req_2:: It shall be possible to configure the length of the inbound request/reply queue separately for each connection.
 que_req_3:: It shall be possible to configure the length of the outbound message queue separately for each connection.
 que_req_4:: It shall be possible to configure the length of the inbound message queue separately for each connection.
+que_req_5:: It shall be possible to configure a default queue.
 
 ==== Low-level distribution mechanisms
 dislow_req_1:: Safir SDK Core shall support distribution using multicast as well as unicast on network level. 
@@ -279,7 +285,7 @@ type_req_4:: Creation and configuration of user defined types shall be done in X
 type_req_5:: Safir SDK Core shall support type extension by the use of inheritance.
 
 ==== Parameters
-A parameter is a name-value pair that can be configured when the system is not started and read during runtime. Parameters cannot be changed during runtime. The value can be of any type that is supported by the type system, both simple types like integers or string and complex user defined types. Parameters can also referee to other parameters of the same type, that is using the same value as another parameter.
+A parameter is a name-value pair that can be configured when the system is not started and read during runtime. Parameters cannot be changed during runtime. The value can be of any type that is supported by the type system, both simple types like integers or string and complex user defined types. Parameters can also refer to other parameters of the same type, that is using the same value as another parameter.
 
 par_req_1:: A parameter shall consist of a name and a value.
 par_req_2:: All types supported by the type system shall be valid as parameter types.
