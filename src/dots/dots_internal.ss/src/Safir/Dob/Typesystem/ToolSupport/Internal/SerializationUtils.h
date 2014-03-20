@@ -176,7 +176,7 @@ namespace SerializationUtils
 
         //When we get here, the blob is guaranteed to have capacity for the needed extra space. Just resize.
         blob.resize(blob.size()+dynamicMemberSizeNeeded);
-        blobLayout.SetSize(&blob[0], blob.size());
+        blobLayout.SetSize(&blob[0], static_cast<DotsC_Int32>(blob.size()));
         //std::cout<<"Blob grew, new size: "<<blob.size()<<std::endl;
     }
 
