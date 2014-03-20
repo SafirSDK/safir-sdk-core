@@ -358,7 +358,7 @@ sys_ctrl_req_9:: The start/stop mechanism shall monitor the processes started th
 === Context
 The concept of contexts in Safir SDK Core is a mechanism for separation of data into different realms that can exist simultanously but are strictly separated from each other. For example the same instance of an object may occur in more than one context at the same time, and the Dob will guarantee that they will never be mixed up. 
 
-Common usages of contexts are simulated data and replay of recorded data. By defining a special simulation context, there is no risk that simulated data for educational purposes are mixed up with real data, and the same applies to replayed data.
+An example of when the use of contexts is well suited, is when replaying recorded data. By defining a special replay context, there is no risk that replayed data are mixed up with real data.
 
 context_req_1:: Safir SDK Core shall support separation of information into different contexts.
 context_req_2:: An application that is connected to the Dob in one context shall not be able to access data from other contexts.
