@@ -263,6 +263,19 @@ que_req_5:: It shall be possible to configure a default queue.
 ==== Low-level distribution mechanisms
 dislow_req_1:: Safir SDK Core shall support distribution using multicast as well as unicast on network level. 
 
+=== Redundancy
+Safir SDK Core provides functionality to support redundancy. There are two flavours of redundancy, cold stand-by and hot stand-by.
+
+The most common redundancy case is cold stand-by where System Control detects that an application (or a complete node) has stopped working and then starts a new instance of the application.
+
+Hot stand-by is used when there is a need for the stand-by application to be started (maybe to do some calculations on received data) in order to be prepared to take over in case the active application instance stops working. To support this, Safir SDK Core provides a mechanism for pending registrations of handlers which means that the application will be notified when its handler actually has become registered.
+
+When a cold or hot stand-by application is started it is given the persistent-flagged entity instances that any failing application has left behind.   
+
+red_req_1:: At successful registration of an entity handler the application shall be given any persistent-flagged entity instances. This holds for cold stand-by as well as for hot stand-by applications.  
+red_req_2:: Safir SDK Core shall provide a mechanism for several hot stand-by application instances to make pending handler registrations. Only one of the application instances shall have its handler registered.
+red_req_3:: In case of failure of the application instance with the registered handler, Safir SDK Core shall automatically register the handler of one of the hot stand-by application instances and notify that instance.
+
 === Persistence
 Persistency services are provided to allow applications to store data persistently in order to survive a restart of the system or an application.
 
