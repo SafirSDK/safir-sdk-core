@@ -220,7 +220,7 @@ ent_req_20:: Safir SDK Core shall provide a mechanism to delete a specified set 
 ent_req_21:: Safir SDK Core shall provide a mechanism to update a specified set of entities according to a template object. 
 
 ==== Services
-A Service has one or more handlers (known as a Service Handlers) to which any application (known as a Requestor) can send service requests. For each service request that is sent, a response is received. The response is sent by the Service Handler, and indicates the result of the operation.
+A Service has one or more handlers (known as service handlers) to which any application (known as a requestor) can send service requests. For each service request that is sent, a response is received. The response is sent by the service handler, and indicates the result of the operation.
 
 ser_req_1:: Safir SDK Core shall provide a mechanism for applications to register handlers for service classes.
 ser_req_2:: Safir SDK Core shall provide a mechanism for applications to send requests to service handlers.
@@ -252,7 +252,7 @@ addr_req_1:: Safir SDK Core shall for addressing use logical addressing, i.e. an
 addr_req_2:: Safir SDK Core shall provide a mechanism for message senders to send messages without any knowledge of the location of the subscribers.
 
 ==== Queues
-For each connection there is a set of associated queues, Outbound request/reply queue, Inbound request/reply queue, Outbound message queue and Inbound message queue.
+For each connection there is a set of associated queues, outbound request/reply queue, inbound request/reply queue, outbound message queue and inbound message queue.
 
 que_reg_1:: It shall be possible to configure the length of the outbound request/reply queue separately for each connection.
 que_req_2:: It shall be possible to configure the length of the inbound request/reply queue separately for each connection.
