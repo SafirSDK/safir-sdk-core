@@ -1,18 +1,18 @@
 .SILENT:
 .PHONY: all clean
 
-DEPS := Makefile requirements_specification.txt
+DEPS := Makefile requirements_specification.txt asciidoc-dblatex-custom.sty
 
 default: all
 
 help:
 	echo "Check the Makefile for available targets"
 
-all: requirements_specification.pdf requirements_specification.html
+all: requirements_specification.pdf requirements_specification.html 
 
 requirements_specification.pdf: $(DEPS)
 	echo "Building Requirements Specification pdf"
-	a2x -L -f pdf -d book -a docinfo --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" --dblatex-opts "-P latex.output.revhistory=0" requirements_specification.txt
+	a2x -L -f pdf -d book --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" --dblatex-opts "-P latex.output.revhistory=0 -s asciidoc-dblatex-custom.sty" requirements_specification.txt
 
 requirements_specification.html: $(DEPS)
 	echo "Building Requirements Specification html"
