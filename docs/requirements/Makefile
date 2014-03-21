@@ -12,6 +12,7 @@ all: requirements_specification.pdf requirements_specification.html
 
 requirements_specification.pdf: $(DEPS)
 	echo "Building Requirements Specification pdf"
+	-cp ../logo/renders/logotype1024.png .
 	a2x -L -f pdf -d book --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" --dblatex-opts "-P latex.output.revhistory=0 -Pdoc.publisher.show=0 -s custom-coverpage-dblatex.sty" requirements_specification.txt
 
 requirements_specification.html: $(DEPS)
