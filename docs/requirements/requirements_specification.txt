@@ -1,8 +1,7 @@
 // -*- coding: utf-8 -*-
 :encoding: UTF-8
 
-Requirements Specification for Safir SDK Core
-=============================================
+= Requirements Specification for Safir SDK Core
 :date: 2014-03-21
 
 == Introduction
