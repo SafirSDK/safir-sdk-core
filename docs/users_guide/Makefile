@@ -5,7 +5,7 @@ DEPS := users_guide.txt olib.txt tracer.txt example_applications.txt \
 		$(wildcard images/*.png) \
 		$(patsubst %.dia,%.eps,$(wildcard images/*.dia)) \
 		$(patsubst %.dia,%.png,$(wildcard images/*.dia)) \
-	    users_guide-docinfo.xml \
+		custom-coverpage-dblatex.sty \
 		Makefile
 
 default: all
@@ -29,7 +29,8 @@ vpath %.dia images
 
 users_guide.pdf: $(DEPS)
 	echo "Building pdf"
-	a2x -L -f pdf -d book -a docinfo --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" --dblatex-opts "-P latex.output.revhistory=0" users_guide.txt 
+	cp -f ../logo/renders/logotype1024.png .
+	a2x -L -f pdf -d book --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" --dblatex-opts "-P latex.output.revhistory=0 -s custom-coverpage-dblatex.sty" users_guide.txt 
 
 users_guide.html: $(DEPS)
 	echo "Building html"
