@@ -16,7 +16,7 @@ requirements_specification.pdf: $(DEPS)
 
 requirements_specification.html: $(DEPS)
 	echo "Building Requirements Specification html"
-	asciidoc -v -d book -a toc -a toclevels=4 -a numbered requirements_specification.txt
+	asciidoc -d book -a toc -a toclevels=4 -a numbered requirements_specification.txt
 
 clean:
 	rm -rf *~ *.pdf *.html *.xml *.fo *.png
