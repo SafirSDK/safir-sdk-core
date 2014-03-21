@@ -6,6 +6,7 @@ DEPS := users_guide.txt olib.txt tracer.txt example_applications.txt \
 		$(patsubst %.dia,%.eps,$(wildcard images/*.dia)) \
 		$(patsubst %.dia,%.png,$(wildcard images/*.dia)) \
 		custom-coverpage-dblatex.sty \
+		custom-xhtml11.css \
 		Makefile
 
 default: all
@@ -31,10 +32,12 @@ users_guide.pdf: $(DEPS)
 	echo "Building pdf"
 	cp -f ../logo/renders/logotype1024.png .
 	a2x -L -f pdf -d book --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" --dblatex-opts "-P latex.output.revhistory=0 -s custom-coverpage-dblatex.sty" users_guide.txt 
+	rm -f logotype1024.png
 
 users_guide.html: $(DEPS)
 	echo "Building html"
-	asciidoc -d book -a toc -a toclevels=4 -a numbered users_guide.txt
+	cp -f ../logo/renders/logotype256.png images/
+	asciidoc --backend=xhtml11  -a stylesheet="`pwd`/custom-xhtml11.css" -d book -a toc -a toclevels=4 -a numbered users_guide.txt
 
 clean:
 	rm -rf *~ *.pdf *.html *.fo *.png *.eps
