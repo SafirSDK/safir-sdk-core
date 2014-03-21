@@ -1,20 +1,9 @@
 // -*- coding: utf-8 -*-
-Requirements Specification for Safir SDK Core
-=============================================
-//:author: Anders Widén, Joel Ottosson and Lars Hagström
 :encoding: UTF-8
 
-
-//:toc:
-//toc-placement: preamble
-//:doctype: book
-
-//image:./v1_large.png[]
-
-// 2014-03-20
-
-// REMEMBER: UPDATE DATE IN requirements_specification-docinfo.xml TOO!!!!
-
+Requirements Specification for Safir SDK Core
+=============================================
+:date: 2014-03-21
 
 == Introduction
 
@@ -38,15 +27,22 @@ The requirements are logically grouped in chapters. All requirements are assigne
 
 === History
 
-.Revision History
-[width="80%",cols="10%,15%,75%",options="header",frame="topbot",grid="none"]
-|=========================================================
-|Version   |Date      |Comment
+This document is based on Saab AB internal documents, ``System / Subsystem Specification for Safir System Kernel'' (SSS-106323 version 1.3) and ``Safir SDK Requirements Model'' (PM384898 version 1.2).
 
-|1.0 draft |2014-03-14|
-First draft, based on information from ``SSS-106323 1.3'' and
-``pm384898_rr_safir_sdk_requirements_model.doc revision 155515
-version 1.2''
+Historically the requirements for Safir SDK Core and Safir SDK (the Saab AB proprietary product, built on top of Safir SDK Core) have been kept together in the documents mentioned above. This document separates the Safir SDK Core requirements into a separate document.
+
+.Revision History
+[width="90%",cols="8%,12%,15%,65%",options="header",frame="topbot",grid="none"]
+|=========================================================
+|Version     |Date      | Author(s)   | Comment
+
+|1.0 *Draft* |2014-03-21| 
+Anders Widén
++
+Lars Hagström
++
+Joel Ottosson| 
+First version
 
 |=========================================================
 
