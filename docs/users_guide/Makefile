@@ -1,11 +1,11 @@
 .SILENT:
 .PHONY: all clean default
 
-DEPS := safir_sdk_core_sug.txt olib.txt tracer.txt example_applications.txt \
+DEPS := users_guide.txt olib.txt tracer.txt example_applications.txt \
 		$(wildcard images/*.png) \
 		$(patsubst %.dia,%.eps,$(wildcard images/*.dia)) \
 		$(patsubst %.dia,%.png,$(wildcard images/*.dia)) \
-	    safir_sdk_core_sug-docinfo.xml \
+	    users_guide-docinfo.xml \
 		Makefile
 
 default: all
@@ -13,11 +13,11 @@ default: all
 help:
 	echo "Some available targets:"
 	echo "   default                 - build pdf and html"
-	echo "   safir_sdk_core_sug.html - build html" 
-	echo "   safir_sdk_core_sug.pdf -  build pdf" 
+	echo "   users_guide.html - build html" 
+	echo "   users_guide.pdf -  build pdf" 
 	echo " Check the Makefile for other targets"
 
-all: safir_sdk_core_sug.pdf safir_sdk_core_sug.html
+all: users_guide.pdf users_guide.html
 
 vpath %.dia images
 %.png: %.dia
@@ -27,13 +27,13 @@ vpath %.dia images
 	dia --export=$@ -t eps $<
 
 
-safir_sdk_core_sug.pdf: $(DEPS)
+users_guide.pdf: $(DEPS)
 	echo "Building pdf"
-	a2x -L -f pdf -d book -a docinfo --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" --dblatex-opts "-P latex.output.revhistory=0" safir_sdk_core_sug.txt 
+	a2x -L -f pdf -d book -a docinfo --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" --dblatex-opts "-P latex.output.revhistory=0" users_guide.txt 
 
-safir_sdk_core_sug.html: $(DEPS)
+users_guide.html: $(DEPS)
 	echo "Building html"
-	asciidoc -d book -a toc -a toclevels=4 -a numbered safir_sdk_core_sug.txt
+	asciidoc -d book -a toc -a toclevels=4 -a numbered users_guide.txt
 
 clean:
 	rm -rf *~ *.pdf *.html *.fo *.png *.eps
