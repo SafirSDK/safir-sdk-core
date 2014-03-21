@@ -17,9 +17,6 @@ Requirements Specification for Safir SDK Core
     A copy of the license is included in the source code distribution and it
     is also available from https://www.gnu.org/licenses.
 
-TODO: har vi några invariant sections?
-
-
 === Scope
 This document establishes the requirements for Safir SDK Core.
 
@@ -86,12 +83,7 @@ Network topology:: The clients may be situated on the same LAN as the server, bu
 
 ==== Vehicle mounted Client/Server system
 
-Same configuration as ``Client/Server system'' above, but with two vital differences:
-
-1. One or more clients may intermittently have very bad connectivity, e.g. due to a slip ring.
-2. The network may fail intermittently due to power failures.
-
-TODO: indent?!
+Same configuration as ``Client/Server system'' above, but with two vital differences: One or more clients may intermittently have very bad connectivity, e.g. due to a slip ring and the network may fail intermittently due to power failures in the networking equipment.
 
 Network topology:: Everything is situated on the same LAN, but some connections may intermittently be in a degraded state or fail completely.
 
