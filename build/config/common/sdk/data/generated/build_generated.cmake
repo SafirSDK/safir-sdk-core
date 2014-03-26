@@ -24,7 +24,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY NAME DEPENDENCIES)
   set(all_dou_directory ${SAFIR_RUNTIME}/data/text/dots/all_dous)
   file(INSTALL ${dou_files} DESTINATION ${all_dou_directory})
 
-  SET(dots_v_command ${PYTHON_EXECUTABLE} "${SAFIR_RUNTIME}/bin/dots_v.py" -dod=${dod_directory} -xdir=${all_dou_directory)
+  SET(dots_v_command ${PYTHON_EXECUTABLE} "${SAFIR_RUNTIME}/bin/dots_v.py" -dod=${dod_directory} -xdir=${all_dou_directory})
   
   ADD_CUSTOM_COMMAND(OUTPUT tags cpp java ada dotnet
     COMMAND ${dots_v_command} ${SOURCE_DIR}
