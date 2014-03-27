@@ -1,0 +1,64 @@
+== Appendix A: Compliance
+
+=== History
+
+.Revision History
+[width="50%",cols="20%,30%,50%",options="header",frame="topbot",grid="none"]
+|=========================================================
+| Safir SDK Core 
++
+Version 
+| Date 
+| Author(s)
+
+| 5.0.1 
+| 2014-03-27
+| Lars Hagström
+
+|=========================================================
+
+=== Typical Systems
+
+This section contains some implicit requirements that Safir SDK Core 5.0.1 is not compliant with.
+
+The split/join functionality is rather unreliable, so clients may not loose contact with a server and reconnect automatically in most cases. A server with redundancy that has been disconnected must certainly not be reconnected without a restart.
+
+All nodes in a system must currently be able to send network packets to each other.
+
+All nodes in a system must have good connectivity. Power failures in the network equipment is an example of bad connectivity.
+
+All nodes will wait for the slowest node. 
+
+
+=== License
+
+*lic_req_2* is not fulfilled, since the User's Guide does not have the correct license.
+
+=== Messages with guaranteed delivery
+
+Requirements *mesack_req_1*, *mesack_req_2*, *mesack_req_3*, and *mesack_req_4*, are currently not implemented in the preferred fashion in Safir SDK Core. The preferred implementation is described in the ``Messages'' whitepaper that can be found on the Safir SDK Core Jenkins server at http://safir.sourceforge.net.
+
+However, as is described in that whitepaper it is actually possible to send ``messages'' using +foreach+ and UpdateRequests.
+
+
+
+=== Persistence
+
+*pers_req_4* and *pers_req_5* are partially implemented. *pers_req_7* is not implemented.
+
+
+=== OS, Platform and Compiler support
+
+*plat_req_1* is not complied with since Ubuntu Precise Pangolin 12.04 is not supported. However, the next LTS release, 14.04 will be supported.
+
+*plat_req_2* is not complied with since RedHat Enterprise Linux (RHEL) 6.x is not supported. However, the next major release RHEL 7 will be supported.
+
+*plat_req_5* is not implemented.
+
+=== System control and failover support
+
+No *sysctrl_req_* requirements are implemented.
+
+=== Performance
+
+None of the load scenarios have been tested, so none of the *perf_req_* requirements are implemented.

@@ -253,17 +253,19 @@ que_req_5:: It shall be possible to configure the default lengths of the queues.
 
 
 === Redundancy
-Safir SDK Core provides functionality to support redundancy. There are two flavours of redundancy, cold stand-by and hot stand-by.
+Safir SDK Core provides functionality to support redundancy. There are two flavours of redundancy, cold standby and hot standby.
 
-The most common redundancy case is cold stand-by where System Control detects that an application (or a complete node) has stopped working and then starts a new instance of the application (or all the applications in the failed node).
+The most common redundancy case is cold standby where System Control detects that an application (or a complete node) has stopped working and then starts a new instance of the application (or all the applications in the failed node).
 
-Hot stand-by is used when there is a need for the stand-by application to be started (maybe to do some calculations on received data) in order to be prepared to take over in case the active application instance stops working. To support this, Safir SDK Core provides a mechanism for pending registrations of handlers which means that the application will be notified when its handler actually has become registered.
+Hot standby is used when there is a need for the standby application to be started (maybe to do some calculations on received data) in order to be prepared to take over in case the active application instance stops working. To support this, Safir SDK Core provides a mechanism for pending registrations of handlers which means that the application will be notified when its handler actually has become registered.
 
-When a cold or hot stand-by application is started it is given the persistent-flagged entity instances that any failing application has left behind.   
+When a cold or hot standby application is started it is given the persistent flagged entity instances that any failing application has left behind.
 
-red_req_1:: At successful registration of an entity handler the application shall be given any persistent-flagged entity instances. This holds for cold stand-by as well as for hot stand-by applications.  
-red_req_2:: Safir SDK Core shall provide a mechanism for several hot stand-by application instances to make pending handler registrations. Only one of the application instances shall have its handler registered.
-red_req_3:: In case of failure of the application instance with the registered handler, Safir SDK Core shall automatically register the handler of one of the hot stand-by application instances and notify that instance.
+red_req_1:: At successful registration of an entity handler the application shall be given any persistent flagged entity instances. This holds for cold standby as well as for hot standby applications.  
+red_req_2:: Safir SDK Core shall provide a mechanism for several hot standby application instances to make pending handler registrations. Only one of the application instances shall have its handler registered.
+red_req_3:: In case of failure of the application instance with the registered handler, Safir SDK Core shall automatically register the handler of one of the hot standby application instances and notify that instance.
+
+More requirements that handle cold standby can be found in <<system_control>>.
 
 === Persistence
 Persistency services are provided to allow applications to store data persistently in order to survive a restart of the system or an application.
@@ -333,6 +335,7 @@ lang_req_3:: Safir SDK Core shall provide programming interfaces in .NET.
 lang_req_4:: Safir SDK Core shall provide programming interfaces in Ada.
 lang_req_5:: An application built on Safir SDK Core shall be able to communicate with other Safir SDK Core applications, regardless of language.
 
+ [[system_control]]
 === System control and failover support
 Node supervision along with redundancy is provided to detect and act on unexpected application or node losses. The system control mechanism starts and stops the entire system including the Dob and will also keep an unambiguous view of the system, i.e which nodes are part of the system and where individual applications are executing.
 
@@ -428,3 +431,8 @@ This scenario is intended to be an approximate instantiation of the typical syst
 
 Multiple client nodes may run on the same hardware, e.g. through virtualization. The clients may also be run on a cloud hosting service, to reduce the need for purchasing dedicated hardware.
 
+////
+Requirements compliance appendix is located in separate file, compliance.txt
+////
+
+include::compliance.txt[]
