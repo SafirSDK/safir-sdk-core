@@ -2,13 +2,13 @@
 :encoding: UTF-8
 
 = Requirements Specification for Safir SDK Core
-:date: 2014-03-21
+:date: 2014-03-27
 
 == Introduction
 
 === License
 
-    Copyright (C) Saab AB.
+    Copyright (C) 2004 - 2014 Saab AB.
     Permission is granted to copy, distribute and/or modify this document
     under the terms of the GNU Free Documentation License, Version 1.3
     or any later version published by the Free Software Foundation;
@@ -32,7 +32,7 @@ Historically the requirements for Safir SDK Core and Safir SDK (the Saab AB prop
 |=========================================================
 |Version     |Date      | Author(s)   | Comment
 
-|1.0 *Draft* |2014-03-21| 
+|1.0 *Draft* |2014-03-27| 
 Anders Widén
 +
 Lars Hagström
