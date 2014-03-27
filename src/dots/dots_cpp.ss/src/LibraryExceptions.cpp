@@ -114,7 +114,7 @@ namespace Typesystem
     static const char * err1 = "Failed to copy the exception string in UnknownException constructor";
     static const char * err2 = "Failed to extract the c_str from the std::string in what()";
 
-    class UnknownException:
+    class DOTS_CPP_API UnknownException:
         public std::exception
     {
     public:
@@ -132,6 +132,11 @@ namespace Typesystem
 
         ~UnknownException() throw() {}
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4702) //unreachable code
+#endif
+
         const char * what() const throw ()
         {
             try
@@ -147,8 +152,23 @@ namespace Typesystem
                 return err2;
             }
         }
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
     private:
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4251) //unreachable code
+#endif
+
         std::string m_what;
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
     };
 
     // -----------------------------------------------------------

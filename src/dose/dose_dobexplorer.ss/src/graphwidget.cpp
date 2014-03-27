@@ -55,11 +55,11 @@ void GraphWidget::paintEvent(QPaintEvent* event)
 
     QPainterPath path;
 
-    path.moveTo(start.secsTo(m_data.begin()->first), m_data.begin()->second);
+    path.moveTo(static_cast<qreal>(start.secsTo(m_data.begin()->first)), m_data.begin()->second);
     for (PlotData::iterator it = ++m_data.begin();
          it != m_data.end(); ++it)
     {
-        path.lineTo(start.secsTo(it->first),it->second);
+        path.lineTo(static_cast<qreal>(start.secsTo(it->first)),it->second);
     }
 
     painter.drawPath(path);

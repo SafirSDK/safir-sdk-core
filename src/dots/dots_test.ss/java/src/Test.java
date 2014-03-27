@@ -222,17 +222,6 @@ public class Test {
                 + Serialization.toXml(MemberTypes.createValueTypes()));
         System.out.println("Create_ValueArrays   : "
                 + Serialization.toXml(MemberTypes.createValueArrays()));
-
-        Header("Create routines (Arrays)");
-        System.out.println("Create_ParameterArrays: "
-                + Serialization.toXml(MemberArrays.createParameterArrays(
-                        ParameterTypes.getInt32Parameter(), ParameterTypes
-                                .getEnumerationParameter(), ParameterTypes
-                                .getTestClassParameter())));
-        System.out.println("Create_ValueArraysOne : "
-                + Serialization.toXml(MemberArrays.createValueArraysOne()));
-        System.out.println("Create_ValueArraysAll : "
-                + Serialization.toXml(MemberArrays.createValueArraysAll()));
     }
 
     private static String toStringNoUnderscore(MemberType val) {
@@ -10364,7 +10353,7 @@ public class Test {
                     System.out.println(Operations.getName(ids[i]));
                 }
             }
-        }
+        }        
     }
 
     static class MiscTests {
@@ -10752,21 +10741,21 @@ public class Test {
                 check(t.entityIdMember().isNull());
                 check(!t.entityIdMember().isChanged());
                 t.entityIdMember().setVal(
-                        new EntityId(1000, new InstanceId("foo")));
+                        new EntityId(com.saabgroup.dotstest.TestItem.ClassTypeId, new InstanceId("foo")));
                 check(!t.entityIdMember().isNull());
                 check(t.entityIdMember().isChanged());
                 check(t.entityIdMember().getVal().equals(
-                        new EntityId(1000, new InstanceId("foo"))),
+                        new EntityId(com.saabgroup.dotstest.TestItem.ClassTypeId, new InstanceId("foo"))),
                         "entityId equals");
 
                 check(t.entityIdMember2().isNull());
                 check(!t.entityIdMember2().isChanged());
                 t.entityIdMember2().setVal(
-                        new EntityId(1000, new InstanceId(1231234)));
+                        new EntityId(com.saabgroup.dotstest.TestItem.ClassTypeId, new InstanceId(1231234)));
                 check(!t.entityIdMember2().isNull());
                 check(t.entityIdMember2().isChanged());
                 check(t.entityIdMember2().getVal().equals(
-                        new EntityId(1000, new InstanceId(1231234))),
+                        new EntityId(com.saabgroup.dotstest.TestItem.ClassTypeId, new InstanceId(1231234))),
                         "entityId equals");
 
                 t.testClassMember().setObj(new TestItem());
@@ -10902,13 +10891,13 @@ public class Test {
                 check(!t2.entityIdMember().isNull());
                 check(t2.entityIdMember().isChanged());
                 check(t2.entityIdMember().getVal().equals(
-                        new EntityId(1000, new InstanceId("foo"))),
+                        new EntityId(com.saabgroup.dotstest.TestItem.ClassTypeId, new InstanceId("foo"))),
                         "entityId equals");
 
                 check(!t2.entityIdMember2().isNull());
                 check(t2.entityIdMember2().isChanged());
                 check(t2.entityIdMember2().getVal().equals(
-                        new EntityId(1000, new InstanceId(1231234))),
+                        new EntityId(com.saabgroup.dotstest.TestItem.ClassTypeId, new InstanceId(1231234))),
                         "entityId equals");
 
                 t2.enumerationMember().setVal(
@@ -11130,11 +11119,11 @@ public class Test {
                 check(t.entityIdMember().get(1).isNull());
                 check(!t.entityIdMember().get(1).isChanged());
                 t.entityIdMember().get(1).setVal(
-                        new EntityId(1000, new InstanceId("foo")));
+                        new EntityId(com.saabgroup.dotstest.TestItem.ClassTypeId, new InstanceId("foo")));
                 check(!t.entityIdMember().get(1).isNull());
                 check(t.entityIdMember().get(1).isChanged());
                 check(t.entityIdMember().get(1).getVal().equals(
-                        new EntityId(1000, new InstanceId("foo"))),
+                        new EntityId(com.saabgroup.dotstest.TestItem.ClassTypeId, new InstanceId("foo"))),
                         "entityId equals");
 
                 t.testClassMember().get(1).setObj(new TestItem());
@@ -11262,7 +11251,7 @@ public class Test {
                 check(!t2.entityIdMember().get(1).isNull());
                 check(t2.entityIdMember().get(1).isChanged());
                 check(t2.entityIdMember().get(1).getVal().equals(
-                        new EntityId(1000, new InstanceId("foo"))),
+                        new EntityId(com.saabgroup.dotstest.TestItem.ClassTypeId, new InstanceId("foo"))),
                         "entityId equals");
 
                 t2.enumerationMember().get(1).setVal(

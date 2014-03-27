@@ -28,7 +28,6 @@
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <string>
 #include <sstream>
@@ -158,7 +157,7 @@ namespace Typesystem
          *
          * @return The instance id as a string.
          */
-        DOTS_API const std::wstring ToString() const;
+        DOTS_CPP_API const std::wstring ToString() const;
 
 
         /** @{ */

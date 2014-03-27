@@ -67,19 +67,14 @@
 // it to be visible.
 //---------------------------------------------------------------------
 
-#if defined _WIN32
-#ifndef DOSECOM_API
-#ifdef DOSE_COM_EXPORTS  // This is defined when used by dose_com.dll
-#define DOSECOM_API _declspec(dllexport)
-#else
-#define DOSECOM_API _declspec(dllimport)
-#endif
-#endif
-#endif
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
-#ifdef _LINUX
-#define DOSECOM_API __attribute__((visibility("default")))
+#ifdef dose_com_EXPORTS
+#  define DOSECOM_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define DOSECOM_API SAFIR_HELPER_DLL_IMPORT
 #endif
+#define DOSE_COM_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 //-------------------------------------
 // NodeStatus returned in

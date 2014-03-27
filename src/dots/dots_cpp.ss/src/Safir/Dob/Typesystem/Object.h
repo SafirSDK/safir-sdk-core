@@ -51,7 +51,7 @@ namespace Typesystem
      *
      * This class is the base class for all automatically generated DOB classes.
      */
-    class DOTS_API Object
+    class DOTS_CPP_API Object
     {
     public:
         /**

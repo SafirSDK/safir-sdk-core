@@ -37,7 +37,9 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/DistributionChannelParameters.h>
+#include <Safir/Logging/Log.h>
 #include <boost/thread.hpp>
+#include <boost/timer/timer.hpp>
 #include <iostream>
 
 class ActionSender
@@ -82,6 +84,7 @@ public:
 
     void Send(const DoseTest::ActionPtr& msg, const int which)
     {
+        std::wcout << "Send(msg,which) '" << DoseTest::ActionEnum::ToString(msg->ActionKind()) << "' to " << which << std::endl;
         Safir::Dob::Typesystem::BinarySerialization binary;
         Safir::Dob::Typesystem::Serialization::ToBinary(msg, binary);
         SendInternal(binary,which);
@@ -94,12 +97,15 @@ public:
         Safir::Dob::Typesystem::Serialization::ToBinary(msg, binary);
         if (msg->Partner().IsNull())
         {
+            std::wcout << "Send(msg) '" << DoseTest::ActionEnum::ToString(msg->ActionKind()) << "' to all" << std::endl;
             SendInternal(binary,0);
             SendInternal(binary,1);
             SendInternal(binary,2);
         }
         else
         {
+            std::wcout << "Send(msg) of " << DoseTest::ActionEnum::ToString(msg->ActionKind()) << " to " 
+                       << static_cast<int>(msg->Partner().GetVal().GetRawValue()) << std::endl;
             SendInternal(binary,static_cast<int>(msg->Partner().GetVal().GetRawValue()));
         }
 
@@ -110,36 +116,128 @@ private:
 
     static void ConnectSocket(const SocketPtr& socket, const std::string& address, const short port)
     {
-        std::wcout << "Connecting to " << address.c_str() << ":" << port << std::endl;
-        //Set up address
-        const boost::asio::ip::address addr = 
-            boost::asio::ip::address::from_string(address);
+        int tries = 0;
 
-        const boost::asio::ip::tcp::endpoint endpoint(addr, port);
-        socket->connect(endpoint);
+        for(;;)
+        {
+            ++tries;
+            try
+            {
+                std::wcout << "Connecting to " << address.c_str() << ":" << port << std::endl;
+                //Set up address
+                const boost::asio::ip::address addr = 
+                    boost::asio::ip::address::from_string(address);
+                
+                const boost::asio::ip::tcp::endpoint endpoint(addr, port);
+                socket->connect(endpoint);
+                boost::asio::ip::tcp::no_delay option(true);
+                socket->set_option(option);
 
+                return;
+            }
+            catch (const boost::system::system_error& e)
+            {
+                std::wcout << "Failed to Connect: " << e.what() << std::endl;
+                if (tries > 3)
+                {
+                    throw;
+                }
+            }
+        }
+    }
+
+    static void Timeout(const int which)
+    {
+        //We've been having problems with a boost sleep bug in some versions, so the double check
+        //here is to allow us to see if it happens again.
+        boost::timer::cpu_timer doublecheck;
+        try
+        {
+            boost::this_thread::sleep_for(boost::chrono::minutes(10));
+
+            Safir::Logging::SendSystemLog(Safir::Logging::Emergency,
+                                          L"Test partner read timed out!");
+            std::wcout << "Read from partner " << which << " timed out!" << std::endl;
+            std::wcout << "elapsed time " << doublecheck.elapsed().wall / 1.0e6 << " milliseconds" << std::endl;
+            exit(31);
+        }
+        catch (const boost::thread_interrupted&)
+        {
+            //ok, read was successful, we just let the thread go away.
+        }
     }
 
     void SendInternal(const Safir::Dob::Typesystem::BinarySerialization& binary,
                       const int which)
     {
+        std::wcout << "Sending action to " << which << std::endl;
         boost::asio::write(*m_sockets[which], boost::asio::buffer(&binary[0], binary.size()));
 
+        boost::thread timeout(boost::bind(ActionSender::Timeout, which));
+
         try
-        {
-            //        std::wcout << "Sent action to " << which << ", waiting for ok" << std::endl;
-            char reply[3];
-            boost::asio::read(*m_sockets[which],
-                              boost::asio::buffer(reply, 3));
-            if (reply != std::string("ok"))
+        {            
+            std::wcout << "Waiting for reply" << std::endl;
+            std::vector<char> reply;
+            while(reply.size() < 3)
             {
-                std::wcout << "Got unexpected reply: '" << std::wstring(reply,reply+3) << "'" << std::endl;
+                char buf[3];
+                boost::system::error_code ec;
+                const size_t received = m_sockets[which]->receive(boost::asio::buffer(buf, 3),
+                                                                  0,
+                                                                  ec);
+                if (received == 0)
+                {
+                    std::wcout << "Received 0 bytes! ERROR!" << std::endl;
+                    std::wcout << "error_code = " << ec << std::endl;
+                    exit(33);
+                }
+
+                if (!!ec)
+                {
+                    std::wcout << "Got an error_code = " << ec << std::endl;
+                    exit(34);
+                }
+
+
+                std::wcout << "Received ";
+                        
+                for (size_t i = 0; i < received; ++i)
+                {
+                    std::wcout << static_cast<int>(buf[i]) << " ";
+                    reply.push_back(buf[i]);
+                }
+
+                std::wcout << std::endl;
+                
+            }
+
+            std::wcout << "Got reply" << std::endl;
+            if (&reply[0] != std::string("ok"))
+            {
+                std::wcout << "Got unexpected reply: '" << std::wstring(reply.begin(),reply.end()) << "' from " << which << std::endl;
+                timeout.interrupt();
+                timeout.join();
                 throw std::logic_error("Got unexpected reply!");
             }
         }
         catch (const boost::system::system_error&)
         {
             std::wcout << "reading failed" << std::endl;
+        }
+
+        //We've been having problems with a boost sleep bug in some versions, so the timer
+        //here is to allow us to see if it happens again.
+        boost::timer::cpu_timer timer;
+        timeout.interrupt();
+        timeout.join();
+        if (timer.elapsed().wall > 3*60*1e9) //3 minutes in nanoseconds
+        {
+            Safir::Logging::SendSystemLog(Safir::Logging::Emergency,
+                                          L"Interrupt of timeout thread was _very_ slow");
+
+            std::wcout << "Interrupting the timeout thread took " << timer.elapsed().wall / 1.0e6 << " milliseconds!" << std::endl;
+            exit(32);
         }
     }
 
@@ -168,10 +266,10 @@ private:
         case DoseTest::ActionEnum::UnregisterHandler:
         case DoseTest::ActionEnum::UpdateRequest:
         case DoseTest::ActionEnum::ResumePostponed:
-            boost::this_thread::sleep(boost::posix_time::milliseconds(140));
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(140));
             break;
         default:
-            boost::this_thread::sleep(boost::posix_time::milliseconds(40));
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(40));
             break;
         }
     }

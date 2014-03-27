@@ -41,130 +41,130 @@ namespace Internal
     class Callbacks
     {
     public:
-        static void __cdecl OnDispatch(void* const consumer,
-                                       bool & success);
+        static void OnDispatch(void* const consumer,
+                               bool & success);
 
-        static void __cdecl OnStopOrder(void* const consumer,
-                                        bool & success);
+        static void OnStopOrder(void* const consumer,
+                                bool & success);
 
-        static void __cdecl OnNewEntity(const char* const currentBlob,
-                                        const char* const currentState,
+        static void OnNewEntity(const char* const currentBlob,
+                                const char* const currentState,
+                                void* const consumer,
+                                const bool timestampDiff,
+                                bool& success);
+
+        static void OnUpdatedEntity(const char* const currentBlob,
+                                    const char* const currentState,
+                                    const char* const previousBlob,
+                                    const char* const previousState,
+                                    void* const consumer,
+                                    const bool timestampDiff,
+                                    bool& success);
+
+        static void OnDeletedEntity(const char* const currentState,
+                                    const char* const previousBlob,
+                                    const char* const previousState,
+                                    const bool explicitlyDeleted,
+                                    void* const consumer,
+                                    const bool timestampDiff,
+                                    bool& success);
+
+        static void OnCreateRequest(const char* const requestBlob,
+                                    const char* const state,
+                                    const long ctrl,
+                                    const Safir::Dob::Typesystem::Int32 responseId,
+                                    void* const consumer,
+                                    bool& success);
+
+        static void OnUpdateRequest(const char* const requestBlob,
+                                    const char* const state,
+                                    const long ctrl,
+                                    const Safir::Dob::Typesystem::Int32 responseId,
+                                    void* const consumer,
+                                    bool& success);
+
+        static void OnDeleteRequest(const char* const state,
+                                    const long ctrl,
+                                    const Safir::Dob::Typesystem::Int32 responseId,
+                                    void* const consumer,
+                                    bool& success);
+
+        static void OnServiceRequest(const char* const requestBlob,
+                                     const char* const state,
+                                     const long ctrl,
+                                     const Safir::Dob::Typesystem::Int32 responseId,
+                                     void* const consumer,
+                                     bool& success);
+
+        static void OnResponse(const Safir::Dob::RequestId requestId,
+                               const char* const responseBlob,
+                               const char* const responseState,
+                               const char* const requestBlob,
+                               const char* const requestState,
+                               void* const consumer,
+                               bool& success);
+
+        static void OnMessage(const char * const message,
+                              const char * const state,
+                              void* const consumer,
+                              bool & success);
+
+        static void OnRegistered(const Safir::Dob::Typesystem::TypeId typeId,
+                                 const Safir::Dob::Typesystem::Int64 handlerId,
+                                 const char* const handlerIdStr,
+                                 void* const consumer,
+                                 bool& success);
+
+        static void OnUnregistered(const Safir::Dob::Typesystem::TypeId typeId,
+                                   const Safir::Dob::Typesystem::Int64 handlerId,
+                                   const char* const handlerIdStr,
+                                   void* const consumer,
+                                   bool& success);
+
+        static void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId,
+                                          const Safir::Dob::Typesystem::Int64 handlerId,
+                                          const char* const handlerIdStr,
+                                          void* const consumer,
+                                          bool& success);
+
+        static void OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId typeId,
+                                            const Safir::Dob::Typesystem::Int64 handlerId,
+                                            const char* const handlerIdStr,
+                                            void* const consumer,
+                                            bool& success);
+
+        static void OnInjectedNewEntity(const char* const injectionBlob,
+                                        const char* const injectionState,
                                         void* const consumer,
-                                        const bool timestampDiff,
                                         bool& success);
 
-        static void __cdecl OnUpdatedEntity(const char* const currentBlob,
+        static void OnInjectedUpdatedEntity(const char* const injectionBlob,
+                                            const char* const injectionState,
+                                            const char* const currentBlob,
                                             const char* const currentState,
-                                            const char* const previousBlob,
-                                            const char* const previousState,
-                                            void* const consumer,
-                                            const bool timestampDiff,
-                                            bool& success);
-
-        static void __cdecl OnDeletedEntity(const char* const currentState,
-                                            const char* const previousBlob,
-                                            const char* const previousState,
-                                            const bool explicitlyDeleted,
-                                            void* const consumer,
-                                            const bool timestampDiff,
-                                            bool& success);
-
-        static void __cdecl OnCreateRequest(const char* const requestBlob,
-                                            const char* const state,
-                                            const long ctrl,
-                                            const Safir::Dob::Typesystem::Int32 responseId,
                                             void* const consumer,
                                             bool& success);
 
-        static void __cdecl OnUpdateRequest(const char* const requestBlob,
-                                            const char* const state,
-                                            const long ctrl,
-                                            const Safir::Dob::Typesystem::Int32 responseId,
+        static void OnInjectedDeletedEntity(const char* const injectionState,
+                                            const char* const currentBlob,
+                                            const char* const currentState,
                                             void* const consumer,
                                             bool& success);
 
-        static void __cdecl OnDeleteRequest(const char* const state,
-                                            const long ctrl,
-                                            const Safir::Dob::Typesystem::Int32 responseId,
+        static void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId,
+                                            const Safir::Dob::Typesystem::Int64 handlerId,
+                                            const char* const handlerIdStr,
                                             void* const consumer,
                                             bool& success);
 
-        static void __cdecl OnServiceRequest(const char* const requestBlob,
-                                             const char* const state,
-                                             const long ctrl,
-                                             const Safir::Dob::Typesystem::Int32 responseId,
-                                             void* const consumer,
-                                             bool& success);
+        static void OnNotRequestOverflow(void* const consumer,
+                                         bool & success);
 
-        static void __cdecl OnResponse(const Safir::Dob::RequestId requestId,
-                                       const char* const responseBlob,
-                                       const char* const responseState,
-                                       const char* const requestBlob,
-                                       const char* const requestState,
-                                       void* const consumer,
-                                       bool& success);
+        static void OnNotMessageOverflow(void* const consumer,
+                                         bool & success);
 
-        static void __cdecl OnMessage(const char * const message,
-                                      const char * const state,
-                                      void* const consumer,
-                                      bool & success);
-
-        static void __cdecl OnRegistered(const Safir::Dob::Typesystem::TypeId typeId,
-                                         const Safir::Dob::Typesystem::Int64 handlerId,
-                                         const char* const handlerIdStr,
-                                         void* const consumer,
-                                         bool& success);
-
-        static void __cdecl OnUnregistered(const Safir::Dob::Typesystem::TypeId typeId,
-                                           const Safir::Dob::Typesystem::Int64 handlerId,
-                                           const char* const handlerIdStr,
-                                           void* const consumer,
-                                           bool& success);
-
-        static void __cdecl OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId,
-                                                  const Safir::Dob::Typesystem::Int64 handlerId,
-                                                  const char* const handlerIdStr,
-                                                  void* const consumer,
-                                                  bool& success);
-
-        static void __cdecl OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId typeId,
-                                                    const Safir::Dob::Typesystem::Int64 handlerId,
-                                                    const char* const handlerIdStr,
-                                                    void* const consumer,
-                                                    bool& success);
-
-        static void __cdecl OnInjectedNewEntity(const char* const injectionBlob,
-                                                const char* const injectionState,
-                                                void* const consumer,
-                                                bool& success);
-
-        static void __cdecl OnInjectedUpdatedEntity(const char* const injectionBlob,
-                                                    const char* const injectionState,
-                                                    const char* const currentBlob,
-                                                    const char* const currentState,
-                                                    void* const consumer,
-                                                    bool& success);
-
-        static void __cdecl OnInjectedDeletedEntity(const char* const injectionState,
-                                                    const char* const currentBlob,
-                                                    const char* const currentState,
-                                                    void* const consumer,
-                                                    bool& success);
-
-        static void __cdecl OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId,
-                                                    const Safir::Dob::Typesystem::Int64 handlerId,
-                                                    const char* const handlerIdStr,
-                                                    void* const consumer,
-                                                    bool& success);
-
-        static void __cdecl OnNotRequestOverflow(void* const consumer,
-                                                 bool & success);
-
-        static void __cdecl OnNotMessageOverflow(void* const consumer,
-                                                 bool & success);
-
-        static void __cdecl OnDropReference(void* const consumer,
-                                            bool & success);
+        static void OnDropReference(void* const consumer,
+                                    bool & success);
     };
 }
 }

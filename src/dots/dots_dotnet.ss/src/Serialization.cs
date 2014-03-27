@@ -29,7 +29,7 @@ using System.Runtime.InteropServices;
 namespace Safir.Dob.Typesystem
 {
     /// <summary>
-    /// Methods for serializing objects to binary and XML forms.
+    /// Methods for serializing objects to binary, XML and JSON forms.
     /// </summary>
     public class Serialization
     {
@@ -141,6 +141,126 @@ namespace Safir.Dob.Typesystem
             if (blob == System.IntPtr.Zero)
             {
                 throw new IllegalValueException("Something is wrong with the XML-formated object");
+            }
+            Object obj = ObjectFactory.Instance.CreateObject(blob);
+
+#if FUNC_PTR_WORKAROUND
+            Internal.Kernel.DotsC_DeleteBlob(ref blob);
+#else
+            deleter(ref blob);
+#endif
+            return obj;
+        }
+
+
+        /// <summary>
+        /// Serialize an object to JSON.
+        /// </summary>
+        /// <param name="obj">The object to serialize</param>
+        /// <returns>The json serialization</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is something wrong with the object.</exception>
+        public static string ToJson(Dob.Typesystem.Object obj)
+        {
+            System.Int32 blobSize = obj.CalculateBlobSize();
+            System.IntPtr blob = Marshal.AllocHGlobal(blobSize);
+            System.IntPtr beginningOfUnused;
+            Internal.Kernel.DotsC_FormatBlob(blob, blobSize, obj.GetTypeId(), out beginningOfUnused);
+            obj.WriteToBlob(blob, ref beginningOfUnused);
+
+            int BUF_SIZE = 100000;
+            IntPtr buf = Marshal.AllocHGlobal(BUF_SIZE);
+            System.Int32 resultSize = 0;
+            Internal.Kernel.DotsC_BlobToJson(buf, blob, BUF_SIZE, out resultSize);
+            if (resultSize > BUF_SIZE)
+            {
+                BUF_SIZE = resultSize;
+                Marshal.FreeHGlobal(buf);
+                buf = Marshal.AllocHGlobal(BUF_SIZE);
+                Internal.Kernel.DotsC_BlobToJson(buf, blob, BUF_SIZE, out resultSize);
+                if (resultSize != BUF_SIZE)
+                {
+                    throw new SoftwareViolationException("Error in serialization buffer sizes!!!");
+                }
+            }
+            string str = Internal.InternalOperations.StringOf(buf, resultSize - 1); //remove null
+            Marshal.FreeHGlobal(buf);
+            Marshal.FreeHGlobal(blob);
+
+            return str;
+        }
+
+        /// <summary>
+        /// Convert a blob to JSON.
+        /// </summary>
+        /// <param name="binary">The blob to convert to json.</param>
+        /// <returns>The json of the blob.</returns>
+        public static string ToJson(byte[] binary)
+        {
+            System.IntPtr blob = Marshal.AllocHGlobal(binary.Length);
+            Marshal.Copy(binary, 0, blob, binary.Length);
+            try
+            {
+                return ToJson(blob);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(blob);
+            }
+        }
+
+        /// <summary>
+        /// Convert a blob to JSON.
+        /// </summary>
+        /// <param name="blob">The blob to convert to json.</param>
+        /// <returns>The json of the blob.</returns>
+        public static string ToJson(System.IntPtr blob)
+        {
+            int BUF_SIZE = 100000;
+            IntPtr buf = Marshal.AllocHGlobal(BUF_SIZE);
+            System.Int32 resultSize = 0;
+            Internal.Kernel.DotsC_BlobToJson(buf, blob, BUF_SIZE, out resultSize);
+            if (resultSize > BUF_SIZE)
+            {
+                BUF_SIZE = resultSize;
+                Marshal.FreeHGlobal(buf);
+                buf = Marshal.AllocHGlobal(BUF_SIZE);
+                Internal.Kernel.DotsC_BlobToJson(buf, blob, BUF_SIZE, out resultSize);
+                if (resultSize != BUF_SIZE)
+                {
+                    throw new SoftwareViolationException("Error in serialization buffer sizes!!!");
+                }
+            }
+            string str = Internal.InternalOperations.StringOf(buf, resultSize - 1); //remove null
+            Marshal.FreeHGlobal(buf);
+            
+            return str;
+        }
+
+        /// <summary>
+        /// Deserialize an JSON serialization.
+        /// <para>
+        /// This method creates a new object from a given json serialization.
+        /// It uses the ObjectFactory to accomplish this.
+        /// </para>
+        /// </summary>
+        /// <param name="json">The json serialization to deserialize.</param>
+        /// <returns>New object.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">If there is something wrong with the JSON or if the type
+        ///  represented by the serialization isn't found in the ObjectFactory.</exception>
+        public static Object ToObjectFromJson(string json)
+        {
+            IntPtr blob;
+            System.IntPtr sp = Internal.InternalOperations.CStringOf(json);
+#if FUNC_PTR_WORKAROUND
+            System.IntPtr deleter;
+#else
+            Internal.Kernel.DotsC_BytePointerDeleter deleter;
+#endif
+            Kernel.DotsC_JsonToBlob(out blob, out deleter, sp);
+            Marshal.FreeHGlobal(sp);
+            if (blob == System.IntPtr.Zero)
+            {
+                throw new IllegalValueException("Something is wrong with the JSON-formated object");
             }
             Object obj = ObjectFactory.Instance.CreateObject(blob);
 

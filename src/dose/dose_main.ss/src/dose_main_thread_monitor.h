@@ -32,7 +32,7 @@
   #pragma warning (disable : 4244 4127)
 #endif
 #include <boost/thread.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/chrono.hpp>
 #if defined _MSC_VER
   #pragma warning (pop)
 #endif
@@ -75,14 +75,14 @@ namespace Internal
                         threadName(_threadName),
                         counter(0),
                         lastCheckedCounterVal(0),
-                        lastTimeAlive(boost::posix_time::second_clock::universal_time()),
+                        lastTimeAlive(boost::chrono::steady_clock::now()),
                         errorLogIsGenerated(false) {};
 
-            std::wstring                threadName;
-            unsigned int                counter;
-            unsigned int                lastCheckedCounterVal;
-            boost::posix_time::ptime    lastTimeAlive;
-            bool                        errorLogIsGenerated;
+            std::wstring                               threadName;
+            unsigned int                               counter;
+            unsigned int                               lastCheckedCounterVal;
+            boost::chrono::steady_clock::time_point    lastTimeAlive;
+            bool                                       errorLogIsGenerated;
         };
 
         typedef std::map<boost::thread::id, WatchdogInfo> WatchdogMap;

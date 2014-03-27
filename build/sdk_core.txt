@@ -10,6 +10,7 @@ build_dir        build/config                              Release
 build_dir        build/patch_check                         Release
 
 #LLUF
+build_dir        src/lluf/lluf_build_helpers.ss/src         Release
 build_dir        src/lluf/lluf_config.ss/src                Release          Debug
 build_dir        src/lluf/lluf_config_dump.ss/src           Release
 build_dir        src/lluf/lluf_crash_reporter.ss/src        Release
@@ -17,6 +18,7 @@ build_dir        src/lluf/lluf_startup_synchronizer.ss/src  RelWithDebInfo
 build_dir        src/lluf/lluf_utils.ss/src                 RelWithDebInfo   Debug
 build_dir        src/lluf/lluf_logger_control.ss/src        RelWithDebInfo
 build_dir        src/lluf/lluf_crash_dump_monitor.ss/src    RelWithDebInfo
+build_dir        src/lluf/lluf_id.ss/src                    RelWithDebInfo
 
 #run the lluf unit tests
 run_test_suite   src/lluf/lluf_config.ss/tests                 lluf_config_tests
@@ -24,6 +26,7 @@ run_test_suite   src/lluf/lluf_crash_reporter.ss/tests         lluf_crash_report
 run_test_suite   src/lluf/lluf_crash_dump_monitor.ss/tests     lluf_crash_dump_monitor_tests
 run_test_suite   src/lluf/lluf_startup_synchronizer.ss/tests   lluf_startup_synchronizer_tests
 run_test_suite   src/lluf/lluf_utils.ss/tests                  lluf_tests
+run_test_suite   src/lluf/lluf_id.ss/tests                     lluf_id_tests
 
 #LOGGING
 build_dir        src/logging/logging_library.ss/src        RelWithDebInfo
@@ -37,8 +40,8 @@ run_test_suite   src/logging/logging_test.ss               logging_tests
  
 
 #DOTS
-build_dir        src/dots/dots_id.ss/src                   RelWithDebInfo
-run_test_suite   src/dots/dots_id.ss/tests                 dots_id_tests
+build_dir        src/dots/dots_internal.ss/src             RelWithDebInfo   Debug
+run_test_suite   src/dots/dots_internal.ss/tests           dots_internal_test_suite
 build_dir        src/dots/dots_kernel.ss/src               RelWithDebInfo
 build_dir        src/dots/dots_configuration_check.ss/src  RelWithDebInfo
 #build_dir        src/dots/dots_schema_validator.ss         RelWithDebInfo
@@ -70,6 +73,9 @@ build_dir        src/dots/dots_v.ss                        RelWithDebInfo
 #dobmake
 
 build_dir        src/dose/dose_dou.ss                      RelWithDebInfo   Debug
+
+#dots_kernel tests need dou files.
+run_test_suite   src/dots/dots_kernel.ss/tests             dots_kernel_tests
 
 build_dir        src/dose/dose_internal.ss/src             RelWithDebInfo   Debug
 run_test_suite   src/dose/dose_internal.ss/tests           dose_internal_tests

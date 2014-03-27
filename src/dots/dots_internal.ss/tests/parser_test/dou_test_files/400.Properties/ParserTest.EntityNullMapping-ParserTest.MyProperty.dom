@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+
+    <property>ParserTest.MyProperty</property>
+    <class>ParserTest.EntityNullMapping</class>
+
+    <memberMapping>
+        <member>
+            <propertyMember>Int32PropertyValue</propertyMember>
+        </member>        
+        <member>
+            <propertyMember>Float64PropertyValue</propertyMember>
+        </member>
+        <member>
+            <propertyMember>StringPropertyValue</propertyMember>
+        </member>
+        <member>
+            <propertyMember>EnumPropertyValue</propertyMember>
+        </member>
+        <member>
+            <propertyMember>EntityIdPropertyValue</propertyMember>
+        </member>
+        <member>
+            <propertyMember>ChannelIdPropertyValue</propertyMember>
+        </member>
+        <member>
+            <propertyMember>ItemPropertyValue</propertyMember>
+        </member>
+
+        <!-- array -->
+        <member>
+            <propertyMember>Int32PropertyValueArray</propertyMember>
+        </member>        
+        <member>
+            <propertyMember>Float64PropertyValueArray</propertyMember>
+        </member>
+        <member>
+            <propertyMember>StringPropertyValueArray</propertyMember>
+        </member>
+        <member>
+            <propertyMember>EnumPropertyValueArray</propertyMember>
+        </member>
+        <member>
+            <propertyMember>EntityIdPropertyValueArray</propertyMember>
+        </member>
+        <member>
+            <propertyMember>ChannelIdPropertyValueArray</propertyMember>
+        </member>
+        <member>
+            <propertyMember>ItemPropertyValueArray</propertyMember>
+        </member>
+    </memberMapping>
+
+</propertyMapping>

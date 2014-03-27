@@ -303,14 +303,10 @@ namespace Internal
                                                         request.GetTypeId(),
                                                         request.GetHandlerId());
 
-        const Dob::Typesystem::Si64::Second timeoutTime =
-            GetUtcTime() + GetTimeout(request.GetTypeId());
-
-        TimerHandler::Instance().Set(Discard, //discard the timer if it is already set
-                                     TimerInfoPtr(new ReqTimer(
-                                                         RequestTimers::m_localReqTimerId,
-                                                         timeoutInfo)),
-                                                         timeoutTime);
+        TimerHandler::Instance().SetRelative(Discard, //discard the timer if it is already set
+                                     TimerInfoPtr(new ReqTimer(RequestTimers::m_localReqTimerId,
+                                                               timeoutInfo)),
+                                     GetTimeout(request.GetTypeId()));
     }
 
 
@@ -588,13 +584,11 @@ namespace Internal
 
             RequestTimerInfo timeoutInfo = RequestTimerInfo(fromConnection->Id().m_id, reqId, request.GetTypeId(),request.GetHandlerId());
 
-            const Dob::Typesystem::Si64::Second timeoutTime = GetUtcTime() + deletedConnReqTimeout;
-
-            TimerHandler::Instance().Set(Replace,
-                                         TimerInfoPtr(new ReqTimer
-                                                      (RequestTimers::m_localReqTimerId,
-                                                       timeoutInfo)),
-                                         timeoutTime);
+            TimerHandler::Instance().SetRelative(Replace,
+                                                 TimerInfoPtr(new ReqTimer
+                                                              (RequestTimers::m_localReqTimerId,
+                                                               timeoutInfo)),
+                                                 deletedConnReqTimeout);
         }
     }
 
@@ -661,14 +655,11 @@ namespace Internal
                                                         request.GetTypeId(),
                                                         request.GetHandlerId());
 
-        const Dob::Typesystem::Si64::Second timeoutTime = GetUtcTime()
-            + GetTimeout(request.GetTypeId());
-
-        TimerHandler::Instance().Set(Discard,   //discard if already set
-                                     TimerInfoPtr(new ReqTimer(RequestTimers::m_externalReqTimerId,
-                                                               timeoutInfo)),
-                                     timeoutTime);
-
+        TimerHandler::Instance().SetRelative(Discard,   //discard if already set
+                                             TimerInfoPtr(new ReqTimer(RequestTimers::m_externalReqTimerId,
+                                                                       timeoutInfo)),
+                                             GetTimeout(request.GetTypeId()));
+                                             
         // Set that dose_main is waiting for the receiver
         m_blockingHandler->Request().AddWaitingConnection(blockingConn,
                                                           ExternNodeCommunication::DoseComVirtualConnectionId);

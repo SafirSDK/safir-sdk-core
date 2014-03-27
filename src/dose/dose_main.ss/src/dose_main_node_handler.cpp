@@ -31,6 +31,7 @@
 #include <Safir/Dob/AccessDeniedException.h>
 #include <Safir/Dob/DistributionChannelProperty.h>
 #include <Safir/Dob/Internal/Connection.h>
+#include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/NodeInfo.h>
@@ -204,9 +205,20 @@ namespace Internal
             m_connection.SetAll(ni,Typesystem::InstanceId(id),Typesystem::HandlerId());
         }
 
-        // Kick all connections so they will do an dispatch. This covers the case when ghost injections
-        // have been delayed because one or more nodes are distributing their pools (node in state Starting)
-        Connections::Instance().ForEachConnectionPtr(boost::bind(&NodeHandler::KickConnection,this,_1));
+
+        if (!NodeStatuses::Instance().AnyNodeHasStatus(NodeStatus::Starting) &&
+            !NodeStatuses::Instance().AnyNodeHasStatus(NodeStatus::Failed))
+        {
+            // Ok, it seems that all nodes are either Started or Expected (has never been started).
+            // In this case we know that we have got the pools, and thus the ghosts, from all nodes so
+            // we can clean-up the ghosts and only save the ones from the newest registration.
+
+            EntityTypes::Instance().CleanGhosts();
+
+            // Kick all connections so they will do an dispatch.
+            Connections::Instance().ForEachConnectionPtr(boost::bind(&NodeHandler::KickConnection,this,_1));
+
+        }
     }
 
     void NodeHandler::HandleDisconnect(const ConnectionPtr & connection, const NodeNumber node)

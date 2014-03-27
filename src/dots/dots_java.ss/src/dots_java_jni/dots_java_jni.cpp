@@ -22,9 +22,19 @@
 *
 ******************************************************************************/
 
+#include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
-#include <Safir/Dob/Typesystem/Internal/Id.h>
+
+#ifdef __GNUC__
+#pragma GCC visibility push (default)
+#endif
+
 #include "com_saabgroup_safir_dob_typesystem_Kernel.h"
+
+#ifdef __GNUC__
+#pragma GCC visibility pop
+#endif
+
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <iostream>
 #include <vector>
@@ -660,6 +670,55 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_XmlToBlob
     char * blob;
     DotsC_BytePointerDeleter deleter;
     DotsC_XmlToBlob(blob,deleter,GetUtf8(env,_xmlSource).get());
+    if (blob != NULL)
+    {
+        SetJArray(env,_blob,env->NewDirectByteBuffer(blob,DotsC_GetSize(blob)));
+    }
+    else
+    {
+        SetJArray(env,_blob,NULL);
+    }
+    SetJArray(env,_deleter,env->NewDirectByteBuffer((void*)deleter,0)); //just passing a pointer!
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    BlobToJson
+ * Signature: (Ljava/nio/ByteBuffer;)Ljava/lang/String;
+ */
+jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_BlobToJson
+  (JNIEnv * env, jclass, jobject _blob)
+{
+    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
+
+    int BUF_SIZE = 100000;
+    std::vector<char> json8(BUF_SIZE);
+    DotsC_Int32 resultSize;
+    DotsC_BlobToJson(&json8[0], blob, BUF_SIZE, resultSize);
+    if (resultSize> BUF_SIZE)
+    {
+        BUF_SIZE = resultSize;
+        json8.resize(BUF_SIZE);
+        DotsC_BlobToJson(&json8[0], blob, BUF_SIZE, resultSize);
+        if (resultSize != BUF_SIZE)
+        {
+            return NULL;
+        }
+    }
+    return env->NewStringUTF(&json8[0]);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    JsonToBlob
+ * Signature: ([Ljava/nio/ByteBuffer;[Ljava/nio/ByteBuffer;Ljava/lang/String;)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_JsonToBlob
+  (JNIEnv * env, jclass, jobjectArray _blob, jobjectArray _deleter, jstring _jsonSource)
+{
+    char * blob;
+    DotsC_BytePointerDeleter deleter;
+    DotsC_JsonToBlob(blob,deleter,GetUtf8(env,_jsonSource).get());
     if (blob != NULL)
     {
         SetJArray(env,_blob,env->NewDirectByteBuffer(blob,DotsC_GetSize(blob)));
@@ -1490,7 +1549,7 @@ jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetEnumerationCheck
 jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GenerateRandom64
   (JNIEnv *, jclass)
 {
-    return DotsId_GenerateRandom64();
+    return LlufId_GenerateRandom64();
 }
 
 /*
@@ -1501,7 +1560,7 @@ jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GenerateRandom64
 jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Generate64
   (JNIEnv * env, jclass, jstring _str)
 {
-    return DotsId_Generate64(GetUtf8(env,_str).get());
+    return LlufId_Generate64(GetUtf8(env,_str).get());
 }
 
 

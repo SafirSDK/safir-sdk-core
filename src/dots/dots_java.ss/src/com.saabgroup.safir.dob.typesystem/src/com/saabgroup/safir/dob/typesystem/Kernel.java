@@ -132,6 +132,12 @@ final class Kernel {
                                         ByteBuffer deleter [], //a very nasty way of passing a pointer back and forth
                                         String xmlSource);
 
+    public static native String BlobToJson(ByteBuffer blob);
+
+    public static native void JsonToBlob(ByteBuffer blob [],
+                                        ByteBuffer deleter [], //a very nasty way of passing a pointer back and forth
+                                        String jsonSource);
+
     public static native void InvokeDeleter(ByteBuffer deleter, ByteBuffer toDelete);
 
     public static native String BinaryToBase64(ByteBuffer binarySource, int size);

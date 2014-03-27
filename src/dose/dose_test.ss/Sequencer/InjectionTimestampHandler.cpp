@@ -28,6 +28,7 @@
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/SuccessResponse.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
+#include <Safir/Dob/Typesystem/Serialization.h>
 #include <iostream>
 
 InjectionTimestampHandler::InjectionTimestampHandler():
@@ -63,6 +64,7 @@ void InjectionTimestampHandler::OnUpdateRequest(const Safir::Dob::EntityRequestP
         (entityRequestProxy.GetRequest(),
          Safir::Dob::Typesystem::InstanceId(DoseTest::LastInjectionTimestamp::ClassTypeId),
          Safir::Dob::Typesystem::HandlerId());
+    std::wcout << "Got UpdateRequest to timestamp entity: " << Safir::Dob::Typesystem::Serialization::ToXml(entityRequestProxy.GetBlob()) << std::endl;
     responseSender->Send(Safir::Dob::SuccessResponse::Create());
 }
 

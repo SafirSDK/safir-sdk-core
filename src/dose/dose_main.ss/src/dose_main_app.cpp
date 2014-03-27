@@ -132,9 +132,9 @@ namespace Internal
 
         // Schedule a timer so that the main thread will kick the watchdog.
         TimerInfoPtr timerInfo(new EmptyTimerInfo(TimerHandler::Instance().RegisterTimeoutHandler(L"dose_main watchdog timer", *this)));
-        TimerHandler::Instance().Set(Discard,
-                                     timerInfo,
-                                     GetUtcTime() + 5.0);
+        TimerHandler::Instance().SetRelative(Discard,
+                                             timerInfo,
+                                             5.0);
 
         // enter main loop
 #ifndef NDEBUG
@@ -284,9 +284,9 @@ namespace Internal
     {
         m_threadMonitor.KickWatchdog(m_mainThreadId);
 
-        TimerHandler::Instance().Set(Discard,
-                                     timer,
-                                     GetUtcTime() + 5.0);
+        TimerHandler::Instance().SetRelative(Discard,
+                                             timer,
+                                             5.0);
     }
 
     ConnectResult DoseApp::CanAddConnection(const std::string & connectionName, const pid_t pid, const long /*context*/)
@@ -707,7 +707,7 @@ namespace Internal
             MemoryMonitor monitor;
             for (;;)
             {
-                boost::this_thread::sleep(boost::posix_time::seconds(5));
+                boost::this_thread::sleep_for(boost::chrono::seconds(5));
                 monitor.Check();
             }
         }

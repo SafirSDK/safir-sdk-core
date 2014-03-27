@@ -168,15 +168,15 @@
             <values>
                 <value>
                     <member>Int32Member</member>
-                    <parameter>DotsTest.ParameterTypes.Int32Parameter</parameter>
+                    <parameter><name>DotsTest.ParameterTypes.Int32Parameter</name></parameter>
                 </value>
                 <value>
                     <member>EnumerationMember</member>
-                    <parameter>DotsTest.ParameterTypes.EnumerationParameter</parameter>
+                    <parameter><name>DotsTest.ParameterTypes.EnumerationParameter</name></parameter>
                 </value>
                 <value>
                     <member>TestClassMember</member>
-                    <parameter>DotsTest.ParameterTypes.TestClassParameter</parameter>
+                    <parameter><name>DotsTest.ParameterTypes.TestClassParameter</name></parameter>
                 </value>
             </values>
         </createRoutine>
@@ -186,18 +186,24 @@
             <values>
                 <value>
                     <member>Int32Member</member>
-                    <parameter>DotsTest.ParameterArrays.Int32Parameter</parameter>
-                    <index>1</index>
+                    <parameter>
+                        <name>DotsTest.ParameterArrays.Int32Parameter</name>
+                        <index>1</index>
+                    </parameter>
                 </value>
                 <value>
                     <member>EnumerationMember</member>
-                    <parameter>DotsTest.ParameterArrays.EnumerationParameter</parameter>
-                    <index>1</index>
+                    <parameter>
+                        <name>DotsTest.ParameterArrays.EnumerationParameter</name>
+                        <index>1</index>
+                    </parameter>
                 </value>
                 <value>
                     <member>TestClassMember</member>
-                    <parameter>DotsTest.ParameterArrays.TestClassParameter</parameter>
-                    <index>1</index>
+                    <parameter>
+                        <name>DotsTest.ParameterArrays.TestClassParameter</name>
+                        <index>1</index>
+                    </parameter>
                 </value>
             </values>
         </createRoutine>

@@ -42,7 +42,7 @@ class TimerTesterBase
 public:
     TimerTesterBase(const std::wstring& name)
         : m_ok(false)
-        , m_constructionTime(GetUtcTime())
+        , m_constructionTime(boost::chrono::steady_clock::now())
     {
         m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(name, *this);
     }
@@ -67,7 +67,7 @@ public:
 protected:
     TimerId m_timerId;
     bool m_ok;
-    const double m_constructionTime;
+    const boost::chrono::steady_clock::time_point m_constructionTime;
 };
 
 
@@ -78,7 +78,7 @@ public:
     SingleTimerTester(const std::wstring& name, const double delay) : TimerTesterBase(name)
     {
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().Set(Replace, timerInfo, GetUtcTime() + delay);
+        TimerHandler::Instance().SetRelative(Replace, timerInfo, delay);
     }
 
     void HandleTimeout(const TimerInfoPtr& /*timer*/)
@@ -95,13 +95,13 @@ public:
     ReplaceTimerTester() : TimerTesterBase(L"Replace Timer")
     {
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().Set(Replace, timerInfo, GetUtcTime() + 10000);
-        TimerHandler::Instance().Set(Replace, timerInfo, GetUtcTime() + 0.01); //replace the previous timer
+        TimerHandler::Instance().SetRelative(Replace, timerInfo, 10000);
+        TimerHandler::Instance().SetRelative(Replace, timerInfo, 0.01); //replace the previous timer
     }
 
     void HandleTimeout(const TimerInfoPtr& /*timer*/)
     {
-        if (GetUtcTime() - m_constructionTime < 100.0)
+        if (boost::chrono::steady_clock::now() - m_constructionTime < boost::chrono::seconds(100))
         {
             m_ok = true;
         }
@@ -116,14 +116,14 @@ public:
     DiscardTimerTester() : TimerTesterBase(L"Discard Timer")
     {
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().Set(Discard, timerInfo, GetUtcTime() + 0.01); 
-        TimerHandler::Instance().Set(Discard, timerInfo, GetUtcTime() + 10); //this should be discarded
+        TimerHandler::Instance().SetRelative(Discard, timerInfo, 0.01); 
+        TimerHandler::Instance().SetRelative(Discard, timerInfo, 10); //this should be discarded
 
     }
 
     void HandleTimeout(const TimerInfoPtr& /*timer*/)
     {
-        if (GetUtcTime() - m_constructionTime < 1.0)
+        if (boost::chrono::steady_clock::now() - m_constructionTime < boost::chrono::seconds(1))
         {
             m_ok = true;
         }
@@ -140,7 +140,8 @@ public:
                             m_timerInfo(new EmptyTimerInfo(m_timerId)),
                             m_repeats(1000),
                             m_count(m_repeats),
-                            m_delay(0.01)
+                            m_delayMillis(10),
+                            m_delay(m_delayMillis)
     {
         TimerHandler::Instance().Set(Replace, m_timerInfo, m_constructionTime + m_delay); 
     }
@@ -149,14 +150,16 @@ public:
     {
         --m_count;
 
-        TimerHandler::Instance().Set(Replace, m_timerInfo, m_constructionTime + (m_repeats - m_count) * m_delay); 
+        TimerHandler::Instance().Set(Replace, 
+                                     m_timerInfo, 
+                                     m_constructionTime + (m_repeats - m_count) * m_delay); 
 
-        const double now = GetUtcTime();
+        const boost::chrono::steady_clock::time_point now = boost::chrono::steady_clock::now();
 
         if (m_count == 0)
         {
-            const double elapsed = now - m_constructionTime;
-            const double error = fabs(elapsed/(m_repeats*m_delay) - 1) * 100;
+            const double elapsed = (now - m_constructionTime).count() / 1.0e9;
+            const double error = fabs(elapsed/(m_repeats*m_delayMillis/1000.0) - 1) * 100;
 
             if (error < 15.0) //15% total error allowed
             {
@@ -174,7 +177,8 @@ private:
     TimerInfoPtr m_timerInfo;
     const int m_repeats;
     int m_count;
-    const double m_delay;
+    const int m_delayMillis;
+    const boost::chrono::milliseconds m_delay;
 };
 
 
@@ -187,16 +191,16 @@ public:
         , m_timeoutCount(0)
     {
         m_timerInfo.reset(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().Set(Discard, m_timerInfo, GetUtcTime() + 0.0001);
+        TimerHandler::Instance().SetRelative(Discard, m_timerInfo, 0.0001);
         m_ok = true;
     }
 
     void HandleTimeout(const TimerInfoPtr& /*timer*/)
     {
         ++m_timeoutCount;
-        const double now = GetUtcTime();
-        boost::this_thread::sleep(boost::posix_time::milliseconds(20));
-        TimerHandler::Instance().Set(Discard, m_timerInfo, now + 0.01);
+        const boost::chrono::steady_clock::time_point now = boost::chrono::steady_clock::now();
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(20));
+        TimerHandler::Instance().Set(Discard, m_timerInfo, now + boost::chrono::milliseconds(10));
     }
 
     ~TimerStarver()

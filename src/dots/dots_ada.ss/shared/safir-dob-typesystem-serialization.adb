@@ -183,6 +183,134 @@ package body Safir.Dob.Typesystem.Serialization is
       end;
    end To_Xml;
 
+   ---------------------------
+   -- To_Json (from object) --
+   ---------------------------
+   function To_Json
+     (Object : Safir.Dob.Typesystem.Object.Smart_Pointer'Class)
+      return Unbounded_Wide_String is
+
+      use type Safir.Dob.Typesystem.Object.Object_Class_Access;
+
+      Blob_Size : constant Safir.Dob.Typesystem.Int_32 := Object.Ref.Calculate_Blob_Size;
+      Blob : Safir.Dob.Typesystem.Blob_T;
+      Beginning_Of_Unused : Safir.Dob.Typesystem.Blob_T;
+   begin
+      if Object.Ref = null then
+         Throw (Software_Violation_Exception'Identity,
+                "Attempt to serialize a null pointer to json!");
+      end if;
+
+      Blob := C_Malloc (C.size_t (Blob_Size));
+
+      Safir.Dob.Typesystem.Kernel.Format_Blob (Blob,
+                                               Blob_Size,
+                                               Object.Ref.Get_Type_Id,
+                                               Beginning_Of_Unused);
+      Object.Ref.Write_To_Blob (Blob, Beginning_Of_Unused);
+
+      declare
+         Str : constant Unbounded_Wide_String := To_Json (Blob);
+      begin
+         C_Free (Blob);
+         return Str;
+      end;
+   end To_Json;
+
+   ---------------------------------------------
+   -- To_Object_From_Json (from Json string) --
+   ---------------------------------------------
+   function To_Object_From_Json (Json : in Unbounded_Wide_String) return
+     Safir.Dob.Typesystem.Object.Smart_Pointer'Class is
+
+      use type Blob_T;
+
+      Deleter     : Safir.Dob.Typesystem.Kernel.Blob_Deleter_Cb_Type;
+      pragma Convention (C, Deleter);
+
+      Blob : Safir.Dob.Typesystem.Blob_T;
+      Json_8 : constant String := Safir.Dob.Typesystem.Utilities.To_Utf_8 (Json);
+   begin
+      Safir.Dob.Typesystem.Kernel.Json_To_Blob (Blob, Deleter, C.To_C (Json_8));
+
+      if Blob = null then
+         Throw (Illegal_Value_Exception'Identity,
+                "Something is wrong with the JSON-formated object");
+      end if;
+
+      declare
+         Obj_Ptr : constant Safir.Dob.Typesystem.Object.Smart_Pointer'Class :=
+                     Safir.Dob.Typesystem.Object.Factory.Create_Object (Blob);
+      begin
+         Deleter.all (Blob);
+         return Obj_Ptr;
+      end;
+
+   end To_Object_From_Json;
+
+   ---------------------------
+   -- To_Json (from binary) --
+   ---------------------------
+   function To_Json (Binary : in Safir.Dob.Typesystem.Binary_Vectors.Vector)
+                    return Unbounded_Wide_String is
+      use type Blob_T;
+
+      Blob      : Safir.Dob.Typesystem.Blob_T;
+      Tmp_Ptr : Safir.Dob.Typesystem.Blob_T;
+   begin
+      Blob := C_Malloc (C.size_t (Binary.Length));
+      Tmp_Ptr := Blob;
+      for I in Binary.First_Index .. Binary.Last_Index loop
+         Tmp_Ptr.all := To_Char (Binary.Element (I));
+         Tmp_Ptr := Tmp_Ptr + 1;
+      end loop;
+
+      declare
+         Str : constant Unbounded_Wide_String := To_Json (Blob);
+      begin
+         C_Free (Blob);
+         return Str;
+      end;
+   end To_Json;
+
+   -------------------------
+   -- To_Json (from blob) --
+   -------------------------
+   function To_Json
+     (Blob : Safir.Dob.Typesystem.Blob_T) return Unbounded_Wide_String is
+
+      Json_Buf_Size : Safir.Dob.Typesystem.Int_32 := 100_000;
+      Json_Buf      : Safir.Dob.Typesystem.Char_Star;
+      Result_Size : Safir.Dob.Typesystem.Int_32;
+   begin
+      Json_Buf := C_Malloc (C.size_t (Json_Buf_Size));
+
+      Safir.Dob.Typesystem.Kernel.Blob_To_Json
+        (Json_Buf, Blob, Json_Buf_Size, Result_Size);
+
+      if Result_Size > Json_Buf_Size then
+         Json_Buf_Size := Result_Size;
+         C_Free (Json_Buf);
+         Json_Buf := C_Malloc (C.size_t (Json_Buf_Size));
+
+         Safir.Dob.Typesystem.Kernel.Blob_To_Json (Json_Buf,
+                                                   Blob,
+                                                   Json_Buf_Size,
+                                                   Result_Size);
+            if Result_Size /= Json_Buf_Size then
+               Throw (Software_Violation_Exception'Identity,
+                      "Error in serialization buffer sizes!!!");
+            end if;
+      end if;
+
+      declare
+         Json_String : constant String := To_Ada (Json_Buf, Result_Size - 1); -- Remove null
+      begin
+         C_Free (Json_Buf);
+         return From_Utf_8 (Json_String);
+      end;
+   end To_Json;
+
    ---------------
    -- To_Binary --
    ---------------

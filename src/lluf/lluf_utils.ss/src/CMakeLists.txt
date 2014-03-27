@@ -11,13 +11,11 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(lluf_utils SHARED ${sources} ${headers})
 
-FIND_PACKAGE(Boost COMPONENTS filesystem date_time system thread program_options)
+FIND_PACKAGE(Boost COMPONENTS filesystem system thread program_options)
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(lluf_utils lluf_startup_synchronizer lluf_config ${Boost_LIBRARIES} dl rt)
 endif()
-
-ADD_DEFINITIONS(-DLLUF_UTILS_EXPORTS)
 
 #on windows we need the psapi library
 if (WIN32)

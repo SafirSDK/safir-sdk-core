@@ -36,7 +36,7 @@ namespace Application
     /**
      * This class just contains two static methods, for starting and stopping the tracers backdoor.
      */
-    class SWRE_API TracerBackdoor
+    class SWRE_INTERFACE_CPP_API TracerBackdoor
     {
     public:
         /**
@@ -66,7 +66,7 @@ namespace Application
     /**
      * A class for trace logging.
      */
-    class SWRE_API Tracer
+    class SWRE_INTERFACE_CPP_API Tracer
     {
     private:
         typedef std::basic_ios<wchar_t, std::char_traits<wchar_t> > ios_type;

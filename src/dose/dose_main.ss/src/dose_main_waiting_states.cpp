@@ -43,9 +43,9 @@ namespace Internal
         m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(L"Waiting States Timer", *this);
 
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().Set(Discard,
-                                     timerInfo,
-                                     GetUtcTime() + 60.0*5); //time out in 5 minutes
+        TimerHandler::Instance().SetRelative(Discard,
+                                             timerInfo,
+                                             60.0*5); //time out in 5 minutes
     }
 
     void WaitingStates::Add(const DistributionData & state)
@@ -80,10 +80,10 @@ namespace Internal
                 //if we didn't have a connection id before
                 theStates.connectionId = senderId;
             }
-            else
+            else if (theStates.connectionId.m_id != -1 && senderId.m_id != -1)
             {
                 ENSURE(theStates.connectionId == senderId, << "WaitingStates::Add does not expect connection id's to change! old "
-                    << theStates.connectionId << ", new " << senderId << ". While processing state " << state.Image());
+                       << theStates.connectionId << ", new " << senderId << ". While processing state " << state.Image());
             }
         }
 
@@ -239,9 +239,9 @@ namespace Internal
 
     void WaitingStates::HandleTimeout(const TimerInfoPtr& timer)
     {
-        TimerHandler::Instance().Set(Discard,
-                                     timer,
-                                     GetUtcTime() + 5*60.0); //time out again in 60 seconds
+        TimerHandler::Instance().SetRelative(Discard,
+                                             timer,
+                                             5*60.0); //time out again in 60 seconds
 
         const size_t size = m_waitingStateTable.size();
         if (size != 0 && size == m_lastSize)

@@ -52,7 +52,7 @@ namespace Utilities
      * @param wstr [in] - The wstring to convert.
      * @return - The string in UTF8 format.
      */
-    DOTS_API const std::string ToUtf8(const std::wstring & wstr);
+    DOTS_CPP_API const std::string ToUtf8(const std::wstring & wstr);
 
     /**
      * Convert a UTF8-encoded std::string to std::wstring
@@ -60,7 +60,7 @@ namespace Utilities
      * @param str [in] - The string to convert.
      * @return - The wide string.
      */
-    DOTS_API const std::wstring ToWstring(const std::string & str);
+    DOTS_CPP_API const std::wstring ToWstring(const std::string & str);
 
     /**
      * Merge the changed members (recursively) from one object into another.
@@ -72,7 +72,7 @@ namespace Utilities
      * @param into [in] - Object to merge into.
      * @param from [in,out] - Object whose changes shall be merged into "into".
      */
-    DOTS_API void MergeChanges(ObjectPtr into, const ObjectPtr from);
+    DOTS_CPP_API void MergeChanges(ObjectPtr into, const ObjectPtr from);
 
     /**
      * Converts binary data to Base64.
@@ -83,7 +83,7 @@ namespace Utilities
      * @param sourceSize [in] - number of bytes to convert.
      * @return The a string containing the Base64 representation of the binary source.
      */
-    DOTS_API const std::string BinaryToBase64(char const * const binarySource, int sourceSize);
+    DOTS_CPP_API const std::string BinaryToBase64(char const * const binarySource, int sourceSize);
 
     /**
      * Converts binary data to Base64.
@@ -93,17 +93,17 @@ namespace Utilities
      * @param bin [in] - binary data to convert.
      * @return A string containing the Base64 representation of the binary source.
      */
-    DOTS_API const std::string BinaryToBase64(const Dob::Typesystem::Binary & bin);
+    DOTS_CPP_API const std::string BinaryToBase64(const Dob::Typesystem::Binary & bin);
 
     /**
      * Converts data in Base64 format into binary data format.
      *
      * Will convert data from Base64 format to binary format.
      *
-     * @param base64 [in] - Base64 data to convert.
+     * @param base64Str [in] - Base64 data to convert.
      * @param binary [out] - binary serialization that will contain the result.
      */
-    DOTS_API void Base64ToBinary(const std::string& base64, Dob::Typesystem::Binary & binary);
+    DOTS_CPP_API void Base64ToBinary(const std::string& base64Str, Dob::Typesystem::Binary & binary);
 }
 }
 }

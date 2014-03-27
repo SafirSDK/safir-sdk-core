@@ -10,42 +10,22 @@ SET(NO_LIBRARY_POSTFIXES 1)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
+#if we're using a very old GCC we need to disable some spurious warnings.
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.5)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-array-bounds -Wno-strict-aliasing")
+endif()
+
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dots_kernel SHARED ${sources} ${headers})
 
-find_library(EXPAT_LIBRARY NAMES expat libexpat
-             HINTS ${SAFIR_SDK}/lib
-             PATHS ENV PATH
-             PATH_SUFFIXES ../lib)
-if (NOT EXPAT_LIBRARY)
-    message(FATAL_ERROR "Couldn't find expat.lib or libexpat.lib")
-endif()
 
-#on windows we don't trust that expat is installed on the INCLUDE path.
-#we also check where it ends up if you use the expat install package.
-if (WIN32)
-    find_path(EXPAT_HEADER NAMES expat.h
-              HINTS ${SAFIR_SDK}/include
-              PATHS ENV PATH
-              PATH_SUFFIXES ../Source/lib ../include)
-    if (NOT EXPAT_HEADER)
-        message(FATAL_ERROR "Couldn't find expat.h")
-    endif()
-    
-    INCLUDE_DIRECTORIES(${EXPAT_HEADER})
-endif()
-
-FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time system)
-
-TARGET_LINK_LIBRARIES(dots_kernel ${EXPAT_LIBRARY})
+FIND_PACKAGE(Boost COMPONENTS regex filesystem system)
 
 IF (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dots_kernel dots_id lluf_utils lluf_startup_synchronizer lluf_crash_reporter lluf_config ${Boost_LIBRARIES} rt)
+  TARGET_LINK_LIBRARIES(dots_kernel dots_internal lluf_utils lluf_startup_synchronizer lluf_crash_reporter lluf_config ${Boost_LIBRARIES} rt)
 ENDIF()
-
-ADD_DEFINITIONS(-DDOTSKERNEL_EXPORTS)
 
 #check if we can do unaligned accesses, or if we should define a symbol that fixes it.
 include(CheckCXXSourceRuns)

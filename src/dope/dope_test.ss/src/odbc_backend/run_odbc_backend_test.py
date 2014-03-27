@@ -23,15 +23,25 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+from __future__ import print_function
 import sys, os, shutil, xml.dom.minidom, glob, time, subprocess, re
 from testenv import TestEnv, TestEnvStopper
+
+class Unbuffered:
+   def __init__(self, stream):
+       self.stream = stream
+   def write(self, data):
+       self.stream.write(data)
+       self.stream.flush()
+   def __getattr__(self, attr):
+       return getattr(self.stream, attr)
 
 def rmdir(directory):
     if os.path.exists(directory):
         try:
             shutil.rmtree(directory)
         except OSError:
-            log("Failed to remove directory, will retry")
+            print("Failed to remove directory, will retry")
             time.sleep(0.2)
             shutil.rmtree(directory)
 
@@ -52,18 +62,18 @@ class Parameters:
         (options,args) = parser.parse_args()
 
         if not options.driver:
-            print "Need --driver argument"
+            print("Need --driver argument")
             sys.exit(1)
 
         if not options.database:
-            print "Need --database argument"
+            print("Need --database argument")
             sys.exit(1)
 
         self.driver = options.driver
 
         self.SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
         if not self.SAFIR_RUNTIME:
-            print "Cannot run without SAFIR_RUNTIME being set."
+            print("Cannot run without SAFIR_RUNTIME being set.")
             sys.exit(1)
 
         self.parameters_path = os.path.join(self.SAFIR_RUNTIME,
@@ -100,7 +110,7 @@ class Parameters:
                                                                hostname = options.hostname,
                                                                database = options.database)
 
-        print "Using connection string", self.connection_string
+        print("Using connection string", self.connection_string)
 
 def getText(nodelist):
     rc = []
@@ -110,7 +120,7 @@ def getText(nodelist):
     return ''.join(rc)
 
 def UpdateConfig(parameters):
-    print "** Updating configuration files"
+    print("** Updating configuration files")
     #backup dou files to temporary directory
     shutil.copy2(parameters.PersistenceParameters_path, parameters.tempdir)
     
@@ -127,7 +137,7 @@ def UpdateConfig(parameters):
        file.write(dom.toxml())
 
 def RestoreConfig(parameters):
-    print "** Restoring configuration files"
+    print("** Restoring configuration files")
     #restore dou files from temporary directory
     dous = glob.glob(os.path.join(parameters.tempdir,"*.dou"))
     for dou in dous:
@@ -135,7 +145,7 @@ def RestoreConfig(parameters):
     rmdir(parameters.tempdir)
 
 #make stdout unbuffered
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+sys.stdout=Unbuffered(sys.stdout)
 
 if sys.platform == "win32":
     config_type = os.environ.get("CMAKE_CONFIG_TYPE")
@@ -157,15 +167,15 @@ def run_sql(parameters,statement):
                                universal_newlines=True)
     output = process.communicate()[0]
     if process.returncode != 0:
-        print "Unexpected return code when running statement:", statement
-        print output
+        print("Unexpected return code when running statement:", statement)
+        print(output)
         sys.exit(1)
     match = run_sql_pattern.search(output)
     try:
         return int(match.group(1))
     except Exception as e:
-        print "Failed to get rows out of output:"
-        print output
+        print("Failed to get rows out of output:")
+        print(output)
         sys.exit(1)
 
 def count_rows(parameters):
@@ -194,120 +204,120 @@ try:
 
     UpdateConfig(parameters)
 
-    print "== Clear the db"
+    print("== Clear the db")
     delete_all_rows(parameters)
 
-    print "== Set a bunch of entities"
+    print("== Set a bunch of entities")
     env = TestEnv()
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", (owner_path,"set")).wait()
-        print "waiting for 110 entities in db"
+        print("waiting for 110 entities in db")
         while count_rows(parameters) != 110:
             time.sleep(1)
 
     if not env.ReturnCodesOk():
-        print "Some process exited with an unexpected value"
+        print("Some process exited with an unexpected value")
         sys.exit(1)
 
     syslog_output = env.Syslog()
     if len(syslog_output) != 0:
-        log("Unexpected syslog output:\n" + syslog_output)
+        print("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
 
 
-    print "== See if dope loads them at startup"
+    print("== See if dope loads them at startup")
     env = TestEnv()
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", (owner_path,"accept")).wait()
 
     if not env.ReturnCodesOk():
-        print "Some process exited with an unexpected value"
+        print("Some process exited with an unexpected value")
         sys.exit(1)
 
     syslog_output = env.Syslog()
     if len(syslog_output) != 0:
-        log("Unexpected syslog output:\n" + syslog_output)
+        print("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
 
     output = env.Output("entity_owner")
     if output.count("OnInjectedNewEntity") != 110:
-        print "could not find the right number of 'OnInjectedNewEntity' in output"
+        print("could not find the right number of 'OnInjectedNewEntity' in output")
         sys.exit(1)
 
-    if output.count("<name>DopeTest.SmallEntity</name>") != 100:
-        print "could not find the right number of 'DopeTest.SmallEntity' in output"
+    if output.count("<DopeTest.SmallEntity>") != 100:
+        print("could not find the right number of 'DopeTest.SmallEntity' in output")
         sys.exit(1)
 
     if count_small(parameters) != 100:
-        print "could not find the right number of entries in the small column in the database"
+        print("could not find the right number of entries in the small column in the database")
         sys.exit(1)
 
-    if output.count("<name>DopeTest.BigEntity</name>") != 10:
-        print "could not find the right number of 'DopeTest.BigEntity' in output"
+    if output.count("<DopeTest.BigEntity>") != 10:
+        print("could not find the right number of 'DopeTest.BigEntity' in output")
         sys.exit(1)
 
     if count_big(parameters) != 10:
-        print "could not find the right number of entries in the big column in the database"
+        print("could not find the right number of entries in the big column in the database")
         sys.exit(1)
 
 
     if count_xml(parameters) != 0:
-        print "Unexpected xml data found!"
+        print("Unexpected xml data found!")
         sys.exit(1)
 
-    print "== Convert binaries to xml"
+    print("== Convert binaries to xml")
 
     #db is automatically chosen by parameter setting
     subprocess.call(os.path.join(parameters.SAFIR_RUNTIME,"bin","dope_bin2xml"))
 
     if count_xml(parameters) != 110 or count_rows(parameters) != 110:
-        print "dope_bin2xml appears to have failed"
+        print("dope_bin2xml appears to have failed")
         sys.exit(1)
 
     #remove bin to check that dope can load xml
     delete_binary(parameters)
     if count_small(parameters) != 0 or count_big(parameters):
-        print "Failed to delete binaries"
+        print("Failed to delete binaries")
         sys.exit(1)
 
-    print "== Check that dope can load xml"
+    print("== Check that dope can load xml")
 
     env = TestEnv()
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", (owner_path,"accept")).wait()
 
     if not env.ReturnCodesOk():
-        print "Some process exited with an unexpected value"
+        print("Some process exited with an unexpected value")
         sys.exit(1)
 
     syslog_output = env.Syslog()
     if len(syslog_output) != 0:
-        log("Unexpected syslog output:\n" + syslog_output)
+        print("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
         
     output = env.Output("entity_owner")
     if output.count("OnInjectedNewEntity") != 110:
-        print "could not find the right number of 'OnInjectedNewEntity' in output"
+        print("could not find the right number of 'OnInjectedNewEntity' in output")
         sys.exit(1)
 
-    if output.count("<name>DopeTest.SmallEntity</name>") != 100:
-        print "could not find the right number of 'DopeTest.SmallEntity' in output"
+    if output.count("<DopeTest.SmallEntity>") != 100:
+        print("could not find the right number of 'DopeTest.SmallEntity' in output")
         sys.exit(1)
 
-    if output.count("<name>DopeTest.BigEntity</name>") != 10:
-        print "could not find the right number of 'DopeTest.BigEntity' in output"
+    if output.count("<DopeTest.BigEntity>") != 10:
+        print("could not find the right number of 'DopeTest.BigEntity' in output")
         sys.exit(1)
 
     if count_big(parameters) != 10 or count_small(parameters) != 100:
-        print "xml does not appear to have been translated into binaries"
+        print("xml does not appear to have been translated into binaries")
         sys.exit(1)
 
     if count_xml(parameters) != 0:
-        print "Unexpected xml found!"
+        print("Unexpected xml found!")
         sys.exit(1)
 
 
-    print "== update the entities"
+    print("== update the entities")
 
 
     env = TestEnv()
@@ -321,48 +331,48 @@ try:
 
         env.launchProcess("entity_owner", (owner_path,"update")).wait()
 
-        print "waiting for 110 entities in db"
+        print("waiting for 110 entities in db")
         while count_binares(parameters) != 110:
             time.sleep(1)
 
     if not env.ReturnCodesOk():
-        print "Some process exited with an unexpected value"
+        print("Some process exited with an unexpected value")
         sys.exit(1)
 
     syslog_output = env.Syslog()
     if len(syslog_output) != 0:
-        log("Unexpected syslog output:\n" + syslog_output)
+        print("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
 
-    print "== Load them again and check output"
+    print("== Load them again and check output")
     env = TestEnv()
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", (owner_path,"accept")).wait()
 
     if not env.ReturnCodesOk():
-        print "Some process exited with an unexpected value"
+        print("Some process exited with an unexpected value")
         sys.exit(1)
 
     syslog_output = env.Syslog()
     if len(syslog_output) != 0:
-        log("Unexpected syslog output:\n" + syslog_output)
+        print("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
 
     output = env.Output("entity_owner")
     if output.count("name is changed") != 100:
-        print "could not find the right number of updated SmallEntity in output"
+        print("could not find the right number of updated SmallEntity in output")
         sys.exit(1)
 
     if output.count("99999999") != 10:
-        print "could not find the right number of updated BigEntity in output"
+        print("could not find the right number of updated BigEntity in output")
         sys.exit(1)
 
 
 finally:
-    print "== Clear the db"
+    print("== Clear the db")
     delete_all_rows(parameters)
 
     RestoreConfig(parameters)
 
-print "Success"
+print("Success")
 sys.exit(0)

@@ -1,87 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<object xmlns="urn:safir-dots-unit">
-  <name>DoseTest.Items.TestCase</name>
-  <members>
-    <member>
-      <name>Description</name>
-      <value>Test of double registration of global entity handler (revoke)</value>
-    </member>
-    <member>
-      <name>Expectation</name>
-      <value>Partner 0/Consumer 0 receives one OnRevokedRegistration for GLOBAL_HANDLER_0</value>
-    </member>
-    <member>
-      <name>TestCaseSetupActions</name>
-      <arrayElements>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.RegisterEntityHandler</value>
-              </member>
-              <member>
-                <name>TypeId</name>
-                <value>DoseTest.GlobalEntity</value>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>GLOBAL_HANDLER_0</value>
-              </member>
-              <member>
-                <name>InstanceIdPolicy</name>
-                <value>Safir.Dob.InstanceIdPolicy.RequestorDecidesInstanceId</value>
-              </member>              
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>                
-      </arrayElements>
-    </member>
-    <member>
-      <name>TestActions</name>
-      <arrayElements>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>2</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.RegisterEntityHandler</value>
-              </member>
-              <member>
-                <name>TypeId</name>
-                <value>DoseTest.GlobalEntity</value>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>GLOBAL_HANDLER_0</value>
-              </member>
-              <member>
-                <name>InstanceIdPolicy</name>
-                <value>Safir.Dob.InstanceIdPolicy.RequestorDecidesInstanceId</value>
-              </member>              
-              <member>
-                <name>Consumer</name>
-                <value>2</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-      </arrayElements>
-    </member>
-  </members>
-</object>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of double registration of global entity handler (revoke)</Description>
+  <Expectation xml:space="preserve">Partner 0/Consumer 0 receives one OnRevokedRegistration for GLOBAL_HANDLER_0</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>GLOBAL_HANDLER_0</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>GLOBAL_HANDLER_0</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

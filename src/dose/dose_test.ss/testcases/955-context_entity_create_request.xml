@@ -1,240 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<object xmlns="urn:safir-dots-unit">
-  <name>DoseTest.Items.TestCase</name>
-  <members>
-    <member>
-      <name>Description</name>
-      <value>Test that an entity create request is sent to handler in correct context.</value>
-    </member>
-    <member>
-      <name>Expectation</name>
-      <value>P1 (context 1) receives one OnCreateRequest. P0 (context 0) receives no entity create request. P2 receives one OnResponse.</value>
-    </member>
-    <member>
-      <name>TestCaseSetupActions</name>
-      <arrayElements>
-
-        <!-- Make sure Partner 0 is in context 0 -->
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Close</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Open</value>
-              </member>
-              <member>
-                <name>Context</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <!-- Make sure Partner 1 is in context 1 -->
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>1</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Close</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>1</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Open</value>
-              </member>
-              <member>
-                <name>Context</name>
-                <value>1</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <!-- Make sure Partner 2 is in context 1 -->
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>2</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Close</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>2</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.Open</value>
-              </member>
-              <member>
-                <name>Context</name>
-                <value>1</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-  
-      </arrayElements>
-    </member>
-    <member>
-      <name>TestActions</name>
-      <arrayElements>
-        
-         <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.RegisterEntityHandler</value>
-              </member>
-              <member>
-                <name>TypeId</name>
-                <value>DoseTest.GlobalEntity</value>
-              </member>              
-              <member>
-                <name>Handler</name>
-                <value>DEFAULT_HANDLER</value>
-              </member>
-              <member>
-                <name>InstanceIdPolicy</name>
-                <value>Safir.Dob.InstanceIdPolicy.RequestorDecidesInstanceId</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <!-- Let partner 1 register the same handler but in a different context -->
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>1</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.RegisterEntityHandler</value>
-              </member>
-              <member>
-                <name>TypeId</name>
-                <value>DoseTest.GlobalEntity</value>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>DEFAULT_HANDLER</value>
-              </member>
-              <member>
-                <name>InstanceIdPolicy</name>
-                <value>Safir.Dob.InstanceIdPolicy.RequestorDecidesInstanceId</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>2</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.CreateRequest</value>
-              </member>
-              <member>
-                <name>Object</name>
-                <object>
-                  <name>DoseTest.GlobalEntity</name>
-                  <members>
-                    <member>
-                      <name>Info</name>
-                      <value>Created</value>
-                    </member>
-                  </members>
-                </object>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>DEFAULT_HANDLER</value>
-              </member>
-              <member>
-                <name>Instance</name>
-                <value>543543</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>        
-
-      </arrayElements>
-    </member>
-  </members>
-</object>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test that an entity create request is sent to handler in correct context.</Description>
+  <Expectation xml:space="preserve">P1 (context 1) receives one OnCreateRequest. P0 (context 0) receives no entity create request. P2 receives one OnResponse.</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>Close</ActionKind>
+      <Partner>0</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>Open</ActionKind>
+      <Partner>0</Partner>
+      <Context>0</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>Close</ActionKind>
+      <Partner>1</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>Open</ActionKind>
+      <Partner>1</Partner>
+      <Context>1</Context>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
+      <ActionKind>Close</ActionKind>
+      <Partner>2</Partner>
+    </DoseTest.Action>
+    <DoseTest.Action index="5">
+      <ActionKind>Open</ActionKind>
+      <Partner>2</Partner>
+      <Context>1</Context>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>1</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>CreateRequest</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <Instance>543543</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Created</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

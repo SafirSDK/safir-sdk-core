@@ -24,18 +24,19 @@
 #ifndef __SWRE_LIBRARY_H__
 #define __SWRE_LIBRARY_H__
 
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
-#if defined _MSC_VER
-#  ifdef SWRE_LIBRARY_EXPORTS
-#    define SWRE_LIBRARY_API __declspec(dllexport)
-#  else
-#    define SWRE_LIBRARY_API __declspec(dllimport)
-#    pragma comment( lib, "swre_library.lib" )
-#  endif
-#elif defined __GNUC__
-#  define SWRE_LIBRARY_API
+#ifdef swre_library_EXPORTS
+#  define SWRE_LIBRARY_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define SWRE_LIBRARY_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "swre_library"
+#  define SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
+#define SWRE_LIBRARY_LOCAL SAFIR_HELPER_DLL_LOCAL
+
+#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 
 extern "C"
 {

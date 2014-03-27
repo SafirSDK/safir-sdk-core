@@ -56,8 +56,15 @@ class SyslogServer(SocketServer.UDPServer):
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 universal_newlines=True)
+
+        output = proc.communicate()[0]
+        if proc.returncode != 0:
+            print("Failed to run safir_show_config. returncode", proc.returncode, "Output:")
+            print(output)
+            raise Exception("Failed to run safir_show_config")
+
         # ConfigParser wants a section header so add a dummy one.
-        conf_str = '[root]\n' + proc.communicate()[0]
+        conf_str = '[root]\n' + output
 
         config = ConfigParser.ConfigParser()
         config.readfp(StringIO(conf_str))
@@ -65,6 +72,7 @@ class SyslogServer(SocketServer.UDPServer):
         send_to_syslog_server = config.getboolean('SystemLog','send_to_syslog_server')
         
         if not send_to_syslog_server:
+            print("Safir is not configured to send logs to a syslog_server! Configuration:")
             print (conf_str)
             raise Exception("Safir is not configured to send logs to a syslog_server!")
         

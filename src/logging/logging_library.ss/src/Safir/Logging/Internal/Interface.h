@@ -21,21 +21,22 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <boost/cstdint.hpp>
-
 #ifndef __SAFIR_LOGGING_LIBRARY_H__
 #define __SAFIR_LOGGING_LIBRARY_H__
 
-#if defined _MSC_VER
-#  ifdef logging_library_EXPORTS
-#    define LOGGING_LIBRARY_API __declspec(dllexport)
-#  else
-#    define LOGGING_LIBRARY_API __declspec(dllimport)
-#    pragma comment( lib, "logging_library.lib" )
-#  endif
-#elif defined __GNUC__
-#  define LOGGING_LIBRARY_API
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef logging_library_EXPORTS
+#  define LOGGING_LIBRARY_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define LOGGING_LIBRARY_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "logging_library"
+#  define SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
+#define LOGGING_LIBRARY_LOCAL SAFIR_HELPER_DLL_LOCAL
+
+#include <boost/cstdint.hpp>
 
 extern "C"
 {

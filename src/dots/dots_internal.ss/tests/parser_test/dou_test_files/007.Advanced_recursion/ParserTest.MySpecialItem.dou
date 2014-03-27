@@ -31,7 +31,7 @@
                 </MyStrings>
               </SingelItem>
               <SingleEntityId>
-                <name>Safir.Dob.Item</name>
+                <name>Safir.Dob.Entity</name>
                 <instanceId>3</instanceId>
               </SingleEntityId>
               <SingleChannel>anyChannel</SingleChannel>

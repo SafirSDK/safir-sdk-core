@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Test item.</summary>
+    <name>ParserTest.MyItem</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <member>
+            <name>Val</name>
+            <type>EntityId</type>
+        </member>
+        <member>
+            <name>MyInt32</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>MyInt64</name>
+            <type>Int64</type>
+        </member>
+        <member>
+            <name>MyString</name>
+            <type>String</type>
+            <maxLength>10</maxLength>
+        </member>
+    </members>
+
+    <parameters>
+        <parameter>
+            <summary>bla bla</summary>
+            <name>kalle</name>
+            <type>ParserTest.MyItem</type>
+            <ParserTest.MyItem/>
+        </parameter>
+    </parameters>
+
+    <createRoutines>
+        <createRoutine>
+            <name>MyCreateRoutine</name>
+            <values>                
+                <value>
+                    <entityId>
+                        <name>ParserTest.MyItem</name>
+                        <instanceId>abc</instanceId>
+                    </entityId>
+                    <member>Val</member>
+                </value>
+            </values>
+            <!--parameters>
+                <member>Val</member>
+            </parameters-->
+        </createRoutine>
+        <createRoutine>
+            <name>MyCreateRoutine2</name>            
+            <parameters>
+                <member>MyInt32</member>
+                <member>MyInt64</member>
+                <member>MyString</member>
+            </parameters>
+        </createRoutine>
+
+        <createRoutine>
+            <name>MyCreateRoutine2</name>            
+            <parameters>
+                <member>MyInt32</member>
+                <member>MyInt64</member>
+                <member>MyString</member>
+            </parameters>
+        </createRoutine>
+    </createRoutines>
+</class>

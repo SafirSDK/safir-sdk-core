@@ -21,7 +21,16 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#ifdef __GNUC__
+#pragma GCC visibility push (default)
+#endif
+
 #include "com_saabgroup_safir_Logging.h"
+
+#ifdef __GNUC__
+#pragma GCC visibility pop
+#endif
+
 #include <Safir/Logging/Internal/Interface.h>
 
 class StringConverter
@@ -52,7 +61,7 @@ private:
 };
 
 void JNICALL Java_com_saabgroup_safir_Logging_sendSystemLogInternal
-  (JNIEnv * _env, jclass, jint _severity, jstring _message)
+(JNIEnv * _env, jclass, jint _severity, jstring _message)
 {
     LoggingC_SendSystemLog(_severity,
                            StringConverter(_env, _message));

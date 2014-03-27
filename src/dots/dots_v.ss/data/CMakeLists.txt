@@ -30,18 +30,18 @@ if (NOT NO_CXX)
     FILE(GLOB cpp_files cpp/${prefix}*.cpp)
 
     #We need to copy the precomp header so that multiple libraries do not share the same pch/gch file
-    configure_file(precompiled_header_for_cpp.h precompiled_header_${prefix}.h COPYONLY)
+    configure_file(precompiled_header_for_cpp.h cpp/precompiled_header_${prefix}.h COPYONLY)
 
     if (MSVC)
       #Visual C++ needs a "special" cpp file in its source list for precompiled headers to work,
       #and also wants an absolute path to the header
-      configure_file(precompiled_header_for_cpp.cpp precompiled_header_${prefix}.cpp)
-      set(cpp_files ${cpp_files} precompiled_header_${prefix}.cpp)
-      set(precompiled_header ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_${prefix}.h)
+      configure_file(precompiled_header_for_cpp.cpp cpp/precompiled_header_${prefix}.cpp)
+      set(cpp_files ${cpp_files} cpp/precompiled_header_${prefix}.cpp)
+      set(precompiled_header ${CMAKE_CURRENT_BINARY_DIR}/cpp/precompiled_header_${prefix}.h)
     else()
       #gcc wants a relative path to the header-
       file(RELATIVE_PATH precompiled_header ${CMAKE_CURRENT_SOURCE_DIR} 
-        ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_${prefix}.h)
+        ${CMAKE_CURRENT_BINARY_DIR}/cpp/precompiled_header_${prefix}.h)
     endif()
 
     ADD_LIBRARY(dots_generated-${prefix}-cpp SHARED ${cpp_files} ${h_files})
@@ -58,9 +58,6 @@ if (NOT NO_CXX)
         TARGET_LINK_LIBRARIES(dots_generated-${prefix}-cpp dots_generated-${DOTS_DEPEND}-cpp)
       ENDFOREACH()
     endif()
-
-    ADD_DEFINITIONS(-DDOTS_GENERATED_CPP_EXPORTS)
-
 
     TARGET_LINK_LIBRARIES(dots_generated-${prefix}-cpp dots_generated-cpp)    
 
@@ -80,7 +77,6 @@ if (NOT NO_CXX)
   # build main dots_generated-cpp
   ##
   ADD_LIBRARY(dots_generated-cpp SHARED dll_imports.cpp dll_imports.h)  
-  ADD_DEFINITIONS(-DDOTS_GENERATED_CPP_EXPORTS)
 
   if (NOT MSVC)
     TARGET_LINK_LIBRARIES(dots_generated-cpp dots_cpp dl)

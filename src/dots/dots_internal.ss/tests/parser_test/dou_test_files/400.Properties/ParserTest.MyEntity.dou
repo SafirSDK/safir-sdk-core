@@ -2,11 +2,24 @@
 <class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <summary>Contains the definition of a distribution channel name.</summary>
     <name>ParserTest.MyEntity</name>
-    <baseClass>Object</baseClass>
+    <baseClass>Safir.Dob.Entity</baseClass>
     <members>
         <member>
             <name>MyInt32</name>
             <type>Int32</type>
+        </member>
+        <member>
+            <name>MyFloat64</name>
+            <type>Float64</type>
+        </member>
+        <member>
+            <name>MyString</name>
+            <type>String</type>
+            <maxLength>10</maxLength>
+        </member>
+        <member>
+            <name>MyEnum</name>
+            <type>ParserTest.MyColorEnum</type>
         </member>
         <member>
             <name>MyEntityId</name>
@@ -17,8 +30,47 @@
             <type>ChannelId</type>
         </member>
         <member>
-            <name>MyObj</name>
+            <name>MyItem</name>
             <type>ParserTest.MyItem</type>
         </member>
+
+        <!-- Arrays -->
+        <member>
+            <name>MyInt32Array</name>
+            <type>Int32</type>
+            <arraySize>3</arraySize>
+        </member>
+        <member>
+            <name>MyFloat64Array</name>
+            <type>Float64</type>
+            <arraySize>3</arraySize>
+        </member>
+        <member>
+            <name>MyStringArray</name>
+            <type>String</type>
+            <maxLength>10</maxLength>
+            <arraySize>3</arraySize>
+        </member>
+        <member>
+            <name>MyEnumArray</name>
+            <type>ParserTest.MyColorEnum</type>
+            <arraySize>3</arraySize>
+        </member>
+        <member>
+            <name>MyEntityIdArray</name>
+            <type>EntityId</type>
+            <arraySize>3</arraySize>
+        </member>
+        <member>
+            <name>MyChannelIdArray</name>
+            <type>ChannelId</type>
+            <arraySize>3</arraySize>
+        </member>
+        <member>
+            <name>MyItemArray</name>
+            <type>ParserTest.MyItem</type>
+            <arraySize>3</arraySize>
+        </member>
+
     </members>
 </class>

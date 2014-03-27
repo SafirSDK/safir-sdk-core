@@ -157,7 +157,7 @@ int main(int argc, char * argv[])
         {
             return 0;
         }
-        boost::this_thread::sleep(boost::posix_time::seconds(options.checkInterval));
+        boost::this_thread::sleep_for(boost::chrono::seconds(options.checkInterval));
     }
 
 #ifndef _MSC_VER

@@ -1,0 +1,15 @@
+dou/root3
+dou/root1
+dou/root2
+
+/dou/root1/ParserTest.MyEntity.dou
+/dou/root1/ParserTest.MyEntityBase.dou
+/dou/root1/ParserTest.MyProperty.dou
+/dou/root1/core/Safir.Dob.Entity.dou
+/dou/root1/core/Safir.Dob.Item.dou
+/dou/root2/ParserTest.ExtraItem.dou
+/dou/root2/ParserTest.MyEntity-ParserTest.MyProperty.dom
+/dou/root2/Test.MyParam.dou
+/dou/root2/folder/ParserTest.MyColorEnum.dou
+/dou/root2/folder/ParserTest.MyItem.dou
+

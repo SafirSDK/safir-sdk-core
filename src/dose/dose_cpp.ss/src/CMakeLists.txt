@@ -11,8 +11,6 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dose_cpp SHARED ${sources} ${headers})
 
-ADD_DEFINITIONS(-DDOSE_CPP_EXPORTS)
-
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(dose_cpp dots_generated-Safir-cpp dose_dll)
 endif()

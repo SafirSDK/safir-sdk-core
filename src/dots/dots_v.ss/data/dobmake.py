@@ -199,6 +199,12 @@ def uninstall():
 def get_config_file():
     return os.path.join(SAFIR_SDK,"dots","dots_generated","dobmake.ini")
 
+def replace_non_ascii(s):
+    if type(s) is str:
+        return "".join([c if ord(c) < 128 else '#' for c in s])
+    else:
+        return "".join([chr(c) if c < 128 else '#' for c in s])
+
 class Logger(object):
     def __init__(self):
         self.logdata = list()
@@ -256,8 +262,7 @@ class Logger(object):
                 data = self.process.stdout.readline()
                 if not data:
                     break
-                if type(data) is not str:
-                    data = data.decode("utf8")
+                data = replace_non_ascii(data)
                 if self.strip_cr:
                     data = data.replace('\r','')
                 self.logger.write(data,"pre")
@@ -284,6 +289,7 @@ buildType = "build"
 default_config="RelWithDebInfo"
 build_java = True
 build_ada = True
+build_dotnet = True
 build_cpp_release = True
 build_cpp_debug = True
 no_gui = False
@@ -302,6 +308,8 @@ def parse_command_line():
                       help="Dont attempt to build Ada code")
     parser.add_option("--no-java", action="store_true",dest="no_java",default=False,
                       help="Dont attempt to build Java code")
+    parser.add_option("--no-dotnet", action="store_true",dest="no_dotnet",default=False,
+                      help="Dont attempt to build C#/.Net code")
     parser.add_option("--no-cpp-debug", action="store_true",dest="no_cpp_debug",default=False,
                       help="Dont attempt to build cpp debug code")      
     parser.add_option("--no-cpp-release", action="store_true",dest="no_cpp_release",default=False,
@@ -351,11 +359,14 @@ def parse_command_line():
 
     global build_java
     global build_ada
+    global build_dotnet
     
     if options.no_ada:
         build_ada = False
     if options.no_java:
         build_java = False
+    if options.no_dotnet:
+        build_dotnet = False
 
     global build_cpp_debug
     global build_cpp_release
@@ -472,8 +483,10 @@ class BuilderBase(object):
 
         run_dots_depends()
 
-        default_builds = ["dotnet",]
+        default_builds = []
         other_builds = []
+        if build_dotnet:
+            default_builds.append("dotnet")
         if build_java:
             default_builds.append("java")
         if build_ada:
@@ -598,6 +611,19 @@ class VisualStudioBuilder(BuilderBase):
                 "\nVSPATH (in dots_generated/dobmake.ini) does not seem to point to a valid path." +
                 "\nTry to delete dots_generated/dobmake.ini and run dobmake.py in a Visual Studio command prompt.")
 
+    def __run_vcvarsall(self, vcvarsall, arch):
+        cmd = '"%s" %s & set' % (vcvarsall, arch)
+        logger.write("Running '" + cmd + "' to extract environment")
+        proc = subprocess.Popen(cmd,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                universal_newlines = True)
+        output = proc.communicate()[0]
+        if proc.returncode != 0:
+            die ("Failed to fetch environment variables out of vcvarsall.bat: " + output)
+        return output
+
+            
     def __setup_build_environment(self):
         """Find vcvarsall.bat and load the relevant environment variables from it.
         This function is inspired (but not copied, for licensing reasons) by the one in python distutils2 msvc9compiler.py"""
@@ -608,15 +634,12 @@ class VisualStudioBuilder(BuilderBase):
         optional_variables = set(["PLATFORM",])
         wanted_variables = required_variables | optional_variables #union
 
-        arch = "x86" if self.arch == "x86" else "amd64"
-        cmd = '"%s" %s & set' % (vcvarsall, arch)
-        proc = subprocess.Popen(cmd,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT,
-                                universal_newlines = True)
-        output = proc.communicate()[0]
-        if proc.returncode != 0:
-            die ("Failed to fetch environment variables out of vcvarsall.bat: " + output)
+        output = self.__run_vcvarsall(vcvarsall, "x86" if self.arch == "x86" else "amd64")
+
+        #retry with cross compilation toolset if we're on amd64 and vcvarsall says the toolset is missing
+        if self.arch == "x86-64" and output.find("configuration might not be installed") != -1:
+            logger.write("Native toolset appears to be missing, trying cross compilation")
+            output = self.__run_vcvarsall(vcvarsall, "x86_amd64")
         
         found_variables = set()
 

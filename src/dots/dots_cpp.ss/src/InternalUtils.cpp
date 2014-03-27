@@ -40,15 +40,15 @@ namespace Internal
 {
     void EnsureFailed (const std::wstring & str)
     {
-        Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Critical,
-                                                     L"ENSURE failed: " + str);
+        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Critical,
+                                              L"ENSURE failed: " + str);
 
         const bool success = Safir::Utilities::CrashReporter::Dump();
         
         if (!success)
         {
-            Safir::Utilities::Internal::SystemLog().Send(Safir::Utilities::Internal::SystemLog::Critical,
-                                                         L"ENSURE failed to generate a dump! It looks like CrashReporter is not started.");
+            Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Critical,
+                                                  L"ENSURE failed to generate a dump! It looks like CrashReporter is not started.");
         }
 
         throw SoftwareViolationException(str, __WFILE__,__LINE__);

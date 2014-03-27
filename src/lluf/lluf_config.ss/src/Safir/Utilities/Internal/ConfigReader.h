@@ -24,25 +24,19 @@
 #ifndef __SAFIR_UTILITIES_CONFIG_READER_H__
 #define __SAFIR_UTILITIES_CONFIG_READER_H__
 
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef lluf_config_EXPORTS
+#  define LLUF_CONFIG_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define LLUF_CONFIG_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "lluf_config"
+#  include <Safir/Utilities/Internal/AutoLink.h>
+#endif
+#define LLUF_CONFIG_LOCAL SAFIR_HELPER_DLL_LOCAL
+
 #include <boost/shared_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
-
-#if defined _MSC_VER
-    #ifdef lluf_config_EXPORTS
-        #define LLUF_CONFIG_API __declspec(dllexport)
-    #else
-        #define LLUF_CONFIG_API __declspec(dllimport)
-        #ifndef NDEBUG
-            #pragma comment( lib, "lluf_configd.lib" )
-        #else
-            #pragma comment( lib, "lluf_config.lib" )
-        #endif
-    #endif
-#elif defined __GNUC__
-  #define LLUF_CONFIG_API
-#endif
-
-
 
 namespace Safir
 {

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <property>ParserTest.MyProperty</property>
+    <class>ParserTest.MyEntity</class>
+    <memberMapping>
+        
+        <member>
+            <propertyMember>Int32PropertyValue</propertyMember>
+            <value>123</value>
+        </member>
+        
+        <member>
+            <propertyMember>EntityIdPropertyValue</propertyMember>
+            <entityId>
+                <name>ParserTest.MyEntity</name>
+                <instanceId>TestInstance</instanceId>
+            </entityId>
+        </member>
+        
+        <member>
+            <propertyMember>ChannelIdPropertyValue</propertyMember>
+            <classMemberReference>
+                <classMember>MyChannelId</classMember>
+            </classMemberReference>
+        </member>
+        
+        <member>
+            <propertyMember>MyItemPropertyValue</propertyMember>
+        </member>                
+        
+
+        <member>
+            <propertyMember>MyStringPropertyValue</propertyMember>
+            <object/>
+        </member>
+
+        <member>
+            <propertyMember>MyStringPropertyArray</propertyMember>
+            <value>kalle</value>
+        </member>
+        
+    </memberMapping>
+</propertyMapping>

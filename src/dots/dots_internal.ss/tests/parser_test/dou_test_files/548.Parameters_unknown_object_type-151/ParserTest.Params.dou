@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>ParserTest.Params</name>
+    <baseClass>Object</baseClass>
+    <parameters>
+        <parameter>
+            <name>ObjParam</name>
+            <type>ParserTest.Superman</type>
+            <ParserTest.Superman>
+                <Int32Val>123</Int32Val>
+            </ParserTest.Superman>
+        </parameter>
+    </parameters>
+</class>

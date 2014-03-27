@@ -46,7 +46,8 @@ try:
         
         procs.append(proc)
 except OSError as e:
-    print ("Failed to launch processes. maybe you need to increase ulimit -u? I need at least 10000")
+    print ("Failed to launch processes. maybe you need to increase ulimit -u or /proc/sys/kernel/threads-max? I need at least 10000")
+    print ("Launched", i, "processes")
     print (e)
     for proc in procs:
         proc.kill()

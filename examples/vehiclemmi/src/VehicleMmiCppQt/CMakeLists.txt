@@ -5,7 +5,11 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 # find and setup Qt4 for this project
 SET(QT_USE_QTMAIN TRUE)
-find_package(Qt4 REQUIRED)
+find_package(Qt4)
+if (NOT Qt4_FOUND)
+  message("Qt4 was not found, not building this example, which currently does not support Qt5")
+  return()
+endif()
 include(${QT_USE_FILE})
 
 FILE(GLOB ui *.ui)

@@ -16,36 +16,34 @@ Table of contents
 5.2     Centos/RHEL
 
 
-Here are instructions for installing on Centos/RHEL 6.x and Ubuntu 12.04.
-They can most probably be adapted to other versions as well, but those are the ones that we run our tests on currently. See http://safir.sourceforge.net for more info.
+Here are instructions for installing on Centos/RHEL 7.x and Ubuntu 13.10 or later.
+The instructions can be adapted to other versions as well, but these are the ones that we run our tests on currently. Contact us at http://safir.sourceforge.net for more info on compatibility and requirements.
 
 1. Prerequisites
 
 First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core.
 
 1.1. Ubuntu
-To install these from the command line "in one go" on distributions based on Ubuntu 12.04 run:
-   sudo apt-get install libqt4-dev mono-devel mono-gmcs libiodbc2-dev cmake g++ default-jdk doxygen graphviz make python-tk libexpat1-dev autoconf build-essential subversion gnat libboost1.48-all-dev
-
-If you're using a different version you may have to change the version of the boost library (the very last argument above). If in doubt use the latest one that is available in your repositories. If you don't know how to work that out, use libboost-all-dev instead.
+To install these from the command line "in one go" on distributions based on Ubuntu 13.10 or 14.04, run:
+   sudo apt-get install qt5-default mono-devel unixodbc-dev cmake g++ default-jdk doxygen graphviz make python-tk autoconf build-essential subversion gnat libboost-all-dev
 
 1.2. Centos/RHEL
-There are a few more steps needed to set up a Centos/RHEL 6.x machine.
+Safir SDK Core is only compatible with 7.0 or later of Centos/RHEL (unless you install a custom Boost of version 1.50 or later), and at the time of this writing RHEL 7 is in Beta. These instructions have been created while using that beta, so they may not end up being 100% correct with the final product. If in doubt, please contact us at http://safir.sourceforge.net.
 
-1.2.1. Add EPEL repository
-Some of the packages we use are not in the default repositories, so you need to add EPEL to your list of repositories. Follow the instructions on http://fedoraproject.org/wiki/EPEL.
+#1.2.1. Add EPEL repository
+Mono, the C#/.Net environment for Linux is not part of the default repositories, so you need to add EPEL to your list of repositories. Follow the instructions on http://fedoraproject.org/wiki/EPEL.
 
 1.2.2. Install packages
-sudo yum install cmake28 boost-devel gcc-c++ doxygen graphviz make expat-devel gcc-gnat tkinter mono-devel java-1.7.0-openjdk-devel qt-devel libiodbc-devel m4 autoconf subversion python-argparse
+sudo yum install cmake boost-devel gcc-c++ doxygen graphviz make gcc-gnat libgnat-static tkinter java-1.7.0-openjdk-devel qt-devel libiodbc-devel m4 autoconf subversion mono-devel
 
 1.2.3. Set up Mono binfmt_misc
-Add "echo ':CLR:M::MZ::/usr/bin/mono:' > /proc/sys/fs/binfmt_misc/register" to the end of /etc/rc.local
+You may need to perform this step to be able to run C# executables directly, like "program.exe" instead of "mono program.exe":
 
-This allows C# executables to be run directly, like "program.exe" instead of "mono program.exe".
+Add "echo ':CLR:M::MZ::/usr/bin/mono:' > /proc/sys/fs/binfmt_misc/register" to the end of /etc/rc.local
 
 2. Patch Boost
 
-Some Boost versions have bugs that we need to patch to be able to run correctly.
+Some Boost versions have bugs that we need to patch to be able to run correctly. Our build script attempts to detect whether patches need to be installed, so if you want to you can skip this step until the build script tells you that you need to install patches.
 
 Go into the build/patches directory in the Safir SDK Core source code tree and run "cmake ." followed by a "sudo make install" which will cause the files to be installed into the correct places.
 
@@ -82,6 +80,8 @@ The directory named "examples" contains some test applications. The simplest way
     build/build.py -f build/example_apps.txt
 When this is complete you should have a few new applications installed under $SAFIR_RUNTIME/bin: VehicleAppCpp, VehicleAppCs, VehicleMmiCppQt, VehicleMmiCsWinForms and VehicleAppDb. 
 Note: There is also a build script configuration file dob_tests.txt, which builds the Dob test suite.
+
+If you run into trouble building VehicleMmiCppQt you may need to install Qt4 ("libqt4-dev" or similar). 
 
 5. Installing runtimes only
 If you have built the SDK on one machine and just want to run it on another without installing all the development tools you need to install some libraries and runtimes to get it to run.

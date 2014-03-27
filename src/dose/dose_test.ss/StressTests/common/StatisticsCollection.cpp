@@ -104,7 +104,7 @@ void StatisticsCollection::PrintThread()
     {
         for(;;)
         {
-            boost::this_thread::sleep(boost::posix_time::seconds(10));
+            boost::this_thread::sleep_for(boost::chrono::seconds(10));
             PrintStatistics();
             Reset();
         }

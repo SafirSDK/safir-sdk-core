@@ -84,13 +84,13 @@ namespace Internal
     {
         try
         {
-            const boost::posix_time::seconds watchdogTimeout = boost::posix_time::seconds(Safir::Dob::NodeParameters::DoseMainThreadWatchdogTimeout());
+            const boost::chrono::seconds watchdogTimeout(Safir::Dob::NodeParameters::DoseMainThreadWatchdogTimeout());
 
             for (;;)
             {
-                boost::this_thread::sleep(watchdogTimeout/4);
+                boost::this_thread::sleep_for(watchdogTimeout/4);
 
-                const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
+                const boost::chrono::steady_clock::time_point now = boost::chrono::steady_clock::now();
 
                 {
                     boost::lock_guard<boost::mutex> lock(m_lock);
@@ -108,12 +108,12 @@ namespace Internal
                         {
                             // The counter hasn't been kicked ...
 
-                            const boost::posix_time::time_duration timeSinceLastKick = now - it->second.lastTimeAlive;
+                            const boost::chrono::steady_clock::duration timeSinceLastKick = now - it->second.lastTimeAlive;
 
                             // Check if the duration since last kick is "abnormal", thus indicating some sort of external
                             // manipulation of the clock. For instance, a very long duration could be caused by the cpu going
                             // into sleep/hibernate mode.
-                            if (timeSinceLastKick.is_negative() || timeSinceLastKick > watchdogTimeout * 2)
+                            if (timeSinceLastKick < boost::chrono::seconds(0) || timeSinceLastKick > watchdogTimeout * 2)
                             {
                                 it->second.lastTimeAlive = now;
                                 continue;
@@ -128,11 +128,11 @@ namespace Internal
                                     SEND_SYSTEM_LOG(Alert,
                                                     << it->second.threadName << " (tid " << it->first
                                                     << ") has been hanging for at least "
-                                                    << ToUtf16(boost::posix_time::to_simple_string(timeSinceLastKick))
+                                                    << timeSinceLastKick
                                                     << ". Safir.Dob.NodeParameters.TerminateDoseMainWhenUnrecoverableError is true"
                                                     << " so dose_main will be terminated!!");
 
-                                    boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(5));
+                                    boost::this_thread::sleep_for(boost::chrono::seconds(5));
 
                                     exit(1); // Terminate dose_main!!!!
                                 }
@@ -141,7 +141,7 @@ namespace Internal
                                     SEND_SYSTEM_LOG(Alert,
                                                     << it->second.threadName << " (tid " << it->first
                                                     << ") has been hanging for at least "
-                                                    << ToUtf16(boost::posix_time::to_simple_string(timeSinceLastKick))
+                                                    << timeSinceLastKick
                                                     << ". Safir.Dob.NodeParameters.TerminateDoseMainWhenUnrecoverableError is true"
                                                     << " so dose_main will not be terminated!!");
 

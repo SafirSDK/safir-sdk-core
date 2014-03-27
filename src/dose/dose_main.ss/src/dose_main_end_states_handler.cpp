@@ -38,18 +38,18 @@ namespace Internal
         m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(L"End States Timer", *this);
 
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().Set(Discard,
-                                     timerInfo,
-                                     GetUtcTime() + 60.0); //time out in 60 seconds
+        TimerHandler::Instance().SetRelative(Discard,
+                                             timerInfo,
+                                             60.0); //time out in 60 seconds
     }
 
 
     void EndStatesHandler::HandleTimeout(const TimerInfoPtr& timer)
     {
         //TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().Set(Discard,
-                                     timer,
-                                     GetUtcTime() + 60.0); //time out again in 60 seconds
+        TimerHandler::Instance().SetRelative(Discard,
+                                             timer,
+                                             60.0); //time out again in 60 seconds
 
         Safir::Dob::Internal::EndStates::Instance().HandleTimeout();
     }

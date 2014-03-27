@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
+#make sure we link with qtmain.lib on windows
+if (NOT CMAKE_VERSION VERSION_LESS "2.8.11")
+  cmake_policy(SET CMP0020 NEW)
+endif()
+
 project(dobexplorer C CXX) #FindQt needs C
 
 INCLUDE("$ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake")
@@ -23,7 +28,7 @@ if (Qt5Widgets_FOUND)
   message("-- Building dobexplorer with Qt5")
   set(CMAKE_AUTOMOC ON)
   QT5_WRAP_UI(ui_headers ${ui})
-else() 
+else()
   # Try to use Qt4 instead
   SET(QT_USE_QTMAIN TRUE)
   find_package(Qt4 REQUIRED)
@@ -56,6 +61,10 @@ ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${dose_
 if (Qt5Widgets_FOUND)
   qt5_use_modules(dobexplorer Widgets)
   QT5_WRAP_CPP(moc_sources ${headers} ${QT5_WRAP_CPP_OPTIONS})
+
+  if (CMAKE_VERSION VERSION_LESS "2.8.11")
+    target_link_libraries(dobexplorer ${Qt5Core_QTMAIN_LIBRARIES})
+  endif()
 else()
   TARGET_LINK_LIBRARIES(dobexplorer ${QT_LIBRARIES})
 endif()

@@ -32,15 +32,6 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4127)
-#endif
-#include <boost/date_time/posix_time/posix_time.hpp>
-#if defined _MSC_VER
-  #pragma warning (pop)
-#endif
-
 namespace Safir
 {
 namespace Dob
@@ -84,13 +75,13 @@ namespace Internal
                 {
                     break;
                 }
-                boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+                boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
             }
 
             for (;;)
             {
 
-                boost::this_thread::sleep(boost::posix_time::seconds(15));
+                boost::this_thread::sleep_for(boost::chrono::seconds(15));
 
                 bool serviceLocksOk = true;
                 for (Dob::Typesystem::TypeIdVector::const_iterator it = m_serviceTypeIds.begin();
@@ -147,7 +138,7 @@ namespace Internal
                                         << "Parameter TerminateDoseMainWhenUnrecoverableError is set to true"
                                         << " so dose_main will now be terminated!!");
 
-                        boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(5));
+                        boost::this_thread::sleep_for(boost::chrono::seconds(5));
 
                         abort(); // Terminate dose_main!!!!
                     }

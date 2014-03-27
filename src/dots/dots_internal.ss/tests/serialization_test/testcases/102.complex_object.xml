@@ -6,7 +6,7 @@
     <MyFloat32Val>3.65</MyFloat32Val>
     <MyFloat64Val>-681231.65</MyFloat64Val>
     <MyTypeIdVal>BlobTest.MyColorEnum</MyTypeIdVal>
-    <MyEntityIdVal><name>BlobTest.MyItem</name><instanceId>first</instanceId></MyEntityIdVal>
+    <MyEntityIdVal><name>BlobTest.MyEntity</name><instanceId>first</instanceId></MyEntityIdVal>
     <MyInstanceIdVal>second</MyInstanceIdVal>
     <MyChannelIdVal>100</MyChannelIdVal>
     <MyHandlerIdVal>-321</MyHandlerIdVal>
@@ -30,4 +30,9 @@
     <MyInt32Array>
         <Int32 index="1">23</Int32>
     </MyInt32Array>
+    <MyEnumArray>
+        <BlobTest.MyColorEnum index="0">Black</BlobTest.MyColorEnum>
+        <BlobTest.MyColorEnum index="1">White</BlobTest.MyColorEnum>
+        <BlobTest.MyColorEnum index="2">Grey</BlobTest.MyColorEnum>                
+    </MyEnumArray>
 </BlobTest.MyEntity>

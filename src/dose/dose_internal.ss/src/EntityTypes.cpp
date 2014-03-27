@@ -27,6 +27,7 @@
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Dob/Entity.h>
+#include <Safir/Dob/NodeParameters.h>
 
 namespace Safir
 {
@@ -417,6 +418,24 @@ namespace Internal
     const DistributionData EntityTypes::ReadEntity(const Dob::Typesystem::EntityId& entityId, const ContextId readerContext) const
     {
         return GetType(entityId.GetTypeId()).ReadEntity(entityId.GetInstanceId(), readerContext);
+    }
+
+    void EntityTypes::CleanGhosts()
+    {
+        // Get all entity type ids
+        Dob::Typesystem::TypeIdVector classTree = Dob::Typesystem::Operations::GetClassTree(Safir::Dob::Entity::ClassTypeId);
+
+        unsigned int nbrOfContexts = Safir::Dob::NodeParameters::NumberOfContexts();
+
+        for (Dob::Typesystem::TypeIdVector::iterator it = classTree.begin();
+             it != classTree.end();
+             ++it)
+        {
+            for (unsigned int context = 0; context < nbrOfContexts; ++context)
+            {
+                CleanGhosts(*it, Dob::Typesystem::HandlerId::ALL_HANDLERS, context);
+            }
+        }
     }
 
     void EntityTypes::CleanGhosts(const Dob::Typesystem::TypeId      typeId,

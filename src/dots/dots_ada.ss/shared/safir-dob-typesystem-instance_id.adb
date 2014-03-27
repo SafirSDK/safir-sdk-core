@@ -47,7 +47,7 @@ package body Safir.Dob.Typesystem.Instance_Id is
    function Create_Instance_Id (Id_Str : in Unbounded_Wide_String) return Instance_Id_Type is
       use Interfaces.C;
       function Internal (Name : in char_array) return Safir.Dob.Typesystem.Int_64;
-      pragma Import (C, Internal, "DotsId_Generate64");
+      pragma Import (C, Internal, "LlufId_Generate64");
    begin
       if Length (Id_Str) = 0 then
          Throw (Software_Violation_Exception'Identity,
@@ -70,7 +70,7 @@ package body Safir.Dob.Typesystem.Instance_Id is
 
    function Create_Random_Instance_Id return Instance_Id_Type is
       function Internal return Safir.Dob.Typesystem.Int_64;
-      pragma Import (C, Internal, "DotsId_GenerateRandom64");
+      pragma Import (C, Internal, "LlufId_GenerateRandom64");
    begin
       return Instance_Id_Type'(Id => Internal,
                                Id_String => Null_Unbounded_Wide_String,

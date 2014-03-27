@@ -43,7 +43,7 @@ package body Safir.Dob.Typesystem.Handler_Id is
    function Create_Handler_Id (Id_Str : in Unbounded_Wide_String) return Handler_Id_Type is
       use Interfaces.C;
       function Internal (Name : in char_array) return Safir.Dob.Typesystem.Int_64;
-      pragma Import (C, Internal, "DotsId_Generate64");
+      pragma Import (C, Internal, "LlufId_Generate64");
    begin
       if Length (Id_Str) = 0 then
          Throw (Software_Violation_Exception'Identity,

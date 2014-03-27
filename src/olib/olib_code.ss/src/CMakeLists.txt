@@ -31,8 +31,6 @@ if (NOT MSVC)
     TARGET_LINK_LIBRARIES(olib dots_generated-olib-cpp logging_cpp ${ODBC_LIBRARIES})
 endif()
 
-ADD_DEFINITIONS(-DOLIB_EXPORTS)
-
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)

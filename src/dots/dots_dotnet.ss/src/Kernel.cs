@@ -34,7 +34,7 @@ namespace Safir.Dob.Typesystem.Internal
     /// </summary>
     internal class Id
     {
-        internal const string DOTS_ID_NAME = "dots_id.dll";
+        internal const string LLUF_ID_NAME = "lluf_id.dll";
 
         internal static Int64 Generate64BitHash(string str)
         {
@@ -43,16 +43,16 @@ namespace Safir.Dob.Typesystem.Internal
                 throw new SoftwareViolationException("Cannot generate a hash from an empty or null string (isNull = " + (str == null) + ")");
             }
             System.IntPtr strPtr = Internal.InternalOperations.CStringOf(str);
-            Int64 result = DotsId_Generate64(strPtr);
+            Int64 result = LlufId_Generate64(strPtr);
             Marshal.FreeHGlobal(strPtr);
             return result;
         }
 
-        [DllImport(DOTS_ID_NAME, CallingConvention = CallingConvention.Cdecl)]
-        private static extern Int64 DotsId_Generate64(System.IntPtr str);
+        [DllImport(LLUF_ID_NAME, CallingConvention = CallingConvention.Cdecl)]
+        private static extern Int64 LlufId_Generate64(System.IntPtr str);
 
-        [DllImport(DOTS_ID_NAME, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern Int64 DotsId_GenerateRandom64();
+        [DllImport(LLUF_ID_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern Int64 LlufId_GenerateRandom64();
     }
     /// <summary>
     /// Summary description for Kernel.
@@ -307,12 +307,26 @@ namespace Safir.Dob.Typesystem.Internal
                                                           System.IntPtr blobSource,
                                                           System.Int32 bufSize,
                                                           out System.Int32 resultSize);
+
+        //BlobToJson
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_BlobToJson(System.IntPtr jsonDest,
+                                                     System.IntPtr blobSource,
+                                                     System.Int32 bufSize,
+                                                     out System.Int32 resultSize);
+
 #if FUNC_PTR_WORKAROUND
         //XmlToBlob
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
         internal static extern void DotsC_XmlToBlob(out System.IntPtr blobDest,
                                                     out System.IntPtr dummy,
                                                     System.IntPtr val);
+
+        //JsonToBlob
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
+        internal static extern void DotsC_JsonToBlob(out System.IntPtr blobDest,
+                                                     out System.IntPtr dummy,
+                                                     System.IntPtr val);
 
 
 #else
@@ -322,6 +336,12 @@ namespace Safir.Dob.Typesystem.Internal
         //XmlToBlob
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DotsC_XmlToBlob(out System.IntPtr blobDest,
+                                                    out DotsC_BytePointerDeleter deleter,
+                                                    System.IntPtr val);
+
+        //JsonToBlob
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DotsC_JsonToBlob(out System.IntPtr blobDest,
                                                     out DotsC_BytePointerDeleter deleter,
                                                     System.IntPtr val);
 #endif

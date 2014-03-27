@@ -474,7 +474,7 @@ class Runner:
         syslog_data = self.syslog.get_data(10) # wait for 10 seconds to collect any output
         results.write_test_result(len(syslog_data) == 0,
                                   "syslog_output",
-                                  "syslog is not empty:\n" + syslog_data)
+                                  "syslog is not empty:\n" + xml.sax.saxutils.quoteattr(syslog_data))
         
     def run_sequencer(self,parameters):
         print "** Running test sequencer with languages set to", parameters.lang0, parameters.lang1, parameters.lang2

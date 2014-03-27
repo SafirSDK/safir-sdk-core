@@ -15,7 +15,7 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
@@ -24,8 +24,8 @@
 #include <sstream>
 #include <algorithm>
 #include <set>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/InternalDefs.h>
 #include "RepositoryBasic.h"
-#include "InternalDefs.h"
 
 namespace Safir
 {
@@ -33,11 +33,11 @@ namespace Dob
 {
 namespace Typesystem
 {
-namespace Internal
+namespace ToolSupport
 {
-    ParameterDescriptionBasic* RepositoryBasic::GetParameterBasic(const std::string& name)
+    ParameterDescriptionBasic* RepositoryBasic::GetParameterBasic(const std::string& qualifiedName)
     {
-        boost::unordered_map<std::string, ParameterDescriptionBasic*>::const_iterator it=m_parameters.find(name);
+        boost::unordered_map<std::string, ParameterDescriptionBasic*>::const_iterator it=m_parameters.find(qualifiedName);
         if (it!=m_parameters.end())
         {
             return it->second;
@@ -62,7 +62,7 @@ namespace Internal
         return ownParameters[index-numInherited].get();
     }
 
-    void ClassDescriptionBasic::GetPropertyIds(std::vector<DotsC_TypeId>& propertyIds) const
+    void ClassDescriptionBasic::GetPropertyIds(std::set<DotsC_TypeId>& propertyIds) const
     {
         if (base)
         {
@@ -71,7 +71,7 @@ namespace Internal
 
         for (std::vector<PropertyMappingDescriptionBasicPtr>::const_iterator it=properties.begin(); it!=properties.end(); ++it)
         {
-            propertyIds.push_back((*it)->property->GetTypeId());
+            propertyIds.insert((*it)->property->GetTypeId());
         }
     }
 
@@ -129,26 +129,14 @@ namespace Internal
     //-----------
     DotsC_MemberIndex PropertyDescriptionBasic::GetMemberIndex(const std::string& memberName) const
     {
-        for (std::vector<MemberDescriptionBasicPtr>::const_iterator it=members.begin(); it!=members.end(); ++it)
-        {
-            if ((*it)->GetName()==memberName)
-            {
-                return static_cast<DotsC_MemberIndex>(std::distance(members.begin(), it));
-            }
-        }
-        return -1;
+        return TypeUtilities::GetPropertyMemberIndex<PropertyDescription, MemberDescription>(this, memberName);
     }
 
     //enumerations
     //-------------
     int EnumDescriptionBasic::GetIndexOfValue(const std::string& valueName) const
     {
-        for (int i=0; i<static_cast<int>(enumerationValues.size()); ++i)
-        {
-            if (enumerationValues[i]==valueName)
-                return i;
-        }
-        return -1;
+        return TypeUtilities::GetIndexOfEnumValue(this, valueName);
     }
 
     //CreateRoutines

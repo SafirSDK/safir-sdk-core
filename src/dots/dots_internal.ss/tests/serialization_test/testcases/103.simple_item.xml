@@ -2,10 +2,10 @@
 <BlobTest.MyItem type="BlobTest.MyItem">
     <MyNumber>666</MyNumber>
     <MyStrings>
-           <String xml:space="preserve" index="0">aaaa</String>
-        <String xml:space="preserve"index="1">bbbb</String>
-        <String xml:space="preserve"index="2">cccc</String>
-        <String xml:space="preserve"index="3">dddd</String>
-        <String xml:space="preserve"index="4">eeee</String>
+           <String xml:space="default" index="0">  aaaa  </String>
+        <String xml:space="preserve" index="1">  bbbb  </String>
+        <String xml:space="preserve" index="2">cccc</String>
+        <String xml:space="preserve" index="3">dddd</String>
+        <String xml:space="preserve" index="4"> &lt;, &gt; &amp; </String>
     </MyStrings>
 </BlobTest.MyItem>

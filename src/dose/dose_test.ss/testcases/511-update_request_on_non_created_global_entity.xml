@@ -1,130 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<object xmlns="urn:safir-dots-unit">
-  <name>DoseTest.Items.TestCase</name>
-  <members>
-    <member>
-      <name>Description</name>
-      <value>Test of sending update request of non-created global instance</value>
-    </member>
-    <member>
-      <name>Expectation</name>
-      <value>Partner 0/Consumer 1 receives an error response SafirNotRegistered, with info that the instance does not exist</value>
-    </member>
-    <member>
-      <name>TestCaseSetupActions</name>
-      <arrayElements>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>2</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.SendResponse</value>
-              </member>
-              <member>
-                <name>ActionCallback</name>
-                <value>Safir.Dob.CallbackId.OnUpdateRequest</value>
-              </member>
-              <member>
-                <name>Object</name>
-                <object>
-                  <name>DoseTest.Success</name>
-                    <members>
-                      <member>
-                        <name>Info</name>
-                        <value>Succesful response</value>
-                      </member>
-                    </members>
-                </object>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>1</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>2</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.RegisterEntityHandler</value>
-              </member>
-              <member>
-                <name>TypeId</name>
-                <value>DoseTest.GlobalEntity</value>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>DEFAULT_HANDLER</value>
-              </member>
-              <member>
-                <name>InstanceIdPolicy</name>
-                <value>Safir.Dob.InstanceIdPolicy.RequestorDecidesInstanceId</value>
-              </member>              
-              <member>
-                <name>Consumer</name>
-                <value>1</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-      </arrayElements>
-    </member>
-    <member>
-      <name>TestActions</name>
-      <arrayElements>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.UpdateRequest</value>
-              </member>
-              <member>
-                <name>Instance</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>Object</name>
-                <object>
-                  <name>DoseTest.GlobalEntity</name>
-                  <members>
-                    <member>
-                      <name>Info</name>
-                      <value>Updated</value>
-                    </member>
-                  </members>
-                </object>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>DEFAULT_HANDLER</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>1</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-      </arrayElements>
-    </member>
-  </members>
-</object>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of sending update request of non-created global instance</Description>
+  <Expectation xml:space="preserve">Partner 0/Consumer 1 receives an error response SafirNotRegistered, with info that the instance does not exist</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>SendResponse</ActionKind>
+      <Partner>2</Partner>
+      <ActionCallback>OnUpdateRequest</ActionCallback>
+      <Consumer>1</Consumer>
+      <Object type="DoseTest.Success">
+        <Info xml:space="preserve">Succesful response</Info>
+      </Object>
+    </DoseTest.Action>
+    <DoseTest.Action index="1">
+      <ActionKind>RegisterEntityHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>1</Consumer>
+      <TypeId>DoseTest.GlobalEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>UpdateRequest</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>1</Consumer>
+      <Instance>0</Instance>
+      <Handler>DEFAULT_HANDLER</Handler>
+      <Object type="DoseTest.GlobalEntity">
+        <Info xml:space="preserve">Updated</Info>
+      </Object>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

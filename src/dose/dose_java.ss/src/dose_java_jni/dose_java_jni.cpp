@@ -21,7 +21,16 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#ifdef __GNUC__
+#pragma GCC visibility push (default)
+#endif
+
 #include "com_saabgroup_safir_dob_Interface.h"
+
+#ifdef __GNUC__
+#pragma GCC visibility pop
+#endif
+
 #include <assert.h>
 #include <iostream>
 #include <Safir/Dob/Internal/Interface.h>

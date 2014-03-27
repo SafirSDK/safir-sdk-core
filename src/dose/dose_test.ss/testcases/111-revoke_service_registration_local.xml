@@ -1,79 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<object xmlns="urn:safir-dots-unit">
-  <name>DoseTest.Items.TestCase</name>
-  <members>
-    <member>
-      <name>Description</name>
-      <value>Test of registering of a service handler with the same name for a local entity handler on two nodes</value>
-    </member>
-    <member>
-      <name>Expectation</name>
-      <value>Partner 2 registration is completed. Partner 0 doesn't get a revoke (if running on different nodes).</value>
-    </member>
-    <member>
-      <name>TestCaseSetupActions</name>
-      <arrayElements>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>0</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.RegisterServiceHandler</value>
-              </member>
-              <member>
-                <name>TypeId</name>
-                <value>DoseTest.LocalService</value>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>LOCAL_HANDLER_0</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>0</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-      </arrayElements>
-    </member>
-    <member>
-      <name>TestActions</name>
-      <arrayElements>
-        <arrayElement>
-          <object>
-            <name>DoseTest.Action</name>
-            <members>
-              <member>
-                <name>Partner</name>
-                <value>2</value>
-              </member>
-              <member>
-                <name>ActionKind</name>
-                <value>DoseTest.ActionEnum.RegisterServiceHandler</value>
-              </member>
-              <member>
-                <name>TypeId</name>
-                <value>DoseTest.LocalService</value>
-              </member>
-              <member>
-                <name>Handler</name>
-                <value>LOCAL_HANDLER_0</value>
-              </member>
-              <member>
-                <name>Consumer</name>
-                <value>2</value>
-              </member>
-            </members>
-          </object>
-        </arrayElement>
-      </arrayElements>
-    </member>
-  </members>
-</object>
-
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Test of registering of a service handler with the same name for a local entity handler on two nodes</Description>
+  <Expectation xml:space="preserve">Partner 2 registration is completed. Partner 0 doesn't get a revoke (if running on different nodes).</Expectation>
+  <TestCaseSetupActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LocalService</TypeId>
+      <Handler>LOCAL_HANDLER_0</Handler>
+    </DoseTest.Action>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action index="0">
+      <ActionKind>RegisterServiceHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>2</Consumer>
+      <TypeId>DoseTest.LocalService</TypeId>
+      <Handler>LOCAL_HANDLER_0</Handler>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

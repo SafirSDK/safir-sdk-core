@@ -24,23 +24,23 @@
 #ifndef __LLUF_CRASH_REPORTER_H__
 #define __LLUF_CRASH_REPORTER_H__
 
-#if defined (_WIN32) 
-  #if defined(lluf_crash_reporter_EXPORTS)
-    #define  LLUF_CRASH_REPORTER_EXPORT __declspec(dllexport)
-  #else
-    #define LLUF_CRASH_REPORTER_EXPORT __declspec(dllimport)
-    #pragma comment(lib , "lluf_crash_reporter.lib")
-  #endif 
-#else 
- #define LLUF_CRASH_REPORTER_EXPORT
-#endif
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
+#ifdef lluf_crash_reporter_EXPORTS
+#  define LLUF_CRASH_REPORTER_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define LLUF_CRASH_REPORTER_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "lluf_crash_reporter"
+#  define SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#  include <Safir/Utilities/Internal/AutoLink.h>
+#endif
+#define LLUF_CRASH_REPORTER_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 namespace Safir
 {
 namespace Utilities
 {
-class LLUF_CRASH_REPORTER_EXPORT CrashReporter
+class LLUF_CRASH_REPORTER_API CrashReporter
 {
 public:
     /** 

@@ -25,11 +25,11 @@
 #ifndef __DOSE_MAIN_TIMERS_H__
 #define __DOSE_MAIN_TIMERS_H__
 
-
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <set>
 #include <boost/noncopyable.hpp>
 #include <vector>
@@ -41,9 +41,6 @@ namespace Dob
 {
 namespace Internal
 {
-
-    double GetUtcTime();
-
 
     typedef Safir::Dob::Typesystem::Int32 TimerId;
 
@@ -137,7 +134,16 @@ namespace Internal
 
         void Set(const SetPolicy policy,
                  const TimerInfoPtr & timerInfo,
-                 const double when);
+                 const boost::chrono::steady_clock::time_point& when);
+
+        void SetRelative(const SetPolicy policy,
+                         const TimerInfoPtr & timerInfo,
+                         const Safir::Dob::Typesystem::Si64::Second inSeconds)
+        {
+            Set(policy,
+                timerInfo,
+                boost::chrono::steady_clock::now() + boost::chrono::microseconds(static_cast<boost::int64_t>(inSeconds*1.0e6)));
+        }
 
         //
         // Remove (all timers that match will be removed)
@@ -159,8 +165,8 @@ namespace Internal
 
     private:
 
-        //returns the time to the next timeout (relative time)
-        const boost::posix_time::time_duration NextTimeout() const;
+        //returns the next timeout time in absolute time
+        const boost::chrono::steady_clock::time_point NextTimeout() const;
 
         void HandleTimeout(const boost::system::error_code & error);
 
@@ -170,8 +176,8 @@ namespace Internal
         ~TimerHandler();
 
         //must use custom comparer to compare pointer contents rather than pointers.
-        typedef std::map<TimerInfoPtr,double, TimerInfoPtrLess> TimerTable;
-        typedef std::multimap<double,TimerTable::iterator> TimerQueue;
+        typedef std::map<TimerInfoPtr,boost::chrono::steady_clock::time_point, TimerInfoPtrLess> TimerTable;
+        typedef std::multimap<boost::chrono::steady_clock::time_point,TimerTable::iterator> TimerQueue;
         typedef std::vector<std::pair<std::wstring, TimeoutHandler *> > TimeoutHandlerTable;
 
         TimerTable m_timerTable;
@@ -180,7 +186,7 @@ namespace Internal
         TimeoutHandlerTable m_timeoutHandlerTable;
         
         boost::asio::io_service & m_ioService;
-        boost::scoped_ptr<boost::asio::deadline_timer> m_deadlineTimer;
+        boost::scoped_ptr<boost::asio::steady_timer> m_steadyTimer;
 
         static TimerHandler* m_instance;
     };

@@ -28,7 +28,6 @@
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
-#include <Safir/Dob/Typesystem/Internal/KernelDefs.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <string>
 #include <sstream>
@@ -46,7 +45,7 @@ namespace Typesystem
     {
     public:
         /** Constant representing all handlers */
-        static DOTS_API const HandlerId ALL_HANDLERS;
+        static DOTS_CPP_API const HandlerId ALL_HANDLERS;
 
         /**
          * Default constructor.
@@ -148,7 +147,7 @@ namespace Typesystem
         /**
          * Return a string representation of the handler id.
          */
-        DOTS_API const std::wstring ToString() const;
+        DOTS_CPP_API const std::wstring ToString() const;
 
         /** @{ */
         /** @name Internal functions. */

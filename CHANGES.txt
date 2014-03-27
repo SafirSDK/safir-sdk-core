@@ -1,4 +1,54 @@
 -----------------------------------------------------------------------------------------------------------------------
+2014-02-28 version 5.0
+-----------------------------------------------------------------------------------------------------------------------
+
+This release introduces the following changes:
+
+* Rewrite of the parser and serializer in Typesystem (Dots):
+ - New public parser interface that can be used for building tools that need to understand the xml.
+ - More robust parsing - detects a lot of errors that previously would cause random failures.
+ - More language features now actually work - previously some constructions caused dots_kernel to give up.
+ - New and better XML object serialization - much more terse and also easier for 3rd party tools to understand.
+ - Backwards compatible - still understands old XML serialized objects.
+ - Provides a script that translates from old to new XML syntax.
+ - Add support for character references (e.g. &#12;) and CDATA for parameters.
+ - JSON object serialization.
+ - No longer depends on the Expat XML parser, instead uses Boost Property Tree. This means that Expat is no longer a 
+   dependency for Safir SDK Core.
+
+* Visibility set correctly on GCC, as described in http://gcc.gnu.org/wiki/Visibility. Makes it possible to build 
+  stuff on top of Safir SDK Core with c++11 enabled, even if the SDK is built with it disabled.
+
+* Internal changes and cleanups.
+
+* Some bug fixes, among which the most notable ones are (see http://safir.sourceforge.net for details):
+
+#128    Incorrect triggering of Ensure in WaitingStates::Add
+#126    Bad performance when injecting entities
+
+-----------------------------------------------------------------------------------------------------------------------
+2013-12-19 version 4.5.4:
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following tickets (see http://safir.sourceforge.net for details):
+
+#122    Douf fallback implementation of GetUtcOffset is wrong for some timezones
+#123    dobmake crashes when used on "non-english" Windows installations
+#125    Add support for Visual Studio 2012 and 2013
+
+-----------------------------------------------------------------------------------------------------------------------
+2013-12-03 version 4.5.3:
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following tickets (see http://safir.sourceforge.net for details):
+
+#113    dots_configuration_check crashes when run from dobmake.
+#117    Dobmake fails with cmake 2.8.12.1
+#118    Dobexplorer fails to link on Windows when using Qt5
+#119    Image on page 2 in user's guide is not scaled properly in PDF
+#120    No revision information in PDF version of Users guide
+
+-----------------------------------------------------------------------------------------------------------------------
 2013-10-29 version 4.5.2:
 -----------------------------------------------------------------------------------------------------------------------
 

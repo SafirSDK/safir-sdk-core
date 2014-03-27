@@ -234,7 +234,7 @@ namespace Internal
                 lllout << "Pool distribution thread is waiting for persistence data from DOPE" << std::endl;
                 while (!m_persistHandler->IsPersistentDataReady())
                 {
-                    boost::this_thread::sleep(boost::posix_time::milliseconds(10)); //sleep is interruption point
+                    boost::this_thread::sleep_for(boost::chrono::milliseconds(10)); //sleep is interruption point
                 
                 m_threadMonitor->KickWatchdog(m_poolDistributionThreadId);
                 }
@@ -430,9 +430,6 @@ namespace Internal
                 }
                 else
                 {
-                    //delete states bypass all waitingstates handling and go straight
-                    //into shared memory, and we keep a reference in endstates for a while
-
                     ENSURE(state.GetSenderId().m_id == -1, << "Delete states are expected to have ConnectionId == -1! Delete for "
                            << state.GetEntityId());
 

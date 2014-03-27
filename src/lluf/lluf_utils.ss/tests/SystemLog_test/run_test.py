@@ -78,36 +78,42 @@ if proc.returncode != 0:
 
 try:
     log_common_part = r"\D{3} [ |\d]\d \d{2}:\d{2}:\d{2} \S* " + system_log_test_pgm + r"\[\d*\]: "
-    for test in range(9):
+    for test in range(11):
         data, addr = sock.recvfrom( 10 * 1024 ) # buffer size is 10 k
-        print ("Received data:", data) 
+        print ("Received data:", data)
         if test == 0:
+            pri = r"<9>"
+            text = r"This is a log from a singleton constructor" 
+        elif test == 1:
             pri = r"<8>"
             text = r"This is an emergency log"
-        elif test == 1:
+        elif test == 2:
             pri = r"<9>"
             text = r"This is an alert log"            
-        elif test == 2:
+        elif test == 3:
             pri = r"<10>"
             text = r"This is a critical log with   newline and \t tab"
-        elif test == 3:
+        elif test == 4:
             pri = r"<11>"
             text = r"This is an error log"
-        elif test == 4:
+        elif test == 5:
             pri = r"<12>"
             text = r"This is a warning log with   newline and \t tab"
-        elif test == 5:
+        elif test == 6:
             pri = r"<13>"
             text = r"This is a notice log"
-        elif test == 6:
+        elif test == 7:
             pri = r"<14>"
             text = r"This is an informational log with   newline and \t tab"
-        elif test == 7:
+        elif test == 8:
             pri = r"<15>"
             text = r"This is a debug log"            
-        elif test == 8:
+        elif test == 9:
             pri = r"<11>"
             text = r"This is another error log"
+        elif test == 10:
+            pri = r"<9>"
+            text = r"This is a log from a singleton destructor"   
             
         p = re.compile(pri + log_common_part + text)
         data = data.decode("utf-8")

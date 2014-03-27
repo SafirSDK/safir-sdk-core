@@ -33,7 +33,7 @@
             <values>
                 <value>
                     <member>First</member>
-                    <parameter>DotsGeneratedTest.Recursive.Myself</parameter>
+                    <parameter><name>DotsGeneratedTest.Recursive.Myself</name></parameter>
                 </value>
             </values>
         </createRoutine>

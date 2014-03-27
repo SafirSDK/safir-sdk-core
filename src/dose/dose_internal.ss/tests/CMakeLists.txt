@@ -15,7 +15,7 @@ ADD_EXECUTABLE(dose_sem_wrapper_test semaphore_test.cpp)
 
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(distribution_data_test dose_internal dots_generated-Safir-cpp dots_cpp dots_id ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(distribution_data_test dose_internal dots_generated-Safir-cpp dots_cpp lluf_id ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(lamport_clock_test dose_internal ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(dose_message_queue_test dose_internal dots_generated-Safir-cpp dots_cpp lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
 endif()

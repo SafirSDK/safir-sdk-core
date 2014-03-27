@@ -1,39 +1,23 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <summary>Contains the parametrization of queue lengths used by a connection.</summary>
-    <name>Safir.Dob.QueueParameters</name>
-    <baseClass>Safir.Dob.Parametrization</baseClass>
-    <parameters>
-        <parameter>
-          <name>QueueRules</name>
-          <type>Safir.Dob.QueueRule</type>
-          <arrayElements>
-            <arrayElement> 
-              <!-- The first array item is the default queue lengths.
-                   We match all connections. -->
-              <object>
-                <name>Safir.Dob.QueueRule</name>
-                <members>
-                  <member>
-                    <name>MessageInQueueCapacity</name>
-                    <value>10</value>
-                  </member>
-                  <member>
-                    <name>MessageOutQueueCapacity</name>
-                    <value>10</value>
-                  </member>
-                  <member>
-                    <name>RequestInQueueCapacity</name>
-                    <value>10</value>
-                  </member>
-                  <member>
-                    <name>RequestOutQueueCapacity</name>
-                    <value>10</value>
-                  </member>
-                </members>
-              </object>
-            </arrayElement>
-          </arrayElements>
-        </parameter>
-    </parameters>
+<class xmlns="urn:safir-dots-unit">
+  <summary>Contains the parametrization of queue lengths used by a connection.</summary>
+  <name>Safir.Dob.QueueParameters</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters>
+    <parameter>
+      <name>QueueRules</name>
+      <type>Safir.Dob.QueueRule</type>
+      <arrayElements>
+        <!-- The first array item is the default queue lengths.
+             We match all connections. -->
+        <arrayElement>
+          <Safir.Dob.QueueRule type="Safir.Dob.QueueRule">
+            <MessageInQueueCapacity>10</MessageInQueueCapacity>
+            <MessageOutQueueCapacity>10</MessageOutQueueCapacity>
+            <RequestInQueueCapacity>10</RequestInQueueCapacity>
+            <RequestOutQueueCapacity>10</RequestOutQueueCapacity>
+          </Safir.Dob.QueueRule>
+        </arrayElement>
+      </arrayElements>
+    </parameter>
+  </parameters>
 </class>

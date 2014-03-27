@@ -18,7 +18,7 @@ FILE(GLOB sources *.cpp)
 ADD_LIBRARY(logging_java_jni SHARED ${sources})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(logging_java_jni logging_library)
+  TARGET_LINK_LIBRARIES(logging_java_jni logging_library)
 endif()
 
 ADD_DEPENDENCIES(javah logging_java)

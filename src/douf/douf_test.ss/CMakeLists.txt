@@ -8,8 +8,6 @@ SET(NO_LIBRARY_POSTFIXES 1)
 
 include($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
-find_package(Boost COMPONENTS date_time)
-
 find_package(PythonInterp)
 
 enable_testing()

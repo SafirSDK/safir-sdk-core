@@ -190,6 +190,36 @@ def copy_boost_dlls(dir, libraries):
         if match is not None and match.group(1) in libraries:
             copy_file(os.path.join(dir,file), DLL_DESTINATION)
 
+def copy_qt_dlls(dir):
+    """Try to copy a bunch of qt files. This is a mismash of qt4 and qt5 stuff,
+    but since QTDIR should only contain one qt version, this should work.
+    The stuff that is marked as for qt4 are the ones that are needed for Qt4,
+    all others are for qt5."""
+
+    names = ("Qt5Core.dll",
+             "Qt5Widgets.dll",
+             "Qt5Gui.dll",
+             "LibGLESv2.dll",
+             "LibEGL.dll",
+             "icudt51.dll",
+             "icuin51.dll",
+             "icuuc51.dll",
+             "QtCore4.dll",  #for qt4
+             "QtGui4.dll")  #for qt4
+
+    for file in names:
+        path = os.path.join(dir, "bin", file)
+        if os.path.isfile(path):
+            log (" " + file)
+            copy_file(path, DLL_DESTINATION)
+
+    qwindows = os.path.join(dir, "plugins", "platforms", "qwindows.dll")
+    if os.path.isfile(qwindows):
+        log (" qwindows.dll")
+        platforms = os.path.join(DLL_DESTINATION, "platforms")
+        mkdir(platforms)
+        copy_file(qwindows, platforms)
+
 def copy_header_dir(dir):
     if not os.path.isdir(dir):
         logError("ERROR! " + dir + " is not a directory")
@@ -234,32 +264,22 @@ def windows():
                        "random",
                        "regex",
                        "system",
-                       "thread")
+                       "thread",
+                       "timer")
 
     copy_boost_libs(boost_lib_dir, boost_libraries)
     copy_boost_dlls(boost_lib_dir, boost_libraries)
     copy_header_dir(os.path.join(boost_dir, "boost"))
 
     ############
-    log("Copying the Qt runtime dll")
-    copy_dll("QtCore4.dll")
-    copy_dll("QtGui4.dll")
+    qt_dir = os.environ.get("QTDIR")
+    if qt_dir is None:
+        logError("QTDIR is not set! Will not copy qt stuff")
+    else:
+        log("Copying the Qt runtime dlls from " + qt_dir)
+        copy_qt_dlls(qt_dir)
 
     ############
-    log("Copying expat stuff")
-    copy_dll("expat.dll",("libexpat.dll",))
-    copy_lib("expat.lib",("libexpat.lib",))
-    expat_dir=os.path.join(find_dll(("expat.dll","libexpat.dll")),"..")
-    expat_header_dir_alt1 = os.path.join(expat_dir,"Source","lib")
-    expat_header_dir_alt2 = os.path.join(expat_dir,"include")
-    if os.path.exists(expat_header_dir_alt1):
-        copy_headers(expat_header_dir_alt1,("expat.h","expat_external.h"))
-    elif os.path.exists(expat_header_dir_alt2):
-        copy_headers(expat_header_dir_alt2,("expat.h","expat_external.h"))
-    else:
-        logError("Failed to find expat headers!")
-    
-
     log("Copying Ada stuff - GNAT runtime")
     copy_dll("libgnat-2013.dll", Log_Error = False)
     copy_dll("libgnarl-2013.dll", Log_Error = False)

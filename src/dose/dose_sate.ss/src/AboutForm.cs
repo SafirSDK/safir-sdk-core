@@ -106,7 +106,7 @@ namespace Sate
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(208, 46);
             this.label2.TabIndex = 1;
-            this.label2.Text = "Version: DOBv4";
+            this.label2.Text = "Safir SDK Core";
             this.label2.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // button1

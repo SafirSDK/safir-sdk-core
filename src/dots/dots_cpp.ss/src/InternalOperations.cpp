@@ -25,7 +25,7 @@
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
-#include <Safir/Dob/Typesystem/Internal/Id.h>
+#include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 
 namespace Safir
@@ -79,12 +79,12 @@ namespace Internal
         {
             throw SoftwareViolationException(L"Cannot generate a hash from an empty string",__WFILE__,__LINE__);
         }
-        return DotsId_Generate64(Utilities::ToUtf8(str).c_str());
+        return LlufId_Generate64(Utilities::ToUtf8(str).c_str());
     }
 
     Int64 GenerateRandom64Bit()
     {
-        return DotsId_GenerateRandom64();
+        return LlufId_GenerateRandom64();
     }
 
 

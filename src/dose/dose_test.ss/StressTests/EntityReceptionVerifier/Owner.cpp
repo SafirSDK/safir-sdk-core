@@ -61,7 +61,7 @@ void Owner::Set()
     if (m_entity->SequenceNumber().GetVal() == CommandLine::Instance().NumSets())
     {
         std::wcout << "Have performed " << m_entity->SequenceNumber().GetVal() << " sets, sleeping 10s and exiting" << std::endl;
-        boost::this_thread::sleep(boost::posix_time::seconds(10));
+        boost::this_thread::sleep_for(boost::chrono::seconds(10));
         exit(0);
     }
 
