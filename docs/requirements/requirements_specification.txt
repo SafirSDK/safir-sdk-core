@@ -42,6 +42,8 @@ First version
 
 |=========================================================
 
+Appendix A, which defines the compliance with the requirements has its own revision history, to allow the compliance to updated without changing the reviewed and approved requirements.
+
 === Definitions
 
 Application::
@@ -335,8 +337,9 @@ lang_req_3:: Safir SDK Core shall provide programming interfaces in .NET.
 lang_req_4:: Safir SDK Core shall provide programming interfaces in Ada.
 lang_req_5:: An application built on Safir SDK Core shall be able to communicate with other Safir SDK Core applications, regardless of language.
 
- [[system_control]]
+[[system_control]]
 === System control and failover support
+
 Node supervision along with redundancy is provided to detect and act on unexpected application or node losses. The system control mechanism starts and stops the entire system including the Dob and will also keep an unambiguous view of the system, i.e which nodes are part of the system and where individual applications are executing.
 
 sysctrl_req_1:: It shall be possible to supervise the existence of a node.

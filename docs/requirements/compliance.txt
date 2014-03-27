@@ -1,6 +1,11 @@
-== Appendix A: Compliance
+[appendix]
+== Compliance
+
+This section defines how Safir SDK Core complies with its requirements. It lists the requirements that are not implemented, and sometimes adds an explanation.
 
 === History
+
+The compliance appendix has its own revision history, to allow the compliance to be updated without changing an reviewed and approved version of the requirements.
 
 .Revision History
 [width="50%",cols="20%,30%,50%",options="header",frame="topbot",grid="none"]
