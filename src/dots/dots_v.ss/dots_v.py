@@ -30,6 +30,7 @@ import sys, os, re, hashlib
 import xml.etree.ElementTree as ET
 from glob import glob
 import codecs
+import argparse
 
 ## Fix for unicode cross compatibility
 if sys.version < '3':
@@ -134,18 +135,47 @@ def dou_uniform_translate(typename):
     return typename
 
 
-def dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dou_file_root):
-    for path, dirs, files in os.walk(dou_file_root): # Walk directory tree
-        for file in files:
-            if file.endswith(".dou"):
-                dou_xml = ET.parse(os.path.join(path, file))
-                xml_root = dou_xml.getroot()
-                dou_type = xml_root.tag.split("}")[1]
-                # Make first char uppercase
-                dou_type = dou_uniform_translate(dou_type)
-                dou_uniform_lookup_cache[os.path.splitext(file)[0]] = dou_type
-                dou_file_lookup_cache[file] = os.path.join(path, file)
-                dou_xml_lookup_cache[os.path.join(path, file)] = dou_xml
+def dou_uniform_lookup_add(dou_uniform_lookup_cache, 
+                           dou_file_lookup_cache, 
+                           dou_xml_lookup_cache, 
+                           file,
+                           path):
+    if file in dou_file_lookup_cache:
+        print ("Duplicate dou file", os.path.join(path,file), file=sys.stderr)
+        sys.exit(1)
+
+    dou_xml = ET.parse(os.path.join(path, file))
+    xml_root = dou_xml.getroot()
+    dou_type = xml_root.tag.split("}")[1]
+    # Make first char uppercase
+    dou_type = dou_uniform_translate(dou_type)
+    dou_uniform_lookup_cache[os.path.splitext(file)[0]] = dou_type
+    dou_file_lookup_cache[file] = os.path.join(path, file)
+    dou_xml_lookup_cache[os.path.join(path, file)] = dou_xml
+
+
+def dou_uniform_lookup_init(dou_uniform_lookup_cache, 
+                            dou_file_lookup_cache, 
+                            dou_xml_lookup_cache, 
+                            dependency_paths, 
+                            dou_files):
+    for dep in dependency_paths:
+        for path, dirs, files in os.walk(dep): # Walk directory tree
+            for file in files:
+                if file.endswith(".dou"):
+                    dou_uniform_lookup_add(dou_uniform_lookup_cache, 
+                                           dou_file_lookup_cache, 
+                                           dou_xml_lookup_cache,
+                                           file,
+                                           path)
+    for dou_file in dou_files:
+        (path, file) = os.path.split(dou_file)
+        dou_uniform_lookup_add(dou_uniform_lookup_cache, 
+                               dou_file_lookup_cache, 
+                               dou_xml_lookup_cache,
+                               file,
+                               path)
+        
 
 
 def dou_uniform_lookup(gSession, typename):
@@ -153,6 +183,21 @@ def dou_uniform_lookup(gSession, typename):
                 
     print("** ERROR - Cannot match dou type", typename, file=sys.stderr)
     sys.exit(1)
+
+def parse_namespace_file(namespace_prefixes, path, file, file_suffix):
+    prefix_file = codecs.open(os.path.join(path, file), "r", encoding="utf-8")
+    found = False
+    line = prefix_file.readline()
+    while len(line) > 0 and not found:
+        if not line.startswith("#") and not line.startswith("--") and line.rstrip() != "": 
+            found = True
+            namespace = file[:file.find(file_suffix)]
+            if namespace not in namespace_prefixes:
+                namespace_prefixes[namespace] = line.rstrip()
+            elif namespace_prefixes[namespace] != line.rstrip():
+                print("Conflicting namespace prefix definition found.", namespace_prefixes[namespace], "is different from", line.rstrip(), file=sys.stderr)
+                sys.exit(1)
+        line = prefix_file.readline()
 
 
 # We only need to call this once per dod file (if Namespace prefixes are used) 
@@ -170,18 +215,21 @@ def namespace_prefix_init(gSession):
     gSession.namespace_prefixes.clear()
     gSession.namespace_prefixes["¤¤Namespace_Prefix_File_Suffix¤¤"] = file_suffix
     
-    for path, dirs, files in os.walk(gSession.dou_file_root): # Walk directory tree
-        for file in files:
-            if file.endswith(file_suffix):
-                prefix_file = codecs.open(os.path.join(path, file), "r", encoding="utf-8")
-                found = False
-                line = prefix_file.readline()
-                while len(line) > 0 and not found:
-                    if not line.startswith("#") and not line.startswith("--") and line.rstrip() != "": 
-                        found = True
-                        namespace = file[:file.find(file_suffix)]
-                        gSession.namespace_prefixes[namespace] = line.rstrip()
-                    line = prefix_file.readline()
+    for dep in gSession.dependency_paths:
+        for path, dirs, files in os.walk(dep): # Walk directory tree
+            for file in files:
+                if file.endswith(file_suffix):
+                    parse_namespace_file(gSession.namespace_prefixes,
+                                         path, 
+                                         file,
+                                         file_suffix)
+    for prefix_file in gSession.namespace_prefix_files:
+        if prefix_file.endswith(file_suffix):
+            (path,file) = os.path.split(prefix_file)
+            parse_namespace_file(gSession.namespace_prefixes, 
+                                 path, 
+                                 file,
+                                 file_suffix)
 
 def namespace_prefixer(gSession, typename):
     # global namespace_prefixes   Read Only
@@ -1480,9 +1528,18 @@ class GeneratorSession(object):
         self.dou_uniform_lookup_cache = None
         self.dou_file_lookup_cache = None
         self.dou_xml_lookup_cache = None
-        self.dou_file_root = None
+        self.dependency_paths = None
+        self.namespace_prefix_files = None
 
-def dod_thread_main(dod_filename, dou_files, gen_src_output_path, show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dou_file_root):
+def dod_thread_main(dod_filename, 
+                    dou_files, 
+                    gen_src_output_path, 
+                    show_files, 
+                    dou_uniform_lookup_cache, 
+                    dou_file_lookup_cache,
+                    dou_xml_lookup_cache, 
+                    dependency_paths,
+                    namespace_prefix_files):
     t1 = os.times()[4]
     global loglevel
 
@@ -1490,7 +1547,8 @@ def dod_thread_main(dod_filename, dou_files, gen_src_output_path, show_files, do
     gSession.dou_uniform_lookup_cache = dou_uniform_lookup_cache
     gSession.dou_file_lookup_cache = dou_file_lookup_cache
     gSession.dou_xml_lookup_cache = dou_xml_lookup_cache
-    gSession.dou_file_root = dou_file_root
+    gSession.dependency_paths = dependency_paths
+    gSession.namespace_prefix_files = namespace_prefix_files
 
     dod_file = dod_init(gSession, dod_filename)
     output_dir = os.path.join(gen_src_output_path, gSession.dod_parameters["Output_Directory"])
@@ -1508,67 +1566,59 @@ def dod_thread_main(dod_filename, dou_files, gen_src_output_path, show_files, do
 def main():
     global loglevel
     
-    # Argument parsing is Python version dependent
-    use_argparse = False
+    # version dependent features
     support_multicpu = True
-    if sys.version_info[0] == 2 and sys.version_info[1] >= 7:
-        # Was added in 2.7
-        use_argparse = True
-    elif sys.version_info[0] <= 2 and sys.version_info[1] < 6:
-        print("Update your Python version, 2.6 or higher required by this module", file=sys.stderr)
-        sys.exit(1)
-    elif sys.version_info[0] == 3:
+    if sys.version_info[0] == 3:
         support_multicpu = False
-
-        if sys.version_info[1] >= 2:
-            # Was added in 3.2, all 3.x version support optparse
-            use_argparse = True
 
         # if ((sys.version_info[1] == 3 and sys.version_info[2] >= 2)) or (sys.version_info[1] > 3) or (sys.version_info[1] == 2 and sys.version_info[2] >= 5):
         #    # This was introduced due to http://bugs.python.org/issue16076, which was resolved in 3.3.2
         #    support_multicpu = True
     
     arguments = None
-    if use_argparse:
-        import argparse
 
-        parser = argparse.ArgumentParser(description='Source code generator tool for Safir SDK Core. Processes .dou files into source code for all supported languages. Files are generated in language specific subdirectories of root path of processed dou files.')
+    parser = argparse.ArgumentParser(description='Source code generator tool for Safir SDK Core. Processes .dou files into source code for all supported languages. Files are generated in language specific subdirectories of root path of processed dou files.')
     
-        parser.add_argument('dou_files', metavar='DOU_FILE(S)', help='.dou file(s) to process. Accepts wildcards (*). If a directory is specified, all .dou files in the directory are processed (recursive)')
-        parser.add_argument('-dod', '--dod', '--dod_files', dest='dod_files', metavar='DOD_FILE(S)', required=True, help='Specifies .dod files to use as templates for the processing. Accepts wildcards (*). If it is a directory, all .dod files in that directory are used.')
-        parser.add_argument('-xdir', '--xdir', '--dou_root', dest='dou_root', metavar='DOU_ROOT', required=True, help='Path to the top directory containing the .dou files')
-        parser.add_argument('-o', '--output_path', dest='output_path', metavar='OUTPUT_PATH', required=False, default='', help='Directory where the generated file structure starts. Defaults to current working directory.')
-        parser.add_argument('-i', '-info', '--info', '--show_files', dest='show_files', required=False, default=False, action='store_true', help='Prints out the dod and dou filenames for each parsing')
-        parser.add_argument('-v', '-verbose', '--verbose', '--show_parsing', dest='show_parsing', required=False, default=False, action='store_true', help='Prints debugging info from the parsing to stderr')
-        parser.add_argument('-j', '-multiprocess', '--multiprocess', dest='multiprocess', required=False, default=False, action='store_true', help='Activates multiprocessing, will spawn 1 process per .dod file (normally 7 processes).')
+    parser.add_argument('dou_files', 
+                        metavar='DOU_FILE(S)', 
+                        help='.dou file(s) to process. Accepts wildcards (*). If a directory is specified, all .dou files in the directory are processed (recursive)')
+    parser.add_argument('--dod-files', 
+                        dest='dod_files', 
+                        metavar='DOD_FILE(S)', 
+                        required=True, 
+                        help='Specifies .dod files to use as templates for the processing. Accepts wildcards (*). If it is a directory, all .dod files in that directory are used.')
+    parser.add_argument('--dependencies', 
+                        dest='dependencies', 
+                        metavar='DEPENDENCIES', 
+                        required=False, 
+                        action="append",
+                        help="Path to directory containing .dou files that the ones we're generating code for depend on.")
+    parser.add_argument('--output-path', 
+                        dest='output_path', 
+                        metavar='OUTPUT_PATH', 
+                        required=False, 
+                        default='', 
+                        help='Directory where the generated file structure starts. Defaults to current working directory.')
+    parser.add_argument('--show-files', 
+                        dest='show_files', 
+                        required=False,
+                        default=False, 
+                        action='store_true', 
+                        help='Prints out the dod and dou filenames for each parsing')
+    parser.add_argument('-v', '--verbose',
+                        dest='show_parsing', 
+                        required=False, 
+                        default=False, 
+                        action='store_true', 
+                        help='Prints debugging info from the parsing to stderr')
+    parser.add_argument('--multiprocess', 
+                        dest='multiprocess', 
+                        required=False, 
+                        default=False, 
+                        action='store_true',
+                        help='Activates multiprocessing, will spawn 1 process per .dod file (normally 7 processes).')
     
-        arguments = parser.parse_args()
-    else:
-        import optparse
-        ## Preparse option names, optparse does not support single dash options with long names
-        ## This is only supported because the old dots_v supports it
-        for i in range(len(sys.argv)):
-            if i == 0: continue
-            if sys.argv[i] == "-dod" or sys.argv[i].startswith("-dod="): sys.argv[i] = sys.argv[i].replace("-dod", "--dod")            
-            if sys.argv[i] == "-xdir" or sys.argv[i].startswith("-xdir="): sys.argv[i] = sys.argv[i].replace("-xdir", "--xdir")
-            if sys.argv[i] == "-info" : sys.argv[i] = "--info"
-            if sys.argv[i] == "-verbose" : sys.argv[i] = "--verbose"
-            if sys.argv[i] == "-multiprocess" : sys.argv[i] = "--multiprocess"
-        
-        parser = optparse.OptionParser(usage='usage: %prog [options] DOU_FILE(S)', description='Source code generator tool for Safir SDK Core. Processes .dou files into source code for all supported languages. Files are generated in language specific subdirectories of root path of processed dou files. DOU_FILE(S): .dou file(s) to process. Accepts wildcards (*). If a directory is specified, all .dou files in the directory are processed (recursive)')
-    
-        parser.add_option('--dod', '--dod_files', dest='dod_files', metavar='DOD_FILE(S)', default='', help='Specifies .dod files to use as templates for the processing. Accepts wildcards (*). If it is a directory, all .dod files in that directory are used.')
-        parser.add_option('--xdir', '--dou_root', dest='dou_root', metavar='DOU_ROOT', default='', help='Path to the top directory containing the .dou files')
-        parser.add_option('--output_path', '-o', dest='output_path', metavar='OUTPUT_PATH', default='', help='Directory where the generated file structure starts. Defaults to current working directory.')
-        parser.add_option( '-i', '--info', '--show_files', dest='show_files', default=False, action='store_true', help='Prints out the dod and dou filenames for each parsing')
-        parser.add_option('-v', '--verbose', '--show_parsing', dest='show_parsing', default=False, action='store_true', help='Prints debugging info from the parsing to stderr')
-        parser.add_option('-j', '--multiprocess', dest='multiprocess', default=False, action='store_true', help='Activates multiprocessing, will spawn 1 process per .dod file (normally 7 processes).')
-    
-        ## Check existense
-    
-        (arguments, args) = parser.parse_args()
-        if len(args) == 0: arguments.dou_files = ""
-        else: arguments.dou_files = args[0]
+    arguments = parser.parse_args()
 
     dod_files = []
     if os.path.isdir(arguments.dod_files):
@@ -1576,22 +1626,16 @@ def main():
         for dod_file in os.listdir(normalized_path + "."):
             if dod_file.endswith(".dod"):
                 dod_files.append(normalized_path + dod_file)
-    elif os.path.isfile(arguments.dod_files):
-        dod_files.append(os.path.abspath(arguments.dod_files))
-    elif arguments.dod_files.find("*") != -1:
-        # Has wildcard
-        dod_files = glob(os.path.abspath(arguments.dod_files))
     
     if len(dod_files) == 0 or not os.path.isfile(dod_files[0]):
         print("Invalid argument for dod files.", file=sys.stderr)
         sys.exit(1)
     
-    dou_file_root = os.path.abspath(arguments.dou_root)
-    if not os.path.isdir(dou_file_root):
-        print("Invalid argument for dou root.", file=sys.stderr)
-        sys.exit(1)
-    dou_file_root = dou_file_root + os.sep
-
+    dependency_paths = [os.path.abspath(dep) for dep in arguments.dependencies]
+    for dep in dependency_paths:
+        if not os.path.isdir(dep):
+            print("warning: Dependency directory", dep, "does not exist or is not a directory.", file=sys.stderr)
+        
     gen_src_output_path = arguments.output_path
     if gen_src_output_path == "":
         gen_src_output_path = os.getcwd()
@@ -1605,16 +1649,17 @@ def main():
     
         
     dou_files = []    
+    namespace_prefix_files = []
     if os.path.isdir(arguments.dou_files):
-        for path, dirs, files in os.walk(os.path.abspath(arguments.dou_files)): # Walk directory tree
+        # Walk directory tree
+        for path, dirs, files in os.walk(os.path.abspath(arguments.dou_files)): 
             for file in files:
                 if file.endswith(".dou"):
                     dou_files.append(os.path.join(path, file))
+                if file.endswith(".namespace.txt"):
+                    namespace_prefix_files.append(os.path.join(path,file))
     elif os.path.isfile(arguments.dou_files):
         dou_files.append(os.path.abspath(arguments.dou_files))
-    elif arguments.dou_files.find("*") != -1:
-        # Has wildcard
-        dou_files = glob(os.path.abspath(arguments.dou_files))
     
     if len(dou_files) == 0:
         print("No valid dou files to process.", file=sys.stderr)
@@ -1630,12 +1675,12 @@ def main():
         dou_uniform_lookup_cache = shared_mem_manager.dict()    
         dou_file_lookup_cache = shared_mem_manager.dict()
         dou_xml_lookup_cache = shared_mem_manager.dict()
-        dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dou_file_root)
+        dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, dou_files)
 
         pool = multiprocessing.Pool() # Defaults number of worker processes to number of CPUs
 
         for dod_filename in dod_files:
-            pool.apply_async(dod_thread_main, args = (dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dou_file_root))
+            pool.apply_async(dod_thread_main, args = (dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, namespace_prefix_files))
 
         pool.close()
         pool.join()
@@ -1646,10 +1691,10 @@ def main():
         dou_uniform_lookup_cache = {}
         dou_file_lookup_cache = {}
         dou_xml_lookup_cache = {}
-        dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dou_file_root)
+        dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, dou_files)
 
         for dod_filename in dod_files:
-            dod_thread_main(dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dou_file_root)
+            dod_thread_main(dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, namespace_prefix_files)
     
     return 0
 
