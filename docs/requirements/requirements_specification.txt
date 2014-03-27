@@ -156,6 +156,9 @@ doc_req_3:: Safir SDK Core shall contain source code for an example of a gui log
 === Distribution
 The Dob provides three distribution mechanisms; Messages, Services and Entities. These three fulfill different needs in a distributed real time system, and have different characteristics and provide different guarantees.
 
+dist_req_1:: Safir SDK Core shall support IPv4.
+dist_req_2:: Safir SDK Core shall support IPv6
+
 ==== Messages
 Messages are data that any application can subscribe to and any application can send. When an application sends a message, it is forwarded to all subscribers of that message.
 

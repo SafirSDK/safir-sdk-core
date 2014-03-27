@@ -34,10 +34,13 @@ All nodes in a system must have good connectivity. Power failures in the network
 
 All nodes will wait for the slowest node. 
 
-
 === License
 
 *lic_req_2* is not fulfilled, since the User's Guide does not have the correct license.
+
+=== Distribution
+
+*dist_req_2* is not implemented.
 
 === Messages with guaranteed delivery
 
