@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 PROJECT (foreach NONE)
 
-INCLUDE(/home/lars/logan/build/config/common/sdk/data/generated/build_generated.cmake)
+INCLUDE(/home/lars/logan/build/config/sdk/data/generated/build_generated.cmake)
 
 SET(DEPENDENCIES Safir)
 

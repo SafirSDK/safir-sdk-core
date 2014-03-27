@@ -20,11 +20,11 @@ FUNCTION(BUILD_GENERATED_LIBRARY NAME DEPENDENCIES)
   # TEMPORARY!!!!
   # TODO: REMOVE THIS STEP WHEN WE CAN!
   # Copy all the dou files to somewhere where we can get at them, so that we can use this as the xdir of dots_v
-  FILE(GLOB_RECURSE dou_files ${SOURCE_DIR} "*.dou")
-  set(all_dou_directory ${SAFIR_RUNTIME}/data/text/dots/all_dous)
-  file(INSTALL ${dou_files} DESTINATION ${all_dou_directory})
+  #FILE(GLOB_RECURSE dou_files ${SOURCE_DIR} "*.dou")
+  #set(all_dou_directory ${SAFIR_RUNTIME}/data/text/dots/all_dous)
+  #file(INSTALL ${dou_files} DESTINATION ${all_dou_directory})
 
-  SET(dots_v_command ${PYTHON_EXECUTABLE} "${SAFIR_RUNTIME}/bin/dots_v.py" -dod=${dod_directory} -xdir=${all_dou_directory})
+  SET(dots_v_command ${PYTHON_EXECUTABLE} "${SAFIR_RUNTIME}/bin/dots_v.py" --dod-files=${dod_directory} --dependencies ${SAFIR_RUNTIME}/data/text/dots/classes)
   
   ADD_CUSTOM_COMMAND(OUTPUT tags cpp java ada dotnet
     COMMAND ${dots_v_command} ${SOURCE_DIR}
