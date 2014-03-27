@@ -238,11 +238,9 @@ hanreg_req_1:: Safir SDK Core shall provide a mechanism for applications to subs
 hanreg_req_2:: Safir SDK Core shall guarantee that a subscriber gets at least one notification when a handler is temporarily unregistered one or more times.
 
 ==== Addressing
-The addressing mechanism used by Safir SDK Core is completely transparent. The sender of a request or message doesn't know if the receiver is located on the same node or on a remote node.
+The addressing mechanism used by Safir SDK Core is completely transparent. The sender of a service or entity request doesn't know if the receiving handler is located on the same node or on a remote node. In the same way the sender of a message is unaware of the location of the subscribers. When an entity owner updates an entity it has no knowledge of the numbers of subscribers and their location.
   
 addr_req_1:: Safir SDK Core shall for addressing use logical addressing, i.e. an applications shall be unaware of the physical address of its counterparts.
-
-addr_req_2:: Safir SDK Core shall provide a mechanism for message senders to send messages without any knowledge of the location of the subscribers.
 
 ==== Queues
 For each connection to the Dob there is a set of associated queues, outbound request/reply queue, inbound request/reply queue, outbound message queue and inbound message queue.
