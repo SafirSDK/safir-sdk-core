@@ -12,7 +12,7 @@ ADD_EXECUTABLE(container_test container_test.cpp)
 
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(container_test dots_generated-DotsTest-cpp dots_generated-Safir-cpp dots_generated-cpp dots_cpp)
+  TARGET_LINK_LIBRARIES(container_test dots_generated-DotsTest-cpp dots_generated-Safir-cpp dots_cpp)
 endif()
 
 ENABLE_TESTING()

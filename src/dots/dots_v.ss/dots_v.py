@@ -1348,32 +1348,37 @@ def find_mkdir_rlock(newdir):
     elif newdir.endswith("/tags") or newdir.find("/tags/"): return MKDIR_TAGS_RLOCK
     return MKDIR_OTHER_RLOCK
 
+
+
 def mkdir(gSession, newdir):
     """works the way a good mkdir should :)
         - already exists, silently complete
         - regular file in the way, raise an exception
         - parent directory(ies) does not exist, make them as well
     """
+    def mkdir_internal(newdir):    
+        # Someone may have created the dir while we waited for the RLock
+        if os.path.isdir(newdir):
+            pass
+        elif os.path.isfile(newdir):
+            raise OSError("a file with the same name as the desired " \
+                          "dir, '%s', already exists." % newdir)
+        else:
+            head, tail = os.path.split(newdir)
+            if head and not os.path.isdir(head):
+                mkdir(gSession, head)
+            if tail:
+                os.mkdir(newdir)
+
     
     if os.path.isdir(newdir): return
 
-    rlock = gSession.mkdir_rlock
-    rlock.acquire()
-
-    # Someone may have created the dir while we waited for the RLock
-    if os.path.isdir(newdir):
-        pass
-    elif os.path.isfile(newdir):
-        raise OSError("a file with the same name as the desired " \
-                      "dir, '%s', already exists." % newdir)
+    if gSession is None:
+        mkdir_internal(newdir)
     else:
-        head, tail = os.path.split(newdir)
-        if head and not os.path.isdir(head):
-            mkdir(gSession, head)
-        if tail:
-            os.mkdir(newdir)
+        with gSession.mkdir_rlock:
+            mkdir_internal(newdir)
 
-    rlock.release()
 
 # Faster file reader, buffers all in memory (good since we loop through same file multiple times)
 class FileReader(object):
@@ -1641,7 +1646,7 @@ def main():
         gen_src_output_path = os.getcwd()
     else:
         if not os.path.isdir(gen_src_output_path):
-            mkdir(gSession, gen_src_output_path)
+            mkdir(None, gen_src_output_path)
             if not os.path.isdir(gen_src_output_path):
                 print("Invalid argument for output path.", file=sys.stderr)
                 sys.exit(1)

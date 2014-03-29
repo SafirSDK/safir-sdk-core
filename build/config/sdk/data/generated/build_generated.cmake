@@ -16,19 +16,11 @@ FUNCTION(BUILD_GENERATED_LIBRARY NAME DEPENDENCIES)
   #
   SET(dod_directory ${SAFIR_RUNTIME}/data/text/dots/config/)
   FILE(GLOB dod_files ${dod_directory} *.dod)
-
-  # TEMPORARY!!!!
-  # TODO: REMOVE THIS STEP WHEN WE CAN!
-  # Copy all the dou files to somewhere where we can get at them, so that we can use this as the xdir of dots_v
-  #FILE(GLOB_RECURSE dou_files ${SOURCE_DIR} "*.dou")
-  #set(all_dou_directory ${SAFIR_RUNTIME}/data/text/dots/all_dous)
-  #file(INSTALL ${dou_files} DESTINATION ${all_dou_directory})
-
-  SET(dots_v_command ${PYTHON_EXECUTABLE} "${SAFIR_RUNTIME}/bin/dots_v.py" --dod-files=${dod_directory} --dependencies ${SAFIR_RUNTIME}/data/text/dots/classes)
+  SET(dots_v_command ${PYTHON_EXECUTABLE} "${SAFIR_RUNTIME}/bin/dots_v.py" --dod-files=${dod_directory} --dependencies ${SAFIR_RUNTIME}/data/text/dots/classes --output-path=generated_code)
   
-  ADD_CUSTOM_COMMAND(OUTPUT tags cpp java ada dotnet
+  ADD_CUSTOM_COMMAND(OUTPUT generated_code/tags generated_code/cpp generated_code/java generated_code/ada generated_code/dotnet
     COMMAND ${dots_v_command} ${SOURCE_DIR}
-    COMMAND cmake -E copy /home/lars/logan/build/config/sdk/data/generated/build_cpp.cmake cpp/CMakeLists.txt
+    COMMAND cmake -E copy /home/lars/logan/build/config/sdk/data/generated/build_cpp.cmake generated_code/cpp/CMakeLists.txt
     DEPENDS ${dod_files}
     COMMENT "Generating code for ${SOURCE_DIR}")
   #############
@@ -45,10 +37,10 @@ FUNCTION(BUILD_GENERATED_LIBRARY NAME DEPENDENCIES)
   # in the code generation step.
   #
   ADD_CUSTOM_TARGET(dots_generated-${NAME}-cpp ALL
-    DEPENDS cpp
+    DEPENDS generated_code/cpp
     COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} -DSAFIR_PROJECT_NAME:string=${NAME}-cpp -DCMAKE_BUILD_TYPE:string=${CMAKE_BUILD_TYPE} -DDEPENDENCIES=${DEPENDENCIES} .
     COMMAND ${CMAKE_COMMAND} --build . -- -j3
-    WORKING_DIRECTORY cpp)
+    WORKING_DIRECTORY generated_code/cpp)
   ############
 
   #TODO fix -j stuff somehow...
@@ -56,7 +48,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY NAME DEPENDENCIES)
   FILE(GLOB_RECURSE files_to_install *.dou *.dom *.namespace.txt)
   #message("files_to_install = ${files_to_install}")
   INSTALL(FILES ${files_to_install} DESTINATION ${SAFIR_RUNTIME}/data/text/dots/classes/)
-  INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build . --target install WORKING_DIRECTORY cpp)")
+  INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build . --target install WORKING_DIRECTORY generated_code/cpp)")
 
 ENDFUNCTION()
 

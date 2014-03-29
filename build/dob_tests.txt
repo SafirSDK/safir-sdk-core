@@ -1,9 +1,11 @@
 #COPY DOB FILES
-copy_dob_files   src/dots/dots_test_dou.ss/data    safir_dob_tests
-copy_dob_files   src/dose/dose_test_dou.ss/data    safir_dob_tests
-copy_dob_files   src/dope/dope_test_dou.ss/data    safir_dob_tests
-copy_dob_files   src/olib/olib_test_dou.ss/data    safir_dob_tests
-dobmake
+#copy_dob_files   src/dots/dots_test_dou.ss/data    safir_dob_tests
+#copy_dob_files   src/dose/dose_test_dou.ss/data    safir_dob_tests
+#copy_dob_files   src/dope/dope_test_dou.ss/data    safir_dob_tests
+#copy_dob_files   src/olib/olib_test_dou.ss/data    safir_dob_tests
+#dobmake
+
+build_dir        src/dots/dots_test_dou.ss                       RelWithDebInfo   Debug
 
 #container tests need the extended types above.
 run_test_suite   src/dots/dots_cpp.ss/tests/container_test       dots_cpp_container_tests
@@ -11,9 +13,9 @@ run_test_suite   src/dots/dots_cpp.ss/tests/container_test       dots_cpp_contai
 run_test_suite   src/dots/dots_test.ss                           dots_test
 
 #run the dose_main smoketest with more stuff in dots_generated.
-run_test_suite   src/dose/dose_main.ss/tests                     dose_main_tests_2
+#run_test_suite   src/dose/dose_main.ss/tests                     dose_main_tests_2
 
 #python classes for test_support is needed by dose tests.
-build_dir        src/tests/test_support                          RelWithDebInfo
-build_dir        src/dose/dose_test.ss                           RelWithDebInfo
-run_test_suite   src/dope/dope_test.ss/src/file_backend          dope_file_backend
+#build_dir        src/tests/test_support                          RelWithDebInfo
+#build_dir        src/dose/dose_test.ss                           RelWithDebInfo
+#run_test_suite   src/dope/dope_test.ss/src/file_backend          dope_file_backend
