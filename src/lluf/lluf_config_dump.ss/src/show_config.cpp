@@ -50,8 +50,9 @@ public:
             ("help,h", "show help message")
             ("typesystem", "Show contents of typesystem.ini")
             ("locations", "Show contents of locations.ini")
-            ("logging", "Show contents of logging.ini");
-
+            ("logging", "Show contents of logging.ini")
+            ("module-install-dir", value<std::string>(&module), "Get the install dir from typesystem.ini for the specified module");
+        
         variables_map vm;
 
         try
@@ -77,11 +78,10 @@ public:
         typesystem = vm.count("typesystem") != 0;
         locations = vm.count("typesystem") != 0;
 
-        if (!logging && !locations && !typesystem)
+        if (!logging && !locations && !typesystem && vm.count("module-install-dir") == 0)
         {
-            logging = true;
-            typesystem = true;
-            locations = true;
+            ShowHelp(options);
+            return;
         }
 
         parseOk = true;
@@ -89,6 +89,7 @@ public:
     bool logging;
     bool typesystem;
     bool locations;
+    std::string module;
 
     bool parseOk;
 
@@ -151,10 +152,24 @@ int main(int argc, char * argv[])
             std::cout << "; ==== typesystem.ini ====" << std::endl;
             PrintPTree(reader.Typesystem());
         }
+        
+        if (!options.module.empty())
+        {
+            try
+            {
+                std::cout << reader.Typesystem().get<std::string>(options.module+".dou_directory") << std::endl;
+            }
+            catch (boost::property_tree::ptree_bad_path&)
+            {
+                std::cout << reader.Typesystem().get<std::string>("default_dou_directory") + options.module << std::endl;                
+            }
+            
+        }
     }
-    catch (const std::exception&)
+    catch (const std::exception&e)
     {
         std::cout << "Can't read configuration. " << std::endl;
+        std::cout << e.what() << std::endl;
         return 1;
     }
     return 0;

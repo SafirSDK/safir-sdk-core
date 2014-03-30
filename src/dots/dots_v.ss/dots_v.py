@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
+# Copyright Saab AB, 2005-2014 (http://safir.sourceforge.net)
 #
 # Created by: Björn Weström
 #
@@ -26,11 +26,21 @@
 
 # Prepared for Python 3
 from __future__ import print_function
-import sys, os, re, hashlib
+import sys, os, re, hashlib, subprocess
 import xml.etree.ElementTree as ET
 from glob import glob
 import codecs
 import argparse
+
+try:
+    import ConfigParser
+except ImportError:
+    import configparser as ConfigParser
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 ## Fix for unicode cross compatibility
 if sys.version < '3':
@@ -50,6 +60,42 @@ dod_parameter_names = [\
         ]
 
 loglevel = 3
+
+class GeneratedLibrary(object):
+    def __init__(self, section, items, default_dou_directory):
+        #print("Creating GeneratedLibrary for", section)
+        self.section = section
+        self.dependencies = items["dependencies"].split()
+        if "dou_directory" in items:
+            self.dou_directory = items["dou_directory"]
+        else:
+            self.dou_directory = os.path.join(default_dou_directory,section)
+
+        #print (" dependencies =", self.dependencies)
+        #print (" dou_directory =", self.dou_directory)
+        
+def read_typesystem_ini():
+    try:
+        ini = subprocess.check_output(("safir_show_config", "--typesystem"))
+
+        # ConfigParser wants a section header so add a dummy one.
+        ini = '[DEFAULT]\n' + ini
+
+        config = ConfigParser.ConfigParser()
+        config.readfp(StringIO(ini))
+
+        result = dict()
+        for section in config.sections():
+            result[section] = GeneratedLibrary(section,
+                                               dict(config.items(section)),
+                                               config.get("DEFAULT",
+                                                          "default_dou_directory"))
+
+        return result
+
+    except Exception as e:
+        print("Failed to read typesystem.ini! (",e,")", file = sys.stderr)
+        sys.exit(1)
 
 class Dou(object):    
     def __init__(self):
@@ -1586,7 +1632,7 @@ def main():
     
     parser.add_argument('dou_files', 
                         metavar='DOU_FILE(S)', 
-                        help='.dou file(s) to process. Accepts wildcards (*). If a directory is specified, all .dou files in the directory are processed (recursive)')
+                        help='.dou file(s) to process. If a directory is specified, all .dou files in the directory are processed (recursive)')
     parser.add_argument('--dod-files', 
                         dest='dod_files', 
                         metavar='DOD_FILE(S)', 
@@ -1595,9 +1641,9 @@ def main():
     parser.add_argument('--dependencies', 
                         dest='dependencies', 
                         metavar='DEPENDENCIES', 
-                        required=False, 
-                        action="append",
-                        help="Path to directory containing .dou files that the ones we're generating code for depend on.")
+                        required=False,
+                        nargs="*",
+                        help="List of abstract generated modules names that this module depends on.")
     parser.add_argument('--output-path', 
                         dest='output_path', 
                         metavar='OUTPUT_PATH', 
@@ -1631,16 +1677,24 @@ def main():
         for dod_file in os.listdir(normalized_path + "."):
             if dod_file.endswith(".dod"):
                 dod_files.append(normalized_path + dod_file)
-    
+
     if len(dod_files) == 0 or not os.path.isfile(dod_files[0]):
         print("Invalid argument for dod files.", file=sys.stderr)
         sys.exit(1)
-    
-    dependency_paths = [os.path.abspath(dep) for dep in arguments.dependencies]
-    for dep in dependency_paths:
-        if not os.path.isdir(dep):
-            print("warning: Dependency directory", dep, "does not exist or is not a directory.", file=sys.stderr)
-        
+
+    typesystem_ini = read_typesystem_ini()
+
+    dependencies = arguments.dependencies
+    dependency_paths = list()
+    for dep in dependencies:
+        try:
+            dependency_paths.append(typesystem_ini[dep].dou_directory)
+        except:
+            print("Error: Dependency", dep, "is not defined in typesystem.ini", file=sys.stderr)
+            sys.exit(1)
+
+    print("Dependency_paths:", dependency_paths)
+                    
     gen_src_output_path = arguments.output_path
     if gen_src_output_path == "":
         gen_src_output_path = os.getcwd()
