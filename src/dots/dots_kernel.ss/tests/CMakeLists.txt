@@ -22,7 +22,7 @@ enable_testing()
 add_test(multiple_init multiple_accesses)
 add_test(multiple_accesses_after_init multiple_accesses sleep)
 add_test(multiple_serialization multiple_serialization)
-add_test(repository_compare repository_compare ${SAFIR_RUNTIME}/data/text/dots/classes)
+add_test(repository_compare repository_compare ../../../dose/dose_dou.ss)
 
 SET_SAFIR_TEST_PROPERTIES(multiple_init 120)
 SET_SAFIR_TEST_PROPERTIES(multiple_accesses_after_init 120)
