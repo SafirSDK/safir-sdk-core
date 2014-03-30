@@ -48,7 +48,7 @@ if not os.path.isdir(config_dir):
 os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = config_dir
 
 #Run the program that writes the ini file configuration to standard output
-proc = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","safir_show_config"),
+proc = subprocess.Popen((os.path.join(SAFIR_RUNTIME,"bin","safir_show_config"),"--locations"),
                         stdout=subprocess.PIPE,
                         stderr=subprocess.STDOUT,
                         universal_newlines=True)
