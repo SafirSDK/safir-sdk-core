@@ -52,7 +52,7 @@ class SyslogServer(SocketServer.UDPServer):
         SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 
         #Run the program that writes the ini file configuration to standard output
-        proc = subprocess.Popen((os.path.join(SAFIR_RUNTIME,"bin","safir_show_config"),"--logging")
+        proc = subprocess.Popen((os.path.join(SAFIR_RUNTIME,"bin","safir_show_config"),"--logging"),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 universal_newlines=True)
