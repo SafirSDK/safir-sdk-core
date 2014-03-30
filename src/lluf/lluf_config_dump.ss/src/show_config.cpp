@@ -43,7 +43,6 @@ public:
         : parseOk(false)
     {
         using namespace boost::program_options;
-        Safir::Utilities::Internal::ConfigReader reader;
         
         options_description options("Options");
         options.add_options()
@@ -76,7 +75,7 @@ public:
 
         logging = vm.count("logging") != 0;
         typesystem = vm.count("typesystem") != 0;
-        locations = vm.count("typesystem") != 0;
+        locations = vm.count("locations") != 0;
 
         if (!logging && !locations && !typesystem && vm.count("module-install-dir") == 0)
         {
