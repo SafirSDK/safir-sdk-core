@@ -79,6 +79,7 @@ namespace Internal
                 exit(1);
             }
 
+            const std::string default_dou_directory = reader.Typesystem().get<std::string>("default_dou_directory");
 
             //loop through all sections in typesystem.ini
             for (boost::property_tree::ptree::const_iterator it = reader.Typesystem().begin();
@@ -91,12 +92,19 @@ namespace Internal
                     boost::filesystem::path douDirectory;
                     try
                     {
-                        douDirectory = it->second.get<std::string>("dou_directory");
+                        try
+                        {
+                            douDirectory = it->second.get<std::string>("dou_directory");
+                        }
+                        catch (boost::property_tree::ptree_bad_path&)
+                        {
+                            douDirectory = default_dou_directory + it->first;
+                        }
                     }
                     catch (const std::exception&)
                     {
                         SEND_SYSTEM_LOG(Error, <<"Exceptions while examining dirs");
-                        std::cout<<"Failed to read dou_directory in section "+it->first+" of typesystem.ini"<<std::endl;
+                        std::cout<<"Failed to read dou_directory in section "+it->first+" and default_dou_directory in root of typesystem.ini"<<std::endl;
                         exit(1);
                     }
 
