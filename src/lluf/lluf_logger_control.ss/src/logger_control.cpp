@@ -23,7 +23,6 @@
 ******************************************************************************/
 #include <iostream>
 #include <Safir/Utilities/Internal/LowLevelLoggerControl.h>
-#include <Safir/Utilities/Internal/ConfigReader.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -57,7 +56,6 @@ public:
         , noFile(false)
     {
         using namespace boost::program_options;
-        Safir::Utilities::Internal::ConfigReader reader;
         
         options_description general("General Options");
         general.add_options()
