@@ -45,45 +45,60 @@ public:
         using namespace boost::program_options;
         Safir::Utilities::Internal::ConfigReader reader;
         
-        options_description general("General Options");
-        general.add_options()
-            ("help,h", "show help message");
+        options_description options("Options");
+        options.add_options()
+            ("help,h", "show help message")
+            ("typesystem", "Show contents of typesystem.ini")
+            ("locations", "Show contents of locations.ini")
+            ("logging", "Show contents of logging.ini");
 
-        options_description all_options;
-        all_options.add(general);
-        
         variables_map vm;
 
         try
         {
             store(command_line_parser(argc, argv).
-                  options(all_options).run(), vm);
+                  options(options).run(), vm);
             notify(vm);
         }
         catch (const std::exception& exc)
         {
-            std::wcout << "Error parsing command line: " << exc.what() << "\n" << std::endl;
-            ShowHelp(all_options);
+            std::cout << "Error parsing command line: " << exc.what() << "\n" << std::endl;
+            ShowHelp(options);
             return;
         }
 
         if (vm.count("help"))
         {
-            ShowHelp(all_options);
+            ShowHelp(options);
             return;
+        }
+
+        logging = vm.count("logging") != 0;
+        typesystem = vm.count("typesystem") != 0;
+        locations = vm.count("typesystem") != 0;
+
+        if (!logging && !locations && !typesystem)
+        {
+            logging = true;
+            typesystem = true;
+            locations = true;
         }
 
         parseOk = true;
     }
+    bool logging;
+    bool typesystem;
+    bool locations;
+
     bool parseOk;
 
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
     {
         std::cout << std::boolalpha
-                   << "Writes the Safir SDK ini file configuration to standard output.\n"
-                   << desc << "\n"
-                   << std::endl;
+                  << "Writes the Safir SDK ini file configuration to standard output.\n"
+                  << desc << "\n"
+                  << std::endl;
     }
 
 };
@@ -121,9 +136,21 @@ int main(int argc, char * argv[])
     {
         Safir::Utilities::Internal::ConfigReader reader;
 
-        PrintPTree(reader.Locations());
-        PrintPTree(reader.Logging());
-        PrintPTree(reader.Typesystem());
+        if (options.locations)
+        {
+            std::cout << "; ==== locations.ini ====" << std::endl;
+            PrintPTree(reader.Locations());
+        }
+        if (options.logging)
+        {
+            std::cout << "; ==== logging.ini ====" << std::endl;
+            PrintPTree(reader.Logging());
+        }
+        if (options.typesystem)
+        {
+            std::cout << "; ==== typesystem.ini ====" << std::endl;
+            PrintPTree(reader.Typesystem());
+        }
     }
     catch (const std::exception&)
     {
