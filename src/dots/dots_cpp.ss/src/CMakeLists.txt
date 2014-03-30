@@ -14,7 +14,7 @@ ADD_LIBRARY(dots_cpp SHARED ${sources} ${headers})
 FIND_PACKAGE(Boost COMPONENTS thread system)
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dots_cpp dots_kernel lluf_id lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(dots_cpp dots_kernel lluf_id lluf_utils lluf_crash_reporter lluf_config ${Boost_LIBRARIES})
 endif()
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include

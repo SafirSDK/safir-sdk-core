@@ -28,6 +28,8 @@
 #include "Safir/Dob/Typesystem/BlobOperations.h"
 #include "Safir/Dob/Typesystem/ContainerProxies.h"
 #include <Safir/Utilities/DynamicLibraryLoader.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <iostream>
 
 namespace Safir
@@ -77,12 +79,21 @@ namespace Typesystem
 
         bool LoadLibraries()
         {
-            //TODO: read from ini file instead!
-            LoadLib("Safir");
-            LoadLib("swre_library");
-            LoadLib("olib");
-            LoadLib("foreach");
-            LoadLib("douf_time");
+            Safir::Utilities::Internal::ConfigReader reader;
+            const boost::property_tree::ptree& ptree = reader.Typesystem();
+            for (boost::property_tree::ptree::const_iterator it = ptree.begin();
+                 it != ptree.end(); ++it)
+            {
+                const bool isSection = !it->second.empty();
+
+                if (isSection)
+                {
+                    const std::string module = it->first;
+                    lllog(1) << "Loading dots generated module " << module.c_str() << std::endl;
+                    
+                    LoadLib(module);
+                }
+            }
 
             return true;
         }
