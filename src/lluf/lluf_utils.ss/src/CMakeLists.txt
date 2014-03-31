@@ -1,15 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
 
-PROJECT (lluf_utils CXX)
-
-INCLUDE_DIRECTORIES(.)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(lluf_utils SHARED ${sources} ${headers})
+
+target_include_directories(lluf_utils PUBLIC .)
 
 FIND_PACKAGE(Boost COMPONENTS filesystem system thread program_options)
 

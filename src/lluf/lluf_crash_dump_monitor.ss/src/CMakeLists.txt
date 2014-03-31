@@ -1,9 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(lluf_crash_dump_monitor CXX)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(crash_dump_monitor ${sources})

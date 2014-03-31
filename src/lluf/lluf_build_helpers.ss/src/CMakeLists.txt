@@ -1,8 +1,6 @@
-cmake_minimum_required(VERSION 2.8)
+INCLUDE_DIRECTORIES(.)
 
-PROJECT (lluf_build_helpers NONE)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
+add_custom_target(lluf_build_helpers)
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

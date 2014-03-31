@@ -1,9 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(logger_control CXX)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(logger_control ${sources})

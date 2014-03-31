@@ -1,16 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(lluf_id C CXX)
-
-INCLUDE_DIRECTORIES(.)
-
+#TODO
 #this library has a C interface, so we don't want the "d" suffix on debug builds on windows
 #Must be set before including safir_sdk_core_config.cmake
 SET(NO_LIBRARY_POSTFIXES 1) 
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 ADD_LIBRARY(lluf_id SHARED lluf_id.cpp md5.c md5.h Safir/Utilities/Internal/Id.h)
+
+target_include_directories(lluf_id PUBLIC .)
 
 FIND_PACKAGE(Boost COMPONENTS filesystem thread)
 
