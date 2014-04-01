@@ -117,6 +117,9 @@ set (Boost_FIND_QUIETLY 0)
 #use dynamic linking with boost
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 
+#dont use autolinking with boost
+ADD_DEFINITIONS(-DBOOST_ALL_NO_LIB)
+
 #disable deprecated functionality that we don't want
 ADD_DEFINITIONS(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 ADD_DEFINITIONS(-DBOOST_SYSTEM_NO_DEPRECATED)
@@ -128,11 +131,12 @@ ADD_DEFINITIONS(-DBOOST_THREAD_DONT_USE_DATETIME)
 #Make Boost.Chrono header-only
 ADD_DEFINITIONS(-DBOOST_CHRONO_HEADER_ONLY)
 
+#TODO: readd this! There is something in LowLevelLogger.cpp and SystemLog.cpp that needs it. Use chrono?
 #Make sure we only use the header-only part of Boost.DateTime
 #on non microsoft compilers/platforms
-if(NOT MSVC)
+#if(NOT MSVC)
   ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
-endif()
+#endif()
 
 #Set up boost for any test code (i.e. CheckCXXSourceCompiles stuff)
 set(CMAKE_REQUIRED_INCLUDES ${Boost_INCLUDE_DIRS})
