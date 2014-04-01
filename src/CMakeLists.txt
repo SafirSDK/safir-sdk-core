@@ -63,26 +63,11 @@ set (Boost_ADDITIONAL_VERSIONS
 
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED ON)
-set(Boost_FIND_QUIETLY 1)
-# Use boost from "tower" if it exists, unless specifically set to something else
-if (NOT BOOST_ROOT AND "$ENV{BOOST_ROOT}" STREQUAL "")
-  set(BOOST_ROOT ${SAFIR_SDK})
-endif()
 find_package(Boost)
 if(Boost_FOUND)
    include_directories(${Boost_INCLUDE_DIRS})
    link_directories(${Boost_LIBRARY_DIRS})
-else()
-   unset(BOOST_ROOT)
-   find_package(Boost)
-   if(Boost_FOUND)
-      include_directories(${Boost_INCLUDE_DIRS})
-      link_directories(${Boost_LIBRARY_DIRS})
-    else()
-        message(FATAL_ERROR "Failed to find a boost installation!")
-    endif()
 endif()
-set (Boost_FIND_QUIETLY 0)
 
 #use dynamic linking with boost
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
