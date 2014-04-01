@@ -13,7 +13,7 @@ add_subdirectory(google-breakpad)
 
 add_library(lluf_crash_reporter SHARED CrashReporter.cpp Safir/Utilities/CrashReporter.h)
 
-TARGET_INCLUDE_DIRECTORIES(lluf_crash_reporter PUBLIC . PRIVATE google-breakpad/src/src)
+TARGET_INCLUDE_DIRECTORIES(lluf_crash_reporter PUBLIC . PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src)
 
 FIND_PACKAGE(Boost COMPONENTS filesystem thread system)
 
