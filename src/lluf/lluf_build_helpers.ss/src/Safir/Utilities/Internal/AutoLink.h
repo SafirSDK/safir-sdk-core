@@ -30,27 +30,31 @@
  * For an example of how to use it check out UtilsExportDefs.h from lluf_utils.
  */
 
-#if !defined (SAFIR_LIBRARY_NAME)
-#  error "SAFIR_LIBRARY_NAME must be defined when using AutoLink.h"
-#endif
+#  if !defined(SAFIR_NO_AUTOLINK)
 
-
-#if defined (_MSC_VER) 
-
-#  if defined(NDEBUG) || defined(SAFIR_NO_DEBUG_LIBRARY_SUFFIX)
-#    define SAFIR_BUILD_TYPE
-#  else
-#    define SAFIR_BUILD_TYPE "d"
+#  if !defined (SAFIR_LIBRARY_NAME)
+#    error "SAFIR_LIBRARY_NAME must be defined when using AutoLink.h"
 #  endif
 
-#  pragma comment(lib, SAFIR_LIBRARY_NAME SAFIR_BUILD_TYPE ".lib")
 
-#  undef SAFIR_BUILD_TYPE
+#  if defined (_MSC_VER) 
 
-#endif
+#    if defined(NDEBUG) || defined(SAFIR_NO_DEBUG_LIBRARY_SUFFIX)
+#      define SAFIR_BUILD_TYPE
+#    else
+#      define SAFIR_BUILD_TYPE "d"
+#    endif
 
-#undef SAFIR_LIBRARY_NAME
+#    pragma comment(lib, SAFIR_LIBRARY_NAME SAFIR_BUILD_TYPE ".lib")
 
-#ifdef SAFIR_NO_DEBUG_LIBRARY_SUFFIX
-#  undef SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#    undef SAFIR_BUILD_TYPE
+
+#  endif
+
+#  undef SAFIR_LIBRARY_NAME
+
+#  ifdef SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#    undef SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#  endif
+
 #endif

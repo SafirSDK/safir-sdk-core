@@ -7,16 +7,18 @@ ADD_LIBRARY(lluf_utils SHARED ${sources} ${headers})
 
 target_include_directories(lluf_utils PUBLIC .)
 
-FIND_PACKAGE(Boost COMPONENTS filesystem system thread program_options)
+#TODO: remove date_time dependency (we want date_time to be header only, but theres
+#something that makes that not work on windows)
 
-if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(lluf_utils lluf_startup_synchronizer lluf_config ${Boost_LIBRARIES} dl rt)
-endif()
+FIND_PACKAGE(Boost COMPONENTS filesystem system thread program_options date_time)
 
-#on windows we need the psapi library
+TARGET_LINK_LIBRARIES(lluf_utils lluf_startup_synchronizer lluf_config ${Boost_LIBRARIES})
+
 if (WIN32)
   TARGET_LINK_LIBRARIES(lluf_utils psapi)
-endif(WIN32)
+else()
+  TARGET_LINK_LIBRARIES(lluf_utils dl rt)
+endif()
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

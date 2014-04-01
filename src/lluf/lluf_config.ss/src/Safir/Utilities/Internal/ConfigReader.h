@@ -30,8 +30,6 @@
 #  define LLUF_CONFIG_API SAFIR_HELPER_DLL_EXPORT
 #else
 #  define LLUF_CONFIG_API SAFIR_HELPER_DLL_IMPORT
-#  define SAFIR_LIBRARY_NAME "lluf_config"
-#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
 #define LLUF_CONFIG_LOCAL SAFIR_HELPER_DLL_LOCAL
 

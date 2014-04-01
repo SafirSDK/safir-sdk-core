@@ -17,6 +17,8 @@ TARGET_INCLUDE_DIRECTORIES(lluf_crash_reporter PUBLIC . PRIVATE google-breakpad/
 
 FIND_PACKAGE(Boost COMPONENTS filesystem thread system)
 
+TARGET_LINK_LIBRARIES(lluf_crash_reporter lluf_config ${Boost_LIBRARIES})
+
 if (MSVC)
   TARGET_LINK_LIBRARIES(lluf_crash_reporter 
   "${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/breakpad_client.lib")
@@ -24,8 +26,6 @@ else()
   #TODO: set only for this target (?!)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs")
   TARGET_LINK_LIBRARIES(lluf_crash_reporter 
-    lluf_config
-    ${Boost_LIBRARIES}
     "${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src/client/linux/libbreakpad_client.a")
 endif()
 

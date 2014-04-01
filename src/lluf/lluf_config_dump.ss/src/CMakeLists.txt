@@ -6,9 +6,7 @@ FIND_PACKAGE(Boost COMPONENTS program_options)
 
 #add_dependencies(safir_show_config lluf_config)
 
-if(NOT MSVC)
-  TARGET_LINK_LIBRARIES(safir_show_config lluf_config ${Boost_LIBRARIES})
-endif()
+TARGET_LINK_LIBRARIES(safir_show_config lluf_config ${Boost_LIBRARIES})
 
 INSTALL(TARGETS safir_show_config  
   DESTINATION ${SAFIR_RUNTIME}/bin)

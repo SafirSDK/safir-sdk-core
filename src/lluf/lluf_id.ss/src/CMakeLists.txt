@@ -9,9 +9,7 @@ target_include_directories(lluf_id PUBLIC .)
 
 FIND_PACKAGE(Boost COMPONENTS filesystem thread)
 
-if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(lluf_id lluf_utils ${Boost_LIBRARIES})
-endif()
+TARGET_LINK_LIBRARIES(lluf_id lluf_utils ${Boost_LIBRARIES})
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
