@@ -118,9 +118,9 @@ endif()
 #Let ctest output stdout on failure by default.
 set(CTEST_OUTPUT_ON_FAILURE ON)
 
-#if (MSVC AND NOT NO_LIBRARY_POSTFIXES)
-#  SET(CMAKE_DEBUG_POSTFIX "d")
-#endif()
+if (MSVC)
+  SET(CMAKE_DEBUG_POSTFIX "d")
+endif()
 
 MACRO(INSTALL_DEBUG_INFO target)
   if(MSVC)

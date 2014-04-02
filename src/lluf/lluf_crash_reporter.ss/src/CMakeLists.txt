@@ -3,11 +3,10 @@ if (NOT "${CMAKE_CONFIGURATION_TYPES}" STREQUAL "")
   message(FATAL_ERROR "This project does not support being built in visual studio. Please use NMake on windows and make on linux")
 endif()
 
-#TODO
 #this library has an interface which is okay to call between debug/release runtimes,
-#and we only want one version of it, so we don't want the "d" suffix on debug builds on windows.
-#Must be set before including safir_sdk_core_config.cmake
-SET(NO_LIBRARY_POSTFIXES 1) 
+#and we only want one version of it, so we never want the "d" suffix on debug builds,
+#which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
 
 add_subdirectory(google-breakpad)
 

@@ -1,7 +1,6 @@
-#TODO
-#this library has a C interface, so we don't want the "d" suffix on debug builds on windows
-#Must be set before including safir_sdk_core_config.cmake
-SET(NO_LIBRARY_POSTFIXES 1) 
+#this library has a C interface and we only want one version of it,
+#so we never want the "d" suffix on debug builds, which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
 
 ADD_LIBRARY(lluf_id SHARED lluf_id.cpp md5.c md5.h Safir/Utilities/Internal/Id.h)
 
