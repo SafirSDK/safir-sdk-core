@@ -1,4 +1,4 @@
-Welcome to the Safir SDK Core trunk.
+Welcome to the Safir SDK Core master branch.
 
 Safir SDK Core is released under the GPL v3 license, a copy of which can be found in COPYING.txt.
 
