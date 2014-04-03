@@ -55,6 +55,11 @@ if (UNIX)
 
    #make sure we get the correct posix version
    ADD_DEFINITIONS(-D_POSIX_C_SOURCE=200809L)
+
+   #enable c++11 support unless we've explicitly been told not to.
+   if (NOT SAFIR_NO_CXX11)
+     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+   endif()
 endif ()
 
 if (MSVC)
@@ -144,6 +149,16 @@ set(CMAKE_REQUIRED_DEFINITIONS
   -DBOOST_THREAD_DONT_USE_DATETIME
   -DBOOST_CHRONO_HEADER_ONLY
   -DBOOST_DATE_TIME_NO_LIB)
+
+if (WIN32)
+  #Try to make Safir able to find Protobuf on windows
+  if ("$ENV{PROTOBUF_DIR}" STREQUAL "")
+    set (PROTOBUF_SRC_ROOT_FOLDER ${SAFIR_SDK}/lib/protobuf)
+    set (CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${SAFIR_SDK}/include)
+  else()
+    set (PROTOBUF_SRC_ROOT_FOLDER $ENV{PROTOBUF_DIR})
+  endif()
+endif()
 
 if(MSVC)
    #We have a weird issue which causes a buffer overrun error when using Visual Studio 2013

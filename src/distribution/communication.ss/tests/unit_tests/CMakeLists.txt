@@ -1,0 +1,54 @@
+cmake_minimum_required(VERSION 2.8.5)
+project(unit_tests CXX C) #C is needed by FindProtobuf
+
+add_definitions(-DSAFIR_TEST)
+
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
+
+find_package(Boost COMPONENTS thread system chrono)
+find_package(Protobuf REQUIRED)
+
+file(GLOB headers *.h)
+file(GLOB sources *.cpp)
+
+INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ../../src/CommunicationMessage.proto)
+
+if (MSVC)
+  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267")
+endif()
+
+add_executable(unit_tests ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS} ../../src/MessageQueue.h
+                ../../src/DeliveryHandler.h ../../src/AckedDataSender.h
+                ../../src/Node.h ../../src/Node.cpp
+                ../../src/Writer.h ../../src/HeartBeatSender.h
+                ../../src/Reader.h ../../src/Reader.cpp
+                ../../src/Discoverer.h ../../src/Discoverer.cpp)
+
+TARGET_LINK_LIBRARIES(unit_tests ${PROTOBUF_LITE_LIBRARIES})
+
+if (NOT MSVC)
+    target_link_libraries(unit_tests lluf_id lluf_utils ${Boost_LIBRARIES})
+endif()
+
+enable_testing()
+ADD_TEST(MessageQueueTest unit_tests MessageQueueTest)
+SET_SAFIR_TEST_PROPERTIES(MessageQueueTest 120)
+
+ADD_TEST(ReaderTest unit_tests ReaderTest)
+SET_SAFIR_TEST_PROPERTIES(ReaderTest 120)
+
+ADD_TEST(WriterTest unit_tests WriterTest)
+SET_SAFIR_TEST_PROPERTIES(WriterTest 120)
+
+ADD_TEST(HeartBeatSenderTest unit_tests HeartBeatSenderTest)
+SET_SAFIR_TEST_PROPERTIES(HeartBeatSenderTest 120)
+
+#ADD_TEST(AckedDataSenderTest unit_tests AckedDataSenderTest)
+#SET_SAFIR_TEST_PROPERTIES(AckedDataSenderTest 120)
+
+#ADD_TEST(DeliveryHandlerTest unit_tests DeliveryHandlerTest)
+#SET_SAFIR_TEST_PROPERTIES(DeliveryHandlerTest 120)
+
+#ADD_TEST(DiscovererTest unit_tests DiscovererTest)
+#SET_SAFIR_TEST_PROPERTIES(DiscovererTest 120)

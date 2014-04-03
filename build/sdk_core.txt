@@ -38,6 +38,16 @@ build_dir        src/logging/logging_ada.ss/src            RelWithDebInfo
 #LOGGING unit tests
 run_test_suite   src/logging/logging_test.ss               logging_tests
  
+#Distribution
+build_dir        src/distribution/communication.ss/src         RelWithDebInfo Debug
+build_dir        src/distribution/system_picture.ss/src        RelWithDebInfo Debug
+
+#Distribution unit tests
+run_test_suite   src/distribution/communication.ss/tests/unit_tests     communication_unit_tests
+run_test_suite   src/distribution/system_picture.ss/tests      system_picture_tests
+
+#CONTROL
+build_dir        src/control/control.ss/src                    RelWithDebInfo
 
 #DOTS
 build_dir        src/dots/dots_internal.ss/src             RelWithDebInfo   Debug
@@ -75,7 +85,7 @@ dobmake
 #dots_kernel tests need dou files.
 run_test_suite   src/dots/dots_kernel.ss/tests             dots_kernel_tests
 
-
+#DOSE
 build_dir        src/dose/dose_internal.ss/src             RelWithDebInfo   Debug
 run_test_suite   src/dose/dose_internal.ss/tests           dose_internal_tests
 build_dir        src/dose/dose_dll.ss/src                  RelWithDebInfo

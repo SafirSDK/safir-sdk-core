@@ -25,7 +25,7 @@ First of all there are a number of packages that you need to have installed on y
 
 1.1. Ubuntu
 To install these from the command line "in one go" on distributions based on Ubuntu 13.10 or 14.04, run:
-   sudo apt-get install qt5-default mono-devel unixodbc-dev cmake g++ default-jdk doxygen graphviz make python-tk autoconf build-essential subversion gnat libboost-all-dev
+   sudo apt-get install qt5-default mono-devel unixodbc-dev cmake g++ default-jdk doxygen graphviz make python-tk autoconf build-essential subversion gnat libboost-all-dev protobuf-compiler libprotobuf-dev
 
 1.2. Centos/RHEL
 Safir SDK Core is only compatible with 7.0 or later of Centos/RHEL (unless you install a custom Boost of version 1.50 or later), and at the time of this writing RHEL 7 is in Beta. These instructions have been created while using that beta, so they may not end up being 100% correct with the final product. If in doubt, please contact us at http://safir.sourceforge.net.
@@ -87,7 +87,7 @@ If you run into trouble building VehicleMmiCppQt you may need to install Qt4 ("l
 If you have built the SDK on one machine and just want to run it on another without installing all the development tools you need to install some libraries and runtimes to get it to run.
 
 5.1 Ubuntu
-Run "sudo apt-get install libboost-.*1.48.0 libgnat-4.6 default-jre-headless libmono-corlib2.0-cil libmono-system2.0-cil"
+Run "sudo apt-get install "libboost-.*1.54.0$" libgnat-4.6 default-jre-headless libmono-corlib2.0-cil libmono-system2.0-cil libprotobuf-lite8"
 
 5.2 Centos/RHEL
 Add the EPEL repository, as outlined above.

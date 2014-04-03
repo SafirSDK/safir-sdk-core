@@ -27,6 +27,7 @@
 #include "Path.h"
 #include <stdlib.h>
 #include <stdexcept>
+#include <boost/lexical_cast.hpp>
 
 namespace Safir
 {
@@ -154,6 +155,29 @@ namespace Internal
         //search for next environment variable or
         //recursively expand nested variable, e.g. $(NAME_$(NUMBER))
         return ExpandEnvironment(res); 
+    }
+
+
+    std::string GetSafirInstanceSuffix()
+    {
+        try
+        {
+            const std::string env = GetEnv("SAFIR_INSTANCE", std::nothrow);
+            
+            if (env.empty())
+            {
+                return "_0";
+            }
+            else
+            {
+                const unsigned int inst = boost::lexical_cast<unsigned int>(env);
+                return std::string("_") + boost::lexical_cast<std::string>(inst);
+            }
+        }
+        catch(const boost::bad_lexical_cast&)
+        {
+            throw std::logic_error("SAFIR_INSTANCE is not set to a number");
+        }
     }
 
 

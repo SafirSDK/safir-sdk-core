@@ -25,7 +25,7 @@
 #define __DOB_UTILITIES_ASIO_DISPATCHER_H__
 
 #include <Safir/Dob/Connection.h>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/noncopyable.hpp>
@@ -82,7 +82,7 @@ namespace Utilities
 
         const Safir::Dob::Connection&      m_connection;
         boost::asio::io_service&           m_ioService;
-        Safir::Dob::Internal::AtomicUint32 m_isNotified;
+        Safir::Utilities::Internal::AtomicUint32 m_isNotified;
     };
 
 

@@ -26,7 +26,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Connection.h>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -105,7 +105,7 @@ namespace Utilities
 
 
         const Safir::Dob::Connection&      m_connection;
-        Safir::Dob::Internal::AtomicUint32 m_isNotified;
+        Safir::Utilities::Internal::AtomicUint32 m_isNotified;
 };
 
 } // namespace Utilities

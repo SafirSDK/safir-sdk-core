@@ -118,6 +118,17 @@ namespace Internal
          * for a list of variables that are expanded (search for Special Folders).
          */
         static std::string ExpandSpecial(const std::string& str);
+    
+        /** 
+         * Get the Safir Instance as a string that can be used to suffix OS primitives.
+         *
+         * Example: If SAFIR_INSTANCE environment variable is 15, this function will return "_15".
+         * If SAFIR_INSTANCE is not set it will return "_0".
+         * 
+         * Throws std::logic_error if SAFIR_INSTANCE is negative or not a number.
+         */
+        static std::string GetSafirInstanceSuffix();
+
     };
 }
 }

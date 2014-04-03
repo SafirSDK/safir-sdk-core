@@ -14,6 +14,10 @@ set(EXCLUDE_LIST
   AceTimeConverter\\.h #these are kind of meant to 
   AceDispatcher\\.h    # include ace, which includes windows.h...
   AsioDispatcher\\.h   #includes asio.hpp, which appears to include windows.h
+  AsioPeriodicTimer\\.h #includes asio.hpp, which appears to include windows.h
+  IpcPublisher\\.h #includes asio.hpp, which appears to include windows.h
+  IpcSubscriber\\.h #includes asio.hpp, which appears to include windows.h
+  IpcAcceptorWin32\\.h #includes asio.hpp, which appears to include windows.h
 
   /Typesystem/ToolSupport #property_tree appears to have some windows.h stuff in it
 

@@ -1,0 +1,20 @@
+Krav på ett system/antaganden
+* Alla ska kunna prata med alla
+* dubbelriktat överallt
+* inga byzantinska noder
+* båda sidor av en split får anse sig vara "systemet"
+
+
+Algoritm 1A:
+* De nya noder som comm meddelar är kandidater
+* Kandidater som Accepterats ingår i systemet
+* SP sköter accepterandet
+* En nod vet att den är en kandidat vid uppstart
+ - Om den hittar ett system så vill den gå med
+ - om den hittar andra kandidater men inget system på X sekunder så blir de ett nytt system
+ - om inga andra kandidater på Xs -> nytt system
+När man väl är medlem så vill man aldrig gå med i ett till system
+ 1 enkelt
+ 2 den med lägst id skapar nytt system ????
+Hur ska includeNode/ExcludeNode användas?
+

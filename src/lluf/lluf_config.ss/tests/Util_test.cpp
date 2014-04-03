@@ -207,8 +207,36 @@ int main()
         }
 
 
+        std::wcout << "test GetSafirInstanceSuffix" << std::endl;
+        {
+            if (GetSafirInstanceSuffix() != "_0")
+            {
+                return 1;
+            }
+            
+            SetEnv("SAFIR_INSTANCE", "0");
+            if (GetSafirInstanceSuffix() != "_0")
+            {
+                return 1;
+            }
 
+            SetEnv("SAFIR_INSTANCE", "1000");
+            if (GetSafirInstanceSuffix() != "_1000")
+            {
+                return 1;
+            }
 
+            SetEnv("SAFIR_INSTANCE", "tardis");
+            try
+            {
+                GetSafirInstanceSuffix();
+                return 1;
+            }
+            catch (const std::logic_error&)
+            {
+
+            }
+        }
     }
     catch (const std::exception& e)
     {

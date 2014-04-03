@@ -1,0 +1,43 @@
+cmake_minimum_required(VERSION 2.8.5)
+
+project(communication CXX C) #C is needed by FindProtobuf
+
+INCLUDE_DIRECTORIES(.)
+
+INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
+
+FILE(GLOB_RECURSE headers *.h)
+FILE(GLOB sources *.cpp)
+
+FIND_PACKAGE(Boost COMPONENTS thread system chrono)
+FIND_PACKAGE(Protobuf REQUIRED)
+
+INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
+
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS CommunicationMessage.proto)
+
+if (MSVC)
+  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267")
+endif()
+
+ADD_LIBRARY(communication SHARED ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS} )
+
+TARGET_LINK_LIBRARIES(communication ${PROTOBUF_LITE_LIBRARIES})
+
+if (NOT MSVC)
+  TARGET_LINK_LIBRARIES(communication
+    lluf_id
+    lluf_utils
+    ${Boost_LIBRARIES})
+endif()
+
+INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
+        PATTERN ".svn" EXCLUDE
+        PATTERN "*~" EXCLUDE)
+
+INSTALL(TARGETS communication
+        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+
+INSTALL_DEBUG_INFO(communication)

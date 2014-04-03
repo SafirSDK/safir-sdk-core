@@ -1,0 +1,25 @@
+option optimize_for = LITE_RUNTIME;
+
+package Safir.Dob.Internal.SP;
+
+message SystemStateMessage
+{
+    message NodeInfo 
+    {       
+        //This info is about other nodes that this node talks to
+        required string name = 1;
+        required sfixed64 id = 2;
+        required string control_address = 3; //The address and port of the node's control socket
+        required bool multicast_enabled = 4;
+    }
+    
+    //information about myself
+    required string name = 1;
+    required sfixed64 id = 2;
+    required string control_address = 3; //The address of the node's control socket
+    
+    repeated NodeInfo node_info = 5;
+
+}
+
+

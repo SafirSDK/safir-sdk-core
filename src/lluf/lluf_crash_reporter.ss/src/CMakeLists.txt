@@ -13,6 +13,9 @@ SET(NO_LIBRARY_POSTFIXES 1)
 
 INCLUDE_DIRECTORIES(. google-breakpad/src/src)
 
+#google breakpad does not compile with c++11 support. But interface is ABI compatible.
+SET(SAFIR_NO_CXX11 True)
+
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 add_subdirectory(google-breakpad)

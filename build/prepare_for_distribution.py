@@ -59,6 +59,7 @@ SAFIR_SDK = os.environ.get("SAFIR_SDK")
 
 SDK_LIB_DESTINATION = os.path.join(SAFIR_SDK, "lib")
 DLL_DESTINATION = os.path.join(SAFIR_RUNTIME, "bin")
+EXE_DESTINATION = os.path.join(SAFIR_RUNTIME, "bin")
 HEADER_DESTINATION = os.path.join(SAFIR_SDK, "include")
 DOCS_DESTINATION = os.path.join(SAFIR_SDK, "docs")
 
@@ -189,6 +190,36 @@ def copy_boost_dlls(dir, libraries):
         match = file_name_filter.match(file)
         if match is not None and match.group(1) in libraries:
             copy_file(os.path.join(dir,file), DLL_DESTINATION)
+            
+def copy_protobuf_lib_files(files, optional):
+    base = os.environ.get("PROTOBUF_DIR")
+    configs = ("Release", "Debug")
+
+    for config in configs:
+        mkdir(os.path.join(SDK_LIB_DESTINATION,
+                           "protobuf",
+                           "vsprojects",
+                           config))
+        for file in files:
+            copy_file(os.path.join(base,
+                                   "vsprojects",
+                                   config,
+                                   file),
+                      os.path.join(SDK_LIB_DESTINATION, 
+                                   "protobuf",
+                                   "vsprojects",
+                                   config))
+        for file in optional:
+            if not os.path.isfile(file):
+                continue
+            copy_file(os.path.join(base,
+                                   "vsprojects",
+                                   config,
+                                   file),
+                      os.path.join(SDK_LIB_DESTINATION, 
+                                   "protobuf",
+                                   "vsprojects",
+                                   config))
 
 def copy_qt_dlls(dir):
     """Try to copy a bunch of qt files. This is a mismash of qt4 and qt5 stuff,
@@ -244,11 +275,8 @@ def windows():
     log("Copying boost stuff")
     boost_dir = os.environ.get("BOOST_ROOT")
     if boost_dir is None:
-        boost_dir = find_dll(("boost_date_time-vc100-mt-1_41.dll",
-                              "boost_date_time-vc100-mt-1_48.dll",
-                              "boost_date_time-vc100-mt-1_50.dll",
-                              "boost_date_time-vc100-mt-1_51.dll",
-                              "boost_date_time-vc100-mt-1_54.dll"))
+        boost_dir = find_dll(("boost_date_time-vc120-mt-1_55.dll",
+                              "boost_date_time-vc120-mt-1_56.dll"))
         boost_dir = os.path.join(boost_dir,"..")
 
     # find lib dir    
@@ -288,6 +316,22 @@ def windows():
     ###########
     log("Copying jom.exe")
     copy_exe("jom.exe")
+
+    ###########
+    log("Copying protobuf stuff")
+    PROTOBUF_DIR = os.environ.get("PROTOBUF_DIR")
+    if PROTOBUF_DIR is None:
+        logError("Failed to get PROTOBUF_DIR")
+
+    copy_file(os.path.join(PROTOBUF_DIR, "vsprojects", "Release", "protoc.exe"),
+              EXE_DESTINATION)
+
+    copy_protobuf_lib_files(("libprotobuf.lib",
+                             "libprotobuf-lite.lib",
+                             "libprotoc.lib"),
+                            ("vc120.pdb"))
+
+    copy_header_dir(os.path.join(PROTOBUF_DIR, "vsprojects", "include", "google"))
 
 def linux():
     pass

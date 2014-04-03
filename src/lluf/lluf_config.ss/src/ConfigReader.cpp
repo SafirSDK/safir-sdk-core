@@ -71,6 +71,11 @@ namespace Internal
         return Safir::Utilities::Internal::ExpandSpecial(str);
     }
 
+    std::string Expansion::GetSafirInstanceSuffix()
+    {
+        return Safir::Utilities::Internal::GetSafirInstanceSuffix();
+    }
+
 }
 }
 }
