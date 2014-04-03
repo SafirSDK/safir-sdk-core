@@ -1,7 +1,7 @@
 .SILENT:
 .PHONY: all clean
 
-DEPS := Makefile requirements_specification.txt custom-coverpage-dblatex.sty custom-xhtml11.css
+DEPS := Makefile requirements_specification.txt custom-coverpage-dblatex.sty custom-xhtml11.css compliance.txt
 
 default: all
 
@@ -19,7 +19,6 @@ requirements_specification.pdf: $(DEPS)
 requirements_specification.html: $(DEPS)
 	echo "Building Requirements Specification html"
 	cp -f ../logo/renders/logotype256.png .
-#	a2x -L -f xhtml -d book --xsltproc-opts="--stringparam section.autolabel 1 --stringparam section.label.includes.component.label 1 --stringparam toc.section.depth 3" requirements_specification.txt
 	asciidoc --backend=xhtml11  -a stylesheet="`pwd`/custom-xhtml11.css" -d book -a toc -a toclevels=4 -a numbered requirements_specification.txt
 
 clean:

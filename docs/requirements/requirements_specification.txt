@@ -2,13 +2,13 @@
 :encoding: UTF-8
 
 = Requirements Specification for Safir SDK Core
-:date: 2014-03-21
+:date: 2014-03-27
 
 == Introduction
 
 === License
 
-    Copyright (C) Saab AB.
+    Copyright (C) 2004 - 2014 Saab AB.
     Permission is granted to copy, distribute and/or modify this document
     under the terms of the GNU Free Documentation License, Version 1.3
     or any later version published by the Free Software Foundation;
@@ -32,7 +32,7 @@ Historically the requirements for Safir SDK Core and Safir SDK (the Saab AB prop
 |=========================================================
 |Version     |Date      | Author(s)   | Comment
 
-|1.0 *Draft* |2014-03-21| 
+|1.0 *Draft* |2014-03-27| 
 Anders Widén
 +
 Lars Hagström
@@ -41,6 +41,8 @@ Joel Ottosson|
 First version
 
 |=========================================================
+
+Appendix A, which defines the compliance with the requirements has its own revision history, to allow the compliance to updated without changing the reviewed and approved requirements.
 
 === Definitions
 
@@ -154,6 +156,9 @@ doc_req_3:: Safir SDK Core shall contain source code for an example of a gui log
 === Distribution
 The Dob provides three distribution mechanisms; Messages, Services and Entities. These three fulfill different needs in a distributed real time system, and have different characteristics and provide different guarantees.
 
+dist_req_1:: Safir SDK Core shall support IPv4.
+dist_req_2:: Safir SDK Core shall support IPv6
+
 ==== Messages
 Messages are data that any application can subscribe to and any application can send. When an application sends a message, it is forwarded to all subscribers of that message.
 
@@ -238,11 +243,9 @@ hanreg_req_1:: Safir SDK Core shall provide a mechanism for applications to subs
 hanreg_req_2:: Safir SDK Core shall guarantee that a subscriber gets at least one notification when a handler is temporarily unregistered one or more times.
 
 ==== Addressing
-The addressing mechanism used by Safir SDK Core is completely transparent. The sender of a request or message doesn't know if the receiver is located on the same node or on a remote node.
+The addressing mechanism used by Safir SDK Core is completely transparent. The sender of a service or entity request doesn't know if the receiving handler is located on the same node or on a remote node. In the same way the sender of a message is unaware of the location of the subscribers. When an entity owner updates an entity it has no knowledge of the numbers of subscribers and their location.
   
 addr_req_1:: Safir SDK Core shall for addressing use logical addressing, i.e. an applications shall be unaware of the physical address of its counterparts.
-
-addr_req_2:: Safir SDK Core shall provide a mechanism for message senders to send messages without any knowledge of the location of the subscribers.
 
 ==== Queues
 For each connection to the Dob there is a set of associated queues, outbound request/reply queue, inbound request/reply queue, outbound message queue and inbound message queue.
@@ -255,17 +258,19 @@ que_req_5:: It shall be possible to configure the default lengths of the queues.
 
 
 === Redundancy
-Safir SDK Core provides functionality to support redundancy. There are two flavours of redundancy, cold stand-by and hot stand-by.
+Safir SDK Core provides functionality to support redundancy. There are two flavours of redundancy, cold standby and hot standby.
 
-The most common redundancy case is cold stand-by where System Control detects that an application (or a complete node) has stopped working and then starts a new instance of the application (or all the applications in the failed node).
+The most common redundancy case is cold standby where System Control detects that an application (or a complete node) has stopped working and then starts a new instance of the application (or all the applications in the failed node).
 
-Hot stand-by is used when there is a need for the stand-by application to be started (maybe to do some calculations on received data) in order to be prepared to take over in case the active application instance stops working. To support this, Safir SDK Core provides a mechanism for pending registrations of handlers which means that the application will be notified when its handler actually has become registered.
+Hot standby is used when there is a need for the standby application to be started (maybe to do some calculations on received data) in order to be prepared to take over in case the active application instance stops working. To support this, Safir SDK Core provides a mechanism for pending registrations of handlers which means that the application will be notified when its handler actually has become registered.
 
-When a cold or hot stand-by application is started it is given the persistent-flagged entity instances that any failing application has left behind.   
+When a cold or hot standby application is started it is given the persistent flagged entity instances that any failing application has left behind.
 
-red_req_1:: At successful registration of an entity handler the application shall be given any persistent-flagged entity instances. This holds for cold stand-by as well as for hot stand-by applications.  
-red_req_2:: Safir SDK Core shall provide a mechanism for several hot stand-by application instances to make pending handler registrations. Only one of the application instances shall have its handler registered.
-red_req_3:: In case of failure of the application instance with the registered handler, Safir SDK Core shall automatically register the handler of one of the hot stand-by application instances and notify that instance.
+red_req_1:: At successful registration of an entity handler the application shall be given any persistent flagged entity instances. This holds for cold standby as well as for hot standby applications.  
+red_req_2:: Safir SDK Core shall provide a mechanism for several hot standby application instances to make pending handler registrations. Only one of the application instances shall have its handler registered.
+red_req_3:: In case of failure of the application instance with the registered handler, Safir SDK Core shall automatically register the handler of one of the hot standby application instances and notify that instance.
+
+More requirements that handle cold standby can be found in <<system_control>>.
 
 === Persistence
 Persistency services are provided to allow applications to store data persistently in order to survive a restart of the system or an application.
@@ -335,7 +340,9 @@ lang_req_3:: Safir SDK Core shall provide programming interfaces in .NET.
 lang_req_4:: Safir SDK Core shall provide programming interfaces in Ada.
 lang_req_5:: An application built on Safir SDK Core shall be able to communicate with other Safir SDK Core applications, regardless of language.
 
+[[system_control]]
 === System control and failover support
+
 Node supervision along with redundancy is provided to detect and act on unexpected application or node losses. The system control mechanism starts and stops the entire system including the Dob and will also keep an unambiguous view of the system, i.e which nodes are part of the system and where individual applications are executing.
 
 sysctrl_req_1:: It shall be possible to supervise the existence of a node.
@@ -430,3 +437,8 @@ This scenario is intended to be an approximate instantiation of the typical syst
 
 Multiple client nodes may run on the same hardware, e.g. through virtualization. The clients may also be run on a cloud hosting service, to reduce the need for purchasing dedicated hardware.
 
+////
+Requirements compliance appendix is located in separate file, compliance.txt
+////
+
+include::compliance.txt[]
