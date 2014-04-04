@@ -51,10 +51,11 @@
 
 #  endif
 
-#  undef SAFIR_LIBRARY_NAME
 
-#  ifdef SAFIR_NO_DEBUG_LIBRARY_SUFFIX
-#    undef SAFIR_NO_DEBUG_LIBRARY_SUFFIX
-#  endif
+#endif
 
+#undef SAFIR_LIBRARY_NAME
+
+#ifdef SAFIR_NO_DEBUG_LIBRARY_SUFFIX
+#  undef SAFIR_NO_DEBUG_LIBRARY_SUFFIX
 #endif
