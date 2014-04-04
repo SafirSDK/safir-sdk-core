@@ -30,7 +30,6 @@ interface
 moc_*.cpp
 moc_*.cpp_parameters
 ui_*.h
-qtcreator-build
 moc_*.cxx
 moc_*.cxx_parameters
 qrc_*.cxx
@@ -43,4 +42,6 @@ buildlog_*.html
 *.bak
 *.pyc
 bin
+*-build
+
 
