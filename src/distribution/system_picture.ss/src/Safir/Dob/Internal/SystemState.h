@@ -63,7 +63,7 @@ namespace SP
      * Use functionality in SystemPicture class to get an instance to one
      * of these objects.
      */
-    class DOB_SYSTEM_PICTURE_API SystemState
+    class DISTRIBUTION_SYSTEM_PICTURE_API SystemState
     {
     public:
         const std::string& Name() const;

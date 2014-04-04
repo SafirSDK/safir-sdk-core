@@ -24,16 +24,15 @@
 #ifndef __SYSTEM_PICTURE_EXPORT_DEFS_H__
 #define __SYSTEM_PICTURE_EXPORT_DEFS_H__
 
-#if defined _MSC_VER
-#  ifdef system_picture_EXPORTS
-#    define DOB_SYSTEM_PICTURE_API __declspec(dllexport)
-#  else
-#    define DOB_SYSTEM_PICTURE_API __declspec(dllimport)
-#    define SAFIR_LIBRARY_NAME "system_picture"
-#    include <Safir/Utilities/Internal/AutoLink.h>
-#  endif
-#elif defined __GNUC__
-#  define DOB_SYSTEM_PICTURE_API
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef system_picture_EXPORTS
+#  define DISTRIBUTION_SYSTEM_PICTURE_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define DISTRIBUTION_SYSTEM_PICTURE_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "system_picture"
+#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
+#define DISTRIBUTION_SYSTEM_PICTURE_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 #endif

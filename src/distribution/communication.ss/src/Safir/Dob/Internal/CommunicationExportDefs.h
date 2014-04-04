@@ -24,17 +24,15 @@
 #ifndef _communication_export_defs_h
 #define _communication_export_defs_h
 
-#if defined _MSC_VER
-    #ifdef communication_EXPORTS
-        #define DOB_COMMUNICATION_API __declspec(dllexport)
-    #else
-        #define DOB_COMMUNICATION_API __declspec(dllimport)
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
-        #define SAFIR_LIBRARY_NAME "communication"
-        #include <Safir/Utilities/Internal/AutoLink.h>
-    #endif
-#elif defined __GNUC__
-    #define DOB_COMMUNICATION_API
+#ifdef communication_EXPORTS
+#  define DISTRIBUTION_COMMUNICATION_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define DISTRIBUTION_COMMUNICATION_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "communication"
+#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
+#define DISTRIBUTION_COMMUNICATION_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 #endif

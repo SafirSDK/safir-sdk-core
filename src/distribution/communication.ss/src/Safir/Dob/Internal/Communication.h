@@ -57,7 +57,7 @@ namespace Com
      *
      * Nowhere in this class is 0 (zero) allowed as node Id.
      */
-    class DOB_COMMUNICATION_API Communication : public boost::noncopyable
+    class DISTRIBUTION_COMMUNICATION_API Communication : public boost::noncopyable
     {
     public:
 

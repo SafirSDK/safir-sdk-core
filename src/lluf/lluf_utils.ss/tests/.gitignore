@@ -10,3 +10,7 @@ ProcessMonitor_test
 ProcessMonitor_test2
 Sleeper
 SystemLog_test
+AsioPeriodicTimer_test
+Atomic_test
+IpcPublisher
+IpcSubscriber

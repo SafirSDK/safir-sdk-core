@@ -36,10 +36,14 @@ moc_*.cxx_parameters
 qrc_*.cxx
 *.qrc.depends
 
+#protobuf
+*.pb.cc
+*.pb.h
+
 #Misc
 __pycache__
 buildlog_*.html
 *.resources
 *.bak
 bin
-
+*.tmp

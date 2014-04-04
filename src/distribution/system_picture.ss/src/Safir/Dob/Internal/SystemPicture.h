@@ -69,7 +69,7 @@ namespace SP
 #pragma warning (disable: 4251)
 #endif
 
-    class DOB_SYSTEM_PICTURE_API SystemPicture
+    class DISTRIBUTION_SYSTEM_PICTURE_API SystemPicture
         : private boost::noncopyable
     {
     public:
