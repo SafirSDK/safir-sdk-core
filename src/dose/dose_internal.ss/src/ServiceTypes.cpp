@@ -35,7 +35,7 @@ namespace Dob
 namespace Internal
 {
     ServiceTypes* ServiceTypes::m_instance = NULL;
-    AtomicUint32 ServiceTypes::m_isInitialized(0);
+    Safir::Utilities::Internal::AtomicUint32 ServiceTypes::m_isInitialized(0);
 
     ServiceTypes& ServiceTypes::Instance()
     {

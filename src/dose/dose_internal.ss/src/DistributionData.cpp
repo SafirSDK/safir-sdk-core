@@ -130,7 +130,7 @@ namespace Internal
 
         BOOST_STATIC_ASSERT(sizeof (unsigned int) == sizeof(boost::uint32_t));
 
-        BOOST_STATIC_ASSERT(sizeof(AtomicUint32) == 4);
+        BOOST_STATIC_ASSERT(sizeof(Safir::Utilities::Internal::AtomicUint32) == 4);
     }
 
 

@@ -23,7 +23,7 @@
 ******************************************************************************/
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Consumer.h>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.>
 #include <Safir/Dob/Typesystem/HandlerId.h>
 #include <Safir/Dob/InstanceIdPolicy.h>
 #include <boost/noncopyable.hpp>
@@ -71,7 +71,7 @@ private:
     }
 
     const boost::function<void(void)> m_dispatchCallback;
-    Safir::Dob::Internal::AtomicUint32 m_isNotified;
+    Safir::Utilities::Internal::AtomicUint32 m_isNotified;
 };
 
 class App:

@@ -225,13 +225,13 @@ namespace Internal
         //the reason that this is an int is that assigns of 0 and 1 should be atomic, and
         //that any compiler should have int be the wordsize for that processor.
 
-        boost::interprocess::offset_ptr<AtomicUint32> m_connectionOutSignals;
+        boost::interprocess::offset_ptr<Safir::Utilities::Internal::AtomicUint32> m_connectionOutSignals;
         Containers<ConnectionId>::vector m_connectionOutIds;
         size_t m_lastUsedSlot; //slot that marks the end of the region of used slots. optimization
 
 
         //Signal for when an application is trying to connect
-        AtomicUint32 m_connectSignal;
+        Safir::Utilities::Internal::AtomicUint32 m_connectSignal;
 
         Semaphore m_connectSem;
         Semaphore m_connectMinusOneSem;

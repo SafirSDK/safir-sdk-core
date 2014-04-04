@@ -35,7 +35,7 @@ namespace Dob
 namespace Internal
 {
     MessageTypes* MessageTypes::m_instance = NULL;
-    AtomicUint32 MessageTypes::m_isInitialized(0);
+    Safir::Utilities::Internal::AtomicUint32 MessageTypes::m_isInitialized(0);
 
     MessageTypes& MessageTypes::Instance()
     {

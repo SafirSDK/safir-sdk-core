@@ -117,11 +117,11 @@ namespace Internal
 
     ExternNodeCommunication::ExternNodeCommunication(boost::asio::io_service & ioService):
         m_thisNode(Safir::Dob::ThisNodeParameters::NodeNumber()),
-        m_queueIsFull(new AtomicUint32 [NUM_PRIORITY_CHANNELS]),
+        m_queueIsFull(new Safir::Utilities::Internal::AtomicUint32 [NUM_PRIORITY_CHANNELS]),
         m_okToSignalPDComplete(0),
         m_isNotified(0),
-        m_incomingDataEvents(new AtomicUint32 [NUM_PRIORITY_CHANNELS]),
-        m_requestPDEvents(new AtomicUint32 [NumberOfNodes]),
+        m_incomingDataEvents(new Safir::Utilities::Internal::AtomicUint32 [NUM_PRIORITY_CHANNELS]),
+        m_requestPDEvents(new Safir::Utilities::Internal::AtomicUint32 [NumberOfNodes]),
         m_queueNotFullEvent(0),
         m_startPoolDistributionEvent(0),
         m_ioService(ioService)

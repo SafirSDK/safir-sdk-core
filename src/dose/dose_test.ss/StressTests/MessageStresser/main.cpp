@@ -35,7 +35,7 @@
 #include <boost/interprocess/exceptions.hpp>
 #include <boost/asio.hpp>
 #include <iostream>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 
 

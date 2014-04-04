@@ -106,9 +106,9 @@ namespace Internal
             }
         }
 
-        const boost::function <void(void)>  m_dispatchFunc;
-        AtomicUint32                        m_isNotified;
-        boost::asio::io_service &           m_ioService;
+        const boost::function <void(void)>       m_dispatchFunc;
+        Safir::Utilities::Internal::AtomicUint32 m_isNotified;
+        boost::asio::io_service &                m_ioService;
     };
 
     class DummyDispatcher:

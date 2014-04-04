@@ -27,7 +27,7 @@
 
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Typesystem/Defs.h>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 #include <boost/noncopyable.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/scoped_ptr.hpp>

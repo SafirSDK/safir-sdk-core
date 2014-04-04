@@ -86,9 +86,9 @@ namespace Internal
 
         //Handler for all other events in dose_main
         void HandleEvents();
-        AtomicUint32 m_connectEvent;
-        AtomicUint32 m_connectionOutEvent;
-        AtomicUint32 m_nodeStatusChangedEvent;
+        Safir::Utilities::Internal::AtomicUint32 m_connectEvent;
+        Safir::Utilities::Internal::AtomicUint32 m_connectionOutEvent;
+        Safir::Utilities::Internal::AtomicUint32 m_nodeStatusChangedEvent;
 
         //Timeout handler
         virtual void HandleTimeout(const TimerInfoPtr& timer);
@@ -171,8 +171,8 @@ namespace Internal
         ThreadMonitor m_threadMonitor;
         boost::thread::id m_mainThreadId;
 
-        AtomicUint32 m_HandleEvents_notified;
-        AtomicUint32 m_DispatchOwnConnection_notified;
+        Safir::Utilities::Internal::AtomicUint32 m_HandleEvents_notified;
+        Safir::Utilities::Internal::AtomicUint32 m_DispatchOwnConnection_notified;
 
         boost::thread m_connectionThread;
         boost::thread m_memoryMonitorThread;

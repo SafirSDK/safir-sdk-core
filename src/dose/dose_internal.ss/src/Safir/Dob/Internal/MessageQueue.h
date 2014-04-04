@@ -132,7 +132,7 @@ namespace Internal
         Typesystem::Int32 m_noPushed;
         Typesystem::Int32 m_noOverflows;
         Typesystem::Int32 m_noDispatchedMsg;
-        AtomicUint32 m_simulateFull;
+        Safir::Utilities::Internal::AtomicUint32 m_simulateFull;
 
         friend void StatisticsCollector(MessageQueue&, void*);
     };

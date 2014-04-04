@@ -139,7 +139,7 @@ namespace Internal
         Typesystem::Int32 m_noAttachedResponses; //number of responses sent attached by dose_main
         Typesystem::Int32 m_noDispatchedResponses; //number of responses dispatched to application
 
-        AtomicUint32 m_simulateFull;
+        Safir::Utilities::Internal::AtomicUint32 m_simulateFull;
 
         friend void StatisticsCollector(RequestOutQueue&, void*);
     };

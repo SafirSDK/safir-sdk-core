@@ -24,7 +24,7 @@
 
 #include <Safir/Dob/Internal/SubscriptionQueue.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 #include <Safir/Dob/Internal/State.h>
 #include <Safir/Dob/Internal/Subscription.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>

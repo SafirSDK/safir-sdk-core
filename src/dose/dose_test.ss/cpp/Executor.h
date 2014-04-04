@@ -27,7 +27,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Connection.h>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 #include <DoseTest/Action.h>
 #include <DoseTest/Sequencer.h>
 #include <Safir/Dob/ErrorResponse.h>
@@ -65,7 +65,7 @@ private:
     }
 
     const boost::function<void(void)> m_dispatchCallback;
-    Safir::Dob::Internal::AtomicUint32 m_isNotified;
+    Safir::Utilities::Internal::AtomicUint32 m_isNotified;
     boost::asio::io_service & m_ioService;
 };
 

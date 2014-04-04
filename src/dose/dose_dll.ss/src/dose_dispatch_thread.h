@@ -90,7 +90,7 @@ namespace Internal
 
         boost::thread m_thread;
 
-        AtomicUint32 m_stop;
+        Safir::Utilities::Internal::AtomicUint32 m_stop;
     };
 }
 }

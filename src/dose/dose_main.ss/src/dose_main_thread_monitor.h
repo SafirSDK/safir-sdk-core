@@ -25,7 +25,7 @@
 #ifndef _dose_main_thread_monitor_h
 #define _dose_main_thread_monitor_h
 
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 
 #if defined _MSC_VER
   #pragma warning (push)

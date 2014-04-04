@@ -105,20 +105,20 @@ namespace Internal
 
         QualityOfServiceData m_QualityOfServiceData;
 
-        boost::scoped_array<AtomicUint32> m_queueIsFull;
+        boost::scoped_array<Safir::Utilities::Internal::AtomicUint32> m_queueIsFull;
         boost::mutex m_queueIsFullLock;
 
-        AtomicUint32 m_okToSignalPDComplete;
-        AtomicUint32 m_isNotified;
+        Safir::Utilities::Internal::AtomicUint32 m_okToSignalPDComplete;
+        Safir::Utilities::Internal::AtomicUint32 m_isNotified;
 
         int m_pdChannel;
         int m_pdPriority;
         bool m_pdIsAcked;
 
-        boost::scoped_array<AtomicUint32> m_incomingDataEvents;
-        boost::scoped_array<AtomicUint32> m_requestPDEvents; // Request pooldistribution from these nodes.
-        AtomicUint32 m_queueNotFullEvent;
-        AtomicUint32 m_startPoolDistributionEvent;
+        boost::scoped_array<Safir::Utilities::Internal::AtomicUint32> m_incomingDataEvents;
+        boost::scoped_array<Safir::Utilities::Internal::AtomicUint32> m_requestPDEvents; // Request pooldistribution from these nodes.
+        Safir::Utilities::Internal::AtomicUint32 m_queueNotFullEvent;
+        Safir::Utilities::Internal::AtomicUint32 m_startPoolDistributionEvent;
 
         boost::asio::io_service& m_ioService;
     };

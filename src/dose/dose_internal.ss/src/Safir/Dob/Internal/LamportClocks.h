@@ -30,7 +30,7 @@
 #include <iosfwd>
 #include <climits>
 #include <Safir/Dob/Internal/InternalExportDefs.h>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 
 namespace Safir
 {
@@ -89,7 +89,7 @@ namespace Internal
         const LamportTimestamp GetNewTimestamp();
 
     private:
-        AtomicUint32 m_currentClock;
+        Safir::Utilities::Internal::AtomicUint32 m_currentClock;
     };
 
 }

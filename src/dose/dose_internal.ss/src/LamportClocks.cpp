@@ -23,7 +23,7 @@
 ******************************************************************************/
 
 #include <Safir/Dob/Internal/LamportClocks.h>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <iostream>
 namespace Safir

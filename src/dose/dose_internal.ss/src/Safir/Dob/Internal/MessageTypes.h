@@ -29,7 +29,7 @@
 #include <Safir/Dob/Typesystem/ChannelId.h>
 #include <Safir/Dob/Internal/MessageType.h>
 #include <Safir/Dob/Internal/ConsumerId.h>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 
 namespace Safir
 {
@@ -91,7 +91,7 @@ namespace Internal
 
         bool m_iAmDoseMain;
         static MessageTypes* m_instance;
-        static AtomicUint32  m_isInitialized;
+        static Safir::Utilities::Internal::AtomicUint32  m_isInitialized;
     };
 }
 }

@@ -36,7 +36,7 @@ namespace Dob
 namespace Internal
 {
     EntityTypes* EntityTypes::m_instance = NULL;
-    AtomicUint32 EntityTypes::m_isInitialized(0);
+    Safir::Utilities::Internal::AtomicUint32 EntityTypes::m_isInitialized(0);
 
     EntityTypes& EntityTypes::Instance()
     {

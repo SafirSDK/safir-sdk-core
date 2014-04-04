@@ -76,8 +76,8 @@ namespace Internal
         m_connectSemSignalled(false)
     {
         m_connectionOutSignals =
-            static_cast<AtomicUint32*>
-            (GetSharedMemory().allocate(sizeof(AtomicUint32)* MAX_NUM_CONNECTIONS));
+            static_cast<Safir::Utilities::Internal::AtomicUint32*>
+            (GetSharedMemory().allocate(sizeof(Safir::Utilities::Internal::AtomicUint32)* MAX_NUM_CONNECTIONS));
 
 
         for (int i = 0; i < MAX_NUM_CONNECTIONS; ++i)
@@ -434,8 +434,8 @@ namespace Internal
         //call the handler for the signalled connections.
         {
             boost::interprocess::sharable_lock<ConnectionsTableLock> lock(m_connectionTablesLock);
-            const AtomicUint32 * end = m_connectionOutSignals.get() + m_lastUsedSlot + 1;
-            for (AtomicUint32 * it = m_connectionOutSignals.get();
+            const Safir::Utilities::Internal::AtomicUint32 * end = m_connectionOutSignals.get() + m_lastUsedSlot + 1;
+            for (Safir::Utilities::Internal::AtomicUint32 * it = m_connectionOutSignals.get();
                  it != end; ++it)
             {
                 if (*it != 0)
