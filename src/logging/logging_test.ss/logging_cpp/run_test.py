@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys
+import subprocess, os, time, sys, argparse
 import syslog_server
 from safe_print import *
 
@@ -44,15 +44,15 @@ if "check_output" not in dir( subprocess ): # duck punch it in!
         return output
     subprocess.check_output = f
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
-    exe_path = "."
-    
-sender_path = os.path.join(exe_path, "log_sender")
+parser = argparse.ArgumentParser("test script for logging")
+parser.add_argument("--sender", required=True)
+parser.add_argument("--safir-show-config", required=True)
 
-log_server = syslog_server.SyslogServer()
+arguments = parser.parse_args()
+    
+sender_path = arguments.sender
+
+log_server = syslog_server.SyslogServer(arguments.safir_show_config)
 
 o1 = subprocess.check_output(sender_path, stderr=subprocess.STDOUT)
 o2 = subprocess.check_output(sender_path, stderr=subprocess.STDOUT)
