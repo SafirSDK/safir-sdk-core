@@ -148,8 +148,37 @@ MACRO(INSTALL_DEBUG_INFO target)
   endif()
 ENDMACRO()
 
+if (UNIX)
+  set(PATH_SEPARATOR ":")
+else()
+  set(PATH_SEPARATOR ";")
+endif()
+
+
+#also accepts an optional second argument TIMEOUT which will set test timeout
+#in seconds
+function (SET_SAFIR_TEST_PROPERTIES TEST_NAME) 
+  #FIND_SAFIR_SDK_SOURCE_ROOT(SAFIR_SOURCE_ROOT)
+  if (ARGV1)
+    SET_TESTS_PROPERTIES(${TEST_NAME} PROPERTIES TIMEOUT ${ARGV1})
+  endif()
+
+  set (pypath "$ENV{PYTHONPATH}${PATH_SEPARATOR}${safir_sdk_core_SOURCE_DIR}/tests/test_support/python")
+  string(REGEX REPLACE "^${PATH_SEPARATOR}+" "" pypath ${pypath}) # remove any leading path separators
+
+  SET_PROPERTY(TEST ${TEST_NAME}
+    PROPERTY ENVIRONMENT 
+    "SAFIR_TEST_CONFIG_OVERRIDE=${safir_sdk_core_SOURCE_DIR}/tests/test_support/test_config"
+    "PYTHONPATH=${pypath}")
+endfunction()
+
+
 include_directories(lluf/lluf_build_helpers.ss/src)
 
 ADD_DEFINITIONS(-DSAFIR_NO_AUTOLINK)
+
+
+ENABLE_TESTING()
+
 
 add_subdirectory(lluf)
