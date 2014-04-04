@@ -41,5 +41,6 @@ __pycache__
 buildlog_*.html
 *.resources
 *.bak
+*.pyc
 bin
 
