@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Contains the definition of a distribution channel name.</summary>
+    <name>ParserTest.MyEntityBase</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <members>
+        <member>
+            <summary>InstanceId.</summary>
+            <name>MyInstanceId</name>
+            <type>InstanceId</type>            
+        </member>
+        <member>
+            <summary>TypeId.</summary>
+            <name>MyTypeId</name>
+            <type>TypeId</type>            
+        </member>
+        <member>
+            <summary>EntityId.</summary>
+            <name>MyEntityId</name>
+            <type>EntityId</type>            
+        </member>
+    </members>
+</class>

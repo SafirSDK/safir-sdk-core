@@ -14,6 +14,8 @@
 #include <Safir/Dob/Typesystem/ToolSupport/BlobLayout.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
+#include <Safir/Dob/Typesystem/ToolSupport/BlobWriter.h>
+//#include <Safir/Dob/Typesystem/ToolSupport/BlobReader.h>
 
 using namespace Safir::Dob::Typesystem::ToolSupport;
 

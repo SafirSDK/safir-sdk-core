@@ -113,6 +113,15 @@ typedef enum
 
 typedef enum
 {
+    NoCollectionType,
+    ArrayCollectionType,
+    RangeCollectionType,
+    SetCollectionType,
+    HashtableCollectionType
+} DotsC_CollectionType;
+
+typedef enum
+{
     NoError=0,
     ReadOnlyProperty,           //when reading properties straight from blobs
     UnableToDereferenceProperty, //when reading properties straight from blobs

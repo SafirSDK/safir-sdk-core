@@ -79,7 +79,7 @@ namespace Internal
             for (DotsC_MemberIndex memberIx=0; memberIx<cd->GetNumberOfMembers(); ++memberIx)
             {
                 const MemberDescriptionType* md=cd->GetMember(memberIx);
-                if (!md->IsArray()) //normal member
+                if (md->GetCollectionType()!=ArrayCollectionType) //normal member
                 {
                     SerializeMember(blob, md, memberIx, 0, md->GetName(), os);
                 }
@@ -188,7 +188,7 @@ namespace Internal
                 MemberStatus status=m_blobLayout.template GetMember<bool>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                     os<<(val ? "true" : "false");
                     os<<"</"<<elementName<<">";
                 }
@@ -202,7 +202,7 @@ namespace Internal
                 if (!status.IsNull())
                 {
                     const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
-                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                     os<<enumVal;
                     os<<"</"<<elementName<<">";
                 }
@@ -215,7 +215,7 @@ namespace Internal
                 MemberStatus status=m_blobLayout.template GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                     os<<val;
                     os<<"</"<<elementName<<">";
                 }
@@ -228,7 +228,7 @@ namespace Internal
                 MemberStatus status=m_blobLayout.template GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                     os<<val;
                     os<<"</"<<elementName<<">";
                 }
@@ -241,7 +241,7 @@ namespace Internal
                 MemberStatus status=m_blobLayout.template GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
 
                     const char* typeName=TypeIdToString(val);
                     if (typeName)
@@ -267,7 +267,7 @@ namespace Internal
                 MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, val, hashStr);
                 if (!status.IsNull())
                 {
-                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                     if (hashStr)
                     {
                         os<<hashStr;
@@ -288,7 +288,7 @@ namespace Internal
                 MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, entId, hashStr);
                 if (!status.IsNull())
                 {
-                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
 
                     const char* typeName=TypeIdToString(entId.typeId);
                     if (typeName)
@@ -321,7 +321,7 @@ namespace Internal
                 MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, strVal, size);
                 if (!status.IsNull())
                 {
-                    if (!md->IsArray())
+                    if (md->GetCollectionType()!=ArrayCollectionType)
                     {
                         os<<"<"<<elementName<<" xml:space=\"preserve\">";
                     }
@@ -353,7 +353,7 @@ namespace Internal
                         os<<"<"<<elementName;
                     }
 
-                    if (!md->IsArray())
+                    if (md->GetCollectionType()!=ArrayCollectionType)
                     {
                         os<<">";
                     }
@@ -375,7 +375,7 @@ namespace Internal
                 MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, binary, size);
                 if (!status.IsNull())
                 {
-                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                     std::string bin(binary, size);
                     os<<SerializationUtils::ToBase64(bin);
                     os<<"</"<<elementName<<">";
@@ -409,7 +409,7 @@ namespace Internal
                 MemberStatus status=m_blobLayout.template GetMember<DotsC_Float32>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                     os<<classic_string_cast<std::string>(val);
                     os<<"</"<<elementName<<">";
                 }
@@ -442,7 +442,7 @@ namespace Internal
                 MemberStatus status=m_blobLayout.template GetMember<DotsC_Float64>(blob, memberIndex, arrayIndex, val);
                 if (!status.IsNull())
                 {
-                    WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
+                    WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                     os<<classic_string_cast<std::string>(val);
                     os<<"</"<<elementName<<">";
                 }
@@ -492,6 +492,6 @@ namespace Internal
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal::Internal
+} //end namespace Safir::Dob::Typesystem::ToolSupport::Internal
 
 #endif

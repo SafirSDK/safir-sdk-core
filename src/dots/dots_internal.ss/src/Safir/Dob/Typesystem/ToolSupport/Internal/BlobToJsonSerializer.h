@@ -99,7 +99,7 @@ namespace Internal
             {
                 const MemberDescriptionType* md=cd->GetMember(memberIx);
 
-                if (!md->IsArray()) //normal member
+                if (md->GetCollectionType()!=ArrayCollectionType) //normal member
                 {
                     if (!m_blobLayout.GetStatus(blob, memberIx, 0).IsNull())
                     {
@@ -441,7 +441,7 @@ namespace Internal
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal::Internal
+} //end namespace Safir::Dob::Typesystem::ToolSupport::Internal
 
 #ifdef _MSC_VER
 #pragma warning( pop )

@@ -148,4 +148,4 @@ namespace ToolSupport
 }
 }
 
-#endif // __PARSESTATE_H__
+#endif

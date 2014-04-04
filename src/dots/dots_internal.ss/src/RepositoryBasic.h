@@ -34,7 +34,7 @@
 using namespace Safir::Dob::Typesystem::ToolSupport::Internal;
 
 /**
- * A local memeory implementation of the TypeRespository interface
+ * A local memory implementation of the TypeRespository interface
  * The constructor takes all the ParseState from each worker in a ParseJob and performes
  * necessary finalization work that could not be done during the xml-parsing stage by the
  * workers. On errors ParseError is thrown, else the Repository is constructed and the
@@ -96,7 +96,7 @@ namespace ToolSupport
     {
     public:
         MemberDescriptionBasic()
-            :isArray(false)
+            :collectionType(NoCollectionType)
             ,arraySize(1)
             ,maxLength(0)
         {
@@ -107,7 +107,8 @@ namespace ToolSupport
         virtual DotsC_TypeId GetTypeId() const {return typeId;}
         virtual const char* GetName() const { return name.c_str(); }
         virtual DotsC_MemberType GetMemberType() const {return memberType;}
-        virtual const bool IsArray() const {return isArray;}
+        virtual DotsC_CollectionType GetCollectionType() const {return collectionType;}
+        virtual DotsC_MemberType GetHashtableKeyType() const {return hashtableKeyType;}
         virtual int GetArraySize() const {return arraySize;}
         virtual int GetMaxLength() const {return maxLength;}
 
@@ -116,7 +117,8 @@ namespace ToolSupport
         std::string name;
         std::string typeName;
         DotsC_MemberType memberType;
-        bool isArray;
+        DotsC_CollectionType collectionType;
+        DotsC_MemberType hashtableKeyType;
         int arraySize; //If isArray
         int maxLength; //Max string length. Only applicable if typeName is 'String'.
 
@@ -178,7 +180,7 @@ namespace ToolSupport
     {
     public:
         ParameterDescriptionBasic()
-            :isArray(false)
+            :collectionType(NoCollectionType)
             ,hidden(false)
         {
         }
@@ -189,7 +191,8 @@ namespace ToolSupport
         virtual const char* GetQualifiedName() const {return qualifiedName.c_str();}
         virtual DotsC_MemberType GetMemberType() const {return memberType;}
         virtual DotsC_TypeId GetTypeId() const {return typeId;} //only valid if MemberType is object or enum
-        virtual bool IsArray() const {return isArray;}
+        virtual DotsC_CollectionType GetCollectionType() const {return collectionType;}
+        virtual DotsC_MemberType GetHashtableKeyType() const {return hashtableKeyType;} //only valid if collectionType is Hashtable
         virtual int GetArraySize() const {return static_cast<int>(values.size());}
         virtual bool IsHidden() const {return hidden;}
 
@@ -244,7 +247,8 @@ namespace ToolSupport
         std::string qualifiedName;
         std::string typeName;
         DotsC_MemberType memberType;
-        bool isArray;
+        DotsC_CollectionType collectionType;
+        DotsC_MemberType hashtableKeyType;
         bool hidden;   //Some parameters are derived from propertyMapping values. The parser will automatically generate a
                         //hidden parameter for those values. All explicitly declared parameters will have hidden=false.
         ParameterValues values;

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<exception xmlns="urn:safir-dots-unit">
+    <summary>Thrown when data could not be sent due to overflowing queues.</summary>
+    <name>Safir.Dob.OverflowException</name>
+    <baseClass>Exception</baseClass>
+</exception>

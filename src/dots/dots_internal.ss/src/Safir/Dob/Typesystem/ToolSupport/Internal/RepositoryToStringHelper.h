@@ -265,13 +265,22 @@ namespace Internal
             break;
         }
 
-        if (c->IsArray())
+        switch (c->GetCollectionType())
         {
-            os<<", isArray=true, arraySize="<<c->GetArraySize()<<std::endl;
-        }
-        else
-        {
-            os<<", isArray=false"<<std::endl;
+        case ArrayCollectionType:
+            os<<", ArrayType, arraySize="<<c->GetArraySize()<<std::endl;
+            break;
+        case RangeCollectionType:
+            os<<", RangeType"<<std::endl;
+            break;
+        case SetCollectionType:
+            os<<", SetType"<<std::endl;
+            break;
+        case HashtableCollectionType:
+            os<<", HashtableType"<<std::endl;
+            break;
+        default:
+            break;
         }
     }
 
@@ -298,16 +307,23 @@ namespace Internal
             break;
         }
 
-        if (c->IsArray())
+        switch (c->GetCollectionType())
         {
-            os<<", isArray=true, arraySize="<<c->GetArraySize()<<std::endl;
+        case ArrayCollectionType:
+            os<<", ArrayType, arraySize="<<c->GetArraySize()<<std::endl;
+            break;
+        case RangeCollectionType:
+            os<<", RangeType"<<std::endl;
+            break;
+        case SetCollectionType:
+            os<<", SetType"<<std::endl;
+            break;
+        case HashtableCollectionType:
+            os<<", HashtableType"<<std::endl;
+            break;
+        default:
+            break;
         }
-        else
-        {
-            os<<", isArray=false"<<std::endl;
-        }
-
-
 
         //Values
         switch(c->GetMemberType())
@@ -316,7 +332,7 @@ namespace Internal
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                if (c->IsArray())
+                if (c->GetCollectionType()!=NoCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -333,7 +349,7 @@ namespace Internal
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                if (c->IsArray())
+                if (c->GetCollectionType()!=NoCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -349,7 +365,7 @@ namespace Internal
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                if (c->IsArray())
+                if (c->GetCollectionType()!=NoCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -366,7 +382,7 @@ namespace Internal
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                if (c->IsArray())
+                if (c->GetCollectionType()!=NoCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -385,7 +401,7 @@ namespace Internal
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                if (c->IsArray())
+                if (c->GetCollectionType()!=NoCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -404,7 +420,7 @@ namespace Internal
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                if (c->IsArray())
+                if (c->GetCollectionType()!=NoCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -422,7 +438,7 @@ namespace Internal
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                if (c->IsArray())
+                if (c->GetCollectionType()!=NoCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -439,7 +455,7 @@ namespace Internal
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                if (c->IsArray())
+                if (c->GetCollectionType()!=NoCollectionType)
                 {
                     os<<"      value["<<i<<"]="<<std::endl;
                 }
@@ -459,7 +475,7 @@ namespace Internal
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                if (c->IsArray())
+                if (c->GetCollectionType()!=NoCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -477,7 +493,7 @@ namespace Internal
             for (int i=0; i<c->GetArraySize(); ++i)
             {
                 //TODO: change to hex or base64 output, this assumes binary is an ascii string
-                if (c->IsArray())
+                if (c->GetCollectionType()!=NoCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -520,7 +536,7 @@ namespace Internal
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                if (c->IsArray())
+                if (c->GetCollectionType()!=NoCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -556,7 +572,7 @@ namespace Internal
         {
             for (int i=0; i<c->GetArraySize(); ++i)
             {
-                if (c->IsArray())
+                if (c->GetCollectionType()!=NoCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -592,7 +608,7 @@ namespace Internal
                 std::pair<const ParameterDescriptionType*, int> par=md->GetParameter();
                 os<<"        MappingKind:     ValueMapping"<<std::endl;
                 os<<"        MappedParam:       "<<par.first->GetName();
-                if (!propertyMember->IsArray())
+                if (propertyMember->GetCollectionType()!=ArrayCollectionType)
                 {
                     os<<"["<<par.second<<"]";
                 }
@@ -609,7 +625,7 @@ namespace Internal
                     std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> ref=md->GetMemberReference(memRef);
                     const MemberDescriptionType* member=currentClass->GetMember(ref.first);
                     os<<"->"<<member->GetName();
-                    if (member->IsArray() && !propertyMember->IsArray())
+                    if (member->GetCollectionType()==ArrayCollectionType && propertyMember->GetCollectionType()!=ArrayCollectionType)
                     {
                         os<<"["<<ref.second<<"]";
                     }
@@ -656,6 +672,6 @@ namespace Internal
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal::Internal
+} //end namespace Safir::Dob::Typesystem::ToolSupport::Internal
 
 #endif

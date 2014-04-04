@@ -233,7 +233,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            state.lastInsertedClass->members.back()->isArray=true;
+            state.lastInsertedClass->members.back()->collectionType=ArrayCollectionType;
             try
             {
                 std::string paramName;
@@ -510,7 +510,7 @@ namespace ToolSupport
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
-            par->isArray=false;
+            par->collectionType=NoCollectionType;
             par->memberType=Int32MemberType; //just to indicate that type is not object or entityId, it is a basicType or enum
             ValueDefinition val;
             val.kind=ValueKind;
@@ -567,7 +567,7 @@ namespace ToolSupport
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
-            par->isArray=false;
+            par->collectionType=NoCollectionType;
             par->memberType=EntityIdMemberType;
             par->typeName=BasicTypeOperations::MemberTypeToString(EntityIdMemberType);
             par->values.push_back(val);
@@ -593,7 +593,7 @@ namespace ToolSupport
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
-            par->isArray=false;
+            par->collectionType=NoCollectionType;
             par->memberType=ObjectMemberType;
             ValueDefinition val;
             val.kind=ValueKind;
@@ -632,7 +632,7 @@ namespace ToolSupport
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
-            par->isArray=false;
+            par->collectionType=NoCollectionType;
             par->memberType=ObjectMemberType;
             ValueDefinition val;
             val.kind=ValueKind;
@@ -718,7 +718,7 @@ namespace ToolSupport
 
     template<> struct ParseAlgorithm<Elements::ParameterArrayElements>
     {
-        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedClass->ownParameters.back()->isArray=true;}
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedClass->ownParameters.back()->collectionType=ArrayCollectionType;}
     };
 
     template<> struct ParseAlgorithm<Elements::ParameterValue>
@@ -870,8 +870,36 @@ namespace ToolSupport
 
     template<> struct ParseAlgorithm<Elements::PropertyMemberisArray>
     {
-        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->isArray=true;}
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->collectionType=ArrayCollectionType;}
     };
+
+    template<> struct ParseAlgorithm<Elements::PropertyMemberIsRange>
+    {
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->collectionType=RangeCollectionType;}
+    };
+
+    template<> struct ParseAlgorithm<Elements::PropertyMemberIsSet>
+    {
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->collectionType=SetCollectionType;}
+    };
+
+    template<> struct ParseAlgorithm<Elements::PropertyMemberIsHashtable>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            state.lastInsertedProperty->members.back()->collectionType=HashtableCollectionType;
+            SerializationUtils::Trim(pt.data());
+            state.lastInsertedProperty->members.back()->typeName=pt.data();
+            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedProperty->members.back()->hashtableKeyType) ||
+                    state.lastInsertedProperty->members.back()->hashtableKeyType==BinaryMemberType)
+            {
+                std::ostringstream ss;
+                ss<<"The specified type '"<<pt.data()<<"' is not valid as key in a hashtable. On member '"<<state.lastInsertedProperty->members.back()->name<<"' in property '"<<state.lastInsertedProperty->name<<"'"<<std::endl;
+                throw ParseError("Invalid hashtable key type", ss.str(), state.currentPath, 651);
+            }
+        }
+    };
+
 
     template<> struct ParseAlgorithm<Elements::Membersummary>
     {
@@ -913,7 +941,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            state.lastInsertedClass->members.back()->isArray=true;
+            state.lastInsertedClass->members.back()->collectionType=ArrayCollectionType;
             try
             {
                 SerializationUtils::Trim(pt.data());
@@ -936,6 +964,33 @@ namespace ToolSupport
         }
     };
 
+    template<> struct ParseAlgorithm<Elements::Range>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->members.back()->collectionType=RangeCollectionType;}
+    };
+
+    template<> struct ParseAlgorithm<Elements::Set>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->members.back()->collectionType=SetCollectionType;}
+    };
+
+    template<> struct ParseAlgorithm<Elements::Hashtable>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            state.lastInsertedClass->members.back()->collectionType=HashtableCollectionType;
+            SerializationUtils::Trim(pt.data());
+            state.lastInsertedClass->members.back()->typeName=pt.data();
+            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedClass->members.back()->hashtableKeyType) ||
+                    state.lastInsertedClass->members.back()->hashtableKeyType==BinaryMemberType)
+            {
+                std::ostringstream ss;
+                ss<<"The specified type '"<<pt.data()<<"' is not valid as key in a hashtable. On member '"<<state.lastInsertedClass->members.back()->name<<"' in class '"<<state.lastInsertedClass->name<<"'"<<std::endl;
+                throw ParseError("Invalid hashtable key type", ss.str(), state.currentPath, 650);
+            }
+        }
+    };
+
     //-----------------------------------------------
     // DOM file algorithms
     //-----------------------------------------------
@@ -951,7 +1006,7 @@ namespace ToolSupport
         param->qualifiedName=paramName.str();
         param->name=param->qualifiedName;
         param->hidden=true;
-        param->isArray=isArray;
+        param->collectionType=isArray ? ArrayCollectionType : NoCollectionType;
         param->memberType=propMem->memberType;
         param->typeId=propMem->typeId;
         param->typeName=propMem->typeName;
@@ -1198,7 +1253,7 @@ namespace ToolSupport
                 throw ParseError("Invalid parameter reference", os.str(), state.currentPath, 90);
             }
 
-            if (propMem->IsArray())
+            if (propMem->GetCollectionType()==ArrayCollectionType)
             {
                 if (paramIndex>=0)
                 {
@@ -1207,7 +1262,7 @@ namespace ToolSupport
                     os<<"Referenced parameter '"<<paramName<<"' is an array, index is not expected. In propertyMapping for member "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName()<<".";
                     throw ParseError("Index not expected", os.str(), state.currentPath, 91);
                 }
-                if (!param->IsArray())
+                if (param->GetCollectionType()!=ArrayCollectionType)
                 {
                     std::ostringstream os;
                     os<<"Referenced parameter '"<<paramName<<"' is not an array. Property member "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName()
@@ -1217,7 +1272,7 @@ namespace ToolSupport
             }
             else //property member not array
             {
-                if (param->IsArray())
+                if (param->GetCollectionType()==ArrayCollectionType)
                 {
                     if (paramIndex<0)
                     {
@@ -1310,7 +1365,7 @@ namespace ToolSupport
             {
                 //since this is not the leaf, we just care that a valid member is pointed out. And that it is an object so it's possible to step into
                 //Types does not have to be compatible.
-                if (classMem->IsArray())
+                if (classMem->GetCollectionType()==ArrayCollectionType)
                 {
                     if (memberArrayIndex<0)
                     {
@@ -1351,9 +1406,9 @@ namespace ToolSupport
             }
             else //This is the leaf, then the types must be compliant
             {
-                if (propMem->IsArray())
+                if (propMem->GetCollectionType()==ArrayCollectionType)
                 {
-                    if (!classMem->IsArray())
+                    if (classMem->GetCollectionType()!=ArrayCollectionType)
                     {
                         //propery is array but not classMember
                         std::ostringstream os;
@@ -1377,7 +1432,7 @@ namespace ToolSupport
                 }
                 else //propertyMember not array
                 {
-                    if (classMem->IsArray())
+                    if (classMem->GetCollectionType()==ArrayCollectionType)
                     {
                         if (memberArrayIndex<0)
                         {
@@ -1503,13 +1558,13 @@ namespace ToolSupport
             if (inlineParam)
             {
                 const MemberDescriptionBasic* propMem=pd->members[md->propertyMemberIndex].get();
-                if (isArray && !propMem->IsArray())
+                if (isArray && propMem->GetCollectionType()!=ArrayCollectionType)
                 {
                     std::ostringstream os;
                     os<<"PropertyMember '"<<pd->GetName()<<"."<<propMem->GetName()<<"' is not an array. Element <arrayElements> is not allowed.";
                     throw ParseError("Property member not array", os.str(), state.currentPath, 96);
                 }
-                else if (!isArray && propMem->IsArray())
+                else if (!isArray && propMem->GetCollectionType()==ArrayCollectionType)
                 {
                     std::ostringstream os;
                     os<<"PropertyMember '"<<pd->GetName()<<"."<<propMem->GetName()<<"' is an array but the specified value is not an array.";

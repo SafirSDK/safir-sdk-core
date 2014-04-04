@@ -431,7 +431,7 @@ namespace BasicTypeOperations
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal
+} //end namespace Safir::Dob::Typesystem::ToolSupport::Internal::BasicTypeOperations
 
 #endif
 

@@ -132,6 +132,6 @@ namespace ToolSupport
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal
+} //end namespace Safir::Dob::Typesystem::ToolSupport
 
 #endif

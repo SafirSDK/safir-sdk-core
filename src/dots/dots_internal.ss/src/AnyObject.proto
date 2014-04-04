@@ -1,0 +1,32 @@
+option optimize_for = LITE_RUNTIME;
+
+package Safir.Dob.Typesystem.ToolSupport.Internal;
+
+message AnyObject {
+
+  message AnyType {
+      optional int32 int32_value = 1;
+      optional int64 int64_value = 2;
+      optional float float32_value = 3;
+      optional double float64_value = 4;
+      optional string string_value = 5;
+      optional bool boolean_value = 6;
+      optional bytes binary_value = 7;      
+      optional sint64 hash_value = 8;
+  }
+
+  message Value {
+      optional bool is_changed = 1;
+      optional AnyType key = 2;
+      optional AnyType value = 3;
+  }
+
+  message Member {
+      optional int32 member_id = 1;
+      optional bool is_changed_here = 2;
+      repeated Value values = 3;
+  }
+
+  repeated Member members = 1;
+}
+

@@ -135,7 +135,7 @@ namespace ToolSupport
             //index out of bounds
             std::ostringstream os;
             os<<"The specified index "<<paramIndex<<" is out of bounds. Referenced parameter "<<*paramName;
-            if (param->IsArray())
+            if (param->GetCollectionType()==ArrayCollectionType)
             {
                 os<<" has arraySize="<<param->GetArraySize();
             }
@@ -716,7 +716,7 @@ namespace ToolSupport
         {
             std::ostringstream ss;
             ss<<"Could not resolve Parameter valueRef "<<ref.parameterName<<". Referenced from parameter:  "<<referencing->GetName();
-            if (referencing->IsArray())
+            if (referencing->GetCollectionType()==ArrayCollectionType)
                 ss<<" (index="<<ref.referee.referencingIndex<<") ";
             throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 42);
         }
@@ -756,7 +756,7 @@ namespace ToolSupport
                 //referenced parameter cant be derived as the same type as referencing parameter
                 std::ostringstream ss;
                 ss<<"The parameter '"<<referencing->GetName()<<"' ";
-                if (referencing->IsArray())
+                if (referencing->GetCollectionType()==ArrayCollectionType)
                     ss<<"(index="<<ref.referee.referencingIndex<<") ";
                 ss<<"of type "<<referencing->typeName<<" is referencing parameter '"<<referenced->GetName()<<
                     " of type "<<referenced->typeName<<". The types are not compatilbe and "<<
@@ -949,7 +949,7 @@ namespace ToolSupport
                     std::ostringstream os;
                     os<<"The createRoutine '"<<cr.name<<"' in class "<<cd->GetName()<<"' specifies an parameter index that is out of range for member '"<<
                         mit->first<<"'. Parameter'"<<mit->second.first<<"'' with index="<<mit->second.second;
-                    if (!pd->IsArray())
+                    if (pd->GetCollectionType()!=ArrayCollectionType)
                     {
                         os<<" is not an array.";
                     }
@@ -969,11 +969,11 @@ namespace ToolSupport
                     throw ParseError("Invalid CreateRoutine value", os.str(), cd->FileName(), 60);
                 }
 
-                if (md->IsArray())
+                if (md->GetCollectionType()==ArrayCollectionType)
                 {
                     std::ostringstream os;
                     os<<"The createRoutine '"<<cr.name<<"' in class '"<<cd->GetName()<<"' a default value for member '"<<mit->first<<"' wich is an array. Array members can't have default values.";
-                    os<<" ..."<<md->GetName()<<" arrSize="<<md->GetArraySize()<<" isArr="<<md->IsArray();
+                    os<<" ..."<<md->GetName()<<" arrSize="<<md->GetArraySize()<<" isArr="<<(md->GetCollectionType()==ArrayCollectionType);
                     throw ParseError("CreateRoutine array values not supported", os.str(), cd->FileName(), 61);
                 }
 
@@ -1090,7 +1090,7 @@ namespace ToolSupport
 
         for (std::vector<MemberDescriptionBasicPtr>::const_iterator memIt=cd->members.begin(); memIt!=cd->members.end(); ++memIt)
         {
-            int repeat=(*memIt)->isArray ? (*memIt)->arraySize : 1;
+            int repeat=((*memIt)->collectionType==ArrayCollectionType) ? (*memIt)->arraySize : 1;
             cd->ownSize+=OFFSET_MEMBER_LENGTH+(MEMBER_STATUS_LENGTH+BasicTypeOperations::SizeOfType((*memIt)->memberType))*repeat;
         }
 

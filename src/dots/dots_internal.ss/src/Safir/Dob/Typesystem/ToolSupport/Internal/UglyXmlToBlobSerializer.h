@@ -140,7 +140,7 @@ namespace Internal
 
                 const MemberDescriptionType* md=cd->GetMember(memIx);
 
-                if (!md->IsArray())
+                if (md->GetCollectionType()!=ArrayCollectionType)
                 {
                     try
                     {
@@ -305,6 +305,6 @@ namespace Internal
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal:Internal
+} //end namespace Safir::Dob::Typesystem::ToolSupport::Internal
 
 #endif

@@ -52,6 +52,11 @@ namespace TypeUtilities
         return Safir::Dob::Typesystem::ToolSupport::Internal::BasicTypeOperations::TypeIdToTypeName(repository, typeId);
     }
 
+    /**
+     * Calculates a typeId from a string. Does not check that the type exists.
+     * @param name [in] - Name of the type
+     * @return The typeId
+     */
     inline DotsC_TypeId CalculateTypeId(const std::string& name)
     {
         return LlufId_Generate64(name.c_str());
@@ -218,6 +223,6 @@ namespace TypeUtilities
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal::TypeUtilities
+} //end namespace Safir::Dob::Typesystem::ToolSupport::TypeUtilities
 
 #endif

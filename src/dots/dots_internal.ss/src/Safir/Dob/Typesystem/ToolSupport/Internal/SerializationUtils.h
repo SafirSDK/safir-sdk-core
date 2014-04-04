@@ -473,7 +473,7 @@ namespace SerializationUtils
             std::ostringstream os;
             os<<"Parameter index out of range in valueRef. Member '"<<md->GetName()<<"'' is referencing parameter '"<<param->GetName()<<
                 "' with index="<<parameterIndex<<" but the parameter ";
-            if (param->IsArray())
+            if (param->GetCollectionType()==ArrayCollectionType)
                 os<<"has arraySize="<<param->GetArraySize();
             else
                 os<<" is not an array.";
@@ -656,7 +656,7 @@ namespace SerializationUtils
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal::Internal
+} //end namespace Safir::Dob::Typesystem::ToolSupport::Internal
 
 #ifdef _MSC_VER
 #pragma warning(default:4127) //Get rid of warning that this if-expression is constant (comparing two constants)

@@ -14,9 +14,18 @@ endif()
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
-ADD_LIBRARY(dots_internal SHARED ${sources} ${headers})
-
 FIND_PACKAGE(Boost COMPONENTS regex filesystem)
+
+FIND_PACKAGE(Protobuf REQUIRED)
+INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS AnyObject.proto)
+if (MSVC)
+  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267")
+endif()
+
+ADD_LIBRARY(dots_internal SHARED ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS} )
+
+TARGET_LINK_LIBRARIES(dots_internal ${PROTOBUF_LITE_LIBRARIES})
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(dots_internal lluf_id lluf_utils  ${Boost_LIBRARIES})

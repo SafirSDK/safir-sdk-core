@@ -122,7 +122,7 @@ namespace Internal
                 }
 
                 const MemberDescriptionType* md=cd->GetMember(memIx);
-                if (!md->IsArray())
+                if (md->GetCollectionType()!=ArrayCollectionType)
                 {
                     //non-array, then the inner propertyTree contains the content, i.e <myInt>123</myInt>
                     try
@@ -447,7 +447,7 @@ namespace Internal
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal::Internal
+} //end namespace Safir::Dob::Typesystem::ToolSupport::Internal
 
 #ifdef _MSC_VER
 #pragma warning( pop )
