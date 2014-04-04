@@ -184,3 +184,4 @@ FIND_PACKAGE(PythonInterp)
 
 
 add_subdirectory(lluf)
+add_subdirectory(logging)
