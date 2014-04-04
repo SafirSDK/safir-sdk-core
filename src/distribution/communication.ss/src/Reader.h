@@ -26,8 +26,8 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/function.hpp>
-#include <Safir/Utilities/SteadyTimer.h>
 #include "Parameters.h"
 #include "Node.h"
 

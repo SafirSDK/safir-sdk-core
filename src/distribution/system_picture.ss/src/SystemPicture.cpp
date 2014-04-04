@@ -33,7 +33,6 @@
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/SteadyTimer.h>
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>

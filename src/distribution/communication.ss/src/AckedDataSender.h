@@ -28,7 +28,6 @@
 #include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
-#include <Safir/Utilities/SteadyTimer.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Node.h"

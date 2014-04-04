@@ -26,8 +26,8 @@
 
 #include <boost/function.hpp>
 #include <boost/random.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/SteadyTimer.h>
 #include "Parameters.h"
 #include "Node.h"
 #include "Message.h"
