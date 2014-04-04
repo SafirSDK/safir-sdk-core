@@ -18,6 +18,7 @@ set(EXCLUDE_LIST
   IpcPublisher\\.h #includes asio.hpp, which appears to include windows.h
   IpcSubscriber\\.h #includes asio.hpp, which appears to include windows.h
   IpcAcceptorWin32\\.h #includes asio.hpp, which appears to include windows.h
+  SteadyTimer\\.h #includes asio.hpp, which appears to include windows.h
 
   /Typesystem/ToolSupport #property_tree appears to have some windows.h stuff in it
 
