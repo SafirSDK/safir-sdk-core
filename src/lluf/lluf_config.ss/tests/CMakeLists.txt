@@ -13,10 +13,10 @@ TARGET_LINK_LIBRARIES (PathFinders_test lluf_config)
 TARGET_LINK_LIBRARIES (ConfigReaderImpl_test lluf_config)
 
 ADD_TEST(ConfigReader_read_parameter read_parameter_test)
-ADD_TEST(ConfigReader_Path Path_test ${lluf_config_test_SOURCE_DIR} ${lluf_config_test_SOURCE_DIR}/Path_test.cpp)
+ADD_TEST(ConfigReader_Path Path_test ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/Path_test.cpp)
 ADD_TEST(ConfigReader_Util Util_test)
 ADD_TEST(ConfigReader_PathFinders PathFinders_test)
-ADD_TEST(ConfigReader_ConfigReaderImpl ConfigReaderImpl_test ${lluf_config_test_SOURCE_DIR}/testconf)
+ADD_TEST(ConfigReader_ConfigReaderImpl ConfigReaderImpl_test ${CMAKE_CURRENT_SOURCE_DIR}/testconf)
 
 #We only need to set the SAFIR_TEST_CONFIG_OVERRIDE variable for the read_parameter test, since all the other tests will take care of themselves.
 SET_SAFIR_TEST_PROPERTIES(ConfigReader_read_parameter)
