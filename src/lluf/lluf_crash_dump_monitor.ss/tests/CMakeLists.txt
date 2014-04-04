@@ -1,5 +1,3 @@
-find_package(PythonInterp)
-
 ADD_TEST(NAME crash_dump_monitor_test 
   COMMAND ${PYTHON_EXECUTABLE} 
   ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py 
