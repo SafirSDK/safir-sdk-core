@@ -1,10 +1,11 @@
-FILE(GLOB sources *.cpp)
+ADD_EXECUTABLE(lll_test lll_test.cpp)
 
-ADD_EXECUTABLE(lll_test ${sources})
+TARGET_LINK_LIBRARIES(lll_test lluf_utils ${Boost_LIBRARIES})
 
-IF (NOT MSVC)
-  TARGET_LINK_LIBRARIES(lll_test lluf_utils ${Boost_LIBRARIES})
-ENDIF()
-
-ADD_TEST(LowLevelLogger ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py ${CMAKE_CURRENT_SOURCE_DIR}/configs)
+ADD_TEST(NAME LowLevelLogger 
+  COMMAND ${PYTHON_EXECUTABLE} 
+  ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+  --test-exe $<TARGET_FILE:lll_test>
+  --control-exe $<TARGET_FILE:logger_control>
+  --config-dir ${CMAKE_CURRENT_SOURCE_DIR}/configs)
 

@@ -179,6 +179,8 @@ ADD_DEFINITIONS(-DSAFIR_NO_AUTOLINK)
 
 
 ENABLE_TESTING()
+FIND_PACKAGE(PythonInterp)
+
 
 
 add_subdirectory(lluf)

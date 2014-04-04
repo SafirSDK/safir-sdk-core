@@ -25,6 +25,8 @@
 ###############################################################################
 from __future__ import print_function
 import subprocess, os, time, sys, shutil
+import argparse
+
 try:
     import ConfigParser
 except ImportError:
@@ -34,13 +36,14 @@ try:
 except ImportError:
     from io import StringIO
 
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
+parser = argparse.ArgumentParser("test script for LowLevelLogger")
+parser.add_argument("--show-config", required=True)
+parser.add_argument("--dump-monitor", required=True)
+parser.add_argument("--config-dir", required=True)
 
-if len(sys.argv) != 2:
-    print ("Expect one argument")
-    sys.exit(1)
+arguments = parser.parse_args()
 
-config_dir = sys.argv[1]
+config_dir = arguments.config_dir
 if not os.path.isdir(config_dir):
     print ("arg is not a directory")
     sys.exit(1)
@@ -48,7 +51,7 @@ if not os.path.isdir(config_dir):
 os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = config_dir
 
 #Run the program that writes the ini file configuration to standard output
-proc = subprocess.Popen((os.path.join(SAFIR_RUNTIME,"bin","safir_show_config"),"--locations"),
+proc = subprocess.Popen((arguments.show_config,"--locations"),
                         stdout=subprocess.PIPE,
                         stderr=subprocess.STDOUT,
                         universal_newlines=True)
@@ -83,7 +86,7 @@ for i in range(2, 31):
     os.utime(f, (last_access_time, last_mod_time))                         
 
 # start the program that we are testing                        
-proc = subprocess.Popen([os.path.join(SAFIR_RUNTIME,"bin","crash_dump_monitor"), "--max-dump-files", "25", "--check-interval", "1", "--run-once"])
+proc = subprocess.Popen((arguments.dump_monitor, "--max-dump-files", "25", "--check-interval", "1", "--run-once"))
 proc.communicate()
 
 # We have created 30 files and max dumpfiles is set to 25 which maybe make

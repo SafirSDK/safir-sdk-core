@@ -1,9 +1,19 @@
 
 
 FILE(GLOB_RECURSE headers *.h)
-FILE(GLOB sources *.cpp)
 
-ADD_LIBRARY(lluf_utils SHARED ${sources} ${headers})
+ADD_LIBRARY(lluf_utils SHARED ${headers} 
+  DynamicLibraryLoader.cpp
+  LowLevelLoggerControl.cpp
+  ProcessMonitor.cpp
+  StringEncoding.cpp
+  LowLevelLogger.cpp
+  ProcessMonitorLinux.cpp
+  SystemLog.cpp
+  LogWin32.cpp
+  ProcessInfo.cpp
+  ProcessMonitorWin32.cpp
+)
 
 target_include_directories(lluf_utils PUBLIC .)
 
@@ -19,6 +29,16 @@ if (WIN32)
 else()
   TARGET_LINK_LIBRARIES(lluf_utils dl rt)
 endif()
+
+
+ADD_EXECUTABLE(logger_control logger_control.cpp)
+
+FIND_PACKAGE(Boost COMPONENTS filesystem program_options system)
+
+TARGET_LINK_LIBRARIES(logger_control lluf_utils ${Boost_LIBRARIES})
+
+
+
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
@@ -36,3 +56,7 @@ if (WIN32)
 INSTALL(FILES ../data/safir_event_log_registration.reg
         DESTINATION ${SAFIR_RUNTIME}/data/text/)
 endif()
+
+
+INSTALL(TARGETS logger_control 
+  DESTINATION ${SAFIR_RUNTIME}/bin)

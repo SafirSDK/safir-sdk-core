@@ -101,8 +101,6 @@ def call_logger_control(args):
 
 
 if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
     temp = os.environ.get("TEMP")
     if temp is None:
         temp = os.environ.get("TMP")
@@ -111,26 +109,27 @@ if sys.platform == "win32":
         sys.exit(1)
     logdir = os.path.join(temp, "safir_sdk_core", "log")
 else:
-    exe_path = "."
     logdir = os.path.join("/", "tmp", "safir_sdk_core", "log")
 
 print ("Logdir: ", logdir)
 
-lll_test = os.path.join(exe_path,"lll_test")
+parser = argparse.ArgumentParser("test script for LowLevelLogger")
+parser.add_argument("--test-exe", required=True)
+parser.add_argument("--control-exe", required=True)
+parser.add_argument("--config-dir", required=True)
 
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
+arguments = parser.parse_args()
 
-logger_control = os.path.join(SAFIR_RUNTIME,"bin","logger_control")
+lll_test = arguments.test_exe
+
+logger_control = arguments.control_exe
 
 def logfilename(proc):
     fn = "lll_test-" + str(proc.pid) + ".txt"
     return os.path.join(logdir,fn)
 
-if len(sys.argv) != 2:
-    print ("Expect one argument")
-    sys.exit(1)
 
-configs_dir = sys.argv[1]
+configs_dir = arguments.config_dir
 if not os.path.isdir(configs_dir):
     print ("arg is not a directory")
     sys.exit(1)
