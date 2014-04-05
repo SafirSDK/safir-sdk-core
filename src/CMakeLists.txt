@@ -172,6 +172,9 @@ function (SET_SAFIR_TEST_PROPERTIES TEST_NAME)
     "PYTHONPATH=${pypath}")
 endfunction()
 
+INCLUDE(../build/config/sdk/data/generated/build_generated.cmake)
+
+
 
 include_directories(lluf/lluf_build_helpers.ss/src)
 
@@ -185,3 +188,5 @@ FIND_PACKAGE(PythonInterp)
 
 add_subdirectory(lluf)
 add_subdirectory(logging)
+add_subdirectory(dots)
+add_subdirectory(dose)

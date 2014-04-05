@@ -43,5 +43,4 @@ buildlog_*.html
 *.pyc
 bin
 *-build
-
-
+generated_code

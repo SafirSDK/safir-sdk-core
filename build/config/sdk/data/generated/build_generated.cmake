@@ -2,25 +2,25 @@
 FUNCTION(BUILD_GENERATED_LIBRARY NAME DEPENDENCIES)
   message("++ Name of project is ${NAME}")
   message("++ Dependencies of project are '${DEPENDENCIES}'")
-  SET (SOURCE_DIR ${${NAME}_SOURCE_DIR})
+  SET (SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
   message("++ SOURCE_DIR is '${SOURCE_DIR}'")
 
-  INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
   FIND_PACKAGE(PythonInterp)
 
+  #TODO: fix the paths below!
   #
   # Generate code
   #
   # We set up some variables to point to dots_v and dod-files and directories,
   # and then we define the custom command that generates the code
   #
-  SET(dod_directory ${SAFIR_RUNTIME}/data/text/dots/config/)
+  SET(dod_directory ${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/data/)
   FILE(GLOB dod_files ${dod_directory} *.dod)
-  SET(dots_v_command ${PYTHON_EXECUTABLE} "${SAFIR_RUNTIME}/bin/dots_v.py" --dod-files=${dod_directory} --dependencies "${DEPENDENCIES}" --output-path=generated_code)
+  SET(dots_v_command ${PYTHON_EXECUTABLE} "${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/dots_v.py" --dod-files=${dod_directory} --dependencies "${DEPENDENCIES}" --output-path=generated_code)
   
   ADD_CUSTOM_COMMAND(OUTPUT generated_code/tags generated_code/cpp generated_code/java generated_code/ada generated_code/dotnet
     COMMAND ${dots_v_command} ${SOURCE_DIR}
-    COMMAND cmake -E copy /home/lars/logan/build/config/sdk/data/generated/build_cpp.cmake generated_code/cpp/CMakeLists.txt
+    COMMAND cmake -E copy ${safir_sdk_core_SOURCE_DIR}/../build/config/sdk/data/generated/build_cpp.cmake generated_code/cpp/CMakeLists.txt
     DEPENDS ${dod_files}
     COMMENT "Generating code for ${SOURCE_DIR}")
   #############
@@ -55,20 +55,24 @@ FUNCTION(BUILD_GENERATED_LIBRARY NAME DEPENDENCIES)
     WORKING_DIRECTORY generated_code/cpp)
   ############
 
-  EXECUTE_PROCESS(
-    COMMAND safir_show_config --module-install-dir ${NAME}
-    RESULT_VARIABLE execute_result
-    OUTPUT_VARIABLE DOU_INSTALL_DIRECTORY
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  #TODO: this requires an installed typesystem.ini!
+  #TODO: sucks below, cant do it this way...
 
-  if (NOT execute_result EQUAL "0")
-    MESSAGE(FATAL_ERROR "Could not find install directory for module ${NAME}. Is it configured in typesystem.ini?")
-  endif()
+#  EXECUTE_PROCESS(
+#    COMMAND safir_show_config --module-install-dir ${NAME}
+#    RESULT_VARIABLE execute_result
+#    OUTPUT_VARIABLE DOU_INSTALL_DIRECTORY
+#    ERROR_VARIABLE ERR
+#    OUTPUT_STRIP_TRAILING_WHITESPACE)
+#
+#  if (NOT execute_result EQUAL "0")
+#    MESSAGE(FATAL_ERROR "Could not find install directory for module ${NAME}. Is it configured in typesystem.ini?")
+#  endif()
 
-  FILE(GLOB_RECURSE files_to_install *.dou *.dom *.namespace.txt)
-  #message("files_to_install = ${files_to_install}")
-  INSTALL(FILES ${files_to_install} DESTINATION ${DOU_INSTALL_DIRECTORY})
-  INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build . --target install WORKING_DIRECTORY generated_code/cpp)")
+#  FILE(GLOB_RECURSE files_to_install *.dou *.dom *.namespace.txt)
+#  #message("files_to_install = ${files_to_install}")
+#  INSTALL(FILES ${files_to_install} DESTINATION ${DOU_INSTALL_DIRECTORY})
+#  INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build . --target install WORKING_DIRECTORY generated_code/cpp)")
 
 ENDFUNCTION()
 

@@ -73,29 +73,6 @@ class GeneratedLibrary(object):
 
         #print (" dependencies =", self.dependencies)
         #print (" dou_directory =", self.dou_directory)
-        
-def read_typesystem_ini():
-    try:
-        ini = subprocess.check_output(("safir_show_config", "--typesystem"))
-
-        # ConfigParser wants a section header so add a dummy one.
-        ini = '[DEFAULT]\n' + ini
-
-        config = ConfigParser.ConfigParser()
-        config.readfp(StringIO(ini))
-
-        result = dict()
-        for section in config.sections():
-            result[section] = GeneratedLibrary(section,
-                                               dict(config.items(section)),
-                                               config.get("DEFAULT",
-                                                          "default_dou_directory"))
-
-        return result
-
-    except Exception as e:
-        print("Failed to read typesystem.ini! (",e,")", file = sys.stderr)
-        sys.exit(1)
 
 class Dou(object):    
     def __init__(self):
@@ -1643,7 +1620,7 @@ def main():
                         metavar='DEPENDENCIES', 
                         required=False,
                         nargs="*",
-                        help="List of abstract generated modules names that this module depends on.")
+                        help="Paths to dou file directory that this module depends on.")
     parser.add_argument('--output-path', 
                         dest='output_path', 
                         metavar='OUTPUT_PATH', 
@@ -1668,7 +1645,7 @@ def main():
                         default=False, 
                         action='store_true',
                         help='Activates multiprocessing, will spawn 1 process per .dod file (normally 7 processes).')
-    
+
     arguments = parser.parse_args()
 
     dod_files = []
@@ -1682,18 +1659,8 @@ def main():
         print("Invalid argument for dod files.", file=sys.stderr)
         sys.exit(1)
 
-    typesystem_ini = read_typesystem_ini()
 
-    dependencies = arguments.dependencies
-    dependency_paths = list()
-    for dep in dependencies:
-        try:
-            dependency_paths.append(typesystem_ini[dep].dou_directory)
-        except:
-            print("Error: Dependency", dep, "is not defined in typesystem.ini", file=sys.stderr)
-            sys.exit(1)
-
-    print("Dependency_paths:", dependency_paths)
+    dependency_paths = arguments.dependencies
                     
     gen_src_output_path = arguments.output_path
     if gen_src_output_path == "":
