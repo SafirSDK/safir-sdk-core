@@ -29,7 +29,7 @@
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
-#include <Safir/Dob/Internal/DoseCom_Interface.h>
+#include <DoseCom_Interface.h>
 #include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>

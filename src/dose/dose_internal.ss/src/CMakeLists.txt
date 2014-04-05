@@ -1,21 +1,13 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(dose_internal CXX)
-
-INCLUDE_DIRECTORIES(.)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dose_internal SHARED ${sources} ${headers})
 
+target_include_directories(dose_internal PUBLIC .)
+
 FIND_PACKAGE(Boost COMPONENTS regex)
 
-if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dose_internal dots_generated-Safir-cpp dots_cpp dots_kernel lluf_utils lluf_startup_synchronizer ${Boost_LIBRARIES} rt)
-endif()
+TARGET_LINK_LIBRARIES(dose_internal dots_generated-Safir-cpp dots_cpp dots_kernel lluf_utils lluf_startup_synchronizer ${Boost_LIBRARIES})
 
 INSTALL(DIRECTORY Safir 
   DESTINATION ${SAFIR_SDK}/include

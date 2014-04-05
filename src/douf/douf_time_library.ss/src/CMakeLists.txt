@@ -1,26 +1,19 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(douf_time_library CXX)
-
-INCLUDE_DIRECTORIES(.)
-
-#this library has a C interface, so we don't want the "d" suffix on debug builds on windows
-#Must be set before including safir_sdk_core_config.cmake
-SET(NO_LIBRARY_POSTFIXES 1) 
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
+#this library has a C interface and we only want one version of it,
+#so we never want the "d" suffix on debug builds, which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
 
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(douf_time_library SHARED ${sources})
+
+target_include_directories(douf_time_library PUBLIC .)
+
 FIND_PACKAGE(Boost COMPONENTS regex thread system)
     
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(douf_time_library 
-      dots_generated-douf_time-cpp 
-      dots_cpp 
-      ${Boost_LIBRARIES})
-endif()
+TARGET_LINK_LIBRARIES(douf_time_library 
+  dots_generated-douf_time-cpp 
+  dots_cpp 
+  ${Boost_LIBRARIES})
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

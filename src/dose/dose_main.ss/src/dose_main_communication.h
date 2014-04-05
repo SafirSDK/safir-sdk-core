@@ -28,7 +28,7 @@
 #include "dose_main_quality_of_service_data.h"
 #include "dose_main_thread_monitor.h"
 #include <Safir/Dob/Internal/DistributionData.h>
-#include <Safir/Dob/Internal/DoseCom_Interface_Classes.h>
+#include <DoseCom_Interface_Classes.h>
 #include <boost/scoped_array.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/asio.hpp>

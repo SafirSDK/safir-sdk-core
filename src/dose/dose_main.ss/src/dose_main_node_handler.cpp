@@ -42,7 +42,7 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/bind.hpp>
-#include <Safir/Dob/Internal/DoseCom_Interface.h>
+#include <DoseCom_Interface.h>
 #include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 

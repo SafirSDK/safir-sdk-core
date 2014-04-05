@@ -47,7 +47,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY NAME DEPENDENCIES)
   
   target_include_directories(dots_generated-${NAME}-cpp
     PRIVATE ${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/data
-    PRIVATE generated_code/cpp/include)
+    PUBLIC generated_code/cpp/include)
   
   target_link_libraries(dots_generated-${NAME}-cpp dots_cpp)
 

@@ -1,9 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(dose_com CXX)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 FILE(GLOB headers *.h ../defs/*.h)
 FILE(GLOB sources *.cpp)
 
@@ -12,6 +6,12 @@ ADD_LIBRARY(dose_com SHARED ${sources} ${headers})
 if (WIN32)
     TARGET_LINK_LIBRARIES(dose_com ws2_32)
 endif()
+
+TARGET_LINK_LIBRARIES(dose_com lluf_utils)
+
+target_include_directories(dose_com PUBLIC ../defs)
+target_include_directories(dose_com PUBLIC .)
+#TODO: definitely move public stuff into better directories!
 
 INSTALL(FILES ../defs/DoseCom_Interface.h 
               ../defs/DoseCom_Interface_Classes.h

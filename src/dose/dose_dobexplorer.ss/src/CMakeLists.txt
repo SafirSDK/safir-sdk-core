@@ -1,18 +1,12 @@
-cmake_minimum_required(VERSION 2.8)
-
 #make sure we link with qtmain.lib on windows
 if (NOT CMAKE_VERSION VERSION_LESS "2.8.11")
   cmake_policy(SET CMP0020 NEW)
 endif()
 
-project(dobexplorer C CXX) #FindQt needs C
-
-INCLUDE("$ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake")
-
 FILE(GLOB ui *.ui)
 FILE(GLOB sources *.cpp)
 FILE(GLOB headers [!ui_]*.h)
-FILE(GLOB dose_com_sources ${SAFIR_SDK}/include/Safir/Dob/Internal/DoseComAux/*.cpp)
+SET(dose_com_sources ../../dose_communication.ss/src/dose_com/DoseOsSharedMem.cpp)
 
 # As moc files are generated in the binary dir, tell CMake
 # to always look for includes there:
@@ -26,8 +20,8 @@ endif()
 
 if (Qt5Widgets_FOUND)
   message("-- Building dobexplorer with Qt5")
-  set(CMAKE_AUTOMOC ON)
   QT5_WRAP_UI(ui_headers ${ui})
+  QT5_WRAP_CPP(moc_sources ${headers} ${QT5_WRAP_CPP_OPTIONS})
 else()
   # Try to use Qt4 instead
   SET(QT_USE_QTMAIN TRUE)
@@ -60,7 +54,6 @@ ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${dose_
 
 if (Qt5Widgets_FOUND)
   qt5_use_modules(dobexplorer Widgets)
-  QT5_WRAP_CPP(moc_sources ${headers} ${QT5_WRAP_CPP_OPTIONS})
 
   if (CMAKE_VERSION VERSION_LESS "2.8.11")
     target_link_libraries(dobexplorer ${Qt5Core_QTMAIN_LIBRARIES})
@@ -71,9 +64,12 @@ endif()
 
 FIND_PACKAGE(Boost COMPONENTS filesystem system)
 
-IF (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dobexplorer dots_cpp dots_generated-Safir-cpp dose_internal lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
-ENDIF ()
+TARGET_LINK_LIBRARIES(dobexplorer dose_internal dots_generated-Safir-cpp dots_cpp lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
+
+target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/defs/)
+target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/dose_com/)
+
+#TODO: hmmm, dobexplorer doesnt really need to link against dose_com, I added that to get the PUBLIC includes. Better way?
 
 INSTALL(TARGETS dobexplorer
         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
@@ -81,3 +77,6 @@ INSTALL(TARGETS dobexplorer
         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
 INSTALL_DEBUG_INFO(dobexplorer)
+
+
+#TODO clean up Boost stuff
