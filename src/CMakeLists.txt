@@ -7,6 +7,10 @@ PROJECT(safir_sdk_core CXX C)
 FILE(TO_CMAKE_PATH "$ENV{SAFIR_SDK}" SAFIR_SDK)
 FILE(TO_CMAKE_PATH "$ENV{SAFIR_RUNTIME}" SAFIR_RUNTIME)
 
+#TODO: move general includes somewhere sensible
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../build/config/sdk/data/build)
+
+
 #Default build release
 #if (NOT CMAKE_BUILD_TYPE)
 #   set(CMAKE_BUILD_TYPE "Release")
@@ -191,3 +195,5 @@ add_subdirectory(logging)
 add_subdirectory(dots)
 add_subdirectory(dose)
 add_subdirectory(douf)
+add_subdirectory(swre)
+add_subdirectory(foreach)

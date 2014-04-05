@@ -1,23 +1,15 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(swre_library CXX)
-
-INCLUDE_DIRECTORIES(.)
-
-#this library has a C interface, so we don't want the "d" suffix on debug builds on windows
-#Must be set before including safir_sdk_core_config.cmake
-SET(NO_LIBRARY_POSTFIXES 1) 
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
+#this library has a C interface and we only want one version of it,
+#so we never want the "d" suffix on debug builds, which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
 
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(swre_library SHARED ${sources} ${headers})
 
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(swre_library douf_time_cpp dose_cpp dots_generated-swre_library-cpp logging_cpp lluf_utils lluf_crash_reporter)
-endif()
+target_include_directories(swre_library PUBLIC .)
+
+TARGET_LINK_LIBRARIES(swre_library douf_time_cpp dose_cpp dots_generated-swre_library-cpp logging_cpp lluf_utils lluf_crash_reporter)
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

@@ -1,19 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(swre_interface_cpp CXX)
-
-INCLUDE_DIRECTORIES(.)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(swre_interface_cpp SHARED ${sources} ${headers})
 
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(swre_interface_cpp dose_cpp swre_library douf_time_cpp logging_cpp)
-endif()
+target_include_directories(swre_interface_cpp PUBLIC .)
+
+TARGET_LINK_LIBRARIES(swre_interface_cpp swre_library)
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

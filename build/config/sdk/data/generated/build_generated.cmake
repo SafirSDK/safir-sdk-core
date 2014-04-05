@@ -42,6 +42,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY NAME DEPENDENCIES)
     COMMENT "Generating code for ${SOURCE_DIR}")
   #############
 
+  #TODO:precompiled headers?!
 
   ADD_LIBRARY(dots_generated-${NAME}-cpp SHARED ${cpp_files}) #TODO headers?
   

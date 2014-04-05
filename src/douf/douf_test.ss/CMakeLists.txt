@@ -1,16 +1,7 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(douf_test CXX)
-
+#TODO
 #this project contains a library that has a C interface, so we don't want the "d" suffix on debug builds on windows
 #Must be set before including safir_sdk_core_config.cmake
-SET(NO_LIBRARY_POSTFIXES 1) 
-
-include($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
-find_package(PythonInterp)
-
-enable_testing()
+#SET(NO_LIBRARY_POSTFIXES 1) 
 
 add_subdirectory(AceTimeConverter_test)
 add_subdirectory(ExternalTimeProvider_test)

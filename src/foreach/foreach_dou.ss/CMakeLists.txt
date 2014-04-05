@@ -1,11 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
+BUILD_GENERATED_LIBRARY(foreach Safir)
 
-PROJECT (foreach NONE)
-
-INCLUDE(../../../build/config/sdk/data/generated/build_generated.cmake)
-
-SET(DEPENDENCIES Safir)
-
-BUILD_GENERATED_LIBRARY(${PROJECT_NAME} ${DEPENDENCIES})
-
-
+#TODO: dependencies will not work if nested. E.g. C depends on B which depends on A. CMakery for dots_v doesnt "remember" deps...
