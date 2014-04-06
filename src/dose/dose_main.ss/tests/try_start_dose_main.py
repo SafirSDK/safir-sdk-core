@@ -24,13 +24,15 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, signal
+import subprocess, os, time, sys, signal, argparse
 
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
+parser = argparse.ArgumentParser("test script")
+parser.add_argument("--dose-main", required=True)
+arguments = parser.parse_args()
 
 print("This test program expects to be killed off after about two minutes unless it has finished successfully before then.")
 
-proc = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","dose_main"), 
+proc = subprocess.Popen(arguments.dose_main, 
                         stdout = subprocess.PIPE, 
                         stderr = subprocess.STDOUT, 
                         universal_newlines=True,

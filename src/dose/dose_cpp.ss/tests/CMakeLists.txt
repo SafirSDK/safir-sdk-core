@@ -2,3 +2,5 @@ ADD_EXECUTABLE(consumer_cast_test consumer_cast_test.cpp)
 TARGET_LINK_LIBRARIES(consumer_cast_test dose_cpp)
 
 ADD_TEST(ConsumerCasting consumer_cast_test)
+
+SET_SAFIR_TEST_PROPERTIES(ConsumerCasting 60)

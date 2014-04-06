@@ -36,7 +36,7 @@ try:
 except ImportError:
     from io import StringIO
 
-parser = argparse.ArgumentParser("test script for LowLevelLogger")
+parser = argparse.ArgumentParser("test script")
 parser.add_argument("--show-config", required=True)
 parser.add_argument("--dump-monitor", required=True)
 parser.add_argument("--config-dir", required=True)

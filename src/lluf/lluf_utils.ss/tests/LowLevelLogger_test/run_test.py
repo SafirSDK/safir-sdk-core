@@ -113,7 +113,7 @@ else:
 
 print ("Logdir: ", logdir)
 
-parser = argparse.ArgumentParser("test script for LowLevelLogger")
+parser = argparse.ArgumentParser("test script")
 parser.add_argument("--test-exe", required=True)
 parser.add_argument("--control-exe", required=True)
 parser.add_argument("--config-dir", required=True)

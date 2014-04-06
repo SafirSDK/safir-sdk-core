@@ -4,7 +4,11 @@ FIND_PACKAGE(Boost COMPONENTS thread system)
 
 TARGET_LINK_LIBRARIES(timer_test dose_internal ${Boost_LIBRARIES})
 
-ADD_TEST(TryStart_dose_main  ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/try_start_dose_main.py)
+ADD_TEST(NAME TryStart_dose_main  
+  COMMAND ${PYTHON_EXECUTABLE} 
+  ${CMAKE_CURRENT_SOURCE_DIR}/try_start_dose_main.py
+  --dose-main $<TARGET_FILE:dose_main>)
+
 ADD_TEST(dose_main_timers timer_test)
 
 SET_SAFIR_TEST_PROPERTIES(TryStart_dose_main 600)

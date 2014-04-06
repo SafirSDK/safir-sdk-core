@@ -26,7 +26,7 @@
 from __future__ import print_function
 import subprocess, os, time, sys, xml.dom.minidom, shutil, argparse
 
-parser = argparse.ArgumentParser("test script for LowLevelLogger")
+parser = argparse.ArgumentParser("test script")
 parser.add_argument("--test-exe-1", required=True)
 parser.add_argument("--test-exe-2", required=True)
 parser.add_argument("--test-exe-3", required=True)
