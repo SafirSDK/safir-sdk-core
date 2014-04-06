@@ -78,16 +78,6 @@ int main()
 
     try
     {
-        std::wcout << "test safir_runtime config" << std::endl;
-        {
-            const Path p = Path("some") / "path";
-            SetEnv("SAFIR_RUNTIME", p.str());
-            if (PathFinder::SafirRuntimeConfigDirectory().str() != (p / "data" / "core_config").str())
-            {
-                return 1;
-            }
-        }
-
         std::wcout << "test override config" << std::endl;
         {
             const Path p = Path("some") / "other" / "path";

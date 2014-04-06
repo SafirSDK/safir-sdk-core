@@ -35,13 +35,6 @@ namespace Internal
 {
     struct CommonPathFinder
     {
-        /** Throws logic_error if environment variable is not set */
-        static Path SafirRuntimeConfigDirectory()
-        {
-            const Path path(GetEnv("SAFIR_RUNTIME"));
-            return path / "data" / "core_config";
-        }
-
         /** Returns empty path if environment variable is not set*/
         static Path SafirTestConfigOverrideDirectory()
         {

@@ -29,7 +29,6 @@ namespace
     using namespace Safir::Utilities::Internal;
     
     static Path test_config;
-    static Path runtime_config;
     static Path system_config;
     static Path user_config;
 
@@ -48,11 +47,6 @@ namespace
         static Path UserConfigDirectory()
         {
             return user_config;
-        }
-
-        static Path SafirRuntimeConfigDirectory()
-        {
-            return runtime_config;
         }
     };
 
@@ -123,31 +117,6 @@ int main(const int argc, const char* argv[])
             {
                 
             }
-        }
-
-        std::wcout << "find safir" << std::endl;
-        {
-            ::runtime_config = dir / "runtime";
-            
-            ConfigReaderImpl impl;
-            impl.Read<TestDirs>();
-            impl.ExpandEnvironmentVariables();
-
-            if (impl.m_locations.get<std::string>("question") != "blahonga")
-            {
-                return 1;
-            }
-
-            if (impl.m_logging.get<std::string>("answer") != "rymdbörje")
-            {
-                return 1;
-            }
-
-            if (impl.m_typesystem.get<std::string>("what") != "runtime_config")
-            {
-                return 1;
-            }
-
         }
 
         std::wcout << "find user" << std::endl;
