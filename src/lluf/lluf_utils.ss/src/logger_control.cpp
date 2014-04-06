@@ -126,7 +126,7 @@ private:
         std::wcout << std::boolalpha
                    << "Usage: logger_control [OPTIONS] <level>\n"
                    << "Control logging level and options.\n\n"
-                   << "Log files are found in the directory %SAFIR_RUNTIME%/log/Dob-LowLevelLog\n"
+                   << "Log files are found in the directory configured in typesystem.ini\n"
                    << "The log directory must exist for it to be possible to turn on logging.\n\n"
                    << "Logging is only turned on for the current session (i.e. settings are reset\n"
                    << "to defaults when no program using the logger is running), but logging can\n"
