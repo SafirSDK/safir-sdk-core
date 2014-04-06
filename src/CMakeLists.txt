@@ -191,6 +191,7 @@ FIND_PACKAGE(PythonInterp)
 
 
 
+add_subdirectory(patch_check)
 add_subdirectory(lluf)
 add_subdirectory(logging)
 add_subdirectory(dots)
