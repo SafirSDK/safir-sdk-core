@@ -24,11 +24,16 @@ void access()
     deleter(blob);
 }
 
-int main()
+int main(int argc, char* argv[])
 {
     //read xml
+    if (argc != 2)
+    {
+        std::wcout << "expect arg" << std::endl;
+        return 1;
+    }
 
-    std::ifstream obj("obj.xml");
+    std::ifstream obj(argv[1]);
     for (;;)
     {
         int c = obj.get();
@@ -37,6 +42,11 @@ int main()
             break;
         }
         xml.push_back(static_cast<char>(c));
+    }
+    if (xml.empty())
+    {
+        std::wcout << "Empty object!" << std::endl;
+        return 1;
     }
     xml.push_back(0);
 

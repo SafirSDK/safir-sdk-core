@@ -11,8 +11,8 @@ TARGET_LINK_LIBRARIES(repository_compare lluf_id lluf_utils dots_internal ${Boos
 
 add_test(multiple_init multiple_accesses)
 add_test(multiple_accesses_after_init multiple_accesses sleep)
-add_test(multiple_serialization multiple_serialization)
-add_test(repository_compare repository_compare ../../../dose/dose_dou.ss)
+add_test(multiple_serialization multiple_serialization ${CMAKE_CURRENT_SOURCE_DIR}/obj.xml)
+add_test(repository_compare repository_compare ${safir_sdk_core_SOURCE_DIR}/dose/dose_dou.ss)
 
 SET_SAFIR_TEST_PROPERTIES(multiple_init 120)
 SET_SAFIR_TEST_PROPERTIES(multiple_accesses_after_init 120)
