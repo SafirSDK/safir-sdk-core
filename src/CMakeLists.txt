@@ -173,6 +173,7 @@ function (SET_SAFIR_TEST_PROPERTIES TEST_NAME)
   SET_PROPERTY(TEST ${TEST_NAME}
     PROPERTY ENVIRONMENT 
     "SAFIR_TEST_CONFIG_OVERRIDE=${safir_sdk_core_SOURCE_DIR}/tests/test_support/test_config"
+    "SAFIR_SOURCE_ROOT=${safir_sdk_core_SOURCE_DIR}/../"
     "PYTHONPATH=${pypath}")
 endfunction()
 
