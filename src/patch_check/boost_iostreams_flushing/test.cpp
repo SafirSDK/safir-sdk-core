@@ -74,10 +74,18 @@ bool check(const std::string& filename)
 
 int main()
 {
-    std::wofstream outputstream("output_fstream.txt");
+    const char* CMAKE_CURRENT_BINARY_DIR = getenv("CMAKE_CURRENT_BINARY_DIR");
+    if (CMAKE_CURRENT_BINARY_DIR == NULL)
+    {
+        std::wcout << "Env not set" << std::endl;
+        return 1;
+    }
+    const std::string path = std::string(CMAKE_CURRENT_BINARY_DIR) + "/";
+    
+    std::wofstream outputstream((path + "output_fstream.txt").c_str());
     
     typedef boost::iostreams::tee_device<boost::iostreams::wfile_sink, std::wostream> my_tee;
-    my_tee tee(boost::iostreams::wfile_sink("output_file_sink.txt"),outputstream);
+    my_tee tee(boost::iostreams::wfile_sink((path + "output_file_sink.txt").c_str()),outputstream);
     boost::iostreams::filtering_wostreambuf buf;
     std::wostream out(&buf);
     DummyFilter filter;
@@ -88,13 +96,13 @@ int main()
 
     int retval = 0;
     
-    if (!check("output_file_sink.txt"))
+    if (!check(path + "output_file_sink.txt"))
     {
         std::wcout << "boost::iostreams::wfile_sink does not appear to get flushed" << std::endl;
         retval = 1;
     }
 
-    if (!check("output_fstream.txt"))
+    if (!check(path + "output_fstream.txt"))
     {
         std::wcout << "std::wofstream does not appear to get flushed" << std::endl;
         retval = 1;

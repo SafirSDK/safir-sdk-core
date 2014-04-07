@@ -1,5 +1,6 @@
 include(CheckCXXSourceRuns)
 
+SET(ENV{CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 CHECK_CXX_SOURCE_RUNS("#include \"${CMAKE_CURRENT_SOURCE_DIR}/test.cpp\"" boost_iostreams_flushing)
 
 if(NOT boost_iostreams_flushing)
