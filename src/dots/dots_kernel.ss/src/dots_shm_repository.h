@@ -488,8 +488,7 @@ namespace Internal
             int startOwnMembers=totalNumMembers-cd->GetNumberOfOwnMembers();
             for (int i=startOwnMembers; i<totalNumMembers; ++i)
             {
-                MemberDescriptionShm member(cd->GetMember(i), shm);
-                m_members.push_back(member);
+                m_members.push_back(MemberDescriptionShm(cd->GetMember(i), shm));
             }
         }
 
