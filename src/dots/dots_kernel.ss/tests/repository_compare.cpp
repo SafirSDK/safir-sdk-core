@@ -41,15 +41,20 @@ int main(int argc, char* argv[])
     std::ostringstream som;
     Safir::Dob::Typesystem::ToolSupport::RepositoryToString(shm, false, som);
 
+    std::string sharedString=som.str();
+    std::string localString=lom.str();
 
-    if (som.str()!=lom.str())
+    if (sharedString!=localString)
     {
-        std::wcout<<"=====LOCAL====="<<std::endl;
-        std::wcout<<lom.str().c_str()<<std::endl;
-        std::wcout<<"=====SHM====="<<std::endl;
-        std::wcout<<som.str().c_str()<<std::endl;
-        std::wcout<<"Local repository and shared repository differ!"<<std::endl;
+        std::cout<<"Local repository and shared repository differ!"<<std::endl;
+        std::cout<<"Shared size: "<<sharedString.size()<<", local size: "<<localString.size()<<std::endl;
 
+        std::cout<<"=====LOCAL====="<<std::endl;
+        std::cout<<localString<<std::endl;
+        std::cout<<"=====SHM====="<<std::endl;
+        std::cout<<sharedString<<std::endl;
+
+        std::cout<<"Local repository and shared repository differ!"<<std::endl;
         return 1;
     }
     else
