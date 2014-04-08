@@ -174,7 +174,8 @@ namespace SP
                                  const std::string& name,
                                  const boost::int64_t id,
                                  const std::string& address,
-                                 const std::string& multicastAddress)
+                                 const std::string& multicastAddress,
+                                 const std::map<std::string, NodeType>& nodeTypes)
         : m_impl(boost::make_shared<Impl>(ioService, 
                                           communication,
                                           name,
