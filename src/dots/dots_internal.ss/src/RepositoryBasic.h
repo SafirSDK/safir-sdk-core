@@ -108,7 +108,7 @@ namespace ToolSupport
         virtual const char* GetName() const { return name.c_str(); }
         virtual DotsC_MemberType GetMemberType() const {return memberType;}
         virtual DotsC_CollectionType GetCollectionType() const {return collectionType;}
-        virtual DotsC_MemberType GetHashtableKeyType() const {return hashtableKeyType;}
+        virtual DotsC_MemberType GetKeyType() const {return hashtableKeyType;}
         virtual int GetArraySize() const {return arraySize;}
         virtual int GetMaxLength() const {return maxLength;}
 
@@ -192,7 +192,7 @@ namespace ToolSupport
         virtual DotsC_MemberType GetMemberType() const {return memberType;}
         virtual DotsC_TypeId GetTypeId() const {return typeId;} //only valid if MemberType is object or enum
         virtual DotsC_CollectionType GetCollectionType() const {return collectionType;}
-        virtual DotsC_MemberType GetHashtableKeyType() const {return hashtableKeyType;} //only valid if collectionType is Hashtable
+        virtual DotsC_MemberType GetKeyType() const {return hashtableKeyType;} //only valid if collectionType is Hashtable
         virtual int GetArraySize() const {return static_cast<int>(values.size());}
         virtual bool IsHidden() const {return hidden;}
 

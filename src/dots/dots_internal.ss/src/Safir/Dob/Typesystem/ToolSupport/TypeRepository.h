@@ -155,7 +155,7 @@ namespace ToolSupport
         virtual const char* GetQualifiedName() const=0;
 
         /**
-         * @brief Get member type of this parameter value. If member type is Enumeration or Object, use GetTypeId() to determin specific type.
+         * @brief Get member type of this parameter value. If member type is Enumeration or Object, use GetTypeId() to determine specific type.
          * @return Parameter value member type.
          */
         virtual DotsC_MemberType GetMemberType() const=0;
@@ -168,10 +168,16 @@ namespace ToolSupport
         virtual DotsC_TypeId GetTypeId() const=0;
 
         /**
-         * @brief Check if this parameter is an array.
-         * @return True if parameter is array, else false.
+         * @brief Get the collection type of this parameter.
+         * @return Collection type.
          */
-        virtual bool IsArray() const=0;
+        virtual DotsC_CollectionType GetCollectionType() const=0;
+
+        /**
+         * @brief Get key type of this parameter. Only valid if CollectionType=HashtableCollectionType, use GetCollectionType() method.
+         * @return Key member type.
+         */
+        virtual DotsC_MemberType GetKeyType() const=0; //only valid if collectionType is Hashtable
 
         /**
          * @brief Get the array size of this parameter.
@@ -336,20 +342,26 @@ namespace ToolSupport
         virtual const char* GetName() const=0;
 
         /**
-         * @brief Get type of this member. If member type is Enumeration or Object, use GetTypeId() to determin specific type.
+         * @brief Get type of this member. If member type is Enumeration or Object, use GetTypeId() to determine specific type.
          * @return Parameter value member type.
          */
         virtual DotsC_MemberType GetMemberType() const=0;
 
         /**
-         * @brief Check if this member is an array.
-         * @return True if member is array, else false.
+         * @brief Get the collection type of this member.
+         * @return Collection type.
          */
-        virtual const bool IsArray() const=0;
+        virtual DotsC_CollectionType GetCollectionType() const=0;
+
+        /**
+         * @brief Get key type of this member. Only valid if CollectionType=HashtableCollectionType, use GetCollectionType() method.
+         * @return Key member type.
+         */
+        virtual DotsC_MemberType GetKeyType() const=0; //only valid if collectionType is Hashtable
 
         /**
          * @brief Get the array size of this member.
-         * @return Array size. If member is not an array, 1 is returned.
+         * @return Array size. If member is not an array, 1 is returned. Use GetCollectionType() method to determine if member is an array.
          */
         virtual int GetArraySize() const=0;
 

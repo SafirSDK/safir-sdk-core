@@ -57,25 +57,32 @@ namespace ToolSupport
         BlobWriter(const RepositoryT* rep, DotsC_TypeId typeId)
             :m_repository(rep)
             ,m_classDescription(m_repository->GetClass(typeId))
-            ,m_memberInfo()
-            ,m_header(0, typeId)
-            ,m_blob()
+            ,m_memberDescription(NULL)
+            ,m_memberIndex(-1)
+            ,m_blob(typeId)
         {
         }
 
-        DotsC_Int32 CalculateBlobSize() const {return m_blob.CalculateBlobSize();}
-        void CopyRawBlob(char* destBlob) const {m_blob.Serialize(destBlob);}
+        DotsC_Int32 CalculateBlobSize() {return m_blob.CalculateBlobSize();}
+        void CopyRawBlob(char* destBlob) {m_blob.Serialize(destBlob);}
 
 
         template <class Key, class Val>
         void Write(DotsC_MemberIndex member, const Key& key, const Val& val, bool isNull, bool hasChanged)
         {
-            MoveToMember(member);
+            if (isNull && !hasChanged)
+            {
+                return; //this is the default and is not present in blob.
+            }
 
+            MoveToMember(member);
 //            switch (m_memberDescription->GetCollectionType())
 //            {
 //            case NoCollectionType:
 //                WriteSingleValue(val, isNull, hasChanged);
+//                break;
+//            case ArrayCollectionType:
+//                WriteHashtableValue(val, key, isNull, hasChanged);
 //                break;
 //            case RangeCollectionType:
 //                WriteRangeValue(val, isNull, hasChanged);
@@ -92,22 +99,15 @@ namespace ToolSupport
 
 
     private:
-
-        struct MemberInfo
-        {
-            const MemberDescriptionType* memberDescription;
-            DotsC_MemberIndex memberIndex; //the memnber we are currently writing
-            MemberInfo() : m_memberDescription(NULL), m_memberIndex(-1), m_blobOffset(0) {}
-        };
-
         const RepositoryType* m_repository;
         const ClassDescriptionType* m_classDescription;
-        MemberInfo m_memberInfo;        
+        const MemberDescriptionType* m_memberDescription;
+        DotsC_MemberIndex m_memberIndex;
         Safir::Dob::Typesystem::ToolSupport::Internal::Blob m_blob;
 
         void MoveToMember(DotsC_MemberIndex member)
         {
-            if (m_memberInfo.memberIndex!=member)
+            if (m_memberIndex!=member)
             {
                 if (!m_blob.MoveToMember(member))
                 {
@@ -115,22 +115,8 @@ namespace ToolSupport
                 }
             }
 
-            m_memberInfo.memberDescription=m_classDescription->GetMember(member);
-            m_memberInfo.memberIndex=member;
-        }
-
-        template <class Val>
-        void WriteArrayElement(DotsC_MemberIndex member, DotsC_ArrayIndex index, const Val& val, bool isNull, bool hasChanged)
-        {
-            if (member!=m_currentMember)
-            {
-                StartNewMember(member);
-            }
-
-            if (m_memberDescription->GetCollectionType()==NoCollectionType)
-            {
-                //write singel value
-            }
+            m_memberDescription=m_classDescription->GetMember(member);
+            m_memberIndex=member;
         }
     };
 }
